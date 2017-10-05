@@ -16,5 +16,11 @@
     "url-loader": "^0.5.9",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.9.1"
+  },
+  "dependencies": {
+    "bootstrap-sass": "^3.3.7",
+    "bootswatch": "^3.3.7",
+    "font-awesome": "^4.7.0",
+    "font-awesome-sass-loader": "^2.0.1"
   }
 }

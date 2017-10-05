@@ -1,5 +1,6 @@
 'use strict'
 
+require('font-awesome-sass-loader')
 require('./index.html')
 
 var Elm = require('./elm/Main.elm')

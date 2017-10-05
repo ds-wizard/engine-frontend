@@ -1,0 +1,60 @@
+@import "~bootswatch/united/variables";
+@import "mixins";
+
+body {
+    margin-left: 240px;
+}
+
+.page {
+    margin: 20px;
+}
+
+.side-navigation {
+    background-color: $brand-primary;
+    width: 240px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow-x: hidden;
+    z-index: 1;
+
+    .logo {
+        color: #fff;
+        font-size: 24px;
+        padding: 15px;
+        display: inline-block;
+    }
+
+    .menu {
+        padding: 0;
+        margin: 0;
+
+        li {
+            padding: 1px 3px;
+
+            a {
+                display: inline-block;
+                width: 100%;
+                padding: 10px;
+                color: #fff;
+                text-decoration: none;
+                @include border-radius(5px);
+
+                &.active {
+                    background: darken($brand-primary, 10%) !important;
+                }
+
+                &:hover {
+                    background: darken($brand-primary, 15%);
+                }
+
+                .fa {
+                    display: inline-block;
+                    width: 30px;
+                    text-align: center
+                }
+            }
+        }
+    }
+}

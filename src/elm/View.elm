@@ -1,7 +1,7 @@
 module View exposing (..)
 
-import Html exposing (Attribute, Html, a, div, li, text, ul)
-import Html.Attributes exposing (href)
+import Html exposing (Attribute, Html, a, div, i, li, text, ul)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Decode
 import Models exposing (Model)
@@ -23,32 +23,53 @@ onLinkClick message =
 view : Model -> Html Msg
 view model =
     div []
-        [ menu
+        [ menu model
         , content model
         ]
 
 
-menu : Html Msg
-menu =
-    ul []
-        [ menuItem "Index" Routing.indexPath
-        , menuItem "Organization" Routing.organizationPath
-        , menuItem "User Management" Routing.userManagementPath
-        , menuItem "Knowledge Models" Routing.knowledgeModelsPath
-        , menuItem "Wizzards" Routing.wizzardsPath
-        , menuItem "Data Management Plans" Routing.dataManagementPlansPath
+menu : Model -> Html Msg
+menu model =
+    div [ class "side-navigation" ]
+        [ logo
+        , ul [ class "menu" ]
+            [ menuItem "Organization" "fa-building" Routing.organizationPath (model.route == Models.OrganizationRoute)
+            , menuItem "User Management" "fa-users" Routing.userManagementPath (model.route == Models.UserManagementRoute)
+            , menuItem "Knowledge Models" "fa-database" Routing.knowledgeModelsPath (model.route == Models.KnowledgeModelsRoute)
+            , menuItem "Wizzards" "fa-list-alt" Routing.wizzardsPath (model.route == Models.WizzardsRoute)
+            , menuItem "Data Management Plans" "fa-file-text" Routing.dataManagementPlansPath (model.route == Models.DataManagementPlansRoute)
+            ]
         ]
 
 
-menuItem : String -> String -> Html Msg
-menuItem label url =
+logo : Html Msg
+logo =
+    a [ class "logo", href Routing.indexPath, onLinkClick (Msgs.ChangeLocation Routing.indexPath) ]
+        [ text "Elixir DSP" ]
+
+
+menuItem : String -> String -> String -> Bool -> Html Msg
+menuItem label icon url active =
     li []
-        [ a [ href url, onLinkClick (Msgs.ChangeLocation url) ] [ text label ] ]
+        [ a
+            [ href url
+            , onLinkClick (Msgs.ChangeLocation url)
+            , class
+                (if active then
+                    "active"
+                 else
+                    ""
+                )
+            ]
+            [ i [ class ("fa " ++ icon) ] []
+            , text label
+            ]
+        ]
 
 
 content : Model -> Html Msg
 content model =
-    div []
+    div [ class "page" ]
         [ page model ]
 
 
