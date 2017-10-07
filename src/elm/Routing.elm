@@ -11,6 +11,7 @@ matchers =
         [ map IndexRoute top
         , map OrganizationRoute (s "organization")
         , map UserManagementRoute (s "user-management")
+        , map KnowledgeModelsEditorRoute (s "knowledge-models" </> s "edit")
         , map KnowledgeModelsRoute (s "knowledge-models")
         , map WizzardsRoute (s "wizzards")
         , map DataManagementPlansRoute (s "data-management-plans")

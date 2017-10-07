@@ -1,0 +1,25 @@
+@import "~bootswatch/united/variables";
+
+.panel-input-child {
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    background: $gray-lighter;
+
+    &:last-child {
+        margin-bottom: 10px;
+    }
+
+    .panel-input-child-actions {
+        a {
+            margin-left: 10px;
+        }
+    }
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}

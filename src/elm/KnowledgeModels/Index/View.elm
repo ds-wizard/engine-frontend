@@ -6,8 +6,8 @@ import Html.Attributes exposing (class, href)
 import Msgs exposing (Msg)
 
 
-index : Html Msg
-index =
+view : Html Msg
+view =
     div []
         [ pageHeader "Knowledge model" indexActions
         , kmTable
