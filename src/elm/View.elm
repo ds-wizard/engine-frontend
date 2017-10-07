@@ -1,23 +1,12 @@
 module View exposing (..)
 
+import Common.Html exposing (onLinkClick)
 import Html exposing (Attribute, Html, a, div, i, li, text, ul)
 import Html.Attributes exposing (class, href)
-import Html.Events exposing (onWithOptions)
-import Json.Decode as Decode
+import KnowledgeModels.Index.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Routing
-
-
-onLinkClick : msg -> Attribute msg
-onLinkClick message =
-    let
-        options =
-            { stopPropagation = False
-            , preventDefault = True
-            }
-    in
-    onWithOptions "click" options (Decode.succeed message)
 
 
 view : Model -> Html Msg
@@ -86,7 +75,7 @@ page model =
             userManagementView
 
         Models.KnowledgeModelsRoute ->
-            knowledgeModelsView
+            KnowledgeModels.Index.View.index
 
         Models.WizzardsRoute ->
             wizzardsView
@@ -111,11 +100,6 @@ organizationView =
 userManagementView : Html Msg
 userManagementView =
     text "User Management"
-
-
-knowledgeModelsView : Html Msg
-knowledgeModelsView =
-    text "Knowledge Models"
 
 
 wizzardsView : Html Msg
