@@ -1,14 +1,13 @@
 .header {
     display: flex;
+    justify-content: space-between;
     margin-bottom: 30px;
 
     h2 {
-        width: 50%;
         margin: 0;
     }
 
     .actions {
-        width: 50%;
         text-align: right;
     }
 }
