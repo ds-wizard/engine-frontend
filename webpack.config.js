@@ -21,6 +21,11 @@ module.exports = {
         loader: 'file-loader?name=[name].[ext]',
       },
       {
+        test: /\.png$/,
+        exclude: /node_modules/,
+        loader: 'file-loader?name=img/[name].[ext]',
+      },
+      {
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
         loader: 'elm-webpack-loader?verbose=true&warn=true',

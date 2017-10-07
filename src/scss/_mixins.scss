@@ -4,3 +4,14 @@
         -ms-border-radius: $radius;
             border-radius: $radius;
   }
+
+
+@mixin background-image-retina($file, $ext) {
+background-image: url($file + '.' + $ext);
+
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 144dpi) {
+        & {
+        background-image: url($file + '@2x.' + $ext);
+        }
+    }
+}

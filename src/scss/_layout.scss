@@ -24,6 +24,15 @@ body {
         font-size: 24px;
         padding: 15px;
         display: inline-block;
+        @include background-image-retina("/img/elixir-logo", "png");
+        background-size: 43px 44px;
+        background-repeat: no-repeat;
+        background-position: left 10px center;
+        display: inline-block;
+        width: 100%;
+        text-decoration: none;
+        padding-top: 25px;
+        text-indent: 30px;
     }
 
     .menu {
