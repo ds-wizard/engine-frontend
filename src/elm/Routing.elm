@@ -11,6 +11,7 @@ matchers =
         [ map IndexRoute top
         , map OrganizationRoute (s "organization")
         , map UserManagementRoute (s "user-management")
+        , map KnowledgeModelsCreateRoute (s "knowledge-models" </> s "create")
         , map KnowledgeModelsEditorRoute (s "knowledge-models" </> s "edit")
         , map KnowledgeModelsRoute (s "knowledge-models")
         , map WizzardsRoute (s "wizzards")
@@ -46,6 +47,11 @@ userManagementPath =
 knowledgeModelsPath : String
 knowledgeModelsPath =
     "/knowledge-models"
+
+
+knowledgeModelsCreatePath : String
+knowledgeModelsCreatePath =
+    "/knowledge-models/create"
 
 
 wizzardsPath : String

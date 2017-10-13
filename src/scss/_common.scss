@@ -27,3 +27,13 @@ textarea {
         margin-right: 5px;
     }
 }
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.form-group {
+    margin-bottom: 40px;
+}

@@ -1,9 +1,10 @@
 module KnowledgeModels.Index.View exposing (..)
 
-import Common.Html exposing (pageHeader)
+import Common.Html exposing (onLinkClick, pageHeader)
 import Html exposing (Html, a, div, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, href)
 import Msgs exposing (Msg)
+import Routing exposing (knowledgeModelsCreatePath)
 
 
 view : Html Msg
@@ -16,7 +17,12 @@ view =
 
 indexActions : List (Html Msg)
 indexActions =
-    [ a [ class "btn btn-primary" ] [ text "Create KM" ]
+    [ a
+        [ class "btn btn-primary"
+        , href knowledgeModelsCreatePath
+        , onLinkClick (Msgs.ChangeLocation knowledgeModelsCreatePath)
+        ]
+        [ text "Create KM" ]
     ]
 
 

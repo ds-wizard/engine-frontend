@@ -7,6 +7,7 @@ type Route
     | UserManagementRoute
     | KnowledgeModelsRoute
     | KnowledgeModelsEditorRoute
+    | KnowledgeModelsCreateRoute
     | WizzardsRoute
     | DataManagementPlansRoute
     | NotFoundRouteRoute

@@ -3,6 +3,7 @@ module View exposing (..)
 import Common.Html exposing (onLinkClick)
 import Html exposing (Attribute, Html, a, div, i, li, text, ul)
 import Html.Attributes exposing (class, href)
+import KnowledgeModels.Create.View
 import KnowledgeModels.Editor.View
 import KnowledgeModels.Index.View
 import Models exposing (Model)
@@ -75,11 +76,14 @@ page model =
         Models.UserManagementRoute ->
             userManagementView
 
-        Models.KnowledgeModelsRoute ->
-            KnowledgeModels.Index.View.view
+        Models.KnowledgeModelsCreateRoute ->
+            KnowledgeModels.Create.View.view
 
         Models.KnowledgeModelsEditorRoute ->
             KnowledgeModels.Editor.View.view
+
+        Models.KnowledgeModelsRoute ->
+            KnowledgeModels.Index.View.view
 
         Models.WizzardsRoute ->
             wizzardsView

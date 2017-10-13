@@ -1,5 +1,6 @@
 module KnowledgeModels.Editor.View exposing (..)
 
+import Common.Forms exposing (formActions, inputSelect, inputText, inputTextarea)
 import Common.Html exposing (pageHeader)
 import Html exposing (Html, a, button, div, h3, i, input, label, li, option, select, text, textarea, ul)
 import Html.Attributes exposing (class, href, rows, type_)
@@ -124,39 +125,6 @@ breadcrumbsElement name =
 
 
 
--- Inputs
-
-
-inputText : String -> Html Msg
-inputText labelText =
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text labelText ]
-        , input [ class "form-control", type_ "text" ] []
-        ]
-
-
-inputTextarea : String -> Html Msg
-inputTextarea labelText =
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text labelText ]
-        , textarea [ class "form-control", rows 4 ] []
-        ]
-
-
-inputSelect : String -> List String -> Html Msg
-inputSelect labelText options =
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text labelText ]
-        , select [ class "form-control" ] (List.map inputSelectOption options)
-        ]
-
-
-inputSelectOption : String -> Html Msg
-inputSelectOption labelText =
-    option [] [ text labelText ]
-
-
-
 -- Children Input
 
 
@@ -180,16 +148,4 @@ inputChildrenChild name =
             [ a [ href "#" ] [ text "Edit" ]
             , a [ href "#" ] [ text "Delete" ]
             ]
-        ]
-
-
-
--- Form Actions
-
-
-formActions : Html Msg
-formActions =
-    div [ class "form-actions" ]
-        [ button [ class "btn btn-default" ] [ text "Cancel" ]
-        , button [ class "btn btn-primary" ] [ text "Save" ]
         ]
