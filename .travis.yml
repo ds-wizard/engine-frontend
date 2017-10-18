@@ -1,0 +1,22 @@
+sudo: required
+
+language: node_js
+
+node_js:
+  - "8.0.0"
+
+services:
+  - docker
+
+env:
+  - IMAGE_TAG="$DOCKER_REGISTRY/elixir/dsp-client:latest"
+
+install:
+  - npm install
+
+script:
+  - npm run build
+  - docker --version
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
+  - docker build -t $IMAGE_TAG .
+  - docker push $IMAGE_TAG
