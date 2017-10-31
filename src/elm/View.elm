@@ -1,7 +1,8 @@
 module View exposing (..)
 
+import Auth.Msgs
 import Auth.View
-import Common.Html exposing (linkTo)
+import Common.Html exposing (linkTo, onLinkClick)
 import Html exposing (Attribute, Html, a, div, i, li, text, ul)
 import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
@@ -66,6 +67,7 @@ menu model =
             , menuItem model "Wizzards" "fa-list-alt" Wizzards
             , menuItem model "Data Management Plans" "fa-file-text" DataManagementPlans
             ]
+        , profileInfo model
         ]
 
 
@@ -90,6 +92,16 @@ menuItem model label icon route =
             [ class activeClass ]
             [ i [ class ("fa " ++ icon) ] []
             , text label
+            ]
+        ]
+
+
+profileInfo : Model -> Html Msg
+profileInfo model =
+    div [ class "profile-info" ]
+        [ a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
+            [ i [ class "fa fa-sign-out" ] []
+            , text "Logout"
             ]
         ]
 

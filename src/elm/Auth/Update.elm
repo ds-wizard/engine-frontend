@@ -43,3 +43,11 @@ update msg model =
 
         AuthMsgs.GetTokenCompleted result ->
             getTokenCompleted model result
+
+        AuthMsgs.Logout ->
+            ( { model | token = "" }
+            , Cmd.batch
+                [ Ports.clearSession ()
+                , cmdNavigate Login
+                ]
+            )

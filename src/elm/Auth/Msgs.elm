@@ -8,3 +8,4 @@ type Msg
     | Password String
     | Login
     | GetTokenCompleted (Result Http.Error String)
+    | Logout
