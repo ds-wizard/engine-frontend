@@ -16,6 +16,7 @@ matchers =
         , map KnowledgeModelsRoute (s "knowledge-models")
         , map WizzardsRoute (s "wizzards")
         , map DataManagementPlansRoute (s "data-management-plans")
+        , map LoginRoute (s "login")
         ]
 
 
@@ -32,6 +33,11 @@ parseLocation location =
 indexPath : String
 indexPath =
     "/"
+
+
+loginPath : String
+loginPath =
+    "/login"
 
 
 organizationPath : String

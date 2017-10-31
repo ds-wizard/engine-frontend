@@ -1,39 +1,41 @@
-.header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
+.app-view {
+    .header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
 
-    h2 {
-        margin: 0;
+        h2 {
+            margin: 0;
+        }
+
+        .actions {
+            text-align: right;
+        }
     }
 
-    .actions {
-        text-align: right;
+    .table-actions {
+        a {
+            margin-right: 15px;
+        }
     }
-}
 
-.table-actions {
-    a {
-        margin-right: 15px;
+    textarea {
+        resize: vertical;
     }
-}
 
-textarea {
-    resize: vertical;
-}
-
-.link-with-icon {
-    .fa {
-        margin-right: 5px;
+    .link-with-icon {
+        .fa {
+            margin-right: 5px;
+        }
     }
-}
 
-.form-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-}
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
 
-.form-group {
-    margin-bottom: 40px;
+    .form-group {
+        margin-bottom: 40px;
+    }
 }

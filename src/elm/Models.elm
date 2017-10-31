@@ -10,6 +10,7 @@ type Route
     | KnowledgeModelsCreateRoute
     | WizzardsRoute
     | DataManagementPlansRoute
+    | LoginRoute
     | NotFoundRouteRoute
 
 

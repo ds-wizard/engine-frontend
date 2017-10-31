@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
 import KnowledgeModels.Editor.View
 import KnowledgeModels.Index.View
+import Login.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Routing
@@ -13,9 +14,44 @@ import Routing
 
 view : Model -> Html Msg
 view model =
-    div []
+    case model.route of
+        Models.LoginRoute ->
+            Login.View.view
+
+        Models.IndexRoute ->
+            appView model indexView
+
+        Models.OrganizationRoute ->
+            appView model organizationView
+
+        Models.UserManagementRoute ->
+            appView model userManagementView
+
+        Models.KnowledgeModelsCreateRoute ->
+            appView model KnowledgeModels.Create.View.view
+
+        Models.KnowledgeModelsEditorRoute ->
+            appView model KnowledgeModels.Editor.View.view
+
+        Models.KnowledgeModelsRoute ->
+            appView model KnowledgeModels.Index.View.view
+
+        Models.WizzardsRoute ->
+            appView model wizzardsView
+
+        Models.DataManagementPlansRoute ->
+            appView model dataManagementPlansView
+
+        Models.NotFoundRouteRoute ->
+            appView model notFoundView
+
+
+appView : Model -> Html Msg -> Html Msg
+appView model content =
+    div [ class "app-view" ]
         [ menu model
-        , content model
+        , div [ class "page" ]
+            [ content ]
         ]
 
 
@@ -56,43 +92,6 @@ menuItem label icon url active =
             , text label
             ]
         ]
-
-
-content : Model -> Html Msg
-content model =
-    div [ class "page" ]
-        [ page model ]
-
-
-page : Model -> Html Msg
-page model =
-    case model.route of
-        Models.IndexRoute ->
-            indexView
-
-        Models.OrganizationRoute ->
-            organizationView
-
-        Models.UserManagementRoute ->
-            userManagementView
-
-        Models.KnowledgeModelsCreateRoute ->
-            KnowledgeModels.Create.View.view
-
-        Models.KnowledgeModelsEditorRoute ->
-            KnowledgeModels.Editor.View.view
-
-        Models.KnowledgeModelsRoute ->
-            KnowledgeModels.Index.View.view
-
-        Models.WizzardsRoute ->
-            wizzardsView
-
-        Models.DataManagementPlansRoute ->
-            dataManagementPlansView
-
-        Models.NotFoundRouteRoute ->
-            notFoundView
 
 
 indexView : Html Msg
