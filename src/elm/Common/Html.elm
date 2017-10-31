@@ -1,10 +1,22 @@
 module Common.Html exposing (..)
 
 import Html exposing (Attribute, Html, a, div, h2, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Decode
 import Msgs exposing (Msg)
+import Routing exposing (Route)
+
+
+linkTo : Route -> List (Attribute Msg) -> List (Html Msg) -> Html Msg
+linkTo route attributes children =
+    let
+        hrefAttributes =
+            [ href <| Routing.toUrl route
+            , onLinkClick <| Msgs.ChangeLocation <| Routing.toUrl route
+            ]
+    in
+    a (attributes ++ hrefAttributes) children
 
 
 onLinkClick : msg -> Attribute msg

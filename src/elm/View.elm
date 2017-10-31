@@ -1,48 +1,48 @@
 module View exposing (..)
 
-import Common.Html exposing (onLinkClick)
+import Auth.View
+import Common.Html exposing (linkTo)
 import Html exposing (Attribute, Html, a, div, i, li, text, ul)
 import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
 import KnowledgeModels.Editor.View
 import KnowledgeModels.Index.View
-import Login.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
-import Routing
+import Routing exposing (Route(..))
 
 
 view : Model -> Html Msg
 view model =
     case model.route of
-        Models.LoginRoute ->
-            Login.View.view
+        Login ->
+            Auth.View.view model.authModel
 
-        Models.IndexRoute ->
+        Index ->
             appView model indexView
 
-        Models.OrganizationRoute ->
+        Organization ->
             appView model organizationView
 
-        Models.UserManagementRoute ->
+        UserManagement ->
             appView model userManagementView
 
-        Models.KnowledgeModelsCreateRoute ->
+        KnowledgeModelsCreate ->
             appView model KnowledgeModels.Create.View.view
 
-        Models.KnowledgeModelsEditorRoute ->
+        KnowledgeModelsEditor ->
             appView model KnowledgeModels.Editor.View.view
 
-        Models.KnowledgeModelsRoute ->
+        KnowledgeModels ->
             appView model KnowledgeModels.Index.View.view
 
-        Models.WizzardsRoute ->
+        Wizzards ->
             appView model wizzardsView
 
-        Models.DataManagementPlansRoute ->
+        DataManagementPlans ->
             appView model dataManagementPlansView
 
-        Models.NotFoundRouteRoute ->
+        NotFound ->
             appView model notFoundView
 
 
@@ -60,34 +60,34 @@ menu model =
     div [ class "side-navigation" ]
         [ logo
         , ul [ class "menu" ]
-            [ menuItem "Organization" "fa-building" Routing.organizationPath (model.route == Models.OrganizationRoute)
-            , menuItem "User Management" "fa-users" Routing.userManagementPath (model.route == Models.UserManagementRoute)
-            , menuItem "Knowledge Models" "fa-database" Routing.knowledgeModelsPath (model.route == Models.KnowledgeModelsRoute)
-            , menuItem "Wizzards" "fa-list-alt" Routing.wizzardsPath (model.route == Models.WizzardsRoute)
-            , menuItem "Data Management Plans" "fa-file-text" Routing.dataManagementPlansPath (model.route == Models.DataManagementPlansRoute)
+            [ menuItem model "Organization" "fa-building" Organization
+            , menuItem model "User Management" "fa-users" UserManagement
+            , menuItem model "Knowledge Models" "fa-database" KnowledgeModels
+            , menuItem model "Wizzards" "fa-list-alt" Wizzards
+            , menuItem model "Data Management Plans" "fa-file-text" DataManagementPlans
             ]
         ]
 
 
 logo : Html Msg
 logo =
-    a [ class "logo", href Routing.indexPath, onLinkClick (Msgs.ChangeLocation Routing.indexPath) ]
+    linkTo Index
+        [ class "logo" ]
         [ text "Elixir DSP" ]
 
 
-menuItem : String -> String -> String -> Bool -> Html Msg
-menuItem label icon url active =
+menuItem : Model -> String -> String -> Route -> Html Msg
+menuItem model label icon route =
+    let
+        activeClass =
+            if model.route == route then
+                "active"
+            else
+                ""
+    in
     li []
-        [ a
-            [ href url
-            , onLinkClick (Msgs.ChangeLocation url)
-            , class
-                (if active then
-                    "active"
-                 else
-                    ""
-                )
-            ]
+        [ linkTo route
+            [ class activeClass ]
             [ i [ class ("fa " ++ icon) ] []
             , text label
             ]

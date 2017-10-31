@@ -1,23 +1,73 @@
 module Routing exposing (..)
 
-import Models exposing (Route(..))
 import Navigation exposing (Location)
 import UrlParser exposing (..)
+
+
+type Route
+    = Index
+    | Organization
+    | UserManagement
+    | KnowledgeModels
+    | KnowledgeModelsEditor
+    | KnowledgeModelsCreate
+    | Wizzards
+    | DataManagementPlans
+    | Login
+    | NotFound
 
 
 matchers : Parser (Route -> a) a
 matchers =
     oneOf
-        [ map IndexRoute top
-        , map OrganizationRoute (s "organization")
-        , map UserManagementRoute (s "user-management")
-        , map KnowledgeModelsCreateRoute (s "knowledge-models" </> s "create")
-        , map KnowledgeModelsEditorRoute (s "knowledge-models" </> s "edit")
-        , map KnowledgeModelsRoute (s "knowledge-models")
-        , map WizzardsRoute (s "wizzards")
-        , map DataManagementPlansRoute (s "data-management-plans")
-        , map LoginRoute (s "login")
+        [ map Index top
+        , map Organization (s "organization")
+        , map UserManagement (s "user-management")
+        , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
+        , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit")
+        , map KnowledgeModels (s "knowledge-models")
+        , map Wizzards (s "wizzards")
+        , map DataManagementPlans (s "data-management-plans")
+        , map Login (s "login")
         ]
+
+
+toUrl : Route -> String
+toUrl route =
+    let
+        parts =
+            case route of
+                Index ->
+                    []
+
+                Organization ->
+                    [ "organization" ]
+
+                UserManagement ->
+                    [ "user-management" ]
+
+                KnowledgeModelsCreate ->
+                    [ "knowledge-models", "create" ]
+
+                KnowledgeModelsEditor ->
+                    [ "knowledge-models", "edit" ]
+
+                KnowledgeModels ->
+                    [ "knowledge-models" ]
+
+                Wizzards ->
+                    [ "wizzards" ]
+
+                DataManagementPlans ->
+                    [ "data-management-plans" ]
+
+                Login ->
+                    [ "login" ]
+
+                _ ->
+                    []
+    in
+    "/" ++ String.join "/" parts
 
 
 parseLocation : Location -> Route
@@ -27,44 +77,9 @@ parseLocation location =
             route
 
         Nothing ->
-            NotFoundRouteRoute
+            NotFound
 
 
-indexPath : String
-indexPath =
-    "/"
-
-
-loginPath : String
-loginPath =
-    "/login"
-
-
-organizationPath : String
-organizationPath =
-    "/organization"
-
-
-userManagementPath : String
-userManagementPath =
-    "/user-management"
-
-
-knowledgeModelsPath : String
-knowledgeModelsPath =
-    "/knowledge-models"
-
-
-knowledgeModelsCreatePath : String
-knowledgeModelsCreatePath =
-    "/knowledge-models/create"
-
-
-wizzardsPath : String
-wizzardsPath =
-    "/wizzards"
-
-
-dataManagementPlansPath : String
-dataManagementPlansPath =
-    "/data-management-plans"
+cmdNavigate : Route -> Cmd msg
+cmdNavigate =
+    Navigation.newUrl << toUrl

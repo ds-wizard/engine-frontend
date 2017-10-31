@@ -1,5 +1,6 @@
 module Update exposing (..)
 
+import Auth.Update
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Navigation
@@ -13,8 +14,11 @@ update msg model =
             ( model, Navigation.newUrl path )
 
         Msgs.OnLocationChange location ->
+            ( { model | route = parseLocation location }, Cmd.none ) |> Debug.log "OnLocationChange"
+
+        Msgs.AuthMsg msg ->
             let
-                newRoute =
-                    parseLocation location
+                ( authModel, cmd ) =
+                    Auth.Update.update msg model.authModel
             in
-            ( { model | route = newRoute }, Cmd.none )
+            ( { model | authModel = authModel }, cmd )

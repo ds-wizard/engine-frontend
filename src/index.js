@@ -13,4 +13,15 @@ require('./img/elixir-logo@2x.png')
 var Elm = require('./elm/Main.elm')
 var mountNode = document.getElementById('main')
 
-var app = Elm.Main.embed(mountNode)
+var app = Elm.Main.embed(mountNode, localStorage.session || null)
+
+// initialize ports to use local storage
+app.ports.storeSession.subscribe(function(session) {
+    localStorage.session = session
+})
+
+window.addEventListener("storage", function(event) {
+    if (event.storageArea === localStorage && event.key === "session") {
+        app.ports.onSessionChange.send(event.newValue)
+    }
+})
