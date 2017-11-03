@@ -2,6 +2,7 @@ module Auth.Models exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
+import Jwt exposing (decodeToken)
 
 
 type alias Model =
@@ -24,6 +25,10 @@ type alias User =
     , name : String
     , surname : String
     }
+
+
+type alias JwtToken =
+    { permissions : List String }
 
 
 
@@ -103,3 +108,23 @@ userDecoder =
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "surname" Decode.string
+
+
+
+-- JWT Helpers
+
+
+parseJwt : String -> Maybe JwtToken
+parseJwt token =
+    case decodeToken jwtDecoder token of
+        Ok jwt ->
+            Just jwt
+
+        Err error ->
+            Nothing
+
+
+jwtDecoder : Decoder JwtToken
+jwtDecoder =
+    decode JwtToken
+        |> required "permissions" (Decode.list Decode.string)

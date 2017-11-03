@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Auth.Models exposing (Session, decodeSession, initialSession)
+import Auth.Models exposing (Session, decodeSession, initialSession, parseJwt)
 import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
@@ -16,16 +16,16 @@ init val location =
         currentRoute =
             Routing.parseLocation location
 
-        session =
+        ( session, jwt ) =
             case decodeSessionFromJson val of
                 Just session ->
-                    session
+                    ( session, parseJwt session.token )
 
                 Nothing ->
-                    initialSession
+                    ( initialSession, Nothing )
 
         model =
-            initialModel currentRoute session
+            initialModel currentRoute session jwt
     in
     ( model, decideInitialRoute model currentRoute )
 

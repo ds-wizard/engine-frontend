@@ -1,6 +1,6 @@
 module Auth.Update exposing (..)
 
-import Auth.Models as AuthModel exposing (User, initialSession, setToken, setUser)
+import Auth.Models as AuthModel exposing (User, initialSession, parseJwt, setToken, setUser)
 import Auth.Msgs as AuthMsgs
 import Auth.Requests exposing (..)
 import Http
@@ -25,9 +25,18 @@ getTokenCompleted : Model -> Result Http.Error String -> ( Model, Cmd Msg )
 getTokenCompleted model result =
     case result of
         Ok token ->
-            ( { model | session = setToken model.session token, authModel = AuthModel.initialModel }
-            , profileCmd model
-            )
+            case parseJwt token of
+                Just jwt ->
+                    ( { model
+                        | session = setToken model.session token
+                        , authModel = AuthModel.initialModel
+                        , jwt = Just jwt
+                      }
+                    , profileCmd model
+                    )
+
+                Nothing ->
+                    ( { model | authModel = AuthModel.updateLoading (AuthModel.updateError model.authModel "Invalid response from the server") False }, Cmd.none )
 
         Err error ->
             ( { model | authModel = AuthModel.updateLoading (AuthModel.updateError model.authModel "Login failed") False }, Cmd.none )
