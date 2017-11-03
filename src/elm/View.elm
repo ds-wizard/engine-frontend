@@ -1,6 +1,7 @@
 module View exposing (..)
 
 import Auth.Msgs
+import Auth.Permission as Perm exposing (hasPerm)
 import Auth.View
 import Common.Html exposing (linkTo, onLinkClick)
 import Html exposing (..)
@@ -56,17 +57,22 @@ appView model content =
         ]
 
 
+menuItems : List ( String, String, Route, String )
+menuItems =
+    [ ( "Organization", "fa-building", Organization, Perm.organization )
+    , ( "User Management", "fa-users", UserManagement, Perm.userManagement )
+    , ( "Knowledge Models", "fa-database", KnowledgeModels, Perm.knowledgeModel )
+    , ( "Wizzards", "fa-list-alt", Wizzards, Perm.wizzard )
+    , ( "Data Management Plans", "fa-file-text", DataManagementPlans, Perm.dataManagementPlan )
+    ]
+
+
 menu : Model -> Html Msg
 menu model =
     div [ class "side-navigation" ]
         [ logo
         , ul [ class "menu" ]
-            [ menuItem model "Organization" "fa-building" Organization
-            , menuItem model "User Management" "fa-users" UserManagement
-            , menuItem model "Knowledge Models" "fa-database" KnowledgeModels
-            , menuItem model "Wizzards" "fa-list-alt" Wizzards
-            , menuItem model "Data Management Plans" "fa-file-text" DataManagementPlans
-            ]
+            (createMenu model)
         , profileInfo model
         ]
 
@@ -78,8 +84,15 @@ logo =
         [ text "Elixir DSP" ]
 
 
-menuItem : Model -> String -> String -> Route -> Html Msg
-menuItem model label icon route =
+createMenu : Model -> List (Html Msg)
+createMenu model =
+    menuItems
+        |> List.filter (\( _, _, _, perm ) -> hasPerm model.jwt perm)
+        |> List.map (menuItem model)
+
+
+menuItem : Model -> ( String, String, Route, String ) -> Html Msg
+menuItem model ( label, icon, route, perm ) =
     let
         activeClass =
             if model.route == route then
