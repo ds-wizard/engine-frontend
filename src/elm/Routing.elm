@@ -1,5 +1,7 @@
 module Routing exposing (..)
 
+import Auth.Models exposing (JwtToken)
+import Auth.Permission as Perm exposing (hasPerm)
 import Navigation exposing (Location)
 import UrlParser exposing (..)
 
@@ -15,6 +17,7 @@ type Route
     | DataManagementPlans
     | Login
     | NotFound
+    | NotAllowed
 
 
 matchers : Parser (Route -> a) a
@@ -30,6 +33,51 @@ matchers =
         , map DataManagementPlans (s "data-management-plans")
         , map Login (s "login")
         ]
+
+
+routeIfAllowed : Maybe JwtToken -> Route -> Route
+routeIfAllowed maybeJwt route =
+    if isAllowed route maybeJwt then
+        route
+    else
+        NotAllowed
+
+
+isAllowed : Route -> Maybe JwtToken -> Bool
+isAllowed route maybeJwt =
+    case route of
+        Index ->
+            True
+
+        Organization ->
+            hasPerm maybeJwt Perm.organization
+
+        UserManagement ->
+            hasPerm maybeJwt Perm.userManagement
+
+        KnowledgeModelsCreate ->
+            hasPerm maybeJwt Perm.knowledgeModel
+
+        KnowledgeModelsEditor ->
+            hasPerm maybeJwt Perm.knowledgeModel
+
+        KnowledgeModels ->
+            hasPerm maybeJwt Perm.knowledgeModel
+
+        Wizzards ->
+            hasPerm maybeJwt Perm.wizzard
+
+        DataManagementPlans ->
+            hasPerm maybeJwt Perm.dataManagementPlan
+
+        Login ->
+            True
+
+        NotFound ->
+            True
+
+        _ ->
+            False
 
 
 toUrl : Route -> String

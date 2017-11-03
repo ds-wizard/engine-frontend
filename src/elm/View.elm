@@ -47,6 +47,9 @@ view model =
         NotFound ->
             appView model notFoundView
 
+        NotAllowed ->
+            appView model notAllowedView
+
 
 appView : Model -> Html Msg -> Html Msg
 appView model content =
@@ -157,3 +160,8 @@ dataManagementPlansView =
 notFoundView : Html msg
 notFoundView =
     text "Not Found"
+
+
+notAllowedView : Html msg
+notAllowedView =
+    text "You don't have a permission to view this page"

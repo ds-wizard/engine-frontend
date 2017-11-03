@@ -5,7 +5,7 @@ import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
-import Routing exposing (Route(..), cmdNavigate)
+import Routing exposing (Route(..), cmdNavigate, routeIfAllowed)
 import Update exposing (update)
 import View exposing (view)
 
@@ -13,9 +13,6 @@ import View exposing (view)
 init : Value -> Location -> ( Model, Cmd Msg )
 init val location =
     let
-        currentRoute =
-            Routing.parseLocation location
-
         ( session, jwt ) =
             case decodeSessionFromJson val of
                 Just session ->
@@ -24,10 +21,15 @@ init val location =
                 Nothing ->
                     ( initialSession, Nothing )
 
+        route =
+            location
+                |> Routing.parseLocation
+                |> routeIfAllowed jwt
+
         model =
-            initialModel currentRoute session jwt
+            initialModel route session jwt
     in
-    ( model, decideInitialRoute model currentRoute )
+    ( model, decideInitialRoute model route )
 
 
 decideInitialRoute : Model -> Route -> Cmd msg

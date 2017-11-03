@@ -4,7 +4,7 @@ import Auth.Update
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Navigation
-import Routing exposing (parseLocation)
+import Routing exposing (Route(..), isAllowed, parseLocation)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
