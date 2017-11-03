@@ -54,7 +54,7 @@ loginButton model =
     let
         buttonContent =
             if model.loading then
-                i [ class "fa fa-circle-o-notch fa-spin" ] []
+                i [ class "fa fa-spinner fa-spin" ] []
             else
                 text "Login"
     in

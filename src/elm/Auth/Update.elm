@@ -31,7 +31,6 @@ getTokenCompleted model result =
                         newModel =
                             { model
                                 | session = setToken model.session token
-                                , authModel = AuthModel.initialModel
                                 , jwt = Just jwt
                             }
                     in
@@ -50,7 +49,7 @@ getProfileCompleted model result =
         Ok user ->
             let
                 newModel =
-                    { model | session = setUser model.session user }
+                    { model | session = setUser model.session user, authModel = AuthModel.initialModel }
             in
             ( newModel
             , Cmd.batch
