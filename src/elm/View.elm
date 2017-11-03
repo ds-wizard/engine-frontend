@@ -12,6 +12,7 @@ import KnowledgeModels.Index.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Routing exposing (Route(..))
+import UserManagement.Index.View
 
 
 view : Model -> Html Msg
@@ -27,7 +28,7 @@ view model =
             appView model organizationView
 
         UserManagement ->
-            appView model userManagementView
+            appView model <| UserManagement.Index.View.view model.userManagementIndexModel
 
         KnowledgeModelsCreate ->
             appView model KnowledgeModels.Create.View.view
@@ -140,11 +141,6 @@ indexView =
 organizationView : Html Msg
 organizationView =
     text "Organization"
-
-
-userManagementView : Html Msg
-userManagementView =
-    text "User Management"
 
 
 wizzardsView : Html Msg

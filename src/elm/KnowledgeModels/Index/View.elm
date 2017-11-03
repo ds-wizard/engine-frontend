@@ -1,6 +1,6 @@
 module KnowledgeModels.Index.View exposing (..)
 
-import Common.Html exposing (onLinkClick, pageHeader)
+import Common.Html exposing (linkTo, pageHeader)
 import Html exposing (Html, a, div, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, href)
 import Msgs exposing (Msg)
@@ -17,11 +17,8 @@ view =
 
 indexActions : List (Html Msg)
 indexActions =
-    [ a
-        [ class "btn btn-primary"
-        , href <| Routing.toUrl Routing.KnowledgeModelsCreate
-        , onLinkClick (Msgs.ChangeLocation <| Routing.toUrl Routing.KnowledgeModelsCreate)
-        ]
+    [ linkTo Routing.KnowledgeModelsCreate
+        [ class "btn btn-primary" ]
         [ text "Create KM" ]
     ]
 

@@ -1,6 +1,6 @@
 module Auth.Update exposing (..)
 
-import Auth.Models as AuthModel exposing (User, initialSession, parseJwt, setToken, setUser)
+import Auth.Models as AuthModel exposing (initialSession, parseJwt, setToken, setUser)
 import Auth.Msgs as AuthMsgs
 import Auth.Requests exposing (..)
 import Http
@@ -9,6 +9,7 @@ import Models exposing (Model)
 import Msgs exposing (Msg)
 import Ports
 import Routing exposing (Route(..), cmdNavigate)
+import UserManagement.Models exposing (User)
 
 
 authUserCmd : Model -> Cmd Msg

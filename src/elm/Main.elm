@@ -6,7 +6,7 @@ import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Routing exposing (Route(..), cmdNavigate, routeIfAllowed)
-import Update exposing (update)
+import Update exposing (fetchData, update)
 import View exposing (view)
 
 
@@ -32,7 +32,7 @@ init val location =
     ( model, decideInitialRoute model route )
 
 
-decideInitialRoute : Model -> Route -> Cmd msg
+decideInitialRoute : Model -> Route -> Cmd Msg
 decideInitialRoute model route =
     case route of
         Login ->
@@ -43,7 +43,7 @@ decideInitialRoute model route =
 
         _ ->
             if userLoggedIn model then
-                Cmd.none
+                fetchData model
             else
                 cmdNavigate Login
 

@@ -1,3 +1,5 @@
+@import "mixins";
+
 .app-view {
     .header {
         display: flex;
@@ -37,5 +39,24 @@
 
     .form-group {
         margin-bottom: 40px;
+    }
+
+    .full-page-loader {
+        text-align: center;
+        color: #aaa;
+        opacity: 0;
+        @include animation(fadeIn, ease-in, 1);
+        @include animation-duration(1s);
+        @include animation-delay(.4s);
+        @include animation-fill-mode(forwards);
+
+        .fa {
+            font-size: 50px;
+            margin: 20px;
+        }
+    }
+
+    .full-page-error {
+        padding: 48px;
     }
 }

@@ -3,6 +3,7 @@ module Auth.Models exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import Jwt exposing (decodeToken)
+import UserManagement.Models exposing (User, userDecoder)
 
 
 type alias Model =
@@ -16,14 +17,6 @@ type alias Model =
 type alias Session =
     { token : String
     , user : Maybe User
-    }
-
-
-type alias User =
-    { uuid : String
-    , email : String
-    , name : String
-    , surname : String
     }
 
 
@@ -95,19 +88,6 @@ decodeSession =
 sessionExists : Session -> Bool
 sessionExists session =
     session.token /= ""
-
-
-
--- User helpers
-
-
-userDecoder : Decoder User
-userDecoder =
-    decode User
-        |> required "email" Decode.string
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-        |> required "surname" Decode.string
 
 
 

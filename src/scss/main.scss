@@ -3,6 +3,7 @@ $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 @import "~bootswatch/united/bootswatch";
 
+@import "animations";
 @import "layout";
 @import "common";
 @import "knowledge-models";

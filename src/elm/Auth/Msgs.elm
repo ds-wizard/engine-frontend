@@ -1,8 +1,8 @@
 module Auth.Msgs exposing (..)
 
-import Auth.Models exposing (User)
 import Http
 import Jwt
+import UserManagement.Models exposing (User)
 
 
 type Msg

@@ -1,12 +1,12 @@
 module Auth.Requests exposing (..)
 
-import Auth.Models exposing (Session, User, userDecoder)
+import Auth.Models exposing (Session)
 import Http
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
 import Jwt
 import Requests exposing (apiUrl)
+import UserManagement.Models exposing (User, userDecoder)
 
 
 authUser : { r | email : String, password : String } -> Http.Request String
