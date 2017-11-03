@@ -2,8 +2,8 @@ module Auth.View exposing (..)
 
 import Auth.Models exposing (Model)
 import Auth.Msgs
-import Html exposing (Html, button, div, fieldset, form, h2, input, label, legend, span, text)
-import Html.Attributes exposing (class, placeholder, type_)
+import Html exposing (Html, button, div, fieldset, form, h2, i, input, label, legend, span, text)
+import Html.Attributes exposing (class, disabled, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
 import Msgs exposing (Msg)
 
@@ -43,11 +43,23 @@ loginForm model =
                 , input [ onInput (Msgs.AuthMsg << Auth.Msgs.Password), type_ "password", class "form-control", placeholder "Password" ] []
                 ]
             , div [ class "form-group text-right" ]
-                [ button [ type_ "submit", class "btn btn-primary" ]
-                    [ text "Login" ]
+                [ loginButton model
                 ]
             ]
         ]
+
+
+loginButton : Model -> Html Msg
+loginButton model =
+    let
+        buttonContent =
+            if model.loading then
+                i [ class "fa fa-circle-o-notch fa-spin" ] []
+            else
+                text "Login"
+    in
+    button [ type_ "submit", class "btn btn-primary", disabled model.loading ]
+        [ buttonContent ]
 
 
 loginError : Model -> Html Msg

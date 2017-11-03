@@ -1,8 +1,11 @@
 module Auth.Requests exposing (..)
 
+import Auth.Models exposing (Session, User, userDecoder)
 import Http
 import Json.Decode as Decode exposing (..)
+import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
+import Jwt
 import Requests exposing (apiUrl)
 
 
@@ -26,3 +29,8 @@ encodeCredentials email password =
 tokenDecoder : Decoder String
 tokenDecoder =
     Decode.field "token" Decode.string
+
+
+getCurrentUser : Session -> Http.Request User
+getCurrentUser session =
+    Jwt.get session.token (apiUrl "/users/current") userDecoder

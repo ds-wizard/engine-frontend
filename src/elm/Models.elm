@@ -1,22 +1,24 @@
 module Models exposing (..)
 
-import Auth.Models
+import Auth.Models as AuthModels exposing (Session, sessionExists)
 import Routing exposing (Route)
 
 
 type alias Model =
     { route : Route
-    , authModel : Auth.Models.Model
+    , authModel : AuthModels.Model
+    , session : Session
     }
 
 
-initialModel : Route -> String -> Model
-initialModel route token =
+initialModel : Route -> Session -> Model
+initialModel route session =
     { route = route
-    , authModel = Auth.Models.initialModel token
+    , authModel = AuthModels.initialModel
+    , session = session
     }
 
 
 userLoggedIn : Model -> Bool
 userLoggedIn model =
-    model.authModel.token /= ""
+    sessionExists model.session

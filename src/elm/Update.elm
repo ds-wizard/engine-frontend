@@ -17,8 +17,4 @@ update msg model =
             ( { model | route = parseLocation location }, Cmd.none ) |> Debug.log "OnLocationChange"
 
         Msgs.AuthMsg msg ->
-            let
-                ( authModel, cmd ) =
-                    Auth.Update.update msg model.authModel
-            in
-            ( { model | authModel = authModel }, cmd )
+            Auth.Update.update msg model

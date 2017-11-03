@@ -1,6 +1,8 @@
 module Auth.Msgs exposing (..)
 
+import Auth.Models exposing (User)
 import Http
+import Jwt
 
 
 type Msg
@@ -8,4 +10,5 @@ type Msg
     | Password String
     | Login
     | GetTokenCompleted (Result Http.Error String)
+    | GetProfileCompleted (Result Jwt.JwtError User)
     | Logout

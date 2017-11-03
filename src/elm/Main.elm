@@ -1,7 +1,8 @@
 module Main exposing (..)
 
+import Auth.Models exposing (Session, decodeSession, initialSession)
 import Json.Decode as Decode exposing (Value)
-import Models exposing (Model, initialModel, userLoggedIn)
+import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Routing exposing (Route(..), cmdNavigate)
@@ -15,16 +16,16 @@ init val location =
         currentRoute =
             Routing.parseLocation location
 
-        token =
-            case decodeTokenFromJson val of
-                Just token ->
-                    token
+        session =
+            case decodeSessionFromJson val of
+                Just session ->
+                    session
 
                 Nothing ->
-                    ""
+                    initialSession
 
         model =
-            initialModel currentRoute token
+            initialModel currentRoute session
     in
     ( model, decideInitialRoute model currentRoute )
 
@@ -45,10 +46,10 @@ decideInitialRoute model route =
                 cmdNavigate Login
 
 
-decodeTokenFromJson : Value -> Maybe String
-decodeTokenFromJson json =
+decodeSessionFromJson : Value -> Maybe Session
+decodeSessionFromJson json =
     json
-        |> Decode.decodeValue Decode.string
+        |> Decode.decodeValue decodeSession
         |> Result.toMaybe
 
 
