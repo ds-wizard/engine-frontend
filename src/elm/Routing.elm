@@ -10,6 +10,7 @@ type Route
     = Index
     | Organization
     | UserManagement
+    | UserManagementDelete String
     | KnowledgeModels
     | KnowledgeModelsEditor
     | KnowledgeModelsCreate
@@ -26,6 +27,7 @@ matchers =
         [ map Index top
         , map Organization (s "organization")
         , map UserManagement (s "user-management")
+        , map UserManagementDelete (s "user-management" </> s "delete" </> string)
         , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
         , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit")
         , map KnowledgeModels (s "knowledge-models")
@@ -53,6 +55,9 @@ isAllowed route maybeJwt =
             hasPerm maybeJwt Perm.organization
 
         UserManagement ->
+            hasPerm maybeJwt Perm.userManagement
+
+        UserManagementDelete uuid ->
             hasPerm maybeJwt Perm.userManagement
 
         KnowledgeModelsCreate ->
@@ -93,6 +98,9 @@ toUrl route =
 
                 UserManagement ->
                     [ "user-management" ]
+
+                UserManagementDelete uuid ->
+                    [ "user-management", "delete", uuid ]
 
                 KnowledgeModelsCreate ->
                     [ "knowledge-models", "create" ]

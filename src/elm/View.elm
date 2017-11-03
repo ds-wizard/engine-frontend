@@ -12,6 +12,7 @@ import KnowledgeModels.Index.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Routing exposing (Route(..))
+import UserManagement.Delete.View
 import UserManagement.Index.View
 
 
@@ -29,6 +30,9 @@ view model =
 
         UserManagement ->
             appView model <| UserManagement.Index.View.view model.userManagementIndexModel
+
+        UserManagementDelete userId ->
+            appView model <| UserManagement.Delete.View.view model.userManagementDeleteModel
 
         KnowledgeModelsCreate ->
             appView model KnowledgeModels.Create.View.view

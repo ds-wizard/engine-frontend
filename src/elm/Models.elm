@@ -2,6 +2,7 @@ module Models exposing (..)
 
 import Auth.Models as AuthModels exposing (JwtToken, Session, sessionExists)
 import Routing exposing (Route)
+import UserManagement.Delete.Models
 import UserManagement.Index.Models
 
 
@@ -11,6 +12,7 @@ type alias Model =
     , session : Session
     , jwt : Maybe JwtToken
     , userManagementIndexModel : UserManagement.Index.Models.Model
+    , userManagementDeleteModel : UserManagement.Delete.Models.Model
     }
 
 
@@ -21,6 +23,7 @@ initialModel route session jwt =
     , session = session
     , jwt = jwt
     , userManagementIndexModel = UserManagement.Index.Models.initialModel
+    , userManagementDeleteModel = UserManagement.Delete.Models.initialModel
     }
 
 

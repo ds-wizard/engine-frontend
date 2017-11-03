@@ -1,9 +1,10 @@
 module UserManagement.Index.View exposing (..)
 
-import Common.Html exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.Html exposing (defaultFullPageError, fullPageLoader, linkTo, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs exposing (Msg)
+import Routing exposing (Route(..))
 import UserManagement.Index.Models exposing (..)
 import UserManagement.Models exposing (User)
 
@@ -63,8 +64,13 @@ umTableRow user =
         , td [] [ text user.surname ]
         , td [] [ text user.email ]
         , td [] [ text user.role ]
-        , td [ class "table-actions" ] [ umTableRowAction "Edit", umTableRowAction "Delete" ]
+        , td [ class "table-actions" ] [ umTableRowAction "Edit", umTableRowActionDelete user ]
         ]
+
+
+umTableRowActionDelete : User -> Html Msg
+umTableRowActionDelete user =
+    linkTo (UserManagementDelete user.uuid) [] [ text "Delete" ]
 
 
 umTableRowAction : String -> Html Msg

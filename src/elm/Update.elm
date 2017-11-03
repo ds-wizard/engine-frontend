@@ -5,6 +5,7 @@ import Models exposing (Model)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Routing exposing (Route(..), isAllowed, parseLocation)
+import UserManagement.Delete.Update
 import UserManagement.Index.Models
 import UserManagement.Index.Update
 
@@ -14,6 +15,9 @@ fetchData model =
     case model.route of
         UserManagement ->
             UserManagement.Index.Update.listUsersCmd model.session
+
+        UserManagementDelete uuid ->
+            UserManagement.Delete.Update.getUserCmd uuid model.session
 
         _ ->
             Cmd.none
@@ -51,3 +55,10 @@ update msg model =
                     UserManagement.Index.Update.update msg model.session model.userManagementIndexModel
             in
             ( { model | userManagementIndexModel = userManagementIndexModel }, cmd )
+
+        Msgs.UserManagementDeleteMsg msg ->
+            let
+                ( userManagementDeleteModel, cmd ) =
+                    UserManagement.Delete.Update.update msg model.session model.userManagementDeleteModel
+            in
+            ( { model | userManagementDeleteModel = userManagementDeleteModel }, cmd )
