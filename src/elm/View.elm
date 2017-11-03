@@ -3,7 +3,7 @@ module View exposing (..)
 import Auth.Msgs
 import Auth.View
 import Common.Html exposing (linkTo, onLinkClick)
-import Html exposing (Attribute, Html, a, div, i, li, text, ul)
+import Html exposing (..)
 import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
 import KnowledgeModels.Editor.View
@@ -98,8 +98,18 @@ menuItem model label icon route =
 
 profileInfo : Model -> Html Msg
 profileInfo model =
+    let
+        name =
+            case model.session.user of
+                Just user ->
+                    user.name ++ " " ++ user.surname
+
+                Nothing ->
+                    ""
+    in
     div [ class "profile-info" ]
-        [ a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
+        [ span [] [ text name ]
+        , a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
             [ i [ class "fa fa-sign-out" ] []
             , text "Logout"
             ]

@@ -70,19 +70,25 @@
     .profile-info {
         position: absolute;
         bottom: 0;
-        width: 100%;
-        padding: 3px;
+        left: 0;
+        right: 0;
+        margin: 3px;
+        padding: 10px;
+        color: #fff;
+        border-top: 1px solid darken($brand-primary, 10%);
+
+        span {
+            display: block;
+        }
 
         a {
+            font-size: 12px;
             color: #fff;
             cursor: pointer;
             display: inline-block;
-            padding: 10px;
 
             .fa {
-                display: inline-block;
-                width: 30px;
-                text-align: center
+                margin-right: 3px;
             }
         }
     }
