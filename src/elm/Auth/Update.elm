@@ -27,13 +27,15 @@ getTokenCompleted model result =
         Ok token ->
             case parseJwt token of
                 Just jwt ->
-                    ( { model
-                        | session = setToken model.session token
-                        , authModel = AuthModel.initialModel
-                        , jwt = Just jwt
-                      }
-                    , profileCmd model
-                    )
+                    let
+                        newModel =
+                            { model
+                                | session = setToken model.session token
+                                , authModel = AuthModel.initialModel
+                                , jwt = Just jwt
+                            }
+                    in
+                    ( newModel, profileCmd newModel )
 
                 Nothing ->
                     ( { model | authModel = AuthModel.updateLoading (AuthModel.updateError model.authModel "Invalid response from the server") False }, Cmd.none )
