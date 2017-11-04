@@ -28,7 +28,7 @@ view model =
 
 indexActions : List (Html Msg)
 indexActions =
-    [ a [ class "btn btn-primary" ] [ text "Create User" ] ]
+    [ linkTo UserManagementCreate [ class "btn btn-primary" ] [ text "Create User" ] ]
 
 
 umTable : Model -> Html Msg

@@ -35,10 +35,10 @@
         display: flex;
         justify-content: space-between;
         margin-top: 30px;
-    }
 
-    .form-group {
-        margin-bottom: 40px;
+        .btn {
+            min-width: 100px;
+        }
     }
 
     .full-page-loader {
@@ -63,5 +63,11 @@
     .btn-with-loader {
         width: 100px;
         text-align: center;
+    }
+
+    .alert {
+        .fa {
+            margin-right: 5px;
+        }
     }
 }

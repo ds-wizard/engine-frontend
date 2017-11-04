@@ -1,8 +1,9 @@
 module UserManagement.Delete.View exposing (..)
 
-import Common.Html exposing (defaultFullPageError, fullPageLoader, linkTo, onLinkClick, pageHeader)
+import Common.Html exposing (defaultFullPageError, fullPageLoader, linkTo, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Msgs exposing (Msg(..))
 import Routing exposing (Route(..))
 import UserManagement.Delete.Models exposing (Model)
@@ -54,7 +55,7 @@ deleteButton model =
     button
         [ class "btn btn-primary btn-with-loader"
         , disabled model.deletingUser
-        , onLinkClick (UserManagementDeleteMsg UserManagement.Delete.Msgs.DeleteUser)
+        , onClick (UserManagementDeleteMsg UserManagement.Delete.Msgs.DeleteUser)
         ]
         [ buttonContent ]
 
