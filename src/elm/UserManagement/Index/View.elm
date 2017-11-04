@@ -64,7 +64,7 @@ umTableRow user =
         , td [] [ text user.surname ]
         , td [] [ text user.email ]
         , td [] [ text user.role ]
-        , td [ class "table-actions" ] [ umTableRowAction "Edit", umTableRowActionDelete user ]
+        , td [ class "table-actions" ] [ umTableRowActionEdit user, umTableRowActionDelete user ]
         ]
 
 
@@ -73,7 +73,6 @@ umTableRowActionDelete user =
     linkTo (UserManagementDelete user.uuid) [] [ text "Delete" ]
 
 
-umTableRowAction : String -> Html Msg
-umTableRowAction name =
-    a [ href "#" ]
-        [ text name ]
+umTableRowActionEdit : User -> Html Msg
+umTableRowActionEdit user =
+    linkTo (UserManagementEdit user.uuid) [] [ text "Edit" ]

@@ -8,6 +8,8 @@ import Routing exposing (Route(..), isAllowed, parseLocation)
 import UserManagement.Create.Models
 import UserManagement.Create.Update
 import UserManagement.Delete.Update
+import UserManagement.Edit.Models
+import UserManagement.Edit.Update
 import UserManagement.Index.Models
 import UserManagement.Index.Update
 
@@ -17,6 +19,9 @@ fetchData model =
     case model.route of
         UserManagement ->
             UserManagement.Index.Update.listUsersCmd model.session
+
+        UserManagementEdit uuid ->
+            UserManagement.Edit.Update.getUserCmd uuid model.session
 
         UserManagementDelete uuid ->
             UserManagement.Delete.Update.getUserCmd uuid model.session
@@ -33,6 +38,9 @@ initLocalModel model =
 
         UserManagementCreate ->
             { model | userManagementCreateModel = UserManagement.Create.Models.initialModel }
+
+        UserManagementEdit uuid ->
+            { model | userManagementEditModel = UserManagement.Edit.Models.initialModel }
 
         _ ->
             model
@@ -74,3 +82,10 @@ update msg model =
                     UserManagement.Delete.Update.update msg model.session model.userManagementDeleteModel
             in
             ( { model | userManagementDeleteModel = userManagementDeleteModel }, cmd )
+
+        Msgs.UserManagementEditMsg msg ->
+            let
+                ( userManagementEditModel, cmd ) =
+                    UserManagement.Edit.Update.update msg model.session model.userManagementEditModel
+            in
+            ( { model | userManagementEditModel = userManagementEditModel }, cmd )

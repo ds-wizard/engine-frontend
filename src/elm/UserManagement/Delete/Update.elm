@@ -29,7 +29,7 @@ getUserCompleted model result =
                     { model | user = Just user, loadingUser = False }
 
                 Err error ->
-                    { model | error = "Unable to get user information,", loadingUser = False }
+                    { model | error = "Unable to get user profile.", loadingUser = False }
     in
     ( newModel, Cmd.none )
 

@@ -120,6 +120,6 @@ saveButton model =
     button
         [ class "btn btn-primary btn-with-loader"
         , disabled model.savingUser
-        , onClick (Msgs.UserManagementCreateMsg <| UserManagement.Create.Msgs.FormMsg Form.Submit)
+        , onClick (Msgs.UserManagementCreateMsg <| FormMsg Form.Submit)
         ]
         [ buttonContent ]

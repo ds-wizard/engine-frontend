@@ -11,6 +11,7 @@ type Route
     | Organization
     | UserManagement
     | UserManagementCreate
+    | UserManagementEdit String
     | UserManagementDelete String
     | KnowledgeModels
     | KnowledgeModelsEditor
@@ -29,6 +30,7 @@ matchers =
         , map Organization (s "organization")
         , map UserManagement (s "user-management")
         , map UserManagementCreate (s "user-management" </> s "create")
+        , map UserManagementEdit (s "user-management" </> s "edit" </> string)
         , map UserManagementDelete (s "user-management" </> s "delete" </> string)
         , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
         , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit")
@@ -61,6 +63,12 @@ isAllowed route maybeJwt =
 
         UserManagementCreate ->
             hasPerm maybeJwt Perm.userManagement
+
+        UserManagementEdit uuid ->
+            if uuid == "current" then
+                True
+            else
+                hasPerm maybeJwt Perm.userManagement
 
         UserManagementDelete uuid ->
             hasPerm maybeJwt Perm.userManagement
@@ -106,6 +114,9 @@ toUrl route =
 
                 UserManagementCreate ->
                     [ "user-management", "create" ]
+
+                UserManagementEdit uuid ->
+                    [ "user-management", "edit", uuid ]
 
                 UserManagementDelete uuid ->
                     [ "user-management", "delete", uuid ]

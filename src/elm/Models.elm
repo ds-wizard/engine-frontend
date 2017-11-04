@@ -7,6 +7,7 @@ import Random.Pcg exposing (Seed, initialSeed)
 import Routing exposing (Route)
 import UserManagement.Create.Models
 import UserManagement.Delete.Models
+import UserManagement.Edit.Models
 import UserManagement.Index.Models
 
 
@@ -18,6 +19,7 @@ type alias Model =
     , jwt : Maybe JwtToken
     , userManagementIndexModel : UserManagement.Index.Models.Model
     , userManagementCreateModel : UserManagement.Create.Models.Model
+    , userManagementEditModel : UserManagement.Edit.Models.Model
     , userManagementDeleteModel : UserManagement.Delete.Models.Model
     }
 
@@ -31,6 +33,7 @@ initialModel route seed session jwt =
     , jwt = jwt
     , userManagementIndexModel = UserManagement.Index.Models.initialModel
     , userManagementCreateModel = UserManagement.Create.Models.initialModel
+    , userManagementEditModel = UserManagement.Edit.Models.initialModel
     , userManagementDeleteModel = UserManagement.Delete.Models.initialModel
     }
 
