@@ -15,7 +15,7 @@ authUser { email, password } =
         body =
             encodeCredentials email password |> Http.jsonBody
     in
-    Http.post (apiUrl "/token") body tokenDecoder
+    Http.post (apiUrl "/tokens") body tokenDecoder
 
 
 encodeCredentials : String -> String -> Encode.Value
