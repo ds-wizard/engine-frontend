@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Auth.Models exposing (Session, decodeSession, initialSession, parseJwt)
+import Auth.Models exposing (Session, initialSession, parseJwt)
 import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
@@ -13,13 +13,18 @@ import View exposing (view)
 init : Value -> Location -> ( Model, Cmd Msg )
 init val location =
     let
-        ( session, jwt ) =
-            case decodeSessionFromJson val of
-                Just session ->
-                    ( session, parseJwt session.token )
+        ( session, jwt, seed ) =
+            case decodeFlagsFromJson val of
+                Just flags ->
+                    case flags.session of
+                        Just session ->
+                            ( session, parseJwt session.token, flags.seed )
+
+                        Nothing ->
+                            ( initialSession, Nothing, flags.seed )
 
                 Nothing ->
-                    ( initialSession, Nothing )
+                    ( initialSession, Nothing, 0 )
 
         route =
             location
@@ -27,7 +32,7 @@ init val location =
                 |> routeIfAllowed jwt
 
         model =
-            initialModel route session jwt
+            initialModel route seed session jwt
     in
     ( model, decideInitialRoute model route )
 
@@ -48,11 +53,9 @@ decideInitialRoute model route =
                 cmdNavigate Login
 
 
-decodeSessionFromJson : Value -> Maybe Session
-decodeSessionFromJson json =
-    json
-        |> Decode.decodeValue decodeSession
-        |> Result.toMaybe
+decodeFlagsFromJson : Value -> Maybe Flags
+decodeFlagsFromJson =
+    Decode.decodeValue flagsDecoder >> Result.toMaybe
 
 
 subscriptions : Model -> Sub Msg

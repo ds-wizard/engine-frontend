@@ -4,7 +4,7 @@ import Auth.Models exposing (Session)
 import Form exposing (Form)
 import Jwt
 import Msgs
-import Random.Pcg exposing (step)
+import Random.Pcg exposing (Seed, step)
 import Routing exposing (Route(..), cmdNavigate)
 import UserManagement.Create.Models exposing (Model)
 import UserManagement.Create.Msgs exposing (Msg(..))
@@ -32,23 +32,27 @@ postUserCompleted model result =
             ( { model | error = "User could not be created.", savingUser = False }, Cmd.none )
 
 
-update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg session model =
+update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg seed session model =
     case msg of
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form ) of
                 ( Form.Submit, Just userCreateForm ) ->
                     let
                         ( newUuid, newSeed ) =
-                            step Uuid.uuidGenerator model.currentSeed
+                            step Uuid.uuidGenerator seed
 
                         cmd =
                             postUserCmd session userCreateForm (Uuid.toString newUuid)
                     in
-                    ( { model | currentSeed = newSeed, savingUser = True }, cmd )
+                    ( newSeed, { model | savingUser = True }, cmd )
 
                 _ ->
-                    ( { model | form = Form.update userCreateFormValidation formMsg model.form }, Cmd.none )
+                    ( seed, { model | form = Form.update userCreateFormValidation formMsg model.form }, Cmd.none )
 
         PostUserCompleted result ->
-            postUserCompleted model result
+            let
+                ( newMdoel, cmd ) =
+                    postUserCompleted model result
+            in
+            ( seed, model, cmd )

@@ -13,7 +13,10 @@ require('./img/elixir-logo@2x.png')
 var Elm = require('./elm/Main.elm')
 var mountNode = document.getElementById('main')
 
-var app = Elm.Main.embed(mountNode, JSON.parse(localStorage.session || null))
+var app = Elm.Main.embed(mountNode, {
+    seed: Math.floor(Math.random() * 0xFFFFFFFF),
+    session: JSON.parse(localStorage.session || null)
+})
 
 // initialize ports to use local storage
 app.ports.storeSession.subscribe(function(session) {

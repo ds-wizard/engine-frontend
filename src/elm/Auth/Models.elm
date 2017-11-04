@@ -78,8 +78,8 @@ setUser session user =
     { session | user = Just user }
 
 
-decodeSession : Decoder Session
-decodeSession =
+sessionDecoder : Decoder Session
+sessionDecoder =
     decode Session
         |> required "token" Decode.string
         |> required "user" (Decode.nullable userDecoder)

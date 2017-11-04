@@ -32,7 +32,7 @@ initLocalModel model =
             { model | userManagementIndexModel = UserManagement.Index.Models.initialModel }
 
         UserManagementCreate ->
-            { model | userManagementCreateModel = UserManagement.Create.Models.initialModel 0 }
+            { model | userManagementCreateModel = UserManagement.Create.Models.initialModel }
 
         _ ->
             model
@@ -63,10 +63,10 @@ update msg model =
 
         Msgs.UserManagementCreateMsg msg ->
             let
-                ( userManagementCreateModel, cmd ) =
-                    UserManagement.Create.Update.update msg model.session model.userManagementCreateModel
+                ( seed, userManagementCreateModel, cmd ) =
+                    UserManagement.Create.Update.update msg model.seed model.session model.userManagementCreateModel
             in
-            ( { model | userManagementCreateModel = userManagementCreateModel }, cmd )
+            ( { model | seed = seed, userManagementCreateModel = userManagementCreateModel }, cmd )
 
         Msgs.UserManagementDeleteMsg msg ->
             let
