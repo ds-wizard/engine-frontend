@@ -36,15 +36,15 @@ content model =
 editFormView : Model -> Html Msgs.Msg
 editFormView model =
     div [ class "well" ]
-        [ editForm model.editForm model.editError |> Html.map (EditFormMsg >> Msgs.UserManagementEditMsg)
+        [ editForm model.editForm model.editError (model.uuid == "current") |> Html.map (EditFormMsg >> Msgs.UserManagementEditMsg)
         , div [ class "text-right" ]
             [ saveButton model.editSaving (Msgs.UserManagementEditMsg <| EditFormMsg Form.Submit)
             ]
         ]
 
 
-editForm : Form () UserEditForm -> String -> Html Form.Msg
-editForm form error =
+editForm : Form () UserEditForm -> String -> Bool -> Html Form.Msg
+editForm form error current =
     let
         email =
             Form.getFieldAsString "email" form
@@ -60,6 +60,12 @@ editForm form error =
 
         roleOptions =
             ( "", "--" ) :: List.map (\o -> ( o, o )) roles
+
+        roleSelect =
+            if current then
+                text ""
+            else
+                selectGroup roleOptions role "Role"
     in
     div []
         [ legend [] [ text "Profile" ]
@@ -67,7 +73,7 @@ editForm form error =
         , inputGroup Input.textInput email "Email"
         , inputGroup Input.textInput name "Name"
         , inputGroup Input.textInput surname "Surname"
-        , selectGroup roleOptions role "Role"
+        , roleSelect
         ]
 
 

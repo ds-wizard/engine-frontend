@@ -33,7 +33,7 @@ initialModel route seed session jwt =
     , jwt = jwt
     , userManagementIndexModel = UserManagement.Index.Models.initialModel
     , userManagementCreateModel = UserManagement.Create.Models.initialModel
-    , userManagementEditModel = UserManagement.Edit.Models.initialModel
+    , userManagementEditModel = UserManagement.Edit.Models.initialModel ""
     , userManagementDeleteModel = UserManagement.Delete.Models.initialModel
     }
 

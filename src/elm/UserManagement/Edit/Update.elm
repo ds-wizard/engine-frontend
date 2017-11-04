@@ -26,7 +26,7 @@ getUserCompleted model result =
                         editForm =
                             initUserEditForm user
                     in
-                    { model | editForm = editForm, uuid = user.uuid, loading = False }
+                    { model | editForm = editForm, loading = False }
 
                 Err error ->
                     { model | loadingError = "Unable to get user profile.", loading = False }
@@ -47,7 +47,7 @@ putUserCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg 
 putUserCompleted model result =
     case result of
         Ok user ->
-            ( model, cmdNavigate UserManagement )
+            ( model, cmdNavigate <| redirectRoute model )
 
         Err error ->
             ( { model | editError = "User could not be saved.", editSaving = False }, Cmd.none )
@@ -66,10 +66,18 @@ putUserPasswordCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd M
 putUserPasswordCompleted model result =
     case result of
         Ok user ->
-            ( model, cmdNavigate UserManagement )
+            ( model, cmdNavigate <| redirectRoute model )
 
         Err error ->
             ( { model | passwordError = "Password could not be changed.", passwordSaving = False }, Cmd.none )
+
+
+redirectRoute : Model -> Route
+redirectRoute model =
+    if model.uuid == "current" then
+        Index
+    else
+        UserManagement
 
 
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )

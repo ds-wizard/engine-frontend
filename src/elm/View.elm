@@ -137,7 +137,7 @@ profileInfo model =
                     ""
     in
     div [ class "profile-info" ]
-        [ span [] [ text name ]
+        [ linkTo (UserManagementEdit "current") [class "name"] [ text name ]
         , a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
             [ i [ class "fa fa-sign-out" ] []
             , text "Logout"

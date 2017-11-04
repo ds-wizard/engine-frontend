@@ -6,7 +6,7 @@ import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Routing exposing (Route(..), cmdNavigate, routeIfAllowed)
-import Update exposing (fetchData, update)
+import Update exposing (fetchData, initLocalModel, update)
 import View exposing (view)
 
 
@@ -34,7 +34,7 @@ init val location =
         model =
             initialModel route seed session jwt
     in
-    ( model, decideInitialRoute model route )
+    ( initLocalModel model, decideInitialRoute model route )
 
 
 decideInitialRoute : Model -> Route -> Cmd Msg

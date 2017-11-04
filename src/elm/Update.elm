@@ -40,7 +40,7 @@ initLocalModel model =
             { model | userManagementCreateModel = UserManagement.Create.Models.initialModel }
 
         UserManagementEdit uuid ->
-            { model | userManagementEditModel = UserManagement.Edit.Models.initialModel }
+            { model | userManagementEditModel = UserManagement.Edit.Models.initialModel uuid } |> Debug.log "this"
 
         _ ->
             model

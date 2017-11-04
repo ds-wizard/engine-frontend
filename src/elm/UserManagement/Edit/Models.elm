@@ -17,9 +17,9 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { uuid = ""
+initialModel : String -> Model
+initialModel uuid =
+    { uuid = uuid
     , loading = True
     , loadingError = ""
     , editForm = initEmptyUserEditForm
