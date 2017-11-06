@@ -54,7 +54,16 @@ umTableHeader =
 
 umTableBody : Model -> Html Msg
 umTableBody model =
-    tbody [] (List.map umTableRow model.users)
+    if List.isEmpty model.users then
+        umTableEmpty
+    else
+        tbody [] (List.map umTableRow model.users)
+
+
+umTableEmpty : Html msg
+umTableEmpty =
+    tr []
+        [ td [ colspan 5, class "td-empty-table" ] [ text "There are no users." ] ]
 
 
 umTableRow : User -> Html Msg
