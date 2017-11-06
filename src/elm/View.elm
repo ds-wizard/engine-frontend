@@ -3,7 +3,7 @@ module View exposing (..)
 import Auth.Msgs
 import Auth.Permission as Perm exposing (hasPerm)
 import Auth.View
-import Common.Html exposing (linkTo, onLinkClick)
+import Common.Html exposing (defaultFullPageError, fullPageError, linkTo, onLinkClick)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
@@ -137,7 +137,7 @@ profileInfo model =
                     ""
     in
     div [ class "profile-info" ]
-        [ linkTo (UserManagementEdit "current") [class "name"] [ text name ]
+        [ linkTo (UserManagementEdit "current") [ class "name" ] [ text name ]
         , a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
             [ i [ class "fa fa-sign-out" ] []
             , text "Logout"
@@ -167,9 +167,9 @@ dataManagementPlansView =
 
 notFoundView : Html msg
 notFoundView =
-    text "Not Found"
+    fullPageError "fa-file-o" "The page was not found"
 
 
 notAllowedView : Html msg
 notAllowedView =
-    text "You don't have a permission to view this page"
+    fullPageError "fa-ban" "You don't have a permission to view this page"
