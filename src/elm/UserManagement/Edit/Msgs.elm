@@ -10,4 +10,4 @@ type Msg
     | EditFormMsg Form.Msg
     | PutUserCompleted (Result Jwt.JwtError String)
     | PasswordFormMsg Form.Msg
-    | PutPasswordCompleted (Result Jwt.JwtError String)
+    | PutUserPasswordCompleted (Result Jwt.JwtError String)

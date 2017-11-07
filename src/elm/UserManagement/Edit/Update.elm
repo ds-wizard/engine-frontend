@@ -4,6 +4,7 @@ import Auth.Models exposing (Session)
 import Form exposing (Form)
 import Jwt
 import Msgs
+import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import UserManagement.Edit.Models exposing (Model)
 import UserManagement.Edit.Msgs exposing (Msg(..))
@@ -13,7 +14,24 @@ import UserManagement.Requests exposing (..)
 
 getUserCmd : String -> Session -> Cmd Msgs.Msg
 getUserCmd uuid session =
-    Jwt.send GetUserCompleted (getUser uuid session) |> Cmd.map Msgs.UserManagementEditMsg
+    getUser uuid session
+        |> toCmd GetUserCompleted Msgs.UserManagementEditMsg
+
+
+putUserCmd : Session -> UserEditForm -> String -> Cmd Msgs.Msg
+putUserCmd session form uuid =
+    form
+        |> encodeUserEditForm uuid
+        |> putUser uuid session
+        |> toCmd PutUserCompleted Msgs.UserManagementEditMsg
+
+
+putUserPasswordCmd : Session -> UserPasswordForm -> String -> Cmd Msgs.Msg
+putUserPasswordCmd session form uuid =
+    form
+        |> encodeUserPasswordForm
+        |> putUserPassword uuid session
+        |> toCmd PutUserPasswordCompleted Msgs.UserManagementEditMsg
 
 
 getUserCompleted : Model -> Result Jwt.JwtError User -> ( Model, Cmd Msgs.Msg )
@@ -34,15 +52,6 @@ getUserCompleted model result =
     ( newModel, Cmd.none )
 
 
-putUserCmd : Session -> UserEditForm -> String -> Cmd Msgs.Msg
-putUserCmd session form uuid =
-    form
-        |> encodeUserEditForm uuid
-        |> putUser uuid session
-        |> Jwt.send PutUserCompleted
-        |> Cmd.map Msgs.UserManagementEditMsg
-
-
 putUserCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 putUserCompleted model result =
     case result of
@@ -51,15 +60,6 @@ putUserCompleted model result =
 
         Err error ->
             ( { model | editError = "User could not be saved.", editSaving = False }, Cmd.none )
-
-
-putUserPasswordCmd : Session -> UserPasswordForm -> String -> Cmd Msgs.Msg
-putUserPasswordCmd session form uuid =
-    form
-        |> encodeUserPasswordForm
-        |> putUserPassword uuid session
-        |> Jwt.send PutPasswordCompleted
-        |> Cmd.map Msgs.UserManagementEditMsg
 
 
 putUserPasswordCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -113,5 +113,5 @@ update msg session model =
                 _ ->
                     ( { model | passwordForm = Form.update userPasswordFormValidation formMsg model.passwordForm }, Cmd.none )
 
-        PutPasswordCompleted result ->
+        PutUserPasswordCompleted result ->
             putUserPasswordCompleted model result

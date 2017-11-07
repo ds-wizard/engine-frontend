@@ -3,15 +3,17 @@ module UserManagement.Index.Update exposing (..)
 import Auth.Models exposing (Session)
 import Jwt
 import Msgs
+import Requests exposing (toCmd)
 import UserManagement.Index.Models exposing (Model)
 import UserManagement.Index.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (User)
 import UserManagement.Requests exposing (getUsers)
 
 
-listUsersCmd : Session -> Cmd Msgs.Msg
-listUsersCmd session =
-    Jwt.send GetUsersCompleted (getUsers session) |> Cmd.map Msgs.UserManagementIndexMsg
+getUsersCmd : Session -> Cmd Msgs.Msg
+getUsersCmd session =
+    getUsers session
+        |> toCmd GetUsersCompleted Msgs.UserManagementIndexMsg
 
 
 getUsersCompleted : Model -> Result Jwt.JwtError (List User) -> ( Model, Cmd Msgs.Msg )

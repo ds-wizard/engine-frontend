@@ -3,6 +3,7 @@ module UserManagement.Delete.Update exposing (..)
 import Auth.Models exposing (Session)
 import Jwt
 import Msgs
+import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import UserManagement.Delete.Models exposing (Model)
 import UserManagement.Delete.Msgs exposing (Msg(..))
@@ -12,12 +13,14 @@ import UserManagement.Requests exposing (deleteUser, getUser)
 
 getUserCmd : String -> Session -> Cmd Msgs.Msg
 getUserCmd uuid session =
-    Jwt.send GetUserCompleted (getUser uuid session) |> Cmd.map Msgs.UserManagementDeleteMsg
+    getUser uuid session
+        |> toCmd GetUserCompleted Msgs.UserManagementDeleteMsg
 
 
 deleteUserCmd : String -> Session -> Cmd Msgs.Msg
 deleteUserCmd uuid session =
-    Jwt.send DeleteUserCompleted (deleteUser uuid session) |> Cmd.map Msgs.UserManagementDeleteMsg
+    deleteUser uuid session
+        |> toCmd DeleteUserCompleted Msgs.UserManagementDeleteMsg
 
 
 getUserCompleted : Model -> Result Jwt.JwtError User -> ( Model, Cmd Msgs.Msg )

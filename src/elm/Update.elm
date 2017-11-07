@@ -18,7 +18,7 @@ fetchData : Model -> Cmd Msg
 fetchData model =
     case model.route of
         UserManagement ->
-            UserManagement.Index.Update.listUsersCmd model.session
+            UserManagement.Index.Update.getUsersCmd model.session
 
         UserManagementEdit uuid ->
             UserManagement.Edit.Update.getUserCmd uuid model.session

@@ -5,6 +5,7 @@ import Form exposing (Form)
 import Jwt
 import Msgs
 import Random.Pcg exposing (Seed, step)
+import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import UserManagement.Create.Models exposing (Model)
 import UserManagement.Create.Msgs exposing (Msg(..))
@@ -18,8 +19,7 @@ postUserCmd session form uuid =
     form
         |> encodeUserCreateForm uuid
         |> postUser session
-        |> Jwt.send PostUserCompleted
-        |> Cmd.map Msgs.UserManagementCreateMsg
+        |> toCmd PostUserCompleted Msgs.UserManagementCreateMsg
 
 
 postUserCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )

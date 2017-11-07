@@ -17,6 +17,13 @@ apiRoot =
     "http://localhost:3000"
 
 
+toCmd : (Result Jwt.JwtError a -> a1) -> (a1 -> msg) -> Http.Request a -> Cmd msg
+toCmd msg rootMsg req =
+    req
+        |> Jwt.send msg
+        |> Cmd.map rootMsg
+
+
 get : Session -> String -> Decoder a -> Http.Request a
 get session url decoder =
     Jwt.get session.token (apiUrl url) decoder

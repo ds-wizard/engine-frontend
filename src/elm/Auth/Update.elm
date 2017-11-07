@@ -8,22 +8,26 @@ import Jwt
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Ports
+import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import UserManagement.Models exposing (User)
 
 
 authUserCmd : Model -> Cmd Msg
 authUserCmd model =
-    Http.send AuthMsgs.GetTokenCompleted (authUser model.authModel) |> Cmd.map Msgs.AuthMsg
+    authUser model.authModel
+        |> Http.send AuthMsgs.AuthUserCompleted
+        |> Cmd.map Msgs.AuthMsg
 
 
-profileCmd : Model -> Cmd Msg
-profileCmd model =
-    Jwt.send AuthMsgs.GetProfileCompleted (getCurrentUser model.session) |> Cmd.map Msgs.AuthMsg
+getCurrentUserCmd : Model -> Cmd Msg
+getCurrentUserCmd model =
+    getCurrentUser model.session
+        |> toCmd AuthMsgs.GetCurrentUserCompleted Msgs.AuthMsg
 
 
-getTokenCompleted : Model -> Result Http.Error String -> ( Model, Cmd Msg )
-getTokenCompleted model result =
+authUserCompleted : Model -> Result Http.Error String -> ( Model, Cmd Msg )
+authUserCompleted model result =
     case result of
         Ok token ->
             case parseJwt token of
@@ -35,7 +39,7 @@ getTokenCompleted model result =
                                 , jwt = Just jwt
                             }
                     in
-                    ( newModel, profileCmd newModel )
+                    ( newModel, getCurrentUserCmd newModel )
 
                 Nothing ->
                     ( { model | authModel = AuthModel.updateLoading (AuthModel.updateError model.authModel "Invalid response from the server") False }, Cmd.none )
@@ -44,8 +48,8 @@ getTokenCompleted model result =
             ( { model | authModel = AuthModel.updateLoading (AuthModel.updateError model.authModel "Login failed") False }, Cmd.none )
 
 
-getProfileCompleted : Model -> Result Jwt.JwtError User -> ( Model, Cmd msg )
-getProfileCompleted model result =
+getCurrentUserCompleted : Model -> Result Jwt.JwtError User -> ( Model, Cmd msg )
+getCurrentUserCompleted model result =
     case result of
         Ok user ->
             let
@@ -75,11 +79,11 @@ update msg model =
         AuthMsgs.Login ->
             ( { model | authModel = AuthModel.updateLoading model.authModel True }, authUserCmd model )
 
-        AuthMsgs.GetTokenCompleted result ->
-            getTokenCompleted model result
+        AuthMsgs.AuthUserCompleted result ->
+            authUserCompleted model result
 
-        AuthMsgs.GetProfileCompleted result ->
-            getProfileCompleted model result
+        AuthMsgs.GetCurrentUserCompleted result ->
+            getCurrentUserCompleted model result
 
         AuthMsgs.Logout ->
             ( { model | session = initialSession }

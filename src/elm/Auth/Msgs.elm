@@ -9,6 +9,6 @@ type Msg
     = Email String
     | Password String
     | Login
-    | GetTokenCompleted (Result Http.Error String)
-    | GetProfileCompleted (Result Jwt.JwtError User)
+    | AuthUserCompleted (Result Http.Error String)
+    | GetCurrentUserCompleted (Result Jwt.JwtError User)
     | Logout
