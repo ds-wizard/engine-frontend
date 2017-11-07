@@ -8,6 +8,7 @@ import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))
 import Organization.Requests exposing (..)
 import Requests exposing (toCmd)
+import Utils exposing (FormResult(..))
 
 
 getCurrentOrganizationCmd : Session -> Cmd Msgs.Msg
@@ -41,15 +42,15 @@ getCurrentOrganizationCompleted model result =
 putCurrentOrganizationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 putCurrentOrganizationCompleted model result =
     let
-        newModel =
+        newResult =
             case result of
                 Ok organization ->
-                    { model | editSuccess = "Organization was successfuly saved", editError = "" }
+                    Success "Organization was successfuly saved"
 
                 Err error ->
-                    { model | editError = "Organization could not be saved", editSuccess = "" }
+                    Error "Organization could not be saved"
     in
-    ( { newModel | editSaving = False }, Cmd.none )
+    ( { model | result = newResult, saving = False }, Cmd.none )
 
 
 handleForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -60,7 +61,7 @@ handleForm formMsg session model =
                 cmd =
                     putCurrentOrganizationCmd session form
             in
-            ( { model | editSaving = True }, cmd )
+            ( { model | saving = True }, cmd )
 
         _ ->
             let

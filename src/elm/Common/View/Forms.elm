@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs exposing (Msg)
 import Routing exposing (Route)
+import Utils exposing (FormResult(..))
 
 
 -- Form fields
@@ -91,6 +92,19 @@ actionButton ( label, progress, msg ) =
 
 
 -- Status Views
+
+
+formResultView : FormResult -> Html Msgs.Msg
+formResultView result =
+    case result of
+        Success msg ->
+            successView msg
+
+        Error msg ->
+            errorView msg
+
+        None ->
+            text ""
 
 
 errorView : String -> Html Msgs.Msg

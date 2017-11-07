@@ -36,7 +36,7 @@ editView : Model -> Html Msgs.Msg
 editView model =
     div [ class "well" ]
         [ legend [] [ text "Profile" ]
-        , errorView model.editError
+        , formResultView model.editResult
         , editFormView model.editForm (model.uuid == "current")
         , formActionOnly ( "Save", model.editSaving, Msgs.UserManagementEditMsg <| EditFormMsg Form.Submit )
         ]
@@ -69,7 +69,7 @@ passwordView : Model -> Html Msgs.Msg
 passwordView model =
     div [ class "well" ]
         [ legend [] [ text "Password" ]
-        , errorView model.passwordError
+        , formResultView model.passwordResult
         , passwordFormView model.passwordForm
         , formActionOnly ( "Save", model.passwordSaving, Msgs.UserManagementEditMsg <| PasswordFormMsg Form.Submit )
         ]

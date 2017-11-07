@@ -26,10 +26,9 @@ content model =
         defaultFullPageError model.loadingError
     else
         div []
-            [ errorView model.editError
-            , successView model.editSuccess
+            [ formResultView model.result
             , formView model.form
-            , formActionOnly ( "Save", model.editSaving, Msgs.OrganizationMsg <| FormMsg Form.Submit )
+            , formActionOnly ( "Save", model.saving, Msgs.OrganizationMsg <| FormMsg Form.Submit )
             ]
 
 

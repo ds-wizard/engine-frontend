@@ -6,15 +6,15 @@ import Form.Validate as Validate exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
+import Utils exposing (FormResult(..))
 
 
 type alias Model =
     { loading : Bool
     , loadingError : String
     , form : Form () OrganizationForm
-    , editSaving : Bool
-    , editError : String
-    , editSuccess : String
+    , saving : Bool
+    , result : FormResult
     }
 
 
@@ -23,9 +23,8 @@ initialModel =
     { loading = True
     , loadingError = ""
     , form = initEmptyOrganizationForm
-    , editSaving = False
-    , editError = ""
-    , editSuccess = ""
+    , saving = False
+    , result = None
     }
 
 

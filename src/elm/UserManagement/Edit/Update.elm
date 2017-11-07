@@ -10,6 +10,7 @@ import UserManagement.Edit.Models exposing (Model)
 import UserManagement.Edit.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)
 import UserManagement.Requests exposing (..)
+import Utils exposing (FormResult(..))
 
 
 getUserCmd : String -> Session -> Cmd Msgs.Msg
@@ -54,30 +55,30 @@ getUserCompleted model result =
 
 putUserCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 putUserCompleted model result =
-    case result of
-        Ok user ->
-            ( model, cmdNavigate <| redirectRoute model )
+    let
+        editResult =
+            case result of
+                Ok user ->
+                    Success "Profile was successfully updated"
 
-        Err error ->
-            ( { model | editError = "User could not be saved.", editSaving = False }, Cmd.none )
+                Err error ->
+                    Error "Profile could not be saved."
+    in
+    ( { model | editResult = editResult, editSaving = False }, Cmd.none )
 
 
 putUserPasswordCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 putUserPasswordCompleted model result =
-    case result of
-        Ok user ->
-            ( model, cmdNavigate <| redirectRoute model )
+    let
+        passwordResult =
+            case result of
+                Ok password ->
+                    Success "Password was successfully changed"
 
-        Err error ->
-            ( { model | passwordError = "Password could not be changed.", passwordSaving = False }, Cmd.none )
-
-
-redirectRoute : Model -> Route
-redirectRoute model =
-    if model.uuid == "current" then
-        Index
-    else
-        UserManagement
+                Err error ->
+                    Error "Password could not be changed."
+    in
+    ( { model | passwordResult = passwordResult, passwordSaving = False }, Cmd.none )
 
 
 handleEditForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )

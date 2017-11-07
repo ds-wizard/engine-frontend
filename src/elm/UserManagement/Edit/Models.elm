@@ -2,6 +2,7 @@ module UserManagement.Edit.Models exposing (..)
 
 import Form exposing (Form)
 import UserManagement.Models exposing (..)
+import Utils exposing (FormResult(..))
 
 
 type alias Model =
@@ -10,10 +11,10 @@ type alias Model =
     , loadingError : String
     , editForm : Form () UserEditForm
     , editSaving : Bool
-    , editError : String
+    , editResult : FormResult
     , passwordForm : Form UserPasswordFormError UserPasswordForm
     , passwordSaving : Bool
-    , passwordError : String
+    , passwordResult : FormResult
     }
 
 
@@ -24,8 +25,8 @@ initialModel uuid =
     , loadingError = ""
     , editForm = initEmptyUserEditForm
     , editSaving = False
-    , editError = ""
+    , editResult = None
     , passwordForm = initUserPasswordForm
     , passwordSaving = False
-    , passwordError = ""
+    , passwordResult = None
     }
