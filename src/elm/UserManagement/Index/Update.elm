@@ -22,12 +22,12 @@ getUsersCompleted model result =
         newModel =
             case result of
                 Ok users ->
-                    { model | users = users, loading = False }
+                    { model | users = users }
 
                 Err error ->
-                    { model | error = "Unable to fetch user list", loading = False }
+                    { model | error = "Unable to fetch user list" }
     in
-    ( newModel, Cmd.none )
+    ( { newModel | loading = False }, Cmd.none )
 
 
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )

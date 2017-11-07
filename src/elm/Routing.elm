@@ -16,6 +16,7 @@ type Route
     | KnowledgeModels
     | KnowledgeModelsEditor
     | KnowledgeModelsCreate
+    | PackageManagement
     | Wizzards
     | DataManagementPlans
     | Login
@@ -35,6 +36,7 @@ matchers =
         , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
         , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit")
         , map KnowledgeModels (s "knowledge-models")
+        , map PackageManagement (s "package-management")
         , map Wizzards (s "wizzards")
         , map DataManagementPlans (s "data-management-plans")
         , map Login (s "login")
@@ -81,6 +83,9 @@ isAllowed route maybeJwt =
 
         KnowledgeModels ->
             hasPerm maybeJwt Perm.knowledgeModel
+
+        PackageManagement ->
+            hasPerm maybeJwt Perm.packageManagement
 
         Wizzards ->
             hasPerm maybeJwt Perm.wizzard
@@ -129,6 +134,9 @@ toUrl route =
 
                 KnowledgeModels ->
                     [ "knowledge-models" ]
+
+                PackageManagement ->
+                    [ "package-management" ]
 
                 Wizzards ->
                     [ "wizzards" ]

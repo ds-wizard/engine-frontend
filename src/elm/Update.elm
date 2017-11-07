@@ -6,6 +6,8 @@ import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Organization.Models
 import Organization.Update
+import PackageManagement.Index.Models
+import PackageManagement.Index.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import UserManagement.Create.Models
 import UserManagement.Create.Update
@@ -31,6 +33,9 @@ fetchData model =
         Organization ->
             Organization.Update.getCurrentOrganizationCmd model.session
 
+        PackageManagement ->
+            PackageManagement.Index.Update.getPackagesCmd model.session
+
         _ ->
             Cmd.none
 
@@ -49,6 +54,9 @@ initLocalModel model =
 
         Organization ->
             { model | organizationModel = Organization.Models.initialModel }
+
+        PackageManagement ->
+            { model | packageManagementIndexModel = PackageManagement.Index.Models.initialModel }
 
         _ ->
             model
@@ -104,3 +112,10 @@ update msg model =
                     Organization.Update.update msg model.session model.organizationModel
             in
             ( { model | organizationModel = organizationModel }, cmd )
+
+        Msgs.PackageManagementIndexMsg msg ->
+            let
+                ( packageManagementIndexModel, cmd ) =
+                    PackageManagement.Index.Update.update msg model.session model.packageManagementIndexModel
+            in
+            ( { model | packageManagementIndexModel = packageManagementIndexModel }, cmd )

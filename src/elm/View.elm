@@ -14,6 +14,7 @@ import KnowledgeModels.Index.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Organization.View
+import PackageManagement.Index.View
 import Routing exposing (Route(..))
 import UserManagement.Create.View
 import UserManagement.Delete.View
@@ -64,6 +65,11 @@ view model =
         KnowledgeModels ->
             appView model KnowledgeModels.Index.View.view
 
+        PackageManagement ->
+            model.packageManagementIndexModel
+                |> PackageManagement.Index.View.view
+                |> appView model
+
         Wizzards ->
             appView model wizzardsView
 
@@ -91,6 +97,7 @@ menuItems =
     [ ( "Organization", "fa-building", Organization, Perm.organization )
     , ( "User Management", "fa-users", UserManagement, Perm.userManagement )
     , ( "Knowledge Models", "fa-database", KnowledgeModels, Perm.knowledgeModel )
+    , ( "Package Management", "fa-cubes", PackageManagement, Perm.packageManagement )
     , ( "Wizzards", "fa-list-alt", Wizzards, Perm.wizzard )
     , ( "Data Management Plans", "fa-file-text", DataManagementPlans, Perm.dataManagementPlan )
     ]

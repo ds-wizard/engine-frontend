@@ -3,6 +3,7 @@ module Msgs exposing (..)
 import Auth.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs
+import PackageManagement.Index.Msgs
 import UserManagement.Create.Msgs
 import UserManagement.Delete.Msgs
 import UserManagement.Edit.Msgs
@@ -18,3 +19,4 @@ type Msg
     | UserManagementEditMsg UserManagement.Edit.Msgs.Msg
     | UserManagementDeleteMsg UserManagement.Delete.Msgs.Msg
     | OrganizationMsg Organization.Msgs.Msg
+    | PackageManagementIndexMsg PackageManagement.Index.Msgs.Msg
