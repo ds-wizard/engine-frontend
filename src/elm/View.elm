@@ -13,6 +13,7 @@ import KnowledgeModels.Editor.View
 import KnowledgeModels.Index.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
+import Organization.View
 import Routing exposing (Route(..))
 import UserManagement.Create.View
 import UserManagement.Delete.View
@@ -30,19 +31,29 @@ view model =
             appView model indexView
 
         Organization ->
-            appView model organizationView
+            model.organizationModel
+                |> Organization.View.view
+                |> appView model
 
         UserManagement ->
-            appView model <| UserManagement.Index.View.view model.userManagementIndexModel
+            model.userManagementIndexModel
+                |> UserManagement.Index.View.view
+                |> appView model
 
         UserManagementCreate ->
-            appView model <| UserManagement.Create.View.view model.userManagementCreateModel
+            model.userManagementCreateModel
+                |> UserManagement.Create.View.view
+                |> appView model
 
         UserManagementEdit uuid ->
-            appView model <| UserManagement.Edit.View.view model.userManagementEditModel
+            model.userManagementEditModel
+                |> UserManagement.Edit.View.view
+                |> appView model
 
         UserManagementDelete uuid ->
-            appView model <| UserManagement.Delete.View.view model.userManagementDeleteModel
+            model.userManagementDeleteModel
+                |> UserManagement.Delete.View.view
+                |> appView model
 
         KnowledgeModelsCreate ->
             appView model KnowledgeModels.Create.View.view
@@ -150,11 +161,6 @@ profileInfo model =
 indexView : Html Msg
 indexView =
     text "Welcome to DSP!"
-
-
-organizationView : Html Msg
-organizationView =
-    text "Organization"
 
 
 wizzardsView : Html Msg

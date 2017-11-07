@@ -4,6 +4,8 @@ import Auth.Update
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
+import Organization.Models
+import Organization.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import UserManagement.Create.Models
 import UserManagement.Create.Update
@@ -26,6 +28,9 @@ fetchData model =
         UserManagementDelete uuid ->
             UserManagement.Delete.Update.getUserCmd uuid model.session
 
+        Organization ->
+            Organization.Update.getCurrentOrganizationCmd model.session
+
         _ ->
             Cmd.none
 
@@ -40,7 +45,10 @@ initLocalModel model =
             { model | userManagementCreateModel = UserManagement.Create.Models.initialModel }
 
         UserManagementEdit uuid ->
-            { model | userManagementEditModel = UserManagement.Edit.Models.initialModel uuid } |> Debug.log "this"
+            { model | userManagementEditModel = UserManagement.Edit.Models.initialModel uuid }
+
+        Organization ->
+            { model | organizationModel = Organization.Models.initialModel }
 
         _ ->
             model
@@ -89,3 +97,10 @@ update msg model =
                     UserManagement.Edit.Update.update msg model.session model.userManagementEditModel
             in
             ( { model | userManagementEditModel = userManagementEditModel }, cmd )
+
+        Msgs.OrganizationMsg msg ->
+            let
+                ( organizationModel, cmd ) =
+                    Organization.Update.update msg model.session model.organizationModel
+            in
+            ( { model | organizationModel = organizationModel }, cmd )

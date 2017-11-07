@@ -90,15 +90,25 @@ actionButton ( label, progress, msg ) =
 
 
 
--- Error Views
+-- Status Views
 
 
 errorView : String -> Html Msgs.Msg
-errorView error =
-    if error /= "" then
-        div [ class "alert alert-danger" ]
-            [ i [ class "fa fa-exclamation-triangle" ] []
-            , text error
+errorView =
+    statusView "alert-danger" "fa-exclamation-triangle"
+
+
+successView : String -> Html Msgs.Msg
+successView =
+    statusView "alert-success" "fa-check"
+
+
+statusView : String -> String -> String -> Html Msgs.Msg
+statusView className icon msg =
+    if msg /= "" then
+        div [ class ("alert " ++ className) ]
+            [ i [ class ("fa " ++ icon) ] []
+            , text msg
             ]
     else
         text ""
