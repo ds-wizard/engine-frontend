@@ -67,6 +67,15 @@ getCurrentUserCompleted model result =
             ( { model | authModel = AuthModel.updateLoading (AuthModel.updateError model.authModel "Loading profile info failed") False }, Cmd.none )
 
 
+logout : Model -> ( Model, Cmd Msg )
+logout model =
+    let
+        cmd =
+            Cmd.batch [ Ports.clearSession (), cmdNavigate Login ]
+    in
+    ( { model | session = initialSession }, cmd )
+
+
 update : AuthMsgs.Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -86,9 +95,4 @@ update msg model =
             getCurrentUserCompleted model result
 
         AuthMsgs.Logout ->
-            ( { model | session = initialSession }
-            , Cmd.batch
-                [ Ports.clearSession ()
-                , cmdNavigate Login
-                ]
-            )
+            logout model

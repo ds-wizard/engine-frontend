@@ -80,6 +80,42 @@ redirectRoute model =
         UserManagement
 
 
+handleEditForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleEditForm formMsg session model =
+    case ( formMsg, Form.getOutput model.editForm ) of
+        ( Form.Submit, Just userEditForm ) ->
+            let
+                cmd =
+                    putUserCmd session userEditForm model.uuid
+            in
+            ( { model | editSaving = True }, cmd )
+
+        _ ->
+            let
+                editForm =
+                    Form.update userEditFormValidation formMsg model.editForm
+            in
+            ( { model | editForm = editForm }, Cmd.none )
+
+
+handlePasswordForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handlePasswordForm formMsg session model =
+    case ( formMsg, Form.getOutput model.passwordForm ) of
+        ( Form.Submit, Just passwordForm ) ->
+            let
+                cmd =
+                    putUserPasswordCmd session passwordForm model.uuid
+            in
+            ( { model | passwordSaving = True }, cmd )
+
+        _ ->
+            let
+                passwordForm =
+                    Form.update userPasswordFormValidation formMsg model.passwordForm
+            in
+            ( { model | passwordForm = passwordForm }, Cmd.none )
+
+
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of
@@ -87,31 +123,13 @@ update msg session model =
             getUserCompleted model result
 
         EditFormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.editForm ) of
-                ( Form.Submit, Just userEditForm ) ->
-                    let
-                        cmd =
-                            putUserCmd session userEditForm model.uuid
-                    in
-                    ( { model | editSaving = True }, cmd )
-
-                _ ->
-                    ( { model | editForm = Form.update userEditFormValidation formMsg model.editForm }, Cmd.none )
+            handleEditForm formMsg session model
 
         PutUserCompleted result ->
             putUserCompleted model result
 
         PasswordFormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.passwordForm ) of
-                ( Form.Submit, Just passwordForm ) ->
-                    let
-                        cmd =
-                            putUserPasswordCmd session passwordForm model.uuid
-                    in
-                    ( { model | passwordSaving = True }, cmd )
-
-                _ ->
-                    ( { model | passwordForm = Form.update userPasswordFormValidation formMsg model.passwordForm }, Cmd.none )
+            handlePasswordForm formMsg session model
 
         PutUserPasswordCompleted result ->
             putUserPasswordCompleted model result

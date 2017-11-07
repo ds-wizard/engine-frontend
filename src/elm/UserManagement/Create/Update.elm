@@ -11,6 +11,7 @@ import UserManagement.Create.Models exposing (Model)
 import UserManagement.Create.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)
 import UserManagement.Requests exposing (postUser)
+import Utils exposing (tuplePrepend)
 import Uuid
 
 
@@ -32,27 +33,32 @@ postUserCompleted model result =
             ( { model | error = "User could not be created.", savingUser = False }, Cmd.none )
 
 
+handleForm : Form.Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+handleForm formMsg seed session model =
+    case ( formMsg, Form.getOutput model.form ) of
+        ( Form.Submit, Just userCreateForm ) ->
+            let
+                ( newUuid, newSeed ) =
+                    step Uuid.uuidGenerator seed
+
+                cmd =
+                    Uuid.toString newUuid |> postUserCmd session userCreateForm
+            in
+            ( newSeed, { model | savingUser = True }, cmd )
+
+        _ ->
+            let
+                newModel =
+                    { model | form = Form.update userCreateFormValidation formMsg model.form }
+            in
+            ( seed, newModel, Cmd.none )
+
+
 update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 update msg seed session model =
     case msg of
         FormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.form ) of
-                ( Form.Submit, Just userCreateForm ) ->
-                    let
-                        ( newUuid, newSeed ) =
-                            step Uuid.uuidGenerator seed
-
-                        cmd =
-                            postUserCmd session userCreateForm (Uuid.toString newUuid)
-                    in
-                    ( newSeed, { model | savingUser = True }, cmd )
-
-                _ ->
-                    ( seed, { model | form = Form.update userCreateFormValidation formMsg model.form }, Cmd.none )
+            handleForm formMsg seed session model
 
         PostUserCompleted result ->
-            let
-                ( newMdoel, cmd ) =
-                    postUserCompleted model result
-            in
-            ( seed, model, cmd )
+            postUserCompleted model result |> tuplePrepend seed

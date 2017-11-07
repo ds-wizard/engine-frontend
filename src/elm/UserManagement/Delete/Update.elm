@@ -47,6 +47,16 @@ deleteUserCompleted model result =
             ( { model | error = "User could not be deleted." }, Cmd.none )
 
 
+handleDeleteUser : Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteUser session model =
+    case model.user of
+        Just user ->
+            ( { model | deletingUser = True }, deleteUserCmd user.uuid session )
+
+        Nothing ->
+            ( model, Cmd.none )
+
+
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of
@@ -54,12 +64,7 @@ update msg session model =
             getUserCompleted model result
 
         DeleteUser ->
-            case model.user of
-                Just user ->
-                    ( { model | deletingUser = True }, deleteUserCmd user.uuid session )
-
-                Nothing ->
-                    ( model, Cmd.none )
+            handleDeleteUser session model
 
         DeleteUserCompleted result ->
             deleteUserCompleted model result
