@@ -4,7 +4,6 @@ import Auth.Models exposing (Session)
 import Http
 import Json.Decode as Decode exposing (..)
 import Json.Encode as Encode exposing (..)
-import Jwt
 import Requests exposing (apiUrl)
 import UserManagement.Models exposing (User, userDecoder)
 
@@ -33,4 +32,4 @@ tokenDecoder =
 
 getCurrentUser : Session -> Http.Request User
 getCurrentUser session =
-    Jwt.get session.token (apiUrl "/users/current") userDecoder
+    Requests.get session "/users/current" userDecoder
