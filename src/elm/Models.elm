@@ -4,6 +4,7 @@ import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, se
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import Organization.Models
+import PackageManagement.Detail.Models
 import PackageManagement.Index.Models
 import Random.Pcg exposing (Seed, initialSeed)
 import Routing exposing (Route)
@@ -25,6 +26,7 @@ type alias Model =
     , userManagementDeleteModel : UserManagement.Delete.Models.Model
     , organizationModel : Organization.Models.Model
     , packageManagementIndexModel : PackageManagement.Index.Models.Model
+    , packageManagementDetailModel : PackageManagement.Detail.Models.Model
     }
 
 
@@ -41,6 +43,7 @@ initialModel route seed session jwt =
     , userManagementDeleteModel = UserManagement.Delete.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , packageManagementIndexModel = PackageManagement.Index.Models.initialModel
+    , packageManagementDetailModel = PackageManagement.Detail.Models.initialModel
     }
 
 

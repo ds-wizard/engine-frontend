@@ -1,11 +1,13 @@
 module PackageManagement.Index.View exposing (..)
 
+import Common.Html exposing (linkTo)
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs exposing (Msg)
 import PackageManagement.Index.Models exposing (..)
 import PackageManagement.Models exposing (..)
+import Routing exposing (Route(..))
 
 
 view : Model -> Html Msgs.Msg
@@ -61,7 +63,7 @@ pmTableEmpty =
 pmTableRow : Package -> Html Msg
 pmTableRow package =
     tr []
-        [ td [] [ text package.name ]
+        [ td [] [ linkTo (PackageManagementDetail package.shortName) [] [ text package.name ] ]
         , td [] [ text package.shortName ]
         , td [] [ text "Actions" ]
         ]

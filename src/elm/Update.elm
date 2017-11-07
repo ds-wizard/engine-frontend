@@ -6,6 +6,7 @@ import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Organization.Models
 import Organization.Update
+import PackageManagement.Detail.Update
 import PackageManagement.Index.Models
 import PackageManagement.Index.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
@@ -35,6 +36,9 @@ fetchData model =
 
         PackageManagement ->
             PackageManagement.Index.Update.getPackagesCmd model.session
+
+        PackageManagementDetail pkgName ->
+            PackageManagement.Detail.Update.getPackageCmd pkgName model.session
 
         _ ->
             Cmd.none
@@ -119,3 +123,10 @@ update msg model =
                     PackageManagement.Index.Update.update msg model.session model.packageManagementIndexModel
             in
             ( { model | packageManagementIndexModel = packageManagementIndexModel }, cmd )
+
+        Msgs.PackageManagementDetailMsg msg ->
+            let
+                ( packageManagementDetailModel, cmd ) =
+                    PackageManagement.Detail.Update.update msg model.session model.packageManagementDetailModel
+            in
+            ( { model | packageManagementDetailModel = packageManagementDetailModel }, cmd )

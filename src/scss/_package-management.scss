@@ -1,0 +1,32 @@
+@import "~bootswatch/united/variables";
+
+.panel-version {
+    background: $gray-lighter;
+    margin-bottom: 10px;
+
+    strong {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 3px;
+    }
+
+    .panel-body {
+        display: flex;
+        justify-content: space-between;
+
+        &:after, &:before {
+            display: none;
+        }
+
+        .actions {
+            .btn {
+                margin-left: 10px;
+            }
+        }
+    }
+}
+
+.package-short-name {
+    display: block;
+    padding: 10px;
+}
