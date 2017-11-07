@@ -1,6 +1,7 @@
 module UserManagement.Index.View exposing (..)
 
-import Common.Html exposing (defaultFullPageError, fullPageLoader, linkTo, pageHeader)
+import Common.Html exposing (linkTo)
+import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs exposing (Msg)

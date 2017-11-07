@@ -5,6 +5,7 @@ import Html.Attributes exposing (class, rows, type_)
 import Msgs exposing (Msg)
 
 
+-- TODO: Remove this entirely when the Knowledge model is done
 -- Inputs
 
 

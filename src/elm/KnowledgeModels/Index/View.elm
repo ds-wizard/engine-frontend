@@ -1,6 +1,7 @@
 module KnowledgeModels.Index.View exposing (..)
 
-import Common.Html exposing (linkTo, pageHeader)
+import Common.Html exposing (linkTo)
+import Common.View exposing (pageHeader)
 import Html exposing (Html, a, div, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, href)
 import Msgs exposing (Msg)

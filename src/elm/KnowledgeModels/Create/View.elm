@@ -1,7 +1,7 @@
 module KnowledgeModels.Create.View exposing (..)
 
 import Common.Forms exposing (formActions, inputSelect, inputText)
-import Common.Html exposing (pageHeader)
+import Common.View exposing (pageHeader)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Msgs exposing (Msg)

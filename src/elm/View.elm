@@ -3,7 +3,9 @@ module View exposing (..)
 import Auth.Msgs
 import Auth.Permission as Perm exposing (hasPerm)
 import Auth.View
-import Common.Html exposing (defaultFullPageError, fullPageError, linkTo, onLinkClick)
+import Common.Html exposing (linkTo)
+import Common.Html.Events exposing (onLinkClick)
+import Common.View exposing (defaultFullPageError, fullPageError)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View

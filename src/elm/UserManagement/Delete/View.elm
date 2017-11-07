@@ -1,6 +1,8 @@
 module UserManagement.Delete.View exposing (..)
 
-import Common.Html exposing (defaultFullPageError, fullPageLoader, linkTo, pageHeader)
+import Common.Html exposing (linkTo)
+import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.View.Forms exposing (formActions)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -31,33 +33,8 @@ content model =
                 [ class "alert alert-warning" ]
                 [ text "You are about to permanently remove the following user from the portal." ]
             , maybeUser model.user
-            , formActions model
+            , formActions UserManagement ( "Delete", model.deletingUser, UserManagementDeleteMsg UserManagement.Delete.Msgs.DeleteUser )
             ]
-
-
-formActions : Model -> Html Msg
-formActions model =
-    div [ class "form-actions" ]
-        [ linkTo UserManagement [ class "btn btn-default" ] [ text "Cancel" ]
-        , deleteButton model
-        ]
-
-
-deleteButton : Model -> Html Msg
-deleteButton model =
-    let
-        buttonContent =
-            if model.deletingUser then
-                i [ class "fa fa-spinner fa-spin" ] []
-            else
-                text "Delete"
-    in
-    button
-        [ class "btn btn-primary btn-with-loader"
-        , disabled model.deletingUser
-        , onClick (UserManagementDeleteMsg UserManagement.Delete.Msgs.DeleteUser)
-        ]
-        [ buttonContent ]
 
 
 maybeUser : Maybe User -> Html Msg

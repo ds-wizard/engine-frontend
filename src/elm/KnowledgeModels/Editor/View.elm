@@ -1,7 +1,7 @@
 module KnowledgeModels.Editor.View exposing (..)
 
 import Common.Forms exposing (formActions, inputSelect, inputText, inputTextarea)
-import Common.Html exposing (pageHeader)
+import Common.View exposing (pageHeader)
 import Html exposing (Html, a, button, div, h3, i, input, label, li, option, select, text, textarea, ul)
 import Html.Attributes exposing (class, href, rows, type_)
 import Msgs exposing (Msg)

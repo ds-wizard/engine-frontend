@@ -43,7 +43,7 @@ type alias UserCreateForm =
 
 roles : List String
 roles =
-    [ "ADMIN", "DATA_STEWARD", "RESEARCHER" ]
+    [ "ADMIN", "DATASTEWARD", "RESEARCHER" ]
 
 
 initUserCreateForm : Form () UserCreateForm
