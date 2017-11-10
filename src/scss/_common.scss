@@ -96,10 +96,25 @@
     z-index: 1000;
     justify-content: center;
     align-items: center;
-    display: none;
+    display: flex;
+    @include transition(opacity 0.2s ease-in);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+
+    .modal-dialog {
+        opacity: 1;
+        margin-top: -20px;
+        @include transition(margin-top 0.2s ease-in)
+    }
 
     &.visible {
-        display: flex;
+        opacity: 1;
+        max-height: 999999px;
+
+        .modal-dialog {
+            margin-top: 0;
+        }
     }
 
     .modal-footer {

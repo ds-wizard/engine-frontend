@@ -19,3 +19,8 @@ getPackage shortName session =
 deletePackage : String -> Session -> Http.Request String
 deletePackage shortName session =
     Requests.delete session ("/packages/" ++ shortName)
+
+
+deletePackageVersion : String -> String -> Session -> Http.Request String
+deletePackageVersion shortName version session =
+    Requests.delete session ("/packages/" ++ shortName ++ "/versions/" ++ version)

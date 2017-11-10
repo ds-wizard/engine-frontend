@@ -27,6 +27,7 @@ view model =
     div []
         [ content
         , deleteModal model
+        , deleteVersionModal model
         ]
 
 
@@ -50,6 +51,31 @@ deleteModal model =
             , actionError = model.deleteError
             , actionMsg = Msgs.PackageManagementDetailMsg DeletePackage
             , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog False
+            }
+    in
+    modalView modalConfig
+
+
+deleteVersionModal : Model -> Html Msgs.Msg
+deleteVersionModal model =
+    let
+        modalContent =
+            [ p []
+                [ text "Are you sure you want to permanently delete version "
+                , strong [] [ text model.versionToBeDeleted ]
+                , text "?"
+                ]
+            ]
+
+        modalConfig =
+            { modalTitle = "Delete version"
+            , modalContent = modalContent
+            , visible = model.versionToBeDeleted /= ""
+            , actionActive = model.deletingVersion
+            , actionName = "Delete"
+            , actionError = model.deleteVersionError
+            , actionMsg = Msgs.PackageManagementDetailMsg DeleteVersion
+            , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion ""
             }
     in
     modalView modalConfig
@@ -90,7 +116,11 @@ versionView detail =
                 ]
             , div [ class "actions" ]
                 [ button [ class "btn btn-info link-with-icon" ] [ i [ class "fa fa-download" ] [], text "Export" ]
-                , button [ class "btn btn-default" ] [ i [ class "fa fa-trash" ] [] ]
+                , button
+                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion detail.version)
+                    , class "btn btn-default"
+                    ]
+                    [ i [ class "fa fa-trash" ] [] ]
                 ]
             ]
         ]

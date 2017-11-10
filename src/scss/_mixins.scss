@@ -5,7 +5,6 @@
     border-radius: $radius;
 }
 
-
 @mixin background-image-retina($file, $ext) {
     background-image: url($file + '.' + $ext);
     @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 144dpi) {
@@ -30,13 +29,11 @@
     }
 }
 
-
 @mixin animation($name, $timing, $repeat) {
     -webkit-animation:$name $timing $repeat;
     -moz-animation:$name $timing $repeat;
     animation:$name $timing $repeat;
 }
-
 
 @mixin animation-duration($value) {
     -webkit-animation-duration:$value;
@@ -54,4 +51,10 @@
     -webkit-animation-fill-mode:$value;
     -moz-animation-fill-mode:$value;
     animation-fill-mode:$value;
+}
+
+@mixin transition($value) {
+    -webkit-transition: $value;
+    -moz-transition: $value;
+    transition: $value;
 }

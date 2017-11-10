@@ -6,6 +6,7 @@ import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Organization.Models
 import Organization.Update
+import PackageManagement.Detail.Models
 import PackageManagement.Detail.Update
 import PackageManagement.Index.Models
 import PackageManagement.Index.Update
@@ -61,6 +62,9 @@ initLocalModel model =
 
         PackageManagement ->
             { model | packageManagementIndexModel = PackageManagement.Index.Models.initialModel }
+
+        PackageManagementDetail pkgName ->
+            { model | packageManagementDetailModel = PackageManagement.Detail.Models.initialModel }
 
         _ ->
             model

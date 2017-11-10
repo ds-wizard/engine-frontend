@@ -10,6 +10,9 @@ type alias Model =
     , showDeleteDialog : Bool
     , deletingPackage : Bool
     , deleteError : String
+    , versionToBeDeleted : String
+    , deletingVersion : Bool
+    , deleteVersionError : String
     }
 
 
@@ -21,4 +24,7 @@ initialModel =
     , showDeleteDialog = False
     , deletingPackage = False
     , deleteError = ""
+    , versionToBeDeleted = ""
+    , deletingVersion = False
+    , deleteVersionError = ""
     }

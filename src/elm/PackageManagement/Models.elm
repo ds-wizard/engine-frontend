@@ -52,3 +52,8 @@ getPackageName packages =
 
         _ ->
             ( "", "" )
+
+
+getPackageShortName : List PackageDetail -> String
+getPackageShortName =
+    getPackageName >> Tuple.second

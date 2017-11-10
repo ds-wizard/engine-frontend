@@ -5,11 +5,10 @@ import Jwt
 import Msgs
 import PackageManagement.Detail.Models exposing (Model)
 import PackageManagement.Detail.Msgs exposing (Msg(..))
-import PackageManagement.Models exposing (PackageDetail, getPackageName)
-import PackageManagement.Requests exposing (deletePackage, getPackage)
+import PackageManagement.Models exposing (PackageDetail, getPackageShortName)
+import PackageManagement.Requests exposing (..)
 import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
-import Tuple
 
 
 getPackageCmd : String -> Session -> Cmd Msgs.Msg
@@ -22,6 +21,12 @@ deletePackageCmd : String -> Session -> Cmd Msgs.Msg
 deletePackageCmd shortName session =
     deletePackage shortName session
         |> toCmd DeletePackageCompleted Msgs.PackageManagementDetailMsg
+
+
+deletePackageVersionCmd : String -> String -> Session -> Cmd Msgs.Msg
+deletePackageVersionCmd shortName version session =
+    deletePackageVersion shortName version session
+        |> toCmd DeleteVersionCompleted Msgs.PackageManagementDetailMsg
 
 
 getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
@@ -42,7 +47,7 @@ handleDeletePackage : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleDeletePackage session model =
     let
         shortName =
-            model.packages |> getPackageName |> Tuple.second
+            getPackageShortName model.packages
     in
     ( { model | deletingPackage = True, deleteError = "" }, deletePackageCmd shortName session )
 
@@ -62,6 +67,44 @@ deletePackageCompleted model result =
             )
 
 
+handleDeleteVersion : Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteVersion session model =
+    let
+        shortName =
+            getPackageShortName model.packages
+    in
+    ( { model
+        | deletingVersion = True
+        , deleteVersionError = ""
+      }
+    , deletePackageVersionCmd shortName model.versionToBeDeleted session
+    )
+
+
+deleteVersionCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+deleteVersionCompleted model result =
+    case result of
+        Ok version ->
+            let
+                route =
+                    if List.length model.packages > 1 then
+                        model.packages
+                            |> getPackageShortName
+                            |> PackageManagementDetail
+                    else
+                        PackageManagement
+            in
+            ( model, cmdNavigate route )
+
+        Err error ->
+            ( { model
+                | deletingVersion = False
+                , deleteVersionError = "Version could not be deleted"
+              }
+            , Cmd.none
+            )
+
+
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of
@@ -76,3 +119,12 @@ update msg session model =
 
         DeletePackageCompleted result ->
             deletePackageCompleted model result
+
+        ShowHideDeleteVersion version ->
+            ( { model | versionToBeDeleted = version }, Cmd.none )
+
+        DeleteVersion ->
+            handleDeleteVersion session model
+
+        DeleteVersionCompleted result ->
+            deleteVersionCompleted model result
