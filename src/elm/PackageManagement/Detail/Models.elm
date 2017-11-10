@@ -4,7 +4,7 @@ import PackageManagement.Models exposing (PackageDetail)
 
 
 type alias Model =
-    { package : Maybe PackageDetail
+    { packages : List PackageDetail
     , loading : Bool
     , error : String
     }
@@ -12,7 +12,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { package = Nothing
+    { packages = []
     , loading = True
     , error = ""
     }

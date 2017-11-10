@@ -25,12 +25,7 @@ packageListDecoder =
 type alias PackageDetail =
     { name : String
     , shortName : String
-    , versions : List PackageVersion
-    }
-
-
-type alias PackageVersion =
-    { version : String
+    , version : String
     , description : String
     }
 
@@ -40,11 +35,10 @@ packageDetailDecoder =
     decode PackageDetail
         |> required "name" Decode.string
         |> required "shortName" Decode.string
-        |> required "versions" (Decode.list packageVersionDecoder)
-
-
-packageVersionDecoder : Decoder PackageVersion
-packageVersionDecoder =
-    decode PackageVersion
         |> required "version" Decode.string
         |> required "description" Decode.string
+
+
+packageDetailListDecoder : Decoder (List PackageDetail)
+packageDetailListDecoder =
+    Decode.list packageDetailDecoder

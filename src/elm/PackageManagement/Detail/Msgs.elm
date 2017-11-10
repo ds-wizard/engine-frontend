@@ -5,4 +5,4 @@ import PackageManagement.Models exposing (PackageDetail)
 
 
 type Msg
-    = GetPackageCompleted (Result Jwt.JwtError PackageDetail)
+    = GetPackageCompleted (Result Jwt.JwtError (List PackageDetail))

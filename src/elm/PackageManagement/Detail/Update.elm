@@ -16,16 +16,16 @@ getPackageCmd pkgName session =
         |> toCmd GetPackageCompleted Msgs.PackageManagementDetailMsg
 
 
-getPackageCompleted : Model -> Result Jwt.JwtError PackageDetail -> ( Model, Cmd Msgs.Msg )
+getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
 getPackageCompleted model result =
     let
         newModel =
             case result of
-                Ok package ->
-                    { model | package = Just package }
+                Ok packages ->
+                    { model | packages = packages }
 
                 Err error ->
-                    { model | error = "Unable to get package" }
+                    { model | error = "Unable to get package detail" }
     in
     ( { newModel | loading = False }, Cmd.none )
 

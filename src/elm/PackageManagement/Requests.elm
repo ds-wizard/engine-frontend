@@ -2,7 +2,7 @@ module PackageManagement.Requests exposing (..)
 
 import Auth.Models exposing (Session)
 import Http
-import PackageManagement.Models exposing (Package, PackageDetail, packageDetailDecoder, packageListDecoder)
+import PackageManagement.Models exposing (Package, PackageDetail, packageDetailListDecoder, packageListDecoder)
 import Requests
 
 
@@ -11,6 +11,6 @@ getPackages session =
     Requests.get session "/packages" packageListDecoder
 
 
-getPackage : String -> Session -> Http.Request PackageDetail
+getPackage : String -> Session -> Http.Request (List PackageDetail)
 getPackage pkgName session =
-    Requests.get session ("/packages/" ++ pkgName) packageDetailDecoder
+    Requests.get session ("/packages/" ++ pkgName) packageDetailListDecoder

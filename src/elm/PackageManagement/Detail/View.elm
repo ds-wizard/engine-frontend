@@ -19,24 +19,28 @@ view model =
             else if model.error /= "" then
                 defaultFullPageError model.error
             else
-                case model.package of
-                    Just package ->
-                        packageDetail package
-
-                    Nothing ->
-                        text ""
+                packageDetail model.packages
     in
     div []
         [ content ]
 
 
-packageDetail : PackageDetail -> Html Msgs.Msg
-packageDetail package =
+packageDetail : List PackageDetail -> Html Msgs.Msg
+packageDetail packages =
+    let
+        ( name, shortName ) =
+            case packages of
+                first :: _ ->
+                    ( first.name, first.shortName )
+
+                _ ->
+                    ( "", "" )
+    in
     div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
-        [ pageHeader package.name actions
-        , code [ class "package-short-name" ] [ text package.shortName ]
+        [ pageHeader name actions
+        , code [ class "package-short-name" ] [ text shortName ]
         , h3 [] [ text "Versions" ]
-        , div [] (List.map versionView package.versions)
+        , div [] (List.map versionView packages)
         ]
 
 
@@ -47,13 +51,13 @@ actions =
     ]
 
 
-versionView : PackageVersion -> Html Msgs.Msg
-versionView version =
+versionView : PackageDetail -> Html Msgs.Msg
+versionView detail =
     div [ class "panel panel-default panel-version" ]
         [ div [ class "panel-body" ]
             [ div [ class "labels" ]
-                [ strong [] [ text version.version ]
-                , text version.description
+                [ strong [] [ text detail.version ]
+                , text detail.description
                 ]
             , div [ class "actions" ]
                 [ button [ class "btn btn-info link-with-icon" ] [ i [ class "fa fa-download" ] [], text "Export" ]
