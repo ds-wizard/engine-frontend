@@ -1,6 +1,10 @@
 @import "mixins";
 @import "animations";
 
+a {
+    cursor: pointer;
+}
+
 .app-view {
     .header {
         display: flex;
