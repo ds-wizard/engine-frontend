@@ -42,3 +42,13 @@ packageDetailDecoder =
 packageDetailListDecoder : Decoder (List PackageDetail)
 packageDetailListDecoder =
     Decode.list packageDetailDecoder
+
+
+getPackageName : List PackageDetail -> ( String, String )
+getPackageName packages =
+    case packages of
+        first :: _ ->
+            ( first.name, first.shortName )
+
+        _ ->
+            ( "", "" )

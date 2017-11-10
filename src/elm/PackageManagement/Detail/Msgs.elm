@@ -6,3 +6,6 @@ import PackageManagement.Models exposing (PackageDetail)
 
 type Msg
     = GetPackageCompleted (Result Jwt.JwtError (List PackageDetail))
+    | ShowHideDeleteDialog Bool
+    | DeletePackage
+    | DeletePackageCompleted (Result Jwt.JwtError String)

@@ -12,5 +12,10 @@ getPackages session =
 
 
 getPackage : String -> Session -> Http.Request (List PackageDetail)
-getPackage pkgName session =
-    Requests.get session ("/packages/" ++ pkgName) packageDetailListDecoder
+getPackage shortName session =
+    Requests.get session ("/packages/" ++ shortName) packageDetailListDecoder
+
+
+deletePackage : String -> Session -> Http.Request String
+deletePackage shortName session =
+    Requests.delete session ("/packages/" ++ shortName)

@@ -1,13 +1,16 @@
 module PackageManagement.Detail.View exposing (..)
 
 import Common.Html exposing (linkTo)
-import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Msgs exposing (Msg)
 import PackageManagement.Detail.Models exposing (..)
+import PackageManagement.Detail.Msgs exposing (..)
 import PackageManagement.Models exposing (..)
 import Routing exposing (Route(..))
+import Tuple exposing (first)
 
 
 view : Model -> Html Msgs.Msg
@@ -22,19 +25,41 @@ view model =
                 packageDetail model.packages
     in
     div []
-        [ content ]
+        [ content
+        , deleteModal model
+        ]
+
+
+deleteModal : Model -> Html Msgs.Msg
+deleteModal model =
+    let
+        modalContent =
+            [ p []
+                [ text "Are you sure you want to permanently delete "
+                , strong [] [ text (model.packages |> getPackageName |> first) ]
+                , text " and all its versions?"
+                ]
+            ]
+
+        modalConfig =
+            { modalTitle = "Delete package"
+            , modalContent = modalContent
+            , visible = model.showDeleteDialog
+            , actionActive = model.deletingPackage
+            , actionName = "Delete"
+            , actionError = model.deleteError
+            , actionMsg = Msgs.PackageManagementDetailMsg DeletePackage
+            , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog False
+            }
+    in
+    modalView modalConfig
 
 
 packageDetail : List PackageDetail -> Html Msgs.Msg
 packageDetail packages =
     let
         ( name, shortName ) =
-            case packages of
-                first :: _ ->
-                    ( first.name, first.shortName )
-
-                _ ->
-                    ( "", "" )
+            getPackageName packages
     in
     div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
         [ pageHeader name actions
@@ -47,7 +72,11 @@ packageDetail packages =
 actions : List (Html Msgs.Msg)
 actions =
     [ linkTo PackageManagement [ class "btn btn-default" ] [ text "Back" ]
-    , button [ class "btn btn-danger" ] [ text "Delete" ]
+    , button
+        [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog True)
+        , class "btn btn-danger"
+        ]
+        [ text "Delete" ]
     ]
 
 
