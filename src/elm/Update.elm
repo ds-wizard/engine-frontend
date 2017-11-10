@@ -8,6 +8,8 @@ import Organization.Models
 import Organization.Update
 import PackageManagement.Detail.Models
 import PackageManagement.Detail.Update
+import PackageManagement.Import.Models
+import PackageManagement.Import.Update
 import PackageManagement.Index.Models
 import PackageManagement.Index.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
@@ -65,6 +67,9 @@ initLocalModel model =
 
         PackageManagementDetail pkgName ->
             { model | packageManagementDetailModel = PackageManagement.Detail.Models.initialModel }
+
+        PackageManagementImport ->
+            { model | packageManagementImportModel = PackageManagement.Import.Models.initialModel }
 
         _ ->
             model
@@ -134,3 +139,10 @@ update msg model =
                     PackageManagement.Detail.Update.update msg model.session model.packageManagementDetailModel
             in
             ( { model | packageManagementDetailModel = packageManagementDetailModel }, cmd )
+
+        Msgs.PackageManagementImportMsg msg ->
+            let
+                ( packageManagementImportModel, cmd ) =
+                    PackageManagement.Import.Update.update msg model.session model.packageManagementImportModel
+            in
+            ( { model | packageManagementImportModel = packageManagementImportModel }, cmd )

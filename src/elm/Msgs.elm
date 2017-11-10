@@ -4,6 +4,7 @@ import Auth.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs
 import PackageManagement.Detail.Msgs
+import PackageManagement.Import.Msgs
 import PackageManagement.Index.Msgs
 import UserManagement.Create.Msgs
 import UserManagement.Delete.Msgs
@@ -22,3 +23,4 @@ type Msg
     | OrganizationMsg Organization.Msgs.Msg
     | PackageManagementIndexMsg PackageManagement.Index.Msgs.Msg
     | PackageManagementDetailMsg PackageManagement.Detail.Msgs.Msg
+    | PackageManagementImportMsg PackageManagement.Import.Msgs.Msg

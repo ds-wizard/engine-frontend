@@ -3,8 +3,8 @@ module PackageManagement.Detail.Update exposing (..)
 import Auth.Models exposing (Session)
 import Jwt
 import Msgs
-import PackageManagement.Detail.Models exposing (Model)
 import PackageManagement.Detail.Msgs exposing (Msg(..))
+import PackageManagement.Detail.Models exposing (Model)
 import PackageManagement.Models exposing (PackageDetail, getPackageShortName)
 import PackageManagement.Requests exposing (..)
 import Requests exposing (toCmd)

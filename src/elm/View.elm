@@ -15,6 +15,7 @@ import Models exposing (Model)
 import Msgs exposing (Msg)
 import Organization.View
 import PackageManagement.Detail.View
+import PackageManagement.Import.View
 import PackageManagement.Index.View
 import Routing exposing (Route(..))
 import UserManagement.Create.View
@@ -74,6 +75,11 @@ view model =
         PackageManagementDetail pkgName ->
             model.packageManagementDetailModel
                 |> PackageManagement.Detail.View.view
+                |> appView model
+
+        PackageManagementImport ->
+            model.packageManagementImportModel
+                |> PackageManagement.Import.View.view
                 |> appView model
 
         Wizzards ->

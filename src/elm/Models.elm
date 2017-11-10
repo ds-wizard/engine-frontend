@@ -5,6 +5,7 @@ import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import Organization.Models
 import PackageManagement.Detail.Models
+import PackageManagement.Import.Models
 import PackageManagement.Index.Models
 import Random.Pcg exposing (Seed, initialSeed)
 import Routing exposing (Route)
@@ -27,6 +28,7 @@ type alias Model =
     , organizationModel : Organization.Models.Model
     , packageManagementIndexModel : PackageManagement.Index.Models.Model
     , packageManagementDetailModel : PackageManagement.Detail.Models.Model
+    , packageManagementImportModel : PackageManagement.Import.Models.Model
     }
 
 
@@ -44,6 +46,7 @@ initialModel route seed session jwt =
     , organizationModel = Organization.Models.initialModel
     , packageManagementIndexModel = PackageManagement.Index.Models.initialModel
     , packageManagementDetailModel = PackageManagement.Detail.Models.initialModel
+    , packageManagementImportModel = PackageManagement.Import.Models.initialModel
     }
 
 

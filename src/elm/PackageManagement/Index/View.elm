@@ -22,9 +22,19 @@ view model =
                 pmTable model
     in
     div []
-        [ pageHeader "Package Management" []
+        [ pageHeader "Package Management" actions
         , content
         ]
+
+
+actions : List (Html Msg)
+actions =
+    [ linkTo PackageManagementImport
+        [ class "btn btn-info link-with-icon" ]
+        [ i [ class "fa fa-upload" ] []
+        , text "Import"
+        ]
+    ]
 
 
 pmTable : Model -> Html Msg
@@ -41,7 +51,6 @@ pmTableHeader =
         [ tr []
             [ th [] [ text "Name" ]
             , th [] [ text "Short Name" ]
-            , th [] [ text "Actions" ]
             ]
         ]
 
@@ -57,7 +66,7 @@ pmTableBody model =
 pmTableEmpty : Html msg
 pmTableEmpty =
     tr []
-        [ td [ colspan 3, class "td-empty-table" ] [ text "There are no packages." ] ]
+        [ td [ colspan 2, class "td-empty-table" ] [ text "There are no packages." ] ]
 
 
 pmTableRow : Package -> Html Msg
@@ -65,5 +74,4 @@ pmTableRow package =
     tr []
         [ td [] [ linkTo (PackageManagementDetail package.shortName) [] [ text package.name ] ]
         , td [] [ text package.shortName ]
-        , td [] [ text "Actions" ]
         ]
