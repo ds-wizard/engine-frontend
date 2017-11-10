@@ -36,3 +36,8 @@ importPackage file session =
             Http.multipartBody [ FileReader.filePart "file" file ]
     in
     Jwt.post session.token (apiUrl "/packages/import") body Decode.value
+
+
+exportPackageUrl : String -> String -> String
+exportPackageUrl shortName version =
+    apiUrl <| "/export/" ++ shortName ++ "/" ++ version

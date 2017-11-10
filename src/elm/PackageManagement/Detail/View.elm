@@ -9,6 +9,7 @@ import Msgs exposing (Msg)
 import PackageManagement.Detail.Models exposing (..)
 import PackageManagement.Detail.Msgs exposing (..)
 import PackageManagement.Models exposing (..)
+import PackageManagement.Requests exposing (exportPackageUrl)
 import Routing exposing (Route(..))
 import Tuple exposing (first)
 
@@ -108,6 +109,10 @@ actions =
 
 versionView : PackageDetail -> Html Msgs.Msg
 versionView detail =
+    let
+        url =
+            exportPackageUrl detail.shortName detail.version
+    in
     div [ class "panel panel-default panel-version" ]
         [ div [ class "panel-body" ]
             [ div [ class "labels" ]
@@ -115,7 +120,7 @@ versionView detail =
                 , text detail.description
                 ]
             , div [ class "actions" ]
-                [ button [ class "btn btn-info link-with-icon" ] [ i [ class "fa fa-download" ] [], text "Export" ]
+                [ a [ class "btn btn-info link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
                 , button
                     [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion detail.version)
                     , class "btn btn-default"
