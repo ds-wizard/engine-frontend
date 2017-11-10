@@ -65,7 +65,9 @@ view model =
             appView model KnowledgeModels.Editor.View.view
 
         KnowledgeModels ->
-            appView model KnowledgeModels.Index.View.view
+            model.knowledgeModelsIndexModel
+                |> KnowledgeModels.Index.View.view
+                |> appView model
 
         PackageManagement ->
             model.packageManagementIndexModel

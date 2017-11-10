@@ -1,6 +1,8 @@
 module Update exposing (..)
 
 import Auth.Update
+import KnowledgeModels.Index.Models
+import KnowledgeModels.Index.Update
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
@@ -43,6 +45,9 @@ fetchData model =
         PackageManagementDetail pkgName ->
             PackageManagement.Detail.Update.getPackageCmd pkgName model.session
 
+        KnowledgeModels ->
+            KnowledgeModels.Index.Update.getKnowledgeModelsCmd model.session
+
         _ ->
             Cmd.none
 
@@ -70,6 +75,9 @@ initLocalModel model =
 
         PackageManagementImport ->
             { model | packageManagementImportModel = PackageManagement.Import.Models.initialModel }
+
+        KnowledgeModels ->
+            { model | knowledgeModelsIndexModel = KnowledgeModels.Index.Models.initialModel }
 
         _ ->
             model
@@ -146,3 +154,10 @@ update msg model =
                     PackageManagement.Import.Update.update msg model.session model.packageManagementImportModel
             in
             ( { model | packageManagementImportModel = packageManagementImportModel }, cmd )
+
+        Msgs.KnowledgeModelsIndexMsg msg ->
+            let
+                ( knowledgeModelsIndexModel, cmd ) =
+                    KnowledgeModels.Index.Update.update msg model.session model.knowledgeModelsIndexModel
+            in
+            ( { model | knowledgeModelsIndexModel = knowledgeModelsIndexModel }, cmd )

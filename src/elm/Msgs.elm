@@ -1,6 +1,7 @@
 module Msgs exposing (..)
 
 import Auth.Msgs
+import KnowledgeModels.Index.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs
 import PackageManagement.Detail.Msgs
@@ -24,3 +25,4 @@ type Msg
     | PackageManagementIndexMsg PackageManagement.Index.Msgs.Msg
     | PackageManagementDetailMsg PackageManagement.Detail.Msgs.Msg
     | PackageManagementImportMsg PackageManagement.Import.Msgs.Msg
+    | KnowledgeModelsIndexMsg KnowledgeModels.Index.Msgs.Msg
