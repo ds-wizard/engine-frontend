@@ -38,7 +38,7 @@ formView form =
         formHtml =
             div []
                 [ inputGroup form "name" "Organization name"
-                , inputGroup form "namespace" "Organization namespace"
+                , inputGroup form "groupId" "Organization Group ID"
                 ]
     in
     formHtml |> Html.map (FormMsg >> Msgs.OrganizationMsg)

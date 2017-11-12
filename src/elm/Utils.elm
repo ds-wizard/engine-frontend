@@ -16,8 +16,8 @@ tuplePrepend a ( b, c ) =
     ( a, b, c )
 
 
-validateRegex : Regex -> Validation e String
+validateRegex : String -> Validation e String
 validateRegex regex =
     Validate.string
         |> Validate.andThen
-            (\s -> Validate.format regex s |> mapError (\_ -> Error.value InvalidFormat))
+            (\s -> Validate.format (Regex.regex regex) s |> mapError (\_ -> Error.value InvalidFormat))
