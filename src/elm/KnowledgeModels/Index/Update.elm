@@ -42,7 +42,7 @@ handleDeleteKM session model =
     case model.kmToBeDeleted of
         Just km ->
             ( { model | deletingKM = True, deleteKMError = "" }
-            , deleteKnowledgeModelCmd km.kmContainerUuid session
+            , deleteKnowledgeModelCmd km.uuid session
             )
 
         _ ->

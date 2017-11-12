@@ -59,6 +59,6 @@ createOption : PackageDetail -> ( String, String )
 createOption package =
     let
         optionText =
-            package.name ++ " " ++ package.version ++ " (" ++ package.packageId ++ ")"
+            package.name ++ " " ++ package.version ++ " (" ++ package.id ++ ")"
     in
-    ( package.packageId, optionText )
+    ( package.id, optionText )

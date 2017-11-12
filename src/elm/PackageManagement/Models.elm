@@ -26,7 +26,7 @@ packageListDecoder =
 
 type alias PackageDetail =
     { name : String
-    , packageId : String
+    , id : String
     , groupId : String
     , artifactId : String
     , version : String
@@ -38,7 +38,7 @@ packageDetailDecoder : Decoder PackageDetail
 packageDetailDecoder =
     decode PackageDetail
         |> required "name" Decode.string
-        |> required "packageId" Decode.string
+        |> required "id" Decode.string
         |> required "groupId" Decode.string
         |> required "artifactId" Decode.string
         |> required "version" Decode.string

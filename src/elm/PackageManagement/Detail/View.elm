@@ -123,7 +123,7 @@ versionView : PackageDetail -> Html Msgs.Msg
 versionView detail =
     let
         url =
-            exportPackageUrl detail.packageId
+            exportPackageUrl detail.id
     in
     div [ class "panel panel-default panel-version" ]
         [ div [ class "panel-body" ]
@@ -134,7 +134,7 @@ versionView detail =
             , div [ class "actions" ]
                 [ a [ class "btn btn-info link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
                 , button
-                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion detail.packageId)
+                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion detail.id)
                     , class "btn btn-default"
                     ]
                     [ i [ class "fa fa-trash" ] [] ]

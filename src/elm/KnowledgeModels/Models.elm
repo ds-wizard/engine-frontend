@@ -10,7 +10,7 @@ import Utils exposing (validateRegex)
 
 
 type alias KnowledgeModel =
-    { kmContainerUuid : String
+    { uuid : String
     , name : String
     , artifactId : String
     , parentPackageId : Maybe String
@@ -20,7 +20,7 @@ type alias KnowledgeModel =
 knowledgeModelDecoder : Decoder KnowledgeModel
 knowledgeModelDecoder =
     decode KnowledgeModel
-        |> required "kmContainerUuid" Decode.string
+        |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "artifactId" Decode.string
         |> required "parentPackageId" (Decode.nullable Decode.string)
@@ -63,7 +63,7 @@ encodeKnowledgeModelForm uuid form =
                     Encode.null
     in
     Encode.object
-        [ ( "kmContainerUuid", Encode.string uuid )
+        [ ( "uuid", Encode.string uuid )
         , ( "name", Encode.string form.name )
         , ( "artifactId", Encode.string form.artifactId )
         , ( "parentPackageId", parentPackage )
