@@ -59,7 +59,9 @@ view model =
                 |> appView model
 
         KnowledgeModelsCreate ->
-            appView model KnowledgeModels.Create.View.view
+            model.knowledgeModelsCreateModel
+                |> KnowledgeModels.Create.View.view
+                |> appView model
 
         KnowledgeModelsEditor ->
             appView model KnowledgeModels.Editor.View.view

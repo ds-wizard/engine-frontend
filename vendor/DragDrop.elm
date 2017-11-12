@@ -95,9 +95,6 @@ onDragLeave =
     onDragFunctionIgnoreFiles "dragleave"
 
 
-
--- onDrop : (List Json.Value -> a) -> Attribute a
-
-
+onDrop : (List NativeFile -> a) -> Attribute a
 onDrop =
     onDragFunctionDecodeFiles "drop"

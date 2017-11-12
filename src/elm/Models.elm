@@ -3,6 +3,7 @@ module Models exposing (..)
 import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, sessionExists)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
+import KnowledgeModels.Create.Models
 import KnowledgeModels.Index.Models
 import Organization.Models
 import PackageManagement.Detail.Models
@@ -31,6 +32,7 @@ type alias Model =
     , packageManagementDetailModel : PackageManagement.Detail.Models.Model
     , packageManagementImportModel : PackageManagement.Import.Models.Model
     , knowledgeModelsIndexModel : KnowledgeModels.Index.Models.Model
+    , knowledgeModelsCreateModel : KnowledgeModels.Create.Models.Model
     }
 
 
@@ -50,6 +52,7 @@ initialModel route seed session jwt =
     , packageManagementDetailModel = PackageManagement.Detail.Models.initialModel
     , packageManagementImportModel = PackageManagement.Import.Models.initialModel
     , knowledgeModelsIndexModel = KnowledgeModels.Index.Models.initialModel
+    , knowledgeModelsCreateModel = KnowledgeModels.Create.Models.initialModel
     }
 
 

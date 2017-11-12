@@ -6,13 +6,13 @@ import Msgs
 import PackageManagement.Index.Models exposing (Model)
 import PackageManagement.Index.Msgs exposing (Msg(..))
 import PackageManagement.Models exposing (Package)
-import PackageManagement.Requests exposing (getPackages)
+import PackageManagement.Requests exposing (getPackagesUnique)
 import Requests exposing (toCmd)
 
 
 getPackagesCmd : Session -> Cmd Msgs.Msg
 getPackagesCmd session =
-    getPackages session
+    getPackagesUnique session
         |> toCmd GetPackagesCompleted Msgs.PackageManagementIndexMsg
 
 

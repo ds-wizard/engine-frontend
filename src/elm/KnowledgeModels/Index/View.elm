@@ -51,7 +51,7 @@ kmTableHeader =
     thead []
         [ tr []
             [ th [] [ text "Name" ]
-            , th [] [ text "Short Name" ]
+            , th [] [ text "Artifact ID" ]
             , th [] [ text "Parent KM" ]
             , th [] [ text "Actions" ]
             ]
@@ -76,16 +76,16 @@ kmTableRow : KnowledgeModel -> Html Msgs.Msg
 kmTableRow km =
     let
         parent =
-            case ( km.parentPackageName, km.parentPackageVersion ) of
-                ( Just name, Just version ) ->
-                    name ++ ":" ++ version
+            case km.parentPackageId of
+                Just parentPackageId ->
+                    parentPackageId
 
                 _ ->
                     "-"
     in
     tr []
         [ td [] [ text km.name ]
-        , td [] [ text km.shortName ]
+        , td [] [ text km.artifactId ]
         , td [] [ text parent ]
         , td [ class "table-actions" ]
             [ kmTableRowAction "Edit"

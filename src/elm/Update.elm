@@ -1,6 +1,8 @@
 module Update exposing (..)
 
 import Auth.Update
+import KnowledgeModels.Create.Models
+import KnowledgeModels.Create.Update
 import KnowledgeModels.Index.Models
 import KnowledgeModels.Index.Update
 import Models exposing (Model)
@@ -48,6 +50,9 @@ fetchData model =
         KnowledgeModels ->
             KnowledgeModels.Index.Update.getKnowledgeModelsCmd model.session
 
+        KnowledgeModelsCreate ->
+            KnowledgeModels.Create.Update.getPackagesCmd model.session
+
         _ ->
             Cmd.none
 
@@ -78,6 +83,9 @@ initLocalModel model =
 
         KnowledgeModels ->
             { model | knowledgeModelsIndexModel = KnowledgeModels.Index.Models.initialModel }
+
+        KnowledgeModelsCreate ->
+            { model | knowledgeModelsCreateModel = KnowledgeModels.Create.Models.initialModel }
 
         _ ->
             model
@@ -161,3 +169,10 @@ update msg model =
                     KnowledgeModels.Index.Update.update msg model.session model.knowledgeModelsIndexModel
             in
             ( { model | knowledgeModelsIndexModel = knowledgeModelsIndexModel }, cmd )
+
+        Msgs.KnowledgeModelsCreateMsg msg ->
+            let
+                ( seed, knowledgeModelsCreateModel, cmd ) =
+                    KnowledgeModels.Create.Update.update msg model.seed model.session model.knowledgeModelsCreateModel
+            in
+            ( { model | seed = seed, knowledgeModelsCreateModel = knowledgeModelsCreateModel }, cmd )

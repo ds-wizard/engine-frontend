@@ -9,9 +9,14 @@ import PackageManagement.Models exposing (Package, PackageDetail, packageDetailL
 import Requests exposing (apiUrl)
 
 
-getPackages : Session -> Http.Request (List Package)
+getPackagesUnique : Session -> Http.Request (List Package)
+getPackagesUnique session =
+    Requests.get session "/packages/unique" packageListDecoder
+
+
+getPackages : Session -> Http.Request (List PackageDetail)
 getPackages session =
-    Requests.get session "/packages" packageListDecoder
+    Requests.get session "/packages" packageDetailListDecoder
 
 
 getPackagesFiltered : String -> String -> Session -> Http.Request (List PackageDetail)
