@@ -15,6 +15,7 @@ type alias Model =
     , form : Form () OrganizationForm
     , saving : Bool
     , result : FormResult
+    , organization : Maybe Organization
     }
 
 
@@ -25,11 +26,13 @@ initialModel =
     , form = initEmptyOrganizationForm
     , saving = False
     , result = None
+    , organization = Nothing
     }
 
 
 type alias Organization =
-    { name : String
+    { uuid : String
+    , name : String
     , groupId : String
     }
 
@@ -37,6 +40,7 @@ type alias Organization =
 organizationDecoder : Decoder Organization
 organizationDecoder =
     decode Organization
+        |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "groupId" Decode.string
 
@@ -71,9 +75,10 @@ organizationToFormInitials organization =
     ]
 
 
-encodeOrganizationForm : OrganizationForm -> Encode.Value
-encodeOrganizationForm form =
+encodeOrganizationForm : String -> OrganizationForm -> Encode.Value
+encodeOrganizationForm uuid form =
     Encode.object
-        [ ( "name", Encode.string form.name )
+        [ ( "uuid", Encode.string uuid )
+        , ( "name", Encode.string form.name )
         , ( "groupId", Encode.string form.groupId )
         ]

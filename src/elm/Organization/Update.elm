@@ -17,10 +17,10 @@ getCurrentOrganizationCmd session =
         |> toCmd GetCurrentOrganizationCompleted Msgs.OrganizationMsg
 
 
-putCurrentOrganizationCmd : Session -> OrganizationForm -> Cmd Msgs.Msg
-putCurrentOrganizationCmd session form =
+putCurrentOrganizationCmd : Session -> OrganizationForm -> String -> Cmd Msgs.Msg
+putCurrentOrganizationCmd session form uuid =
     form
-        |> encodeOrganizationForm
+        |> encodeOrganizationForm uuid
         |> putCurrentOrganization session
         |> toCmd PutCurrentOrganizationCompleted Msgs.OrganizationMsg
 
@@ -31,7 +31,7 @@ getCurrentOrganizationCompleted model result =
         newModel =
             case result of
                 Ok organization ->
-                    { model | form = initOrganizationForm organization }
+                    { model | form = initOrganizationForm organization, organization = Just organization }
 
                 Err error ->
                     { model | loadingError = "Unable to get organization information." }
@@ -55,11 +55,11 @@ putCurrentOrganizationCompleted model result =
 
 handleForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleForm formMsg session model =
-    case ( formMsg, Form.getOutput model.form ) of
-        ( Form.Submit, Just form ) ->
+    case ( formMsg, Form.getOutput model.form, model.organization ) of
+        ( Form.Submit, Just form, Just organization ) ->
             let
                 cmd =
-                    putCurrentOrganizationCmd session form
+                    putCurrentOrganizationCmd session form organization.uuid
             in
             ( { model | saving = True }, cmd )
 
