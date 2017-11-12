@@ -42,8 +42,8 @@ fetchData model =
         PackageManagement ->
             PackageManagement.Index.Update.getPackagesCmd model.session
 
-        PackageManagementDetail pkgName ->
-            PackageManagement.Detail.Update.getPackageCmd pkgName model.session
+        PackageManagementDetail groupId artifactId ->
+            PackageManagement.Detail.Update.getPackagesFilteredCmd groupId artifactId model.session
 
         KnowledgeModels ->
             KnowledgeModels.Index.Update.getKnowledgeModelsCmd model.session
@@ -70,7 +70,7 @@ initLocalModel model =
         PackageManagement ->
             { model | packageManagementIndexModel = PackageManagement.Index.Models.initialModel }
 
-        PackageManagementDetail pkgName ->
+        PackageManagementDetail groupId artifactId ->
             { model | packageManagementDetailModel = PackageManagement.Detail.Models.initialModel }
 
         PackageManagementImport ->

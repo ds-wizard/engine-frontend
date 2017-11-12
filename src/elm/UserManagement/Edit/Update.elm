@@ -5,7 +5,6 @@ import Form exposing (Form)
 import Jwt
 import Msgs
 import Requests exposing (toCmd)
-import Routing exposing (Route(..), cmdNavigate)
 import UserManagement.Edit.Models exposing (Model)
 import UserManagement.Edit.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)

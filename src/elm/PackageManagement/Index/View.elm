@@ -50,7 +50,8 @@ pmTableHeader =
     thead []
         [ tr []
             [ th [] [ text "Name" ]
-            , th [] [ text "Short Name" ]
+            , th [] [ text "Group ID" ]
+            , th [] [ text "Artifact ID" ]
             ]
         ]
 
@@ -66,12 +67,13 @@ pmTableBody model =
 pmTableEmpty : Html msg
 pmTableEmpty =
     tr []
-        [ td [ colspan 2, class "td-empty-table" ] [ text "There are no packages." ] ]
+        [ td [ colspan 3, class "td-empty-table" ] [ text "There are no packages." ] ]
 
 
 pmTableRow : Package -> Html Msg
 pmTableRow package =
     tr []
-        [ td [] [ linkTo (PackageManagementDetail package.shortName) [] [ text package.name ] ]
-        , td [] [ text package.shortName ]
+        [ td [] [ linkTo (PackageManagementDetail package.groupId package.artifactId) [] [ text package.name ] ]
+        , td [] [ text package.groupId ]
+        , td [] [ text package.artifactId ]
         ]

@@ -11,7 +11,6 @@ import PackageManagement.Detail.Msgs exposing (..)
 import PackageManagement.Models exposing (..)
 import PackageManagement.Requests exposing (exportPackageUrl)
 import Routing exposing (Route(..))
-import Tuple exposing (first)
 
 
 view : Model -> Html Msgs.Msg
@@ -35,10 +34,18 @@ view model =
 deleteModal : Model -> Html Msgs.Msg
 deleteModal model =
     let
+        version =
+            case List.head model.packages of
+                Just package ->
+                    package.groupId ++ ":" ++ package.artifactId
+
+                Nothing ->
+                    ""
+
         modalContent =
             [ p []
                 [ text "Are you sure you want to permanently delete "
-                , strong [] [ text (model.packages |> getPackageName |> first) ]
+                , strong [] [ text version ]
                 , text " and all its versions?"
                 ]
             ]
@@ -85,12 +92,17 @@ deleteVersionModal model =
 packageDetail : List PackageDetail -> Html Msgs.Msg
 packageDetail packages =
     let
-        ( name, shortName ) =
-            getPackageName packages
+        ( name, groupId, artifactId ) =
+            case List.head packages of
+                Just package ->
+                    ( package.name, package.groupId, package.artifactId )
+
+                Nothing ->
+                    ( "", "", "" )
     in
     div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
         [ pageHeader name actions
-        , code [ class "package-short-name" ] [ text shortName ]
+        , code [ class "package-short-name" ] [ text (groupId ++ ":" ++ artifactId) ]
         , h3 [] [ text "Versions" ]
         , div [] (List.map versionView packages)
         ]
@@ -111,7 +123,7 @@ versionView : PackageDetail -> Html Msgs.Msg
 versionView detail =
     let
         url =
-            exportPackageUrl detail.shortName detail.version
+            exportPackageUrl detail.packageId
     in
     div [ class "panel panel-default panel-version" ]
         [ div [ class "panel-body" ]
@@ -122,7 +134,7 @@ versionView detail =
             , div [ class "actions" ]
                 [ a [ class "btn btn-info link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
                 , button
-                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion detail.version)
+                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion detail.packageId)
                     , class "btn btn-default"
                     ]
                     [ i [ class "fa fa-trash" ] [] ]

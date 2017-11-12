@@ -3,29 +3,29 @@ module PackageManagement.Detail.Update exposing (..)
 import Auth.Models exposing (Session)
 import Jwt
 import Msgs
-import PackageManagement.Detail.Msgs exposing (Msg(..))
 import PackageManagement.Detail.Models exposing (Model)
-import PackageManagement.Models exposing (PackageDetail, getPackageShortName)
+import PackageManagement.Detail.Msgs exposing (Msg(..))
+import PackageManagement.Models exposing (PackageDetail)
 import PackageManagement.Requests exposing (..)
 import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
-getPackageCmd : String -> Session -> Cmd Msgs.Msg
-getPackageCmd shortName session =
-    getPackage shortName session
+getPackagesFilteredCmd : String -> String -> Session -> Cmd Msgs.Msg
+getPackagesFilteredCmd groupId artifactId session =
+    getPackagesFiltered groupId artifactId session
         |> toCmd GetPackageCompleted Msgs.PackageManagementDetailMsg
 
 
-deletePackageCmd : String -> Session -> Cmd Msgs.Msg
-deletePackageCmd shortName session =
-    deletePackage shortName session
+deletePackageCmd : String -> String -> Session -> Cmd Msgs.Msg
+deletePackageCmd groupId artifactId session =
+    deletePackage groupId artifactId session
         |> toCmd DeletePackageCompleted Msgs.PackageManagementDetailMsg
 
 
-deletePackageVersionCmd : String -> String -> Session -> Cmd Msgs.Msg
-deletePackageVersionCmd shortName version session =
-    deletePackageVersion shortName version session
+deletePackageVersionCmd : String -> Session -> Cmd Msgs.Msg
+deletePackageVersionCmd packageId session =
+    deletePackageVersion packageId session
         |> toCmd DeleteVersionCompleted Msgs.PackageManagementDetailMsg
 
 
@@ -45,11 +45,14 @@ getPackageCompleted model result =
 
 handleDeletePackage : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleDeletePackage session model =
-    let
-        shortName =
-            getPackageShortName model.packages
-    in
-    ( { model | deletingPackage = True, deleteError = "" }, deletePackageCmd shortName session )
+    case List.head model.packages of
+        Just package ->
+            ( { model | deletingPackage = True, deleteError = "" }
+            , deletePackageCmd package.groupId package.artifactId session
+            )
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 deletePackageCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -69,16 +72,14 @@ deletePackageCompleted model result =
 
 handleDeleteVersion : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleDeleteVersion session model =
-    let
-        shortName =
-            getPackageShortName model.packages
-    in
-    ( { model
-        | deletingVersion = True
-        , deleteVersionError = ""
-      }
-    , deletePackageVersionCmd shortName model.versionToBeDeleted session
-    )
+    case List.head model.packages of
+        Just package ->
+            ( { model | deletingVersion = True, deleteVersionError = "" }
+            , deletePackageVersionCmd model.versionToBeDeleted session
+            )
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 deleteVersionCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -87,12 +88,12 @@ deleteVersionCompleted model result =
         Ok version ->
             let
                 route =
-                    if List.length model.packages > 1 then
-                        model.packages
-                            |> getPackageShortName
-                            |> PackageManagementDetail
-                    else
-                        PackageManagement
+                    case ( List.length model.packages > 1, List.head model.packages ) of
+                        ( True, Just package ) ->
+                            PackageManagementDetail package.groupId package.artifactId
+
+                        _ ->
+                            PackageManagement
             in
             ( model, cmdNavigate route )
 

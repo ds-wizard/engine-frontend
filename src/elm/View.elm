@@ -74,7 +74,7 @@ view model =
                 |> PackageManagement.Index.View.view
                 |> appView model
 
-        PackageManagementDetail pkgName ->
+        PackageManagementDetail groupId artifactId ->
             model.packageManagementDetailModel
                 |> PackageManagement.Detail.View.view
                 |> appView model

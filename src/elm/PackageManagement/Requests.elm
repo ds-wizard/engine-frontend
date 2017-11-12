@@ -14,19 +14,19 @@ getPackages session =
     Requests.get session "/packages" packageListDecoder
 
 
-getPackage : String -> Session -> Http.Request (List PackageDetail)
-getPackage shortName session =
-    Requests.get session ("/packages/" ++ shortName) packageDetailListDecoder
+getPackagesFiltered : String -> String -> Session -> Http.Request (List PackageDetail)
+getPackagesFiltered groupId artifactId session =
+    Requests.get session ("/packages/?groupId=" ++ groupId ++ "&artifactId=" ++ artifactId) packageDetailListDecoder
 
 
-deletePackage : String -> Session -> Http.Request String
-deletePackage shortName session =
-    Requests.delete session ("/packages/" ++ shortName)
+deletePackage : String -> String -> Session -> Http.Request String
+deletePackage groupId artifactId session =
+    Requests.delete session ("/packages/?groupId=" ++ groupId ++ "&artifactId=" ++ artifactId)
 
 
-deletePackageVersion : String -> String -> Session -> Http.Request String
-deletePackageVersion shortName version session =
-    Requests.delete session ("/packages/" ++ shortName ++ "/versions/" ++ version)
+deletePackageVersion : String -> Session -> Http.Request String
+deletePackageVersion packageId session =
+    Requests.delete session ("/packages/" ++ packageId)
 
 
 importPackage : NativeFile -> Session -> Http.Request Decode.Value
@@ -38,6 +38,6 @@ importPackage file session =
     Jwt.post session.token (apiUrl "/import") body Decode.value
 
 
-exportPackageUrl : String -> String -> String
-exportPackageUrl shortName version =
-    apiUrl <| "/export/" ++ shortName ++ "/" ++ version
+exportPackageUrl : String -> String
+exportPackageUrl packageId =
+    apiUrl <| "/export/" ++ packageId
