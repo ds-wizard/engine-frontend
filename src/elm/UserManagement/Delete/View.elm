@@ -1,11 +1,9 @@
 module UserManagement.Delete.View exposing (..)
 
-import Common.Html exposing (linkTo)
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (formActions)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Msgs exposing (Msg(..))
 import Routing exposing (Route(..))
 import UserManagement.Delete.Models exposing (Model)
