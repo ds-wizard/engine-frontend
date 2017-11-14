@@ -1,32 +1,26 @@
 module UserManagement.Edit.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import UserManagement.Models exposing (..)
-import Utils exposing (FormResult(..))
 
 
 type alias Model =
     { uuid : String
-    , loading : Bool
-    , loadingError : String
-    , editForm : Form () UserEditForm
-    , editSaving : Bool
-    , editResult : FormResult
+    , user : ActionResult User
+    , savingUser : ActionResult String
+    , savingPassword : ActionResult String
+    , userForm : Form () UserEditForm
     , passwordForm : Form UserPasswordFormError UserPasswordForm
-    , passwordSaving : Bool
-    , passwordResult : FormResult
     }
 
 
 initialModel : String -> Model
 initialModel uuid =
     { uuid = uuid
-    , loading = True
-    , loadingError = ""
-    , editForm = initEmptyUserEditForm
-    , editSaving = False
-    , editResult = None
+    , user = Loading
+    , savingUser = Unset
+    , savingPassword = Unset
+    , userForm = initEmptyUserEditForm
     , passwordForm = initUserPasswordForm
-    , passwordSaving = False
-    , passwordResult = None
     }

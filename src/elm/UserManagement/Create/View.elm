@@ -16,7 +16,7 @@ view : Model -> Html Msgs.Msg
 view model =
     div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
         [ pageHeader "Create user" []
-        , errorView model.error
+        , formResultView model.savingUser
         , formView model.form
         , formActions UserManagement ( "Save", model.savingUser, Msgs.UserManagementCreateMsg <| FormMsg Form.Submit )
         ]

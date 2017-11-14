@@ -1,5 +1,7 @@
 module KnowledgeModels.Create.View exposing (..)
 
+import Common.Html exposing (emptyNode)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
@@ -15,32 +17,34 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    let
-        content =
-            if model.loading then
-                fullPageLoader
-            else if model.loadingError /= "" then
-                defaultFullPageError model.loadingError
-            else
-                formView model
-    in
     div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
         [ pageHeader "Create Knowledge Model" []
-        , errorView model.error
-        , content
+        , content model
         ]
 
 
-formView : Model -> Html Msgs.Msg
-formView model =
-    div []
-        [ formFields model.form model.packages
-        , formActions KnowledgeModels ( "Save", model.savingKm, Msgs.KnowledgeModelsCreateMsg <| FormMsg Form.Submit )
-        ]
+content : Model -> Html Msgs.Msg
+content model =
+    case model.packages of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success packages ->
+            div []
+                [ formResultView model.savingKnowledgeModel
+                , formView model.form packages
+                , formActions KnowledgeModels ( "Save", model.savingKnowledgeModel, Msgs.KnowledgeModelsCreateMsg <| FormMsg Form.Submit )
+                ]
 
 
-formFields : Form () KnowledgeModelCreateForm -> List PackageDetail -> Html Msgs.Msg
-formFields form packages =
+formView : Form () KnowledgeModelCreateForm -> List PackageDetail -> Html Msgs.Msg
+formView form packages =
     let
         parentOptions =
             ( "", "--" ) :: List.map createOption packages

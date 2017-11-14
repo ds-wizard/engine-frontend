@@ -1,6 +1,7 @@
 module PackageManagement.Import.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import FileReader exposing (NativeFile)
 import Json.Decode as Decode
 import Jwt
@@ -22,7 +23,7 @@ handleSubmit : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleSubmit session model =
     case List.head model.files of
         Just file ->
-            ( model, importPackageCmd file session )
+            ( { model | importing = Loading }, importPackageCmd file session )
 
         Nothing ->
             ( model, Cmd.none )
@@ -35,7 +36,7 @@ importPackageCompleted model result =
             ( model, cmdNavigate PackageManagement )
 
         Err error ->
-            ( { model | error = "Importing package failed." }, Cmd.none )
+            ( { model | importing = Error "Importing package failed." }, Cmd.none )
 
 
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -57,7 +58,7 @@ update msg session model =
             handleSubmit session model
 
         Cancel ->
-            ( { model | files = [], error = "" }, Cmd.none )
+            ( { model | files = [], importing = Unset }, Cmd.none )
 
         ImportPackageCompleted result ->
             importPackageCompleted model result

@@ -1,30 +1,43 @@
 module PackageManagement.Detail.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import PackageManagement.Models exposing (PackageDetail)
 
 
 type alias Model =
-    { packages : List PackageDetail
-    , loading : Bool
-    , error : String
+    { packages : ActionResult (List PackageDetail)
+    , deletingPackage : ActionResult String
+    , deletingVersion : ActionResult String
     , showDeleteDialog : Bool
-    , deletingPackage : Bool
-    , deleteError : String
-    , versionToBeDeleted : String
-    , deletingVersion : Bool
-    , deleteVersionError : String
+    , versionToBeDeleted : Maybe String
     }
 
 
 initialModel : Model
 initialModel =
-    { packages = []
-    , loading = True
-    , error = ""
+    { packages = Loading
+    , deletingPackage = Unset
+    , deletingVersion = Unset
     , showDeleteDialog = False
-    , deletingPackage = False
-    , deleteError = ""
-    , versionToBeDeleted = ""
-    , deletingVersion = False
-    , deleteVersionError = ""
+    , versionToBeDeleted = Nothing
     }
+
+
+currentPackage : Model -> Maybe PackageDetail
+currentPackage model =
+    case model.packages of
+        Success packages ->
+            List.head packages
+
+        _ ->
+            Nothing
+
+
+packagesLength : Model -> Int
+packagesLength model =
+    case model.packages of
+        Success packages ->
+            List.length packages
+
+        _ ->
+            0

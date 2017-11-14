@@ -1,6 +1,7 @@
 module Common.View exposing (..)
 
-import Common.View.Forms exposing (actionButton, errorView)
+import Common.Types exposing (ActionResult(..))
+import Common.View.Forms exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -42,19 +43,18 @@ fullPageError icon error =
         ]
 
 
-type alias ModalConifg =
+type alias ModalConifg_ =
     { modalTitle : String
     , modalContent : List (Html Msg)
     , visible : Bool
-    , actionActive : Bool
+    , actionResult : ActionResult String
     , actionName : String
     , actionMsg : Msg
-    , actionError : String
     , cancelMsg : Msg
     }
 
 
-modalView : ModalConifg -> Html Msg
+modalView : ModalConifg_ -> Html Msg
 modalView cfg =
     let
         visibleClass =
@@ -64,7 +64,15 @@ modalView cfg =
                 ""
 
         content =
-            errorView cfg.actionError :: cfg.modalContent
+            formResultView cfg.actionResult :: cfg.modalContent
+
+        cancelDisabled =
+            case cfg.actionResult of
+                Loading ->
+                    True
+
+                _ ->
+                    False
     in
     div [ class ("modal-cover " ++ visibleClass) ]
         [ div [ class "modal-dialog" ]
@@ -75,9 +83,9 @@ modalView cfg =
                 , div [ class "modal-body" ]
                     content
                 , div [ class "modal-footer" ]
-                    [ button [ onClick cfg.cancelMsg, disabled cfg.actionActive, class "btn btn-default" ]
+                    [ button [ onClick cfg.cancelMsg, disabled cancelDisabled, class "btn btn-default" ]
                         [ text "Cancel" ]
-                    , actionButton ( cfg.actionName, cfg.actionActive, cfg.actionMsg )
+                    , actionButton ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
                     ]
                 ]
             ]

@@ -1,6 +1,7 @@
 module UserManagement.Index.View exposing (..)
 
-import Common.Html exposing (linkTo)
+import Common.Html exposing (..)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -12,19 +13,26 @@ import UserManagement.Models exposing (User)
 
 view : Model -> Html Msg
 view model =
-    let
-        content =
-            if model.loading then
-                fullPageLoader
-            else if model.error /= "" then
-                defaultFullPageError model.error
-            else
-                umTable model
-    in
     div []
         [ pageHeader "User Management" indexActions
-        , content
+        , content model
         ]
+
+
+content : Model -> Html Msgs.Msg
+content model =
+    case model.users of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success users ->
+            umTable users
 
 
 indexActions : List (Html Msg)
@@ -32,11 +40,11 @@ indexActions =
     [ linkTo UserManagementCreate [ class "btn btn-primary" ] [ text "Create User" ] ]
 
 
-umTable : Model -> Html Msg
-umTable model =
+umTable : List User -> Html Msg
+umTable users =
     table [ class "table" ]
         [ umTableHeader
-        , umTableBody model
+        , umTableBody users
         ]
 
 
@@ -53,12 +61,12 @@ umTableHeader =
         ]
 
 
-umTableBody : Model -> Html Msg
-umTableBody model =
-    if List.isEmpty model.users then
+umTableBody : List User -> Html Msg
+umTableBody users =
+    if List.isEmpty users then
         umTableEmpty
     else
-        tbody [] (List.map umTableRow model.users)
+        tbody [] (List.map umTableRow users)
 
 
 umTableEmpty : Html msg

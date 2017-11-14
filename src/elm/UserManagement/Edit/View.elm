@@ -1,5 +1,7 @@
 module UserManagement.Edit.View exposing (..)
 
+import Common.Html exposing (emptyNode)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
@@ -21,29 +23,35 @@ view model =
 
 content : Model -> Html Msgs.Msg
 content model =
-    if model.loading then
-        fullPageLoader
-    else if model.loadingError /= "" then
-        defaultFullPageError model.loadingError
-    else
-        div []
-            [ editView model
-            , passwordView model
-            ]
+    case model.user of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success user ->
+            div []
+                [ userView model
+                , passwordView model
+                ]
 
 
-editView : Model -> Html Msgs.Msg
-editView model =
+userView : Model -> Html Msgs.Msg
+userView model =
     div [ class "well" ]
         [ legend [] [ text "Profile" ]
-        , formResultView model.editResult
-        , editFormView model.editForm (model.uuid == "current")
-        , formActionOnly ( "Save", model.editSaving, Msgs.UserManagementEditMsg <| EditFormMsg Form.Submit )
+        , formResultView model.savingUser
+        , userFormView model.userForm (model.uuid == "current")
+        , formActionOnly ( "Save", model.savingUser, Msgs.UserManagementEditMsg <| EditFormMsg Form.Submit )
         ]
 
 
-editFormView : Form () UserEditForm -> Bool -> Html Msgs.Msg
-editFormView form current =
+userFormView : Form () UserEditForm -> Bool -> Html Msgs.Msg
+userFormView form current =
     let
         roleOptions =
             ( "", "--" ) :: List.map (\o -> ( o, o )) roles
@@ -69,9 +77,9 @@ passwordView : Model -> Html Msgs.Msg
 passwordView model =
     div [ class "well" ]
         [ legend [] [ text "Password" ]
-        , formResultView model.passwordResult
+        , formResultView model.savingPassword
         , passwordFormView model.passwordForm
-        , formActionOnly ( "Save", model.passwordSaving, Msgs.UserManagementEditMsg <| PasswordFormMsg Form.Submit )
+        , formActionOnly ( "Save", model.savingPassword, Msgs.UserManagementEditMsg <| PasswordFormMsg Form.Submit )
         ]
 
 

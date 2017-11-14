@@ -1,6 +1,7 @@
 module UserManagement.Edit.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
 import Msgs
@@ -9,7 +10,6 @@ import UserManagement.Edit.Models exposing (Model)
 import UserManagement.Edit.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)
 import UserManagement.Requests exposing (..)
-import Utils exposing (FormResult(..))
 
 
 getUserCmd : String -> Session -> Cmd Msgs.Msg
@@ -41,13 +41,13 @@ getUserCompleted model result =
             case result of
                 Ok user ->
                     let
-                        editForm =
+                        userForm =
                             initUserEditForm user
                     in
-                    { model | editForm = editForm, loading = False }
+                    { model | userForm = userForm, user = Success user }
 
                 Err error ->
-                    { model | loadingError = "Unable to get user profile.", loading = False }
+                    { model | user = Error "Unable to get user profile." }
     in
     ( newModel, Cmd.none )
 
@@ -63,7 +63,7 @@ putUserCompleted model result =
                 Err error ->
                     Error "Profile could not be saved."
     in
-    ( { model | editResult = editResult, editSaving = False }, Cmd.none )
+    ( { model | savingUser = editResult }, Cmd.none )
 
 
 putUserPasswordCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -77,25 +77,25 @@ putUserPasswordCompleted model result =
                 Err error ->
                     Error "Password could not be changed."
     in
-    ( { model | passwordResult = passwordResult, passwordSaving = False }, Cmd.none )
+    ( { model | savingPassword = passwordResult }, Cmd.none )
 
 
-handleEditForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleEditForm formMsg session model =
-    case ( formMsg, Form.getOutput model.editForm ) of
-        ( Form.Submit, Just userEditForm ) ->
+handleUserForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleUserForm formMsg session model =
+    case ( formMsg, Form.getOutput model.userForm ) of
+        ( Form.Submit, Just userForm ) ->
             let
                 cmd =
-                    putUserCmd session userEditForm model.uuid
+                    putUserCmd session userForm model.uuid
             in
-            ( { model | editSaving = True }, cmd )
+            ( { model | savingUser = Loading }, cmd )
 
         _ ->
             let
-                editForm =
-                    Form.update userEditFormValidation formMsg model.editForm
+                userForm =
+                    Form.update userEditFormValidation formMsg model.userForm
             in
-            ( { model | editForm = editForm }, Cmd.none )
+            ( { model | userForm = userForm }, Cmd.none )
 
 
 handlePasswordForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -106,7 +106,7 @@ handlePasswordForm formMsg session model =
                 cmd =
                     putUserPasswordCmd session passwordForm model.uuid
             in
-            ( { model | passwordSaving = True }, cmd )
+            ( { model | savingPassword = Loading }, cmd )
 
         _ ->
             let
@@ -123,7 +123,7 @@ update msg session model =
             getUserCompleted model result
 
         EditFormMsg formMsg ->
-            handleEditForm formMsg session model
+            handleUserForm formMsg session model
 
         PutUserCompleted result ->
             putUserCompleted model result

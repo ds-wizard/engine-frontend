@@ -1,6 +1,7 @@
 module PackageManagement.Index.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
 import PackageManagement.Index.Models exposing (Model)
@@ -22,12 +23,12 @@ getPackagesCompleted model result =
         newModel =
             case result of
                 Ok packages ->
-                    { model | packages = packages }
+                    { model | packages = Success packages }
 
                 Err error ->
-                    { model | error = "Unable to fetch package list" }
+                    { model | packages = Error "Unable to fetch package list" }
     in
-    ( { newModel | loading = False }, Cmd.none )
+    ( newModel, Cmd.none )
 
 
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )

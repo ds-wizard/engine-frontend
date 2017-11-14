@@ -1,7 +1,9 @@
 module UserManagement.Delete.View exposing (..)
 
+import Common.Html exposing (emptyNode)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
-import Common.View.Forms exposing (formActions)
+import Common.View.Forms exposing (formActions, formResultView)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs exposing (Msg(..))
@@ -21,28 +23,25 @@ view model =
 
 content : Model -> Html Msg
 content model =
-    if model.error /= "" then
-        defaultFullPageError model.error
-    else if model.loadingUser then
-        fullPageLoader
-    else
-        div []
-            [ div
-                [ class "alert alert-warning" ]
-                [ text "You are about to permanently remove the following user from the portal." ]
-            , maybeUser model.user
-            , formActions UserManagement ( "Delete", model.deletingUser, UserManagementDeleteMsg UserManagement.Delete.Msgs.DeleteUser )
-            ]
+    case model.user of
+        Unset ->
+            emptyNode
 
+        Loading ->
+            fullPageLoader
 
-maybeUser : Maybe User -> Html Msg
-maybeUser maybeUser =
-    case maybeUser of
-        Just user ->
-            userCard user
+        Error err ->
+            defaultFullPageError err
 
-        Nothing ->
-            text ""
+        Success user ->
+            div []
+                [ formResultView model.deletingUser
+                , div
+                    [ class "alert alert-warning" ]
+                    [ text "You are about to permanently remove the following user from the portal." ]
+                , userCard user
+                , formActions UserManagement ( "Delete", model.deletingUser, UserManagementDeleteMsg UserManagement.Delete.Msgs.DeleteUser )
+                ]
 
 
 userCard : User -> Html Msg

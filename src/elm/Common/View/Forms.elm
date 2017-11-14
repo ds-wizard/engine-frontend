@@ -1,6 +1,7 @@
 module Common.View.Forms exposing (..)
 
-import Common.Html exposing (linkTo)
+import Common.Html exposing (..)
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (..)
@@ -8,7 +9,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs exposing (Msg)
 import Routing exposing (Route)
-import Utils exposing (FormResult(..))
 
 
 -- Form fields
@@ -59,13 +59,13 @@ getErrors field =
 -- Form Actions
 
 
-formActionOnly : ( String, Bool, Msg ) -> Html Msg
+formActionOnly : ( String, ActionResult a, Msg ) -> Html Msg
 formActionOnly actionButtonSettings =
     div [ class "text-right" ]
         [ actionButton actionButtonSettings ]
 
 
-formActions : Route -> ( String, Bool, Msg ) -> Html Msg
+formActions : Route -> ( String, ActionResult a, Msg ) -> Html Msg
 formActions cancelRoute actionButtonSettings =
     div [ class "form-actions" ]
         [ linkTo cancelRoute [ class "btn btn-default" ] [ text "Cancel" ]
@@ -73,18 +73,20 @@ formActions cancelRoute actionButtonSettings =
         ]
 
 
-actionButton : ( String, Bool, Msg ) -> Html Msg
-actionButton ( label, progress, msg ) =
+actionButton : ( String, ActionResult a, Msg ) -> Html Msg
+actionButton ( label, result, msg ) =
     let
-        buttonContent =
-            if progress then
-                i [ class "fa fa-spinner fa-spin" ] []
-            else
-                text label
+        ( buttonContent, isDisabled ) =
+            case result of
+                Loading ->
+                    ( i [ class "fa fa-spinner fa-spin" ] [], True )
+
+                _ ->
+                    ( text label, False )
     in
     button
         [ class "btn btn-primary btn-with-loader"
-        , disabled progress
+        , disabled isDisabled
         , onClick msg
         ]
         [ buttonContent ]
@@ -94,7 +96,7 @@ actionButton ( label, progress, msg ) =
 -- Status Views
 
 
-formResultView : FormResult -> Html Msgs.Msg
+formResultView : ActionResult String -> Html Msgs.Msg
 formResultView result =
     case result of
         Success msg ->
@@ -103,8 +105,8 @@ formResultView result =
         Error msg ->
             errorView msg
 
-        None ->
-            text ""
+        _ ->
+            emptyNode
 
 
 errorView : String -> Html Msgs.Msg

@@ -35,14 +35,16 @@
     position: relative;
     text-align: center;
 
-    .fa {
-        display: block;
-        font-size: 40px;
-    }
+    .file {
+        .fa {
+            display: block;
+            font-size: 40px;
+        }
 
-    .filename {
-        margin-top: 20px;
-        font-size: 20px;
+        .filename {
+            margin-top: 20px;
+            font-size: 20px;
+        }
     }
 
     .actions {

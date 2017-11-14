@@ -1,9 +1,10 @@
 module PackageManagement.Detail.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
-import PackageManagement.Detail.Models exposing (Model)
+import PackageManagement.Detail.Models exposing (..)
 import PackageManagement.Detail.Msgs exposing (Msg(..))
 import PackageManagement.Models exposing (PackageDetail)
 import PackageManagement.Requests exposing (..)
@@ -35,19 +36,19 @@ getPackageCompleted model result =
         newModel =
             case result of
                 Ok packages ->
-                    { model | packages = packages }
+                    { model | packages = Success packages }
 
                 Err error ->
-                    { model | error = "Unable to get package detail" }
+                    { model | packages = Error "Unable to get package detail" }
     in
-    ( { newModel | loading = False }, Cmd.none )
+    ( newModel, Cmd.none )
 
 
 handleDeletePackage : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleDeletePackage session model =
-    case List.head model.packages of
+    case currentPackage model of
         Just package ->
-            ( { model | deletingPackage = True, deleteError = "" }
+            ( { model | deletingPackage = Loading }
             , deletePackageCmd package.groupId package.artifactId session
             )
 
@@ -62,23 +63,20 @@ deletePackageCompleted model result =
             ( model, cmdNavigate PackageManagement )
 
         Err error ->
-            ( { model
-                | deletingPackage = False
-                , deleteError = "Package could not be deleted"
-              }
+            ( { model | deletingPackage = Error "Package could not be deleted" }
             , Cmd.none
             )
 
 
 handleDeleteVersion : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleDeleteVersion session model =
-    case List.head model.packages of
-        Just package ->
-            ( { model | deletingVersion = True, deleteVersionError = "" }
-            , deletePackageVersionCmd model.versionToBeDeleted session
+    case ( currentPackage model, model.versionToBeDeleted ) of
+        ( Just package, Just version ) ->
+            ( { model | deletingVersion = Loading }
+            , deletePackageVersionCmd version session
             )
 
-        Nothing ->
+        _ ->
             ( model, Cmd.none )
 
 
@@ -88,7 +86,7 @@ deleteVersionCompleted model result =
         Ok version ->
             let
                 route =
-                    case ( List.length model.packages > 1, List.head model.packages ) of
+                    case ( packagesLength model > 1, currentPackage model ) of
                         ( True, Just package ) ->
                             PackageManagementDetail package.groupId package.artifactId
 
@@ -99,8 +97,7 @@ deleteVersionCompleted model result =
 
         Err error ->
             ( { model
-                | deletingVersion = False
-                , deleteVersionError = "Version could not be deleted"
+                | deletingVersion = Error "Version could not be deleted"
               }
             , Cmd.none
             )
@@ -113,7 +110,7 @@ update msg session model =
             getPackageCompleted model result
 
         ShowHideDeleteDialog value ->
-            ( { model | showDeleteDialog = value }, Cmd.none )
+            ( { model | showDeleteDialog = value, deletingPackage = Unset }, Cmd.none )
 
         DeletePackage ->
             handleDeletePackage session model
@@ -122,7 +119,7 @@ update msg session model =
             deletePackageCompleted model result
 
         ShowHideDeleteVersion version ->
-            ( { model | versionToBeDeleted = version }, Cmd.none )
+            ( { model | versionToBeDeleted = version, deletingVersion = Unset }, Cmd.none )
 
         DeleteVersion ->
             handleDeleteVersion session model

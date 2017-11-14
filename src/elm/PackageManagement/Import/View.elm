@@ -1,7 +1,8 @@
 module PackageManagement.Import.View exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (pageHeader)
-import Common.View.Forms exposing (errorView)
+import Common.View.Forms exposing (actionButton, formResultView)
 import DragDrop exposing (onDragEnter, onDragLeave, onDragOver, onDrop)
 import FileReader exposing (..)
 import Html exposing (..)
@@ -19,31 +20,39 @@ view model =
         content =
             case List.head model.files of
                 Just file ->
-                    fileView file.name
+                    fileView model file.name
 
                 Nothing ->
                     dropzone model |> Html.map Msgs.PackageManagementImportMsg
     in
     div []
         [ pageHeader "Import package" []
-        , errorView model.error
+        , formResultView model.importing
         , content
         ]
 
 
-fileView : String -> Html Msgs.Msg
-fileView fileName =
+fileView : Model -> String -> Html Msgs.Msg
+fileView model fileName =
+    let
+        cancelDisabled =
+            case model.importing of
+                Loading ->
+                    True
+
+                _ ->
+                    False
+    in
     div [ class "file-view" ]
-        [ div []
+        [ div [ class "file" ]
             [ i [ class "fa fa-file-o" ] []
             , div [ class "filename" ]
                 [ text fileName ]
             ]
         , div [ class "actions" ]
-            [ button [ onClick (Msgs.PackageManagementImportMsg Cancel), class "btn btn-default" ]
+            [ button [ disabled cancelDisabled, onClick (Msgs.PackageManagementImportMsg Cancel), class "btn btn-default" ]
                 [ text "Cancel" ]
-            , button [ onClick (Msgs.PackageManagementImportMsg Submit), class "btn btn-primary" ]
-                [ text "Upload" ]
+            , actionButton ( "Upload", model.importing, Msgs.PackageManagementImportMsg Submit )
             ]
         ]
 

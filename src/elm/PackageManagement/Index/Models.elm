@@ -1,18 +1,15 @@
 module PackageManagement.Index.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import PackageManagement.Models exposing (Package)
 
 
 type alias Model =
-    { packages : List Package
-    , loading : Bool
-    , error : String
+    { packages : ActionResult (List Package)
     }
 
 
 initialModel : Model
 initialModel =
-    { packages = []
-    , loading = True
-    , error = ""
+    { packages = Loading
     }

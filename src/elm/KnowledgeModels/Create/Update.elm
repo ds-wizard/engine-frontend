@@ -1,6 +1,7 @@
 module KnowledgeModels.Create.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
 import KnowledgeModels.Create.Models exposing (Model)
@@ -37,12 +38,12 @@ getPackageCompleted model result =
         newModel =
             case result of
                 Ok packages ->
-                    { model | packages = packages }
+                    { model | packages = Success packages }
 
                 Err error ->
-                    { model | loadingError = "Unable to get package list" }
+                    { model | packages = Error "Unable to get package list" }
     in
-    ( { newModel | loading = False }, Cmd.none )
+    ( newModel, Cmd.none )
 
 
 postKmCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -52,7 +53,7 @@ postKmCompleted model result =
             ( model, cmdNavigate KnowledgeModels )
 
         Err error ->
-            ( { model | error = "Knowledge model could not be created.", savingKm = False }, Cmd.none )
+            ( { model | savingKnowledgeModel = Error "Knowledge model could not be created." }, Cmd.none )
 
 
 handleForm : Form.Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
@@ -66,7 +67,7 @@ handleForm formMsg seed session model =
                 cmd =
                     Uuid.toString newUuid |> postKmCmd session kmCreateForm
             in
-            ( newSeed, { model | savingKm = True }, cmd )
+            ( newSeed, { model | savingKnowledgeModel = Loading }, cmd )
 
         _ ->
             let

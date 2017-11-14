@@ -1,6 +1,7 @@
 module Organization.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
 import Msgs
@@ -8,7 +9,6 @@ import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))
 import Organization.Requests exposing (..)
 import Requests exposing (toCmd)
-import Utils exposing (FormResult(..))
 
 
 getCurrentOrganizationCmd : Session -> Cmd Msgs.Msg
@@ -31,12 +31,12 @@ getCurrentOrganizationCompleted model result =
         newModel =
             case result of
                 Ok organization ->
-                    { model | form = initOrganizationForm organization, organization = Just organization }
+                    { model | form = initOrganizationForm organization, organization = Success organization }
 
                 Err error ->
-                    { model | loadingError = "Unable to get organization information." }
+                    { model | organization = Error "Unable to get organization information." }
     in
-    ( { newModel | loading = False }, Cmd.none )
+    ( newModel, Cmd.none )
 
 
 putCurrentOrganizationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -50,18 +50,18 @@ putCurrentOrganizationCompleted model result =
                 Err error ->
                     Error "Organization could not be saved"
     in
-    ( { model | result = newResult, saving = False }, Cmd.none )
+    ( { model | savingOrganization = newResult }, Cmd.none )
 
 
 handleForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleForm formMsg session model =
     case ( formMsg, Form.getOutput model.form, model.organization ) of
-        ( Form.Submit, Just form, Just organization ) ->
+        ( Form.Submit, Just form, Success organization ) ->
             let
                 cmd =
                     putCurrentOrganizationCmd session form organization.uuid
             in
-            ( { model | saving = True }, cmd )
+            ( { model | savingOrganization = Loading }, cmd )
 
         _ ->
             let

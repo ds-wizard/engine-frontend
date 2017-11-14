@@ -1,6 +1,7 @@
 module KnowledgeModels.Index.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Jwt
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
@@ -29,19 +30,19 @@ getKnowledgeModelsCompleted model result =
         newModel =
             case result of
                 Ok knowledgeModels ->
-                    { model | knowledgeModels = knowledgeModels }
+                    { model | knowledgeModels = Success knowledgeModels }
 
                 Err error ->
-                    { model | error = "Unable to fetch knowledge models" }
+                    { model | knowledgeModels = Error "Unable to fetch knowledge models" }
     in
-    ( { newModel | loading = False }, Cmd.none )
+    ( newModel, Cmd.none )
 
 
 handleDeleteKM : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleDeleteKM session model =
     case model.kmToBeDeleted of
         Just km ->
-            ( { model | deletingKM = True, deleteKMError = "" }
+            ( { model | deletingKnowledgeModel = Loading }
             , deleteKnowledgeModelCmd km.uuid session
             )
 
@@ -56,10 +57,7 @@ deleteKnowledgeModelCompleted model result =
             ( model, cmdNavigate KnowledgeModels )
 
         Err error ->
-            ( { model
-                | deletingKM = False
-                , deleteKMError = "Knowledge model could not be deleted"
-              }
+            ( { model | deletingKnowledgeModel = Error "Knowledge model could not be deleted" }
             , Cmd.none
             )
 
@@ -71,7 +69,7 @@ update msg session model =
             getKnowledgeModelsCompleted model result
 
         ShowHideDeleteKnowledgeModel km ->
-            ( { model | kmToBeDeleted = km }, Cmd.none )
+            ( { model | kmToBeDeleted = km, deletingKnowledgeModel = Unset }, Cmd.none )
 
         DeleteKnowledgeModel ->
             handleDeleteKM session model

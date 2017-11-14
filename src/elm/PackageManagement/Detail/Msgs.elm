@@ -9,6 +9,6 @@ type Msg
     | ShowHideDeleteDialog Bool
     | DeletePackage
     | DeletePackageCompleted (Result Jwt.JwtError String)
-    | ShowHideDeleteVersion String
+    | ShowHideDeleteVersion (Maybe String)
     | DeleteVersion
     | DeleteVersionCompleted (Result Jwt.JwtError String)

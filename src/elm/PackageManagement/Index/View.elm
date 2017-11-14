@@ -1,6 +1,7 @@
 module PackageManagement.Index.View exposing (..)
 
-import Common.Html exposing (linkTo)
+import Common.Html exposing (..)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -12,19 +13,26 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    let
-        content =
-            if model.loading then
-                fullPageLoader
-            else if model.error /= "" then
-                defaultFullPageError model.error
-            else
-                pmTable model
-    in
     div []
         [ pageHeader "Package Management" actions
-        , content
+        , content model
         ]
+
+
+content : Model -> Html Msgs.Msg
+content model =
+    case model.packages of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success packages ->
+            pmTable packages
 
 
 actions : List (Html Msg)
@@ -37,11 +45,11 @@ actions =
     ]
 
 
-pmTable : Model -> Html Msg
-pmTable model =
+pmTable : List Package -> Html Msg
+pmTable packages =
     table [ class "table" ]
         [ pmTableHeader
-        , pmTableBody model
+        , pmTableBody packages
         ]
 
 
@@ -56,12 +64,12 @@ pmTableHeader =
         ]
 
 
-pmTableBody : Model -> Html Msg
-pmTableBody model =
-    if List.isEmpty model.packages then
+pmTableBody : List Package -> Html Msg
+pmTableBody packages =
+    if List.isEmpty packages then
         pmTableEmpty
     else
-        tbody [] (List.map pmTableRow model.packages)
+        tbody [] (List.map pmTableRow packages)
 
 
 pmTableEmpty : Html msg

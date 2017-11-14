@@ -1,6 +1,7 @@
 module KnowledgeModels.Index.View exposing (..)
 
-import Common.Html exposing (linkTo)
+import Common.Html exposing (..)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -14,20 +15,27 @@ import Routing
 
 view : Model -> Html Msgs.Msg
 view model =
-    let
-        content =
-            if model.loading then
-                fullPageLoader
-            else if model.error /= "" then
-                defaultFullPageError model.error
-            else
-                kmTable model
-    in
     div []
         [ pageHeader "Knowledge model" indexActions
-        , content
+        , content model
         , deleteModal model
         ]
+
+
+content : Model -> Html Msgs.Msg
+content model =
+    case model.knowledgeModels of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success knowledgeModels ->
+            kmTable knowledgeModels
 
 
 indexActions : List (Html Msgs.Msg)
@@ -38,11 +46,11 @@ indexActions =
     ]
 
 
-kmTable : Model -> Html Msgs.Msg
-kmTable model =
+kmTable : List KnowledgeModel -> Html Msgs.Msg
+kmTable knowledgeModels =
     table [ class "table" ]
         [ kmTableHeader
-        , kmTableBody model
+        , kmTableBody knowledgeModels
         ]
 
 
@@ -58,12 +66,12 @@ kmTableHeader =
         ]
 
 
-kmTableBody : Model -> Html Msgs.Msg
-kmTableBody model =
-    if List.isEmpty model.knowledgeModels then
+kmTableBody : List KnowledgeModel -> Html Msgs.Msg
+kmTableBody knowledgeModels =
+    if List.isEmpty knowledgeModels then
         kmTableEmpty
     else
-        tbody [] (List.map kmTableRow model.knowledgeModels)
+        tbody [] (List.map kmTableRow knowledgeModels)
 
 
 kmTableEmpty : Html msg
@@ -130,9 +138,8 @@ deleteModal model =
             { modalTitle = "Delete knowledge model"
             , modalContent = modalContent
             , visible = visible
-            , actionActive = model.deletingKM
+            , actionResult = model.deletingKnowledgeModel
             , actionName = "Delete"
-            , actionError = model.deleteKMError
             , actionMsg = Msgs.KnowledgeModelsIndexMsg DeleteKnowledgeModel
             , cancelMsg = Msgs.KnowledgeModelsIndexMsg <| ShowHideDeleteKnowledgeModel Nothing
             }

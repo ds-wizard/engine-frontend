@@ -1,5 +1,7 @@
 module Organization.View exposing (..)
 
+import Common.Html exposing (emptyNode)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
@@ -20,16 +22,22 @@ view model =
 
 content : Model -> Html Msgs.Msg
 content model =
-    if model.loading then
-        fullPageLoader
-    else if model.loadingError /= "" then
-        defaultFullPageError model.loadingError
-    else
-        div []
-            [ formResultView model.result
-            , formView model.form
-            , formActionOnly ( "Save", model.saving, Msgs.OrganizationMsg <| FormMsg Form.Submit )
-            ]
+    case model.organization of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success organization ->
+            div []
+                [ formResultView model.savingOrganization
+                , formView model.form
+                , formActionOnly ( "Save", model.savingOrganization, Msgs.OrganizationMsg <| FormMsg Form.Submit )
+                ]
 
 
 formView : Form () OrganizationForm -> Html Msgs.Msg

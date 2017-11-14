@@ -16,3 +16,8 @@ linkTo route attributes children =
             ]
     in
     a (attributes ++ hrefAttributes) children
+
+
+emptyNode : Html msg
+emptyNode =
+    text ""

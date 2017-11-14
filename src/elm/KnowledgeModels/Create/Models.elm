@@ -1,26 +1,21 @@
 module KnowledgeModels.Create.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import KnowledgeModels.Models exposing (KnowledgeModelCreateForm, initKnowledgeModelCreateForm)
 import PackageManagement.Models exposing (PackageDetail)
 
 
 type alias Model =
-    { form : Form () KnowledgeModelCreateForm
-    , savingKm : Bool
-    , error : String
-    , loading : Bool
-    , loadingError : String
-    , packages : List PackageDetail
+    { packages : ActionResult (List PackageDetail)
+    , savingKnowledgeModel : ActionResult String
+    , form : Form () KnowledgeModelCreateForm
     }
 
 
 initialModel : Model
 initialModel =
-    { form = initKnowledgeModelCreateForm
-    , savingKm = False
-    , error = ""
-    , loading = True
-    , loadingError = ""
-    , packages = []
+    { packages = Loading
+    , savingKnowledgeModel = Unset
+    , form = initKnowledgeModelCreateForm
     }

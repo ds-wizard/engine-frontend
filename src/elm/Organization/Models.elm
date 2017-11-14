@@ -1,32 +1,27 @@
 module Organization.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
-import Utils exposing (FormResult(..), validateRegex)
+import Utils exposing (validateRegex)
 
 
 type alias Model =
-    { loading : Bool
-    , loadingError : String
+    { organization : ActionResult Organization
+    , savingOrganization : ActionResult String
     , form : Form () OrganizationForm
-    , saving : Bool
-    , result : FormResult
-    , organization : Maybe Organization
     }
 
 
 initialModel : Model
 initialModel =
-    { loading = True
-    , loadingError = ""
+    { organization = Loading
+    , savingOrganization = Unset
     , form = initEmptyOrganizationForm
-    , saving = False
-    , result = None
-    , organization = Nothing
     }
 
 

@@ -1,24 +1,19 @@
 module KnowledgeModels.Index.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import KnowledgeModels.Models exposing (KnowledgeModel)
 
 
 type alias Model =
-    { knowledgeModels : List KnowledgeModel
-    , loading : Bool
-    , error : String
+    { knowledgeModels : ActionResult (List KnowledgeModel)
     , kmToBeDeleted : Maybe KnowledgeModel
-    , deletingKM : Bool
-    , deleteKMError : String
+    , deletingKnowledgeModel : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { knowledgeModels = []
-    , loading = True
-    , error = ""
+    { knowledgeModels = Loading
     , kmToBeDeleted = Nothing
-    , deletingKM = False
-    , deleteKMError = ""
+    , deletingKnowledgeModel = Unset
     }

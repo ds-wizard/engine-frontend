@@ -1,6 +1,7 @@
 module PackageManagement.Detail.View exposing (..)
 
-import Common.Html exposing (linkTo)
+import Common.Html exposing (emptyNode, linkTo)
+import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -15,27 +16,34 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    let
-        content =
-            if model.loading then
-                fullPageLoader
-            else if model.error /= "" then
-                defaultFullPageError model.error
-            else
-                packageDetail model.packages
-    in
     div []
-        [ content
+        [ content model
         , deleteModal model
         , deleteVersionModal model
         ]
+
+
+content : Model -> Html Msgs.Msg
+content model =
+    case model.packages of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success packages ->
+            packageDetail packages
 
 
 deleteModal : Model -> Html Msgs.Msg
 deleteModal model =
     let
         version =
-            case List.head model.packages of
+            case currentPackage model of
                 Just package ->
                     package.groupId ++ ":" ++ package.artifactId
 
@@ -54,9 +62,8 @@ deleteModal model =
             { modalTitle = "Delete package"
             , modalContent = modalContent
             , visible = model.showDeleteDialog
-            , actionActive = model.deletingPackage
+            , actionResult = model.deletingPackage
             , actionName = "Delete"
-            , actionError = model.deleteError
             , actionMsg = Msgs.PackageManagementDetailMsg DeletePackage
             , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog False
             }
@@ -67,10 +74,18 @@ deleteModal model =
 deleteVersionModal : Model -> Html Msgs.Msg
 deleteVersionModal model =
     let
+        ( version, visible ) =
+            case model.versionToBeDeleted of
+                Just version ->
+                    ( version, True )
+
+                Nothing ->
+                    ( "", False )
+
         modalContent =
             [ p []
                 [ text "Are you sure you want to permanently delete version "
-                , strong [] [ text model.versionToBeDeleted ]
+                , strong [] [ text version ]
                 , text "?"
                 ]
             ]
@@ -78,12 +93,11 @@ deleteVersionModal model =
         modalConfig =
             { modalTitle = "Delete version"
             , modalContent = modalContent
-            , visible = model.versionToBeDeleted /= ""
-            , actionActive = model.deletingVersion
+            , visible = visible
+            , actionResult = model.deletingVersion
             , actionName = "Delete"
-            , actionError = model.deleteVersionError
             , actionMsg = Msgs.PackageManagementDetailMsg DeleteVersion
-            , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion ""
+            , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion Nothing
             }
     in
     modalView modalConfig
@@ -91,21 +105,18 @@ deleteVersionModal model =
 
 packageDetail : List PackageDetail -> Html Msgs.Msg
 packageDetail packages =
-    let
-        ( name, groupId, artifactId ) =
-            case List.head packages of
-                Just package ->
-                    ( package.name, package.groupId, package.artifactId )
+    case List.head packages of
+        Just package ->
+            div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
+                [ pageHeader package.name actions
+                , code [ class "package-short-name" ]
+                    [ text (package.groupId ++ ":" ++ package.artifactId) ]
+                , h3 [] [ text "Versions" ]
+                , div [] (List.map versionView packages)
+                ]
 
-                Nothing ->
-                    ( "", "", "" )
-    in
-    div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
-        [ pageHeader name actions
-        , code [ class "package-short-name" ] [ text (groupId ++ ":" ++ artifactId) ]
-        , h3 [] [ text "Versions" ]
-        , div [] (List.map versionView packages)
-        ]
+        Nothing ->
+            text ""
 
 
 actions : List (Html Msgs.Msg)
@@ -134,7 +145,7 @@ versionView detail =
             , div [ class "actions" ]
                 [ a [ class "btn btn-info link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
                 , button
-                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion detail.id)
+                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion <| Just detail.id)
                     , class "btn btn-default"
                     ]
                     [ i [ class "fa fa-trash" ] [] ]

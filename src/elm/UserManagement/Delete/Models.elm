@@ -1,20 +1,17 @@
 module UserManagement.Delete.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import UserManagement.Models exposing (User)
 
 
 type alias Model =
-    { user : Maybe User
-    , loadingUser : Bool
-    , deletingUser : Bool
-    , error : String
+    { user : ActionResult User
+    , deletingUser : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { user = Nothing
-    , loadingUser = True
-    , deletingUser = False
-    , error = ""
+    { user = Loading
+    , deletingUser = Unset
     }

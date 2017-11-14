@@ -1,6 +1,7 @@
 module UserManagement.Delete.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
 import Requests exposing (toCmd)
@@ -29,10 +30,10 @@ getUserCompleted model result =
         newModel =
             case result of
                 Ok user ->
-                    { model | user = Just user, loadingUser = False }
+                    { model | user = Success user }
 
                 Err error ->
-                    { model | error = "Unable to get user profile.", loadingUser = False }
+                    { model | user = Error "Unable to get user profile." }
     in
     ( newModel, Cmd.none )
 
@@ -44,16 +45,16 @@ deleteUserCompleted model result =
             ( model, cmdNavigate UserManagement )
 
         Err error ->
-            ( { model | error = "User could not be deleted." }, Cmd.none )
+            ( { model | deletingUser = Error "User could not be deleted." }, Cmd.none )
 
 
 handleDeleteUser : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleDeleteUser session model =
     case model.user of
-        Just user ->
-            ( { model | deletingUser = True }, deleteUserCmd user.uuid session )
+        Success user ->
+            ( { model | deletingUser = Loading }, deleteUserCmd user.uuid session )
 
-        Nothing ->
+        _ ->
             ( model, Cmd.none )
 
 

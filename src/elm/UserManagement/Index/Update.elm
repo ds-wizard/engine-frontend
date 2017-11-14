@@ -1,6 +1,7 @@
 module UserManagement.Index.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
 import Requests exposing (toCmd)
@@ -22,12 +23,12 @@ getUsersCompleted model result =
         newModel =
             case result of
                 Ok users ->
-                    { model | users = users }
+                    { model | users = Success users }
 
                 Err error ->
-                    { model | error = "Unable to fetch user list" }
+                    { model | users = Error "Unable to fetch user list" }
     in
-    ( { newModel | loading = False }, Cmd.none )
+    ( newModel, Cmd.none )
 
 
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )

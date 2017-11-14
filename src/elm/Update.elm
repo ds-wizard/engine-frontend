@@ -19,6 +19,7 @@ import PackageManagement.Index.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import UserManagement.Create.Models
 import UserManagement.Create.Update
+import UserManagement.Delete.Models
 import UserManagement.Delete.Update
 import UserManagement.Edit.Models
 import UserManagement.Edit.Update
@@ -68,6 +69,9 @@ initLocalModel model =
 
         UserManagementEdit uuid ->
             { model | userManagementEditModel = UserManagement.Edit.Models.initialModel uuid }
+
+        UserManagementDelete uuid ->
+            { model | userManagementDeleteModel = UserManagement.Delete.Models.initialModel }
 
         Organization ->
             { model | organizationModel = Organization.Models.initialModel }

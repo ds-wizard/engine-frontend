@@ -1,18 +1,19 @@
 module PackageManagement.Import.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import FileReader exposing (NativeFile)
 
 
 type alias Model =
-    { error : String
-    , dnd : Int
+    { dnd : Int
     , files : List NativeFile
+    , importing : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { error = ""
-    , dnd = 0
+    { dnd = 0
     , files = []
+    , importing = Unset
     }

@@ -1,19 +1,18 @@
 module UserManagement.Create.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import UserManagement.Models exposing (UserCreateForm, initUserCreateForm)
 
 
 type alias Model =
-    { form : Form () UserCreateForm
-    , savingUser : Bool
-    , error : String
+    { savingUser : ActionResult String
+    , form : Form () UserCreateForm
     }
 
 
 initialModel : Model
 initialModel =
-    { form = initUserCreateForm
-    , savingUser = False
-    , error = ""
+    { savingUser = Unset
+    , form = initUserCreateForm
     }

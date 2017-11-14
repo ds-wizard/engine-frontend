@@ -1,6 +1,7 @@
 module UserManagement.Create.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
 import Msgs
@@ -30,7 +31,7 @@ postUserCompleted model result =
             ( model, cmdNavigate UserManagement )
 
         Err error ->
-            ( { model | error = "User could not be created.", savingUser = False }, Cmd.none )
+            ( { model | savingUser = Error "User could not be created." }, Cmd.none )
 
 
 handleForm : Form.Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
@@ -44,7 +45,7 @@ handleForm formMsg seed session model =
                 cmd =
                     Uuid.toString newUuid |> postUserCmd session userCreateForm
             in
-            ( newSeed, { model | savingUser = True }, cmd )
+            ( newSeed, { model | savingUser = Loading }, cmd )
 
         _ ->
             let
