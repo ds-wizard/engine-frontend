@@ -47,7 +47,7 @@ knowledgeModelCreateFormValidation : Validation () KnowledgeModelCreateForm
 knowledgeModelCreateFormValidation =
     Validate.map3 KnowledgeModelCreateForm
         (Validate.field "name" Validate.string)
-        (Validate.field "artifactId" (validateRegex "^[a-zA-Z0-9_-]+$"))
+        (Validate.field "artifactId" (validateRegex "^^(?![-])(?!.*[-]$)[a-zA-Z0-9-]+$"))
         (Validate.field "parentPackageId" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
 
 

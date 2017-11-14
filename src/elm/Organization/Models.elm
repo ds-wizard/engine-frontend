@@ -60,7 +60,7 @@ organizationFormValidation : Validation () OrganizationForm
 organizationFormValidation =
     Validate.map2 OrganizationForm
         (Validate.field "name" Validate.string)
-        (Validate.field "groupId" (validateRegex "^[a-zA-Z0-9.]+$"))
+        (Validate.field "groupId" (validateRegex "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"))
 
 
 organizationToFormInitials : Organization -> List ( String, Field.Field )

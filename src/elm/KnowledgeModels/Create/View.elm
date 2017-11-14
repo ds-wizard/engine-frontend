@@ -5,7 +5,7 @@ import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
-import Html exposing (Html, div)
+import Html exposing (..)
 import Html.Attributes exposing (class)
 import KnowledgeModels.Create.Models exposing (..)
 import KnowledgeModels.Create.Msgs exposing (Msg(..))
@@ -53,6 +53,8 @@ formView form packages =
             div []
                 [ inputGroup form "name" "Name"
                 , inputGroup form "artifactId" "Artifact ID"
+                , p [ class "help-block help-block-after" ]
+                    [ text "Artifact ID can contain alfanumeric characters and dash but cannot start or end with dash." ]
                 , selectGroup parentOptions form "parentPackageId" "Parent Package"
                 ]
     in

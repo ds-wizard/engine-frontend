@@ -135,6 +135,7 @@ a {
     position: relative;
     overflow: hidden;
 }
+
 .btn-file input[type=file] {
     position: absolute;
     top: 0;
@@ -149,4 +150,8 @@ a {
     background: white;
     cursor: inherit;
     display: block;
+}
+
+.help-block-after {
+    margin-top: -10px;
 }
