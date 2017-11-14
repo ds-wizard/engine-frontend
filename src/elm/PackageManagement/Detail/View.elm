@@ -109,7 +109,7 @@ packageDetail packages =
         Just package ->
             div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
                 [ pageHeader package.name actions
-                , code [ class "package-short-name" ]
+                , code [ class "package-artifact-id" ]
                     [ text (package.groupId ++ ":" ++ package.artifactId) ]
                 , h3 [] [ text "Versions" ]
                 , div [] (List.map versionView packages)

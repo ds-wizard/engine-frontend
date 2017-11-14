@@ -1,0 +1,21 @@
+.knowledge-models-publish {
+    p.form-value {
+        padding: 8px 0;
+        height: 38px;
+    }
+
+    .version-inputs {
+        font-weight: bold;
+
+        input {
+            display: inline-block;
+            width: 60px;
+            text-align: center;
+            margin: 5px;
+
+            &:first-child {
+                margin-left: 0;
+            }
+        }
+    }
+}

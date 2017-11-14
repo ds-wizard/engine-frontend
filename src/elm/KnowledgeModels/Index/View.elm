@@ -10,7 +10,7 @@ import KnowledgeModels.Index.Models exposing (..)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
 import KnowledgeModels.Models exposing (KnowledgeModel)
 import Msgs
-import Routing
+import Routing exposing (Route(..))
 
 
 view : Model -> Html Msgs.Msg
@@ -98,6 +98,7 @@ kmTableRow km =
         , td [ class "table-actions" ]
             [ kmTableRowAction "Edit"
             , kmTableRowAction "Upgrade"
+            , kmTableRowActionPublish km
             , kmTableRowActionDelete km
             ]
         ]
@@ -107,6 +108,11 @@ kmTableRowAction : String -> Html Msgs.Msg
 kmTableRowAction name =
     a [ href "#" ]
         [ text name ]
+
+
+kmTableRowActionPublish : KnowledgeModel -> Html Msgs.Msg
+kmTableRowActionPublish km =
+    linkTo (KnowledgeModelsPublish km.uuid) [] [ text "Publish" ]
 
 
 kmTableRowActionDelete : KnowledgeModel -> Html Msgs.Msg

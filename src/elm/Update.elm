@@ -5,6 +5,8 @@ import KnowledgeModels.Create.Models
 import KnowledgeModels.Create.Update
 import KnowledgeModels.Index.Models
 import KnowledgeModels.Index.Update
+import KnowledgeModels.Publish.Models
+import KnowledgeModels.Publish.Update
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
@@ -54,6 +56,9 @@ fetchData model =
         KnowledgeModelsCreate ->
             KnowledgeModels.Create.Update.getPackagesCmd model.session
 
+        KnowledgeModelsPublish uuid ->
+            KnowledgeModels.Publish.Update.getKnowledgeModelCmd uuid model.session
+
         _ ->
             Cmd.none
 
@@ -90,6 +95,9 @@ initLocalModel model =
 
         KnowledgeModelsCreate ->
             { model | knowledgeModelsCreateModel = KnowledgeModels.Create.Models.initialModel }
+
+        KnowledgeModelsPublish uuid ->
+            { model | knowledgeModelsPublishModel = KnowledgeModels.Publish.Models.initialModel }
 
         _ ->
             model
@@ -180,3 +188,10 @@ update msg model =
                     KnowledgeModels.Create.Update.update msg model.seed model.session model.knowledgeModelsCreateModel
             in
             ( { model | seed = seed, knowledgeModelsCreateModel = knowledgeModelsCreateModel }, cmd )
+
+        Msgs.KnowledgeModelsPublishMsg msg ->
+            let
+                ( knowledgeModelsPublishModel, cmd ) =
+                    KnowledgeModels.Publish.Update.update msg model.session model.knowledgeModelsPublishModel
+            in
+            ( { model | knowledgeModelsPublishModel = knowledgeModelsPublishModel }, cmd )

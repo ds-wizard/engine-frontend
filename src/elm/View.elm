@@ -11,6 +11,7 @@ import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
 import KnowledgeModels.Editor.View
 import KnowledgeModels.Index.View
+import KnowledgeModels.Publish.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Organization.View
@@ -69,6 +70,11 @@ view model =
         KnowledgeModels ->
             model.knowledgeModelsIndexModel
                 |> KnowledgeModels.Index.View.view
+                |> appView model
+
+        KnowledgeModelsPublish uuid ->
+            model.knowledgeModelsPublishModel
+                |> KnowledgeModels.Publish.View.view
                 |> appView model
 
         PackageManagement ->

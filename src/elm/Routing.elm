@@ -16,6 +16,7 @@ type Route
     | KnowledgeModels
     | KnowledgeModelsEditor
     | KnowledgeModelsCreate
+    | KnowledgeModelsPublish String
     | PackageManagement
     | PackageManagementDetail String String
     | PackageManagementImport
@@ -37,6 +38,7 @@ matchers =
         , map UserManagementDelete (s "user-management" </> s "delete" </> string)
         , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
         , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit")
+        , map KnowledgeModelsPublish (s "knowledge-models" </> s "publish" </> string)
         , map KnowledgeModels (s "knowledge-models")
         , map PackageManagement (s "package-management")
         , map PackageManagementDetail (s "package-management" </> s "package" </> string </> string)
@@ -83,6 +85,9 @@ isAllowed route maybeJwt =
             hasPerm maybeJwt Perm.knowledgeModel
 
         KnowledgeModelsEditor ->
+            hasPerm maybeJwt Perm.knowledgeModel
+
+        KnowledgeModelsPublish uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
         KnowledgeModels ->
@@ -141,6 +146,9 @@ toUrl route =
 
                 KnowledgeModelsEditor ->
                     [ "knowledge-models", "edit" ]
+
+                KnowledgeModelsPublish uuid ->
+                    [ "knowledge-models", "publish", uuid ]
 
                 KnowledgeModels ->
                     [ "knowledge-models" ]
