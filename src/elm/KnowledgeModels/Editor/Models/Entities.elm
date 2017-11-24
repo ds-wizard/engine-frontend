@@ -111,3 +111,24 @@ expertDecoder =
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "email" Decode.string
+
+
+newChapter : String -> Chapter
+newChapter uuid =
+    { uuid = uuid
+    , title = "New chapter"
+    , text = "Chapter text"
+    , questions = []
+    }
+
+
+newQuestion : String -> Question
+newQuestion uuid =
+    { uuid = uuid
+    , type_ = ""
+    , title = "New question"
+    , text = "Question text"
+    , answers = []
+    , references = []
+    , experts = []
+    }

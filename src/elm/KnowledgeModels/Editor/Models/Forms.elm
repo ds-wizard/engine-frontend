@@ -17,8 +17,7 @@ type alias ChapterForm =
 
 
 type alias QuestionForm =
-    { type_ : String
-    , title : String
+    { title : String
     , text : String
     }
 
@@ -55,6 +54,16 @@ knowledgeModelFormInitials knowledgeModel =
     [ ( "name", Field.string knowledgeModel.name ) ]
 
 
+updateKnowledgeModelWithForm : KnowledgeModel -> KnowledgeModelForm -> KnowledgeModel
+updateKnowledgeModelWithForm knowledgeModel knowledgeModelForm =
+    { knowledgeModel | name = knowledgeModelForm.name }
+
+
+initChapterForm : Chapter -> Form () ChapterForm
+initChapterForm =
+    chapterFormInitials >> initForm chapterFormValidation
+
+
 chapterFormValidation : Validation () ChapterForm
 chapterFormValidation =
     Validate.map2 ChapterForm
@@ -69,20 +78,33 @@ chapterFormInitials chapter =
     ]
 
 
+updateChapterWithForm : Chapter -> ChapterForm -> Chapter
+updateChapterWithForm chapter chapterForm =
+    { chapter | title = chapterForm.title, text = chapterForm.text }
+
+
+initQuestionForm : Question -> Form () QuestionForm
+initQuestionForm =
+    questionFormInitials >> initForm questionFormValidation
+
+
 questionFormValidation : Validation () QuestionForm
 questionFormValidation =
-    Validate.map3 QuestionForm
-        (Validate.field "type_" Validate.string)
+    Validate.map2 QuestionForm
         (Validate.field "title" Validate.string)
         (Validate.field "text" Validate.string)
 
 
 questionFormInitials : Question -> List ( String, Field.Field )
 questionFormInitials question =
-    [ ( "type_", Field.string question.type_ )
-    , ( "title", Field.string question.title )
+    [ ( "title", Field.string question.title )
     , ( "text", Field.string question.text )
     ]
+
+
+updateQuestionWithForm : Question -> QuestionForm -> Question
+updateQuestionWithForm question questionForm =
+    { question | title = questionForm.title, text = questionForm.text }
 
 
 answerFormValidation : Validation () AnswerForm

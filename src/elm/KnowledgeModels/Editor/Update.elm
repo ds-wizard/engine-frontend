@@ -11,7 +11,7 @@ import KnowledgeModels.Editor.Models.Events exposing (..)
 import KnowledgeModels.Editor.Models.Forms exposing (..)
 import KnowledgeModels.Editor.Msgs exposing (..)
 import KnowledgeModels.Requests exposing (getKnowledgeModelData, postEventsBulk)
-import List.Extra exposing (getAt)
+import List.Extra as List
 import Msgs
 import Random.Pcg exposing (Seed)
 import Reorderable
@@ -63,7 +63,7 @@ updateEdit msg seed session model =
     case model.knowledgeModelEditor of
         Success knowledgeModelEditor ->
             let
-                ( newSeed, newKnolwedgeModelEditor, maybeEvent, submit ) =
+                ( newSeed, newKnowledgeModelEditor, maybeEvent, submit ) =
                     updateKnowledgeModel msg seed knowledgeModelEditor
 
                 newEvents =
@@ -80,7 +80,7 @@ updateEdit msg seed session model =
                     else
                         ( model, Cmd.none )
             in
-            ( newSeed, { newModel | knowledgeModelEditor = Success newKnolwedgeModelEditor, events = newEvents }, cmd )
+            ( newSeed, { newModel | knowledgeModelEditor = Success newKnowledgeModelEditor, events = newEvents }, cmd )
 
         _ ->
             ( seed, model, Cmd.none )
@@ -96,11 +96,10 @@ updateKnowledgeModel msg seed ((KnowledgeModelEditor editor) as originalEditor) 
                         newKnowledgeModel =
                             updateKnowledgeModelWithForm editor.knowledgeModel knowledgeModelForm
 
-                        chapterIds =
-                            List.map (\(ChapterEditor e) -> e.chapter.uuid) editor.chapters
-
                         ( event, newSeed ) =
-                            createEditKnowledgeModelEvent seed newKnowledgeModel chapterIds
+                            editor.chapters
+                                |> List.map getChapterUuid
+                                |> createEditKnowledgeModelEvent seed newKnowledgeModel
                     in
                     ( newSeed, originalEditor, Just event, True )
 
@@ -119,48 +118,32 @@ updateKnowledgeModel msg seed ((KnowledgeModelEditor editor) as originalEditor) 
                 ( newUuid, seed2 ) =
                     getUuid seed
 
-                chapter =
-                    { uuid = newUuid, title = "New chapter", text = "Chapter text", questions = [] }
-
-                chapterForm =
-                    chapterFormInitials chapter
-                        |> initForm chapterFormValidation
-
-                newChapterEditor =
-                    ChapterEditor { active = True, form = chapterForm, chapter = chapter, questions = [], order = List.length editor.chapters }
-
                 newChapters =
-                    editor.chapters ++ [ newChapterEditor ]
+                    createChapterEditor True (List.length editor.chapters) (newChapter newUuid)
+                        |> List.singleton
+                        |> List.append editor.chapters
 
                 ( event, newSeed ) =
-                    createAddChapterEvent editor.knowledgeModel seed2 chapter
+                    createAddChapterEvent editor.knowledgeModel seed2 (newChapter newUuid)
             in
             ( newSeed, KnowledgeModelEditor { editor | chapters = newChapters }, Just event, False )
 
         ViewChapter uuid ->
             let
-                activateChapter seed (ChapterEditor chapterEditor) =
-                    ( seed, ChapterEditor { chapterEditor | active = True }, Nothing )
-
-                ( newSeed, newChapters, event ) =
-                    updateInList editor.chapters seed (\(ChapterEditor e) -> e.chapter.uuid == uuid) activateChapter
+                newChapters =
+                    updateInList editor.chapters (matchChapter uuid) activateChapter
             in
-            ( seed, KnowledgeModelEditor { editor | chapters = newChapters }, event, False )
+            ( seed, KnowledgeModelEditor { editor | chapters = newChapters }, Nothing, False )
 
-        DeleteChapter index ->
-            case getAt index editor.chapters of
-                Just (ChapterEditor chapterEditor) ->
-                    let
-                        newChapters =
-                            List.take index editor.chapters ++ List.drop (index + 1) editor.chapters
+        DeleteChapter uuid ->
+            let
+                newChapters =
+                    List.removeWhen (matchChapter uuid) editor.chapters
 
-                        ( event, newSeed ) =
-                            createDeleteChapterEvent editor.knowledgeModel seed chapterEditor.chapter
-                    in
-                    ( newSeed, KnowledgeModelEditor { editor | chapters = newChapters }, Just event, False )
-
-                Nothing ->
-                    ( seed, originalEditor, Nothing, False )
+                ( event, newSeed ) =
+                    createDeleteChapterEvent editor.knowledgeModel seed uuid
+            in
+            ( newSeed, KnowledgeModelEditor { editor | chapters = newChapters }, Just event, False )
 
         ReorderChapterList newChapters ->
             ( seed, KnowledgeModelEditor { editor | chapters = newChapters, chaptersDirty = True }, Nothing, False )
@@ -168,7 +151,7 @@ updateKnowledgeModel msg seed ((KnowledgeModelEditor editor) as originalEditor) 
         ChapterMsg uuid chapterMsg ->
             let
                 ( newSeed, newChapters, event ) =
-                    updateInList editor.chapters seed (\(ChapterEditor e) -> e.chapter.uuid == uuid) (updateChapter editor.knowledgeModel chapterMsg)
+                    updateInListWithSeed editor.chapters seed (matchChapter uuid) (updateChapter editor.knowledgeModel chapterMsg)
             in
             ( newSeed, KnowledgeModelEditor { editor | chapters = newChapters }, event, False )
 
@@ -177,20 +160,32 @@ updateChapter : KnowledgeModel -> ChapterMsg -> Seed -> ChapterEditor -> ( Seed,
 updateChapter knowledgeModel msg seed ((ChapterEditor editor) as originalEditor) =
     case msg of
         ChapterFormMsg formMsg ->
-            case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
+            case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.questionsDirty ) of
                 ( Form.Submit, Just chapterForm, True ) ->
                     let
+                        -- Create new chapter based on the form fields
                         newChapter =
-                            updateChapterEditorWithForm editor.chapter chapterForm
+                            updateChapterWithForm editor.chapter chapterForm
 
+                        -- Initialize new form with new chapter values
                         newForm =
-                            chapterFormInitials newChapter |> initForm chapterFormValidation
+                            initChapterForm newChapter
 
+                        -- Get the question ids in correct order
+                        questionIds =
+                            List.map (\(QuestionEditor e) -> e.question.uuid) editor.questions
+
+                        -- Set the new order for the questions
+                        newQuestions =
+                            List.indexedMap (\i (QuestionEditor qe) -> QuestionEditor { qe | order = i }) editor.questions
+
+                        -- Create new editor structure
                         newEditor =
-                            { editor | active = False, form = newForm, chapter = newChapter }
+                            { editor | active = False, form = newForm, chapter = newChapter, questions = newQuestions, questionsDirty = False }
 
+                        -- Create the new event
                         ( event, newSeed ) =
-                            createEditChapterEvent knowledgeModel seed newChapter
+                            createEditChapterEvent knowledgeModel questionIds seed newChapter
                     in
                     ( newSeed, ChapterEditor newEditor, Just event )
 
@@ -204,19 +199,105 @@ updateChapter knowledgeModel msg seed ((ChapterEditor editor) as originalEditor)
                     in
                     ( seed, ChapterEditor { editor | form = newForm }, Nothing )
 
+        AddChapterQuestion ->
+            let
+                ( newUuid, seed2 ) =
+                    getUuid seed
+
+                newQuestions =
+                    createQuestionEditor True (List.length editor.questions) (newQuestion newUuid)
+                        |> List.singleton
+                        |> List.append editor.questions
+
+                ( event, newSeed ) =
+                    createAddQuestionEvent editor.chapter knowledgeModel seed2 (newQuestion newUuid)
+            in
+            ( newSeed, ChapterEditor { editor | questions = newQuestions }, Just event )
+
+        ViewQuestion uuid ->
+            let
+                newQuestions =
+                    updateInList editor.questions (matchQuestion uuid) activateQuestion
+            in
+            ( seed, ChapterEditor { editor | questions = newQuestions }, Nothing )
+
+        DeleteChapterQuestion uuid ->
+            let
+                newQuestions =
+                    List.removeWhen (matchQuestion uuid) editor.questions
+
+                ( event, newSeed ) =
+                    createDeleteQuestionEvent editor.chapter knowledgeModel seed uuid
+            in
+            ( newSeed, ChapterEditor { editor | questions = newQuestions }, Just event )
+
+        ReorderQuestionList newQuestions ->
+            ( seed, ChapterEditor { editor | questions = newQuestions, questionsDirty = True }, Nothing )
+
         ChapterCancel ->
             let
+                -- Reinitialize the form with the original chapter values
                 newForm =
-                    chapterFormInitials editor.chapter |> initForm chapterFormValidation
+                    initChapterForm editor.chapter
+
+                -- Reset the order of the questions to the original one
+                newQuestions =
+                    List.sortBy (\(QuestionEditor qe) -> qe.order) editor.questions
             in
-            ( seed, ChapterEditor { editor | active = False, form = newForm }, Nothing )
+            ( seed, ChapterEditor { editor | active = False, form = newForm, questions = newQuestions }, Nothing )
+
+        ChapterQuestionMsg uuid questionMsg ->
+            let
+                ( newSeed, newQuestions, event ) =
+                    updateInListWithSeed editor.questions seed (matchQuestion uuid) (updateQuestion editor.chapter knowledgeModel questionMsg)
+            in
+            ( newSeed, ChapterEditor { editor | questions = newQuestions }, event )
+
+
+updateQuestion : Chapter -> KnowledgeModel -> QuestionMsg -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as originalEditor) =
+    case msg of
+        QuestionFormMsg formMsg ->
+            case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
+                ( Form.Submit, Just questionForm, True ) ->
+                    let
+                        newQuestion =
+                            updateQuestionWithForm editor.question questionForm
+
+                        newForm =
+                            initQuestionForm newQuestion
+
+                        newEditor =
+                            { editor | active = False, form = newForm, question = newQuestion }
+
+                        ( event, newSeed ) =
+                            createEditQuestionEvent chapter knowledgeModel seed newQuestion
+                    in
+                    ( newSeed, QuestionEditor { editor | active = False }, Nothing )
+
+                ( Form.Submit, Just questionForm, False ) ->
+                    ( seed, QuestionEditor { editor | active = False }, Nothing )
+
+                _ ->
+                    let
+                        newForm =
+                            Form.update questionFormValidation formMsg editor.form |> Debug.log "Other"
+                    in
+                    ( seed, QuestionEditor { editor | form = newForm }, Nothing )
+
+        QuestionCancel ->
+            let
+                newForm =
+                    initQuestionForm editor.question
+            in
+            ( seed, QuestionEditor { editor | active = False, form = newForm }, Nothing )
 
         _ ->
             ( seed, originalEditor, Nothing )
 
 
-updateInList : List t -> Seed -> (t -> Bool) -> (Seed -> t -> ( Seed, t, Maybe Event )) -> ( Seed, List t, Maybe Event )
-updateInList list seed predicate updateFunction =
+updateInListWithSeed : List t -> Seed -> (t -> Bool) -> (Seed -> t -> ( Seed, t, Maybe Event )) -> ( Seed, List t, Maybe Event )
+updateInListWithSeed list seed predicate updateFunction =
     let
         fn =
             \item ( currentSeed, items, currentEvent ) ->
@@ -230,6 +311,19 @@ updateInList list seed predicate updateFunction =
                     ( currentSeed, items ++ [ item ], currentEvent )
     in
     List.foldl fn ( seed, [], Nothing ) list
+
+
+updateInList : List a -> (a -> Bool) -> (a -> a) -> List a
+updateInList list predicate updateFunction =
+    let
+        fn =
+            \item ->
+                if predicate item then
+                    updateFunction item
+                else
+                    item
+    in
+    List.map fn list
 
 
 formChanged : Form () a -> Bool

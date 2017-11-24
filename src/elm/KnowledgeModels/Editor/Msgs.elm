@@ -18,7 +18,7 @@ type KnowledgeModelMsg
     = KnowledgeModelFormMsg Form.Msg
     | ViewChapter String
     | AddChapter
-    | DeleteChapter Int
+    | DeleteChapter String
     | ReorderChapterList (List ChapterEditor)
     | ChapterMsg String ChapterMsg
 
@@ -26,11 +26,17 @@ type KnowledgeModelMsg
 type ChapterMsg
     = ChapterFormMsg Form.Msg
     | ChapterCancel
-    | ChapterQuestionMsg Int QuestionMsg
+    | ViewQuestion String
+    | AddChapterQuestion
+    | DeleteChapterQuestion String
+    | ReorderQuestionList (List QuestionEditor)
+    | ChapterQuestionMsg String QuestionMsg
 
 
 type QuestionMsg
     = QuestionFormMsg Form.Msg
+    | QuestionCancel
+    | QuestionDelete
     | AnswerMsg Int AnswerMsg
     | ReferenceMsg Int ReferenceMsg
     | ExpertMsg Int ExpertMsg

@@ -52,3 +52,12 @@ find predicate list =
                 Just first
             else
                 find predicate rest
+
+
+{-| Take a predicate and a list, and return a list that contains elements which fails to satisfy the predicate.
+This is equivalent to `List.filter (not << predicate) list`.
+removeWhen isEven [1,2,3,4] == [1,3]
+-}
+removeWhen : (a -> Bool) -> List a -> List a
+removeWhen pred list =
+    List.filter (not << pred) list

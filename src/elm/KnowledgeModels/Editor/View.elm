@@ -60,30 +60,29 @@ editorView model =
 
 
 viewKnowledgeModel : Model -> KnowledgeModelEditor -> (KnowledgeModelMsg -> Msgs.Msg) -> Html Msgs.Msg
-viewKnowledgeModel model (KnowledgeModelEditor knowledgeModelEditor) parentMsg =
+viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
     let
         chapterActive (ChapterEditor editor) =
             editor.active
 
-        chapterUuid (ChapterEditor editor) =
-            editor.chapter.uuid
-
         activeChapter =
-            find chapterActive knowledgeModelEditor.chapters
+            find chapterActive editor.chapters
 
         content =
             case activeChapter of
                 Just ((ChapterEditor editor) as chapterEditor) ->
                     [ viewChapter
+                        model
                         chapterEditor
                         (ChapterMsg editor.chapter.uuid >> parentMsg)
+                        (DeleteChapter editor.chapter.uuid |> parentMsg)
                     ]
 
                 Nothing ->
                     let
                         formContent =
                             div []
-                                [ inputGroup knowledgeModelEditor.form "name" "Name" ]
+                                [ inputGroup editor.form "name" "Name" ]
                                 |> Html.map (KnowledgeModelFormMsg >> parentMsg)
                     in
                     [ editorTitle "Knowledge Model"
@@ -91,12 +90,12 @@ viewKnowledgeModel model (KnowledgeModelEditor knowledgeModelEditor) parentMsg =
                     , inputChildren
                         "Chapter"
                         model.reorderableState
-                        knowledgeModelEditor.chapters
+                        editor.chapters
                         (ReorderChapterList >> parentMsg)
                         (AddChapter |> parentMsg)
-                        (\(ChapterEditor editor) -> editor.chapter.uuid)
-                        (\(ChapterEditor editor) -> (Form.getFieldAsString "title" editor.form).value |> Maybe.withDefault "")
-                        (\(ChapterEditor editor) -> ViewChapter editor.chapter.uuid |> parentMsg)
+                        (\(ChapterEditor chapterEditor) -> chapterEditor.chapter.uuid)
+                        (\(ChapterEditor chapterEditor) -> (Form.getFieldAsString "title" chapterEditor.form).value |> Maybe.withDefault "")
+                        (\(ChapterEditor chapterEditor) -> ViewChapter chapterEditor.chapter.uuid |> parentMsg)
                     , div [ class "form-actions" ]
                         [ linkTo KnowledgeModels
                             [ class "btn btn-default" ]
@@ -109,20 +108,66 @@ viewKnowledgeModel model (KnowledgeModelEditor knowledgeModelEditor) parentMsg =
         content
 
 
-viewChapter : ChapterEditor -> (ChapterMsg -> Msgs.Msg) -> Html Msgs.Msg
-viewChapter (ChapterEditor editor) parentMsg =
+viewChapter : Model -> ChapterEditor -> (ChapterMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
+    let
+        questionActive (QuestionEditor qe) =
+            qe.active
+
+        activeQuestion =
+            find questionActive editor.questions
+
+        content =
+            case activeQuestion of
+                Just ((QuestionEditor qe) as questionEditor) ->
+                    [ viewQuestion
+                        model
+                        questionEditor
+                        (ChapterQuestionMsg qe.question.uuid >> parentMsg)
+                        (DeleteChapterQuestion qe.question.uuid |> parentMsg)
+                    ]
+
+                Nothing ->
+                    let
+                        formContent =
+                            div []
+                                [ inputGroup editor.form "title" "Title"
+                                , textAreaGroup editor.form "text" "Text"
+                                ]
+                                |> Html.map (ChapterFormMsg >> parentMsg)
+                    in
+                    [ editorTitle "Chapter"
+                    , formContent
+                    , inputChildren
+                        "Question"
+                        model.reorderableState
+                        editor.questions
+                        (ReorderQuestionList >> parentMsg)
+                        (AddChapterQuestion |> parentMsg)
+                        (\(QuestionEditor questionEditor) -> questionEditor.question.uuid)
+                        (\(QuestionEditor questionEditor) -> (Form.getFieldAsString "title" questionEditor.form).value |> Maybe.withDefault "")
+                        (\(QuestionEditor questionEditor) -> ViewQuestion questionEditor.question.uuid |> parentMsg)
+                    , formActions (ChapterCancel |> parentMsg) deleteMsg (ChapterFormMsg Form.Submit |> parentMsg)
+                    ]
+    in
+    div [ class "chapter" ]
+        content
+
+
+viewQuestion : Model -> QuestionEditor -> (QuestionMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
     let
         formContent =
             div []
                 [ inputGroup editor.form "title" "Title"
                 , textAreaGroup editor.form "text" "Text"
                 ]
-                |> Html.map (ChapterFormMsg >> parentMsg)
+                |> Html.map (QuestionFormMsg >> parentMsg)
     in
-    div [ class "chapter" ]
-        [ editorTitle "Chapter"
+    div [ class "question" ]
+        [ editorTitle "Question"
         , formContent
-        , formActions (ChapterCancel |> parentMsg) (ChapterFormMsg Form.Submit |> parentMsg)
+        , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)
         ]
 
 
@@ -155,19 +200,15 @@ inputChildren childName reorderableState children reorderMsg addMsg toId getName
 inputChild : (a -> String) -> (a -> Msgs.Msg) -> Reorderable.HtmlWrapper Msgs.Msg -> a -> Html Msgs.Msg
 inputChild getName getMsg ignoreDrag item =
     div []
-        [ div []
-            [ ignoreDrag a
-                [ onClick <| getMsg item ]
-                [ text <| getName item ]
-            ]
+        [ ignoreDrag a
+            [ onClick <| getMsg item ]
+            [ text <| getName item ]
         ]
 
 
 placeholderView : a -> Html msg
 placeholderView _ =
-    div []
-        [ div [] [ text "-" ]
-        ]
+    div [] [ text "-" ]
 
 
 editorTitle : String -> Html Msgs.Msg
@@ -186,11 +227,17 @@ breadcrumbsElement_ name =
     li [] [ text name ]
 
 
-formActions : Msgs.Msg -> Msgs.Msg -> Html Msgs.Msg
-formActions cancelMsg submitMsg =
+formActions : Msgs.Msg -> Msgs.Msg -> Msgs.Msg -> Html Msgs.Msg
+formActions cancelMsg deleteMsg submitMsg =
     div [ class "form-actions" ]
-        [ button [ class "btn btn-default", onClick cancelMsg ]
-            [ text "Cancel" ]
+        [ div []
+            [ button [ class "btn btn-default", onClick cancelMsg ]
+                [ text "Cancel" ]
+            , button [ class "btn btn-link link-with-icon delete-entity", onClick deleteMsg ]
+                [ i [ class "fa fa-trash-o" ] []
+                , text "Delete"
+                ]
+            ]
         , button [ class "btn btn-primary", onClick submitMsg ]
             [ text "Save" ]
         ]

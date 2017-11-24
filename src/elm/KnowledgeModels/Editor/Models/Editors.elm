@@ -21,16 +21,25 @@ type ChapterEditor
         , form : Form () ChapterForm
         , chapter : Chapter
         , questions : List QuestionEditor
+        , questionsDirty : Bool
+        , order : Int
+        }
+
+
+type QuestionEditor
+    = QuestionEditor
+        { active : Bool
+        , form : Form () QuestionForm
+        , question : Question
+        , answers : List AnswerEditor
+        , references : List ReferenceEditor
+        , experts : List ExpertEditor
         , order : Int
         }
 
 
 
 -- TODO: Refactor follwoing editors
-
-
-type QuestionEditor
-    = QuestionEditor Bool (Form () QuestionForm) (List AnswerEditor) (List ReferenceEditor) (List ExpertEditor)
 
 
 type AnswerEditor
@@ -53,7 +62,7 @@ createKnowledgeModelEditor knowledgeModel =
                 |> initForm knowledgeModelFormValidation
 
         chapters =
-            List.indexedMap createChapterEditor knowledgeModel.chapters
+            List.indexedMap (createChapterEditor False) knowledgeModel.chapters
     in
     KnowledgeModelEditor
         { active = True
@@ -64,37 +73,42 @@ createKnowledgeModelEditor knowledgeModel =
         }
 
 
-updateKnowledgeModelWithForm : KnowledgeModel -> KnowledgeModelForm -> KnowledgeModel
-updateKnowledgeModelWithForm knowledgeModel knowledgeModelForm =
-    { knowledgeModel | name = knowledgeModelForm.name }
-
-
-createChapterEditor : Int -> Chapter -> ChapterEditor
-createChapterEditor order chapter =
+createChapterEditor : Bool -> Int -> Chapter -> ChapterEditor
+createChapterEditor active order chapter =
     let
         form =
-            chapterFormInitials chapter
-                |> initForm chapterFormValidation
+            initChapterForm chapter
 
         questions =
-            List.map createQuestionEditor chapter.questions
+            List.indexedMap (createQuestionEditor False) chapter.questions
     in
     ChapterEditor
-        { active = False
+        { active = active
         , form = form
         , chapter = chapter
         , questions = questions
+        , questionsDirty = False
         , order = order
         }
 
 
-updateChapterEditorWithForm : Chapter -> ChapterForm -> Chapter
-updateChapterEditorWithForm chapter chapterForm =
-    { chapter | title = chapterForm.title, text = chapterForm.text }
+getChapterUuid : ChapterEditor -> String
+getChapterUuid (ChapterEditor chapterEditor) =
+    chapterEditor.chapter.uuid
 
 
-createQuestionEditor : Question -> QuestionEditor
-createQuestionEditor question =
+activateChapter : ChapterEditor -> ChapterEditor
+activateChapter (ChapterEditor chapterEditor) =
+    ChapterEditor { chapterEditor | active = True }
+
+
+matchChapter : String -> ChapterEditor -> Bool
+matchChapter uuid (ChapterEditor chapterEditor) =
+    chapterEditor.chapter.uuid == uuid
+
+
+createQuestionEditor : Bool -> Int -> Question -> QuestionEditor
+createQuestionEditor active order question =
     let
         form =
             questionFormInitials question
@@ -109,7 +123,30 @@ createQuestionEditor question =
         experts =
             List.map createExpertEditor question.experts
     in
-    QuestionEditor False form answers references experts
+    QuestionEditor
+        { active = active
+        , form = form
+        , question = question
+        , answers = answers
+        , references = references
+        , experts = experts
+        , order = order
+        }
+
+
+getQuestionUuid : QuestionEditor -> String
+getQuestionUuid (QuestionEditor questionEditor) =
+    questionEditor.question.uuid
+
+
+activateQuestion : QuestionEditor -> QuestionEditor
+activateQuestion (QuestionEditor questionEditor) =
+    QuestionEditor { questionEditor | active = True }
+
+
+matchQuestion : String -> QuestionEditor -> Bool
+matchQuestion uuid (QuestionEditor questionEditor) =
+    questionEditor.question.uuid == uuid
 
 
 createAnswerEditor : Answer -> AnswerEditor
@@ -120,9 +157,7 @@ createAnswerEditor answer =
                 |> initForm answerFormValidation
 
         questions =
-            case answer.following of
-                Followings questions ->
-                    List.map createQuestionEditor questions
+            []
     in
     AnswerEditor False form questions
 

@@ -14,8 +14,11 @@ apiUrl url =
 
 apiRoot : String
 apiRoot =
-    -- "http://localhost:3000"
-    "https://api.dsp.fairdata.solutions/"
+    "http://localhost:3000"
+
+
+
+--    "https://api.dsp.fairdata.solutions/"
 
 
 toCmd : (Result Jwt.JwtError a -> a1) -> (a1 -> msg) -> Http.Request a -> Cmd msg

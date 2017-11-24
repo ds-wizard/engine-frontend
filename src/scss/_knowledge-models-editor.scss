@@ -52,4 +52,16 @@
         margin-top: 10px;
         display: inline-block;
     }
+
+    .form-actions {
+        button {
+            outline: none !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+        }
+
+        .delete-entity {
+            color: $gray;
+        }
+    }
 }
