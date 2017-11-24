@@ -157,17 +157,63 @@ viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
 viewQuestion : Model -> QuestionEditor -> (QuestionMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
 viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
     let
-        formContent =
-            div []
-                [ inputGroup editor.form "title" "Title"
-                , textAreaGroup editor.form "text" "Text"
-                ]
-                |> Html.map (QuestionFormMsg >> parentMsg)
+        answerActive (AnswerEditor ae) =
+            ae.active
+
+        activeAnswer =
+            find answerActive editor.answers
+
+        content =
+            case activeAnswer of
+                Just ((AnswerEditor ae) as answerEditor) ->
+                    [ viewAnswer
+                        model
+                        answerEditor
+                        (AnswerMsg ae.answer.uuid >> parentMsg)
+                        (DeleteAnswer ae.answer.uuid |> parentMsg)
+                    ]
+
+                Nothing ->
+                    let
+                        formContent =
+                            div []
+                                [ inputGroup editor.form "title" "Title"
+                                , textAreaGroup editor.form "text" "Text"
+                                ]
+                                |> Html.map (QuestionFormMsg >> parentMsg)
+                    in
+                    [ editorTitle "Question"
+                    , formContent
+                    , inputChildren
+                        "Answer"
+                        model.reorderableState
+                        editor.answers
+                        (ReorderAnswerList >> parentMsg)
+                        (AddAnswer |> parentMsg)
+                        (\(AnswerEditor answerEditor) -> answerEditor.answer.uuid)
+                        (\(AnswerEditor answerEditor) -> (Form.getFieldAsString "label" answerEditor.form).value |> Maybe.withDefault "")
+                        (\(AnswerEditor answerEditor) -> ViewAnswer answerEditor.answer.uuid |> parentMsg)
+                    , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)
+                    ]
     in
     div [ class "question" ]
-        [ editorTitle "Question"
+        content
+
+
+viewAnswer : Model -> AnswerEditor -> (AnswerMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewAnswer model (AnswerEditor editor) parentMsg deleteMsg =
+    let
+        formContent =
+            div []
+                [ inputGroup editor.form "label" "Label"
+                , textAreaGroup editor.form "advice" "Advice"
+                ]
+                |> Html.map (AnswerFormMsg >> parentMsg)
+    in
+    div [ class "answer" ]
+        [ editorTitle "Answer"
         , formContent
-        , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)
+        , formActions (AnswerCancel |> parentMsg) deleteMsg (AnswerFormMsg Form.Submit |> parentMsg)
         ]
 
 

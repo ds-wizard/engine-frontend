@@ -258,7 +258,7 @@ updateQuestion : Chapter -> KnowledgeModel -> QuestionMsg -> Seed -> QuestionEdi
 updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as originalEditor) =
     case msg of
         QuestionFormMsg formMsg ->
-            case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
+            case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.answersDirty ) of
                 ( Form.Submit, Just questionForm, True ) ->
                     let
                         newQuestion =
@@ -267,13 +267,19 @@ updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as origi
                         newForm =
                             initQuestionForm newQuestion
 
+                        answerIds =
+                            List.map (\(AnswerEditor ae) -> ae.answer.uuid) editor.answers
+
+                        newAnswers =
+                            List.indexedMap (\i (AnswerEditor ae) -> AnswerEditor { ae | order = i }) editor.answers
+
                         newEditor =
-                            { editor | active = False, form = newForm, question = newQuestion }
+                            { editor | active = False, form = newForm, question = newQuestion, answers = newAnswers, answersDirty = False }
 
                         ( event, newSeed ) =
-                            createEditQuestionEvent chapter knowledgeModel seed newQuestion
+                            createEditQuestionEvent chapter knowledgeModel answerIds seed newQuestion
                     in
-                    ( newSeed, QuestionEditor { editor | active = False }, Nothing )
+                    ( newSeed, QuestionEditor { editor | active = False }, Just event )
 
                 ( Form.Submit, Just questionForm, False ) ->
                     ( seed, QuestionEditor { editor | active = False }, Nothing )
@@ -281,16 +287,103 @@ updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as origi
                 _ ->
                     let
                         newForm =
-                            Form.update questionFormValidation formMsg editor.form |> Debug.log "Other"
+                            Form.update questionFormValidation formMsg editor.form
                     in
                     ( seed, QuestionEditor { editor | form = newForm }, Nothing )
+
+        AddAnswer ->
+            let
+                ( newUuid, seed2 ) =
+                    getUuid seed
+
+                newAnswers =
+                    createAnswerEditor True (List.length editor.answers) (newAnswer newUuid)
+                        |> List.singleton
+                        |> List.append editor.answers
+
+                ( event, newSeed ) =
+                    createAddAnswerEvent editor.question chapter knowledgeModel seed2 (newAnswer newUuid)
+            in
+            ( newSeed, QuestionEditor { editor | answers = newAnswers }, Just event )
+
+        ViewAnswer uuid ->
+            let
+                newAnswers =
+                    updateInList editor.answers (matchAnswer uuid) activateAnswer
+            in
+            ( seed, QuestionEditor { editor | answers = newAnswers }, Nothing )
+
+        DeleteAnswer uuid ->
+            let
+                newAnswers =
+                    List.removeWhen (matchAnswer uuid) editor.answers
+
+                ( event, newSeed ) =
+                    createDeleteAnswerEvent editor.question chapter knowledgeModel seed uuid
+            in
+            ( newSeed, QuestionEditor { editor | answers = newAnswers }, Just event )
+
+        ReorderAnswerList newAnswers ->
+            ( seed, QuestionEditor { editor | answers = newAnswers, answersDirty = True }, Nothing )
 
         QuestionCancel ->
             let
                 newForm =
                     initQuestionForm editor.question
+
+                newAnswers =
+                    List.sortBy (\(AnswerEditor ae) -> ae.order) editor.answers
             in
-            ( seed, QuestionEditor { editor | active = False, form = newForm }, Nothing )
+            ( seed, QuestionEditor { editor | active = False, form = newForm, answers = newAnswers }, Nothing )
+
+        AnswerMsg uuid answerMsg ->
+            let
+                ( newSeed, newAnswers, event ) =
+                    updateInListWithSeed editor.answers seed (matchAnswer uuid) (updateAnswer editor.question chapter knowledgeModel answerMsg)
+            in
+            ( newSeed, QuestionEditor { editor | answers = newAnswers }, event )
+
+        _ ->
+            ( seed, originalEditor, Nothing )
+
+
+updateAnswer : Question -> Chapter -> KnowledgeModel -> AnswerMsg -> Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
+updateAnswer question chapter knowledgeModel msg seed ((AnswerEditor editor) as originalEditor) =
+    case msg of
+        AnswerFormMsg formMsg ->
+            case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
+                ( Form.Submit, Just answerForm, True ) ->
+                    let
+                        newAnswer =
+                            updateAnswerWithForm editor.answer answerForm
+
+                        newForm =
+                            initAnswerForm newAnswer
+
+                        newEditor =
+                            { editor | active = False, form = newForm, answer = newAnswer }
+
+                        ( event, newSeed ) =
+                            createEditAnswerEvent question chapter knowledgeModel [] seed newAnswer
+                    in
+                    ( newSeed, AnswerEditor { editor | active = False }, Just event )
+
+                ( Form.Submit, Just answerForm, False ) ->
+                    ( seed, AnswerEditor { editor | active = False }, Nothing )
+
+                _ ->
+                    let
+                        newForm =
+                            Form.update answerFormValidation formMsg editor.form
+                    in
+                    ( seed, AnswerEditor { editor | form = newForm }, Nothing )
+
+        AnswerCancel ->
+            let
+                newForm =
+                    initAnswerForm editor.answer
+            in
+            ( seed, AnswerEditor { editor | active = False, form = newForm }, Nothing )
 
         _ ->
             ( seed, originalEditor, Nothing )

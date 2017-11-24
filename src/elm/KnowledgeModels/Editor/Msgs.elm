@@ -36,14 +36,18 @@ type ChapterMsg
 type QuestionMsg
     = QuestionFormMsg Form.Msg
     | QuestionCancel
-    | QuestionDelete
-    | AnswerMsg Int AnswerMsg
-    | ReferenceMsg Int ReferenceMsg
-    | ExpertMsg Int ExpertMsg
+    | ViewAnswer String
+    | AddAnswer
+    | DeleteAnswer String
+    | ReorderAnswerList (List AnswerEditor)
+    | AnswerMsg String AnswerMsg
+    | ReferenceMsg String ReferenceMsg
+    | ExpertMsg String ExpertMsg
 
 
 type AnswerMsg
     = AnswerFormMsg Form.Msg
+    | AnswerCancel
     | AnswerQuestionMsg Int QuestionMsg
 
 

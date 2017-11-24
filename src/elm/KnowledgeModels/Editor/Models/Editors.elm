@@ -32,18 +32,25 @@ type QuestionEditor
         , form : Form () QuestionForm
         , question : Question
         , answers : List AnswerEditor
+        , answersDirty : Bool
         , references : List ReferenceEditor
         , experts : List ExpertEditor
         , order : Int
         }
 
 
-
--- TODO: Refactor follwoing editors
-
-
 type AnswerEditor
-    = AnswerEditor Bool (Form () AnswerForm) (List QuestionEditor)
+    = AnswerEditor
+        { active : Bool
+        , form : Form () AnswerForm
+        , answer : Answer
+        , followups : List QuestionEditor
+        , order : Int
+        }
+
+
+
+-- TODO: Refactor following editors
 
 
 type ReferenceEditor
@@ -115,7 +122,7 @@ createQuestionEditor active order question =
                 |> initForm questionFormValidation
 
         answers =
-            List.map createAnswerEditor question.answers
+            List.indexedMap (createAnswerEditor False) question.answers
 
         references =
             List.map createReferenceEditor question.references
@@ -128,6 +135,7 @@ createQuestionEditor active order question =
         , form = form
         , question = question
         , answers = answers
+        , answersDirty = False
         , references = references
         , experts = experts
         , order = order
@@ -149,17 +157,38 @@ matchQuestion uuid (QuestionEditor questionEditor) =
     questionEditor.question.uuid == uuid
 
 
-createAnswerEditor : Answer -> AnswerEditor
-createAnswerEditor answer =
+createAnswerEditor : Bool -> Int -> Answer -> AnswerEditor
+createAnswerEditor active order answer =
     let
         form =
             answerFormInitials answer
                 |> initForm answerFormValidation
 
-        questions =
+        followups =
             []
     in
-    AnswerEditor False form questions
+    AnswerEditor
+        { active = active
+        , form = form
+        , answer = answer
+        , followups = followups
+        , order = order
+        }
+
+
+getAnswerUuid : AnswerEditor -> String
+getAnswerUuid (AnswerEditor answerEditor) =
+    answerEditor.answer.uuid
+
+
+activateAnswer : AnswerEditor -> AnswerEditor
+activateAnswer (AnswerEditor answerEditor) =
+    AnswerEditor { answerEditor | active = True }
+
+
+matchAnswer : String -> AnswerEditor -> Bool
+matchAnswer uuid (AnswerEditor answerEditor) =
+    answerEditor.answer.uuid == uuid
 
 
 createReferenceEditor : Reference -> ReferenceEditor

@@ -107,6 +107,11 @@ updateQuestionWithForm question questionForm =
     { question | title = questionForm.title, text = questionForm.text }
 
 
+initAnswerForm : Answer -> Form () AnswerForm
+initAnswerForm =
+    answerFormInitials >> initForm answerFormValidation
+
+
 answerFormValidation : Validation () AnswerForm
 answerFormValidation =
     Validate.map2 AnswerForm
@@ -128,6 +133,11 @@ answerFormInitials answer =
     [ ( "label", Field.string answer.label )
     , ( "advice", Field.string advice )
     ]
+
+
+updateAnswerWithForm : Answer -> AnswerForm -> Answer
+updateAnswerWithForm answer answerForm =
+    { answer | label = answerForm.label, advice = answerForm.advice }
 
 
 referenceFormValidation : Validation () ReferenceForm
