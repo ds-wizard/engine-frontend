@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Auth.Models exposing (Session, initialSession, parseJwt)
 import Json.Decode as Decode exposing (Value)
+import KnowledgeModels.Editor.Subscriptions
 import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
@@ -60,7 +61,12 @@ decodeFlagsFromJson =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    case model.route of
+        KnowledgeModelsEditor _ ->
+            KnowledgeModels.Editor.Subscriptions.subscriptions model.knowledgeModelsEditorModel
+
+        _ ->
+            Sub.none
 
 
 main : Program Value Model Msg

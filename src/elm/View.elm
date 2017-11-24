@@ -64,8 +64,10 @@ view model =
                 |> KnowledgeModels.Create.View.view
                 |> appView model
 
-        KnowledgeModelsEditor ->
-            appView model KnowledgeModels.Editor.View.view
+        KnowledgeModelsEditor uuid ->
+            model.knowledgeModelsEditorModel
+                |> KnowledgeModels.Editor.View.view
+                |> appView model
 
         KnowledgeModels ->
             model.knowledgeModelsIndexModel

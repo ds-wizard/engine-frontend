@@ -1,0 +1,55 @@
+@import "~bootswatch/united/variables";
+@import "mixins";
+
+.knowledge-model-editor {
+    h3 {
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 40px;
+    }
+
+    textarea {
+        min-height: 200px;
+    }
+
+    .input-children {
+        margin: 0;
+        padding: 0;
+    }
+
+    .panel-input-child {
+        padding: 8px 12px;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        background: $gray-lighter;
+        width: 100%;
+        cursor: move;
+        @include not-selectable();
+
+        a {
+            text-decoration: underline;
+        }
+
+        .panel-input-child-actions {
+            a {
+                margin-left: 10px;
+            }
+        }
+    }
+
+    .panel-placeholder {
+        border: 1px dashed $brand-primary;
+        background: #fff;
+        color: #fff;
+        @include not-selectable();
+    }
+
+    .link-add-child {
+        margin-top: 10px;
+        display: inline-block;
+    }
+}

@@ -96,7 +96,7 @@ kmTableRow km =
         , td [] [ text km.artifactId ]
         , td [] [ text parent ]
         , td [ class "table-actions" ]
-            [ kmTableRowAction "Edit"
+            [ kmTableRowActionEdit km
             , kmTableRowAction "Upgrade"
             , kmTableRowActionPublish km
             , kmTableRowActionDelete km
@@ -108,6 +108,11 @@ kmTableRowAction : String -> Html Msgs.Msg
 kmTableRowAction name =
     a [ href "#" ]
         [ text name ]
+
+
+kmTableRowActionEdit : KnowledgeModel -> Html Msgs.Msg
+kmTableRowActionEdit km =
+    linkTo (KnowledgeModelsEditor km.uuid) [] [ text "Edit" ]
 
 
 kmTableRowActionPublish : KnowledgeModel -> Html Msgs.Msg

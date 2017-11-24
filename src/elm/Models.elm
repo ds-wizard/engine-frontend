@@ -4,6 +4,7 @@ import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, se
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import KnowledgeModels.Create.Models
+import KnowledgeModels.Editor.Models
 import KnowledgeModels.Index.Models
 import KnowledgeModels.Publish.Models
 import Organization.Models
@@ -35,6 +36,7 @@ type alias Model =
     , knowledgeModelsIndexModel : KnowledgeModels.Index.Models.Model
     , knowledgeModelsCreateModel : KnowledgeModels.Create.Models.Model
     , knowledgeModelsPublishModel : KnowledgeModels.Publish.Models.Model
+    , knowledgeModelsEditorModel : KnowledgeModels.Editor.Models.Model
     }
 
 
@@ -56,6 +58,7 @@ initialModel route seed session jwt =
     , knowledgeModelsIndexModel = KnowledgeModels.Index.Models.initialModel
     , knowledgeModelsCreateModel = KnowledgeModels.Create.Models.initialModel
     , knowledgeModelsPublishModel = KnowledgeModels.Publish.Models.initialModel
+    , knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel ""
     }
 
 

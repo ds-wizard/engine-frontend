@@ -28,9 +28,11 @@ selectGroup : List ( String, String ) -> Form e o -> String -> String -> Html.Ht
 selectGroup options =
     formGroup (Input.selectInput options)
 
-textAreaGroup:Form e o -> String -> String -> Html.Html Form.Msg
+
+textAreaGroup : Form e o -> String -> String -> Html.Html Form.Msg
 textAreaGroup =
     formGroup Input.textArea
+
 
 formGroup : Input.Input e String -> Form e o -> String -> String -> Html.Html Form.Msg
 formGroup input form fieldName labelText =

@@ -38,10 +38,6 @@ getKnowledgeModelCompleted model result =
                     { model | knowledgeModel = Success knowledgeModel }
 
                 Err error ->
-                    let
-                        a =
-                            error |> Debug.log "error"
-                    in
                     { model | knowledgeModel = Error "Unable to get the knowledge model." }
     in
     ( newModel, Cmd.none )

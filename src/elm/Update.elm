@@ -3,6 +3,8 @@ module Update exposing (..)
 import Auth.Update
 import KnowledgeModels.Create.Models
 import KnowledgeModels.Create.Update
+import KnowledgeModels.Editor.Models
+import KnowledgeModels.Editor.Update
 import KnowledgeModels.Index.Models
 import KnowledgeModels.Index.Update
 import KnowledgeModels.Publish.Models
@@ -59,6 +61,9 @@ fetchData model =
         KnowledgeModelsPublish uuid ->
             KnowledgeModels.Publish.Update.getKnowledgeModelCmd uuid model.session
 
+        KnowledgeModelsEditor uuid ->
+            KnowledgeModels.Editor.Update.getKnowledgeModelCmd uuid model.session
+
         _ ->
             Cmd.none
 
@@ -98,6 +103,9 @@ initLocalModel model =
 
         KnowledgeModelsPublish uuid ->
             { model | knowledgeModelsPublishModel = KnowledgeModels.Publish.Models.initialModel }
+
+        KnowledgeModelsEditor uuid ->
+            { model | knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel uuid }
 
         _ ->
             model
@@ -195,3 +203,10 @@ update msg model =
                     KnowledgeModels.Publish.Update.update msg model.session model.knowledgeModelsPublishModel
             in
             ( { model | knowledgeModelsPublishModel = knowledgeModelsPublishModel }, cmd )
+
+        Msgs.KnowledgeModelsEditorMsg msg ->
+            let
+                ( seed, knowledgeModelsEditorModel, cmd ) =
+                    KnowledgeModels.Editor.Update.update msg model.seed model.session model.knowledgeModelsEditorModel
+            in
+            ( { model | seed = seed, knowledgeModelsEditorModel = knowledgeModelsEditorModel }, cmd )
