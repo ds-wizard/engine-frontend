@@ -34,7 +34,9 @@ type QuestionEditor
         , answers : List AnswerEditor
         , answersDirty : Bool
         , references : List ReferenceEditor
+        , referencesDirty : Bool
         , experts : List ExpertEditor
+        , expertsDirty : Bool
         , order : Int
         }
 
@@ -49,16 +51,22 @@ type AnswerEditor
         }
 
 
-
--- TODO: Refactor following editors
-
-
 type ReferenceEditor
-    = ReferenceEditor Bool (Form () ReferenceForm)
+    = ReferenceEditor
+        { active : Bool
+        , form : Form () ReferenceForm
+        , reference : Reference
+        , order : Int
+        }
 
 
 type ExpertEditor
-    = ExpertEditor Bool (Form () ExpertForm)
+    = ExpertEditor
+        { active : Bool
+        , form : Form () ExpertForm
+        , expert : Expert
+        , order : Int
+        }
 
 
 createKnowledgeModelEditor : KnowledgeModel -> KnowledgeModelEditor
@@ -125,10 +133,10 @@ createQuestionEditor active order question =
             List.indexedMap (createAnswerEditor False) question.answers
 
         references =
-            List.map createReferenceEditor question.references
+            List.indexedMap (createReferenceEditor False) question.references
 
         experts =
-            List.map createExpertEditor question.experts
+            List.indexedMap (createExpertEditor False) question.experts
     in
     QuestionEditor
         { active = active
@@ -137,7 +145,9 @@ createQuestionEditor active order question =
         , answers = answers
         , answersDirty = False
         , references = references
+        , referencesDirty = False
         , experts = experts
+        , expertsDirty = False
         , order = order
         }
 
@@ -191,21 +201,61 @@ matchAnswer uuid (AnswerEditor answerEditor) =
     answerEditor.answer.uuid == uuid
 
 
-createReferenceEditor : Reference -> ReferenceEditor
-createReferenceEditor reference =
+createReferenceEditor : Bool -> Int -> Reference -> ReferenceEditor
+createReferenceEditor active order reference =
     let
         form =
             referenceFormInitials reference
                 |> initForm referenceFormValidation
     in
-    ReferenceEditor False form
+    ReferenceEditor
+        { active = active
+        , form = form
+        , reference = reference
+        , order = order
+        }
 
 
-createExpertEditor : Expert -> ExpertEditor
-createExpertEditor expert =
+getReferenceUuid : ReferenceEditor -> String
+getReferenceUuid (ReferenceEditor referenceEditor) =
+    referenceEditor.reference.uuid
+
+
+activateReference : ReferenceEditor -> ReferenceEditor
+activateReference (ReferenceEditor referenceEditor) =
+    ReferenceEditor { referenceEditor | active = True }
+
+
+matchReference : String -> ReferenceEditor -> Bool
+matchReference uuid (ReferenceEditor referenceEditor) =
+    referenceEditor.reference.uuid == uuid
+
+
+createExpertEditor : Bool -> Int -> Expert -> ExpertEditor
+createExpertEditor active order expert =
     let
         form =
             expertFormInitials expert
                 |> initForm expertFormValidation
     in
-    ExpertEditor False form
+    ExpertEditor
+        { active = active
+        , form = form
+        , expert = expert
+        , order = order
+        }
+
+
+getExpertUuid : ExpertEditor -> String
+getExpertUuid (ExpertEditor expertEditor) =
+    expertEditor.expert.uuid
+
+
+activateExpert : ExpertEditor -> ExpertEditor
+activateExpert (ExpertEditor expertEditor) =
+    ExpertEditor { expertEditor | active = True }
+
+
+matchExpert : String -> ExpertEditor -> Bool
+matchExpert uuid (ExpertEditor expertEditor) =
+    expertEditor.expert.uuid == uuid

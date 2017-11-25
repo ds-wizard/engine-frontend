@@ -23,6 +23,7 @@ type alias Question =
     { uuid : String
     , type_ : String
     , title : String
+    , shortUuid : Maybe String
     , text : String
     , answers : List Answer
     , references : List Reference
@@ -78,6 +79,7 @@ questionDecoder =
         |> required "uuid" Decode.string
         |> required "type" Decode.string
         |> required "title" Decode.string
+        |> required "shortUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
         |> required "answers" (Decode.lazy (\_ -> Decode.list answerDecoder))
         |> required "references" (Decode.list referenceDecoder)
@@ -127,6 +129,7 @@ newQuestion uuid =
     { uuid = uuid
     , type_ = ""
     , title = "New question"
+    , shortUuid = Nothing
     , text = "Question text"
     , answers = []
     , references = []
@@ -140,4 +143,19 @@ newAnswer uuid =
     , label = "New answer"
     , advice = Nothing
     , followUps = FollowUps []
+    }
+
+
+newReference : String -> Reference
+newReference uuid =
+    { uuid = uuid
+    , chapter = "New reference"
+    }
+
+
+newExpert : String -> Expert
+newExpert uuid =
+    { uuid = uuid
+    , name = "New expert"
+    , email = "expert@example.com"
     }

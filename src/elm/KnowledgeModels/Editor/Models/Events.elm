@@ -17,6 +17,12 @@ type Event
     | AddAnswerEvent AddAnswerEventData
     | EditAnswerEvent EditAnswerEventData
     | DeleteAnswerEvent DeleteAnswerEventData
+    | AddReferenceEvent AddReferenceEventData
+    | EditReferenceEvent EditReferenceEventData
+    | DeleteReferenceEvent DeleteReferenceEventData
+    | AddExpertEvent AddExpertEventData
+    | EditExpertEvent EditExpertEventData
+    | DeleteExpertEvent DeleteExpertEventData
 
 
 type alias EditKnowledgeModelEventData =
@@ -60,6 +66,7 @@ type alias AddQuestionEventData =
     , questionUuid : String
     , type_ : String
     , title : String
+    , shortUuid : Maybe String
     , text : String
     }
 
@@ -71,6 +78,7 @@ type alias EditQuestionEventData =
     , questionUuid : String
     , type_ : String
     , title : String
+    , shortUuid : Maybe String
     , text : String
     , answerIds : List String
     , expertIds : List String
@@ -105,7 +113,7 @@ type alias EditAnswerEventData =
     , answerUuid : String
     , label : String
     , advice : Maybe String
-    , followupIds : List String
+    , followUpIds : List String
     }
 
 
@@ -115,6 +123,66 @@ type alias DeleteAnswerEventData =
     , chapterUuid : String
     , questionUuid : String
     , answerUuid : String
+    }
+
+
+type alias AddReferenceEventData =
+    { uuid : String
+    , kmUuid : String
+    , chapterUuid : String
+    , questionUuid : String
+    , referenceUuid : String
+    , chapter : String
+    }
+
+
+type alias EditReferenceEventData =
+    { uuid : String
+    , kmUuid : String
+    , chapterUuid : String
+    , questionUuid : String
+    , referenceUuid : String
+    , chapter : String
+    }
+
+
+type alias DeleteReferenceEventData =
+    { uuid : String
+    , kmUuid : String
+    , chapterUuid : String
+    , questionUuid : String
+    , referenceUuid : String
+    }
+
+
+type alias AddExpertEventData =
+    { uuid : String
+    , kmUuid : String
+    , chapterUuid : String
+    , questionUuid : String
+    , expertUuid : String
+    , name : String
+    , email : String
+    }
+
+
+type alias EditExpertEventData =
+    { uuid : String
+    , kmUuid : String
+    , chapterUuid : String
+    , questionUuid : String
+    , expertUuid : String
+    , name : String
+    , email : String
+    }
+
+
+type alias DeleteExpertEventData =
+    { uuid : String
+    , kmUuid : String
+    , chapterUuid : String
+    , questionUuid : String
+    , expertUuid : String
     }
 
 
@@ -202,14 +270,15 @@ createAddQuestionEvent chapter knowledgeModel seed question =
                 , questionUuid = question.uuid
                 , type_ = question.type_
                 , title = question.title
+                , shortUuid = question.shortUuid
                 , text = question.text
                 }
     in
     ( event, newSeed )
 
 
-createEditQuestionEvent : Chapter -> KnowledgeModel -> List String -> Seed -> Question -> ( Event, Seed )
-createEditQuestionEvent chapter knowledgeModel answerIds seed question =
+createEditQuestionEvent : Chapter -> KnowledgeModel -> List String -> List String -> List String -> Seed -> Question -> ( Event, Seed )
+createEditQuestionEvent chapter knowledgeModel answerIds referenceIds expertIds seed question =
     let
         ( uuid, newSeed ) =
             getUuid seed
@@ -222,10 +291,11 @@ createEditQuestionEvent chapter knowledgeModel answerIds seed question =
                 , questionUuid = question.uuid
                 , type_ = question.type_
                 , title = question.title
+                , shortUuid = question.shortUuid
                 , text = question.text
                 , answerIds = answerIds
-                , expertIds = []
-                , referenceIds = []
+                , referenceIds = referenceIds
+                , expertIds = expertIds
                 }
     in
     ( event, newSeed )
@@ -269,7 +339,7 @@ createAddAnswerEvent question chapter knowledgeModel seed answer =
 
 
 createEditAnswerEvent : Question -> Chapter -> KnowledgeModel -> List String -> Seed -> Answer -> ( Event, Seed )
-createEditAnswerEvent question chapter knowledgeModel followupIds seed answer =
+createEditAnswerEvent question chapter knowledgeModel followUpIds seed answer =
     let
         ( uuid, newSeed ) =
             getUuid seed
@@ -283,7 +353,7 @@ createEditAnswerEvent question chapter knowledgeModel followupIds seed answer =
                 , answerUuid = answer.uuid
                 , label = answer.label
                 , advice = answer.advice
-                , followupIds = followupIds
+                , followUpIds = followUpIds
                 }
     in
     ( event, newSeed )
@@ -302,6 +372,120 @@ createDeleteAnswerEvent question chapter knowledgeModel seed answerUuid =
                 , chapterUuid = chapter.uuid
                 , questionUuid = question.uuid
                 , answerUuid = answerUuid
+                }
+    in
+    ( event, newSeed )
+
+
+createAddReferenceEvent : Question -> Chapter -> KnowledgeModel -> Seed -> Reference -> ( Event, Seed )
+createAddReferenceEvent question chapter knowledgeModel seed reference =
+    let
+        ( uuid, newSeed ) =
+            getUuid seed
+
+        event =
+            AddReferenceEvent
+                { uuid = uuid
+                , kmUuid = knowledgeModel.uuid
+                , chapterUuid = chapter.uuid
+                , questionUuid = question.uuid
+                , referenceUuid = reference.uuid
+                , chapter = reference.chapter
+                }
+    in
+    ( event, newSeed )
+
+
+createEditReferenceEvent : Question -> Chapter -> KnowledgeModel -> List String -> Seed -> Reference -> ( Event, Seed )
+createEditReferenceEvent question chapter knowledgeModel followupIds seed reference =
+    let
+        ( uuid, newSeed ) =
+            getUuid seed
+
+        event =
+            EditReferenceEvent
+                { uuid = uuid
+                , kmUuid = knowledgeModel.uuid
+                , chapterUuid = chapter.uuid
+                , questionUuid = question.uuid
+                , referenceUuid = reference.uuid
+                , chapter = reference.chapter
+                }
+    in
+    ( event, newSeed )
+
+
+createDeleteReferenceEvent : Question -> Chapter -> KnowledgeModel -> Seed -> String -> ( Event, Seed )
+createDeleteReferenceEvent question chapter knowledgeModel seed referenceUuid =
+    let
+        ( uuid, newSeed ) =
+            getUuid seed
+
+        event =
+            DeleteReferenceEvent
+                { uuid = uuid
+                , kmUuid = knowledgeModel.uuid
+                , chapterUuid = chapter.uuid
+                , questionUuid = question.uuid
+                , referenceUuid = referenceUuid
+                }
+    in
+    ( event, newSeed )
+
+
+createAddExpertEvent : Question -> Chapter -> KnowledgeModel -> Seed -> Expert -> ( Event, Seed )
+createAddExpertEvent question chapter knowledgeModel seed expert =
+    let
+        ( uuid, newSeed ) =
+            getUuid seed
+
+        event =
+            AddExpertEvent
+                { uuid = uuid
+                , kmUuid = knowledgeModel.uuid
+                , chapterUuid = chapter.uuid
+                , questionUuid = question.uuid
+                , expertUuid = expert.uuid
+                , name = expert.name
+                , email = expert.email
+                }
+    in
+    ( event, newSeed )
+
+
+createEditExpertEvent : Question -> Chapter -> KnowledgeModel -> List String -> Seed -> Expert -> ( Event, Seed )
+createEditExpertEvent question chapter knowledgeModel followupIds seed expert =
+    let
+        ( uuid, newSeed ) =
+            getUuid seed
+
+        event =
+            EditExpertEvent
+                { uuid = uuid
+                , kmUuid = knowledgeModel.uuid
+                , chapterUuid = chapter.uuid
+                , questionUuid = question.uuid
+                , expertUuid = expert.uuid
+                , name = expert.name
+                , email = expert.email
+                }
+    in
+    ( event, newSeed )
+
+
+createDeleteExpertEvent : Question -> Chapter -> KnowledgeModel -> Seed -> String -> ( Event, Seed )
+createDeleteExpertEvent question chapter knowledgeModel seed expertUuid =
+    let
+        ( uuid, newSeed ) =
+            getUuid seed
+
+        event =
+            DeleteExpertEvent
+                { uuid = uuid
+                , kmUuid = knowledgeModel.uuid
+                , chapterUuid = chapter.uuid
+                , questionUuid = question.uuid
+                , expertUuid = expertUuid
                 }
     in
     ( event, newSeed )
@@ -344,6 +528,24 @@ encodeEvent event =
 
         DeleteAnswerEvent data ->
             encodeDeleteAnswerEvent data
+
+        AddReferenceEvent data ->
+            encodeAddReferenceEvent data
+
+        EditReferenceEvent data ->
+            encodeEditReferenceEvent data
+
+        DeleteReferenceEvent data ->
+            encodeDeleteReferenceEvent data
+
+        AddExpertEvent data ->
+            encodeAddExpertEvent data
+
+        EditExpertEvent data ->
+            encodeEditExpertEvent data
+
+        DeleteExpertEvent data ->
+            encodeDeleteExpertEvent data
 
 
 encodeEditKnowledgeModelEvent : EditKnowledgeModelEventData -> Encode.Value
@@ -394,6 +596,12 @@ encodeDeleteChapterEvent data =
 
 encodeAddQuestionEvent : AddQuestionEventData -> Encode.Value
 encodeAddQuestionEvent data =
+    let
+        shortUuid =
+            data.shortUuid
+                |> Maybe.map Encode.string
+                |> Maybe.withDefault Encode.null
+    in
     Encode.object
         [ ( "eventType", Encode.string "AddQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -403,12 +611,19 @@ encodeAddQuestionEvent data =
         , ( "shortuid", Encode.null )
         , ( "type", Encode.string data.type_ )
         , ( "title", Encode.string data.title )
+        , ( "shortUuid", shortUuid )
         , ( "text", Encode.string data.text )
         ]
 
 
 encodeEditQuestionEvent : EditQuestionEventData -> Encode.Value
 encodeEditQuestionEvent data =
+    let
+        shortUuid =
+            data.shortUuid
+                |> Maybe.map Encode.string
+                |> Maybe.withDefault Encode.null
+    in
     Encode.object
         [ ( "eventType", Encode.string "EditQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -418,10 +633,11 @@ encodeEditQuestionEvent data =
         , ( "shortuid", Encode.null )
         , ( "type", Encode.string data.type_ )
         , ( "title", Encode.string data.title )
+        , ( "shortUuid", shortUuid )
         , ( "text", Encode.string data.text )
         , ( "answerIds", Encode.list <| List.map Encode.string data.answerIds )
-        , ( "expertIds", Encode.null )
-        , ( "referenceIds", Encode.null )
+        , ( "expertIds", Encode.list <| List.map Encode.string data.expertIds )
+        , ( "referenceIds", Encode.list <| List.map Encode.string data.referenceIds )
         ]
 
 
@@ -473,7 +689,7 @@ encodeEditAnswerEvent data =
         , ( "answerUuid", Encode.string data.answerUuid )
         , ( "label", Encode.string data.label )
         , ( "advice", advice )
-        , ( "followuIds", Encode.null )
+        , ( "followUpIds", Encode.null )
         ]
 
 
@@ -486,4 +702,82 @@ encodeDeleteAnswerEvent data =
         , ( "chapterUuid", Encode.string data.chapterUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "answerUuid", Encode.string data.answerUuid )
+        ]
+
+
+encodeAddReferenceEvent : AddReferenceEventData -> Encode.Value
+encodeAddReferenceEvent data =
+    Encode.object
+        [ ( "eventType", Encode.string "AddReferenceEvent" )
+        , ( "uuid", Encode.string data.uuid )
+        , ( "kmUuid", Encode.string data.kmUuid )
+        , ( "chapterUuid", Encode.string data.chapterUuid )
+        , ( "questionUuid", Encode.string data.questionUuid )
+        , ( "referenceUuid", Encode.string data.referenceUuid )
+        , ( "chapter", Encode.string data.chapter )
+        ]
+
+
+encodeEditReferenceEvent : EditReferenceEventData -> Encode.Value
+encodeEditReferenceEvent data =
+    Encode.object
+        [ ( "eventType", Encode.string "EditReferenceEvent" )
+        , ( "uuid", Encode.string data.uuid )
+        , ( "kmUuid", Encode.string data.kmUuid )
+        , ( "chapterUuid", Encode.string data.chapterUuid )
+        , ( "questionUuid", Encode.string data.questionUuid )
+        , ( "referenceUuid", Encode.string data.referenceUuid )
+        , ( "chapter", Encode.string data.chapter )
+        ]
+
+
+encodeDeleteReferenceEvent : DeleteReferenceEventData -> Encode.Value
+encodeDeleteReferenceEvent data =
+    Encode.object
+        [ ( "eventType", Encode.string "DeleteReferenceEvent" )
+        , ( "uuid", Encode.string data.uuid )
+        , ( "kmUuid", Encode.string data.kmUuid )
+        , ( "chapterUuid", Encode.string data.chapterUuid )
+        , ( "questionUuid", Encode.string data.questionUuid )
+        , ( "referenceUuid", Encode.string data.referenceUuid )
+        ]
+
+
+encodeAddExpertEvent : AddExpertEventData -> Encode.Value
+encodeAddExpertEvent data =
+    Encode.object
+        [ ( "eventType", Encode.string "AddExpertEvent" )
+        , ( "uuid", Encode.string data.uuid )
+        , ( "kmUuid", Encode.string data.kmUuid )
+        , ( "chapterUuid", Encode.string data.chapterUuid )
+        , ( "questionUuid", Encode.string data.questionUuid )
+        , ( "expertUuid", Encode.string data.expertUuid )
+        , ( "name", Encode.string data.name )
+        , ( "email", Encode.string data.email )
+        ]
+
+
+encodeEditExpertEvent : EditExpertEventData -> Encode.Value
+encodeEditExpertEvent data =
+    Encode.object
+        [ ( "eventType", Encode.string "EditExpertEvent" )
+        , ( "uuid", Encode.string data.uuid )
+        , ( "kmUuid", Encode.string data.kmUuid )
+        , ( "chapterUuid", Encode.string data.chapterUuid )
+        , ( "questionUuid", Encode.string data.questionUuid )
+        , ( "expertUuid", Encode.string data.expertUuid )
+        , ( "name", Encode.string data.name )
+        , ( "email", Encode.string data.email )
+        ]
+
+
+encodeDeleteExpertEvent : DeleteExpertEventData -> Encode.Value
+encodeDeleteExpertEvent data =
+    Encode.object
+        [ ( "eventType", Encode.string "DeleteExpertEvent" )
+        , ( "uuid", Encode.string data.uuid )
+        , ( "kmUuid", Encode.string data.kmUuid )
+        , ( "chapterUuid", Encode.string data.chapterUuid )
+        , ( "questionUuid", Encode.string data.questionUuid )
+        , ( "expertUuid", Encode.string data.expertUuid )
         ]

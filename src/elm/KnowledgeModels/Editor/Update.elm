@@ -268,7 +268,7 @@ updateQuestion : Chapter -> KnowledgeModel -> QuestionMsg -> Seed -> QuestionEdi
 updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as originalEditor) =
     case msg of
         QuestionFormMsg formMsg ->
-            case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.answersDirty ) of
+            case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.answersDirty || editor.referencesDirty || editor.expertsDirty ) of
                 ( Form.Submit, Just questionForm, True ) ->
                     let
                         newQuestion =
@@ -283,11 +283,33 @@ updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as origi
                         newAnswers =
                             List.indexedMap (\i (AnswerEditor ae) -> AnswerEditor { ae | order = i }) editor.answers
 
+                        referenceIds =
+                            List.map (\(ReferenceEditor re) -> re.reference.uuid) editor.references
+
+                        newReferences =
+                            List.indexedMap (\i (ReferenceEditor re) -> ReferenceEditor { re | order = i }) editor.references
+
+                        expertIds =
+                            List.map (\(ExpertEditor ee) -> ee.expert.uuid) editor.experts
+
+                        newExperts =
+                            List.indexedMap (\i (ExpertEditor ee) -> ExpertEditor { ee | order = i }) editor.experts
+
                         newEditor =
-                            { editor | active = False, form = newForm, question = newQuestion, answers = newAnswers, answersDirty = False }
+                            { editor
+                                | active = False
+                                , form = newForm
+                                , question = newQuestion
+                                , answers = newAnswers
+                                , answersDirty = False
+                                , references = newReferences
+                                , referencesDirty = False
+                                , experts = newExperts
+                                , expertsDirty = False
+                            }
 
                         ( event, newSeed ) =
-                            createEditQuestionEvent chapter knowledgeModel answerIds seed newQuestion
+                            createEditQuestionEvent chapter knowledgeModel answerIds referenceIds expertIds seed newQuestion
                     in
                     ( newSeed, QuestionEditor { editor | active = False }, Just event )
 
@@ -300,6 +322,16 @@ updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as origi
                             Form.update questionFormValidation formMsg editor.form
                     in
                     ( seed, QuestionEditor { editor | form = newForm }, Nothing )
+
+        QuestionCancel ->
+            let
+                newForm =
+                    initQuestionForm editor.question
+
+                newExperts =
+                    List.sortBy (\(ExpertEditor ae) -> ae.order) editor.experts
+            in
+            ( seed, QuestionEditor { editor | active = False, form = newForm, experts = newExperts }, Nothing )
 
         AddAnswer ->
             let
@@ -336,16 +368,6 @@ updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as origi
         ReorderAnswerList newAnswers ->
             ( seed, QuestionEditor { editor | answers = newAnswers, answersDirty = True }, Nothing )
 
-        QuestionCancel ->
-            let
-                newForm =
-                    initQuestionForm editor.question
-
-                newAnswers =
-                    List.sortBy (\(AnswerEditor ae) -> ae.order) editor.answers
-            in
-            ( seed, QuestionEditor { editor | active = False, form = newForm, answers = newAnswers }, Nothing )
-
         AnswerMsg uuid answerMsg ->
             let
                 ( newSeed, newAnswers, event ) =
@@ -353,8 +375,89 @@ updateQuestion chapter knowledgeModel msg seed ((QuestionEditor editor) as origi
             in
             ( newSeed, QuestionEditor { editor | answers = newAnswers }, event )
 
-        _ ->
-            ( seed, originalEditor, Nothing )
+        AddReference ->
+            let
+                ( newUuid, seed2 ) =
+                    getUuid seed
+
+                newReferences =
+                    createReferenceEditor True (List.length editor.references) (newReference newUuid)
+                        |> List.singleton
+                        |> List.append editor.references
+
+                ( event, newSeed ) =
+                    createAddReferenceEvent editor.question chapter knowledgeModel seed2 (newReference newUuid)
+            in
+            ( newSeed, QuestionEditor { editor | references = newReferences }, Just event )
+
+        ViewReference uuid ->
+            let
+                newReferences =
+                    updateInList editor.references (matchReference uuid) activateReference
+            in
+            ( seed, QuestionEditor { editor | references = newReferences }, Nothing )
+
+        DeleteReference uuid ->
+            let
+                newReferences =
+                    List.removeWhen (matchReference uuid) editor.references
+
+                ( event, newSeed ) =
+                    createDeleteReferenceEvent editor.question chapter knowledgeModel seed uuid
+            in
+            ( newSeed, QuestionEditor { editor | references = newReferences }, Just event )
+
+        ReorderReferenceList newReferences ->
+            ( seed, QuestionEditor { editor | references = newReferences, referencesDirty = True }, Nothing )
+
+        ReferenceMsg uuid referenceMsg ->
+            let
+                ( newSeed, newReferences, event ) =
+                    updateInListWithSeed editor.references seed (matchReference uuid) (updateReference editor.question chapter knowledgeModel referenceMsg)
+            in
+            ( newSeed, QuestionEditor { editor | references = newReferences }, event )
+
+        AddExpert ->
+            let
+                ( newUuid, seed2 ) =
+                    getUuid seed
+
+                newExperts =
+                    createExpertEditor True (List.length editor.experts) (newExpert newUuid)
+                        |> List.singleton
+                        |> List.append editor.experts
+
+                ( event, newSeed ) =
+                    createAddExpertEvent editor.question chapter knowledgeModel seed2 (newExpert newUuid)
+            in
+            ( newSeed, QuestionEditor { editor | experts = newExperts }, Just event )
+
+        ViewExpert uuid ->
+            let
+                newExperts =
+                    updateInList editor.experts (matchExpert uuid) activateExpert
+            in
+            ( seed, QuestionEditor { editor | experts = newExperts }, Nothing )
+
+        DeleteExpert uuid ->
+            let
+                newExperts =
+                    List.removeWhen (matchExpert uuid) editor.experts
+
+                ( event, newSeed ) =
+                    createDeleteExpertEvent editor.question chapter knowledgeModel seed uuid
+            in
+            ( newSeed, QuestionEditor { editor | experts = newExperts }, Just event )
+
+        ReorderExpertList newExperts ->
+            ( seed, QuestionEditor { editor | experts = newExperts, expertsDirty = True }, Nothing )
+
+        ExpertMsg uuid expertMsg ->
+            let
+                ( newSeed, newExperts, event ) =
+                    updateInListWithSeed editor.experts seed (matchExpert uuid) (updateExpert editor.question chapter knowledgeModel expertMsg)
+            in
+            ( newSeed, QuestionEditor { editor | experts = newExperts }, event )
 
 
 updateAnswer : Question -> Chapter -> KnowledgeModel -> AnswerMsg -> Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
@@ -397,6 +500,84 @@ updateAnswer question chapter knowledgeModel msg seed ((AnswerEditor editor) as 
 
         _ ->
             ( seed, originalEditor, Nothing )
+
+
+updateReference : Question -> Chapter -> KnowledgeModel -> ReferenceMsg -> Seed -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )
+updateReference question chapter knowledgeModel msg seed ((ReferenceEditor editor) as originalEditor) =
+    case msg of
+        ReferenceFormMsg formMsg ->
+            case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
+                ( Form.Submit, Just referenceForm, True ) ->
+                    let
+                        newReference =
+                            updateReferenceWithForm editor.reference referenceForm
+
+                        newForm =
+                            initReferenceForm newReference
+
+                        newEditor =
+                            { editor | active = False, form = newForm, reference = newReference }
+
+                        ( event, newSeed ) =
+                            createEditReferenceEvent question chapter knowledgeModel [] seed newReference
+                    in
+                    ( newSeed, ReferenceEditor { editor | active = False }, Just event )
+
+                ( Form.Submit, Just referenceForm, False ) ->
+                    ( seed, ReferenceEditor { editor | active = False }, Nothing )
+
+                _ ->
+                    let
+                        newForm =
+                            Form.update referenceFormValidation formMsg editor.form
+                    in
+                    ( seed, ReferenceEditor { editor | form = newForm }, Nothing )
+
+        ReferenceCancel ->
+            let
+                newForm =
+                    initReferenceForm editor.reference
+            in
+            ( seed, ReferenceEditor { editor | active = False, form = newForm }, Nothing )
+
+
+updateExpert : Question -> Chapter -> KnowledgeModel -> ExpertMsg -> Seed -> ExpertEditor -> ( Seed, ExpertEditor, Maybe Event )
+updateExpert question chapter knowledgeModel msg seed ((ExpertEditor editor) as originalEditor) =
+    case msg of
+        ExpertFormMsg formMsg ->
+            case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
+                ( Form.Submit, Just expertForm, True ) ->
+                    let
+                        newExpert =
+                            updateExpertWithForm editor.expert expertForm
+
+                        newForm =
+                            initExpertForm newExpert
+
+                        newEditor =
+                            { editor | active = False, form = newForm, expert = newExpert }
+
+                        ( event, newSeed ) =
+                            createEditExpertEvent question chapter knowledgeModel [] seed newExpert
+                    in
+                    ( newSeed, ExpertEditor { editor | active = False }, Just event )
+
+                ( Form.Submit, Just expertForm, False ) ->
+                    ( seed, ExpertEditor { editor | active = False }, Nothing )
+
+                _ ->
+                    let
+                        newForm =
+                            Form.update expertFormValidation formMsg editor.form
+                    in
+                    ( seed, ExpertEditor { editor | form = newForm }, Nothing )
+
+        ExpertCancel ->
+            let
+                newForm =
+                    initExpertForm editor.expert
+            in
+            ( seed, ExpertEditor { editor | active = False, form = newForm }, Nothing )
 
 
 updateInListWithSeed : List t -> Seed -> (t -> Bool) -> (Seed -> t -> ( Seed, t, Maybe Event )) -> ( Seed, List t, Maybe Event )

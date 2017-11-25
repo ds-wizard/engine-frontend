@@ -41,7 +41,15 @@ type QuestionMsg
     | DeleteAnswer String
     | ReorderAnswerList (List AnswerEditor)
     | AnswerMsg String AnswerMsg
+    | ViewReference String
+    | AddReference
+    | DeleteReference String
+    | ReorderReferenceList (List ReferenceEditor)
     | ReferenceMsg String ReferenceMsg
+    | ViewExpert String
+    | AddExpert
+    | DeleteExpert String
+    | ReorderExpertList (List ExpertEditor)
     | ExpertMsg String ExpertMsg
 
 
@@ -53,7 +61,9 @@ type AnswerMsg
 
 type ReferenceMsg
     = ReferenceFormMsg Form.Msg
+    | ReferenceCancel
 
 
 type ExpertMsg
     = ExpertFormMsg Form.Msg
+    | ExpertCancel

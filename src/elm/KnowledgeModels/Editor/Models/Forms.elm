@@ -140,6 +140,11 @@ updateAnswerWithForm answer answerForm =
     { answer | label = answerForm.label, advice = answerForm.advice }
 
 
+initReferenceForm : Reference -> Form () ReferenceForm
+initReferenceForm =
+    referenceFormInitials >> initForm referenceFormValidation
+
+
 referenceFormValidation : Validation () ReferenceForm
 referenceFormValidation =
     Validate.map ReferenceForm
@@ -149,6 +154,16 @@ referenceFormValidation =
 referenceFormInitials : Reference -> List ( String, Field.Field )
 referenceFormInitials reference =
     [ ( "chapter", Field.string reference.chapter ) ]
+
+
+updateReferenceWithForm : Reference -> ReferenceForm -> Reference
+updateReferenceWithForm reference referenceForm =
+    { reference | chapter = referenceForm.chapter }
+
+
+initExpertForm : Expert -> Form () ExpertForm
+initExpertForm =
+    expertFormInitials >> initForm expertFormValidation
 
 
 expertFormValidation : Validation () ExpertForm
@@ -163,3 +178,8 @@ expertFormInitials expert =
     [ ( "name", Field.string expert.name )
     , ( "email", Field.string expert.email )
     ]
+
+
+updateExpertWithForm : Expert -> ExpertForm -> Expert
+updateExpertWithForm expert expertForm =
+    { expert | name = expertForm.name, email = expertForm.email }

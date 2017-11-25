@@ -157,15 +157,18 @@ viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
 viewQuestion : Model -> QuestionEditor -> (QuestionMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
 viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
     let
-        answerActive (AnswerEditor ae) =
-            ae.active
-
         activeAnswer =
-            find answerActive editor.answers
+            find (\(AnswerEditor ae) -> ae.active) editor.answers
+
+        activeReference =
+            find (\(ReferenceEditor re) -> re.active) editor.references
+
+        activeExpert =
+            find (\(ExpertEditor ee) -> ee.active) editor.experts
 
         content =
-            case activeAnswer of
-                Just ((AnswerEditor ae) as answerEditor) ->
+            case ( activeAnswer, activeReference, activeExpert ) of
+                ( Just ((AnswerEditor ae) as answerEditor), _, _ ) ->
                     [ viewAnswer
                         model
                         answerEditor
@@ -173,11 +176,28 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                         (DeleteAnswer ae.answer.uuid |> parentMsg)
                     ]
 
-                Nothing ->
+                ( _, Just ((ReferenceEditor re) as referenceEditor), _ ) ->
+                    [ viewReference
+                        model
+                        referenceEditor
+                        (ReferenceMsg re.reference.uuid >> parentMsg)
+                        (DeleteReference re.reference.uuid |> parentMsg)
+                    ]
+
+                ( _, _, Just ((ExpertEditor ee) as expertEditor) ) ->
+                    [ viewExpert
+                        model
+                        expertEditor
+                        (ExpertMsg ee.expert.uuid >> parentMsg)
+                        (DeleteExpert ee.expert.uuid |> parentMsg)
+                    ]
+
+                _ ->
                     let
                         formContent =
                             div []
                                 [ inputGroup editor.form "title" "Title"
+                                , inputGroup editor.form "shortUuid" "Short UUID"
                                 , textAreaGroup editor.form "text" "Text"
                                 ]
                                 |> Html.map (QuestionFormMsg >> parentMsg)
@@ -190,9 +210,27 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                         editor.answers
                         (ReorderAnswerList >> parentMsg)
                         (AddAnswer |> parentMsg)
-                        (\(AnswerEditor answerEditor) -> answerEditor.answer.uuid)
-                        (\(AnswerEditor answerEditor) -> (Form.getFieldAsString "label" answerEditor.form).value |> Maybe.withDefault "")
-                        (\(AnswerEditor answerEditor) -> ViewAnswer answerEditor.answer.uuid |> parentMsg)
+                        (\(AnswerEditor ae) -> ae.answer.uuid)
+                        (\(AnswerEditor ae) -> (Form.getFieldAsString "label" ae.form).value |> Maybe.withDefault "")
+                        (\(AnswerEditor ae) -> ViewAnswer ae.answer.uuid |> parentMsg)
+                    , inputChildren
+                        "Reference"
+                        model.reorderableState
+                        editor.references
+                        (ReorderReferenceList >> parentMsg)
+                        (AddReference |> parentMsg)
+                        (\(ReferenceEditor re) -> re.reference.uuid)
+                        (\(ReferenceEditor re) -> (Form.getFieldAsString "chapter" re.form).value |> Maybe.withDefault "")
+                        (\(ReferenceEditor re) -> ViewReference re.reference.uuid |> parentMsg)
+                    , inputChildren
+                        "Expert"
+                        model.reorderableState
+                        editor.experts
+                        (ReorderExpertList >> parentMsg)
+                        (AddExpert |> parentMsg)
+                        (\(ExpertEditor ee) -> ee.expert.uuid)
+                        (\(ExpertEditor ee) -> (Form.getFieldAsString "name" ee.form).value |> Maybe.withDefault "")
+                        (\(ExpertEditor ee) -> ViewExpert ee.expert.uuid |> parentMsg)
                     , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)
                     ]
     in
@@ -214,6 +252,39 @@ viewAnswer model (AnswerEditor editor) parentMsg deleteMsg =
         [ editorTitle "Answer"
         , formContent
         , formActions (AnswerCancel |> parentMsg) deleteMsg (AnswerFormMsg Form.Submit |> parentMsg)
+        ]
+
+
+viewReference : Model -> ReferenceEditor -> (ReferenceMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewReference model (ReferenceEditor editor) parentMsg deleteMsg =
+    let
+        formContent =
+            div []
+                [ inputGroup editor.form "chapter" "Chapter"
+                ]
+                |> Html.map (ReferenceFormMsg >> parentMsg)
+    in
+    div [ class "reference" ]
+        [ editorTitle "Reference"
+        , formContent
+        , formActions (ReferenceCancel |> parentMsg) deleteMsg (ReferenceFormMsg Form.Submit |> parentMsg)
+        ]
+
+
+viewExpert : Model -> ExpertEditor -> (ExpertMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewExpert model (ExpertEditor editor) parentMsg deleteMsg =
+    let
+        formContent =
+            div []
+                [ inputGroup editor.form "name" "Name"
+                , inputGroup editor.form "email" "Email"
+                ]
+                |> Html.map (ExpertFormMsg >> parentMsg)
+    in
+    div [ class "expert" ]
+        [ editorTitle "Expert"
+        , formContent
+        , formActions (ExpertCancel |> parentMsg) deleteMsg (ExpertFormMsg Form.Submit |> parentMsg)
         ]
 
 
