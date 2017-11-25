@@ -34,12 +34,12 @@ type alias Answer =
     { uuid : String
     , label : String
     , advice : Maybe String
-    , followups : Followups
+    , followUps : FollowUps
     }
 
 
-type Followups
-    = Followups (List Question)
+type FollowUps
+    = FollowUps (List Question)
 
 
 type alias Reference =
@@ -90,12 +90,12 @@ answerDecoder =
         |> required "uuid" Decode.string
         |> required "label" Decode.string
         |> required "advice" (Decode.nullable Decode.string)
-        |> required "followups" followupsDecoder
+        |> required "followUps" followupsDecoder
 
 
-followupsDecoder : Decoder Followups
+followupsDecoder : Decoder FollowUps
 followupsDecoder =
-    Decode.map Followups (Decode.lazy (\_ -> Decode.list questionDecoder))
+    Decode.map FollowUps (Decode.lazy (\_ -> Decode.list questionDecoder))
 
 
 referenceDecoder : Decoder Reference
@@ -139,5 +139,5 @@ newAnswer uuid =
     { uuid = uuid
     , label = "New answer"
     , advice = Nothing
-    , followups = Followups []
+    , followUps = FollowUps []
     }

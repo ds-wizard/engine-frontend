@@ -74,13 +74,23 @@ updateEdit msg seed session model =
                         Nothing ->
                             model.events
 
+                newReorderableState =
+                    Reorderable.update (Reorderable.MouseOverIgnored False) model.reorderableState
+
                 ( newModel, cmd ) =
                     if submit then
                         ( { model | saving = Loading }, postEventsBulkCmd model.branchUuid newEvents session )
                     else
                         ( model, Cmd.none )
             in
-            ( newSeed, { newModel | knowledgeModelEditor = Success newKnowledgeModelEditor, events = newEvents }, cmd )
+            ( newSeed
+            , { newModel
+                | knowledgeModelEditor = Success newKnowledgeModelEditor
+                , events = newEvents
+                , reorderableState = newReorderableState
+              }
+            , cmd
+            )
 
         _ ->
             ( seed, model, Cmd.none )

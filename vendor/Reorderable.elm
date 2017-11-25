@@ -3,7 +3,7 @@ module Reorderable
         ( Config
         , Event(..)
         , HtmlWrapper
-        , Msg
+        , Msg(..)
         , State
         , div
         , fullConfig
