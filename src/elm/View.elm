@@ -191,7 +191,8 @@ profileInfo model =
 
 indexView : Html Msg
 indexView =
-    text "Welcome to DSP!"
+    --    text "Welcome to DSP!"
+    fullPageError "fa-hand-spock-o" "Welcome to DSP!"
 
 
 wizzardsView : Html Msg
