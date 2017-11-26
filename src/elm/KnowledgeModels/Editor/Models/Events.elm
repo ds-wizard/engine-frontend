@@ -802,7 +802,7 @@ encodeEditAnswerEvent data =
         , ( "answerUuid", Encode.string data.answerUuid )
         , ( "label", Encode.string data.label )
         , ( "advice", advice )
-        , ( "followUpIds", Encode.null )
+        , ( "followUpIds", Encode.list <| List.map Encode.string data.followUpIds )
         ]
 
 
