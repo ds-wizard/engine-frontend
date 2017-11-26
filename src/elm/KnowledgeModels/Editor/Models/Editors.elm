@@ -46,7 +46,8 @@ type AnswerEditor
         { active : Bool
         , form : Form () AnswerForm
         , answer : Answer
-        , followups : List QuestionEditor
+        , followUps : List QuestionEditor
+        , followUpsDirty : Bool
         , order : Int
         }
 
@@ -174,14 +175,15 @@ createAnswerEditor active order answer =
             answerFormInitials answer
                 |> initForm answerFormValidation
 
-        followups =
-            []
+        createFollowUps (FollowUps questions) =
+            List.indexedMap (createQuestionEditor False) questions
     in
     AnswerEditor
         { active = active
         , form = form
         , answer = answer
-        , followups = followups
+        , followUps = createFollowUps answer.followUps
+        , followUpsDirty = False
         , order = order
         }
 

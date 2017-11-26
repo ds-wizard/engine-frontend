@@ -18,6 +18,7 @@ type alias ChapterForm =
 
 type alias QuestionForm =
     { title : String
+    , shortUuid : Maybe String
     , text : String
     }
 
@@ -90,21 +91,23 @@ initQuestionForm =
 
 questionFormValidation : Validation () QuestionForm
 questionFormValidation =
-    Validate.map2 QuestionForm
+    Validate.map3 QuestionForm
         (Validate.field "title" Validate.string)
+        (Validate.field "shortUuid" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
         (Validate.field "text" Validate.string)
 
 
 questionFormInitials : Question -> List ( String, Field.Field )
 questionFormInitials question =
     [ ( "title", Field.string question.title )
+    , ( "shortUuid", Field.string (question.shortUuid |> Maybe.withDefault "") )
     , ( "text", Field.string question.text )
     ]
 
 
 updateQuestionWithForm : Question -> QuestionForm -> Question
 updateQuestionWithForm question questionForm =
-    { question | title = questionForm.title, text = questionForm.text }
+    { question | title = questionForm.title, text = questionForm.text, shortUuid = questionForm.shortUuid }
 
 
 initAnswerForm : Answer -> Form () AnswerForm
@@ -121,17 +124,8 @@ answerFormValidation =
 
 answerFormInitials : Answer -> List ( String, Field.Field )
 answerFormInitials answer =
-    let
-        advice =
-            case answer.advice of
-                Just a ->
-                    a
-
-                Nothing ->
-                    ""
-    in
     [ ( "label", Field.string answer.label )
-    , ( "advice", Field.string advice )
+    , ( "advice", Field.string (answer.advice |> Maybe.withDefault "") )
     ]
 
 

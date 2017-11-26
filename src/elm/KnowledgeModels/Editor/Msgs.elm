@@ -56,7 +56,11 @@ type QuestionMsg
 type AnswerMsg
     = AnswerFormMsg Form.Msg
     | AnswerCancel
-    | AnswerQuestionMsg Int QuestionMsg
+    | ViewFollowUpQuestion String
+    | AddFollowUpQuestion
+    | DeleteFollowUpQuestion String
+    | ReorderFollowUpQuestionList (List QuestionEditor)
+    | FollowUpQuestionMsg String QuestionMsg
 
 
 type ReferenceMsg

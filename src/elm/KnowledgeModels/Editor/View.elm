@@ -241,18 +241,44 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
 viewAnswer : Model -> AnswerEditor -> (AnswerMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
 viewAnswer model (AnswerEditor editor) parentMsg deleteMsg =
     let
-        formContent =
-            div []
-                [ inputGroup editor.form "label" "Label"
-                , textAreaGroup editor.form "advice" "Advice"
-                ]
-                |> Html.map (AnswerFormMsg >> parentMsg)
+        activeQuestion =
+            find (\(QuestionEditor qe) -> qe.active) editor.followUps
+
+        content =
+            case activeQuestion of
+                Just ((QuestionEditor qe) as questionEditor) ->
+                    [ viewQuestion
+                        model
+                        questionEditor
+                        (FollowUpQuestionMsg qe.question.uuid >> parentMsg)
+                        (DeleteFollowUpQuestion qe.question.uuid |> parentMsg)
+                    ]
+
+                Nothing ->
+                    let
+                        formContent =
+                            div []
+                                [ inputGroup editor.form "label" "Label"
+                                , textAreaGroup editor.form "advice" "Advice"
+                                ]
+                                |> Html.map (AnswerFormMsg >> parentMsg)
+                    in
+                    [ editorTitle "Answer"
+                    , formContent
+                    , inputChildren
+                        "Follow-up Question"
+                        model.reorderableState
+                        editor.followUps
+                        (ReorderFollowUpQuestionList >> parentMsg)
+                        (AddFollowUpQuestion |> parentMsg)
+                        (\(QuestionEditor questionEditor) -> questionEditor.question.uuid)
+                        (\(QuestionEditor questionEditor) -> (Form.getFieldAsString "title" questionEditor.form).value |> Maybe.withDefault "")
+                        (\(QuestionEditor questionEditor) -> ViewFollowUpQuestion questionEditor.question.uuid |> parentMsg)
+                    , formActions (AnswerCancel |> parentMsg) deleteMsg (AnswerFormMsg Form.Submit |> parentMsg)
+                    ]
     in
     div [ class "answer" ]
-        [ editorTitle "Answer"
-        , formContent
-        , formActions (AnswerCancel |> parentMsg) deleteMsg (AnswerFormMsg Form.Submit |> parentMsg)
-        ]
+        content
 
 
 viewReference : Model -> ReferenceEditor -> (ReferenceMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
