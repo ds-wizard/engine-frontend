@@ -356,5 +356,5 @@ formActions cancelMsg deleteMsg submitMsg =
                 ]
             ]
         , button [ class "btn btn-primary", onClick submitMsg ]
-            [ text "Save" ]
+            [ text "Done" ]
         ]
