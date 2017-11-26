@@ -3,6 +3,7 @@ module KnowledgeModels.Editor.Models.Editors exposing (..)
 import Form exposing (Form)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
 import KnowledgeModels.Editor.Models.Forms exposing (..)
+import List.Extra as List
 
 
 type KnowledgeModelEditor
@@ -89,6 +90,11 @@ createKnowledgeModelEditor knowledgeModel =
         }
 
 
+getKnowledgeModelEditorName : KnowledgeModelEditor -> String
+getKnowledgeModelEditorName (KnowledgeModelEditor kme) =
+    (Form.getFieldAsString "name" kme.form).value |> Maybe.withDefault ""
+
+
 createChapterEditor : Bool -> Int -> Chapter -> ChapterEditor
 createChapterEditor active order chapter =
     let
@@ -113,6 +119,11 @@ getChapterUuid (ChapterEditor chapterEditor) =
     chapterEditor.chapter.uuid
 
 
+getChapterEditorName : ChapterEditor -> String
+getChapterEditorName (ChapterEditor ce) =
+    (Form.getFieldAsString "title" ce.form).value |> Maybe.withDefault ""
+
+
 activateChapter : ChapterEditor -> ChapterEditor
 activateChapter (ChapterEditor chapterEditor) =
     ChapterEditor { chapterEditor | active = True }
@@ -121,6 +132,11 @@ activateChapter (ChapterEditor chapterEditor) =
 matchChapter : String -> ChapterEditor -> Bool
 matchChapter uuid (ChapterEditor chapterEditor) =
     chapterEditor.chapter.uuid == uuid
+
+
+getActiveChapterEditor : List ChapterEditor -> Maybe ChapterEditor
+getActiveChapterEditor =
+    List.find (\(ChapterEditor ce) -> ce.active)
 
 
 createQuestionEditor : Bool -> Int -> Question -> QuestionEditor
@@ -158,6 +174,11 @@ getQuestionUuid (QuestionEditor questionEditor) =
     questionEditor.question.uuid
 
 
+getQuestionEditorName : QuestionEditor -> String
+getQuestionEditorName (QuestionEditor ce) =
+    (Form.getFieldAsString "title" ce.form).value |> Maybe.withDefault ""
+
+
 activateQuestion : QuestionEditor -> QuestionEditor
 activateQuestion (QuestionEditor questionEditor) =
     QuestionEditor { questionEditor | active = True }
@@ -166,6 +187,11 @@ activateQuestion (QuestionEditor questionEditor) =
 matchQuestion : String -> QuestionEditor -> Bool
 matchQuestion uuid (QuestionEditor questionEditor) =
     questionEditor.question.uuid == uuid
+
+
+getActiveQuestionEditor : List QuestionEditor -> Maybe QuestionEditor
+getActiveQuestionEditor =
+    List.find (\(QuestionEditor qe) -> qe.active)
 
 
 createAnswerEditor : Bool -> Int -> Answer -> AnswerEditor
@@ -193,6 +219,11 @@ getAnswerUuid (AnswerEditor answerEditor) =
     answerEditor.answer.uuid
 
 
+getAnswerEditorName : AnswerEditor -> String
+getAnswerEditorName (AnswerEditor ae) =
+    (Form.getFieldAsString "label" ae.form).value |> Maybe.withDefault ""
+
+
 activateAnswer : AnswerEditor -> AnswerEditor
 activateAnswer (AnswerEditor answerEditor) =
     AnswerEditor { answerEditor | active = True }
@@ -201,6 +232,11 @@ activateAnswer (AnswerEditor answerEditor) =
 matchAnswer : String -> AnswerEditor -> Bool
 matchAnswer uuid (AnswerEditor answerEditor) =
     answerEditor.answer.uuid == uuid
+
+
+getActiveAnswerEditor : List AnswerEditor -> Maybe AnswerEditor
+getActiveAnswerEditor =
+    List.find (\(AnswerEditor ae) -> ae.active)
 
 
 createReferenceEditor : Bool -> Int -> Reference -> ReferenceEditor
@@ -223,6 +259,11 @@ getReferenceUuid (ReferenceEditor referenceEditor) =
     referenceEditor.reference.uuid
 
 
+getReferenceEditorName : ReferenceEditor -> String
+getReferenceEditorName (ReferenceEditor re) =
+    (Form.getFieldAsString "chapter" re.form).value |> Maybe.withDefault ""
+
+
 activateReference : ReferenceEditor -> ReferenceEditor
 activateReference (ReferenceEditor referenceEditor) =
     ReferenceEditor { referenceEditor | active = True }
@@ -231,6 +272,11 @@ activateReference (ReferenceEditor referenceEditor) =
 matchReference : String -> ReferenceEditor -> Bool
 matchReference uuid (ReferenceEditor referenceEditor) =
     referenceEditor.reference.uuid == uuid
+
+
+getActiveReferenceEditor : List ReferenceEditor -> Maybe ReferenceEditor
+getActiveReferenceEditor =
+    List.find (\(ReferenceEditor re) -> re.active)
 
 
 createExpertEditor : Bool -> Int -> Expert -> ExpertEditor
@@ -253,6 +299,11 @@ getExpertUuid (ExpertEditor expertEditor) =
     expertEditor.expert.uuid
 
 
+getExpertEditorName : ExpertEditor -> String
+getExpertEditorName (ExpertEditor ee) =
+    (Form.getFieldAsString "label" ee.form).value |> Maybe.withDefault ""
+
+
 activateExpert : ExpertEditor -> ExpertEditor
 activateExpert (ExpertEditor expertEditor) =
     ExpertEditor { expertEditor | active = True }
@@ -261,3 +312,8 @@ activateExpert (ExpertEditor expertEditor) =
 matchExpert : String -> ExpertEditor -> Bool
 matchExpert uuid (ExpertEditor expertEditor) =
     expertEditor.expert.uuid == uuid
+
+
+getActiveExpertEditor : List ExpertEditor -> Maybe ExpertEditor
+getActiveExpertEditor =
+    List.find (\(ExpertEditor re) -> re.active)

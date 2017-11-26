@@ -11,7 +11,7 @@ import Html.Events exposing (..)
 import KnowledgeModels.Editor.Models exposing (..)
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Msgs exposing (..)
-import List.Extra exposing (find)
+import KnowledgeModels.Editor.View.Breadcrumbs exposing (breadcrumbs, getKnowledgeModelBreadcrumbs)
 import Msgs
 import Reorderable
 import Routing exposing (Route(..))
@@ -45,16 +45,19 @@ content model =
 editorView : Model -> Html Msgs.Msg
 editorView model =
     let
-        currentView =
+        ( breadcrumbsView, currentView ) =
             case model.knowledgeModelEditor of
                 Success knowledgeModelEditor ->
-                    viewKnowledgeModel model knowledgeModelEditor (Edit >> Msgs.KnowledgeModelsEditorMsg)
+                    ( getKnowledgeModelBreadcrumbs knowledgeModelEditor |> breadcrumbs
+                    , viewKnowledgeModel model knowledgeModelEditor (Edit >> Msgs.KnowledgeModelsEditorMsg)
+                    )
 
                 _ ->
-                    emptyNode
+                    ( emptyNode, emptyNode )
     in
     div []
         [ formResultView model.saving
+        , breadcrumbsView
         , div [ class "knowledge-model-editor col-xs-12 col-lg-10 col-lg-offset-1" ] [ currentView ]
         ]
 
@@ -62,14 +65,8 @@ editorView model =
 viewKnowledgeModel : Model -> KnowledgeModelEditor -> (KnowledgeModelMsg -> Msgs.Msg) -> Html Msgs.Msg
 viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
     let
-        chapterActive (ChapterEditor editor) =
-            editor.active
-
-        activeChapter =
-            find chapterActive editor.chapters
-
         content =
-            case activeChapter of
+            case getActiveChapterEditor editor.chapters of
                 Just ((ChapterEditor editor) as chapterEditor) ->
                     [ viewChapter
                         model
@@ -93,8 +90,8 @@ viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
                         editor.chapters
                         (ReorderChapterList >> parentMsg)
                         (AddChapter |> parentMsg)
-                        (\(ChapterEditor chapterEditor) -> chapterEditor.chapter.uuid)
-                        (\(ChapterEditor chapterEditor) -> (Form.getFieldAsString "title" chapterEditor.form).value |> Maybe.withDefault "")
+                        getChapterUuid
+                        getChapterEditorName
                         (\(ChapterEditor chapterEditor) -> ViewChapter chapterEditor.chapter.uuid |> parentMsg)
                     , div [ class "form-actions" ]
                         [ linkTo KnowledgeModels
@@ -111,14 +108,8 @@ viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
 viewChapter : Model -> ChapterEditor -> (ChapterMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
 viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
     let
-        questionActive (QuestionEditor qe) =
-            qe.active
-
-        activeQuestion =
-            find questionActive editor.questions
-
         content =
-            case activeQuestion of
+            case getActiveQuestionEditor editor.questions of
                 Just ((QuestionEditor qe) as questionEditor) ->
                     [ viewQuestion
                         model
@@ -144,8 +135,8 @@ viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
                         editor.questions
                         (ReorderQuestionList >> parentMsg)
                         (AddChapterQuestion |> parentMsg)
-                        (\(QuestionEditor questionEditor) -> questionEditor.question.uuid)
-                        (\(QuestionEditor questionEditor) -> (Form.getFieldAsString "title" questionEditor.form).value |> Maybe.withDefault "")
+                        getQuestionUuid
+                        getQuestionEditorName
                         (\(QuestionEditor questionEditor) -> ViewQuestion questionEditor.question.uuid |> parentMsg)
                     , formActions (ChapterCancel |> parentMsg) deleteMsg (ChapterFormMsg Form.Submit |> parentMsg)
                     ]
@@ -157,17 +148,14 @@ viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
 viewQuestion : Model -> QuestionEditor -> (QuestionMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
 viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
     let
-        activeAnswer =
-            find (\(AnswerEditor ae) -> ae.active) editor.answers
-
-        activeReference =
-            find (\(ReferenceEditor re) -> re.active) editor.references
-
-        activeExpert =
-            find (\(ExpertEditor ee) -> ee.active) editor.experts
+        activeChild =
+            ( getActiveAnswerEditor editor.answers
+            , getActiveReferenceEditor editor.references
+            , getActiveExpertEditor editor.experts
+            )
 
         content =
-            case ( activeAnswer, activeReference, activeExpert ) of
+            case activeChild of
                 ( Just ((AnswerEditor ae) as answerEditor), _, _ ) ->
                     [ viewAnswer
                         model
@@ -210,8 +198,8 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                         editor.answers
                         (ReorderAnswerList >> parentMsg)
                         (AddAnswer |> parentMsg)
-                        (\(AnswerEditor ae) -> ae.answer.uuid)
-                        (\(AnswerEditor ae) -> (Form.getFieldAsString "label" ae.form).value |> Maybe.withDefault "")
+                        getAnswerUuid
+                        getAnswerEditorName
                         (\(AnswerEditor ae) -> ViewAnswer ae.answer.uuid |> parentMsg)
                     , inputChildren
                         "Reference"
@@ -219,8 +207,8 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                         editor.references
                         (ReorderReferenceList >> parentMsg)
                         (AddReference |> parentMsg)
-                        (\(ReferenceEditor re) -> re.reference.uuid)
-                        (\(ReferenceEditor re) -> (Form.getFieldAsString "chapter" re.form).value |> Maybe.withDefault "")
+                        getReferenceUuid
+                        getReferenceEditorName
                         (\(ReferenceEditor re) -> ViewReference re.reference.uuid |> parentMsg)
                     , inputChildren
                         "Expert"
@@ -228,8 +216,8 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                         editor.experts
                         (ReorderExpertList >> parentMsg)
                         (AddExpert |> parentMsg)
-                        (\(ExpertEditor ee) -> ee.expert.uuid)
-                        (\(ExpertEditor ee) -> (Form.getFieldAsString "name" ee.form).value |> Maybe.withDefault "")
+                        getExpertUuid
+                        getExpertEditorName
                         (\(ExpertEditor ee) -> ViewExpert ee.expert.uuid |> parentMsg)
                     , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)
                     ]
@@ -241,11 +229,8 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
 viewAnswer : Model -> AnswerEditor -> (AnswerMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
 viewAnswer model (AnswerEditor editor) parentMsg deleteMsg =
     let
-        activeQuestion =
-            find (\(QuestionEditor qe) -> qe.active) editor.followUps
-
         content =
-            case activeQuestion of
+            case getActiveQuestionEditor editor.followUps of
                 Just ((QuestionEditor qe) as questionEditor) ->
                     [ viewQuestion
                         model
@@ -271,8 +256,8 @@ viewAnswer model (AnswerEditor editor) parentMsg deleteMsg =
                         editor.followUps
                         (ReorderFollowUpQuestionList >> parentMsg)
                         (AddFollowUpQuestion |> parentMsg)
-                        (\(QuestionEditor questionEditor) -> questionEditor.question.uuid)
-                        (\(QuestionEditor questionEditor) -> (Form.getFieldAsString "title" questionEditor.form).value |> Maybe.withDefault "")
+                        getQuestionUuid
+                        getQuestionEditorName
                         (\(QuestionEditor questionEditor) -> ViewFollowUpQuestion questionEditor.question.uuid |> parentMsg)
                     , formActions (AnswerCancel |> parentMsg) deleteMsg (AnswerFormMsg Form.Submit |> parentMsg)
                     ]
@@ -357,17 +342,6 @@ placeholderView _ =
 editorTitle : String -> Html Msgs.Msg
 editorTitle title =
     h3 [] [ text title ]
-
-
-breadcrumbs_ : List String -> Html Msgs.Msg
-breadcrumbs_ elements =
-    ul [ class "breadcrumb" ]
-        (List.map breadcrumbsElement_ elements)
-
-
-breadcrumbsElement_ : String -> Html Msgs.Msg
-breadcrumbsElement_ name =
-    li [] [ text name ]
 
 
 formActions : Msgs.Msg -> Msgs.Msg -> Msgs.Msg -> Html Msgs.Msg
