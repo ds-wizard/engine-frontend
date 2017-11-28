@@ -71,7 +71,7 @@ view model =
 
         KnowledgeModels ->
             model.knowledgeModelsIndexModel
-                |> KnowledgeModels.Index.View.view
+                |> KnowledgeModels.Index.View.view model.jwt
                 |> appView model
 
         KnowledgeModelsPublish uuid ->

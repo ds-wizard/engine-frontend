@@ -88,7 +88,7 @@ isAllowed route maybeJwt =
             hasPerm maybeJwt Perm.knowledgeModel
 
         KnowledgeModelsPublish uuid ->
-            hasPerm maybeJwt Perm.knowledgeModel
+            hasPerm maybeJwt Perm.knowledgeModelPublish
 
         KnowledgeModels ->
             hasPerm maybeJwt Perm.knowledgeModel

@@ -13,7 +13,15 @@ type alias KnowledgeModel =
     , name : String
     , artifactId : String
     , parentPackageId : Maybe String
+    , state : KnowledgeModelState
     }
+
+
+type KnowledgeModelState
+    = Default
+    | Edited
+    | Outdated
+    | Migrating
 
 
 knowledgeModelDecoder : Decoder KnowledgeModel
@@ -23,11 +31,40 @@ knowledgeModelDecoder =
         |> required "name" Decode.string
         |> required "artifactId" Decode.string
         |> required "parentPackageId" (Decode.nullable Decode.string)
+        |> required "state" knowledgeModelStateDecoder
+
+
+knowledgeModelStateDecoder : Decoder KnowledgeModelState
+knowledgeModelStateDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "default" ->
+                        Decode.succeed Default
+
+                    "edited" ->
+                        Decode.succeed Edited
+
+                    "outdated" ->
+                        Decode.succeed Outdated
+
+                    "migrating" ->
+                        Decode.succeed Migrating
+
+                    unknownState ->
+                        Decode.fail <| "Unknown knowledge model state " ++ unknownState
+            )
 
 
 knowledgeModelListDecoder : Decoder (List KnowledgeModel)
 knowledgeModelListDecoder =
     Decode.list knowledgeModelDecoder
+
+
+kmMatchState : List KnowledgeModelState -> KnowledgeModel -> Bool
+kmMatchState states knowledgeModel =
+    List.any ((==) knowledgeModel.state) states
 
 
 type alias KnowledgeModelCreateForm =
