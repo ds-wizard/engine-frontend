@@ -9,3 +9,5 @@ type Msg
     | ShowHideDeleteKnowledgeModel (Maybe KnowledgeModel)
     | DeleteKnowledgeModel
     | DeleteKnowledgeModelCompleted (Result Jwt.JwtError String)
+    | PostMigration String
+    | PostMigrationCompleted (Result Jwt.JwtError String)

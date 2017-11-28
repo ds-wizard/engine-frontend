@@ -5,6 +5,7 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
+import Common.View.Forms exposing (formResultView)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -19,6 +20,7 @@ view : Maybe JwtToken -> Model -> Html Msgs.Msg
 view jwt model =
     div []
         [ pageHeader "Knowledge model" indexActions
+        , formResultView model.creatingMigration
         , content jwt model
         , deleteModal model
         ]
@@ -37,7 +39,7 @@ content jwt model =
             defaultFullPageError err
 
         Success knowledgeModels ->
-            kmTable jwt knowledgeModels
+            kmTable jwt model knowledgeModels
 
 
 indexActions : List (Html Msgs.Msg)
@@ -48,11 +50,11 @@ indexActions =
     ]
 
 
-kmTable : Maybe JwtToken -> List KnowledgeModel -> Html Msgs.Msg
-kmTable jwt knowledgeModels =
+kmTable : Maybe JwtToken -> Model -> List KnowledgeModel -> Html Msgs.Msg
+kmTable jwt model knowledgeModels =
     table [ class "table" ]
         [ kmTableHeader
-        , kmTableBody jwt knowledgeModels
+        , kmTableBody jwt model knowledgeModels
         ]
 
 
@@ -68,12 +70,12 @@ kmTableHeader =
         ]
 
 
-kmTableBody : Maybe JwtToken -> List KnowledgeModel -> Html Msgs.Msg
-kmTableBody jwt knowledgeModels =
+kmTableBody : Maybe JwtToken -> Model -> List KnowledgeModel -> Html Msgs.Msg
+kmTableBody jwt model knowledgeModels =
     if List.isEmpty knowledgeModels then
         kmTableEmpty
     else
-        tbody [] (List.map (kmTableRow jwt) knowledgeModels)
+        tbody [] (List.map (kmTableRow jwt model) knowledgeModels)
 
 
 kmTableEmpty : Html msg
@@ -82,8 +84,8 @@ kmTableEmpty =
         [ td [ colspan 4, class "td-empty-table" ] [ text "There are no knowledge models." ] ]
 
 
-kmTableRow : Maybe JwtToken -> KnowledgeModel -> Html Msgs.Msg
-kmTableRow jwt km =
+kmTableRow : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
+kmTableRow jwt model km =
     let
         parent =
             case km.parentPackageId of
@@ -101,7 +103,7 @@ kmTableRow jwt km =
             [ kmTableRowActionDelete km
             , kmTableRowActionEdit km
             , kmTableRowActionPublish jwt km
-            , kmTableRowActionUpgrade jwt km
+            , kmTableRowActionUpgrade jwt model km
             , kmTableRowActionContinueMigration jwt km
             ]
         ]
@@ -132,11 +134,21 @@ kmTableRowActionPublish jwt km =
         emptyNode
 
 
-kmTableRowActionUpgrade : Maybe JwtToken -> KnowledgeModel -> Html Msgs.Msg
-kmTableRowActionUpgrade jwt km =
+kmTableRowActionUpgrade : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
+kmTableRowActionUpgrade jwt model km =
     if hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Outdated ] km then
-        a []
-            [ text "Upgrade"
+        let
+            loader =
+                case ( model.migrationUuid |> Maybe.map ((==) km.uuid), model.creatingMigration ) of
+                    ( Just True, Loading ) ->
+                        i [ class "fa fa-spinner fa-spin" ] []
+
+                    _ ->
+                        emptyNode
+        in
+        a [ class "link-with-icon", onClick <| Msgs.KnowledgeModelsIndexMsg <| PostMigration km.uuid ]
+            [ loader
+            , text "Upgrade"
             ]
     else
         emptyNode

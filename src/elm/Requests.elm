@@ -34,6 +34,11 @@ post body =
     emptyResponseRequest "POST" (Http.jsonBody body)
 
 
+postEmpty : Session -> String -> Http.Request String
+postEmpty =
+    emptyResponseRequest "POST" Http.emptyBody
+
+
 put : Value -> Session -> String -> Http.Request String
 put body =
     emptyResponseRequest "PUT" (Http.jsonBody body)

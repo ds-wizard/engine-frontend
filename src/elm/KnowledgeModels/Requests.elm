@@ -2,7 +2,7 @@ module KnowledgeModels.Requests exposing (..)
 
 import Auth.Models exposing (Session)
 import Http
-import Json.Encode exposing (Value)
+import Json.Encode as Encode exposing (Value)
 import KnowledgeModels.Editor.Models.Entities as Editor exposing (KnowledgeModel, knowledgeModelDecoder)
 import KnowledgeModels.Models as Models exposing (KnowledgeModel, knowledgeModelDecoder, knowledgeModelListDecoder)
 import Requests
@@ -41,3 +41,8 @@ getKnowledgeModelData uuid session =
 postEventsBulk : Session -> String -> Value -> Http.Request String
 postEventsBulk session uuid data =
     Requests.post data session ("/branches/" ++ uuid ++ "/events/_bulk")
+
+
+postMigration : Session -> String -> Http.Request String
+postMigration session uuid =
+    Requests.postEmpty session ("/branches/" ++ uuid ++ "/migrations/current")

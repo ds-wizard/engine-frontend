@@ -8,6 +8,8 @@ type alias Model =
     { knowledgeModels : ActionResult (List KnowledgeModel)
     , kmToBeDeleted : Maybe KnowledgeModel
     , deletingKnowledgeModel : ActionResult String
+    , migrationUuid : Maybe String
+    , creatingMigration : ActionResult String
     }
 
 
@@ -16,4 +18,6 @@ initialModel =
     { knowledgeModels = Loading
     , kmToBeDeleted = Nothing
     , deletingKnowledgeModel = Unset
+    , migrationUuid = Nothing
+    , creatingMigration = Unset
     }

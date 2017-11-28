@@ -6,7 +6,7 @@ import Jwt
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
 import KnowledgeModels.Models exposing (KnowledgeModel)
-import KnowledgeModels.Requests exposing (deleteKnowledgeModel, getKnowledgeModels)
+import KnowledgeModels.Requests exposing (deleteKnowledgeModel, getKnowledgeModels, postMigration)
 import Msgs
 import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
@@ -22,6 +22,12 @@ deleteKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 deleteKnowledgeModelCmd kmId session =
     deleteKnowledgeModel kmId session
         |> toCmd DeleteKnowledgeModelCompleted Msgs.KnowledgeModelsIndexMsg
+
+
+postMigrationCmd : String -> Session -> Cmd Msgs.Msg
+postMigrationCmd uuid session =
+    postMigration session uuid
+        |> toCmd PostMigrationCompleted Msgs.KnowledgeModelsIndexMsg
 
 
 getKnowledgeModelsCompleted : Model -> Result Jwt.JwtError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
@@ -62,6 +68,26 @@ deleteKnowledgeModelCompleted model result =
             )
 
 
+handlePostMigration : Session -> Model -> String -> ( Model, Cmd Msgs.Msg )
+handlePostMigration session model uuid =
+    case model.creatingMigration of
+        Loading ->
+            ( model, Cmd.none )
+
+        _ ->
+            ( { model | creatingMigration = Loading, migrationUuid = Just uuid }, postMigrationCmd uuid session )
+
+
+postMigrationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+postMigrationCompleted model result =
+    case result of
+        Ok migration ->
+            ( model, cmdNavigate <| KnowledgeModelsMigration <| Maybe.withDefault "" model.migrationUuid )
+
+        Err error ->
+            ( { model | creatingMigration = Error "Migration could not be created" }, Cmd.none )
+
+
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of
@@ -76,3 +102,9 @@ update msg session model =
 
         DeleteKnowledgeModelCompleted result ->
             deleteKnowledgeModelCompleted model result
+
+        PostMigration uuid ->
+            handlePostMigration session model uuid
+
+        PostMigrationCompleted result ->
+            postMigrationCompleted model result
