@@ -11,6 +11,7 @@ import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
 import KnowledgeModels.Editor.View
 import KnowledgeModels.Index.View
+import KnowledgeModels.Migration.View
 import KnowledgeModels.Publish.View
 import Models exposing (Model)
 import Msgs exposing (Msg)
@@ -77,6 +78,11 @@ view model =
         KnowledgeModelsPublish uuid ->
             model.knowledgeModelsPublishModel
                 |> KnowledgeModels.Publish.View.view
+                |> appView model
+
+        KnowledgeModelsMigration uuid ->
+            model.knowledgeModelsMigrationModel
+                |> KnowledgeModels.Migration.View.view
                 |> appView model
 
         PackageManagement ->
@@ -191,7 +197,6 @@ profileInfo model =
 
 indexView : Html Msg
 indexView =
-    --    text "Welcome to DSP!"
     fullPageError "fa-hand-spock-o" "Welcome to DSP!"
 
 

@@ -145,7 +145,8 @@ kmTableRowActionUpgrade jwt km =
 kmTableRowActionContinueMigration : Maybe JwtToken -> KnowledgeModel -> Html Msgs.Msg
 kmTableRowActionContinueMigration jwt km =
     if hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Migrating ] km then
-        a []
+        linkTo (KnowledgeModelsMigration km.uuid)
+            []
             [ text "Continue Migration"
             ]
     else

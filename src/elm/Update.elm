@@ -7,6 +7,7 @@ import KnowledgeModels.Editor.Models
 import KnowledgeModels.Editor.Update
 import KnowledgeModels.Index.Models
 import KnowledgeModels.Index.Update
+import KnowledgeModels.Migration.Update
 import KnowledgeModels.Publish.Models
 import KnowledgeModels.Publish.Update
 import Models exposing (Model)
@@ -210,3 +211,10 @@ update msg model =
                     KnowledgeModels.Editor.Update.update msg model.seed model.session model.knowledgeModelsEditorModel
             in
             ( { model | seed = seed, knowledgeModelsEditorModel = knowledgeModelsEditorModel }, cmd )
+
+        Msgs.KnowledgeModelsMigrationMsg msg ->
+            let
+                ( seed, knowledgeModelsMigrationModel, cmd ) =
+                    KnowledgeModels.Migration.Update.update msg model.seed model.session model.knowledgeModelsMigrationModel
+            in
+            ( { model | seed = seed, knowledgeModelsMigrationModel = knowledgeModelsMigrationModel }, cmd )

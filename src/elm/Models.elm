@@ -6,6 +6,7 @@ import Json.Decode.Pipeline exposing (decode, required)
 import KnowledgeModels.Create.Models
 import KnowledgeModels.Editor.Models
 import KnowledgeModels.Index.Models
+import KnowledgeModels.Migration.Models
 import KnowledgeModels.Publish.Models
 import Organization.Models
 import PackageManagement.Detail.Models
@@ -37,6 +38,7 @@ type alias Model =
     , knowledgeModelsCreateModel : KnowledgeModels.Create.Models.Model
     , knowledgeModelsPublishModel : KnowledgeModels.Publish.Models.Model
     , knowledgeModelsEditorModel : KnowledgeModels.Editor.Models.Model
+    , knowledgeModelsMigrationModel : KnowledgeModels.Migration.Models.Model
     }
 
 
@@ -59,6 +61,7 @@ initialModel route seed session jwt =
     , knowledgeModelsCreateModel = KnowledgeModels.Create.Models.initialModel
     , knowledgeModelsPublishModel = KnowledgeModels.Publish.Models.initialModel
     , knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel ""
+    , knowledgeModelsMigrationModel = KnowledgeModels.Migration.Models.initialModel
     }
 
 

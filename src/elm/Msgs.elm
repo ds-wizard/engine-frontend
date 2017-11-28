@@ -4,6 +4,7 @@ import Auth.Msgs
 import KnowledgeModels.Create.Msgs
 import KnowledgeModels.Editor.Msgs
 import KnowledgeModels.Index.Msgs
+import KnowledgeModels.Migration.Msgs
 import KnowledgeModels.Publish.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs
@@ -32,3 +33,4 @@ type Msg
     | KnowledgeModelsCreateMsg KnowledgeModels.Create.Msgs.Msg
     | KnowledgeModelsPublishMsg KnowledgeModels.Publish.Msgs.Msg
     | KnowledgeModelsEditorMsg KnowledgeModels.Editor.Msgs.Msg
+    | KnowledgeModelsMigrationMsg KnowledgeModels.Migration.Msgs.Msg
