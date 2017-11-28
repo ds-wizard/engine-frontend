@@ -10,6 +10,7 @@ type alias Model =
     { packages : ActionResult (List PackageDetail)
     , savingKnowledgeModel : ActionResult String
     , form : Form () KnowledgeModelCreateForm
+    , newUuid : Maybe String
     }
 
 
@@ -18,4 +19,5 @@ initialModel =
     { packages = Loading
     , savingKnowledgeModel = Unset
     , form = initKnowledgeModelCreateForm
+    , newUuid = Nothing
     }

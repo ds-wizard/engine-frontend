@@ -11,11 +11,10 @@ import KnowledgeModels.Requests exposing (postKnowledgeModel)
 import Msgs
 import PackageManagement.Models exposing (PackageDetail)
 import PackageManagement.Requests exposing (getPackages)
-import Random.Pcg exposing (Seed, step)
+import Random.Pcg exposing (Seed)
 import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
-import Utils exposing (tuplePrepend)
-import Uuid
+import Utils exposing (getUuid, tuplePrepend)
 
 
 getPackagesCmd : Session -> Cmd Msgs.Msg
@@ -50,7 +49,11 @@ postKmCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 postKmCompleted model result =
     case result of
         Ok km ->
-            ( model, cmdNavigate KnowledgeModels )
+            ( model
+            , Maybe.map KnowledgeModelsEditor model.newUuid
+                |> Maybe.withDefault KnowledgeModels
+                |> cmdNavigate
+            )
 
         Err error ->
             ( { model | savingKnowledgeModel = Error "Knowledge model could not be created." }, Cmd.none )
@@ -62,12 +65,12 @@ handleForm formMsg seed session model =
         ( Form.Submit, Just kmCreateForm ) ->
             let
                 ( newUuid, newSeed ) =
-                    step Uuid.uuidGenerator seed
+                    getUuid seed
 
                 cmd =
-                    Uuid.toString newUuid |> postKmCmd session kmCreateForm
+                    postKmCmd session kmCreateForm newUuid
             in
-            ( newSeed, { model | savingKnowledgeModel = Loading }, cmd )
+            ( newSeed, { model | savingKnowledgeModel = Loading, newUuid = Just newUuid }, cmd )
 
         _ ->
             let
