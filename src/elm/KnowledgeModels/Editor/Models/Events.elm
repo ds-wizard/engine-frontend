@@ -1,5 +1,7 @@
 module KnowledgeModels.Editor.Models.Events exposing (..)
 
+import Json.Decode as Decode exposing (..)
+import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
 import Random.Pcg exposing (Seed)
@@ -953,3 +955,310 @@ encodeDeleteFollowUpQuestionEvent data =
         , ( "answerUuid", Encode.string data.answerUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
         ]
+
+
+eventDecoder : Decoder Event
+eventDecoder =
+    Decode.field "eventType" Decode.string
+        |> Decode.andThen eventDecoderByType
+
+
+eventDecoderByType : String -> Decoder Event
+eventDecoderByType eventType =
+    case eventType of
+        "EditKnowledgeModelEvent" ->
+            editKnowledgeModelEventDecoder
+
+        "AddChapterEvent" ->
+            addChapterEventDecoder
+
+        "EditChapterEvent" ->
+            editChapterEventDecoder
+
+        "DeleteChapterEvent" ->
+            deleteChapterEventDecoder
+
+        "AddQuestionEvent" ->
+            addQuestionEventDecoder
+
+        "EditQuestionEvent" ->
+            editQuestionEventDecoder
+
+        "DeleteQuestionEvent" ->
+            deleteQuestionEventDecoder
+
+        "AddAnswerEvent" ->
+            addAnswerEventDecoder
+
+        "EditAnswerEvent" ->
+            editAnswerEventDecoder
+
+        "DeleteAnswerEvent" ->
+            deleteAnswerEventDecoder
+
+        "AddReferenceEvent" ->
+            addReferenceEventDecoder
+
+        "EditReferenceEvent" ->
+            editReferenceEventDecoder
+
+        "DeleteReferenceEvent" ->
+            deleteReferenceEventDecoder
+
+        "AddExpertEvent" ->
+            addExpertEventDecoder
+
+        "EditExpertEvent" ->
+            editExpertEventDecoder
+
+        "DeleteExpertEvent" ->
+            deleteExpertEventDecoder
+
+        "AddFollowUpQuestionEvent" ->
+            addFollowUpQuestionEventDecoder
+
+        "EditFollowUpQuestionEvent" ->
+            editFollowUpQuestionEventDecoder
+
+        "DeleteFollowUpQuestionEvent" ->
+            deleteFollowUpQuestionEventDecoder
+
+        _ ->
+            Decode.fail <| "Unknown event type: " ++ eventType
+
+
+editKnowledgeModelEventDecoder : Decoder Event
+editKnowledgeModelEventDecoder =
+    decode EditKnowledgeModelEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "name" Decode.string
+        |> required "chapterIds" (Decode.list Decode.string)
+        |> Decode.map EditKnowledgeModelEvent
+
+
+addChapterEventDecoder : Decoder Event
+addChapterEventDecoder =
+    decode AddChapterEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" Decode.string
+        |> Decode.map AddChapterEvent
+
+
+editChapterEventDecoder : Decoder Event
+editChapterEventDecoder =
+    decode EditChapterEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" Decode.string
+        |> required "questionIds" (Decode.list Decode.string)
+        |> Decode.map EditChapterEvent
+
+
+deleteChapterEventDecoder : Decoder Event
+deleteChapterEventDecoder =
+    decode DeleteChapterEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> Decode.map DeleteChapterEvent
+
+
+addQuestionEventDecoder : Decoder Event
+addQuestionEventDecoder =
+    decode AddQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "type" Decode.string
+        |> required "title" Decode.string
+        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
+        |> required "text" Decode.string
+        |> Decode.map AddQuestionEvent
+
+
+editQuestionEventDecoder : Decoder Event
+editQuestionEventDecoder =
+    decode EditQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "type" Decode.string
+        |> required "title" Decode.string
+        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
+        |> required "text" Decode.string
+        |> required "answerIds" (Decode.list Decode.string)
+        |> required "expertIds" (Decode.list Decode.string)
+        |> required "referenceIds" (Decode.list Decode.string)
+        |> Decode.map EditQuestionEvent
+
+
+deleteQuestionEventDecoder : Decoder Event
+deleteQuestionEventDecoder =
+    decode DeleteQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> Decode.map DeleteQuestionEvent
+
+
+addAnswerEventDecoder : Decoder Event
+addAnswerEventDecoder =
+    decode AddAnswerEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "label" Decode.string
+        |> required "advice" (Decode.nullable Decode.string)
+        |> Decode.map AddAnswerEvent
+
+
+editAnswerEventDecoder : Decoder Event
+editAnswerEventDecoder =
+    decode EditAnswerEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "label" Decode.string
+        |> required "advice" (Decode.nullable Decode.string)
+        |> required "followUpIds" (Decode.list Decode.string)
+        |> Decode.map EditAnswerEvent
+
+
+deleteAnswerEventDecoder : Decoder Event
+deleteAnswerEventDecoder =
+    decode DeleteAnswerEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> Decode.map DeleteAnswerEvent
+
+
+addReferenceEventDecoder : Decoder Event
+addReferenceEventDecoder =
+    decode AddReferenceEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "referenceUuid" Decode.string
+        |> required "chapter" Decode.string
+        |> Decode.map AddReferenceEvent
+
+
+editReferenceEventDecoder : Decoder Event
+editReferenceEventDecoder =
+    decode EditReferenceEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "referenceUuid" Decode.string
+        |> required "chapter" Decode.string
+        |> Decode.map EditReferenceEvent
+
+
+deleteReferenceEventDecoder : Decoder Event
+deleteReferenceEventDecoder =
+    decode DeleteReferenceEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "referenceUuid" Decode.string
+        |> Decode.map DeleteReferenceEvent
+
+
+addExpertEventDecoder : Decoder Event
+addExpertEventDecoder =
+    decode AddExpertEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "expertUuid" Decode.string
+        |> required "name" Decode.string
+        |> required "email" Decode.string
+        |> Decode.map AddExpertEvent
+
+
+editExpertEventDecoder : Decoder Event
+editExpertEventDecoder =
+    decode EditExpertEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "expertUuid" Decode.string
+        |> required "name" Decode.string
+        |> required "email" Decode.string
+        |> Decode.map EditExpertEvent
+
+
+deleteExpertEventDecoder : Decoder Event
+deleteExpertEventDecoder =
+    decode DeleteExpertEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "expertUuid" Decode.string
+        |> Decode.map DeleteExpertEvent
+
+
+addFollowUpQuestionEventDecoder : Decoder Event
+addFollowUpQuestionEventDecoder =
+    decode AddFollowUpQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "type" Decode.string
+        |> required "title" Decode.string
+        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
+        |> required "text" Decode.string
+        |> Decode.map AddFollowUpQuestionEvent
+
+
+editFollowUpQuestionEventDecoder : Decoder Event
+editFollowUpQuestionEventDecoder =
+    decode EditFollowUpQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "type" Decode.string
+        |> required "title" Decode.string
+        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
+        |> required "text" Decode.string
+        |> required "answerIds" (Decode.list Decode.string)
+        |> required "expertIds" (Decode.list Decode.string)
+        |> required "referenceIds" (Decode.list Decode.string)
+        |> Decode.map EditFollowUpQuestionEvent
+
+
+deleteFollowUpQuestionEventDecoder : Decoder Event
+deleteFollowUpQuestionEventDecoder =
+    decode DeleteFollowUpQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> Decode.map DeleteFollowUpQuestionEvent
