@@ -38,7 +38,7 @@ formGroup : Input.Input e String -> Form e o -> String -> String -> Html.Html Fo
 formGroup input form fieldName labelText =
     let
         field =
-            Form.getFieldAsString fieldName form
+            Form.getFieldAsString fieldName form |> Debug.log "This is it kamo"
 
         ( error, errorClass ) =
             getErrors field

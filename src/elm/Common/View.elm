@@ -43,7 +43,7 @@ fullPageError icon error =
         ]
 
 
-type alias ModalConifg_ =
+type alias ModalConifg =
     { modalTitle : String
     , modalContent : List (Html Msg)
     , visible : Bool
@@ -54,7 +54,7 @@ type alias ModalConifg_ =
     }
 
 
-modalView : ModalConifg_ -> Html Msg
+modalView : ModalConifg -> Html Msg
 modalView cfg =
     let
         visibleClass =

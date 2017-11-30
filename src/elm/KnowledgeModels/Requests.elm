@@ -43,6 +43,6 @@ postEventsBulk session uuid data =
     Requests.post data session ("/branches/" ++ uuid ++ "/events/_bulk")
 
 
-postMigration : Session -> String -> Http.Request String
-postMigration session uuid =
-    Requests.postEmpty session ("/branches/" ++ uuid ++ "/migrations/current")
+postMigration : Session -> String -> Value -> Http.Request String
+postMigration session uuid data =
+    Requests.post data session ("/branches/" ++ uuid ++ "/migrations/current")

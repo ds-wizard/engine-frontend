@@ -5,7 +5,8 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
-import Common.View.Forms exposing (formResultView)
+import Common.View.Forms exposing (formResultView, selectGroup)
+import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -13,6 +14,7 @@ import KnowledgeModels.Index.Models exposing (..)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
 import KnowledgeModels.Models exposing (KnowledgeModel, KnowledgeModelState(..), kmMatchState)
 import Msgs
+import PackageManagement.Models exposing (PackageDetail)
 import Routing exposing (Route(..))
 
 
@@ -20,9 +22,9 @@ view : Maybe JwtToken -> Model -> Html Msgs.Msg
 view jwt model =
     div []
         [ pageHeader "Knowledge model" indexActions
-        , formResultView model.creatingMigration
         , content jwt model
         , deleteModal model
+        , upgradeModel model
         ]
 
 
@@ -137,19 +139,8 @@ kmTableRowActionPublish jwt km =
 kmTableRowActionUpgrade : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
 kmTableRowActionUpgrade jwt model km =
     if hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Outdated ] km then
-        let
-            loader =
-                case ( model.migrationUuid |> Maybe.map ((==) km.uuid), model.creatingMigration ) of
-                    ( Just True, Loading ) ->
-                        i [ class "fa fa-spinner fa-spin" ] []
-
-                    _ ->
-                        emptyNode
-        in
-        a [ class "link-with-icon", onClick <| Msgs.KnowledgeModelsIndexMsg <| PostMigration km.uuid ]
-            [ loader
-            , text "Upgrade"
-            ]
+        a [ class "link-with-icon", onClick <| Msgs.KnowledgeModelsIndexMsg <| ShowHideUpgradeModal <| Just km ]
+            [ text "Upgrade" ]
     else
         emptyNode
 
@@ -167,7 +158,7 @@ kmTableRowActionContinueMigration jwt km =
 
 kmTableRowActionDelete : KnowledgeModel -> Html Msgs.Msg
 kmTableRowActionDelete km =
-    a [ onClick <| Msgs.KnowledgeModelsIndexMsg <| ShowHideDeleteKnowledgeModel <| Just km ]
+    a [ onClick <| Msgs.KnowledgeModelsIndexMsg <| ShowHideDeleteKnowledgeModal <| Just km ]
         [ i [ class "fa fa-trash-o" ] [] ]
 
 
@@ -197,7 +188,69 @@ deleteModal model =
             , actionResult = model.deletingKnowledgeModel
             , actionName = "Delete"
             , actionMsg = Msgs.KnowledgeModelsIndexMsg DeleteKnowledgeModel
-            , cancelMsg = Msgs.KnowledgeModelsIndexMsg <| ShowHideDeleteKnowledgeModel Nothing
+            , cancelMsg = Msgs.KnowledgeModelsIndexMsg <| ShowHideDeleteKnowledgeModal Nothing
             }
     in
     modalView modalConfig
+
+
+upgradeModel : Model -> Html Msgs.Msg
+upgradeModel model =
+    let
+        ( visible, name ) =
+            case model.kmToBeUpgraded of
+                Just km ->
+                    ( True, km.name )
+
+                Nothing ->
+                    ( False, "" )
+
+        options =
+            case model.packages of
+                Success packages ->
+                    ( "", "- select parent package -" ) :: List.map createOption packages
+
+                _ ->
+                    []
+
+        modalContent =
+            case model.packages of
+                Unset ->
+                    [ emptyNode ]
+
+                Loading ->
+                    [ fullPageLoader ]
+
+                Error error ->
+                    [ p [ class "alert alert-danger" ] [ text error ] ]
+
+                Success packages ->
+                    [ p [ class "alert alert-info" ]
+                        [ text "Select the new parent package you want to migrate "
+                        , strong [] [ text name ]
+                        , text " to."
+                        ]
+                    , selectGroup options model.kmUpgradeForm "targetPackageId" "New parent package"
+                        |> Html.map (UpgradeFormMsg >> Msgs.KnowledgeModelsIndexMsg)
+                    ]
+
+        modalConfig =
+            { modalTitle = "Create migration"
+            , modalContent = modalContent
+            , visible = visible
+            , actionResult = model.creatingMigration
+            , actionName = "Create"
+            , actionMsg = Msgs.KnowledgeModelsIndexMsg <| UpgradeFormMsg Form.Submit
+            , cancelMsg = Msgs.KnowledgeModelsIndexMsg <| ShowHideUpgradeModal Nothing
+            }
+    in
+    modalView modalConfig
+
+
+createOption : PackageDetail -> ( String, String )
+createOption package =
+    let
+        optionText =
+            package.name ++ " " ++ package.version ++ " (" ++ package.id ++ ")"
+    in
+    ( package.id, optionText )

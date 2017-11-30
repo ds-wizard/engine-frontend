@@ -138,3 +138,25 @@ encodeKnowledgeModelPublishForm form =
             Encode.object [ ( "description", Encode.string form.description ) ]
     in
     ( version, object )
+
+
+type alias KnowledgeModelUpgradeForm =
+    { targetPackageId : String
+    }
+
+
+initKnowledgeModelUpgradeForm : Form () KnowledgeModelUpgradeForm
+initKnowledgeModelUpgradeForm =
+    Form.initial [] knowledgeModelUpgradeFormValidation
+
+
+knowledgeModelUpgradeFormValidation : Validation () KnowledgeModelUpgradeForm
+knowledgeModelUpgradeFormValidation =
+    Validate.map KnowledgeModelUpgradeForm
+        (Validate.field "targetPackageId" Validate.string)
+
+
+encodeKnowledgeModelUpgradeForm : KnowledgeModelUpgradeForm -> Encode.Value
+encodeKnowledgeModelUpgradeForm form =
+    Encode.object
+        [ ( "targetParentId", Encode.string form.targetPackageId ) ]

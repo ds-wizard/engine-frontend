@@ -2,14 +2,19 @@ module KnowledgeModels.Index.Update exposing (..)
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
+import Form
 import Jwt
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
-import KnowledgeModels.Models exposing (KnowledgeModel)
+import KnowledgeModels.Models exposing (KnowledgeModel, KnowledgeModelUpgradeForm, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
 import KnowledgeModels.Requests exposing (deleteKnowledgeModel, getKnowledgeModels, postMigration)
+import List.Extra as List
 import Msgs
+import PackageManagement.Models exposing (PackageDetail)
+import PackageManagement.Requests exposing (getPackagesFiltered)
 import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
+import Utils exposing (versionIsGreater)
 
 
 getKnowledgeModelsCmd : Session -> Cmd Msgs.Msg
@@ -24,10 +29,27 @@ deleteKnowledgeModelCmd kmId session =
         |> toCmd DeleteKnowledgeModelCompleted Msgs.KnowledgeModelsIndexMsg
 
 
-postMigrationCmd : String -> Session -> Cmd Msgs.Msg
-postMigrationCmd uuid session =
-    postMigration session uuid
+postMigrationCmd : Session -> KnowledgeModelUpgradeForm -> String -> Cmd Msgs.Msg
+postMigrationCmd session form uuid =
+    form
+        |> encodeKnowledgeModelUpgradeForm
+        |> postMigration session uuid
         |> toCmd PostMigrationCompleted Msgs.KnowledgeModelsIndexMsg
+
+
+getPackagesFilteredCmd : String -> Session -> Cmd Msgs.Msg
+getPackagesFilteredCmd parentPacakgeId session =
+    let
+        parts =
+            String.split ":" parentPacakgeId
+    in
+    case ( List.head parts, List.getAt 1 parts ) of
+        ( Just groupId, Just artifactId ) ->
+            getPackagesFiltered groupId artifactId session
+                |> toCmd GetPackagesCompleted Msgs.KnowledgeModelsIndexMsg
+
+        _ ->
+            Cmd.none
 
 
 getKnowledgeModelsCompleted : Model -> Result Jwt.JwtError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
@@ -68,21 +90,76 @@ deleteKnowledgeModelCompleted model result =
             )
 
 
-handlePostMigration : Session -> Model -> String -> ( Model, Cmd Msgs.Msg )
-handlePostMigration session model uuid =
-    case model.creatingMigration of
-        Loading ->
-            ( model, Cmd.none )
+handleShowHideUpgradeModal : Maybe KnowledgeModel -> Model -> Session -> ( Model, Cmd Msgs.Msg )
+handleShowHideUpgradeModal maybeKm model session =
+    let
+        getPackages parentPackageId =
+            let
+                cmd =
+                    getPackagesFilteredCmd parentPackageId session
+            in
+            Just ( { model | kmToBeUpgraded = maybeKm, packages = Loading }, cmd )
+    in
+    maybeKm
+        |> Maybe.andThen .parentPackageId
+        |> Maybe.andThen getPackages
+        |> Maybe.withDefault ( { model | kmToBeUpgraded = Nothing, packages = Unset }, Cmd.none )
+
+
+filterPackages : List PackageDetail -> KnowledgeModel -> Maybe (List PackageDetail)
+filterPackages packageList knowledgeModel =
+    let
+        getFilteredList packages version =
+            Just <| List.filter (.version >> versionIsGreater version) packages
+    in
+    knowledgeModel.parentPackageId
+        |> Maybe.andThen (String.split ":" >> List.getAt 2)
+        |> Maybe.andThen (getFilteredList packageList)
+
+
+handleGetPackagesCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
+handleGetPackagesCompleted model result =
+    case result of
+        Ok packages ->
+            let
+                packageList =
+                    model.kmToBeUpgraded
+                        |> Maybe.andThen (filterPackages packages)
+                        |> Maybe.withDefault []
+            in
+            ( { model | packages = Success packageList }, Cmd.none )
+
+        Err error ->
+            ( { model | packages = Error "Unable to get package list" }, Cmd.none )
+
+
+handleUpgradeForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleUpgradeForm formMsg session model =
+    case ( formMsg, Form.getOutput model.kmUpgradeForm, model.kmToBeUpgraded ) of
+        ( Form.Submit, Just kmUpgradeForm, Just km ) ->
+            let
+                cmd =
+                    postMigrationCmd session kmUpgradeForm km.uuid
+            in
+            ( { model | creatingMigration = Loading }, cmd )
 
         _ ->
-            ( { model | creatingMigration = Loading, migrationUuid = Just uuid }, postMigrationCmd uuid session )
+            ( { model | kmUpgradeForm = Form.update knowledgeModelUpgradeFormValidation formMsg model.kmUpgradeForm }
+            , Cmd.none
+            )
 
 
 postMigrationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 postMigrationCompleted model result =
     case result of
         Ok migration ->
-            ( model, cmdNavigate <| KnowledgeModelsMigration <| Maybe.withDefault "" model.migrationUuid )
+            let
+                kmUuid =
+                    model.kmToBeUpgraded
+                        |> Maybe.andThen (\km -> Just km.uuid)
+                        |> Maybe.withDefault ""
+            in
+            ( model, cmdNavigate <| KnowledgeModelsMigration kmUuid )
 
         Err error ->
             ( { model | creatingMigration = Error "Migration could not be created" }, Cmd.none )
@@ -94,7 +171,7 @@ update msg session model =
         GetKnowledgeModelsCompleted result ->
             getKnowledgeModelsCompleted model result
 
-        ShowHideDeleteKnowledgeModel km ->
+        ShowHideDeleteKnowledgeModal km ->
             ( { model | kmToBeDeleted = km, deletingKnowledgeModel = Unset }, Cmd.none )
 
         DeleteKnowledgeModel ->
@@ -103,8 +180,14 @@ update msg session model =
         DeleteKnowledgeModelCompleted result ->
             deleteKnowledgeModelCompleted model result
 
-        PostMigration uuid ->
-            handlePostMigration session model uuid
-
         PostMigrationCompleted result ->
             postMigrationCompleted model result
+
+        ShowHideUpgradeModal km ->
+            handleShowHideUpgradeModal km model session
+
+        UpgradeFormMsg msg ->
+            handleUpgradeForm msg session model
+
+        GetPackagesCompleted result ->
+            handleGetPackagesCompleted model result
