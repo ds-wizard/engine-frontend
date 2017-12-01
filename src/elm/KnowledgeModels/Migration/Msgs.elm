@@ -9,4 +9,3 @@ type Msg
     | AcceptEvent
     | RejectEvent
     | PostMigrationConflictCompleted (Result Jwt.JwtError String)
-    | NoOp

@@ -2,6 +2,7 @@ module KnowledgeModels.Editor.Models.Entities exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
+import List.Extra as List
 
 
 type alias KnowledgeModel =
@@ -159,3 +160,83 @@ newExpert uuid =
     , name = "New expert"
     , email = "expert@example.com"
     }
+
+
+getChapters : KnowledgeModel -> List Chapter
+getChapters km =
+    km.chapters
+
+
+getChapter : KnowledgeModel -> String -> Maybe Chapter
+getChapter km chapterUuid =
+    getChapters km
+        |> List.find (\c -> c.uuid == chapterUuid)
+
+
+getQuestions : KnowledgeModel -> List Question
+getQuestions km =
+    let
+        nestedQuestions question =
+            List.map getFollowUpQuestions question.answers
+                |> List.concat
+                |> (::) question
+    in
+    getChapters km
+        |> List.map .questions
+        |> List.concat
+        |> List.map nestedQuestions
+        |> List.concat
+
+
+getQuestion : KnowledgeModel -> String -> Maybe Question
+getQuestion km questionUuid =
+    getQuestions km
+        |> List.find (\q -> q.uuid == questionUuid)
+
+
+getFollowUpQuestions : Answer -> List Question
+getFollowUpQuestions answer =
+    let
+        getFollowUpsQuestionList (FollowUps questions) =
+            questions
+    in
+    getFollowUpsQuestionList answer.followUps
+
+
+getAnswers : KnowledgeModel -> List Answer
+getAnswers km =
+    getQuestions km
+        |> List.map .answers
+        |> List.concat
+
+
+getAnswer : KnowledgeModel -> String -> Maybe Answer
+getAnswer km answerUuid =
+    getAnswers km
+        |> List.find (\a -> a.uuid == answerUuid)
+
+
+getReferences : KnowledgeModel -> List Reference
+getReferences km =
+    getQuestions km
+        |> List.map .references
+        |> List.concat
+
+
+getReference : KnowledgeModel -> String -> Maybe Reference
+getReference km referenceUuid =
+    getReferences km
+        |> List.find (\r -> r.uuid == referenceUuid)
+
+
+getExperts : KnowledgeModel -> List Expert
+getExperts km =
+    getQuestions km
+        |> List.map .experts
+        |> List.concat
+
+
+getExpert : KnowledgeModel -> String -> Maybe Expert
+getExpert km expertUuid =
+    getExperts km
+        |> List.find (\e -> e.uuid == expertUuid)

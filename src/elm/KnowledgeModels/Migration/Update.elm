@@ -90,6 +90,3 @@ update msg session model =
 
         PostMigrationConflictCompleted result ->
             handlePostMigrationConflictCompleted session model result
-
-        _ ->
-            ( model, Cmd.none )
