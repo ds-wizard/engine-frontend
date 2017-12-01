@@ -14,6 +14,7 @@ type alias Model =
     , kmToBeUpgraded : Maybe KnowledgeModel
     , packages : ActionResult (List PackageDetail)
     , kmUpgradeForm : Form () KnowledgeModelUpgradeForm
+    , deletingMigration : ActionResult String
     }
 
 
@@ -26,4 +27,5 @@ initialModel =
     , kmToBeUpgraded = Nothing
     , packages = Unset
     , kmUpgradeForm = initKnowledgeModelUpgradeForm
+    , deletingMigration = Unset
     }

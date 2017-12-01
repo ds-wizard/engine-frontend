@@ -185,3 +185,8 @@ ins, .ins {
         font-style: italic;
     }
 }
+
+a.disabled {
+    text-decoration: none;
+    color: #aaa;
+}

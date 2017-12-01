@@ -57,3 +57,8 @@ getMigration uuid session =
 postMigrationConflict : String -> Session -> Value -> Http.Request String
 postMigrationConflict uuid session data =
     Requests.post data session ("/branches/" ++ uuid ++ "/migrations/current/conflict")
+
+
+deleteMigration : String -> Session -> Http.Request String
+deleteMigration uuid session =
+    Requests.delete session ("/branches/" ++ uuid ++ "/migrations/current")

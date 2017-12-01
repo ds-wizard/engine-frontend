@@ -7,7 +7,7 @@ import Jwt
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
 import KnowledgeModels.Models exposing (KnowledgeModel, KnowledgeModelUpgradeForm, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
-import KnowledgeModels.Requests exposing (deleteKnowledgeModel, getKnowledgeModels, postMigration)
+import KnowledgeModels.Requests exposing (deleteKnowledgeModel, deleteMigration, getKnowledgeModels, postMigration)
 import List.Extra as List
 import Msgs
 import PackageManagement.Models exposing (PackageDetail)
@@ -50,6 +50,12 @@ getPackagesFilteredCmd parentPacakgeId session =
 
         _ ->
             Cmd.none
+
+
+deleteMigrationCmd : String -> Session -> Cmd Msgs.Msg
+deleteMigrationCmd uuid session =
+    deleteMigration uuid session
+        |> toCmd DeleteMigrationCompleted Msgs.KnowledgeModelsIndexMsg
 
 
 getKnowledgeModelsCompleted : Model -> Result Jwt.JwtError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
@@ -165,6 +171,23 @@ postMigrationCompleted model result =
             ( { model | creatingMigration = Error "Migration could not be created" }, Cmd.none )
 
 
+handleDeleteMigration : String -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteMigration uuid session model =
+    ( { model | deletingMigration = Loading }, deleteMigrationCmd uuid session )
+
+
+deleteMigrationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+deleteMigrationCompleted model result =
+    case result of
+        Ok km ->
+            ( model, cmdNavigate KnowledgeModels )
+
+        Err error ->
+            ( { model | deletingMigration = Error "Migration could not be deleted" }
+            , Cmd.none
+            )
+
+
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of
@@ -191,3 +214,9 @@ update msg session model =
 
         GetPackagesCompleted result ->
             handleGetPackagesCompleted model result
+
+        DeleteMigration uuid ->
+            handleDeleteMigration uuid session model
+
+        DeleteMigrationCompleted result ->
+            deleteMigrationCompleted model result

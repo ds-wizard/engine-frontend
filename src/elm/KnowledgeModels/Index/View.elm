@@ -22,6 +22,7 @@ view : Maybe JwtToken -> Model -> Html Msgs.Msg
 view jwt model =
     div []
         [ pageHeader "Knowledge model" indexActions
+        , formResultView model.deletingMigration
         , content jwt model
         , deleteModal model
         , upgradeModel model
@@ -107,6 +108,7 @@ kmTableRow jwt model km =
             , kmTableRowActionPublish jwt km
             , kmTableRowActionUpgrade jwt model km
             , kmTableRowActionContinueMigration jwt km
+            , kmTableRowActionCancelMigration jwt model km
             ]
         ]
 
@@ -152,6 +154,21 @@ kmTableRowActionContinueMigration jwt km =
             []
             [ text "Continue Migration"
             ]
+    else
+        emptyNode
+
+
+kmTableRowActionCancelMigration : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
+kmTableRowActionCancelMigration jwt model km =
+    if hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Migrating ] km then
+        case model.deletingMigration of
+            Loading ->
+                a [ class "disabled" ] [ text "Cancel Migration" ]
+
+            _ ->
+                a [ onClick <| Msgs.KnowledgeModelsIndexMsg <| DeleteMigration km.uuid ]
+                    [ text "Cancel Migration"
+                    ]
     else
         emptyNode
 

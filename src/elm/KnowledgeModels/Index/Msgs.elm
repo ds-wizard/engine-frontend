@@ -15,3 +15,5 @@ type Msg
     | ShowHideUpgradeModal (Maybe KnowledgeModel)
     | GetPackagesCompleted (Result Jwt.JwtError (List PackageDetail))
     | UpgradeFormMsg Form.Msg
+    | DeleteMigration String
+    | DeleteMigrationCompleted (Result Jwt.JwtError String)
