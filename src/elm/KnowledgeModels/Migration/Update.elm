@@ -42,9 +42,11 @@ handleResolveChange createMigrationResolution session model =
         cmd =
             case model.migration of
                 Success migration ->
-                    getEventUuid migration.migrationState.targetEvent
-                        |> createMigrationResolution
-                        |> postMigrationConflictCmd model.branchUuid session
+                    migration.migrationState.targetEvent
+                        |> Maybe.map getEventUuid
+                        |> Maybe.map createMigrationResolution
+                        |> Maybe.map (postMigrationConflictCmd model.branchUuid session)
+                        |> Maybe.withDefault Cmd.none
 
                 _ ->
                     Cmd.none

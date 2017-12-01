@@ -1,6 +1,6 @@
 module KnowledgeModels.Migration.View exposing (..)
 
-import Common.Html exposing (emptyNode)
+import Common.Html exposing (emptyNode, linkTo)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (formResultView)
@@ -12,8 +12,9 @@ import KnowledgeModels.Editor.Models.Entities exposing (..)
 import KnowledgeModels.Editor.Models.Events exposing (..)
 import KnowledgeModels.Migration.Models exposing (Model)
 import KnowledgeModels.Migration.Msgs exposing (Msg(..))
-import KnowledgeModels.Models.Migration exposing (Migration)
+import KnowledgeModels.Models.Migration exposing (Migration, MigrationStateType(..))
 import Msgs
+import Routing exposing (Route(..))
 
 
 view : Model -> Html Msgs.Msg
@@ -46,112 +47,132 @@ migrationView model migration =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
-                [ text "The event is not connected to any entity in the knowledge model." ]
+                [ text "Migration state is corrupted." ]
 
         view =
-            case migration.migrationState.targetEvent of
-                EditKnowledgeModelEvent data ->
-                    migration.currentKnowledgeModel
-                        |> viewEditKnowledgeModelDiff data
-                        |> viewEvent model "Edit knowledge model"
-
-                AddChapterEvent data ->
-                    viewAddChapterDiff data
-                        |> viewEvent model "Add chapter"
-
-                EditChapterEvent data ->
-                    getChapter migration.currentKnowledgeModel data.chapterUuid
-                        |> Maybe.map (viewEditChapterDiff data)
-                        |> Maybe.map (viewEvent model "Edit chapter")
+            case migration.migrationState.stateType of
+                ConflictState ->
+                    migration.migrationState.targetEvent
+                        |> Maybe.map (getEventView model migration)
                         |> Maybe.withDefault errorMessage
 
-                DeleteChapterEvent data ->
-                    getChapter migration.currentKnowledgeModel data.chapterUuid
-                        |> Maybe.map viewDeleteChapterDiff
-                        |> Maybe.map (viewEvent model "Delete chapter")
-                        |> Maybe.withDefault errorMessage
+                CompletedState ->
+                    viewCompletedMigration
 
-                AddQuestionEvent data ->
-                    viewAddQuestionDiff data
-                        |> viewEvent model "Add question"
-
-                EditQuestionEvent data ->
-                    getQuestion migration.currentKnowledgeModel data.questionUuid
-                        |> Maybe.map (viewEditQuestionDiff data)
-                        |> Maybe.map (viewEvent model "Edit question")
-                        |> Maybe.withDefault errorMessage
-
-                DeleteQuestionEvent data ->
-                    getQuestion migration.currentKnowledgeModel data.questionUuid
-                        |> Maybe.map viewDeleteQuestionDiff
-                        |> Maybe.map (viewEvent model "Delete question")
-                        |> Maybe.withDefault errorMessage
-
-                AddAnswerEvent data ->
-                    viewAddAnswerDiff data
-                        |> viewEvent model "Add answer"
-
-                EditAnswerEvent data ->
-                    getAnswer migration.currentKnowledgeModel data.answerUuid
-                        |> Maybe.map (viewEditAnswerDiff data)
-                        |> Maybe.map (viewEvent model "Edit answer")
-                        |> Maybe.withDefault errorMessage
-
-                DeleteAnswerEvent data ->
-                    getAnswer migration.currentKnowledgeModel data.answerUuid
-                        |> Maybe.map viewDeleteAnswerDiff
-                        |> Maybe.map (viewEvent model "Delete answer")
-                        |> Maybe.withDefault errorMessage
-
-                AddReferenceEvent data ->
-                    viewAddReferenceDiff data
-                        |> viewEvent model "Add reference"
-
-                EditReferenceEvent data ->
-                    getReference migration.currentKnowledgeModel data.referenceUuid
-                        |> Maybe.map (viewEditReferenceDiff data)
-                        |> Maybe.map (viewEvent model "Edit reference")
-                        |> Maybe.withDefault errorMessage
-
-                DeleteReferenceEvent data ->
-                    getReference migration.currentKnowledgeModel data.referenceUuid
-                        |> Maybe.map viewDeleteReferenceDiff
-                        |> Maybe.map (viewEvent model "Delete reference")
-                        |> Maybe.withDefault errorMessage
-
-                AddExpertEvent data ->
-                    viewAddExpertDiff data
-                        |> viewEvent model "Add expert"
-
-                EditExpertEvent data ->
-                    getExpert migration.currentKnowledgeModel data.expertUuid
-                        |> Maybe.map (viewEditExpertDiff data)
-                        |> Maybe.map (viewEvent model "Edit expert")
-                        |> Maybe.withDefault errorMessage
-
-                DeleteExpertEvent data ->
-                    getExpert migration.currentKnowledgeModel data.expertUuid
-                        |> Maybe.map viewDeleteExpertDiff
-                        |> Maybe.map (viewEvent model "Delete expert")
-                        |> Maybe.withDefault errorMessage
-
-                AddFollowUpQuestionEvent data ->
-                    viewAddQuestionDiff data
-                        |> viewEvent model "Add follow-up question"
-
-                EditFollowUpQuestionEvent data ->
-                    getQuestion migration.currentKnowledgeModel data.questionUuid
-                        |> Maybe.map (viewEditQuestionDiff data)
-                        |> Maybe.map (viewEvent model "Edit follow-up question")
-                        |> Maybe.withDefault errorMessage
-
-                DeleteFollowUpQuestionEvent data ->
-                    getQuestion migration.currentKnowledgeModel data.questionUuid
-                        |> Maybe.map viewDeleteQuestionDiff
-                        |> Maybe.map (viewEvent model "Delete follow-up question")
-                        |> Maybe.withDefault errorMessage
+                _ ->
+                    errorMessage
     in
     view
+
+
+getEventView : Model -> Migration -> Event -> Html Msgs.Msg
+getEventView model migration event =
+    let
+        errorMessage =
+            div [ class "alert alert-danger" ]
+                [ text "The event is not connected to any entity in the knowledge model." ]
+    in
+    case event of
+        EditKnowledgeModelEvent data ->
+            migration.currentKnowledgeModel
+                |> viewEditKnowledgeModelDiff data
+                |> viewEvent model "Edit knowledge model"
+
+        AddChapterEvent data ->
+            viewAddChapterDiff data
+                |> viewEvent model "Add chapter"
+
+        EditChapterEvent data ->
+            getChapter migration.currentKnowledgeModel data.chapterUuid
+                |> Maybe.map (viewEditChapterDiff data)
+                |> Maybe.map (viewEvent model "Edit chapter")
+                |> Maybe.withDefault errorMessage
+
+        DeleteChapterEvent data ->
+            getChapter migration.currentKnowledgeModel data.chapterUuid
+                |> Maybe.map viewDeleteChapterDiff
+                |> Maybe.map (viewEvent model "Delete chapter")
+                |> Maybe.withDefault errorMessage
+
+        AddQuestionEvent data ->
+            viewAddQuestionDiff data
+                |> viewEvent model "Add question"
+
+        EditQuestionEvent data ->
+            getQuestion migration.currentKnowledgeModel data.questionUuid
+                |> Maybe.map (viewEditQuestionDiff data)
+                |> Maybe.map (viewEvent model "Edit question")
+                |> Maybe.withDefault errorMessage
+
+        DeleteQuestionEvent data ->
+            getQuestion migration.currentKnowledgeModel data.questionUuid
+                |> Maybe.map viewDeleteQuestionDiff
+                |> Maybe.map (viewEvent model "Delete question")
+                |> Maybe.withDefault errorMessage
+
+        AddAnswerEvent data ->
+            viewAddAnswerDiff data
+                |> viewEvent model "Add answer"
+
+        EditAnswerEvent data ->
+            getAnswer migration.currentKnowledgeModel data.answerUuid
+                |> Maybe.map (viewEditAnswerDiff data)
+                |> Maybe.map (viewEvent model "Edit answer")
+                |> Maybe.withDefault errorMessage
+
+        DeleteAnswerEvent data ->
+            getAnswer migration.currentKnowledgeModel data.answerUuid
+                |> Maybe.map viewDeleteAnswerDiff
+                |> Maybe.map (viewEvent model "Delete answer")
+                |> Maybe.withDefault errorMessage
+
+        AddReferenceEvent data ->
+            viewAddReferenceDiff data
+                |> viewEvent model "Add reference"
+
+        EditReferenceEvent data ->
+            getReference migration.currentKnowledgeModel data.referenceUuid
+                |> Maybe.map (viewEditReferenceDiff data)
+                |> Maybe.map (viewEvent model "Edit reference")
+                |> Maybe.withDefault errorMessage
+
+        DeleteReferenceEvent data ->
+            getReference migration.currentKnowledgeModel data.referenceUuid
+                |> Maybe.map viewDeleteReferenceDiff
+                |> Maybe.map (viewEvent model "Delete reference")
+                |> Maybe.withDefault errorMessage
+
+        AddExpertEvent data ->
+            viewAddExpertDiff data
+                |> viewEvent model "Add expert"
+
+        EditExpertEvent data ->
+            getExpert migration.currentKnowledgeModel data.expertUuid
+                |> Maybe.map (viewEditExpertDiff data)
+                |> Maybe.map (viewEvent model "Edit expert")
+                |> Maybe.withDefault errorMessage
+
+        DeleteExpertEvent data ->
+            getExpert migration.currentKnowledgeModel data.expertUuid
+                |> Maybe.map viewDeleteExpertDiff
+                |> Maybe.map (viewEvent model "Delete expert")
+                |> Maybe.withDefault errorMessage
+
+        AddFollowUpQuestionEvent data ->
+            viewAddQuestionDiff data
+                |> viewEvent model "Add follow-up question"
+
+        EditFollowUpQuestionEvent data ->
+            getQuestion migration.currentKnowledgeModel data.questionUuid
+                |> Maybe.map (viewEditQuestionDiff data)
+                |> Maybe.map (viewEvent model "Edit follow-up question")
+                |> Maybe.withDefault errorMessage
+
+        DeleteFollowUpQuestionEvent data ->
+            getQuestion migration.currentKnowledgeModel data.questionUuid
+                |> Maybe.map viewDeleteQuestionDiff
+                |> Maybe.map (viewEvent model "Delete follow-up question")
+                |> Maybe.withDefault errorMessage
 
 
 viewEvent : Model -> String -> Html Msgs.Msg -> Html Msgs.Msg
@@ -515,3 +536,13 @@ formActions model =
             [ text "Accept" ]
         ]
         |> Html.map Msgs.KnowledgeModelsMigrationMsg
+
+
+viewCompletedMigration : Html Msgs.Msg
+viewCompletedMigration =
+    div [ class "jumbotron full-page-error" ]
+        [ h1 [ class "display-3" ] [ i [ class "fa fa-check-square-o" ] [] ]
+        , p [] [ text "Migration successfully completed." ]
+        , div [ class "text-right" ]
+            [ linkTo KnowledgeModels [ class "btn btn-primary" ] [ text "Done" ] ]
+        ]

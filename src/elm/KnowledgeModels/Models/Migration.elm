@@ -1,7 +1,7 @@
 module KnowledgeModels.Models.Migration exposing (..)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
 import KnowledgeModels.Editor.Models.Events exposing (Event, eventDecoder)
@@ -17,8 +17,8 @@ type alias Migration =
 
 
 type alias MigrationState =
-    { type_ : MigrationStateType
-    , targetEvent : Event
+    { stateType : MigrationStateType
+    , targetEvent : Maybe Event
     }
 
 
@@ -48,7 +48,7 @@ migrationStateDecoder : Decoder MigrationState
 migrationStateDecoder =
     decode MigrationState
         |> required "type" migrationStateTypeDecoder
-        |> required "targetEvent" eventDecoder
+        |> optional "targetEvent" (Decode.maybe eventDecoder) Nothing
 
 
 migrationStateTypeDecoder : Decoder MigrationStateType
