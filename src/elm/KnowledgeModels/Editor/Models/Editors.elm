@@ -301,7 +301,7 @@ getExpertUuid (ExpertEditor expertEditor) =
 
 getExpertEditorName : ExpertEditor -> String
 getExpertEditorName (ExpertEditor ee) =
-    (Form.getFieldAsString "label" ee.form).value |> Maybe.withDefault ""
+    (Form.getFieldAsString "name" ee.form).value |> Maybe.withDefault ""
 
 
 activateExpert : ExpertEditor -> ExpertEditor
