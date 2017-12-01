@@ -48,6 +48,16 @@ a {
         .btn {
             min-width: 100px;
         }
+
+        button {
+            outline: none !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+        }
+
+        .extra-action {
+            color: $gray;
+        }
     }
 
     .full-page-loader {
@@ -154,4 +164,24 @@ a {
 
 .help-block-after {
     margin-top: -10px;
+}
+
+del, .del {
+    color: #900;
+    background: #fee;
+    text-decoration: line-through;
+}
+
+ins, .ins {
+    color: #090;
+    background: #efe;
+    text-decoration: none;
+}
+
+
+.control-label {
+    .regular {
+        font-weight: normal;
+        font-style: italic;
+    }
 }

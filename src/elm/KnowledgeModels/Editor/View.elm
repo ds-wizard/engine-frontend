@@ -350,7 +350,7 @@ formActions cancelMsg deleteMsg submitMsg =
         [ div []
             [ button [ class "btn btn-default", onClick cancelMsg ]
                 [ text "Cancel" ]
-            , button [ class "btn btn-link link-with-icon delete-entity", onClick deleteMsg ]
+            , button [ class "btn btn-link link-with-icon extra-action", onClick deleteMsg ]
                 [ i [ class "fa fa-trash-o" ] []
                 , text "Delete"
                 ]

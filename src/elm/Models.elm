@@ -61,7 +61,7 @@ initialModel route seed session jwt =
     , knowledgeModelsCreateModel = KnowledgeModels.Create.Models.initialModel
     , knowledgeModelsPublishModel = KnowledgeModels.Publish.Models.initialModel
     , knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel ""
-    , knowledgeModelsMigrationModel = KnowledgeModels.Migration.Models.initialModel
+    , knowledgeModelsMigrationModel = KnowledgeModels.Migration.Models.initialModel ""
     }
 
 

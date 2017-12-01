@@ -1262,3 +1262,64 @@ deleteFollowUpQuestionEventDecoder =
         |> required "answerUuid" Decode.string
         |> required "questionUuid" Decode.string
         |> Decode.map DeleteFollowUpQuestionEvent
+
+
+getEventUuid : Event -> String
+getEventUuid event =
+    case event of
+        EditKnowledgeModelEvent data ->
+            data.uuid
+
+        AddChapterEvent data ->
+            data.uuid
+
+        EditChapterEvent data ->
+            data.uuid
+
+        DeleteChapterEvent data ->
+            data.uuid
+
+        AddQuestionEvent data ->
+            data.uuid
+
+        EditQuestionEvent data ->
+            data.uuid
+
+        DeleteQuestionEvent data ->
+            data.uuid
+
+        AddAnswerEvent data ->
+            data.uuid
+
+        EditAnswerEvent data ->
+            data.uuid
+
+        DeleteAnswerEvent data ->
+            data.uuid
+
+        AddReferenceEvent data ->
+            data.uuid
+
+        EditReferenceEvent data ->
+            data.uuid
+
+        DeleteReferenceEvent data ->
+            data.uuid
+
+        AddExpertEvent data ->
+            data.uuid
+
+        EditExpertEvent data ->
+            data.uuid
+
+        DeleteExpertEvent data ->
+            data.uuid
+
+        AddFollowUpQuestionEvent data ->
+            data.uuid
+
+        EditFollowUpQuestionEvent data ->
+            data.uuid
+
+        DeleteFollowUpQuestionEvent data ->
+            data.uuid

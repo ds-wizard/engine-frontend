@@ -7,6 +7,7 @@ import KnowledgeModels.Editor.Models
 import KnowledgeModels.Editor.Update
 import KnowledgeModels.Index.Models
 import KnowledgeModels.Index.Update
+import KnowledgeModels.Migration.Models
 import KnowledgeModels.Migration.Update
 import KnowledgeModels.Publish.Models
 import KnowledgeModels.Publish.Update
@@ -65,6 +66,9 @@ fetchData model =
         KnowledgeModelsEditor uuid ->
             KnowledgeModels.Editor.Update.getKnowledgeModelCmd uuid model.session
 
+        KnowledgeModelsMigration uuid ->
+            KnowledgeModels.Migration.Update.getMigrationCmd uuid model.session
+
         _ ->
             Cmd.none
 
@@ -107,6 +111,9 @@ initLocalModel model =
 
         KnowledgeModelsEditor uuid ->
             { model | knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel uuid }
+
+        KnowledgeModelsMigration uuid ->
+            { model | knowledgeModelsMigrationModel = KnowledgeModels.Migration.Models.initialModel uuid }
 
         _ ->
             model
@@ -214,7 +221,7 @@ update msg model =
 
         Msgs.KnowledgeModelsMigrationMsg msg ->
             let
-                ( seed, knowledgeModelsMigrationModel, cmd ) =
-                    KnowledgeModels.Migration.Update.update msg model.seed model.session model.knowledgeModelsMigrationModel
+                ( knowledgeModelsMigrationModel, cmd ) =
+                    KnowledgeModels.Migration.Update.update msg model.session model.knowledgeModelsMigrationModel
             in
-            ( { model | seed = seed, knowledgeModelsMigrationModel = knowledgeModelsMigrationModel }, cmd )
+            ( { model | knowledgeModelsMigrationModel = knowledgeModelsMigrationModel }, cmd )

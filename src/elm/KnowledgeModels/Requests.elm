@@ -5,6 +5,7 @@ import Http
 import Json.Encode as Encode exposing (Value)
 import KnowledgeModels.Editor.Models.Entities as Editor exposing (KnowledgeModel, knowledgeModelDecoder)
 import KnowledgeModels.Models as Models exposing (KnowledgeModel, knowledgeModelDecoder, knowledgeModelListDecoder)
+import KnowledgeModels.Models.Migration exposing (Migration, migrationDecoder)
 import Requests
 
 
@@ -46,3 +47,13 @@ postEventsBulk session uuid data =
 postMigration : Session -> String -> Value -> Http.Request String
 postMigration session uuid data =
     Requests.post data session ("/branches/" ++ uuid ++ "/migrations/current")
+
+
+getMigration : String -> Session -> Http.Request Migration
+getMigration uuid session =
+    Requests.get session ("/branches/" ++ uuid ++ "/migrations/current") migrationDecoder
+
+
+postMigrationConflict : String -> Session -> Value -> Http.Request String
+postMigrationConflict uuid session data =
+    Requests.post data session ("/branches/" ++ uuid ++ "/migrations/current/conflict")
