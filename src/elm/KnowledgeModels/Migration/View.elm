@@ -1,6 +1,6 @@
 module KnowledgeModels.Migration.View exposing (..)
 
-import Common.Html exposing (emptyNode, linkTo)
+import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (formResultView)
@@ -19,7 +19,7 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
+    div [ detailContainerClass ]
         [ pageHeader "Migration" []
         , formResultView model.conflict
         , content model

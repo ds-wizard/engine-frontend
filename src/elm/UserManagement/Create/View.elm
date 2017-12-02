@@ -1,5 +1,6 @@
 module UserManagement.Create.View exposing (..)
 
+import Common.Html exposing (detailContainerClass)
 import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
@@ -14,7 +15,7 @@ import UserManagement.Models exposing (..)
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
+    div [ detailContainerClass ]
         [ pageHeader "Create user" []
         , formResultView model.savingUser
         , formView model.form

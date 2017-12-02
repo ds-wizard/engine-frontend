@@ -1,8 +1,9 @@
 module PackageManagement.Detail.View exposing (..)
 
-import Common.Html exposing (emptyNode, linkTo)
+import Common.Html exposing (detailContainerClassWith, emptyNode, linkTo)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
+import Common.View.Forms exposing (codeGroup)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -16,7 +17,7 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div []
+    div [ detailContainerClassWith "package-management-detail" ]
         [ content model
         , deleteModal model
         , deleteVersionModal model
@@ -107,10 +108,10 @@ packageDetail : List PackageDetail -> Html Msgs.Msg
 packageDetail packages =
     case List.head packages of
         Just package ->
-            div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
+            div []
                 [ pageHeader package.name actions
-                , code [ class "package-artifact-id" ]
-                    [ text (package.groupId ++ ":" ++ package.artifactId) ]
+                , codeGroup package.groupId "Group ID"
+                , codeGroup package.artifactId "Artifact ID"
                 , h3 [] [ text "Versions" ]
                 , div [] (List.map versionView packages)
                 ]
@@ -121,9 +122,9 @@ packageDetail packages =
 
 actions : List (Html Msgs.Msg)
 actions =
-    [ button
+    [ a
         [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog True)
-        , class "btn btn-link link-with-icon"
+        , class "link-with-icon"
         ]
         [ i [ class "fa fa-trash-o" ] []
         , text "Delete"

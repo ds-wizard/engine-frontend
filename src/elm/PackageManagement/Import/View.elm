@@ -1,5 +1,6 @@
 module PackageManagement.Import.View exposing (..)
 
+import Common.Html exposing (detailContainerClassWith)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (actionButton, formResultView)
@@ -25,7 +26,7 @@ view model =
                 Nothing ->
                     dropzone model |> Html.map Msgs.PackageManagementImportMsg
     in
-    div []
+    div [ detailContainerClassWith "package-management-import" ]
         [ pageHeader "Import package" []
         , formResultView model.importing
         , content

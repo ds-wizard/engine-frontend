@@ -1,6 +1,6 @@
 module KnowledgeModels.Publish.View exposing (..)
 
-import Common.Html exposing (emptyNode)
+import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
@@ -18,7 +18,7 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ class "col-xs-12 col-lg-10 col-lg-offset-1 knowledge-models-publish" ]
+    div [ detailContainerClassWith "knowledge-models-publish" ]
         [ pageHeader "Publish new version" []
         , content model
         ]
@@ -49,8 +49,8 @@ formView form knowledgeModel =
     let
         formHtml =
             div []
-                [ knowledgeModelName knowledgeModel.name
-                , artifactId knowledgeModel.artifactId
+                [ textGroup knowledgeModel.name "Knowledge Model"
+                , codeGroup knowledgeModel.artifactId "Artifact ID"
                 , lastVersion (kmLastVersion knowledgeModel)
                 , versionInputGroup form
                 , textAreaGroup form "description" "Description"
@@ -61,34 +61,14 @@ formView form knowledgeModel =
     formHtml |> Html.map (FormMsg >> Msgs.KnowledgeModelsPublishMsg)
 
 
-knowledgeModelName : String -> Html msg
-knowledgeModelName name =
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text "Knowledge Model" ]
-        , p [ class "form-value" ] [ text name ]
-        ]
-
-
-artifactId : String -> Html msg
-artifactId artifactId =
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text "Artifact ID" ]
-        , code [] [ text artifactId ]
-        ]
-
-
 lastVersion : Maybe String -> Html msg
 lastVersion version =
     let
         content =
             version
-                |> Maybe.map (text >> List.singleton >> code [])
-                |> Maybe.withDefault (text "No version of this package has been published yet.")
+                |> Maybe.withDefault "No version of this package has been published yet."
     in
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text "Last version" ]
-        , p [ class "form-value" ] [ content ]
-        ]
+    textGroup content "Last version"
 
 
 versionInputGroup : Form e o -> Html Form.Msg

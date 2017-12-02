@@ -1,0 +1,32 @@
+.table-actions {
+    a {
+        margin-right: 15px;
+    }
+}
+
+.td-empty-table {
+    text-align: center;
+    padding: 40px;
+    font-size: 16px;
+    color: #aaa;
+}
+
+.td-with-labels {
+    .label {
+        font-weight: normal;
+        margin-left: 10px;
+    }
+
+    .fa {
+        margin-left: 10px;
+        color: #aaa;
+    }
+}
+
+.table {
+    tbody {
+        tr:hover {
+            background: #f7f7f7;
+        }
+    }
+}

@@ -1,6 +1,6 @@
 module Organization.View exposing (..)
 
-import Common.Html exposing (emptyNode)
+import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
@@ -14,7 +14,7 @@ import Organization.Msgs exposing (Msg(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
+    div [ detailContainerClass ]
         [ pageHeader "Organization" []
         , content model
         ]

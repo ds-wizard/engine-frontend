@@ -25,7 +25,7 @@ view jwt model =
         , formResultView model.deletingMigration
         , content jwt model
         , deleteModal model
-        , upgradeModel model
+        , upgradeModal model
         ]
 
 
@@ -90,7 +90,7 @@ kmTableEmpty =
 kmTableRow : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
 kmTableRow jwt model km =
     tr []
-        [ td [] [ kmTableRowName km ]
+        [ td [ class "td-with-labels" ] [ kmTableRowName km ]
         , td [] [ text km.artifactId ]
         , td [] [ text (Maybe.withDefault "-" km.lastAppliedParentPackageId) ]
         , td [ class "table-actions" ]
@@ -127,7 +127,7 @@ kmTableRowName km =
                 _ ->
                     emptyNode
     in
-    span [ class "name" ]
+    span []
         [ text km.name
         , extra
         ]
@@ -231,13 +231,13 @@ deleteModal model =
     modalView modalConfig
 
 
-upgradeModel : Model -> Html Msgs.Msg
-upgradeModel model =
+upgradeModal : Model -> Html Msgs.Msg
+upgradeModal model =
     let
         ( visible, name ) =
             case model.kmToBeUpgraded of
                 Just km ->
-                    ( True, km.name )
+                    ( True, km.name ) |> Debug.log "State"
 
                 Nothing ->
                     ( False, "" )

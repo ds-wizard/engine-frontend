@@ -1,4 +1,4 @@
-@import "~bootswatch/united/variables";
+@import "mixins";
 
 .login {
     h2 {
@@ -6,10 +6,9 @@
     }
 
     .navbar-brand {
+        background: no-repeat left 10px center;
         @include background-image-retina("/img/elixir-logo", "png");
         background-size: 33px 34px;
-        background-repeat: no-repeat;
-        background-position: left 10px center;
         text-indent: 30px;
     }
 

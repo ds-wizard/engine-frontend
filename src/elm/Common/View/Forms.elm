@@ -50,6 +50,26 @@ formGroup input form fieldName labelText =
         ]
 
 
+textGroup : String -> String -> Html.Html msg
+textGroup value =
+    plainGroup <|
+        p [ class "form-value" ] [ text value ]
+
+
+codeGroup : String -> String -> Html.Html msg
+codeGroup value =
+    plainGroup <|
+        code [] [ text value ]
+
+
+plainGroup : Html.Html msg -> String -> Html.Html msg
+plainGroup valueHtml labelText =
+    div [ class "form-group" ]
+        [ label [ class "control-label" ] [ text labelText ]
+        , valueHtml
+        ]
+
+
 getErrors : Form.FieldState e String -> ( Html msg, String )
 getErrors field =
     case field.liveError of

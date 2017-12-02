@@ -20,7 +20,7 @@ import String exposing (toLower)
 
 view : Model -> Html Msgs.Msg
 view model =
-    div []
+    div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
         [ pageHeader "Knowledge model editor" []
         , content model
         ]
@@ -58,7 +58,7 @@ editorView model =
     div []
         [ formResultView model.saving
         , breadcrumbsView
-        , div [ class "knowledge-model-editor col-xs-12 col-lg-10 col-lg-offset-1" ] [ currentView ]
+        , div [ class "knowledge-model-editor" ] [ currentView ]
         ]
 
 

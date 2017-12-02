@@ -5,11 +5,15 @@ $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "~font-awesome/css/font-awesome.css";
 
 @import "animations";
-@import "layout";
 @import "common";
-@import "knowledge-models-editor";
-@import "knowledge-models-publish";
-@import "user-management";
-@import "package-management";
-@import "package-management-import";
+@import "elements";
+@import "forms";
+@import "layout";
 @import "login";
+@import "tables";
+
+@import "modules/knowledge-models-editor";
+@import "modules/knowledge-models-publish";
+@import "modules/user-management";
+@import "modules/package-management-detail";
+@import "modules/package-management-import";

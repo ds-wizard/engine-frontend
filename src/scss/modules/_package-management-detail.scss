@@ -1,0 +1,29 @@
+@import "../../../node_modules/bootswatch/united/variables";
+
+.package-management-detail {
+    .panel-version {
+        background: $gray-lighter;
+        margin-bottom: 10px;
+
+        strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .panel-body {
+            display: flex;
+            justify-content: space-between;
+
+            &:after, &:before {
+                display: none;
+            }
+
+            .actions {
+                a {
+                    margin-left: 20px;
+                }
+            }
+        }
+    }
+}

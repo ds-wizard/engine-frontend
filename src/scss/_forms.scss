@@ -1,0 +1,44 @@
+@import "~bootswatch/united/variables";
+
+textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    margin-bottom: 50px;
+
+    .btn {
+        min-width: 100px;
+    }
+
+    button {
+        outline: none !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .extra-action {
+        color: $gray;
+    }
+}
+
+.help-block-after {
+    margin-top: -10px;
+}
+
+.control-label {
+    .regular {
+        font-weight: normal;
+        font-style: italic;
+    }
+}
+
+.form-group {
+    code {
+        display: block;
+        padding: 10px;
+    }
+}
