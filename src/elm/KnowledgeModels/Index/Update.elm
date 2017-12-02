@@ -118,7 +118,7 @@ filterPackages packageList knowledgeModel =
         getFilteredList packages version =
             Just <| List.filter (.version >> versionIsGreater version) packages
     in
-    knowledgeModel.parentPackageId
+    knowledgeModel.lastAppliedParentPackageId
         |> Maybe.andThen (String.split ":" >> List.getAt 2)
         |> Maybe.andThen (getFilteredList packageList)
 
