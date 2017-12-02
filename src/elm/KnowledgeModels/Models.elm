@@ -159,4 +159,4 @@ knowledgeModelUpgradeFormValidation =
 encodeKnowledgeModelUpgradeForm : KnowledgeModelUpgradeForm -> Encode.Value
 encodeKnowledgeModelUpgradeForm form =
     Encode.object
-        [ ( "targetParentId", Encode.string form.targetPackageId ) ]
+        [ ( "targetPackageId", Encode.string form.targetPackageId ) ]
