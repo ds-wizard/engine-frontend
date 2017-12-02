@@ -40,7 +40,7 @@ content model =
             div []
                 [ formResultView model.publishingKnowledgeModel
                 , formView model.form knowledgeModel
-                , formActions KnowledgeModels ( "Save", model.publishingKnowledgeModel, Msgs.KnowledgeModelsPublishMsg <| FormMsg Form.Submit )
+                , formActions KnowledgeModels ( "Publish", model.publishingKnowledgeModel, Msgs.KnowledgeModelsPublishMsg <| FormMsg Form.Submit )
                 ]
 
 
@@ -54,7 +54,7 @@ formView form knowledgeModel =
                 , versionInputGroup form
                 , textAreaGroup form "description" "Description"
                 , p [ class "help-block help-block-after" ]
-                    [ text "Describe what is changed in the new version." ]
+                    [ text "Describe what has changed in the new version." ]
                 ]
     in
     formHtml |> Html.map (FormMsg >> Msgs.KnowledgeModelsPublishMsg)
