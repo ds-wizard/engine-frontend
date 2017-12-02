@@ -5,12 +5,14 @@ import Form.Validate as Validate exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
+import List.Extra as List
 import Utils exposing (validateRegex)
 
 
 type alias KnowledgeModel =
     { uuid : String
     , name : String
+    , groupId : String
     , artifactId : String
     , parentPackageId : Maybe String
     , lastAppliedParentPackageId : Maybe String
@@ -30,6 +32,7 @@ knowledgeModelDecoder =
     decode KnowledgeModel
         |> required "uuid" Decode.string
         |> required "name" Decode.string
+        |> required "groupId" Decode.string
         |> required "artifactId" Decode.string
         |> required "parentPackageId" (Decode.nullable Decode.string)
         |> required "lastAppliedParentPackageId" (Decode.nullable Decode.string)
@@ -67,6 +70,33 @@ knowledgeModelListDecoder =
 kmMatchState : List KnowledgeModelState -> KnowledgeModel -> Bool
 kmMatchState states knowledgeModel =
     List.any ((==) knowledgeModel.stateType) states
+
+
+kmLastVersion : KnowledgeModel -> Maybe String
+kmLastVersion km =
+    let
+        getVersion parent =
+            let
+                parts =
+                    String.split ":" parent
+
+                samePackage =
+                    List.getAt 1 parts
+                        |> Maybe.map ((==) km.artifactId)
+                        |> Maybe.withDefault False
+
+                sameGroup =
+                    List.getAt 0 parts
+                        |> Maybe.map ((==) km.groupId)
+                        |> Maybe.withDefault False
+            in
+            if sameGroup && samePackage then
+                List.getAt 2 parts
+            else
+                Nothing
+    in
+    km.parentPackageId
+        |> Maybe.andThen getVersion
 
 
 type alias KnowledgeModelCreateForm =

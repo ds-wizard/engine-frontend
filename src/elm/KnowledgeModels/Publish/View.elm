@@ -9,7 +9,7 @@ import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KnowledgeModels.Models exposing (KnowledgeModel, KnowledgeModelPublishForm)
+import KnowledgeModels.Models exposing (KnowledgeModel, KnowledgeModelPublishForm, kmLastVersion)
 import KnowledgeModels.Publish.Models exposing (Model)
 import KnowledgeModels.Publish.Msgs exposing (Msg(..))
 import Msgs
@@ -51,6 +51,7 @@ formView form knowledgeModel =
             div []
                 [ knowledgeModelName knowledgeModel.name
                 , artifactId knowledgeModel.artifactId
+                , lastVersion (kmLastVersion knowledgeModel)
                 , versionInputGroup form
                 , textAreaGroup form "description" "Description"
                 , p [ class "help-block help-block-after" ]
@@ -72,7 +73,21 @@ artifactId : String -> Html msg
 artifactId artifactId =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text "Artifact ID" ]
-        , code [ class "package-artifact-id" ] [ text artifactId ]
+        , code [] [ text artifactId ]
+        ]
+
+
+lastVersion : Maybe String -> Html msg
+lastVersion version =
+    let
+        content =
+            version
+                |> Maybe.map (text >> List.singleton >> code [])
+                |> Maybe.withDefault (text "No version of this package has been published yet.")
+    in
+    div [ class "form-group" ]
+        [ label [ class "control-label" ] [ text "Last version" ]
+        , p [ class "form-value" ] [ content ]
         ]
 
 
@@ -97,7 +112,7 @@ versionInputGroup form =
                     "has-error"
     in
     div [ class ("form-group " ++ errorClass) ]
-        [ label [ class "control-label" ] [ text "Version" ]
+        [ label [ class "control-label" ] [ text "New version" ]
         , div [ class "version-inputs" ]
             [ Input.baseInput "number" String Form.Text majorField [ class "form-control", Html.Attributes.min "0" ]
             , text "."
