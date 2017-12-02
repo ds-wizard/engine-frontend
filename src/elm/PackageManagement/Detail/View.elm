@@ -12,7 +12,6 @@ import PackageManagement.Detail.Models exposing (..)
 import PackageManagement.Detail.Msgs exposing (..)
 import PackageManagement.Models exposing (..)
 import PackageManagement.Requests exposing (exportPackageUrl)
-import Routing exposing (Route(..))
 
 
 view : Model -> Html Msgs.Msg

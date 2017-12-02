@@ -21,7 +21,6 @@ import PackageManagement.Import.View
 import PackageManagement.Index.View
 import Routing exposing (Route(..))
 import UserManagement.Create.View
-import UserManagement.Delete.View
 import UserManagement.Edit.View
 import UserManagement.Index.View
 
@@ -53,11 +52,6 @@ view model =
         UserManagementEdit uuid ->
             model.userManagementEditModel
                 |> UserManagement.Edit.View.view
-                |> appView model
-
-        UserManagementDelete uuid ->
-            model.userManagementDeleteModel
-                |> UserManagement.Delete.View.view
                 |> appView model
 
         KnowledgeModelsCreate ->

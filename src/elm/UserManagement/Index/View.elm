@@ -2,19 +2,23 @@ module UserManagement.Index.View exposing (..)
 
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
-import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
+import Common.View.Forms exposing (formSuccessResultView)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Msgs exposing (Msg)
+import Html.Events exposing (onClick)
+import Msgs
 import Routing exposing (Route(..))
 import UserManagement.Index.Models exposing (..)
+import UserManagement.Index.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (User)
 
 
-view : Model -> Html Msg
+view : Model -> Html Msgs.Msg
 view model =
-    div []
+    div [ class "user-management" ]
         [ pageHeader "User Management" indexActions
+        , formSuccessResultView model.deletingUser
         , content model
         ]
 
@@ -32,23 +36,24 @@ content model =
             defaultFullPageError err
 
         Success users ->
-            umTable users
+            umTable model users
 
 
-indexActions : List (Html Msg)
+indexActions : List (Html Msgs.Msg)
 indexActions =
     [ linkTo UserManagementCreate [ class "btn btn-primary" ] [ text "Create User" ] ]
 
 
-umTable : List User -> Html Msg
-umTable users =
+umTable : Model -> List User -> Html Msgs.Msg
+umTable model users =
     table [ class "table" ]
         [ umTableHeader
         , umTableBody users
+        , deleteModal model
         ]
 
 
-umTableHeader : Html Msg
+umTableHeader : Html Msgs.Msg
 umTableHeader =
     thead []
         [ tr []
@@ -61,7 +66,7 @@ umTableHeader =
         ]
 
 
-umTableBody : List User -> Html Msg
+umTableBody : List User -> Html Msgs.Msg
 umTableBody users =
     if List.isEmpty users then
         umTableEmpty
@@ -75,7 +80,7 @@ umTableEmpty =
         [ td [ colspan 5, class "td-empty-table" ] [ text "There are no users." ] ]
 
 
-umTableRow : User -> Html Msg
+umTableRow : User -> Html Msgs.Msg
 umTableRow user =
     tr []
         [ td [] [ text user.name ]
@@ -86,11 +91,56 @@ umTableRow user =
         ]
 
 
-umTableRowActionDelete : User -> Html Msg
+umTableRowActionDelete : User -> Html Msgs.Msg
 umTableRowActionDelete user =
-    linkTo (UserManagementDelete user.uuid) [] [ i [ class "fa fa-trash-o" ] [] ]
+    a [ onClick <| Msgs.UserManagementIndexMsg <| ShowHideDeleteUser <| Just user ]
+        [ i [ class "fa fa-trash-o" ] [] ]
 
 
-umTableRowActionEdit : User -> Html Msg
+umTableRowActionEdit : User -> Html Msgs.Msg
 umTableRowActionEdit user =
     linkTo (UserManagementEdit user.uuid) [] [ i [ class "fa fa-edit" ] [] ]
+
+
+deleteModal : Model -> Html Msgs.Msg
+deleteModal model =
+    let
+        ( visible, userHtml ) =
+            case model.userToBeDeleted of
+                Just user ->
+                    ( True, userCard user )
+
+                Nothing ->
+                    ( False, emptyNode )
+
+        modalContent =
+            [ p []
+                [ text "Are you sure you want to permamently delete the following user?" ]
+            , userHtml
+            ]
+
+        modalConfig =
+            { modalTitle = "Delete user"
+            , modalContent = modalContent
+            , visible = visible
+            , actionResult = model.deletingUser
+            , actionName = "Delete"
+            , actionMsg = Msgs.UserManagementIndexMsg DeleteUser
+            , cancelMsg = Msgs.UserManagementIndexMsg <| ShowHideDeleteUser Nothing
+            }
+    in
+    modalView modalConfig
+
+
+userCard : User -> Html Msgs.Msg
+userCard user =
+    div [ class "user-card" ]
+        [ div [ class "icon" ] [ i [ class "fa fa-user-circle-o" ] [] ]
+        , div [ class "name" ] [ text (user.name ++ " " ++ user.surname) ]
+        , div [ class "email" ]
+            [ a [ href ("mailto:" ++ user.email) ] [ text user.email ]
+            ]
+        , div [ class "role" ]
+            [ text ("Role: " ++ user.role)
+            ]
+        ]

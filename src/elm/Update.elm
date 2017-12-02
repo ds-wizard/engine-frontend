@@ -25,8 +25,6 @@ import PackageManagement.Index.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import UserManagement.Create.Models
 import UserManagement.Create.Update
-import UserManagement.Delete.Models
-import UserManagement.Delete.Update
 import UserManagement.Edit.Models
 import UserManagement.Edit.Update
 import UserManagement.Index.Models
@@ -41,9 +39,6 @@ fetchData model =
 
         UserManagementEdit uuid ->
             UserManagement.Edit.Update.getUserCmd uuid model.session
-
-        UserManagementDelete uuid ->
-            UserManagement.Delete.Update.getUserCmd uuid model.session
 
         Organization ->
             Organization.Update.getCurrentOrganizationCmd model.session
@@ -84,9 +79,6 @@ initLocalModel model =
 
         UserManagementEdit uuid ->
             { model | userManagementEditModel = UserManagement.Edit.Models.initialModel uuid }
-
-        UserManagementDelete uuid ->
-            { model | userManagementDeleteModel = UserManagement.Delete.Models.initialModel }
 
         Organization ->
             { model | organizationModel = Organization.Models.initialModel }
@@ -148,13 +140,6 @@ update msg model =
                     UserManagement.Create.Update.update msg model.seed model.session model.userManagementCreateModel
             in
             ( { model | seed = seed, userManagementCreateModel = userManagementCreateModel }, cmd )
-
-        Msgs.UserManagementDeleteMsg msg ->
-            let
-                ( userManagementDeleteModel, cmd ) =
-                    UserManagement.Delete.Update.update msg model.session model.userManagementDeleteModel
-            in
-            ( { model | userManagementDeleteModel = userManagementDeleteModel }, cmd )
 
         Msgs.UserManagementEditMsg msg ->
             let

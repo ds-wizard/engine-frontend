@@ -134,6 +134,16 @@ formResultView result =
             emptyNode
 
 
+formSuccessResultView : ActionResult String -> Html Msgs.Msg
+formSuccessResultView result =
+    case result of
+        Success msg ->
+            successView msg
+
+        _ ->
+            emptyNode
+
+
 errorView : String -> Html Msgs.Msg
 errorView =
     statusView "alert-danger" "fa-exclamation-triangle"

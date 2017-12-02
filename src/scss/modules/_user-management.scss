@@ -1,23 +1,25 @@
 @import "../mixins";
 
-.user-card {
-    text-align: center;
-    background: #eee;
-    @include border-radius(5px);
-    padding: 20px;
-    width: 200px;
-    margin: auto;
+.user-management {
+    .user-card {
+        text-align: center;
+        background: #eee;
+        @include border-radius(5px);
+        padding: 20px;
+        width: 200px;
+        margin: auto;
 
-    .icon {
-        font-size: 50px;
-    }
+        .icon {
+            font-size: 50px;
+        }
 
-    .name {
-        font-size: 18px;
-        margin-top: 5px;
-    }
+        .name {
+            font-size: 18px;
+            margin-top: 5px;
+        }
 
-    .email {
-        margin-bottom: 10px;
+        .email {
+            margin-bottom: 10px;
+        }
     }
 }

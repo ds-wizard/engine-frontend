@@ -15,7 +15,6 @@ import PackageManagement.Index.Models
 import Random.Pcg exposing (Seed, initialSeed)
 import Routing exposing (Route)
 import UserManagement.Create.Models
-import UserManagement.Delete.Models
 import UserManagement.Edit.Models
 import UserManagement.Index.Models
 
@@ -29,7 +28,6 @@ type alias Model =
     , userManagementIndexModel : UserManagement.Index.Models.Model
     , userManagementCreateModel : UserManagement.Create.Models.Model
     , userManagementEditModel : UserManagement.Edit.Models.Model
-    , userManagementDeleteModel : UserManagement.Delete.Models.Model
     , organizationModel : Organization.Models.Model
     , packageManagementIndexModel : PackageManagement.Index.Models.Model
     , packageManagementDetailModel : PackageManagement.Detail.Models.Model
@@ -52,7 +50,6 @@ initialModel route seed session jwt =
     , userManagementIndexModel = UserManagement.Index.Models.initialModel
     , userManagementCreateModel = UserManagement.Create.Models.initialModel
     , userManagementEditModel = UserManagement.Edit.Models.initialModel ""
-    , userManagementDeleteModel = UserManagement.Delete.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , packageManagementIndexModel = PackageManagement.Index.Models.initialModel
     , packageManagementDetailModel = PackageManagement.Detail.Models.initialModel

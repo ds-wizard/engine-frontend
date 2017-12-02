@@ -12,7 +12,6 @@ import PackageManagement.Detail.Msgs
 import PackageManagement.Import.Msgs
 import PackageManagement.Index.Msgs
 import UserManagement.Create.Msgs
-import UserManagement.Delete.Msgs
 import UserManagement.Edit.Msgs
 import UserManagement.Index.Msgs
 
@@ -24,7 +23,6 @@ type Msg
     | UserManagementIndexMsg UserManagement.Index.Msgs.Msg
     | UserManagementCreateMsg UserManagement.Create.Msgs.Msg
     | UserManagementEditMsg UserManagement.Edit.Msgs.Msg
-    | UserManagementDeleteMsg UserManagement.Delete.Msgs.Msg
     | OrganizationMsg Organization.Msgs.Msg
     | PackageManagementIndexMsg PackageManagement.Index.Msgs.Msg
     | PackageManagementDetailMsg PackageManagement.Detail.Msgs.Msg

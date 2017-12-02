@@ -5,7 +5,6 @@ import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Msgs
 import Routing exposing (Route(..))
 import UserManagement.Create.Models exposing (Model)
