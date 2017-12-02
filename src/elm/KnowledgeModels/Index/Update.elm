@@ -38,10 +38,10 @@ postMigrationCmd session form uuid =
 
 
 getPackagesFilteredCmd : String -> Session -> Cmd Msgs.Msg
-getPackagesFilteredCmd parentPacakgeId session =
+getPackagesFilteredCmd lastAppliedParentPackageId session =
     let
         parts =
-            String.split ":" parentPacakgeId
+            String.split ":" lastAppliedParentPackageId
     in
     case ( List.head parts, List.getAt 1 parts ) of
         ( Just groupId, Just artifactId ) ->
@@ -99,15 +99,15 @@ deleteKnowledgeModelCompleted model result =
 handleShowHideUpgradeModal : Maybe KnowledgeModel -> Model -> Session -> ( Model, Cmd Msgs.Msg )
 handleShowHideUpgradeModal maybeKm model session =
     let
-        getPackages parentPackageId =
+        getPackages lastAppliedParentPackageId =
             let
                 cmd =
-                    getPackagesFilteredCmd parentPackageId session
+                    getPackagesFilteredCmd lastAppliedParentPackageId session
             in
             Just ( { model | kmToBeUpgraded = maybeKm, packages = Loading }, cmd )
     in
     maybeKm
-        |> Maybe.andThen .parentPackageId
+        |> Maybe.andThen .lastAppliedParentPackageId
         |> Maybe.andThen getPackages
         |> Maybe.withDefault ( { model | kmToBeUpgraded = Nothing, packages = Unset }, Cmd.none )
 
