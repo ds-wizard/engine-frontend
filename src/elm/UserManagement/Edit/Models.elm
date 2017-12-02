@@ -5,8 +5,14 @@ import Form exposing (Form)
 import UserManagement.Models exposing (..)
 
 
+type View
+    = Profile
+    | Password
+
+
 type alias Model =
     { uuid : String
+    , currentView : View
     , user : ActionResult User
     , savingUser : ActionResult String
     , savingPassword : ActionResult String
@@ -18,6 +24,7 @@ type alias Model =
 initialModel : String -> Model
 initialModel uuid =
     { uuid = uuid
+    , currentView = Profile
     , user = Loading
     , savingUser = Unset
     , savingPassword = Unset

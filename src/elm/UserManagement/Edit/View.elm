@@ -7,8 +7,9 @@ import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Msgs
-import UserManagement.Edit.Models exposing (Model)
+import UserManagement.Edit.Models exposing (Model, View(..))
 import UserManagement.Edit.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)
 
@@ -34,17 +35,57 @@ content model =
             defaultFullPageError err
 
         Success user ->
-            div []
-                [ userView model
-                , passwordView model
-                ]
+            profileView model
+
+
+profileView : Model -> Html Msgs.Msg
+profileView model =
+    let
+        currentView =
+            case model.currentView of
+                Profile ->
+                    userView model
+
+                Password ->
+                    passwordView model
+    in
+    div []
+        [ navbar model
+        , currentView
+        ]
+
+
+navbar : Model -> Html Msgs.Msg
+navbar model =
+    let
+        profileClass =
+            if model.currentView == Profile then
+                "active"
+            else
+                ""
+
+        passwordClass =
+            if model.currentView == Password then
+                "active"
+            else
+                ""
+    in
+    ul [ class "nav nav-tabs" ]
+        [ li [ class profileClass ]
+            [ a [ onClick <| Msgs.UserManagementEditMsg <| ChangeView Profile ]
+                [ text "Profile" ]
+            ]
+        , li [ class passwordClass ]
+            [ a [ onClick <| Msgs.UserManagementEditMsg <| ChangeView Password ]
+                [ text "Password" ]
+            ]
+        ]
 
 
 userView : Model -> Html Msgs.Msg
 userView model =
-    div [ class "well" ]
-        [ legend [] [ text "Profile" ]
-        , formResultView model.savingUser
+    div []
+        [ formResultView model.savingUser
         , userFormView model.userForm (model.uuid == "current")
         , formActionOnly ( "Save", model.savingUser, Msgs.UserManagementEditMsg <| EditFormMsg Form.Submit )
         ]
@@ -75,9 +116,8 @@ userFormView form current =
 
 passwordView : Model -> Html Msgs.Msg
 passwordView model =
-    div [ class "well" ]
-        [ legend [] [ text "Password" ]
-        , formResultView model.savingPassword
+    div []
+        [ formResultView model.savingPassword
         , passwordFormView model.passwordForm
         , formActionOnly ( "Save", model.savingPassword, Msgs.UserManagementEditMsg <| PasswordFormMsg Form.Submit )
         ]

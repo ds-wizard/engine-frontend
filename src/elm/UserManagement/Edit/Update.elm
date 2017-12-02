@@ -133,3 +133,6 @@ update msg session model =
 
         PutUserPasswordCompleted result ->
             putUserPasswordCompleted model result
+
+        ChangeView view ->
+            ( { model | currentView = view }, Cmd.none )
