@@ -132,7 +132,7 @@ kmTableRowActionPublish jwt km =
 kmTableRowActionUpgrade : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
 kmTableRowActionUpgrade jwt model km =
     if hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Outdated ] km then
-        a [ class "link-with-icon", onClick <| Msgs.KnowledgeModelsIndexMsg <| ShowHideUpgradeModal <| Just km ]
+        a [ onClick <| Msgs.KnowledgeModelsIndexMsg <| ShowHideUpgradeModal <| Just km ]
             [ text "Upgrade" ]
     else
         emptyNode
