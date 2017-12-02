@@ -78,9 +78,9 @@ newMigrationResolution action uuid =
     }
 
 
-newAcceptMigrationResolution : String -> MigrationResolution
-newAcceptMigrationResolution =
-    newMigrationResolution "Accept"
+newApplyMigrationResolution : String -> MigrationResolution
+newApplyMigrationResolution =
+    newMigrationResolution "Apply"
 
 
 newRejectMigrationResolution : String -> MigrationResolution

@@ -56,7 +56,7 @@ handleResolveChange createMigrationResolution session model =
 
 handleAcceptChange : Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleAcceptChange =
-    handleResolveChange newAcceptMigrationResolution
+    handleResolveChange newApplyMigrationResolution
 
 
 handleRejectChange : Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -84,7 +84,7 @@ update msg session model =
         GetMigrationCompleted result ->
             handleGetMigrationCompleted model result
 
-        AcceptEvent ->
+        ApplyEvent ->
             handleAcceptChange session model
 
         RejectEvent ->

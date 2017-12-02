@@ -532,8 +532,8 @@ formActions model =
     div [ class "form-actions" ]
         [ button [ class "btn btn-warning", onClick RejectEvent, disabled actionsDisabled ]
             [ text "Reject" ]
-        , button [ class "btn btn-success", onClick AcceptEvent, disabled actionsDisabled ]
-            [ text "Accept" ]
+        , button [ class "btn btn-success", onClick ApplyEvent, disabled actionsDisabled ]
+            [ text "Apply" ]
         ]
         |> Html.map Msgs.KnowledgeModelsMigrationMsg
 
