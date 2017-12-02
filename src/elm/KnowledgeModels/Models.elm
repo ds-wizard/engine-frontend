@@ -135,6 +135,8 @@ encodeKnowledgeModelForm uuid form =
         , ( "name", Encode.string form.name )
         , ( "artifactId", Encode.string form.artifactId )
         , ( "parentPackageId", parentPackage )
+        , ( "lastAppliedParentPackageId", parentPackage )
+        , ( "groupId", Encode.string "" )
         ]
 
 
