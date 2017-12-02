@@ -19,7 +19,7 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ detailContainerClass ]
+    div [ detailContainerClassWith "knowledge-models-migration" ]
         [ pageHeader "Migration" []
         , formResultView model.conflict
         , content model
@@ -486,16 +486,16 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
                 (List.map
                     (\uuid ->
                         Dict.get uuid childrenNames
-                            |> Maybe.withDefault ""
-                            |> text
-                            |> List.singleton
-                            |> li []
+                            |> Maybe.map (text >> List.singleton >> li [])
+                            |> Maybe.withDefault emptyNode
                     )
                     uuids
                 )
 
         diff =
-            if originalOrder == newOrder then
+            if List.length originalOrder == 0 then
+                div [ class "form-value" ] [ text "-" ]
+            else if originalOrder == newOrder then
                 div [ class "form-value" ]
                     [ viewChildren "" originalOrder
                     ]
