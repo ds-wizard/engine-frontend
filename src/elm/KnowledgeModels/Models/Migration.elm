@@ -26,6 +26,7 @@ type MigrationStateType
     = ConflictState
     | ErrorState
     | CompletedState
+    | RunningState
 
 
 type alias MigrationResolution =
@@ -65,6 +66,9 @@ migrationStateTypeDecoder =
 
                     "CompletedState" ->
                         Decode.succeed CompletedState
+
+                    "RunningState" ->
+                        Decode.succeed RunningState
 
                     unknownStateType ->
                         Decode.fail <| "Unknown migration state type " ++ unknownStateType

@@ -49,6 +49,10 @@ migrationView model migration =
             div [ class "alert alert-danger" ]
                 [ text "Migration state is corrupted." ]
 
+        runningStateMessage =
+            div [ class "alert alert-warning" ]
+                [ text "Migration is still running, try again later." ]
+
         view =
             case migration.migrationState.stateType of
                 ConflictState ->
@@ -58,6 +62,9 @@ migrationView model migration =
 
                 CompletedState ->
                     viewCompletedMigration
+
+                RunningState ->
+                    runningStateMessage
 
                 _ ->
                     errorMessage
