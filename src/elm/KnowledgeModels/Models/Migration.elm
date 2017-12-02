@@ -47,7 +47,7 @@ migrationDecoder =
 migrationStateDecoder : Decoder MigrationState
 migrationStateDecoder =
     decode MigrationState
-        |> required "type" migrationStateTypeDecoder
+        |> required "stateType" migrationStateTypeDecoder
         |> optional "targetEvent" (Decode.maybe eventDecoder) Nothing
 
 
