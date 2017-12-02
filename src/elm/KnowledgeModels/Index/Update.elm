@@ -176,11 +176,13 @@ handleDeleteMigration uuid session model =
     ( { model | deletingMigration = Loading }, deleteMigrationCmd uuid session )
 
 
-deleteMigrationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteMigrationCompleted model result =
+deleteMigrationCompleted : Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+deleteMigrationCompleted session model result =
     case result of
         Ok km ->
-            ( model, cmdNavigate KnowledgeModels )
+            ( { model | deletingMigration = Success "Migration was successfully canceled", knowledgeModels = Loading }
+            , getKnowledgeModelsCmd session
+            )
 
         Err error ->
             ( { model | deletingMigration = Error "Migration could not be deleted" }
@@ -219,4 +221,4 @@ update msg session model =
             handleDeleteMigration uuid session model
 
         DeleteMigrationCompleted result ->
-            deleteMigrationCompleted model result
+            deleteMigrationCompleted session model result
