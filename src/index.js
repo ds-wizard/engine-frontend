@@ -1,7 +1,5 @@
 'use strict'
 
-require('font-awesome-sass-loader')
-
 // get index.html to the build
 require('./index.html')
 
