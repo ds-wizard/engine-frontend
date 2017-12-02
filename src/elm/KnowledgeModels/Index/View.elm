@@ -120,7 +120,7 @@ kmTableRowActionEdit km =
 
 kmTableRowActionPublish : Maybe JwtToken -> KnowledgeModel -> Html Msgs.Msg
 kmTableRowActionPublish jwt km =
-    if hasPerm jwt Perm.knowledgeModelPublish && kmMatchState [ Edited ] km then
+    if hasPerm jwt Perm.knowledgeModelPublish && kmMatchState [ Edited, Migrated ] km then
         linkTo (KnowledgeModelsPublish km.uuid)
             []
             [ text "Publish"

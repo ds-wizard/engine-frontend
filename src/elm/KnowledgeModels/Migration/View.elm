@@ -61,7 +61,7 @@ migrationView model migration =
                         |> Maybe.withDefault errorMessage
 
                 CompletedState ->
-                    viewCompletedMigration
+                    viewCompletedMigration model
 
                 RunningState ->
                     runningStateMessage
@@ -545,11 +545,20 @@ formActions model =
         |> Html.map Msgs.KnowledgeModelsMigrationMsg
 
 
-viewCompletedMigration : Html Msgs.Msg
-viewCompletedMigration =
+viewCompletedMigration : Model -> Html Msgs.Msg
+viewCompletedMigration model =
     div [ class "jumbotron full-page-error" ]
         [ h1 [ class "display-3" ] [ i [ class "fa fa-check-square-o" ] [] ]
-        , p [] [ text "Migration successfully completed." ]
+        , p []
+            [ text "Migration successfully completed."
+            , br [] []
+            , text "You can publish the new version now."
+            ]
         , div [ class "text-right" ]
-            [ linkTo KnowledgeModels [ class "btn btn-primary" ] [ text "Done" ] ]
+            [ linkTo (KnowledgeModelsPublish model.branchUuid)
+                [ class "btn btn-primary" ]
+                [ text "Publish"
+                , i [ class "fa fa-long-arrow-right", style [ ( "margin-left", "10px" ) ] ] []
+                ]
+            ]
         ]

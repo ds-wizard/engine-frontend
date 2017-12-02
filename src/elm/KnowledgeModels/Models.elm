@@ -25,6 +25,7 @@ type KnowledgeModelState
     | Edited
     | Outdated
     | Migrating
+    | Migrated
 
 
 knowledgeModelDecoder : Decoder KnowledgeModel
@@ -56,6 +57,9 @@ knowledgeModelStateDecoder =
 
                     "Migrating" ->
                         Decode.succeed Migrating
+
+                    "Migrated" ->
+                        Decode.succeed Migrated
 
                     unknownState ->
                         Decode.fail <| "Unknown knowledge model state " ++ unknownState
