@@ -90,7 +90,7 @@ kmTableEmpty =
 kmTableRow : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
 kmTableRow jwt model km =
     tr []
-        [ td [] [ text km.name ]
+        [ td [] [ kmTableRowName km ]
         , td [] [ text km.artifactId ]
         , td [] [ text (Maybe.withDefault "-" km.lastAppliedParentPackageId) ]
         , td [ class "table-actions" ]
@@ -101,6 +101,35 @@ kmTableRow jwt model km =
             , kmTableRowActionContinueMigration jwt km
             , kmTableRowActionCancelMigration jwt model km
             ]
+        ]
+
+
+kmTableRowName : KnowledgeModel -> Html Msgs.Msg
+kmTableRowName km =
+    let
+        extra =
+            case km.stateType of
+                Outdated ->
+                    span [ class "label label-warning" ]
+                        [ text "outdated" ]
+
+                Migrating ->
+                    span [ class "label label-info" ]
+                        [ text "migrating" ]
+
+                Migrated ->
+                    span [ class "label label-success" ]
+                        [ text "migrated" ]
+
+                Edited ->
+                    i [ class "fa fa-pencil" ] []
+
+                _ ->
+                    emptyNode
+    in
+    span [ class "name" ]
+        [ text km.name
+        , extra
         ]
 
 
@@ -151,7 +180,7 @@ kmTableRowActionContinueMigration jwt km =
 
 kmTableRowActionCancelMigration : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
 kmTableRowActionCancelMigration jwt model km =
-    if hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Migrating ] km then
+    if hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Migrating, Migrated ] km then
         case model.deletingMigration of
             Loading ->
                 a [ class "disabled" ] [ text "Cancel Migration" ]

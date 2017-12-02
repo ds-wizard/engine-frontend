@@ -96,6 +96,22 @@ a {
         font-size: 16px;
         color: #aaa;
     }
+
+    table {
+        td {
+            .name {
+                .label {
+                    font-weight: normal;
+                    margin-left: 10px;
+                }
+
+                .fa {
+                    margin-left: 10px;
+                    color: #aaa;
+                }
+            }
+        }
+    }
 }
 
 .modal-cover {
