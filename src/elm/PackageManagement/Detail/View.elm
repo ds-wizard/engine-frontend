@@ -121,12 +121,13 @@ packageDetail packages =
 
 actions : List (Html Msgs.Msg)
 actions =
-    [ linkTo PackageManagement [ class "btn btn-default" ] [ text "Back" ]
-    , button
+    [ button
         [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog True)
-        , class "btn btn-danger"
+        , class "btn btn-link link-with-icon"
         ]
-        [ text "Delete" ]
+        [ i [ class "fa fa-trash-o" ] []
+        , text "Delete"
+        ]
     ]
 
 
@@ -143,12 +144,11 @@ versionView detail =
                 , text detail.description
                 ]
             , div [ class "actions" ]
-                [ a [ class "btn btn-info link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
-                , button
+                [ a [ class "link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
+                , a
                     [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion <| Just detail.id)
-                    , class "btn btn-default"
                     ]
-                    [ i [ class "fa fa-trash" ] [] ]
+                    [ i [ class "fa fa-trash-o" ] [] ]
                 ]
             ]
         ]
