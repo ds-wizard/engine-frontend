@@ -89,19 +89,10 @@ kmTableEmpty =
 
 kmTableRow : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
 kmTableRow jwt model km =
-    let
-        parent =
-            case km.parentPackageId of
-                Just parentPackageId ->
-                    parentPackageId
-
-                _ ->
-                    "-"
-    in
     tr []
         [ td [] [ text km.name ]
         , td [] [ text km.artifactId ]
-        , td [] [ text parent ]
+        , td [] [ text (Maybe.withDefault "-" km.lastAppliedParentPackageId) ]
         , td [ class "table-actions" ]
             [ kmTableRowActionDelete km
             , kmTableRowActionEdit km

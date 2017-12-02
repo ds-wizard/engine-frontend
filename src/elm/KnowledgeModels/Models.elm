@@ -13,6 +13,7 @@ type alias KnowledgeModel =
     , name : String
     , artifactId : String
     , parentPackageId : Maybe String
+    , lastAppliedParentPackageId : Maybe String
     , stateType : KnowledgeModelState
     }
 
@@ -31,6 +32,7 @@ knowledgeModelDecoder =
         |> required "name" Decode.string
         |> required "artifactId" Decode.string
         |> required "parentPackageId" (Decode.nullable Decode.string)
+        |> required "lastAppliedParentPackageId" (Decode.nullable Decode.string)
         |> required "stateType" knowledgeModelStateDecoder
 
 
