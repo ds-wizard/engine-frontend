@@ -37,9 +37,11 @@ defaultFullPageError =
 
 fullPageError : String -> String -> Html msg
 fullPageError icon error =
-    div [ class "jumbotron full-page-error" ]
-        [ h1 [ class "display-3" ] [ i [ class ("fa " ++ icon) ] [] ]
-        , p [] [ text error ]
+    div [ class "col-xs-12" ]
+        [ div [ class "jumbotron full-page-error" ]
+            [ h1 [ class "display-3" ] [ i [ class ("fa " ++ icon) ] [] ]
+            , p [] [ text error ]
+            ]
         ]
 
 

@@ -13,14 +13,15 @@ import KnowledgeModels.Editor.Models.Events exposing (..)
 import KnowledgeModels.Migration.Models exposing (Model)
 import KnowledgeModels.Migration.Msgs exposing (Msg(..))
 import KnowledgeModels.Models.Migration exposing (Migration, MigrationStateType(..))
+import KnowledgeModels.View exposing (diffTreeView)
 import Msgs
 import Routing exposing (Route(..))
 
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ detailContainerClassWith "knowledge-models-migration" ]
-        [ pageHeader "Migration" []
+    div [ class "row knowledge-models-migration" ]
+        [ div [ class "col-xs-12" ] [ pageHeader "Migration" [] ]
         , formResultView model.conflict
         , content model
         ]
@@ -46,19 +47,35 @@ migrationView : Model -> Migration -> Html Msgs.Msg
 migrationView model migration =
     let
         errorMessage =
-            div [ class "alert alert-danger" ]
-                [ text "Migration state is corrupted." ]
+            div [ class "col-xs-12" ]
+                [ div [ class "alert alert-danger" ]
+                    [ text "Migration state is corrupted." ]
+                ]
 
         runningStateMessage =
-            div [ class "alert alert-warning" ]
-                [ text "Migration is still running, try again later." ]
+            div [ class "col-xs-12" ]
+                [ div [ class "alert alert-warning" ]
+                    [ text "Migration is still running, try again later." ]
+                ]
 
         view =
             case migration.migrationState.stateType of
                 ConflictState ->
-                    migration.migrationState.targetEvent
-                        |> Maybe.map (getEventView model migration)
-                        |> Maybe.withDefault errorMessage
+                    let
+                        conflictView =
+                            migration.migrationState.targetEvent
+                                |> Maybe.map (getEventView model migration)
+                                |> Maybe.map (List.singleton >> div [ class "col-xs-8" ])
+                                |> Maybe.withDefault errorMessage
+
+                        diffTree =
+                            migration.migrationState.targetEvent
+                                |> Maybe.map (List.singleton >> diffTreeView migration.currentKnowledgeModel)
+                                |> Maybe.map (List.singleton >> div [ class "col-xs-4" ])
+                                |> Maybe.withDefault emptyNode
+                    in
+                    div [ class "row" ]
+                        [ conflictView, diffTree ]
 
                 CompletedState ->
                     viewCompletedMigration model
@@ -547,18 +564,20 @@ formActions model =
 
 viewCompletedMigration : Model -> Html Msgs.Msg
 viewCompletedMigration model =
-    div [ class "jumbotron full-page-error" ]
-        [ h1 [ class "display-3" ] [ i [ class "fa fa-check-square-o" ] [] ]
-        , p []
-            [ text "Migration successfully completed."
-            , br [] []
-            , text "You can publish the new version now."
-            ]
-        , div [ class "text-right" ]
-            [ linkTo (KnowledgeModelsPublish model.branchUuid)
-                [ class "btn btn-primary" ]
-                [ text "Publish"
-                , i [ class "fa fa-long-arrow-right", style [ ( "margin-left", "10px" ) ] ] []
+    div [ class "col-xs-12" ]
+        [ div [ class "jumbotron full-page-error" ]
+            [ h1 [ class "display-3" ] [ i [ class "fa fa-check-square-o" ] [] ]
+            , p []
+                [ text "Migration successfully completed."
+                , br [] []
+                , text "You can publish the new version now."
+                ]
+            , div [ class "text-right" ]
+                [ linkTo (KnowledgeModelsPublish model.branchUuid)
+                    [ class "btn btn-primary" ]
+                    [ text "Publish"
+                    , i [ class "fa fa-long-arrow-right", style [ ( "margin-left", "10px" ) ] ] []
+                    ]
                 ]
             ]
         ]
