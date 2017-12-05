@@ -95,6 +95,11 @@ getKnowledgeModelEditorName (KnowledgeModelEditor kme) =
     (Form.getFieldAsString "name" kme.form).value |> Maybe.withDefault ""
 
 
+getKnowledgeModel : KnowledgeModelEditor -> KnowledgeModel
+getKnowledgeModel (KnowledgeModelEditor kme) =
+    kme.knowledgeModel
+
+
 createChapterEditor : Bool -> Int -> Chapter -> ChapterEditor
 createChapterEditor active order chapter =
     let

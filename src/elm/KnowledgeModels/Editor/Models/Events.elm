@@ -1323,3 +1323,215 @@ getEventUuid event =
 
         DeleteFollowUpQuestionEvent data ->
             data.uuid
+
+
+getEventEntityVisibleName : Event -> Maybe String
+getEventEntityVisibleName event =
+    case event of
+        EditKnowledgeModelEvent data ->
+            Just data.name
+
+        AddChapterEvent data ->
+            Just data.title
+
+        EditChapterEvent data ->
+            Just data.title
+
+        AddQuestionEvent data ->
+            Just data.title
+
+        EditQuestionEvent data ->
+            Just data.title
+
+        AddAnswerEvent data ->
+            Just data.label
+
+        EditAnswerEvent data ->
+            Just data.label
+
+        AddReferenceEvent data ->
+            Just data.chapter
+
+        EditReferenceEvent data ->
+            Just data.chapter
+
+        AddExpertEvent data ->
+            Just data.name
+
+        EditExpertEvent data ->
+            Just data.name
+
+        AddFollowUpQuestionEvent data ->
+            Just data.title
+
+        EditFollowUpQuestionEvent data ->
+            Just data.title
+
+        _ ->
+            Nothing
+
+
+isEditChapter : Chapter -> Event -> Bool
+isEditChapter chapter event =
+    case event of
+        EditChapterEvent data ->
+            data.chapterUuid == chapter.uuid
+
+        _ ->
+            False
+
+
+isDeleteChapter : Chapter -> Event -> Bool
+isDeleteChapter chapter event =
+    case event of
+        DeleteChapterEvent data ->
+            data.chapterUuid == chapter.uuid
+
+        _ ->
+            False
+
+
+isEditQuestion : Question -> Event -> Bool
+isEditQuestion question event =
+    case event of
+        EditQuestionEvent data ->
+            data.questionUuid == question.uuid
+
+        EditFollowUpQuestionEvent data ->
+            data.questionUuid == question.uuid
+
+        _ ->
+            False
+
+
+isDeleteQuestion : Question -> Event -> Bool
+isDeleteQuestion question event =
+    case event of
+        DeleteQuestionEvent data ->
+            data.questionUuid == question.uuid
+
+        DeleteFollowUpQuestionEvent data ->
+            data.questionUuid == question.uuid
+
+        _ ->
+            False
+
+
+isEditAnswer : Answer -> Event -> Bool
+isEditAnswer answer event =
+    case event of
+        EditAnswerEvent data ->
+            data.answerUuid == answer.uuid
+
+        _ ->
+            False
+
+
+isDeleteAnswer : Answer -> Event -> Bool
+isDeleteAnswer answer event =
+    case event of
+        DeleteAnswerEvent data ->
+            data.answerUuid == answer.uuid
+
+        _ ->
+            False
+
+
+isEditReference : Reference -> Event -> Bool
+isEditReference reference event =
+    case event of
+        EditReferenceEvent data ->
+            data.referenceUuid == reference.uuid
+
+        _ ->
+            False
+
+
+isDeleteReference : Reference -> Event -> Bool
+isDeleteReference reference event =
+    case event of
+        DeleteReferenceEvent data ->
+            data.referenceUuid == reference.uuid
+
+        _ ->
+            False
+
+
+isEditExpert : Expert -> Event -> Bool
+isEditExpert expert event =
+    case event of
+        EditExpertEvent data ->
+            data.expertUuid == expert.uuid
+
+        _ ->
+            False
+
+
+isDeleteExpert : Expert -> Event -> Bool
+isDeleteExpert expert event =
+    case event of
+        DeleteExpertEvent data ->
+            data.expertUuid == expert.uuid
+
+        _ ->
+            False
+
+
+isAddChapter : KnowledgeModel -> Event -> Bool
+isAddChapter km event =
+    case event of
+        AddChapterEvent data ->
+            data.kmUuid == km.uuid
+
+        _ ->
+            False
+
+
+isAddQuestion : Chapter -> Event -> Bool
+isAddQuestion chapter event =
+    case event of
+        AddQuestionEvent data ->
+            data.chapterUuid == chapter.uuid
+
+        _ ->
+            False
+
+
+isAddAnswer : Question -> Event -> Bool
+isAddAnswer question event =
+    case event of
+        AddAnswerEvent data ->
+            data.questionUuid == question.uuid
+
+        _ ->
+            False
+
+
+isAddExpert : Question -> Event -> Bool
+isAddExpert question event =
+    case event of
+        AddExpertEvent data ->
+            data.questionUuid == question.uuid
+
+        _ ->
+            False
+
+
+isAddReference : Question -> Event -> Bool
+isAddReference question event =
+    case event of
+        AddReferenceEvent data ->
+            data.questionUuid == question.uuid
+
+        _ ->
+            False
+
+
+isAddFollowUpQuestion : Answer -> Event -> Bool
+isAddFollowUpQuestion answer event =
+    case event of
+        AddFollowUpQuestionEvent data ->
+            data.answerUuid == answer.uuid
+
+        _ ->
+            False

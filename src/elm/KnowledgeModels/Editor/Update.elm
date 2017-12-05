@@ -112,7 +112,7 @@ updateKnowledgeModel msg seed ((KnowledgeModelEditor editor) as kmEditor) =
             updateKnowledgeModelViewChapter uuid seed kmEditor
 
         DeleteChapter uuid ->
-            updateKnowledgeModelViewChapter uuid seed kmEditor
+            updateKnowledgeModelDeleteChapter uuid seed kmEditor
 
         ReorderChapterList newChapters ->
             ( seed, KnowledgeModelEditor { editor | chapters = newChapters, chaptersDirty = True }, Nothing, False )

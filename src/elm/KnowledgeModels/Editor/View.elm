@@ -5,13 +5,14 @@ import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
-import Html exposing (Html, a, button, div, h3, i, input, label, li, option, select, text, textarea, ul)
+import Html exposing (..)
 import Html.Attributes exposing (class, href, rows, type_)
 import Html.Events exposing (..)
 import KnowledgeModels.Editor.Models exposing (..)
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Msgs exposing (..)
 import KnowledgeModels.Editor.View.Breadcrumbs exposing (breadcrumbs, getKnowledgeModelBreadcrumbs)
+import KnowledgeModels.View exposing (diffTreeView)
 import Msgs
 import Reorderable
 import Routing exposing (Route(..))
@@ -20,8 +21,8 @@ import String exposing (toLower)
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ class "col-xs-12 col-lg-10 col-lg-offset-1" ]
-        [ pageHeader "Knowledge model editor" []
+    div [ class "row knowledge-model-editor " ]
+        [ div [ class "col-xs-12" ] [ pageHeader "Knowledge model editor" [] ]
         , content model
         ]
 
@@ -45,20 +46,24 @@ content model =
 editorView : Model -> Html Msgs.Msg
 editorView model =
     let
-        ( breadcrumbsView, currentView ) =
+        ( breadcrumbsView, currentView, diffTree ) =
             case model.knowledgeModelEditor of
                 Success knowledgeModelEditor ->
                     ( getKnowledgeModelBreadcrumbs knowledgeModelEditor |> breadcrumbs
                     , viewKnowledgeModel model knowledgeModelEditor (Edit >> Msgs.KnowledgeModelsEditorMsg)
+                    , diffTreeView (getKnowledgeModel knowledgeModelEditor) model.events
                     )
 
                 _ ->
-                    ( emptyNode, emptyNode )
+                    ( emptyNode, emptyNode, emptyNode )
     in
     div []
         [ formResultView model.saving
-        , breadcrumbsView
-        , div [ class "knowledge-model-editor" ] [ currentView ]
+        , div [ class "col-xs-8" ] [ breadcrumbsView, currentView ]
+        , div [ class "col-xs-4 diff-tree-col" ]
+            [ h4 [] [ text "Current changes" ]
+            , diffTree
+            ]
         ]
 
 

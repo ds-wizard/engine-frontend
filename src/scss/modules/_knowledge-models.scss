@@ -1,0 +1,27 @@
+.diff-tree {
+    ul {
+        margin: 0;
+        padding: 0;
+
+        li {
+            list-style: none;
+            padding: 2px 0;
+
+            &.answer, &.expert, &.reference, &.answer .question {
+                padding-left: 20px;
+            }
+
+            &.chapter {
+                margin-bottom: 15px;
+            }
+
+            .fa {
+                margin-right: 5px;
+            }
+
+            span {
+                display: flex;
+            }
+        }
+    }
+}

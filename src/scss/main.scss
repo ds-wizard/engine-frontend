@@ -12,6 +12,7 @@ $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "login";
 @import "tables";
 
+@import "modules/knowledge-models";
 @import "modules/knowledge-models-editor";
 @import "modules/knowledge-models-publish";
 @import "modules/knowledge-models-migration";
