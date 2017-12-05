@@ -3,9 +3,9 @@ module View exposing (..)
 import Auth.Msgs
 import Auth.Permission as Perm exposing (hasPerm)
 import Auth.View
-import Common.Html exposing (linkTo)
+import Common.Html exposing (detailContainerClass, linkTo)
 import Common.Html.Events exposing (onLinkClick)
-import Common.View exposing (defaultFullPageError, fullPageError)
+import Common.View exposing (defaultFullPageError, fullPageError, pageHeader)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
@@ -196,12 +196,18 @@ indexView =
 
 wizzardsView : Html Msg
 wizzardsView =
-    text "Wizzards"
+    div [ detailContainerClass ]
+        [ pageHeader "Wizzards" []
+        , fullPageError "fa-magic" "Wizzards are not implemented yet."
+        ]
 
 
 dataManagementPlansView : Html Msg
 dataManagementPlansView =
-    text "Data Management Plans"
+    div [ detailContainerClass ]
+        [ pageHeader "Data Management Plans" []
+        , fullPageError "fa-book" "Data Management Plans are not implemented yet."
+        ]
 
 
 notFoundView : Html msg
