@@ -14,26 +14,8 @@ import Routing exposing (Route)
 -- Form fields
 
 
-inputGroup : Form e o -> String -> String -> Html.Html Form.Msg
-inputGroup =
-    formGroup Input.textInput
-
-
-passwordGroup : Form e o -> String -> String -> Html.Html Form.Msg
-passwordGroup =
-    formGroup Input.passwordInput
-
-
-selectGroup : List ( String, String ) -> Form e o -> String -> String -> Html.Html Form.Msg
-selectGroup options =
-    formGroup (Input.selectInput options)
-
-
-textAreaGroup : Form e o -> String -> String -> Html.Html Form.Msg
-textAreaGroup =
-    formGroup Input.textArea
-
-
+{-| Create Html for a form field using the given input field.
+-}
 formGroup : Input.Input e String -> Form e o -> String -> String -> Html.Html Form.Msg
 formGroup input form fieldName labelText =
     let
@@ -50,18 +32,37 @@ formGroup input form fieldName labelText =
         ]
 
 
-textGroup : String -> String -> Html.Html msg
-textGroup value =
-    plainGroup <|
-        p [ class "form-value" ] [ text value ]
+{-| Helper for creating form group with text input field.
+-}
+inputGroup : Form e o -> String -> String -> Html.Html Form.Msg
+inputGroup =
+    formGroup Input.textInput
 
 
-codeGroup : String -> String -> Html.Html msg
-codeGroup value =
-    plainGroup <|
-        code [] [ text value ]
+{-| Helper for creating form group with password input field.
+-}
+passwordGroup : Form e o -> String -> String -> Html.Html Form.Msg
+passwordGroup =
+    formGroup Input.passwordInput
 
 
+{-| Helper for creating form group with select field.
+-}
+selectGroup : List ( String, String ) -> Form e o -> String -> String -> Html.Html Form.Msg
+selectGroup options =
+    formGroup (Input.selectInput options)
+
+
+{-| Helper for creating form group with textarea.
+-}
+textAreaGroup : Form e o -> String -> String -> Html.Html Form.Msg
+textAreaGroup =
+    formGroup Input.textArea
+
+
+{-| Plain group is same Html as formGroup but without any input fields. It only
+shows label with read only Html value.
+-}
 plainGroup : Html.Html msg -> String -> Html.Html msg
 plainGroup valueHtml labelText =
     div [ class "form-group" ]
@@ -70,6 +71,25 @@ plainGroup valueHtml labelText =
         ]
 
 
+{-| Helper for creating plain group with text value.
+-}
+textGroup : String -> String -> Html.Html msg
+textGroup value =
+    plainGroup <|
+        p [ class "form-value" ] [ text value ]
+
+
+{-| Helper for creating plain group with code block.
+-}
+codeGroup : String -> String -> Html.Html msg
+codeGroup value =
+    plainGroup <|
+        code [] [ text value ]
+
+
+{-| Get Html and form group error class for a given field. If the field
+contains no errors, the returned Html and error class are empty.
+-}
 getErrors : Form.FieldState e String -> ( Html msg, String )
 getErrors field =
     case field.liveError of
@@ -84,12 +104,12 @@ getErrors field =
 -- Form Actions
 
 
-formActionOnly : ( String, ActionResult a, Msg ) -> Html Msg
-formActionOnly actionButtonSettings =
-    div [ class "text-right" ]
-        [ actionButton actionButtonSettings ]
+{-| Helper to show action buttons below the form.
 
+  - Cancel button simply redirects to another route
+  - Action button invokes specified message when clicked
 
+-}
 formActions : Route -> ( String, ActionResult a, Msg ) -> Html Msg
 formActions cancelRoute actionButtonSettings =
     div [ class "form-actions" ]
@@ -98,6 +118,18 @@ formActions cancelRoute actionButtonSettings =
         ]
 
 
+{-| Similar to formActions, but it contains only the action button.
+-}
+formActionOnly : ( String, ActionResult a, Msg ) -> Html Msg
+formActionOnly actionButtonSettings =
+    div [ class "text-right" ]
+        [ actionButton actionButtonSettings ]
+
+
+{-| Action button invokes a message when clicked. It's state is defined by
+the ActionResult. If the state is Loading action button is disabled and
+a loader is shown instead of action name.
+-}
 actionButton : ( String, ActionResult a, Msg ) -> Html Msg
 actionButton ( label, result, msg ) =
     let
