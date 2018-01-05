@@ -20,7 +20,7 @@ type Route
     | PackageManagement
     | PackageManagementDetail String String
     | PackageManagementImport
-    | Wizzards
+    | Wizards
     | DataManagementPlans
     | Login
     | NotFound
@@ -43,7 +43,7 @@ matchers =
         , map PackageManagement (s "package-management")
         , map PackageManagementDetail (s "package-management" </> s "package" </> string </> string)
         , map PackageManagementImport (s "package-management" </> s "import")
-        , map Wizzards (s "wizzards")
+        , map Wizards (s "wizards")
         , map DataManagementPlans (s "data-management-plans")
         , map Login (s "login")
         ]
@@ -102,8 +102,8 @@ isAllowed route maybeJwt =
         PackageManagementImport ->
             hasPerm maybeJwt Perm.packageManagement
 
-        Wizzards ->
-            hasPerm maybeJwt Perm.wizzard
+        Wizards ->
+            hasPerm maybeJwt Perm.wizard
 
         DataManagementPlans ->
             hasPerm maybeJwt Perm.dataManagementPlan
@@ -162,8 +162,8 @@ toUrl route =
                 PackageManagementImport ->
                     [ "package-management", "import" ]
 
-                Wizzards ->
-                    [ "wizzards" ]
+                Wizards ->
+                    [ "wizards" ]
 
                 DataManagementPlans ->
                     [ "data-management-plans" ]

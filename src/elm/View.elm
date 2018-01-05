@@ -94,7 +94,7 @@ view model =
                 |> PackageManagement.Import.View.view
                 |> appView model
 
-        Wizzards ->
+        Wizards ->
             appView model wizzardsView
 
         DataManagementPlans ->
@@ -122,7 +122,7 @@ menuItems =
     , ( "User Management", "fa-users", UserManagement, Perm.userManagement )
     , ( "Knowledge Models", "fa-database", KnowledgeModels, Perm.knowledgeModel )
     , ( "Package Management", "fa-cubes", PackageManagement, Perm.packageManagement )
-    , ( "Wizzards", "fa-list-alt", Wizzards, Perm.wizzard )
+    , ( "Wizards", "fa-list-alt", Wizards, Perm.wizard )
     , ( "Data Management Plans", "fa-file-text", DataManagementPlans, Perm.dataManagementPlan )
     ]
 
@@ -197,8 +197,8 @@ indexView =
 wizzardsView : Html Msg
 wizzardsView =
     div [ detailContainerClass ]
-        [ pageHeader "Wizzards" []
-        , fullPageError "fa-magic" "Wizzards are not implemented yet."
+        [ pageHeader "Wizards" []
+        , fullPageError "fa-magic" "Wizards are not implemented yet."
         ]
 
 
