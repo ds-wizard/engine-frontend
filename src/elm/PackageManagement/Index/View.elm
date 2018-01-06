@@ -1,4 +1,10 @@
-module PackageManagement.Index.View exposing (..)
+module PackageManagement.Index.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
@@ -11,6 +17,7 @@ import PackageManagement.Models exposing (..)
 import Routing exposing (Route(..))
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div []

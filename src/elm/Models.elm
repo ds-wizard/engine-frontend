@@ -1,5 +1,19 @@
 module Models exposing (..)
 
+{-|
+
+
+# Types
+
+@docs Model, Flags
+
+
+# Helpers
+
+@docs initialModel, userLoggedIn, flagsDecoder
+
+-}
+
 import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, sessionExists)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -19,6 +33,7 @@ import UserManagement.Edit.Models
 import UserManagement.Index.Models
 
 
+{-| -}
 type alias Model =
     { route : Route
     , seed : Seed
@@ -40,6 +55,7 @@ type alias Model =
     }
 
 
+{-| -}
 initialModel : Route -> Int -> Session -> Maybe JwtToken -> Model
 initialModel route seed session jwt =
     { route = route
@@ -62,17 +78,20 @@ initialModel route seed session jwt =
     }
 
 
+{-| -}
 userLoggedIn : Model -> Bool
 userLoggedIn model =
     sessionExists model.session
 
 
+{-| -}
 type alias Flags =
     { session : Maybe Session
     , seed : Int
     }
 
 
+{-| -}
 flagsDecoder : Decoder Flags
 flagsDecoder =
     decode Flags

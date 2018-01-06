@@ -1,5 +1,11 @@
 module KnowledgeModels.Editor.Update.UpdateReference exposing (..)
 
+{-|
+
+@docs updateReferenceFormMsg, updateReferenceCancel
+
+-}
+
 import Form
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
@@ -9,6 +15,7 @@ import KnowledgeModels.Editor.Update.Utils exposing (formChanged)
 import Random.Pcg exposing (Seed)
 
 
+{-| -}
 updateReferenceFormMsg : Form.Msg -> Seed -> Question -> Chapter -> KnowledgeModel -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )
 updateReferenceFormMsg formMsg seed question chapter knowledgeModel ((ReferenceEditor editor) as originalEditor) =
     case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
@@ -39,6 +46,7 @@ updateReferenceFormMsg formMsg seed question chapter knowledgeModel ((ReferenceE
             ( seed, ReferenceEditor { editor | form = newForm }, Nothing )
 
 
+{-| -}
 updateReferenceCancel : Seed -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )
 updateReferenceCancel seed (ReferenceEditor editor) =
     let

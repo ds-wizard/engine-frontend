@@ -1,5 +1,12 @@
 module KnowledgeModels.Editor.Update.UpdateChapter exposing (..)
 
+{-|
+
+@docs updateChapterFormMsg, updateChapterCancel
+@docs updateChapterAddQuestion, updateChapterViewQuestion, updateChapterDeleteQuestion
+
+-}
+
 import Form
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (KnowledgeModel, newQuestion)
@@ -10,6 +17,7 @@ import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
+{-| -}
 updateChapterFormMsg : Form.Msg -> Seed -> KnowledgeModel -> ChapterEditor -> ( Seed, ChapterEditor, Maybe Event )
 updateChapterFormMsg formMsg seed knowledgeModel ((ChapterEditor editor) as originalEditor) =
     case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.questionsDirty ) of
@@ -52,6 +60,7 @@ updateChapterFormMsg formMsg seed knowledgeModel ((ChapterEditor editor) as orig
             ( seed, ChapterEditor { editor | form = newForm }, Nothing )
 
 
+{-| -}
 updateChapterCancel : Seed -> ChapterEditor -> ( Seed, ChapterEditor, Maybe Event )
 updateChapterCancel seed (ChapterEditor editor) =
     let
@@ -66,6 +75,7 @@ updateChapterCancel seed (ChapterEditor editor) =
     ( seed, ChapterEditor { editor | active = False, form = newForm, questions = newQuestions, questionsDirty = False }, Nothing )
 
 
+{-| -}
 updateChapterAddQuestion : Seed -> KnowledgeModel -> ChapterEditor -> ( Seed, ChapterEditor, Maybe Event )
 updateChapterAddQuestion seed knowledgeModel (ChapterEditor editor) =
     let
@@ -80,6 +90,7 @@ updateChapterAddQuestion seed knowledgeModel (ChapterEditor editor) =
     ( newSeed, ChapterEditor { editor | questions = newQuestions }, Just event )
 
 
+{-| -}
 updateChapterViewQuestion : String -> Seed -> ChapterEditor -> ( Seed, ChapterEditor, Maybe Event )
 updateChapterViewQuestion uuid seed (ChapterEditor editor) =
     let
@@ -89,6 +100,7 @@ updateChapterViewQuestion uuid seed (ChapterEditor editor) =
     ( seed, ChapterEditor { editor | questions = newQuestions }, Nothing )
 
 
+{-| -}
 updateChapterDeleteQuestion : String -> Seed -> KnowledgeModel -> ChapterEditor -> ( Seed, ChapterEditor, Maybe Event )
 updateChapterDeleteQuestion uuid seed knowledgeModel (ChapterEditor editor) =
     let

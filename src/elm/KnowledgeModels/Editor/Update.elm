@@ -1,4 +1,10 @@
-module KnowledgeModels.Editor.Update exposing (..)
+module KnowledgeModels.Editor.Update exposing (getKnowledgeModelCmd, update)
+
+{-|
+
+@docs update, getKnowledgeModelCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -24,6 +30,7 @@ import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
 
+{-| -}
 getKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 getKnowledgeModelCmd uuid session =
     getKnowledgeModelData uuid session
@@ -270,6 +277,7 @@ updateExpert question chapter knowledgeModel msg seed expertEditor =
             updateExpertCancel seed expertEditor
 
 
+{-| -}
 update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 update msg seed session model =
     case msg of

@@ -1,4 +1,10 @@
-module PackageManagement.Import.View exposing (..)
+module PackageManagement.Import.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (detailContainerClassWith)
 import Common.Types exposing (ActionResult(..))
@@ -15,6 +21,7 @@ import PackageManagement.Import.Models exposing (..)
 import PackageManagement.Import.Msgs exposing (Msg(..))
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     let

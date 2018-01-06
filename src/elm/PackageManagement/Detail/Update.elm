@@ -1,4 +1,10 @@
-module PackageManagement.Detail.Update exposing (..)
+module PackageManagement.Detail.Update exposing (getPackagesFilteredCmd, update)
+
+{-|
+
+@docs update, getPackagesFilteredCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -12,6 +18,7 @@ import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
+{-| -}
 getPackagesFilteredCmd : String -> String -> Session -> Cmd Msgs.Msg
 getPackagesFilteredCmd groupId artifactId session =
     getPackagesFiltered groupId artifactId session
@@ -103,6 +110,7 @@ deleteVersionCompleted model result =
             )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

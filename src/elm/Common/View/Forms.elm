@@ -1,4 +1,38 @@
-module Common.View.Forms exposing (..)
+module Common.View.Forms
+    exposing
+        ( actionButton
+        , codeGroup
+        , formActionOnly
+        , formActions
+        , formGroup
+        , formResultView
+        , formSuccessResultView
+        , inputGroup
+        , passwordGroup
+        , plainGroup
+        , selectGroup
+        , textAreaGroup
+        , textGroup
+        )
+
+{-|
+
+
+# Form fields
+
+@docs formGroup, inputGroup, passwordGroup, selectGroup, textAreaGroup, plainGroup, textGroup, codeGroup
+
+
+# Form actions
+
+@docs formActions, formActionOnly, actionButton
+
+
+# Status views
+
+@docs formResultView,formSuccessResultView
+
+-}
 
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
@@ -153,6 +187,7 @@ actionButton ( label, result, msg ) =
 -- Status Views
 
 
+{-| -}
 formResultView : ActionResult String -> Html Msgs.Msg
 formResultView result =
     case result of
@@ -166,6 +201,7 @@ formResultView result =
             emptyNode
 
 
+{-| -}
 formSuccessResultView : ActionResult String -> Html Msgs.Msg
 formSuccessResultView result =
     case result of

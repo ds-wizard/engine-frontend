@@ -1,9 +1,24 @@
 module PackageManagement.Detail.Models exposing (..)
 
+{-|
+
+
+# Types
+
+@docs Model
+
+
+# Helpers
+
+@docs initialModel, currentPackage, packagesLength
+
+-}
+
 import Common.Types exposing (ActionResult(..))
 import PackageManagement.Models exposing (PackageDetail)
 
 
+{-| -}
 type alias Model =
     { packages : ActionResult (List PackageDetail)
     , deletingPackage : ActionResult String
@@ -13,6 +28,7 @@ type alias Model =
     }
 
 
+{-| -}
 initialModel : Model
 initialModel =
     { packages = Loading
@@ -23,6 +39,7 @@ initialModel =
     }
 
 
+{-| -}
 currentPackage : Model -> Maybe PackageDetail
 currentPackage model =
     case model.packages of
@@ -33,6 +50,7 @@ currentPackage model =
             Nothing
 
 
+{-| -}
 packagesLength : Model -> Int
 packagesLength model =
     case model.packages of

@@ -1,4 +1,10 @@
-module KnowledgeModels.View exposing (..)
+module KnowledgeModels.View exposing (diffTreeView)
+
+{-|
+
+@docs diffTreeView
+
+-}
 
 import Common.Html exposing (emptyNode)
 import Html exposing (..)
@@ -8,6 +14,7 @@ import KnowledgeModels.Editor.Models.Events exposing (..)
 import List.Extra as List
 
 
+{-| -}
 diffTreeView : KnowledgeModel -> List Event -> Html msg
 diffTreeView km events =
     diffTreeNodeKnowledgeModel (List.reverse events) km

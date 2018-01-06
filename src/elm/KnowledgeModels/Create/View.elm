@@ -1,4 +1,10 @@
-module KnowledgeModels.Create.View exposing (..)
+module KnowledgeModels.Create.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
@@ -15,6 +21,7 @@ import PackageManagement.Models exposing (PackageDetail)
 import Routing exposing (Route(..))
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClass ]

@@ -1,4 +1,10 @@
-module KnowledgeModels.Publish.View exposing (..)
+module KnowledgeModels.Publish.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.Types exposing (ActionResult(..))
@@ -16,6 +22,7 @@ import Msgs
 import Routing exposing (Route(..))
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClassWith "knowledge-models-publish" ]

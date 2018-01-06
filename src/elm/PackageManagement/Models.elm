@@ -1,9 +1,29 @@
 module PackageManagement.Models exposing (..)
 
+{-|
+
+
+# Types
+
+@docs Package, PackageDetail
+
+
+# Package decoders
+
+@docs packageDecoder, packageListDecoder
+
+
+# PackageDetail decoders
+
+@docs packageDetailDecoder, packageDetailListDecoder
+
+-}
+
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 
 
+{-| -}
 type alias Package =
     { name : String
     , groupId : String
@@ -11,6 +31,7 @@ type alias Package =
     }
 
 
+{-| -}
 packageDecoder : Decoder Package
 packageDecoder =
     decode Package
@@ -19,11 +40,13 @@ packageDecoder =
         |> required "artifactId" Decode.string
 
 
+{-| -}
 packageListDecoder : Decoder (List Package)
 packageListDecoder =
     Decode.list packageDecoder
 
 
+{-| -}
 type alias PackageDetail =
     { name : String
     , id : String
@@ -34,6 +57,7 @@ type alias PackageDetail =
     }
 
 
+{-| -}
 packageDetailDecoder : Decoder PackageDetail
 packageDetailDecoder =
     decode PackageDetail
@@ -45,6 +69,7 @@ packageDetailDecoder =
         |> required "description" Decode.string
 
 
+{-| -}
 packageDetailListDecoder : Decoder (List PackageDetail)
 packageDetailListDecoder =
     Decode.list packageDetailDecoder

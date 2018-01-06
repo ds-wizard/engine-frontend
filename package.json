@@ -4,7 +4,8 @@
   "scripts": {
     "build": "rm -rf ./dist && webpack -p",
     "start": "webpack-dev-server --port 8080",
-    "test": "elm-test"
+    "test": "elm-test",
+    "docs": "elm-doc . --output docs"
   },
   "devDependencies": {
     "css-loader": "^0.28.7",

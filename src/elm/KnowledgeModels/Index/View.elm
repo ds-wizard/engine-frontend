@@ -1,4 +1,10 @@
-module KnowledgeModels.Index.View exposing (..)
+module KnowledgeModels.Index.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
@@ -18,6 +24,7 @@ import PackageManagement.Models exposing (PackageDetail)
 import Routing exposing (Route(..))
 
 
+{-| -}
 view : Maybe JwtToken -> Model -> Html Msgs.Msg
 view jwt model =
     div []

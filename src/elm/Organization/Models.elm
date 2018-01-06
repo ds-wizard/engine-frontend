@@ -1,5 +1,29 @@
 module Organization.Models exposing (..)
 
+{-|
+
+
+# Types
+
+@docs Model, Organization, OrganizationForm
+
+
+# Model helpers
+
+@docs initialModel
+
+
+# Organization helpers
+
+@docs organizationDecoder
+
+
+# OrganizationForm helpers
+
+@docs initEmptyOrganizationForm, initOrganizationForm, organizationFormValidation, organizationToFormInitials, encodeOrganizationForm
+
+-}
+
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
@@ -10,6 +34,7 @@ import Json.Encode as Encode exposing (..)
 import Utils exposing (validateRegex)
 
 
+{-| -}
 type alias Model =
     { organization : ActionResult Organization
     , savingOrganization : ActionResult String
@@ -17,6 +42,22 @@ type alias Model =
     }
 
 
+{-| -}
+type alias Organization =
+    { uuid : String
+    , name : String
+    , groupId : String
+    }
+
+
+{-| -}
+type alias OrganizationForm =
+    { name : String
+    , groupId : String
+    }
+
+
+{-| -}
 initialModel : Model
 initialModel =
     { organization = Loading
@@ -25,13 +66,7 @@ initialModel =
     }
 
 
-type alias Organization =
-    { uuid : String
-    , name : String
-    , groupId : String
-    }
-
-
+{-| -}
 organizationDecoder : Decoder Organization
 organizationDecoder =
     decode Organization
@@ -40,22 +75,19 @@ organizationDecoder =
         |> required "groupId" Decode.string
 
 
-type alias OrganizationForm =
-    { name : String
-    , groupId : String
-    }
-
-
+{-| -}
 initEmptyOrganizationForm : Form () OrganizationForm
 initEmptyOrganizationForm =
     Form.initial [] organizationFormValidation
 
 
+{-| -}
 initOrganizationForm : Organization -> Form () OrganizationForm
 initOrganizationForm organization =
     Form.initial (organizationToFormInitials organization) organizationFormValidation
 
 
+{-| -}
 organizationFormValidation : Validation () OrganizationForm
 organizationFormValidation =
     Validate.map2 OrganizationForm
@@ -63,6 +95,7 @@ organizationFormValidation =
         (Validate.field "groupId" (validateRegex "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"))
 
 
+{-| -}
 organizationToFormInitials : Organization -> List ( String, Field.Field )
 organizationToFormInitials organization =
     [ ( "name", Field.string organization.name )
@@ -70,6 +103,7 @@ organizationToFormInitials organization =
     ]
 
 
+{-| -}
 encodeOrganizationForm : String -> OrganizationForm -> Encode.Value
 encodeOrganizationForm uuid form =
     Encode.object

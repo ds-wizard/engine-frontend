@@ -1,4 +1,10 @@
-module Main exposing (..)
+module Main exposing (main)
+
+{-|
+
+@docs main
+
+-}
 
 import Auth.Models exposing (Session, initialSession, parseJwt)
 import Json.Decode as Decode exposing (Value)
@@ -69,6 +75,7 @@ subscriptions model =
             Sub.none
 
 
+{-| -}
 main : Program Value Model Msg
 main =
     Navigation.programWithFlags Msgs.OnLocationChange

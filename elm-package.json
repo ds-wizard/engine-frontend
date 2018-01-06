@@ -1,7 +1,7 @@
 {
     "version": "0.1.0",
     "summary": "Elixir DSP Client",
-    "repository": "https://github.com/user/project.git",
+    "repository": "https://github.com/janslifka/dsp-client.git",
     "license": "BSD3",
     "source-directories": [
         "src/elm",

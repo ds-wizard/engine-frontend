@@ -1,5 +1,14 @@
 module KnowledgeModels.Editor.Update.UpdateQuestion exposing (..)
 
+{-|
+
+@docs updateQuestionFormMsg, updateQuestionCancel
+@docs updateQuestionAddAnswer, updateQuestionViewAnswer, updateQuestionDeleteAnswer
+@docs updateQuestionAddReference, updateQuestionViewReference, updateQuestionDeleteReference
+@docs updateQuestionAddExpert, updateQuestionViewExpert, updateQuestionDeleteExpert
+
+-}
+
 import Form
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
@@ -10,6 +19,7 @@ import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
+{-| -}
 updateQuestionFormMsg : Form.Msg -> Seed -> (Chapter -> KnowledgeModel -> List String -> List String -> List String -> Seed -> Question -> ( Event, Seed )) -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionFormMsg formMsg seed createEditEvent chapter knowledgeModel ((QuestionEditor editor) as questionEditor) =
     case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.answersDirty || editor.referencesDirty || editor.expertsDirty ) of
@@ -68,6 +78,7 @@ updateQuestionFormMsg formMsg seed createEditEvent chapter knowledgeModel ((Ques
             ( seed, QuestionEditor { editor | form = newForm }, Nothing )
 
 
+{-| -}
 updateQuestionCancel : Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionCancel seed (QuestionEditor editor) =
     let
@@ -99,6 +110,7 @@ updateQuestionCancel seed (QuestionEditor editor) =
     )
 
 
+{-| -}
 updateQuestionAddAnswer : Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionAddAnswer seed chapter knowledgeModel (QuestionEditor editor) =
     let
@@ -113,6 +125,7 @@ updateQuestionAddAnswer seed chapter knowledgeModel (QuestionEditor editor) =
     ( newSeed, QuestionEditor { editor | answers = newAnswers }, Just event )
 
 
+{-| -}
 updateQuestionViewAnswer : String -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionViewAnswer uuid seed (QuestionEditor editor) =
     let
@@ -122,6 +135,7 @@ updateQuestionViewAnswer uuid seed (QuestionEditor editor) =
     ( seed, QuestionEditor { editor | answers = newAnswers }, Nothing )
 
 
+{-| -}
 updateQuestionDeleteAnswer : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionDeleteAnswer uuid seed chapter knowledgeModel (QuestionEditor editor) =
     let
@@ -134,6 +148,7 @@ updateQuestionDeleteAnswer uuid seed chapter knowledgeModel (QuestionEditor edit
     ( newSeed, QuestionEditor { editor | answers = newAnswers }, Just event )
 
 
+{-| -}
 updateQuestionAddReference : Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionAddReference seed chapter knowledgeModel (QuestionEditor editor) =
     let
@@ -148,6 +163,7 @@ updateQuestionAddReference seed chapter knowledgeModel (QuestionEditor editor) =
     ( newSeed, QuestionEditor { editor | references = newReferences }, Just event )
 
 
+{-| -}
 updateQuestionViewReference : String -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionViewReference uuid seed (QuestionEditor editor) =
     let
@@ -157,6 +173,7 @@ updateQuestionViewReference uuid seed (QuestionEditor editor) =
     ( seed, QuestionEditor { editor | references = newReferences }, Nothing )
 
 
+{-| -}
 updateQuestionDeleteReference : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionDeleteReference uuid seed chapter knowledgeModel (QuestionEditor editor) =
     let
@@ -169,6 +186,7 @@ updateQuestionDeleteReference uuid seed chapter knowledgeModel (QuestionEditor e
     ( newSeed, QuestionEditor { editor | references = newReferences }, Just event )
 
 
+{-| -}
 updateQuestionAddExpert : Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionAddExpert seed chapter knowledgeModel (QuestionEditor editor) =
     let
@@ -183,6 +201,7 @@ updateQuestionAddExpert seed chapter knowledgeModel (QuestionEditor editor) =
     ( newSeed, QuestionEditor { editor | experts = newExperts }, Just event )
 
 
+{-| -}
 updateQuestionViewExpert : String -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionViewExpert uuid seed (QuestionEditor editor) =
     let
@@ -192,6 +211,7 @@ updateQuestionViewExpert uuid seed (QuestionEditor editor) =
     ( seed, QuestionEditor { editor | experts = newExperts }, Nothing )
 
 
+{-| -}
 updateQuestionDeleteExpert : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestionDeleteExpert uuid seed chapter knowledgeModel (QuestionEditor editor) =
     let

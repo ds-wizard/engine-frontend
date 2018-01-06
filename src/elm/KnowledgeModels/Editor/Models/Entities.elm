@@ -1,10 +1,35 @@
 module KnowledgeModels.Editor.Models.Entities exposing (..)
 
+{-| Defines the entities used within the editor and their helpers
+
+
+# Types
+
+@docs KnowledgeModel, Chapter, Question, Answer, FollowUps, Reference, Expert
+
+
+# Decoders
+
+@docs knowledgeModelDecoder, chapterDecoder, questionDecoder, answerDecoder, followupsDecoder, referenceDecoder, expertDecoder
+
+
+# Constructors
+
+@docs newChapter, newQuestion, newAnswer, newReference, newExpert
+
+
+# Getters
+
+@docs getChapters, getChapter, getQuestions, getQuestion, getFollowUpQuestions, getAnswers, getAnswer, getReferences, getReference, getExperts, getExpert
+
+-}
+
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import List.Extra as List
 
 
+{-| -}
 type alias KnowledgeModel =
     { uuid : String
     , name : String
@@ -12,6 +37,7 @@ type alias KnowledgeModel =
     }
 
 
+{-| -}
 type alias Chapter =
     { uuid : String
     , title : String
@@ -20,6 +46,7 @@ type alias Chapter =
     }
 
 
+{-| -}
 type alias Question =
     { uuid : String
     , type_ : String
@@ -32,6 +59,7 @@ type alias Question =
     }
 
 
+{-| -}
 type alias Answer =
     { uuid : String
     , label : String
@@ -40,16 +68,19 @@ type alias Answer =
     }
 
 
+{-| -}
 type FollowUps
     = FollowUps (List Question)
 
 
+{-| -}
 type alias Reference =
     { uuid : String
     , chapter : String
     }
 
 
+{-| -}
 type alias Expert =
     { uuid : String
     , name : String
@@ -57,6 +88,7 @@ type alias Expert =
     }
 
 
+{-| -}
 knowledgeModelDecoder : Decoder KnowledgeModel
 knowledgeModelDecoder =
     decode KnowledgeModel
@@ -65,6 +97,7 @@ knowledgeModelDecoder =
         |> required "chapters" (Decode.list chapterDecoder)
 
 
+{-| -}
 chapterDecoder : Decoder Chapter
 chapterDecoder =
     decode Chapter
@@ -74,6 +107,7 @@ chapterDecoder =
         |> required "questions" (Decode.list questionDecoder)
 
 
+{-| -}
 questionDecoder : Decoder Question
 questionDecoder =
     decode Question
@@ -87,6 +121,7 @@ questionDecoder =
         |> required "experts" (Decode.list expertDecoder)
 
 
+{-| -}
 answerDecoder : Decoder Answer
 answerDecoder =
     decode Answer
@@ -96,11 +131,13 @@ answerDecoder =
         |> required "followUps" followupsDecoder
 
 
+{-| -}
 followupsDecoder : Decoder FollowUps
 followupsDecoder =
     Decode.map FollowUps (Decode.lazy (\_ -> Decode.list questionDecoder))
 
 
+{-| -}
 referenceDecoder : Decoder Reference
 referenceDecoder =
     decode Reference
@@ -108,6 +145,7 @@ referenceDecoder =
         |> required "chapter" Decode.string
 
 
+{-| -}
 expertDecoder : Decoder Expert
 expertDecoder =
     decode Expert
@@ -116,6 +154,7 @@ expertDecoder =
         |> required "email" Decode.string
 
 
+{-| -}
 newChapter : String -> Chapter
 newChapter uuid =
     { uuid = uuid
@@ -125,6 +164,7 @@ newChapter uuid =
     }
 
 
+{-| -}
 newQuestion : String -> Question
 newQuestion uuid =
     { uuid = uuid
@@ -138,6 +178,7 @@ newQuestion uuid =
     }
 
 
+{-| -}
 newAnswer : String -> Answer
 newAnswer uuid =
     { uuid = uuid
@@ -147,6 +188,7 @@ newAnswer uuid =
     }
 
 
+{-| -}
 newReference : String -> Reference
 newReference uuid =
     { uuid = uuid
@@ -154,6 +196,7 @@ newReference uuid =
     }
 
 
+{-| -}
 newExpert : String -> Expert
 newExpert uuid =
     { uuid = uuid
@@ -162,17 +205,20 @@ newExpert uuid =
     }
 
 
+{-| -}
 getChapters : KnowledgeModel -> List Chapter
 getChapters km =
     km.chapters
 
 
+{-| -}
 getChapter : KnowledgeModel -> String -> Maybe Chapter
 getChapter km chapterUuid =
     getChapters km
         |> List.find (\c -> c.uuid == chapterUuid)
 
 
+{-| -}
 getQuestions : KnowledgeModel -> List Question
 getQuestions km =
     let
@@ -188,12 +234,14 @@ getQuestions km =
         |> List.concat
 
 
+{-| -}
 getQuestion : KnowledgeModel -> String -> Maybe Question
 getQuestion km questionUuid =
     getQuestions km
         |> List.find (\q -> q.uuid == questionUuid)
 
 
+{-| -}
 getFollowUpQuestions : Answer -> List Question
 getFollowUpQuestions answer =
     let
@@ -203,6 +251,7 @@ getFollowUpQuestions answer =
     getFollowUpsQuestionList answer.followUps
 
 
+{-| -}
 getAnswers : KnowledgeModel -> List Answer
 getAnswers km =
     getQuestions km
@@ -210,12 +259,14 @@ getAnswers km =
         |> List.concat
 
 
+{-| -}
 getAnswer : KnowledgeModel -> String -> Maybe Answer
 getAnswer km answerUuid =
     getAnswers km
         |> List.find (\a -> a.uuid == answerUuid)
 
 
+{-| -}
 getReferences : KnowledgeModel -> List Reference
 getReferences km =
     getQuestions km
@@ -223,12 +274,14 @@ getReferences km =
         |> List.concat
 
 
+{-| -}
 getReference : KnowledgeModel -> String -> Maybe Reference
 getReference km referenceUuid =
     getReferences km
         |> List.find (\r -> r.uuid == referenceUuid)
 
 
+{-| -}
 getExperts : KnowledgeModel -> List Expert
 getExperts km =
     getQuestions km
@@ -236,6 +289,7 @@ getExperts km =
         |> List.concat
 
 
+{-| -}
 getExpert : KnowledgeModel -> String -> Maybe Expert
 getExpert km expertUuid =
     getExperts km

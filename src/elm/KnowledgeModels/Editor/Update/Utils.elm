@@ -1,5 +1,11 @@
 module KnowledgeModels.Editor.Update.Utils exposing (..)
 
+{-|
+
+@docs updateInListWithSeed, updateInList, formChanged, addChild
+
+-}
+
 import Form exposing (Form)
 import KnowledgeModels.Editor.Models.Events exposing (Event)
 import Random.Pcg exposing (Seed)
@@ -7,6 +13,7 @@ import Set
 import Utils exposing (getUuid)
 
 
+{-| -}
 updateInListWithSeed : List t -> Seed -> (t -> Bool) -> (Seed -> t -> ( Seed, t, Maybe Event )) -> ( Seed, List t, Maybe Event )
 updateInListWithSeed list seed predicate updateFunction =
     let
@@ -24,6 +31,7 @@ updateInListWithSeed list seed predicate updateFunction =
     List.foldl fn ( seed, [], Nothing ) list
 
 
+{-| -}
 updateInList : List a -> (a -> Bool) -> (a -> a) -> List a
 updateInList list predicate updateFunction =
     let
@@ -37,11 +45,13 @@ updateInList list predicate updateFunction =
     List.map fn list
 
 
+{-| -}
 formChanged : Form () a -> Bool
 formChanged form =
     Set.size (Form.getChangedFields form) > 0
 
 
+{-| -}
 addChild : Seed -> List et -> (Bool -> Int -> ct -> et) -> (String -> ct) -> (Seed -> ct -> ( Event, Seed )) -> ( Seed, List et, Event )
 addChild seed children createChildEditor newChild createAddChildEvent =
     let

@@ -1,5 +1,12 @@
 module KnowledgeModels.Editor.Update.UpdateAnswer exposing (..)
 
+{-|
+
+@docs updateAnswerFormMsg, updateAnswerCancel
+@docs updateAnswerAddFollowUpQuestion, updateAnswerViewFollowUpQuestion, updateAnswerDeleteFollowUpQuestion
+
+-}
+
 import Form
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
@@ -10,6 +17,7 @@ import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
+{-| -}
 updateAnswerFormMsg : Form.Msg -> Seed -> Question -> Chapter -> KnowledgeModel -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
 updateAnswerFormMsg formMsg seed question chapter knowledgeModel ((AnswerEditor editor) as originalEditor) =
     case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.followUpsDirty ) of
@@ -46,6 +54,7 @@ updateAnswerFormMsg formMsg seed question chapter knowledgeModel ((AnswerEditor 
             ( seed, AnswerEditor { editor | form = newForm }, Nothing )
 
 
+{-| -}
 updateAnswerCancel : Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
 updateAnswerCancel seed (AnswerEditor editor) =
     let
@@ -58,6 +67,7 @@ updateAnswerCancel seed (AnswerEditor editor) =
     ( seed, AnswerEditor { editor | active = False, form = newForm, followUps = newFollowUps, followUpsDirty = False }, Nothing )
 
 
+{-| -}
 updateAnswerAddFollowUpQuestion : Seed -> Chapter -> KnowledgeModel -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
 updateAnswerAddFollowUpQuestion seed chapter knowledgeModel (AnswerEditor editor) =
     let
@@ -72,6 +82,7 @@ updateAnswerAddFollowUpQuestion seed chapter knowledgeModel (AnswerEditor editor
     ( newSeed, AnswerEditor { editor | followUps = newFollowUps }, Just event )
 
 
+{-| -}
 updateAnswerViewFollowUpQuestion : String -> Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
 updateAnswerViewFollowUpQuestion uuid seed (AnswerEditor editor) =
     let
@@ -81,6 +92,7 @@ updateAnswerViewFollowUpQuestion uuid seed (AnswerEditor editor) =
     ( seed, AnswerEditor { editor | followUps = newFollowUps }, Nothing )
 
 
+{-| -}
 updateAnswerDeleteFollowUpQuestion : String -> Seed -> Chapter -> KnowledgeModel -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
 updateAnswerDeleteFollowUpQuestion uuid seed chapter knowledgeModel (AnswerEditor editor) =
     let

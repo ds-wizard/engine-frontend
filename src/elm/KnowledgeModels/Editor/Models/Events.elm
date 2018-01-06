@@ -1,4 +1,160 @@
-module KnowledgeModels.Editor.Models.Events exposing (..)
+module KnowledgeModels.Editor.Models.Events
+    exposing
+        ( AddAnswerEventData
+        , AddChapterEventData
+        , AddExpertEventData
+        , AddFollowUpQuestionEventData
+        , AddQuestionEventData
+        , AddReferenceEventData
+        , DeleteAnswerEventData
+        , DeleteChapterEventData
+        , DeleteExpertEventData
+        , DeleteFollowUpQuestionEventData
+        , DeleteQuestionEventData
+        , DeleteReferenceEventData
+        , EditAnswerEventData
+        , EditChapterEventData
+        , EditExpertEventData
+        , EditFollowUpQuestionEventData
+        , EditKnowledgeModelEventData
+        , EditQuestionEventData
+        , EditReferenceEventData
+        , Event(..)
+        , createAddAnswerEvent
+        , createAddChapterEvent
+        , createAddExpertEvent
+        , createAddFollowUpQuestionEvent
+        , createAddQuestionEvent
+        , createAddReferenceEvent
+        , createDeleteAnswerEvent
+        , createDeleteChapterEvent
+        , createDeleteExpertEvent
+        , createDeleteFollowUpQuestionEvent
+        , createDeleteQuestionEvent
+        , createDeleteReferenceEvent
+        , createEditAnswerEvent
+        , createEditChapterEvent
+        , createEditExpertEvent
+        , createEditFollowUpQuestionEvent
+        , createEditKnowledgeModelEvent
+        , createEditQuestionEvent
+        , createEditReferenceEvent
+        , encodeEvent
+        , encodeEvents
+        , eventDecoder
+        , eventDecoderByType
+        , getEventEntityVisibleName
+        , getEventUuid
+        , isAddAnswer
+        , isAddChapter
+        , isAddExpert
+        , isAddFollowUpQuestion
+        , isAddQuestion
+        , isAddReference
+        , isDeleteAnswer
+        , isDeleteChapter
+        , isDeleteExpert
+        , isDeleteQuestion
+        , isDeleteReference
+        , isEditAnswer
+        , isEditChapter
+        , isEditExpert
+        , isEditQuestion
+        , isEditReference
+        )
+
+{-|
+
+
+# Events
+
+@docs Event, EditKnowledgeModelEventData
+
+
+# Chapter Events
+
+@docs AddChapterEventData, EditChapterEventData, DeleteChapterEventData
+
+
+# Question Events
+
+@docs AddQuestionEventData, EditQuestionEventData, DeleteQuestionEventData
+
+
+# Answer Events
+
+@docs AddAnswerEventData, EditAnswerEventData, DeleteAnswerEventData
+
+
+# Reference Events
+
+@docs AddReferenceEventData, EditReferenceEventData, DeleteReferenceEventData
+
+
+# Expert Events
+
+@docs AddExpertEventData, EditExpertEventData, DeleteExpertEventData
+
+
+# FollowUpQuestion Events
+
+@docs AddFollowUpQuestionEventData, EditFollowUpQuestionEventData, DeleteFollowUpQuestionEventData
+
+
+# Creating events
+
+@docs createEditKnowledgeModelEvent
+
+
+# Creating chapter events
+
+@docs createAddChapterEvent, createEditChapterEvent, createDeleteChapterEvent
+
+
+# Creating question events
+
+@docs createAddQuestionEvent, createEditQuestionEvent, createDeleteQuestionEvent
+
+
+# Creating answer events
+
+@docs createAddAnswerEvent, createEditAnswerEvent, createDeleteAnswerEvent
+
+
+# Creating reference events
+
+@docs createAddReferenceEvent, createEditReferenceEvent, createDeleteReferenceEvent
+
+
+# Creating expert events
+
+@docs createAddExpertEvent, createEditExpertEvent, createDeleteExpertEvent
+
+
+# Creating follow up question events
+
+@docs createAddFollowUpQuestionEvent, createEditFollowUpQuestionEvent, createDeleteFollowUpQuestionEvent
+
+
+# Event encoders
+
+@docs encodeEvents, encodeEvent
+
+
+# Event decoders
+
+@docs eventDecoder, eventDecoderByType
+
+
+# Event helpers
+
+@docs getEventUuid, getEventEntityVisibleName
+
+@docs isEditChapter,isEditQuestion, isEditAnswer, isEditReference, isEditExpert, isEditExpert
+@docs isDeleteChapter, isDeleteQuestion, isDeleteAnswer, isDeleteReference, isDeleteExpert
+@docs isAddChapter, isAddQuestion, isAddAnswer, isAddExpert, isAddReference, isAddFollowUpQuestion
+
+-}
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -8,6 +164,7 @@ import Random.Pcg exposing (Seed)
 import Utils exposing (getUuid)
 
 
+{-| -}
 type Event
     = EditKnowledgeModelEvent EditKnowledgeModelEventData
     | AddChapterEvent AddChapterEventData
@@ -30,6 +187,7 @@ type Event
     | DeleteFollowUpQuestionEvent DeleteFollowUpQuestionEventData
 
 
+{-| -}
 type alias EditKnowledgeModelEventData =
     { uuid : String
     , kmUuid : String
@@ -38,6 +196,7 @@ type alias EditKnowledgeModelEventData =
     }
 
 
+{-| -}
 type alias AddChapterEventData =
     { uuid : String
     , kmUuid : String
@@ -47,6 +206,7 @@ type alias AddChapterEventData =
     }
 
 
+{-| -}
 type alias EditChapterEventData =
     { uuid : String
     , kmUuid : String
@@ -57,6 +217,7 @@ type alias EditChapterEventData =
     }
 
 
+{-| -}
 type alias DeleteChapterEventData =
     { uuid : String
     , kmUuid : String
@@ -64,6 +225,7 @@ type alias DeleteChapterEventData =
     }
 
 
+{-| -}
 type alias AddQuestionEventData =
     { uuid : String
     , kmUuid : String
@@ -76,6 +238,7 @@ type alias AddQuestionEventData =
     }
 
 
+{-| -}
 type alias EditQuestionEventData =
     { uuid : String
     , kmUuid : String
@@ -91,6 +254,7 @@ type alias EditQuestionEventData =
     }
 
 
+{-| -}
 type alias DeleteQuestionEventData =
     { uuid : String
     , kmUuid : String
@@ -99,6 +263,7 @@ type alias DeleteQuestionEventData =
     }
 
 
+{-| -}
 type alias AddAnswerEventData =
     { uuid : String
     , kmUuid : String
@@ -110,6 +275,7 @@ type alias AddAnswerEventData =
     }
 
 
+{-| -}
 type alias EditAnswerEventData =
     { uuid : String
     , kmUuid : String
@@ -122,6 +288,7 @@ type alias EditAnswerEventData =
     }
 
 
+{-| -}
 type alias DeleteAnswerEventData =
     { uuid : String
     , kmUuid : String
@@ -131,6 +298,7 @@ type alias DeleteAnswerEventData =
     }
 
 
+{-| -}
 type alias AddReferenceEventData =
     { uuid : String
     , kmUuid : String
@@ -141,6 +309,7 @@ type alias AddReferenceEventData =
     }
 
 
+{-| -}
 type alias EditReferenceEventData =
     { uuid : String
     , kmUuid : String
@@ -151,6 +320,7 @@ type alias EditReferenceEventData =
     }
 
 
+{-| -}
 type alias DeleteReferenceEventData =
     { uuid : String
     , kmUuid : String
@@ -160,6 +330,7 @@ type alias DeleteReferenceEventData =
     }
 
 
+{-| -}
 type alias AddExpertEventData =
     { uuid : String
     , kmUuid : String
@@ -171,6 +342,7 @@ type alias AddExpertEventData =
     }
 
 
+{-| -}
 type alias EditExpertEventData =
     { uuid : String
     , kmUuid : String
@@ -182,6 +354,7 @@ type alias EditExpertEventData =
     }
 
 
+{-| -}
 type alias DeleteExpertEventData =
     { uuid : String
     , kmUuid : String
@@ -191,6 +364,7 @@ type alias DeleteExpertEventData =
     }
 
 
+{-| -}
 type alias AddFollowUpQuestionEventData =
     { uuid : String
     , kmUuid : String
@@ -204,6 +378,7 @@ type alias AddFollowUpQuestionEventData =
     }
 
 
+{-| -}
 type alias EditFollowUpQuestionEventData =
     { uuid : String
     , kmUuid : String
@@ -220,6 +395,7 @@ type alias EditFollowUpQuestionEventData =
     }
 
 
+{-| -}
 type alias DeleteFollowUpQuestionEventData =
     { uuid : String
     , kmUuid : String
@@ -229,6 +405,7 @@ type alias DeleteFollowUpQuestionEventData =
     }
 
 
+{-| -}
 createEditKnowledgeModelEvent : Seed -> KnowledgeModel -> List String -> ( Event, Seed )
 createEditKnowledgeModelEvent seed knowledgeModel chapterIds =
     let
@@ -246,6 +423,7 @@ createEditKnowledgeModelEvent seed knowledgeModel chapterIds =
     ( event, newSeed )
 
 
+{-| -}
 createAddChapterEvent : KnowledgeModel -> Seed -> Chapter -> ( Event, Seed )
 createAddChapterEvent knowledgeModel seed chapter =
     let
@@ -264,6 +442,7 @@ createAddChapterEvent knowledgeModel seed chapter =
     ( event, newSeed )
 
 
+{-| -}
 createEditChapterEvent : KnowledgeModel -> List String -> Seed -> Chapter -> ( Event, Seed )
 createEditChapterEvent knowledgeModel questionIds seed chapter =
     let
@@ -283,6 +462,7 @@ createEditChapterEvent knowledgeModel questionIds seed chapter =
     ( event, newSeed )
 
 
+{-| -}
 createDeleteChapterEvent : KnowledgeModel -> Seed -> String -> ( Event, Seed )
 createDeleteChapterEvent knowledgeModel seed chapterUuid =
     let
@@ -299,6 +479,7 @@ createDeleteChapterEvent knowledgeModel seed chapterUuid =
     ( event, newSeed )
 
 
+{-| -}
 createAddQuestionEvent : Chapter -> KnowledgeModel -> Seed -> Question -> ( Event, Seed )
 createAddQuestionEvent chapter knowledgeModel seed question =
     let
@@ -320,6 +501,7 @@ createAddQuestionEvent chapter knowledgeModel seed question =
     ( event, newSeed )
 
 
+{-| -}
 createEditQuestionEvent : Chapter -> KnowledgeModel -> List String -> List String -> List String -> Seed -> Question -> ( Event, Seed )
 createEditQuestionEvent chapter knowledgeModel answerIds referenceIds expertIds seed question =
     let
@@ -344,6 +526,7 @@ createEditQuestionEvent chapter knowledgeModel answerIds referenceIds expertIds 
     ( event, newSeed )
 
 
+{-| -}
 createDeleteQuestionEvent : Chapter -> KnowledgeModel -> Seed -> String -> ( Event, Seed )
 createDeleteQuestionEvent chapter knowledgeModel seed questionUuid =
     let
@@ -361,6 +544,7 @@ createDeleteQuestionEvent chapter knowledgeModel seed questionUuid =
     ( event, newSeed )
 
 
+{-| -}
 createAddAnswerEvent : Question -> Chapter -> KnowledgeModel -> Seed -> Answer -> ( Event, Seed )
 createAddAnswerEvent question chapter knowledgeModel seed answer =
     let
@@ -381,6 +565,7 @@ createAddAnswerEvent question chapter knowledgeModel seed answer =
     ( event, newSeed )
 
 
+{-| -}
 createEditAnswerEvent : Question -> Chapter -> KnowledgeModel -> List String -> Seed -> Answer -> ( Event, Seed )
 createEditAnswerEvent question chapter knowledgeModel followUpIds seed answer =
     let
@@ -402,6 +587,7 @@ createEditAnswerEvent question chapter knowledgeModel followUpIds seed answer =
     ( event, newSeed )
 
 
+{-| -}
 createDeleteAnswerEvent : Question -> Chapter -> KnowledgeModel -> Seed -> String -> ( Event, Seed )
 createDeleteAnswerEvent question chapter knowledgeModel seed answerUuid =
     let
@@ -420,6 +606,7 @@ createDeleteAnswerEvent question chapter knowledgeModel seed answerUuid =
     ( event, newSeed )
 
 
+{-| -}
 createAddReferenceEvent : Question -> Chapter -> KnowledgeModel -> Seed -> Reference -> ( Event, Seed )
 createAddReferenceEvent question chapter knowledgeModel seed reference =
     let
@@ -439,6 +626,7 @@ createAddReferenceEvent question chapter knowledgeModel seed reference =
     ( event, newSeed )
 
 
+{-| -}
 createEditReferenceEvent : Question -> Chapter -> KnowledgeModel -> List String -> Seed -> Reference -> ( Event, Seed )
 createEditReferenceEvent question chapter knowledgeModel followupIds seed reference =
     let
@@ -458,6 +646,7 @@ createEditReferenceEvent question chapter knowledgeModel followupIds seed refere
     ( event, newSeed )
 
 
+{-| -}
 createDeleteReferenceEvent : Question -> Chapter -> KnowledgeModel -> Seed -> String -> ( Event, Seed )
 createDeleteReferenceEvent question chapter knowledgeModel seed referenceUuid =
     let
@@ -476,6 +665,7 @@ createDeleteReferenceEvent question chapter knowledgeModel seed referenceUuid =
     ( event, newSeed )
 
 
+{-| -}
 createAddExpertEvent : Question -> Chapter -> KnowledgeModel -> Seed -> Expert -> ( Event, Seed )
 createAddExpertEvent question chapter knowledgeModel seed expert =
     let
@@ -496,6 +686,7 @@ createAddExpertEvent question chapter knowledgeModel seed expert =
     ( event, newSeed )
 
 
+{-| -}
 createEditExpertEvent : Question -> Chapter -> KnowledgeModel -> List String -> Seed -> Expert -> ( Event, Seed )
 createEditExpertEvent question chapter knowledgeModel followupIds seed expert =
     let
@@ -516,6 +707,7 @@ createEditExpertEvent question chapter knowledgeModel followupIds seed expert =
     ( event, newSeed )
 
 
+{-| -}
 createDeleteExpertEvent : Question -> Chapter -> KnowledgeModel -> Seed -> String -> ( Event, Seed )
 createDeleteExpertEvent question chapter knowledgeModel seed expertUuid =
     let
@@ -534,6 +726,7 @@ createDeleteExpertEvent question chapter knowledgeModel seed expertUuid =
     ( event, newSeed )
 
 
+{-| -}
 createAddFollowUpQuestionEvent : Answer -> Chapter -> KnowledgeModel -> Seed -> Question -> ( Event, Seed )
 createAddFollowUpQuestionEvent answer chapter knowledgeModel seed question =
     let
@@ -556,6 +749,7 @@ createAddFollowUpQuestionEvent answer chapter knowledgeModel seed question =
     ( event, newSeed )
 
 
+{-| -}
 createEditFollowUpQuestionEvent : Answer -> Chapter -> KnowledgeModel -> List String -> List String -> List String -> Seed -> Question -> ( Event, Seed )
 createEditFollowUpQuestionEvent answer chapter knowledgeModel answerIds referenceIds expertIds seed question =
     let
@@ -581,6 +775,7 @@ createEditFollowUpQuestionEvent answer chapter knowledgeModel answerIds referenc
     ( event, newSeed )
 
 
+{-| -}
 createDeleteFollowUpQuestionEvent : Answer -> Chapter -> KnowledgeModel -> Seed -> String -> ( Event, Seed )
 createDeleteFollowUpQuestionEvent answer chapter knowledgeModel seed questionUuid =
     let
@@ -599,11 +794,13 @@ createDeleteFollowUpQuestionEvent answer chapter knowledgeModel seed questionUui
     ( event, newSeed )
 
 
+{-| -}
 encodeEvents : List Event -> Encode.Value
 encodeEvents events =
     Encode.list (List.map encodeEvent events)
 
 
+{-| -}
 encodeEvent : Event -> Encode.Value
 encodeEvent event =
     case event of
@@ -957,12 +1154,14 @@ encodeDeleteFollowUpQuestionEvent data =
         ]
 
 
+{-| -}
 eventDecoder : Decoder Event
 eventDecoder =
     Decode.field "eventType" Decode.string
         |> Decode.andThen eventDecoderByType
 
 
+{-| -}
 eventDecoderByType : String -> Decoder Event
 eventDecoderByType eventType =
     case eventType of
@@ -1264,6 +1463,7 @@ deleteFollowUpQuestionEventDecoder =
         |> Decode.map DeleteFollowUpQuestionEvent
 
 
+{-| -}
 getEventUuid : Event -> String
 getEventUuid event =
     case event of
@@ -1325,6 +1525,7 @@ getEventUuid event =
             data.uuid
 
 
+{-| -}
 getEventEntityVisibleName : Event -> Maybe String
 getEventEntityVisibleName event =
     case event of
@@ -1371,6 +1572,7 @@ getEventEntityVisibleName event =
             Nothing
 
 
+{-| -}
 isEditChapter : Chapter -> Event -> Bool
 isEditChapter chapter event =
     case event of
@@ -1381,6 +1583,7 @@ isEditChapter chapter event =
             False
 
 
+{-| -}
 isDeleteChapter : Chapter -> Event -> Bool
 isDeleteChapter chapter event =
     case event of
@@ -1391,6 +1594,7 @@ isDeleteChapter chapter event =
             False
 
 
+{-| -}
 isEditQuestion : Question -> Event -> Bool
 isEditQuestion question event =
     case event of
@@ -1404,6 +1608,7 @@ isEditQuestion question event =
             False
 
 
+{-| -}
 isDeleteQuestion : Question -> Event -> Bool
 isDeleteQuestion question event =
     case event of
@@ -1417,6 +1622,7 @@ isDeleteQuestion question event =
             False
 
 
+{-| -}
 isEditAnswer : Answer -> Event -> Bool
 isEditAnswer answer event =
     case event of
@@ -1427,6 +1633,7 @@ isEditAnswer answer event =
             False
 
 
+{-| -}
 isDeleteAnswer : Answer -> Event -> Bool
 isDeleteAnswer answer event =
     case event of
@@ -1437,6 +1644,7 @@ isDeleteAnswer answer event =
             False
 
 
+{-| -}
 isEditReference : Reference -> Event -> Bool
 isEditReference reference event =
     case event of
@@ -1447,6 +1655,7 @@ isEditReference reference event =
             False
 
 
+{-| -}
 isDeleteReference : Reference -> Event -> Bool
 isDeleteReference reference event =
     case event of
@@ -1457,6 +1666,7 @@ isDeleteReference reference event =
             False
 
 
+{-| -}
 isEditExpert : Expert -> Event -> Bool
 isEditExpert expert event =
     case event of
@@ -1467,6 +1677,7 @@ isEditExpert expert event =
             False
 
 
+{-| -}
 isDeleteExpert : Expert -> Event -> Bool
 isDeleteExpert expert event =
     case event of
@@ -1477,6 +1688,7 @@ isDeleteExpert expert event =
             False
 
 
+{-| -}
 isAddChapter : KnowledgeModel -> Event -> Bool
 isAddChapter km event =
     case event of
@@ -1487,6 +1699,7 @@ isAddChapter km event =
             False
 
 
+{-| -}
 isAddQuestion : Chapter -> Event -> Bool
 isAddQuestion chapter event =
     case event of
@@ -1497,6 +1710,7 @@ isAddQuestion chapter event =
             False
 
 
+{-| -}
 isAddAnswer : Question -> Event -> Bool
 isAddAnswer question event =
     case event of
@@ -1507,6 +1721,7 @@ isAddAnswer question event =
             False
 
 
+{-| -}
 isAddExpert : Question -> Event -> Bool
 isAddExpert question event =
     case event of
@@ -1517,6 +1732,7 @@ isAddExpert question event =
             False
 
 
+{-| -}
 isAddReference : Question -> Event -> Bool
 isAddReference question event =
     case event of
@@ -1527,6 +1743,7 @@ isAddReference question event =
             False
 
 
+{-| -}
 isAddFollowUpQuestion : Answer -> Event -> Bool
 isAddFollowUpQuestion answer event =
     case event of

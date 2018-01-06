@@ -1,10 +1,17 @@
 module Organization.Msgs exposing (..)
 
+{-|
+
+@docs Msg
+
+-}
+
 import Form
 import Jwt
 import Organization.Models exposing (Organization)
 
 
+{-| -}
 type Msg
     = GetCurrentOrganizationCompleted (Result Jwt.JwtError Organization)
     | PutCurrentOrganizationCompleted (Result Jwt.JwtError String)

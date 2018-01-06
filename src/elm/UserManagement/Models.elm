@@ -1,5 +1,34 @@
 module UserManagement.Models exposing (..)
 
+{-|
+
+
+# Types
+
+@docs User, UserCreateForm, UserEditForm, UserPasswordForm, UserPasswordFormError
+
+
+# User decoders
+
+@docs userDecoder, userListDecoder
+
+
+# UserCreateForm helpers
+
+@docs roles, initUserCreateForm, userCreateFormValidation, encodeUserCreateForm
+
+
+# UserEditForm helpers
+
+@docs initEmptyUserEditForm, initUserEditForm, userEditFormValidation, encodeUserEditForm, userToUserEditFormInitials
+
+
+# UserPasswordForm helpers
+
+@docs initUserPasswordForm, userPasswordFormValidation, userPasswordFormValidateConfirmation, encodeUserPasswordForm
+
+-}
+
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
@@ -8,6 +37,7 @@ import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
 
 
+{-| -}
 type alias User =
     { uuid : String
     , email : String
@@ -17,6 +47,7 @@ type alias User =
     }
 
 
+{-| -}
 userDecoder : Decoder User
 userDecoder =
     decode User
@@ -27,11 +58,13 @@ userDecoder =
         |> required "role" Decode.string
 
 
+{-| -}
 userListDecoder : Decoder (List User)
 userListDecoder =
     Decode.list userDecoder
 
 
+{-| -}
 type alias UserCreateForm =
     { email : String
     , name : String
@@ -41,16 +74,19 @@ type alias UserCreateForm =
     }
 
 
+{-| -}
 roles : List String
 roles =
     [ "ADMIN", "DATASTEWARD", "RESEARCHER" ]
 
 
+{-| -}
 initUserCreateForm : Form () UserCreateForm
 initUserCreateForm =
     Form.initial [] userCreateFormValidation
 
 
+{-| -}
 userCreateFormValidation : Validation () UserCreateForm
 userCreateFormValidation =
     Validate.map5 UserCreateForm
@@ -61,6 +97,7 @@ userCreateFormValidation =
         (Validate.field "password" Validate.string)
 
 
+{-| -}
 encodeUserCreateForm : String -> UserCreateForm -> Encode.Value
 encodeUserCreateForm uuid form =
     Encode.object
@@ -73,6 +110,7 @@ encodeUserCreateForm uuid form =
         ]
 
 
+{-| -}
 type alias UserEditForm =
     { email : String
     , name : String
@@ -81,16 +119,19 @@ type alias UserEditForm =
     }
 
 
+{-| -}
 initEmptyUserEditForm : Form () UserEditForm
 initEmptyUserEditForm =
     Form.initial [] userEditFormValidation
 
 
+{-| -}
 initUserEditForm : User -> Form () UserEditForm
 initUserEditForm user =
     Form.initial (userToUserEditFormInitials user) userEditFormValidation
 
 
+{-| -}
 userEditFormValidation : Validation () UserEditForm
 userEditFormValidation =
     Validate.map4 UserEditForm
@@ -100,6 +141,7 @@ userEditFormValidation =
         (Validate.field "role" Validate.string)
 
 
+{-| -}
 encodeUserEditForm : String -> UserEditForm -> Encode.Value
 encodeUserEditForm uuid form =
     Encode.object
@@ -111,6 +153,7 @@ encodeUserEditForm uuid form =
         ]
 
 
+{-| -}
 userToUserEditFormInitials : User -> List ( String, Field.Field )
 userToUserEditFormInitials user =
     [ ( "email", Field.string user.email )
@@ -120,21 +163,25 @@ userToUserEditFormInitials user =
     ]
 
 
+{-| -}
 type alias UserPasswordForm =
     { password : String
     , passwordConfirmation : String
     }
 
 
+{-| -}
 type UserPasswordFormError
     = ConfirmationError
 
 
+{-| -}
 initUserPasswordForm : Form UserPasswordFormError UserPasswordForm
 initUserPasswordForm =
     Form.initial [] userPasswordFormValidation
 
 
+{-| -}
 userPasswordFormValidation : Validation UserPasswordFormError UserPasswordForm
 userPasswordFormValidation =
     Validate.map2 UserPasswordForm
@@ -144,6 +191,7 @@ userPasswordFormValidation =
         )
 
 
+{-| -}
 userPasswordFormValidateConfirmation : String -> Validation UserPasswordFormError String
 userPasswordFormValidateConfirmation password =
     Validate.field "passwordConfirmation"
@@ -158,6 +206,7 @@ userPasswordFormValidateConfirmation password =
         )
 
 
+{-| -}
 encodeUserPasswordForm : UserPasswordForm -> Encode.Value
 encodeUserPasswordForm form =
     Encode.object

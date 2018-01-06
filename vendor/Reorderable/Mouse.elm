@@ -1,15 +1,29 @@
 effect module Reorderable.Mouse
     where { subscription = MySub }
     exposing
-        ( Position
+        ( MouseEvent
+        , Position
+        , clicks
+        , downs
         , mouseEvent
         , mouseEventDecoder
-        , MouseEvent
-        , clicks
         , moves
-        , downs
         , ups
         )
+
+{-|
+
+
+# Positions
+
+@docs Position, MouseEvent, mouseEvent, mouseEventDecoder
+
+
+# Mouse events
+
+@docs clicks, moves, downs, ups
+
+-}
 
 import Dict
 import Dom.LowLevel as Dom
@@ -21,18 +35,21 @@ import Task exposing (Task)
 -- POSITIONS
 
 
+{-| -}
 type alias Position =
     { x : Int
     , y : Int
     }
 
 
+{-| -}
 type alias MouseEvent =
     { startingPosition : Position
     , movement : Position
     }
 
 
+{-| -}
 mouseEvent : Int -> Int -> Int -> Int -> MouseEvent
 mouseEvent elemOffsetX elemOffsetY movementX movementY =
     { startingPosition = Position elemOffsetX elemOffsetY
@@ -40,6 +57,7 @@ mouseEvent elemOffsetX elemOffsetY movementX movementY =
     }
 
 
+{-| -}
 mouseEventDecoder : Json.Decoder MouseEvent
 mouseEventDecoder =
     Json.map4 mouseEvent
@@ -53,22 +71,25 @@ mouseEventDecoder =
 -- MOUSE EVENTS
 
 
+{-| -}
 clicks : (MouseEvent -> msg) -> Sub msg
 clicks tagger =
     subscription (MySub "click" tagger)
 
 
+{-| -}
 moves : (MouseEvent -> msg) -> Sub msg
 moves tagger =
     subscription (MySub "mousemove" tagger)
 
 
+{-| -}
 downs : (MouseEvent -> msg) -> Sub msg
 downs tagger =
     subscription (MySub "mousedown" tagger)
 
 
-{-| Get a position whenever the user *releases* the mouse button.
+{-| Get a position whenever the user _releases_ the mouse button.
 -}
 ups : (MouseEvent -> msg) -> Sub msg
 ups tagger =
@@ -171,20 +192,20 @@ onEffects router newSubs oldState =
                 tracker =
                     Dom.onDocument category mouseEventDecoder (Platform.sendToSelf router << Msg category)
             in
-                task
-                    |> Task.andThen
-                        (\state ->
-                            Process.spawn tracker
-                                |> Task.andThen (\pid -> Task.succeed (Dict.insert category (Watcher taggers pid) state))
-                        )
+            task
+                |> Task.andThen
+                    (\state ->
+                        Process.spawn tracker
+                            |> Task.andThen (\pid -> Task.succeed (Dict.insert category (Watcher taggers pid) state))
+                    )
     in
-        Dict.merge
-            leftStep
-            bothStep
-            rightStep
-            oldState
-            (categorize newSubs)
-            (Task.succeed Dict.empty)
+    Dict.merge
+        leftStep
+        bothStep
+        rightStep
+        oldState
+        (categorize newSubs)
+        (Task.succeed Dict.empty)
 
 
 onSelfMsg : Platform.Router msg Msg -> Msg -> State msg -> Task Never (State msg)
@@ -198,5 +219,5 @@ onSelfMsg router { category, mouseEvent } state =
                 send tagger =
                     Platform.sendToApp router (tagger mouseEvent)
             in
-                Task.sequence (List.map send taggers)
-                    &> Task.succeed state
+            Task.sequence (List.map send taggers)
+                &> Task.succeed state

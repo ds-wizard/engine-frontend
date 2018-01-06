@@ -1,4 +1,10 @@
-module UserManagement.Create.Update exposing (..)
+module UserManagement.Create.Update exposing (update)
+
+{-|
+
+@docs update
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -55,6 +61,7 @@ handleForm formMsg seed session model =
             ( seed, newModel, Cmd.none )
 
 
+{-| -}
 update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 update msg seed session model =
     case msg of

@@ -1,4 +1,10 @@
-module KnowledgeModels.Editor.View exposing (..)
+module KnowledgeModels.Editor.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
@@ -11,7 +17,7 @@ import Html.Events exposing (..)
 import KnowledgeModels.Editor.Models exposing (..)
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Msgs exposing (..)
-import KnowledgeModels.Editor.View.Breadcrumbs exposing (breadcrumbs, getKnowledgeModelBreadcrumbs)
+import KnowledgeModels.Editor.View.Breadcrumbs exposing (breadcrumbs)
 import KnowledgeModels.View exposing (diffTreeView)
 import Msgs
 import Reorderable
@@ -19,6 +25,7 @@ import Routing exposing (Route(..))
 import String exposing (toLower)
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ class "row knowledge-model-editor " ]
@@ -49,7 +56,7 @@ editorView model =
         ( breadcrumbsView, currentView, diffTree ) =
             case model.knowledgeModelEditor of
                 Success knowledgeModelEditor ->
-                    ( getKnowledgeModelBreadcrumbs knowledgeModelEditor |> breadcrumbs
+                    ( breadcrumbs knowledgeModelEditor
                     , viewKnowledgeModel model knowledgeModelEditor (Edit >> Msgs.KnowledgeModelsEditorMsg)
                     , diffTreeView (getKnowledgeModel knowledgeModelEditor) model.events
                     )

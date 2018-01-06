@@ -1,4 +1,10 @@
-module UserManagement.Edit.View exposing (..)
+module UserManagement.Edit.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
@@ -14,6 +20,7 @@ import UserManagement.Edit.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClass ]

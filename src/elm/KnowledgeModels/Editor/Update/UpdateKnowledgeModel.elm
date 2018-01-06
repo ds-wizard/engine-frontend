@@ -1,5 +1,12 @@
 module KnowledgeModels.Editor.Update.UpdateKnowledgeModel exposing (..)
 
+{-|
+
+@docs updateKnowledgeModelFormMsg
+@docs updateKnowledgeModelAddChapter, updateKnowledgeModelViewChapter, updateKnowledgeModelDeleteChapter
+
+-}
+
 import Form
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (newChapter)
@@ -10,6 +17,7 @@ import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
+{-| -}
 updateKnowledgeModelFormMsg : Form.Msg -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
 updateKnowledgeModelFormMsg formMsg seed ((KnowledgeModelEditor editor) as originalEditor) =
     case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.chaptersDirty ) of
@@ -36,6 +44,7 @@ updateKnowledgeModelFormMsg formMsg seed ((KnowledgeModelEditor editor) as origi
             ( seed, KnowledgeModelEditor { editor | form = newForm }, Nothing, False )
 
 
+{-| -}
 updateKnowledgeModelAddChapter : Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
 updateKnowledgeModelAddChapter seed (KnowledgeModelEditor editor) =
     let
@@ -50,6 +59,7 @@ updateKnowledgeModelAddChapter seed (KnowledgeModelEditor editor) =
     ( newSeed, KnowledgeModelEditor { editor | chapters = newChapters }, Just event, False )
 
 
+{-| -}
 updateKnowledgeModelViewChapter : String -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
 updateKnowledgeModelViewChapter uuid seed (KnowledgeModelEditor editor) =
     let
@@ -59,6 +69,7 @@ updateKnowledgeModelViewChapter uuid seed (KnowledgeModelEditor editor) =
     ( seed, KnowledgeModelEditor { editor | chapters = newChapters }, Nothing, False )
 
 
+{-| -}
 updateKnowledgeModelDeleteChapter : String -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
 updateKnowledgeModelDeleteChapter uuid seed (KnowledgeModelEditor editor) =
     let

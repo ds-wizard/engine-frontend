@@ -1,11 +1,51 @@
 module KnowledgeModels.Editor.Models.Editors exposing (..)
 
+{-|
+
+
+# Editor types
+
+@docs KnowledgeModelEditor, ChapterEditor, QuestionEditor, AnswerEditor, ReferenceEditor, ExpertEditor
+
+
+# KnowledgeModelEditor helpers
+
+@docs createKnowledgeModelEditor, getKnowledgeModelEditorName, getKnowledgeModel
+
+
+# ChapterEditor helpers
+
+@docs createChapterEditor, getChapterUuid, getChapterEditorName, activateChapter, matchChapter, getActiveChapterEditor
+
+
+# QuestionEditor helpers
+
+@docs createQuestionEditor, getQuestionUuid, getQuestionEditorName, activateQuestion, matchQuestion, getActiveQuestionEditor
+
+
+# AnswerEditor helpers
+
+@docs createAnswerEditor, getAnswerUuid, getAnswerEditorName, activateAnswer, matchAnswer, getActiveAnswerEditor
+
+
+# ReferenceEditor helpers
+
+@docs createReferenceEditor, getReferenceUuid, getReferenceEditorName, activateReference, matchReference, getActiveReferenceEditor
+
+
+# ExpertEditor helpers
+
+@docs createExpertEditor, getExpertUuid, getExpertEditorName, activateExpert, matchExpert, getActiveExpertEditor
+
+-}
+
 import Form exposing (Form)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
 import KnowledgeModels.Editor.Models.Forms exposing (..)
 import List.Extra as List
 
 
+{-| -}
 type KnowledgeModelEditor
     = KnowledgeModelEditor
         { active : Bool
@@ -16,6 +56,7 @@ type KnowledgeModelEditor
         }
 
 
+{-| -}
 type ChapterEditor
     = ChapterEditor
         { active : Bool
@@ -27,6 +68,7 @@ type ChapterEditor
         }
 
 
+{-| -}
 type QuestionEditor
     = QuestionEditor
         { active : Bool
@@ -42,6 +84,7 @@ type QuestionEditor
         }
 
 
+{-| -}
 type AnswerEditor
     = AnswerEditor
         { active : Bool
@@ -53,6 +96,7 @@ type AnswerEditor
         }
 
 
+{-| -}
 type ReferenceEditor
     = ReferenceEditor
         { active : Bool
@@ -62,6 +106,7 @@ type ReferenceEditor
         }
 
 
+{-| -}
 type ExpertEditor
     = ExpertEditor
         { active : Bool
@@ -71,6 +116,7 @@ type ExpertEditor
         }
 
 
+{-| -}
 createKnowledgeModelEditor : KnowledgeModel -> KnowledgeModelEditor
 createKnowledgeModelEditor knowledgeModel =
     let
@@ -90,16 +136,19 @@ createKnowledgeModelEditor knowledgeModel =
         }
 
 
+{-| -}
 getKnowledgeModelEditorName : KnowledgeModelEditor -> String
 getKnowledgeModelEditorName (KnowledgeModelEditor kme) =
     (Form.getFieldAsString "name" kme.form).value |> Maybe.withDefault ""
 
 
+{-| -}
 getKnowledgeModel : KnowledgeModelEditor -> KnowledgeModel
 getKnowledgeModel (KnowledgeModelEditor kme) =
     kme.knowledgeModel
 
 
+{-| -}
 createChapterEditor : Bool -> Int -> Chapter -> ChapterEditor
 createChapterEditor active order chapter =
     let
@@ -119,31 +168,37 @@ createChapterEditor active order chapter =
         }
 
 
+{-| -}
 getChapterUuid : ChapterEditor -> String
 getChapterUuid (ChapterEditor chapterEditor) =
     chapterEditor.chapter.uuid
 
 
+{-| -}
 getChapterEditorName : ChapterEditor -> String
 getChapterEditorName (ChapterEditor ce) =
     (Form.getFieldAsString "title" ce.form).value |> Maybe.withDefault ""
 
 
+{-| -}
 activateChapter : ChapterEditor -> ChapterEditor
 activateChapter (ChapterEditor chapterEditor) =
     ChapterEditor { chapterEditor | active = True }
 
 
+{-| -}
 matchChapter : String -> ChapterEditor -> Bool
 matchChapter uuid (ChapterEditor chapterEditor) =
     chapterEditor.chapter.uuid == uuid
 
 
+{-| -}
 getActiveChapterEditor : List ChapterEditor -> Maybe ChapterEditor
 getActiveChapterEditor =
     List.find (\(ChapterEditor ce) -> ce.active)
 
 
+{-| -}
 createQuestionEditor : Bool -> Int -> Question -> QuestionEditor
 createQuestionEditor active order question =
     let
@@ -174,31 +229,37 @@ createQuestionEditor active order question =
         }
 
 
+{-| -}
 getQuestionUuid : QuestionEditor -> String
 getQuestionUuid (QuestionEditor questionEditor) =
     questionEditor.question.uuid
 
 
+{-| -}
 getQuestionEditorName : QuestionEditor -> String
 getQuestionEditorName (QuestionEditor ce) =
     (Form.getFieldAsString "title" ce.form).value |> Maybe.withDefault ""
 
 
+{-| -}
 activateQuestion : QuestionEditor -> QuestionEditor
 activateQuestion (QuestionEditor questionEditor) =
     QuestionEditor { questionEditor | active = True }
 
 
+{-| -}
 matchQuestion : String -> QuestionEditor -> Bool
 matchQuestion uuid (QuestionEditor questionEditor) =
     questionEditor.question.uuid == uuid
 
 
+{-| -}
 getActiveQuestionEditor : List QuestionEditor -> Maybe QuestionEditor
 getActiveQuestionEditor =
     List.find (\(QuestionEditor qe) -> qe.active)
 
 
+{-| -}
 createAnswerEditor : Bool -> Int -> Answer -> AnswerEditor
 createAnswerEditor active order answer =
     let
@@ -219,31 +280,37 @@ createAnswerEditor active order answer =
         }
 
 
+{-| -}
 getAnswerUuid : AnswerEditor -> String
 getAnswerUuid (AnswerEditor answerEditor) =
     answerEditor.answer.uuid
 
 
+{-| -}
 getAnswerEditorName : AnswerEditor -> String
 getAnswerEditorName (AnswerEditor ae) =
     (Form.getFieldAsString "label" ae.form).value |> Maybe.withDefault ""
 
 
+{-| -}
 activateAnswer : AnswerEditor -> AnswerEditor
 activateAnswer (AnswerEditor answerEditor) =
     AnswerEditor { answerEditor | active = True }
 
 
+{-| -}
 matchAnswer : String -> AnswerEditor -> Bool
 matchAnswer uuid (AnswerEditor answerEditor) =
     answerEditor.answer.uuid == uuid
 
 
+{-| -}
 getActiveAnswerEditor : List AnswerEditor -> Maybe AnswerEditor
 getActiveAnswerEditor =
     List.find (\(AnswerEditor ae) -> ae.active)
 
 
+{-| -}
 createReferenceEditor : Bool -> Int -> Reference -> ReferenceEditor
 createReferenceEditor active order reference =
     let
@@ -259,31 +326,37 @@ createReferenceEditor active order reference =
         }
 
 
+{-| -}
 getReferenceUuid : ReferenceEditor -> String
 getReferenceUuid (ReferenceEditor referenceEditor) =
     referenceEditor.reference.uuid
 
 
+{-| -}
 getReferenceEditorName : ReferenceEditor -> String
 getReferenceEditorName (ReferenceEditor re) =
     (Form.getFieldAsString "chapter" re.form).value |> Maybe.withDefault ""
 
 
+{-| -}
 activateReference : ReferenceEditor -> ReferenceEditor
 activateReference (ReferenceEditor referenceEditor) =
     ReferenceEditor { referenceEditor | active = True }
 
 
+{-| -}
 matchReference : String -> ReferenceEditor -> Bool
 matchReference uuid (ReferenceEditor referenceEditor) =
     referenceEditor.reference.uuid == uuid
 
 
+{-| -}
 getActiveReferenceEditor : List ReferenceEditor -> Maybe ReferenceEditor
 getActiveReferenceEditor =
     List.find (\(ReferenceEditor re) -> re.active)
 
 
+{-| -}
 createExpertEditor : Bool -> Int -> Expert -> ExpertEditor
 createExpertEditor active order expert =
     let
@@ -299,26 +372,31 @@ createExpertEditor active order expert =
         }
 
 
+{-| -}
 getExpertUuid : ExpertEditor -> String
 getExpertUuid (ExpertEditor expertEditor) =
     expertEditor.expert.uuid
 
 
+{-| -}
 getExpertEditorName : ExpertEditor -> String
 getExpertEditorName (ExpertEditor ee) =
     (Form.getFieldAsString "name" ee.form).value |> Maybe.withDefault ""
 
 
+{-| -}
 activateExpert : ExpertEditor -> ExpertEditor
 activateExpert (ExpertEditor expertEditor) =
     ExpertEditor { expertEditor | active = True }
 
 
+{-| -}
 matchExpert : String -> ExpertEditor -> Bool
 matchExpert uuid (ExpertEditor expertEditor) =
     expertEditor.expert.uuid == uuid
 
 
+{-| -}
 getActiveExpertEditor : List ExpertEditor -> Maybe ExpertEditor
 getActiveExpertEditor =
     List.find (\(ExpertEditor re) -> re.active)

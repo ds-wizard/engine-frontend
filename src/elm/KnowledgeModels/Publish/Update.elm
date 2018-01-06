@@ -1,4 +1,10 @@
-module KnowledgeModels.Publish.Update exposing (..)
+module KnowledgeModels.Publish.Update exposing (getKnowledgeModelCmd, update)
+
+{-|
+
+@docs update, getKnowledgeModelCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -13,6 +19,7 @@ import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
+{-| -}
 getKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 getKnowledgeModelCmd uuid session =
     getKnowledgeModel uuid session
@@ -71,6 +78,7 @@ handleForm formMsg session model =
             ( { model | form = form }, Cmd.none )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

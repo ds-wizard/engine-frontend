@@ -1,4 +1,10 @@
-module KnowledgeModels.Create.Update exposing (..)
+module KnowledgeModels.Create.Update exposing (getPackagesCmd, update)
+
+{-|
+
+@docs update, getPackagesCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -17,6 +23,7 @@ import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
 
+{-| -}
 getPackagesCmd : Session -> Cmd Msgs.Msg
 getPackagesCmd session =
     getPackages session
@@ -80,6 +87,7 @@ handleForm formMsg seed session model =
             ( seed, newModel, Cmd.none )
 
 
+{-| -}
 update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 update msg seed session model =
     case msg of

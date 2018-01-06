@@ -1,4 +1,10 @@
-module UserManagement.Index.View exposing (..)
+module UserManagement.Index.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
@@ -14,6 +20,7 @@ import UserManagement.Index.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (User)
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ class "user-management" ]

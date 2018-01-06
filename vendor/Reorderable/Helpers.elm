@@ -1,8 +1,15 @@
 module Reorderable.Helpers exposing (moveTo, updateList)
 
+{-|
+
+@docs moveTo, updateList
+
+-}
+
 import List.Extra as List
 
 
+{-| -}
 moveTo : Int -> Int -> List a -> List a
 moveTo startIndex destIndex list =
     let
@@ -36,6 +43,7 @@ insertAt index elem list =
                 head :: insertAt (index - 1) elem tail
 
 
+{-| -}
 updateList : (data -> String) -> String -> Maybe String -> List data -> List data
 updateList toId overId dragging list =
     case dragging of

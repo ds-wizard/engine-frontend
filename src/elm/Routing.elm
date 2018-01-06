@@ -1,4 +1,18 @@
-module Routing exposing (..)
+module Routing exposing (Route(..), cmdNavigate, isAllowed, parseLocation, routeIfAllowed, toUrl)
+
+{-|
+
+
+# Route type
+
+@docs Route
+
+
+# Helpers
+
+@docs parseLocation, routeIfAllowed, isAllowed, toUrl, cmdNavigate
+
+-}
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
@@ -6,6 +20,7 @@ import Navigation exposing (Location)
 import UrlParser exposing (..)
 
 
+{-| -}
 type Route
     = Index
     | Organization
@@ -49,6 +64,7 @@ matchers =
         ]
 
 
+{-| -}
 routeIfAllowed : Maybe JwtToken -> Route -> Route
 routeIfAllowed maybeJwt route =
     if isAllowed route maybeJwt then
@@ -57,6 +73,7 @@ routeIfAllowed maybeJwt route =
         NotAllowed
 
 
+{-| -}
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
@@ -118,6 +135,7 @@ isAllowed route maybeJwt =
             False
 
 
+{-| -}
 toUrl : Route -> String
 toUrl route =
     let
@@ -177,6 +195,7 @@ toUrl route =
     "/" ++ String.join "/" parts
 
 
+{-| -}
 parseLocation : Location -> Route
 parseLocation location =
     case UrlParser.parsePath matchers location of
@@ -187,6 +206,7 @@ parseLocation location =
             NotFound
 
 
+{-| -}
 cmdNavigate : Route -> Cmd msg
 cmdNavigate =
     Navigation.newUrl << toUrl

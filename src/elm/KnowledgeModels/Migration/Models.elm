@@ -1,9 +1,16 @@
 module KnowledgeModels.Migration.Models exposing (..)
 
+{-|
+
+@docs Model, initialModel
+
+-}
+
 import Common.Types exposing (ActionResult(..))
 import KnowledgeModels.Models.Migration exposing (Migration)
 
 
+{-| -}
 type alias Model =
     { branchUuid : String
     , migration : ActionResult Migration
@@ -11,6 +18,7 @@ type alias Model =
     }
 
 
+{-| -}
 initialModel : String -> Model
 initialModel branchUuid =
     { branchUuid = branchUuid

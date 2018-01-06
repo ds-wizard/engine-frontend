@@ -1,4 +1,53 @@
-module KnowledgeModels.Models exposing (..)
+module KnowledgeModels.Models
+    exposing
+        ( KnowledgeModel
+        , KnowledgeModelCreateForm
+        , KnowledgeModelPublishForm
+        , KnowledgeModelState(..)
+        , KnowledgeModelUpgradeForm
+        , encodeKnowledgeModelForm
+        , encodeKnowledgeModelPublishForm
+        , encodeKnowledgeModelUpgradeForm
+        , initKnowledgeModelCreateForm
+        , initKnowledgeModelPublishForm
+        , initKnowledgeModelUpgradeForm
+        , kmLastVersion
+        , kmMatchState
+        , knowledgeModelCreateFormValidation
+        , knowledgeModelDecoder
+        , knowledgeModelListDecoder
+        , knowledgeModelPublishFormValidation
+        , knowledgeModelUpgradeFormValidation
+        )
+
+{-|
+
+
+# Types
+
+@docs KnowledgeModel, KnowledgeModelState, KnowledgeModelCreateForm, KnowledgeModelPublishForm, KnowledgeModelUpgradeForm
+
+
+# KnowledgeModel helpers
+
+@docs knowledgeModelDecoder, knowledgeModelListDecoder, kmMatchState, kmLastVersion
+
+
+# KnowledgeModelCreateForm helpers
+
+@docs initKnowledgeModelCreateForm, knowledgeModelCreateFormValidation, encodeKnowledgeModelForm
+
+
+# KnowledgeModelPublishForm helpers
+
+@docs initKnowledgeModelPublishForm, knowledgeModelPublishFormValidation, encodeKnowledgeModelPublishForm
+
+
+# KnowledgeModelUpgradeForm helpers
+
+@docs initKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation, encodeKnowledgeModelUpgradeForm
+
+-}
 
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
@@ -9,6 +58,7 @@ import List.Extra as List
 import Utils exposing (validateRegex)
 
 
+{-| -}
 type alias KnowledgeModel =
     { uuid : String
     , name : String
@@ -20,6 +70,7 @@ type alias KnowledgeModel =
     }
 
 
+{-| -}
 type KnowledgeModelState
     = Default
     | Edited
@@ -28,6 +79,30 @@ type KnowledgeModelState
     | Migrated
 
 
+{-| -}
+type alias KnowledgeModelCreateForm =
+    { name : String
+    , artifactId : String
+    , parentPackageId : Maybe String
+    }
+
+
+{-| -}
+type alias KnowledgeModelPublishForm =
+    { major : Int
+    , minor : Int
+    , patch : Int
+    , description : String
+    }
+
+
+{-| -}
+type alias KnowledgeModelUpgradeForm =
+    { targetPackageId : String
+    }
+
+
+{-| -}
 knowledgeModelDecoder : Decoder KnowledgeModel
 knowledgeModelDecoder =
     decode KnowledgeModel
@@ -66,16 +141,19 @@ knowledgeModelStateDecoder =
             )
 
 
+{-| -}
 knowledgeModelListDecoder : Decoder (List KnowledgeModel)
 knowledgeModelListDecoder =
     Decode.list knowledgeModelDecoder
 
 
+{-| -}
 kmMatchState : List KnowledgeModelState -> KnowledgeModel -> Bool
 kmMatchState states knowledgeModel =
     List.any ((==) knowledgeModel.stateType) states
 
 
+{-| -}
 kmLastVersion : KnowledgeModel -> Maybe String
 kmLastVersion km =
     let
@@ -103,18 +181,13 @@ kmLastVersion km =
         |> Maybe.andThen getVersion
 
 
-type alias KnowledgeModelCreateForm =
-    { name : String
-    , artifactId : String
-    , parentPackageId : Maybe String
-    }
-
-
+{-| -}
 initKnowledgeModelCreateForm : Form () KnowledgeModelCreateForm
 initKnowledgeModelCreateForm =
     Form.initial [] knowledgeModelCreateFormValidation
 
 
+{-| -}
 knowledgeModelCreateFormValidation : Validation () KnowledgeModelCreateForm
 knowledgeModelCreateFormValidation =
     Validate.map3 KnowledgeModelCreateForm
@@ -123,6 +196,7 @@ knowledgeModelCreateFormValidation =
         (Validate.field "parentPackageId" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
 
 
+{-| -}
 encodeKnowledgeModelForm : String -> KnowledgeModelCreateForm -> Encode.Value
 encodeKnowledgeModelForm uuid form =
     let
@@ -144,19 +218,13 @@ encodeKnowledgeModelForm uuid form =
         ]
 
 
-type alias KnowledgeModelPublishForm =
-    { major : Int
-    , minor : Int
-    , patch : Int
-    , description : String
-    }
-
-
+{-| -}
 initKnowledgeModelPublishForm : Form () KnowledgeModelPublishForm
 initKnowledgeModelPublishForm =
     Form.initial [] knowledgeModelPublishFormValidation
 
 
+{-| -}
 knowledgeModelPublishFormValidation : Validation () KnowledgeModelPublishForm
 knowledgeModelPublishFormValidation =
     Validate.map4 KnowledgeModelPublishForm
@@ -166,6 +234,7 @@ knowledgeModelPublishFormValidation =
         (Validate.field "description" Validate.string)
 
 
+{-| -}
 encodeKnowledgeModelPublishForm : KnowledgeModelPublishForm -> ( String, Encode.Value )
 encodeKnowledgeModelPublishForm form =
     let
@@ -178,22 +247,20 @@ encodeKnowledgeModelPublishForm form =
     ( version, object )
 
 
-type alias KnowledgeModelUpgradeForm =
-    { targetPackageId : String
-    }
-
-
+{-| -}
 initKnowledgeModelUpgradeForm : Form () KnowledgeModelUpgradeForm
 initKnowledgeModelUpgradeForm =
     Form.initial [] knowledgeModelUpgradeFormValidation
 
 
+{-| -}
 knowledgeModelUpgradeFormValidation : Validation () KnowledgeModelUpgradeForm
 knowledgeModelUpgradeFormValidation =
     Validate.map KnowledgeModelUpgradeForm
         (Validate.field "targetPackageId" Validate.string)
 
 
+{-| -}
 encodeKnowledgeModelUpgradeForm : KnowledgeModelUpgradeForm -> Encode.Value
 encodeKnowledgeModelUpgradeForm form =
     Encode.object

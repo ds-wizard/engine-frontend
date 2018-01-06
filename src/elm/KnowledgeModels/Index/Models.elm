@@ -1,11 +1,18 @@
 module KnowledgeModels.Index.Models exposing (..)
 
+{-|
+
+@docs Model, initialModel
+
+-}
+
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import KnowledgeModels.Models exposing (KnowledgeModel, KnowledgeModelUpgradeForm, initKnowledgeModelUpgradeForm)
 import PackageManagement.Models exposing (PackageDetail)
 
 
+{-| -}
 type alias Model =
     { knowledgeModels : ActionResult (List KnowledgeModel)
     , kmToBeDeleted : Maybe KnowledgeModel
@@ -18,6 +25,7 @@ type alias Model =
     }
 
 
+{-| -}
 initialModel : Model
 initialModel =
     { knowledgeModels = Loading

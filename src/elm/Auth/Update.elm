@@ -1,4 +1,10 @@
-module Auth.Update exposing (..)
+module Auth.Update exposing (update)
+
+{-|
+
+@docs update
+
+-}
 
 import Auth.Models as AuthModel exposing (initialSession, parseJwt, setToken, setUser)
 import Auth.Msgs as AuthMsgs
@@ -76,6 +82,7 @@ logout model =
     ( { model | session = initialSession }, cmd )
 
 
+{-| -}
 update : AuthMsgs.Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of

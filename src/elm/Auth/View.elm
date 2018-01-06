@@ -1,4 +1,10 @@
-module Auth.View exposing (..)
+module Auth.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Auth.Models exposing (Model)
 import Auth.Msgs
@@ -8,6 +14,7 @@ import Html.Events exposing (onInput, onSubmit)
 import Msgs exposing (Msg)
 
 
+{-| -}
 view : Model -> Html Msg
 view model =
     div [ class "login" ]

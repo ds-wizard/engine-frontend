@@ -1,4 +1,10 @@
-module UserManagement.Index.Update exposing (..)
+module UserManagement.Index.Update exposing (getUsersCmd, update)
+
+{-|
+
+@docs getUsersCmd, update
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -11,6 +17,7 @@ import UserManagement.Models exposing (User)
 import UserManagement.Requests exposing (deleteUser, getUsers)
 
 
+{-| -}
 getUsersCmd : Session -> Cmd Msgs.Msg
 getUsersCmd session =
     getUsers session
@@ -63,6 +70,7 @@ deleteUserCompleted session model result =
             )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

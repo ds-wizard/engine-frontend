@@ -4,3 +4,7 @@ elm-stuff
 
 # build
 dist
+
+# docs
+.doit.db
+docs

@@ -1,4 +1,10 @@
-module PackageManagement.Index.Update exposing (..)
+module PackageManagement.Index.Update exposing (getPackagesCmd, update)
+
+{-|
+
+@docs update, getPackagesCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -11,6 +17,7 @@ import PackageManagement.Requests exposing (getPackagesUnique)
 import Requests exposing (toCmd)
 
 
+{-| -}
 getPackagesCmd : Session -> Cmd Msgs.Msg
 getPackagesCmd session =
     getPackagesUnique session
@@ -31,6 +38,7 @@ getPackagesCompleted model result =
     ( newModel, Cmd.none )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

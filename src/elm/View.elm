@@ -1,4 +1,10 @@
-module View exposing (..)
+module View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Auth.Msgs
 import Auth.Permission as Perm exposing (hasPerm)
@@ -25,6 +31,7 @@ import UserManagement.Edit.View
 import UserManagement.Index.View
 
 
+{-| -}
 view : Model -> Html Msg
 view model =
     case model.route of

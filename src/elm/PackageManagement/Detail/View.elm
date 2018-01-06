@@ -1,4 +1,10 @@
-module PackageManagement.Detail.View exposing (..)
+module PackageManagement.Detail.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (detailContainerClassWith, emptyNode, linkTo)
 import Common.Types exposing (ActionResult(..))
@@ -14,6 +20,7 @@ import PackageManagement.Models exposing (..)
 import PackageManagement.Requests exposing (exportPackageUrl)
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClassWith "package-management-detail" ]

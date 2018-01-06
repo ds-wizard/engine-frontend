@@ -1,4 +1,10 @@
-module KnowledgeModels.Migration.Update exposing (..)
+module KnowledgeModels.Migration.Update exposing (getMigrationCmd, update)
+
+{-|
+
+@docs update, getMigrationCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -12,6 +18,7 @@ import Msgs
 import Requests exposing (toCmd)
 
 
+{-| -}
 getMigrationCmd : String -> Session -> Cmd Msgs.Msg
 getMigrationCmd uuid session =
     getMigration uuid session
@@ -78,6 +85,7 @@ handlePostMigrationConflictCompleted session model result =
             ( { model | conflict = Error "Unable to resolve conflict" }, Cmd.none )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

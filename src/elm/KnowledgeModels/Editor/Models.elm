@@ -1,11 +1,18 @@
 module KnowledgeModels.Editor.Models exposing (..)
 
+{-|
+
+@docs Model, initialModel
+
+-}
+
 import Common.Types exposing (ActionResult(..))
 import KnowledgeModels.Editor.Models.Editors exposing (KnowledgeModelEditor)
 import KnowledgeModels.Editor.Models.Events exposing (Event)
 import Reorderable
 
 
+{-| -}
 type alias Model =
     { branchUuid : String
     , knowledgeModelEditor : ActionResult KnowledgeModelEditor
@@ -15,6 +22,7 @@ type alias Model =
     }
 
 
+{-| -}
 initialModel : String -> Model
 initialModel branchUuid =
     { branchUuid = branchUuid

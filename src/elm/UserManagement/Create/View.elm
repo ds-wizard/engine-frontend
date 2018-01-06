@@ -1,4 +1,10 @@
-module UserManagement.Create.View exposing (..)
+module UserManagement.Create.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (detailContainerClass)
 import Common.View exposing (pageHeader)
@@ -12,6 +18,7 @@ import UserManagement.Create.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClass ]

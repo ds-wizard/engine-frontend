@@ -1,9 +1,12 @@
-{-
-   Based on original code from Daniel Bachler (danyx23)
--}
-
-
 module DragDrop exposing (..)
+
+{-| Based on original code from Daniel Bachler (danyx23)
+
+@docs HoverState, Model
+
+@docs defs, onDragFunctionIgnoreFiles, onDragFunctionDecodeFiles, onDragEnter, onDragOver, onDragLeave, onDrop
+
+-}
 
 -- import Effects exposing (Effects)
 
@@ -16,11 +19,13 @@ import Json.Decode as Json
 -- MODEL
 
 
+{-| -}
 type HoverState
     = Normal
     | Hovering
 
 
+{-| -}
 type alias Model =
     HoverState
 
@@ -58,11 +63,13 @@ type alias Model =
 -- Individual handler functions
 
 
+{-| -}
 defs : Options
 defs =
     { stopPropagation = False, preventDefault = True }
 
 
+{-| -}
 onDragFunctionIgnoreFiles : String -> msg -> Attribute msg
 onDragFunctionIgnoreFiles nativeEventName message =
     onWithOptions
@@ -71,6 +78,7 @@ onDragFunctionIgnoreFiles nativeEventName message =
         (Json.map (\_ -> message) Json.value)
 
 
+{-| -}
 onDragFunctionDecodeFiles : String -> (List NativeFile -> msg) -> Attribute msg
 onDragFunctionDecodeFiles nativeEventName actionCreator =
     onWithOptions
@@ -80,21 +88,25 @@ onDragFunctionDecodeFiles nativeEventName actionCreator =
         (Json.map actionCreator parseDroppedFiles)
 
 
+{-| -}
 onDragEnter : a -> Attribute a
 onDragEnter =
     onDragFunctionIgnoreFiles "dragenter"
 
 
+{-| -}
 onDragOver : a -> Attribute a
 onDragOver =
     onDragFunctionIgnoreFiles "dragover"
 
 
+{-| -}
 onDragLeave : a -> Attribute a
 onDragLeave =
     onDragFunctionIgnoreFiles "dragleave"
 
 
+{-| -}
 onDrop : (List NativeFile -> a) -> Attribute a
 onDrop =
     onDragFunctionDecodeFiles "drop"

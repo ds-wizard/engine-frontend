@@ -1,5 +1,11 @@
 module KnowledgeModels.Editor.Update.UpdateExpert exposing (..)
 
+{-|
+
+@docs updateExpertFormMsg, updateExpertCancel
+
+-}
+
 import Form
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
@@ -9,6 +15,7 @@ import KnowledgeModels.Editor.Update.Utils exposing (formChanged)
 import Random.Pcg exposing (Seed)
 
 
+{-| -}
 updateExpertFormMsg : Form.Msg -> Seed -> Question -> Chapter -> KnowledgeModel -> ExpertEditor -> ( Seed, ExpertEditor, Maybe Event )
 updateExpertFormMsg formMsg seed question chapter knowledgeModel ((ExpertEditor editor) as originalEditor) =
     case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
@@ -39,6 +46,7 @@ updateExpertFormMsg formMsg seed question chapter knowledgeModel ((ExpertEditor 
             ( seed, ExpertEditor { editor | form = newForm }, Nothing )
 
 
+{-| -}
 updateExpertCancel : Seed -> ExpertEditor -> ( Seed, ExpertEditor, Maybe Event )
 updateExpertCancel seed (ExpertEditor editor) =
     let

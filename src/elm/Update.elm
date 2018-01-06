@@ -1,4 +1,10 @@
-module Update exposing (..)
+module Update exposing (fetchData, initLocalModel, update)
+
+{-|
+
+@docs update, fetchData, initLocalModel
+
+-}
 
 import Auth.Update
 import KnowledgeModels.Create.Models
@@ -31,6 +37,7 @@ import UserManagement.Index.Models
 import UserManagement.Index.Update
 
 
+{-| -}
 fetchData : Model -> Cmd Msg
 fetchData model =
     case model.route of
@@ -68,6 +75,7 @@ fetchData model =
             Cmd.none
 
 
+{-| -}
 initLocalModel : Model -> Model
 initLocalModel model =
     case model.route of
@@ -111,6 +119,7 @@ initLocalModel model =
             model
 
 
+{-| -}
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of

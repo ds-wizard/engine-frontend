@@ -1,10 +1,17 @@
 module KnowledgeModels.Publish.Models exposing (..)
 
+{-|
+
+@docs Model, initialModel
+
+-}
+
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import KnowledgeModels.Models exposing (..)
 
 
+{-| -}
 type alias Model =
     { knowledgeModel : ActionResult KnowledgeModel
     , publishingKnowledgeModel : ActionResult String
@@ -12,6 +19,7 @@ type alias Model =
     }
 
 
+{-| -}
 initialModel : Model
 initialModel =
     { knowledgeModel = Loading

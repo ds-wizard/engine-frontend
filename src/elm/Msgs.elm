@@ -1,5 +1,11 @@
 module Msgs exposing (..)
 
+{-|
+
+@docs Msg
+
+-}
+
 import Auth.Msgs
 import KnowledgeModels.Create.Msgs
 import KnowledgeModels.Editor.Msgs
@@ -16,6 +22,7 @@ import UserManagement.Edit.Msgs
 import UserManagement.Index.Msgs
 
 
+{-| -}
 type Msg
     = ChangeLocation String
     | OnLocationChange Location

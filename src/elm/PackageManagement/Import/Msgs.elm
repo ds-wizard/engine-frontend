@@ -1,10 +1,17 @@
 module PackageManagement.Import.Msgs exposing (..)
 
+{-|
+
+@docs Msg
+
+-}
+
 import FileReader exposing (..)
 import Json.Decode
 import Jwt
 
 
+{-| -}
 type Msg
     = DragEnter
     | DragOver

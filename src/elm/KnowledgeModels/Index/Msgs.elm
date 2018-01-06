@@ -1,11 +1,18 @@
 module KnowledgeModels.Index.Msgs exposing (..)
 
+{-|
+
+@docs Msg
+
+-}
+
 import Form
 import Jwt
 import KnowledgeModels.Models exposing (KnowledgeModel)
 import PackageManagement.Models exposing (PackageDetail)
 
 
+{-| -}
 type Msg
     = GetKnowledgeModelsCompleted (Result Jwt.JwtError (List KnowledgeModel))
     | ShowHideDeleteKnowledgeModal (Maybe KnowledgeModel)

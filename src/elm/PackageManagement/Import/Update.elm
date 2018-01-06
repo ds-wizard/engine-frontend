@@ -1,4 +1,10 @@
-module PackageManagement.Import.Update exposing (..)
+module PackageManagement.Import.Update exposing (update)
+
+{-|
+
+@docs update
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -39,6 +45,7 @@ importPackageCompleted model result =
             ( { model | importing = Error "Importing package failed." }, Cmd.none )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

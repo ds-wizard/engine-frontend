@@ -1,4 +1,38 @@
-module KnowledgeModels.Models.Migration exposing (..)
+module KnowledgeModels.Models.Migration
+    exposing
+        ( Migration
+        , MigrationResolution
+        , MigrationState
+        , MigrationStateType(..)
+        , encodeMigrationResolution
+        , migrationDecoder
+        , newApplyMigrationResolution
+        , newRejectMigrationResolution
+        )
+
+{-|
+
+
+# Types
+
+@docs Migration, MigrationState, MigrationStateType, MigrationResolution
+
+
+# Decoders
+
+@docs migrationDecoder
+
+
+# Creating resolutions
+
+@docs newApplyMigrationResolution, newRejectMigrationResolution
+
+
+# Encoders
+
+@docs encodeMigrationResolution
+
+-}
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, optional, required)
@@ -7,6 +41,7 @@ import KnowledgeModels.Editor.Models.Entities exposing (KnowledgeModel, knowledg
 import KnowledgeModels.Editor.Models.Events exposing (Event, eventDecoder)
 
 
+{-| -}
 type alias Migration =
     { branchUuid : String
     , migrationState : MigrationState
@@ -16,12 +51,14 @@ type alias Migration =
     }
 
 
+{-| -}
 type alias MigrationState =
     { stateType : MigrationStateType
     , targetEvent : Maybe Event
     }
 
 
+{-| -}
 type MigrationStateType
     = ConflictState
     | ErrorState
@@ -29,12 +66,14 @@ type MigrationStateType
     | RunningState
 
 
+{-| -}
 type alias MigrationResolution =
     { originalEventUuid : String
     , action : String
     }
 
 
+{-| -}
 migrationDecoder : Decoder Migration
 migrationDecoder =
     decode Migration
@@ -82,16 +121,19 @@ newMigrationResolution action uuid =
     }
 
 
+{-| -}
 newApplyMigrationResolution : String -> MigrationResolution
 newApplyMigrationResolution =
     newMigrationResolution "Apply"
 
 
+{-| -}
 newRejectMigrationResolution : String -> MigrationResolution
 newRejectMigrationResolution =
     newMigrationResolution "Reject"
 
 
+{-| -}
 encodeMigrationResolution : MigrationResolution -> Encode.Value
 encodeMigrationResolution data =
     Encode.object

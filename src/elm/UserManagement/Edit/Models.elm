@@ -1,15 +1,23 @@
 module UserManagement.Edit.Models exposing (..)
 
+{-|
+
+@docs View, Model, initialModel
+
+-}
+
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import UserManagement.Models exposing (..)
 
 
+{-| -}
 type View
     = Profile
     | Password
 
 
+{-| -}
 type alias Model =
     { uuid : String
     , currentView : View
@@ -21,6 +29,7 @@ type alias Model =
     }
 
 
+{-| -}
 initialModel : String -> Model
 initialModel uuid =
     { uuid = uuid

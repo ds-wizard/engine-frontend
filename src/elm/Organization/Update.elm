@@ -1,4 +1,10 @@
-module Organization.Update exposing (..)
+module Organization.Update exposing (getCurrentOrganizationCmd, update)
+
+{-|
+
+@docs update, getCurrentOrganizationCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -11,6 +17,7 @@ import Organization.Requests exposing (..)
 import Requests exposing (toCmd)
 
 
+{-| -}
 getCurrentOrganizationCmd : Session -> Cmd Msgs.Msg
 getCurrentOrganizationCmd session =
     getCurrentOrganization session
@@ -71,6 +78,7 @@ handleForm formMsg session model =
             ( { model | form = form }, Cmd.none )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

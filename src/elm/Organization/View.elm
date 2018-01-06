@@ -1,4 +1,10 @@
-module Organization.View exposing (..)
+module Organization.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
@@ -12,6 +18,7 @@ import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClass ]

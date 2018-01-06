@@ -1,4 +1,10 @@
-module UserManagement.Edit.Update exposing (..)
+module UserManagement.Edit.Update exposing (getUserCmd, update)
+
+{-|
+
+@docs update, getUserCmd
+
+-}
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
@@ -12,6 +18,7 @@ import UserManagement.Models exposing (..)
 import UserManagement.Requests exposing (..)
 
 
+{-| -}
 getUserCmd : String -> Session -> Cmd Msgs.Msg
 getUserCmd uuid session =
     getUser uuid session
@@ -116,6 +123,7 @@ handlePasswordForm formMsg session model =
             ( { model | passwordForm = passwordForm }, Cmd.none )
 
 
+{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

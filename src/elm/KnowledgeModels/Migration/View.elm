@@ -1,4 +1,10 @@
-module KnowledgeModels.Migration.View exposing (..)
+module KnowledgeModels.Migration.View exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
@@ -18,6 +24,7 @@ import Msgs
 import Routing exposing (Route(..))
 
 
+{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ class "row knowledge-models-migration" ]

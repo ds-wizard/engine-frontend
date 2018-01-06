@@ -1,5 +1,11 @@
 module List.Extra exposing (..)
 
+{-|
+
+@docs getAt, removeAt, findIndex, findIndices, find, removeWhen
+
+-}
+
 import List exposing (..)
 import Tuple
 
@@ -12,6 +18,7 @@ getAt idx xs =
     List.head <| List.drop idx xs
 
 
+{-| -}
 removeAt : Int -> List a -> List a
 removeAt idx xs =
     List.take idx xs ++ List.drop (idx + 1) xs
