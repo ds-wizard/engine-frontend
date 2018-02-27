@@ -1,12 +1,12 @@
 # Data Stewardship Portal - Web Client
 
-[![Build Status](https://travis-ci.com/janslifka/dsp-client.svg?token=SaiZzGoNgwUFFzrCQ7xp&branch=master)](https://travis-ci.com/janslifka/dsp-client)
+[![Build Status](https://travis-ci.org/DataStewardshipPortal/dsp-client.svg?branch=master)](https://travis-ci.org/DataStewardshipPortal/dsp-client)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 
 This is a web client for the Data Stewardship Portal which is part of
 the Interoperability platform at [ELIXIR CZ](https://www.elixir-czech.cz).
 
-[Data Stewardship Portal - Server Application](https://github.com/vknaisl/dsp-server)
+[Data Stewardship Portal - Server Application](https://github.com/DataStewardshipPortal/dsp-server)
 is the backend providing the API this client is using.
 
 The Data Stewardship Portal has the following functionality:
