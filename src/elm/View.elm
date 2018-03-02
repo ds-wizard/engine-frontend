@@ -6,26 +6,23 @@ module View exposing (view)
 
 -}
 
-import Auth.Msgs
-import Auth.Permission as Perm exposing (hasPerm)
-import Auth.View
 import Common.Html exposing (detailContainerClass, linkTo)
-import Common.Html.Events exposing (onLinkClick)
 import Common.View exposing (defaultFullPageError, fullPageError, pageHeader)
+import Common.View.Layout exposing (appView, publicView)
 import Html exposing (..)
-import Html.Attributes exposing (class, href)
 import KnowledgeModels.Create.View
 import KnowledgeModels.Editor.View
 import KnowledgeModels.Index.View
 import KnowledgeModels.Migration.View
 import KnowledgeModels.Publish.View
 import Models exposing (Model)
-import Msgs exposing (Msg)
+import Msgs exposing (Msg(..))
 import Organization.View
 import PackageManagement.Detail.View
 import PackageManagement.Import.View
 import PackageManagement.Index.View
-import Routing exposing (Route(..))
+import Public.View
+import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
 import UserManagement.Create.View
 import UserManagement.Edit.View
 import UserManagement.Index.View
@@ -35,11 +32,10 @@ import UserManagement.Index.View
 view : Model -> Html Msg
 view model =
     case model.route of
-        Login ->
-            Auth.View.view model.authModel
-
-        Index ->
-            appView model indexView
+        --        Login ->
+        --            Auth.View.view model.authModel
+        Welcome ->
+            appView model welcomeView
 
         Organization ->
             model.organizationModel
@@ -107,6 +103,11 @@ view model =
         DataManagementPlans ->
             appView model dataManagementPlansView
 
+        Public route ->
+            model.publicModel
+                |> Public.View.view route PublicMsg
+                |> publicView
+
         NotFound ->
             appView model notFoundView
 
@@ -114,90 +115,8 @@ view model =
             appView model notAllowedView
 
 
-appView : Model -> Html Msg -> Html Msg
-appView model content =
-    div [ class "app-view" ]
-        [ menu model
-        , div [ class "page" ]
-            [ content ]
-        ]
-
-
-menuItems : List ( String, String, Route, String )
-menuItems =
-    [ ( "Organization", "fa-building", Organization, Perm.organization )
-    , ( "User Management", "fa-users", UserManagement, Perm.userManagement )
-    , ( "Knowledge Models", "fa-database", KnowledgeModels, Perm.knowledgeModel )
-    , ( "Package Management", "fa-cubes", PackageManagement, Perm.packageManagement )
-    , ( "Wizards", "fa-list-alt", Wizards, Perm.wizard )
-    , ( "Data Management Plans", "fa-file-text", DataManagementPlans, Perm.dataManagementPlan )
-    ]
-
-
-menu : Model -> Html Msg
-menu model =
-    div [ class "side-navigation" ]
-        [ logo
-        , ul [ class "menu" ]
-            (createMenu model)
-        , profileInfo model
-        ]
-
-
-logo : Html Msg
-logo =
-    linkTo Index
-        [ class "logo" ]
-        [ text "Elixir DSP" ]
-
-
-createMenu : Model -> List (Html Msg)
-createMenu model =
-    menuItems
-        |> List.filter (\( _, _, _, perm ) -> hasPerm model.jwt perm)
-        |> List.map (menuItem model)
-
-
-menuItem : Model -> ( String, String, Route, String ) -> Html Msg
-menuItem model ( label, icon, route, perm ) =
-    let
-        activeClass =
-            if model.route == route then
-                "active"
-            else
-                ""
-    in
-    li []
-        [ linkTo route
-            [ class activeClass ]
-            [ i [ class ("fa " ++ icon) ] []
-            , text label
-            ]
-        ]
-
-
-profileInfo : Model -> Html Msg
-profileInfo model =
-    let
-        name =
-            case model.session.user of
-                Just user ->
-                    user.name ++ " " ++ user.surname
-
-                Nothing ->
-                    ""
-    in
-    div [ class "profile-info" ]
-        [ linkTo (UserManagementEdit "current") [ class "name" ] [ text name ]
-        , a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
-            [ i [ class "fa fa-sign-out" ] []
-            , text "Logout"
-            ]
-        ]
-
-
-indexView : Html Msg
-indexView =
+welcomeView : Html Msg
+welcomeView =
     fullPageError "fa-hand-spock-o" "Welcome to DSP!"
 
 

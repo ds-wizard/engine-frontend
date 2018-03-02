@@ -9,7 +9,7 @@ $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "elements";
 @import "forms";
 @import "layout";
-@import "login";
+@import "public-layout";
 @import "tables";
 
 @import "modules/knowledge-models";
@@ -18,4 +18,5 @@ $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "modules/knowledge-models-migration";
 @import "modules/package-management-detail";
 @import "modules/package-management-import";
+@import "modules/public";
 @import "modules/user-management";

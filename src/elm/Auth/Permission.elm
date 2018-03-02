@@ -1,23 +1,8 @@
 module Auth.Permission exposing (..)
 
-{-|
-
-
-# Helpers
-
-@docs hasPerm
-
-
-# Permission constants
-
-@docs userManagement, organization, knowledgeModel, knowledgeModelUpgrade, knowledgeModelUpgrade, knowledgeModelPublish, packageManagement, wizard, dataManagementPlan
-
--}
-
 import Auth.Models exposing (JwtToken)
 
 
-{-| -}
 hasPerm : Maybe JwtToken -> String -> Bool
 hasPerm maybeJwt perm =
     case maybeJwt of
@@ -28,49 +13,41 @@ hasPerm maybeJwt perm =
             False
 
 
-{-| -}
 userManagement : String
 userManagement =
     "UM_PERM"
 
 
-{-| -}
 organization : String
 organization =
     "ORG_PERM"
 
 
-{-| -}
 knowledgeModel : String
 knowledgeModel =
     "KM_PERM"
 
 
-{-| -}
 knowledgeModelUpgrade : String
 knowledgeModelUpgrade =
     "KM_UPGRADE_PERM"
 
 
-{-| -}
 knowledgeModelPublish : String
 knowledgeModelPublish =
     "KM_PUBLISH_PERM"
 
 
-{-| -}
 packageManagement : String
 packageManagement =
     "PM_PERM"
 
 
-{-| -}
 wizard : String
 wizard =
     "WIZ_PERM"
 
 
-{-| -}
 dataManagementPlan : String
 dataManagementPlan =
     "DMP_PERM"

@@ -76,19 +76,6 @@ In the `nginx` directory, there is the configuration and the start script for
 nginx that is used in the Docker container to run the project. 
 
 
-## Documentation
-
-It is possible to generate the documentation using [elm-doc](https://github.com/ento/elm-doc).
-First you need to install elm-doc following the instruction in its repository.
-Then you can run the following command to generate the docs:
-
-```
-$ npm run docs
-```
-
-The documentation will be generated in the `docs` directory. Follow the elm-doc
-documentation to see how to view the documentation.
-
 ## Deployment
 
 The project is automatically build into a Docker image using Travis CI. The

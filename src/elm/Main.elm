@@ -1,19 +1,13 @@
 module Main exposing (main)
 
-{-|
-
-@docs main
-
--}
-
 import Auth.Models exposing (Session, initialSession, parseJwt)
 import Json.Decode as Decode exposing (Value)
 import KnowledgeModels.Editor.Subscriptions
 import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
-import Routing exposing (Route(..), cmdNavigate, routeIfAllowed)
-import Update exposing (fetchData, initLocalModel, update)
+import Routing exposing (Route(..), cmdNavigate, homeRoute, routeIfAllowed)
+import Update exposing (fetchData, update)
 import View exposing (view)
 
 
@@ -44,12 +38,17 @@ init val location =
     ( initLocalModel model, decideInitialRoute model route )
 
 
+decodeFlagsFromJson : Value -> Maybe Flags
+decodeFlagsFromJson =
+    Decode.decodeValue flagsDecoder >> Result.toMaybe
+
+
 decideInitialRoute : Model -> Route -> Cmd Msg
 decideInitialRoute model route =
     case route of
-        Login ->
+        Public _ ->
             if userLoggedIn model then
-                cmdNavigate Index
+                cmdNavigate Welcome
             else
                 Cmd.none
 
@@ -57,12 +56,7 @@ decideInitialRoute model route =
             if userLoggedIn model then
                 fetchData model
             else
-                cmdNavigate Login
-
-
-decodeFlagsFromJson : Value -> Maybe Flags
-decodeFlagsFromJson =
-    Decode.decodeValue flagsDecoder >> Result.toMaybe
+                cmdNavigate homeRoute
 
 
 subscriptions : Model -> Sub Msg
@@ -75,7 +69,6 @@ subscriptions model =
             Sub.none
 
 
-{-| -}
 main : Program Value Model Msg
 main =
     Navigation.programWithFlags Msgs.OnLocationChange

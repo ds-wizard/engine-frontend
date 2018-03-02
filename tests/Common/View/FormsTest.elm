@@ -18,13 +18,13 @@ formActionsTests =
     describe "formActions"
         [ test "should contain cancel button" <|
             \_ ->
-                formActions Index ( "Action", Unset, ChangeLocation "/" )
+                formActions Welcome ( "Action", Unset, ChangeLocation "/" )
                     |> Query.fromHtml
                     |> Query.find [ tag "a" ]
                     |> Query.has [ attribute <| Attr.href "/" ]
         , test "should contain an action button" <|
             \_ ->
-                formActions Index ( "Action", Unset, ChangeLocation "/" )
+                formActions Welcome ( "Action", Unset, ChangeLocation "/" )
                     |> Query.fromHtml
                     |> Query.find [ tag "button" ]
                     |> Query.has [ text "Action" ]

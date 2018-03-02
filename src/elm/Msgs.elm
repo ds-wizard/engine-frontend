@@ -1,11 +1,5 @@
 module Msgs exposing (..)
 
-{-|
-
-@docs Msg
-
--}
-
 import Auth.Msgs
 import KnowledgeModels.Create.Msgs
 import KnowledgeModels.Editor.Msgs
@@ -17,12 +11,12 @@ import Organization.Msgs
 import PackageManagement.Detail.Msgs
 import PackageManagement.Import.Msgs
 import PackageManagement.Index.Msgs
+import Public.Msgs
 import UserManagement.Create.Msgs
 import UserManagement.Edit.Msgs
 import UserManagement.Index.Msgs
 
 
-{-| -}
 type Msg
     = ChangeLocation String
     | OnLocationChange Location
@@ -39,3 +33,4 @@ type Msg
     | KnowledgeModelsPublishMsg KnowledgeModels.Publish.Msgs.Msg
     | KnowledgeModelsEditorMsg KnowledgeModels.Editor.Msgs.Msg
     | KnowledgeModelsMigrationMsg KnowledgeModels.Migration.Msgs.Msg
+    | PublicMsg Public.Msgs.Msg

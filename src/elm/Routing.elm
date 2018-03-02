@@ -1,28 +1,14 @@
-module Routing exposing (Route(..), cmdNavigate, isAllowed, parseLocation, routeIfAllowed, toUrl)
-
-{-|
-
-
-# Route type
-
-@docs Route
-
-
-# Helpers
-
-@docs parseLocation, routeIfAllowed, isAllowed, toUrl, cmdNavigate
-
--}
+module Routing exposing (..)
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Navigation exposing (Location)
+import Public.Routing
 import UrlParser exposing (..)
 
 
-{-| -}
 type Route
-    = Index
+    = Welcome
     | Organization
     | UserManagement
     | UserManagementCreate
@@ -37,34 +23,41 @@ type Route
     | PackageManagementImport
     | Wizards
     | DataManagementPlans
-    | Login
     | NotFound
     | NotAllowed
+    | Public Public.Routing.Route
 
 
 matchers : Parser (Route -> a) a
 matchers =
-    oneOf
-        [ map Index top
-        , map Organization (s "organization")
-        , map UserManagement (s "user-management")
-        , map UserManagementCreate (s "user-management" </> s "create")
-        , map UserManagementEdit (s "user-management" </> s "edit" </> string)
-        , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
-        , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit" </> string)
-        , map KnowledgeModelsPublish (s "knowledge-models" </> s "publish" </> string)
-        , map KnowledgeModelsMigration (s "knowledge-models" </> s "migration" </> string)
-        , map KnowledgeModels (s "knowledge-models")
-        , map PackageManagement (s "package-management")
-        , map PackageManagementDetail (s "package-management" </> s "package" </> string </> string)
-        , map PackageManagementImport (s "package-management" </> s "import")
-        , map Wizards (s "wizards")
-        , map DataManagementPlans (s "data-management-plans")
-        , map Login (s "login")
-        ]
+    let
+        parsers =
+            mapParsers Public Public.Routing.parsers
+                ++ [ map Welcome (s "welcome")
+                   , map Organization (s "organization")
+                   , map UserManagement (s "user-management")
+                   , map UserManagementCreate (s "user-management" </> s "create")
+                   , map UserManagementEdit (s "user-management" </> s "edit" </> string)
+                   , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
+                   , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit" </> string)
+                   , map KnowledgeModelsPublish (s "knowledge-models" </> s "publish" </> string)
+                   , map KnowledgeModelsMigration (s "knowledge-models" </> s "migration" </> string)
+                   , map KnowledgeModels (s "knowledge-models")
+                   , map PackageManagement (s "package-management")
+                   , map PackageManagementDetail (s "package-management" </> s "package" </> string </> string)
+                   , map PackageManagementImport (s "package-management" </> s "import")
+                   , map Wizards (s "wizards")
+                   , map DataManagementPlans (s "data-management-plans")
+                   ]
+    in
+    oneOf parsers
 
 
-{-| -}
+mapParsers : (a -> d) -> List ( a, Parser d b ) -> List (Parser (b -> c) c)
+mapParsers wrap parsers =
+    List.map (\( route, parser ) -> map (wrap route) parser) parsers
+
+
 routeIfAllowed : Maybe JwtToken -> Route -> Route
 routeIfAllowed maybeJwt route =
     if isAllowed route maybeJwt then
@@ -73,11 +66,10 @@ routeIfAllowed maybeJwt route =
         NotAllowed
 
 
-{-| -}
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
-        Index ->
+        Welcome ->
             True
 
         Organization ->
@@ -125,7 +117,7 @@ isAllowed route maybeJwt =
         DataManagementPlans ->
             hasPerm maybeJwt Perm.dataManagementPlan
 
-        Login ->
+        Public _ ->
             True
 
         NotFound ->
@@ -135,14 +127,13 @@ isAllowed route maybeJwt =
             False
 
 
-{-| -}
 toUrl : Route -> String
 toUrl route =
     let
         parts =
             case route of
-                Index ->
-                    []
+                Welcome ->
+                    [ "welcome" ]
 
                 Organization ->
                     [ "organization" ]
@@ -186,8 +177,8 @@ toUrl route =
                 DataManagementPlans ->
                     [ "data-management-plans" ]
 
-                Login ->
-                    [ "login" ]
+                Public route ->
+                    Public.Routing.toUrl route
 
                 _ ->
                     []
@@ -195,7 +186,6 @@ toUrl route =
     "/" ++ String.join "/" parts
 
 
-{-| -}
 parseLocation : Location -> Route
 parseLocation location =
     case UrlParser.parsePath matchers location of
@@ -206,7 +196,21 @@ parseLocation location =
             NotFound
 
 
-{-| -}
 cmdNavigate : Route -> Cmd msg
 cmdNavigate =
     Navigation.newUrl << toUrl
+
+
+homeRoute : Route
+homeRoute =
+    Public Public.Routing.Home
+
+
+loginRoute : Route
+loginRoute =
+    Public Public.Routing.Login
+
+
+signupRoute : Route
+signupRoute =
+    Public Public.Routing.Signup

@@ -1,6 +1,22 @@
 @import "mixins";
 
-.login {
+.public-view {
+    margin-top: 60px;
+
+    .navbar-nav {
+        float: right;
+
+        & > li {
+            a:focus {
+                background-color: transparent;
+            }
+
+            a:hover {
+                background-color: #ac3911;
+            }
+        }
+    }
+
     h2 {
         color: #fff;
     }

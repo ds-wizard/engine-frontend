@@ -1,43 +1,25 @@
-module Update exposing (fetchData, initLocalModel, update)
-
-{-|
-
-@docs update, fetchData, initLocalModel
-
--}
+module Update exposing (..)
 
 import Auth.Update
-import KnowledgeModels.Create.Models
 import KnowledgeModels.Create.Update
-import KnowledgeModels.Editor.Models
 import KnowledgeModels.Editor.Update
-import KnowledgeModels.Index.Models
 import KnowledgeModels.Index.Update
-import KnowledgeModels.Migration.Models
 import KnowledgeModels.Migration.Update
-import KnowledgeModels.Publish.Models
 import KnowledgeModels.Publish.Update
-import Models exposing (Model)
+import Models exposing (Model, initLocalModel)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
-import Organization.Models
 import Organization.Update
-import PackageManagement.Detail.Models
 import PackageManagement.Detail.Update
-import PackageManagement.Import.Models
 import PackageManagement.Import.Update
-import PackageManagement.Index.Models
 import PackageManagement.Index.Update
+import Public.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
-import UserManagement.Create.Models
 import UserManagement.Create.Update
-import UserManagement.Edit.Models
 import UserManagement.Edit.Update
-import UserManagement.Index.Models
 import UserManagement.Index.Update
 
 
-{-| -}
 fetchData : Model -> Cmd Msg
 fetchData model =
     case model.route of
@@ -75,51 +57,6 @@ fetchData model =
             Cmd.none
 
 
-{-| -}
-initLocalModel : Model -> Model
-initLocalModel model =
-    case model.route of
-        UserManagement ->
-            { model | userManagementIndexModel = UserManagement.Index.Models.initialModel }
-
-        UserManagementCreate ->
-            { model | userManagementCreateModel = UserManagement.Create.Models.initialModel }
-
-        UserManagementEdit uuid ->
-            { model | userManagementEditModel = UserManagement.Edit.Models.initialModel uuid }
-
-        Organization ->
-            { model | organizationModel = Organization.Models.initialModel }
-
-        PackageManagement ->
-            { model | packageManagementIndexModel = PackageManagement.Index.Models.initialModel }
-
-        PackageManagementDetail groupId artifactId ->
-            { model | packageManagementDetailModel = PackageManagement.Detail.Models.initialModel }
-
-        PackageManagementImport ->
-            { model | packageManagementImportModel = PackageManagement.Import.Models.initialModel }
-
-        KnowledgeModels ->
-            { model | knowledgeModelsIndexModel = KnowledgeModels.Index.Models.initialModel }
-
-        KnowledgeModelsCreate ->
-            { model | knowledgeModelsCreateModel = KnowledgeModels.Create.Models.initialModel }
-
-        KnowledgeModelsPublish uuid ->
-            { model | knowledgeModelsPublishModel = KnowledgeModels.Publish.Models.initialModel }
-
-        KnowledgeModelsEditor uuid ->
-            { model | knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel uuid }
-
-        KnowledgeModelsMigration uuid ->
-            { model | knowledgeModelsMigrationModel = KnowledgeModels.Migration.Models.initialModel uuid }
-
-        _ ->
-            model
-
-
-{-| -}
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -219,3 +156,10 @@ update msg model =
                     KnowledgeModels.Migration.Update.update msg model.session model.knowledgeModelsMigrationModel
             in
             ( { model | knowledgeModelsMigrationModel = knowledgeModelsMigrationModel }, cmd )
+
+        Msgs.PublicMsg msg ->
+            let
+                ( publicModel, cmd ) =
+                    Public.Update.update msg Msgs.PublicMsg model.publicModel
+            in
+            ( { model | publicModel = publicModel }, cmd )

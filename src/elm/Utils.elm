@@ -17,6 +17,7 @@ import Form.Validate as Validate exposing (..)
 import List.Extra as List
 import Random.Pcg exposing (Seed, step)
 import Regex exposing (Regex)
+import Task
 import Uuid
 
 
@@ -68,3 +69,8 @@ splitVersion version =
 
         _ ->
             Nothing
+
+
+dispatch : a -> Cmd a
+dispatch msg =
+    Task.perform (always msg) (Task.succeed ())
