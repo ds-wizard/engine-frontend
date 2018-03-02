@@ -18,10 +18,10 @@ formActionsTests =
     describe "formActions"
         [ test "should contain cancel button" <|
             \_ ->
-                formActions Welcome ( "Action", Unset, ChangeLocation "/" )
+                formActions Welcome ( "Action", Unset, ChangeLocation "/welcome" )
                     |> Query.fromHtml
                     |> Query.find [ tag "a" ]
-                    |> Query.has [ attribute <| Attr.href "/" ]
+                    |> Query.has [ attribute <| Attr.href "/welcome" ]
         , test "should contain an action button" <|
             \_ ->
                 formActions Welcome ( "Action", Unset, ChangeLocation "/" )
