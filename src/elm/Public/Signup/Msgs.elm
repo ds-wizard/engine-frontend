@@ -1,5 +1,9 @@
 module Public.Signup.Msgs exposing (..)
 
+import Form
+import Http
+
 
 type Msg
-    = NoOp
+    = FormMsg Form.Msg
+    | PostSignupCompleted (Result Http.Error String)

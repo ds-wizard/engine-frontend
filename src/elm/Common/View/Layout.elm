@@ -13,7 +13,7 @@ import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
 
 publicView : Html Msg -> Html Msg
 publicView content =
-    div [ class "public-view" ]
+    div [ class "public" ]
         [ publicHeader
         , div [ class "container" ]
             [ content ]

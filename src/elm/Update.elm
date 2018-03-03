@@ -159,7 +159,7 @@ update msg model =
 
         Msgs.PublicMsg msg ->
             let
-                ( publicModel, cmd ) =
-                    Public.Update.update msg Msgs.PublicMsg model.publicModel
+                ( seed, publicModel, cmd ) =
+                    Public.Update.update msg Msgs.PublicMsg model.seed model.publicModel
             in
-            ( { model | publicModel = publicModel }, cmd )
+            ( { model | seed = seed, publicModel = publicModel }, cmd )

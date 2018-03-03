@@ -24,4 +24,4 @@ view route wrapMsg model =
             Public.Login.View.view (wrapMsg << LoginMsg) model.loginModel
 
         Signup ->
-            Public.Signup.View.view
+            Public.Signup.View.view (wrapMsg << SignupMsg) model.signupModel

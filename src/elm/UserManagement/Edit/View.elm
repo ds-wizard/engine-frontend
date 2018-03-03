@@ -1,11 +1,6 @@
 module UserManagement.Edit.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
+import Common.Form.Validate exposing (CustomFormError)
 import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
@@ -20,7 +15,6 @@ import UserManagement.Edit.Msgs exposing (Msg(..))
 import UserManagement.Models exposing (..)
 
 
-{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClass ]
@@ -130,7 +124,7 @@ passwordView model =
         ]
 
 
-passwordFormView : Form UserPasswordFormError UserPasswordForm -> Html Msgs.Msg
+passwordFormView : Form CustomFormError UserPasswordForm -> Html Msgs.Msg
 passwordFormView form =
     let
         formHtml =

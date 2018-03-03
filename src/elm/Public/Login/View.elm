@@ -21,7 +21,7 @@ loginForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 loginForm wrapMsg model =
     form [ onSubmit (wrapMsg Login), class "well col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" ]
         [ fieldset []
-            [ legend [] [ text "Login" ]
+            [ legend [] [ text "Log in" ]
             , loginError model
             , div [ class "form-group" ]
                 [ label [ class "control-label" ]
@@ -50,7 +50,7 @@ loginButton model =
             if model.loading then
                 i [ class "fa fa-spinner fa-spin" ] []
             else
-                text "Login"
+                text "Log in"
     in
     button [ type_ "submit", class "btn btn-primary", disabled model.loading ]
         [ buttonContent ]

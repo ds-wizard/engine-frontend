@@ -1,23 +1,16 @@
 module UserManagement.Edit.Models exposing (..)
 
-{-|
-
-@docs View, Model, initialModel
-
--}
-
+import Common.Form.Validate exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import UserManagement.Models exposing (..)
 
 
-{-| -}
 type View
     = Profile
     | Password
 
 
-{-| -}
 type alias Model =
     { uuid : String
     , currentView : View
@@ -25,11 +18,10 @@ type alias Model =
     , savingUser : ActionResult String
     , savingPassword : ActionResult String
     , userForm : Form () UserEditForm
-    , passwordForm : Form UserPasswordFormError UserPasswordForm
+    , passwordForm : Form CustomFormError UserPasswordForm
     }
 
 
-{-| -}
 initialModel : String -> Model
 initialModel uuid =
     { uuid = uuid
