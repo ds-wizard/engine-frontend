@@ -52,4 +52,5 @@ encodeSignupForm uuid form =
         , ( "name", Encode.string form.name )
         , ( "surname", Encode.string form.surname )
         , ( "password", Encode.string form.password )
+        , ( "role", Encode.null )
         ]
