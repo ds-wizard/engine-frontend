@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
+import UserManagement.Routing
 
 
 publicView : Html Msg -> Html Msg
@@ -70,7 +71,7 @@ createMenu model =
 menuItems : List ( String, String, Route, String )
 menuItems =
     [ ( "Organization", "fa-building", Organization, Perm.organization )
-    , ( "User Management", "fa-users", UserManagement, Perm.userManagement )
+    , ( "User Management", "fa-users", UserManagement UserManagement.Routing.Index, Perm.userManagement )
     , ( "Knowledge Models", "fa-database", KnowledgeModels, Perm.knowledgeModel )
     , ( "Package Management", "fa-cubes", PackageManagement, Perm.packageManagement )
     , ( "Wizards", "fa-list-alt", Wizards, Perm.wizard )
@@ -108,7 +109,7 @@ profileInfo model =
                     ""
     in
     div [ class "profile-info" ]
-        [ linkTo (UserManagementEdit "current") [ class "name" ] [ text name ]
+        [ linkTo (UserManagement <| UserManagement.Routing.Edit "current") [ class "name" ] [ text name ]
         , a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
             [ i [ class "fa fa-sign-out" ] []
             , text "Logout"

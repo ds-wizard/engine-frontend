@@ -12,18 +12,13 @@ import PackageManagement.Detail.Msgs
 import PackageManagement.Import.Msgs
 import PackageManagement.Index.Msgs
 import Public.Msgs
-import UserManagement.Create.Msgs
-import UserManagement.Edit.Msgs
-import UserManagement.Index.Msgs
+import UserManagement.Msgs
 
 
 type Msg
     = ChangeLocation String
     | OnLocationChange Location
     | AuthMsg Auth.Msgs.Msg
-    | UserManagementIndexMsg UserManagement.Index.Msgs.Msg
-    | UserManagementCreateMsg UserManagement.Create.Msgs.Msg
-    | UserManagementEditMsg UserManagement.Edit.Msgs.Msg
     | OrganizationMsg Organization.Msgs.Msg
     | PackageManagementIndexMsg PackageManagement.Index.Msgs.Msg
     | PackageManagementDetailMsg PackageManagement.Detail.Msgs.Msg
@@ -34,3 +29,4 @@ type Msg
     | KnowledgeModelsEditorMsg KnowledgeModels.Editor.Msgs.Msg
     | KnowledgeModelsMigrationMsg KnowledgeModels.Migration.Msgs.Msg
     | PublicMsg Public.Msgs.Msg
+    | UserManagementMsg UserManagement.Msgs.Msg

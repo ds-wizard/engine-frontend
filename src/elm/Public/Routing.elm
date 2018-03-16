@@ -10,12 +10,12 @@ type Route
     | Signup
 
 
-parsers : List ( Route, Parser a a )
-parsers =
-    [ ( ForgottenPassword, s "forgotten-password" )
-    , ( Home, top )
-    , ( Login, s "login" )
-    , ( Signup, s "signup" )
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
+    [ map (wrapRoute ForgottenPassword) (s "forgotten-password")
+    , map (wrapRoute Home) top
+    , map (wrapRoute Login) (s "login")
+    , map (wrapRoute Signup) (s "signup")
     ]
 
 

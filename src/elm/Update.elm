@@ -15,20 +15,12 @@ import PackageManagement.Import.Update
 import PackageManagement.Index.Update
 import Public.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
-import UserManagement.Create.Update
-import UserManagement.Edit.Update
-import UserManagement.Index.Update
+import UserManagement.Update
 
 
 fetchData : Model -> Cmd Msg
 fetchData model =
     case model.route of
-        UserManagement ->
-            UserManagement.Index.Update.getUsersCmd model.session
-
-        UserManagementEdit uuid ->
-            UserManagement.Edit.Update.getUserCmd uuid model.session
-
         Organization ->
             Organization.Update.getCurrentOrganizationCmd model.session
 
@@ -53,6 +45,9 @@ fetchData model =
         KnowledgeModelsMigration uuid ->
             KnowledgeModels.Migration.Update.getMigrationCmd uuid model.session
 
+        UserManagement route ->
+            UserManagement.Update.fetchData route Msgs.UserManagementMsg model.session model.userManagement
+
         _ ->
             Cmd.none
 
@@ -72,27 +67,6 @@ update msg model =
 
         Msgs.AuthMsg msg ->
             Auth.Update.update msg model
-
-        Msgs.UserManagementIndexMsg msg ->
-            let
-                ( userManagementIndexModel, cmd ) =
-                    UserManagement.Index.Update.update msg model.session model.userManagementIndexModel
-            in
-            ( { model | userManagementIndexModel = userManagementIndexModel }, cmd )
-
-        Msgs.UserManagementCreateMsg msg ->
-            let
-                ( seed, userManagementCreateModel, cmd ) =
-                    UserManagement.Create.Update.update msg model.seed model.session model.userManagementCreateModel
-            in
-            ( { model | seed = seed, userManagementCreateModel = userManagementCreateModel }, cmd )
-
-        Msgs.UserManagementEditMsg msg ->
-            let
-                ( userManagementEditModel, cmd ) =
-                    UserManagement.Edit.Update.update msg model.session model.userManagementEditModel
-            in
-            ( { model | userManagementEditModel = userManagementEditModel }, cmd )
 
         Msgs.OrganizationMsg msg ->
             let
@@ -163,3 +137,10 @@ update msg model =
                     Public.Update.update msg Msgs.PublicMsg model.seed model.publicModel
             in
             ( { model | seed = seed, publicModel = publicModel }, cmd )
+
+        Msgs.UserManagementMsg msg ->
+            let
+                ( seed, userManagement, cmd ) =
+                    UserManagement.Update.update msg Msgs.UserManagementMsg model.seed model.session model.userManagement
+            in
+            ( { model | seed = seed, userManagement = userManagement }, cmd )

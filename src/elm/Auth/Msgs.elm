@@ -2,7 +2,7 @@ module Auth.Msgs exposing (..)
 
 import Auth.Models exposing (JwtToken)
 import Jwt
-import UserManagement.Models exposing (User)
+import UserManagement.Common.Models exposing (User)
 
 
 type Msg

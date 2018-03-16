@@ -1,11 +1,5 @@
 module UserManagement.Index.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
@@ -14,24 +8,24 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs
-import Routing exposing (Route(..))
+import Routing
+import UserManagement.Common.Models exposing (User)
 import UserManagement.Index.Models exposing (..)
 import UserManagement.Index.Msgs exposing (Msg(..))
-import UserManagement.Models exposing (User)
+import UserManagement.Routing exposing (Route(..))
 
 
-{-| -}
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div [ class "user-management" ]
         [ pageHeader "User Management" indexActions
         , formSuccessResultView model.deletingUser
-        , content model
+        , content wrapMsg model
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
+content : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+content wrapMsg model =
     case model.users of
         Unset ->
             emptyNode
@@ -43,20 +37,20 @@ content model =
             defaultFullPageError err
 
         Success users ->
-            umTable model users
+            umTable wrapMsg model users
 
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo UserManagementCreate [ class "btn btn-primary" ] [ text "Create User" ] ]
+    [ linkTo (Routing.UserManagement Create) [ class "btn btn-primary" ] [ text "Create User" ] ]
 
 
-umTable : Model -> List User -> Html Msgs.Msg
-umTable model users =
+umTable : (Msg -> Msgs.Msg) -> Model -> List User -> Html Msgs.Msg
+umTable wrapMsg model users =
     table [ class "table" ]
         [ umTableHeader
-        , umTableBody users
-        , deleteModal model
+        , umTableBody wrapMsg users
+        , deleteModal wrapMsg model
         ]
 
 
@@ -73,12 +67,12 @@ umTableHeader =
         ]
 
 
-umTableBody : List User -> Html Msgs.Msg
-umTableBody users =
+umTableBody : (Msg -> Msgs.Msg) -> List User -> Html Msgs.Msg
+umTableBody wrapMsg users =
     if List.isEmpty users then
         umTableEmpty
     else
-        tbody [] (List.map umTableRow users)
+        tbody [] (List.map (umTableRow wrapMsg) users)
 
 
 umTableEmpty : Html msg
@@ -87,30 +81,30 @@ umTableEmpty =
         [ td [ colspan 5, class "td-empty-table" ] [ text "There are no users." ] ]
 
 
-umTableRow : User -> Html Msgs.Msg
-umTableRow user =
+umTableRow : (Msg -> Msgs.Msg) -> User -> Html Msgs.Msg
+umTableRow wrapMsg user =
     tr []
         [ td [] [ text user.name ]
         , td [] [ text user.surname ]
         , td [] [ text user.email ]
         , td [] [ text user.role ]
-        , td [ class "table-actions" ] [ umTableRowActionDelete user, umTableRowActionEdit user ]
+        , td [ class "table-actions" ] [ umTableRowActionDelete wrapMsg user, umTableRowActionEdit user ]
         ]
 
 
-umTableRowActionDelete : User -> Html Msgs.Msg
-umTableRowActionDelete user =
-    a [ onClick <| Msgs.UserManagementIndexMsg <| ShowHideDeleteUser <| Just user ]
+umTableRowActionDelete : (Msg -> Msgs.Msg) -> User -> Html Msgs.Msg
+umTableRowActionDelete wrapMsg user =
+    a [ onClick <| wrapMsg <| ShowHideDeleteUser <| Just user ]
         [ i [ class "fa fa-trash-o" ] [] ]
 
 
 umTableRowActionEdit : User -> Html Msgs.Msg
 umTableRowActionEdit user =
-    linkTo (UserManagementEdit user.uuid) [] [ i [ class "fa fa-edit" ] [] ]
+    linkTo (Routing.UserManagement <| Edit user.uuid) [] [ i [ class "fa fa-edit" ] [] ]
 
 
-deleteModal : Model -> Html Msgs.Msg
-deleteModal model =
+deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+deleteModal wrapMsg model =
     let
         ( visible, userHtml ) =
             case model.userToBeDeleted of
@@ -132,8 +126,8 @@ deleteModal model =
             , visible = visible
             , actionResult = model.deletingUser
             , actionName = "Delete"
-            , actionMsg = Msgs.UserManagementIndexMsg DeleteUser
-            , cancelMsg = Msgs.UserManagementIndexMsg <| ShowHideDeleteUser Nothing
+            , actionMsg = wrapMsg DeleteUser
+            , cancelMsg = wrapMsg <| ShowHideDeleteUser Nothing
             }
     in
     modalView modalConfig

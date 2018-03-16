@@ -10,21 +10,21 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs
-import UserManagement.Edit.Models exposing (Model, View(..))
+import UserManagement.Common.Models exposing (roles)
+import UserManagement.Edit.Models exposing (..)
 import UserManagement.Edit.Msgs exposing (Msg(..))
-import UserManagement.Models exposing (..)
 
 
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div [ detailContainerClass ]
         [ pageHeader "Edit user profile" []
-        , content model
+        , content wrapMsg model
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
+content : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+content wrapMsg model =
     case model.user of
         Unset ->
             emptyNode
@@ -36,28 +36,28 @@ content model =
             defaultFullPageError err
 
         Success user ->
-            profileView model
+            profileView wrapMsg model
 
 
-profileView : Model -> Html Msgs.Msg
-profileView model =
+profileView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+profileView wrapMsg model =
     let
         currentView =
             case model.currentView of
                 Profile ->
-                    userView model
+                    userView wrapMsg model
 
                 Password ->
-                    passwordView model
+                    passwordView wrapMsg model
     in
     div []
-        [ navbar model
+        [ navbar wrapMsg model
         , currentView
         ]
 
 
-navbar : Model -> Html Msgs.Msg
-navbar model =
+navbar : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+navbar wrapMsg model =
     let
         profileClass =
             if model.currentView == Profile then
@@ -73,26 +73,26 @@ navbar model =
     in
     ul [ class "nav nav-tabs" ]
         [ li [ class profileClass ]
-            [ a [ onClick <| Msgs.UserManagementEditMsg <| ChangeView Profile ]
+            [ a [ onClick <| wrapMsg <| ChangeView Profile ]
                 [ text "Profile" ]
             ]
         , li [ class passwordClass ]
-            [ a [ onClick <| Msgs.UserManagementEditMsg <| ChangeView Password ]
+            [ a [ onClick <| wrapMsg <| ChangeView Password ]
                 [ text "Password" ]
             ]
         ]
 
 
-userView : Model -> Html Msgs.Msg
-userView model =
+userView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+userView wrapMsg model =
     div []
         [ formResultView model.savingUser
-        , userFormView model.userForm (model.uuid == "current")
-        , formActionOnly ( "Save", model.savingUser, Msgs.UserManagementEditMsg <| EditFormMsg Form.Submit )
+        , userFormView model.userForm (model.uuid == "current") |> Html.map (wrapMsg << EditFormMsg)
+        , formActionOnly ( "Save", model.savingUser, wrapMsg <| EditFormMsg Form.Submit )
         ]
 
 
-userFormView : Form () UserEditForm -> Bool -> Html Msgs.Msg
+userFormView : Form () UserEditForm -> Bool -> Html Form.Msg
 userFormView form current =
     let
         roleOptions =
@@ -112,25 +112,21 @@ userFormView form current =
                 , roleSelect
                 ]
     in
-    formHtml |> Html.map (EditFormMsg >> Msgs.UserManagementEditMsg)
+    formHtml
 
 
-passwordView : Model -> Html Msgs.Msg
-passwordView model =
+passwordView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+passwordView wrapMsg model =
     div []
         [ formResultView model.savingPassword
-        , passwordFormView model.passwordForm
-        , formActionOnly ( "Save", model.savingPassword, Msgs.UserManagementEditMsg <| PasswordFormMsg Form.Submit )
+        , passwordFormView model.passwordForm |> Html.map (wrapMsg << PasswordFormMsg)
+        , formActionOnly ( "Save", model.savingPassword, wrapMsg <| PasswordFormMsg Form.Submit )
         ]
 
 
-passwordFormView : Form CustomFormError UserPasswordForm -> Html Msgs.Msg
+passwordFormView : Form CustomFormError UserPasswordForm -> Html Form.Msg
 passwordFormView form =
-    let
-        formHtml =
-            div []
-                [ passwordGroup form "password" "New password"
-                , passwordGroup form "passwordConfirmation" "New password again"
-                ]
-    in
-    formHtml |> Html.map (PasswordFormMsg >> Msgs.UserManagementEditMsg)
+    div []
+        [ passwordGroup form "password" "New password"
+        , passwordGroup form "passwordConfirmation" "New password again"
+        ]

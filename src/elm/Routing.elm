@@ -5,14 +5,12 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Navigation exposing (Location)
 import Public.Routing
 import UrlParser exposing (..)
+import UserManagement.Routing
 
 
 type Route
     = Welcome
     | Organization
-    | UserManagement
-    | UserManagementCreate
-    | UserManagementEdit String
     | KnowledgeModels
     | KnowledgeModelsEditor String
     | KnowledgeModelsCreate
@@ -26,18 +24,17 @@ type Route
     | NotFound
     | NotAllowed
     | Public Public.Routing.Route
+    | UserManagement UserManagement.Routing.Route
 
 
 matchers : Parser (Route -> a) a
 matchers =
     let
         parsers =
-            mapParsers Public Public.Routing.parsers
+            UserManagement.Routing.parses UserManagement
+                ++ Public.Routing.parsers Public
                 ++ [ map Welcome (s "welcome")
                    , map Organization (s "organization")
-                   , map UserManagement (s "user-management")
-                   , map UserManagementCreate (s "user-management" </> s "create")
-                   , map UserManagementEdit (s "user-management" </> s "edit" </> string)
                    , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
                    , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit" </> string)
                    , map KnowledgeModelsPublish (s "knowledge-models" </> s "publish" </> string)
@@ -75,18 +72,6 @@ isAllowed route maybeJwt =
         Organization ->
             hasPerm maybeJwt Perm.organization
 
-        UserManagement ->
-            hasPerm maybeJwt Perm.userManagement
-
-        UserManagementCreate ->
-            hasPerm maybeJwt Perm.userManagement
-
-        UserManagementEdit uuid ->
-            if uuid == "current" then
-                True
-            else
-                hasPerm maybeJwt Perm.userManagement
-
         KnowledgeModelsCreate ->
             hasPerm maybeJwt Perm.knowledgeModel
 
@@ -120,6 +105,9 @@ isAllowed route maybeJwt =
         Public _ ->
             True
 
+        UserManagement route ->
+            UserManagement.Routing.isAllowed route maybeJwt
+
         NotFound ->
             True
 
@@ -137,15 +125,6 @@ toUrl route =
 
                 Organization ->
                     [ "organization" ]
-
-                UserManagement ->
-                    [ "user-management" ]
-
-                UserManagementCreate ->
-                    [ "user-management", "create" ]
-
-                UserManagementEdit uuid ->
-                    [ "user-management", "edit", uuid ]
 
                 KnowledgeModelsCreate ->
                     [ "knowledge-models", "create" ]
@@ -179,6 +158,9 @@ toUrl route =
 
                 Public route ->
                     Public.Routing.toUrl route
+
+                UserManagement route ->
+                    UserManagement.Routing.toUrl route
 
                 _ ->
                     []

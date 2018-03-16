@@ -3,7 +3,7 @@ module Auth.Models exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import Jwt exposing (decodeToken)
-import UserManagement.Models exposing (User, userDecoder)
+import UserManagement.Common.Models exposing (User, userDecoder)
 
 
 type alias Session =

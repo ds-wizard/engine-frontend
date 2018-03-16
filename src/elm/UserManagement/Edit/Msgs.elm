@@ -1,18 +1,11 @@
 module UserManagement.Edit.Msgs exposing (..)
 
-{-|
-
-@docs Msg
-
--}
-
 import Form
 import Jwt
+import UserManagement.Common.Models exposing (User)
 import UserManagement.Edit.Models exposing (View)
-import UserManagement.Models exposing (User)
 
 
-{-| -}
 type Msg
     = GetUserCompleted (Result Jwt.JwtError User)
     | EditFormMsg Form.Msg

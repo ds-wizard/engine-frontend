@@ -15,9 +15,7 @@ import PackageManagement.Index.Models
 import Public.Models
 import Random.Pcg exposing (Seed, initialSeed)
 import Routing exposing (Route(..))
-import UserManagement.Create.Models
-import UserManagement.Edit.Models
-import UserManagement.Index.Models
+import UserManagement.Models
 
 
 type alias Model =
@@ -25,9 +23,6 @@ type alias Model =
     , seed : Seed
     , session : Session
     , jwt : Maybe JwtToken
-    , userManagementIndexModel : UserManagement.Index.Models.Model
-    , userManagementCreateModel : UserManagement.Create.Models.Model
-    , userManagementEditModel : UserManagement.Edit.Models.Model
     , organizationModel : Organization.Models.Model
     , packageManagementIndexModel : PackageManagement.Index.Models.Model
     , packageManagementDetailModel : PackageManagement.Detail.Models.Model
@@ -38,6 +33,7 @@ type alias Model =
     , knowledgeModelsEditorModel : KnowledgeModels.Editor.Models.Model
     , knowledgeModelsMigrationModel : KnowledgeModels.Migration.Models.Model
     , publicModel : Public.Models.Model
+    , userManagement : UserManagement.Models.Model
     }
 
 
@@ -47,9 +43,6 @@ initialModel route seed session jwt =
     , seed = initialSeed seed
     , session = session
     , jwt = jwt
-    , userManagementIndexModel = UserManagement.Index.Models.initialModel
-    , userManagementCreateModel = UserManagement.Create.Models.initialModel
-    , userManagementEditModel = UserManagement.Edit.Models.initialModel ""
     , organizationModel = Organization.Models.initialModel
     , packageManagementIndexModel = PackageManagement.Index.Models.initialModel
     , packageManagementDetailModel = PackageManagement.Detail.Models.initialModel
@@ -60,21 +53,13 @@ initialModel route seed session jwt =
     , knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel ""
     , knowledgeModelsMigrationModel = KnowledgeModels.Migration.Models.initialModel ""
     , publicModel = Public.Models.initialModel
+    , userManagement = UserManagement.Models.initialModel
     }
 
 
 initLocalModel : Model -> Model
 initLocalModel model =
     case model.route of
-        UserManagement ->
-            { model | userManagementIndexModel = UserManagement.Index.Models.initialModel }
-
-        UserManagementCreate ->
-            { model | userManagementCreateModel = UserManagement.Create.Models.initialModel }
-
-        UserManagementEdit uuid ->
-            { model | userManagementEditModel = UserManagement.Edit.Models.initialModel uuid }
-
         Organization ->
             { model | organizationModel = Organization.Models.initialModel }
 
@@ -104,6 +89,9 @@ initLocalModel model =
 
         Public route ->
             { model | publicModel = Public.Models.initLocalModel route model.publicModel }
+
+        UserManagement route ->
+            { model | userManagement = UserManagement.Models.initLocalModel route model.userManagement }
 
         _ ->
             model

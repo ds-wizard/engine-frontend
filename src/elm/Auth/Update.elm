@@ -11,7 +11,7 @@ import Public.Login.Msgs
 import Public.Msgs
 import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate, homeRoute)
-import UserManagement.Models exposing (User)
+import UserManagement.Common.Models exposing (User)
 import Utils exposing (dispatch)
 
 

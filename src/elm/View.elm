@@ -1,11 +1,5 @@
 module View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Html exposing (detailContainerClass, linkTo)
 import Common.View exposing (defaultFullPageError, fullPageError, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
@@ -23,38 +17,18 @@ import PackageManagement.Import.View
 import PackageManagement.Index.View
 import Public.View
 import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
-import UserManagement.Create.View
-import UserManagement.Edit.View
-import UserManagement.Index.View
+import UserManagement.View
 
 
-{-| -}
 view : Model -> Html Msg
 view model =
     case model.route of
-        --        Login ->
-        --            Auth.View.view model.authModel
         Welcome ->
             appView model welcomeView
 
         Organization ->
             model.organizationModel
                 |> Organization.View.view
-                |> appView model
-
-        UserManagement ->
-            model.userManagementIndexModel
-                |> UserManagement.Index.View.view
-                |> appView model
-
-        UserManagementCreate ->
-            model.userManagementCreateModel
-                |> UserManagement.Create.View.view
-                |> appView model
-
-        UserManagementEdit uuid ->
-            model.userManagementEditModel
-                |> UserManagement.Edit.View.view
                 |> appView model
 
         KnowledgeModelsCreate ->
@@ -107,6 +81,11 @@ view model =
             model.publicModel
                 |> Public.View.view route PublicMsg
                 |> publicView
+
+        UserManagement route ->
+            model.userManagement
+                |> UserManagement.View.view route UserManagementMsg
+                |> appView model
 
         NotFound ->
             appView model notFoundView

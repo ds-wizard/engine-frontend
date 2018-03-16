@@ -1,33 +1,44 @@
-module UserManagement.Index.Update exposing (getUsersCmd, update)
-
-{-|
-
-@docs getUsersCmd, update
-
--}
+module UserManagement.Index.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
-import Requests exposing (toCmd)
+import UserManagement.Common.Models exposing (User)
 import UserManagement.Index.Models exposing (Model)
 import UserManagement.Index.Msgs exposing (Msg(..))
-import UserManagement.Models exposing (User)
 import UserManagement.Requests exposing (deleteUser, getUsers)
 
 
-{-| -}
-getUsersCmd : Session -> Cmd Msgs.Msg
+fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
+fetchData wrapMsg session =
+    getUsersCmd session |> Cmd.map wrapMsg
+
+
+update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg session model =
+    case msg of
+        GetUsersCompleted result ->
+            getUsersCompleted model result
+
+        ShowHideDeleteUser user ->
+            ( { model | userToBeDeleted = user, deletingUser = Unset }, Cmd.none )
+
+        DeleteUser ->
+            handleDeleteUser wrapMsg session model |> Debug.log "Deleting user "
+
+        DeleteUserCompleted result ->
+            deleteUserCompleted wrapMsg session model result
+
+
+getUsersCmd : Session -> Cmd Msg
 getUsersCmd session =
-    getUsers session
-        |> toCmd GetUsersCompleted Msgs.UserManagementIndexMsg
+    getUsers session |> Jwt.send GetUsersCompleted
 
 
-deleteUserCmd : String -> Session -> Cmd Msgs.Msg
+deleteUserCmd : String -> Session -> Cmd Msg
 deleteUserCmd uuid session =
-    deleteUser uuid session
-        |> toCmd DeleteUserCompleted Msgs.UserManagementIndexMsg
+    deleteUser uuid session |> Jwt.send DeleteUserCompleted
 
 
 getUsersCompleted : Model -> Result Jwt.JwtError (List User) -> ( Model, Cmd Msgs.Msg )
@@ -44,44 +55,27 @@ getUsersCompleted model result =
     ( newModel, Cmd.none )
 
 
-handleDeleteUser : Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeleteUser session model =
+handleDeleteUser : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteUser wrapMsg session model =
     case model.userToBeDeleted of
         Just user ->
             ( { model | deletingUser = Loading }
-            , deleteUserCmd user.uuid session
+            , deleteUserCmd user.uuid session |> Cmd.map wrapMsg
             )
 
         _ ->
-            ( model, Cmd.none )
+            ( model, Cmd.none ) |> Debug.log "This awkward situation"
 
 
-deleteUserCompleted : Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteUserCompleted session model result =
+deleteUserCompleted : (Msg -> Msgs.Msg) -> Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+deleteUserCompleted wrapMsg session model result =
     case result of
         Ok user ->
             ( { model | deletingUser = Success "User was sucessfully deleted", users = Loading, userToBeDeleted = Nothing }
-            , getUsersCmd session
+            , getUsersCmd session |> Cmd.map wrapMsg
             )
 
         Err error ->
             ( { model | deletingUser = Error "User could not be deleted" }
             , Cmd.none
             )
-
-
-{-| -}
-update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg session model =
-    case msg of
-        GetUsersCompleted result ->
-            getUsersCompleted model result
-
-        ShowHideDeleteUser user ->
-            ( { model | userToBeDeleted = user, deletingUser = Unset }, Cmd.none )
-
-        DeleteUser ->
-            handleDeleteUser session model
-
-        DeleteUserCompleted result ->
-            deleteUserCompleted session model result
