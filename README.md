@@ -1,15 +1,15 @@
-# Data Stewardship Portal - Web Client
+# Data Stewardship Wizard - Web Client
 
-[![Build Status](https://travis-ci.org/DataStewardshipPortal/dsp-client.svg?branch=master)](https://travis-ci.org/DataStewardshipPortal/dsp-client)
+[![Build Status](https://travis-ci.org/DataStewardshipWizard/dsw-client.svg?branch=master)](https://travis-ci.org/DataStewardshipWizard/dsw-client)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 
-This is a web client for the Data Stewardship Portal which is part of
+This is a web client for the Data Stewardship Wizard which is part of
 the Interoperability platform at [ELIXIR CZ](https://www.elixir-czech.cz).
 
-[Data Stewardship Portal - Server Application](https://github.com/DataStewardshipPortal/dsp-server)
+[Data Stewardship Wizard - Server Application](https://github.com/DataStewardshipWizard/dsw-server)
 is the backend providing the API this client is using.
 
-The Data Stewardship Portal has the following functionality:
+The Data Stewardship Wizard has the following functionality:
 
 - Organization & User Management
 - Knowledge Model Editor

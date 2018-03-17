@@ -26,7 +26,7 @@ publicHeader =
     div [ class "navbar navbar-default navbar-fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
-                [ linkTo homeRoute [ class "navbar-brand" ] [ text "Elixir DSP" ] ]
+                [ linkTo homeRoute [ class "navbar-brand" ] [ text "Elixir DSW" ] ]
             , ul [ class "nav navbar-nav" ]
                 [ li [] [ linkTo loginRoute [] [ text "Log In" ] ]
                 , li [] [ linkTo signupRoute [] [ text "Sign Up" ] ]
@@ -58,7 +58,7 @@ logo : Html Msg
 logo =
     linkTo Welcome
         [ class "logo" ]
-        [ text "Elixir DSP" ]
+        [ text "Elixir DSW" ]
 
 
 createMenu : Model -> List (Html Msg)

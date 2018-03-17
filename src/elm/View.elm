@@ -96,7 +96,7 @@ view model =
 
 welcomeView : Html Msg
 welcomeView =
-    fullPageError "fa-hand-spock-o" "Welcome to DSP!"
+    fullPageError "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
 
 
 wizzardsView : Html Msg

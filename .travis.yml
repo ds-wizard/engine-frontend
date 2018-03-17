@@ -9,7 +9,7 @@ services:
   - docker
 
 env:
-  - IMAGE_TAG="$DOCKER_REGISTRY/elixir/dsp-client:latest"
+  - IMAGE_TAG="$DOCKER_REGISTRY/elixir/dsw-client:latest"
 
 install:
   - npm install
