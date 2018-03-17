@@ -1,7 +1,7 @@
 module Public.Signup.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (emptyNode)
+import Common.Html exposing (emptyNode, linkTo)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageError)
 import Common.View.Forms exposing (..)
@@ -9,8 +9,10 @@ import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Msgs
+import Public.Routing exposing (Route(Login))
 import Public.Signup.Models exposing (..)
 import Public.Signup.Msgs exposing (Msg(FormMsg))
+import Routing exposing (Route(Public))
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -35,7 +37,10 @@ signupForm wrapMsg model =
             [ legend [] [ text "Sign up" ]
             , signupError model.signingUp
             , formView model.form |> Html.map (wrapMsg << FormMsg)
-            , formActionOnly ( "Sign up", model.signingUp, wrapMsg <| FormMsg Form.Submit )
+            , div [ class "form-actions public__signup__formButtons" ]
+                [ linkTo (Public Login) [] [ text "I already have an account" ]
+                , actionButton ( "Sign up", model.signingUp, wrapMsg <| FormMsg Form.Submit )
+                ]
             ]
         ]
 
