@@ -1,6 +1,6 @@
 module Public.Signup.View exposing (view)
 
-import Common.Form.Validate exposing (CustomFormError)
+import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageError)

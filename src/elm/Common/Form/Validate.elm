@@ -1,10 +1,7 @@
 module Common.Form.Validate exposing (..)
 
+import Common.Form exposing (CustomFormError(ConfirmationError))
 import Form.Validate as Validate exposing (..)
-
-
-type CustomFormError
-    = ConfirmationError
 
 
 validateConfirmation : String -> Validation CustomFormError String -> Validation CustomFormError String

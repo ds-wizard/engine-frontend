@@ -1,5 +1,6 @@
 module Public.Signup.Models exposing (..)
 
+import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)

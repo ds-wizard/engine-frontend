@@ -1,12 +1,11 @@
 module UserManagement.Edit.Models exposing (..)
 
-import Common.Form.Validate exposing (CustomFormError, validateConfirmation)
+import Common.Form exposing (CustomFormError)
+import Common.Form.Validate exposing (validateConfirmation)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
 import Json.Encode as Encode exposing (..)
 import UserManagement.Common.Models exposing (User)
 

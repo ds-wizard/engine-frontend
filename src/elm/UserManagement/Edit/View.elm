@@ -1,6 +1,6 @@
 module UserManagement.Edit.View exposing (view)
 
-import Common.Form.Validate exposing (CustomFormError)
+import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)

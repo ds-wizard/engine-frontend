@@ -1,9 +1,5 @@
 module UserManagement.Common.Models exposing (..)
 
-import Common.Form.Validate exposing (CustomFormError, validateConfirmation)
-import Form exposing (Form)
-import Form.Field as Field
-import Form.Validate as Validate exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 
