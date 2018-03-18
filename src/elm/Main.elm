@@ -50,7 +50,7 @@ decideInitialRoute model route =
             if userLoggedIn model then
                 cmdNavigate Welcome
             else
-                Cmd.none
+                fetchData model
 
         _ ->
             if userLoggedIn model then

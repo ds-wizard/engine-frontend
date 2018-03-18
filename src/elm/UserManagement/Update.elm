@@ -11,8 +11,8 @@ import UserManagement.Msgs exposing (Msg(..))
 import UserManagement.Routing exposing (Route(..))
 
 
-fetchData : Route -> (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
-fetchData route wrapMsg session model =
+fetchData : Route -> (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
+fetchData route wrapMsg session =
     case route of
         Edit uuid ->
             UserManagement.Edit.Update.fetchData (wrapMsg << EditMsg) session uuid

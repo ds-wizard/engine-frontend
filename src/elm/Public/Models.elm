@@ -3,11 +3,13 @@ module Public.Models exposing (..)
 import Public.Login.Models
 import Public.Routing exposing (Route(..))
 import Public.Signup.Models
+import Public.SignupConfirmation.Models
 
 
 type alias Model =
     { loginModel : Public.Login.Models.Model
     , signupModel : Public.Signup.Models.Model
+    , signupConfirmationModel : Public.SignupConfirmation.Models.Model
     }
 
 
@@ -15,6 +17,7 @@ initialModel : Model
 initialModel =
     { loginModel = Public.Login.Models.initialModel
     , signupModel = Public.Signup.Models.initialModel
+    , signupConfirmationModel = Public.SignupConfirmation.Models.initialModel
     }
 
 

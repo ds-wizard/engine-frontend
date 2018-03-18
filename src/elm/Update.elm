@@ -45,8 +45,11 @@ fetchData model =
         KnowledgeModelsMigration uuid ->
             KnowledgeModels.Migration.Update.getMigrationCmd uuid model.session
 
+        Public route ->
+            Public.Update.fetchData route Msgs.PublicMsg
+
         UserManagement route ->
-            UserManagement.Update.fetchData route Msgs.UserManagementMsg model.session model.userManagement
+            UserManagement.Update.fetchData route Msgs.UserManagementMsg model.session
 
         _ ->
             Cmd.none

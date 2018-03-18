@@ -9,6 +9,7 @@ import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
 import Public.Routing exposing (Route(..))
 import Public.Signup.View
+import Public.SignupConfirmation.View
 
 
 view : Route -> (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -25,3 +26,6 @@ view route wrapMsg model =
 
         Signup ->
             Public.Signup.View.view (wrapMsg << SignupMsg) model.signupModel
+
+        SignupConfirmation userId hash ->
+            Public.SignupConfirmation.View.view model.signupConfirmationModel
