@@ -92,7 +92,7 @@ userView wrapMsg model =
         ]
 
 
-userFormView : Form () UserEditForm -> Bool -> Html Form.Msg
+userFormView : Form CustomFormError UserEditForm -> Bool -> Html Form.Msg
 userFormView form current =
     let
         roleOptions =

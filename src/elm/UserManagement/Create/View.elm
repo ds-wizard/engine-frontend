@@ -1,5 +1,6 @@
 module UserManagement.Create.View exposing (view)
 
+import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClass)
 import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (..)
@@ -23,7 +24,7 @@ view wrapMsg model =
         ]
 
 
-formView : Form () UserCreateForm -> Html Form.Msg
+formView : Form CustomFormError UserCreateForm -> Html Form.Msg
 formView form =
     let
         roleOptions =

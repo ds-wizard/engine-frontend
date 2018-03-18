@@ -6,6 +6,7 @@ module KnowledgeModels.Editor.Update.Utils exposing (..)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
 import KnowledgeModels.Editor.Models.Events exposing (Event)
 import Random.Pcg exposing (Seed)
@@ -46,7 +47,7 @@ updateInList list predicate updateFunction =
 
 
 {-| -}
-formChanged : Form () a -> Bool
+formChanged : Form CustomFormError a -> Bool
 formChanged form =
     Set.size (Form.getChangedFields form) > 0
 

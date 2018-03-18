@@ -6,6 +6,7 @@ module KnowledgeModels.Publish.View exposing (view)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
@@ -51,7 +52,7 @@ content model =
                 ]
 
 
-formView : Form () KnowledgeModelPublishForm -> KnowledgeModel -> Html Msgs.Msg
+formView : Form CustomFormError KnowledgeModelPublishForm -> KnowledgeModel -> Html Msgs.Msg
 formView form knowledgeModel =
     let
         formHtml =

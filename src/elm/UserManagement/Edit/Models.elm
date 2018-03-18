@@ -21,7 +21,7 @@ type alias Model =
     , user : ActionResult User
     , savingUser : ActionResult String
     , savingPassword : ActionResult String
-    , userForm : Form () UserEditForm
+    , userForm : Form CustomFormError UserEditForm
     , passwordForm : Form CustomFormError UserPasswordForm
     }
 
@@ -46,17 +46,17 @@ type alias UserEditForm =
     }
 
 
-initEmptyUserEditForm : Form () UserEditForm
+initEmptyUserEditForm : Form CustomFormError UserEditForm
 initEmptyUserEditForm =
     Form.initial [] userEditFormValidation
 
 
-initUserEditForm : User -> Form () UserEditForm
+initUserEditForm : User -> Form CustomFormError UserEditForm
 initUserEditForm user =
     Form.initial (userToUserEditFormInitials user) userEditFormValidation
 
 
-userEditFormValidation : Validation () UserEditForm
+userEditFormValidation : Validation CustomFormError UserEditForm
 userEditFormValidation =
     Validate.map4 UserEditForm
         (Validate.field "email" Validate.email)

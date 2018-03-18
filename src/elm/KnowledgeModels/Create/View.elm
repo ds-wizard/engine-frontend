@@ -6,6 +6,7 @@ module KnowledgeModels.Create.View exposing (view)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
@@ -50,7 +51,7 @@ content model =
                 ]
 
 
-formView : Form () KnowledgeModelCreateForm -> List PackageDetail -> Html Msgs.Msg
+formView : Form CustomFormError KnowledgeModelCreateForm -> List PackageDetail -> Html Msgs.Msg
 formView form packages =
     let
         parentOptions =

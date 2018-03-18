@@ -39,6 +39,7 @@ module KnowledgeModels.Editor.Models.Forms exposing (..)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
@@ -85,13 +86,13 @@ type alias ExpertForm =
 
 
 {-| -}
-initForm : Validation () a -> List ( String, Field.Field ) -> Form () a
+initForm : Validation CustomFormError a -> List ( String, Field.Field ) -> Form CustomFormError a
 initForm validation initials =
     Form.initial initials validation
 
 
 {-| -}
-knowledgeModelFormValidation : Validation () KnowledgeModelForm
+knowledgeModelFormValidation : Validation CustomFormError KnowledgeModelForm
 knowledgeModelFormValidation =
     Validate.map KnowledgeModelForm
         (Validate.field "name" Validate.string)
@@ -110,13 +111,13 @@ updateKnowledgeModelWithForm knowledgeModel knowledgeModelForm =
 
 
 {-| -}
-initChapterForm : Chapter -> Form () ChapterForm
+initChapterForm : Chapter -> Form CustomFormError ChapterForm
 initChapterForm =
     chapterFormInitials >> initForm chapterFormValidation
 
 
 {-| -}
-chapterFormValidation : Validation () ChapterForm
+chapterFormValidation : Validation CustomFormError ChapterForm
 chapterFormValidation =
     Validate.map2 ChapterForm
         (Validate.field "title" Validate.string)
@@ -138,13 +139,13 @@ updateChapterWithForm chapter chapterForm =
 
 
 {-| -}
-initQuestionForm : Question -> Form () QuestionForm
+initQuestionForm : Question -> Form CustomFormError QuestionForm
 initQuestionForm =
     questionFormInitials >> initForm questionFormValidation
 
 
 {-| -}
-questionFormValidation : Validation () QuestionForm
+questionFormValidation : Validation CustomFormError QuestionForm
 questionFormValidation =
     Validate.map3 QuestionForm
         (Validate.field "title" Validate.string)
@@ -168,13 +169,13 @@ updateQuestionWithForm question questionForm =
 
 
 {-| -}
-initAnswerForm : Answer -> Form () AnswerForm
+initAnswerForm : Answer -> Form CustomFormError AnswerForm
 initAnswerForm =
     answerFormInitials >> initForm answerFormValidation
 
 
 {-| -}
-answerFormValidation : Validation () AnswerForm
+answerFormValidation : Validation CustomFormError AnswerForm
 answerFormValidation =
     Validate.map2 AnswerForm
         (Validate.field "label" Validate.string)
@@ -196,13 +197,13 @@ updateAnswerWithForm answer answerForm =
 
 
 {-| -}
-initReferenceForm : Reference -> Form () ReferenceForm
+initReferenceForm : Reference -> Form CustomFormError ReferenceForm
 initReferenceForm =
     referenceFormInitials >> initForm referenceFormValidation
 
 
 {-| -}
-referenceFormValidation : Validation () ReferenceForm
+referenceFormValidation : Validation CustomFormError ReferenceForm
 referenceFormValidation =
     Validate.map ReferenceForm
         (Validate.field "chapter" Validate.string)
@@ -221,13 +222,13 @@ updateReferenceWithForm reference referenceForm =
 
 
 {-| -}
-initExpertForm : Expert -> Form () ExpertForm
+initExpertForm : Expert -> Form CustomFormError ExpertForm
 initExpertForm =
     expertFormInitials >> initForm expertFormValidation
 
 
 {-| -}
-expertFormValidation : Validation () ExpertForm
+expertFormValidation : Validation CustomFormError ExpertForm
 expertFormValidation =
     Validate.map2 ExpertForm
         (Validate.field "name" Validate.string)

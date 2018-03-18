@@ -49,6 +49,7 @@ module KnowledgeModels.Models
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Decode as Decode exposing (..)
@@ -182,13 +183,13 @@ kmLastVersion km =
 
 
 {-| -}
-initKnowledgeModelCreateForm : Form () KnowledgeModelCreateForm
+initKnowledgeModelCreateForm : Form CustomFormError KnowledgeModelCreateForm
 initKnowledgeModelCreateForm =
     Form.initial [] knowledgeModelCreateFormValidation
 
 
 {-| -}
-knowledgeModelCreateFormValidation : Validation () KnowledgeModelCreateForm
+knowledgeModelCreateFormValidation : Validation CustomFormError KnowledgeModelCreateForm
 knowledgeModelCreateFormValidation =
     Validate.map3 KnowledgeModelCreateForm
         (Validate.field "name" Validate.string)
@@ -219,13 +220,13 @@ encodeKnowledgeModelForm uuid form =
 
 
 {-| -}
-initKnowledgeModelPublishForm : Form () KnowledgeModelPublishForm
+initKnowledgeModelPublishForm : Form CustomFormError KnowledgeModelPublishForm
 initKnowledgeModelPublishForm =
     Form.initial [] knowledgeModelPublishFormValidation
 
 
 {-| -}
-knowledgeModelPublishFormValidation : Validation () KnowledgeModelPublishForm
+knowledgeModelPublishFormValidation : Validation CustomFormError KnowledgeModelPublishForm
 knowledgeModelPublishFormValidation =
     Validate.map4 KnowledgeModelPublishForm
         (Validate.field "major" (Validate.int |> Validate.andThen (Validate.minInt 0)))
@@ -248,13 +249,13 @@ encodeKnowledgeModelPublishForm form =
 
 
 {-| -}
-initKnowledgeModelUpgradeForm : Form () KnowledgeModelUpgradeForm
+initKnowledgeModelUpgradeForm : Form CustomFormError KnowledgeModelUpgradeForm
 initKnowledgeModelUpgradeForm =
     Form.initial [] knowledgeModelUpgradeFormValidation
 
 
 {-| -}
-knowledgeModelUpgradeFormValidation : Validation () KnowledgeModelUpgradeForm
+knowledgeModelUpgradeFormValidation : Validation CustomFormError KnowledgeModelUpgradeForm
 knowledgeModelUpgradeFormValidation =
     Validate.map KnowledgeModelUpgradeForm
         (Validate.field "targetPackageId" Validate.string)

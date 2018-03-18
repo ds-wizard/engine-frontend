@@ -6,6 +6,7 @@ module Organization.View exposing (view)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClass, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
@@ -47,7 +48,7 @@ content model =
                 ]
 
 
-formView : Form () OrganizationForm -> Html Msgs.Msg
+formView : Form CustomFormError OrganizationForm -> Html Msgs.Msg
 formView form =
     let
         formHtml =

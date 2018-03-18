@@ -24,6 +24,7 @@ module Organization.Models exposing (..)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
@@ -38,7 +39,7 @@ import Utils exposing (validateRegex)
 type alias Model =
     { organization : ActionResult Organization
     , savingOrganization : ActionResult String
-    , form : Form () OrganizationForm
+    , form : Form CustomFormError OrganizationForm
     }
 
 
@@ -76,19 +77,19 @@ organizationDecoder =
 
 
 {-| -}
-initEmptyOrganizationForm : Form () OrganizationForm
+initEmptyOrganizationForm : Form CustomFormError OrganizationForm
 initEmptyOrganizationForm =
     Form.initial [] organizationFormValidation
 
 
 {-| -}
-initOrganizationForm : Organization -> Form () OrganizationForm
+initOrganizationForm : Organization -> Form CustomFormError OrganizationForm
 initOrganizationForm organization =
     Form.initial (organizationToFormInitials organization) organizationFormValidation
 
 
 {-| -}
-organizationFormValidation : Validation () OrganizationForm
+organizationFormValidation : Validation CustomFormError OrganizationForm
 organizationFormValidation =
     Validate.map2 OrganizationForm
         (Validate.field "name" Validate.string)

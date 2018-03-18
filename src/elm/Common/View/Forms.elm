@@ -1,8 +1,10 @@
 module Common.View.Forms exposing (..)
 
+import Common.Form exposing (CustomFormError(..))
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
+import Form.Error exposing (ErrorValue(..))
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -16,14 +18,14 @@ import Routing exposing (Route)
 
 {-| Create Html for a form field using the given input field.
 -}
-formGroup : Input.Input e String -> Form e o -> String -> String -> Html.Html Form.Msg
+formGroup : Input.Input CustomFormError String -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 formGroup input form fieldName labelText =
     let
         field =
             Form.getFieldAsString fieldName form
 
         ( error, errorClass ) =
-            getErrors field
+            getErrors field labelText
     in
     div [ class ("form-group " ++ errorClass) ]
         [ label [ class "control-label", for fieldName ] [ text labelText ]
@@ -34,28 +36,28 @@ formGroup input form fieldName labelText =
 
 {-| Helper for creating form group with text input field.
 -}
-inputGroup : Form e o -> String -> String -> Html.Html Form.Msg
+inputGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 inputGroup =
     formGroup Input.textInput
 
 
 {-| Helper for creating form group with password input field.
 -}
-passwordGroup : Form e o -> String -> String -> Html.Html Form.Msg
+passwordGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 passwordGroup =
     formGroup Input.passwordInput
 
 
 {-| Helper for creating form group with select field.
 -}
-selectGroup : List ( String, String ) -> Form e o -> String -> String -> Html.Html Form.Msg
+selectGroup : List ( String, String ) -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 selectGroup options =
     formGroup (Input.selectInput options)
 
 
 {-| Helper for creating form group with textarea.
 -}
-textAreaGroup : Form e o -> String -> String -> Html.Html Form.Msg
+textAreaGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 textAreaGroup =
     formGroup Input.textArea
 
@@ -90,14 +92,38 @@ codeGroup value =
 {-| Get Html and form group error class for a given field. If the field
 contains no errors, the returned Html and error class are empty.
 -}
-getErrors : Form.FieldState e String -> ( Html msg, String )
-getErrors field =
+getErrors : Form.FieldState CustomFormError String -> String -> ( Html msg, String )
+getErrors field labelText =
     case field.liveError of
         Just error ->
-            ( p [ class "help-block" ] [ text (toString error) ], "has-error" )
+            ( p [ class "help-block" ] [ text (toReadable error labelText) ], "has-error" )
 
         Nothing ->
             ( text "", "" )
+
+
+toReadable : ErrorValue CustomFormError -> String -> String
+toReadable error labelText =
+    case error of
+        Empty ->
+            labelText ++ " cannot be empty"
+
+        InvalidString ->
+            labelText ++ " cannot be empty"
+
+        InvalidEmail ->
+            "This is not a valid email"
+
+        CustomError err ->
+            case err of
+                ConfirmationError ->
+                    "Passwords don't match"
+
+                ServerValidationError msg ->
+                    msg
+
+        _ ->
+            toString error
 
 
 

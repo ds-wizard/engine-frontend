@@ -1,5 +1,6 @@
 module UserManagement.Create.Models exposing (..)
 
+import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
@@ -8,7 +9,7 @@ import Json.Encode as Encode exposing (..)
 
 type alias Model =
     { savingUser : ActionResult String
-    , form : Form () UserCreateForm
+    , form : Form CustomFormError UserCreateForm
     }
 
 
@@ -28,12 +29,12 @@ type alias UserCreateForm =
     }
 
 
-initUserCreateForm : Form () UserCreateForm
+initUserCreateForm : Form CustomFormError UserCreateForm
 initUserCreateForm =
     Form.initial [] userCreateFormValidation
 
 
-userCreateFormValidation : Validation () UserCreateForm
+userCreateFormValidation : Validation CustomFormError UserCreateForm
 userCreateFormValidation =
     Validate.map5 UserCreateForm
         (Validate.field "email" Validate.email)

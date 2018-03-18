@@ -39,6 +39,7 @@ module KnowledgeModels.Editor.Models.Editors exposing (..)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
 import KnowledgeModels.Editor.Models.Entities exposing (..)
 import KnowledgeModels.Editor.Models.Forms exposing (..)
@@ -49,7 +50,7 @@ import List.Extra as List
 type KnowledgeModelEditor
     = KnowledgeModelEditor
         { active : Bool
-        , form : Form () KnowledgeModelForm
+        , form : Form CustomFormError KnowledgeModelForm
         , knowledgeModel : KnowledgeModel
         , chapters : List ChapterEditor
         , chaptersDirty : Bool
@@ -60,7 +61,7 @@ type KnowledgeModelEditor
 type ChapterEditor
     = ChapterEditor
         { active : Bool
-        , form : Form () ChapterForm
+        , form : Form CustomFormError ChapterForm
         , chapter : Chapter
         , questions : List QuestionEditor
         , questionsDirty : Bool
@@ -72,7 +73,7 @@ type ChapterEditor
 type QuestionEditor
     = QuestionEditor
         { active : Bool
-        , form : Form () QuestionForm
+        , form : Form CustomFormError QuestionForm
         , question : Question
         , answers : List AnswerEditor
         , answersDirty : Bool
@@ -88,7 +89,7 @@ type QuestionEditor
 type AnswerEditor
     = AnswerEditor
         { active : Bool
-        , form : Form () AnswerForm
+        , form : Form CustomFormError AnswerForm
         , answer : Answer
         , followUps : List QuestionEditor
         , followUpsDirty : Bool
@@ -100,7 +101,7 @@ type AnswerEditor
 type ReferenceEditor
     = ReferenceEditor
         { active : Bool
-        , form : Form () ReferenceForm
+        , form : Form CustomFormError ReferenceForm
         , reference : Reference
         , order : Int
         }
@@ -110,7 +111,7 @@ type ReferenceEditor
 type ExpertEditor
     = ExpertEditor
         { active : Bool
-        , form : Form () ExpertForm
+        , form : Form CustomFormError ExpertForm
         , expert : Expert
         , order : Int
         }

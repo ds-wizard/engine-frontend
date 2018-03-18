@@ -6,6 +6,7 @@ module KnowledgeModels.Publish.Models exposing (..)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import KnowledgeModels.Models exposing (..)
@@ -15,7 +16,7 @@ import KnowledgeModels.Models exposing (..)
 type alias Model =
     { knowledgeModel : ActionResult KnowledgeModel
     , publishingKnowledgeModel : ActionResult String
-    , form : Form () KnowledgeModelPublishForm
+    , form : Form CustomFormError KnowledgeModelPublishForm
     }
 
 

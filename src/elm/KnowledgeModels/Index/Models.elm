@@ -6,6 +6,7 @@ module KnowledgeModels.Index.Models exposing (..)
 
 -}
 
+import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import KnowledgeModels.Models exposing (KnowledgeModel, KnowledgeModelUpgradeForm, initKnowledgeModelUpgradeForm)
@@ -20,7 +21,7 @@ type alias Model =
     , creatingMigration : ActionResult String
     , kmToBeUpgraded : Maybe KnowledgeModel
     , packages : ActionResult (List PackageDetail)
-    , kmUpgradeForm : Form () KnowledgeModelUpgradeForm
+    , kmUpgradeForm : Form CustomFormError KnowledgeModelUpgradeForm
     , deletingMigration : ActionResult String
     }
 
