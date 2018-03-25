@@ -1,6 +1,8 @@
 module Public.Update exposing (..)
 
 import Msgs
+import Public.ForgottenPassword.Update
+import Public.ForgottenPasswordConfirmation.Update
 import Public.Login.Update
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
@@ -23,6 +25,20 @@ fetchData route wrapMsg =
 update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 update msg wrapMsg seed model =
     case msg of
+        ForgottenPasswordMsg msg ->
+            let
+                ( forgottenPasswordModel, cmd ) =
+                    Public.ForgottenPassword.Update.update msg (wrapMsg << ForgottenPasswordMsg) model.forgottenPasswordModel
+            in
+            ( seed, { model | forgottenPasswordModel = forgottenPasswordModel }, cmd )
+
+        ForgottenPasswordConfirmationMsg msg ->
+            let
+                ( forgottenPasswordConfirmationModel, cmd ) =
+                    Public.ForgottenPasswordConfirmation.Update.update msg (wrapMsg << ForgottenPasswordConfirmationMsg) model.forgottenPasswordConfirmationModel
+            in
+            ( seed, { model | forgottenPasswordConfirmationModel = forgottenPasswordConfirmationModel }, cmd )
+
         LoginMsg msg ->
             let
                 ( loginModel, cmd ) =

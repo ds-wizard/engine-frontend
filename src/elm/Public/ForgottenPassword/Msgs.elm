@@ -1,5 +1,9 @@
 module Public.ForgottenPassword.Msgs exposing (..)
 
+import Form
+import Http
+
 
 type Msg
-    = NoOp
+    = FormMsg Form.Msg
+    | PostForgottenPasswordCompleted (Result Http.Error String)

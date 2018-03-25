@@ -3,6 +3,7 @@ module Public.View exposing (view)
 import Html exposing (Html)
 import Msgs
 import Public.ForgottenPassword.View
+import Public.ForgottenPasswordConfirmation.View
 import Public.Home.View
 import Public.Login.View
 import Public.Models exposing (Model)
@@ -16,7 +17,10 @@ view : Route -> (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view route wrapMsg model =
     case route of
         ForgottenPassword ->
-            Public.ForgottenPassword.View.view
+            Public.ForgottenPassword.View.view (wrapMsg << ForgottenPasswordMsg) model.forgottenPasswordModel
+
+        ForgottenPasswordConfirmation userId hash ->
+            Public.ForgottenPasswordConfirmation.View.view (wrapMsg << ForgottenPasswordConfirmationMsg) model.forgottenPasswordConfirmationModel
 
         Home ->
             Public.Home.View.view
