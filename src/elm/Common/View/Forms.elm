@@ -29,7 +29,7 @@ formGroup input form fieldName labelText =
     in
     div [ class ("form-group " ++ errorClass) ]
         [ label [ class "control-label", for fieldName ] [ text labelText ]
-        , input field [ class "form-control", id fieldName ]
+        , input field [ class "form-control", id fieldName, name fieldName ]
         , error
         ]
 

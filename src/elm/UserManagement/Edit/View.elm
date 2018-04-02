@@ -54,7 +54,8 @@ profileView wrapMsg model =
     in
     div []
         [ navbar wrapMsg model
-        , currentView
+        , userView wrapMsg model
+        , passwordView wrapMsg model
         ]
 
 
@@ -87,7 +88,7 @@ navbar wrapMsg model =
 
 userView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 userView wrapMsg model =
-    div []
+    div [ class <| getClass (model.currentView /= Profile) "hidden" ]
         [ formResultView model.savingUser
         , userFormView model.userForm (model.uuid == "current") |> Html.map (wrapMsg << EditFormMsg)
         , formActionsView model ( "Save", model.savingUser, wrapMsg <| EditFormMsg Form.Submit )
@@ -102,7 +103,7 @@ userFormView form current =
 
         roleSelect =
             if current then
-                text ""
+                emptyNode
             else
                 selectGroup roleOptions form "role" "Role"
 
@@ -119,7 +120,7 @@ userFormView form current =
 
 passwordView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 passwordView wrapMsg model =
-    div []
+    div [ class <| getClass (model.currentView /= Password) "hidden" ]
         [ formResultView model.savingPassword
         , passwordFormView model.passwordForm |> Html.map (wrapMsg << PasswordFormMsg)
         , formActionsView model ( "Save", model.savingPassword, wrapMsg <| PasswordFormMsg Form.Submit )
@@ -142,3 +143,11 @@ formActionsView { uuid } actionButtonSettings =
 
         _ ->
             formActions (UserManagement UserManagement.Routing.Index) actionButtonSettings
+
+
+getClass : Bool -> String -> String
+getClass condition class =
+    if condition then
+        class
+    else
+        ""
