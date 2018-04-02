@@ -26,7 +26,7 @@
     .file-view {
         height: 300px;
         margin: auto;
-        border: 10px solid #fff;
+        border: 10px solid #eee;
         background: #eee;
         display: flex;
         justify-content: center;
@@ -53,6 +53,10 @@
             justify-content: space-between;
             width: 100%;
             padding: 10px;
+
+            .btn {
+                min-width: 100px;
+            }
         }
     }
 }
