@@ -81,7 +81,7 @@ migrationView model migration =
                                 |> Maybe.map (List.singleton >> div [ class "col-xs-4" ])
                                 |> Maybe.withDefault emptyNode
                     in
-                    div [ class "row" ]
+                    div []
                         [ conflictView, diffTree ]
 
                 CompletedState ->
