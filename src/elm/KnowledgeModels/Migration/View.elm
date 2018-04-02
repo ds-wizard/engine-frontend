@@ -82,7 +82,7 @@ migrationView model migration =
                                 |> Maybe.withDefault emptyNode
                     in
                     div []
-                        [ conflictView, diffTree ]
+                        [ migrationSummary migration, conflictView, diffTree ]
 
                 CompletedState ->
                     viewCompletedMigration model
@@ -94,6 +94,21 @@ migrationView model migration =
                     errorMessage
     in
     view
+
+
+migrationSummary : Migration -> Html Msgs.Msg
+migrationSummary migration =
+    div [ class "col-xs-12" ]
+        [ p []
+            [ text "Migration of "
+            , strong [] [ text migration.currentKnowledgeModel.name ]
+            , text " from "
+            , code [] [ text migration.branchParentId ]
+            , text " to "
+            , code [] [ text migration.targetPackageId ]
+            , text "."
+            ]
+        ]
 
 
 getEventView : Model -> Migration -> Event -> Html Msgs.Msg
