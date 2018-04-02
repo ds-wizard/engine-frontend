@@ -89,5 +89,9 @@
         &::before, &::after {
             display: none;
         }
+
+        .btn {
+            min-width: 100px;
+        }
     }
 }
