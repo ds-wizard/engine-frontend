@@ -46,7 +46,7 @@ actions : List (Html Msg)
 actions =
     [ linkTo PackageManagementImport
         [ class "btn btn-info link-with-icon" ]
-        [ i [ class "fa fa-upload" ] []
+        [ i [ class "fa fa-cloud-upload" ] []
         , text "Import"
         ]
     ]
