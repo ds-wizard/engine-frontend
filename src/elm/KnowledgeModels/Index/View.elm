@@ -28,7 +28,7 @@ import Routing exposing (Route(..))
 view : Maybe JwtToken -> Model -> Html Msgs.Msg
 view jwt model =
     div []
-        [ pageHeader "Knowledge model" indexActions
+        [ pageHeader "Knowledge models" indexActions
         , formResultView model.deletingMigration
         , content jwt model
         , deleteModal model
