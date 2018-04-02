@@ -10,9 +10,11 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs
+import Routing exposing (Route(UserManagement))
 import UserManagement.Common.Models exposing (roles)
 import UserManagement.Edit.Models exposing (..)
 import UserManagement.Edit.Msgs exposing (Msg(..))
+import UserManagement.Routing
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -88,7 +90,7 @@ userView wrapMsg model =
     div []
         [ formResultView model.savingUser
         , userFormView model.userForm (model.uuid == "current") |> Html.map (wrapMsg << EditFormMsg)
-        , formActionOnly ( "Save", model.savingUser, wrapMsg <| EditFormMsg Form.Submit )
+        , formActionsView model ( "Save", model.savingUser, wrapMsg <| EditFormMsg Form.Submit )
         ]
 
 
@@ -120,7 +122,7 @@ passwordView wrapMsg model =
     div []
         [ formResultView model.savingPassword
         , passwordFormView model.passwordForm |> Html.map (wrapMsg << PasswordFormMsg)
-        , formActionOnly ( "Save", model.savingPassword, wrapMsg <| PasswordFormMsg Form.Submit )
+        , formActionsView model ( "Save", model.savingPassword, wrapMsg <| PasswordFormMsg Form.Submit )
         ]
 
 
@@ -130,3 +132,13 @@ passwordFormView form =
         [ passwordGroup form "password" "New password"
         , passwordGroup form "passwordConfirmation" "New password again"
         ]
+
+
+formActionsView : Model -> ( String, ActionResult a, Msgs.Msg ) -> Html Msgs.Msg
+formActionsView { uuid } actionButtonSettings =
+    case uuid of
+        "current" ->
+            formActionOnly actionButtonSettings
+
+        _ ->
+            formActions (UserManagement UserManagement.Routing.Index) actionButtonSettings
