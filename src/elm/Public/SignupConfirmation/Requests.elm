@@ -20,4 +20,4 @@ putUserActivation userId hash =
 
 activateBody : Value
 activateBody =
-    Encode.object [ ( "activate", Encode.bool True ) ]
+    Encode.object [ ( "active", Encode.bool True ) ]
