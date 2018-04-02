@@ -16,6 +16,7 @@ import Html.Attributes exposing (class, href, rows, type_)
 import Html.Events exposing (..)
 import KnowledgeModels.Editor.Models exposing (..)
 import KnowledgeModels.Editor.Models.Editors exposing (..)
+import KnowledgeModels.Editor.Models.Forms exposing (questionTypeOptions)
 import KnowledgeModels.Editor.Msgs exposing (..)
 import KnowledgeModels.Editor.View.Breadcrumbs exposing (breadcrumbs)
 import KnowledgeModels.View exposing (diffTreeView)
@@ -199,38 +200,53 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                                 [ inputGroup editor.form "title" "Title"
                                 , inputGroup editor.form "shortUuid" "Short UUID"
                                 , textAreaGroup editor.form "text" "Text"
+                                , selectGroup questionTypeOptions editor.form "type_" "Question Type"
                                 ]
                                 |> Html.map (QuestionFormMsg >> parentMsg)
+
+                        answers =
+                            case (Form.getFieldAsString "type_" editor.form).value of
+                                Just "options" ->
+                                    inputChildren
+                                        "Answer"
+                                        model.reorderableState
+                                        editor.answers
+                                        (ReorderAnswerList >> parentMsg)
+                                        (AddAnswer |> parentMsg)
+                                        getAnswerUuid
+                                        getAnswerEditorName
+                                        (\(AnswerEditor ae) -> ViewAnswer ae.answer.uuid |> parentMsg)
+
+                                _ ->
+                                    emptyNode
+
+                        references =
+                            inputChildren
+                                "Reference"
+                                model.reorderableState
+                                editor.references
+                                (ReorderReferenceList >> parentMsg)
+                                (AddReference |> parentMsg)
+                                getReferenceUuid
+                                getReferenceEditorName
+                                (\(ReferenceEditor re) -> ViewReference re.reference.uuid |> parentMsg)
+
+                        experts =
+                            inputChildren
+                                "Expert"
+                                model.reorderableState
+                                editor.experts
+                                (ReorderExpertList >> parentMsg)
+                                (AddExpert |> parentMsg)
+                                getExpertUuid
+                                getExpertEditorName
+                                (\(ExpertEditor ee) -> ViewExpert ee.expert.uuid |> parentMsg)
                     in
                     [ editorTitle "Question"
                     , formContent
-                    , inputChildren
-                        "Answer"
-                        model.reorderableState
-                        editor.answers
-                        (ReorderAnswerList >> parentMsg)
-                        (AddAnswer |> parentMsg)
-                        getAnswerUuid
-                        getAnswerEditorName
-                        (\(AnswerEditor ae) -> ViewAnswer ae.answer.uuid |> parentMsg)
-                    , inputChildren
-                        "Reference"
-                        model.reorderableState
-                        editor.references
-                        (ReorderReferenceList >> parentMsg)
-                        (AddReference |> parentMsg)
-                        getReferenceUuid
-                        getReferenceEditorName
-                        (\(ReferenceEditor re) -> ViewReference re.reference.uuid |> parentMsg)
-                    , inputChildren
-                        "Expert"
-                        model.reorderableState
-                        editor.experts
-                        (ReorderExpertList >> parentMsg)
-                        (AddExpert |> parentMsg)
-                        getExpertUuid
-                        getExpertEditorName
-                        (\(ExpertEditor ee) -> ViewExpert ee.expert.uuid |> parentMsg)
+                    , answers
+                    , references
+                    , experts
                     , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)
                     ]
     in

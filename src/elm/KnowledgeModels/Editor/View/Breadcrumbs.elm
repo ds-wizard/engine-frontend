@@ -1,18 +1,11 @@
 module KnowledgeModels.Editor.View.Breadcrumbs exposing (breadcrumbs)
 
-{-|
-
-@docs breadcrumbs
-
--}
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KnowledgeModels.Editor.Models.Editors exposing (..)
 import Msgs
 
 
-{-| -}
 breadcrumbs : KnowledgeModelEditor -> Html Msgs.Msg
 breadcrumbs editor =
     ul [ class "breadcrumb" ]
