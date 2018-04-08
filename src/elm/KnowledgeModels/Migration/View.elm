@@ -311,7 +311,7 @@ viewAddQuestionDiff event =
         (viewAdd fields)
 
 
-viewEditQuestionDiff : { a | title : String, shortQuestionUuid : Maybe String, text : String, answerIds : List String, referenceIds : List String, expertIds : List String } -> Question -> Html Msgs.Msg
+viewEditQuestionDiff : { a | title : String, shortQuestionUuid : Maybe String, text : String, answerIds : Maybe (List String), referenceIds : List String, expertIds : List String } -> Question -> Html Msgs.Msg
 viewEditQuestionDiff event question =
     let
         originalAnswers =
@@ -342,7 +342,12 @@ viewEditQuestionDiff event question =
             viewDiff fields
 
         answersDiff =
-            viewDiffChildren "Questions" originalAnswers event.answerIds answerNames
+            case event.answerIds of
+                Just answerIds ->
+                    viewDiffChildren "Questions" originalAnswers answerIds answerNames
+
+                _ ->
+                    emptyNode
 
         referencesDiff =
             viewDiffChildren "References" originalReferences event.referenceIds referenceNames

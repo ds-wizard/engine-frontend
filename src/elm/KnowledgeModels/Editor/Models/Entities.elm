@@ -1,7 +1,7 @@
 module KnowledgeModels.Editor.Models.Entities exposing (..)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
 import List.Extra as List
 
 
@@ -26,6 +26,7 @@ type alias Question =
     , title : String
     , shortUuid : Maybe String
     , text : String
+    , itemName : String
     , answers : List Answer
     , references : List Reference
     , experts : List Expert
@@ -82,6 +83,7 @@ questionDecoder =
         |> required "title" Decode.string
         |> required "shortUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
+        |> optional "itemName" Decode.string "Item"
         |> required "answers" (Decode.lazy (\_ -> Decode.list answerDecoder))
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
@@ -132,6 +134,7 @@ newQuestion uuid =
     , title = "New question"
     , shortUuid = Nothing
     , text = "Question text"
+    , itemName = "Item"
     , answers = []
     , references = []
     , experts = []

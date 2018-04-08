@@ -248,7 +248,7 @@ type alias EditQuestionEventData =
     , title : String
     , shortQuestionUuid : Maybe String
     , text : String
-    , answerIds : List String
+    , answerIds : Maybe (List String)
     , expertIds : List String
     , referenceIds : List String
     }
@@ -389,7 +389,7 @@ type alias EditFollowUpQuestionEventData =
     , title : String
     , shortQuestionUuid : Maybe String
     , text : String
-    , answerIds : List String
+    , answerIds : Maybe (List String)
     , expertIds : List String
     , referenceIds : List String
     }
@@ -508,6 +508,14 @@ createEditQuestionEvent chapter knowledgeModel answerIds referenceIds expertIds 
         ( uuid, newSeed ) =
             getUuid seed
 
+        maybeAnswerIds =
+            case question.type_ of
+                "items" ->
+                    Just answerIds
+
+                _ ->
+                    Nothing
+
         event =
             EditQuestionEvent
                 { uuid = uuid
@@ -518,7 +526,7 @@ createEditQuestionEvent chapter knowledgeModel answerIds referenceIds expertIds 
                 , title = question.title
                 , shortQuestionUuid = question.shortUuid
                 , text = question.text
-                , answerIds = answerIds
+                , answerIds = maybeAnswerIds
                 , referenceIds = referenceIds
                 , expertIds = expertIds
                 }
@@ -756,6 +764,14 @@ createEditFollowUpQuestionEvent answer chapter knowledgeModel answerIds referenc
         ( uuid, newSeed ) =
             getUuid seed
 
+        maybeAnswerIds =
+            case question.type_ of
+                "items" ->
+                    Just answerIds
+
+                _ ->
+                    Nothing
+
         event =
             EditFollowUpQuestionEvent
                 { uuid = uuid
@@ -767,7 +783,7 @@ createEditFollowUpQuestionEvent answer chapter knowledgeModel answerIds referenc
                 , title = question.title
                 , shortQuestionUuid = question.shortUuid
                 , text = question.text
-                , answerIds = answerIds
+                , answerIds = maybeAnswerIds
                 , referenceIds = referenceIds
                 , expertIds = expertIds
                 }
@@ -936,6 +952,11 @@ encodeEditQuestionEvent data =
             data.shortQuestionUuid
                 |> Maybe.map Encode.string
                 |> Maybe.withDefault Encode.null
+
+        answerIds =
+            data.answerIds
+                |> Maybe.map (Encode.list << List.map Encode.string)
+                |> Maybe.withDefault Encode.null
     in
     Encode.object
         [ ( "eventType", Encode.string "EditQuestionEvent" )
@@ -947,7 +968,7 @@ encodeEditQuestionEvent data =
         , ( "title", Encode.string data.title )
         , ( "shortQuestionUuid", shortQuestionUuid )
         , ( "text", Encode.string data.text )
-        , ( "answerIds", Encode.list <| List.map Encode.string data.answerIds )
+        , ( "answerIds", answerIds )
         , ( "expertIds", Encode.list <| List.map Encode.string data.expertIds )
         , ( "referenceIds", Encode.list <| List.map Encode.string data.referenceIds )
         ]
@@ -1124,6 +1145,11 @@ encodeEditFollowUpQuestionEvent data =
             data.shortQuestionUuid
                 |> Maybe.map Encode.string
                 |> Maybe.withDefault Encode.null
+
+        answerIds =
+            data.answerIds
+                |> Maybe.map (Encode.list << List.map Encode.string)
+                |> Maybe.withDefault Encode.null
     in
     Encode.object
         [ ( "eventType", Encode.string "EditFollowUpQuestionEvent" )
@@ -1136,7 +1162,7 @@ encodeEditFollowUpQuestionEvent data =
         , ( "title", Encode.string data.title )
         , ( "shortQuestionUuid", shortQuestionUuid )
         , ( "text", Encode.string data.text )
-        , ( "answerIds", Encode.list <| List.map Encode.string data.answerIds )
+        , ( "answerIds", answerIds )
         , ( "expertIds", Encode.list <| List.map Encode.string data.expertIds )
         , ( "referenceIds", Encode.list <| List.map Encode.string data.referenceIds )
         ]
@@ -1293,7 +1319,7 @@ editQuestionEventDecoder =
         |> required "title" Decode.string
         |> required "shortQuestionUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
-        |> required "answerIds" (Decode.list Decode.string)
+        |> required "answerIds" (Decode.nullable (Decode.list Decode.string))
         |> required "expertIds" (Decode.list Decode.string)
         |> required "referenceIds" (Decode.list Decode.string)
         |> Decode.map EditQuestionEvent
@@ -1446,7 +1472,7 @@ editFollowUpQuestionEventDecoder =
         |> required "title" Decode.string
         |> required "shortQuestionUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
-        |> required "answerIds" (Decode.list Decode.string)
+        |> required "answerIds" (Decode.nullable (Decode.list Decode.string))
         |> required "expertIds" (Decode.list Decode.string)
         |> required "referenceIds" (Decode.list Decode.string)
         |> Decode.map EditFollowUpQuestionEvent

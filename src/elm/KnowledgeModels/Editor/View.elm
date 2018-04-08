@@ -220,6 +220,16 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                                 _ ->
                                     emptyNode
 
+                        item =
+                            case (Form.getFieldAsString "type_" editor.form).value of
+                                Just "items" ->
+                                    div [ class "form-group" ]
+                                        [ inputGroup editor.form "itemName" "Item Title" ]
+                                        |> Html.map (QuestionFormMsg >> parentMsg)
+
+                                _ ->
+                                    emptyNode
+
                         references =
                             inputChildren
                                 "Reference"
@@ -245,6 +255,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                     [ editorTitle "Question"
                     , formContent
                     , answers
+                    , item
                     , references
                     , experts
                     , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)
