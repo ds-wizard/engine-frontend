@@ -2,6 +2,7 @@ module Public.Login.Update exposing (..)
 
 import Auth.Models exposing (parseJwt)
 import Auth.Msgs
+import Common.Form exposing (getErrorMessage)
 import Http
 import Msgs
 import Public.Login.Models exposing (Model)
@@ -46,4 +47,8 @@ loginCompleted model result =
                     ( { model | loading = False, error = "Invalid response from the server" }, Cmd.none )
 
         Err error ->
-            ( { model | loading = False, error = "Login failed" }, Cmd.none )
+            let
+                errorMessage =
+                    getErrorMessage error "Login failed"
+            in
+            ( { model | loading = False, error = errorMessage }, Cmd.none )
