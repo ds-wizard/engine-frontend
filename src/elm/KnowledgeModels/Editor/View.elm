@@ -162,14 +162,23 @@ viewQuestion : Model -> QuestionEditor -> (QuestionMsg -> Msgs.Msg) -> Msgs.Msg 
 viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
     let
         activeChild =
-            ( getActiveAnswerEditor editor.answers
+            ( getActiveQuestionEditor editor.answerItemTemplateQuestions
+            , getActiveAnswerEditor editor.answers
             , getActiveReferenceEditor editor.references
             , getActiveExpertEditor editor.experts
             )
 
         content =
             case activeChild of
-                ( Just ((AnswerEditor ae) as answerEditor), _, _ ) ->
+                ( Just ((QuestionEditor qe) as questionEditor), _, _, _ ) ->
+                    [ viewQuestion
+                        model
+                        questionEditor
+                        (AnswerItemTemplateQuestionMsg qe.question.uuid >> parentMsg)
+                        (DeleteAnswerItemTemplateQuestion qe.question.uuid |> parentMsg)
+                    ]
+
+                ( _, Just ((AnswerEditor ae) as answerEditor), _, _ ) ->
                     [ viewAnswer
                         model
                         answerEditor
@@ -177,7 +186,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                         (DeleteAnswer ae.answer.uuid |> parentMsg)
                     ]
 
-                ( _, Just ((ReferenceEditor re) as referenceEditor), _ ) ->
+                ( _, _, Just ((ReferenceEditor re) as referenceEditor), _ ) ->
                     [ viewReference
                         model
                         referenceEditor
@@ -185,7 +194,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                         (DeleteReference re.reference.uuid |> parentMsg)
                     ]
 
-                ( _, _, Just ((ExpertEditor ee) as expertEditor) ) ->
+                ( _, _, _, Just ((ExpertEditor ee) as expertEditor) ) ->
                     [ viewExpert
                         model
                         expertEditor
@@ -220,12 +229,27 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                                 _ ->
                                     emptyNode
 
-                        item =
+                        answerItemTemplate =
                             case (Form.getFieldAsString "type_" editor.form).value of
-                                Just "items" ->
-                                    div [ class "form-group" ]
-                                        [ inputGroup editor.form "itemName" "Item Title" ]
-                                        |> Html.map (QuestionFormMsg >> parentMsg)
+                                Just "list" ->
+                                    div [ class "panel panel-default" ]
+                                        [ div [ class "panel-heading" ]
+                                            [ text "Item template" ]
+                                        , div [ class "panel-body" ]
+                                            [ div [ class "form-group" ]
+                                                [ inputGroup editor.form "itemName" "Item Title" ]
+                                                |> Html.map (QuestionFormMsg >> parentMsg)
+                                            , inputChildren
+                                                "Item Question"
+                                                model.reorderableState
+                                                editor.answerItemTemplateQuestions
+                                                (ReorderAnswerItemTemplateQuestions >> parentMsg)
+                                                (AddAnswerItemTemplateQuestion |> parentMsg)
+                                                getQuestionUuid
+                                                getQuestionEditorName
+                                                (\(QuestionEditor qe) -> ViewAnswerItemTemplateQuestion qe.question.uuid |> parentMsg)
+                                            ]
+                                        ]
 
                                 _ ->
                                     emptyNode
@@ -254,8 +278,8 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                     in
                     [ editorTitle "Question"
                     , formContent
+                    , answerItemTemplate
                     , answers
-                    , item
                     , references
                     , experts
                     , formActions (QuestionCancel |> parentMsg) deleteMsg (QuestionFormMsg Form.Submit |> parentMsg)

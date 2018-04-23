@@ -33,6 +33,8 @@ type QuestionEditor
         { active : Bool
         , form : Form CustomFormError QuestionForm
         , question : Question
+        , answerItemTemplateQuestions : List QuestionEditor
+        , answerItemTemplateQuestionsDirty : Bool
         , answers : List AnswerEditor
         , answersDirty : Bool
         , references : List ReferenceEditor
@@ -164,8 +166,17 @@ createQuestionEditor active order question =
             questionFormInitials question
                 |> initForm questionFormValidation
 
+        unwrapAnswerItemTemplateQuestions (AnswerItemTemplateQuestions questions) =
+            questions
+
+        answerItemTemplateQuestions =
+            question.answerItemTemplate
+                |> Maybe.map (.questions >> unwrapAnswerItemTemplateQuestions)
+                |> Maybe.withDefault []
+                |> List.indexedMap (createQuestionEditor False)
+
         answers =
-            List.indexedMap (createAnswerEditor False) question.answers
+            List.indexedMap (createAnswerEditor False) (question.answers |> Maybe.withDefault [])
 
         references =
             List.indexedMap (createReferenceEditor False) question.references
@@ -177,6 +188,8 @@ createQuestionEditor active order question =
         { active = active
         , form = form
         , question = question
+        , answerItemTemplateQuestions = answerItemTemplateQuestions
+        , answerItemTemplateQuestionsDirty = False
         , answers = answers
         , answersDirty = False
         , references = references

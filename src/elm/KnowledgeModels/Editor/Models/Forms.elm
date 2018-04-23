@@ -111,7 +111,7 @@ questionFormValidation =
         (Validate.field "type_" Validate.string)
         (Validate.field "shortUuid" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
         (Validate.field "text" Validate.string)
-        (Validate.field "itemName" Validate.string)
+        (Validate.field "itemName" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
 
 
 questionFormInitials : Question -> List ( String, Field.Field )
@@ -120,19 +120,35 @@ questionFormInitials question =
     , ( "type_", Field.string question.type_ )
     , ( "shortUuid", Field.string (question.shortUuid |> Maybe.withDefault "") )
     , ( "text", Field.string question.text )
-    , ( "itemName", Field.string question.itemName )
+    , ( "itemName", Field.string (question.answerItemTemplate |> Maybe.map .title |> Maybe.withDefault "") )
     ]
 
 
 updateQuestionWithForm : Question -> QuestionForm -> Question
 updateQuestionWithForm question questionForm =
-    { question | title = questionForm.title, text = questionForm.text, shortUuid = questionForm.shortUuid, type_ = questionForm.type_ }
+    let
+        answerItemTemplate =
+            if questionForm.type_ == "list" then
+                Just
+                    { title = questionForm.itemName
+                    , questions = AnswerItemTemplateQuestions []
+                    }
+            else
+                Nothing
+    in
+    { question
+        | title = questionForm.title
+        , text = questionForm.text
+        , shortUuid = questionForm.shortUuid
+        , type_ = questionForm.type_
+        , answerItemTemplate = answerItemTemplate
+    }
 
 
 questionTypeOptions : List ( String, String )
 questionTypeOptions =
     [ ( "options", "Options" )
-    , ( "items", "Items" )
+    , ( "list", "List of items" )
     , ( "string", "String" )
     , ( "number", "Number" )
     , ( "date", "Date" )

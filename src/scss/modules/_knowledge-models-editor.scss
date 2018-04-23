@@ -11,6 +11,10 @@
         margin-bottom: 40px;
     }
 
+    .panel .form-group:last-child {
+        margin-bottom: 0;
+    }
+
     textarea {
         min-height: 150px;
     }

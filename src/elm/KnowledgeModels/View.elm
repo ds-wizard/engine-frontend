@@ -95,7 +95,7 @@ diffTreeNodeQuestion events question =
             , text question.title
             ]
         , ul []
-            (List.map (diffTreeNodeAnswer events) question.answers ++ newAnswers)
+            (List.map (diffTreeNodeAnswer events) (question.answers |> Maybe.withDefault []) ++ newAnswers)
         , ul []
             (List.map (diffTreeNodeReference events) question.references ++ newReferences)
         , ul []

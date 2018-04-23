@@ -26,11 +26,21 @@ type alias Question =
     , title : String
     , shortUuid : Maybe String
     , text : String
-    , itemName : String
-    , answers : List Answer
+    , answerItemTemplate : Maybe AnswerItemTemplate
+    , answers : Maybe (List Answer)
     , references : List Reference
     , experts : List Expert
     }
+
+
+type alias AnswerItemTemplate =
+    { title : String
+    , questions : AnswerItemTemplateQuestions
+    }
+
+
+type AnswerItemTemplateQuestions
+    = AnswerItemTemplateQuestions (List Question)
 
 
 type alias Answer =
@@ -83,10 +93,22 @@ questionDecoder =
         |> required "title" Decode.string
         |> required "shortUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
-        |> optional "itemName" Decode.string "Item"
-        |> required "answers" (Decode.lazy (\_ -> Decode.list answerDecoder))
+        |> required "answerItemTemplate" (Decode.nullable <| Decode.lazy (\_ -> answerItemTemplateDecoder))
+        |> required "answers" (Decode.nullable <| Decode.lazy (\_ -> Decode.list answerDecoder))
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
+
+
+answerItemTemplateDecoder : Decoder AnswerItemTemplate
+answerItemTemplateDecoder =
+    decode AnswerItemTemplate
+        |> required "title" Decode.string
+        |> required "questions" (Decode.lazy (\_ -> answerItemTemplateQuestionsDecoder))
+
+
+answerItemTemplateQuestionsDecoder : Decoder AnswerItemTemplateQuestions
+answerItemTemplateQuestionsDecoder =
+    Decode.map AnswerItemTemplateQuestions (Decode.list questionDecoder)
 
 
 answerDecoder : Decoder Answer
@@ -130,12 +152,12 @@ newChapter uuid =
 newQuestion : String -> Question
 newQuestion uuid =
     { uuid = uuid
-    , type_ = ""
+    , type_ = "options"
     , title = "New question"
     , shortUuid = Nothing
     , text = "Question text"
-    , itemName = "Item"
-    , answers = []
+    , answerItemTemplate = Nothing
+    , answers = Nothing
     , references = []
     , experts = []
     }
@@ -180,7 +202,7 @@ getQuestions : KnowledgeModel -> List Question
 getQuestions km =
     let
         nestedQuestions question =
-            List.map getFollowUpQuestions question.answers
+            List.map getFollowUpQuestions (question.answers |> Maybe.withDefault [])
                 |> List.concat
                 |> (::) question
     in
@@ -209,7 +231,7 @@ getFollowUpQuestions answer =
 getAnswers : KnowledgeModel -> List Answer
 getAnswers km =
     getQuestions km
-        |> List.map .answers
+        |> List.map (.answers >> Maybe.withDefault [])
         |> List.concat
 
 

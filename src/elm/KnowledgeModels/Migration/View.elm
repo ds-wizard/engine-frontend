@@ -220,6 +220,9 @@ getEventView model migration event =
                 |> Maybe.map (viewEvent model "Delete follow-up question")
                 |> Maybe.withDefault errorMessage
 
+        _ ->
+            div [ class "alert alert-danger" ] [ text "Event type not implemented" ]
+
 
 viewEvent : Model -> String -> Html Msgs.Msg -> Html Msgs.Msg
 viewEvent model name diffView =
@@ -315,10 +318,10 @@ viewEditQuestionDiff : { a | title : String, shortQuestionUuid : Maybe String, t
 viewEditQuestionDiff event question =
     let
         originalAnswers =
-            List.map .uuid question.answers
+            List.map .uuid (question.answers |> Maybe.withDefault [])
 
         answerNames =
-            Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) question.answers
+            Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) (question.answers |> Maybe.withDefault [])
 
         originalReferences =
             List.map .uuid question.references
@@ -371,7 +374,7 @@ viewDeleteQuestionDiff question =
             viewDelete fields
 
         answersDiff =
-            viewDeletedChildren "Answers" <| List.map .label question.answers
+            viewDeletedChildren "Answers" <| List.map .label (question.answers |> Maybe.withDefault [])
 
         referencesDiff =
             viewDeletedChildren "References" <| List.map .chapter question.references

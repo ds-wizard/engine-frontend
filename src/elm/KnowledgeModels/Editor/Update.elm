@@ -1,11 +1,5 @@
 module KnowledgeModels.Editor.Update exposing (getKnowledgeModelCmd, update)
 
-{-|
-
-@docs update, getKnowledgeModelCmd
-
--}
-
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
 import Jwt
@@ -18,7 +12,7 @@ import KnowledgeModels.Editor.Update.UpdateAnswer exposing (..)
 import KnowledgeModels.Editor.Update.UpdateChapter exposing (..)
 import KnowledgeModels.Editor.Update.UpdateExpert exposing (..)
 import KnowledgeModels.Editor.Update.UpdateKnowledgeModel exposing (..)
-import KnowledgeModels.Editor.Update.UpdateQuestion exposing (..)
+import KnowledgeModels.Editor.Update.UpdateQuestion as UpdateQuestion
 import KnowledgeModels.Editor.Update.UpdateReference exposing (..)
 import KnowledgeModels.Editor.Update.Utils exposing (..)
 import KnowledgeModels.Requests exposing (getKnowledgeModelData, postEventsBulk)
@@ -30,7 +24,26 @@ import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
 
-{-| -}
+update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg seed session model =
+    case msg of
+        GetKnowledgeModelCompleted result ->
+            getKnowledgeModelCompleted model result |> tuplePrepend seed
+
+        Edit knowledgeModelMsg ->
+            updateEdit knowledgeModelMsg seed session model
+
+        SaveCompleted result ->
+            postEventsBulkCompleted model result |> tuplePrepend seed
+
+        ReorderableMsg reorderableMsg ->
+            let
+                newReorderableState =
+                    Reorderable.update reorderableMsg model.reorderableState
+            in
+            ( seed, { model | reorderableState = newReorderableState }, Cmd.none )
+
+
 getKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 getKnowledgeModelCmd uuid session =
     getKnowledgeModelData uuid session
@@ -161,23 +174,42 @@ updateChapter knowledgeModel msg seed ((ChapterEditor editor) as chapterEditor) 
             ( newSeed, ChapterEditor { editor | questions = newQuestions }, event )
 
 
-updateQuestion : (Chapter -> KnowledgeModel -> List String -> List String -> List String -> Seed -> Question -> ( Event, Seed )) -> Chapter -> KnowledgeModel -> QuestionMsg -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+updateQuestion : (Chapter -> KnowledgeModel -> Seed -> QuestionEditor -> ( Event, Seed )) -> Chapter -> KnowledgeModel -> QuestionMsg -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestion createEditEvent chapter knowledgeModel msg seed ((QuestionEditor editor) as questionEditor) =
     case msg of
         QuestionFormMsg formMsg ->
-            updateQuestionFormMsg formMsg seed createEditEvent chapter knowledgeModel questionEditor
+            UpdateQuestion.formMsg formMsg seed createEditEvent chapter knowledgeModel questionEditor
 
         QuestionCancel ->
-            updateQuestionCancel seed questionEditor
+            UpdateQuestion.cancel seed questionEditor
+
+        AddAnswerItemTemplateQuestion ->
+            UpdateQuestion.addAnswerItemTemplateQuestion seed chapter knowledgeModel questionEditor
+
+        ViewAnswerItemTemplateQuestion uuid ->
+            UpdateQuestion.viewAnswerItemTemplateQuestion uuid seed questionEditor
+
+        DeleteAnswerItemTemplateQuestion uuid ->
+            UpdateQuestion.deleteAnswerItemTemplateQuestion uuid seed chapter knowledgeModel questionEditor
+
+        ReorderAnswerItemTemplateQuestions newAnswerItemTemplateQuestions ->
+            ( seed, QuestionEditor { editor | answerItemTemplateQuestions = newAnswerItemTemplateQuestions, answersDirty = True }, Nothing )
+
+        AnswerItemTemplateQuestionMsg uuid answerItemTemplateQuestionMsg ->
+            let
+                ( newSeed, newAnswerItemTemplateQuestions, event ) =
+                    updateInListWithSeed editor.answerItemTemplateQuestions seed (matchQuestion uuid) (updateQuestion (createEditAnswerItemTemplateQuestionEvent editor.question) chapter knowledgeModel answerItemTemplateQuestionMsg)
+            in
+            ( seed, QuestionEditor { editor | answerItemTemplateQuestions = newAnswerItemTemplateQuestions, answerItemTemplateQuestionsDirty = True }, event )
 
         AddAnswer ->
-            updateQuestionAddAnswer seed chapter knowledgeModel questionEditor
+            UpdateQuestion.addAnswer seed chapter knowledgeModel questionEditor
 
         ViewAnswer uuid ->
-            updateQuestionViewAnswer uuid seed questionEditor
+            UpdateQuestion.viewAnswer uuid seed questionEditor
 
         DeleteAnswer uuid ->
-            updateQuestionDeleteAnswer uuid seed chapter knowledgeModel questionEditor
+            UpdateQuestion.deleteAnswer uuid seed chapter knowledgeModel questionEditor
 
         ReorderAnswerList newAnswers ->
             ( seed, QuestionEditor { editor | answers = newAnswers, answersDirty = True }, Nothing )
@@ -190,13 +222,13 @@ updateQuestion createEditEvent chapter knowledgeModel msg seed ((QuestionEditor 
             ( newSeed, QuestionEditor { editor | answers = newAnswers }, event )
 
         AddReference ->
-            updateQuestionAddReference seed chapter knowledgeModel questionEditor
+            UpdateQuestion.addReference seed chapter knowledgeModel questionEditor
 
         ViewReference uuid ->
-            updateQuestionViewReference uuid seed questionEditor
+            UpdateQuestion.viewReference uuid seed questionEditor
 
         DeleteReference uuid ->
-            updateQuestionDeleteReference uuid seed chapter knowledgeModel questionEditor
+            UpdateQuestion.deleteReference uuid seed chapter knowledgeModel questionEditor
 
         ReorderReferenceList newReferences ->
             ( seed, QuestionEditor { editor | references = newReferences, referencesDirty = True }, Nothing )
@@ -209,13 +241,13 @@ updateQuestion createEditEvent chapter knowledgeModel msg seed ((QuestionEditor 
             ( newSeed, QuestionEditor { editor | references = newReferences }, event )
 
         AddExpert ->
-            updateQuestionAddExpert seed chapter knowledgeModel questionEditor
+            UpdateQuestion.addExpert seed chapter knowledgeModel questionEditor
 
         ViewExpert uuid ->
-            updateQuestionViewExpert uuid seed questionEditor
+            UpdateQuestion.viewExpert uuid seed questionEditor
 
         DeleteExpert uuid ->
-            updateQuestionDeleteExpert uuid seed chapter knowledgeModel questionEditor
+            UpdateQuestion.deleteExpert uuid seed chapter knowledgeModel questionEditor
 
         ReorderExpertList newExperts ->
             ( seed, QuestionEditor { editor | experts = newExperts, expertsDirty = True }, Nothing )
@@ -275,24 +307,3 @@ updateExpert question chapter knowledgeModel msg seed expertEditor =
 
         ExpertCancel ->
             updateExpertCancel seed expertEditor
-
-
-{-| -}
-update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg seed session model =
-    case msg of
-        GetKnowledgeModelCompleted result ->
-            getKnowledgeModelCompleted model result |> tuplePrepend seed
-
-        Edit knowledgeModelMsg ->
-            updateEdit knowledgeModelMsg seed session model
-
-        SaveCompleted result ->
-            postEventsBulkCompleted model result |> tuplePrepend seed
-
-        ReorderableMsg reorderableMsg ->
-            let
-                newReorderableState =
-                    Reorderable.update reorderableMsg model.reorderableState
-            in
-            ( seed, { model | reorderableState = newReorderableState }, Cmd.none )

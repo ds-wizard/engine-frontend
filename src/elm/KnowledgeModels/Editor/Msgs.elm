@@ -46,6 +46,11 @@ type ChapterMsg
 type QuestionMsg
     = QuestionFormMsg Form.Msg
     | QuestionCancel
+    | ViewAnswerItemTemplateQuestion String
+    | AddAnswerItemTemplateQuestion
+    | DeleteAnswerItemTemplateQuestion String
+    | ReorderAnswerItemTemplateQuestions (List QuestionEditor)
+    | AnswerItemTemplateQuestionMsg String QuestionMsg
     | ViewAnswer String
     | AddAnswer
     | DeleteAnswer String
