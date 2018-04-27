@@ -7,17 +7,17 @@
     "test": "elm-test"
   },
   "devDependencies": {
-    "css-loader": "^0.28.7",
+    "css-loader": "^0.28.11",
     "elm-test": "^0.18.12",
-    "elm-webpack-loader": "^4.3.1",
-    "extract-text-webpack-plugin": "^3.0.0",
+    "elm-webpack-loader": "^4.5.0",
+    "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^0.11.2",
-    "node-sass": "^4.5.3",
-    "sass-loader": "^6.0.6",
+    "node-sass": "^4.9.0",
+    "sass-loader": "^6.0.7",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
-    "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.1"
+    "webpack": "^3.11.0",
+    "webpack-dev-server": "^2.11.2"
   },
   "dependencies": {
     "bootstrap-sass": "^3.3.7",
