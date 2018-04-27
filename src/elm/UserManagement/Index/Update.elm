@@ -25,7 +25,7 @@ update msg wrapMsg session model =
             ( { model | userToBeDeleted = user, deletingUser = Unset }, Cmd.none )
 
         DeleteUser ->
-            handleDeleteUser wrapMsg session model |> Debug.log "Deleting user "
+            handleDeleteUser wrapMsg session model
 
         DeleteUserCompleted result ->
             deleteUserCompleted wrapMsg session model result
@@ -64,7 +64,7 @@ handleDeleteUser wrapMsg session model =
             )
 
         _ ->
-            ( model, Cmd.none ) |> Debug.log "This awkward situation"
+            ( model, Cmd.none )
 
 
 deleteUserCompleted : (Msg -> Msgs.Msg) -> Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )

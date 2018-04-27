@@ -245,10 +245,10 @@ viewEditKnowledgeModelDiff event km =
             Dict.fromList <| List.map (\c -> ( c.uuid, c.title )) km.chapters
 
         fieldDiff =
-            viewDiff <| List.map3 (,,) [ "Name" ] [ km.name ] [ event.name ]
+            viewDiff <| List.map3 (,,) [ "Name" ] [ km.name ] [ getEventFieldValueWithDefault event.name km.name ]
 
         chaptersDiff =
-            viewDiffChildren "Chapters" originalChapters event.chapterIds chapterNames
+            viewDiffChildren "Chapters" originalChapters (getEventFieldValueWithDefault event.chapterIds originalChapters) chapterNames
     in
     div []
         (fieldDiff ++ [ chaptersDiff ])
@@ -274,10 +274,16 @@ viewEditChapterDiff event chapter =
             Dict.fromList <| List.map (\q -> ( q.uuid, q.title )) chapter.questions
 
         fieldDiff =
-            viewDiff <| List.map3 (,,) [ "Title", "Text" ] [ chapter.title, chapter.text ] [ event.title, event.text ]
+            viewDiff <|
+                List.map3 (,,)
+                    [ "Title", "Text" ]
+                    [ chapter.title, chapter.text ]
+                    [ getEventFieldValueWithDefault event.title chapter.title
+                    , getEventFieldValueWithDefault event.text chapter.text
+                    ]
 
         questionsDiff =
-            viewDiffChildren "Questions" originalQuestions event.questionIds questionNames
+            viewDiffChildren "Questions" originalQuestions (getEventFieldValueWithDefault event.questionIds originalQuestions) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
@@ -314,7 +320,7 @@ viewAddQuestionDiff event =
         (viewAdd fields)
 
 
-viewEditQuestionDiff : { a | title : String, shortQuestionUuid : Maybe String, text : String, answerIds : Maybe (List String), referenceIds : List String, expertIds : List String } -> Question -> Html Msgs.Msg
+viewEditQuestionDiff : { a | title : EventField String, shortQuestionUuid : EventField (Maybe String), text : EventField String, answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
 viewEditQuestionDiff event question =
     let
         originalAnswers =
@@ -339,24 +345,27 @@ viewEditQuestionDiff event question =
             List.map3 (,,)
                 [ "Title", "Short UUID", "Text" ]
                 [ question.title, question.shortUuid |> Maybe.withDefault "", question.text ]
-                [ event.title, event.shortQuestionUuid |> Maybe.withDefault "", event.text ]
+                [ getEventFieldValueWithDefault event.title question.title
+                , getEventFieldValueWithDefault event.shortQuestionUuid question.shortUuid |> Maybe.withDefault ""
+                , getEventFieldValueWithDefault event.text question.text
+                ]
 
         fieldDiff =
             viewDiff fields
 
         answersDiff =
-            case event.answerIds of
+            case getEventFieldValueWithDefault event.answerIds (Just originalAnswers) of
                 Just answerIds ->
-                    viewDiffChildren "Questions" originalAnswers answerIds answerNames
+                    viewDiffChildren "Answers" originalAnswers answerIds answerNames
 
                 _ ->
                     emptyNode
 
         referencesDiff =
-            viewDiffChildren "References" originalReferences event.referenceIds referenceNames
+            viewDiffChildren "References" originalReferences (getEventFieldValueWithDefault event.referenceIds originalReferences) referenceNames
 
         expertsDiff =
-            viewDiffChildren "Experts" originalExperts event.expertIds expertNames
+            viewDiffChildren "Experts" originalExperts (getEventFieldValueWithDefault event.expertIds originalExperts) expertNames
     in
     div []
         (fieldDiff ++ [ answersDiff, referencesDiff, expertsDiff ])
@@ -406,10 +415,16 @@ viewEditAnswerDiff event answer =
             Dict.fromList <| List.map (\q -> ( q.uuid, q.title )) <| getFollowUpQuestions answer
 
         fieldDiff =
-            viewDiff <| List.map3 (,,) [ "Label", "Advice" ] [ answer.label, answer.advice |> Maybe.withDefault "" ] [ event.label, event.advice |> Maybe.withDefault "" ]
+            viewDiff <|
+                List.map3 (,,)
+                    [ "Label", "Advice" ]
+                    [ answer.label, answer.advice |> Maybe.withDefault "" ]
+                    [ getEventFieldValueWithDefault event.label answer.label
+                    , getEventFieldValueWithDefault event.advice answer.advice |> Maybe.withDefault ""
+                    ]
 
         questionsDiff =
-            viewDiffChildren "Questions" originalQuestions event.followUpIds questionNames
+            viewDiffChildren "Questions" originalQuestions (getEventFieldValueWithDefault event.followUpIds originalQuestions) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
@@ -443,7 +458,12 @@ viewAddReferenceDiff event =
 viewEditReferenceDiff : EditReferenceEventData -> Reference -> Html Msgs.Msg
 viewEditReferenceDiff event reference =
     div []
-        (viewDiff <| List.map3 (,,) [ "Chapter" ] [ reference.chapter ] [ event.chapter ])
+        (viewDiff <|
+            List.map3 (,,)
+                [ "Chapter" ]
+                [ reference.chapter ]
+                [ getEventFieldValueWithDefault event.chapter reference.chapter ]
+        )
 
 
 viewDeleteReferenceDiff : Reference -> Html Msgs.Msg
@@ -461,7 +481,14 @@ viewAddExpertDiff event =
 viewEditExpertDiff : EditExpertEventData -> Expert -> Html Msgs.Msg
 viewEditExpertDiff event expert =
     div []
-        (viewDiff <| List.map3 (,,) [ "Name", "Email" ] [ expert.name, expert.email ] [ event.name, event.email ])
+        (viewDiff <|
+            List.map3 (,,)
+                [ "Name", "Email" ]
+                [ expert.name, expert.email ]
+                [ getEventFieldValueWithDefault event.name expert.name
+                , getEventFieldValueWithDefault event.email expert.email
+                ]
+        )
 
 
 viewDeleteExpertDiff : Expert -> Html Msgs.Msg

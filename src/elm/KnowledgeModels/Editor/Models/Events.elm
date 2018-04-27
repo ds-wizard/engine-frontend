@@ -1,8 +1,9 @@
 module KnowledgeModels.Editor.Models.Events exposing (..)
 
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode exposing (..)
+import Json.Encode.Extra exposing (maybe)
 import KnowledgeModels.Editor.Models.Editors exposing (AnswerEditor(..), ExpertEditor(..), QuestionEditor(..), ReferenceEditor(..))
 import KnowledgeModels.Editor.Models.Entities exposing (..)
 import Random.Pcg exposing (Seed)
@@ -34,6 +35,12 @@ type Event
     | DeleteAnswerItemTemplateQuestionEvent DeleteAnswerItemTemplateQuestionEventData
 
 
+type alias EventField a =
+    { changed : Bool
+    , value : Maybe a
+    }
+
+
 type alias AnswerItemTemplateData =
     { title : String
     , questionIds : List String
@@ -43,22 +50,22 @@ type alias AnswerItemTemplateData =
 type alias CommonEditQuestionEventData =
     { uuid : String
     , questionUuid : String
-    , type_ : String
-    , title : String
-    , shortQuestionUuid : Maybe String
-    , text : String
-    , answerItemTemplate : Maybe AnswerItemTemplateData
-    , answerIds : Maybe (List String)
-    , expertIds : List String
-    , referenceIds : List String
+    , type_ : EventField String
+    , title : EventField String
+    , shortQuestionUuid : EventField (Maybe String)
+    , text : EventField String
+    , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
+    , answerIds : EventField (Maybe (List String))
+    , expertIds : EventField (List String)
+    , referenceIds : EventField (List String)
     }
 
 
 type alias EditKnowledgeModelEventData =
     { uuid : String
     , kmUuid : String
-    , name : String
-    , chapterIds : List String
+    , name : EventField String
+    , chapterIds : EventField (List String)
     }
 
 
@@ -75,9 +82,9 @@ type alias EditChapterEventData =
     { uuid : String
     , kmUuid : String
     , chapterUuid : String
-    , title : String
-    , text : String
-    , questionIds : List String
+    , title : EventField String
+    , text : EventField String
+    , questionIds : EventField (List String)
     }
 
 
@@ -97,6 +104,7 @@ type alias AddQuestionEventData =
     , title : String
     , shortQuestionUuid : Maybe String
     , text : String
+    , answerItemTemplate : Maybe AnswerItemTemplateData
     }
 
 
@@ -105,14 +113,14 @@ type alias EditQuestionEventData =
     , kmUuid : String
     , chapterUuid : String
     , questionUuid : String
-    , type_ : String
-    , title : String
-    , shortQuestionUuid : Maybe String
-    , text : String
-    , answerItemTemplate : Maybe AnswerItemTemplateData
-    , answerIds : Maybe (List String)
-    , expertIds : List String
-    , referenceIds : List String
+    , type_ : EventField String
+    , title : EventField String
+    , shortQuestionUuid : EventField (Maybe String)
+    , text : EventField String
+    , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
+    , answerIds : EventField (Maybe (List String))
+    , expertIds : EventField (List String)
+    , referenceIds : EventField (List String)
     }
 
 
@@ -141,9 +149,9 @@ type alias EditAnswerEventData =
     , chapterUuid : String
     , questionUuid : String
     , answerUuid : String
-    , label : String
-    , advice : Maybe String
-    , followUpIds : List String
+    , label : EventField String
+    , advice : EventField (Maybe String)
+    , followUpIds : EventField (List String)
     }
 
 
@@ -172,7 +180,7 @@ type alias EditReferenceEventData =
     , chapterUuid : String
     , questionUuid : String
     , referenceUuid : String
-    , chapter : String
+    , chapter : EventField String
     }
 
 
@@ -202,8 +210,8 @@ type alias EditExpertEventData =
     , chapterUuid : String
     , questionUuid : String
     , expertUuid : String
-    , name : String
-    , email : String
+    , name : EventField String
+    , email : EventField String
     }
 
 
@@ -226,6 +234,7 @@ type alias AddFollowUpQuestionEventData =
     , title : String
     , shortQuestionUuid : Maybe String
     , text : String
+    , answerItemTemplate : Maybe AnswerItemTemplateData
     }
 
 
@@ -235,14 +244,14 @@ type alias EditFollowUpQuestionEventData =
     , chapterUuid : String
     , answerUuid : String
     , questionUuid : String
-    , type_ : String
-    , title : String
-    , shortQuestionUuid : Maybe String
-    , text : String
-    , answerItemTemplate : Maybe AnswerItemTemplateData
-    , answerIds : Maybe (List String)
-    , expertIds : List String
-    , referenceIds : List String
+    , type_ : EventField String
+    , title : EventField String
+    , shortQuestionUuid : EventField (Maybe String)
+    , text : EventField String
+    , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
+    , answerIds : EventField (Maybe (List String))
+    , expertIds : EventField (List String)
+    , referenceIds : EventField (List String)
     }
 
 
@@ -265,6 +274,7 @@ type alias AddAnswerItemTemplateQuestionEventData =
     , title : String
     , shortQuestionUuid : Maybe String
     , text : String
+    , answerItemTemplate : Maybe AnswerItemTemplateData
     }
 
 
@@ -274,14 +284,14 @@ type alias EditAnswerItemTemplateQuestionEventData =
     , chapterUuid : String
     , parentQuestionUuid : String
     , questionUuid : String
-    , type_ : String
-    , title : String
-    , shortQuestionUuid : Maybe String
-    , text : String
-    , answerItemTemplate : Maybe AnswerItemTemplateData
-    , answerIds : Maybe (List String)
-    , expertIds : List String
-    , referenceIds : List String
+    , type_ : EventField String
+    , title : EventField String
+    , shortQuestionUuid : EventField (Maybe String)
+    , text : EventField String
+    , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
+    , answerIds : EventField (Maybe (List String))
+    , expertIds : EventField (List String)
+    , referenceIds : EventField (List String)
     }
 
 
@@ -298,12 +308,15 @@ type alias DeleteAnswerItemTemplateQuestionEventData =
 {- Common data -}
 
 
+createEventField : a -> EventField a
+createEventField value =
+    { changed = True
+    , value = Just value
+    }
+
+
 createAnswerItemTemplateData : List String -> AnswerItemTemplate -> AnswerItemTemplateData
 createAnswerItemTemplateData questionIds answerItemTemplate =
-    let
-        getQuestions (AnswerItemTemplateQuestions questions) =
-            questions
-    in
     { title = answerItemTemplate.title
     , questionIds = questionIds
     }
@@ -344,14 +357,14 @@ createCommonEditQuestionEvent seed (QuestionEditor qe) =
         eventData =
             { uuid = uuid
             , questionUuid = qe.question.uuid
-            , type_ = qe.question.type_
-            , title = qe.question.title
-            , shortQuestionUuid = qe.question.shortUuid
-            , text = qe.question.text
-            , answerItemTemplate = maybeAnswerItemTemplate
-            , answerIds = maybeAnswerIds
-            , referenceIds = referenceIds
-            , expertIds = expertIds
+            , type_ = createEventField qe.question.type_
+            , title = createEventField qe.question.title
+            , shortQuestionUuid = createEventField qe.question.shortUuid
+            , text = createEventField qe.question.text
+            , answerItemTemplate = createEventField maybeAnswerItemTemplate
+            , answerIds = createEventField maybeAnswerIds
+            , referenceIds = createEventField referenceIds
+            , expertIds = createEventField expertIds
             }
     in
     ( newSeed, eventData )
@@ -371,8 +384,8 @@ createEditKnowledgeModelEvent seed knowledgeModel chapterIds =
             EditKnowledgeModelEvent
                 { uuid = uuid
                 , kmUuid = knowledgeModel.uuid
-                , name = knowledgeModel.name
-                , chapterIds = chapterIds
+                , name = createEventField knowledgeModel.name
+                , chapterIds = createEventField chapterIds
                 }
     in
     ( event, newSeed )
@@ -407,9 +420,9 @@ createEditChapterEvent knowledgeModel questionIds seed chapter =
                 { uuid = uuid
                 , kmUuid = knowledgeModel.uuid
                 , chapterUuid = chapter.uuid
-                , title = chapter.title
-                , text = chapter.text
-                , questionIds = questionIds
+                , title = createEventField chapter.title
+                , text = createEventField chapter.text
+                , questionIds = createEventField questionIds
                 }
     in
     ( event, newSeed )
@@ -447,6 +460,7 @@ createAddQuestionEvent chapter knowledgeModel seed question =
                 , title = question.title
                 , shortQuestionUuid = question.shortUuid
                 , text = question.text
+                , answerItemTemplate = Nothing
                 }
     in
     ( event, newSeed )
@@ -527,9 +541,9 @@ createEditAnswerEvent question chapter knowledgeModel followUpIds seed answer =
                 , chapterUuid = chapter.uuid
                 , questionUuid = question.uuid
                 , answerUuid = answer.uuid
-                , label = answer.label
-                , advice = answer.advice
-                , followUpIds = followUpIds
+                , label = createEventField answer.label
+                , advice = createEventField answer.advice
+                , followUpIds = createEventField followUpIds
                 }
     in
     ( event, newSeed )
@@ -585,7 +599,7 @@ createEditReferenceEvent question chapter knowledgeModel followupIds seed refere
                 , chapterUuid = chapter.uuid
                 , questionUuid = question.uuid
                 , referenceUuid = reference.uuid
-                , chapter = reference.chapter
+                , chapter = createEventField reference.chapter
                 }
     in
     ( event, newSeed )
@@ -642,8 +656,8 @@ createEditExpertEvent question chapter knowledgeModel followupIds seed expert =
                 , chapterUuid = chapter.uuid
                 , questionUuid = question.uuid
                 , expertUuid = expert.uuid
-                , name = expert.name
-                , email = expert.email
+                , name = createEventField expert.name
+                , email = createEventField expert.email
                 }
     in
     ( event, newSeed )
@@ -684,6 +698,7 @@ createAddFollowUpQuestionEvent answer chapter knowledgeModel seed question =
                 , title = question.title
                 , shortQuestionUuid = question.shortUuid
                 , text = question.text
+                , answerItemTemplate = Nothing
                 }
     in
     ( event, newSeed )
@@ -750,6 +765,7 @@ createAddAnswerItemTemplateQuestionEvent parentQuestion chapter knowledgeModel s
                 , title = question.title
                 , shortQuestionUuid = question.shortUuid
                 , text = question.text
+                , answerItemTemplate = Nothing
                 }
     in
     ( event, newSeed )
@@ -874,14 +890,29 @@ encodeEvent event =
             encodeDeleteAnswerItemTemplateQuestionEvent data
 
 
+encodeEventField : (a -> Encode.Value) -> EventField a -> Encode.Value
+encodeEventField encode field =
+    case ( field.changed, field.value ) of
+        ( True, Just value ) ->
+            Encode.object
+                [ ( "changed", Encode.bool True )
+                , ( "value", encode value )
+                ]
+
+        _ ->
+            Encode.object
+                [ ( "changed", Encode.bool False )
+                ]
+
+
 encodeEditKnowledgeModelEvent : EditKnowledgeModelEventData -> Encode.Value
 encodeEditKnowledgeModelEvent data =
     Encode.object
         [ ( "eventType", Encode.string "EditKnowledgeModelEvent" )
         , ( "uuid", Encode.string data.uuid )
         , ( "kmUuid", Encode.string data.kmUuid )
-        , ( "name", Encode.string data.name )
-        , ( "chapterIds", Encode.list <| List.map Encode.string data.chapterIds )
+        , ( "name", encodeEventField Encode.string data.name )
+        , ( "chapterIds", encodeEventField (Encode.list << List.map Encode.string) data.chapterIds )
         ]
 
 
@@ -904,9 +935,9 @@ encodeEditChapterEvent data =
         , ( "uuid", Encode.string data.uuid )
         , ( "kmUuid", Encode.string data.kmUuid )
         , ( "chapterUuid", Encode.string data.chapterUuid )
-        , ( "title", Encode.string data.title )
-        , ( "text", Encode.string data.text )
-        , ( "questionIds", Encode.list <| List.map Encode.string data.questionIds )
+        , ( "title", encodeEventField Encode.string data.title )
+        , ( "text", encodeEventField Encode.string data.text )
+        , ( "questionIds", encodeEventField (Encode.list << List.map Encode.string) data.questionIds )
         ]
 
 
@@ -922,12 +953,6 @@ encodeDeleteChapterEvent data =
 
 encodeAddQuestionEvent : AddQuestionEventData -> Encode.Value
 encodeAddQuestionEvent data =
-    let
-        shortQuestionUuid =
-            data.shortQuestionUuid
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "AddQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -936,53 +961,28 @@ encodeAddQuestionEvent data =
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "type", Encode.string data.type_ )
         , ( "title", Encode.string data.title )
-        , ( "shortQuestionUuid", shortQuestionUuid )
+        , ( "shortQuestionUuid", maybe Encode.string data.shortQuestionUuid )
         , ( "text", Encode.string data.text )
+        , ( "answerItemTemplate", maybe encodeAnswerItemTemplateData data.answerItemTemplate )
         ]
 
 
 encodeEditQuestionEvent : EditQuestionEventData -> Encode.Value
 encodeEditQuestionEvent data =
-    let
-        shortQuestionUuid =
-            data.shortQuestionUuid
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-
-        answerIds =
-            case data.type_ of
-                "options" ->
-                    data.answerIds
-                        |> Maybe.map (Encode.list << List.map Encode.string)
-                        |> Maybe.withDefault Encode.null
-
-                _ ->
-                    Encode.null
-
-        answerItemTemplate =
-            case data.type_ of
-                "list" ->
-                    data.answerItemTemplate
-                        |> Maybe.map encodeAnswerItemTemplateData
-                        |> Maybe.withDefault Encode.null
-
-                _ ->
-                    Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "EditQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
         , ( "kmUuid", Encode.string data.kmUuid )
         , ( "chapterUuid", Encode.string data.chapterUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
-        , ( "type", Encode.string data.type_ )
-        , ( "title", Encode.string data.title )
-        , ( "shortQuestionUuid", shortQuestionUuid )
-        , ( "text", Encode.string data.text )
-        , ( "answerItemTemplate", answerItemTemplate )
-        , ( "answerIds", answerIds )
-        , ( "expertIds", Encode.list <| List.map Encode.string data.expertIds )
-        , ( "referenceIds", Encode.list <| List.map Encode.string data.referenceIds )
+        , ( "type", encodeEventField Encode.string data.type_ )
+        , ( "title", encodeEventField Encode.string data.title )
+        , ( "shortQuestionUuid", encodeEventField (maybe Encode.string) data.shortQuestionUuid )
+        , ( "text", encodeEventField Encode.string data.text )
+        , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
+        , ( "answerIds", encodeEventField (maybe (Encode.list << List.map Encode.string)) data.answerIds )
+        , ( "expertIds", encodeEventField (Encode.list << List.map Encode.string) data.expertIds )
+        , ( "referenceIds", encodeEventField (Encode.list << List.map Encode.string) data.referenceIds )
         ]
 
 
@@ -1007,12 +1007,6 @@ encodeDeleteQuestionEvent data =
 
 encodeAddAnswerEvent : AddAnswerEventData -> Encode.Value
 encodeAddAnswerEvent data =
-    let
-        advice =
-            data.advice
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "AddAnswerEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -1021,18 +1015,12 @@ encodeAddAnswerEvent data =
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "answerUuid", Encode.string data.answerUuid )
         , ( "label", Encode.string data.label )
-        , ( "advice", advice )
+        , ( "advice", maybe Encode.string data.advice )
         ]
 
 
 encodeEditAnswerEvent : EditAnswerEventData -> Encode.Value
 encodeEditAnswerEvent data =
-    let
-        advice =
-            data.advice
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "EditAnswerEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -1040,9 +1028,9 @@ encodeEditAnswerEvent data =
         , ( "chapterUuid", Encode.string data.chapterUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "answerUuid", Encode.string data.answerUuid )
-        , ( "label", Encode.string data.label )
-        , ( "advice", advice )
-        , ( "followUpIds", Encode.list <| List.map Encode.string data.followUpIds )
+        , ( "label", encodeEventField Encode.string data.label )
+        , ( "advice", encodeEventField (maybe Encode.string) data.advice )
+        , ( "followUpIds", encodeEventField (Encode.list << List.map Encode.string) data.followUpIds )
         ]
 
 
@@ -1080,7 +1068,7 @@ encodeEditReferenceEvent data =
         , ( "chapterUuid", Encode.string data.chapterUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "referenceUuid", Encode.string data.referenceUuid )
-        , ( "chapter", Encode.string data.chapter )
+        , ( "chapter", encodeEventField Encode.string data.chapter )
         ]
 
 
@@ -1119,8 +1107,8 @@ encodeEditExpertEvent data =
         , ( "chapterUuid", Encode.string data.chapterUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "expertUuid", Encode.string data.expertUuid )
-        , ( "name", Encode.string data.name )
-        , ( "email", Encode.string data.email )
+        , ( "name", encodeEventField Encode.string data.name )
+        , ( "email", encodeEventField Encode.string data.email )
         ]
 
 
@@ -1138,12 +1126,6 @@ encodeDeleteExpertEvent data =
 
 encodeAddFollowUpQuestionEvent : AddFollowUpQuestionEventData -> Encode.Value
 encodeAddFollowUpQuestionEvent data =
-    let
-        shortQuestionUuid =
-            data.shortQuestionUuid
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "AddFollowUpQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -1153,24 +1135,14 @@ encodeAddFollowUpQuestionEvent data =
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "type", Encode.string data.type_ )
         , ( "title", Encode.string data.title )
-        , ( "shortQuestionUuid", shortQuestionUuid )
+        , ( "shortQuestionUuid", maybe Encode.string data.shortQuestionUuid )
         , ( "text", Encode.string data.text )
+        , ( "answerItemTemplate", maybe encodeAnswerItemTemplateData data.answerItemTemplate )
         ]
 
 
 encodeEditFollowUpQuestionEvent : EditFollowUpQuestionEventData -> Encode.Value
 encodeEditFollowUpQuestionEvent data =
-    let
-        shortQuestionUuid =
-            data.shortQuestionUuid
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-
-        answerIds =
-            data.answerIds
-                |> Maybe.map (Encode.list << List.map Encode.string)
-                |> Maybe.withDefault Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "EditFollowUpQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -1178,13 +1150,14 @@ encodeEditFollowUpQuestionEvent data =
         , ( "chapterUuid", Encode.string data.chapterUuid )
         , ( "answerUuid", Encode.string data.answerUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
-        , ( "type", Encode.string data.type_ )
-        , ( "title", Encode.string data.title )
-        , ( "shortQuestionUuid", shortQuestionUuid )
-        , ( "text", Encode.string data.text )
-        , ( "answerIds", answerIds )
-        , ( "expertIds", Encode.list <| List.map Encode.string data.expertIds )
-        , ( "referenceIds", Encode.list <| List.map Encode.string data.referenceIds )
+        , ( "type", encodeEventField Encode.string data.type_ )
+        , ( "title", encodeEventField Encode.string data.title )
+        , ( "shortQuestionUuid", encodeEventField (maybe Encode.string) data.shortQuestionUuid )
+        , ( "text", encodeEventField Encode.string data.text )
+        , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
+        , ( "answerIds", encodeEventField (maybe (Encode.list << List.map Encode.string)) data.answerIds )
+        , ( "expertIds", encodeEventField (Encode.list << List.map Encode.string) data.expertIds )
+        , ( "referenceIds", encodeEventField (Encode.list << List.map Encode.string) data.referenceIds )
         ]
 
 
@@ -1202,12 +1175,6 @@ encodeDeleteFollowUpQuestionEvent data =
 
 encodeAddAnswerItemTemplateQuestionEvent : AddAnswerItemTemplateQuestionEventData -> Encode.Value
 encodeAddAnswerItemTemplateQuestionEvent data =
-    let
-        shortQuestionUuid =
-            data.shortQuestionUuid
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "AddAnswerItemTemplateQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -1217,24 +1184,14 @@ encodeAddAnswerItemTemplateQuestionEvent data =
         , ( "questionUuid", Encode.string data.questionUuid )
         , ( "type", Encode.string data.type_ )
         , ( "title", Encode.string data.title )
-        , ( "shortQuestionUuid", shortQuestionUuid )
+        , ( "shortQuestionUuid", maybe Encode.string data.shortQuestionUuid )
         , ( "text", Encode.string data.text )
+        , ( "answerItemTemplate", maybe encodeAnswerItemTemplateData data.answerItemTemplate )
         ]
 
 
 encodeEditAnswerItemTemplateQuestionEvent : EditAnswerItemTemplateQuestionEventData -> Encode.Value
 encodeEditAnswerItemTemplateQuestionEvent data =
-    let
-        shortQuestionUuid =
-            data.shortQuestionUuid
-                |> Maybe.map Encode.string
-                |> Maybe.withDefault Encode.null
-
-        answerIds =
-            data.answerIds
-                |> Maybe.map (Encode.list << List.map Encode.string)
-                |> Maybe.withDefault Encode.null
-    in
     Encode.object
         [ ( "eventType", Encode.string "EditAnswerItemTemplateQuestionEvent" )
         , ( "uuid", Encode.string data.uuid )
@@ -1242,13 +1199,14 @@ encodeEditAnswerItemTemplateQuestionEvent data =
         , ( "chapterUuid", Encode.string data.chapterUuid )
         , ( "parentQuestionUuid", Encode.string data.parentQuestionUuid )
         , ( "questionUuid", Encode.string data.questionUuid )
-        , ( "type", Encode.string data.type_ )
-        , ( "title", Encode.string data.title )
-        , ( "shortQuestionUuid", shortQuestionUuid )
-        , ( "text", Encode.string data.text )
-        , ( "answerIds", answerIds )
-        , ( "expertIds", Encode.list <| List.map Encode.string data.expertIds )
-        , ( "referenceIds", Encode.list <| List.map Encode.string data.referenceIds )
+        , ( "type", encodeEventField Encode.string data.type_ )
+        , ( "title", encodeEventField Encode.string data.title )
+        , ( "shortQuestionUuid", encodeEventField (maybe Encode.string) data.shortQuestionUuid )
+        , ( "text", encodeEventField Encode.string data.text )
+        , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
+        , ( "answerIds", encodeEventField (maybe (Encode.list << List.map Encode.string)) data.answerIds )
+        , ( "expertIds", encodeEventField (Encode.list << List.map Encode.string) data.expertIds )
+        , ( "referenceIds", encodeEventField (Encode.list << List.map Encode.string) data.referenceIds )
         ]
 
 
@@ -1330,8 +1288,24 @@ eventDecoderByType eventType =
         "DeleteFollowUpQuestionEvent" ->
             deleteFollowUpQuestionEventDecoder
 
+        "AddAnswerItemTemplateQuestionEvent" ->
+            addAnswerItemTemplateQuestionEventDecoder
+
+        "EditAnswerItemTemplateQuestionEvent" ->
+            editAnswerItemTemplateQuestionEventDecoder
+
+        "DeleteAnswerItemTemplateQuestionEvent" ->
+            deleteAnswerItemTemplateQuestionEventDecoder
+
         _ ->
             Decode.fail <| "Unknown event type: " ++ eventType
+
+
+eventFieldDecoder : Decoder a -> Decoder (EventField a)
+eventFieldDecoder decoder =
+    decode EventField
+        |> required "changed" Decode.bool
+        |> optional "value" (Decode.nullable decoder) Nothing
 
 
 answerItemTemplateDecoder : Decoder AnswerItemTemplateData
@@ -1346,8 +1320,8 @@ editKnowledgeModelEventDecoder =
     decode EditKnowledgeModelEventData
         |> required "uuid" Decode.string
         |> required "kmUuid" Decode.string
-        |> required "name" Decode.string
-        |> required "chapterIds" (Decode.list Decode.string)
+        |> required "name" (eventFieldDecoder Decode.string)
+        |> required "chapterIds" (eventFieldDecoder (Decode.list Decode.string))
         |> Decode.map EditKnowledgeModelEvent
 
 
@@ -1368,9 +1342,9 @@ editChapterEventDecoder =
         |> required "uuid" Decode.string
         |> required "kmUuid" Decode.string
         |> required "chapterUuid" Decode.string
-        |> required "title" Decode.string
-        |> required "text" Decode.string
-        |> required "questionIds" (Decode.list Decode.string)
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "text" (eventFieldDecoder Decode.string)
+        |> required "questionIds" (eventFieldDecoder (Decode.list Decode.string))
         |> Decode.map EditChapterEvent
 
 
@@ -1394,6 +1368,7 @@ addQuestionEventDecoder =
         |> required "title" Decode.string
         |> required "shortQuestionUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
+        |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
         |> Decode.map AddQuestionEvent
 
 
@@ -1404,14 +1379,14 @@ editQuestionEventDecoder =
         |> required "kmUuid" Decode.string
         |> required "chapterUuid" Decode.string
         |> required "questionUuid" Decode.string
-        |> required "type" Decode.string
-        |> required "title" Decode.string
-        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
-        |> required "text" Decode.string
-        |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
-        |> required "answerIds" (Decode.nullable (Decode.list Decode.string))
-        |> required "expertIds" (Decode.list Decode.string)
-        |> required "referenceIds" (Decode.list Decode.string)
+        |> required "type" (eventFieldDecoder Decode.string)
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "shortQuestionUuid" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "text" (eventFieldDecoder Decode.string)
+        |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
+        |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
+        |> required "expertIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceIds" (eventFieldDecoder (Decode.list Decode.string))
         |> Decode.map EditQuestionEvent
 
 
@@ -1446,9 +1421,9 @@ editAnswerEventDecoder =
         |> required "chapterUuid" Decode.string
         |> required "questionUuid" Decode.string
         |> required "answerUuid" Decode.string
-        |> required "label" Decode.string
-        |> required "advice" (Decode.nullable Decode.string)
-        |> required "followUpIds" (Decode.list Decode.string)
+        |> required "label" (eventFieldDecoder Decode.string)
+        |> required "advice" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "followUpIds" (eventFieldDecoder (Decode.list Decode.string))
         |> Decode.map EditAnswerEvent
 
 
@@ -1483,7 +1458,7 @@ editReferenceEventDecoder =
         |> required "chapterUuid" Decode.string
         |> required "questionUuid" Decode.string
         |> required "referenceUuid" Decode.string
-        |> required "chapter" Decode.string
+        |> required "chapter" (eventFieldDecoder Decode.string)
         |> Decode.map EditReferenceEvent
 
 
@@ -1519,8 +1494,8 @@ editExpertEventDecoder =
         |> required "chapterUuid" Decode.string
         |> required "questionUuid" Decode.string
         |> required "expertUuid" Decode.string
-        |> required "name" Decode.string
-        |> required "email" Decode.string
+        |> required "name" (eventFieldDecoder Decode.string)
+        |> required "email" (eventFieldDecoder Decode.string)
         |> Decode.map EditExpertEvent
 
 
@@ -1547,6 +1522,7 @@ addFollowUpQuestionEventDecoder =
         |> required "title" Decode.string
         |> required "shortQuestionUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
+        |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
         |> Decode.map AddFollowUpQuestionEvent
 
 
@@ -1558,14 +1534,14 @@ editFollowUpQuestionEventDecoder =
         |> required "chapterUuid" Decode.string
         |> required "answerUuid" Decode.string
         |> required "questionUuid" Decode.string
-        |> required "type" Decode.string
-        |> required "title" Decode.string
-        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
-        |> required "text" Decode.string
-        |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
-        |> required "answerIds" (Decode.nullable (Decode.list Decode.string))
-        |> required "expertIds" (Decode.list Decode.string)
-        |> required "referenceIds" (Decode.list Decode.string)
+        |> required "type" (eventFieldDecoder Decode.string)
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "shortQuestionUuid" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "text" (eventFieldDecoder Decode.string)
+        |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
+        |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
+        |> required "expertIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceIds" (eventFieldDecoder (Decode.list Decode.string))
         |> Decode.map EditFollowUpQuestionEvent
 
 
@@ -1578,6 +1554,52 @@ deleteFollowUpQuestionEventDecoder =
         |> required "answerUuid" Decode.string
         |> required "questionUuid" Decode.string
         |> Decode.map DeleteFollowUpQuestionEvent
+
+
+addAnswerItemTemplateQuestionEventDecoder : Decoder Event
+addAnswerItemTemplateQuestionEventDecoder =
+    decode AddAnswerItemTemplateQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "type" Decode.string
+        |> required "title" Decode.string
+        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
+        |> required "text" Decode.string
+        |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
+        |> Decode.map AddAnswerItemTemplateQuestionEvent
+
+
+editAnswerItemTemplateQuestionEventDecoder : Decoder Event
+editAnswerItemTemplateQuestionEventDecoder =
+    decode EditAnswerItemTemplateQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> required "type" (eventFieldDecoder Decode.string)
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "shortQuestionUuid" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "text" (eventFieldDecoder Decode.string)
+        |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
+        |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
+        |> required "expertIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> Decode.map EditAnswerItemTemplateQuestionEvent
+
+
+deleteAnswerItemTemplateQuestionEventDecoder : Decoder Event
+deleteAnswerItemTemplateQuestionEventDecoder =
+    decode DeleteAnswerItemTemplateQuestionEventData
+        |> required "uuid" Decode.string
+        |> required "kmUuid" Decode.string
+        |> required "chapterUuid" Decode.string
+        |> required "answerUuid" Decode.string
+        |> required "questionUuid" Decode.string
+        |> Decode.map DeleteAnswerItemTemplateQuestionEvent
 
 
 getEventUuid : Event -> String
@@ -1650,47 +1672,60 @@ getEventUuid event =
             data.uuid
 
 
+getEventFieldValue : EventField a -> Maybe a
+getEventFieldValue eventField =
+    if eventField.changed then
+        eventField.value
+    else
+        Nothing
+
+
+getEventFieldValueWithDefault : EventField a -> a -> a
+getEventFieldValueWithDefault eventField default =
+    getEventFieldValue eventField |> Maybe.withDefault default
+
+
 getEventEntityVisibleName : Event -> Maybe String
 getEventEntityVisibleName event =
     case event of
         EditKnowledgeModelEvent data ->
-            Just data.name
+            getEventFieldValue data.name
 
         AddChapterEvent data ->
             Just data.title
 
         EditChapterEvent data ->
-            Just data.title
+            getEventFieldValue data.title
 
         AddQuestionEvent data ->
             Just data.title
 
         EditQuestionEvent data ->
-            Just data.title
+            getEventFieldValue data.title
 
         AddAnswerEvent data ->
             Just data.label
 
         EditAnswerEvent data ->
-            Just data.label
+            getEventFieldValue data.label
 
         AddReferenceEvent data ->
             Just data.chapter
 
         EditReferenceEvent data ->
-            Just data.chapter
+            getEventFieldValue data.chapter
 
         AddExpertEvent data ->
             Just data.name
 
         EditExpertEvent data ->
-            Just data.name
+            getEventFieldValue data.name
 
         AddFollowUpQuestionEvent data ->
             Just data.title
 
         EditFollowUpQuestionEvent data ->
-            Just data.title
+            getEventFieldValue data.title
 
         _ ->
             Nothing

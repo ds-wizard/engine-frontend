@@ -244,7 +244,7 @@ upgradeModal model =
         ( visible, name ) =
             case model.kmToBeUpgraded of
                 Just km ->
-                    ( True, km.name ) |> Debug.log "State"
+                    ( True, km.name )
 
                 Nothing ->
                     ( False, "" )

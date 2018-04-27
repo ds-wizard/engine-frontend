@@ -66,7 +66,7 @@ editorView model =
                     ( emptyNode, emptyNode, emptyNode )
     in
     div []
-        [ formResultView model.saving
+        [ div [ class "col-xs-12" ] [ formResultView model.saving ]
         , div [ class "col-xs-8" ] [ breadcrumbsView, currentView ]
         , div [ class "col-xs-4 diff-tree-col" ]
             [ h4 [] [ text "Current changes" ]
