@@ -13,6 +13,7 @@ import PackageManagement.Detail.Models
 import PackageManagement.Import.Models
 import PackageManagement.Index.Models
 import Public.Models
+import Questionnaires.Models
 import Random.Pcg exposing (Seed, initialSeed)
 import Routing exposing (Route(..))
 import UserManagement.Models
@@ -33,6 +34,7 @@ type alias Model =
     , knowledgeModelsEditorModel : KnowledgeModels.Editor.Models.Model
     , knowledgeModelsMigrationModel : KnowledgeModels.Migration.Models.Model
     , publicModel : Public.Models.Model
+    , questionnairesModel : Questionnaires.Models.Model
     , userManagement : UserManagement.Models.Model
     }
 
@@ -52,6 +54,7 @@ initialModel route seed session jwt =
     , knowledgeModelsPublishModel = KnowledgeModels.Publish.Models.initialModel
     , knowledgeModelsEditorModel = KnowledgeModels.Editor.Models.initialModel ""
     , knowledgeModelsMigrationModel = KnowledgeModels.Migration.Models.initialModel ""
+    , questionnairesModel = Questionnaires.Models.initialModel
     , publicModel = Public.Models.initialModel
     , userManagement = UserManagement.Models.initialModel
     }

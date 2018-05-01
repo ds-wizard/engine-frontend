@@ -12,6 +12,7 @@ import PackageManagement.Detail.Msgs
 import PackageManagement.Import.Msgs
 import PackageManagement.Index.Msgs
 import Public.Msgs
+import Questionnaires.Msgs
 import UserManagement.Msgs
 
 
@@ -28,5 +29,6 @@ type Msg
     | KnowledgeModelsPublishMsg KnowledgeModels.Publish.Msgs.Msg
     | KnowledgeModelsEditorMsg KnowledgeModels.Editor.Msgs.Msg
     | KnowledgeModelsMigrationMsg KnowledgeModels.Migration.Msgs.Msg
+    | QuestionnairesMsg Questionnaires.Msgs.Msg
     | PublicMsg Public.Msgs.Msg
     | UserManagementMsg UserManagement.Msgs.Msg

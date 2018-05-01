@@ -16,6 +16,7 @@ import PackageManagement.Detail.View
 import PackageManagement.Import.View
 import PackageManagement.Index.View
 import Public.View
+import Questionnaires.View
 import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
 import UserManagement.View
 
@@ -71,8 +72,10 @@ view model =
                 |> PackageManagement.Import.View.view
                 |> appView model
 
-        Wizards ->
-            appView model wizzardsView
+        Questionnaires route ->
+            model.questionnairesModel
+                |> Questionnaires.View.view route QuestionnairesMsg
+                |> appView model
 
         DataManagementPlans ->
             appView model dataManagementPlansView
@@ -97,14 +100,6 @@ view model =
 welcomeView : Html Msg
 welcomeView =
     fullPageError "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
-
-
-wizzardsView : Html Msg
-wizzardsView =
-    div [ detailContainerClass ]
-        [ pageHeader "Wizards" []
-        , fullPageError "fa-magic" "Wizards are not implemented yet."
-        ]
 
 
 dataManagementPlansView : Html Msg

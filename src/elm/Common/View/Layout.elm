@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Models exposing (Model)
 import Msgs exposing (Msg)
+import Questionnaires.Routing
 import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
 import UserManagement.Routing
 
@@ -74,8 +75,8 @@ menuItems =
     , ( "User Management", "fa-users", UserManagement UserManagement.Routing.Index, Perm.userManagement )
     , ( "Knowledge Models", "fa-database", KnowledgeModels, Perm.knowledgeModel )
     , ( "Package Management", "fa-cubes", PackageManagement, Perm.packageManagement )
-    , ( "Wizards", "fa-list-alt", Wizards, Perm.wizard )
-    , ( "Data Management Plans", "fa-file-text", DataManagementPlans, Perm.dataManagementPlan )
+    , ( "Questionnaires", "fa-list-alt", Questionnaires Questionnaires.Routing.Index, Perm.questionnaire )
+    , ( "Data Management Plans", "fa-book", DataManagementPlans, Perm.dataManagementPlan )
     ]
 
 

@@ -14,6 +14,7 @@ import PackageManagement.Detail.Update
 import PackageManagement.Import.Update
 import PackageManagement.Index.Update
 import Public.Update
+import Questionnaires.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import UserManagement.Update
 
@@ -140,6 +141,13 @@ update msg model =
                     Public.Update.update msg Msgs.PublicMsg model.seed model.publicModel
             in
             ( { model | seed = seed, publicModel = publicModel }, cmd )
+
+        Msgs.QuestionnairesMsg msg ->
+            let
+                ( questionnairesModel, cmd ) =
+                    Questionnaires.Update.update msg Msgs.QuestionnairesMsg model.questionnairesModel
+            in
+            ( { model | questionnairesModel = questionnairesModel }, cmd )
 
         Msgs.UserManagementMsg msg ->
             let

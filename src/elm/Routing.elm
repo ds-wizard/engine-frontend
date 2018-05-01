@@ -4,6 +4,7 @@ import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Navigation exposing (Location)
 import Public.Routing
+import Questionnaires.Routing
 import UrlParser exposing (..)
 import UserManagement.Routing
 
@@ -19,7 +20,7 @@ type Route
     | PackageManagement
     | PackageManagementDetail String String
     | PackageManagementImport
-    | Wizards
+    | Questionnaires Questionnaires.Routing.Route
     | DataManagementPlans
     | NotFound
     | NotAllowed
@@ -31,8 +32,10 @@ matchers : Parser (Route -> a) a
 matchers =
     let
         parsers =
-            UserManagement.Routing.parses UserManagement
+            []
                 ++ Public.Routing.parsers Public
+                ++ Questionnaires.Routing.parses Questionnaires
+                ++ UserManagement.Routing.parses UserManagement
                 ++ [ map Welcome (s "welcome")
                    , map Organization (s "organization")
                    , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
@@ -43,16 +46,10 @@ matchers =
                    , map PackageManagement (s "package-management")
                    , map PackageManagementDetail (s "package-management" </> s "package" </> string </> string)
                    , map PackageManagementImport (s "package-management" </> s "import")
-                   , map Wizards (s "wizards")
                    , map DataManagementPlans (s "data-management-plans")
                    ]
     in
     oneOf parsers
-
-
-mapParsers : (a -> d) -> List ( a, Parser d b ) -> List (Parser (b -> c) c)
-mapParsers wrap parsers =
-    List.map (\( route, parser ) -> map (wrap route) parser) parsers
 
 
 routeIfAllowed : Maybe JwtToken -> Route -> Route
@@ -96,8 +93,8 @@ isAllowed route maybeJwt =
         PackageManagementImport ->
             hasPerm maybeJwt Perm.packageManagement
 
-        Wizards ->
-            hasPerm maybeJwt Perm.wizard
+        Questionnaires route ->
+            Questionnaires.Routing.isAllowed route maybeJwt
 
         DataManagementPlans ->
             hasPerm maybeJwt Perm.dataManagementPlan
@@ -150,8 +147,8 @@ toUrl route =
                 PackageManagementImport ->
                     [ "package-management", "import" ]
 
-                Wizards ->
-                    [ "wizards" ]
+                Questionnaires route ->
+                    Questionnaires.Routing.toUrl route
 
                 DataManagementPlans ->
                     [ "data-management-plans" ]

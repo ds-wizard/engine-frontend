@@ -43,8 +43,8 @@ packageManagement =
     "PM_PERM"
 
 
-wizard : String
-wizard =
+questionnaire : String
+questionnaire =
     "WIZ_PERM"
 
 
