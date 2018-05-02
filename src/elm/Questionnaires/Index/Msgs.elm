@@ -7,3 +7,5 @@ import Questionnaires.Common.Models exposing (Questionnaire)
 type Msg
     = GetQuestionnairesCompleted (Result Jwt.JwtError (List Questionnaire))
     | ShowHideDeleteQuestionnaire (Maybe Questionnaire)
+    | DeleteQuestionnaire
+    | DeleteQuestionnaireCompleted (Result Jwt.JwtError String)

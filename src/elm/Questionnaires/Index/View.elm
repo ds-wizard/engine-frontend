@@ -1,7 +1,8 @@
 module Questionnaires.Index.View exposing (..)
 
 import Common.Html exposing (detailContainerClass, emptyNode, linkTo)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
+import Common.View.Forms exposing (formSuccessResultView)
 import Common.View.Table exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -17,7 +18,9 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "questionnaires" ]
         [ pageHeader "Questionnaires" indexActions
+        , formSuccessResultView model.deletingQuestionnaire
         , fullPageActionResultView (indexTable tableConfig wrapMsg) model.questionnaires
+        , deleteModal wrapMsg model
         ]
 
 
@@ -51,3 +54,35 @@ tableConfig =
 tableActionDelete : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
 tableActionDelete wrapMsg =
     wrapMsg << ShowHideDeleteQuestionnaire << Just
+
+
+deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+deleteModal wrapMsg model =
+    let
+        ( visible, name ) =
+            case model.questionnaireToBeDeleted of
+                Just questionnaire ->
+                    ( True, questionnaire.name )
+
+                Nothing ->
+                    ( False, "" )
+
+        modalContent =
+            [ p []
+                [ text "Are you sure you want to permanently delete "
+                , strong [] [ text name ]
+                , text "?"
+                ]
+            ]
+
+        modalConfig =
+            { modalTitle = "Delete questionnaire"
+            , modalContent = modalContent
+            , visible = visible
+            , actionResult = model.deletingQuestionnaire
+            , actionName = "Delete"
+            , actionMsg = wrapMsg DeleteQuestionnaire
+            , cancelMsg = wrapMsg <| ShowHideDeleteQuestionnaire Nothing
+            }
+    in
+    modalView modalConfig

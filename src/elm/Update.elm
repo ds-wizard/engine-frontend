@@ -148,7 +148,7 @@ update msg model =
         Msgs.QuestionnairesMsg msg ->
             let
                 ( questionnairesModel, cmd ) =
-                    Questionnaires.Update.update msg Msgs.QuestionnairesMsg model.questionnairesModel
+                    Questionnaires.Update.update msg Msgs.QuestionnairesMsg model.session model.questionnairesModel
             in
             ( { model | questionnairesModel = questionnairesModel }, cmd )
 

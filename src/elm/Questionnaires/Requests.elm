@@ -9,3 +9,8 @@ import Requests
 getQuestionnaires : Session -> Http.Request (List Questionnaire)
 getQuestionnaires session =
     Requests.get session "/questionnaires" questionnaireListDecoder
+
+
+deleteQuestionnaire : String -> Session -> Http.Request String
+deleteQuestionnaire uuid session =
+    Requests.delete session ("/questionnaires/" ++ uuid)

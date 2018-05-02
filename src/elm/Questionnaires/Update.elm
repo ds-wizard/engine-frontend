@@ -20,8 +20,8 @@ fetchData route wrapMsg session =
             Cmd.none
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg model =
+update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg session model =
     case msg of
         CreateMsg msg ->
             let
@@ -40,6 +40,6 @@ update msg wrapMsg model =
         IndexMsg msg ->
             let
                 ( indexModel, cmd ) =
-                    Questionnaires.Index.Update.update msg (wrapMsg << IndexMsg) model.indexModel
+                    Questionnaires.Index.Update.update msg (wrapMsg << IndexMsg) session model.indexModel
             in
             ( { model | indexModel = indexModel }, cmd )
