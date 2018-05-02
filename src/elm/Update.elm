@@ -49,6 +49,9 @@ fetchData model =
         Public route ->
             Public.Update.fetchData route Msgs.PublicMsg
 
+        Questionnaires route ->
+            Questionnaires.Update.fetchData route Msgs.QuestionnairesMsg model.session
+
         UserManagement route ->
             UserManagement.Update.fetchData route Msgs.UserManagementMsg model.session
 

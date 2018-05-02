@@ -3,6 +3,7 @@ module Questionnaires.Models exposing (..)
 import Questionnaires.Create.Models
 import Questionnaires.Detail.Models
 import Questionnaires.Index.Models
+import Questionnaires.Routing exposing (Route(..))
 
 
 type alias Model =
@@ -18,3 +19,16 @@ initialModel =
     , detailModel = Questionnaires.Detail.Models.initialModel
     , indexModel = Questionnaires.Index.Models.initialModel
     }
+
+
+initLocalModel : Route -> Model -> Model
+initLocalModel route model =
+    case route of
+        Create ->
+            { model | createModel = Questionnaires.Create.Models.initialModel }
+
+        Detail uuid ->
+            { model | detailModel = Questionnaires.Detail.Models.initialModel }
+
+        Index ->
+            { model | indexModel = Questionnaires.Index.Models.initialModel }

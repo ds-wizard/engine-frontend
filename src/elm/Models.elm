@@ -93,6 +93,9 @@ initLocalModel model =
         Public route ->
             { model | publicModel = Public.Models.initLocalModel route model.publicModel }
 
+        Questionnaires route ->
+            { model | questionnairesModel = Questionnaires.Models.initLocalModel route model.questionnairesModel }
+
         UserManagement route ->
             { model | userManagement = UserManagement.Models.initLocalModel route model.userManagement }
 

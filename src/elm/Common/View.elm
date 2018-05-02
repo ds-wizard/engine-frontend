@@ -1,24 +1,6 @@
 module Common.View exposing (..)
 
-{-|
-
-
-# Layout helpers
-
-@docs pageHeader, pageActions
-
-
-# Page status
-
-@docs fullPageLoader, defaultFullPageError, fullPageError
-
-
-# Modals
-
-@docs ModalConifg, modalView
-
--}
-
+import Common.Html exposing (emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View.Forms exposing (..)
 import Html exposing (..)
@@ -27,7 +9,6 @@ import Html.Events exposing (onClick)
 import Msgs exposing (Msg)
 
 
-{-| -}
 pageHeader : String -> List (Html msg) -> Html msg
 pageHeader title actions =
     div [ class "header" ]
@@ -36,14 +17,12 @@ pageHeader title actions =
         ]
 
 
-{-| -}
 pageActions : List (Html msg) -> Html msg
 pageActions actions =
     div [ class "actions" ]
         actions
 
 
-{-| -}
 fullPageLoader : Html msg
 fullPageLoader =
     div [ class "full-page-loader" ]
@@ -52,13 +31,11 @@ fullPageLoader =
         ]
 
 
-{-| -}
 defaultFullPageError : String -> Html msg
 defaultFullPageError =
     fullPageError "fa-frown-o"
 
 
-{-| -}
 fullPageError : String -> String -> Html msg
 fullPageError icon error =
     div [ class "jumbotron full-page-error" ]
@@ -67,7 +44,22 @@ fullPageError icon error =
         ]
 
 
-{-| -}
+fullPageActionResultView : (a -> Html Msgs.Msg) -> ActionResult a -> Html Msgs.Msg
+fullPageActionResultView viewContent actionResult =
+    case actionResult of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            fullPageLoader
+
+        Error err ->
+            defaultFullPageError err
+
+        Success result ->
+            viewContent result
+
+
 type alias ModalConifg =
     { modalTitle : String
     , modalContent : List (Html Msg)
@@ -79,7 +71,6 @@ type alias ModalConifg =
     }
 
 
-{-| -}
 modalView : ModalConifg -> Html Msg
 modalView cfg =
     let
