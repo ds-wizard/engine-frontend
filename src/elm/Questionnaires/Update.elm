@@ -13,6 +13,9 @@ import Questionnaires.Routing exposing (Route(..))
 fetchData : Route -> (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
 fetchData route wrapMsg session =
     case route of
+        Create ->
+            Questionnaires.Create.Update.fetchData (wrapMsg << CreateMsg) session
+
         Index ->
             Questionnaires.Index.Update.fetchData (wrapMsg << IndexMsg) session
 
@@ -26,7 +29,7 @@ update msg wrapMsg session model =
         CreateMsg msg ->
             let
                 ( createModel, cmd ) =
-                    Questionnaires.Create.Update.update msg (wrapMsg << CreateMsg) model.createModel
+                    Questionnaires.Create.Update.update msg (wrapMsg << CreateMsg) session model.createModel
             in
             ( { model | createModel = createModel }, cmd )
 
