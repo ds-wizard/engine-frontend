@@ -63,7 +63,7 @@ viewGroupItem path index itemElement =
                 button [ class "btn btn-default btn-item-delete", onClick (GroupItemRemove path index) ]
                     [ i [ class "fa fa-trash-o" ] [] ]
     in
-    div [ class "well well-sm well-item" ] <|
+    div [ class "well well-item" ] <|
         [ deleteButton ]
             ++ List.map (viewFormElement (path ++ [ toString index ])) itemElement
 
@@ -77,7 +77,7 @@ viewChoice path parentDescriptor parentState optionElement =
         viewOption title value extra =
             div [ class "radio" ]
                 [ label []
-                    [ input [ type_ "radio", name radioName, onClick (Input path value), checked (Just value == parentState.value) |> Debug.log "selected" ] []
+                    [ input [ type_ "radio", name radioName, onClick (Input path value), checked (Just value == parentState.value) ] []
                     , text title
                     , extra
                     ]
@@ -133,7 +133,7 @@ adviceElement maybeAdvice =
             text ""
 
 
-viewFollowUps :a List String -> Maybe String -> List OptionElement -> Html Msg
+viewFollowUps : List String -> Maybe String -> List OptionElement -> Html Msg
 viewFollowUps path value options =
     let
         isSelected option =
