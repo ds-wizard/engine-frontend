@@ -1,0 +1,40 @@
+.form-engine-form {
+    .form-group {
+        margin-bottom: 40px;
+
+        &:last-child {
+            margin-bottom: 15px;
+        }
+    }
+
+    .followups-group {
+        margin-top: 20px;
+        border-left: 5px #ddd solid;
+        padding-left: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .well-item {
+        position: relative;
+
+        .btn-item-delete {
+            position: absolute;
+            right: -50px;
+            top: 0;
+        }
+    }
+
+    .alert {
+        margin-bottom: 0;
+    }
+
+    .expand-icon {
+        margin-left: 10px;
+        color: #bbb;
+    }
+
+    input[type="radio"] {
+        margin-top: 2px;
+    }
+}
