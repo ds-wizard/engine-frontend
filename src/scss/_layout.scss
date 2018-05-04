@@ -21,20 +21,17 @@
 
     .logo {
         color: #fff;
-        font-size: 24px;
+        font-size: 18px;
         display: inline-block;
-        background: no-repeat left 10px center;
-        @include background-image-retina("/img/elixir-logo", "png");
-        background-size: 43px 44px;
         width: 100%;
         text-decoration: none;
-        padding: 25px 15px 15px;
-        text-indent: 30px;
+        padding: 15px;
+        border-bottom: 1px solid darken($brand-primary, 10%);
     }
 
     .menu {
         padding: 0;
-        margin: 0;
+        margin: 15px 0 0 0;
 
         li {
             padding: 1px 3px;
