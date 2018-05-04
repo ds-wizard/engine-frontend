@@ -3,13 +3,18 @@ module Questionnaires.Requests exposing (..)
 import Auth.Models exposing (Session)
 import Http
 import Json.Encode exposing (Value)
-import Questionnaires.Common.Models exposing (Questionnaire, questionnaireListDecoder)
+import Questionnaires.Common.Models exposing (..)
 import Requests
 
 
 getQuestionnaires : Session -> Http.Request (List Questionnaire)
 getQuestionnaires session =
     Requests.get session "/questionnaires" questionnaireListDecoder
+
+
+getQuestionnaire : String -> Session -> Http.Request QuestionnaireDetail
+getQuestionnaire uuid session =
+    Requests.get session ("/questionnaires/" ++ uuid) questionnaireDetailDecoder
 
 
 deleteQuestionnaire : String -> Session -> Http.Request String

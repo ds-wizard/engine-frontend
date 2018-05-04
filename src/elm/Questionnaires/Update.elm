@@ -16,11 +16,11 @@ fetchData route wrapMsg session =
         Create ->
             Questionnaires.Create.Update.fetchData (wrapMsg << CreateMsg) session
 
+        Detail uuid ->
+            Questionnaires.Detail.Update.fetchData (wrapMsg << DetailMsg) session uuid
+
         Index ->
             Questionnaires.Index.Update.fetchData (wrapMsg << IndexMsg) session
-
-        _ ->
-            Cmd.none
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
