@@ -36,8 +36,14 @@ tableConfig =
         [ { label = "Name"
           , getValue = TextValue .name
           }
+        , { label = "Package Name"
+          , getValue = TextValue (.package >> .name)
+          }
+        , { label = "Package Version"
+          , getValue = TextValue (.package >> .version)
+          }
         , { label = "Package ID"
-          , getValue = TextValue .pkgId
+          , getValue = TextValue (.package >> .id)
           }
         ]
     , actions =

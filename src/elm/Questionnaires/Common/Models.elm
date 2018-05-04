@@ -2,12 +2,13 @@ module Questionnaires.Common.Models exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
+import PackageManagement.Models exposing (PackageDetail, packageDetailDecoder)
 
 
 type alias Questionnaire =
     { uuid : String
-    , pkgId : String
     , name : String
+    , package : PackageDetail
     }
 
 
@@ -15,8 +16,8 @@ questionnaireDecoder : Decoder Questionnaire
 questionnaireDecoder =
     decode Questionnaire
         |> required "uuid" Decode.string
-        |> required "pkgId" Decode.string
         |> required "name" Decode.string
+        |> required "package" packageDetailDecoder
 
 
 questionnaireListDecoder : Decoder (List Questionnaire)
