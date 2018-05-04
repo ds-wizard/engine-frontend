@@ -45,7 +45,7 @@ packageManagement =
 
 questionnaire : String
 questionnaire =
-    "WIZ_PERM"
+    "QTN_PERM"
 
 
 dataManagementPlan : String
