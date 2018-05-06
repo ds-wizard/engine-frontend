@@ -182,7 +182,7 @@ cmdNavigate =
 
 homeRoute : Route
 homeRoute =
-    Public Public.Routing.Home
+    Public Public.Routing.Login
 
 
 loginRoute : Route

@@ -59,6 +59,3 @@ update msg wrapMsg seed model =
                     Public.SignupConfirmation.Update.update msg model.signupConfirmationModel
             in
             ( seed, { model | signupConfirmationModel = signupConfirmationModel }, Cmd.none )
-
-        _ ->
-            ( seed, model, Cmd.none )

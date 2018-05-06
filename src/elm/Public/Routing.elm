@@ -6,7 +6,6 @@ import UrlParser exposing (..)
 type Route
     = ForgottenPassword
     | ForgottenPasswordConfirmation String String
-    | Home
     | Login
     | Signup
     | SignupConfirmation String String
@@ -16,8 +15,7 @@ parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     [ map (wrapRoute <| ForgottenPassword) (s "forgotten-password")
     , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
-    , map (wrapRoute <| Home) top
-    , map (wrapRoute <| Login) (s "login")
+    , map (wrapRoute <| Login) top
     , map (wrapRoute <| Signup) (s "signup")
     , map (signupConfirmation wrapRoute) (s "signup-confirmation" </> string </> string)
     ]
@@ -42,11 +40,8 @@ toUrl route =
         ForgottenPasswordConfirmation userId hash ->
             [ "forgotten-password", userId, hash ]
 
-        Home ->
-            []
-
         Login ->
-            [ "login" ]
+            []
 
         Signup ->
             [ "signup" ]

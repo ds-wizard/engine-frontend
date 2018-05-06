@@ -4,7 +4,6 @@ import Html exposing (Html)
 import Msgs
 import Public.ForgottenPassword.View
 import Public.ForgottenPasswordConfirmation.View
-import Public.Home.View
 import Public.Login.View
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
@@ -21,9 +20,6 @@ view route wrapMsg model =
 
         ForgottenPasswordConfirmation userId hash ->
             Public.ForgottenPasswordConfirmation.View.view (wrapMsg << ForgottenPasswordConfirmationMsg) model.forgottenPasswordConfirmationModel
-
-        Home ->
-            Public.Home.View.view
 
         Login ->
             Public.Login.View.view (wrapMsg << LoginMsg) model.loginModel
