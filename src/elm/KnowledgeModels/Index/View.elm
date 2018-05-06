@@ -28,7 +28,7 @@ import Routing exposing (Route(..))
 view : Maybe JwtToken -> Model -> Html Msgs.Msg
 view jwt model =
     div []
-        [ pageHeader "Knowledge models" indexActions
+        [ pageHeader "Knowledge Model Editor" indexActions
         , formResultView model.deletingMigration
         , content jwt model
         , deleteModal model
@@ -56,7 +56,7 @@ indexActions : List (Html Msgs.Msg)
 indexActions =
     [ linkTo Routing.KnowledgeModelsCreate
         [ class "btn btn-primary" ]
-        [ text "Create KM" ]
+        [ text "Create" ]
     ]
 
 

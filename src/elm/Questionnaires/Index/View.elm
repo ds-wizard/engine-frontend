@@ -17,7 +17,7 @@ import Routing
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "questionnaires" ]
-        [ pageHeader "Questionnaires" indexActions
+        [ pageHeader "Data Stewardship Planner" indexActions
         , formSuccessResultView model.deletingQuestionnaire
         , fullPageActionResultView (indexTable tableConfig wrapMsg) model.questionnaires
         , deleteModal wrapMsg model
@@ -26,7 +26,7 @@ view wrapMsg model =
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo (Routing.Questionnaires Create) [ class "btn btn-primary" ] [ text "Create questionnaire" ] ]
+    [ linkTo (Routing.Questionnaires Create) [ class "btn btn-primary" ] [ text "Create" ] ]
 
 
 tableConfig : TableConfig Questionnaire Msg
