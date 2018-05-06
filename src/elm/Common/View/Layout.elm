@@ -74,7 +74,7 @@ menuItems =
     [ ( "Organization", "fa-building", Organization, Perm.organization )
     , ( "User Management", "fa-users", UserManagement UserManagement.Routing.Index, Perm.userManagement )
     , ( "Knowledge Models", "fa-database", KnowledgeModels, Perm.knowledgeModel )
-    , ( "Package Management", "fa-cubes", PackageManagement, Perm.packageManagement )
+    , ( "KM Packages", "fa-cubes", PackageManagement, Perm.packageManagement )
     , ( "Questionnaires", "fa-list-alt", Questionnaires Questionnaires.Routing.Index, Perm.questionnaire )
     , ( "Data Management Plans", "fa-book", DataManagementPlans, Perm.dataManagementPlan )
     ]

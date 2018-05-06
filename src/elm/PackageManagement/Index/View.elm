@@ -21,7 +21,7 @@ import Routing exposing (Route(..))
 view : Model -> Html Msgs.Msg
 view model =
     div []
-        [ pageHeader "Package Management" actions
+        [ pageHeader "Knowledge Model Packages" actions
         , content model
         ]
 
@@ -65,8 +65,8 @@ pmTableHeader =
     thead []
         [ tr []
             [ th [] [ text "Name" ]
-            , th [] [ text "Group ID" ]
-            , th [] [ text "Artifact ID" ]
+            , th [] [ text "Organization ID" ]
+            , th [] [ text "Knowledge Model ID" ]
             ]
         ]
 

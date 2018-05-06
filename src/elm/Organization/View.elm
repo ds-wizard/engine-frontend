@@ -54,9 +54,9 @@ formView form =
         formHtml =
             div []
                 [ inputGroup form "name" "Organization name"
-                , inputGroup form "groupId" "Organization Group ID"
+                , inputGroup form "groupId" "Organization ID"
                 , p [ class "help-block help-block-after" ]
-                    [ text "Group ID can contain alfanumeric characters and dot but cannot start or end with dot." ]
+                    [ text "Organization ID can contain alfanumeric characters and dot but cannot start or end with dot." ]
                 ]
     in
     formHtml |> Html.map (FormMsg >> Msgs.OrganizationMsg)

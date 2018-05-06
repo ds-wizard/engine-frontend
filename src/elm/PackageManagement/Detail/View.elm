@@ -116,8 +116,8 @@ packageDetail packages =
         Just package ->
             div []
                 [ pageHeader package.name actions
-                , codeGroup package.groupId "Group ID"
-                , codeGroup package.artifactId "Artifact ID"
+                , codeGroup package.groupId "Organization ID"
+                , codeGroup package.artifactId "Knowledge Model ID"
                 , h3 [] [ text "Versions" ]
                 , div [] (List.map versionView packages)
                 ]
