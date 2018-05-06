@@ -26,8 +26,8 @@ content wrapMsg model questionnaire =
     div [ class "questionnaire-detail" ]
         [ pageHeader (questionnaire.name ++ " (" ++ questionnaire.package.name ++ ", " ++ questionnaire.package.version ++ ")") []
         , div [ class "row" ]
-            [ div [ class "col-xs-2" ] [ chapterList wrapMsg questionnaire model.activeChapter ]
-            , div [ class "col-xs-8" ]
+            [ div [ class "col-xs-12 col-md-3 col-lg-2" ] [ chapterList wrapMsg questionnaire model.activeChapter ]
+            , div [ class "col-xs-11 col-md-8 col-lg 10" ]
                 [ chapterHeader model.activeChapter
                 , viewChapterForm model |> Html.map (wrapMsg << FormMsg)
                 ]
