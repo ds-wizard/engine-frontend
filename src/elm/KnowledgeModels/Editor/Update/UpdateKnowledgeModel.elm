@@ -13,7 +13,6 @@ import KnowledgeModels.Editor.Models.Entities exposing (newChapter)
 import KnowledgeModels.Editor.Models.Events exposing (..)
 import KnowledgeModels.Editor.Models.Forms exposing (knowledgeModelFormValidation, updateKnowledgeModelWithForm)
 import KnowledgeModels.Editor.Update.Utils exposing (..)
-import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
@@ -74,7 +73,7 @@ updateKnowledgeModelDeleteChapter : String -> Seed -> KnowledgeModelEditor -> ( 
 updateKnowledgeModelDeleteChapter uuid seed (KnowledgeModelEditor editor) =
     let
         newChapters =
-            List.removeWhen (matchChapter uuid) editor.chapters
+            List.filter (not << matchChapter uuid) editor.chapters
 
         ( event, newSeed ) =
             createDeleteChapterEvent editor.knowledgeModel seed uuid

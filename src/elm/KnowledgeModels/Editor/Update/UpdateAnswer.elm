@@ -13,7 +13,6 @@ import KnowledgeModels.Editor.Models.Entities exposing (..)
 import KnowledgeModels.Editor.Models.Events exposing (Event, createAddFollowUpQuestionEvent, createDeleteFollowUpQuestionEvent, createEditAnswerEvent)
 import KnowledgeModels.Editor.Models.Forms exposing (answerFormValidation, initAnswerForm, updateAnswerWithForm)
 import KnowledgeModels.Editor.Update.Utils exposing (addChild, formChanged, updateInList)
-import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
@@ -97,7 +96,7 @@ updateAnswerDeleteFollowUpQuestion : String -> Seed -> Chapter -> KnowledgeModel
 updateAnswerDeleteFollowUpQuestion uuid seed chapter knowledgeModel (AnswerEditor editor) =
     let
         newFollowUps =
-            List.removeWhen (matchQuestion uuid) editor.followUps
+            List.filter (not << matchQuestion uuid) editor.followUps
 
         ( event, newSeed ) =
             createDeleteFollowUpQuestionEvent editor.answer chapter knowledgeModel seed uuid

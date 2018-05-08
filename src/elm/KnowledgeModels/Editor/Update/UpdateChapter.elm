@@ -105,7 +105,7 @@ updateChapterDeleteQuestion : String -> Seed -> KnowledgeModel -> ChapterEditor 
 updateChapterDeleteQuestion uuid seed knowledgeModel (ChapterEditor editor) =
     let
         newQuestions =
-            List.removeWhen (matchQuestion uuid) editor.questions
+            List.filter (not << matchQuestion uuid) editor.questions
 
         ( event, newSeed ) =
             createDeleteQuestionEvent editor.chapter knowledgeModel seed uuid

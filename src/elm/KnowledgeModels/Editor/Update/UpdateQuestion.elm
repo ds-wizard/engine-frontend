@@ -6,7 +6,6 @@ import KnowledgeModels.Editor.Models.Entities exposing (..)
 import KnowledgeModels.Editor.Models.Events exposing (..)
 import KnowledgeModels.Editor.Models.Forms exposing (..)
 import KnowledgeModels.Editor.Update.Utils exposing (addChild, formChanged, updateInList)
-import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
@@ -123,7 +122,7 @@ deleteAnswerItemTemplateQuestion : String -> Seed -> Chapter -> KnowledgeModel -
 deleteAnswerItemTemplateQuestion uuid seed chapter knowledgeModel (QuestionEditor editor) =
     let
         newAnswerItemTemplateQuestions =
-            List.removeWhen (matchQuestion uuid) editor.answerItemTemplateQuestions
+            List.filter (not << matchQuestion uuid) editor.answerItemTemplateQuestions
 
         ( event, newSeed ) =
             createDeleteAnswerItemTemplateQuestionEvent editor.question chapter knowledgeModel seed uuid
@@ -158,7 +157,7 @@ deleteAnswer : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> 
 deleteAnswer uuid seed chapter knowledgeModel (QuestionEditor editor) =
     let
         newAnswers =
-            List.removeWhen (matchAnswer uuid) editor.answers
+            List.filter (not << matchAnswer uuid) editor.answers
 
         ( event, newSeed ) =
             createDeleteAnswerEvent editor.question chapter knowledgeModel seed uuid
@@ -193,7 +192,7 @@ deleteReference : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor 
 deleteReference uuid seed chapter knowledgeModel (QuestionEditor editor) =
     let
         newReferences =
-            List.removeWhen (matchReference uuid) editor.references
+            List.filter (not << matchReference uuid) editor.references
 
         ( event, newSeed ) =
             createDeleteReferenceEvent editor.question chapter knowledgeModel seed uuid
@@ -228,7 +227,7 @@ deleteExpert : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> 
 deleteExpert uuid seed chapter knowledgeModel (QuestionEditor editor) =
     let
         newExperts =
-            List.removeWhen (matchExpert uuid) editor.experts
+            List.filter (not << matchExpert uuid) editor.experts
 
         ( event, newSeed ) =
             createDeleteExpertEvent editor.question chapter knowledgeModel seed uuid
