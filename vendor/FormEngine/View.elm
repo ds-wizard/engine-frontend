@@ -48,16 +48,16 @@ viewFormElement path formItem =
         GroupFormElement descriptor _ items state ->
             div [ class "form-group" ]
                 [ label [ class "control-label" ] [ text descriptor.label ]
-                , div [] (List.indexedMap (viewGroupItem (path ++ [ descriptor.name ])) items)
+                , div [] (List.indexedMap (viewGroupItem (path ++ [ descriptor.name ]) (List.length items)) items)
                 , button [ class "btn btn-default", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [] ]
                 ]
 
 
-viewGroupItem : List String -> Int -> ItemElement -> Html Msg
-viewGroupItem path index itemElement =
+viewGroupItem : List String -> Int -> Int -> ItemElement -> Html Msg
+viewGroupItem path numberOfItems index itemElement =
     let
         deleteButton =
-            if index == 0 then
+            if numberOfItems == 1 then
                 text ""
             else
                 button [ class "btn btn-default btn-item-delete", onClick (GroupItemRemove path index) ]

@@ -10,3 +10,5 @@ type Msg
     = GetQuestionnaireCompleted (Result Jwt.JwtError QuestionnaireDetail)
     | SetActiveChapter Chapter
     | FormMsg FormEngine.Msgs.Msg
+    | Save
+    | PutValuesCompleted (Result Jwt.JwtError String)

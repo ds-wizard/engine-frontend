@@ -36,7 +36,7 @@ update msg wrapMsg session model =
         DetailMsg msg ->
             let
                 ( detailModel, cmd ) =
-                    Questionnaires.Detail.Update.update msg (wrapMsg << DetailMsg) model.detailModel
+                    Questionnaires.Detail.Update.update msg (wrapMsg << DetailMsg) session model.detailModel
             in
             ( { model | detailModel = detailModel }, cmd )
 

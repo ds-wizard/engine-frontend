@@ -25,3 +25,8 @@ deleteQuestionnaire uuid session =
 postQuestionnaire : Session -> Value -> Http.Request String
 postQuestionnaire session questionnaire =
     Requests.post questionnaire session "/questionnaires"
+
+
+putValues : String -> Session -> Value -> Http.Request String
+putValues uuid session values =
+    Requests.put values session ("/questionnaires/" ++ uuid ++ "/values")

@@ -16,7 +16,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { createModel = Questionnaires.Create.Models.initialModel
-    , detailModel = Questionnaires.Detail.Models.initialModel
+    , detailModel = Questionnaires.Detail.Models.initialModel ""
     , indexModel = Questionnaires.Index.Models.initialModel
     }
 
@@ -28,7 +28,7 @@ initLocalModel route model =
             { model | createModel = Questionnaires.Create.Models.initialModel }
 
         Detail uuid ->
-            { model | detailModel = Questionnaires.Detail.Models.initialModel }
+            { model | detailModel = Questionnaires.Detail.Models.initialModel uuid }
 
         Index ->
             { model | indexModel = Questionnaires.Index.Models.initialModel }

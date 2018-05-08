@@ -3,15 +3,19 @@ module Questionnaires.Detail.Update exposing (..)
 import Auth.Models exposing (Session)
 import Common.Types exposing (ActionResult(..))
 import Dict exposing (Dict)
-import FormEngine.Model exposing (Form, FormItem(ChoiceFormItem, GroupFormItem, StringFormItem), FormItemDescriptor, FormTree, Option(DetailedOption, SimpleOption), OptionDescriptor, createForm)
+import FormEngine.Model exposing (..)
+import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
+import Json.Encode as Encode exposing (..)
 import Jwt
 import KnowledgeModels.Editor.Models.Entities exposing (Answer, AnswerItemTemplate, AnswerItemTemplateQuestions(..), Chapter, FollowUps(..), Question)
 import Msgs
 import Questionnaires.Common.Models exposing (QuestionnaireDetail)
 import Questionnaires.Detail.Models exposing (Model)
 import Questionnaires.Detail.Msgs exposing (Msg(..))
-import Questionnaires.Requests exposing (getQuestionnaire)
+import Questionnaires.Requests exposing (getQuestionnaire, putValues)
+import Questionnaires.Routing exposing (Route(Index))
+import Routing exposing (cmdNavigate)
 
 
 fetchData : (Msg -> Msgs.Msg) -> Session -> String -> Cmd Msgs.Msg
@@ -21,34 +25,31 @@ fetchData wrapMsg session uuid =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg model =
+update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg session model =
     case msg of
         GetQuestionnaireCompleted result ->
-            getQuestionnaireCompleted model result
+            ( handleGetQuestionnaireCompleted model result, Cmd.none )
 
         SetActiveChapter chapter ->
-            let
-                newModel =
-                    { model | activeChapter = Just chapter }
-            in
-            ( setActiveChapterForm newModel, Cmd.none )
+            ( handleSetActiveChapter chapter model, Cmd.none )
 
         FormMsg msg ->
-            let
-                newModel =
-                    case model.activeChapterForm of
-                        Just form ->
-                            { model | activeChapterForm = Just <| updateForm msg form }
+            ( handleFormMsg msg model, Cmd.none )
 
-                        _ ->
-                            model
-            in
-            ( newModel, Cmd.none )
+        Save ->
+            handleSave wrapMsg session model
+
+        PutValuesCompleted result ->
+            handlePutValuesCompleted model result
 
 
-getQuestionnaireCompleted : Model -> Result Jwt.JwtError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
-getQuestionnaireCompleted model result =
+
+{- Update handlers -}
+
+
+handleGetQuestionnaireCompleted : Model -> Result Jwt.JwtError QuestionnaireDetail -> Model
+handleGetQuestionnaireCompleted model result =
     let
         newModel =
             case result of
@@ -56,27 +57,109 @@ getQuestionnaireCompleted model result =
                     { model
                         | questionnaire = Success questionnaireDetail
                         , activeChapter = List.head questionnaireDetail.knowledgeModel.chapters
+                        , values = questionnaireDetail.values
                     }
 
                 Err error ->
                     { model | questionnaire = Error "Unable to get questionnaire." }
     in
-    ( setActiveChapterForm newModel, Cmd.none )
+    setActiveChapterForm newModel
+
+
+handleSetActiveChapter : Chapter -> Model -> Model
+handleSetActiveChapter chapter model =
+    model
+        |> updateValues
+        |> setActiveChapter chapter
+        |> setActiveChapterForm
+
+
+handleFormMsg : FormEngine.Msgs.Msg -> Model -> Model
+handleFormMsg msg model =
+    case model.activeChapterForm of
+        Just form ->
+            { model | activeChapterForm = Just <| updateForm msg form }
+
+        _ ->
+            model
+
+
+handleSave : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleSave wrapMsg session model =
+    let
+        newModel =
+            updateValues model
+
+        cmd =
+            putValuesCmd wrapMsg session newModel
+    in
+    ( { newModel | savingQuestionnaire = Loading }, cmd )
+
+
+handlePutValuesCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+handlePutValuesCompleted model result =
+    case result of
+        Ok _ ->
+            ( model, cmdNavigate <| Routing.Questionnaires Index )
+
+        Err error ->
+            ( { model | savingQuestionnaire = Error "Questionnaire could not be saved." }, Cmd.none )
+
+
+
+{- Helpers -}
+
+
+putValuesCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
+putValuesCmd wrapMsg session model =
+    model.values
+        |> encodeValues
+        |> putValues model.uuid session
+        |> Jwt.send PutValuesCompleted
+        |> Cmd.map wrapMsg
+
+
+encodeValues : Dict String String -> Encode.Value
+encodeValues values =
+    values
+        |> Dict.toList
+        |> List.map (\( k, v ) -> ( k, Encode.string v ))
+        |> Encode.object
+
+
+updateValues : Model -> Model
+updateValues model =
+    let
+        values =
+            model.activeChapterForm
+                |> Maybe.map (getFormValues model.values)
+                |> Maybe.withDefault model.values
+    in
+    { model | values = values }
+
+
+setActiveChapter : Chapter -> Model -> Model
+setActiveChapter chapter model =
+    { model | activeChapter = Just chapter }
 
 
 setActiveChapterForm : Model -> Model
 setActiveChapterForm model =
     case model.activeChapter of
         Just chapter ->
-            { model | activeChapterForm = Just <| createChapterForm chapter }
+            { model | activeChapterForm = Just <| createChapterForm chapter model.values }
 
         _ ->
             model
 
 
-createChapterForm : Chapter -> Form
-createChapterForm chapter =
-    createForm { items = List.map createQuestionFormItem chapter.questions } { values = Dict.empty }
+
+{- Form creation -}
+
+
+createChapterForm : Chapter -> Dict String String -> Form
+createChapterForm chapter values =
+    createForm { items = List.map createQuestionFormItem chapter.questions } { values = values }
 
 
 createQuestionFormItem : Question -> FormItem
@@ -91,6 +174,12 @@ createQuestionFormItem question =
 
         "list" ->
             GroupFormItem descriptor (createGroupItems question)
+
+        "number" ->
+            NumberFormItem descriptor
+
+        "text" ->
+            TextFormItem descriptor
 
         _ ->
             StringFormItem descriptor

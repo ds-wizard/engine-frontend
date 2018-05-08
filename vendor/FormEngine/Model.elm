@@ -14,10 +14,12 @@ module FormEngine.Model
         , createForm
         , createItemElement
         , getDescriptor
+        , getFormValues
         , getOptionDescriptor
         )
 
 import Dict exposing (Dict)
+import List.Extra as List
 
 
 {- Types definitions -}
@@ -206,7 +208,10 @@ getInitialValue : FormValues -> List String -> String -> Maybe String
 getInitialValue formValues path current =
     let
         key =
-            String.join "." (path ++ [ current ])
+            String.join "." (path ++ [ current ]) |> Debug.log "key"
+
+        a =
+            Dict.get key formValues.values |> Debug.log "value"
     in
     Dict.get key formValues.values
 
@@ -229,3 +234,81 @@ setInitialValuesOption formValues path option =
 setInitialValuesItems : FormValues -> List String -> Int -> ItemElement -> ItemElement
 setInitialValuesItems formValues path index itemElement =
     List.map (setInitialValue formValues (path ++ [ toString index ])) itemElement
+
+
+
+{- getting form values -}
+
+
+getFormValues : Dict String String -> Form -> Dict String String
+getFormValues originalValues form =
+    List.foldl (getFieldValue []) originalValues form.elements
+
+
+getFieldValue : List String -> FormElement -> Dict String String -> Dict String String
+getFieldValue path element values =
+    case element of
+        StringFormElement descriptor state ->
+            applyFieldValue values (pathToKey path descriptor.name) state
+
+        NumberFormElement descriptor state ->
+            applyFieldValue values (pathToKey path descriptor.name) state
+
+        TextFormElement descriptor state ->
+            applyFieldValue values (pathToKey path descriptor.name) state
+
+        ChoiceFormElement descriptor options state ->
+            let
+                newValues =
+                    applyFieldValue values (pathToKey path descriptor.name) state
+            in
+            List.foldl (getOptionValues (path ++ [ descriptor.name ])) newValues options
+
+        GroupFormElement descriptor items itemElements state ->
+            let
+                newValues =
+                    applyFieldValue values (pathToKey path descriptor.name) state
+            in
+            List.indexedFoldl (getItemValues (path ++ [ descriptor.name ])) newValues itemElements
+
+
+getOptionValues : List String -> OptionElement -> Dict String String -> Dict String String
+getOptionValues path option values =
+    case option of
+        DetailedOptionElement descriptor items ->
+            List.foldl (getFieldValue (path ++ [ descriptor.name ])) values items
+
+        _ ->
+            values
+
+
+getItemValues : List String -> Int -> ItemElement -> Dict String String -> Dict String String
+getItemValues path index item values =
+    List.foldl (getFieldValue (path ++ [ toString index ])) values item
+
+
+pathToKey : List String -> String -> String
+pathToKey path current =
+    String.join "." (path ++ [ current ])
+
+
+applyFieldValue : Dict String String -> String -> FormElementState a -> Dict String String
+applyFieldValue values key state =
+    case state.value of
+        Just value ->
+            Dict.insert key (valueToString value) values
+
+        _ ->
+            values
+
+
+valueToString : a -> String
+valueToString value =
+    let
+        str =
+            toString value
+    in
+    if String.left 1 str == "\"" then
+        String.dropRight 1 (String.dropLeft 1 str)
+    else
+        str

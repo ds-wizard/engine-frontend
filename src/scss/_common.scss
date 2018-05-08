@@ -14,13 +14,10 @@
         text-align: right;
 
         .btn {
-            margin-left: 10px;
-        }
-
-        a {
             display: inline-block;
             margin-left: 10px;
             margin-top: 7px;
+            min-width: 100px;
         }
     }
 }

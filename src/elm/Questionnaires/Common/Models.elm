@@ -1,5 +1,6 @@
 module Questionnaires.Common.Models exposing (..)
 
+import Dict exposing (Dict)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import KnowledgeModels.Editor.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
@@ -18,6 +19,7 @@ type alias QuestionnaireDetail =
     , name : String
     , package : PackageDetail
     , knowledgeModel : KnowledgeModel
+    , values : Dict String String
     }
 
 
@@ -41,3 +43,4 @@ questionnaireDetailDecoder =
         |> required "name" Decode.string
         |> required "package" packageDetailDecoder
         |> required "knowledgeModel" knowledgeModelDecoder
+        |> required "values" (Decode.dict Decode.string)
