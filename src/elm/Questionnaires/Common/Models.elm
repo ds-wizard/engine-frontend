@@ -19,7 +19,7 @@ type alias QuestionnaireDetail =
     , name : String
     , package : PackageDetail
     , knowledgeModel : KnowledgeModel
-    , values : Dict String String
+    , replies : Dict String String
     }
 
 
@@ -43,4 +43,4 @@ questionnaireDetailDecoder =
         |> required "name" Decode.string
         |> required "package" packageDetailDecoder
         |> required "knowledgeModel" knowledgeModelDecoder
-        |> required "values" (Decode.dict Decode.string)
+        |> required "replies" (Decode.dict Decode.string)

@@ -13,7 +13,7 @@ import Msgs
 import Questionnaires.Common.Models exposing (QuestionnaireDetail)
 import Questionnaires.Detail.Models exposing (Model)
 import Questionnaires.Detail.Msgs exposing (Msg(..))
-import Questionnaires.Requests exposing (getQuestionnaire, putValues)
+import Questionnaires.Requests exposing (getQuestionnaire, putReplies)
 import Questionnaires.Routing exposing (Route(Index))
 import Routing exposing (cmdNavigate)
 
@@ -40,8 +40,8 @@ update msg wrapMsg session model =
         Save ->
             handleSave wrapMsg session model
 
-        PutValuesCompleted result ->
-            handlePutValuesCompleted model result
+        PutRepliesCompleted result ->
+            handlePutRepliesCompleted model result
 
 
 
@@ -57,7 +57,7 @@ handleGetQuestionnaireCompleted model result =
                     { model
                         | questionnaire = Success questionnaireDetail
                         , activeChapter = List.head questionnaireDetail.knowledgeModel.chapters
-                        , values = questionnaireDetail.values
+                        , replies = questionnaireDetail.replies
                     }
 
                 Err error ->
@@ -69,7 +69,7 @@ handleGetQuestionnaireCompleted model result =
 handleSetActiveChapter : Chapter -> Model -> Model
 handleSetActiveChapter chapter model =
     model
-        |> updateValues
+        |> updateReplies
         |> setActiveChapter chapter
         |> setActiveChapterForm
 
@@ -88,16 +88,16 @@ handleSave : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleSave wrapMsg session model =
     let
         newModel =
-            updateValues model
+            updateReplies model
 
         cmd =
-            putValuesCmd wrapMsg session newModel
+            putRepliesCmd wrapMsg session newModel
     in
     ( { newModel | savingQuestionnaire = Loading }, cmd )
 
 
-handlePutValuesCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-handlePutValuesCompleted model result =
+handlePutRepliesCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+handlePutRepliesCompleted model result =
     case result of
         Ok _ ->
             ( model, cmdNavigate <| Routing.Questionnaires Index )
@@ -110,32 +110,32 @@ handlePutValuesCompleted model result =
 {- Helpers -}
 
 
-putValuesCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
-putValuesCmd wrapMsg session model =
-    model.values
-        |> encodeValues
-        |> putValues model.uuid session
-        |> Jwt.send PutValuesCompleted
+putRepliesCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
+putRepliesCmd wrapMsg session model =
+    model.replies
+        |> encodeReplies
+        |> putReplies model.uuid session
+        |> Jwt.send PutRepliesCompleted
         |> Cmd.map wrapMsg
 
 
-encodeValues : Dict String String -> Encode.Value
-encodeValues values =
-    values
+encodeReplies : Dict String String -> Encode.Value
+encodeReplies replies =
+    replies
         |> Dict.toList
         |> List.map (\( k, v ) -> ( k, Encode.string v ))
         |> Encode.object
 
 
-updateValues : Model -> Model
-updateValues model =
+updateReplies : Model -> Model
+updateReplies model =
     let
-        values =
+        replies =
             model.activeChapterForm
-                |> Maybe.map (getFormValues model.values)
-                |> Maybe.withDefault model.values
+                |> Maybe.map (getFormValues model.replies)
+                |> Maybe.withDefault model.replies
     in
-    { model | values = values }
+    { model | replies = replies }
 
 
 setActiveChapter : Chapter -> Model -> Model
@@ -147,7 +147,7 @@ setActiveChapterForm : Model -> Model
 setActiveChapterForm model =
     case model.activeChapter of
         Just chapter ->
-            { model | activeChapterForm = Just <| createChapterForm chapter model.values }
+            { model | activeChapterForm = Just <| createChapterForm chapter model.replies }
 
         _ ->
             model

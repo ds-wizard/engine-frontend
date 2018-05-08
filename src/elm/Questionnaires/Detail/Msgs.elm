@@ -11,4 +11,4 @@ type Msg
     | SetActiveChapter Chapter
     | FormMsg FormEngine.Msgs.Msg
     | Save
-    | PutValuesCompleted (Result Jwt.JwtError String)
+    | PutRepliesCompleted (Result Jwt.JwtError String)

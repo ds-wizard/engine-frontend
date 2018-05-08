@@ -27,6 +27,6 @@ postQuestionnaire session questionnaire =
     Requests.post questionnaire session "/questionnaires"
 
 
-putValues : String -> Session -> Value -> Http.Request String
-putValues uuid session values =
-    Requests.put values session ("/questionnaires/" ++ uuid ++ "/values")
+putReplies : String -> Session -> Value -> Http.Request String
+putReplies uuid session replies =
+    Requests.put replies session ("/questionnaires/" ++ uuid ++ "/replies")

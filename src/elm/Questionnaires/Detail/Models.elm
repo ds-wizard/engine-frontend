@@ -12,7 +12,7 @@ type alias Model =
     , questionnaire : ActionResult QuestionnaireDetail
     , activeChapterForm : Maybe Form
     , activeChapter : Maybe Chapter
-    , values : Dict String String
+    , replies : Dict String String
     , savingQuestionnaire : ActionResult String
     }
 
@@ -23,6 +23,6 @@ initialModel uuid =
     , questionnaire = Loading
     , activeChapterForm = Nothing
     , activeChapter = Nothing
-    , values = Dict.empty
+    , replies = Dict.empty
     , savingQuestionnaire = Unset
     }
