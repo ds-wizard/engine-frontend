@@ -1,6 +1,6 @@
-module Common.FormTest exposing (..)
+module Common.ModelsTest exposing (..)
 
-import Common.Form exposing (errorDecoder)
+import Common.Models exposing (errorDecoder)
 import Expect
 import Json.Decode as Decode exposing (..)
 import Test exposing (..)
