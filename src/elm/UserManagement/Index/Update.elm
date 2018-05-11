@@ -1,6 +1,7 @@
 module UserManagement.Index.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
@@ -50,7 +51,7 @@ getUsersCompleted model result =
                     { model | users = Success users }
 
                 Err error ->
-                    { model | users = Error "Unable to fetch user list" }
+                    { model | users = getServerErrorJwt error "Unable to fetch user list" }
     in
     ( newModel, Cmd.none )
 
@@ -76,6 +77,6 @@ deleteUserCompleted wrapMsg session model result =
             )
 
         Err error ->
-            ( { model | deletingUser = Error "User could not be deleted" }
+            ( { model | deletingUser = getServerErrorJwt error "User could not be deleted" }
             , Cmd.none
             )

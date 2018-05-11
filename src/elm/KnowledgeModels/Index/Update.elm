@@ -7,6 +7,7 @@ module KnowledgeModels.Index.Update exposing (getKnowledgeModelsCmd, update)
 -}
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form
 import Jwt
@@ -74,7 +75,7 @@ getKnowledgeModelsCompleted model result =
                     { model | knowledgeModels = Success knowledgeModels }
 
                 Err error ->
-                    { model | knowledgeModels = Error "Unable to fetch knowledge models" }
+                    { model | knowledgeModels = getServerErrorJwt error "Unable to fetch knowledge models" }
     in
     ( newModel, Cmd.none )
 
@@ -98,7 +99,7 @@ deleteKnowledgeModelCompleted model result =
             ( model, cmdNavigate KnowledgeModels )
 
         Err error ->
-            ( { model | deletingKnowledgeModel = Error "Knowledge model could not be deleted" }
+            ( { model | deletingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be deleted" }
             , Cmd.none
             )
 
@@ -143,7 +144,7 @@ handleGetPackagesCompleted model result =
             ( { model | packages = Success packageList }, Cmd.none )
 
         Err error ->
-            ( { model | packages = Error "Unable to get package list" }, Cmd.none )
+            ( { model | packages = getServerErrorJwt error "Unable to get package list" }, Cmd.none )
 
 
 handleUpgradeForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -175,7 +176,7 @@ postMigrationCompleted model result =
             ( model, cmdNavigate <| KnowledgeModelsMigration kmUuid )
 
         Err error ->
-            ( { model | creatingMigration = Error "Migration could not be created" }, Cmd.none )
+            ( { model | creatingMigration = getServerErrorJwt error "Migration could not be created" }, Cmd.none )
 
 
 handleDeleteMigration : String -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -192,7 +193,7 @@ deleteMigrationCompleted session model result =
             )
 
         Err error ->
-            ( { model | deletingMigration = Error "Migration could not be deleted" }
+            ( { model | deletingMigration = getServerErrorJwt error "Migration could not be deleted" }
             , Cmd.none
             )
 

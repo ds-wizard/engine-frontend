@@ -2,7 +2,8 @@ module Public.Login.Update exposing (..)
 
 import Auth.Models exposing (parseJwt)
 import Auth.Msgs
-import Common.Form exposing (getErrorMessage)
+import Common.Models exposing (getServerError)
+import Common.Types exposing (ActionResult(..))
 import Http
 import Msgs
 import Public.Login.Models exposing (Model)
@@ -21,13 +22,13 @@ update msg wrapMsg model =
             ( { model | password = password }, Cmd.none )
 
         Login ->
-            ( { model | loading = True }, loginCmd wrapMsg model )
+            ( { model | loggingIn = Loading }, loginCmd wrapMsg model )
 
         LoginCompleted result ->
             loginCompleted model result
 
-        GetProfileInfoFailed ->
-            ( { model | loading = False, error = "Loading profile info failed" }, Cmd.none )
+        GetProfileInfoFailed error ->
+            ( { model | loggingIn = error }, Cmd.none )
 
 
 loginCmd : (Msg -> Msgs.Msg) -> Model -> Cmd Msgs.Msg
@@ -44,11 +45,7 @@ loginCompleted model result =
                     ( model, dispatch (Msgs.AuthMsg <| Auth.Msgs.Token token jwt) )
 
                 Nothing ->
-                    ( { model | loading = False, error = "Invalid response from the server" }, Cmd.none )
+                    ( { model | loggingIn = Error "Invalid response from the server" }, Cmd.none )
 
         Err error ->
-            let
-                errorMessage =
-                    getErrorMessage error "Login failed"
-            in
-            ( { model | loading = False, error = errorMessage }, Cmd.none )
+            ( { model | loggingIn = getServerError error "Login failed" }, Cmd.none )

@@ -1,6 +1,7 @@
 module KnowledgeModels.Migration.Update exposing (getMigrationCmd, update)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import KnowledgeModels.Editor.Models.Events exposing (getEventUuid)
@@ -49,7 +50,7 @@ handleGetMigrationCompleted model result =
             ( { model | migration = Success migration }, Cmd.none )
 
         Err error ->
-            ( { model | migration = Error "Unable to get migration" }, Cmd.none )
+            ( { model | migration = getServerErrorJwt error "Unable to get migration" }, Cmd.none )
 
 
 handleResolveChange : (String -> MigrationResolution) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -91,4 +92,4 @@ handlePostMigrationConflictCompleted session model result =
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
         Err error ->
-            ( { model | conflict = Error "Unable to resolve conflict" }, Cmd.none )
+            ( { model | conflict = getServerErrorJwt error "Unable to resolve conflict" }, Cmd.none )

@@ -7,6 +7,7 @@ module KnowledgeModels.Publish.Update exposing (getKnowledgeModelCmd, update)
 -}
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form
 import Jwt
@@ -45,7 +46,7 @@ getKnowledgeModelCompleted model result =
                     { model | knowledgeModel = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModel = Error "Unable to get the knowledge model." }
+                    { model | knowledgeModel = getServerErrorJwt error "Unable to get the knowledge model." }
     in
     ( newModel, Cmd.none )
 
@@ -57,7 +58,7 @@ putKnowledgeModelVersionCompleted model result =
             ( model, cmdNavigate PackageManagement )
 
         Err error ->
-            ( { model | publishingKnowledgeModel = Error "Publishing new version failed" }, Cmd.none )
+            ( { model | publishingKnowledgeModel = getServerErrorJwt error "Publishing new version failed" }, Cmd.none )
 
 
 handleForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )

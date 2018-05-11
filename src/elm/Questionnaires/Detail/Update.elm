@@ -1,6 +1,7 @@
 module Questionnaires.Detail.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Dict exposing (Dict)
 import FormEngine.Model exposing (..)
@@ -61,7 +62,7 @@ handleGetQuestionnaireCompleted model result =
                     }
 
                 Err error ->
-                    { model | questionnaire = Error "Unable to get questionnaire." }
+                    { model | questionnaire = getServerErrorJwt error "Unable to get questionnaire." }
     in
     setActiveChapterForm newModel
 
@@ -103,7 +104,7 @@ handlePutRepliesCompleted model result =
             ( model, cmdNavigate <| Routing.Questionnaires Index )
 
         Err error ->
-            ( { model | savingQuestionnaire = Error "Questionnaire could not be saved." }, Cmd.none )
+            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be saved." }, Cmd.none )
 
 
 

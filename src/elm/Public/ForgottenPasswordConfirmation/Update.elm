@@ -1,6 +1,7 @@
 module Public.ForgottenPasswordConfirmation.Update exposing (..)
 
-import Common.Form exposing (getErrorMessage, setFormErrors)
+import Common.Form exposing (setFormErrors)
+import Common.Models exposing (getServerError)
 import Common.Types exposing (ActionResult(..))
 import Form
 import Http
@@ -60,6 +61,6 @@ handlePutUserPasswordCompleted result model =
                     setFormErrors error model.form
 
                 errorMessage =
-                    getErrorMessage error "Forgotten password recovery failed."
+                    getServerError error "Forgotten password recovery failed."
             in
-            ( { model | submitting = Error errorMessage, form = form }, Cmd.none )
+            ( { model | submitting = errorMessage, form = form }, Cmd.none )

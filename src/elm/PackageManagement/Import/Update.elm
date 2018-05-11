@@ -7,6 +7,7 @@ module PackageManagement.Import.Update exposing (update)
 -}
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import FileReader exposing (NativeFile)
 import Json.Decode as Decode
@@ -42,7 +43,7 @@ importPackageCompleted model result =
             ( model, cmdNavigate PackageManagement )
 
         Err error ->
-            ( { model | importing = Error "Importing package failed." }, Cmd.none )
+            ( { model | importing = getServerErrorJwt error "Importing package failed." }, Cmd.none )
 
 
 {-| -}

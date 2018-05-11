@@ -1,6 +1,7 @@
 module Questionnaires.Index.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
@@ -42,7 +43,7 @@ getQuestionnairesCompleted model result =
                     { model | questionnaires = Success users }
 
                 Err error ->
-                    { model | questionnaires = Error "Unable to fetch questionnaire list" }
+                    { model | questionnaires = getServerErrorJwt error "Unable to fetch questionnaire list" }
     in
     ( newModel, Cmd.none )
 
@@ -75,6 +76,6 @@ deleteQuestionnaireCompleted wrapMsg session model result =
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = Error "Questionnaire could not be deleted" }
+            ( { model | deletingQuestionnaire = getServerErrorJwt error "Questionnaire could not be deleted" }
             , Cmd.none
             )

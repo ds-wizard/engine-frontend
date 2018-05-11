@@ -7,6 +7,7 @@ module Organization.Update exposing (getCurrentOrganizationCmd, update)
 -}
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
@@ -41,7 +42,7 @@ getCurrentOrganizationCompleted model result =
                     { model | form = initOrganizationForm organization, organization = Success organization }
 
                 Err error ->
-                    { model | organization = Error "Unable to get organization information." }
+                    { model | organization = getServerErrorJwt error "Unable to get organization information." }
     in
     ( newModel, Cmd.none )
 
@@ -55,7 +56,7 @@ putCurrentOrganizationCompleted model result =
                     Success "Organization was successfuly saved"
 
                 Err error ->
-                    Error "Organization could not be saved"
+                    getServerErrorJwt error "Organization could not be saved"
     in
     ( { model | savingOrganization = newResult }, Cmd.none )
 

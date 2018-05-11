@@ -1,6 +1,7 @@
 module UserManagement.Edit.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
@@ -136,6 +137,6 @@ putUserPasswordCompleted model result =
                     Success "Password was successfully changed"
 
                 Err error ->
-                    Error "Password could not be changed."
+                    getServerErrorJwt error "Password could not be changed."
     in
     ( { model | savingPassword = passwordResult }, Cmd.none )

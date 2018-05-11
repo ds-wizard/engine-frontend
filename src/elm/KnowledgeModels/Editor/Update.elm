@@ -1,6 +1,7 @@
 module KnowledgeModels.Editor.Update exposing (getKnowledgeModelCmd, update)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import KnowledgeModels.Editor.Models exposing (..)
@@ -59,7 +60,7 @@ getKnowledgeModelCompleted model result =
                     { model | knowledgeModelEditor = Success <| createKnowledgeModelEditor knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelEditor = Error "Unable to get knowledge model" }
+                    { model | knowledgeModelEditor = getServerErrorJwt error "Unable to get knowledge model" }
     in
     ( newModel, Cmd.none )
 
@@ -78,7 +79,7 @@ postEventsBulkCompleted model result =
             ( model, cmdNavigate KnowledgeModels )
 
         Err error ->
-            ( { model | saving = Error "Knowledge model could not be saved" }, Cmd.none )
+            ( { model | saving = getServerErrorJwt error "Knowledge model could not be saved" }, Cmd.none )
 
 
 updateEdit : KnowledgeModelMsg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )

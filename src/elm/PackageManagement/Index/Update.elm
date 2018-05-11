@@ -7,6 +7,7 @@ module PackageManagement.Index.Update exposing (getPackagesCmd, update)
 -}
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
@@ -33,7 +34,7 @@ getPackagesCompleted model result =
                     { model | packages = Success packages }
 
                 Err error ->
-                    { model | packages = Error "Unable to fetch package list" }
+                    { model | packages = getServerErrorJwt error "Unable to fetch package list" }
     in
     ( newModel, Cmd.none )
 

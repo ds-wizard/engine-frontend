@@ -1,6 +1,7 @@
 module Public.Signup.Update exposing (..)
 
-import Common.Form exposing (getErrorMessage, setFormErrors)
+import Common.Form exposing (setFormErrors)
+import Common.Models exposing (getServerError)
 import Common.Types exposing (ActionResult(..))
 import Form
 import Http
@@ -66,6 +67,6 @@ handlePostSignupCompleted result model =
                     setFormErrors error model.form
 
                 errorMessage =
-                    getErrorMessage error "Sign up process failed."
+                    getServerError error "Sign up process failed."
             in
-            ( { model | signingUp = Error errorMessage, form = form }, Cmd.none )
+            ( { model | signingUp = errorMessage, form = form }, Cmd.none )

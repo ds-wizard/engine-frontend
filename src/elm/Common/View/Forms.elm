@@ -158,21 +158,29 @@ a loader is shown instead of action name.
 -}
 actionButton : ( String, ActionResult a, Msg ) -> Html Msg
 actionButton ( label, result, msg ) =
+    actionButtonView [ onClick msg ] label result
+
+
+submitButton : ( String, ActionResult a ) -> Html Msg
+submitButton ( label, result ) =
+    actionButtonView [ type_ "submit" ] label result
+
+
+actionButtonView : List (Attribute msg) -> String -> ActionResult a -> Html msg
+actionButtonView attributes label result =
     let
-        ( buttonContent, isDisabled ) =
+        buttonContent =
             case result of
                 Loading ->
-                    ( i [ class "fa fa-spinner fa-spin" ] [], True )
+                    i [ class "fa fa-spinner fa-spin" ] []
 
                 _ ->
-                    ( text label, False )
+                    text label
+
+        buttonAttributes =
+            [ class "btn btn-primary btn-with-loader", disabled (result == Loading) ] ++ attributes
     in
-    button
-        [ class "btn btn-primary btn-with-loader"
-        , disabled isDisabled
-        , onClick msg
-        ]
-        [ buttonContent ]
+    button buttonAttributes [ buttonContent ]
 
 
 

@@ -3,6 +3,7 @@ module Auth.Update exposing (update)
 import Auth.Models as AuthModel exposing (initialSession, parseJwt, setToken, setUser)
 import Auth.Msgs as AuthMsgs
 import Auth.Requests exposing (..)
+import Common.Models exposing (getServerErrorJwt)
 import Jwt
 import Models exposing (Model)
 import Msgs exposing (Msg)
@@ -54,7 +55,14 @@ getCurrentUserCompleted model result =
             )
 
         Err error ->
-            ( model, dispatch (Msgs.PublicMsg <| Public.Msgs.LoginMsg Public.Login.Msgs.GetProfileInfoFailed) )
+            let
+                msg =
+                    getServerErrorJwt error "Loading profile info failed"
+                        |> Public.Login.Msgs.GetProfileInfoFailed
+                        |> Public.Msgs.LoginMsg
+                        |> Msgs.PublicMsg
+            in
+            ( model, dispatch msg )
 
 
 logout : Model -> ( Model, Cmd Msg )

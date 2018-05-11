@@ -1,11 +1,12 @@
 module Public.Login.Models exposing (..)
 
+import Common.Types exposing (ActionResult(..))
+
 
 type alias Model =
     { email : String
     , password : String
-    , error : String
-    , loading : Bool
+    , loggingIn : ActionResult String
     }
 
 
@@ -13,6 +14,5 @@ initialModel : Model
 initialModel =
     { email = ""
     , password = ""
-    , error = ""
-    , loading = False
+    , loggingIn = Unset
     }

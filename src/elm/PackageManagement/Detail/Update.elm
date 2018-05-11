@@ -7,6 +7,7 @@ module PackageManagement.Detail.Update exposing (getPackagesFilteredCmd, update)
 -}
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
@@ -46,7 +47,7 @@ getPackageCompleted model result =
                     { model | packages = Success packages }
 
                 Err error ->
-                    { model | packages = Error "Unable to get package detail" }
+                    { model | packages = getServerErrorJwt error "Unable to get package detail" }
     in
     ( newModel, Cmd.none )
 
@@ -70,7 +71,7 @@ deletePackageCompleted model result =
             ( model, cmdNavigate PackageManagement )
 
         Err error ->
-            ( { model | deletingPackage = Error "Package could not be deleted" }
+            ( { model | deletingPackage = getServerErrorJwt error "Package could not be deleted" }
             , Cmd.none
             )
 
@@ -104,7 +105,7 @@ deleteVersionCompleted model result =
 
         Err error ->
             ( { model
-                | deletingVersion = Error "Version could not be deleted"
+                | deletingVersion = getServerErrorJwt error "Version could not be deleted"
               }
             , Cmd.none
             )

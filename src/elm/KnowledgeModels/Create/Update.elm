@@ -7,6 +7,7 @@ module KnowledgeModels.Create.Update exposing (getPackagesCmd, update)
 -}
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
@@ -47,7 +48,7 @@ getPackageCompleted model result =
                     { model | packages = Success packages }
 
                 Err error ->
-                    { model | packages = Error "Unable to get package list" }
+                    { model | packages = getServerErrorJwt error "Unable to get package list" }
     in
     ( newModel, Cmd.none )
 
@@ -63,7 +64,7 @@ postKmCompleted model result =
             )
 
         Err error ->
-            ( { model | savingKnowledgeModel = Error "Knowledge model could not be created." }, Cmd.none )
+            ( { model | savingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be created." }, Cmd.none )
 
 
 handleForm : Form.Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )

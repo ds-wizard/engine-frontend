@@ -1,6 +1,7 @@
 module Questionnaires.Create.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form
 import Jwt
@@ -43,7 +44,7 @@ getPackagesCompleted model result =
                     { model | packages = Success packages }
 
                 Err error ->
-                    { model | packages = Error "Unable to get package list" }
+                    { model | packages = getServerErrorJwt error "Unable to get package list" }
     in
     ( newModel, Cmd.none )
 
@@ -82,4 +83,4 @@ postQuestionnaireCompleted model result =
             ( model, cmdNavigate <| Routing.Questionnaires Index )
 
         Err error ->
-            ( { model | savingQuestionnaire = Error "Questionnaire could not be created." }, Cmd.none )
+            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be created." }, Cmd.none )

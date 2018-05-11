@@ -1,6 +1,7 @@
 module UserManagement.Create.Update exposing (update)
 
 import Auth.Models exposing (Session)
+import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
@@ -63,4 +64,4 @@ postUserCompleted model result =
             ( model, cmdNavigate <| Routing.UserManagement Index )
 
         Err error ->
-            ( { model | savingUser = Error "User could not be created." }, Cmd.none )
+            ( { model | savingUser = getServerErrorJwt error "User could not be created." }, Cmd.none )
