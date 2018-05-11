@@ -98,7 +98,7 @@ kmTableRow : Maybe JwtToken -> Model -> KnowledgeModel -> Html Msgs.Msg
 kmTableRow jwt model km =
     tr []
         [ td [ class "td-with-labels" ] [ kmTableRowName km ]
-        , td [] [ text km.artifactId ]
+        , td [] [ text km.kmId ]
         , td [] [ text (Maybe.withDefault "-" km.lastAppliedParentPackageId) ]
         , td [ class "table-actions" ]
             [ kmTableRowActionDelete km

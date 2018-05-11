@@ -52,8 +52,8 @@ getPackagesFilteredCmd lastAppliedParentPackageId session =
             String.split ":" lastAppliedParentPackageId
     in
     case ( List.head parts, List.getAt 1 parts ) of
-        ( Just groupId, Just artifactId ) ->
-            getPackagesFiltered groupId artifactId session
+        ( Just organizationId, Just kmId ) ->
+            getPackagesFiltered organizationId kmId session
                 |> toCmd GetPackagesCompleted Msgs.KnowledgeModelsIndexMsg
 
         _ ->

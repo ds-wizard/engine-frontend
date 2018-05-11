@@ -37,14 +37,14 @@ getPackages session =
 
 {-| -}
 getPackagesFiltered : String -> String -> Session -> Http.Request (List PackageDetail)
-getPackagesFiltered groupId artifactId session =
-    Requests.get session ("/packages/?groupId=" ++ groupId ++ "&artifactId=" ++ artifactId) packageDetailListDecoder
+getPackagesFiltered organizationId kmId session =
+    Requests.get session ("/packages/?organizationId=" ++ organizationId ++ "&kmId=" ++ kmId) packageDetailListDecoder
 
 
 {-| -}
 deletePackage : String -> String -> Session -> Http.Request String
-deletePackage groupId artifactId session =
-    Requests.delete session ("/packages/?groupId=" ++ groupId ++ "&artifactId=" ++ artifactId)
+deletePackage organizationId kmId session =
+    Requests.delete session ("/packages/?organizationId=" ++ organizationId ++ "&kmId=" ++ kmId)
 
 
 {-| -}

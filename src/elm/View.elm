@@ -62,7 +62,7 @@ view model =
                 |> PackageManagement.Index.View.view
                 |> appView model
 
-        PackageManagementDetail groupId artifactId ->
+        PackageManagementDetail organizationId kmId ->
             model.packageManagementDetailModel
                 |> PackageManagement.Detail.View.view
                 |> appView model

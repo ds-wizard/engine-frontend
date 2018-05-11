@@ -88,7 +88,7 @@ pmTableEmpty =
 pmTableRow : Package -> Html Msg
 pmTableRow package =
     tr []
-        [ td [] [ linkTo (PackageManagementDetail package.groupId package.artifactId) [] [ text package.name ] ]
-        , td [] [ text package.groupId ]
-        , td [] [ text package.artifactId ]
+        [ td [] [ linkTo (PackageManagementDetail package.organizationId package.kmId) [] [ text package.name ] ]
+        , td [] [ text package.organizationId ]
+        , td [] [ text package.kmId ]
         ]

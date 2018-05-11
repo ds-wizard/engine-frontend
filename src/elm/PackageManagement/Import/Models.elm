@@ -1,16 +1,9 @@
 module PackageManagement.Import.Models exposing (..)
 
-{-|
-
-@docs Model, initialModel
-
--}
-
 import Common.Types exposing (ActionResult(..))
 import FileReader exposing (NativeFile)
 
 
-{-| -}
 type alias Model =
     { dnd : Int
     , files : List NativeFile
@@ -18,7 +11,6 @@ type alias Model =
     }
 
 
-{-| -}
 initialModel : Model
 initialModel =
     { dnd = 0

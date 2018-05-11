@@ -87,7 +87,7 @@ isAllowed route maybeJwt =
         PackageManagement ->
             hasPerm maybeJwt Perm.packageManagement
 
-        PackageManagementDetail groupId artifactId ->
+        PackageManagementDetail organizationId kmId ->
             hasPerm maybeJwt Perm.packageManagement
 
         PackageManagementImport ->
@@ -141,8 +141,8 @@ toUrl route =
                 PackageManagement ->
                     [ "package-management" ]
 
-                PackageManagementDetail groupId artifactId ->
-                    [ "package-management", "package", groupId, artifactId ]
+                PackageManagementDetail organizationId kmId ->
+                    [ "package-management", "package", organizationId, kmId ]
 
                 PackageManagementImport ->
                     [ "package-management", "import" ]

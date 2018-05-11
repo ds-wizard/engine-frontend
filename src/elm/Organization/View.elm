@@ -54,7 +54,7 @@ formView form =
         formHtml =
             div []
                 [ inputGroup form "name" "Organization name"
-                , inputGroup form "groupId" "Organization ID"
+                , inputGroup form "organizationId" "Organization ID"
                 , p [ class "help-block help-block-after" ]
                     [ text "Organization ID can contain alfanumeric characters and dot but cannot start or end with dot." ]
                 ]

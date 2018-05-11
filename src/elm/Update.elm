@@ -28,8 +28,8 @@ fetchData model =
         PackageManagement ->
             PackageManagement.Index.Update.getPackagesCmd model.session
 
-        PackageManagementDetail groupId artifactId ->
-            PackageManagement.Detail.Update.getPackagesFilteredCmd groupId artifactId model.session
+        PackageManagementDetail organizationId kmId ->
+            PackageManagement.Detail.Update.getPackagesFilteredCmd organizationId kmId model.session
 
         KnowledgeModels ->
             KnowledgeModels.Index.Update.getKnowledgeModelsCmd model.session

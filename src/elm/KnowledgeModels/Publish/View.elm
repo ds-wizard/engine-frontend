@@ -58,7 +58,7 @@ formView form knowledgeModel =
         formHtml =
             div []
                 [ textGroup knowledgeModel.name "Knowledge Model"
-                , codeGroup knowledgeModel.artifactId "Knowledge Model ID"
+                , codeGroup knowledgeModel.kmId "Knowledge Model ID"
                 , lastVersion (kmLastVersion knowledgeModel)
                 , versionInputGroup form
                 , textAreaGroup form "description" "Description"

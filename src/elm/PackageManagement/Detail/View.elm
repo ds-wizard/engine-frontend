@@ -52,7 +52,7 @@ deleteModal model =
         version =
             case currentPackage model of
                 Just package ->
-                    package.groupId ++ ":" ++ package.artifactId
+                    package.organizationId ++ ":" ++ package.kmId
 
                 Nothing ->
                     ""
@@ -116,8 +116,8 @@ packageDetail packages =
         Just package ->
             div []
                 [ pageHeader package.name actions
-                , codeGroup package.groupId "Organization ID"
-                , codeGroup package.artifactId "Knowledge Model ID"
+                , codeGroup package.organizationId "Organization ID"
+                , codeGroup package.kmId "Knowledge Model ID"
                 , h3 [] [ text "Versions" ]
                 , div [] (List.map versionView packages)
                 ]

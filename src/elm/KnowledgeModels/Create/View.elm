@@ -53,7 +53,7 @@ formView form packages =
         formHtml =
             div []
                 [ inputGroup form "name" "Name"
-                , inputGroup form "artifactId" "Knowledge Model ID"
+                , inputGroup form "kmId" "Knowledge Model ID"
                 , p [ class "help-block help-block-after" ]
                     [ text "Knowledge Model ID can contain alfanumeric characters and dash but cannot start or end with dash." ]
                 , selectGroup parentOptions form "parentPackageId" "Parent Package"

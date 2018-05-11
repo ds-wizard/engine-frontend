@@ -1,11 +1,5 @@
 module PackageManagement.Detail.Update exposing (getPackagesFilteredCmd, update)
 
-{-|
-
-@docs update, getPackagesFilteredCmd
-
--}
-
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
@@ -19,16 +13,15 @@ import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
-{-| -}
 getPackagesFilteredCmd : String -> String -> Session -> Cmd Msgs.Msg
-getPackagesFilteredCmd groupId artifactId session =
-    getPackagesFiltered groupId artifactId session
+getPackagesFilteredCmd organizationId kmId session =
+    getPackagesFiltered organizationId kmId session
         |> toCmd GetPackageCompleted Msgs.PackageManagementDetailMsg
 
 
 deletePackageCmd : String -> String -> Session -> Cmd Msgs.Msg
-deletePackageCmd groupId artifactId session =
-    deletePackage groupId artifactId session
+deletePackageCmd organizationId kmId session =
+    deletePackage organizationId kmId session
         |> toCmd DeletePackageCompleted Msgs.PackageManagementDetailMsg
 
 
@@ -57,7 +50,7 @@ handleDeletePackage session model =
     case currentPackage model of
         Just package ->
             ( { model | deletingPackage = Loading }
-            , deletePackageCmd package.groupId package.artifactId session
+            , deletePackageCmd package.organizationId package.kmId session
             )
 
         Nothing ->
@@ -96,7 +89,7 @@ deleteVersionCompleted model result =
                 route =
                     case ( packagesLength model > 1, currentPackage model ) of
                         ( True, Just package ) ->
-                            PackageManagementDetail package.groupId package.artifactId
+                            PackageManagementDetail package.organizationId package.kmId
 
                         _ ->
                             PackageManagement

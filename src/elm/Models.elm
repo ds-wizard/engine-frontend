@@ -69,7 +69,7 @@ initLocalModel model =
         PackageManagement ->
             { model | packageManagementIndexModel = PackageManagement.Index.Models.initialModel }
 
-        PackageManagementDetail groupId artifactId ->
+        PackageManagementDetail organizationId kmId ->
             { model | packageManagementDetailModel = PackageManagement.Detail.Models.initialModel }
 
         PackageManagementImport ->
