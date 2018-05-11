@@ -4,13 +4,13 @@ import Auth.Msgs
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (linkTo)
 import Common.Html.Events exposing (onLinkClick)
+import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Models exposing (Model)
 import Msgs exposing (Msg)
-import Questionnaires.Routing
 import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
-import UserManagement.Routing
+import Users.Routing
 
 
 publicView : Html Msg -> Html Msg
@@ -72,10 +72,10 @@ createMenu model =
 menuItems : List ( String, String, Route, String )
 menuItems =
     [ ( "Organization", "fa-building", Organization, Perm.organization )
-    , ( "User Management", "fa-users", UserManagement UserManagement.Routing.Index, Perm.userManagement )
-    , ( "KM Editor", "fa-edit", KnowledgeModels, Perm.knowledgeModel )
-    , ( "KM Packages", "fa-cubes", PackageManagement, Perm.packageManagement )
-    , ( "DS Planner", "fa-list-alt", Questionnaires Questionnaires.Routing.Index, Perm.questionnaire )
+    , ( "Users", "fa-users", Users Users.Routing.Index, Perm.userManagement )
+    , ( "KM Editor", "fa-edit", KMEditor, Perm.knowledgeModel )
+    , ( "KM Packages", "fa-cubes", KMPackages, Perm.packageManagement )
+    , ( "DS Planner", "fa-list-alt", DSPlanner DSPlanner.Routing.Index, Perm.questionnaire )
     ]
 
 
@@ -109,7 +109,7 @@ profileInfo model =
                     ""
     in
     div [ class "profile-info" ]
-        [ linkTo (UserManagement <| UserManagement.Routing.Edit "current") [ class "name" ] [ text name ]
+        [ linkTo (Users <| Users.Routing.Edit "current") [ class "name" ] [ text name ]
         , a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
             [ i [ class "fa fa-sign-out" ] []
             , text "Logout"

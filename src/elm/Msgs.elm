@@ -1,19 +1,19 @@
 module Msgs exposing (..)
 
 import Auth.Msgs
-import KnowledgeModels.Create.Msgs
-import KnowledgeModels.Editor.Msgs
-import KnowledgeModels.Index.Msgs
-import KnowledgeModels.Migration.Msgs
-import KnowledgeModels.Publish.Msgs
+import DSPlanner.Msgs
+import KMEditor.Create.Msgs
+import KMEditor.Editor.Msgs
+import KMEditor.Index.Msgs
+import KMEditor.Migration.Msgs
+import KMEditor.Publish.Msgs
+import KMPackages.Detail.Msgs
+import KMPackages.Import.Msgs
+import KMPackages.Index.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs
-import PackageManagement.Detail.Msgs
-import PackageManagement.Import.Msgs
-import PackageManagement.Index.Msgs
 import Public.Msgs
-import Questionnaires.Msgs
-import UserManagement.Msgs
+import Users.Msgs
 
 
 type Msg
@@ -21,14 +21,14 @@ type Msg
     | OnLocationChange Location
     | AuthMsg Auth.Msgs.Msg
     | OrganizationMsg Organization.Msgs.Msg
-    | PackageManagementIndexMsg PackageManagement.Index.Msgs.Msg
-    | PackageManagementDetailMsg PackageManagement.Detail.Msgs.Msg
-    | PackageManagementImportMsg PackageManagement.Import.Msgs.Msg
-    | KnowledgeModelsIndexMsg KnowledgeModels.Index.Msgs.Msg
-    | KnowledgeModelsCreateMsg KnowledgeModels.Create.Msgs.Msg
-    | KnowledgeModelsPublishMsg KnowledgeModels.Publish.Msgs.Msg
-    | KnowledgeModelsEditorMsg KnowledgeModels.Editor.Msgs.Msg
-    | KnowledgeModelsMigrationMsg KnowledgeModels.Migration.Msgs.Msg
-    | QuestionnairesMsg Questionnaires.Msgs.Msg
+    | PackageManagementIndexMsg KMPackages.Index.Msgs.Msg
+    | PackageManagementDetailMsg KMPackages.Detail.Msgs.Msg
+    | PackageManagementImportMsg KMPackages.Import.Msgs.Msg
+    | KnowledgeModelsIndexMsg KMEditor.Index.Msgs.Msg
+    | KnowledgeModelsCreateMsg KMEditor.Create.Msgs.Msg
+    | KnowledgeModelsPublishMsg KMEditor.Publish.Msgs.Msg
+    | KnowledgeModelsEditorMsg KMEditor.Editor.Msgs.Msg
+    | KnowledgeModelsMigrationMsg KMEditor.Migration.Msgs.Msg
+    | QuestionnairesMsg DSPlanner.Msgs.Msg
     | PublicMsg Public.Msgs.Msg
-    | UserManagementMsg UserManagement.Msgs.Msg
+    | UserManagementMsg Users.Msgs.Msg

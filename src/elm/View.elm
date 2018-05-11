@@ -3,22 +3,22 @@ module View exposing (view)
 import Common.Html exposing (detailContainerClass, linkTo)
 import Common.View exposing (defaultFullPageError, fullPageError, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
+import DSPlanner.View
 import Html exposing (..)
-import KnowledgeModels.Create.View
-import KnowledgeModels.Editor.View
-import KnowledgeModels.Index.View
-import KnowledgeModels.Migration.View
-import KnowledgeModels.Publish.View
+import KMEditor.Create.View
+import KMEditor.Editor.View
+import KMEditor.Index.View
+import KMEditor.Migration.View
+import KMEditor.Publish.View
+import KMPackages.Detail.View
+import KMPackages.Import.View
+import KMPackages.Index.View
 import Models exposing (Model)
 import Msgs exposing (Msg(..))
 import Organization.View
-import PackageManagement.Detail.View
-import PackageManagement.Import.View
-import PackageManagement.Index.View
 import Public.View
-import Questionnaires.View
 import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
-import UserManagement.View
+import Users.View
 
 
 view : Model -> Html Msg
@@ -32,49 +32,49 @@ view model =
                 |> Organization.View.view
                 |> appView model
 
-        KnowledgeModelsCreate ->
-            model.knowledgeModelsCreateModel
-                |> KnowledgeModels.Create.View.view
+        KMEditorCreate ->
+            model.kmEditorCreateModel
+                |> KMEditor.Create.View.view
                 |> appView model
 
-        KnowledgeModelsEditor uuid ->
-            model.knowledgeModelsEditorModel
-                |> KnowledgeModels.Editor.View.view
+        KMEditorEditor uuid ->
+            model.kmEditorEditorModel
+                |> KMEditor.Editor.View.view
                 |> appView model
 
-        KnowledgeModels ->
-            model.knowledgeModelsIndexModel
-                |> KnowledgeModels.Index.View.view model.jwt
+        KMEditor ->
+            model.kmEditorIndexModel
+                |> KMEditor.Index.View.view model.jwt
                 |> appView model
 
-        KnowledgeModelsPublish uuid ->
-            model.knowledgeModelsPublishModel
-                |> KnowledgeModels.Publish.View.view
+        KMEditorPublish uuid ->
+            model.kmEditorPublishModel
+                |> KMEditor.Publish.View.view
                 |> appView model
 
-        KnowledgeModelsMigration uuid ->
-            model.knowledgeModelsMigrationModel
-                |> KnowledgeModels.Migration.View.view
+        KMEditorMigration uuid ->
+            model.kmEditorMigrationModel
+                |> KMEditor.Migration.View.view
                 |> appView model
 
-        PackageManagement ->
-            model.packageManagementIndexModel
-                |> PackageManagement.Index.View.view
+        KMPackages ->
+            model.kmPackagesIndexModel
+                |> KMPackages.Index.View.view
                 |> appView model
 
-        PackageManagementDetail organizationId kmId ->
-            model.packageManagementDetailModel
-                |> PackageManagement.Detail.View.view
+        KMPackagesDetail organizationId kmId ->
+            model.kmPackagesDetailModel
+                |> KMPackages.Detail.View.view
                 |> appView model
 
-        PackageManagementImport ->
-            model.packageManagementImportModel
-                |> PackageManagement.Import.View.view
+        KMPackagesImport ->
+            model.kmPackagesImportModel
+                |> KMPackages.Import.View.view
                 |> appView model
 
-        Questionnaires route ->
-            model.questionnairesModel
-                |> Questionnaires.View.view route QuestionnairesMsg
+        DSPlanner route ->
+            model.dsPlannerModel
+                |> DSPlanner.View.view route QuestionnairesMsg
                 |> appView model
 
         DataManagementPlans ->
@@ -85,9 +85,9 @@ view model =
                 |> Public.View.view route PublicMsg
                 |> publicView
 
-        UserManagement route ->
-            model.userManagement
-                |> UserManagement.View.view route UserManagementMsg
+        Users route ->
+            model.users
+                |> Users.View.view route UserManagementMsg
                 |> appView model
 
         NotFound ->

@@ -2,30 +2,30 @@ module Routing exposing (..)
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
+import DSPlanner.Routing
 import Navigation exposing (Location)
 import Public.Routing
-import Questionnaires.Routing
 import UrlParser exposing (..)
-import UserManagement.Routing
+import Users.Routing
 
 
 type Route
     = Welcome
     | Organization
-    | KnowledgeModels
-    | KnowledgeModelsEditor String
-    | KnowledgeModelsCreate
-    | KnowledgeModelsPublish String
-    | KnowledgeModelsMigration String
-    | PackageManagement
-    | PackageManagementDetail String String
-    | PackageManagementImport
-    | Questionnaires Questionnaires.Routing.Route
+    | KMEditor
+    | KMEditorEditor String
+    | KMEditorCreate
+    | KMEditorPublish String
+    | KMEditorMigration String
+    | KMPackages
+    | KMPackagesDetail String String
+    | KMPackagesImport
+    | DSPlanner DSPlanner.Routing.Route
     | DataManagementPlans
     | NotFound
     | NotAllowed
     | Public Public.Routing.Route
-    | UserManagement UserManagement.Routing.Route
+    | Users Users.Routing.Route
 
 
 matchers : Parser (Route -> a) a
@@ -34,18 +34,18 @@ matchers =
         parsers =
             []
                 ++ Public.Routing.parsers Public
-                ++ Questionnaires.Routing.parses Questionnaires
-                ++ UserManagement.Routing.parses UserManagement
+                ++ DSPlanner.Routing.parses DSPlanner
+                ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
                    , map Organization (s "organization")
-                   , map KnowledgeModelsCreate (s "knowledge-models" </> s "create")
-                   , map KnowledgeModelsEditor (s "knowledge-models" </> s "edit" </> string)
-                   , map KnowledgeModelsPublish (s "knowledge-models" </> s "publish" </> string)
-                   , map KnowledgeModelsMigration (s "knowledge-models" </> s "migration" </> string)
-                   , map KnowledgeModels (s "knowledge-models")
-                   , map PackageManagement (s "package-management")
-                   , map PackageManagementDetail (s "package-management" </> s "package" </> string </> string)
-                   , map PackageManagementImport (s "package-management" </> s "import")
+                   , map KMEditorCreate (s "km-editor" </> s "create")
+                   , map KMEditorEditor (s "km-editor" </> s "edit" </> string)
+                   , map KMEditorPublish (s "km-editor" </> s "publish" </> string)
+                   , map KMEditorMigration (s "km-editor" </> s "migration" </> string)
+                   , map KMEditor (s "km-editor")
+                   , map KMPackages (s "km-packages")
+                   , map KMPackagesDetail (s "km-packages" </> s "package" </> string </> string)
+                   , map KMPackagesImport (s "km-packages" </> s "import")
                    , map DataManagementPlans (s "data-management-plans")
                    ]
     in
@@ -69,32 +69,32 @@ isAllowed route maybeJwt =
         Organization ->
             hasPerm maybeJwt Perm.organization
 
-        KnowledgeModelsCreate ->
+        KMEditorCreate ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        KnowledgeModelsEditor uuid ->
+        KMEditorEditor uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        KnowledgeModelsPublish uuid ->
+        KMEditorPublish uuid ->
             hasPerm maybeJwt Perm.knowledgeModelPublish
 
-        KnowledgeModelsMigration uuid ->
+        KMEditorMigration uuid ->
             hasPerm maybeJwt Perm.knowledgeModelUpgrade
 
-        KnowledgeModels ->
+        KMEditor ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        PackageManagement ->
+        KMPackages ->
             hasPerm maybeJwt Perm.packageManagement
 
-        PackageManagementDetail organizationId kmId ->
+        KMPackagesDetail organizationId kmId ->
             hasPerm maybeJwt Perm.packageManagement
 
-        PackageManagementImport ->
+        KMPackagesImport ->
             hasPerm maybeJwt Perm.packageManagement
 
-        Questionnaires route ->
-            Questionnaires.Routing.isAllowed route maybeJwt
+        DSPlanner route ->
+            DSPlanner.Routing.isAllowed route maybeJwt
 
         DataManagementPlans ->
             hasPerm maybeJwt Perm.dataManagementPlan
@@ -102,8 +102,8 @@ isAllowed route maybeJwt =
         Public _ ->
             True
 
-        UserManagement route ->
-            UserManagement.Routing.isAllowed route maybeJwt
+        Users route ->
+            Users.Routing.isAllowed route maybeJwt
 
         NotFound ->
             True
@@ -123,32 +123,32 @@ toUrl route =
                 Organization ->
                     [ "organization" ]
 
-                KnowledgeModelsCreate ->
-                    [ "knowledge-models", "create" ]
+                KMEditorCreate ->
+                    [ "km-editor", "create" ]
 
-                KnowledgeModelsEditor uuid ->
-                    [ "knowledge-models", "edit", uuid ]
+                KMEditorEditor uuid ->
+                    [ "km-editor", "edit", uuid ]
 
-                KnowledgeModelsPublish uuid ->
-                    [ "knowledge-models", "publish", uuid ]
+                KMEditorPublish uuid ->
+                    [ "km-editor", "publish", uuid ]
 
-                KnowledgeModelsMigration uuid ->
-                    [ "knowledge-models", "migration", uuid ]
+                KMEditorMigration uuid ->
+                    [ "km-editor", "migration", uuid ]
 
-                KnowledgeModels ->
-                    [ "knowledge-models" ]
+                KMEditor ->
+                    [ "km-editor" ]
 
-                PackageManagement ->
-                    [ "package-management" ]
+                KMPackages ->
+                    [ "km-packages" ]
 
-                PackageManagementDetail organizationId kmId ->
-                    [ "package-management", "package", organizationId, kmId ]
+                KMPackagesDetail organizationId kmId ->
+                    [ "km-packages", "package", organizationId, kmId ]
 
-                PackageManagementImport ->
-                    [ "package-management", "import" ]
+                KMPackagesImport ->
+                    [ "km-packages", "import" ]
 
-                Questionnaires route ->
-                    Questionnaires.Routing.toUrl route
+                DSPlanner route ->
+                    DSPlanner.Routing.toUrl route
 
                 DataManagementPlans ->
                     [ "data-management-plans" ]
@@ -156,8 +156,8 @@ toUrl route =
                 Public route ->
                     Public.Routing.toUrl route
 
-                UserManagement route ->
-                    UserManagement.Routing.toUrl route
+                Users route ->
+                    Users.Routing.toUrl route
 
                 _ ->
                     []

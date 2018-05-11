@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Auth.Models exposing (Session, initialSession, parseJwt)
 import Json.Decode as Decode exposing (Value)
-import KnowledgeModels.Editor.Subscriptions
+import KMEditor.Editor.Subscriptions
 import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
@@ -62,8 +62,8 @@ decideInitialRoute model route =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.route of
-        KnowledgeModelsEditor _ ->
-            KnowledgeModels.Editor.Subscriptions.subscriptions model.knowledgeModelsEditorModel
+        KMEditorEditor _ ->
+            KMEditor.Editor.Subscriptions.subscriptions model.kmEditorEditorModel
 
         _ ->
             Sub.none
