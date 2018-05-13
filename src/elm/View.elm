@@ -25,9 +25,9 @@ view model =
         Welcome ->
             appView model welcomeView
 
-        Organization ->
-            model.organizationModel
-                |> Organization.View.view
+        DSPlanner route ->
+            model.dsPlannerModel
+                |> DSPlanner.View.view route DSPlannerMsg
                 |> appView model
 
         KMEditorCreate ->
@@ -40,14 +40,9 @@ view model =
                 |> KMEditor.Editor.View.view
                 |> appView model
 
-        KMEditor ->
+        KMEditorIndex ->
             model.kmEditorIndexModel
                 |> KMEditor.Index.View.view model.jwt
-                |> appView model
-
-        KMEditorPublish uuid ->
-            model.kmEditorPublishModel
-                |> KMEditor.Publish.View.view
                 |> appView model
 
         KMEditorMigration uuid ->
@@ -55,18 +50,20 @@ view model =
                 |> KMEditor.Migration.View.view
                 |> appView model
 
+        KMEditorPublish uuid ->
+            model.kmEditorPublishModel
+                |> KMEditor.Publish.View.view
+                |> appView model
+
         KMPackages route ->
             model.kmPackagesModel
                 |> KMPackages.View.view route KMPackagesMsg
                 |> appView model
 
-        DSPlanner route ->
-            model.dsPlannerModel
-                |> DSPlanner.View.view route QuestionnairesMsg
+        Organization ->
+            model.organizationModel
+                |> Organization.View.view
                 |> appView model
-
-        DataManagementPlans ->
-            appView model dataManagementPlansView
 
         Public route ->
             model.publicModel
@@ -75,14 +72,17 @@ view model =
 
         Users route ->
             model.users
-                |> Users.View.view route UserManagementMsg
+                |> Users.View.view route UsersMsg
                 |> appView model
+
+        NotAllowed ->
+            appView model notAllowedView
 
         NotFound ->
             appView model notFoundView
 
-        NotAllowed ->
-            appView model notAllowedView
+        DataManagementPlans ->
+            appView model dataManagementPlansView
 
 
 welcomeView : Html Msg

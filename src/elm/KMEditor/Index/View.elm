@@ -23,7 +23,7 @@ view jwt model =
     div []
         [ pageHeader "Knowledge Model Editor" indexActions
         , formResultView model.deletingMigration
-        , fullPageActionResultView (indexTable (tableConfig jwt) Msgs.KnowledgeModelsIndexMsg) model.knowledgeModels
+        , fullPageActionResultView (indexTable (tableConfig jwt) Msgs.KMEditorIndexMsg) model.knowledgeModels
         , deleteModal model
         , upgradeModal model
         ]
@@ -169,8 +169,8 @@ deleteModal model =
             , visible = visible
             , actionResult = model.deletingKnowledgeModel
             , actionName = "Delete"
-            , actionMsg = Msgs.KnowledgeModelsIndexMsg DeleteKnowledgeModel
-            , cancelMsg = Msgs.KnowledgeModelsIndexMsg <| ShowHideDeleteKnowledgeModal Nothing
+            , actionMsg = Msgs.KMEditorIndexMsg DeleteKnowledgeModel
+            , cancelMsg = Msgs.KMEditorIndexMsg <| ShowHideDeleteKnowledgeModal Nothing
             }
     in
     modalView modalConfig
@@ -213,7 +213,7 @@ upgradeModal model =
                         , text " to."
                         ]
                     , selectGroup options model.kmUpgradeForm "targetPackageId" "New parent package"
-                        |> Html.map (UpgradeFormMsg >> Msgs.KnowledgeModelsIndexMsg)
+                        |> Html.map (UpgradeFormMsg >> Msgs.KMEditorIndexMsg)
                     ]
 
         modalConfig =
@@ -222,8 +222,8 @@ upgradeModal model =
             , visible = visible
             , actionResult = model.creatingMigration
             , actionName = "Create"
-            , actionMsg = Msgs.KnowledgeModelsIndexMsg <| UpgradeFormMsg Form.Submit
-            , cancelMsg = Msgs.KnowledgeModelsIndexMsg <| ShowHideUpgradeModal Nothing
+            , actionMsg = Msgs.KMEditorIndexMsg <| UpgradeFormMsg Form.Submit
+            , cancelMsg = Msgs.KMEditorIndexMsg <| ShowHideUpgradeModal Nothing
             }
     in
     modalView modalConfig

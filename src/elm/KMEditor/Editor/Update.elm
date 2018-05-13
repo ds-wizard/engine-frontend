@@ -48,7 +48,7 @@ update msg seed session model =
 getKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 getKnowledgeModelCmd uuid session =
     getKnowledgeModelData uuid session
-        |> toCmd GetKnowledgeModelCompleted Msgs.KnowledgeModelsEditorMsg
+        |> toCmd GetKnowledgeModelCompleted Msgs.KMEditorEditorMsg
 
 
 getKnowledgeModelCompleted : Model -> Result Jwt.JwtError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
@@ -69,14 +69,14 @@ postEventsBulkCmd : String -> List Event -> Session -> Cmd Msgs.Msg
 postEventsBulkCmd uuid events session =
     encodeEvents events
         |> postEventsBulk session uuid
-        |> toCmd SaveCompleted Msgs.KnowledgeModelsEditorMsg
+        |> toCmd SaveCompleted Msgs.KMEditorEditorMsg
 
 
 postEventsBulkCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 postEventsBulkCompleted model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate KMEditor )
+            ( model, cmdNavigate KMEditorIndex )
 
         Err error ->
             ( { model | saving = getServerErrorJwt error "Knowledge model could not be saved" }, Cmd.none )

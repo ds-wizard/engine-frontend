@@ -21,13 +21,13 @@ import Utils exposing (versionIsGreater)
 getKnowledgeModelsCmd : Session -> Cmd Msgs.Msg
 getKnowledgeModelsCmd session =
     getKnowledgeModels session
-        |> toCmd GetKnowledgeModelsCompleted Msgs.KnowledgeModelsIndexMsg
+        |> toCmd GetKnowledgeModelsCompleted Msgs.KMEditorIndexMsg
 
 
 deleteKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 deleteKnowledgeModelCmd kmId session =
     deleteKnowledgeModel kmId session
-        |> toCmd DeleteKnowledgeModelCompleted Msgs.KnowledgeModelsIndexMsg
+        |> toCmd DeleteKnowledgeModelCompleted Msgs.KMEditorIndexMsg
 
 
 postMigrationCmd : Session -> KnowledgeModelUpgradeForm -> String -> Cmd Msgs.Msg
@@ -35,7 +35,7 @@ postMigrationCmd session form uuid =
     form
         |> encodeKnowledgeModelUpgradeForm
         |> postMigration session uuid
-        |> toCmd PostMigrationCompleted Msgs.KnowledgeModelsIndexMsg
+        |> toCmd PostMigrationCompleted Msgs.KMEditorIndexMsg
 
 
 getPackagesFilteredCmd : String -> Session -> Cmd Msgs.Msg
@@ -47,7 +47,7 @@ getPackagesFilteredCmd lastAppliedParentPackageId session =
     case ( List.head parts, List.getAt 1 parts ) of
         ( Just organizationId, Just kmId ) ->
             getPackagesFiltered organizationId kmId session
-                |> toCmd GetPackagesCompleted Msgs.KnowledgeModelsIndexMsg
+                |> toCmd GetPackagesCompleted Msgs.KMEditorIndexMsg
 
         _ ->
             Cmd.none
@@ -56,7 +56,7 @@ getPackagesFilteredCmd lastAppliedParentPackageId session =
 deleteMigrationCmd : String -> Session -> Cmd Msgs.Msg
 deleteMigrationCmd uuid session =
     deleteMigration uuid session
-        |> toCmd DeleteMigrationCompleted Msgs.KnowledgeModelsIndexMsg
+        |> toCmd DeleteMigrationCompleted Msgs.KMEditorIndexMsg
 
 
 getKnowledgeModelsCompleted : Model -> Result Jwt.JwtError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
@@ -89,7 +89,7 @@ deleteKnowledgeModelCompleted : Model -> Result Jwt.JwtError String -> ( Model, 
 deleteKnowledgeModelCompleted model result =
     case result of
         Ok km ->
-            ( model, cmdNavigate KMEditor )
+            ( model, cmdNavigate KMEditorIndex )
 
         Err error ->
             ( { model | deletingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be deleted" }

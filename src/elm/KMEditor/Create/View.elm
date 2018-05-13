@@ -40,7 +40,7 @@ content model =
             div []
                 [ formResultView model.savingKnowledgeModel
                 , formView model.form packages
-                , formActions KMEditor ( "Save", model.savingKnowledgeModel, Msgs.KnowledgeModelsCreateMsg <| FormMsg Form.Submit )
+                , formActions KMEditorIndex ( "Save", model.savingKnowledgeModel, Msgs.KMEditorCreateMsg <| FormMsg Form.Submit )
                 ]
 
 
@@ -59,7 +59,7 @@ formView form packages =
                 , selectGroup parentOptions form "parentPackageId" "Parent Package"
                 ]
     in
-    formHtml |> Html.map (FormMsg >> Msgs.KnowledgeModelsCreateMsg)
+    formHtml |> Html.map (FormMsg >> Msgs.KMEditorCreateMsg)
 
 
 createOption : PackageDetail -> ( String, String )

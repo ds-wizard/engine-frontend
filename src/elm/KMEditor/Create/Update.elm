@@ -28,7 +28,7 @@ import Utils exposing (getUuid, tuplePrepend)
 getPackagesCmd : Session -> Cmd Msgs.Msg
 getPackagesCmd session =
     getPackages session
-        |> toCmd GetPackagesCompleted Msgs.KnowledgeModelsCreateMsg
+        |> toCmd GetPackagesCompleted Msgs.KMEditorCreateMsg
 
 
 postKmCmd : Session -> KnowledgeModelCreateForm -> String -> Cmd Msgs.Msg
@@ -36,7 +36,7 @@ postKmCmd session form uuid =
     form
         |> encodeKnowledgeModelForm uuid
         |> postKnowledgeModel session
-        |> toCmd PostKnowledgeModelCompleted Msgs.KnowledgeModelsCreateMsg
+        |> toCmd PostKnowledgeModelCompleted Msgs.KMEditorCreateMsg
 
 
 getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
@@ -59,7 +59,7 @@ postKmCompleted model result =
         Ok km ->
             ( model
             , Maybe.map KMEditorEditor model.newUuid
-                |> Maybe.withDefault KMEditor
+                |> Maybe.withDefault KMEditorIndex
                 |> cmdNavigate
             )
 

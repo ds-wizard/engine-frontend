@@ -32,7 +32,7 @@ update msg session model =
 getMigrationCmd : String -> Session -> Cmd Msgs.Msg
 getMigrationCmd uuid session =
     getMigration uuid session
-        |> toCmd GetMigrationCompleted Msgs.KnowledgeModelsMigrationMsg
+        |> toCmd GetMigrationCompleted Msgs.KMEditorMigrationMsg
 
 
 postMigrationConflictCmd : String -> Session -> MigrationResolution -> Cmd Msgs.Msg
@@ -40,7 +40,7 @@ postMigrationConflictCmd uuid session resolution =
     resolution
         |> encodeMigrationResolution
         |> postMigrationConflict uuid session
-        |> toCmd PostMigrationConflictCompleted Msgs.KnowledgeModelsMigrationMsg
+        |> toCmd PostMigrationConflictCompleted Msgs.KMEditorMigrationMsg
 
 
 handleGetMigrationCompleted : Model -> Result Jwt.JwtError Migration -> ( Model, Cmd Msgs.Msg )

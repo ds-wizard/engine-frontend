@@ -63,7 +63,7 @@ initLocalModel model =
         KMPackages route ->
             { model | kmPackagesModel = KMPackages.Models.initLocalModel route model.kmPackagesModel }
 
-        KMEditor ->
+        KMEditorIndex ->
             { model | kmEditorIndexModel = KMEditor.Index.Models.initialModel }
 
         KMEditorCreate ->

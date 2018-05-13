@@ -18,7 +18,7 @@ import Routing exposing (Route(..), cmdNavigate)
 getKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 getKnowledgeModelCmd uuid session =
     getKnowledgeModel uuid session
-        |> toCmd GetKnowledgeModelCompleted Msgs.KnowledgeModelsPublishMsg
+        |> toCmd GetKnowledgeModelCompleted Msgs.KMEditorPublishMsg
 
 
 putKnowledgeModelVersionCmd : Session -> KnowledgeModelPublishForm -> String -> Cmd Msgs.Msg
@@ -28,7 +28,7 @@ putKnowledgeModelVersionCmd session form uuid =
             encodeKnowledgeModelPublishForm form
     in
     putKnowledgeModelVersion uuid version data session
-        |> toCmd PutKnowledgeModelVersionCompleted Msgs.KnowledgeModelsPublishMsg
+        |> toCmd PutKnowledgeModelVersionCompleted Msgs.KMEditorPublishMsg
 
 
 getKnowledgeModelCompleted : Model -> Result Jwt.JwtError KnowledgeModel -> ( Model, Cmd Msgs.Msg )

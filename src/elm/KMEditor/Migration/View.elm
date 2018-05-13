@@ -616,7 +616,7 @@ formActions model =
         , button [ class "btn btn-success", onClick ApplyEvent, disabled actionsDisabled ]
             [ text "Apply" ]
         ]
-        |> Html.map Msgs.KnowledgeModelsMigrationMsg
+        |> Html.map Msgs.KMEditorMigrationMsg
 
 
 viewCompletedMigration : Model -> Html Msgs.Msg

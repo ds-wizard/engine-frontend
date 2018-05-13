@@ -15,4 +15,4 @@ import Reorderable
 {-| -}
 subscriptions : Model -> Sub Msgs.Msg
 subscriptions model =
-    Reorderable.subscriptions (ReorderableMsg >> Msgs.KnowledgeModelsEditorMsg) model.reorderableState
+    Reorderable.subscriptions (ReorderableMsg >> Msgs.KMEditorEditorMsg) model.reorderableState

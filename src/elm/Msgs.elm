@@ -21,13 +21,13 @@ type Msg
     = ChangeLocation String
     | OnLocationChange Location
     | AuthMsg Auth.Msgs.Msg
-    | OrganizationMsg Organization.Msgs.Msg
+    | DSPlannerMsg DSPlanner.Msgs.Msg
+    | KMEditorCreateMsg KMEditor.Create.Msgs.Msg
+    | KMEditorEditorMsg KMEditor.Editor.Msgs.Msg
+    | KMEditorIndexMsg KMEditor.Index.Msgs.Msg
+    | KMEditorMigrationMsg KMEditor.Migration.Msgs.Msg
+    | KMEditorPublishMsg KMEditor.Publish.Msgs.Msg
     | KMPackagesMsg KMPackages.Msgs.Msg
-    | KnowledgeModelsIndexMsg KMEditor.Index.Msgs.Msg
-    | KnowledgeModelsCreateMsg KMEditor.Create.Msgs.Msg
-    | KnowledgeModelsPublishMsg KMEditor.Publish.Msgs.Msg
-    | KnowledgeModelsEditorMsg KMEditor.Editor.Msgs.Msg
-    | KnowledgeModelsMigrationMsg KMEditor.Migration.Msgs.Msg
-    | QuestionnairesMsg DSPlanner.Msgs.Msg
+    | OrganizationMsg Organization.Msgs.Msg
     | PublicMsg Public.Msgs.Msg
-    | UserManagementMsg Users.Msgs.Msg
+    | UsersMsg Users.Msgs.Msg

@@ -23,35 +23,35 @@ import Users.Update
 fetchData : Model -> Cmd Msg
 fetchData model =
     case model.route of
-        Organization ->
-            Organization.Update.getCurrentOrganizationCmd model.session
-
-        KMPackages route ->
-            KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.session
-
-        KMEditor ->
-            KMEditor.Index.Update.getKnowledgeModelsCmd model.session
+        DSPlanner route ->
+            DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.session
 
         KMEditorCreate ->
             KMEditor.Create.Update.getPackagesCmd model.session
 
-        KMEditorPublish uuid ->
-            KMEditor.Publish.Update.getKnowledgeModelCmd uuid model.session
-
         KMEditorEditor uuid ->
             KMEditor.Editor.Update.getKnowledgeModelCmd uuid model.session
+
+        KMEditorIndex ->
+            KMEditor.Index.Update.getKnowledgeModelsCmd model.session
 
         KMEditorMigration uuid ->
             KMEditor.Migration.Update.getMigrationCmd uuid model.session
 
+        KMEditorPublish uuid ->
+            KMEditor.Publish.Update.getKnowledgeModelCmd uuid model.session
+
+        KMPackages route ->
+            KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.session
+
+        Organization ->
+            Organization.Update.getCurrentOrganizationCmd model.session
+
         Public route ->
             Public.Update.fetchData route Msgs.PublicMsg
 
-        DSPlanner route ->
-            DSPlanner.Update.fetchData route Msgs.QuestionnairesMsg model.session
-
         Users route ->
-            Users.Update.fetchData route Msgs.UserManagementMsg model.session
+            Users.Update.fetchData route Msgs.UsersMsg model.session
 
         _ ->
             Cmd.none
@@ -73,47 +73,47 @@ update msg model =
         Msgs.AuthMsg msg ->
             Auth.Update.update msg model
 
-        Msgs.OrganizationMsg msg ->
+        Msgs.DSPlannerMsg msg ->
             let
-                ( organizationModel, cmd ) =
-                    Organization.Update.update msg model.session model.organizationModel
+                ( dsPlannerModel, cmd ) =
+                    DSPlanner.Update.update msg Msgs.DSPlannerMsg model.session model.dsPlannerModel
             in
-            ( { model | organizationModel = organizationModel }, cmd )
+            ( { model | dsPlannerModel = dsPlannerModel }, cmd )
 
-        Msgs.KnowledgeModelsIndexMsg msg ->
-            let
-                ( kmEditorIndexModel, cmd ) =
-                    KMEditor.Index.Update.update msg model.session model.kmEditorIndexModel
-            in
-            ( { model | kmEditorIndexModel = kmEditorIndexModel }, cmd )
-
-        Msgs.KnowledgeModelsCreateMsg msg ->
+        Msgs.KMEditorCreateMsg msg ->
             let
                 ( seed, kmEditorCreateModel, cmd ) =
                     KMEditor.Create.Update.update msg model.seed model.session model.kmEditorCreateModel
             in
             ( { model | seed = seed, kmEditorCreateModel = kmEditorCreateModel }, cmd )
 
-        Msgs.KnowledgeModelsPublishMsg msg ->
-            let
-                ( kmEditorPublishModel, cmd ) =
-                    KMEditor.Publish.Update.update msg model.session model.kmEditorPublishModel
-            in
-            ( { model | kmEditorPublishModel = kmEditorPublishModel }, cmd )
-
-        Msgs.KnowledgeModelsEditorMsg msg ->
+        Msgs.KMEditorEditorMsg msg ->
             let
                 ( seed, kmEditorEditorModel, cmd ) =
                     KMEditor.Editor.Update.update msg model.seed model.session model.kmEditorEditorModel
             in
             ( { model | seed = seed, kmEditorEditorModel = kmEditorEditorModel }, cmd )
 
-        Msgs.KnowledgeModelsMigrationMsg msg ->
+        Msgs.KMEditorIndexMsg msg ->
+            let
+                ( kmEditorIndexModel, cmd ) =
+                    KMEditor.Index.Update.update msg model.session model.kmEditorIndexModel
+            in
+            ( { model | kmEditorIndexModel = kmEditorIndexModel }, cmd )
+
+        Msgs.KMEditorMigrationMsg msg ->
             let
                 ( kmEditorMigrationModel, cmd ) =
                     KMEditor.Migration.Update.update msg model.session model.kmEditorMigrationModel
             in
             ( { model | kmEditorMigrationModel = kmEditorMigrationModel }, cmd )
+
+        Msgs.KMEditorPublishMsg msg ->
+            let
+                ( kmEditorPublishModel, cmd ) =
+                    KMEditor.Publish.Update.update msg model.session model.kmEditorPublishModel
+            in
+            ( { model | kmEditorPublishModel = kmEditorPublishModel }, cmd )
 
         Msgs.KMPackagesMsg msg ->
             let
@@ -122,6 +122,13 @@ update msg model =
             in
             ( { model | kmPackagesModel = kmPackagesModel }, cmd )
 
+        Msgs.OrganizationMsg msg ->
+            let
+                ( organizationModel, cmd ) =
+                    Organization.Update.update msg model.session model.organizationModel
+            in
+            ( { model | organizationModel = organizationModel }, cmd )
+
         Msgs.PublicMsg msg ->
             let
                 ( seed, publicModel, cmd ) =
@@ -129,16 +136,9 @@ update msg model =
             in
             ( { model | seed = seed, publicModel = publicModel }, cmd )
 
-        Msgs.QuestionnairesMsg msg ->
-            let
-                ( dsPlannerModel, cmd ) =
-                    DSPlanner.Update.update msg Msgs.QuestionnairesMsg model.session model.dsPlannerModel
-            in
-            ( { model | dsPlannerModel = dsPlannerModel }, cmd )
-
-        Msgs.UserManagementMsg msg ->
+        Msgs.UsersMsg msg ->
             let
                 ( seed, users, cmd ) =
-                    Users.Update.update msg Msgs.UserManagementMsg model.seed model.session model.users
+                    Users.Update.update msg Msgs.UsersMsg model.seed model.session model.users
             in
             ( { model | seed = seed, users = users }, cmd )

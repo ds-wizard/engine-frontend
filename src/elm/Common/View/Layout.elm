@@ -74,7 +74,7 @@ menuItems : List ( String, String, Route, String )
 menuItems =
     [ ( "Organization", "fa-building", Organization, Perm.organization )
     , ( "Users", "fa-users", Users Users.Routing.Index, Perm.userManagement )
-    , ( "KM Editor", "fa-edit", KMEditor, Perm.knowledgeModel )
+    , ( "KM Editor", "fa-edit", KMEditorIndex, Perm.knowledgeModel )
     , ( "KM Packages", "fa-cubes", KMPackages KMPackages.Routing.Index, Perm.packageManagement )
     , ( "DS Planner", "fa-list-alt", DSPlanner DSPlanner.Routing.Index, Perm.questionnaire )
     ]

@@ -12,19 +12,19 @@ import Users.Routing
 
 type Route
     = Welcome
-    | Organization
-    | KMEditor
-    | KMEditorEditor String
-    | KMEditorCreate
-    | KMEditorPublish String
-    | KMEditorMigration String
-    | KMPackages KMPackages.Routing.Route
     | DSPlanner DSPlanner.Routing.Route
-    | DataManagementPlans
-    | NotFound
-    | NotAllowed
+    | KMEditorCreate
+    | KMEditorEditor String
+    | KMEditorIndex
+    | KMEditorMigration String
+    | KMEditorPublish String
+    | KMPackages KMPackages.Routing.Route
+    | Organization
     | Public Public.Routing.Route
     | Users Users.Routing.Route
+    | NotAllowed
+    | NotFound
+    | DataManagementPlans
 
 
 matchers : Parser (Route -> a) a
@@ -37,12 +37,12 @@ matchers =
                 ++ Public.Routing.parsers Public
                 ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
-                   , map Organization (s "organization")
                    , map KMEditorCreate (s "km-editor" </> s "create")
                    , map KMEditorEditor (s "km-editor" </> s "edit" </> string)
-                   , map KMEditorPublish (s "km-editor" </> s "publish" </> string)
+                   , map KMEditorIndex (s "km-editor")
                    , map KMEditorMigration (s "km-editor" </> s "migration" </> string)
-                   , map KMEditor (s "km-editor")
+                   , map KMEditorPublish (s "km-editor" </> s "publish" </> string)
+                   , map Organization (s "organization")
                    , map DataManagementPlans (s "data-management-plans")
                    ]
     in
@@ -63,8 +63,8 @@ isAllowed route maybeJwt =
         Welcome ->
             True
 
-        Organization ->
-            hasPerm maybeJwt Perm.organization
+        DSPlanner route ->
+            DSPlanner.Routing.isAllowed route maybeJwt
 
         KMEditorCreate ->
             hasPerm maybeJwt Perm.knowledgeModel
@@ -72,23 +72,20 @@ isAllowed route maybeJwt =
         KMEditorEditor uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        KMEditorPublish uuid ->
-            hasPerm maybeJwt Perm.knowledgeModelPublish
+        KMEditorIndex ->
+            hasPerm maybeJwt Perm.knowledgeModel
 
         KMEditorMigration uuid ->
             hasPerm maybeJwt Perm.knowledgeModelUpgrade
 
-        KMEditor ->
-            hasPerm maybeJwt Perm.knowledgeModel
+        KMEditorPublish uuid ->
+            hasPerm maybeJwt Perm.knowledgeModelPublish
 
         KMPackages route ->
             KMPackages.Routing.isAllowed route maybeJwt
 
-        DSPlanner route ->
-            DSPlanner.Routing.isAllowed route maybeJwt
-
-        DataManagementPlans ->
-            hasPerm maybeJwt Perm.dataManagementPlan
+        Organization ->
+            hasPerm maybeJwt Perm.organization
 
         Public _ ->
             True
@@ -98,6 +95,9 @@ isAllowed route maybeJwt =
 
         NotFound ->
             True
+
+        DataManagementPlans ->
+            hasPerm maybeJwt Perm.dataManagementPlan
 
         _ ->
             False
@@ -111,8 +111,8 @@ toUrl route =
                 Welcome ->
                     [ "welcome" ]
 
-                Organization ->
-                    [ "organization" ]
+                DSPlanner route ->
+                    DSPlanner.Routing.toUrl route
 
                 KMEditorCreate ->
                     [ "km-editor", "create" ]
@@ -120,29 +120,29 @@ toUrl route =
                 KMEditorEditor uuid ->
                     [ "km-editor", "edit", uuid ]
 
-                KMEditorPublish uuid ->
-                    [ "km-editor", "publish", uuid ]
+                KMEditorIndex ->
+                    [ "km-editor" ]
 
                 KMEditorMigration uuid ->
                     [ "km-editor", "migration", uuid ]
 
-                KMEditor ->
-                    [ "km-editor" ]
+                KMEditorPublish uuid ->
+                    [ "km-editor", "publish", uuid ]
 
                 KMPackages route ->
                     KMPackages.Routing.toUrl route
 
-                DSPlanner route ->
-                    DSPlanner.Routing.toUrl route
-
-                DataManagementPlans ->
-                    [ "data-management-plans" ]
+                Organization ->
+                    [ "organization" ]
 
                 Public route ->
                     Public.Routing.toUrl route
 
                 Users route ->
                     Users.Routing.toUrl route
+
+                DataManagementPlans ->
+                    [ "data-management-plans" ]
 
                 _ ->
                     []

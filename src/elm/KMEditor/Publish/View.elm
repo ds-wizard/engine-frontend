@@ -48,7 +48,7 @@ content model =
             div []
                 [ formResultView model.publishingKnowledgeModel
                 , formView model.form knowledgeModel
-                , formActions KMEditor ( "Publish", model.publishingKnowledgeModel, Msgs.KnowledgeModelsPublishMsg <| FormMsg Form.Submit )
+                , formActions KMEditorIndex ( "Publish", model.publishingKnowledgeModel, Msgs.KMEditorPublishMsg <| FormMsg Form.Submit )
                 ]
 
 
@@ -66,7 +66,7 @@ formView form knowledgeModel =
                     [ text "Describe what has changed in the new version." ]
                 ]
     in
-    formHtml |> Html.map (FormMsg >> Msgs.KnowledgeModelsPublishMsg)
+    formHtml |> Html.map (FormMsg >> Msgs.KMEditorPublishMsg)
 
 
 lastVersion : Maybe String -> Html msg

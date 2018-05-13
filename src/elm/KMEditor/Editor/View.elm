@@ -58,7 +58,7 @@ editorView model =
             case model.knowledgeModelEditor of
                 Success knowledgeModelEditor ->
                     ( breadcrumbs knowledgeModelEditor
-                    , viewKnowledgeModel model knowledgeModelEditor (Edit >> Msgs.KnowledgeModelsEditorMsg)
+                    , viewKnowledgeModel model knowledgeModelEditor (Edit >> Msgs.KMEditorEditorMsg)
                     , diffTreeView (getKnowledgeModel knowledgeModelEditor) model.events
                     )
 
@@ -107,7 +107,7 @@ viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
                         getChapterEditorName
                         (\(ChapterEditor chapterEditor) -> ViewChapter chapterEditor.chapter.uuid |> parentMsg)
                     , div [ class "form-actions" ]
-                        [ linkTo KMEditor
+                        [ linkTo KMEditorIndex
                             [ class "btn btn-default" ]
                             [ text "Cancel" ]
                         , actionButton ( "Save", model.saving, KnowledgeModelFormMsg Form.Submit |> parentMsg )
@@ -369,7 +369,7 @@ inputChildren childName reorderableState children reorderMsg addMsg toId getName
         , Reorderable.ul
             (Reorderable.fullConfig
                 { toId = toId
-                , toMsg = ReorderableMsg >> Msgs.KnowledgeModelsEditorMsg
+                , toMsg = ReorderableMsg >> Msgs.KMEditorEditorMsg
                 , draggable = True
                 , updateList = reorderMsg
                 , itemView = inputChild getName getMsg
