@@ -32,6 +32,7 @@ type TableAction a msg
 type alias TableActionConfig a msg =
     { label : TableActionLabel
     , action : TableAction a msg
+    , visible : a -> Bool
     }
 
 
@@ -44,7 +45,7 @@ type alias TableConfig a msg =
 
 indexTable : TableConfig a msg -> (msg -> Msgs.Msg) -> List a -> Html Msgs.Msg
 indexTable config wrapMsg data =
-    table [ class "table" ]
+    table [ class "table index-table" ]
         [ tableHeader config
         , tableBody config wrapMsg data
         ]
@@ -90,7 +91,13 @@ tableRow config wrapMsg item =
 
 tableRowActions : TableConfig a msg -> (msg -> Msgs.Msg) -> a -> Html Msgs.Msg
 tableRowActions config wrapMsg item =
-    td [ class "table-actions" ] (List.map (tableAction wrapMsg item) config.actions)
+    let
+        actions =
+            config.actions
+                |> List.filter (\a -> a.visible item)
+                |> List.map (tableAction wrapMsg item)
+    in
+    td [ class "table-actions" ] actions
 
 
 tableAction : (msg -> Msgs.Msg) -> a -> TableActionConfig a msg -> Html Msgs.Msg

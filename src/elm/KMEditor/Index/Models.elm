@@ -1,11 +1,5 @@
 module KMEditor.Index.Models exposing (..)
 
-{-|
-
-@docs Model, initialModel
-
--}
-
 import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
@@ -13,7 +7,6 @@ import KMEditor.Models exposing (KnowledgeModel, KnowledgeModelUpgradeForm, init
 import KMPackages.Models exposing (PackageDetail)
 
 
-{-| -}
 type alias Model =
     { knowledgeModels : ActionResult (List KnowledgeModel)
     , kmToBeDeleted : Maybe KnowledgeModel
@@ -26,7 +19,6 @@ type alias Model =
     }
 
 
-{-| -}
 initialModel : Model
 initialModel =
     { knowledgeModels = Loading

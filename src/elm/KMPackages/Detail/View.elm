@@ -1,11 +1,5 @@
 module KMPackages.Detail.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Html exposing (detailContainerClassWith, emptyNode, linkTo)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
@@ -20,12 +14,10 @@ import KMPackages.Requests exposing (exportPackageUrl)
 import Msgs exposing (Msg)
 
 
-{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div [ detailContainerClassWith "package-management-detail" ]
         [ content model
-        , deleteModal model
         , deleteVersionModal model
         ]
 
@@ -44,38 +36,6 @@ content model =
 
         Success packages ->
             packageDetail packages
-
-
-deleteModal : Model -> Html Msgs.Msg
-deleteModal model =
-    let
-        version =
-            case currentPackage model of
-                Just package ->
-                    package.organizationId ++ ":" ++ package.kmId
-
-                Nothing ->
-                    ""
-
-        modalContent =
-            [ p []
-                [ text "Are you sure you want to permanently delete "
-                , strong [] [ text version ]
-                , text " and all its versions?"
-                ]
-            ]
-
-        modalConfig =
-            { modalTitle = "Delete package"
-            , modalContent = modalContent
-            , visible = model.showDeleteDialog
-            , actionResult = model.deletingPackage
-            , actionName = "Delete"
-            , actionMsg = Msgs.PackageManagementDetailMsg DeletePackage
-            , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog False
-            }
-    in
-    modalView modalConfig
 
 
 deleteVersionModal : Model -> Html Msgs.Msg
@@ -115,7 +75,7 @@ packageDetail packages =
     case List.head packages of
         Just package ->
             div []
-                [ pageHeader package.name actions
+                [ pageHeader package.name []
                 , codeGroup package.organizationId "Organization ID"
                 , codeGroup package.kmId "Knowledge Model ID"
                 , h3 [] [ text "Versions" ]
@@ -124,18 +84,6 @@ packageDetail packages =
 
         Nothing ->
             text ""
-
-
-actions : List (Html Msgs.Msg)
-actions =
-    [ a
-        [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteDialog True)
-        , class "link-with-icon"
-        ]
-        [ i [ class "fa fa-trash-o" ] []
-        , text "Delete"
-        ]
-    ]
 
 
 versionView : PackageDetail -> Html Msgs.Msg

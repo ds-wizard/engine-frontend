@@ -13,16 +13,26 @@ import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
+update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+update msg session model =
+    case msg of
+        GetPackageCompleted result ->
+            getPackageCompleted model result
+
+        ShowHideDeleteVersion version ->
+            ( { model | versionToBeDeleted = version, deletingVersion = Unset }, Cmd.none )
+
+        DeleteVersion ->
+            handleDeleteVersion session model
+
+        DeleteVersionCompleted result ->
+            deleteVersionCompleted model result
+
+
 getPackagesFilteredCmd : String -> String -> Session -> Cmd Msgs.Msg
 getPackagesFilteredCmd organizationId kmId session =
     getPackagesFiltered organizationId kmId session
         |> toCmd GetPackageCompleted Msgs.PackageManagementDetailMsg
-
-
-deletePackageCmd : String -> String -> Session -> Cmd Msgs.Msg
-deletePackageCmd organizationId kmId session =
-    deletePackage organizationId kmId session
-        |> toCmd DeletePackageCompleted Msgs.PackageManagementDetailMsg
 
 
 deletePackageVersionCmd : String -> Session -> Cmd Msgs.Msg
@@ -43,30 +53,6 @@ getPackageCompleted model result =
                     { model | packages = getServerErrorJwt error "Unable to get package detail" }
     in
     ( newModel, Cmd.none )
-
-
-handleDeletePackage : Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeletePackage session model =
-    case currentPackage model of
-        Just package ->
-            ( { model | deletingPackage = Loading }
-            , deletePackageCmd package.organizationId package.kmId session
-            )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-deletePackageCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deletePackageCompleted model result =
-    case result of
-        Ok package ->
-            ( model, cmdNavigate KMPackages )
-
-        Err error ->
-            ( { model | deletingPackage = getServerErrorJwt error "Package could not be deleted" }
-            , Cmd.none
-            )
 
 
 handleDeleteVersion : Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -102,29 +88,3 @@ deleteVersionCompleted model result =
               }
             , Cmd.none
             )
-
-
-{-| -}
-update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg session model =
-    case msg of
-        GetPackageCompleted result ->
-            getPackageCompleted model result
-
-        ShowHideDeleteDialog value ->
-            ( { model | showDeleteDialog = value, deletingPackage = Unset }, Cmd.none )
-
-        DeletePackage ->
-            handleDeletePackage session model
-
-        DeletePackageCompleted result ->
-            deletePackageCompleted model result
-
-        ShowHideDeleteVersion version ->
-            ( { model | versionToBeDeleted = version, deletingVersion = Unset }, Cmd.none )
-
-        DeleteVersion ->
-            handleDeleteVersion session model
-
-        DeleteVersionCompleted result ->
-            deleteVersionCompleted model result

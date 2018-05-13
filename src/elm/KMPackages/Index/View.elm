@@ -1,94 +1,103 @@
 module KMPackages.Index.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
-import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
+import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon, TableActionText), TableConfig, TableFieldValue(TextValue), indexTable)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMPackages.Index.Models exposing (..)
+import KMPackages.Index.Msgs exposing (Msg(..))
 import KMPackages.Models exposing (..)
-import Msgs exposing (Msg)
+import Msgs
 import Routing exposing (Route(..))
 
 
-{-| -}
 view : Model -> Html Msgs.Msg
 view model =
     div []
-        [ pageHeader "Knowledge Model Packages" actions
-        , content model
+        [ pageHeader "Knowledge Model Packages" indexActions
+        , formSuccessResultView model.deletingPackage
+        , fullPageActionResultView (indexTable tableConfig Msgs.PackageManagementIndexMsg) model.packages
+        , deleteModal model
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
-    case model.packages of
-        Unset ->
-            emptyNode
-
-        Loading ->
-            fullPageLoader
-
-        Error err ->
-            defaultFullPageError err
-
-        Success packages ->
-            pmTable packages
-
-
-actions : List (Html Msg)
-actions =
+indexActions : List (Html Msgs.Msg)
+indexActions =
     [ linkTo KMPackagesImport
-        [ class "btn btn-info link-with-icon" ]
+        [ class "btn btn-primary link-with-icon" ]
         [ i [ class "fa fa-cloud-upload" ] []
         , text "Import"
         ]
     ]
 
 
-pmTable : List Package -> Html Msg
-pmTable packages =
-    table [ class "table" ]
-        [ pmTableHeader
-        , pmTableBody packages
+tableConfig : TableConfig Package Msg
+tableConfig =
+    { emptyMessage = "There are no packages."
+    , fields =
+        [ { label = "Name"
+          , getValue = TextValue .name
+          }
+        , { label = "Organization ID"
+          , getValue = TextValue .organizationId
+          }
+        , { label = "Knowledge Model ID"
+          , getValue = TextValue .kmId
+          }
         ]
+    , actions =
+        [ { label = TableActionIcon "fa fa-trash-o"
+          , action = TableActionMsg tableActionDelete
+          , visible = always True
+          }
+        , { label = TableActionText "View detail"
+          , action = TableActionLink tableActionViewDetail
+          , visible = always True
+          }
+        ]
+    }
 
 
-pmTableHeader : Html Msg
-pmTableHeader =
-    thead []
-        [ tr []
-            [ th [] [ text "Name" ]
-            , th [] [ text "Organization ID" ]
-            , th [] [ text "Knowledge Model ID" ]
+tableActionDelete : (Msg -> Msgs.Msg) -> Package -> Msgs.Msg
+tableActionDelete wrapMsg =
+    wrapMsg << ShowHideDeletePackage << Just
+
+
+tableActionViewDetail : Package -> Routing.Route
+tableActionViewDetail package =
+    Routing.KMPackagesDetail package.organizationId package.kmId
+
+
+deleteModal : Model -> Html Msgs.Msg
+deleteModal model =
+    let
+        ( visible, version ) =
+            case model.packageToBeDeleted of
+                Just package ->
+                    ( True, package.organizationId ++ ":" ++ package.kmId )
+
+                Nothing ->
+                    ( False, "" )
+
+        modalContent =
+            [ p []
+                [ text "Are you sure you want to permanently delete "
+                , strong [] [ text version ]
+                , text " and all its versions?"
+                ]
             ]
-        ]
 
-
-pmTableBody : List Package -> Html Msg
-pmTableBody packages =
-    if List.isEmpty packages then
-        pmTableEmpty
-    else
-        tbody [] (List.map pmTableRow packages)
-
-
-pmTableEmpty : Html msg
-pmTableEmpty =
-    tr []
-        [ td [ colspan 3, class "td-empty-table" ] [ text "There are no packages." ] ]
-
-
-pmTableRow : Package -> Html Msg
-pmTableRow package =
-    tr []
-        [ td [] [ linkTo (KMPackagesDetail package.organizationId package.kmId) [] [ text package.name ] ]
-        , td [] [ text package.organizationId ]
-        , td [] [ text package.kmId ]
-        ]
+        modalConfig =
+            { modalTitle = "Delete package"
+            , modalContent = modalContent
+            , visible = visible
+            , actionResult = model.deletingPackage
+            , actionName = "Delete"
+            , actionMsg = Msgs.PackageManagementIndexMsg DeletePackage
+            , cancelMsg = Msgs.PackageManagementIndexMsg <| ShowHideDeletePackage Nothing
+            }
+    in
+    modalView modalConfig

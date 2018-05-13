@@ -6,7 +6,6 @@ import KMPackages.Models exposing (PackageDetail)
 
 type alias Model =
     { packages : ActionResult (List PackageDetail)
-    , deletingPackage : ActionResult String
     , deletingVersion : ActionResult String
     , showDeleteDialog : Bool
     , versionToBeDeleted : Maybe String
@@ -16,7 +15,6 @@ type alias Model =
 initialModel : Model
 initialModel =
     { packages = Loading
-    , deletingPackage = Unset
     , deletingVersion = Unset
     , showDeleteDialog = False
     , versionToBeDeleted = Nothing

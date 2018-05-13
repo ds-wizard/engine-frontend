@@ -49,9 +49,11 @@ tableConfig =
     , actions =
         [ { label = TableActionIcon "fa fa-trash-o"
           , action = TableActionMsg tableActionDelete
+          , visible = always True
           }
         , { label = TableActionText "Fill questionnaire"
           , action = TableActionLink (Routing.DSPlanner << Detail << .uuid)
+          , visible = always True
           }
         ]
     }
