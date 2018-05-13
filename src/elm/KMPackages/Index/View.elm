@@ -1,7 +1,6 @@
 module KMPackages.Index.View exposing (view)
 
 import Common.Html exposing (..)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (formSuccessResultView)
 import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon, TableActionText), TableConfig, TableFieldValue(TextValue), indexTable)

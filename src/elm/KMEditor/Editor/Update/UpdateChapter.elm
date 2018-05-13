@@ -13,7 +13,6 @@ import KMEditor.Editor.Models.Entities exposing (KnowledgeModel, newQuestion)
 import KMEditor.Editor.Models.Events exposing (..)
 import KMEditor.Editor.Models.Forms exposing (..)
 import KMEditor.Editor.Update.Utils exposing (addChild, formChanged, updateInList)
-import List.Extra as List
 import Random.Pcg exposing (Seed)
 
 
