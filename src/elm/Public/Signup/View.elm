@@ -8,6 +8,7 @@ import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onSubmit)
 import Msgs
 import Public.Routing exposing (Route(Login))
 import Public.Signup.Models exposing (..)
@@ -32,14 +33,14 @@ view wrapMsg model =
 
 signupForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 signupForm wrapMsg model =
-    div [ class "well col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" ]
+    form [ onSubmit (wrapMsg <| FormMsg Form.Submit), class "well col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" ]
         [ fieldset []
             [ legend [] [ text "Sign up" ]
             , signupError model.signingUp
             , formView model.form |> Html.map (wrapMsg << FormMsg)
             , div [ class "form-actions public__signup__formButtons" ]
                 [ linkTo (Public Login) [] [ text "I already have an account" ]
-                , actionButton ( "Sign up", model.signingUp, wrapMsg <| FormMsg Form.Submit )
+                , submitButton ( "Sign up", model.signingUp )
                 ]
             ]
         ]

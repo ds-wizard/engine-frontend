@@ -4,10 +4,11 @@ import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageError)
-import Common.View.Forms exposing (actionButton, errorView, inputGroup)
+import Common.View.Forms exposing (errorView, inputGroup, submitButton)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onSubmit)
 import Msgs
 import Public.ForgottenPassword.Models exposing (ForgottenPasswordForm, Model)
 import Public.ForgottenPassword.Msgs exposing (Msg(FormMsg))
@@ -30,13 +31,13 @@ view wrapMsg model =
 
 signupForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 signupForm wrapMsg model =
-    div [ class "well col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" ]
+    form [ onSubmit (wrapMsg <| FormMsg Form.Submit), class "well col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" ]
         [ fieldset []
             [ legend [] [ text "Forgotten Password" ]
             , submitError model.submitting
             , formView model.form |> Html.map (wrapMsg << FormMsg)
             , div [ class "form-actions public__forgottenPassword__formButtons" ]
-                [ actionButton ( "Recover", model.submitting, wrapMsg <| FormMsg Form.Submit )
+                [ submitButton ( "Recover", model.submitting )
                 ]
             ]
         ]
