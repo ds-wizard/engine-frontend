@@ -3,6 +3,7 @@ module Routing exposing (..)
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import DSPlanner.Routing
+import KMPackages.Routing
 import Navigation exposing (Location)
 import Public.Routing
 import UrlParser exposing (..)
@@ -17,9 +18,7 @@ type Route
     | KMEditorCreate
     | KMEditorPublish String
     | KMEditorMigration String
-    | KMPackages
-    | KMPackagesDetail String String
-    | KMPackagesImport
+    | KMPackages KMPackages.Routing.Route
     | DSPlanner DSPlanner.Routing.Route
     | DataManagementPlans
     | NotFound
@@ -33,8 +32,9 @@ matchers =
     let
         parsers =
             []
-                ++ Public.Routing.parsers Public
                 ++ DSPlanner.Routing.parses DSPlanner
+                ++ KMPackages.Routing.parsers KMPackages
+                ++ Public.Routing.parsers Public
                 ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
                    , map Organization (s "organization")
@@ -43,9 +43,6 @@ matchers =
                    , map KMEditorPublish (s "km-editor" </> s "publish" </> string)
                    , map KMEditorMigration (s "km-editor" </> s "migration" </> string)
                    , map KMEditor (s "km-editor")
-                   , map KMPackages (s "km-packages")
-                   , map KMPackagesDetail (s "km-packages" </> s "package" </> string </> string)
-                   , map KMPackagesImport (s "km-packages" </> s "import")
                    , map DataManagementPlans (s "data-management-plans")
                    ]
     in
@@ -84,14 +81,8 @@ isAllowed route maybeJwt =
         KMEditor ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        KMPackages ->
-            hasPerm maybeJwt Perm.packageManagement
-
-        KMPackagesDetail organizationId kmId ->
-            hasPerm maybeJwt Perm.packageManagement
-
-        KMPackagesImport ->
-            hasPerm maybeJwt Perm.packageManagement
+        KMPackages route ->
+            KMPackages.Routing.isAllowed route maybeJwt
 
         DSPlanner route ->
             DSPlanner.Routing.isAllowed route maybeJwt
@@ -138,14 +129,8 @@ toUrl route =
                 KMEditor ->
                     [ "km-editor" ]
 
-                KMPackages ->
-                    [ "km-packages" ]
-
-                KMPackagesDetail organizationId kmId ->
-                    [ "km-packages", "package", organizationId, kmId ]
-
-                KMPackagesImport ->
-                    [ "km-packages", "import" ]
+                KMPackages route ->
+                    KMPackages.Routing.toUrl route
 
                 DSPlanner route ->
                     DSPlanner.Routing.toUrl route

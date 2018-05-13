@@ -1,7 +1,7 @@
 module KMPackages.Detail.Msgs exposing (..)
 
 import Jwt
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 
 
 type Msg

@@ -1,11 +1,5 @@
 module KMPackages.Import.Update exposing (update)
 
-{-|
-
-@docs update
-
--}
-
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
@@ -15,40 +9,13 @@ import Jwt
 import KMPackages.Import.Models exposing (Model)
 import KMPackages.Import.Msgs exposing (Msg(..))
 import KMPackages.Requests exposing (importPackage)
+import KMPackages.Routing
 import Msgs
-import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
-importPackageCmd : NativeFile -> Session -> Cmd Msgs.Msg
-importPackageCmd file session =
-    importPackage file session
-        |> toCmd ImportPackageCompleted Msgs.PackageManagementImportMsg
-
-
-handleSubmit : Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleSubmit session model =
-    case List.head model.files of
-        Just file ->
-            ( { model | importing = Loading }, importPackageCmd file session )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-importPackageCompleted : Model -> Result Jwt.JwtError Decode.Value -> ( Model, Cmd Msgs.Msg )
-importPackageCompleted model result =
-    case result of
-        Ok msg ->
-            ( model, cmdNavigate KMPackages )
-
-        Err error ->
-            ( { model | importing = getServerErrorJwt error "Importing package failed." }, Cmd.none )
-
-
-{-| -}
-update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg session model =
     case msg of
         DragEnter ->
             ( { model | dnd = model.dnd + 1 }, Cmd.none )
@@ -63,7 +30,7 @@ update msg session model =
             ( { model | files = files }, Cmd.none )
 
         Submit ->
-            handleSubmit session model
+            handleSubmit wrapMsg session model
 
         Cancel ->
             ( { model | files = [], importing = Unset }, Cmd.none )
@@ -73,3 +40,30 @@ update msg session model =
 
         _ ->
             ( model, Cmd.none )
+
+
+handleSubmit : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleSubmit wrapMsg session model =
+    case List.head model.files of
+        Just file ->
+            ( { model | importing = Loading }, importPackageCmd wrapMsg file session )
+
+        Nothing ->
+            ( model, Cmd.none )
+
+
+importPackageCmd : (Msg -> Msgs.Msg) -> NativeFile -> Session -> Cmd Msgs.Msg
+importPackageCmd wrapMsg file session =
+    importPackage file session
+        |> Jwt.send ImportPackageCompleted
+        |> Cmd.map wrapMsg
+
+
+importPackageCompleted : Model -> Result Jwt.JwtError Decode.Value -> ( Model, Cmd Msgs.Msg )
+importPackageCompleted model result =
+    case result of
+        Ok msg ->
+            ( model, cmdNavigate (KMPackages KMPackages.Routing.Index) )
+
+        Err error ->
+            ( { model | importing = getServerErrorJwt error "Importing package failed." }, Cmd.none )

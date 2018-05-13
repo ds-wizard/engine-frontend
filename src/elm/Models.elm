@@ -9,9 +9,7 @@ import KMEditor.Editor.Models
 import KMEditor.Index.Models
 import KMEditor.Migration.Models
 import KMEditor.Publish.Models
-import KMPackages.Detail.Models
-import KMPackages.Import.Models
-import KMPackages.Index.Models
+import KMPackages.Models
 import Organization.Models
 import Public.Models
 import Random.Pcg exposing (Seed, initialSeed)
@@ -25,14 +23,12 @@ type alias Model =
     , session : Session
     , jwt : Maybe JwtToken
     , organizationModel : Organization.Models.Model
-    , kmPackagesIndexModel : KMPackages.Index.Models.Model
-    , kmPackagesDetailModel : KMPackages.Detail.Models.Model
-    , kmPackagesImportModel : KMPackages.Import.Models.Model
     , kmEditorIndexModel : KMEditor.Index.Models.Model
     , kmEditorCreateModel : KMEditor.Create.Models.Model
     , kmEditorPublishModel : KMEditor.Publish.Models.Model
     , kmEditorEditorModel : KMEditor.Editor.Models.Model
     , kmEditorMigrationModel : KMEditor.Migration.Models.Model
+    , kmPackagesModel : KMPackages.Models.Model
     , publicModel : Public.Models.Model
     , dsPlannerModel : DSPlanner.Models.Model
     , users : Users.Models.Model
@@ -46,9 +42,7 @@ initialModel route seed session jwt =
     , session = session
     , jwt = jwt
     , organizationModel = Organization.Models.initialModel
-    , kmPackagesIndexModel = KMPackages.Index.Models.initialModel
-    , kmPackagesDetailModel = KMPackages.Detail.Models.initialModel
-    , kmPackagesImportModel = KMPackages.Import.Models.initialModel
+    , kmPackagesModel = KMPackages.Models.initialModel
     , kmEditorIndexModel = KMEditor.Index.Models.initialModel
     , kmEditorCreateModel = KMEditor.Create.Models.initialModel
     , kmEditorPublishModel = KMEditor.Publish.Models.initialModel
@@ -66,14 +60,8 @@ initLocalModel model =
         Organization ->
             { model | organizationModel = Organization.Models.initialModel }
 
-        KMPackages ->
-            { model | kmPackagesIndexModel = KMPackages.Index.Models.initialModel }
-
-        KMPackagesDetail organizationId kmId ->
-            { model | kmPackagesDetailModel = KMPackages.Detail.Models.initialModel }
-
-        KMPackagesImport ->
-            { model | kmPackagesImportModel = KMPackages.Import.Models.initialModel }
+        KMPackages route ->
+            { model | kmPackagesModel = KMPackages.Models.initLocalModel route model.kmPackagesModel }
 
         KMEditor ->
             { model | kmEditorIndexModel = KMEditor.Index.Models.initialModel }

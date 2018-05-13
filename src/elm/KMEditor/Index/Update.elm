@@ -1,11 +1,5 @@
 module KMEditor.Index.Update exposing (getKnowledgeModelsCmd, update)
 
-{-|
-
-@docs update, getKnowledgeModelsCmd
-
--}
-
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
@@ -15,7 +9,7 @@ import KMEditor.Index.Models exposing (Model)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Models exposing (KnowledgeModel, KnowledgeModelUpgradeForm, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
 import KMEditor.Requests exposing (deleteKnowledgeModel, deleteMigration, getKnowledgeModels, postMigration)
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackagesFiltered)
 import List.Extra as List
 import Msgs
@@ -24,7 +18,6 @@ import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (versionIsGreater)
 
 
-{-| -}
 getKnowledgeModelsCmd : Session -> Cmd Msgs.Msg
 getKnowledgeModelsCmd session =
     getKnowledgeModels session
@@ -198,7 +191,6 @@ deleteMigrationCompleted session model result =
             )
 
 
-{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

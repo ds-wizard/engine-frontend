@@ -1,7 +1,7 @@
 module KMPackages.Detail.Models exposing (..)
 
 import Common.Types exposing (ActionResult(..))
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 
 
 type alias Model =

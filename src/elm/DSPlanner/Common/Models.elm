@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 import KMEditor.Editor.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
-import KMPackages.Models exposing (PackageDetail, packageDetailDecoder)
+import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
 
 
 type alias Questionnaire =

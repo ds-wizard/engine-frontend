@@ -1,45 +1,67 @@
 module KMPackages.Detail.View exposing (view)
 
 import Common.Html exposing (detailContainerClassWith, emptyNode, linkTo)
-import Common.Types exposing (ActionResult(..))
-import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (codeGroup)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import KMPackages.Common.Models exposing (..)
 import KMPackages.Detail.Models exposing (..)
 import KMPackages.Detail.Msgs exposing (..)
-import KMPackages.Models exposing (..)
 import KMPackages.Requests exposing (exportPackageUrl)
-import Msgs exposing (Msg)
+import Msgs
 
 
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div [ detailContainerClassWith "package-management-detail" ]
-        [ content model
-        , deleteVersionModal model
+        [ fullPageActionResultView (packageDetail wrapMsg) model.packages
+        , deleteVersionModal wrapMsg model
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
-    case model.packages of
-        Unset ->
+packageDetail : (Msg -> Msgs.Msg) -> List PackageDetail -> Html Msgs.Msg
+packageDetail wrapMsg packages =
+    case List.head packages of
+        Just package ->
+            div []
+                [ pageHeader package.name []
+                , codeGroup package.organizationId "Organization ID"
+                , codeGroup package.kmId "Knowledge Model ID"
+                , h3 [] [ text "Versions" ]
+                , div [] (List.map (versionView wrapMsg) packages)
+                ]
+
+        Nothing ->
             emptyNode
 
-        Loading ->
-            fullPageLoader
 
-        Error err ->
-            defaultFullPageError err
+versionView : (Msg -> Msgs.Msg) -> PackageDetail -> Html Msgs.Msg
+versionView wrapMsg detail =
+    let
+        url =
+            exportPackageUrl detail.id
+    in
+    div [ class "panel panel-default panel-version" ]
+        [ div [ class "panel-body" ]
+            [ div [ class "labels" ]
+                [ strong [] [ text detail.version ]
+                , text detail.description
+                ]
+            , div [ class "actions" ]
+                [ a [ class "link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
+                , a
+                    [ onClick (wrapMsg <| ShowHideDeleteVersion <| Just detail.id)
+                    ]
+                    [ i [ class "fa fa-trash-o" ] [] ]
+                ]
+            ]
+        ]
 
-        Success packages ->
-            packageDetail packages
 
-
-deleteVersionModal : Model -> Html Msgs.Msg
-deleteVersionModal model =
+deleteVersionModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+deleteVersionModal wrapMsg model =
     let
         ( version, visible ) =
             case model.versionToBeDeleted of
@@ -63,47 +85,8 @@ deleteVersionModal model =
             , visible = visible
             , actionResult = model.deletingVersion
             , actionName = "Delete"
-            , actionMsg = Msgs.PackageManagementDetailMsg DeleteVersion
-            , cancelMsg = Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion Nothing
+            , actionMsg = wrapMsg DeleteVersion
+            , cancelMsg = wrapMsg <| ShowHideDeleteVersion Nothing
             }
     in
     modalView modalConfig
-
-
-packageDetail : List PackageDetail -> Html Msgs.Msg
-packageDetail packages =
-    case List.head packages of
-        Just package ->
-            div []
-                [ pageHeader package.name []
-                , codeGroup package.organizationId "Organization ID"
-                , codeGroup package.kmId "Knowledge Model ID"
-                , h3 [] [ text "Versions" ]
-                , div [] (List.map versionView packages)
-                ]
-
-        Nothing ->
-            text ""
-
-
-versionView : PackageDetail -> Html Msgs.Msg
-versionView detail =
-    let
-        url =
-            exportPackageUrl detail.id
-    in
-    div [ class "panel panel-default panel-version" ]
-        [ div [ class "panel-body" ]
-            [ div [ class "labels" ]
-                [ strong [] [ text detail.version ]
-                , text detail.description
-                ]
-            , div [ class "actions" ]
-                [ a [ class "link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
-                , a
-                    [ onClick (Msgs.PackageManagementDetailMsg <| ShowHideDeleteVersion <| Just detail.id)
-                    ]
-                    [ i [ class "fa fa-trash-o" ] [] ]
-                ]
-            ]
-        ]

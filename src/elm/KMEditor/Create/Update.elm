@@ -15,7 +15,7 @@ import KMEditor.Create.Models exposing (Model)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Models exposing (..)
 import KMEditor.Requests exposing (postKnowledgeModel)
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
 import Msgs
 import Random.Pcg exposing (Seed)

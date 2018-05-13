@@ -1,11 +1,5 @@
 module KMPackages.Import.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Html exposing (detailContainerClassWith)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (pageHeader)
@@ -21,17 +15,16 @@ import KMPackages.Import.Msgs exposing (Msg(..))
 import Msgs
 
 
-{-| -}
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     let
         content =
             case List.head model.files of
                 Just file ->
-                    fileView model file.name
+                    fileView wrapMsg model file.name
 
                 Nothing ->
-                    dropzone model |> Html.map Msgs.PackageManagementImportMsg
+                    dropzone model |> Html.map wrapMsg
     in
     div [ detailContainerClassWith "package-management-import" ]
         [ pageHeader "Import package" []
@@ -40,8 +33,8 @@ view model =
         ]
 
 
-fileView : Model -> String -> Html Msgs.Msg
-fileView model fileName =
+fileView : (Msg -> Msgs.Msg) -> Model -> String -> Html Msgs.Msg
+fileView wrapMsg model fileName =
     let
         cancelDisabled =
             case model.importing of
@@ -58,9 +51,9 @@ fileView model fileName =
                 [ text fileName ]
             ]
         , div [ class "actions" ]
-            [ button [ disabled cancelDisabled, onClick (Msgs.PackageManagementImportMsg Cancel), class "btn btn-default" ]
+            [ button [ disabled cancelDisabled, onClick (wrapMsg Cancel), class "btn btn-default" ]
                 [ text "Cancel" ]
-            , actionButton ( "Upload", model.importing, Msgs.PackageManagementImportMsg Submit )
+            , actionButton ( "Upload", model.importing, wrapMsg Submit )
             ]
         ]
 

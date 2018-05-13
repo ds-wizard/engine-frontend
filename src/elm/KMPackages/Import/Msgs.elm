@@ -11,7 +11,6 @@ import Json.Decode
 import Jwt
 
 
-{-| -}
 type Msg
     = DragEnter
     | DragOver

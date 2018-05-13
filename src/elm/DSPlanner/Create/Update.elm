@@ -9,7 +9,7 @@ import DSPlanner.Requests exposing (postQuestionnaire)
 import DSPlanner.Routing exposing (Route(Index))
 import Form
 import Jwt
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
 import Msgs
 import Routing exposing (cmdNavigate)

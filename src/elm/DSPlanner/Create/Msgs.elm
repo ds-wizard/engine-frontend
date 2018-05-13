@@ -2,7 +2,7 @@ module DSPlanner.Create.Msgs exposing (..)
 
 import Form
 import Jwt
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 
 
 type Msg

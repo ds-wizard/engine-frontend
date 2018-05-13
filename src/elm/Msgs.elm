@@ -10,6 +10,7 @@ import KMEditor.Publish.Msgs
 import KMPackages.Detail.Msgs
 import KMPackages.Import.Msgs
 import KMPackages.Index.Msgs
+import KMPackages.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs
 import Public.Msgs
@@ -21,9 +22,7 @@ type Msg
     | OnLocationChange Location
     | AuthMsg Auth.Msgs.Msg
     | OrganizationMsg Organization.Msgs.Msg
-    | PackageManagementIndexMsg KMPackages.Index.Msgs.Msg
-    | PackageManagementDetailMsg KMPackages.Detail.Msgs.Msg
-    | PackageManagementImportMsg KMPackages.Import.Msgs.Msg
+    | KMPackagesMsg KMPackages.Msgs.Msg
     | KnowledgeModelsIndexMsg KMEditor.Index.Msgs.Msg
     | KnowledgeModelsCreateMsg KMEditor.Create.Msgs.Msg
     | KnowledgeModelsPublishMsg KMEditor.Publish.Msgs.Msg

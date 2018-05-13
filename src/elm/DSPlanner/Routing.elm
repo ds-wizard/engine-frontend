@@ -39,12 +39,4 @@ toUrl route =
 
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
-    case route of
-        Create ->
-            hasPerm maybeJwt Perm.questionnaire
-
-        Detail uuid ->
-            hasPerm maybeJwt Perm.questionnaire
-
-        Index ->
-            hasPerm maybeJwt Perm.questionnaire
+    hasPerm maybeJwt Perm.questionnaire

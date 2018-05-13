@@ -5,7 +5,7 @@ import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 
 
 type alias Model =

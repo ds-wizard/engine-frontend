@@ -4,7 +4,7 @@ import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import KMEditor.Models exposing (KnowledgeModelCreateForm, initKnowledgeModelCreateForm)
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 
 
 type alias Model =

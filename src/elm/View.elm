@@ -10,9 +10,7 @@ import KMEditor.Editor.View
 import KMEditor.Index.View
 import KMEditor.Migration.View
 import KMEditor.Publish.View
-import KMPackages.Detail.View
-import KMPackages.Import.View
-import KMPackages.Index.View
+import KMPackages.View
 import Models exposing (Model)
 import Msgs exposing (Msg(..))
 import Organization.View
@@ -57,19 +55,9 @@ view model =
                 |> KMEditor.Migration.View.view
                 |> appView model
 
-        KMPackages ->
-            model.kmPackagesIndexModel
-                |> KMPackages.Index.View.view
-                |> appView model
-
-        KMPackagesDetail organizationId kmId ->
-            model.kmPackagesDetailModel
-                |> KMPackages.Detail.View.view
-                |> appView model
-
-        KMPackagesImport ->
-            model.kmPackagesImportModel
-                |> KMPackages.Import.View.view
+        KMPackages route ->
+            model.kmPackagesModel
+                |> KMPackages.View.view route KMPackagesMsg
                 |> appView model
 
         DSPlanner route ->

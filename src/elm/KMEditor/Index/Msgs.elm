@@ -9,7 +9,7 @@ module KMEditor.Index.Msgs exposing (..)
 import Form
 import Jwt
 import KMEditor.Models exposing (KnowledgeModel)
-import KMPackages.Models exposing (PackageDetail)
+import KMPackages.Common.Models exposing (PackageDetail)
 
 
 {-| -}

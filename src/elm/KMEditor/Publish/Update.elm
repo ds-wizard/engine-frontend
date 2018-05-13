@@ -1,11 +1,5 @@
 module KMEditor.Publish.Update exposing (getKnowledgeModelCmd, update)
 
-{-|
-
-@docs update, getKnowledgeModelCmd
-
--}
-
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
@@ -15,12 +9,12 @@ import KMEditor.Models exposing (..)
 import KMEditor.Publish.Models exposing (Model)
 import KMEditor.Publish.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (getKnowledgeModel, putKnowledgeModelVersion)
+import KMPackages.Routing
 import Msgs
 import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
-{-| -}
 getKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
 getKnowledgeModelCmd uuid session =
     getKnowledgeModel uuid session
@@ -55,7 +49,7 @@ putKnowledgeModelVersionCompleted : Model -> Result Jwt.JwtError String -> ( Mod
 putKnowledgeModelVersionCompleted model result =
     case result of
         Ok version ->
-            ( model, cmdNavigate KMPackages )
+            ( model, cmdNavigate (KMPackages KMPackages.Routing.Index) )
 
         Err error ->
             ( { model | publishingKnowledgeModel = getServerErrorJwt error "Publishing new version failed" }, Cmd.none )
@@ -79,7 +73,6 @@ handleForm formMsg session model =
             ( { model | form = form }, Cmd.none )
 
 
-{-| -}
 update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg session model =
     case msg of

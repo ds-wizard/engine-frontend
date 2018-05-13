@@ -10,6 +10,7 @@ import KMEditor.Publish.Update
 import KMPackages.Detail.Update
 import KMPackages.Import.Update
 import KMPackages.Index.Update
+import KMPackages.Update
 import Models exposing (Model, initLocalModel)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
@@ -25,11 +26,8 @@ fetchData model =
         Organization ->
             Organization.Update.getCurrentOrganizationCmd model.session
 
-        KMPackages ->
-            KMPackages.Index.Update.getPackagesCmd model.session
-
-        KMPackagesDetail organizationId kmId ->
-            KMPackages.Detail.Update.getPackagesFilteredCmd organizationId kmId model.session
+        KMPackages route ->
+            KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.session
 
         KMEditor ->
             KMEditor.Index.Update.getKnowledgeModelsCmd model.session
@@ -82,27 +80,6 @@ update msg model =
             in
             ( { model | organizationModel = organizationModel }, cmd )
 
-        Msgs.PackageManagementIndexMsg msg ->
-            let
-                ( kmPackagesIndexModel, cmd ) =
-                    KMPackages.Index.Update.update msg model.session model.kmPackagesIndexModel
-            in
-            ( { model | kmPackagesIndexModel = kmPackagesIndexModel }, cmd )
-
-        Msgs.PackageManagementDetailMsg msg ->
-            let
-                ( kmPackagesDetailModel, cmd ) =
-                    KMPackages.Detail.Update.update msg model.session model.kmPackagesDetailModel
-            in
-            ( { model | kmPackagesDetailModel = kmPackagesDetailModel }, cmd )
-
-        Msgs.PackageManagementImportMsg msg ->
-            let
-                ( kmPackagesImportModel, cmd ) =
-                    KMPackages.Import.Update.update msg model.session model.kmPackagesImportModel
-            in
-            ( { model | kmPackagesImportModel = kmPackagesImportModel }, cmd )
-
         Msgs.KnowledgeModelsIndexMsg msg ->
             let
                 ( kmEditorIndexModel, cmd ) =
@@ -137,6 +114,13 @@ update msg model =
                     KMEditor.Migration.Update.update msg model.session model.kmEditorMigrationModel
             in
             ( { model | kmEditorMigrationModel = kmEditorMigrationModel }, cmd )
+
+        Msgs.KMPackagesMsg msg ->
+            let
+                ( kmPackagesModel, cmd ) =
+                    KMPackages.Update.update msg Msgs.KMPackagesMsg model.session model.kmPackagesModel
+            in
+            ( { model | kmPackagesModel = kmPackagesModel }, cmd )
 
         Msgs.PublicMsg msg ->
             let

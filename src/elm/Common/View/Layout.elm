@@ -7,6 +7,7 @@ import Common.Html.Events exposing (onLinkClick)
 import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import KMPackages.Routing
 import Models exposing (Model)
 import Msgs exposing (Msg)
 import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
@@ -74,7 +75,7 @@ menuItems =
     [ ( "Organization", "fa-building", Organization, Perm.organization )
     , ( "Users", "fa-users", Users Users.Routing.Index, Perm.userManagement )
     , ( "KM Editor", "fa-edit", KMEditor, Perm.knowledgeModel )
-    , ( "KM Packages", "fa-cubes", KMPackages, Perm.packageManagement )
+    , ( "KM Packages", "fa-cubes", KMPackages KMPackages.Routing.Index, Perm.packageManagement )
     , ( "DS Planner", "fa-list-alt", DSPlanner DSPlanner.Routing.Index, Perm.questionnaire )
     ]
 

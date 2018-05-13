@@ -6,26 +6,27 @@ import Common.View.Forms exposing (formSuccessResultView)
 import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon, TableActionText), TableConfig, TableFieldValue(TextValue), indexTable)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import KMPackages.Common.Models exposing (..)
 import KMPackages.Index.Models exposing (..)
 import KMPackages.Index.Msgs exposing (Msg(..))
-import KMPackages.Models exposing (..)
+import KMPackages.Routing exposing (Route(..))
 import Msgs
 import Routing exposing (Route(..))
 
 
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div []
         [ pageHeader "Knowledge Model Packages" indexActions
         , formSuccessResultView model.deletingPackage
-        , fullPageActionResultView (indexTable tableConfig Msgs.PackageManagementIndexMsg) model.packages
-        , deleteModal model
+        , fullPageActionResultView (indexTable tableConfig wrapMsg) model.packages
+        , deleteModal wrapMsg model
         ]
 
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo KMPackagesImport
+    [ linkTo (Routing.KMPackages Import)
         [ class "btn btn-primary link-with-icon" ]
         [ i [ class "fa fa-cloud-upload" ] []
         , text "Import"
@@ -67,11 +68,11 @@ tableActionDelete wrapMsg =
 
 tableActionViewDetail : Package -> Routing.Route
 tableActionViewDetail package =
-    Routing.KMPackagesDetail package.organizationId package.kmId
+    Routing.KMPackages <| Detail package.organizationId package.kmId
 
 
-deleteModal : Model -> Html Msgs.Msg
-deleteModal model =
+deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+deleteModal wrapMsg model =
     let
         ( visible, version ) =
             case model.packageToBeDeleted of
@@ -95,8 +96,8 @@ deleteModal model =
             , visible = visible
             , actionResult = model.deletingPackage
             , actionName = "Delete"
-            , actionMsg = Msgs.PackageManagementIndexMsg DeletePackage
-            , cancelMsg = Msgs.PackageManagementIndexMsg <| ShowHideDeletePackage Nothing
+            , actionMsg = wrapMsg DeletePackage
+            , cancelMsg = wrapMsg <| ShowHideDeletePackage Nothing
             }
     in
     modalView modalConfig

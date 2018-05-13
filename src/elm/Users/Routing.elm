@@ -40,14 +40,11 @@ toUrl route =
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
-        Create ->
-            hasPerm maybeJwt Perm.userManagement
-
         Edit uuid ->
             if uuid == "current" then
                 True
             else
                 hasPerm maybeJwt Perm.userManagement
 
-        Index ->
+        _ ->
             hasPerm maybeJwt Perm.userManagement
