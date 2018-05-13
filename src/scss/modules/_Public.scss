@@ -1,8 +1,7 @@
-@import "../mixins";
-@import "public/forgotten-password";
-@import "public/login";
-@import "public/signup";
-@import "public/signup-confirmation";
+@import "Public/ForgottenPassword";
+@import "Public/Login";
+@import "Public/Signup";
+@import "Public/SignupConfirmation";
 
 
 .public {

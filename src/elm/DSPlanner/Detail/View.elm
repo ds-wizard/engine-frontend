@@ -25,7 +25,7 @@ view wrapMsg model =
 
 content : (Msg -> Msgs.Msg) -> Model -> QuestionnaireDetail -> Html Msgs.Msg
 content wrapMsg model questionnaire =
-    div [ class "questionnaire-detail" ]
+    div [ class "DSPlanner__Detail" ]
         [ pageHeader (questionnaireTitle questionnaire) (actions wrapMsg model.savingQuestionnaire)
         , formResultView model.savingQuestionnaire
         , div [ class "row" ]

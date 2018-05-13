@@ -1,7 +1,7 @@
 module KMEditor.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClass, emptyNode)
+import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
@@ -18,7 +18,7 @@ import Routing exposing (Route(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ detailContainerClass ]
+    div [ detailContainerClassWith "KMEditor__Create" ]
         [ pageHeader "Create Knowledge Model" []
         , content model
         ]

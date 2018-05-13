@@ -27,7 +27,7 @@ view wrapMsg model =
                 _ ->
                     signupForm wrapMsg model
     in
-    div [ class "public__signup" ]
+    div [ class "Public__Signup" ]
         [ content ]
 
 
@@ -38,7 +38,7 @@ signupForm wrapMsg model =
             [ legend [] [ text "Sign up" ]
             , signupError model.signingUp
             , formView model.form |> Html.map (wrapMsg << FormMsg)
-            , div [ class "form-actions public__signup__formButtons" ]
+            , div [ class "form-actions Public__Signup__FormButtons" ]
                 [ linkTo (Public Login) [] [ text "I already have an account" ]
                 , submitButton ( "Sign up", model.signingUp )
                 ]

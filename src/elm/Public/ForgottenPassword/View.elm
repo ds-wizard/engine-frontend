@@ -25,7 +25,7 @@ view wrapMsg model =
                 _ ->
                     signupForm wrapMsg model
     in
-    div [ class "public__forgottenPassword" ]
+    div [ class "Public__ForgottenPassword" ]
         [ content ]
 
 
@@ -36,7 +36,7 @@ signupForm wrapMsg model =
             [ legend [] [ text "Forgotten Password" ]
             , submitError model.submitting
             , formView model.form |> Html.map (wrapMsg << FormMsg)
-            , div [ class "form-actions public__forgottenPassword__formButtons" ]
+            , div [ class "form-actions" ]
                 [ submitButton ( "Recover", model.submitting )
                 ]
             ]

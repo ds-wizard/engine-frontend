@@ -1,7 +1,7 @@
 module Users.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClass)
+import Common.Html exposing (detailContainerClassWith)
 import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
@@ -16,7 +16,7 @@ import Users.Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClass ]
+    div [ detailContainerClassWith "Users__Create" ]
         [ pageHeader "Create user" []
         , formResultView model.savingUser
         , formView model.form |> Html.map (wrapMsg << FormMsg)

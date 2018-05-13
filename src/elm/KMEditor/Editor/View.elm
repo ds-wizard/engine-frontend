@@ -1,11 +1,5 @@
 module KMEditor.Editor.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
@@ -26,10 +20,9 @@ import Routing exposing (Route(..))
 import String exposing (toLower)
 
 
-{-| -}
 view : Model -> Html Msgs.Msg
 view model =
-    div [ class "row knowledge-model-editor " ]
+    div [ class "row KMEditor__Editor" ]
         [ div [ class "col-xs-12" ] [ pageHeader "Knowledge model editor" [] ]
         , content model
         ]

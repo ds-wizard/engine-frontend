@@ -1,11 +1,5 @@
 module KMEditor.Migration.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
@@ -24,10 +18,9 @@ import Msgs
 import Routing exposing (Route(..))
 
 
-{-| -}
 view : Model -> Html Msgs.Msg
 view model =
-    div [ class "row knowledge-models-migration" ]
+    div [ class "row KMEditor__Migration" ]
         [ div [ class "col-xs-12" ] [ pageHeader "Migration" [] ]
         , formResultView model.conflict
         , content model

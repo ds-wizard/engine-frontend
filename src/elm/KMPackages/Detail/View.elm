@@ -15,7 +15,7 @@ import Msgs
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "package-management-detail" ]
+    div [ detailContainerClassWith "KMPackages__Detail" ]
         [ fullPageActionResultView (packageDetail wrapMsg) model.packages
         , deleteVersionModal wrapMsg model
         ]
@@ -43,7 +43,7 @@ versionView wrapMsg detail =
         url =
             exportPackageUrl detail.id
     in
-    div [ class "panel panel-default panel-version" ]
+    div [ class "panel panel-default" ]
         [ div [ class "panel-body" ]
             [ div [ class "labels" ]
                 [ strong [] [ text detail.version ]

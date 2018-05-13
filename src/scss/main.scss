@@ -12,12 +12,8 @@ $icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 @import "layout";
 @import "tables";
 
-@import "modules/knowledge-models";
-@import "modules/knowledge-models-editor";
-@import "modules/knowledge-models-publish";
-@import "modules/knowledge-models-migration";
-@import "modules/package-management-detail";
-@import "modules/package-management-import";
-@import "modules/public";
-@import "modules/questionnaires";
-@import "modules/user-management";
+@import "modules/DSPlanner";
+@import "modules/KMEditor";
+@import "modules/KMPackages";
+@import "modules/Public";
+@import "modules/Users";

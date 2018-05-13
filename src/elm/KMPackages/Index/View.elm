@@ -16,7 +16,7 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div []
+    div [ class "KMPackages__Index" ]
         [ pageHeader "Knowledge Model Packages" indexActions
         , formSuccessResultView model.deletingPackage
         , fullPageActionResultView (indexTable tableConfig wrapMsg) model.packages

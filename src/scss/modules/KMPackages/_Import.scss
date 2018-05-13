@@ -1,7 +1,7 @@
-@import "../../../node_modules/bootswatch/united/variables";
-@import "../mixins";
+@import "~bootswatch/united/variables";
+@import "../../mixins";
 
-.package-management-import {
+.KMPackages__Import {
     .dropzone {
         height: 300px;
         margin: auto;

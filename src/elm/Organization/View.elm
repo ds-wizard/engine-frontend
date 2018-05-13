@@ -1,13 +1,7 @@
 module Organization.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClass, emptyNode)
+import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
@@ -19,10 +13,9 @@ import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))
 
 
-{-| -}
 view : Model -> Html Msgs.Msg
 view model =
-    div [ detailContainerClass ]
+    div [ detailContainerClassWith "Organization" ]
         [ pageHeader "Organization" []
         , content model
         ]

@@ -1,11 +1,5 @@
 module KMEditor.Publish.View exposing (view)
 
-{-|
-
-@docs view
-
--}
-
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.Types exposing (ActionResult(..))
@@ -23,10 +17,9 @@ import Msgs
 import Routing exposing (Route(..))
 
 
-{-| -}
 view : Model -> Html Msgs.Msg
 view model =
-    div [ detailContainerClassWith "knowledge-models-publish" ]
+    div [ detailContainerClassWith "KMEditor__Publish" ]
         [ pageHeader "Publish new version" []
         , content model
         ]

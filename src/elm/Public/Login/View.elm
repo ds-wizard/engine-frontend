@@ -14,7 +14,7 @@ import Routing exposing (Route(Public))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "public__login" ]
+    div [ class "Public__Login" ]
         [ loginForm wrapMsg model ]
 
 
@@ -34,7 +34,7 @@ loginForm wrapMsg model =
                     [ text "Password" ]
                 , input [ onInput (wrapMsg << Password), type_ "password", class "form-control", placeholder "Password" ] []
                 ]
-            , div [ class "form-group row public__login__formButtons" ]
+            , div [ class "form-group row Public__Login__FormButtons" ]
                 [ div [ class "col-xs-6" ]
                     [ linkTo (Public ForgottenPassword) [] [ text "Forgot your password?" ] ]
                 , div [ class "col-xs-6 text-right" ]

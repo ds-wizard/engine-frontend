@@ -1,7 +1,7 @@
-@import "../../../node_modules/bootswatch/united/variables";
+@import "~bootswatch/united/variables";
 
-.package-management-detail {
-    .panel-version {
+.KMPackages__Detail {
+    .panel {
         background: $gray-lighter;
         margin-bottom: 10px;
 

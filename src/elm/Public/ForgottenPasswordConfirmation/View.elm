@@ -26,7 +26,7 @@ view wrapMsg model =
                 _ ->
                     signupForm wrapMsg model
     in
-    div [ class "public__forgottenPassword" ]
+    div [ class "Public__ForgottenPassword" ]
         [ content ]
 
 

@@ -1,7 +1,7 @@
-@import "../../../node_modules/bootswatch/united/variables";
-@import "../mixins";
+@import "~bootswatch/united/variables";
+@import "../../mixins";
 
-.knowledge-model-editor {
+.KMEditor__Editor {
     h3 {
         margin-top: 30px;
         margin-bottom: 30px;

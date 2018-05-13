@@ -1,7 +1,7 @@
 module DSPlanner.Create.View exposing (..)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClass)
+import Common.Html exposing (detailContainerClassWith)
 import Common.View exposing (fullPageActionResultView, pageHeader)
 import Common.View.Forms exposing (formActions, formResultView, inputGroup, selectGroup)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
@@ -16,7 +16,7 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClass ]
+    div [ detailContainerClassWith "DSPlanner__Create" ]
         [ pageHeader "Create questionnaire" []
         , fullPageActionResultView (content wrapMsg model) model.packages
         ]

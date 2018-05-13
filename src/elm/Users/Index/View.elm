@@ -16,7 +16,7 @@ import Users.Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "user-management" ]
+    div [ class "Users__Index" ]
         [ pageHeader "Users" indexActions
         , formSuccessResultView model.deletingUser
         , fullPageActionResultView (indexTable tableConfig wrapMsg) model.users

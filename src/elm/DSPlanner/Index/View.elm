@@ -16,7 +16,7 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "questionnaires" ]
+    div [ class "DSPlanner__Index" ]
         [ pageHeader "Data Stewardship Planner" indexActions
         , formSuccessResultView model.deletingQuestionnaire
         , fullPageActionResultView (indexTable tableConfig wrapMsg) model.questionnaires

@@ -28,7 +28,7 @@ view model =
                 Success _ ->
                     successView
     in
-    div [ class "public__signupConfirmation" ]
+    div [ class "Public__SignupConfirmation" ]
         [ content ]
 
 
