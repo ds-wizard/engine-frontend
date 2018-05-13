@@ -3,7 +3,7 @@ module Users.Index.View exposing (view)
 import Common.Html exposing (..)
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (formSuccessResultView)
-import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon), TableConfig, TableFieldValue(TextValue), indexTable)
+import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon), TableConfig, TableFieldValue(BoolValue, TextValue), indexTable)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
@@ -44,6 +44,9 @@ tableConfig =
           }
         , { label = "Role"
           , getValue = TextValue .role
+          }
+        , { label = "Active"
+          , getValue = BoolValue .isActive
           }
         ]
     , actions =

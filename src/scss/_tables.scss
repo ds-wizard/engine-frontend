@@ -12,7 +12,7 @@
         color: #aaa;
     }
 
-    td:not(.table-actions) {
+    td:not(.table-actions):not(.td-bool) {
         .label {
             font-weight: normal;
             margin-left: 10px;
@@ -21,6 +21,12 @@
         .fa {
             margin-left: 10px;
             color: #aaa;
+        }
+    }
+
+    .td-bool {
+        .fa {
+            margin-left: 10px;
         }
     }
 

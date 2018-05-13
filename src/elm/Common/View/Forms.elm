@@ -62,6 +62,22 @@ textAreaGroup =
     formGroup Input.textArea
 
 
+{-| Helper for creating form group with toggle
+-}
+toggleGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+toggleGroup form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsBool fieldName form
+    in
+    div [ class "form-check" ]
+        [ label [ class "form-check-label form-check-toggle" ]
+            [ Input.checkboxInput field [ class "form-check-input" ]
+            , span [] [ text labelText ]
+            ]
+        ]
+
+
 {-| Plain group is same Html as formGroup but without any input fields. It only
 shows label with read only Html value.
 -}

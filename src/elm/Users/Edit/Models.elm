@@ -43,6 +43,7 @@ type alias UserEditForm =
     , name : String
     , surname : String
     , role : String
+    , isActive : Bool
     }
 
 
@@ -58,11 +59,12 @@ initUserEditForm user =
 
 userEditFormValidation : Validation CustomFormError UserEditForm
 userEditFormValidation =
-    Validate.map4 UserEditForm
+    Validate.map5 UserEditForm
         (Validate.field "email" Validate.email)
         (Validate.field "name" Validate.string)
         (Validate.field "surname" Validate.string)
         (Validate.field "role" Validate.string)
+        (Validate.field "isActive" Validate.bool)
 
 
 encodeUserEditForm : String -> UserEditForm -> Encode.Value
@@ -73,6 +75,7 @@ encodeUserEditForm uuid form =
         , ( "name", Encode.string form.name )
         , ( "surname", Encode.string form.surname )
         , ( "role", Encode.string form.role )
+        , ( "isActive", Encode.bool form.isActive )
         ]
 
 
@@ -82,6 +85,7 @@ userToUserEditFormInitials user =
     , ( "name", Field.string user.name )
     , ( "surname", Field.string user.surname )
     , ( "role", Field.string user.role )
+    , ( "isActive", Field.bool user.isActive )
     ]
 
 

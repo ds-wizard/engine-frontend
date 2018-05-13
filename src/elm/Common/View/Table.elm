@@ -10,6 +10,7 @@ import Routing
 
 type TableFieldValue a
     = TextValue (a -> String)
+    | BoolValue (a -> Bool)
     | HtmlValue (a -> Html Msgs.Msg)
 
 
@@ -125,15 +126,26 @@ tableAction wrapMsg item actionConfig =
 bodyField : a -> TableFieldValue a -> Html Msgs.Msg
 bodyField item fieldValue =
     let
-        fieldContent =
+        ( fieldClass, fieldContent ) =
             case fieldValue of
                 TextValue getValue ->
-                    text <| getValue item
+                    ( "", text <| getValue item )
+
+                BoolValue getValue ->
+                    ( "td-bool", getBoolIcon <| getValue item )
 
                 HtmlValue getValue ->
-                    getValue item
+                    ( "", getValue item )
     in
-    td [] [ fieldContent ]
+    td [ class fieldClass ] [ fieldContent ]
+
+
+getBoolIcon : Bool -> Html Msgs.Msg
+getBoolIcon bool =
+    if bool then
+        i [ class "fa fa-check" ] []
+    else
+        i [ class "fa fa-times" ] []
 
 
 tableEmpty : TableConfig a msg -> Html Msgs.Msg

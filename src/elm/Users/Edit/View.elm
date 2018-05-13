@@ -107,12 +107,19 @@ userFormView form current =
             else
                 selectGroup roleOptions form "role" "Role"
 
+        activeToggle =
+            if current then
+                emptyNode
+            else
+                toggleGroup form "isActive" "Active"
+
         formHtml =
             div []
                 [ inputGroup form "email" "Email"
                 , inputGroup form "name" "Name"
                 , inputGroup form "surname" "Surname"
                 , roleSelect
+                , activeToggle
                 ]
     in
     formHtml

@@ -10,6 +10,7 @@ type alias User =
     , name : String
     , surname : String
     , role : String
+    , isActive : Bool
     }
 
 
@@ -21,6 +22,7 @@ userDecoder =
         |> required "name" Decode.string
         |> required "surname" Decode.string
         |> required "role" Decode.string
+        |> required "isActive" Decode.bool
 
 
 userListDecoder : Decoder (List User)
