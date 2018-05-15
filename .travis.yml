@@ -13,7 +13,7 @@ stages:
   - tag
 
 env:
-  - IMAGE="$DOCKER_REGISTRY/elixir/dsw-client" IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_LATEST="$IMAGE:latest" IMAGE_TAG_VERSION="$IMAGE:$TRAVIS_TAG"
+  - IMAGE="$DOCKER_REGISTRY/elixir/dsw-client" IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest" IMAGE_TAG_VERSION="$IMAGE:$TRAVIS_TAG"
 
 install:
   - npm install
@@ -35,6 +35,14 @@ jobs:
         - npm test
         - docker build -t $IMAGE_TAG .
         - docker push $IMAGE_TAG
+
+    - stage: tag
+      if: (branch = develop) AND (NOT (type IN (pull_request)))
+      install: false
+      script:
+        - docker pull $IMAGE_TAG
+        - docker image tag $IMAGE_TAG $IMAGE_TAG_LATEST
+        - docker push $IMAGE_TAG_LATEST
 
     - stage: tag
       if: (branch = master) AND (NOT (type IN (pull_request)))
