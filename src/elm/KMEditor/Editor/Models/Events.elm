@@ -4,6 +4,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode exposing (..)
 import Json.Encode.Extra exposing (maybe)
+import KMEditor.Common.Models.Events
 import KMEditor.Editor.Models.Editors exposing (AnswerEditor(..), ExpertEditor(..), QuestionEditor(..), ReferenceEditor(..))
 import KMEditor.Editor.Models.Entities exposing (..)
 import Random.Pcg exposing (Seed)
