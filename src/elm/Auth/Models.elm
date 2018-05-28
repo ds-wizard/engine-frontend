@@ -1,7 +1,7 @@
 module Auth.Models exposing (..)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, optional, required)
 import Jwt exposing (decodeToken)
 import Users.Common.Models exposing (User, userDecoder)
 
@@ -9,6 +9,7 @@ import Users.Common.Models exposing (User, userDecoder)
 type alias Session =
     { token : String
     , user : Maybe User
+    , sidebarCollapsed : Bool
     }
 
 
@@ -24,6 +25,7 @@ initialSession : Session
 initialSession =
     { token = ""
     , user = Nothing
+    , sidebarCollapsed = False
     }
 
 
@@ -37,11 +39,17 @@ setUser session user =
     { session | user = Just user }
 
 
+setSidebarCollapsed : Session -> Bool -> Session
+setSidebarCollapsed session collapsed =
+    { session | sidebarCollapsed = collapsed }
+
+
 sessionDecoder : Decoder Session
 sessionDecoder =
     decode Session
         |> required "token" Decode.string
         |> required "user" (Decode.nullable userDecoder)
+        |> optional "sidebarCollapsed" Decode.bool False
 
 
 sessionExists : Session -> Bool

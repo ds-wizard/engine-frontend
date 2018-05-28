@@ -39,7 +39,7 @@ publicHeader =
 
 appView : Model -> Html Msg -> Html Msg
 appView model content =
-    div [ class "app-view" ]
+    div [ class "app-view", classList [ ( "side-navigation-collapsed", model.session.sidebarCollapsed ) ] ]
         [ menu model
         , div [ class "page" ]
             [ content ]
@@ -48,19 +48,26 @@ appView model content =
 
 menu : Model -> Html Msg
 menu model =
-    div [ class "side-navigation" ]
-        [ logo
+    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.session.sidebarCollapsed ) ] ]
+        [ logo model
         , ul [ class "menu" ]
             (createMenu model)
         , profileInfo model
         ]
 
 
-logo : Html Msg
-logo =
+logo : Model -> Html Msg
+logo model =
+    let
+        heading =
+            if model.session.sidebarCollapsed then
+                "DSW"
+            else
+                "Data Stewardship Wizard"
+    in
     linkTo Welcome
         [ class "logo" ]
-        [ text "Data Stewardship Wizard" ]
+        [ text heading ]
 
 
 createMenu : Model -> List (Html Msg)
@@ -93,7 +100,7 @@ menuItem model ( label, icon, route, perm ) =
         [ linkTo route
             [ class activeClass ]
             [ i [ class ("fa " ++ icon) ] []
-            , text label
+            , span [ class "sidebar-link" ] [ text label ]
             ]
         ]
 
@@ -108,11 +115,32 @@ profileInfo model =
 
                 Nothing ->
                     ""
+
+        collapseLink =
+            if model.session.sidebarCollapsed then
+                a [ onLinkClick (Msgs.SetSidebarCollapsed False), class "collapse" ]
+                    [ i [ class "fa fa-angle-double-right" ] []
+                    ]
+            else
+                a [ onLinkClick (Msgs.SetSidebarCollapsed True), class "collapse" ]
+                    [ i [ class "fa fa-angle-double-left" ] []
+                    ]
     in
     div [ class "profile-info" ]
-        [ linkTo (Users <| Users.Routing.Edit "current") [ class "name" ] [ text name ]
-        , a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
-            [ i [ class "fa fa-sign-out" ] []
-            , text "Logout"
+        [ ul [ class "menu" ]
+            [ li []
+                [ linkTo (Users <| Users.Routing.Edit "current")
+                    []
+                    [ i [ class "fa fa-user-circle-o" ] []
+                    , span [ class "sidebar-link" ] [ text name ]
+                    ]
+                ]
+            , li []
+                [ a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
+                    [ i [ class "fa fa-sign-out" ] []
+                    , span [ class "sidebar-link" ] [ text "Logout" ]
+                    ]
+                ]
             ]
+        , collapseLink
         ]

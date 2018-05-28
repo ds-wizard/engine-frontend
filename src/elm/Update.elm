@@ -1,5 +1,6 @@
 module Update exposing (..)
 
+import Auth.Models exposing (setSidebarCollapsed)
 import Auth.Update
 import DSPlanner.Update
 import KMEditor.Create.Update
@@ -12,6 +13,7 @@ import Models exposing (Model, initLocalModel)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Organization.Update
+import Ports
 import Public.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import Users.Update
@@ -69,6 +71,13 @@ update msg model =
 
         Msgs.AuthMsg msg ->
             Auth.Update.update msg model
+
+        Msgs.SetSidebarCollapsed collapsed ->
+            let
+                newModel =
+                    { model | session = setSidebarCollapsed model.session collapsed }
+            in
+            ( newModel, Ports.storeSession <| Just newModel.session )
 
         Msgs.DSPlannerMsg msg ->
             let
