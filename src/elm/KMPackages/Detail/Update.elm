@@ -10,7 +10,6 @@ import KMPackages.Detail.Msgs exposing (Msg(..))
 import KMPackages.Requests exposing (..)
 import KMPackages.Routing exposing (Route(..))
 import Msgs
-import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 

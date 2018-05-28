@@ -1,20 +1,10 @@
 module KMEditor.Editor.Update.Utils exposing (..)
 
-{-|
-
-@docs updateInListWithSeed, updateInList, formChanged, addChild
-
--}
-
-import Common.Form exposing (CustomFormError)
-import Form exposing (Form)
-import KMEditor.Editor.Models.Events exposing (Event)
+import KMEditor.Common.Models.Events exposing (Event, Path, PathNode)
 import Random.Pcg exposing (Seed)
-import Set
 import Utils exposing (getUuid)
 
 
-{-| -}
 updateInListWithSeed : List t -> Seed -> (t -> Bool) -> (Seed -> t -> ( Seed, t, Maybe Event )) -> ( Seed, List t, Maybe Event )
 updateInListWithSeed list seed predicate updateFunction =
     let
@@ -32,7 +22,6 @@ updateInListWithSeed list seed predicate updateFunction =
     List.foldl fn ( seed, [], Nothing ) list
 
 
-{-| -}
 updateInList : List a -> (a -> Bool) -> (a -> a) -> List a
 updateInList list predicate updateFunction =
     let
@@ -46,14 +35,7 @@ updateInList list predicate updateFunction =
     List.map fn list
 
 
-{-| -}
-formChanged : Form CustomFormError a -> Bool
-formChanged form =
-    Set.size (Form.getChangedFields form) > 0
-
-
-{-| -}
-addChild : Seed -> List et -> (Bool -> Int -> ct -> et) -> (String -> ct) -> (Seed -> ct -> ( Event, Seed )) -> ( Seed, List et, Event )
+addChild : Seed -> List et -> (Bool -> Int -> ct -> et) -> (String -> ct) -> (ct -> Seed -> ( Event, Seed )) -> ( Seed, List et, Event )
 addChild seed children createChildEditor newChild createAddChildEvent =
     let
         ( newUuid, seed2 ) =
@@ -68,6 +50,11 @@ addChild seed children createChildEditor newChild createAddChildEvent =
                 |> List.append children
 
         ( event, newSeed ) =
-            createAddChildEvent seed2 child
+            createAddChildEvent child seed2
     in
     ( newSeed, newChildren, event )
+
+
+appendPath : Path -> PathNode -> Path
+appendPath path pathNode =
+    path ++ [ pathNode ]

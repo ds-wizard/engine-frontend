@@ -14,7 +14,7 @@ import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import Json.Encode as Encode exposing (..)
 import Jwt
-import KMEditor.Editor.Models.Entities exposing (Answer, AnswerItemTemplate, AnswerItemTemplateQuestions(..), Chapter, FollowUps(..), Question)
+import KMEditor.Common.Models.Entities exposing (..)
 import Msgs
 import Routing exposing (cmdNavigate)
 

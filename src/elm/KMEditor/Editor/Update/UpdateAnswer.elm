@@ -1,104 +1,89 @@
 module KMEditor.Editor.Update.UpdateAnswer exposing (..)
 
-{-|
-
-@docs updateAnswerFormMsg, updateAnswerCancel
-@docs updateAnswerAddFollowUpQuestion, updateAnswerViewFollowUpQuestion, updateAnswerDeleteFollowUpQuestion
-
--}
-
 import Form
+import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Entities exposing (..)
-import KMEditor.Editor.Models.Events exposing (Event, createAddFollowUpQuestionEvent, createDeleteFollowUpQuestionEvent, createEditAnswerEvent)
 import KMEditor.Editor.Models.Forms exposing (answerFormValidation, initAnswerForm, updateAnswerWithForm)
-import KMEditor.Editor.Update.Utils exposing (addChild, formChanged, updateInList)
+import KMEditor.Editor.Update.Utils exposing (addChild, updateInList)
 import Random.Pcg exposing (Seed)
 
 
-{-| -}
-updateAnswerFormMsg : Form.Msg -> Seed -> Question -> Chapter -> KnowledgeModel -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
-updateAnswerFormMsg formMsg seed question chapter knowledgeModel ((AnswerEditor editor) as originalEditor) =
-    case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.followUpsDirty ) of
+formMsg : Form.Msg -> Seed -> Path -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
+formMsg formMsg seed path ((AnswerEditor ae) as editor) =
+    case ( formMsg, Form.getOutput ae.form, isAnswerEditorDirty editor ) of
         ( Form.Submit, Just answerForm, True ) ->
             let
                 newAnswer =
-                    updateAnswerWithForm editor.answer answerForm
+                    updateAnswerWithForm ae.answer answerForm
 
                 newForm =
                     initAnswerForm newAnswer
 
-                followUpsIds =
-                    List.map (\(QuestionEditor qe) -> qe.question.uuid) editor.followUps
-
                 newFollowUps =
-                    List.indexedMap (\i (QuestionEditor qe) -> QuestionEditor { qe | order = i }) editor.followUps
+                    List.indexedMap (\i (QuestionEditor qe) -> QuestionEditor { qe | order = i }) ae.followUps
 
                 newEditor =
-                    { editor | active = False, form = newForm, answer = newAnswer, followUps = newFollowUps, followUpsDirty = False }
+                    AnswerEditor { ae | active = False, form = newForm, answer = newAnswer, followUps = newFollowUps, followUpsDirty = False }
 
                 ( event, newSeed ) =
-                    createEditAnswerEvent question chapter knowledgeModel followUpsIds seed newAnswer
+                    createEditAnswerEvent newEditor path seed
             in
-            ( newSeed, AnswerEditor { editor | active = False }, Just event )
+            ( newSeed, newEditor, Just event )
 
         ( Form.Submit, Just answerForm, False ) ->
-            ( seed, AnswerEditor { editor | active = False }, Nothing )
+            ( seed, AnswerEditor { ae | active = False }, Nothing )
 
         _ ->
             let
                 newForm =
-                    Form.update answerFormValidation formMsg editor.form
+                    Form.update answerFormValidation formMsg ae.form
             in
-            ( seed, AnswerEditor { editor | form = newForm }, Nothing )
+            ( seed, AnswerEditor { ae | form = newForm }, Nothing )
 
 
-{-| -}
-updateAnswerCancel : Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
-updateAnswerCancel seed (AnswerEditor editor) =
+cancel : Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
+cancel seed (AnswerEditor ae) =
     let
         newForm =
-            initAnswerForm editor.answer
+            initAnswerForm ae.answer
 
         newFollowUps =
-            List.sortBy (\(QuestionEditor qe) -> qe.order) editor.followUps
+            List.sortBy (\(QuestionEditor qe) -> qe.order) ae.followUps
     in
-    ( seed, AnswerEditor { editor | active = False, form = newForm, followUps = newFollowUps, followUpsDirty = False }, Nothing )
+    ( seed, AnswerEditor { ae | active = False, form = newForm, followUps = newFollowUps, followUpsDirty = False }, Nothing )
 
 
-{-| -}
-updateAnswerAddFollowUpQuestion : Seed -> Chapter -> KnowledgeModel -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
-updateAnswerAddFollowUpQuestion seed chapter knowledgeModel (AnswerEditor editor) =
+addFollowUpQuestion : Seed -> Path -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
+addFollowUpQuestion seed path (AnswerEditor ae) =
     let
         ( newSeed, newFollowUps, event ) =
             addChild
                 seed
-                editor.followUps
+                ae.followUps
                 createQuestionEditor
                 newQuestion
-                (createAddFollowUpQuestionEvent editor.answer chapter knowledgeModel)
+                (flip createAddQuestionEvent path)
     in
-    ( newSeed, AnswerEditor { editor | followUps = newFollowUps }, Just event )
+    ( newSeed, AnswerEditor { ae | followUps = newFollowUps }, Just event )
 
 
-{-| -}
-updateAnswerViewFollowUpQuestion : String -> Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
-updateAnswerViewFollowUpQuestion uuid seed (AnswerEditor editor) =
+viewFollowUpQuestion : String -> Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
+viewFollowUpQuestion uuid seed (AnswerEditor ae) =
     let
         newFollowUps =
-            updateInList editor.followUps (matchQuestion uuid) activateQuestion
+            updateInList ae.followUps (matchQuestion uuid) activateQuestion
     in
-    ( seed, AnswerEditor { editor | followUps = newFollowUps }, Nothing )
+    ( seed, AnswerEditor { ae | followUps = newFollowUps }, Nothing )
 
 
-{-| -}
-updateAnswerDeleteFollowUpQuestion : String -> Seed -> Chapter -> KnowledgeModel -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
-updateAnswerDeleteFollowUpQuestion uuid seed chapter knowledgeModel (AnswerEditor editor) =
+deleteFollowUpQuestion : String -> Seed -> Path -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
+deleteFollowUpQuestion uuid seed path (AnswerEditor ae) =
     let
         newFollowUps =
-            List.filter (not << matchQuestion uuid) editor.followUps
+            List.filter (not << matchQuestion uuid) ae.followUps
 
         ( event, newSeed ) =
-            createDeleteFollowUpQuestionEvent editor.answer chapter knowledgeModel seed uuid
+            createDeleteQuestionEvent uuid path seed
     in
-    ( newSeed, AnswerEditor { editor | followUps = newFollowUps }, Just event )
+    ( newSeed, AnswerEditor { ae | followUps = newFollowUps }, Just event )

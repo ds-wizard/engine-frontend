@@ -1,40 +1,40 @@
 module KMEditor.Editor.Update.UpdateQuestion exposing (..)
 
 import Form
+import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Entities exposing (..)
-import KMEditor.Editor.Models.Events exposing (..)
 import KMEditor.Editor.Models.Forms exposing (..)
-import KMEditor.Editor.Update.Utils exposing (addChild, formChanged, updateInList)
+import KMEditor.Editor.Update.Utils exposing (addChild, updateInList)
 import Random.Pcg exposing (Seed)
 
 
-formMsg : Form.Msg -> Seed -> (Chapter -> KnowledgeModel -> Seed -> QuestionEditor -> ( Event, Seed )) -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-formMsg formMsg seed createEditEvent chapter knowledgeModel ((QuestionEditor editor) as questionEditor) =
-    case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.answerItemTemplateQuestionsDirty || editor.answersDirty || editor.referencesDirty || editor.expertsDirty ) of
+formMsg : Form.Msg -> Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+formMsg formMsg seed path ((QuestionEditor qe) as editor) =
+    case ( formMsg, Form.getOutput qe.form, isQuestionEditorDirty editor ) of
         ( Form.Submit, Just questionForm, True ) ->
             let
                 newQuestion =
-                    updateQuestionWithForm editor.question questionForm
+                    updateQuestionWithForm qe.question questionForm
 
                 newForm =
                     initQuestionForm newQuestion
 
                 newAnswerItemTemplateQuestions =
-                    List.indexedMap (\i (QuestionEditor qe) -> QuestionEditor { qe | order = i }) editor.answerItemTemplateQuestions
+                    List.indexedMap (\i (QuestionEditor qe) -> QuestionEditor { qe | order = i }) qe.answerItemTemplateQuestions
 
                 newAnswers =
-                    List.indexedMap (\i (AnswerEditor ae) -> AnswerEditor { ae | order = i }) editor.answers
+                    List.indexedMap (\i (AnswerEditor ae) -> AnswerEditor { ae | order = i }) qe.answers
 
                 newReferences =
-                    List.indexedMap (\i (ReferenceEditor re) -> ReferenceEditor { re | order = i }) editor.references
+                    List.indexedMap (\i (ReferenceEditor re) -> ReferenceEditor { re | order = i }) qe.references
 
                 newExperts =
-                    List.indexedMap (\i (ExpertEditor ee) -> ExpertEditor { ee | order = i }) editor.experts
+                    List.indexedMap (\i (ExpertEditor ee) -> ExpertEditor { ee | order = i }) qe.experts
 
                 newEditor =
                     QuestionEditor
-                        { editor
+                        { qe
                             | active = False
                             , form = newForm
                             , question = newQuestion
@@ -49,39 +49,39 @@ formMsg formMsg seed createEditEvent chapter knowledgeModel ((QuestionEditor edi
                         }
 
                 ( event, newSeed ) =
-                    createEditEvent chapter knowledgeModel seed newEditor
+                    createEditQuestionEvent newEditor path seed
             in
             ( newSeed, newEditor, Just event )
 
         ( Form.Submit, Just questionForm, False ) ->
-            ( seed, QuestionEditor { editor | active = False }, Nothing )
+            ( seed, QuestionEditor { qe | active = False }, Nothing )
 
         _ ->
             let
                 newForm =
-                    Form.update questionFormValidation formMsg editor.form
+                    Form.update questionFormValidation formMsg qe.form
             in
-            ( seed, QuestionEditor { editor | form = newForm }, Nothing )
+            ( seed, QuestionEditor { qe | form = newForm }, Nothing )
 
 
 cancel : Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-cancel seed (QuestionEditor editor) =
+cancel seed (QuestionEditor qe) =
     let
         newForm =
-            initQuestionForm editor.question
+            initQuestionForm qe.question
 
         newAnswers =
-            List.sortBy (\(AnswerEditor ae) -> ae.order) editor.answers
+            List.sortBy (\(AnswerEditor ae) -> ae.order) qe.answers
 
         newReferences =
-            List.sortBy (\(ReferenceEditor re) -> re.order) editor.references
+            List.sortBy (\(ReferenceEditor re) -> re.order) qe.references
 
         newExperts =
-            List.sortBy (\(ExpertEditor ee) -> ee.order) editor.experts
+            List.sortBy (\(ExpertEditor ee) -> ee.order) qe.experts
     in
     ( seed
     , QuestionEditor
-        { editor
+        { qe
             | active = False
             , form = newForm
             , answers = newAnswers
@@ -95,141 +95,141 @@ cancel seed (QuestionEditor editor) =
     )
 
 
-addAnswerItemTemplateQuestion : Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-addAnswerItemTemplateQuestion seed chapter knowledgeModel (QuestionEditor editor) =
+addAnswerItemTemplateQuestion : Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+addAnswerItemTemplateQuestion seed path (QuestionEditor qe) =
     let
         ( newSeed, newAnswerItemTepmlateQuestions, event ) =
             addChild
                 seed
-                editor.answerItemTemplateQuestions
+                qe.answerItemTemplateQuestions
                 createQuestionEditor
                 newQuestion
-                (createAddAnswerItemTemplateQuestionEvent editor.question chapter knowledgeModel)
+                (flip createAddQuestionEvent path)
     in
-    ( newSeed, QuestionEditor { editor | answerItemTemplateQuestions = newAnswerItemTepmlateQuestions }, Just event )
+    ( newSeed, QuestionEditor { qe | answerItemTemplateQuestions = newAnswerItemTepmlateQuestions }, Just event )
 
 
 viewAnswerItemTemplateQuestion : String -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-viewAnswerItemTemplateQuestion uuid seed (QuestionEditor editor) =
+viewAnswerItemTemplateQuestion uuid seed (QuestionEditor qe) =
     let
         newAnswerItemTemplateQuestions =
-            updateInList editor.answerItemTemplateQuestions (matchQuestion uuid) activateQuestion
+            updateInList qe.answerItemTemplateQuestions (matchQuestion uuid) activateQuestion
     in
-    ( seed, QuestionEditor { editor | answerItemTemplateQuestions = newAnswerItemTemplateQuestions }, Nothing )
+    ( seed, QuestionEditor { qe | answerItemTemplateQuestions = newAnswerItemTemplateQuestions }, Nothing )
 
 
-deleteAnswerItemTemplateQuestion : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-deleteAnswerItemTemplateQuestion uuid seed chapter knowledgeModel (QuestionEditor editor) =
+deleteAnswerItemTemplateQuestion : String -> Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+deleteAnswerItemTemplateQuestion uuid seed path (QuestionEditor qe) =
     let
         newAnswerItemTemplateQuestions =
-            List.filter (not << matchQuestion uuid) editor.answerItemTemplateQuestions
+            List.filter (not << matchQuestion uuid) qe.answerItemTemplateQuestions
 
         ( event, newSeed ) =
-            createDeleteAnswerItemTemplateQuestionEvent editor.question chapter knowledgeModel seed uuid
+            createDeleteQuestionEvent uuid path seed
     in
-    ( newSeed, QuestionEditor { editor | answerItemTemplateQuestions = newAnswerItemTemplateQuestions }, Just event )
+    ( newSeed, QuestionEditor { qe | answerItemTemplateQuestions = newAnswerItemTemplateQuestions }, Just event )
 
 
-addAnswer : Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-addAnswer seed chapter knowledgeModel (QuestionEditor editor) =
+addAnswer : Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+addAnswer seed path (QuestionEditor qe) =
     let
         ( newSeed, newAnswers, event ) =
             addChild
                 seed
-                editor.answers
+                qe.answers
                 createAnswerEditor
                 newAnswer
-                (createAddAnswerEvent editor.question chapter knowledgeModel)
+                (flip createAddAnswerEvent path)
     in
-    ( newSeed, QuestionEditor { editor | answers = newAnswers }, Just event )
+    ( newSeed, QuestionEditor { qe | answers = newAnswers }, Just event )
 
 
 viewAnswer : String -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-viewAnswer uuid seed (QuestionEditor editor) =
+viewAnswer uuid seed (QuestionEditor qe) =
     let
         newAnswers =
-            updateInList editor.answers (matchAnswer uuid) activateAnswer
+            updateInList qe.answers (matchAnswer uuid) activateAnswer
     in
-    ( seed, QuestionEditor { editor | answers = newAnswers }, Nothing )
+    ( seed, QuestionEditor { qe | answers = newAnswers }, Nothing )
 
 
-deleteAnswer : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-deleteAnswer uuid seed chapter knowledgeModel (QuestionEditor editor) =
+deleteAnswer : String -> Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+deleteAnswer uuid seed path (QuestionEditor qe) =
     let
         newAnswers =
-            List.filter (not << matchAnswer uuid) editor.answers
+            List.filter (not << matchAnswer uuid) qe.answers
 
         ( event, newSeed ) =
-            createDeleteAnswerEvent editor.question chapter knowledgeModel seed uuid
+            createDeleteAnswerEvent uuid path seed
     in
-    ( newSeed, QuestionEditor { editor | answers = newAnswers }, Just event )
+    ( newSeed, QuestionEditor { qe | answers = newAnswers }, Just event )
 
 
-addReference : Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-addReference seed chapter knowledgeModel (QuestionEditor editor) =
+addReference : Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+addReference seed path (QuestionEditor qe) =
     let
         ( newSeed, newReferences, event ) =
             addChild
                 seed
-                editor.references
+                qe.references
                 createReferenceEditor
                 newReference
-                (createAddReferenceEvent editor.question chapter knowledgeModel)
+                (flip createAddReferenceEvent path)
     in
-    ( newSeed, QuestionEditor { editor | references = newReferences }, Just event )
+    ( newSeed, QuestionEditor { qe | references = newReferences }, Just event )
 
 
 viewReference : String -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-viewReference uuid seed (QuestionEditor editor) =
+viewReference uuid seed (QuestionEditor qe) =
     let
         newReferences =
-            updateInList editor.references (matchReference uuid) activateReference
+            updateInList qe.references (matchReference uuid) activateReference
     in
-    ( seed, QuestionEditor { editor | references = newReferences }, Nothing )
+    ( seed, QuestionEditor { qe | references = newReferences }, Nothing )
 
 
-deleteReference : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-deleteReference uuid seed chapter knowledgeModel (QuestionEditor editor) =
+deleteReference : String -> Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+deleteReference uuid seed path (QuestionEditor qe) =
     let
         newReferences =
-            List.filter (not << matchReference uuid) editor.references
+            List.filter (not << matchReference uuid) qe.references
 
         ( event, newSeed ) =
-            createDeleteReferenceEvent editor.question chapter knowledgeModel seed uuid
+            createDeleteReferenceEvent uuid path seed
     in
-    ( newSeed, QuestionEditor { editor | references = newReferences }, Just event )
+    ( newSeed, QuestionEditor { qe | references = newReferences }, Just event )
 
 
-addExpert : Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-addExpert seed chapter knowledgeModel (QuestionEditor editor) =
+addExpert : Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+addExpert seed path (QuestionEditor qe) =
     let
         ( newSeed, newExperts, event ) =
             addChild
                 seed
-                editor.experts
+                qe.experts
                 createExpertEditor
                 newExpert
-                (createAddExpertEvent editor.question chapter knowledgeModel)
+                (flip createAddExpertEvent path)
     in
-    ( newSeed, QuestionEditor { editor | experts = newExperts }, Just event )
+    ( newSeed, QuestionEditor { qe | experts = newExperts }, Just event )
 
 
 viewExpert : String -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-viewExpert uuid seed (QuestionEditor editor) =
+viewExpert uuid seed (QuestionEditor qe) =
     let
         newExperts =
-            updateInList editor.experts (matchExpert uuid) activateExpert
+            updateInList qe.experts (matchExpert uuid) activateExpert
     in
-    ( seed, QuestionEditor { editor | experts = newExperts }, Nothing )
+    ( seed, QuestionEditor { qe | experts = newExperts }, Nothing )
 
 
-deleteExpert : String -> Seed -> Chapter -> KnowledgeModel -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
-deleteExpert uuid seed chapter knowledgeModel (QuestionEditor editor) =
+deleteExpert : String -> Seed -> Path -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
+deleteExpert uuid seed path (QuestionEditor qe) =
     let
         newExperts =
-            List.filter (not << matchExpert uuid) editor.experts
+            List.filter (not << matchExpert uuid) qe.experts
 
         ( event, newSeed ) =
-            createDeleteExpertEvent editor.question chapter knowledgeModel seed uuid
+            createDeleteExpertEvent uuid path seed
     in
-    ( newSeed, QuestionEditor { editor | experts = newExperts }, Just event )
+    ( newSeed, QuestionEditor { qe | experts = newExperts }, Just event )

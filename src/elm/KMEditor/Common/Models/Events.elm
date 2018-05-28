@@ -4,8 +4,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode exposing (..)
 import Json.Encode.Extra exposing (maybe)
+import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Entities exposing (..)
 import List.Extra as List
 import Random.Pcg exposing (Seed)
 import Utils exposing (getUuid)
@@ -1163,13 +1163,13 @@ isAddChapter km event =
             False
 
 
-isAddQuestion : Chapter -> Event -> Bool
-isAddQuestion chapter event =
+isAddQuestion : String -> Event -> Bool
+isAddQuestion parentUuid event =
     case event of
         AddQuestionEvent eventData commonData ->
             case List.last commonData.path of
                 Just (ChapterPathNode uuid) ->
-                    uuid == chapter.uuid
+                    uuid == parentUuid
 
                 _ ->
                     False

@@ -1,19 +1,12 @@
 module KMEditor.Editor.Msgs exposing (..)
 
-{-|
-
-@docs Msg, KnowledgeModelMsg, ChapterMsg, QuestionMsg, AnswerMsg, ReferenceMsg, ExpertMsg
-
--}
-
 import Form
 import Jwt
+import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Entities exposing (..)
 import Reorderable
 
 
-{-| -}
 type Msg
     = GetKnowledgeModelCompleted (Result Jwt.JwtError KnowledgeModel)
     | Edit KnowledgeModelMsg
@@ -21,7 +14,6 @@ type Msg
     | SaveCompleted (Result Jwt.JwtError String)
 
 
-{-| -}
 type KnowledgeModelMsg
     = KnowledgeModelFormMsg Form.Msg
     | ViewChapter String
@@ -31,7 +23,6 @@ type KnowledgeModelMsg
     | ChapterMsg String ChapterMsg
 
 
-{-| -}
 type ChapterMsg
     = ChapterFormMsg Form.Msg
     | ChapterCancel
@@ -42,7 +33,6 @@ type ChapterMsg
     | ChapterQuestionMsg String QuestionMsg
 
 
-{-| -}
 type QuestionMsg
     = QuestionFormMsg Form.Msg
     | QuestionCancel
@@ -68,7 +58,6 @@ type QuestionMsg
     | ExpertMsg String ExpertMsg
 
 
-{-| -}
 type AnswerMsg
     = AnswerFormMsg Form.Msg
     | AnswerCancel
@@ -79,13 +68,11 @@ type AnswerMsg
     | FollowUpQuestionMsg String QuestionMsg
 
 
-{-| -}
 type ReferenceMsg
     = ReferenceFormMsg Form.Msg
     | ReferenceCancel
 
 
-{-| -}
 type ExpertMsg
     = ExpertFormMsg Form.Msg
     | ExpertCancel

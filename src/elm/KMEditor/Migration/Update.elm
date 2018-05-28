@@ -4,7 +4,7 @@ import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
-import KMEditor.Editor.Models.Events exposing (getEventUuid)
+import KMEditor.Common.Models.Events exposing (getEventUuid)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
 import KMEditor.Models.Migration exposing (..)

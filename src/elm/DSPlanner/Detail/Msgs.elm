@@ -3,7 +3,7 @@ module DSPlanner.Detail.Msgs exposing (..)
 import DSPlanner.Common.Models exposing (QuestionnaireDetail)
 import FormEngine.Msgs
 import Jwt
-import KMEditor.Editor.Models.Entities exposing (Chapter)
+import KMEditor.Common.Models.Entities exposing (Chapter)
 
 
 type Msg
