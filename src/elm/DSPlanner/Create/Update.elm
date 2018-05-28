@@ -3,7 +3,7 @@ module DSPlanner.Create.Update exposing (..)
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
-import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, questionnaireCreateFormValidation)
+import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, initQuestionnaireCreateForm, questionnaireCreateFormValidation)
 import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (postQuestionnaire)
 import DSPlanner.Routing exposing (Route(Index))
@@ -41,12 +41,25 @@ getPackagesCompleted model result =
         newModel =
             case result of
                 Ok packages ->
-                    { model | packages = Success packages }
+                    case model.selectedPackage of
+                        Just selected ->
+                            setSelectedPackage { model | packages = Success packages } packages selected
+
+                        _ ->
+                            { model | packages = Success packages }
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package list" }
     in
     ( newModel, Cmd.none )
+
+
+setSelectedPackage : Model -> List PackageDetail -> String -> Model
+setSelectedPackage model packages selected =
+    if List.any (.id >> (==) selected) packages then
+        { model | form = initQuestionnaireCreateForm (Just selected) }
+    else
+        model
 
 
 handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )

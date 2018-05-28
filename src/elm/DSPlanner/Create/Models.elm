@@ -3,6 +3,7 @@ module DSPlanner.Create.Models exposing (..)
 import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
+import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 import KMPackages.Common.Models exposing (PackageDetail)
@@ -12,14 +13,16 @@ type alias Model =
     { packages : ActionResult (List PackageDetail)
     , savingQuestionnaire : ActionResult String
     , form : Form CustomFormError QuestionnaireCreateForm
+    , selectedPackage : Maybe String
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : Maybe String -> Model
+initialModel selectedPackage =
     { packages = Loading
     , savingQuestionnaire = Unset
-    , form = initQuestionnaireCreateForm
+    , form = initQuestionnaireCreateForm Nothing
+    , selectedPackage = selectedPackage
     }
 
 
@@ -29,9 +32,18 @@ type alias QuestionnaireCreateForm =
     }
 
 
-initQuestionnaireCreateForm : Form CustomFormError QuestionnaireCreateForm
-initQuestionnaireCreateForm =
-    Form.initial [] questionnaireCreateFormValidation
+initQuestionnaireCreateForm : Maybe String -> Form CustomFormError QuestionnaireCreateForm
+initQuestionnaireCreateForm selectedPackage =
+    let
+        initials =
+            case selectedPackage of
+                Just packageId ->
+                    [ ( "packageId", Field.string packageId ) ]
+
+                _ ->
+                    []
+    in
+    Form.initial initials questionnaireCreateFormValidation
 
 
 questionnaireCreateFormValidation : Validation CustomFormError QuestionnaireCreateForm

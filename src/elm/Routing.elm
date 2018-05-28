@@ -147,7 +147,10 @@ toUrl route =
                 _ ->
                     []
     in
-    "/" ++ String.join "/" parts
+    "/"
+        ++ String.join "/" parts
+        |> String.split "/?"
+        |> String.join "?"
 
 
 parseLocation : Location -> Route
