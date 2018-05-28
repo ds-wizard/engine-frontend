@@ -18,6 +18,7 @@ type Msg
     = ChangeLocation String
     | OnLocationChange Location
     | AuthMsg Auth.Msgs.Msg
+    | SetSidebarCollapsed Bool
     | DSPlannerMsg DSPlanner.Msgs.Msg
     | KMEditorCreateMsg KMEditor.Create.Msgs.Msg
     | KMEditorEditorMsg KMEditor.Editor.Msgs.Msg
