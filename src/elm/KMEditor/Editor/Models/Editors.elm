@@ -2,9 +2,10 @@ module KMEditor.Editor.Models.Editors exposing (..)
 
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
-import KMEditor.Editor.Models.Entities exposing (..)
+import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Editor.Models.Forms exposing (..)
 import List.Extra as List
+import Set
 
 
 type KnowledgeModelEditor
@@ -107,6 +108,11 @@ getKnowledgeModel (KnowledgeModelEditor kme) =
     kme.knowledgeModel
 
 
+isKnowledgeModelEditorDirty : KnowledgeModelEditor -> Bool
+isKnowledgeModelEditorDirty (KnowledgeModelEditor kme) =
+    formChanged kme.form || kme.chaptersDirty
+
+
 
 {- Chapter -}
 
@@ -153,6 +159,11 @@ matchChapter uuid (ChapterEditor chapterEditor) =
 getActiveChapterEditor : List ChapterEditor -> Maybe ChapterEditor
 getActiveChapterEditor =
     List.find (\(ChapterEditor ce) -> ce.active)
+
+
+isChapterEditorDirty : ChapterEditor -> Bool
+isChapterEditorDirty (ChapterEditor ce) =
+    formChanged ce.form || ce.questionsDirty
 
 
 
@@ -225,6 +236,11 @@ getActiveQuestionEditor =
     List.find (\(QuestionEditor qe) -> qe.active)
 
 
+isQuestionEditorDirty : QuestionEditor -> Bool
+isQuestionEditorDirty (QuestionEditor qe) =
+    formChanged qe.form || qe.answerItemTemplateQuestionsDirty || qe.answersDirty || qe.referencesDirty || qe.expertsDirty
+
+
 
 {- Answer -}
 
@@ -274,6 +290,11 @@ getActiveAnswerEditor =
     List.find (\(AnswerEditor ae) -> ae.active)
 
 
+isAnswerEditorDirty : AnswerEditor -> Bool
+isAnswerEditorDirty (AnswerEditor ae) =
+    formChanged ae.form || ae.followUpsDirty
+
+
 
 {- Reference -}
 
@@ -318,6 +339,11 @@ getActiveReferenceEditor =
     List.find (\(ReferenceEditor re) -> re.active)
 
 
+isReferenceEditorDirty : ReferenceEditor -> Bool
+isReferenceEditorDirty (ReferenceEditor re) =
+    formChanged re.form
+
+
 
 {- Expert -}
 
@@ -360,3 +386,17 @@ matchExpert uuid (ExpertEditor expertEditor) =
 getActiveExpertEditor : List ExpertEditor -> Maybe ExpertEditor
 getActiveExpertEditor =
     List.find (\(ExpertEditor re) -> re.active)
+
+
+isExpertEditorDirty : ExpertEditor -> Bool
+isExpertEditorDirty (ExpertEditor ee) =
+    formChanged ee.form
+
+
+
+{- Helpers -}
+
+
+formChanged : Form CustomFormError a -> Bool
+formChanged form =
+    Set.size (Form.getChangedFields form) > 0

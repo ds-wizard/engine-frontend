@@ -4,7 +4,7 @@ import Common.Types exposing (ActionResult(..))
 import DSPlanner.Common.Models exposing (QuestionnaireDetail)
 import Dict exposing (Dict)
 import FormEngine.Model exposing (Form)
-import KMEditor.Editor.Models.Entities exposing (Chapter)
+import KMEditor.Common.Models.Entities exposing (Chapter)
 
 
 type alias Model =

@@ -1,56 +1,46 @@
 module KMEditor.Editor.Update.UpdateReference exposing (..)
 
-{-|
-
-@docs updateReferenceFormMsg, updateReferenceCancel
-
--}
-
 import Form
+import KMEditor.Common.Models.Events exposing (Event, Path, createEditReferenceEvent)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Entities exposing (..)
-import KMEditor.Editor.Models.Events exposing (Event, createEditReferenceEvent)
 import KMEditor.Editor.Models.Forms exposing (initReferenceForm, referenceFormValidation, updateReferenceWithForm)
-import KMEditor.Editor.Update.Utils exposing (formChanged)
 import Random.Pcg exposing (Seed)
 
 
-{-| -}
-updateReferenceFormMsg : Form.Msg -> Seed -> Question -> Chapter -> KnowledgeModel -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )
-updateReferenceFormMsg formMsg seed question chapter knowledgeModel ((ReferenceEditor editor) as originalEditor) =
-    case ( formMsg, Form.getOutput editor.form, formChanged editor.form ) of
+formMsg : Form.Msg -> Seed -> Path -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )
+formMsg formMsg seed path ((ReferenceEditor re) as editor) =
+    case ( formMsg, Form.getOutput re.form, isReferenceEditorDirty editor ) of
         ( Form.Submit, Just referenceForm, True ) ->
             let
                 newReference =
-                    updateReferenceWithForm editor.reference referenceForm
+                    updateReferenceWithForm re.reference referenceForm
 
                 newForm =
                     initReferenceForm newReference
 
                 newEditor =
-                    { editor | active = False, form = newForm, reference = newReference }
+                    ReferenceEditor { re | active = False, form = newForm, reference = newReference }
 
                 ( event, newSeed ) =
-                    createEditReferenceEvent question chapter knowledgeModel [] seed newReference
+                    createEditReferenceEvent newReference path seed
             in
-            ( newSeed, ReferenceEditor { editor | active = False }, Just event )
+            ( newSeed, newEditor, Just event )
 
         ( Form.Submit, Just referenceForm, False ) ->
-            ( seed, ReferenceEditor { editor | active = False }, Nothing )
+            ( seed, ReferenceEditor { re | active = False }, Nothing )
 
         _ ->
             let
                 newForm =
-                    Form.update referenceFormValidation formMsg editor.form
+                    Form.update referenceFormValidation formMsg re.form
             in
-            ( seed, ReferenceEditor { editor | form = newForm }, Nothing )
+            ( seed, ReferenceEditor { re | form = newForm }, Nothing )
 
 
-{-| -}
-updateReferenceCancel : Seed -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )
-updateReferenceCancel seed (ReferenceEditor editor) =
+cancel : Seed -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )
+cancel seed (ReferenceEditor re) =
     let
         newForm =
-            initReferenceForm editor.reference
+            initReferenceForm re.reference
     in
-    ( seed, ReferenceEditor { editor | active = False, form = newForm }, Nothing )
+    ( seed, ReferenceEditor { re | active = False, form = newForm }, Nothing )

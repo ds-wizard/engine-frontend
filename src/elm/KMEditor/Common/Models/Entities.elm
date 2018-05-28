@@ -1,4 +1,4 @@
-module KMEditor.Editor.Models.Entities exposing (..)
+module KMEditor.Common.Models.Entities exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)

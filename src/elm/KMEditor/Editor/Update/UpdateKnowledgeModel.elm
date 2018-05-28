@@ -1,81 +1,77 @@
 module KMEditor.Editor.Update.UpdateKnowledgeModel exposing (..)
 
-{-|
-
-@docs updateKnowledgeModelFormMsg
-@docs updateKnowledgeModelAddChapter, updateKnowledgeModelViewChapter, updateKnowledgeModelDeleteChapter
-
--}
-
 import Form
+import KMEditor.Common.Models.Entities exposing (newChapter)
+import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Entities exposing (newChapter)
-import KMEditor.Editor.Models.Events exposing (..)
-import KMEditor.Editor.Models.Forms exposing (knowledgeModelFormValidation, updateKnowledgeModelWithForm)
+import KMEditor.Editor.Models.Forms exposing (initKnowledgeModelFrom, knowledgeModelFormValidation, updateKnowledgeModelWithForm)
 import KMEditor.Editor.Update.Utils exposing (..)
 import Random.Pcg exposing (Seed)
 
 
-{-| -}
-updateKnowledgeModelFormMsg : Form.Msg -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
-updateKnowledgeModelFormMsg formMsg seed ((KnowledgeModelEditor editor) as originalEditor) =
-    case ( formMsg, Form.getOutput editor.form, formChanged editor.form || editor.chaptersDirty ) of
-        ( Form.Submit, Just knowledgeModelForm, True ) ->
+formMsg : Form.Msg -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
+formMsg formMsg seed ((KnowledgeModelEditor kme) as editor) =
+    case ( formMsg, Form.getOutput kme.form, isKnowledgeModelEditorDirty editor ) of
+        ( Form.Submit, Just form, True ) ->
             let
                 newKnowledgeModel =
-                    updateKnowledgeModelWithForm editor.knowledgeModel knowledgeModelForm
+                    updateKnowledgeModelWithForm kme.knowledgeModel form
+
+                newForm =
+                    initKnowledgeModelFrom newKnowledgeModel
+
+                newChapters =
+                    List.indexedMap (\i (ChapterEditor ce) -> ChapterEditor { ce | order = i }) kme.chapters
+
+                newEditor =
+                    KnowledgeModelEditor { kme | form = newForm, knowledgeModel = newKnowledgeModel, chapters = newChapters }
 
                 ( event, newSeed ) =
-                    editor.chapters
-                        |> List.map getChapterUuid
-                        |> createEditKnowledgeModelEvent seed newKnowledgeModel
+                    createEditKnowledgeModelEvent newEditor seed
             in
-            ( newSeed, originalEditor, Just event, True )
+            ( newSeed, newEditor, Just event, True )
 
-        ( Form.Submit, Just chapterForm, False ) ->
-            ( seed, originalEditor, Nothing, True )
+        ( Form.Submit, Just from, False ) ->
+            ( seed, editor, Nothing, True )
 
         _ ->
             let
                 newForm =
-                    Form.update knowledgeModelFormValidation formMsg editor.form
+                    Form.update knowledgeModelFormValidation formMsg kme.form
             in
-            ( seed, KnowledgeModelEditor { editor | form = newForm }, Nothing, False )
+            ( seed, KnowledgeModelEditor { kme | form = newForm }, Nothing, False )
 
 
-{-| -}
-updateKnowledgeModelAddChapter : Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
-updateKnowledgeModelAddChapter seed (KnowledgeModelEditor editor) =
+addChapter : Seed -> Path -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
+addChapter seed path (KnowledgeModelEditor kme) =
     let
         ( newSeed, newChapters, event ) =
             addChild
                 seed
-                editor.chapters
+                kme.chapters
                 createChapterEditor
                 newChapter
-                (createAddChapterEvent editor.knowledgeModel)
+                (flip createAddChapterEvent path)
     in
-    ( newSeed, KnowledgeModelEditor { editor | chapters = newChapters }, Just event, False )
+    ( newSeed, KnowledgeModelEditor { kme | chapters = newChapters }, Just event, False )
 
 
-{-| -}
-updateKnowledgeModelViewChapter : String -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
-updateKnowledgeModelViewChapter uuid seed (KnowledgeModelEditor editor) =
+viewChapter : String -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
+viewChapter uuid seed (KnowledgeModelEditor kme) =
     let
         newChapters =
-            updateInList editor.chapters (matchChapter uuid) activateChapter
+            updateInList kme.chapters (matchChapter uuid) activateChapter
     in
-    ( seed, KnowledgeModelEditor { editor | chapters = newChapters }, Nothing, False )
+    ( seed, KnowledgeModelEditor { kme | chapters = newChapters }, Nothing, False )
 
 
-{-| -}
-updateKnowledgeModelDeleteChapter : String -> Seed -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
-updateKnowledgeModelDeleteChapter uuid seed (KnowledgeModelEditor editor) =
+deleteChapter : String -> Seed -> Path -> KnowledgeModelEditor -> ( Seed, KnowledgeModelEditor, Maybe Event, Bool )
+deleteChapter uuid seed path (KnowledgeModelEditor kme) =
     let
         newChapters =
-            List.filter (not << matchChapter uuid) editor.chapters
+            List.filter (not << matchChapter uuid) kme.chapters
 
         ( event, newSeed ) =
-            createDeleteChapterEvent editor.knowledgeModel seed uuid
+            createDeleteChapterEvent uuid path seed
     in
-    ( newSeed, KnowledgeModelEditor { editor | chapters = newChapters }, Just event, False )
+    ( newSeed, KnowledgeModelEditor { kme | chapters = newChapters }, Just event, False )

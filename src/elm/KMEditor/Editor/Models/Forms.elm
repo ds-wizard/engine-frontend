@@ -4,7 +4,7 @@ import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
-import KMEditor.Editor.Models.Entities exposing (..)
+import KMEditor.Common.Models.Entities exposing (..)
 
 
 type alias KnowledgeModelForm =
@@ -49,6 +49,11 @@ initForm validation initials =
 
 
 {- Knowledge Model -}
+
+
+initKnowledgeModelFrom : KnowledgeModel -> Form CustomFormError KnowledgeModelForm
+initKnowledgeModelFrom =
+    knowledgeModelFormInitials >> initForm knowledgeModelFormValidation
 
 
 knowledgeModelFormValidation : Validation CustomFormError KnowledgeModelForm

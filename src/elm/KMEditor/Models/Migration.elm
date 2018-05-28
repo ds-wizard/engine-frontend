@@ -1,47 +1,12 @@
-module KMEditor.Models.Migration
-    exposing
-        ( Migration
-        , MigrationResolution
-        , MigrationState
-        , MigrationStateType(..)
-        , encodeMigrationResolution
-        , migrationDecoder
-        , newApplyMigrationResolution
-        , newRejectMigrationResolution
-        )
-
-{-|
-
-
-# Types
-
-@docs Migration, MigrationState, MigrationStateType, MigrationResolution
-
-
-# Decoders
-
-@docs migrationDecoder
-
-
-# Creating resolutions
-
-@docs newApplyMigrationResolution, newRejectMigrationResolution
-
-
-# Encoders
-
-@docs encodeMigrationResolution
-
--}
+module KMEditor.Models.Migration exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode exposing (..)
-import KMEditor.Editor.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
-import KMEditor.Editor.Models.Events exposing (Event, eventDecoder)
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
+import KMEditor.Common.Models.Events exposing (Event, eventDecoder)
 
 
-{-| -}
 type alias Migration =
     { branchUuid : String
     , migrationState : MigrationState
@@ -51,14 +16,12 @@ type alias Migration =
     }
 
 
-{-| -}
 type alias MigrationState =
     { stateType : MigrationStateType
     , targetEvent : Maybe Event
     }
 
 
-{-| -}
 type MigrationStateType
     = ConflictState
     | ErrorState
@@ -66,14 +29,12 @@ type MigrationStateType
     | RunningState
 
 
-{-| -}
 type alias MigrationResolution =
     { originalEventUuid : String
     , action : String
     }
 
 
-{-| -}
 migrationDecoder : Decoder Migration
 migrationDecoder =
     decode Migration
@@ -121,19 +82,16 @@ newMigrationResolution action uuid =
     }
 
 
-{-| -}
 newApplyMigrationResolution : String -> MigrationResolution
 newApplyMigrationResolution =
     newMigrationResolution "Apply"
 
 
-{-| -}
 newRejectMigrationResolution : String -> MigrationResolution
 newRejectMigrationResolution =
     newMigrationResolution "Reject"
 
 
-{-| -}
 encodeMigrationResolution : MigrationResolution -> Encode.Value
 encodeMigrationResolution data =
     Encode.object

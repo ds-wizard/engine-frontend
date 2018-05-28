@@ -7,9 +7,6 @@ import KMEditor.Editor.Msgs
 import KMEditor.Index.Msgs
 import KMEditor.Migration.Msgs
 import KMEditor.Publish.Msgs
-import KMPackages.Detail.Msgs
-import KMPackages.Import.Msgs
-import KMPackages.Index.Msgs
 import KMPackages.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs

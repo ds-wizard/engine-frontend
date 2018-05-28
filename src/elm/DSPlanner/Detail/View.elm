@@ -13,7 +13,7 @@ import FormEngine.View exposing (viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import KMEditor.Editor.Models.Entities exposing (Chapter)
+import KMEditor.Common.Models.Entities exposing (Chapter)
 import Msgs
 import Routing
 

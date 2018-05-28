@@ -1,18 +1,11 @@
 module KMEditor.Editor.Models exposing (..)
 
-{-|
-
-@docs Model, initialModel
-
--}
-
 import Common.Types exposing (ActionResult(..))
+import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.Models.Editors exposing (KnowledgeModelEditor)
-import KMEditor.Editor.Models.Events exposing (Event)
 import Reorderable
 
 
-{-| -}
 type alias Model =
     { branchUuid : String
     , knowledgeModelEditor : ActionResult KnowledgeModelEditor
@@ -22,7 +15,6 @@ type alias Model =
     }
 
 
-{-| -}
 initialModel : String -> Model
 initialModel branchUuid =
     { branchUuid = branchUuid

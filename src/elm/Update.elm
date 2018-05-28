@@ -7,9 +7,6 @@ import KMEditor.Editor.Update
 import KMEditor.Index.Update
 import KMEditor.Migration.Update
 import KMEditor.Publish.Update
-import KMPackages.Detail.Update
-import KMPackages.Import.Update
-import KMPackages.Index.Update
 import KMPackages.Update
 import Models exposing (Model, initLocalModel)
 import Msgs exposing (Msg)
