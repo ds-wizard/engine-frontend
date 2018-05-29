@@ -191,7 +191,7 @@ updateQuestion msg path seed ((QuestionEditor editor) as questionEditor) =
     in
     case msg of
         QuestionFormMsg formMsg ->
-            UpdateQuestion.formMsg formMsg seed currentPath questionEditor
+            UpdateQuestion.formMsg formMsg seed path questionEditor
 
         QuestionCancel ->
             UpdateQuestion.cancel seed questionEditor
@@ -281,7 +281,7 @@ updateAnswer msg path seed ((AnswerEditor editor) as answerEditor) =
     in
     case msg of
         AnswerFormMsg formMsg ->
-            UpdateAnswer.formMsg formMsg seed currentPath answerEditor
+            UpdateAnswer.formMsg formMsg seed path answerEditor
 
         AnswerCancel ->
             UpdateAnswer.cancel seed answerEditor
