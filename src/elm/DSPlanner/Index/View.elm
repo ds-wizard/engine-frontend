@@ -26,7 +26,7 @@ view wrapMsg model =
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo (Routing.DSPlanner Create) [ class "btn btn-primary" ] [ text "Create" ] ]
+    [ linkTo (Routing.DSPlanner <| Create Nothing) [ class "btn btn-primary" ] [ text "Create" ] ]
 
 
 tableConfig : TableConfig Questionnaire Msg

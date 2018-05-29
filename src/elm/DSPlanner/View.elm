@@ -13,7 +13,7 @@ import Msgs
 view : Route -> (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view route wrapMsg model =
     case route of
-        Create ->
+        Create _ ->
             DSPlanner.Create.View.view (wrapMsg << CreateMsg) model.createModel
 
         Detail uuid ->

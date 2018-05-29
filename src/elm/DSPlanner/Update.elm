@@ -13,7 +13,7 @@ import Msgs
 fetchData : Route -> (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
 fetchData route wrapMsg session =
     case route of
-        Create ->
+        Create _ ->
             DSPlanner.Create.Update.fetchData (wrapMsg << CreateMsg) session
 
         Detail uuid ->

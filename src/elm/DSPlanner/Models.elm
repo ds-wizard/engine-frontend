@@ -15,7 +15,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { createModel = DSPlanner.Create.Models.initialModel
+    { createModel = DSPlanner.Create.Models.initialModel Nothing
     , detailModel = DSPlanner.Detail.Models.initialModel ""
     , indexModel = DSPlanner.Index.Models.initialModel
     }
@@ -24,8 +24,8 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        Create ->
-            { model | createModel = DSPlanner.Create.Models.initialModel }
+        Create selectedPackage ->
+            { model | createModel = DSPlanner.Create.Models.initialModel selectedPackage }
 
         Detail uuid ->
             { model | detailModel = DSPlanner.Detail.Models.initialModel uuid }

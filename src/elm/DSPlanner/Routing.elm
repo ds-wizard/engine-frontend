@@ -6,7 +6,7 @@ import UrlParser exposing (..)
 
 
 type Route
-    = Create
+    = Create (Maybe String)
     | Detail String
     | Index
 
@@ -18,7 +18,7 @@ moduleRoot =
 
 parses : (Route -> a) -> List (Parser (a -> c) c)
 parses wrapRoute =
-    [ map (wrapRoute <| Create) (s moduleRoot </> s "create")
+    [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> stringParam "selected")
     , map (wrapRoute << Detail) (s moduleRoot </> s "detail" </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
     ]
@@ -27,8 +27,13 @@ parses wrapRoute =
 toUrl : Route -> List String
 toUrl route =
     case route of
-        Create ->
-            [ moduleRoot, "create" ]
+        Create selected ->
+            case selected of
+                Just id ->
+                    [ moduleRoot, "create", "?selected=" ++ id ]
+
+                Nothing ->
+                    [ moduleRoot, "create" ]
 
         Detail uuid ->
             [ moduleRoot, "detail", uuid ]

@@ -25,7 +25,7 @@ fetchData model =
         DSPlanner route ->
             DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.session
 
-        KMEditorCreate ->
+        KMEditorCreate _ ->
             KMEditor.Create.Update.getPackagesCmd model.session
 
         KMEditorEditor uuid ->

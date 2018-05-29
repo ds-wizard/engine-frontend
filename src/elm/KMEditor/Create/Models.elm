@@ -12,13 +12,15 @@ type alias Model =
     , savingKnowledgeModel : ActionResult String
     , form : Form CustomFormError KnowledgeModelCreateForm
     , newUuid : Maybe String
+    , selectedPackage : Maybe String
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : Maybe String -> Model
+initialModel selectedPackage =
     { packages = Loading
     , savingKnowledgeModel = Unset
-    , form = initKnowledgeModelCreateForm
+    , form = initKnowledgeModelCreateForm Nothing
     , newUuid = Nothing
+    , selectedPackage = selectedPackage
     }

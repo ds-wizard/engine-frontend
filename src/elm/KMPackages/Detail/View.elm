@@ -3,6 +3,7 @@ module KMPackages.Detail.View exposing (view)
 import Common.Html exposing (detailContainerClassWith, emptyNode, linkTo)
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (codeGroup)
+import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -11,6 +12,7 @@ import KMPackages.Detail.Models exposing (..)
 import KMPackages.Detail.Msgs exposing (..)
 import KMPackages.Requests exposing (exportPackageUrl)
 import Msgs
+import Routing
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -50,10 +52,15 @@ versionView wrapMsg detail =
                 , text detail.description
                 ]
             , div [ class "actions" ]
-                [ a [ class "link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
+                [ linkTo (Routing.KMEditorCreate <| Just detail.id)
+                    []
+                    [ text "Create KM Editor" ]
+                , linkTo (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just detail.id)
+                    []
+                    [ text "Create DS Planner" ]
+                , a [ class "link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]
                 , a
-                    [ onClick (wrapMsg <| ShowHideDeleteVersion <| Just detail.id)
-                    ]
+                    [ onClick (wrapMsg <| ShowHideDeleteVersion <| Just detail.id) ]
                     [ i [ class "fa fa-trash-o" ] [] ]
                 ]
             ]

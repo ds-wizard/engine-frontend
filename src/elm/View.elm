@@ -30,7 +30,7 @@ view model =
                 |> DSPlanner.View.view route DSPlannerMsg
                 |> appView model
 
-        KMEditorCreate ->
+        KMEditorCreate _ ->
             model.kmEditorCreateModel
                 |> KMEditor.Create.View.view
                 |> appView model
