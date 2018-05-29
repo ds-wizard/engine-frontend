@@ -31,7 +31,7 @@ view jwt model =
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo Routing.KMEditorCreate
+    [ linkTo (Routing.KMEditorCreate Nothing)
         [ class "btn btn-primary" ]
         [ text "Create" ]
     ]

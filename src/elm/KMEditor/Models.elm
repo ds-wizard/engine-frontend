@@ -2,6 +2,7 @@ module KMEditor.Models exposing (..)
 
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
+import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -124,9 +125,18 @@ kmLastVersion km =
         |> Maybe.andThen getVersion
 
 
-initKnowledgeModelCreateForm : Form CustomFormError KnowledgeModelCreateForm
-initKnowledgeModelCreateForm =
-    Form.initial [] knowledgeModelCreateFormValidation
+initKnowledgeModelCreateForm : Maybe String -> Form CustomFormError KnowledgeModelCreateForm
+initKnowledgeModelCreateForm selectedPackage =
+    let
+        initials =
+            case selectedPackage of
+                Just packageId ->
+                    [ ( "parentPackageId", Field.string packageId ) ]
+
+                _ ->
+                    []
+    in
+    Form.initial initials knowledgeModelCreateFormValidation
 
 
 knowledgeModelCreateFormValidation : Validation CustomFormError KnowledgeModelCreateForm

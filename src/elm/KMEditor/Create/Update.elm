@@ -1,11 +1,5 @@
 module KMEditor.Create.Update exposing (getPackagesCmd, update)
 
-{-|
-
-@docs update, getPackagesCmd
-
--}
-
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
@@ -24,7 +18,6 @@ import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
 
-{-| -}
 getPackagesCmd : Session -> Cmd Msgs.Msg
 getPackagesCmd session =
     getPackages session
@@ -45,12 +38,25 @@ getPackageCompleted model result =
         newModel =
             case result of
                 Ok packages ->
-                    { model | packages = Success packages }
+                    setSelectedPackage { model | packages = Success packages } packages
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package list" }
     in
     ( newModel, Cmd.none )
+
+
+setSelectedPackage : Model -> List PackageDetail -> Model
+setSelectedPackage model packages =
+    case model.selectedPackage of
+        Just id ->
+            if List.any (.id >> (==) id) packages then
+                { model | form = initKnowledgeModelCreateForm model.selectedPackage }
+            else
+                model
+
+        _ ->
+            model
 
 
 postKmCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -88,7 +94,6 @@ handleForm formMsg seed session model =
             ( seed, newModel, Cmd.none )
 
 
-{-| -}
 update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 update msg seed session model =
     case msg of

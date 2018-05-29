@@ -44,7 +44,7 @@ initialModel route seed session jwt =
     , organizationModel = Organization.Models.initialModel
     , kmPackagesModel = KMPackages.Models.initialModel
     , kmEditorIndexModel = KMEditor.Index.Models.initialModel
-    , kmEditorCreateModel = KMEditor.Create.Models.initialModel
+    , kmEditorCreateModel = KMEditor.Create.Models.initialModel Nothing
     , kmEditorPublishModel = KMEditor.Publish.Models.initialModel
     , kmEditorEditorModel = KMEditor.Editor.Models.initialModel ""
     , kmEditorMigrationModel = KMEditor.Migration.Models.initialModel ""
@@ -66,8 +66,8 @@ initLocalModel model =
         KMEditorIndex ->
             { model | kmEditorIndexModel = KMEditor.Index.Models.initialModel }
 
-        KMEditorCreate ->
-            { model | kmEditorCreateModel = KMEditor.Create.Models.initialModel }
+        KMEditorCreate selectedPackage ->
+            { model | kmEditorCreateModel = KMEditor.Create.Models.initialModel selectedPackage }
 
         KMEditorPublish uuid ->
             { model | kmEditorPublishModel = KMEditor.Publish.Models.initialModel }

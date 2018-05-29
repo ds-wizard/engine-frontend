@@ -13,7 +13,7 @@ import Users.Routing
 type Route
     = Welcome
     | DSPlanner DSPlanner.Routing.Route
-    | KMEditorCreate
+    | KMEditorCreate (Maybe String)
     | KMEditorEditor String
     | KMEditorIndex
     | KMEditorMigration String
@@ -37,7 +37,7 @@ matchers =
                 ++ Public.Routing.parsers Public
                 ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
-                   , map KMEditorCreate (s "km-editor" </> s "create")
+                   , map KMEditorCreate (s "km-editor" </> s "create" <?> stringParam "selected")
                    , map KMEditorEditor (s "km-editor" </> s "edit" </> string)
                    , map KMEditorIndex (s "km-editor")
                    , map KMEditorMigration (s "km-editor" </> s "migration" </> string)
@@ -66,7 +66,7 @@ isAllowed route maybeJwt =
         DSPlanner route ->
             DSPlanner.Routing.isAllowed route maybeJwt
 
-        KMEditorCreate ->
+        KMEditorCreate _ ->
             hasPerm maybeJwt Perm.knowledgeModel
 
         KMEditorEditor uuid ->
@@ -114,8 +114,13 @@ toUrl route =
                 DSPlanner route ->
                     DSPlanner.Routing.toUrl route
 
-                KMEditorCreate ->
-                    [ "km-editor", "create" ]
+                KMEditorCreate selected ->
+                    case selected of
+                        Just id ->
+                            [ "km-editor", "create", "?selected=" ++ id ]
+
+                        Nothing ->
+                            [ "km-editor", "create" ]
 
                 KMEditorEditor uuid ->
                     [ "km-editor", "edit", uuid ]

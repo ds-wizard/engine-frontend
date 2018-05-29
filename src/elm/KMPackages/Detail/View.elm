@@ -52,7 +52,10 @@ versionView wrapMsg detail =
                 , text detail.description
                 ]
             , div [ class "actions" ]
-                [ linkTo (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just detail.id)
+                [ linkTo (Routing.KMEditorCreate <| Just detail.id)
+                    []
+                    [ text "Create KM Editor" ]
+                , linkTo (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just detail.id)
                     []
                     [ text "Create DS Planner" ]
                 , a [ class "link-with-icon", href url, target "_blank" ] [ i [ class "fa fa-download" ] [], text "Export" ]

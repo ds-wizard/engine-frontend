@@ -41,12 +41,7 @@ getPackagesCompleted model result =
         newModel =
             case result of
                 Ok packages ->
-                    case model.selectedPackage of
-                        Just selected ->
-                            setSelectedPackage { model | packages = Success packages } packages selected
-
-                        _ ->
-                            { model | packages = Success packages }
+                    setSelectedPackage { model | packages = Success packages } packages
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package list" }
@@ -54,12 +49,17 @@ getPackagesCompleted model result =
     ( newModel, Cmd.none )
 
 
-setSelectedPackage : Model -> List PackageDetail -> String -> Model
-setSelectedPackage model packages selected =
-    if List.any (.id >> (==) selected) packages then
-        { model | form = initQuestionnaireCreateForm (Just selected) }
-    else
-        model
+setSelectedPackage : Model -> List PackageDetail -> Model
+setSelectedPackage model packages =
+    case model.selectedPackage of
+        Just id ->
+            if List.any (.id >> (==) id) packages then
+                { model | form = initQuestionnaireCreateForm model.selectedPackage }
+            else
+                model
+
+        _ ->
+            model
 
 
 handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
