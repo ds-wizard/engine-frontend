@@ -2,7 +2,7 @@ module KMEditor.Migration.View exposing (view)
 
 import Common.Html exposing (..)
 import Common.Types exposing (ActionResult(..))
-import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (formResultView)
 import Dict exposing (Dict)
 import Html exposing (..)
@@ -10,41 +10,26 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
+import KMEditor.Common.Models.Migration exposing (Migration, MigrationStateType(..))
+import KMEditor.Common.View exposing (diffTreeView)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
-import KMEditor.Models.Migration exposing (Migration, MigrationStateType(..))
-import KMEditor.View exposing (diffTreeView)
+import KMEditor.Routing exposing (Route(Publish))
 import Msgs
 import Routing exposing (Route(..))
 
 
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div [ class "row KMEditor__Migration" ]
         [ div [ class "col-xs-12" ] [ pageHeader "Migration" [] ]
         , formResultView model.conflict
-        , content model
+        , fullPageActionResultView (migrationView wrapMsg model) model.migration
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
-    case model.migration of
-        Unset ->
-            emptyNode
-
-        Loading ->
-            fullPageLoader
-
-        Error err ->
-            defaultFullPageError err
-
-        Success migration ->
-            migrationView model migration
-
-
-migrationView : Model -> Migration -> Html Msgs.Msg
-migrationView model migration =
+migrationView : (Msg -> Msgs.Msg) -> Model -> Migration -> Html Msgs.Msg
+migrationView wrapMsg model migration =
     let
         errorMessage =
             div [ class "col-xs-12" ]
@@ -64,7 +49,7 @@ migrationView model migration =
                     let
                         conflictView =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (getEventView model migration)
+                                |> Maybe.map (getEventView wrapMsg model migration)
                                 |> Maybe.map (List.singleton >> div [ class "col-xs-8" ])
                                 |> Maybe.withDefault errorMessage
 
@@ -104,8 +89,8 @@ migrationSummary migration =
         ]
 
 
-getEventView : Model -> Migration -> Event -> Html Msgs.Msg
-getEventView model migration event =
+getEventView : (Msg -> Msgs.Msg) -> Model -> Migration -> Event -> Html Msgs.Msg
+getEventView wrapMsg model migration event =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
@@ -115,96 +100,96 @@ getEventView model migration event =
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
                 |> viewEditKnowledgeModelDiff eventData
-                |> viewEvent model "Edit knowledge model"
+                |> viewEvent wrapMsg model "Edit knowledge model"
 
         AddChapterEvent eventData _ ->
             viewAddChapterDiff eventData
-                |> viewEvent model "Add chapter"
+                |> viewEvent wrapMsg model "Add chapter"
 
         EditChapterEvent eventData _ ->
             getChapter migration.currentKnowledgeModel eventData.chapterUuid
                 |> Maybe.map (viewEditChapterDiff eventData)
-                |> Maybe.map (viewEvent model "Edit chapter")
+                |> Maybe.map (viewEvent wrapMsg model "Edit chapter")
                 |> Maybe.withDefault errorMessage
 
         DeleteChapterEvent eventData _ ->
             getChapter migration.currentKnowledgeModel eventData.chapterUuid
                 |> Maybe.map viewDeleteChapterDiff
-                |> Maybe.map (viewEvent model "Delete chapter")
+                |> Maybe.map (viewEvent wrapMsg model "Delete chapter")
                 |> Maybe.withDefault errorMessage
 
         AddQuestionEvent eventData _ ->
             viewAddQuestionDiff eventData
-                |> viewEvent model "Add question"
+                |> viewEvent wrapMsg model "Add question"
 
         EditQuestionEvent eventData _ ->
             getQuestion migration.currentKnowledgeModel eventData.questionUuid
                 |> Maybe.map (viewEditQuestionDiff eventData)
-                |> Maybe.map (viewEvent model "Edit question")
+                |> Maybe.map (viewEvent wrapMsg model "Edit question")
                 |> Maybe.withDefault errorMessage
 
         DeleteQuestionEvent eventData _ ->
             getQuestion migration.currentKnowledgeModel eventData.questionUuid
                 |> Maybe.map viewDeleteQuestionDiff
-                |> Maybe.map (viewEvent model "Delete question")
+                |> Maybe.map (viewEvent wrapMsg model "Delete question")
                 |> Maybe.withDefault errorMessage
 
         AddAnswerEvent eventData _ ->
             viewAddAnswerDiff eventData
-                |> viewEvent model "Add answer"
+                |> viewEvent wrapMsg model "Add answer"
 
         EditAnswerEvent eventData _ ->
             getAnswer migration.currentKnowledgeModel eventData.answerUuid
                 |> Maybe.map (viewEditAnswerDiff eventData)
-                |> Maybe.map (viewEvent model "Edit answer")
+                |> Maybe.map (viewEvent wrapMsg model "Edit answer")
                 |> Maybe.withDefault errorMessage
 
         DeleteAnswerEvent eventData _ ->
             getAnswer migration.currentKnowledgeModel eventData.answerUuid
                 |> Maybe.map viewDeleteAnswerDiff
-                |> Maybe.map (viewEvent model "Delete answer")
+                |> Maybe.map (viewEvent wrapMsg model "Delete answer")
                 |> Maybe.withDefault errorMessage
 
         AddReferenceEvent eventData _ ->
             viewAddReferenceDiff eventData
-                |> viewEvent model "Add reference"
+                |> viewEvent wrapMsg model "Add reference"
 
         EditReferenceEvent eventData _ ->
             getReference migration.currentKnowledgeModel eventData.referenceUuid
                 |> Maybe.map (viewEditReferenceDiff eventData)
-                |> Maybe.map (viewEvent model "Edit reference")
+                |> Maybe.map (viewEvent wrapMsg model "Edit reference")
                 |> Maybe.withDefault errorMessage
 
         DeleteReferenceEvent eventData _ ->
             getReference migration.currentKnowledgeModel eventData.referenceUuid
                 |> Maybe.map viewDeleteReferenceDiff
-                |> Maybe.map (viewEvent model "Delete reference")
+                |> Maybe.map (viewEvent wrapMsg model "Delete reference")
                 |> Maybe.withDefault errorMessage
 
         AddExpertEvent eventData _ ->
             viewAddExpertDiff eventData
-                |> viewEvent model "Add expert"
+                |> viewEvent wrapMsg model "Add expert"
 
         EditExpertEvent eventData _ ->
             getExpert migration.currentKnowledgeModel eventData.expertUuid
                 |> Maybe.map (viewEditExpertDiff eventData)
-                |> Maybe.map (viewEvent model "Edit expert")
+                |> Maybe.map (viewEvent wrapMsg model "Edit expert")
                 |> Maybe.withDefault errorMessage
 
         DeleteExpertEvent eventData _ ->
             getExpert migration.currentKnowledgeModel eventData.expertUuid
                 |> Maybe.map viewDeleteExpertDiff
-                |> Maybe.map (viewEvent model "Delete expert")
+                |> Maybe.map (viewEvent wrapMsg model "Delete expert")
                 |> Maybe.withDefault errorMessage
 
 
-viewEvent : Model -> String -> Html Msgs.Msg -> Html Msgs.Msg
-viewEvent model name diffView =
+viewEvent : (Msg -> Msgs.Msg) -> Model -> String -> Html Msgs.Msg -> Html Msgs.Msg
+viewEvent wrapMsg model name diffView =
     div []
         [ h3 [] [ text name ]
         , div [ class "well" ]
             [ diffView
-            , formActions model
+            , formActions wrapMsg model
             ]
         ]
 
@@ -573,8 +558,8 @@ childrenView fieldName diffView =
         ]
 
 
-formActions : Model -> Html Msgs.Msg
-formActions model =
+formActions : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+formActions wrapMsg model =
     let
         actionsDisabled =
             case model.conflict of
@@ -585,12 +570,11 @@ formActions model =
                     False
     in
     div [ class "form-actions" ]
-        [ button [ class "btn btn-warning", onClick RejectEvent, disabled actionsDisabled ]
+        [ button [ class "btn btn-warning", onClick (wrapMsg RejectEvent), disabled actionsDisabled ]
             [ text "Reject" ]
-        , button [ class "btn btn-success", onClick ApplyEvent, disabled actionsDisabled ]
+        , button [ class "btn btn-success", onClick (wrapMsg ApplyEvent), disabled actionsDisabled ]
             [ text "Apply" ]
         ]
-        |> Html.map Msgs.KMEditorMigrationMsg
 
 
 viewCompletedMigration : Model -> Html Msgs.Msg
@@ -604,7 +588,7 @@ viewCompletedMigration model =
                 , text "You can publish the new version now."
                 ]
             , div [ class "text-right" ]
-                [ linkTo (KMEditorPublish model.branchUuid)
+                [ linkTo (KMEditor <| Publish model.branchUuid)
                     [ class "btn btn-primary" ]
                     [ text "Publish"
                     , i [ class "fa fa-long-arrow-right", style [ ( "margin-left", "10px" ) ] ] []

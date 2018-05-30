@@ -2,50 +2,38 @@ module KMEditor.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.Types exposing (ActionResult(..))
-import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
-import KMEditor.Models exposing (..)
+import KMEditor.Routing exposing (Route(Index))
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))
 
 
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div [ detailContainerClassWith "KMEditor__Create" ]
         [ pageHeader "Create Knowledge Model" []
-        , content model
+        , fullPageActionResultView (content wrapMsg model) model.packages
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
-    case model.packages of
-        Unset ->
-            emptyNode
-
-        Loading ->
-            fullPageLoader
-
-        Error err ->
-            defaultFullPageError err
-
-        Success packages ->
-            div []
-                [ formResultView model.savingKnowledgeModel
-                , formView model.form packages
-                , formActions KMEditorIndex ( "Save", model.savingKnowledgeModel, Msgs.KMEditorCreateMsg <| FormMsg Form.Submit )
-                ]
+content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
+content wrapMsg model packages =
+    div []
+        [ formResultView model.savingKnowledgeModel
+        , formView wrapMsg model.form packages
+        , formActions (KMEditor Index) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        ]
 
 
-formView : Form CustomFormError KnowledgeModelCreateForm -> List PackageDetail -> Html Msgs.Msg
-formView form packages =
+formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelCreateForm -> List PackageDetail -> Html Msgs.Msg
+formView wrapMsg form packages =
     let
         parentOptions =
             ( "", "--" ) :: List.map createOption packages
@@ -59,7 +47,7 @@ formView form packages =
                 , selectGroup parentOptions form "parentPackageId" "Parent Package"
                 ]
     in
-    formHtml |> Html.map (FormMsg >> Msgs.KMEditorCreateMsg)
+    formHtml |> Html.map (wrapMsg << FormMsg)
 
 
 createOption : PackageDetail -> ( String, String )

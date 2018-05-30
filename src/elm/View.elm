@@ -5,11 +5,7 @@ import Common.View exposing (defaultFullPageError, fullPageError, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
 import DSPlanner.View
 import Html exposing (..)
-import KMEditor.Create.View
-import KMEditor.Editor.View
-import KMEditor.Index.View
-import KMEditor.Migration.View
-import KMEditor.Publish.View
+import KMEditor.View
 import KMPackages.View
 import Models exposing (Model)
 import Msgs exposing (Msg(..))
@@ -30,29 +26,9 @@ view model =
                 |> DSPlanner.View.view route DSPlannerMsg
                 |> appView model
 
-        KMEditorCreate _ ->
-            model.kmEditorCreateModel
-                |> KMEditor.Create.View.view
-                |> appView model
-
-        KMEditorEditor uuid ->
-            model.kmEditorEditorModel
-                |> KMEditor.Editor.View.view
-                |> appView model
-
-        KMEditorIndex ->
-            model.kmEditorIndexModel
-                |> KMEditor.Index.View.view model.jwt
-                |> appView model
-
-        KMEditorMigration uuid ->
-            model.kmEditorMigrationModel
-                |> KMEditor.Migration.View.view
-                |> appView model
-
-        KMEditorPublish uuid ->
-            model.kmEditorPublishModel
-                |> KMEditor.Publish.View.view
+        KMEditor route ->
+            model.kmEditorModel
+                |> KMEditor.View.view route KMEditorMsg model.jwt
                 |> appView model
 
         KMPackages route ->

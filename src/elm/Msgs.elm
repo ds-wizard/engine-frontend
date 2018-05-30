@@ -2,11 +2,7 @@ module Msgs exposing (..)
 
 import Auth.Msgs
 import DSPlanner.Msgs
-import KMEditor.Create.Msgs
-import KMEditor.Editor.Msgs
-import KMEditor.Index.Msgs
-import KMEditor.Migration.Msgs
-import KMEditor.Publish.Msgs
+import KMEditor.Msgs
 import KMPackages.Msgs
 import Navigation exposing (Location)
 import Organization.Msgs
@@ -20,11 +16,7 @@ type Msg
     | AuthMsg Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
     | DSPlannerMsg DSPlanner.Msgs.Msg
-    | KMEditorCreateMsg KMEditor.Create.Msgs.Msg
-    | KMEditorEditorMsg KMEditor.Editor.Msgs.Msg
-    | KMEditorIndexMsg KMEditor.Index.Msgs.Msg
-    | KMEditorMigrationMsg KMEditor.Migration.Msgs.Msg
-    | KMEditorPublishMsg KMEditor.Publish.Msgs.Msg
+    | KMEditorMsg KMEditor.Msgs.Msg
     | KMPackagesMsg KMPackages.Msgs.Msg
     | OrganizationMsg Organization.Msgs.Msg
     | PublicMsg Public.Msgs.Msg

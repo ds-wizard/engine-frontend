@@ -10,28 +10,29 @@ import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg),
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..), kmMatchState)
 import KMEditor.Index.Models exposing (..)
 import KMEditor.Index.Msgs exposing (Msg(..))
-import KMEditor.Models exposing (KnowledgeModel, KnowledgeModelState(..), kmMatchState)
+import KMEditor.Routing exposing (Route(Create, Editor, Migration, Publish))
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))
 
 
-view : Maybe JwtToken -> Model -> Html Msgs.Msg
-view jwt model =
+view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
+view wrapMsg jwt model =
     div [ class "KMEditor__Index" ]
         [ pageHeader "Knowledge Model Editor" indexActions
         , formResultView model.deletingMigration
-        , fullPageActionResultView (indexTable (tableConfig jwt) Msgs.KMEditorIndexMsg) model.knowledgeModels
-        , deleteModal model
-        , upgradeModal model
+        , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels
+        , deleteModal wrapMsg model
+        , upgradeModal wrapMsg model
         ]
 
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo (Routing.KMEditorCreate Nothing)
+    [ linkTo (Routing.KMEditor <| Create Nothing)
         [ class "btn btn-primary" ]
         [ text "Create" ]
     ]
@@ -57,11 +58,11 @@ tableConfig jwt =
           , visible = always True
           }
         , { label = TableActionIcon "fa fa-edit"
-          , action = TableActionLink (Routing.KMEditorEditor << .uuid)
+          , action = TableActionLink (Routing.KMEditor << Editor << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]
           }
         , { label = TableActionText "Publish"
-          , action = TableActionLink (Routing.KMEditorPublish << .uuid)
+          , action = TableActionLink (Routing.KMEditor << Publish << .uuid)
           , visible = tableActionPublishVisible jwt
           }
         , { label = TableActionText "Upgrade"
@@ -69,7 +70,7 @@ tableConfig jwt =
           , visible = tableActionUpgradeVisible jwt
           }
         , { label = TableActionText "Continue Migration"
-          , action = TableActionLink (Routing.KMEditorMigration << .uuid)
+          , action = TableActionLink (Routing.KMEditor << Migration << .uuid)
           , visible = tableActionContinueMigrationVisible jwt
           }
         , { label = TableActionText "Cancel Migration"
@@ -144,8 +145,8 @@ tableActionCancelMigrationVisible jwt km =
     hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Migrating, Migrated ] km
 
 
-deleteModal : Model -> Html Msgs.Msg
-deleteModal model =
+deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+deleteModal wrapMsg model =
     let
         ( visible, name ) =
             case model.kmToBeDeleted of
@@ -169,15 +170,15 @@ deleteModal model =
             , visible = visible
             , actionResult = model.deletingKnowledgeModel
             , actionName = "Delete"
-            , actionMsg = Msgs.KMEditorIndexMsg DeleteKnowledgeModel
-            , cancelMsg = Msgs.KMEditorIndexMsg <| ShowHideDeleteKnowledgeModal Nothing
+            , actionMsg = wrapMsg DeleteKnowledgeModel
+            , cancelMsg = wrapMsg <| ShowHideDeleteKnowledgeModal Nothing
             }
     in
     modalView modalConfig
 
 
-upgradeModal : Model -> Html Msgs.Msg
-upgradeModal model =
+upgradeModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+upgradeModal wrapMsg model =
     let
         ( visible, name ) =
             case model.kmToBeUpgraded of
@@ -213,7 +214,7 @@ upgradeModal model =
                         , text " to."
                         ]
                     , selectGroup options model.kmUpgradeForm "targetPackageId" "New parent package"
-                        |> Html.map (UpgradeFormMsg >> Msgs.KMEditorIndexMsg)
+                        |> Html.map (wrapMsg << UpgradeFormMsg)
                     ]
 
         modalConfig =
@@ -222,8 +223,8 @@ upgradeModal model =
             , visible = visible
             , actionResult = model.creatingMigration
             , actionName = "Create"
-            , actionMsg = Msgs.KMEditorIndexMsg <| UpgradeFormMsg Form.Submit
-            , cancelMsg = Msgs.KMEditorIndexMsg <| ShowHideUpgradeModal Nothing
+            , actionMsg = wrapMsg <| UpgradeFormMsg Form.Submit
+            , cancelMsg = wrapMsg <| ShowHideUpgradeModal Nothing
             }
     in
     modalView modalConfig

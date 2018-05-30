@@ -1,4 +1,4 @@
-module KMEditor.Editor.Update exposing (getKnowledgeModelCmd, update)
+module KMEditor.Editor.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
@@ -17,22 +17,29 @@ import KMEditor.Editor.Update.UpdateQuestion as UpdateQuestion
 import KMEditor.Editor.Update.UpdateReference as UpdateReference
 import KMEditor.Editor.Update.Utils exposing (..)
 import KMEditor.Requests exposing (getKnowledgeModelData, postEventsBulk)
+import KMEditor.Routing exposing (Route(Index))
 import Msgs
 import Random.Pcg exposing (Seed)
 import Reorderable
-import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
 
-update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg seed session model =
+fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
+fetchData wrapMsg uuid session =
+    getKnowledgeModelData uuid session
+        |> Jwt.send GetKnowledgeModelCompleted
+        |> Cmd.map wrapMsg
+
+
+update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg seed session model =
     case msg of
         GetKnowledgeModelCompleted result ->
             getKnowledgeModelCompleted model result |> tuplePrepend seed
 
         Edit knowledgeModelMsg ->
-            updateEdit knowledgeModelMsg seed session model
+            updateEdit knowledgeModelMsg wrapMsg seed session model
 
         SaveCompleted result ->
             postEventsBulkCompleted model result |> tuplePrepend seed
@@ -43,12 +50,6 @@ update msg seed session model =
                     Reorderable.update reorderableMsg model.reorderableState
             in
             ( seed, { model | reorderableState = newReorderableState }, Cmd.none )
-
-
-getKnowledgeModelCmd : String -> Session -> Cmd Msgs.Msg
-getKnowledgeModelCmd uuid session =
-    getKnowledgeModelData uuid session
-        |> toCmd GetKnowledgeModelCompleted Msgs.KMEditorEditorMsg
 
 
 getKnowledgeModelCompleted : Model -> Result Jwt.JwtError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
@@ -65,25 +66,26 @@ getKnowledgeModelCompleted model result =
     ( newModel, Cmd.none )
 
 
-postEventsBulkCmd : String -> List Event -> Session -> Cmd Msgs.Msg
-postEventsBulkCmd uuid events session =
+postEventsBulkCmd : (Msg -> Msgs.Msg) -> String -> List Event -> Session -> Cmd Msgs.Msg
+postEventsBulkCmd wrapMsg uuid events session =
     encodeEvents events
         |> postEventsBulk session uuid
-        |> toCmd SaveCompleted Msgs.KMEditorEditorMsg
+        |> Jwt.send SaveCompleted
+        |> Cmd.map wrapMsg
 
 
 postEventsBulkCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
 postEventsBulkCompleted model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate KMEditorIndex )
+            ( model, cmdNavigate <| KMEditor Index )
 
         Err error ->
             ( { model | saving = getServerErrorJwt error "Knowledge model could not be saved" }, Cmd.none )
 
 
-updateEdit : KnowledgeModelMsg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-updateEdit msg seed session model =
+updateEdit : KnowledgeModelMsg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+updateEdit msg wrapMsg seed session model =
     case model.knowledgeModelEditor of
         Success knowledgeModelEditor ->
             let
@@ -103,7 +105,9 @@ updateEdit msg seed session model =
 
                 ( newModel, cmd ) =
                     if submit then
-                        ( { model | saving = Loading }, postEventsBulkCmd model.branchUuid newEvents session )
+                        ( { model | saving = Loading }
+                        , postEventsBulkCmd wrapMsg model.branchUuid newEvents session
+                        )
                     else
                         ( model, Cmd.none )
             in

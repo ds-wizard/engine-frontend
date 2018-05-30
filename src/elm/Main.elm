@@ -2,11 +2,11 @@ module Main exposing (main)
 
 import Auth.Models exposing (Session, initialSession, parseJwt)
 import Json.Decode as Decode exposing (Value)
-import KMEditor.Editor.Subscriptions
 import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
 import Routing exposing (Route(..), cmdNavigate, homeRoute, routeIfAllowed)
+import Subscriptions exposing (subscriptions)
 import Update exposing (fetchData, update)
 import View exposing (view)
 
@@ -57,16 +57,6 @@ decideInitialRoute model route =
                 fetchData model
             else
                 cmdNavigate homeRoute
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    case model.route of
-        KMEditorEditor _ ->
-            KMEditor.Editor.Subscriptions.subscriptions model.kmEditorEditorModel
-
-        _ ->
-            Sub.none
 
 
 main : Program Value Model Msg

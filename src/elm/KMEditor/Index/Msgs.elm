@@ -1,18 +1,11 @@
 module KMEditor.Index.Msgs exposing (..)
 
-{-|
-
-@docs Msg
-
--}
-
 import Form
 import Jwt
-import KMEditor.Models exposing (KnowledgeModel)
+import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMPackages.Common.Models exposing (PackageDetail)
 
 
-{-| -}
 type Msg
     = GetKnowledgeModelsCompleted (Result Jwt.JwtError (List KnowledgeModel))
     | ShowHideDeleteKnowledgeModal (Maybe KnowledgeModel)

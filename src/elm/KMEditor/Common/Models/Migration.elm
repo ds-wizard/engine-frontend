@@ -1,4 +1,4 @@
-module KMEditor.Models.Migration exposing (..)
+module KMEditor.Common.Models.Migration exposing (..)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, optional, required)
