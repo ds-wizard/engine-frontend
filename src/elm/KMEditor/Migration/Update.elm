@@ -1,46 +1,38 @@
-module KMEditor.Migration.Update exposing (getMigrationCmd, update)
+module KMEditor.Migration.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import KMEditor.Common.Models.Events exposing (getEventUuid)
+import KMEditor.Common.Models.Migration exposing (Migration, MigrationResolution, encodeMigrationResolution, newApplyMigrationResolution, newRejectMigrationResolution)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
-import KMEditor.Models.Migration exposing (..)
 import KMEditor.Requests exposing (getMigration, postMigrationConflict)
 import Msgs
-import Requests exposing (toCmd)
 
 
-update : Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg session model =
+fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
+fetchData wrapMsg uuid session =
+    getMigration uuid session
+        |> Jwt.send GetMigrationCompleted
+        |> Cmd.map wrapMsg
+
+
+update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg session model =
     case msg of
         GetMigrationCompleted result ->
             handleGetMigrationCompleted model result
 
         ApplyEvent ->
-            handleAcceptChange session model
+            handleAcceptChange wrapMsg session model
 
         RejectEvent ->
-            handleRejectChange session model
+            handleRejectChange wrapMsg session model
 
         PostMigrationConflictCompleted result ->
-            handlePostMigrationConflictCompleted session model result
-
-
-getMigrationCmd : String -> Session -> Cmd Msgs.Msg
-getMigrationCmd uuid session =
-    getMigration uuid session
-        |> toCmd GetMigrationCompleted Msgs.KMEditorMigrationMsg
-
-
-postMigrationConflictCmd : String -> Session -> MigrationResolution -> Cmd Msgs.Msg
-postMigrationConflictCmd uuid session resolution =
-    resolution
-        |> encodeMigrationResolution
-        |> postMigrationConflict uuid session
-        |> toCmd PostMigrationConflictCompleted Msgs.KMEditorMigrationMsg
+            handlePostMigrationConflictCompleted wrapMsg session model result
 
 
 handleGetMigrationCompleted : Model -> Result Jwt.JwtError Migration -> ( Model, Cmd Msgs.Msg )
@@ -53,8 +45,18 @@ handleGetMigrationCompleted model result =
             ( { model | migration = getServerErrorJwt error "Unable to get migration" }, Cmd.none )
 
 
-handleResolveChange : (String -> MigrationResolution) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleResolveChange createMigrationResolution session model =
+handleAcceptChange : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleAcceptChange =
+    handleResolveChange newApplyMigrationResolution
+
+
+handleRejectChange : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleRejectChange =
+    handleResolveChange newRejectMigrationResolution
+
+
+handleResolveChange : (String -> MigrationResolution) -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleResolveChange createMigrationResolution wrapMsg session model =
     let
         cmd =
             case model.migration of
@@ -62,7 +64,7 @@ handleResolveChange createMigrationResolution session model =
                     migration.migrationState.targetEvent
                         |> Maybe.map getEventUuid
                         |> Maybe.map createMigrationResolution
-                        |> Maybe.map (postMigrationConflictCmd model.branchUuid session)
+                        |> Maybe.map (postMigrationConflictCmd wrapMsg model.branchUuid session)
                         |> Maybe.withDefault Cmd.none
 
                 _ ->
@@ -71,23 +73,22 @@ handleResolveChange createMigrationResolution session model =
     ( { model | conflict = Loading }, cmd )
 
 
-handleAcceptChange : Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleAcceptChange =
-    handleResolveChange newApplyMigrationResolution
+postMigrationConflictCmd : (Msg -> Msgs.Msg) -> String -> Session -> MigrationResolution -> Cmd Msgs.Msg
+postMigrationConflictCmd wrapMsg uuid session resolution =
+    resolution
+        |> encodeMigrationResolution
+        |> postMigrationConflict uuid session
+        |> Jwt.send PostMigrationConflictCompleted
+        |> Cmd.map wrapMsg
 
 
-handleRejectChange : Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleRejectChange =
-    handleResolveChange newRejectMigrationResolution
-
-
-handlePostMigrationConflictCompleted : Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-handlePostMigrationConflictCompleted session model result =
+handlePostMigrationConflictCompleted : (Msg -> Msgs.Msg) -> Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+handlePostMigrationConflictCompleted wrapMsg session model result =
     case result of
         Ok migration ->
             let
                 cmd =
-                    getMigrationCmd model.branchUuid session
+                    fetchData wrapMsg model.branchUuid session
             in
             ( { model | migration = Loading, conflict = Unset }, cmd )
 

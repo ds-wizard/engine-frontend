@@ -1,18 +1,11 @@
 module KMEditor.Editor.Subscriptions exposing (subscriptions)
 
-{-|
-
-@docs subscriptions
-
--}
-
 import KMEditor.Editor.Models exposing (Model)
 import KMEditor.Editor.Msgs exposing (Msg(..))
 import Msgs
 import Reorderable
 
 
-{-| -}
-subscriptions : Model -> Sub Msgs.Msg
-subscriptions model =
-    Reorderable.subscriptions (ReorderableMsg >> Msgs.KMEditorEditorMsg) model.reorderableState
+subscriptions : (Msg -> Msgs.Msg) -> Model -> Sub Msgs.Msg
+subscriptions wrapMsg model =
+    Reorderable.subscriptions (wrapMsg << ReorderableMsg) model.reorderableState

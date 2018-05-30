@@ -7,6 +7,7 @@ import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import KMEditor.Routing
 import KMPackages.Common.Models exposing (..)
 import KMPackages.Detail.Models exposing (..)
 import KMPackages.Detail.Msgs exposing (..)
@@ -52,7 +53,7 @@ versionView wrapMsg detail =
                 , text detail.description
                 ]
             , div [ class "actions" ]
-                [ linkTo (Routing.KMEditorCreate <| Just detail.id)
+                [ linkTo (Routing.KMEditor <| KMEditor.Routing.Create <| Just detail.id)
                     []
                     [ text "Create KM Editor" ]
                 , linkTo (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just detail.id)

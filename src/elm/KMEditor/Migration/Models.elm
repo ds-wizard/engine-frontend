@@ -1,7 +1,7 @@
 module KMEditor.Migration.Models exposing (..)
 
 import Common.Types exposing (ActionResult(..))
-import KMEditor.Models.Migration exposing (Migration)
+import KMEditor.Common.Models.Migration exposing (Migration)
 
 
 type alias Model =

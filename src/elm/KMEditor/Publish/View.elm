@@ -2,64 +2,50 @@ module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.Types exposing (ActionResult(..))
-import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KMEditor.Models exposing (KnowledgeModel, KnowledgeModelPublishForm, kmLastVersion)
-import KMEditor.Publish.Models exposing (Model)
+import KMEditor.Common.Models exposing (KnowledgeModel, kmLastVersion)
+import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model)
 import KMEditor.Publish.Msgs exposing (Msg(..))
+import KMEditor.Routing exposing (Route(Index))
 import Msgs
 import Routing exposing (Route(..))
 
 
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div [ detailContainerClassWith "KMEditor__Publish" ]
         [ pageHeader "Publish new version" []
-        , content model
+        , fullPageActionResultView (content wrapMsg model) model.knowledgeModel
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
-    case model.knowledgeModel of
-        Unset ->
-            emptyNode
-
-        Loading ->
-            fullPageLoader
-
-        Error err ->
-            defaultFullPageError err
-
-        Success knowledgeModel ->
-            div []
-                [ formResultView model.publishingKnowledgeModel
-                , formView model.form knowledgeModel
-                , formActions KMEditorIndex ( "Publish", model.publishingKnowledgeModel, Msgs.KMEditorPublishMsg <| FormMsg Form.Submit )
-                ]
+content : (Msg -> Msgs.Msg) -> Model -> KnowledgeModel -> Html Msgs.Msg
+content wrapMsg model knowledgeModel =
+    div []
+        [ formResultView model.publishingKnowledgeModel
+        , formView wrapMsg model.form knowledgeModel
+        , formActions (KMEditor Index) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        ]
 
 
-formView : Form CustomFormError KnowledgeModelPublishForm -> KnowledgeModel -> Html Msgs.Msg
-formView form knowledgeModel =
-    let
-        formHtml =
-            div []
-                [ textGroup knowledgeModel.name "Knowledge Model"
-                , codeGroup knowledgeModel.kmId "Knowledge Model ID"
-                , lastVersion (kmLastVersion knowledgeModel)
-                , versionInputGroup form
-                , textAreaGroup form "description" "Description"
-                , p [ class "help-block help-block-after" ]
-                    [ text "Describe what has changed in the new version." ]
-                ]
-    in
-    formHtml |> Html.map (FormMsg >> Msgs.KMEditorPublishMsg)
+formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelPublishForm -> KnowledgeModel -> Html Msgs.Msg
+formView wrapMsg form knowledgeModel =
+    div []
+        [ textGroup knowledgeModel.name "Knowledge Model"
+        , codeGroup knowledgeModel.kmId "Knowledge Model ID"
+        , lastVersion (kmLastVersion knowledgeModel)
+        , versionInputGroup form
+        , textAreaGroup form "description" "Description"
+        , p [ class "help-block help-block-after" ]
+            [ text "Describe what has changed in the new version." ]
+        ]
+        |> Html.map (wrapMsg << FormMsg)
 
 
 lastVersion : Maybe String -> Html msg

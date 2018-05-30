@@ -3,9 +3,9 @@ module KMEditor.Requests exposing (..)
 import Auth.Models exposing (Session)
 import Http
 import Json.Encode as Encode exposing (Value)
+import KMEditor.Common.Models as Models exposing (KnowledgeModel, knowledgeModelDecoder, knowledgeModelListDecoder)
 import KMEditor.Common.Models.Entities as Editor exposing (KnowledgeModel, knowledgeModelDecoder)
-import KMEditor.Models as Models exposing (KnowledgeModel, knowledgeModelDecoder, knowledgeModelListDecoder)
-import KMEditor.Models.Migration exposing (Migration, migrationDecoder)
+import KMEditor.Common.Models.Migration exposing (Migration, migrationDecoder)
 import Requests
 
 

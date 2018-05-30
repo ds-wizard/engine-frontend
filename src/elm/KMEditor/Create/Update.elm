@@ -1,35 +1,40 @@
-module KMEditor.Create.Update exposing (getPackagesCmd, update)
+module KMEditor.Create.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
-import KMEditor.Create.Models exposing (Model)
+import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
-import KMEditor.Models exposing (..)
 import KMEditor.Requests exposing (postKnowledgeModel)
+import KMEditor.Routing exposing (Route(Editor, Index))
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
 import Msgs
 import Random.Pcg exposing (Seed)
-import Requests exposing (toCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
 
-getPackagesCmd : Session -> Cmd Msgs.Msg
-getPackagesCmd session =
+fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
+fetchData wrapMsg session =
     getPackages session
-        |> toCmd GetPackagesCompleted Msgs.KMEditorCreateMsg
+        |> Jwt.send GetPackagesCompleted
+        |> Cmd.map wrapMsg
 
 
-postKmCmd : Session -> KnowledgeModelCreateForm -> String -> Cmd Msgs.Msg
-postKmCmd session form uuid =
-    form
-        |> encodeKnowledgeModelForm uuid
-        |> postKnowledgeModel session
-        |> toCmd PostKnowledgeModelCompleted Msgs.KMEditorCreateMsg
+update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg seed session model =
+    case msg of
+        GetPackagesCompleted result ->
+            getPackageCompleted model result |> tuplePrepend seed
+
+        FormMsg formMsg ->
+            handleForm formMsg wrapMsg seed session model
+
+        PostKnowledgeModelCompleted result ->
+            postKmCompleted model result |> tuplePrepend seed
 
 
 getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
@@ -59,22 +64,8 @@ setSelectedPackage model packages =
             model
 
 
-postKmCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-postKmCompleted model result =
-    case result of
-        Ok km ->
-            ( model
-            , Maybe.map KMEditorEditor model.newUuid
-                |> Maybe.withDefault KMEditorIndex
-                |> cmdNavigate
-            )
-
-        Err error ->
-            ( { model | savingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be created." }, Cmd.none )
-
-
-handleForm : Form.Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-handleForm formMsg seed session model =
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+handleForm formMsg wrapMsg seed session model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just kmCreateForm ) ->
             let
@@ -82,7 +73,7 @@ handleForm formMsg seed session model =
                     getUuid seed
 
                 cmd =
-                    postKmCmd session kmCreateForm newUuid
+                    postKmCmd wrapMsg session kmCreateForm newUuid
             in
             ( newSeed, { model | savingKnowledgeModel = Loading, newUuid = Just newUuid }, cmd )
 
@@ -94,17 +85,24 @@ handleForm formMsg seed session model =
             ( seed, newModel, Cmd.none )
 
 
-update : Msg -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg seed session model =
-    case msg of
-        GetPackagesCompleted result ->
-            getPackageCompleted model result |> tuplePrepend seed
+postKmCmd : (Msg -> Msgs.Msg) -> Session -> KnowledgeModelCreateForm -> String -> Cmd Msgs.Msg
+postKmCmd wrapMsg session form uuid =
+    form
+        |> encodeKnowledgeCreateModelForm uuid
+        |> postKnowledgeModel session
+        |> Jwt.send PostKnowledgeModelCompleted
+        |> Cmd.map wrapMsg
 
-        FormMsg formMsg ->
-            handleForm formMsg seed session model
 
-        PostKnowledgeModelCompleted result ->
-            postKmCompleted model result |> tuplePrepend seed
+postKmCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+postKmCompleted model result =
+    case result of
+        Ok km ->
+            ( model
+            , Maybe.map (Routing.KMEditor << Editor) model.newUuid
+                |> Maybe.withDefault (Routing.KMEditor Index)
+                |> cmdNavigate
+            )
 
-        _ ->
-            ( seed, model, Cmd.none )
+        Err error ->
+            ( { model | savingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be created." }, Cmd.none )

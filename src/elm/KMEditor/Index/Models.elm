@@ -3,7 +3,9 @@ module KMEditor.Index.Models exposing (..)
 import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
-import KMEditor.Models exposing (KnowledgeModel, KnowledgeModelUpgradeForm, initKnowledgeModelUpgradeForm)
+import Form.Validate as Validate exposing (..)
+import Json.Encode as Encode exposing (..)
+import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMPackages.Common.Models exposing (PackageDetail)
 
 
@@ -30,3 +32,25 @@ initialModel =
     , kmUpgradeForm = initKnowledgeModelUpgradeForm
     , deletingMigration = Unset
     }
+
+
+type alias KnowledgeModelUpgradeForm =
+    { targetPackageId : String
+    }
+
+
+initKnowledgeModelUpgradeForm : Form CustomFormError KnowledgeModelUpgradeForm
+initKnowledgeModelUpgradeForm =
+    Form.initial [] knowledgeModelUpgradeFormValidation
+
+
+knowledgeModelUpgradeFormValidation : Validation CustomFormError KnowledgeModelUpgradeForm
+knowledgeModelUpgradeFormValidation =
+    Validate.map KnowledgeModelUpgradeForm
+        (Validate.field "targetPackageId" Validate.string)
+
+
+encodeKnowledgeModelUpgradeForm : KnowledgeModelUpgradeForm -> Encode.Value
+encodeKnowledgeModelUpgradeForm form =
+    Encode.object
+        [ ( "targetPackageId", Encode.string form.targetPackageId ) ]

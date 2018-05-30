@@ -1,80 +1,57 @@
 module KMEditor.Editor.View exposing (view)
 
 import Common.Html exposing (..)
-import Common.Types exposing (ActionResult(..))
-import Common.View exposing (defaultFullPageError, fullPageLoader, modalView, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class, href, rows, type_)
 import Html.Events exposing (..)
+import KMEditor.Common.View exposing (diffTreeView)
 import KMEditor.Editor.Models exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (questionTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import KMEditor.Editor.View.Breadcrumbs exposing (breadcrumbs)
-import KMEditor.View exposing (diffTreeView)
+import KMEditor.Routing exposing (Route(Index))
 import Msgs
 import Reorderable
 import Routing exposing (Route(..))
 import String exposing (toLower)
 
 
-view : Model -> Html Msgs.Msg
-view model =
+view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+view wrapMsg model =
     div [ class "row KMEditor__Editor" ]
         [ div [ class "col-xs-12" ] [ pageHeader "Knowledge model editor" [] ]
-        , content model
+        , fullPageActionResultView (editorView wrapMsg model) model.knowledgeModelEditor
         ]
 
 
-content : Model -> Html Msgs.Msg
-content model =
-    case model.knowledgeModelEditor of
-        Unset ->
-            emptyNode
-
-        Loading ->
-            fullPageLoader
-
-        Error err ->
-            defaultFullPageError err
-
-        Success knowledgeModel ->
-            editorView model
-
-
-editorView : Model -> Html Msgs.Msg
-editorView model =
-    let
-        ( breadcrumbsView, currentView, diffTree ) =
-            case model.knowledgeModelEditor of
-                Success knowledgeModelEditor ->
-                    ( breadcrumbs knowledgeModelEditor
-                    , viewKnowledgeModel model knowledgeModelEditor (Edit >> Msgs.KMEditorEditorMsg)
-                    , diffTreeView (getKnowledgeModel knowledgeModelEditor) model.events
-                    )
-
-                _ ->
-                    ( emptyNode, emptyNode, emptyNode )
-    in
+editorView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModelEditor -> Html Msgs.Msg
+editorView wrapMsg model knowledgeModelEditor =
     div []
-        [ div [ class "col-xs-12" ] [ formResultView model.saving ]
-        , div [ class "col-xs-8" ] [ breadcrumbsView, currentView ]
+        [ div [ class "col-xs-12" ]
+            [ formResultView model.saving ]
+        , div [ class "col-xs-8" ]
+            [ breadcrumbs knowledgeModelEditor
+            , viewKnowledgeModel wrapMsg model knowledgeModelEditor (wrapMsg << Edit)
+            ]
         , div [ class "col-xs-4 diff-tree-col" ]
             [ h4 [] [ text "Current changes" ]
-            , diffTree
+            , diffTreeView (getKnowledgeModel knowledgeModelEditor) model.events
             ]
         ]
 
 
-viewKnowledgeModel : Model -> KnowledgeModelEditor -> (KnowledgeModelMsg -> Msgs.Msg) -> Html Msgs.Msg
-viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
+viewKnowledgeModel : (Msg -> Msgs.Msg) -> Model -> KnowledgeModelEditor -> (KnowledgeModelMsg -> Msgs.Msg) -> Html Msgs.Msg
+viewKnowledgeModel wrapMsg model (KnowledgeModelEditor editor) parentMsg =
     let
         content =
             case getActiveChapterEditor editor.chapters of
                 Just ((ChapterEditor editor) as chapterEditor) ->
                     [ viewChapter
+                        wrapMsg
                         model
                         chapterEditor
                         (ChapterMsg editor.chapter.uuid >> parentMsg)
@@ -91,6 +68,7 @@ viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
                     [ editorTitle "Knowledge Model"
                     , formContent
                     , inputChildren
+                        wrapMsg
                         "Chapter"
                         model.reorderableState
                         editor.chapters
@@ -100,7 +78,7 @@ viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
                         getChapterEditorName
                         (\(ChapterEditor chapterEditor) -> ViewChapter chapterEditor.chapter.uuid |> parentMsg)
                     , div [ class "form-actions" ]
-                        [ linkTo KMEditorIndex
+                        [ linkTo (KMEditor Index)
                             [ class "btn btn-default" ]
                             [ text "Cancel" ]
                         , actionButton ( "Save", model.saving, KnowledgeModelFormMsg Form.Submit |> parentMsg )
@@ -111,13 +89,14 @@ viewKnowledgeModel model (KnowledgeModelEditor editor) parentMsg =
         content
 
 
-viewChapter : Model -> ChapterEditor -> (ChapterMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
-viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
+viewChapter : (Msg -> Msgs.Msg) -> Model -> ChapterEditor -> (ChapterMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewChapter wrapMsg model (ChapterEditor editor) parentMsg deleteMsg =
     let
         content =
             case getActiveQuestionEditor editor.questions of
                 Just ((QuestionEditor qe) as questionEditor) ->
                     [ viewQuestion
+                        wrapMsg
                         model
                         questionEditor
                         (ChapterQuestionMsg qe.question.uuid >> parentMsg)
@@ -136,6 +115,7 @@ viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
                     [ editorTitle "Chapter"
                     , formContent
                     , inputChildren
+                        wrapMsg
                         "Question"
                         model.reorderableState
                         editor.questions
@@ -151,8 +131,8 @@ viewChapter model (ChapterEditor editor) parentMsg deleteMsg =
         content
 
 
-viewQuestion : Model -> QuestionEditor -> (QuestionMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
-viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
+viewQuestion : (Msg -> Msgs.Msg) -> Model -> QuestionEditor -> (QuestionMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewQuestion wrapMsg model (QuestionEditor editor) parentMsg deleteMsg =
     let
         activeChild =
             ( getActiveQuestionEditor editor.answerItemTemplateQuestions
@@ -165,6 +145,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
             case activeChild of
                 ( Just ((QuestionEditor qe) as questionEditor), _, _, _ ) ->
                     [ viewQuestion
+                        wrapMsg
                         model
                         questionEditor
                         (AnswerItemTemplateQuestionMsg qe.question.uuid >> parentMsg)
@@ -173,6 +154,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
 
                 ( _, Just ((AnswerEditor ae) as answerEditor), _, _ ) ->
                     [ viewAnswer
+                        wrapMsg
                         model
                         answerEditor
                         (AnswerMsg ae.answer.uuid >> parentMsg)
@@ -210,6 +192,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                             case (Form.getFieldAsString "type_" editor.form).value of
                                 Just "options" ->
                                     inputChildren
+                                        wrapMsg
                                         "Answer"
                                         model.reorderableState
                                         editor.answers
@@ -233,6 +216,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
                                                 [ inputGroup editor.form "itemName" "Item Title" ]
                                                 |> Html.map (QuestionFormMsg >> parentMsg)
                                             , inputChildren
+                                                wrapMsg
                                                 "Item Question"
                                                 model.reorderableState
                                                 editor.answerItemTemplateQuestions
@@ -249,6 +233,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
 
                         references =
                             inputChildren
+                                wrapMsg
                                 "Reference"
                                 model.reorderableState
                                 editor.references
@@ -260,6 +245,7 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
 
                         experts =
                             inputChildren
+                                wrapMsg
                                 "Expert"
                                 model.reorderableState
                                 editor.experts
@@ -282,13 +268,14 @@ viewQuestion model (QuestionEditor editor) parentMsg deleteMsg =
         content
 
 
-viewAnswer : Model -> AnswerEditor -> (AnswerMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
-viewAnswer model (AnswerEditor editor) parentMsg deleteMsg =
+viewAnswer : (Msg -> Msgs.Msg) -> Model -> AnswerEditor -> (AnswerMsg -> Msgs.Msg) -> Msgs.Msg -> Html Msgs.Msg
+viewAnswer wrapMsg model (AnswerEditor editor) parentMsg deleteMsg =
     let
         content =
             case getActiveQuestionEditor editor.followUps of
                 Just ((QuestionEditor qe) as questionEditor) ->
                     [ viewQuestion
+                        wrapMsg
                         model
                         questionEditor
                         (FollowUpQuestionMsg qe.question.uuid >> parentMsg)
@@ -307,6 +294,7 @@ viewAnswer model (AnswerEditor editor) parentMsg deleteMsg =
                     [ editorTitle "Answer"
                     , formContent
                     , inputChildren
+                        wrapMsg
                         "Follow-up Question"
                         model.reorderableState
                         editor.followUps
@@ -355,14 +343,14 @@ viewExpert model (ExpertEditor editor) parentMsg deleteMsg =
         ]
 
 
-inputChildren : String -> Reorderable.State -> List a -> (List a -> Msgs.Msg) -> Msgs.Msg -> (a -> String) -> (a -> String) -> (a -> Msgs.Msg) -> Html Msgs.Msg
-inputChildren childName reorderableState children reorderMsg addMsg toId getName getMsg =
+inputChildren : (Msg -> Msgs.Msg) -> String -> Reorderable.State -> List a -> (List a -> Msgs.Msg) -> Msgs.Msg -> (a -> String) -> (a -> String) -> (a -> Msgs.Msg) -> Html Msgs.Msg
+inputChildren wrapMsg childName reorderableState children reorderMsg addMsg toId getName getMsg =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text (childName ++ "s") ]
         , Reorderable.ul
             (Reorderable.fullConfig
                 { toId = toId
-                , toMsg = ReorderableMsg >> Msgs.KMEditorEditorMsg
+                , toMsg = wrapMsg << ReorderableMsg
                 , draggable = True
                 , updateList = reorderMsg
                 , itemView = inputChild getName getMsg

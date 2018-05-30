@@ -3,11 +3,7 @@ module Update exposing (..)
 import Auth.Models exposing (setSidebarCollapsed)
 import Auth.Update
 import DSPlanner.Update
-import KMEditor.Create.Update
-import KMEditor.Editor.Update
-import KMEditor.Index.Update
-import KMEditor.Migration.Update
-import KMEditor.Publish.Update
+import KMEditor.Update
 import KMPackages.Update
 import Models exposing (Model, initLocalModel)
 import Msgs exposing (Msg)
@@ -25,20 +21,8 @@ fetchData model =
         DSPlanner route ->
             DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.session
 
-        KMEditorCreate _ ->
-            KMEditor.Create.Update.getPackagesCmd model.session
-
-        KMEditorEditor uuid ->
-            KMEditor.Editor.Update.getKnowledgeModelCmd uuid model.session
-
-        KMEditorIndex ->
-            KMEditor.Index.Update.getKnowledgeModelsCmd model.session
-
-        KMEditorMigration uuid ->
-            KMEditor.Migration.Update.getMigrationCmd uuid model.session
-
-        KMEditorPublish uuid ->
-            KMEditor.Publish.Update.getKnowledgeModelCmd uuid model.session
+        KMEditor route ->
+            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.session
 
         KMPackages route ->
             KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.session
@@ -86,40 +70,12 @@ update msg model =
             in
             ( { model | dsPlannerModel = dsPlannerModel }, cmd )
 
-        Msgs.KMEditorCreateMsg msg ->
+        Msgs.KMEditorMsg msg ->
             let
-                ( seed, kmEditorCreateModel, cmd ) =
-                    KMEditor.Create.Update.update msg model.seed model.session model.kmEditorCreateModel
+                ( seed, kmEditorModel, cmd ) =
+                    KMEditor.Update.update msg Msgs.KMEditorMsg model.seed model.session model.kmEditorModel
             in
-            ( { model | seed = seed, kmEditorCreateModel = kmEditorCreateModel }, cmd )
-
-        Msgs.KMEditorEditorMsg msg ->
-            let
-                ( seed, kmEditorEditorModel, cmd ) =
-                    KMEditor.Editor.Update.update msg model.seed model.session model.kmEditorEditorModel
-            in
-            ( { model | seed = seed, kmEditorEditorModel = kmEditorEditorModel }, cmd )
-
-        Msgs.KMEditorIndexMsg msg ->
-            let
-                ( kmEditorIndexModel, cmd ) =
-                    KMEditor.Index.Update.update msg model.session model.kmEditorIndexModel
-            in
-            ( { model | kmEditorIndexModel = kmEditorIndexModel }, cmd )
-
-        Msgs.KMEditorMigrationMsg msg ->
-            let
-                ( kmEditorMigrationModel, cmd ) =
-                    KMEditor.Migration.Update.update msg model.session model.kmEditorMigrationModel
-            in
-            ( { model | kmEditorMigrationModel = kmEditorMigrationModel }, cmd )
-
-        Msgs.KMEditorPublishMsg msg ->
-            let
-                ( kmEditorPublishModel, cmd ) =
-                    KMEditor.Publish.Update.update msg model.session model.kmEditorPublishModel
-            in
-            ( { model | kmEditorPublishModel = kmEditorPublishModel }, cmd )
+            ( { model | seed = seed, kmEditorModel = kmEditorModel }, cmd )
 
         Msgs.KMPackagesMsg msg ->
             let

@@ -3,6 +3,7 @@ module Routing exposing (..)
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import DSPlanner.Routing
+import KMEditor.Routing
 import KMPackages.Routing
 import Navigation exposing (Location)
 import Public.Routing
@@ -13,11 +14,7 @@ import Users.Routing
 type Route
     = Welcome
     | DSPlanner DSPlanner.Routing.Route
-    | KMEditorCreate (Maybe String)
-    | KMEditorEditor String
-    | KMEditorIndex
-    | KMEditorMigration String
-    | KMEditorPublish String
+    | KMEditor KMEditor.Routing.Route
     | KMPackages KMPackages.Routing.Route
     | Organization
     | Public Public.Routing.Route
@@ -33,15 +30,11 @@ matchers =
         parsers =
             []
                 ++ DSPlanner.Routing.parses DSPlanner
+                ++ KMEditor.Routing.parsers KMEditor
                 ++ KMPackages.Routing.parsers KMPackages
                 ++ Public.Routing.parsers Public
                 ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
-                   , map KMEditorCreate (s "km-editor" </> s "create" <?> stringParam "selected")
-                   , map KMEditorEditor (s "km-editor" </> s "edit" </> string)
-                   , map KMEditorIndex (s "km-editor")
-                   , map KMEditorMigration (s "km-editor" </> s "migration" </> string)
-                   , map KMEditorPublish (s "km-editor" </> s "publish" </> string)
                    , map Organization (s "organization")
                    , map DataManagementPlans (s "data-management-plans")
                    ]
@@ -66,20 +59,8 @@ isAllowed route maybeJwt =
         DSPlanner route ->
             DSPlanner.Routing.isAllowed route maybeJwt
 
-        KMEditorCreate _ ->
-            hasPerm maybeJwt Perm.knowledgeModel
-
-        KMEditorEditor uuid ->
-            hasPerm maybeJwt Perm.knowledgeModel
-
-        KMEditorIndex ->
-            hasPerm maybeJwt Perm.knowledgeModel
-
-        KMEditorMigration uuid ->
-            hasPerm maybeJwt Perm.knowledgeModelUpgrade
-
-        KMEditorPublish uuid ->
-            hasPerm maybeJwt Perm.knowledgeModelPublish
+        KMEditor route ->
+            KMEditor.Routing.isAllowed route maybeJwt
 
         KMPackages route ->
             KMPackages.Routing.isAllowed route maybeJwt
@@ -114,25 +95,8 @@ toUrl route =
                 DSPlanner route ->
                     DSPlanner.Routing.toUrl route
 
-                KMEditorCreate selected ->
-                    case selected of
-                        Just id ->
-                            [ "km-editor", "create", "?selected=" ++ id ]
-
-                        Nothing ->
-                            [ "km-editor", "create" ]
-
-                KMEditorEditor uuid ->
-                    [ "km-editor", "edit", uuid ]
-
-                KMEditorIndex ->
-                    [ "km-editor" ]
-
-                KMEditorMigration uuid ->
-                    [ "km-editor", "migration", uuid ]
-
-                KMEditorPublish uuid ->
-                    [ "km-editor", "publish", uuid ]
+                KMEditor route ->
+                    KMEditor.Routing.toUrl route
 
                 KMPackages route ->
                     KMPackages.Routing.toUrl route
