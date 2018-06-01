@@ -28,6 +28,7 @@ type TableActionLabel
 type TableAction a msg
     = TableActionMsg ((msg -> Msgs.Msg) -> a -> Msgs.Msg)
     | TableActionLink (a -> Routing.Route)
+    | TableActionExternalLink (a -> String)
 
 
 type alias TableActionConfig a msg =
@@ -119,6 +120,9 @@ tableAction wrapMsg item actionConfig =
 
                 TableActionLink getRoute ->
                     linkTo (getRoute item) []
+
+                TableActionExternalLink getUrl ->
+                    a [ href (getUrl item), target "_blank" ]
     in
     actionElement [ actionLabel ]
 

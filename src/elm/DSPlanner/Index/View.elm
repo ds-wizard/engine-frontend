@@ -11,6 +11,7 @@ import DSPlanner.Routing exposing (Route(Create, Detail))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
+import Requests exposing (apiUrl)
 import Routing
 
 
@@ -55,6 +56,18 @@ tableConfig =
           , action = TableActionLink (Routing.DSPlanner << Detail << .uuid)
           , visible = always True
           }
+        , { label = TableActionText "Export JSON"
+          , action = TableActionExternalLink (getExportUrl "json")
+          , visible = always True
+          }
+        , { label = TableActionText "Export HTML"
+          , action = TableActionExternalLink (getExportUrl "html")
+          , visible = always True
+          }
+        , { label = TableActionText "Export PDF"
+          , action = TableActionExternalLink (getExportUrl "pdf")
+          , visible = always True
+          }
         ]
     }
 
@@ -62,6 +75,11 @@ tableConfig =
 tableActionDelete : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
 tableActionDelete wrapMsg =
     wrapMsg << ShowHideDeleteQuestionnaire << Just
+
+
+getExportUrl : String -> Questionnaire -> String
+getExportUrl format questionnaire =
+    apiUrl "/dmps/" ++ questionnaire.uuid ++ "?type=" ++ format
 
 
 deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
