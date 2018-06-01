@@ -1,7 +1,8 @@
-$icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
-@import "~bootswatch/united/variables";
-@import "~bootstrap-sass/assets/stylesheets/bootstrap";
-@import "~bootswatch/united/bootswatch";
+$font-size-base: 0.875rem;
+
+@import "~bootswatch/dist/united/variables";
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/united/bootswatch";
 @import "~font-awesome/css/font-awesome.css";
 
 @import "animations";

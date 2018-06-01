@@ -61,26 +61,21 @@ profileView wrapMsg model =
 
 navbar : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 navbar wrapMsg model =
-    let
-        profileClass =
-            if model.currentView == Profile then
-                "active"
-            else
-                ""
-
-        passwordClass =
-            if model.currentView == Password then
-                "active"
-            else
-                ""
-    in
     ul [ class "nav nav-tabs" ]
-        [ li [ class profileClass ]
-            [ a [ onClick <| wrapMsg <| ChangeView Profile ]
+        [ li [ class "nav-item" ]
+            [ a
+                [ class "nav-link"
+                , classList [ ( "active", model.currentView == Profile ) ]
+                , onClick <| wrapMsg <| ChangeView Profile
+                ]
                 [ text "Profile" ]
             ]
-        , li [ class passwordClass ]
-            [ a [ onClick <| wrapMsg <| ChangeView Password ]
+        , li [ class "nav-item" ]
+            [ a
+                [ class "nav-link"
+                , classList [ ( "active", model.currentView == Password ) ]
+                , onClick <| wrapMsg <| ChangeView Password
+                ]
                 [ text "Password" ]
             ]
         ]

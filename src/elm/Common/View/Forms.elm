@@ -27,9 +27,9 @@ formGroup input form fieldName labelText =
         ( error, errorClass ) =
             getErrors field labelText
     in
-    div [ class ("form-group " ++ errorClass) ]
-        [ label [ class "control-label", for fieldName ] [ text labelText ]
-        , input field [ class "form-control", id fieldName, name fieldName ]
+    div [ class "form-group" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , input field [ class <| "form-control " ++ errorClass, id fieldName, name fieldName ]
         , error
         ]
 
@@ -112,7 +112,7 @@ getErrors : Form.FieldState CustomFormError String -> String -> ( Html msg, Stri
 getErrors field labelText =
     case field.liveError of
         Just error ->
-            ( p [ class "help-block" ] [ text (toReadable error labelText) ], "has-error" )
+            ( p [ class "invalid-feedback" ] [ text (toReadable error labelText) ], "is-invalid" )
 
         Nothing ->
             ( text "", "" )
@@ -155,7 +155,7 @@ toReadable error labelText =
 formActions : Route -> ( String, ActionResult a, Msg ) -> Html Msg
 formActions cancelRoute actionButtonSettings =
     div [ class "form-actions" ]
-        [ linkTo cancelRoute [ class "btn btn-default" ] [ text "Cancel" ]
+        [ linkTo cancelRoute [ class "btn btn-secondary" ] [ text "Cancel" ]
         , actionButton actionButtonSettings
         ]
 

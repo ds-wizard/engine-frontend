@@ -1,3 +1,5 @@
+@import "~bootswatch/dist/united/variables";
+
 .index-table {
     .table-actions {
         a {
@@ -9,7 +11,7 @@
         text-align: center;
         padding: 40px;
         font-size: 16px;
-        color: #aaa;
+        color: $gray-500;
     }
 
     td:not(.table-actions):not(.td-bool) {
@@ -20,19 +22,13 @@
 
         .fa {
             margin-left: 10px;
-            color: #aaa;
+            color: $gray-500;
         }
     }
 
     .td-bool {
         .fa {
             margin-left: 10px;
-        }
-    }
-
-    tbody {
-        tr:hover {
-            background: #f7f7f7;
         }
     }
 }

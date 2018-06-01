@@ -1,4 +1,4 @@
-@import "~bootswatch/united/variables";
+@import "~bootswatch/dist/united/variables";
 @import "../../mixins";
 
 .KMEditor__Editor {
@@ -11,7 +11,7 @@
         margin-bottom: 40px;
     }
 
-    .panel .form-group:last-child {
+    .card .form-group:last-child {
         margin-bottom: 0;
     }
 
@@ -24,12 +24,14 @@
         padding: 0;
     }
 
-    .panel-input-child {
+    .input-child {
         padding: 8px 12px;
         margin-bottom: 5px;
         display: flex;
         justify-content: space-between;
-        background: $gray-lighter;
+        background: $gray-200;
+        border: 1px solid $gray-400;
+        border-radius: 4px;
         width: 100%;
         cursor: move;
         @include not-selectable();
@@ -45,8 +47,8 @@
         }
     }
 
-    .panel-placeholder {
-        border: 1px dashed $brand-primary;
+    .input-child-placeholder {
+        border: 1px dashed $primary;
         background: #fff;
         color: #fff;
         @include not-selectable();
@@ -62,8 +64,6 @@
     }
 
     .diff-tree-col {
-        padding-left: 40px;
-
         h4 {
             margin-top: 0;
             margin-bottom: 20px;

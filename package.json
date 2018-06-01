@@ -13,6 +13,7 @@
     "elm-webpack-loader": "^4.5.0",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^0.11.2",
+    "font-awesome-sass-loader": "^2.0.1",
     "node-sass": "^4.9.0",
     "sass-loader": "^6.0.7",
     "style-loader": "^0.18.2",
@@ -21,10 +22,8 @@
     "webpack-dev-server": "^2.11.2"
   },
   "dependencies": {
-    "bootstrap-sass": "^3.3.7",
-    "bootswatch": "^3.3.7",
-    "font-awesome": "^4.7.0",
-    "font-awesome-sass-loader": "^2.0.1"
+    "bootswatch": "^4.1.1",
+    "font-awesome": "^4.7.0"
   },
   "false": {}
 }

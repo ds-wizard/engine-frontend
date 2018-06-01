@@ -10,6 +10,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Msgs
+import Public.Common.View exposing (publicForm)
 import Public.ForgottenPassword.Models exposing (ForgottenPasswordForm, Model)
 import Public.ForgottenPassword.Msgs exposing (Msg(FormMsg))
 
@@ -23,31 +24,32 @@ view wrapMsg model =
                     successView
 
                 _ ->
-                    signupForm wrapMsg model
+                    forgottenPasswordForm wrapMsg model
     in
-    div [ class "Public__ForgottenPassword" ]
+    div [ class "row justify-content-center" ]
         [ content ]
 
 
-signupForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-signupForm wrapMsg model =
-    form [ onSubmit (wrapMsg <| FormMsg Form.Submit), class "well col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" ]
-        [ fieldset []
-            [ legend [] [ text "Forgotten Password" ]
-            , submitError model.submitting
-            , formView model.form |> Html.map (wrapMsg << FormMsg)
-            , div [ class "form-actions" ]
-                [ submitButton ( "Recover", model.submitting )
-                ]
-            ]
-        ]
+forgottenPasswordForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+forgottenPasswordForm wrapMsg model =
+    let
+        formConfig =
+            { title = "Forgotten Password"
+            , submitMsg = wrapMsg <| FormMsg Form.Submit
+            , actionResult = model.submitting
+            , submitLabel = "Recover"
+            , formContent = formView model.form |> Html.map (wrapMsg << FormMsg)
+            , link = Nothing
+            }
+    in
+    publicForm formConfig
 
 
 formView : Form CustomFormError ForgottenPasswordForm -> Html Form.Msg
 formView form =
     div []
         [ inputGroup form "email" "Email"
-        , p [ class "help-block help-block-after" ]
+        , p [ class "form-text text-muted form-text-after" ]
             [ text "Enter the email you use to log in and we will send you a recover link." ]
         ]
 
@@ -55,13 +57,3 @@ formView form =
 successView : Html Msgs.Msg
 successView =
     fullPageError "fa-check" "We've sent you a recover link. Follow the instructions in your email."
-
-
-submitError : ActionResult String -> Html Msgs.Msg
-submitError result =
-    case result of
-        Error err ->
-            errorView err
-
-        _ ->
-            emptyNode

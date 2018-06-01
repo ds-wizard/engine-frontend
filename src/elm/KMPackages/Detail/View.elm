@@ -46,13 +46,11 @@ versionView wrapMsg detail =
         url =
             exportPackageUrl detail.id
     in
-    div [ class "panel panel-default" ]
-        [ div [ class "panel-body" ]
-            [ div [ class "labels" ]
-                [ strong [] [ text detail.version ]
-                , text detail.description
-                ]
-            , div [ class "actions" ]
+    div [ class "card bg-light mb-3" ]
+        [ div [ class "card-body row" ]
+            [ div [ class "col-2 labels" ]
+                [ strong [] [ text detail.version ] ]
+            , div [ class "col-10 text-right actions" ]
                 [ linkTo (Routing.KMEditor <| KMEditor.Routing.Create <| Just detail.id)
                     []
                     [ text "Create KM Editor" ]
@@ -64,6 +62,7 @@ versionView wrapMsg detail =
                     [ onClick (wrapMsg <| ShowHideDeleteVersion <| Just detail.id) ]
                     [ i [ class "fa fa-trash-o" ] [] ]
                 ]
+            , div [ class "col-12" ] [ text detail.description ]
             ]
         ]
 

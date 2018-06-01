@@ -1,12 +1,26 @@
+@import "~bootswatch/dist/united/variables";
 @import "mixins";
 
 a {
     cursor: pointer;
 
+    &:not([href]):not([tabindex]) {
+        color: $primary;
+
+        &:hover, &:active, &:focus {
+            text-decoration: underline;
+            color: darken($primary, 15%);
+        }
+    }
+
     &.disabled {
         text-decoration: none;
         color: #aaa;
     }
+}
+
+label {
+    font-weight: bold;
 }
 
 .link-with-icon {
@@ -70,4 +84,36 @@ ins, .ins {
 
 .nav-tabs {
     margin-bottom: 30px;
+
+    .nav-link {
+        &:hover {
+            text-decoration: none !important;
+        }
+
+        &.active, &.active:hover {
+            color: $gray-700;
+            cursor: default;
+        }
+    }
+}
+
+.nav-pills {
+    .nav-link {
+        &:hover {
+            text-decoration: none !important;
+        }
+
+        &.active, &.active:hover {
+            color: $white;
+            cursor: default;
+        }
+    }
+}
+
+.invalid-feedback {
+    font-size: 100%;
+}
+
+code {
+    background-color: #f9f2f4;
 }

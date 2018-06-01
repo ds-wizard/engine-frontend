@@ -40,7 +40,7 @@ fullPageError : String -> String -> Html msg
 fullPageError icon error =
     div [ class "jumbotron full-page-error" ]
         [ h1 [ class "display-3" ] [ i [ class ("fa " ++ icon) ] [] ]
-        , p [] [ text error ]
+        , p [ class "lead" ] [ text error ]
         ]
 
 
@@ -100,7 +100,7 @@ modalView cfg =
                 , div [ class "modal-body" ]
                     content
                 , div [ class "modal-footer" ]
-                    [ button [ onClick cfg.cancelMsg, disabled cancelDisabled, class "btn btn-default" ]
+                    [ button [ onClick cfg.cancelMsg, disabled cancelDisabled, class "btn btn-secondary" ]
                         [ text "Cancel" ]
                     , actionButton ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
                     ]

@@ -47,7 +47,7 @@ type alias TableConfig a msg =
 
 indexTable : TableConfig a msg -> (msg -> Msgs.Msg) -> List a -> Html Msgs.Msg
 indexTable config wrapMsg data =
-    table [ class "table index-table" ]
+    table [ class "table index-table table-hover" ]
         [ tableHeader config
         , tableBody config wrapMsg data
         ]
