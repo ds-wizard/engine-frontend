@@ -44,7 +44,10 @@ getServerError : Http.Error -> String -> ActionResult a
 getServerError error defaultMessage =
     case decodeError error of
         Just error ->
-            Error error.message
+            if String.isEmpty error.message then
+                Error defaultMessage
+            else
+                Error error.message
 
         Nothing ->
             Error defaultMessage
