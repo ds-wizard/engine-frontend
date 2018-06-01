@@ -4,6 +4,7 @@ import Common.Models exposing (decodeError)
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Http exposing (Error(BadStatus), Response)
+import Jwt
 
 
 type CustomFormError
@@ -16,6 +17,16 @@ setFormErrors rawError form =
     case decodeError rawError of
         Just error ->
             List.foldl setFormError form error.fieldErrors
+
+        _ ->
+            form
+
+
+setFormErrorsJwt : Jwt.JwtError -> Form CustomFormError a -> Form CustomFormError a
+setFormErrorsJwt error form =
+    case error of
+        Jwt.HttpError httpError ->
+            setFormErrors httpError form
 
         _ ->
             form

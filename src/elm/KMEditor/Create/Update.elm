@@ -1,6 +1,7 @@
 module KMEditor.Create.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
+import Common.Form exposing (setFormErrorsJwt)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
@@ -105,4 +106,9 @@ postKmCompleted model result =
             )
 
         Err error ->
-            ( { model | savingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be created." }, Cmd.none )
+            ( { model
+                | form = setFormErrorsJwt error model.form
+                , savingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be created."
+              }
+            , Cmd.none
+            )
