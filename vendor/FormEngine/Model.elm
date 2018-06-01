@@ -127,9 +127,9 @@ getDescriptor element =
 {- Form creation -}
 
 
-createForm : FormTree -> FormValues -> Form
-createForm formTree formValues =
-    { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues []) }
+createForm : FormTree -> FormValues -> List String -> Form
+createForm formTree formValues defaultPath =
+    { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues defaultPath) }
 
 
 createFormElement : FormItem -> FormElement
@@ -240,9 +240,9 @@ setInitialValuesItems formValues path index itemElement =
 {- getting form values -}
 
 
-getFormValues : Dict String String -> Form -> Dict String String
-getFormValues originalValues form =
-    List.foldl (getFieldValue []) originalValues form.elements
+getFormValues : Dict String String -> List String -> Form -> Dict String String
+getFormValues originalValues defaultPath form =
+    List.foldl (getFieldValue defaultPath) originalValues form.elements
 
 
 getFieldValue : List String -> FormElement -> Dict String String -> Dict String String

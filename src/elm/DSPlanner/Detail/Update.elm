@@ -132,9 +132,12 @@ updateReplies : Model -> Model
 updateReplies model =
     let
         replies =
-            model.activeChapterForm
-                |> Maybe.map (getFormValues model.replies)
-                |> Maybe.withDefault model.replies
+            case ( model.activeChapterForm, model.activeChapter ) of
+                ( Just form, Just chapter ) ->
+                    getFormValues model.replies [ chapter.uuid ] form
+
+                _ ->
+                    model.replies
     in
     { model | replies = replies }
 
@@ -160,7 +163,7 @@ setActiveChapterForm model =
 
 createChapterForm : Chapter -> Dict String String -> Form
 createChapterForm chapter values =
-    createForm { items = List.map createQuestionFormItem chapter.questions } { values = values }
+    createForm { items = List.map createQuestionFormItem chapter.questions } { values = values } [ chapter.uuid ]
 
 
 createQuestionFormItem : Question -> FormItem
