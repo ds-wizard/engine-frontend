@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import Common.Html exposing (detailContainerClass, linkTo)
-import Common.View exposing (defaultFullPageError, fullPageError, pageHeader)
+import Common.View exposing (defaultFullPageError, fullPageMessage, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
 import DSPlanner.View
 import Html exposing (..)
@@ -63,22 +63,22 @@ view model =
 
 welcomeView : Html Msg
 welcomeView =
-    fullPageError "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+    fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
 
 
 dataManagementPlansView : Html Msg
 dataManagementPlansView =
     div [ detailContainerClass ]
         [ pageHeader "Data Management Plans" []
-        , fullPageError "fa-book" "Data Management Plans are not implemented yet."
+        , fullPageMessage "fa-book" "Data Management Plans are not implemented yet."
         ]
 
 
 notFoundView : Html msg
 notFoundView =
-    fullPageError "fa-file-o" "The page was not found"
+    fullPageMessage "fa-file-o" "The page was not found"
 
 
 notAllowedView : Html msg
 notAllowedView =
-    fullPageError "fa-ban" "You don't have a permission to view this page"
+    fullPageMessage "fa-ban" "You don't have a permission to view this page"

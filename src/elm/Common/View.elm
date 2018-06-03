@@ -33,12 +33,12 @@ fullPageLoader =
 
 defaultFullPageError : String -> Html msg
 defaultFullPageError =
-    fullPageError "fa-frown-o"
+    fullPageMessage "fa-frown-o"
 
 
-fullPageError : String -> String -> Html msg
-fullPageError icon error =
-    div [ class "jumbotron full-page-error" ]
+fullPageMessage : String -> String -> Html msg
+fullPageMessage icon error =
+    div [ class "jumbotron full-page-message" ]
         [ h1 [ class "display-3" ] [ i [ class ("fa " ++ icon) ] [] ]
         , p [ class "lead" ] [ text error ]
         ]

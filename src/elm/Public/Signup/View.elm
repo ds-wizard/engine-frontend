@@ -2,7 +2,7 @@ module Public.Signup.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
-import Common.View exposing (fullPageError)
+import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
@@ -58,4 +58,4 @@ formView form =
 
 successView : Html Msgs.Msg
 successView =
-    fullPageError "fa-check" "Sign up was successful. Check your email for activation link."
+    fullPageMessage "fa-check" "Sign up was successful. Check your email for activation link."

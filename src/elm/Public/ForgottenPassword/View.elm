@@ -2,7 +2,7 @@ module Public.ForgottenPassword.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Types exposing (ActionResult(..))
-import Common.View exposing (fullPageError)
+import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (errorView, inputGroup, submitButton)
 import Form exposing (Form)
 import Html exposing (..)
@@ -54,4 +54,4 @@ formView form =
 
 successView : Html Msgs.Msg
 successView =
-    fullPageError "fa-check" "We've sent you a recover link. Follow the instructions in your email."
+    fullPageMessage "fa-check" "We've sent you a recover link. Follow the instructions in your email."
