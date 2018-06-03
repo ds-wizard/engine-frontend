@@ -25,12 +25,12 @@ view wrapMsg model =
 
 content : (Msg -> Msgs.Msg) -> Model -> QuestionnaireDetail -> Html Msgs.Msg
 content wrapMsg model questionnaire =
-    div [ class "DSPlanner__Detail" ]
+    div [ class "col DSPlanner__Detail" ]
         [ pageHeader (questionnaireTitle questionnaire) (actions wrapMsg model.savingQuestionnaire)
         , formResultView model.savingQuestionnaire
         , div [ class "row" ]
-            [ div [ class "col-xs-12 col-md-3 col-lg-2" ] [ chapterList wrapMsg questionnaire model.activeChapter ]
-            , div [ class "col-xs-11 col-md-8 col-lg 10" ]
+            [ div [ class "col-sm-12 col-md-3 col-lg-3 col-xl-3" ] [ chapterList wrapMsg questionnaire model.activeChapter ]
+            , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
                 [ chapterHeader model.activeChapter
                 , viewChapterForm model |> Html.map (wrapMsg << FormMsg)
                 ]
@@ -45,7 +45,7 @@ questionnaireTitle questionnaire =
 
 actions : (Msg -> Msgs.Msg) -> ActionResult String -> List (Html Msgs.Msg)
 actions wrapMsg savingQuestionnaire =
-    [ linkTo (Routing.DSPlanner Index) [ class "btn btn-default" ] [ text "Cancel" ]
+    [ linkTo (Routing.DSPlanner Index) [ class "btn btn-secondary" ] [ text "Cancel" ]
     , actionButton ( "Save", savingQuestionnaire, wrapMsg <| Save )
     ]
 
@@ -62,15 +62,17 @@ viewChapterForm model =
 
 chapterList : (Msg -> Msgs.Msg) -> QuestionnaireDetail -> Maybe Chapter -> Html Msgs.Msg
 chapterList wrapMsg questionnaire activeChapter =
-    ul [ class "nav nav-pills nav-stacked" ]
+    div [ class "nav nav-pills flex-column" ]
         (List.map (chapterListChapter wrapMsg activeChapter) questionnaire.knowledgeModel.chapters)
 
 
 chapterListChapter : (Msg -> Msgs.Msg) -> Maybe Chapter -> Chapter -> Html Msgs.Msg
 chapterListChapter wrapMsg activeChapter chapter =
-    li [ classList [ ( "active", activeChapter == Just chapter ) ] ]
-        [ a [ onClick (wrapMsg <| SetActiveChapter chapter) ] [ text chapter.title ]
+    a
+        [ classList [ ( "nav-link", True ), ( "active", activeChapter == Just chapter ) ]
+        , onClick (wrapMsg <| SetActiveChapter chapter)
         ]
+        [ text chapter.title ]
 
 
 chapterHeader : Maybe Chapter -> Html Msgs.Msg

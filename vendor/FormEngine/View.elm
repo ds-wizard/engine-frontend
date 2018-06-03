@@ -18,28 +18,28 @@ viewFormElement path formItem =
     case formItem of
         StringFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [ class "control-label" ] [ text descriptor.label ]
+                [ label [] [ text descriptor.label ]
                 , input [ class "form-control", type_ "text", value (state.value |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
-                , p [ class "help-block" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 ]
 
         TextFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [ class "control-label" ] [ text descriptor.label ]
+                [ label [] [ text descriptor.label ]
                 , textarea [ class "form-control", value (state.value |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
-                , p [ class "help-block" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 ]
 
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [ class "control-label" ] [ text descriptor.label ]
+                [ label [] [ text descriptor.label ]
                 , input [ class "form-control", type_ "number", value (state.value |> Maybe.map toString |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
                 ]
 
         ChoiceFormElement descriptor options state ->
             div [ class "form-group" ]
-                [ label [ class "control-label" ] [ text descriptor.label ]
-                , p [ class "help-block" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                [ label [] [ text descriptor.label ]
+                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , div [] (List.map (viewChoice (path ++ [ descriptor.name ]) descriptor state) options)
                 , viewAdvice state.value options
                 , viewFollowUps (path ++ [ descriptor.name ]) state.value options
@@ -47,9 +47,9 @@ viewFormElement path formItem =
 
         GroupFormElement descriptor _ items state ->
             div [ class "form-group" ]
-                [ label [ class "control-label" ] [ text descriptor.label ]
+                [ label [] [ text descriptor.label ]
                 , div [] (List.indexedMap (viewGroupItem (path ++ [ descriptor.name ]) (List.length items)) items)
-                , button [ class "btn btn-default", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [] ]
+                , button [ class "btn btn-secondary", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [] ]
                 ]
 
 
@@ -60,12 +60,14 @@ viewGroupItem path numberOfItems index itemElement =
             if numberOfItems == 1 then
                 text ""
             else
-                button [ class "btn btn-default btn-item-delete", onClick (GroupItemRemove path index) ]
+                button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
                     [ i [ class "fa fa-trash-o" ] [] ]
     in
-    div [ class "well well-item" ] <|
-        [ deleteButton ]
-            ++ List.map (viewFormElement (path ++ [ toString index ])) itemElement
+    div [ class "card bg-light item mb-5" ]
+        [ div [ class "card-body" ] <|
+            [ deleteButton ]
+                ++ List.map (viewFormElement (path ++ [ toString index ])) itemElement
+        ]
 
 
 viewChoice : List String -> FormItemDescriptor -> FormElementState String -> OptionElement -> Html Msg

@@ -25,7 +25,7 @@ emptyNode =
 
 detailContainerClassWith : String -> Html.Attribute msg
 detailContainerClassWith otherClass =
-    class <| "col-sm-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2 " ++ otherClass
+    class <| "col-sm-12 col-md-10 col-lg-8 col-xl-6 " ++ otherClass
 
 
 detailContainerClass : Html.Attribute msg

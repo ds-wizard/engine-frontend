@@ -1,4 +1,4 @@
-@import "~bootswatch/united/variables";
+@import "~bootswatch/dist/united/variables";
 @import "mixins";
 
 .app-view {
@@ -10,11 +10,11 @@
 }
 
 .page {
-    margin: 20px;
+    margin: 20px 0;
 }
 
 .side-navigation {
-    background-color: $brand-primary;
+    background-color: $primary;
     width: 240px;
     position: fixed;
     top: 0;
@@ -24,13 +24,13 @@
     z-index: 1;
 
     .logo {
-        color: #fff;
+        color: $white;
         font-size: 18px;
         display: inline-block;
         width: 100%;
         text-decoration: none;
         padding: 15px;
-        border-bottom: 1px solid darken($brand-primary, 10%);
+        border-bottom: 1px solid darken($primary, 10%);
     }
 
     .menu {
@@ -49,11 +49,13 @@
                 @include border-radius(5px);
 
                 &.active {
-                    background: darken($brand-primary, 10%) !important;
+                    background: darken($primary, 10%) !important;
                 }
 
                 &:hover {
-                    background: darken($brand-primary, 15%);
+                    background: darken($primary, 15%);
+                    color: $white;
+                    text-decoration: none;
                 }
 
                 .fa {
@@ -70,8 +72,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        color: #fff;
-        border-top: 1px solid darken($brand-primary, 10%);
+        border-top: 1px solid darken($primary, 10%);
 
         .menu {
             margin-top: 0;
@@ -86,14 +87,15 @@
         .collapse {
             margin: 0;
             padding: 5px;
-            border-top: 1px solid darken($brand-primary, 10%);
+            border-top: 1px solid darken($primary, 10%);
             display: block;
             text-align: center;
-            color: #fff;
+            color: $white;
 
             &:hover {
                 text-decoration: none;
-                background: darken($brand-primary, 5%);
+                background: darken($primary, 5%);
+                color: $white;
             }
         }
     }

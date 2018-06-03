@@ -1,4 +1,4 @@
-@import "~bootswatch/united/variables";
+@import "~bootswatch/dist/united/variables";
 
 textarea {
     resize: vertical;
@@ -21,12 +21,12 @@ textarea {
     }
 
     .extra-action {
-        color: $gray;
+        color: $gray-600;
     }
 }
 
-.help-block-after {
-    margin-top: -10px;
+.form-text-after {
+    margin-top: -0.75rem;
 }
 
 .control-label {
@@ -48,6 +48,7 @@ textarea {
     position: relative;
     display: block;
     margin-bottom: 15px;
+    padding-left: 0;
 }
 
 .form-check-toggle {
@@ -118,8 +119,8 @@ textarea {
             }
 
             &:before {
-                background-color: $brand-primary;
-                border-color: $brand-primary;
+                background-color: $primary;
+                border-color: $primary;
                 transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
             }
         }

@@ -1,27 +1,43 @@
-@import "Public/ForgottenPassword";
-@import "Public/Login";
-@import "Public/Signup";
-@import "Public/SignupConfirmation";
-
+@import "~bootswatch/dist/united/variables";
 
 .public {
-    padding-top: 60px;
+    padding-top: 160px;
+    padding-bottom: 50px;
 
-    h2 {
-        color: #fff;
+    .navbar-brand {
+        color: $white;
     }
 
-    .navbar-nav {
-        float: right;
+    .navbar-expand-sm {
+        .navbar-nav {
+            & > li {
+                a {
+                    color: $white;
+                    border-radius: 5px;
+                    margin-left: 0.5rem;
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                }
 
-        & > li {
-            a:focus {
-                background-color: transparent;
-            }
+                a:focus {
+                    background-color: transparent;
+                }
 
-            a:hover {
-                background-color: #ac3911;
+                a:hover {
+                    background-color: darken($primary, 15%);
+                }
             }
+        }
+    }
+
+    .card-header {
+        font-weight: bold;
+    }
+
+    .card-body {
+        .form-group:last-child {
+            margin-bottom: 0;
+            margin-top: 30px;
         }
     }
 }

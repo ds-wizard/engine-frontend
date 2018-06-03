@@ -14,7 +14,7 @@ breadcrumbs editor =
 
 breadcrumbsElement : String -> Html Msgs.Msg
 breadcrumbsElement name =
-    li [] [ text name ]
+    li [ class "breadcrumb-item" ] [ text name ]
 
 
 getKnowledgeModelBreadcrumbs : KnowledgeModelEditor -> List String

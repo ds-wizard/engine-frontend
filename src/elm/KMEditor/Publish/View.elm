@@ -42,7 +42,7 @@ formView wrapMsg form knowledgeModel =
         , lastVersion (kmLastVersion knowledgeModel)
         , versionInputGroup form
         , textAreaGroup form "description" "Description"
-        , p [ class "help-block help-block-after" ]
+        , p [ class "form-text text-muted form-text-after" ]
             [ text "Describe what has changed in the new version." ]
         ]
         |> Html.map (wrapMsg << FormMsg)
@@ -76,17 +76,17 @@ versionInputGroup form =
                     ""
 
                 _ ->
-                    "has-error"
+                    " is-invalid"
     in
-    div [ class ("form-group " ++ errorClass) ]
+    div [ class "form-group" ]
         [ label [ class "control-label" ] [ text "New version" ]
         , div [ class "version-inputs" ]
-            [ Input.baseInput "number" String Form.Text majorField [ class "form-control", Html.Attributes.min "0" ]
+            [ Input.baseInput "number" String Form.Text majorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
             , text "."
-            , Input.baseInput "number" String Form.Text minorField [ class "form-control", Html.Attributes.min "0" ]
+            , Input.baseInput "number" String Form.Text minorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
             , text "."
-            , Input.baseInput "number" String Form.Text patchField [ class "form-control", Html.Attributes.min "0" ]
+            , Input.baseInput "number" String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
             ]
-        , p [ class "help-block" ]
+        , p [ class "form-text text-muted" ]
             [ text "Version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes and number X indicate major change." ]
         ]

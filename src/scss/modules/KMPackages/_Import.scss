@@ -1,4 +1,4 @@
-@import "~bootswatch/united/variables";
+@import "~bootswatch/dist/united/variables";
 @import "../../mixins";
 
 .KMPackages__Import {
@@ -13,13 +13,13 @@
         flex-direction: column;
 
         &.active {
-            border: 10px dashed $brand-primary;
+            border: 10px dashed $primary;
         }
 
         p {
             padding: 20px;
             font-size: 16px;
-            color: $gray-light;
+            color: $secondary;
         }
     }
 

@@ -51,7 +51,7 @@ fileView wrapMsg model fileName =
                 [ text fileName ]
             ]
         , div [ class "actions" ]
-            [ button [ disabled cancelDisabled, onClick (wrapMsg Cancel), class "btn btn-default" ]
+            [ button [ disabled cancelDisabled, onClick (wrapMsg Cancel), class "btn btn-secondary" ]
                 [ text "Cancel" ]
             , actionButton ( "Upload", model.importing, wrapMsg Submit )
             ]
@@ -61,7 +61,7 @@ fileView wrapMsg model fileName =
 dropzone : Model -> Html Msg
 dropzone model =
     div (dropzoneAttributes model)
-        [ label [ class "btn btn-default btn-file" ]
+        [ label [ class "btn btn-secondary btn-file" ]
             [ text "Choose file"
             , input [ type_ "file", onchange FilesSelect ] []
             ]

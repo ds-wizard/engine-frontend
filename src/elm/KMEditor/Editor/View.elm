@@ -22,22 +22,22 @@ import String exposing (toLower)
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "row KMEditor__Editor" ]
-        [ div [ class "col-xs-12" ] [ pageHeader "Knowledge model editor" [] ]
+    div [ class "col KMEditor__Editor" ]
+        [ div [] [ pageHeader "Knowledge model editor" [] ]
         , fullPageActionResultView (editorView wrapMsg model) model.knowledgeModelEditor
         ]
 
 
 editorView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModelEditor -> Html Msgs.Msg
 editorView wrapMsg model knowledgeModelEditor =
-    div []
-        [ div [ class "col-xs-12" ]
+    div [ class "row" ]
+        [ div [ class "col-12" ]
             [ formResultView model.saving ]
-        , div [ class "col-xs-8" ]
+        , div [ class "col-8" ]
             [ breadcrumbs knowledgeModelEditor
             , viewKnowledgeModel wrapMsg model knowledgeModelEditor (wrapMsg << Edit)
             ]
-        , div [ class "col-xs-4 diff-tree-col" ]
+        , div [ class "col-4 diff-tree-col" ]
             [ h4 [] [ text "Current changes" ]
             , diffTreeView (getKnowledgeModel knowledgeModelEditor) model.events
             ]
@@ -79,7 +79,7 @@ viewKnowledgeModel wrapMsg model (KnowledgeModelEditor editor) parentMsg =
                         (\(ChapterEditor chapterEditor) -> ViewChapter chapterEditor.chapter.uuid |> parentMsg)
                     , div [ class "form-actions" ]
                         [ linkTo (KMEditor Index)
-                            [ class "btn btn-default" ]
+                            [ class "btn btn-secondary" ]
                             [ text "Cancel" ]
                         , actionButton ( "Save", model.saving, KnowledgeModelFormMsg Form.Submit |> parentMsg )
                         ]
@@ -208,10 +208,10 @@ viewQuestion wrapMsg model (QuestionEditor editor) parentMsg deleteMsg =
                         answerItemTemplate =
                             case (Form.getFieldAsString "type_" editor.form).value of
                                 Just "list" ->
-                                    div [ class "panel panel-default" ]
-                                        [ div [ class "panel-heading" ]
+                                    div [ class "card card-border-light mb-3" ]
+                                        [ div [ class "card-header" ]
                                             [ text "Item template" ]
-                                        , div [ class "panel-body" ]
+                                        , div [ class "card-body" ]
                                             [ div [ class "form-group" ]
                                                 [ inputGroup editor.form "itemName" "Item Title" ]
                                                 |> Html.map (QuestionFormMsg >> parentMsg)
@@ -356,8 +356,8 @@ inputChildren wrapMsg childName reorderableState children reorderMsg addMsg toId
                 , itemView = inputChild getName getMsg
                 , placeholderView = placeholderView
                 , listClass = "input-children"
-                , itemClass = "panel panel-default panel-input-child"
-                , placeholderClass = "panel panel-placeholder panel-input-child"
+                , itemClass = "input-child"
+                , placeholderClass = "input-child input-child-placeholder"
                 }
             )
             reorderableState
@@ -392,7 +392,7 @@ formActions : Msgs.Msg -> Msgs.Msg -> Msgs.Msg -> Html Msgs.Msg
 formActions cancelMsg deleteMsg submitMsg =
     div [ class "form-actions" ]
         [ div []
-            [ button [ class "btn btn-default", onClick cancelMsg ]
+            [ button [ class "btn btn-secondary", onClick cancelMsg ]
                 [ text "Cancel" ]
             , button [ class "btn btn-link link-with-icon extra-action", onClick deleteMsg ]
                 [ i [ class "fa fa-trash-o" ] []

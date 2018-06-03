@@ -26,13 +26,13 @@ publicView content =
 
 publicHeader : Html Msg
 publicHeader =
-    div [ class "navbar navbar-default navbar-fixed-top" ]
+    nav [ class "navbar navbar-expand-sm bg-primary fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
                 [ linkTo homeRoute [ class "navbar-brand" ] [ text "Data Stewardship Wizard" ] ]
-            , ul [ class "nav navbar-nav" ]
-                [ li [] [ linkTo loginRoute [] [ text "Log In" ] ]
-                , li [] [ linkTo signupRoute [] [ text "Sign Up" ] ]
+            , ul [ class "nav navbar-nav ml-auto" ]
+                [ li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
+                , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
                 ]
             ]
         ]
@@ -42,7 +42,7 @@ appView : Model -> Html Msg -> Html Msg
 appView model content =
     div [ class "app-view", classList [ ( "side-navigation-collapsed", model.session.sidebarCollapsed ) ] ]
         [ menu model
-        , div [ class "page" ]
+        , div [ class "page row justify-content-center" ]
             [ content ]
         ]
 

@@ -28,7 +28,7 @@ view model =
                 Success _ ->
                     successView
     in
-    div [ class "Public__SignupConfirmation" ]
+    div [ class "row justify-content-center" ]
         [ content ]
 
 
@@ -36,7 +36,7 @@ successView : Html Msgs.Msg
 successView =
     div [ class "jumbotron full-page-error" ]
         [ h1 [ class "display-3" ] [ i [ class "fa fa-check" ] [] ]
-        , p []
+        , p [ class "lead" ]
             [ text "Your email was successfully confirmed. You can now "
             , linkTo (Routing.Public Login) [] [ text "log in" ]
             , text "."

@@ -10,6 +10,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Msgs
+import Public.Common.View exposing (publicForm)
 import Public.Routing exposing (Route(Login))
 import Public.Signup.Models exposing (..)
 import Public.Signup.Msgs exposing (Msg(FormMsg))
@@ -27,23 +28,23 @@ view wrapMsg model =
                 _ ->
                     signupForm wrapMsg model
     in
-    div [ class "Public__Signup" ]
+    div [ class "row justify-content-center" ]
         [ content ]
 
 
 signupForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 signupForm wrapMsg model =
-    form [ onSubmit (wrapMsg <| FormMsg Form.Submit), class "well col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" ]
-        [ fieldset []
-            [ legend [] [ text "Sign up" ]
-            , signupError model.signingUp
-            , formView model.form |> Html.map (wrapMsg << FormMsg)
-            , div [ class "form-actions Public__Signup__FormButtons" ]
-                [ linkTo (Public Login) [] [ text "I already have an account" ]
-                , submitButton ( "Sign up", model.signingUp )
-                ]
-            ]
-        ]
+    let
+        formConfig =
+            { title = "Sign up"
+            , submitMsg = wrapMsg <| FormMsg Form.Submit
+            , actionResult = model.signingUp
+            , submitLabel = "Sign up"
+            , formContent = formView model.form |> Html.map (wrapMsg << FormMsg)
+            , link = Just ( Public Login, "I already have an account" )
+            }
+    in
+    publicForm formConfig
 
 
 formView : Form CustomFormError SignupForm -> Html Form.Msg
@@ -60,13 +61,3 @@ formView form =
 successView : Html Msgs.Msg
 successView =
     fullPageError "fa-check" "Sign up was successful. Check your email for activation link."
-
-
-signupError : ActionResult String -> Html Msgs.Msg
-signupError result =
-    case result of
-        Error err ->
-            errorView err
-
-        _ ->
-            emptyNode

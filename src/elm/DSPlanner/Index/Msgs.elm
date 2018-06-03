@@ -1,5 +1,6 @@
 module DSPlanner.Index.Msgs exposing (..)
 
+import Bootstrap.Dropdown as Dropdown
 import DSPlanner.Common.Models exposing (Questionnaire)
 import Jwt
 
@@ -9,3 +10,4 @@ type Msg
     | ShowHideDeleteQuestionnaire (Maybe Questionnaire)
     | DeleteQuestionnaire
     | DeleteQuestionnaireCompleted (Result Jwt.JwtError String)
+    | DropdownMsg Questionnaire Dropdown.State
