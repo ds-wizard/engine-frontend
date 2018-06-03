@@ -1,14 +1,12 @@
 module Public.Signup.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (emptyNode, linkTo)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageError)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onSubmit)
 import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.Routing exposing (Route(Login))

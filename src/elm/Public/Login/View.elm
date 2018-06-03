@@ -1,8 +1,5 @@
 module Public.Login.View exposing (view)
 
-import Common.Html exposing (linkTo)
-import Common.Types exposing (ActionResult)
-import Common.View.Forms exposing (actionButton, formResultView, submitButton)
 import Html exposing (..)
 import Html.Attributes exposing (class, disabled, for, id, placeholder, type_)
 import Html.Events exposing (..)
