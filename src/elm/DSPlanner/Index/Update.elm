@@ -1,10 +1,11 @@
 module DSPlanner.Index.Update exposing (..)
 
 import Auth.Models exposing (Session)
+import Bootstrap.Dropdown as Dropdown
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import DSPlanner.Common.Models exposing (Questionnaire)
-import DSPlanner.Index.Models exposing (Model)
+import DSPlanner.Index.Models exposing (Model, QuestionnaireRow, initQuestionnaireRow)
 import DSPlanner.Index.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (deleteQuestionnaire, getQuestionnaires)
 import Jwt
@@ -33,14 +34,17 @@ update msg wrapMsg session model =
         DeleteQuestionnaireCompleted result ->
             deleteQuestionnaireCompleted wrapMsg session model result
 
+        DropdownMsg questionnaire state ->
+            handleDropdownToggle model questionnaire state
+
 
 getQuestionnairesCompleted : Model -> Result Jwt.JwtError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
 getQuestionnairesCompleted model result =
     let
         newModel =
             case result of
-                Ok users ->
-                    { model | questionnaires = Success users }
+                Ok questionnaires ->
+                    { model | questionnaires = Success <| List.map initQuestionnaireRow questionnaires }
 
                 Err error ->
                     { model | questionnaires = getServerErrorJwt error "Unable to fetch questionnaire list" }
@@ -79,3 +83,23 @@ deleteQuestionnaireCompleted wrapMsg session model result =
             ( { model | deletingQuestionnaire = getServerErrorJwt error "Questionnaire could not be deleted" }
             , Cmd.none
             )
+
+
+handleDropdownToggle : Model -> Questionnaire -> Dropdown.State -> ( Model, Cmd Msgs.Msg )
+handleDropdownToggle model questionnaire state =
+    case model.questionnaires of
+        Success questionnaireRows ->
+            let
+                replaceWith row =
+                    if row.questionnaire == questionnaire then
+                        { row | dropdownState = state }
+                    else
+                        row
+
+                newRows =
+                    List.map replaceWith questionnaireRows
+            in
+            ( { model | questionnaires = Success newRows }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )

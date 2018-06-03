@@ -29,6 +29,7 @@ type TableAction a msg
     = TableActionMsg ((msg -> Msgs.Msg) -> a -> Msgs.Msg)
     | TableActionLink (a -> Routing.Route)
     | TableActionExternalLink (a -> String)
+    | TableActionCustom ((msg -> Msgs.Msg) -> a -> Html Msgs.Msg)
 
 
 type alias TableActionConfig a msg =
@@ -112,19 +113,19 @@ tableAction wrapMsg item actionConfig =
 
                 TableActionIcon iconClass ->
                     i [ class iconClass ] []
-
-        actionElement =
-            case actionConfig.action of
-                TableActionMsg createMsg ->
-                    a [ onClick <| createMsg wrapMsg item ]
-
-                TableActionLink getRoute ->
-                    linkTo (getRoute item) []
-
-                TableActionExternalLink getUrl ->
-                    a [ href (getUrl item), target "_blank" ]
     in
-    actionElement [ actionLabel ]
+    case actionConfig.action of
+        TableActionMsg createMsg ->
+            a [ onClick <| createMsg wrapMsg item ] [ actionLabel ]
+
+        TableActionLink getRoute ->
+            linkTo (getRoute item) [] [ actionLabel ]
+
+        TableActionExternalLink getUrl ->
+            a [ href (getUrl item), target "_blank" ] [ actionLabel ]
+
+        TableActionCustom getHtml ->
+            getHtml wrapMsg item
 
 
 bodyField : a -> TableFieldValue a -> Html Msgs.Msg

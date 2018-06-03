@@ -117,3 +117,11 @@ ins, .ins {
 code {
     background-color: #f9f2f4;
 }
+
+.dropdown-menu-right {
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 35px;
+}
