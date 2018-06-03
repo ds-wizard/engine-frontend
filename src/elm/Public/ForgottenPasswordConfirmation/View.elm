@@ -7,7 +7,6 @@ import Common.View.Forms exposing (errorView, passwordGroup, submitButton)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onSubmit)
 import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.ForgottenPasswordConfirmation.Models exposing (..)

@@ -8,11 +8,9 @@ import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (getQuestionnaire, putReplies)
 import DSPlanner.Routing exposing (Route(Index))
-import Dict exposing (Dict)
 import FormEngine.Model exposing (..)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
-import Json.Encode as Encode exposing (..)
 import Jwt
 import KMEditor.Common.Models.Entities exposing (..)
 import Msgs

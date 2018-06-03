@@ -1,14 +1,12 @@
 module Public.ForgottenPassword.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (emptyNode)
 import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageError)
 import Common.View.Forms exposing (errorView, inputGroup, submitButton)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onSubmit)
 import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.ForgottenPassword.Models exposing (ForgottenPasswordForm, Model)
