@@ -13,12 +13,16 @@ module FormEngine.Model
         , OptionElement(..)
         , createForm
         , createItemElement
+        , decodeFormValues
+        , encodeFormValues
         , getDescriptor
         , getFormValues
         , getOptionDescriptor
         )
 
-import Dict exposing (Dict)
+import Json.Decode as Decode exposing (..)
+import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode exposing (..)
 import List.Extra as List
 
 
@@ -86,8 +90,42 @@ type alias Form =
 
 
 type alias FormValues =
-    { values : Dict String String
+    List FormValue
+
+
+type alias FormValue =
+    { path : String
+    , value : String
     }
+
+
+
+{- Decoders and encoders -}
+
+
+decodeFormValues : Decoder FormValues
+decodeFormValues =
+    Decode.list decodeFormValue
+
+
+decodeFormValue : Decoder FormValue
+decodeFormValue =
+    decode FormValue
+        |> required "path" Decode.string
+        |> required "value" Decode.string
+
+
+encodeFormValues : FormValues -> Encode.Value
+encodeFormValues formValues =
+    Encode.list <| List.map encodeFormValue formValues
+
+
+encodeFormValue : FormValue -> Encode.Value
+encodeFormValue formValue =
+    Encode.object
+        [ ( "path", Encode.string formValue.path )
+        , ( "value", Encode.string formValue.value )
+        ]
 
 
 
@@ -200,20 +238,21 @@ setInitialValue formValues path element =
                 itemElements =
                     List.repeat numberOfItems (createItemElement items)
                         |> List.indexedMap (setInitialValuesItems formValues (path ++ [ descriptor.name ]))
+
+                newState =
+                    { state | value = Just numberOfItems }
             in
-            GroupFormElement descriptor items itemElements state
+            GroupFormElement descriptor items itemElements newState
 
 
 getInitialValue : FormValues -> List String -> String -> Maybe String
 getInitialValue formValues path current =
     let
         key =
-            String.join "." (path ++ [ current ]) |> Debug.log "key"
-
-        a =
-            Dict.get key formValues.values |> Debug.log "value"
+            String.join "." (path ++ [ current ])
     in
-    Dict.get key formValues.values
+    List.find (.path >> (==) key) formValues
+        |> Maybe.map .value
 
 
 initialValueToInt : Maybe String -> Maybe Int
@@ -240,12 +279,12 @@ setInitialValuesItems formValues path index itemElement =
 {- getting form values -}
 
 
-getFormValues : Dict String String -> List String -> Form -> Dict String String
-getFormValues originalValues defaultPath form =
-    List.foldl (getFieldValue defaultPath) originalValues form.elements
+getFormValues : List String -> Form -> FormValues
+getFormValues defaultPath form =
+    List.foldl (getFieldValue defaultPath) [] form.elements
 
 
-getFieldValue : List String -> FormElement -> Dict String String -> Dict String String
+getFieldValue : List String -> FormElement -> FormValues -> FormValues
 getFieldValue path element values =
     case element of
         StringFormElement descriptor state ->
@@ -272,7 +311,7 @@ getFieldValue path element values =
             List.indexedFoldl (getItemValues (path ++ [ descriptor.name ])) newValues itemElements
 
 
-getOptionValues : List String -> OptionElement -> Dict String String -> Dict String String
+getOptionValues : List String -> OptionElement -> FormValues -> FormValues
 getOptionValues path option values =
     case option of
         DetailedOptionElement descriptor items ->
@@ -282,7 +321,7 @@ getOptionValues path option values =
             values
 
 
-getItemValues : List String -> Int -> ItemElement -> Dict String String -> Dict String String
+getItemValues : List String -> Int -> ItemElement -> FormValues -> FormValues
 getItemValues path index item values =
     List.foldl (getFieldValue (path ++ [ toString index ])) values item
 
@@ -292,11 +331,11 @@ pathToKey path current =
     String.join "." (path ++ [ current ])
 
 
-applyFieldValue : Dict String String -> String -> FormElementState a -> Dict String String
+applyFieldValue : FormValues -> String -> FormElementState a -> FormValues
 applyFieldValue values key state =
     case state.value of
         Just value ->
-            Dict.insert key (valueToString value) values
+            values ++ [ { path = key, value = valueToString value } ]
 
         _ ->
             values

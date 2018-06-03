@@ -114,18 +114,10 @@ handlePutRepliesCompleted model result =
 putRepliesCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
 putRepliesCmd wrapMsg session model =
     model.replies
-        |> encodeReplies
+        |> encodeFormValues
         |> putReplies model.uuid session
         |> Jwt.send PutRepliesCompleted
         |> Cmd.map wrapMsg
-
-
-encodeReplies : Dict String String -> Encode.Value
-encodeReplies replies =
-    replies
-        |> Dict.toList
-        |> List.map (\( k, v ) -> ( k, Encode.string v ))
-        |> Encode.object
 
 
 updateReplies : Model -> Model
@@ -134,7 +126,7 @@ updateReplies model =
         replies =
             case ( model.activeChapterForm, model.activeChapter ) of
                 ( Just form, Just chapter ) ->
-                    getFormValues model.replies [ chapter.uuid ] form
+                    getFormValues [ chapter.uuid ] form
 
                 _ ->
                     model.replies
@@ -161,9 +153,9 @@ setActiveChapterForm model =
 {- Form creation -}
 
 
-createChapterForm : Chapter -> Dict String String -> Form
+createChapterForm : Chapter -> FormValues -> Form
 createChapterForm chapter values =
-    createForm { items = List.map createQuestionFormItem chapter.questions } { values = values } [ chapter.uuid ]
+    createForm { items = List.map createQuestionFormItem chapter.questions } values [ chapter.uuid ]
 
 
 createQuestionFormItem : Question -> FormItem
