@@ -74,9 +74,6 @@ tableActionDelete wrapMsg =
 exportFormats : List ( String, String )
 exportFormats =
     [ ( "json", "JSON Data" )
-    , ( "pdf", "PDF Document" )
-    , ( "html", "HTML Document" )
-    , ( "docx", "DOCX Document" )
     ]
 
 
