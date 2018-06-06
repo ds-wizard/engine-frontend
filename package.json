@@ -1,6 +1,6 @@
 {
   "name": "elixir-dsw-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "build": "rm -rf ./dist && webpack -p",
     "start": "webpack-dev-server --port 8080",
