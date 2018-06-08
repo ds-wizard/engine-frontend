@@ -13,6 +13,7 @@ import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import Jwt
 import KMEditor.Common.Models.Entities exposing (..)
+import List.Extra as List
 import Msgs
 import Routing exposing (cmdNavigate)
 
@@ -125,6 +126,8 @@ updateReplies model =
             case ( model.activeChapterForm, model.activeChapter ) of
                 ( Just form, Just chapter ) ->
                     getFormValues [ chapter.uuid ] form
+                        ++ model.replies
+                        |> List.uniqueBy .path
 
                 _ ->
                     model.replies
