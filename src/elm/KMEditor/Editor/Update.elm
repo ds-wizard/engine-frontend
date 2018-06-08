@@ -21,6 +21,7 @@ import KMEditor.Routing exposing (Route(Index))
 import Msgs
 import Random.Pcg exposing (Seed)
 import Reorderable
+import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
@@ -62,8 +63,11 @@ getKnowledgeModelCompleted model result =
 
                 Err error ->
                     { model | knowledgeModelEditor = getServerErrorJwt error "Unable to get knowledge model" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 postEventsBulkCmd : (Msg -> Msgs.Msg) -> String -> List Event -> Session -> Cmd Msgs.Msg
@@ -81,7 +85,9 @@ postEventsBulkCompleted model result =
             ( model, cmdNavigate <| KMEditor Index )
 
         Err error ->
-            ( { model | saving = getServerErrorJwt error "Knowledge model could not be saved" }, Cmd.none )
+            ( { model | saving = getServerErrorJwt error "Knowledge model could not be saved" }
+            , getResultCmd result
+            )
 
 
 updateEdit : KnowledgeModelMsg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )

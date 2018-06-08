@@ -15,7 +15,7 @@ import Msgs
 import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))
 import Organization.Requests exposing (..)
-import Requests exposing (toCmd)
+import Requests exposing (getResultCmd, toCmd)
 
 
 {-| -}
@@ -43,8 +43,11 @@ getCurrentOrganizationCompleted model result =
 
                 Err error ->
                     { model | organization = getServerErrorJwt error "Unable to get organization information." }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 putCurrentOrganizationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -57,8 +60,11 @@ putCurrentOrganizationCompleted model result =
 
                 Err error ->
                     getServerErrorJwt error "Organization could not be saved"
+
+        cmd =
+            getResultCmd result
     in
-    ( { model | savingOrganization = newResult }, Cmd.none )
+    ( { model | savingOrganization = newResult }, cmd )
 
 
 handleForm : Form.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )

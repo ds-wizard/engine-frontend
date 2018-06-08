@@ -1,17 +1,5 @@
 module Utils exposing (..)
 
-{-|
-
-@docs tuplePrepend
-
-@docs validateRegex
-
-@docs getUuid
-
-@docs versionIsGreater, splitVersion
-
--}
-
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
 import List.Extra as List
@@ -21,13 +9,11 @@ import Task
 import Uuid
 
 
-{-| -}
 tuplePrepend : a -> ( b, c ) -> ( a, b, c )
 tuplePrepend a ( b, c ) =
     ( a, b, c )
 
 
-{-| -}
 validateRegex : String -> Validation e String
 validateRegex regex =
     Validate.string
@@ -35,7 +21,6 @@ validateRegex regex =
             (\s -> Validate.format (Regex.regex regex) s |> mapError (\_ -> Error.value InvalidFormat))
 
 
-{-| -}
 getUuid : Seed -> ( String, Seed )
 getUuid seed =
     let
@@ -45,7 +30,6 @@ getUuid seed =
     ( Uuid.toString uuid, newSeed )
 
 
-{-| -}
 versionIsGreater : String -> String -> Bool
 versionIsGreater than version =
     case ( splitVersion version, splitVersion than ) of
@@ -56,7 +40,6 @@ versionIsGreater than version =
             False
 
 
-{-| -}
 splitVersion : String -> Maybe ( Int, Int, Int )
 splitVersion version =
     let

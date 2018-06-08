@@ -1,10 +1,13 @@
 module Requests exposing (..)
 
 import Auth.Models exposing (Session)
+import Auth.Msgs
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode exposing (Value)
 import Jwt
+import Msgs
+import Utils exposing (dispatch)
 
 
 apiUrl : String -> String
@@ -61,3 +64,22 @@ emptyResponseRequest method body session url =
                 (Decode.succeed "")
     in
     { req | expect = Http.expectString } |> Http.request
+
+
+getResultCmd : Result Jwt.JwtError a -> Cmd Msgs.Msg
+getResultCmd result =
+    case result of
+        Ok _ ->
+            Cmd.none
+
+        Err error ->
+            let
+                a =
+                    Debug.log "tralala" error
+            in
+            case error of
+                Jwt.Unauthorized ->
+                    dispatch <| Msgs.AuthMsg Auth.Msgs.Logout
+
+                _ ->
+                    Cmd.none

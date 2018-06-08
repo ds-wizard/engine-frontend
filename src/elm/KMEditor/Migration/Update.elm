@@ -10,6 +10,7 @@ import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (getMigration, postMigrationConflict)
 import Msgs
+import Requests exposing (getResultCmd)
 
 
 fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
@@ -42,7 +43,9 @@ handleGetMigrationCompleted model result =
             ( { model | migration = Success migration }, Cmd.none )
 
         Err error ->
-            ( { model | migration = getServerErrorJwt error "Unable to get migration" }, Cmd.none )
+            ( { model | migration = getServerErrorJwt error "Unable to get migration" }
+            , getResultCmd result
+            )
 
 
 handleAcceptChange : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -93,4 +96,6 @@ handlePostMigrationConflictCompleted wrapMsg session model result =
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
         Err error ->
-            ( { model | conflict = getServerErrorJwt error "Unable to resolve conflict" }, Cmd.none )
+            ( { model | conflict = getServerErrorJwt error "Unable to resolve conflict" }
+            , getResultCmd result
+            )

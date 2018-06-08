@@ -14,6 +14,7 @@ import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackagesFiltered)
 import List.Extra as List
 import Msgs
+import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (versionIsGreater)
 
@@ -69,8 +70,11 @@ getKnowledgeModelsCompleted model result =
 
                 Err error ->
                     { model | knowledgeModels = getServerErrorJwt error "Unable to fetch knowledge models" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 handleDeleteKM : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -100,7 +104,7 @@ deleteKnowledgeModelCompleted model result =
 
         Err error ->
             ( { model | deletingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be deleted" }
-            , Cmd.none
+            , getResultCmd result
             )
 
 
@@ -117,7 +121,9 @@ postMigrationCompleted model result =
             ( model, cmdNavigate <| KMEditor <| Migration kmUuid )
 
         Err error ->
-            ( { model | creatingMigration = getServerErrorJwt error "Migration could not be created" }, Cmd.none )
+            ( { model | creatingMigration = getServerErrorJwt error "Migration could not be created" }
+            , getResultCmd result
+            )
 
 
 handleShowHideUpgradeModal : (Msg -> Msgs.Msg) -> Maybe KnowledgeModel -> Model -> Session -> ( Model, Cmd Msgs.Msg )
@@ -188,7 +194,9 @@ handleGetPackagesCompleted model result =
             ( { model | packages = Success packageList }, Cmd.none )
 
         Err error ->
-            ( { model | packages = getServerErrorJwt error "Unable to get package list" }, Cmd.none )
+            ( { model | packages = getServerErrorJwt error "Unable to get package list" }
+            , getResultCmd result
+            )
 
 
 filterPackages : List PackageDetail -> KnowledgeModel -> Maybe (List PackageDetail)
@@ -224,5 +232,5 @@ deleteMigrationCompleted wrapMsg session model result =
 
         Err error ->
             ( { model | deletingMigration = getServerErrorJwt error "Migration could not be deleted" }
-            , Cmd.none
+            , getResultCmd result
             )

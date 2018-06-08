@@ -12,6 +12,7 @@ import Jwt
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
 import Msgs
+import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 
 
@@ -45,8 +46,11 @@ getPackagesCompleted model result =
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package list" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 setSelectedPackage : Model -> List PackageDetail -> Model
@@ -96,4 +100,6 @@ postQuestionnaireCompleted model result =
             ( model, cmdNavigate <| Routing.DSPlanner Index )
 
         Err error ->
-            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be created." }, Cmd.none )
+            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be created." }
+            , getResultCmd result
+            )

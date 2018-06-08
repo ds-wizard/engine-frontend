@@ -15,6 +15,7 @@ import Jwt
 import KMEditor.Common.Models.Entities exposing (..)
 import List.Extra as List
 import Msgs
+import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 
 
@@ -29,7 +30,7 @@ update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg session model =
     case msg of
         GetQuestionnaireCompleted result ->
-            ( handleGetQuestionnaireCompleted model result, Cmd.none )
+            handleGetQuestionnaireCompleted model result
 
         SetActiveChapter chapter ->
             ( handleSetActiveChapter chapter model, Cmd.none )
@@ -48,7 +49,7 @@ update msg wrapMsg session model =
 {- Update handlers -}
 
 
-handleGetQuestionnaireCompleted : Model -> Result Jwt.JwtError QuestionnaireDetail -> Model
+handleGetQuestionnaireCompleted : Model -> Result Jwt.JwtError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
 handleGetQuestionnaireCompleted model result =
     let
         newModel =
@@ -62,8 +63,11 @@ handleGetQuestionnaireCompleted model result =
 
                 Err error ->
                     { model | questionnaire = getServerErrorJwt error "Unable to get questionnaire." }
+
+        cmd =
+            getResultCmd result
     in
-    setActiveChapterForm newModel
+    ( setActiveChapterForm newModel, cmd )
 
 
 handleSetActiveChapter : Chapter -> Model -> Model
@@ -103,7 +107,9 @@ handlePutRepliesCompleted model result =
             ( model, cmdNavigate <| Routing.DSPlanner Index )
 
         Err error ->
-            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be saved." }, Cmd.none )
+            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be saved." }
+            , getResultCmd result
+            )
 
 
 

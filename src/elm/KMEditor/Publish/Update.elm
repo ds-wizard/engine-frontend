@@ -11,6 +11,7 @@ import KMEditor.Publish.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (getKnowledgeModel, putKnowledgeModelVersion)
 import KMPackages.Routing
 import Msgs
+import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
@@ -44,6 +45,9 @@ getKnowledgeModelCompleted model result =
 
                 Err error ->
                     { model | knowledgeModel = getServerErrorJwt error "Unable to get the knowledge model." }
+
+        cmd =
+            getResultCmd result
     in
     ( newModel, Cmd.none )
 
@@ -84,4 +88,6 @@ putKnowledgeModelVersionCompleted model result =
             ( model, cmdNavigate (KMPackages KMPackages.Routing.Index) )
 
         Err error ->
-            ( { model | publishingKnowledgeModel = getServerErrorJwt error "Publishing new version failed" }, Cmd.none )
+            ( { model | publishingKnowledgeModel = getServerErrorJwt error "Publishing new version failed" }
+            , getResultCmd result
+            )

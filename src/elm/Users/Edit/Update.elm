@@ -6,6 +6,7 @@ import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
 import Msgs
+import Requests exposing (getResultCmd)
 import Users.Common.Models exposing (..)
 import Users.Edit.Models exposing (..)
 import Users.Edit.Msgs exposing (Msg(..))
@@ -84,8 +85,11 @@ getUserCompleted model result =
 
                 Err error ->
                     { model | user = Error "Unable to get user profile." }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 handlePasswordForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -124,8 +128,11 @@ putUserCompleted model result =
 
                 Err error ->
                     Error "Profile could not be saved."
+
+        cmd =
+            getResultCmd result
     in
-    ( { model | savingUser = editResult }, Cmd.none )
+    ( { model | savingUser = editResult }, cmd )
 
 
 putUserPasswordCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -138,5 +145,8 @@ putUserPasswordCompleted model result =
 
                 Err error ->
                     getServerErrorJwt error "Password could not be changed."
+
+        cmd =
+            getResultCmd result
     in
-    ( { model | savingPassword = passwordResult }, Cmd.none )
+    ( { model | savingPassword = passwordResult }, cmd )

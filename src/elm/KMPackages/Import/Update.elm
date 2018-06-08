@@ -11,6 +11,7 @@ import KMPackages.Import.Msgs exposing (Msg(..))
 import KMPackages.Requests exposing (importPackage)
 import KMPackages.Routing
 import Msgs
+import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
@@ -66,4 +67,6 @@ importPackageCompleted model result =
             ( model, cmdNavigate (KMPackages KMPackages.Routing.Index) )
 
         Err error ->
-            ( { model | importing = getServerErrorJwt error "Importing package failed." }, Cmd.none )
+            ( { model | importing = getServerErrorJwt error "Importing package failed." }
+            , getResultCmd result
+            )
