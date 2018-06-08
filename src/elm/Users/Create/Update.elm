@@ -7,6 +7,7 @@ import Form exposing (Form)
 import Jwt
 import Msgs
 import Random.Pcg exposing (Seed, step)
+import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 import Users.Create.Models exposing (..)
 import Users.Create.Msgs exposing (Msg(..))
@@ -64,4 +65,6 @@ postUserCompleted model result =
             ( model, cmdNavigate <| Routing.Users Index )
 
         Err error ->
-            ( { model | savingUser = getServerErrorJwt error "User could not be created." }, Cmd.none )
+            ( { model | savingUser = getServerErrorJwt error "User could not be created." }
+            , getResultCmd result
+            )

@@ -14,6 +14,7 @@ import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
 import Msgs
 import Random.Pcg exposing (Seed)
+import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
 
@@ -48,8 +49,11 @@ getPackageCompleted model result =
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package list" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 setSelectedPackage : Model -> List PackageDetail -> Model
@@ -110,5 +114,5 @@ postKmCompleted model result =
                 | form = setFormErrorsJwt error model.form
                 , savingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be created."
               }
-            , Cmd.none
+            , getResultCmd result
             )

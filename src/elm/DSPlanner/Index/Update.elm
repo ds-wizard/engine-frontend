@@ -10,6 +10,7 @@ import DSPlanner.Index.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (deleteQuestionnaire, getQuestionnaires)
 import Jwt
 import Msgs
+import Requests exposing (getResultCmd)
 
 
 fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
@@ -48,8 +49,11 @@ getQuestionnairesCompleted model result =
 
                 Err error ->
                     { model | questionnaires = getServerErrorJwt error "Unable to fetch questionnaire list" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 handleDeleteQuestionnaire : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -81,7 +85,7 @@ deleteQuestionnaireCompleted wrapMsg session model result =
 
         Err error ->
             ( { model | deletingQuestionnaire = getServerErrorJwt error "Questionnaire could not be deleted" }
-            , Cmd.none
+            , getResultCmd result
             )
 
 

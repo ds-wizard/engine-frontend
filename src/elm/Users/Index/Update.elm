@@ -5,6 +5,7 @@ import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
+import Requests exposing (getResultCmd)
 import Users.Common.Models exposing (User)
 import Users.Index.Models exposing (Model)
 import Users.Index.Msgs exposing (Msg(..))
@@ -52,8 +53,11 @@ getUsersCompleted model result =
 
                 Err error ->
                     { model | users = getServerErrorJwt error "Unable to fetch user list" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 handleDeleteUser : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -78,5 +82,5 @@ deleteUserCompleted wrapMsg session model result =
 
         Err error ->
             ( { model | deletingUser = getServerErrorJwt error "User could not be deleted" }
-            , Cmd.none
+            , getResultCmd result
             )

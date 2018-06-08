@@ -10,6 +10,7 @@ import KMPackages.Detail.Msgs exposing (Msg(..))
 import KMPackages.Requests exposing (..)
 import KMPackages.Routing exposing (Route(..))
 import Msgs
+import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
@@ -46,8 +47,11 @@ getPackageCompleted model result =
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package detail" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 handleDeleteVersion : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -88,5 +92,5 @@ deleteVersionCompleted model result =
             ( { model
                 | deletingVersion = getServerErrorJwt error "Version could not be deleted"
               }
-            , Cmd.none
+            , getResultCmd result
             )

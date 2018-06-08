@@ -9,6 +9,7 @@ import KMPackages.Index.Models exposing (Model)
 import KMPackages.Index.Msgs exposing (Msg(..))
 import KMPackages.Requests exposing (deletePackage, getPackagesUnique)
 import Msgs
+import Requests exposing (getResultCmd)
 
 
 fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
@@ -44,8 +45,11 @@ getPackagesCompleted model result =
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to fetch package list" }
+
+        cmd =
+            getResultCmd result
     in
-    ( newModel, Cmd.none )
+    ( newModel, cmd )
 
 
 handleDeletePackage : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -81,5 +85,5 @@ deletePackageCompleted wrapMsg session model result =
 
         Err error ->
             ( { model | deletingPackage = getServerErrorJwt error "Package could not be deleted" }
-            , Cmd.none
+            , getResultCmd result
             )
