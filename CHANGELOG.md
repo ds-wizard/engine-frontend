@@ -1,3 +1,10 @@
+# 0.2.1
+
+## Fixes
+
+- Fix a bug when switching the chapter in questionnaire without saving it first caused loosing the replies data 
+
+
 # 0.2.0
 
 ## Data structures
