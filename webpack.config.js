@@ -1,12 +1,13 @@
 var path = require('path')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
+var HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   entry: ['./src/index.js', './src/scss/main.scss'],
 
   output: {
     path: path.resolve(__dirname + '/dist'),
-    filename: 'app.js',
+    filename: '[name].[chunkhash].js',
     publicPath: '/'
   },
 
@@ -45,8 +46,11 @@ module.exports = {
   },
 
   plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Data Stewardship Wizard'
+    }),
     new ExtractTextPlugin({
-      filename: 'style.css',
+      filename: '[name].[chunkhash].css',
       allChunks: true
     })
   ],
