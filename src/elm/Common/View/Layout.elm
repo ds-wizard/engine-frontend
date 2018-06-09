@@ -83,7 +83,7 @@ menuItems =
     [ ( "Organization", "fa-building", Organization, Perm.organization )
     , ( "Users", "fa-users", Users Users.Routing.Index, Perm.userManagement )
     , ( "KM Editor", "fa-edit", KMEditor KMEditor.Routing.Index, Perm.knowledgeModel )
-    , ( "KM Packages", "fa-cubes", KMPackages KMPackages.Routing.Index, Perm.packageManagement )
+    , ( "KM Packages", "fa-cubes", KMPackages KMPackages.Routing.Index, Perm.packageManagementRead )
     , ( "DS Planner", "fa-list-alt", DSPlanner DSPlanner.Routing.Index, Perm.questionnaire )
     ]
 

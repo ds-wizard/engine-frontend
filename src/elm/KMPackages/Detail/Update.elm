@@ -1,6 +1,7 @@
 module KMPackages.Detail.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
+import Bootstrap.Dropdown as Dropdown
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(..))
 import Jwt
@@ -36,6 +37,9 @@ update msg wrapMsg session model =
         DeleteVersionCompleted result ->
             deleteVersionCompleted model result
 
+        DropdownMsg packageDetail state ->
+            handleDropdownToggle model packageDetail state
+
 
 getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
 getPackageCompleted model result =
@@ -43,7 +47,7 @@ getPackageCompleted model result =
         newModel =
             case result of
                 Ok packages ->
-                    { model | packages = Success packages }
+                    { model | packages = Success <| List.map initPackageDetailRow packages }
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package detail" }
@@ -94,3 +98,23 @@ deleteVersionCompleted model result =
               }
             , getResultCmd result
             )
+
+
+handleDropdownToggle : Model -> PackageDetail -> Dropdown.State -> ( Model, Cmd Msgs.Msg )
+handleDropdownToggle model packageDetail state =
+    case model.packages of
+        Success packageDetailRows ->
+            let
+                replaceWith row =
+                    if row.packageDetail == packageDetail then
+                        { row | dropdownState = state }
+                    else
+                        row
+
+                newRows =
+                    List.map replaceWith packageDetailRows
+            in
+            ( { model | packages = Success newRows }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )

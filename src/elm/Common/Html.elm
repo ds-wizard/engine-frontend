@@ -9,13 +9,14 @@ import Routing exposing (Route)
 
 linkTo : Route -> List (Attribute Msg) -> List (Html Msg) -> Html Msg
 linkTo route attributes children =
-    let
-        hrefAttributes =
-            [ href <| Routing.toUrl route
-            , onLinkClick <| Msgs.ChangeLocation <| Routing.toUrl route
-            ]
-    in
-    a (attributes ++ hrefAttributes) children
+    a (attributes ++ linkToAttributes route) children
+
+
+linkToAttributes : Route -> List (Attribute Msg)
+linkToAttributes route =
+    [ href <| Routing.toUrl route
+    , onLinkClick <| Msgs.ChangeLocation <| Routing.toUrl route
+    ]
 
 
 emptyNode : Html msg

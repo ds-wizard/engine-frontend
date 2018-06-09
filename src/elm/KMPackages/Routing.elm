@@ -44,4 +44,9 @@ toUrl route =
 
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
-    hasPerm maybeJwt Perm.packageManagement
+    case route of
+        Import ->
+            hasPerm maybeJwt Perm.packageManagementWrite
+
+        _ ->
+            hasPerm maybeJwt Perm.packageManagementRead

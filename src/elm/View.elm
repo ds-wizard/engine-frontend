@@ -33,7 +33,7 @@ view model =
 
         KMPackages route ->
             model.kmPackagesModel
-                |> KMPackages.View.view route KMPackagesMsg
+                |> KMPackages.View.view route KMPackagesMsg model.jwt
                 |> appView model
 
         Organization ->

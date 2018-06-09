@@ -65,6 +65,10 @@ label {
     display: block;
 }
 
+.btn-outline-primary:hover {
+    color: $white !important;
+}
+
 del, .del {
     color: #900;
     background: #fee;
