@@ -1,16 +1,9 @@
 'use strict'
 
-// get index.html to the build
-require('./index.html')
-
-// get images to the build
-// ...
-
 // initialize elm app
 var Elm = require('./elm/Main.elm')
-var mountNode = document.getElementById('main')
 
-var app = Elm.Main.embed(mountNode, {
+var app = Elm.Main.fullscreen({
     seed: Math.floor(Math.random() * 0xFFFFFFFF),
     session: JSON.parse(localStorage.session || null)
 })
