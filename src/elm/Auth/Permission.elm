@@ -38,9 +38,14 @@ knowledgeModelPublish =
     "KM_PUBLISH_PERM"
 
 
-packageManagement : String
-packageManagement =
-    "PM_PERM"
+packageManagementWrite : String
+packageManagementWrite =
+    "PM_WRITE_PERM"
+
+
+packageManagementRead : String
+packageManagementRead =
+    "PM_READ_PERM"
 
 
 questionnaire : String

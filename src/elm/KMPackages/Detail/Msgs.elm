@@ -1,5 +1,6 @@
 module KMPackages.Detail.Msgs exposing (..)
 
+import Bootstrap.Dropdown as Dropdown
 import Jwt
 import KMPackages.Common.Models exposing (PackageDetail)
 
@@ -9,3 +10,4 @@ type Msg
     | ShowHideDeleteVersion (Maybe String)
     | DeleteVersion
     | DeleteVersionCompleted (Result Jwt.JwtError String)
+    | DropdownMsg PackageDetail Dropdown.State

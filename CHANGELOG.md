@@ -1,3 +1,8 @@
+# Develop
+
+- Split permision `PM_PERM` to `PM_READ_PERM` and `PM_WRITE_PERM`
+- Logout user when the server respond with 401
+
 # 0.2.1
 
 ## Fixes

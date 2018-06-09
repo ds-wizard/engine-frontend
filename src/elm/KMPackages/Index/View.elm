@@ -1,5 +1,7 @@
 module KMPackages.Index.View exposing (view)
 
+import Auth.Models exposing (JwtToken)
+import Auth.Permission exposing (hasPerm, packageManagementWrite)
 import Common.Html exposing (..)
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (formSuccessResultView)
@@ -14,28 +16,31 @@ import Msgs
 import Routing exposing (Route(..))
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
+view wrapMsg jwt model =
     div [ class "col" ]
-        [ pageHeader "Knowledge Model Packages" indexActions
+        [ pageHeader "Knowledge Model Packages" (indexActions jwt)
         , formSuccessResultView model.deletingPackage
-        , fullPageActionResultView (indexTable tableConfig wrapMsg) model.packages
+        , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.packages
         , deleteModal wrapMsg model
         ]
 
 
-indexActions : List (Html Msgs.Msg)
-indexActions =
-    [ linkTo (Routing.KMPackages Import)
-        [ class "btn btn-primary link-with-icon" ]
-        [ i [ class "fa fa-cloud-upload" ] []
-        , text "Import"
+indexActions : Maybe JwtToken -> List (Html Msgs.Msg)
+indexActions jwt =
+    if hasPerm jwt packageManagementWrite then
+        [ linkTo (Routing.KMPackages Import)
+            [ class "btn btn-primary link-with-icon" ]
+            [ i [ class "fa fa-cloud-upload" ] []
+            , text "Import"
+            ]
         ]
-    ]
+    else
+        []
 
 
-tableConfig : TableConfig Package Msg
-tableConfig =
+tableConfig : Maybe JwtToken -> TableConfig Package Msg
+tableConfig jwt =
     { emptyMessage = "There are no packages."
     , fields =
         [ { label = "Name"
@@ -51,7 +56,7 @@ tableConfig =
     , actions =
         [ { label = TableActionIcon "fa fa-trash-o"
           , action = TableActionMsg tableActionDelete
-          , visible = always True
+          , visible = always <| hasPerm jwt packageManagementWrite
           }
         , { label = TableActionText "View detail"
           , action = TableActionLink tableActionViewDetail
