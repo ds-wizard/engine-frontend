@@ -1,12 +1,13 @@
 module Public.Update exposing (..)
 
 import Msgs
+import Public.BookReference.Update
 import Public.ForgottenPassword.Update
 import Public.ForgottenPasswordConfirmation.Update
 import Public.Login.Update
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
-import Public.Routing exposing (Route(SignupConfirmation))
+import Public.Routing exposing (Route(BookReference, SignupConfirmation))
 import Public.Signup.Update
 import Public.SignupConfirmation.Update
 import Random.Pcg exposing (Seed)
@@ -15,6 +16,9 @@ import Random.Pcg exposing (Seed)
 fetchData : Route -> (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
 fetchData route wrapMsg =
     case route of
+        BookReference uuid ->
+            Public.BookReference.Update.fetchData (wrapMsg << BookReferenceMsg) uuid
+
         SignupConfirmation userId hash ->
             Public.SignupConfirmation.Update.fetchData (wrapMsg << SignupConfirmationMsg) userId hash
 
@@ -25,6 +29,13 @@ fetchData route wrapMsg =
 update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 update msg wrapMsg seed model =
     case msg of
+        BookReferenceMsg msg ->
+            let
+                ( bookReferenceModel, cmd ) =
+                    Public.BookReference.Update.update msg (wrapMsg << BookReferenceMsg) model.bookReferenceModel
+            in
+            ( seed, { model | bookReferenceModel = bookReferenceModel }, cmd )
+
         ForgottenPasswordMsg msg ->
             let
                 ( forgottenPasswordModel, cmd ) =

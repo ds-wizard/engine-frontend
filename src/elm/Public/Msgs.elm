@@ -1,5 +1,6 @@
 module Public.Msgs exposing (..)
 
+import Public.BookReference.Msgs
 import Public.ForgottenPassword.Msgs
 import Public.ForgottenPasswordConfirmation.Msgs
 import Public.Login.Msgs
@@ -8,7 +9,8 @@ import Public.SignupConfirmation.Msgs
 
 
 type Msg
-    = ForgottenPasswordMsg Public.ForgottenPassword.Msgs.Msg
+    = BookReferenceMsg Public.BookReference.Msgs.Msg
+    | ForgottenPasswordMsg Public.ForgottenPassword.Msgs.Msg
     | ForgottenPasswordConfirmationMsg Public.ForgottenPasswordConfirmation.Msgs.Msg
     | LoginMsg Public.Login.Msgs.Msg
     | SignupMsg Public.Signup.Msgs.Msg
