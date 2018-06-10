@@ -1,5 +1,6 @@
 module Public.Models exposing (..)
 
+import Public.BookReference.Models
 import Public.ForgottenPassword.Models
 import Public.ForgottenPasswordConfirmation.Models
 import Public.Login.Models
@@ -9,7 +10,8 @@ import Public.SignupConfirmation.Models
 
 
 type alias Model =
-    { forgottenPasswordModel : Public.ForgottenPassword.Models.Model
+    { bookReferenceModel : Public.BookReference.Models.Model
+    , forgottenPasswordModel : Public.ForgottenPassword.Models.Model
     , forgottenPasswordConfirmationModel : Public.ForgottenPasswordConfirmation.Models.Model
     , loginModel : Public.Login.Models.Model
     , signupModel : Public.Signup.Models.Model
@@ -19,7 +21,8 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { forgottenPasswordModel = Public.ForgottenPassword.Models.initialModel
+    { bookReferenceModel = Public.BookReference.Models.initialModel
+    , forgottenPasswordModel = Public.ForgottenPassword.Models.initialModel
     , forgottenPasswordConfirmationModel = Public.ForgottenPasswordConfirmation.Models.initialModel "" ""
     , loginModel = Public.Login.Models.initialModel
     , signupModel = Public.Signup.Models.initialModel
@@ -30,6 +33,9 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
+        BookReference uuid ->
+            { model | bookReferenceModel = Public.BookReference.Models.initialModel }
+
         ForgottenPassword ->
             { model | forgottenPasswordModel = Public.ForgottenPassword.Models.initialModel }
 

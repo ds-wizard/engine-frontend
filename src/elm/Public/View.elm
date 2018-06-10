@@ -2,6 +2,7 @@ module Public.View exposing (view)
 
 import Html exposing (Html)
 import Msgs
+import Public.BookReference.View
 import Public.ForgottenPassword.View
 import Public.ForgottenPasswordConfirmation.View
 import Public.Login.View
@@ -15,6 +16,9 @@ import Public.SignupConfirmation.View
 view : Route -> (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view route wrapMsg model =
     case route of
+        BookReference uuid ->
+            Public.BookReference.View.view model.bookReferenceModel
+
         ForgottenPassword ->
             Public.ForgottenPassword.View.view (wrapMsg << ForgottenPasswordMsg) model.forgottenPasswordModel
 
