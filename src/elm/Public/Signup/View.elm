@@ -5,8 +5,9 @@ import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
+import Form.Input as Input
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.Routing exposing (Route(Login))
@@ -26,7 +27,7 @@ view wrapMsg model =
                 _ ->
                     signupForm wrapMsg model
     in
-    div [ class "row justify-content-center" ]
+    div [ class "row justify-content-center Public__Signup" ]
         [ content ]
 
 
@@ -47,12 +48,37 @@ signupForm wrapMsg model =
 
 formView : Form CustomFormError SignupForm -> Html Form.Msg
 formView form =
+    let
+        acceptField =
+            Form.getFieldAsBool "accept" form
+
+        hasError =
+            case acceptField.liveError of
+                Just err ->
+                    True
+
+                Nothing ->
+                    False
+
+        acceptGroup =
+            div [ class "form-group form-group-accept", classList [ ( "has-error", hasError ) ] ]
+                [ label [ for "accept" ]
+                    [ Input.checkboxInput acceptField [ id "accept", name "accept" ]
+                    , text "I have read "
+                    , a [ href "https://dsw.fairdata.solutions/privacy.html", target "_blank" ]
+                        [ text "Privacy" ]
+                    , text "."
+                    ]
+                , p [ class "invalid-feedback" ] [ text "You have to read Privacy first" ]
+                ]
+    in
     div []
         [ inputGroup form "email" "Email"
         , inputGroup form "name" "Name"
         , inputGroup form "surname" "Surname"
         , passwordGroup form "password" "Password"
         , passwordGroup form "passwordConfirmation" "Password again"
+        , acceptGroup
         ]
 
 

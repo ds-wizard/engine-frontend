@@ -4,6 +4,8 @@
 - Logout user when the server respond with 401
 - Cache busting
 - Public book references
+- Privacy link added to the signup form
+
 
 # 0.2.1
 

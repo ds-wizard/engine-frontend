@@ -2,8 +2,10 @@ module Public.Signup.Models exposing (..)
 
 import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (..)
-import Common.Types exposing (ActionResult(..))
+import Common.Types exposing (ActionResult(Unset))
 import Form exposing (Form)
+import Form.Error as Error exposing (Error, ErrorValue(Empty))
+import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 
@@ -27,6 +29,7 @@ type alias SignupForm =
     , surname : String
     , password : String
     , passwordConfirmation : String
+    , accept : Bool
     }
 
 
@@ -37,12 +40,21 @@ initEmptySignupForm =
 
 signupFormValidation : Validation CustomFormError SignupForm
 signupFormValidation =
-    Validate.map5 SignupForm
+    Validate.map6 SignupForm
         (Validate.field "email" Validate.email)
         (Validate.field "name" Validate.string)
         (Validate.field "surname" Validate.string)
         (Validate.field "password" Validate.string)
         (Validate.field "password" Validate.string |> validateConfirmation "passwordConfirmation")
+        (Validate.field "accept" validateAcceptField)
+
+
+validateAcceptField : Field -> Result (Error customError) Bool
+validateAcceptField v =
+    if Field.asBool v |> Maybe.withDefault False then
+        Ok True
+    else
+        Err (Error.value Empty)
 
 
 encodeSignupForm : String -> SignupForm -> Encode.Value
