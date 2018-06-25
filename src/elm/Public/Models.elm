@@ -4,6 +4,7 @@ import Public.BookReference.Models
 import Public.ForgottenPassword.Models
 import Public.ForgottenPasswordConfirmation.Models
 import Public.Login.Models
+import Public.Questionnaire.Models
 import Public.Routing exposing (Route(..))
 import Public.Signup.Models
 import Public.SignupConfirmation.Models
@@ -14,6 +15,7 @@ type alias Model =
     , forgottenPasswordModel : Public.ForgottenPassword.Models.Model
     , forgottenPasswordConfirmationModel : Public.ForgottenPasswordConfirmation.Models.Model
     , loginModel : Public.Login.Models.Model
+    , questionnaireModel : Public.Questionnaire.Models.Model
     , signupModel : Public.Signup.Models.Model
     , signupConfirmationModel : Public.SignupConfirmation.Models.Model
     }
@@ -25,6 +27,7 @@ initialModel =
     , forgottenPasswordModel = Public.ForgottenPassword.Models.initialModel
     , forgottenPasswordConfirmationModel = Public.ForgottenPasswordConfirmation.Models.initialModel "" ""
     , loginModel = Public.Login.Models.initialModel
+    , questionnaireModel = Public.Questionnaire.Models.initialModel
     , signupModel = Public.Signup.Models.initialModel
     , signupConfirmationModel = Public.SignupConfirmation.Models.initialModel
     }
@@ -44,6 +47,9 @@ initLocalModel route model =
 
         Login ->
             { model | loginModel = Public.Login.Models.initialModel }
+
+        Questionnaire ->
+            { model | questionnaireModel = Public.Questionnaire.Models.initialModel }
 
         Signup ->
             { model | signupModel = Public.Signup.Models.initialModel }

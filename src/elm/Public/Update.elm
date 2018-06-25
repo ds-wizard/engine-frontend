@@ -7,6 +7,7 @@ import Public.ForgottenPasswordConfirmation.Update
 import Public.Login.Update
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
+import Public.Questionnaire.Update
 import Public.Routing exposing (Route(BookReference, SignupConfirmation))
 import Public.Signup.Update
 import Public.SignupConfirmation.Update
@@ -56,6 +57,13 @@ update msg wrapMsg seed model =
                     Public.Login.Update.update msg (wrapMsg << LoginMsg) model.loginModel
             in
             ( seed, { model | loginModel = loginModel }, cmd )
+
+        QuestionnaireMsg msg ->
+            let
+                ( questionnaireModel, cmd ) =
+                    Public.Questionnaire.Update.update msg (wrapMsg << QuestionnaireMsg) model.questionnaireModel
+            in
+            ( seed, { model | questionnaireModel = questionnaireModel }, cmd )
 
         SignupMsg msg ->
             let

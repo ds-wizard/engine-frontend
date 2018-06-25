@@ -52,6 +52,9 @@ decideInitialRoute model route =
                 ( True, Public.Routing.BookReference _ ) ->
                     fetchData model
 
+                ( True, Public.Routing.Questionnaire ) ->
+                    fetchData model
+
                 ( True, _ ) ->
                     cmdNavigate Welcome
 
