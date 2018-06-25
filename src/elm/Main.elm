@@ -5,6 +5,7 @@ import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
 import Navigation exposing (Location)
+import Public.Routing
 import Routing exposing (Route(..), cmdNavigate, homeRoute, routeIfAllowed)
 import Subscriptions exposing (subscriptions)
 import Update exposing (fetchData, update)
@@ -46,11 +47,16 @@ decodeFlagsFromJson =
 decideInitialRoute : Model -> Route -> Cmd Msg
 decideInitialRoute model route =
     case route of
-        Public _ ->
-            if userLoggedIn model then
-                cmdNavigate Welcome
-            else
-                fetchData model
+        Public subroute ->
+            case ( userLoggedIn model, subroute ) of
+                ( True, Public.Routing.BookReference _ ) ->
+                    fetchData model
+
+                ( True, _ ) ->
+                    cmdNavigate Welcome
+
+                _ ->
+                    fetchData model
 
         _ ->
             if userLoggedIn model then

@@ -150,3 +150,8 @@ loginRoute =
 signupRoute : Route
 signupRoute =
     Public Public.Routing.Signup
+
+
+appRoute : Route
+appRoute =
+    Welcome

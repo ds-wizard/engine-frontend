@@ -44,7 +44,7 @@ view model =
         Public route ->
             model.publicModel
                 |> Public.View.view route PublicMsg
-                |> publicView
+                |> publicView model
 
         Users route ->
             model.users

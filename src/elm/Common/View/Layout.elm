@@ -9,31 +9,38 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMEditor.Routing
 import KMPackages.Routing
-import Models exposing (Model)
+import Models exposing (Model, userLoggedIn)
 import Msgs exposing (Msg)
-import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
+import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, signupRoute)
 import Users.Routing
 
 
-publicView : Html Msg -> Html Msg
-publicView content =
+publicView : Model -> Html Msg -> Html Msg
+publicView model content =
     div [ class "public" ]
-        [ publicHeader
+        [ publicHeader model
         , div [ class "container" ]
             [ content ]
         ]
 
 
-publicHeader : Html Msg
-publicHeader =
+publicHeader : Model -> Html Msg
+publicHeader model =
+    let
+        links =
+            if userLoggedIn model then
+                [ li [ class "nav-item" ] [ linkTo appRoute [ class "nav-link" ] [ text "Go to App" ] ]
+                ]
+            else
+                [ li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
+                , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
+                ]
+    in
     nav [ class "navbar navbar-expand-sm bg-primary fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
                 [ linkTo homeRoute [ class "navbar-brand" ] [ text "Data Stewardship Wizard" ] ]
-            , ul [ class "nav navbar-nav ml-auto" ]
-                [ li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
-                , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
-                ]
+            , ul [ class "nav navbar-nav ml-auto" ] links
             ]
         ]
 
