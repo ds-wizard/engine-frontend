@@ -1,8 +1,10 @@
 module Public.Questionnaire.Msgs exposing (..)
 
+import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.Questionnaire.Msgs
 import Http
-import Public.BookReference.Models exposing (BookReference)
 
 
 type Msg
-    = NoOp
+    = GetQuestionnaireCompleted (Result Http.Error QuestionnaireDetail)
+    | QuestionnaireMsg Common.Questionnaire.Msgs.Msg

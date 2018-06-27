@@ -1,10 +1,10 @@
 module Public.Questionnaire.Requests exposing (..)
 
+import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
 import Http
-import Public.BookReference.Models exposing (BookReference, bookReferenceDecoder)
 import Requests exposing (apiUrl)
 
 
-getBookReference : String -> Http.Request BookReference
-getBookReference uuid =
-    Http.get (apiUrl "/book-references/" ++ uuid) bookReferenceDecoder
+getQuestionnaire : Http.Request QuestionnaireDetail
+getQuestionnaire =
+    Http.get (apiUrl "/questionnaires/public") questionnaireDetailDecoder

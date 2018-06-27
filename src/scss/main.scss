@@ -13,6 +13,7 @@ $font-size-base: 0.875rem;
 @import "layout";
 @import "tables";
 
+@import "modules/Common";
 @import "modules/DSPlanner";
 @import "modules/KMEditor";
 @import "modules/KMPackages";
