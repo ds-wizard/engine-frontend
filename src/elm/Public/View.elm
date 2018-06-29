@@ -8,6 +8,7 @@ import Public.ForgottenPasswordConfirmation.View
 import Public.Login.View
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
+import Public.Questionnaire.View
 import Public.Routing exposing (Route(..))
 import Public.Signup.View
 import Public.SignupConfirmation.View
@@ -27,6 +28,9 @@ view route wrapMsg model =
 
         Login ->
             Public.Login.View.view (wrapMsg << LoginMsg) model.loginModel
+
+        Questionnaire ->
+            Public.Questionnaire.View.view (wrapMsg << QuestionnaireMsg) model.questionnaireModel
 
         Signup ->
             Public.Signup.View.view (wrapMsg << SignupMsg) model.signupModel

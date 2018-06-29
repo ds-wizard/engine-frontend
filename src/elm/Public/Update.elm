@@ -7,7 +7,8 @@ import Public.ForgottenPasswordConfirmation.Update
 import Public.Login.Update
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
-import Public.Routing exposing (Route(BookReference, SignupConfirmation))
+import Public.Questionnaire.Update
+import Public.Routing exposing (Route(BookReference, Questionnaire, SignupConfirmation))
 import Public.Signup.Update
 import Public.SignupConfirmation.Update
 import Random.Pcg exposing (Seed)
@@ -18,6 +19,9 @@ fetchData route wrapMsg =
     case route of
         BookReference uuid ->
             Public.BookReference.Update.fetchData (wrapMsg << BookReferenceMsg) uuid
+
+        Questionnaire ->
+            Public.Questionnaire.Update.fetchData (wrapMsg << QuestionnaireMsg)
 
         SignupConfirmation userId hash ->
             Public.SignupConfirmation.Update.fetchData (wrapMsg << SignupConfirmationMsg) userId hash
@@ -56,6 +60,13 @@ update msg wrapMsg seed model =
                     Public.Login.Update.update msg (wrapMsg << LoginMsg) model.loginModel
             in
             ( seed, { model | loginModel = loginModel }, cmd )
+
+        QuestionnaireMsg msg ->
+            let
+                ( questionnaireModel, cmd ) =
+                    Public.Questionnaire.Update.update msg (wrapMsg << QuestionnaireMsg) model.questionnaireModel
+            in
+            ( seed, { model | questionnaireModel = questionnaireModel }, cmd )
 
         SignupMsg msg ->
             let

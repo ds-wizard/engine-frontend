@@ -11,7 +11,7 @@ import KMEditor.Routing
 import KMPackages.Routing
 import Models exposing (Model, userLoggedIn)
 import Msgs exposing (Msg)
-import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, signupRoute)
+import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, questionnaireDemoRoute, signupRoute)
 import Users.Routing
 
 
@@ -27,12 +27,17 @@ publicView model content =
 publicHeader : Model -> Html Msg
 publicHeader model =
     let
+        questionnaireDemoLink =
+            li [ class "nav-item" ] [ linkTo questionnaireDemoRoute [ class "nav-link" ] [ text "Questionnaire Demo" ] ]
+
         links =
             if userLoggedIn model then
-                [ li [ class "nav-item" ] [ linkTo appRoute [ class "nav-link" ] [ text "Go to App" ] ]
+                [ questionnaireDemoLink
+                , li [ class "nav-item" ] [ linkTo appRoute [ class "nav-link" ] [ text "Go to App" ] ]
                 ]
             else
-                [ li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
+                [ questionnaireDemoLink
+                , li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
                 , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
                 ]
     in

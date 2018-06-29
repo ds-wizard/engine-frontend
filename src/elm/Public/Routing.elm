@@ -8,6 +8,7 @@ type Route
     | ForgottenPassword
     | ForgottenPasswordConfirmation String String
     | Login
+    | Questionnaire
     | Signup
     | SignupConfirmation String String
 
@@ -18,6 +19,7 @@ parsers wrapRoute =
     , map (wrapRoute <| ForgottenPassword) (s "forgotten-password")
     , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
     , map (wrapRoute <| Login) top
+    , map (wrapRoute <| Questionnaire) (s "questionnaire")
     , map (wrapRoute <| Signup) (s "signup")
     , map (signupConfirmation wrapRoute) (s "signup-confirmation" </> string </> string)
     ]
@@ -47,6 +49,9 @@ toUrl route =
 
         Login ->
             []
+
+        Questionnaire ->
+            [ "questionnaire" ]
 
         Signup ->
             [ "signup" ]

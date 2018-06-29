@@ -2,18 +2,16 @@ module DSPlanner.Detail.Update exposing (..)
 
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
+import Common.Questionnaire.Models exposing (QuestionnaireDetail, initialModel, updateReplies)
+import Common.Questionnaire.Msgs
+import Common.Questionnaire.Update
 import Common.Types exposing (ActionResult(..))
-import DSPlanner.Common.Models exposing (QuestionnaireDetail)
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (getQuestionnaire, putReplies)
 import DSPlanner.Routing exposing (Route(Index))
 import FormEngine.Model exposing (..)
-import FormEngine.Msgs
-import FormEngine.Update exposing (updateForm)
 import Jwt
-import KMEditor.Common.Models.Entities exposing (..)
-import List.Extra as List
 import Msgs
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
@@ -32,11 +30,8 @@ update msg wrapMsg session model =
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted model result
 
-        SetActiveChapter chapter ->
-            ( handleSetActiveChapter chapter model, Cmd.none )
-
-        FormMsg msg ->
-            ( handleFormMsg msg model, Cmd.none )
+        QuestionnaireMsg msg ->
+            handleQuestionnaireMsg msg model
 
         Save ->
             handleSave wrapMsg session model
@@ -45,59 +40,52 @@ update msg wrapMsg session model =
             handlePutRepliesCompleted model result
 
 
-
-{- Update handlers -}
-
-
 handleGetQuestionnaireCompleted : Model -> Result Jwt.JwtError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
 handleGetQuestionnaireCompleted model result =
     let
         newModel =
             case result of
                 Ok questionnaireDetail ->
-                    { model
-                        | questionnaire = Success questionnaireDetail
-                        , activeChapter = List.head questionnaireDetail.knowledgeModel.chapters
-                        , replies = questionnaireDetail.replies
-                    }
+                    { model | questionnaireModel = Success <| initialModel questionnaireDetail }
 
                 Err error ->
-                    { model | questionnaire = getServerErrorJwt error "Unable to get questionnaire." }
+                    { model | questionnaireModel = getServerErrorJwt error "Unable to get questionnaire." }
 
         cmd =
             getResultCmd result
     in
-    ( setActiveChapterForm newModel, cmd )
+    ( newModel, cmd )
 
 
-handleSetActiveChapter : Chapter -> Model -> Model
-handleSetActiveChapter chapter model =
-    model
-        |> updateReplies
-        |> setActiveChapter chapter
-        |> setActiveChapterForm
+handleQuestionnaireMsg : Common.Questionnaire.Msgs.Msg -> Model -> ( Model, Cmd Msgs.Msg )
+handleQuestionnaireMsg msg model =
+    let
+        newQuestionnaireModel =
+            case model.questionnaireModel of
+                Success questionnaireModel ->
+                    Success <| Common.Questionnaire.Update.update msg questionnaireModel
 
-
-handleFormMsg : FormEngine.Msgs.Msg -> Model -> Model
-handleFormMsg msg model =
-    case model.activeChapterForm of
-        Just form ->
-            { model | activeChapterForm = Just <| updateForm msg form }
-
-        _ ->
-            model
+                _ ->
+                    model.questionnaireModel
+    in
+    ( { model | questionnaireModel = newQuestionnaireModel }, Cmd.none )
 
 
 handleSave : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
 handleSave wrapMsg session model =
-    let
-        newModel =
-            updateReplies model
+    case model.questionnaireModel of
+        Success questionnaireModel ->
+            let
+                newQuestionnaireModel =
+                    updateReplies questionnaireModel
 
-        cmd =
-            putRepliesCmd wrapMsg session newModel
-    in
-    ( { newModel | savingQuestionnaire = Loading }, cmd )
+                cmd =
+                    putRepliesCmd wrapMsg session model.uuid newQuestionnaireModel.questionnaire
+            in
+            ( { model | questionnaireModel = Success newQuestionnaireModel }, cmd )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 handlePutRepliesCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
@@ -112,129 +100,10 @@ handlePutRepliesCompleted model result =
             )
 
 
-
-{- Helpers -}
-
-
-putRepliesCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
-putRepliesCmd wrapMsg session model =
-    model.replies
+putRepliesCmd : (Msg -> Msgs.Msg) -> Session -> String -> QuestionnaireDetail -> Cmd Msgs.Msg
+putRepliesCmd wrapMsg session uuid questionnaire =
+    questionnaire.replies
         |> encodeFormValues
-        |> putReplies model.uuid session
+        |> putReplies uuid session
         |> Jwt.send PutRepliesCompleted
         |> Cmd.map wrapMsg
-
-
-updateReplies : Model -> Model
-updateReplies model =
-    let
-        replies =
-            case ( model.activeChapterForm, model.activeChapter ) of
-                ( Just form, Just chapter ) ->
-                    getFormValues [ chapter.uuid ] form
-                        ++ model.replies
-                        |> List.uniqueBy .path
-
-                _ ->
-                    model.replies
-    in
-    { model | replies = replies }
-
-
-setActiveChapter : Chapter -> Model -> Model
-setActiveChapter chapter model =
-    { model | activeChapter = Just chapter }
-
-
-setActiveChapterForm : Model -> Model
-setActiveChapterForm model =
-    case model.activeChapter of
-        Just chapter ->
-            { model | activeChapterForm = Just <| createChapterForm chapter model.replies }
-
-        _ ->
-            model
-
-
-
-{- Form creation -}
-
-
-createChapterForm : Chapter -> FormValues -> Form
-createChapterForm chapter values =
-    createForm { items = List.map createQuestionFormItem chapter.questions } values [ chapter.uuid ]
-
-
-createQuestionFormItem : Question -> FormItem
-createQuestionFormItem question =
-    let
-        descriptor =
-            createFormItemDescriptor question
-    in
-    case question.type_ of
-        "options" ->
-            ChoiceFormItem descriptor (List.map createAnswerOption (question.answers |> Maybe.withDefault []))
-
-        "list" ->
-            GroupFormItem descriptor (createGroupItems question)
-
-        "number" ->
-            NumberFormItem descriptor
-
-        "text" ->
-            TextFormItem descriptor
-
-        _ ->
-            StringFormItem descriptor
-
-
-createFormItemDescriptor : Question -> FormItemDescriptor
-createFormItemDescriptor question =
-    { name = question.uuid
-    , label = question.title
-    , text = Just question.text
-    }
-
-
-createAnswerOption : Answer -> Option
-createAnswerOption answer =
-    let
-        descriptor =
-            createOptionFormDescriptor answer
-    in
-    case answer.followUps of
-        FollowUps [] ->
-            SimpleOption descriptor
-
-        FollowUps followUps ->
-            DetailedOption descriptor (List.map createQuestionFormItem followUps)
-
-
-createOptionFormDescriptor : Answer -> OptionDescriptor
-createOptionFormDescriptor answer =
-    { name = answer.uuid
-    , label = answer.label
-    , text = answer.advice
-    }
-
-
-createGroupItems : Question -> List FormItem
-createGroupItems question =
-    case question.answerItemTemplate of
-        Just answerItemTemplate ->
-            let
-                itemName =
-                    StringFormItem { name = "itemName", label = answerItemTemplate.title, text = Nothing }
-
-                questions =
-                    List.map createQuestionFormItem <| getQuestions answerItemTemplate.questions
-            in
-            itemName :: questions
-
-        _ ->
-            []
-
-
-getQuestions : AnswerItemTemplateQuestions -> List Question
-getQuestions (AnswerItemTemplateQuestions questions) =
-    questions
