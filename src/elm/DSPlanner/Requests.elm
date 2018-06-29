@@ -1,6 +1,7 @@
 module DSPlanner.Requests exposing (..)
 
 import Auth.Models exposing (Session)
+import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
 import DSPlanner.Common.Models exposing (..)
 import Http
 import Json.Encode exposing (Value)

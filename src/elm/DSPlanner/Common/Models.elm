@@ -14,15 +14,6 @@ type alias Questionnaire =
     }
 
 
-type alias QuestionnaireDetail =
-    { uuid : String
-    , name : String
-    , package : PackageDetail
-    , knowledgeModel : KnowledgeModel
-    , replies : FormValues
-    }
-
-
 questionnaireDecoder : Decoder Questionnaire
 questionnaireDecoder =
     decode Questionnaire
@@ -34,13 +25,3 @@ questionnaireDecoder =
 questionnaireListDecoder : Decoder (List Questionnaire)
 questionnaireListDecoder =
     Decode.list questionnaireDecoder
-
-
-questionnaireDetailDecoder : Decoder QuestionnaireDetail
-questionnaireDetailDecoder =
-    decode QuestionnaireDetail
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-        |> required "package" packageDetailDecoder
-        |> required "knowledgeModel" knowledgeModelDecoder
-        |> required "replies" decodeFormValues

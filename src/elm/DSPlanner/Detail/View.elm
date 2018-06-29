@@ -1,40 +1,31 @@
 module DSPlanner.Detail.View exposing (..)
 
 import Common.Html exposing (emptyNode, linkTo)
+import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.Types exposing (ActionResult)
 import Common.View exposing (fullPageActionResultView, pageHeader)
 import Common.View.Forms exposing (actionButton, formResultView)
-import DSPlanner.Common.Models exposing (QuestionnaireDetail)
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
 import DSPlanner.Routing exposing (Route(Index))
-import FormEngine.Msgs
-import FormEngine.View exposing (viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Chapter)
 import Msgs
 import Routing
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    fullPageActionResultView (content wrapMsg model) model.questionnaire
+    fullPageActionResultView (content wrapMsg model) model.questionnaireModel
 
 
-content : (Msg -> Msgs.Msg) -> Model -> QuestionnaireDetail -> Html Msgs.Msg
-content wrapMsg model questionnaire =
+content : (Msg -> Msgs.Msg) -> Model -> Common.Questionnaire.Models.Model -> Html Msgs.Msg
+content wrapMsg model questionnaireModel =
     div [ class "col DSPlanner__Detail" ]
-        [ pageHeader (questionnaireTitle questionnaire) (actions wrapMsg model.savingQuestionnaire)
+        [ pageHeader (questionnaireTitle questionnaireModel.questionnaire) (actions wrapMsg model.savingQuestionnaire)
         , formResultView model.savingQuestionnaire
-        , div [ class "row" ]
-            [ div [ class "col-sm-12 col-md-3 col-lg-3 col-xl-3" ] [ chapterList wrapMsg questionnaire model.activeChapter ]
-            , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
-                [ chapterHeader model.activeChapter
-                , viewChapterForm model |> Html.map (wrapMsg << FormMsg)
-                ]
-            ]
+        , viewQuestionnaire questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg)
         ]
 
 
@@ -48,41 +39,3 @@ actions wrapMsg savingQuestionnaire =
     [ linkTo (Routing.DSPlanner Index) [ class "btn btn-secondary" ] [ text "Cancel" ]
     , actionButton ( "Save", savingQuestionnaire, wrapMsg <| Save )
     ]
-
-
-viewChapterForm : Model -> Html FormEngine.Msgs.Msg
-viewChapterForm model =
-    case model.activeChapterForm of
-        Just form ->
-            viewForm form
-
-        _ ->
-            emptyNode
-
-
-chapterList : (Msg -> Msgs.Msg) -> QuestionnaireDetail -> Maybe Chapter -> Html Msgs.Msg
-chapterList wrapMsg questionnaire activeChapter =
-    div [ class "nav nav-pills flex-column" ]
-        (List.map (chapterListChapter wrapMsg activeChapter) questionnaire.knowledgeModel.chapters)
-
-
-chapterListChapter : (Msg -> Msgs.Msg) -> Maybe Chapter -> Chapter -> Html Msgs.Msg
-chapterListChapter wrapMsg activeChapter chapter =
-    a
-        [ classList [ ( "nav-link", True ), ( "active", activeChapter == Just chapter ) ]
-        , onClick (wrapMsg <| SetActiveChapter chapter)
-        ]
-        [ text chapter.title ]
-
-
-chapterHeader : Maybe Chapter -> Html Msgs.Msg
-chapterHeader maybeChapter =
-    case maybeChapter of
-        Just chapter ->
-            div []
-                [ h3 [] [ text chapter.title ]
-                , p [ class "chapter-description" ] [ text chapter.text ]
-                ]
-
-        _ ->
-            emptyNode
