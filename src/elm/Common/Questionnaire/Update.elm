@@ -2,7 +2,6 @@ module Common.Questionnaire.Update exposing (..)
 
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (Msg(FormMsg, SetActiveChapter))
-import FormEngine.Model exposing (getFormValues)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import KMEditor.Common.Models.Entities exposing (Chapter)
