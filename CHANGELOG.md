@@ -5,6 +5,7 @@
 - Cache busting
 - Public book references
 - Privacy link added to the signup form
+- Public questionnaire demo
 
 
 # 0.2.1
