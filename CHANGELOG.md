@@ -1,11 +1,16 @@
-# Develop
+# 0.3.0
+
+## Features
+
+- Public book references
+- Public questionnaire demo
+
+## Other
 
 - Split permision `PM_PERM` to `PM_READ_PERM` and `PM_WRITE_PERM`
 - Logout user when the server respond with 401
-- Cache busting
-- Public book references
 - Privacy link added to the signup form
-- Public questionnaire demo
+- Cache busting
 
 
 # 0.2.1
