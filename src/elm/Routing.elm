@@ -152,6 +152,11 @@ signupRoute =
     Public Public.Routing.Signup
 
 
+questionnaireDemoRoute : Route
+questionnaireDemoRoute =
+    Public Public.Routing.Questionnaire
+
+
 appRoute : Route
 appRoute =
     Welcome
