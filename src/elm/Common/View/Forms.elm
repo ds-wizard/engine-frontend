@@ -162,7 +162,7 @@ formActions cancelRoute actionButtonSettings =
 
 {-| Similar to formActions, but it contains only the action button.
 -}
-formActionOnly : ( String, ActionResult a, Msg ) -> Html Msg
+formActionOnly : ( String, ActionResult a, msg ) -> Html msg
 formActionOnly actionButtonSettings =
     div [ class "text-right" ]
         [ actionButton actionButtonSettings ]
@@ -172,12 +172,12 @@ formActionOnly actionButtonSettings =
 the ActionResult. If the state is Loading action button is disabled and
 a loader is shown instead of action name.
 -}
-actionButton : ( String, ActionResult a, Msg ) -> Html Msg
+actionButton : ( String, ActionResult a, msg ) -> Html msg
 actionButton ( label, result, msg ) =
     actionButtonView [ onClick msg ] label result
 
 
-submitButton : ( String, ActionResult a ) -> Html Msg
+submitButton : ( String, ActionResult a ) -> Html msg
 submitButton ( label, result ) =
     actionButtonView [ type_ "submit" ] label result
 
@@ -203,7 +203,7 @@ actionButtonView attributes label result =
 -- Status Views
 
 
-formResultView : ActionResult String -> Html Msgs.Msg
+formResultView : ActionResult String -> Html msg
 formResultView result =
     case result of
         Success msg ->
@@ -216,7 +216,7 @@ formResultView result =
             emptyNode
 
 
-formSuccessResultView : ActionResult String -> Html Msgs.Msg
+formSuccessResultView : ActionResult String -> Html msg
 formSuccessResultView result =
     case result of
         Success msg ->
@@ -226,17 +226,17 @@ formSuccessResultView result =
             emptyNode
 
 
-errorView : String -> Html Msgs.Msg
+errorView : String -> Html msg
 errorView =
     statusView "alert-danger" "fa-exclamation-triangle"
 
 
-successView : String -> Html Msgs.Msg
+successView : String -> Html msg
 successView =
     statusView "alert-success" "fa-check"
 
 
-statusView : String -> String -> String -> Html Msgs.Msg
+statusView : String -> String -> String -> Html msg
 statusView className icon msg =
     if msg /= "" then
         div [ class ("alert " ++ className) ]

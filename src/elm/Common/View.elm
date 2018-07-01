@@ -60,18 +60,18 @@ fullPageActionResultView viewContent actionResult =
             viewContent result
 
 
-type alias ModalConfig =
+type alias ModalConfig msg =
     { modalTitle : String
-    , modalContent : List (Html Msg)
+    , modalContent : List (Html msg)
     , visible : Bool
     , actionResult : ActionResult String
     , actionName : String
-    , actionMsg : Msg
-    , cancelMsg : Msg
+    , actionMsg : msg
+    , cancelMsg : msg
     }
 
 
-modalView : ModalConfig -> Html Msg
+modalView : ModalConfig msg -> Html msg
 modalView cfg =
     let
         visibleClass =

@@ -12,6 +12,8 @@
     }
 
     .navbar-expand-sm {
+        z-index: 900;
+
         .navbar-nav {
             & > li {
                 a {

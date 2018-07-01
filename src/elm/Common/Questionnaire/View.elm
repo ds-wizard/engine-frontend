@@ -1,8 +1,11 @@
 module Common.Questionnaire.View exposing (..)
 
 import Common.Html exposing (emptyNode)
-import Common.Questionnaire.Models exposing (Model)
-import Common.Questionnaire.Msgs exposing (Msg(..))
+import Common.Questionnaire.Models exposing (FeedbackForm, Model)
+import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
+import Common.Types exposing (ActionResult(Success))
+import Common.View exposing (modalView)
+import Common.View.Forms exposing (inputGroup, textAreaGroup)
 import FormEngine.View exposing (viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -19,6 +22,7 @@ viewQuestionnaire model =
             [ chapterHeader model.activeChapter
             , viewChapterForm model
             ]
+        , feedbackModal model
         ]
 
 
@@ -54,7 +58,62 @@ viewChapterForm : Model -> Html Msg
 viewChapterForm model =
     case model.activeChapterForm of
         Just form ->
-            viewForm form |> Html.map FormMsg
+            viewForm [ ( "fa-exclamation-circle", FeedbackMsg ) ] form |> Html.map FormMsg
 
         _ ->
             emptyNode
+
+
+feedbackModal : Model -> Html Msg
+feedbackModal model =
+    let
+        visible =
+            case model.feedback of
+                Just _ ->
+                    True
+
+                Nothing ->
+                    False
+
+        modalContent =
+            case model.sendingFeedback of
+                Success _ ->
+                    case model.feedbackResult of
+                        Just feedback ->
+                            [ p []
+                                [ text "You can follow the GitHub "
+                                , a [ href <| "https://github.com/DSWGlobal/dsw-staging/issues/" ++ toString feedback.issueId, target "_blank" ]
+                                    [ text <| "issue " ++ toString feedback.issueId ]
+                                , text "."
+                                ]
+                            ]
+
+                        Nothing ->
+                            [ emptyNode ]
+
+                _ ->
+                    [ div [ class "alert alert-info" ]
+                        [ text "If you found something wrong with the question, you can send your feedback how to improve it." ]
+                    , inputGroup model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
+                    , textAreaGroup model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
+                    ]
+
+        ( actionName, actionMsg ) =
+            case model.sendingFeedback of
+                Success _ ->
+                    ( "Done", CloseFeedback )
+
+                _ ->
+                    ( "Send", SendFeedbackForm )
+
+        modalConfig =
+            { modalTitle = "Feedback"
+            , modalContent = modalContent
+            , visible = visible
+            , actionResult = model.sendingFeedback
+            , actionName = actionName
+            , actionMsg = actionMsg
+            , cancelMsg = CloseFeedback
+            }
+    in
+    modalView modalConfig

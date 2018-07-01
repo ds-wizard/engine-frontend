@@ -1,8 +1,13 @@
 module Common.Questionnaire.Models exposing (..)
 
+import Common.Form exposing (CustomFormError)
+import Common.Types exposing (ActionResult(Unset))
+import Form
+import Form.Validate as Validate exposing (..)
 import FormEngine.Model exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
+import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
@@ -12,6 +17,10 @@ type alias Model =
     { questionnaire : QuestionnaireDetail
     , activeChapter : Maybe Chapter
     , activeChapterForm : Maybe Form
+    , feedback : Maybe String
+    , feedbackForm : Form.Form CustomFormError FeedbackForm
+    , sendingFeedback : ActionResult String
+    , feedbackResult : Maybe Feedback
     }
 
 
@@ -22,6 +31,10 @@ initialModel questionnaire =
             { questionnaire = questionnaire
             , activeChapter = List.head questionnaire.knowledgeModel.chapters
             , activeChapterForm = Nothing
+            , feedback = Nothing
+            , feedbackForm = initEmptyFeedbackFrom
+            , sendingFeedback = Unset
+            , feedbackResult = Nothing
             }
     in
     setActiveChapterForm model
@@ -44,6 +57,45 @@ questionnaireDetailDecoder =
         |> required "package" packageDetailDecoder
         |> required "knowledgeModel" knowledgeModelDecoder
         |> required "replies" decodeFormValues
+
+
+type alias FeedbackForm =
+    { title : String
+    , content : String
+    }
+
+
+initEmptyFeedbackFrom : Form.Form CustomFormError FeedbackForm
+initEmptyFeedbackFrom =
+    Form.initial [] feedbackFormValidation
+
+
+feedbackFormValidation : Validation CustomFormError FeedbackForm
+feedbackFormValidation =
+    Validate.map2 FeedbackForm
+        (Validate.field "title" Validate.string)
+        (Validate.field "content" Validate.string)
+
+
+encodeFeedbackFrom : String -> String -> FeedbackForm -> Encode.Value
+encodeFeedbackFrom questionUuid packageId form =
+    Encode.object
+        [ ( "questionUuid", Encode.string questionUuid )
+        , ( "packageId", Encode.string packageId )
+        , ( "title", Encode.string form.title )
+        , ( "content", Encode.string form.content )
+        ]
+
+
+type alias Feedback =
+    { issueId : Int
+    }
+
+
+feedbackDecoder : Decoder Feedback
+feedbackDecoder =
+    decode Feedback
+        |> required "issueId" Decode.int
 
 
 
