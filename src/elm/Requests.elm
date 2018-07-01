@@ -73,10 +73,6 @@ getResultCmd result =
             Cmd.none
 
         Err error ->
-            let
-                a =
-                    Debug.log "tralala" error
-            in
             case error of
                 Jwt.Unauthorized ->
                     dispatch <| Msgs.AuthMsg Auth.Msgs.Logout

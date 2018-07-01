@@ -64,7 +64,8 @@
     .modal-dialog {
         opacity: 1;
         margin-top: -20px;
-        @include transition(margin-top 0.2s ease-in)
+        min-width: 500px;
+        @include transition(margin-top 0.2s ease-in);
     }
 
     &.visible {

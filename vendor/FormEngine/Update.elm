@@ -4,7 +4,7 @@ import FormEngine.Model exposing (..)
 import FormEngine.Msgs exposing (Msg(..))
 
 
-updateForm : Msg -> Form -> Form
+updateForm : Msg a -> Form -> Form
 updateForm msg form =
     case msg of
         Input path value ->
@@ -15,6 +15,9 @@ updateForm msg form =
 
         GroupItemRemove path index ->
             { elements = List.map (updateElement (updateGroupItemRemove index) path) form.elements }
+
+        _ ->
+            form
 
 
 updateElement : (FormElement -> FormElement) -> List String -> FormElement -> FormElement
