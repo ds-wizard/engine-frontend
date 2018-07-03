@@ -56,9 +56,10 @@
         }
     }
 
-    .feedback {
+    .custom-actions {
         a {
             color: $gray-400;
+            margin-left: 10px;
 
             &:hover {
                 color: $gray-700;

@@ -1,12 +1,12 @@
 module Common.Questionnaire.View exposing (..)
 
 import Common.Html exposing (emptyNode)
-import Common.Questionnaire.Models exposing (FeedbackForm, Model)
+import Common.Questionnaire.Models exposing (FeedbackForm, FormExtraData, Model)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
 import Common.Types exposing (ActionResult(Success))
 import Common.View exposing (modalView)
 import Common.View.Forms exposing (inputGroup, textAreaGroup)
-import FormEngine.View exposing (viewForm)
+import FormEngine.View exposing (FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -54,11 +54,33 @@ chapterHeader maybeChapter =
             emptyNode
 
 
+viewExtraData : FormExtraData -> Html msg
+viewExtraData data =
+    case data.shortUuid of
+        Just uuid ->
+            p [ class "extra-data" ]
+                [ a [ href <| "/book-references/" ++ uuid, target "_blank" ]
+                    [ i [ class "fa fa-book" ] []
+                    , text <| "Book Reference #" ++ uuid
+                    ]
+                ]
+
+        Nothing ->
+            emptyNode
+
+
+formConfig : FormViewConfig CustomFormMessage FormExtraData
+formConfig =
+    { customActions = [ ( "fa-exclamation-circle", FeedbackMsg ) ]
+    , viewExtraData = Just viewExtraData
+    }
+
+
 viewChapterForm : Model -> Html Msg
 viewChapterForm model =
     case model.activeChapterForm of
         Just form ->
-            viewForm [ ( "fa-exclamation-circle", FeedbackMsg ) ] form |> Html.map FormMsg
+            viewForm formConfig form |> Html.map FormMsg
 
         _ ->
             emptyNode
