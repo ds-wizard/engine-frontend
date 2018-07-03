@@ -29,10 +29,11 @@ import List.Extra as List
 {- Types definitions -}
 
 
-type alias FormItemDescriptor =
+type alias FormItemDescriptor a =
     { name : String
     , label : String
     , text : Maybe String
+    , extraData : Maybe a
     }
 
 
@@ -43,21 +44,21 @@ type alias OptionDescriptor =
     }
 
 
-type Option
+type Option a
     = SimpleOption OptionDescriptor
-    | DetailedOption OptionDescriptor (List FormItem)
+    | DetailedOption OptionDescriptor (List (FormItem a))
 
 
-type FormItem
-    = StringFormItem FormItemDescriptor
-    | NumberFormItem FormItemDescriptor
-    | TextFormItem FormItemDescriptor
-    | ChoiceFormItem FormItemDescriptor (List Option)
-    | GroupFormItem FormItemDescriptor (List FormItem)
+type FormItem a
+    = StringFormItem (FormItemDescriptor a)
+    | NumberFormItem (FormItemDescriptor a)
+    | TextFormItem (FormItemDescriptor a)
+    | ChoiceFormItem (FormItemDescriptor a) (List (Option a))
+    | GroupFormItem (FormItemDescriptor a) (List (FormItem a))
 
 
-type alias FormTree =
-    { items : List FormItem
+type alias FormTree a =
+    { items : List (FormItem a)
     }
 
 
@@ -67,25 +68,25 @@ type alias FormElementState value =
     }
 
 
-type OptionElement
+type OptionElement a
     = SimpleOptionElement OptionDescriptor
-    | DetailedOptionElement OptionDescriptor (List FormElement)
+    | DetailedOptionElement OptionDescriptor (List (FormElement a))
 
 
-type alias ItemElement =
-    List FormElement
+type alias ItemElement a =
+    List (FormElement a)
 
 
-type FormElement
-    = StringFormElement FormItemDescriptor (FormElementState String)
-    | NumberFormElement FormItemDescriptor (FormElementState Int)
-    | TextFormElement FormItemDescriptor (FormElementState String)
-    | ChoiceFormElement FormItemDescriptor (List OptionElement) (FormElementState String)
-    | GroupFormElement FormItemDescriptor (List FormItem) (List ItemElement) (FormElementState Int)
+type FormElement a
+    = StringFormElement (FormItemDescriptor a) (FormElementState String)
+    | NumberFormElement (FormItemDescriptor a) (FormElementState Int)
+    | TextFormElement (FormItemDescriptor a) (FormElementState String)
+    | ChoiceFormElement (FormItemDescriptor a) (List (OptionElement a)) (FormElementState String)
+    | GroupFormElement (FormItemDescriptor a) (List (FormItem a)) (List (ItemElement a)) (FormElementState Int)
 
 
-type alias Form =
-    { elements : List FormElement
+type alias Form a =
+    { elements : List (FormElement a)
     }
 
 
@@ -132,7 +133,7 @@ encodeFormValue formValue =
 {- Type helpers -}
 
 
-getOptionDescriptor : OptionElement -> OptionDescriptor
+getOptionDescriptor : OptionElement a -> OptionDescriptor
 getOptionDescriptor option =
     case option of
         SimpleOptionElement descriptor ->
@@ -142,7 +143,7 @@ getOptionDescriptor option =
             descriptor
 
 
-getDescriptor : FormElement -> FormItemDescriptor
+getDescriptor : FormElement a -> FormItemDescriptor a
 getDescriptor element =
     case element of
         StringFormElement descriptor _ ->
@@ -165,12 +166,12 @@ getDescriptor element =
 {- Form creation -}
 
 
-createForm : FormTree -> FormValues -> List String -> Form
+createForm : FormTree a -> FormValues -> List String -> Form a
 createForm formTree formValues defaultPath =
     { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues defaultPath) }
 
 
-createFormElement : FormItem -> FormElement
+createFormElement : FormItem a -> FormElement a
 createFormElement item =
     case item of
         StringFormItem descriptor ->
@@ -194,7 +195,7 @@ emptyFormElementState =
     { value = Nothing, valid = True }
 
 
-createOptionElement : Option -> OptionElement
+createOptionElement : Option a -> OptionElement a
 createOptionElement option =
     case option of
         SimpleOption descriptor ->
@@ -204,12 +205,12 @@ createOptionElement option =
             DetailedOptionElement descriptor (List.map createFormElement items)
 
 
-createItemElement : List FormItem -> ItemElement
+createItemElement : List (FormItem a) -> ItemElement a
 createItemElement formItems =
     List.map createFormElement formItems
 
 
-setInitialValue : FormValues -> List String -> FormElement -> FormElement
+setInitialValue : FormValues -> List String -> FormElement a -> FormElement a
 setInitialValue formValues path element =
     case element of
         StringFormElement descriptor state ->
@@ -260,7 +261,7 @@ initialValueToInt =
     Maybe.map (String.toInt >> Result.withDefault 0)
 
 
-setInitialValuesOption : FormValues -> List String -> OptionElement -> OptionElement
+setInitialValuesOption : FormValues -> List String -> OptionElement a -> OptionElement a
 setInitialValuesOption formValues path option =
     case option of
         DetailedOptionElement descriptor items ->
@@ -270,7 +271,7 @@ setInitialValuesOption formValues path option =
             option
 
 
-setInitialValuesItems : FormValues -> List String -> Int -> ItemElement -> ItemElement
+setInitialValuesItems : FormValues -> List String -> Int -> ItemElement a -> ItemElement a
 setInitialValuesItems formValues path index itemElement =
     List.map (setInitialValue formValues (path ++ [ toString index ])) itemElement
 
@@ -279,12 +280,12 @@ setInitialValuesItems formValues path index itemElement =
 {- getting form values -}
 
 
-getFormValues : List String -> Form -> FormValues
+getFormValues : List String -> Form a -> FormValues
 getFormValues defaultPath form =
     List.foldl (getFieldValue defaultPath) [] form.elements
 
 
-getFieldValue : List String -> FormElement -> FormValues -> FormValues
+getFieldValue : List String -> FormElement a -> FormValues -> FormValues
 getFieldValue path element values =
     case element of
         StringFormElement descriptor state ->
@@ -311,7 +312,7 @@ getFieldValue path element values =
             List.indexedFoldl (getItemValues (path ++ [ descriptor.name ])) newValues itemElements
 
 
-getOptionValues : List String -> OptionElement -> FormValues -> FormValues
+getOptionValues : List String -> OptionElement a -> FormValues -> FormValues
 getOptionValues path option values =
     case option of
         DetailedOptionElement descriptor items ->
@@ -321,7 +322,7 @@ getOptionValues path option values =
             values
 
 
-getItemValues : List String -> Int -> ItemElement -> FormValues -> FormValues
+getItemValues : List String -> Int -> ItemElement a -> FormValues -> FormValues
 getItemValues path index item values =
     List.foldl (getFieldValue (path ++ [ toString index ])) values item
 

@@ -1,4 +1,4 @@
-module FormEngine.View exposing (viewForm)
+module FormEngine.View exposing (FormViewConfig, viewForm)
 
 import FormEngine.Model exposing (..)
 import FormEngine.Msgs exposing (Msg(..))
@@ -7,67 +7,89 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 
 
-viewForm : List ( String, a ) -> Form -> Html (Msg a)
-viewForm customActions form =
+type alias FormViewConfig msg a =
+    { customActions : List ( String, msg )
+    , viewExtraData : Maybe (a -> Html (Msg msg))
+    }
+
+
+viewForm : FormViewConfig msg a -> Form a -> Html (Msg msg)
+viewForm config form =
     div [ class "form-engine-form" ]
-        (List.map (viewFormElement customActions []) form.elements)
+        (List.map (viewFormElement config []) form.elements)
 
 
-viewFormElement : List ( String, a ) -> List String -> FormElement -> Html (Msg a)
-viewFormElement customActions path formItem =
+viewFormElement : FormViewConfig msg a -> List String -> FormElement a -> Html (Msg msg)
+viewFormElement config path formItem =
     case formItem of
         StringFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name customActions ]
+                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
                 , input [ class "form-control", type_ "text", value (state.value |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewExtraData config descriptor.extraData
                 ]
 
         TextFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name customActions ]
+                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
                 , textarea [ class "form-control", value (state.value |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewExtraData config descriptor.extraData
                 ]
 
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name customActions ]
+                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
                 , input [ class "form-control", type_ "number", value (state.value |> Maybe.map toString |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewExtraData config descriptor.extraData
                 ]
 
         ChoiceFormElement descriptor options state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name customActions ]
+                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewExtraData config descriptor.extraData
                 , div [] (List.map (viewChoice (path ++ [ descriptor.name ]) descriptor state) options)
                 , viewAdvice state.value options
-                , viewFollowUps customActions (path ++ [ descriptor.name ]) state.value options
+                , viewFollowUps config (path ++ [ descriptor.name ]) state.value options
                 ]
 
         GroupFormElement descriptor _ items state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name customActions ]
-                , div [] (List.indexedMap (viewGroupItem customActions (path ++ [ descriptor.name ]) (List.length items)) items)
+                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
+                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewExtraData config descriptor.extraData
+                , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ]) (List.length items)) items)
                 , button [ class "btn btn-secondary", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [] ]
                 ]
 
 
-viewCustomActions : String -> List ( String, a ) -> Html (Msg a)
-viewCustomActions questionId customActions =
-    span [ class "feedback" ]
-        (List.map (viewCustomAction questionId) customActions)
+viewCustomActions : String -> FormViewConfig msg a -> Html (Msg msg)
+viewCustomActions questionId config =
+    span [ class "custom-actions" ]
+        (List.map (viewCustomAction questionId) config.customActions)
 
 
-viewCustomAction : String -> ( String, a ) -> Html (Msg a)
+viewCustomAction : String -> ( String, msg ) -> Html (Msg msg)
 viewCustomAction questionId ( icon, msg ) =
     a [ onClick <| CustomQuestionMsg questionId msg ]
         [ i [ class <| "fa " ++ icon ] [] ]
 
 
-viewGroupItem : List ( String, a ) -> List String -> Int -> Int -> ItemElement -> Html (Msg a)
-viewGroupItem customActions path numberOfItems index itemElement =
+viewExtraData : FormViewConfig msg a -> Maybe a -> Html (Msg msg)
+viewExtraData config extraData =
+    case ( config.viewExtraData, extraData ) of
+        ( Just view, Just data ) ->
+            view data
+
+        _ ->
+            text ""
+
+
+viewGroupItem : FormViewConfig msg a -> List String -> Int -> Int -> ItemElement a -> Html (Msg msg)
+viewGroupItem config path numberOfItems index itemElement =
     let
         deleteButton =
             if numberOfItems == 1 then
@@ -79,11 +101,11 @@ viewGroupItem customActions path numberOfItems index itemElement =
     div [ class "card bg-light item mb-5" ]
         [ div [ class "card-body" ] <|
             [ deleteButton ]
-                ++ List.map (viewFormElement customActions (path ++ [ toString index ])) itemElement
+                ++ List.map (viewFormElement config (path ++ [ toString index ])) itemElement
         ]
 
 
-viewChoice : List String -> FormItemDescriptor -> FormElementState String -> OptionElement -> Html (Msg a)
+viewChoice : List String -> FormItemDescriptor a -> FormElementState String -> OptionElement a -> Html (Msg msg)
 viewChoice path parentDescriptor parentState optionElement =
     let
         radioName =
@@ -106,7 +128,7 @@ viewChoice path parentDescriptor parentState optionElement =
             viewOption label name (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] [])
 
 
-viewAdvice : Maybe String -> List OptionElement -> Html (Msg a)
+viewAdvice : Maybe String -> List (OptionElement a) -> Html (Msg msg)
 viewAdvice value options =
     let
         getDescriptor option =
@@ -138,7 +160,7 @@ viewAdvice value options =
             text ""
 
 
-adviceElement : Maybe String -> Html (Msg a)
+adviceElement : Maybe String -> Html (Msg msg)
 adviceElement maybeAdvice =
     case maybeAdvice of
         Just advice ->
@@ -148,8 +170,8 @@ adviceElement maybeAdvice =
             text ""
 
 
-viewFollowUps : List ( String, a ) -> List String -> Maybe String -> List OptionElement -> Html (Msg a)
-viewFollowUps customActions path value options =
+viewFollowUps : FormViewConfig msg a -> List String -> Maybe String -> List (OptionElement a) -> Html (Msg msg)
+viewFollowUps config path value options =
     let
         isSelected option =
             case ( value, option ) of
@@ -165,7 +187,7 @@ viewFollowUps customActions path value options =
     case selectedDetailedOption of
         Just (DetailedOptionElement descriptor items) ->
             div [ class "followups-group" ]
-                (List.map (viewFormElement customActions (path ++ [ descriptor.name ])) items)
+                (List.map (viewFormElement config (path ++ [ descriptor.name ])) items)
 
         _ ->
             text ""

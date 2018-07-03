@@ -4,7 +4,7 @@ import FormEngine.Model exposing (..)
 import FormEngine.Msgs exposing (Msg(..))
 
 
-updateForm : Msg a -> Form -> Form
+updateForm : Msg msg -> Form a -> Form a
 updateForm msg form =
     case msg of
         Input path value ->
@@ -20,7 +20,7 @@ updateForm msg form =
             form
 
 
-updateElement : (FormElement -> FormElement) -> List String -> FormElement -> FormElement
+updateElement : (FormElement a -> FormElement a) -> List String -> FormElement a -> FormElement a
 updateElement updateFunction path element =
     case path of
         head :: [] ->
@@ -47,7 +47,7 @@ updateElement updateFunction path element =
             element
 
 
-updateOption : (FormElement -> FormElement) -> List String -> OptionElement -> OptionElement
+updateOption : (FormElement a -> FormElement a) -> List String -> OptionElement a -> OptionElement a
 updateOption updateFunction path option =
     case path of
         head :: tail ->
@@ -65,7 +65,7 @@ updateOption updateFunction path option =
             option
 
 
-updateItem : (FormElement -> FormElement) -> List String -> Int -> ItemElement -> ItemElement
+updateItem : (FormElement a -> FormElement a) -> List String -> Int -> ItemElement a -> ItemElement a
 updateItem updateFunction path index item =
     case path of
         head :: tail ->
@@ -78,7 +78,7 @@ updateItem updateFunction path index item =
             item
 
 
-updateElementValue : String -> FormElement -> FormElement
+updateElementValue : String -> FormElement a -> FormElement a
 updateElementValue value element =
     case element of
         StringFormElement descriptor state ->
@@ -97,7 +97,7 @@ updateElementValue value element =
             element
 
 
-updateGroupItemAdd : FormElement -> FormElement
+updateGroupItemAdd : FormElement a -> FormElement a
 updateGroupItemAdd element =
     case element of
         GroupFormElement descriptor items elementItems state ->
@@ -111,7 +111,7 @@ updateGroupItemAdd element =
             element
 
 
-updateGroupItemRemove : Int -> FormElement -> FormElement
+updateGroupItemRemove : Int -> FormElement a -> FormElement a
 updateGroupItemRemove index element =
     case element of
         GroupFormElement descriptor items elementItems state ->

@@ -16,11 +16,16 @@ import List.Extra as List
 type alias Model =
     { questionnaire : QuestionnaireDetail
     , activeChapter : Maybe Chapter
-    , activeChapterForm : Maybe Form
+    , activeChapterForm : Maybe (Form FormExtraData)
     , feedback : Maybe String
     , feedbackForm : Form.Form CustomFormError FeedbackForm
     , sendingFeedback : ActionResult String
     , feedbackResult : Maybe Feedback
+    }
+
+
+type alias FormExtraData =
+    { shortUuid : Maybe String
     }
 
 
@@ -102,12 +107,12 @@ feedbackDecoder =
 {- Form creation -}
 
 
-createChapterForm : Chapter -> FormValues -> Form
+createChapterForm : Chapter -> FormValues -> Form FormExtraData
 createChapterForm chapter values =
     createForm { items = List.map createQuestionFormItem chapter.questions } values [ chapter.uuid ]
 
 
-createQuestionFormItem : Question -> FormItem
+createQuestionFormItem : Question -> FormItem FormExtraData
 createQuestionFormItem question =
     let
         descriptor =
@@ -130,15 +135,16 @@ createQuestionFormItem question =
             StringFormItem descriptor
 
 
-createFormItemDescriptor : Question -> FormItemDescriptor
+createFormItemDescriptor : Question -> FormItemDescriptor FormExtraData
 createFormItemDescriptor question =
     { name = question.uuid
     , label = question.title
     , text = Just question.text
+    , extraData = Just { shortUuid = question.shortUuid }
     }
 
 
-createAnswerOption : Answer -> Option
+createAnswerOption : Answer -> Option FormExtraData
 createAnswerOption answer =
     let
         descriptor =
@@ -160,13 +166,13 @@ createOptionFormDescriptor answer =
     }
 
 
-createGroupItems : Question -> List FormItem
+createGroupItems : Question -> List (FormItem FormExtraData)
 createGroupItems question =
     case question.answerItemTemplate of
         Just answerItemTemplate ->
             let
                 itemName =
-                    StringFormItem { name = "itemName", label = answerItemTemplate.title, text = Nothing }
+                    StringFormItem { name = "itemName", label = answerItemTemplate.title, text = Nothing, extraData = Nothing }
 
                 questions =
                     List.map createQuestionFormItem <| getQuestions answerItemTemplate.questions
