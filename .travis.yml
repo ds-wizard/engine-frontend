@@ -13,7 +13,7 @@ stages:
   - tag
 
 env:
-  - IMAGE="$DOCKER_REGISTRY/elixir/dsw-client" IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest" IMAGE_TAG_VERSION="$IMAGE:$TRAVIS_TAG"
+  - IMAGE="datastewardshipwizard/client" IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest" IMAGE_TAG_VERSION="$IMAGE:$TRAVIS_TAG"
 
 install:
   - npm install
@@ -25,7 +25,7 @@ cache:
     - tests/elm-stuff
 
 before_script:
-  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" $DOCKER_REGISTRY
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
 
 jobs:
   include:
