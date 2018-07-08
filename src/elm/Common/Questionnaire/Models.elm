@@ -17,7 +17,8 @@ type alias Model =
     { questionnaire : QuestionnaireDetail
     , activeChapter : Maybe Chapter
     , activeChapterForm : Maybe (Form FormExtraData)
-    , feedback : Maybe String
+    , feedback : ActionResult (List Feedback)
+    , feedbackQuestionUuid : Maybe String
     , feedbackForm : Form.Form CustomFormError FeedbackForm
     , sendingFeedback : ActionResult String
     , feedbackResult : Maybe Feedback
@@ -36,7 +37,8 @@ initialModel questionnaire =
             { questionnaire = questionnaire
             , activeChapter = List.head questionnaire.knowledgeModel.chapters
             , activeChapterForm = Nothing
-            , feedback = Nothing
+            , feedback = Unset
+            , feedbackQuestionUuid = Nothing
             , feedbackForm = initEmptyFeedbackFrom
             , sendingFeedback = Unset
             , feedbackResult = Nothing
@@ -93,14 +95,23 @@ encodeFeedbackFrom questionUuid packageId form =
 
 
 type alias Feedback =
-    { issueId : Int
+    { title : String
+    , issueId : Int
+    , issueUrl : String
     }
 
 
 feedbackDecoder : Decoder Feedback
 feedbackDecoder =
     decode Feedback
+        |> required "title" Decode.string
         |> required "issueId" Decode.int
+        |> required "issueUrl" Decode.string
+
+
+feedbackListDecoder : Decoder (List Feedback)
+feedbackListDecoder =
+    Decode.list feedbackDecoder
 
 
 

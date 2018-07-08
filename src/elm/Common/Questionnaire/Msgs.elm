@@ -14,6 +14,7 @@ type Msg
     | FeedbackFormMsg Form.Msg
     | PostFeedbackCompleted (Result Http.Error Feedback)
     | SendFeedbackForm
+    | GetFeedbacksCompleted (Result Http.Error (List Feedback))
 
 
 type CustomFormMessage

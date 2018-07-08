@@ -1,10 +1,10 @@
 module Common.Questionnaire.View exposing (..)
 
 import Common.Html exposing (emptyNode)
-import Common.Questionnaire.Models exposing (FeedbackForm, FormExtraData, Model)
+import Common.Questionnaire.Models exposing (Feedback, FeedbackForm, FormExtraData, Model)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
-import Common.Types exposing (ActionResult(Success))
-import Common.View exposing (modalView)
+import Common.Types exposing (ActionResult(Success, Unset))
+import Common.View exposing (fullPageActionResultView, modalView)
 import Common.View.Forms exposing (inputGroup, textAreaGroup)
 import FormEngine.View exposing (FormViewConfig, viewForm)
 import Html exposing (..)
@@ -91,11 +91,11 @@ feedbackModal model =
     let
         visible =
             case model.feedback of
-                Just _ ->
-                    True
-
-                Nothing ->
+                Unset ->
                     False
+
+                _ ->
+                    True
 
         modalContent =
             case model.sendingFeedback of
@@ -104,7 +104,7 @@ feedbackModal model =
                         Just feedback ->
                             [ p []
                                 [ text "You can follow the GitHub "
-                                , a [ href <| "https://github.com/DSWGlobal/dsw-staging/issues/" ++ toString feedback.issueId, target "_blank" ]
+                                , a [ href feedback.issueUrl, target "_blank" ]
                                     [ text <| "issue " ++ toString feedback.issueId ]
                                 , text "."
                                 ]
@@ -114,11 +114,7 @@ feedbackModal model =
                             [ emptyNode ]
 
                 _ ->
-                    [ div [ class "alert alert-info" ]
-                        [ text "If you found something wrong with the question, you can send your feedback how to improve it." ]
-                    , inputGroup model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
-                    , textAreaGroup model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
-                    ]
+                    feedbackModalContent model
 
         ( actionName, actionMsg ) =
             case model.sendingFeedback of
@@ -139,3 +135,37 @@ feedbackModal model =
             }
     in
     modalView modalConfig
+
+
+feedbackModalContent : Model -> List (Html Msg)
+feedbackModalContent model =
+    let
+        feedbackList =
+            case model.feedback of
+                Success feedbacks ->
+                    if List.length feedbacks > 0 then
+                        div []
+                            [ div []
+                                [ text "There are already some issues reported with this question" ]
+                            , ul [] (List.map feedbackIssue feedbacks)
+                            ]
+                    else
+                        emptyNode
+
+                _ ->
+                    emptyNode
+    in
+    [ div [ class "alert alert-info" ]
+        [ text "If you found something wrong with the question, you can send us your feedback how to improve it." ]
+    , feedbackList
+    , inputGroup model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
+    , textAreaGroup model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
+    ]
+
+
+feedbackIssue : Feedback -> Html Msg
+feedbackIssue feedback =
+    li []
+        [ a [ href feedback.issueUrl, target "_blank" ]
+            [ text feedback.title ]
+        ]
