@@ -12,4 +12,30 @@
     p {
         text-align: justify;
     }
+
+    .jumbotron {
+        padding: 2rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .book-name {
+            font-size: 1.5rem;
+
+            .fa {
+                margin-right: 10px;
+            }
+            
+            a:not(:hover) {
+                color: $body-color;
+                text-decoration: underline;
+            }
+        }
+
+        .book-crc {
+            img {
+                width: 150px;
+            }
+        }
+    }
 }

@@ -19,6 +19,7 @@ initialModel =
 type alias BookReference =
     { shortUuid : String
     , content : String
+    , bookChapter : String
     }
 
 
@@ -27,3 +28,4 @@ bookReferenceDecoder =
     decode BookReference
         |> required "shortUuid" Decode.string
         |> required "content" Decode.string
+        |> required "bookChapter" Decode.string
