@@ -3,7 +3,7 @@ module Common.Questionnaire.Update exposing (..)
 import Common.Models exposing (getServerError)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
-import Common.Questionnaire.Requests exposing (postFeedback)
+import Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import FormEngine.Msgs
@@ -16,13 +16,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FormMsg msg ->
-            ( handleFormMsg msg model, Cmd.none )
+            handleFormMsg msg model
 
         SetActiveChapter chapter ->
             ( handleSetActiveChapter chapter model, Cmd.none )
 
         CloseFeedback ->
-            ( { model | feedback = Nothing }, Cmd.none )
+            ( { model | feedback = Unset, feedbackQuestionUuid = Nothing }, Cmd.none )
 
         FeedbackFormMsg formMsg ->
             ( { model | feedbackForm = Form.update feedbackFormValidation formMsg model.feedbackForm }, Cmd.none )
@@ -33,8 +33,21 @@ update msg model =
         PostFeedbackCompleted result ->
             ( handlePostFeedbackCompleted result model, Cmd.none )
 
+        GetFeedbacksCompleted result ->
+            case model.feedback of
+                Loading ->
+                    case result of
+                        Ok feedback ->
+                            ( { model | feedback = Success feedback }, Cmd.none )
 
-handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> Model -> Model
+                        Err error ->
+                            ( { model | feedback = getServerError error "Unable to get feedback" }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+
+handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> Model -> ( Model, Cmd Msg )
 handleFormMsg msg model =
     case model.activeChapterForm of
         Just form ->
@@ -42,18 +55,21 @@ handleFormMsg msg model =
                 FormEngine.Msgs.CustomQuestionMsg questionUuid customMsg ->
                     case customMsg of
                         FeedbackMsg ->
-                            { model
-                                | feedback = Just questionUuid
+                            ( { model
+                                | feedback = Loading
+                                , feedbackQuestionUuid = Just questionUuid
                                 , feedbackForm = initEmptyFeedbackFrom
                                 , sendingFeedback = Unset
                                 , feedbackResult = Nothing
-                            }
+                              }
+                            , getFeedbacksCmd model.questionnaire.package.id questionUuid
+                            )
 
                 _ ->
-                    { model | activeChapterForm = Just <| updateForm msg form }
+                    ( { model | activeChapterForm = Just <| updateForm msg form }, Cmd.none )
 
         _ ->
-            model
+            ( model, Cmd.none )
 
 
 handleSetActiveChapter : Chapter -> Model -> Model
@@ -74,7 +90,7 @@ handleSendFeedbackForm model =
         Just feedbackForm ->
             let
                 cmd =
-                    postFeedbackCmd feedbackForm (model.feedback |> Maybe.withDefault "") model.questionnaire.package.id
+                    postFeedbackCmd feedbackForm (model.feedbackQuestionUuid |> Maybe.withDefault "") model.questionnaire.package.id
             in
             ( { model | feedbackForm = newFeedbackForm, sendingFeedback = Loading }, cmd )
 
@@ -101,3 +117,9 @@ postFeedbackCmd feedbackFrom questionUuid packageId =
         |> encodeFeedbackFrom questionUuid packageId
         |> postFeedback
         |> Http.send PostFeedbackCompleted
+
+
+getFeedbacksCmd : String -> String -> Cmd Msg
+getFeedbacksCmd packageId questionUuid =
+    getFeedbacks packageId questionUuid
+        |> Http.send GetFeedbacksCompleted
