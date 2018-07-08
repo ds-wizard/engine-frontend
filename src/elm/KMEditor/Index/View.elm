@@ -87,15 +87,15 @@ tableFieldName km =
         extra =
             case km.stateType of
                 Outdated ->
-                    span [ class "label label-warning" ]
+                    span [ class "badge badge-warning" ]
                         [ text "outdated" ]
 
                 Migrating ->
-                    span [ class "label label-info" ]
+                    span [ class "badge badge-info" ]
                         [ text "migrating" ]
 
                 Migrated ->
-                    span [ class "label label-success" ]
+                    span [ class "badge badge-success" ]
                         [ text "migrated" ]
 
                 Edited ->
