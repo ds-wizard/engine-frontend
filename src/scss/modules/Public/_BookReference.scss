@@ -22,13 +22,17 @@
         .book-name {
             font-size: 1.5rem;
 
-            .fa {
-                margin-right: 10px;
-            }
-            
-            a:not(:hover) {
-                color: $body-color;
-                text-decoration: underline;
+            a {
+                img {
+                    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+                    margin-right: 20px;
+                    height: 75px;
+                }
+
+                &:not(:hover) {
+                    color: $body-color;
+                    text-decoration: underline;
+                }
             }
         }
 

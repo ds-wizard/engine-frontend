@@ -28,8 +28,10 @@ viewBookReference bookReference =
     div [ class "Public__BookReference" ]
         [ div [ class "jumbotron" ]
             [ div [ class "book-name" ]
-                [ i [ class "fa fa-book" ] []
-                , a [ href bookUrl, target "_blank" ] [ text "Data Stewardship for Open Science" ]
+                [ a [ href bookUrl, target "_blank" ]
+                    [ img [ src "/img/book-preview.png", alt "Book" ] []
+                    , text "Data Stewardship for Open Science"
+                    ]
                 , text <| ": Chapter " ++ bookReference.bookChapter
                 ]
             , div [ class "book-crc" ]
