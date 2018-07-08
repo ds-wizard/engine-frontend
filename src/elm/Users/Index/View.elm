@@ -59,6 +59,7 @@ tableConfig =
           , visible = always True
           }
         ]
+    , sortBy = .surname
     }
 
 

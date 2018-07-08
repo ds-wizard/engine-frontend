@@ -78,6 +78,7 @@ tableConfig jwt =
           , visible = tableActionCancelMigrationVisible jwt
           }
         ]
+    , sortBy = .name
     }
 
 
