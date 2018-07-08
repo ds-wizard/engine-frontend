@@ -63,6 +63,7 @@ tableConfig jwt =
           , visible = always True
           }
         ]
+    , sortBy = .name
     }
 
 

@@ -63,6 +63,7 @@ tableConfig model =
           , visible = always True
           }
         ]
+    , sortBy = .questionnaire >> .name
     }
 
 

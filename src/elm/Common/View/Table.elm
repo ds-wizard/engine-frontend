@@ -43,14 +43,19 @@ type alias TableConfig a msg =
     { emptyMessage : String
     , fields : List (TableFieldConfig a)
     , actions : List (TableActionConfig a msg)
+    , sortBy : a -> String
     }
 
 
 indexTable : TableConfig a msg -> (msg -> Msgs.Msg) -> List a -> Html Msgs.Msg
 indexTable config wrapMsg data =
+    let
+        tableData =
+            List.sortBy config.sortBy data
+    in
     table [ class "table index-table table-hover" ]
         [ tableHeader config
-        , tableBody config wrapMsg data
+        , tableBody config wrapMsg tableData
         ]
 
 
