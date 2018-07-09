@@ -1,3 +1,17 @@
+# 0.4.0
+
+## Features
+
+- Feedback
+- More DMP export formats
+- Book header for book references
+
+## Fixes
+
+- Fix flag colors for KM editor states
+- Tables are now sorted
+
+
 # 0.3.0
 
 ## Features
@@ -17,7 +31,7 @@
 
 ## Fixes
 
-- Fix a bug when switching the chapter in questionnaire without saving it first caused loosing the replies data 
+- Fix a bug when switching the chapter in questionnaire without saving it first caused loosing the replies data
 
 
 # 0.2.0
