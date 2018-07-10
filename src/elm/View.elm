@@ -5,6 +5,7 @@ import Common.View exposing (defaultFullPageError, fullPageMessage, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
 import DSPlanner.View
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import KMEditor.View
 import KMPackages.View
 import Models exposing (Model)
@@ -63,7 +64,13 @@ view model =
 
 welcomeView : Html Msg
 welcomeView =
-    fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+    div [ detailContainerClass ]
+        [ div [ class "alert alert-warning" ]
+            [ h4 [ class "alert-heading" ] [ text "Warning" ]
+            , p [ class "mb-0" ] [ text "DSW is currently in intensive development. Stored DS plans may become incompatible in future versions." ]
+            ]
+        , fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+        ]
 
 
 dataManagementPlansView : Html Msg
