@@ -2,9 +2,15 @@
 @import "../../mixins";
 
 .KMEditor__Editor {
-    h3 {
-        margin-top: 30px;
+    .editor-title {
         margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h3 {
+            margin: 0;
+        }
     }
 
     .form-group {
@@ -63,10 +69,10 @@
         margin-bottom: 50px;
     }
 
-    .diff-tree-col {
-        h4 {
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
+    .tree-col {
+        background: $gray-200;
+        overflow: auto;
+        padding: 0;
+        border-right: 1px solid $gray-400;
     }
 }

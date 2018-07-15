@@ -31,6 +31,7 @@ type ChapterMsg
     | DeleteChapterQuestion String
     | ReorderQuestionList (List QuestionEditor)
     | ChapterQuestionMsg String QuestionMsg
+    | ChapterEditorStateMsg EditorState
 
 
 type QuestionMsg
@@ -56,6 +57,7 @@ type QuestionMsg
     | DeleteExpert String
     | ReorderExpertList (List ExpertEditor)
     | ExpertMsg String ExpertMsg
+    | QuestionEditorStateMsg EditorState
 
 
 type AnswerMsg
@@ -66,6 +68,7 @@ type AnswerMsg
     | DeleteFollowUpQuestion String
     | ReorderFollowUpQuestionList (List QuestionEditor)
     | FollowUpQuestionMsg String QuestionMsg
+    | AnswerEditorStateMsg EditorState
 
 
 type ReferenceMsg

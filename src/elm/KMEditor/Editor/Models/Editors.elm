@@ -8,9 +8,15 @@ import List.Extra as List
 import Set
 
 
+type alias EditorState =
+    { treeOpen : Bool
+    }
+
+
 type KnowledgeModelEditor
     = KnowledgeModelEditor
-        { active : Bool
+        { editorState : EditorState
+        , active : Bool
         , form : Form CustomFormError KnowledgeModelForm
         , knowledgeModel : KnowledgeModel
         , chapters : List ChapterEditor
@@ -20,7 +26,8 @@ type KnowledgeModelEditor
 
 type ChapterEditor
     = ChapterEditor
-        { active : Bool
+        { editorState : EditorState
+        , active : Bool
         , form : Form CustomFormError ChapterForm
         , chapter : Chapter
         , questions : List QuestionEditor
@@ -31,7 +38,8 @@ type ChapterEditor
 
 type QuestionEditor
     = QuestionEditor
-        { active : Bool
+        { editorState : EditorState
+        , active : Bool
         , form : Form CustomFormError QuestionForm
         , question : Question
         , answerItemTemplateQuestions : List QuestionEditor
@@ -48,7 +56,8 @@ type QuestionEditor
 
 type AnswerEditor
     = AnswerEditor
-        { active : Bool
+        { editorState : EditorState
+        , active : Bool
         , form : Form CustomFormError AnswerForm
         , answer : Answer
         , followUps : List QuestionEditor
@@ -59,7 +68,8 @@ type AnswerEditor
 
 type ReferenceEditor
     = ReferenceEditor
-        { active : Bool
+        { editorState : EditorState
+        , active : Bool
         , form : Form CustomFormError ReferenceForm
         , reference : Reference
         , order : Int
@@ -68,7 +78,8 @@ type ReferenceEditor
 
 type ExpertEditor
     = ExpertEditor
-        { active : Bool
+        { editorState : EditorState
+        , active : Bool
         , form : Form CustomFormError ExpertForm
         , expert : Expert
         , order : Int
@@ -90,7 +101,8 @@ createKnowledgeModelEditor knowledgeModel =
             List.indexedMap (createChapterEditor False) knowledgeModel.chapters
     in
     KnowledgeModelEditor
-        { active = True
+        { editorState = inititalEditorState
+        , active = True
         , form = form
         , knowledgeModel = knowledgeModel
         , chapters = chapters
@@ -127,7 +139,8 @@ createChapterEditor active order chapter =
             List.indexedMap (createQuestionEditor False) chapter.questions
     in
     ChapterEditor
-        { active = active
+        { editorState = inititalEditorState
+        , active = active
         , form = form
         , chapter = chapter
         , questions = questions
@@ -196,7 +209,8 @@ createQuestionEditor active order question =
             List.indexedMap (createExpertEditor False) question.experts
     in
     QuestionEditor
-        { active = active
+        { editorState = inititalEditorState
+        , active = active
         , form = form
         , question = question
         , answerItemTemplateQuestions = answerItemTemplateQuestions
@@ -256,7 +270,8 @@ createAnswerEditor active order answer =
             List.indexedMap (createQuestionEditor False) questions
     in
     AnswerEditor
-        { active = active
+        { editorState = inititalEditorState
+        , active = active
         , form = form
         , answer = answer
         , followUps = createFollowUps answer.followUps
@@ -307,7 +322,8 @@ createReferenceEditor active order reference =
                 |> initForm referenceFormValidation
     in
     ReferenceEditor
-        { active = active
+        { editorState = inititalEditorState
+        , active = active
         , form = form
         , reference = reference
         , order = order
@@ -356,7 +372,8 @@ createExpertEditor active order expert =
                 |> initForm expertFormValidation
     in
     ExpertEditor
-        { active = active
+        { editorState = inititalEditorState
+        , active = active
         , form = form
         , expert = expert
         , order = order
@@ -395,6 +412,11 @@ isExpertEditorDirty (ExpertEditor ee) =
 
 
 {- Helpers -}
+
+
+inititalEditorState : EditorState
+inititalEditorState =
+    { treeOpen = False }
 
 
 formChanged : Form CustomFormError a -> Bool

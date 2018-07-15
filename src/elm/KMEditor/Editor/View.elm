@@ -5,7 +5,7 @@ import Common.View exposing (defaultFullPageError, fullPageActionResultView, ful
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (class, href, rows, type_)
+import Html.Attributes exposing (class, classList, href, rows, type_)
 import Html.Events exposing (..)
 import KMEditor.Common.View exposing (diffTreeView)
 import KMEditor.Editor.Models exposing (..)
@@ -33,14 +33,170 @@ editorView wrapMsg model knowledgeModelEditor =
     div [ class "row" ]
         [ div [ class "col-12" ]
             [ formResultView model.saving ]
+        , div [ class "col-4 tree-col" ]
+            [ treeView wrapMsg knowledgeModelEditor
+            ]
         , div [ class "col-8" ]
             [ breadcrumbs knowledgeModelEditor
             , viewKnowledgeModel wrapMsg model knowledgeModelEditor (wrapMsg << Edit)
             ]
-        , div [ class "col-4 diff-tree-col" ]
-            [ h4 [] [ text "Current changes" ]
-            , diffTreeView (getKnowledgeModel knowledgeModelEditor) model.events
+        ]
+
+
+treeView : (Msg -> Msgs.Msg) -> KnowledgeModelEditor -> Html Msgs.Msg
+treeView wrapMsg editor =
+    div [ class "diff-tree" ]
+        [ ul [] [ treeNodeKnowledgeModel wrapMsg editor ]
+        ]
+
+
+treeNodeKnowledgeModel : (Msg -> Msgs.Msg) -> KnowledgeModelEditor -> Html Msgs.Msg
+treeNodeKnowledgeModel wrapMsg (KnowledgeModelEditor kme) =
+    let
+        chapterMsg uuid msg =
+            wrapMsg <| Edit <| ChapterMsg uuid msg
+    in
+    treeNode
+        { class = "knowledge-model"
+        , icon = "fa-database"
+        , label = kme.knowledgeModel.name
+        , children = List.map (treeNodeChapter chapterMsg) kme.chapters
+        , open = True
+        , toggleMsg = Nothing
+        }
+
+
+treeNodeChapter : (String -> ChapterMsg -> Msgs.Msg) -> ChapterEditor -> Html Msgs.Msg
+treeNodeChapter wrapMsg (ChapterEditor ce) =
+    let
+        currentMsg =
+            wrapMsg ce.chapter.uuid
+
+        questionMsg uuid msg =
+            currentMsg <| ChapterQuestionMsg uuid msg
+    in
+    treeNode
+        { class = "chapter"
+        , icon = "fa-book"
+        , label = ce.chapter.title
+        , children = List.map (treeNodeQuestion questionMsg) ce.questions
+        , open = ce.editorState.treeOpen
+        , toggleMsg = Just <| currentMsg <| ChapterEditorStateMsg { treeOpen = not ce.editorState.treeOpen }
+        }
+
+
+treeNodeQuestion : (String -> QuestionMsg -> Msgs.Msg) -> QuestionEditor -> Html Msgs.Msg
+treeNodeQuestion wrapMsg (QuestionEditor qe) =
+    let
+        currentMsg =
+            wrapMsg qe.question.uuid
+
+        answerMsg uuid msg =
+            currentMsg <| AnswerMsg uuid msg
+
+        answers =
+            List.map (treeNodeAnswer answerMsg) qe.answers
+
+        experts =
+            List.map treeNodeExpert qe.experts
+
+        references =
+            List.map treeNodeReference qe.references
+    in
+    treeNode
+        { class = "question"
+        , icon = "fa-comment-o"
+        , label = qe.question.title
+        , children = answers ++ experts ++ references
+        , open = qe.editorState.treeOpen
+        , toggleMsg = Just <| currentMsg <| QuestionEditorStateMsg { treeOpen = not qe.editorState.treeOpen }
+        }
+
+
+treeNodeAnswer : (String -> AnswerMsg -> Msgs.Msg) -> AnswerEditor -> Html Msgs.Msg
+treeNodeAnswer wrapMsg (AnswerEditor ae) =
+    let
+        currentMsg =
+            wrapMsg ae.answer.uuid
+
+        questionMsg uuid msg =
+            currentMsg <| FollowUpQuestionMsg uuid msg
+    in
+    treeNode
+        { class = "answer"
+        , icon = "fa-check-square-o"
+        , label = ae.answer.label
+        , children = List.map (treeNodeQuestion questionMsg) ae.followUps
+        , open = ae.editorState.treeOpen
+        , toggleMsg = Just <| currentMsg <| AnswerEditorStateMsg { treeOpen = not ae.editorState.treeOpen }
+        }
+
+
+treeNodeExpert : ExpertEditor -> Html Msgs.Msg
+treeNodeExpert (ExpertEditor ee) =
+    treeNode
+        { class = "expert"
+        , icon = "fa fa-user-o"
+        , label = ee.expert.name
+        , children = []
+        , open = ee.editorState.treeOpen
+        , toggleMsg = Nothing
+        }
+
+
+treeNodeReference : ReferenceEditor -> Html Msgs.Msg
+treeNodeReference (ReferenceEditor re) =
+    treeNode
+        { class = "reference"
+        , icon = "fa fa-bookmark-o"
+        , label = re.reference.chapter
+        , children = []
+        , open = re.editorState.treeOpen
+        , toggleMsg = Nothing
+        }
+
+
+type alias TreeNodeConfig =
+    { class : String
+    , icon : String
+    , label : String
+    , children : List (Html Msgs.Msg)
+    , open : Bool
+    , toggleMsg : Maybe Msgs.Msg
+    }
+
+
+treeNode : TreeNodeConfig -> Html Msgs.Msg
+treeNode config =
+    let
+        caret =
+            case ( config.toggleMsg, List.length config.children > 0 ) of
+                ( Just msg, True ) ->
+                    treeNodeCaret msg config.open
+
+                _ ->
+                    emptyNode
+
+        children =
+            if config.open then
+                ul [] config.children
+            else
+                emptyNode
+    in
+    li [ class config.class ]
+        [ caret
+        , a []
+            [ i [ class <| "fa " ++ config.icon ] []
+            , text config.label
             ]
+        , children
+        ]
+
+
+treeNodeCaret : Msgs.Msg -> Bool -> Html Msgs.Msg
+treeNodeCaret toggleMsg open =
+    a [ onClick toggleMsg, class "caret" ]
+        [ i [ class "fa", classList [ ( "fa-caret-right", not open ), ( "fa-caret-down", open ) ] ] []
         ]
 
 

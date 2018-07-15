@@ -1,7 +1,8 @@
 module KMEditor.Editor.Update.UpdateExpert exposing (..)
 
 import Form
-import KMEditor.Common.Models.Events exposing (Event, Path, createEditExpertEvent)
+import KMEditor.Common.Models.Events exposing (Event, createEditExpertEvent)
+import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (expertFormValidation, initExpertForm, updateExpertWithForm)
 import Random.Pcg exposing (Seed)

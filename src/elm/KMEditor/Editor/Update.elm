@@ -6,6 +6,7 @@ import Common.Types exposing (ActionResult(..))
 import Jwt
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
+import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import KMEditor.Editor.Models exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Msgs exposing (..)
@@ -192,6 +193,9 @@ updateChapter msg path seed ((ChapterEditor editor) as chapterEditor) =
             in
             ( newSeed, ChapterEditor { editor | questions = newQuestions }, event )
 
+        ChapterEditorStateMsg state ->
+            ( seed, ChapterEditor { editor | editorState = state }, Nothing )
+
 
 updateQuestion : QuestionMsg -> Path -> Seed -> QuestionEditor -> ( Seed, QuestionEditor, Maybe Event )
 updateQuestion msg path seed ((QuestionEditor editor) as questionEditor) =
@@ -282,6 +286,9 @@ updateQuestion msg path seed ((QuestionEditor editor) as questionEditor) =
             in
             ( newSeed, QuestionEditor { editor | experts = newExperts }, event )
 
+        QuestionEditorStateMsg state ->
+            ( seed, QuestionEditor { editor | editorState = state }, Nothing )
+
 
 updateAnswer : AnswerMsg -> Path -> Seed -> AnswerEditor -> ( Seed, AnswerEditor, Maybe Event )
 updateAnswer msg path seed ((AnswerEditor editor) as answerEditor) =
@@ -314,6 +321,9 @@ updateAnswer msg path seed ((AnswerEditor editor) as answerEditor) =
                     updateInListWithSeed editor.followUps seed (matchQuestion uuid) (updateQuestion questionMsg currentPath)
             in
             ( newSeed, AnswerEditor { editor | followUps = newFollowUps }, event )
+
+        AnswerEditorStateMsg state ->
+            ( seed, AnswerEditor { editor | editorState = state }, Nothing )
 
 
 updateReference : ReferenceMsg -> Path -> Seed -> ReferenceEditor -> ( Seed, ReferenceEditor, Maybe Event )

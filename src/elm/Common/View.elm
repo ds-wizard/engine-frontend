@@ -74,12 +74,6 @@ type alias ModalConfig msg =
 modalView : ModalConfig msg -> Html msg
 modalView cfg =
     let
-        visibleClass =
-            if cfg.visible then
-                "visible"
-            else
-                ""
-
         content =
             formResultView cfg.actionResult :: cfg.modalContent
 
@@ -91,7 +85,7 @@ modalView cfg =
                 _ ->
                     False
     in
-    div [ class ("modal-cover " ++ visibleClass) ]
+    div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content" ]
                 [ div [ class "modal-header" ]
@@ -103,6 +97,28 @@ modalView cfg =
                     [ button [ onClick cfg.cancelMsg, disabled cancelDisabled, class "btn btn-secondary" ]
                         [ text "Cancel" ]
                     , actionButton ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
+                    ]
+                ]
+            ]
+        ]
+
+
+type alias AlertConfig msg =
+    { message : String
+    , visible : Bool
+    , actionMsg : msg
+    , actionName : String
+    }
+
+
+alertView : AlertConfig msg -> Html msg
+alertView cfg =
+    div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
+        [ div [ class "modal-dialog" ]
+            [ div [ class "modal-content" ]
+                [ div [ class "modal-body text-center" ]
+                    [ p [] [ text cfg.message ]
+                    , button [ onClick cfg.actionMsg, class "btn btn-primary" ] [ text cfg.actionName ]
                     ]
                 ]
             ]

@@ -5,6 +5,7 @@ import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode exposing (..)
 import Json.Encode.Extra exposing (maybe)
 import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.Models.Path exposing (..)
 import KMEditor.Editor.Models.Editors exposing (..)
 import List.Extra as List
 import Random.Pcg exposing (Seed)
@@ -145,17 +146,6 @@ type alias EditExpertEventData =
 type alias DeleteExpertEventData =
     { expertUuid : String
     }
-
-
-type PathNode
-    = KMPathNode String
-    | ChapterPathNode String
-    | QuestionPathNode String
-    | AnswerPathNode String
-
-
-type alias Path =
-    List PathNode
 
 
 type alias EventField a =
@@ -644,30 +634,6 @@ encodeDeleteExpertEvent data =
     ]
 
 
-encodePathNode : PathNode -> Encode.Value
-encodePathNode node =
-    case node of
-        KMPathNode uuid ->
-            createEncodedPathNode "km" uuid
-
-        ChapterPathNode uuid ->
-            createEncodedPathNode "chapter" uuid
-
-        QuestionPathNode uuid ->
-            createEncodedPathNode "question" uuid
-
-        AnswerPathNode uuid ->
-            createEncodedPathNode "answer" uuid
-
-
-createEncodedPathNode : String -> String -> Encode.Value
-createEncodedPathNode pathNodeType uuid =
-    Encode.object
-        [ ( "type", Encode.string pathNodeType )
-        , ( "uuid", Encode.string uuid )
-        ]
-
-
 encodeEventField : (a -> Encode.Value) -> EventField a -> Encode.Value
 encodeEventField encode field =
     case ( field.changed, field.value ) of
@@ -888,41 +854,6 @@ deleteExpertEventDecoder : Decoder DeleteExpertEventData
 deleteExpertEventDecoder =
     decode DeleteExpertEventData
         |> required "expertUuid" Decode.string
-
-
-pathDecoder : Decoder Path
-pathDecoder =
-    Decode.list pathNodeDecoder
-
-
-pathNodeDecoder : Decoder PathNode
-pathNodeDecoder =
-    Decode.field "type" Decode.string
-        |> Decode.andThen pathNodeDecoderByType
-
-
-pathNodeDecoderByType : String -> Decoder PathNode
-pathNodeDecoderByType pathNodeType =
-    case pathNodeType of
-        "km" ->
-            Decode.map KMPathNode pathNodeUuidDecoder
-
-        "chapter" ->
-            Decode.map ChapterPathNode pathNodeUuidDecoder
-
-        "question" ->
-            Decode.map QuestionPathNode pathNodeUuidDecoder
-
-        "answer" ->
-            Decode.map AnswerPathNode pathNodeUuidDecoder
-
-        _ ->
-            Decode.fail <| "Unknown path node type: " ++ pathNodeType
-
-
-pathNodeUuidDecoder : Decoder String
-pathNodeUuidDecoder =
-    Decode.field "uuid" Decode.string
 
 
 eventFieldDecoder : Decoder a -> Decoder (EventField a)

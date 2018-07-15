@@ -9,6 +9,11 @@ import Task
 import Uuid
 
 
+pair : a -> b -> ( a, b )
+pair a b =
+    ( a, b )
+
+
 tuplePrepend : a -> ( b, c ) -> ( a, b, c )
 tuplePrepend a ( b, c ) =
     ( a, b, c )

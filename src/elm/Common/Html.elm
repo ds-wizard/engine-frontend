@@ -32,3 +32,8 @@ detailContainerClassWith otherClass =
 detailContainerClass : Html.Attribute msg
 detailContainerClass =
     detailContainerClassWith ""
+
+
+fa : String -> Html msg
+fa icon =
+    i [ class <| "fa fa-" ++ icon ] []

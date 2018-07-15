@@ -1,6 +1,7 @@
 module KMEditor.Editor.Update.Utils exposing (..)
 
-import KMEditor.Common.Models.Events exposing (Event, Path, PathNode)
+import KMEditor.Common.Models.Events exposing (Event)
+import KMEditor.Common.Models.Path exposing (Path, PathNode)
 import Random.Pcg exposing (Seed)
 import Utils exposing (getUuid)
 

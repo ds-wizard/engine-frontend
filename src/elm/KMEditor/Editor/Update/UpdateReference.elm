@@ -1,7 +1,8 @@
 module KMEditor.Editor.Update.UpdateReference exposing (..)
 
 import Form
-import KMEditor.Common.Models.Events exposing (Event, Path, createEditReferenceEvent)
+import KMEditor.Common.Models.Events exposing (Event, createEditReferenceEvent)
+import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (initReferenceForm, referenceFormValidation, updateReferenceWithForm)
 import Random.Pcg exposing (Seed)

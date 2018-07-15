@@ -3,6 +3,7 @@ module KMEditor.Editor.Update.UpdateQuestion exposing (..)
 import Form
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
+import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (..)
 import KMEditor.Editor.Update.Utils exposing (addChild, updateInList)

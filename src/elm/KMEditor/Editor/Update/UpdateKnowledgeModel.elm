@@ -3,6 +3,7 @@ module KMEditor.Editor.Update.UpdateKnowledgeModel exposing (..)
 import Form
 import KMEditor.Common.Models.Entities exposing (newChapter)
 import KMEditor.Common.Models.Events exposing (..)
+import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (initKnowledgeModelFrom, knowledgeModelFormValidation, updateKnowledgeModelWithForm)
 import KMEditor.Editor.Update.Utils exposing (..)

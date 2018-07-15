@@ -2,6 +2,7 @@ module KMEditor.Models exposing (..)
 
 import KMEditor.Create.Models
 import KMEditor.Editor.Models
+import KMEditor.Editor2.Models
 import KMEditor.Index.Models
 import KMEditor.Migration.Models
 import KMEditor.Publish.Models
@@ -11,6 +12,7 @@ import KMEditor.Routing exposing (Route(..))
 type alias Model =
     { createModel : KMEditor.Create.Models.Model
     , editorModel : KMEditor.Editor.Models.Model
+    , editor2Model : KMEditor.Editor2.Models.Model
     , indexModel : KMEditor.Index.Models.Model
     , migrationModel : KMEditor.Migration.Models.Model
     , publishModel : KMEditor.Publish.Models.Model
@@ -21,6 +23,7 @@ initialModel : Model
 initialModel =
     { createModel = KMEditor.Create.Models.initialModel Nothing
     , editorModel = KMEditor.Editor.Models.initialModel ""
+    , editor2Model = KMEditor.Editor2.Models.initialModel ""
     , indexModel = KMEditor.Index.Models.initialModel
     , migrationModel = KMEditor.Migration.Models.initialModel ""
     , publishModel = KMEditor.Publish.Models.initialModel
@@ -35,6 +38,9 @@ initLocalModel route model =
 
         Editor uuid ->
             { model | editorModel = KMEditor.Editor.Models.initialModel uuid }
+
+        Editor2 uuid ->
+            { model | editor2Model = KMEditor.Editor2.Models.initialModel uuid }
 
         Index ->
             { model | indexModel = KMEditor.Index.Models.initialModel }
