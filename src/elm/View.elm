@@ -5,6 +5,7 @@ import Common.View exposing (defaultFullPageError, fullPageMessage, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
 import DSPlanner.View
 import Html exposing (..)
+import Html.Attributes exposing (class, href, target)
 import KMEditor.View
 import KMPackages.View
 import Models exposing (Model)
@@ -63,7 +64,20 @@ view model =
 
 welcomeView : Html Msg
 welcomeView =
-    fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+    div [ detailContainerClass ]
+        [ div [ class "alert alert-warning" ]
+            [ h4 [ class "alert-heading" ] [ text "Warning" ]
+            , p [ class "mb-0" ] [ text "DSW is currently under intensive development. As such, we cannot guarantee DS plans compatibility in future versions." ]
+            ]
+        , div [ class "alert alert-info" ]
+            [ p [ class "mb-0" ]
+                [ text "This is a demonstration ELIXIR DSW installment. To deploy your local DSW copy, follow the instructions in "
+                , a [ href "https://docs.dsw.fairdata.solutions", target "_blank" ] [ text "docs.dsw.fairdata.solutions" ]
+                , text "."
+                ]
+            ]
+        , fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+        ]
 
 
 dataManagementPlansView : Html Msg
