@@ -13,6 +13,7 @@ import KMEditor.Editor2.View.Editors exposing (activeEditor)
 import KMEditor.Editor2.View.Tree exposing (treeView)
 import Maybe.Extra as Maybe
 import Msgs
+import SplitPane exposing (ViewConfig, createViewConfig)
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -41,15 +42,30 @@ editorView wrapMsg model kmUuid =
             ]
         , div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
-        , div [ class "tree-col" ]
-            [ treeView (Maybe.withDefault "" model.activeEditorUuid) model.editors kmUuid
-            ]
-            |> Html.map wrapMsg
-        , Html.Keyed.node "div"
-            [ class "editor-form-view" ]
-            [ activeEditor model
-            ]
-            |> Html.map wrapMsg
+        , SplitPane.view viewConfig (viewTree model kmUuid) (viewEditor model) model.splitPane |> Html.map wrapMsg
+        ]
+
+
+viewConfig : ViewConfig Msg
+viewConfig =
+    createViewConfig
+        { toMsg = PaneMsg
+        , customSplitter = Nothing
+        }
+
+
+viewTree : Model -> String -> Html Msg
+viewTree model kmUuid =
+    div [ class "tree-col" ]
+        [ treeView (Maybe.withDefault "" model.activeEditorUuid) model.editors kmUuid
+        ]
+
+
+viewEditor : Model -> Html Msg
+viewEditor model =
+    Html.Keyed.node "div"
+        [ class "editor-form-view" ]
+        [ activeEditor model
         ]
 
 

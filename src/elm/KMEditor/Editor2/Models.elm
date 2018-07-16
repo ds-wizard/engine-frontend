@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor2.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid)
 import Reorderable
+import SplitPane exposing (Orientation(Horizontal), configureSplitter, percentage)
 
 
 type alias Model =
@@ -16,6 +17,7 @@ type alias Model =
     , events : List Event
     , alert : Maybe String
     , submitting : ActionResult String
+    , splitPane : SplitPane.State
     }
 
 
@@ -29,6 +31,7 @@ initialModel branchUuid =
     , events = []
     , alert = Nothing
     , submitting = Unset
+    , splitPane = SplitPane.init Horizontal |> configureSplitter (percentage 0.2 (Just ( 0.05, 0.7 )))
     }
 
 

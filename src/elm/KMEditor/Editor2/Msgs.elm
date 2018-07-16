@@ -4,6 +4,7 @@ import Form
 import Jwt
 import KMEditor.Common.Models.Entities exposing (..)
 import Reorderable
+import SplitPane
 
 
 type Msg
@@ -15,6 +16,7 @@ type Msg
     | CloseAlert
     | Submit
     | SubmitCompleted (Result Jwt.JwtError String)
+    | PaneMsg SplitPane.Msg
 
 
 type EditorMsg

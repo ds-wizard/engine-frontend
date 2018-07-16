@@ -54,15 +54,17 @@
         overflow: auto;
         padding: 0;
         border-right: 1px solid $gray-400;
-        height: calc(100vh - 100px);
-        width: 300px;
+        height: 100%;
+        width: 100%;
     }
 
     .editor-form-view {
         height: calc(100vh - 100px);
         overflow: auto;
         padding: 25px;
-        width: calc(100% - 300px);
+        width: 100%;
+        display: flex;
+        justify-content: center;
     }
 
     .editor-title {
@@ -74,6 +76,10 @@
         h3 {
             margin: 0;
         }
+    }
+
+    .pane-container {
+        height: calc(100vh - 90px) !important;
     }
 
     .form-group {

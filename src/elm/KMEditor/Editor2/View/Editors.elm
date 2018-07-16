@@ -50,6 +50,11 @@ getChildName editors uuid =
         |> Maybe.withDefault "-"
 
 
+editorClass : String
+editorClass =
+    "col-xl-8 col-lg-10 col-md-12"
+
+
 kmEditorView : Model -> KMEditorData -> ( String, Html Msg )
 kmEditorView model editorData =
     let
@@ -75,7 +80,7 @@ kmEditorView model editorData =
                 ]
     in
     ( editorData.uuid
-    , div [ class "knowledge-model" ]
+    , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (KMEditorFormMsg >> KMEditorMsg >> EditorMsg)
         , inputChildren chaptersConfig
@@ -109,7 +114,7 @@ chapterEditorView model editorData =
                 ]
     in
     ( editorData.uuid
-    , div [ class "chapter" ]
+    , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (ChapterFormMsg >> ChapterEditorMsg >> EditorMsg)
         , inputChildren questionsConfig
@@ -145,7 +150,7 @@ questionEditorView model editorData =
                     emptyNode
     in
     ( editorData.uuid
-    , div [ class "question" ]
+    , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
         , answersOrItem
@@ -249,7 +254,7 @@ answerEditorView model editorData =
                 ]
     in
     ( editorData.uuid
-    , div [ class "answer" ]
+    , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
         , inputChildren followUpsConfig
@@ -270,7 +275,7 @@ referenceEditorView editorData =
                 [ inputGroup editorData.form "chapter" "Chapter" ]
     in
     ( editorData.uuid
-    , div [ class "reference" ]
+    , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (ReferenceFormMsg >> ReferenceEditorMsg >> EditorMsg)
         ]
@@ -292,7 +297,7 @@ expertEditorView editorData =
                 ]
     in
     ( editorData.uuid
-    , div [ class "expert" ]
+    , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (ExpertFormMsg >> ExpertEditorMsg >> EditorMsg)
         ]

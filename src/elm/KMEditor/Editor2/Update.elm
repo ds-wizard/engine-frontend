@@ -23,6 +23,7 @@ import Random.Pcg exposing (Seed)
 import Reorderable
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
+import SplitPane
 import Utils exposing (pair)
 
 
@@ -89,6 +90,9 @@ update msg wrapMsg seed session model =
                     , { model | submitting = getServerErrorJwt error "Knowledge model could not be saved" }
                     , getResultCmd result
                     )
+
+        PaneMsg paneMsg ->
+            ( seed, { model | splitPane = SplitPane.update paneMsg model.splitPane }, Cmd.none )
 
         GetKnowledgeModelCompleted result ->
             let
