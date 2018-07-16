@@ -50,16 +50,16 @@ tableConfig model =
           }
         ]
     , actions =
-        [ { label = TableActionIcon "fa fa-trash-o"
-          , action = TableActionMsg tableActionDelete
-          , visible = always True
-          }
-        , { label = TableActionText "Fill questionnaire"
-          , action = TableActionLink (Routing.DSPlanner << Detail << .uuid << .questionnaire)
+        [ { label = TableActionText "Fill questionnaire"
+          , action = TableActionButtonLink (Routing.DSPlanner << Detail << .uuid << .questionnaire)
           , visible = always True
           }
         , { label = TableActionText ""
           , action = TableActionCustom exportAction
+          , visible = always True
+          }
+        , { label = TableActionIcon "fa fa-trash-o"
+          , action = TableActionMsg tableActionDelete
           , visible = always True
           }
         ]
@@ -89,7 +89,7 @@ exportAction wrapMsg questionnaireRow =
     Dropdown.dropdown questionnaireRow.dropdownState
         { options = [ Dropdown.alignMenuRight ]
         , toggleMsg = wrapMsg << DropdownMsg questionnaireRow.questionnaire
-        , toggleButton = Dropdown.toggle [ Button.outlinePrimary ] [ text "Export" ]
+        , toggleButton = Dropdown.toggle [ Button.roleLink ] [ text "Export" ]
         , items = List.map (exportItem questionnaireRow.questionnaire) exportFormats
         }
 
