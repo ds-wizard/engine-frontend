@@ -55,9 +55,7 @@ $indent-step: 20px;
 
             a {
                 white-space: nowrap;
-                max-width: 250px;
-                text-overflow: ellipsis;
-                overflow: hidden;
+                padding: 1px 0;
                 display: inline-block;
                 z-index: 1;
                 position: relative;

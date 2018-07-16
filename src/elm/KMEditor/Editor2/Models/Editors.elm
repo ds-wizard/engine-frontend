@@ -304,6 +304,28 @@ getEditorUuid editor =
             data.expert.uuid
 
 
+getEditorPath : Editor -> Path
+getEditorPath editor =
+    case editor of
+        KMEditor data ->
+            data.path
+
+        ChapterEditor data ->
+            data.path
+
+        QuestionEditor data ->
+            data.path
+
+        AnswerEditor data ->
+            data.path
+
+        ReferenceEditor data ->
+            data.path
+
+        ExpertEditor data ->
+            data.path
+
+
 getNewState : EditorState -> EditorState -> EditorState
 getNewState originalState newState =
     if newState == Deleted then

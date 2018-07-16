@@ -26,11 +26,13 @@
     .logo {
         color: $white;
         font-size: 18px;
-        display: inline-block;
+        display: flex;
         width: 100%;
         text-decoration: none;
-        padding: 15px;
         border-bottom: 1px solid darken($primary, 10%);
+        height: 50px;
+        justify-content: center;
+        align-items: center;
     }
 
     .menu {
@@ -114,11 +116,6 @@
                     text-align: center;
                 }
             }
-        }
-
-        .logo {
-            padding: 15px 0;
-            text-align: center;
         }
     }
 }
