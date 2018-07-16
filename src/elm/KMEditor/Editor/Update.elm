@@ -3,6 +3,7 @@ module KMEditor.Editor.Update exposing (..)
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Types exposing (ActionResult(Loading, Success), mapSuccess)
+import Dom.Scroll
 import Jwt
 import KMEditor.Common.Models.Events exposing (encodeEvents)
 import KMEditor.Editor.Models exposing (..)
@@ -24,6 +25,7 @@ import Reorderable
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 import SplitPane
+import Task
 import Utils exposing (pair)
 
 
@@ -130,31 +132,31 @@ update msg wrapMsg seed session model =
                 Just editor ->
                     case editor of
                         KMEditor data ->
-                            setActiveEditor uuid
+                            setActiveEditor wrapMsg uuid
                                 |> withGenerateKMEditEvent seed model data
 
                         ChapterEditor data ->
-                            setActiveEditor uuid
+                            setActiveEditor wrapMsg uuid
                                 |> withGenerateChapterEditEvent seed model data
 
                         QuestionEditor data ->
-                            setActiveEditor uuid
+                            setActiveEditor wrapMsg uuid
                                 |> withGenerateQuestionEditEvent seed model data
 
                         AnswerEditor data ->
-                            setActiveEditor uuid
+                            setActiveEditor wrapMsg uuid
                                 |> withGenerateAnswerEditEvent seed model data
 
                         ReferenceEditor data ->
-                            setActiveEditor uuid
+                            setActiveEditor wrapMsg uuid
                                 |> withGenerateReferenceEditEvent seed model data
 
                         ExpertEditor data ->
-                            setActiveEditor uuid
+                            setActiveEditor wrapMsg uuid
                                 |> withGenerateExpertEditEvent seed model data
 
                 _ ->
-                    setActiveEditor uuid seed model ()
+                    setActiveEditor wrapMsg uuid seed model ()
 
         EditorMsg editorMsg ->
             case ( editorMsg, getActiveEditor model ) of
@@ -296,12 +298,21 @@ update msg wrapMsg seed session model =
         ReorderableMsg reorderableMsg ->
             ( seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
 
+        NoOp ->
+            ( seed, model, Cmd.none )
+
 
 withNoCmd : ( a, b ) -> ( a, b, Cmd msg )
 withNoCmd ( a, b ) =
     ( a, b, Cmd.none )
 
 
-setActiveEditor : String -> Seed -> Model -> a -> ( Seed, Model, Cmd Msgs.Msg )
-setActiveEditor uuid seed model _ =
-    ( seed, { model | activeEditorUuid = Just uuid }, Cmd.none )
+setActiveEditor : (Msg -> Msgs.Msg) -> String -> Seed -> Model -> a -> ( Seed, Model, Cmd Msgs.Msg )
+setActiveEditor wrapMsg uuid seed model _ =
+    let
+        cmd =
+            Dom.Scroll.toTop "editor-view"
+                |> Task.attempt (always NoOp)
+                |> Cmd.map wrapMsg
+    in
+    ( seed, { model | activeEditorUuid = Just uuid }, cmd )

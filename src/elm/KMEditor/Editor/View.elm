@@ -4,7 +4,7 @@ import Common.Html exposing (emptyNode)
 import Common.View exposing (AlertConfig, alertView, fullPageActionResultView)
 import Common.View.Forms exposing (actionButton)
 import Html exposing (..)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (class, classList, id)
 import Html.Keyed
 import KMEditor.Editor.Models exposing (..)
 import KMEditor.Editor.Msgs exposing (..)
@@ -64,7 +64,7 @@ viewTree model kmUuid =
 viewEditor : Model -> Html Msg
 viewEditor model =
     Html.Keyed.node "div"
-        [ class "editor-form-view" ]
+        [ class "editor-form-view", id "editor-view" ]
         [ activeEditor model
         ]
 

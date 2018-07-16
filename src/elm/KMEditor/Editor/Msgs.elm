@@ -17,6 +17,7 @@ type Msg
     | Submit
     | SubmitCompleted (Result Jwt.JwtError String)
     | PaneMsg SplitPane.Msg
+    | NoOp
 
 
 type EditorMsg
