@@ -5,6 +5,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
+import Set
 
 
 type alias KnowledgeModelForm =
@@ -42,9 +43,18 @@ type alias ExpertForm =
     }
 
 
+
+{- Common utils -}
+
+
 initForm : Validation CustomFormError a -> List ( String, Field.Field ) -> Form CustomFormError a
 initForm validation initials =
     Form.initial initials validation
+
+
+formChanged : Form CustomFormError a -> Bool
+formChanged form =
+    Set.size (Form.getChangedFields form) > 0
 
 
 

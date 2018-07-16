@@ -1,14 +1,14 @@
-module KMEditor.Editor2.Update.Answer exposing (..)
+module KMEditor.Editor.Update.Answer exposing (..)
 
 import Form
 import KMEditor.Common.Models.Entities exposing (newQuestion)
 import KMEditor.Common.Models.Path exposing (PathNode(AnswerPathNode))
-import KMEditor.Editor2.Models exposing (Model)
-import KMEditor.Editor2.Models.Children as Children exposing (Children)
-import KMEditor.Editor2.Models.Editors exposing (AnswerEditorData, Editor(AnswerEditor, QuestionEditor), QuestionEditorData, addAnswerFollowUp, createQuestionEditor, isAnswerEditorDirty, updateAnswerEditorData)
-import KMEditor.Editor2.Models.Forms exposing (answerFormValidation)
-import KMEditor.Editor2.Update.Abstract exposing (addEntity, deleteEntity, updateForm, withGenerateEvent)
-import KMEditor.Editor2.Update.Events exposing (createAddAnswerEvent, createDeleteAnswerEvent, createEditAnswerEvent)
+import KMEditor.Editor.Models exposing (Model)
+import KMEditor.Editor.Models.Children as Children exposing (Children)
+import KMEditor.Editor.Models.Editors exposing (AnswerEditorData, Editor(AnswerEditor, QuestionEditor), QuestionEditorData, addAnswerFollowUp, createQuestionEditor, isAnswerEditorDirty, updateAnswerEditorData)
+import KMEditor.Editor.Models.Forms exposing (answerFormValidation)
+import KMEditor.Editor.Update.Abstract exposing (addEntity, deleteEntity, updateForm, withGenerateEvent)
+import KMEditor.Editor.Update.Events exposing (createAddAnswerEvent, createDeleteAnswerEvent, createEditAnswerEvent)
 import Msgs
 import Random.Pcg exposing (Seed)
 

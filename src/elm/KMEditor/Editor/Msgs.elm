@@ -3,79 +3,69 @@ module KMEditor.Editor.Msgs exposing (..)
 import Form
 import Jwt
 import KMEditor.Common.Models.Entities exposing (..)
-import KMEditor.Editor.Models.Editors exposing (..)
 import Reorderable
+import SplitPane
 
 
 type Msg
     = GetKnowledgeModelCompleted (Result Jwt.JwtError KnowledgeModel)
-    | Edit KnowledgeModelMsg
+    | ToggleOpen String
+    | SetActiveEditor String
+    | EditorMsg EditorMsg
     | ReorderableMsg Reorderable.Msg
-    | SaveCompleted (Result Jwt.JwtError String)
+    | CloseAlert
+    | Submit
+    | SubmitCompleted (Result Jwt.JwtError String)
+    | PaneMsg SplitPane.Msg
 
 
-type KnowledgeModelMsg
-    = KnowledgeModelFormMsg Form.Msg
-    | ViewChapter String
+type EditorMsg
+    = KMEditorMsg KMEditorMsg
+    | ChapterEditorMsg ChapterEditorMsg
+    | QuestionEditorMsg QuestionEditorMsg
+    | AnswerEditorMsg AnswerEditorMsg
+    | ReferenceEditorMsg ReferenceEditorMsg
+    | ExpertEditorMsg ExpertEditorMsg
+
+
+type KMEditorMsg
+    = KMEditorFormMsg Form.Msg
+    | ReorderChapters (List String)
     | AddChapter
-    | DeleteChapter String
-    | ReorderChapterList (List ChapterEditor)
-    | ChapterMsg String ChapterMsg
 
 
-type ChapterMsg
+type ChapterEditorMsg
     = ChapterFormMsg Form.Msg
-    | ChapterCancel
-    | ViewQuestion String
-    | AddChapterQuestion
-    | DeleteChapterQuestion String
-    | ReorderQuestionList (List QuestionEditor)
-    | ChapterQuestionMsg String QuestionMsg
-    | ChapterEditorStateMsg EditorState
+    | DeleteChapter String
+    | ReorderQuestions (List String)
+    | AddQuestion
 
 
-type QuestionMsg
+type QuestionEditorMsg
     = QuestionFormMsg Form.Msg
-    | QuestionCancel
-    | ViewAnswerItemTemplateQuestion String
-    | AddAnswerItemTemplateQuestion
-    | DeleteAnswerItemTemplateQuestion String
-    | ReorderAnswerItemTemplateQuestions (List QuestionEditor)
-    | AnswerItemTemplateQuestionMsg String QuestionMsg
-    | ViewAnswer String
+    | DeleteQuestion String
+    | ReorderAnswers (List String)
     | AddAnswer
-    | DeleteAnswer String
-    | ReorderAnswerList (List AnswerEditor)
-    | AnswerMsg String AnswerMsg
-    | ViewReference String
+    | ReorderAnswerItemTemplateQuestions (List String)
+    | AddAnswerItemTemplateQuestion
+    | ReorderReferences (List String)
     | AddReference
-    | DeleteReference String
-    | ReorderReferenceList (List ReferenceEditor)
-    | ReferenceMsg String ReferenceMsg
-    | ViewExpert String
+    | ReorderExperts (List String)
     | AddExpert
-    | DeleteExpert String
-    | ReorderExpertList (List ExpertEditor)
-    | ExpertMsg String ExpertMsg
-    | QuestionEditorStateMsg EditorState
 
 
-type AnswerMsg
+type AnswerEditorMsg
     = AnswerFormMsg Form.Msg
-    | AnswerCancel
-    | ViewFollowUpQuestion String
-    | AddFollowUpQuestion
-    | DeleteFollowUpQuestion String
-    | ReorderFollowUpQuestionList (List QuestionEditor)
-    | FollowUpQuestionMsg String QuestionMsg
-    | AnswerEditorStateMsg EditorState
+    | DeleteAnswer String
+    | ReorderFollowUps (List String)
+    | AddFollowUp
 
 
-type ReferenceMsg
+type ReferenceEditorMsg
     = ReferenceFormMsg Form.Msg
-    | ReferenceCancel
+    | DeleteReference String
 
 
-type ExpertMsg
+type ExpertEditorMsg
     = ExpertFormMsg Form.Msg
-    | ExpertCancel
+    | DeleteExpert String

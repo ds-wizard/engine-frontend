@@ -1,14 +1,14 @@
-module KMEditor.Editor2.Update.Chapter exposing (..)
+module KMEditor.Editor.Update.Chapter exposing (..)
 
 import Form
 import KMEditor.Common.Models.Entities exposing (newQuestion)
 import KMEditor.Common.Models.Path exposing (PathNode(ChapterPathNode))
-import KMEditor.Editor2.Models exposing (Model)
-import KMEditor.Editor2.Models.Children as Children exposing (Children)
-import KMEditor.Editor2.Models.Editors exposing (..)
-import KMEditor.Editor2.Models.Forms exposing (chapterFormValidation)
-import KMEditor.Editor2.Update.Abstract exposing (addEntity, deleteEntity, updateForm, withGenerateEvent)
-import KMEditor.Editor2.Update.Events exposing (createAddChapterEvent, createDeleteChapterEvent, createEditChapterEvent)
+import KMEditor.Editor.Models exposing (Model)
+import KMEditor.Editor.Models.Children as Children exposing (Children)
+import KMEditor.Editor.Models.Editors exposing (..)
+import KMEditor.Editor.Models.Forms exposing (chapterFormValidation)
+import KMEditor.Editor.Update.Abstract exposing (addEntity, deleteEntity, updateForm, withGenerateEvent)
+import KMEditor.Editor.Update.Events exposing (createAddChapterEvent, createDeleteChapterEvent, createEditChapterEvent)
 import Msgs
 import Random.Pcg exposing (Seed)
 

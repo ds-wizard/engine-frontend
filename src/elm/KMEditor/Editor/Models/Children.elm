@@ -1,4 +1,4 @@
-module KMEditor.Editor2.Models.Children exposing (..)
+module KMEditor.Editor.Models.Children exposing (..)
 
 import List.Extra as List
 

@@ -8,7 +8,6 @@ import UrlParser exposing (..)
 type Route
     = Create (Maybe String)
     | Editor String
-    | Editor2 String
     | Index
     | Migration String
     | Publish String
@@ -22,8 +21,7 @@ moduleRoot =
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> stringParam "selected")
-    , map (wrapRoute << Editor) (s moduleRoot </> s "edit" </> string)
-    , map (wrapRoute << Editor2) (s moduleRoot </> s "edit2" </> string)
+    , map (wrapRoute << Editor) (s moduleRoot </> s "edit2" </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
     , map (wrapRoute << Migration) (s moduleRoot </> s "migration" </> string)
     , map (wrapRoute << Publish) (s moduleRoot </> s "publish" </> string)
@@ -42,9 +40,6 @@ toUrl route =
                     [ moduleRoot, "create" ]
 
         Editor uuid ->
-            [ moduleRoot, "edit", uuid ]
-
-        Editor2 uuid ->
             [ moduleRoot, "edit2", uuid ]
 
         Index ->
@@ -64,9 +59,6 @@ isAllowed route maybeJwt =
             hasPerm maybeJwt Perm.knowledgeModel
 
         Editor uuid ->
-            hasPerm maybeJwt Perm.knowledgeModel
-
-        Editor2 uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
         Index ->

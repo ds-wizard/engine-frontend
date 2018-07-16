@@ -1,4 +1,4 @@
-module KMEditor.Editor2.View.Editors exposing (activeEditor)
+module KMEditor.Editor.View.Editors exposing (activeEditor)
 
 import Common.Html exposing (emptyNode, fa)
 import Common.View exposing (fullPageMessage)
@@ -8,10 +8,10 @@ import Form
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import KMEditor.Editor2.Models exposing (Model, getActiveEditor)
-import KMEditor.Editor2.Models.Editors exposing (..)
-import KMEditor.Editor2.Models.Forms exposing (questionTypeOptions)
-import KMEditor.Editor2.Msgs exposing (..)
+import KMEditor.Editor.Models exposing (Model, getActiveEditor)
+import KMEditor.Editor.Models.Editors exposing (..)
+import KMEditor.Editor.Models.Forms exposing (questionTypeOptions)
+import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
 import String exposing (toLower)
 
@@ -52,7 +52,7 @@ getChildName editors uuid =
 
 editorClass : String
 editorClass =
-    "col-xl-8 col-lg-10 col-md-12"
+    "col-xl-10 col-lg-12"
 
 
 kmEditorView : Model -> KMEditorData -> ( String, Html Msg )

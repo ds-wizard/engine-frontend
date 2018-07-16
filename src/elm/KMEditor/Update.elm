@@ -3,7 +3,6 @@ module KMEditor.Update exposing (..)
 import Auth.Models exposing (Session)
 import KMEditor.Create.Update
 import KMEditor.Editor.Update
-import KMEditor.Editor2.Update
 import KMEditor.Index.Update
 import KMEditor.Migration.Update
 import KMEditor.Models exposing (Model)
@@ -22,9 +21,6 @@ fetchData route wrapMsg session =
 
         Editor uuid ->
             KMEditor.Editor.Update.fetchData (wrapMsg << EditorMsg) uuid session
-
-        Editor2 uuid ->
-            KMEditor.Editor2.Update.fetchData (wrapMsg << Editor2Msg) uuid session
 
         Index ->
             KMEditor.Index.Update.fetchData (wrapMsg << IndexMsg) session
@@ -48,15 +44,8 @@ update msg wrapMsg seed session model =
 
         EditorMsg msg ->
             let
-                ( newSeed, editorModel, cmd ) =
-                    KMEditor.Editor.Update.update msg (wrapMsg << EditorMsg) seed session model.editorModel
-            in
-            ( newSeed, { model | editorModel = editorModel }, cmd )
-
-        Editor2Msg msg ->
-            let
                 ( newSeed, editor2Model, cmd ) =
-                    KMEditor.Editor2.Update.update msg (wrapMsg << Editor2Msg) seed session model.editor2Model
+                    KMEditor.Editor.Update.update msg (wrapMsg << EditorMsg) seed session model.editor2Model
             in
             ( newSeed, { model | editor2Model = editor2Model }, cmd )
 

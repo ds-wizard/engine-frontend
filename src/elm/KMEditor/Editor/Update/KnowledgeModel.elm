@@ -1,13 +1,13 @@
-module KMEditor.Editor2.Update.KnowledgeModel exposing (..)
+module KMEditor.Editor.Update.KnowledgeModel exposing (..)
 
 import Form
 import KMEditor.Common.Models.Entities exposing (newChapter)
 import KMEditor.Common.Models.Path exposing (PathNode(KMPathNode))
-import KMEditor.Editor2.Models exposing (Model)
-import KMEditor.Editor2.Models.Editors exposing (..)
-import KMEditor.Editor2.Models.Forms exposing (knowledgeModelFormValidation)
-import KMEditor.Editor2.Update.Abstract exposing (addEntity, updateForm, withGenerateEvent)
-import KMEditor.Editor2.Update.Events exposing (createEditKnowledgeModelEvent)
+import KMEditor.Editor.Models exposing (Model)
+import KMEditor.Editor.Models.Editors exposing (..)
+import KMEditor.Editor.Models.Forms exposing (knowledgeModelFormValidation)
+import KMEditor.Editor.Update.Abstract exposing (addEntity, updateForm, withGenerateEvent)
+import KMEditor.Editor.Update.Events exposing (createEditKnowledgeModelEvent)
 import Msgs
 import Random.Pcg exposing (Seed)
 

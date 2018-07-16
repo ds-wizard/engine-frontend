@@ -13,7 +13,7 @@ import Html.Attributes exposing (..)
 import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..), kmMatchState)
 import KMEditor.Index.Models exposing (..)
 import KMEditor.Index.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(Create, Editor, Editor2, Migration, Publish))
+import KMEditor.Routing exposing (Route(..))
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))
@@ -58,7 +58,7 @@ tableConfig jwt =
           , visible = always True
           }
         , { label = TableActionIcon "fa fa-edit"
-          , action = TableActionLink (Routing.KMEditor << Editor2 << .uuid)
+          , action = TableActionLink (Routing.KMEditor << Editor << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]
           }
         , { label = TableActionText "Publish"

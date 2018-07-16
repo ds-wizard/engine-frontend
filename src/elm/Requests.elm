@@ -17,11 +17,7 @@ apiUrl url =
 
 apiRoot : String
 apiRoot =
-    "https://api.staging.dsw.fairdata.solutions"
-
-
-
---    "http://localhost:3000"
+    "http://localhost:3000"
 
 
 toCmd : (Result Jwt.JwtError a -> a1) -> (a1 -> msg) -> Http.Request a -> Cmd msg

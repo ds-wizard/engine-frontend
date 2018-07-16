@@ -4,7 +4,6 @@ import Auth.Models exposing (JwtToken)
 import Html exposing (Html)
 import KMEditor.Create.View
 import KMEditor.Editor.View
-import KMEditor.Editor2.View
 import KMEditor.Index.View
 import KMEditor.Migration.View
 import KMEditor.Models exposing (Model)
@@ -21,10 +20,7 @@ view route wrapMsg maybeJwt model =
             KMEditor.Create.View.view (wrapMsg << CreateMsg) model.createModel
 
         Editor _ ->
-            KMEditor.Editor.View.view (wrapMsg << EditorMsg) model.editorModel
-
-        Editor2 _ ->
-            KMEditor.Editor2.View.view (wrapMsg << Editor2Msg) model.editor2Model
+            KMEditor.Editor.View.view (wrapMsg << EditorMsg) model.editor2Model
 
         Index ->
             KMEditor.Index.View.view (wrapMsg << IndexMsg) maybeJwt model.indexModel

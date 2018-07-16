@@ -1,9 +1,9 @@
-module KMEditor.Editor2.Update.Events exposing (..)
+module KMEditor.Editor.Update.Events exposing (..)
 
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (Path)
-import KMEditor.Editor2.Models.Editors exposing (..)
-import KMEditor.Editor2.Models.Forms exposing (..)
+import KMEditor.Editor.Models.Editors exposing (..)
+import KMEditor.Editor.Models.Forms exposing (..)
 import Random.Pcg exposing (Seed)
 import Utils exposing (getUuid)
 

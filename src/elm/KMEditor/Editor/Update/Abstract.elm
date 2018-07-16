@@ -1,13 +1,13 @@
-module KMEditor.Editor2.Update.Abstract exposing (..)
+module KMEditor.Editor.Update.Abstract exposing (..)
 
 import Dict exposing (Dict)
 import Form
 import Form.Validate exposing (Validation)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Common.Models.Path exposing (Path, PathNode, getParentUuid)
-import KMEditor.Editor2.Models exposing (Model, addEvent, insertEditor, setAlert)
-import KMEditor.Editor2.Models.Children as Children exposing (Children)
-import KMEditor.Editor2.Models.Editors exposing (Editor, EditorLike, EditorState(..), getNewState)
+import KMEditor.Editor.Models exposing (Model, addEvent, insertEditor, setAlert)
+import KMEditor.Editor.Models.Children as Children exposing (Children)
+import KMEditor.Editor.Models.Editors exposing (Editor, EditorLike, EditorState(..), getNewState)
 import Msgs
 import Random.Pcg exposing (Seed)
 import Utils exposing (getUuid)

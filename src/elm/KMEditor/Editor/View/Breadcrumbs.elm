@@ -1,86 +1,67 @@
 module KMEditor.Editor.View.Breadcrumbs exposing (breadcrumbs)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import KMEditor.Editor.Models.Editors exposing (..)
-import Msgs
+import Common.Html exposing (emptyNode)
+import Dict exposing (Dict)
+import Html exposing (Html, a, li, ol, span, text)
+import Html.Attributes exposing (class, classList)
+import Html.Events exposing (onClick)
+import KMEditor.Common.Models.Path exposing (getNodeUuid)
+import KMEditor.Editor.Models.Editors exposing (Editor, getEditorPath, getEditorTitle)
+import KMEditor.Editor.Msgs exposing (Msg(SetActiveEditor))
+import List.Extra as List
 
 
-breadcrumbs : KnowledgeModelEditor -> Html Msgs.Msg
-breadcrumbs editor =
-    ul [ class "breadcrumb" ]
-        (List.map breadcrumbsElement <| getKnowledgeModelBreadcrumbs editor)
+breadcrumbs : String -> Dict String Editor -> Html Msg
+breadcrumbs activeUuid editors =
+    case Dict.get activeUuid editors of
+        Just editor ->
+            let
+                path =
+                    getEditorPath editor
+
+                nodes =
+                    path
+                        |> List.splitAt (List.length path - 4)
+                        |> Tuple.second
+                        |> List.map (getNodeUuid >> mapIntoLabel editors)
+                        |> flip List.append [ ( Nothing, getEditorTitle editor ) ]
+                        |> addTooLongNode (List.length path > 4)
+                        |> List.map breadcrumbNode
+            in
+            ol [ class "breadcrumb" ]
+                nodes
+
+        Nothing ->
+            emptyNode
 
 
-breadcrumbsElement : String -> Html Msgs.Msg
-breadcrumbsElement name =
-    li [ class "breadcrumb-item" ] [ text name ]
-
-
-getKnowledgeModelBreadcrumbs : KnowledgeModelEditor -> List String
-getKnowledgeModelBreadcrumbs ((KnowledgeModelEditor editor) as kme) =
+breadcrumbNode : ( Maybe String, String ) -> Html Msg
+breadcrumbNode ( maybeUuid, label ) =
     let
-        items =
-            getActiveChapterEditor editor.chapters
-                |> Maybe.map getChapterBreadcrumbs
-                |> Maybe.withDefault []
+        ( content, withLink ) =
+            case maybeUuid of
+                Just uuid ->
+                    ( a [ onClick <| SetActiveEditor uuid ] [ text label ], True )
+
+                Nothing ->
+                    ( text label, False )
     in
-    [ getKnowledgeModelEditorName kme ] ++ items
+    li [ class "breadcrumb-item", classList [ ( "with-link", withLink ) ] ] [ content ]
 
 
-getChapterBreadcrumbs : ChapterEditor -> List String
-getChapterBreadcrumbs ((ChapterEditor editor) as ce) =
-    let
-        items =
-            getActiveQuestionEditor editor.questions
-                |> Maybe.map getQuestionBreadcrumbs
-                |> Maybe.withDefault []
-    in
-    [ getChapterEditorName ce ] ++ items
+mapIntoLabel : Dict String Editor -> String -> ( Maybe String, String )
+mapIntoLabel editors uuid =
+    case Dict.get uuid editors of
+        Just editor ->
+            ( Just uuid, getEditorTitle editor )
+
+        Nothing ->
+            ( Nothing, "-" )
 
 
-getQuestionBreadcrumbs : QuestionEditor -> List String
-getQuestionBreadcrumbs ((QuestionEditor editor) as qe) =
-    let
-        activeChildren =
-            ( getActiveAnswerEditor editor.answers
-            , getActiveReferenceEditor editor.references
-            , getActiveExpertEditor editor.experts
-            )
-
-        items =
-            case activeChildren of
-                ( Just ae, _, _ ) ->
-                    getAnswerBreadcrumbs ae
-
-                ( _, Just re, _ ) ->
-                    getReferenceBreadcrumbs re
-
-                ( _, _, Just ee ) ->
-                    getExpertBreadcrumbs ee
-
-                _ ->
-                    []
-    in
-    [ getQuestionEditorName qe ] ++ items
-
-
-getAnswerBreadcrumbs : AnswerEditor -> List String
-getAnswerBreadcrumbs ((AnswerEditor editor) as ae) =
-    let
-        items =
-            getActiveQuestionEditor editor.followUps
-                |> Maybe.map getQuestionBreadcrumbs
-                |> Maybe.withDefault []
-    in
-    [ getAnswerEditorName ae ] ++ items
-
-
-getReferenceBreadcrumbs : ReferenceEditor -> List String
-getReferenceBreadcrumbs =
-    getReferenceEditorName >> List.singleton
-
-
-getExpertBreadcrumbs : ExpertEditor -> List String
-getExpertBreadcrumbs =
-    getExpertEditorName >> List.singleton
+addTooLongNode : Bool -> List ( Maybe String, String ) -> List ( Maybe String, String )
+addTooLongNode tooLong list =
+    if tooLong then
+        [ ( Nothing, "..." ) ] ++ list
+    else
+        list

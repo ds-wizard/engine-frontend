@@ -1,12 +1,12 @@
-module KMEditor.Editor2.View.Tree exposing (treeView)
+module KMEditor.Editor.View.Tree exposing (treeView)
 
 import Common.Html exposing (emptyNode, fa)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import KMEditor.Editor2.Models.Editors exposing (..)
-import KMEditor.Editor2.Msgs exposing (Msg(..))
+import KMEditor.Editor.Models.Editors exposing (..)
+import KMEditor.Editor.Msgs exposing (Msg(..))
 
 
 treeView : String -> Dict String Editor -> String -> Html Msg

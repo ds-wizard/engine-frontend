@@ -1,424 +1,584 @@
 module KMEditor.Editor.Models.Editors exposing (..)
 
 import Common.Form exposing (CustomFormError)
+import Dict exposing (Dict)
 import Form exposing (Form)
 import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
+import KMEditor.Editor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.Models.Forms exposing (..)
-import List.Extra as List
-import Set
 
 
-type alias EditorState =
-    { treeOpen : Bool
+type EditorState
+    = Initial
+    | Edited
+    | Deleted
+    | Added
+    | AddedEdited
+
+
+type Editor
+    = KMEditor KMEditorData
+    | ChapterEditor ChapterEditorData
+    | QuestionEditor QuestionEditorData
+    | AnswerEditor AnswerEditorData
+    | ReferenceEditor ReferenceEditorData
+    | ExpertEditor ExpertEditorData
+
+
+type alias EditorLike editorData e form =
+    { editorData
+        | form : Form e form
+        , editorState : EditorState
+        , uuid : String
+        , treeOpen : Bool
+        , path : Path
     }
 
 
-type KnowledgeModelEditor
-    = KnowledgeModelEditor
-        { editorState : EditorState
-        , active : Bool
-        , form : Form CustomFormError KnowledgeModelForm
-        , knowledgeModel : KnowledgeModel
-        , chapters : List ChapterEditor
-        , chaptersDirty : Bool
-        }
+type alias KMEditorData =
+    { uuid : String
+    , knowledgeModel : KnowledgeModel
+    , form : Form CustomFormError KnowledgeModelForm
+    , chapters : Children
+    , treeOpen : Bool
+    , editorState : EditorState
+    , path : Path
+    }
 
 
-type ChapterEditor
-    = ChapterEditor
-        { editorState : EditorState
-        , active : Bool
-        , form : Form CustomFormError ChapterForm
-        , chapter : Chapter
-        , questions : List QuestionEditor
-        , questionsDirty : Bool
-        , order : Int
-        }
+type alias ChapterEditorData =
+    { uuid : String
+    , chapter : Chapter
+    , form : Form CustomFormError ChapterForm
+    , questions : Children
+    , treeOpen : Bool
+    , editorState : EditorState
+    , path : Path
+    }
 
 
-type QuestionEditor
-    = QuestionEditor
-        { editorState : EditorState
-        , active : Bool
-        , form : Form CustomFormError QuestionForm
-        , question : Question
-        , answerItemTemplateQuestions : List QuestionEditor
-        , answerItemTemplateQuestionsDirty : Bool
-        , answers : List AnswerEditor
-        , answersDirty : Bool
-        , references : List ReferenceEditor
-        , referencesDirty : Bool
-        , experts : List ExpertEditor
-        , expertsDirty : Bool
-        , order : Int
-        }
+type alias QuestionEditorData =
+    { uuid : String
+    , question : Question
+    , form : Form CustomFormError QuestionForm
+    , answers : Children
+    , answerItemTemplateQuestions : Children
+    , references : Children
+    , experts : Children
+    , treeOpen : Bool
+    , editorState : EditorState
+    , path : Path
+    }
 
 
-type AnswerEditor
-    = AnswerEditor
-        { editorState : EditorState
-        , active : Bool
-        , form : Form CustomFormError AnswerForm
-        , answer : Answer
-        , followUps : List QuestionEditor
-        , followUpsDirty : Bool
-        , order : Int
-        }
+type alias AnswerEditorData =
+    { uuid : String
+    , answer : Answer
+    , form : Form CustomFormError AnswerForm
+    , followUps : Children
+    , treeOpen : Bool
+    , editorState : EditorState
+    , path : Path
+    }
 
 
-type ReferenceEditor
-    = ReferenceEditor
-        { editorState : EditorState
-        , active : Bool
-        , form : Form CustomFormError ReferenceForm
-        , reference : Reference
-        , order : Int
-        }
+type alias ReferenceEditorData =
+    { uuid : String
+    , reference : Reference
+    , form : Form CustomFormError ReferenceForm
+    , treeOpen : Bool
+    , editorState : EditorState
+    , path : Path
+    }
 
 
-type ExpertEditor
-    = ExpertEditor
-        { editorState : EditorState
-        , active : Bool
-        , form : Form CustomFormError ExpertForm
-        , expert : Expert
-        , order : Int
-        }
+type alias ExpertEditorData =
+    { uuid : String
+    , expert : Expert
+    , form : Form CustomFormError ExpertForm
+    , treeOpen : Bool
+    , editorState : EditorState
+    , path : Path
+    }
 
 
 
-{- Knowledge Model -}
+{- constructors -}
 
 
-createKnowledgeModelEditor : KnowledgeModel -> KnowledgeModelEditor
-createKnowledgeModelEditor knowledgeModel =
+createKnowledgeModelEditor : KnowledgeModel -> Dict String Editor -> Dict String Editor
+createKnowledgeModelEditor km editors =
     let
-        form =
-            knowledgeModelFormInitials knowledgeModel
-                |> initForm knowledgeModelFormValidation
+        editor =
+            KMEditor
+                { uuid = km.uuid
+                , knowledgeModel = km
+                , form = initKnowledgeModelFrom km
+                , chapters = Children.init <| List.map .uuid km.chapters
+                , treeOpen = True
+                , editorState = Initial
+                , path = []
+                }
 
-        chapters =
-            List.indexedMap (createChapterEditor False) knowledgeModel.chapters
+        currentPath =
+            [ KMPathNode km.uuid ]
+
+        withChapters =
+            List.foldl (createChapterEditor currentPath Initial) editors km.chapters
     in
-    KnowledgeModelEditor
-        { editorState = inititalEditorState
-        , active = True
-        , form = form
-        , knowledgeModel = knowledgeModel
-        , chapters = chapters
-        , chaptersDirty = False
-        }
+    Dict.insert km.uuid editor withChapters
 
 
-getKnowledgeModelEditorName : KnowledgeModelEditor -> String
-getKnowledgeModelEditorName (KnowledgeModelEditor kme) =
-    (Form.getFieldAsString "name" kme.form).value |> Maybe.withDefault ""
-
-
-getKnowledgeModel : KnowledgeModelEditor -> KnowledgeModel
-getKnowledgeModel (KnowledgeModelEditor kme) =
-    kme.knowledgeModel
-
-
-isKnowledgeModelEditorDirty : KnowledgeModelEditor -> Bool
-isKnowledgeModelEditorDirty (KnowledgeModelEditor kme) =
-    formChanged kme.form || kme.chaptersDirty
-
-
-
-{- Chapter -}
-
-
-createChapterEditor : Bool -> Int -> Chapter -> ChapterEditor
-createChapterEditor active order chapter =
+createChapterEditor : Path -> EditorState -> Chapter -> Dict String Editor -> Dict String Editor
+createChapterEditor path editorState chapter editors =
     let
-        form =
-            initChapterForm chapter
+        editor =
+            ChapterEditor
+                { uuid = chapter.uuid
+                , chapter = chapter
+                , form = initChapterForm chapter
+                , questions = Children.init <| List.map .uuid chapter.questions
+                , treeOpen = False
+                , editorState = editorState
+                , path = path
+                }
 
-        questions =
-            List.indexedMap (createQuestionEditor False) chapter.questions
+        currentPath =
+            path ++ [ ChapterPathNode chapter.uuid ]
+
+        withQuestions =
+            List.foldl (createQuestionEditor currentPath Initial) editors chapter.questions
     in
-    ChapterEditor
-        { editorState = inititalEditorState
-        , active = active
-        , form = form
-        , chapter = chapter
-        , questions = questions
-        , questionsDirty = False
-        , order = order
-        }
+    Dict.insert chapter.uuid editor withQuestions
 
 
-getChapterUuid : ChapterEditor -> String
-getChapterUuid (ChapterEditor chapterEditor) =
-    chapterEditor.chapter.uuid
-
-
-getChapterEditorName : ChapterEditor -> String
-getChapterEditorName (ChapterEditor ce) =
-    (Form.getFieldAsString "title" ce.form).value |> Maybe.withDefault ""
-
-
-activateChapter : ChapterEditor -> ChapterEditor
-activateChapter (ChapterEditor chapterEditor) =
-    ChapterEditor { chapterEditor | active = True }
-
-
-matchChapter : String -> ChapterEditor -> Bool
-matchChapter uuid (ChapterEditor chapterEditor) =
-    chapterEditor.chapter.uuid == uuid
-
-
-getActiveChapterEditor : List ChapterEditor -> Maybe ChapterEditor
-getActiveChapterEditor =
-    List.find (\(ChapterEditor ce) -> ce.active)
-
-
-isChapterEditorDirty : ChapterEditor -> Bool
-isChapterEditorDirty (ChapterEditor ce) =
-    formChanged ce.form || ce.questionsDirty
-
-
-
-{- Question -}
-
-
-createQuestionEditor : Bool -> Int -> Question -> QuestionEditor
-createQuestionEditor active order question =
+createQuestionEditor : Path -> EditorState -> Question -> Dict String Editor -> Dict String Editor
+createQuestionEditor path editorState question editors =
     let
-        form =
-            questionFormInitials question
-                |> initForm questionFormValidation
-
-        unwrapAnswerItemTemplateQuestions (AnswerItemTemplateQuestions questions) =
-            questions
+        answers =
+            question.answers
+                |> Maybe.withDefault []
+                |> List.map .uuid
 
         answerItemTemplateQuestions =
-            question.answerItemTemplate
-                |> Maybe.map (.questions >> unwrapAnswerItemTemplateQuestions)
-                |> Maybe.withDefault []
-                |> List.indexedMap (createQuestionEditor False)
+            getAnswerItemTemplateQuestions question
+                |> List.map .uuid
 
-        answers =
-            List.indexedMap (createAnswerEditor False) (question.answers |> Maybe.withDefault [])
+        editor =
+            QuestionEditor
+                { uuid = question.uuid
+                , question = question
+                , form = initQuestionForm question
+                , answers = Children.init answers
+                , answerItemTemplateQuestions = Children.init answerItemTemplateQuestions
+                , references = Children.init <| List.map .uuid question.references
+                , experts = Children.init <| List.map .uuid question.experts
+                , treeOpen = False
+                , editorState = editorState
+                , path = path
+                }
 
-        references =
-            List.indexedMap (createReferenceEditor False) question.references
+        currentPath =
+            path ++ [ QuestionPathNode question.uuid ]
 
-        experts =
-            List.indexedMap (createExpertEditor False) question.experts
+        withAnswers =
+            List.foldl (createAnswerEditor currentPath Initial) editors <| Maybe.withDefault [] <| question.answers
+
+        withAnswerItemTemplateQuestions =
+            List.foldl (createQuestionEditor currentPath Initial) withAnswers <| getAnswerItemTemplateQuestions question
+
+        withReferences =
+            List.foldl (createReferenceEditor currentPath Initial) withAnswerItemTemplateQuestions question.references
+
+        withExperts =
+            List.foldl (createExpertEditor currentPath Initial) withReferences question.experts
     in
+    Dict.insert question.uuid editor withExperts
+
+
+createAnswerEditor : Path -> EditorState -> Answer -> Dict String Editor -> Dict String Editor
+createAnswerEditor path editorState answer editors =
+    let
+        followUps =
+            getFollowUpQuestions answer
+                |> List.map .uuid
+
+        editor =
+            AnswerEditor
+                { uuid = answer.uuid
+                , answer = answer
+                , form = initAnswerForm answer
+                , followUps = Children.init followUps
+                , treeOpen = False
+                , editorState = editorState
+                , path = path
+                }
+
+        currentPath =
+            path ++ [ AnswerPathNode answer.uuid ]
+
+        withFollowUps =
+            List.foldl (createQuestionEditor currentPath Initial) editors <| getFollowUpQuestions answer
+    in
+    Dict.insert answer.uuid editor withFollowUps
+
+
+createReferenceEditor : Path -> EditorState -> Reference -> Dict String Editor -> Dict String Editor
+createReferenceEditor path editorState reference editors =
+    let
+        editor =
+            ReferenceEditor
+                { uuid = reference.uuid
+                , reference = reference
+                , form = initReferenceForm reference
+                , treeOpen = False
+                , editorState = editorState
+                , path = path
+                }
+    in
+    Dict.insert reference.uuid editor editors
+
+
+createExpertEditor : Path -> EditorState -> Expert -> Dict String Editor -> Dict String Editor
+createExpertEditor path editorState expert editors =
+    let
+        editor =
+            ExpertEditor
+                { uuid = expert.uuid
+                , expert = expert
+                , form = initExpertForm expert
+                , treeOpen = False
+                , editorState = editorState
+                , path = path
+                }
+    in
+    Dict.insert expert.uuid editor editors
+
+
+
+{- utils -}
+
+
+getEditorTitle : Editor -> String
+getEditorTitle editor =
+    case editor of
+        KMEditor data ->
+            data.knowledgeModel.name
+
+        ChapterEditor data ->
+            data.chapter.title
+
+        QuestionEditor data ->
+            data.question.title
+
+        AnswerEditor data ->
+            data.answer.label
+
+        ReferenceEditor data ->
+            data.reference.chapter
+
+        ExpertEditor data ->
+            data.expert.name
+
+
+getEditorUuid : Editor -> String
+getEditorUuid editor =
+    case editor of
+        KMEditor data ->
+            data.knowledgeModel.uuid
+
+        ChapterEditor data ->
+            data.chapter.uuid
+
+        QuestionEditor data ->
+            data.question.uuid
+
+        AnswerEditor data ->
+            data.answer.uuid
+
+        ReferenceEditor data ->
+            data.reference.uuid
+
+        ExpertEditor data ->
+            data.expert.uuid
+
+
+getEditorPath : Editor -> Path
+getEditorPath editor =
+    case editor of
+        KMEditor data ->
+            data.path
+
+        ChapterEditor data ->
+            data.path
+
+        QuestionEditor data ->
+            data.path
+
+        AnswerEditor data ->
+            data.path
+
+        ReferenceEditor data ->
+            data.path
+
+        ExpertEditor data ->
+            data.path
+
+
+getNewState : EditorState -> EditorState -> EditorState
+getNewState originalState newState =
+    if newState == Deleted then
+        Deleted
+    else if (originalState == Added || originalState == AddedEdited) && newState == Edited then
+        AddedEdited
+    else
+        newState
+
+
+toggleEditorOpen : Editor -> Editor
+toggleEditorOpen editor =
+    case editor of
+        KMEditor data ->
+            KMEditor { data | treeOpen = not data.treeOpen }
+
+        ChapterEditor data ->
+            ChapterEditor { data | treeOpen = not data.treeOpen }
+
+        QuestionEditor data ->
+            QuestionEditor { data | treeOpen = not data.treeOpen }
+
+        AnswerEditor data ->
+            AnswerEditor { data | treeOpen = not data.treeOpen }
+
+        ReferenceEditor data ->
+            ReferenceEditor { data | treeOpen = not data.treeOpen }
+
+        ExpertEditor data ->
+            ExpertEditor { data | treeOpen = not data.treeOpen }
+
+
+editorNotDeleted : Dict String Editor -> String -> Bool
+editorNotDeleted editors uuid =
+    Dict.get uuid editors
+        |> Maybe.map (not << isEditorDeleted)
+        |> Maybe.withDefault False
+
+
+isEditorDeleted : Editor -> Bool
+isEditorDeleted editor =
+    case editor of
+        KMEditor data ->
+            data.editorState == Deleted
+
+        ChapterEditor data ->
+            data.editorState == Deleted
+
+        QuestionEditor data ->
+            data.editorState == Deleted
+
+        AnswerEditor data ->
+            data.editorState == Deleted
+
+        ReferenceEditor data ->
+            data.editorState == Deleted
+
+        ExpertEditor data ->
+            data.editorState == Deleted
+
+
+isKMEditorDirty : KMEditorData -> Bool
+isKMEditorDirty editorData =
+    formChanged editorData.form || editorData.chapters.dirty
+
+
+isChapterEditorDirty : ChapterEditorData -> Bool
+isChapterEditorDirty editorData =
+    formChanged editorData.form || editorData.questions.dirty
+
+
+isQuestionEditorDirty : QuestionEditorData -> Bool
+isQuestionEditorDirty editorData =
+    formChanged editorData.form || editorData.answers.dirty || editorData.answerItemTemplateQuestions.dirty || editorData.references.dirty || editorData.experts.dirty
+
+
+isAnswerEditorDirty : AnswerEditorData -> Bool
+isAnswerEditorDirty editorData =
+    formChanged editorData.form || editorData.followUps.dirty
+
+
+isReferenceEditorDirty : ReferenceEditorData -> Bool
+isReferenceEditorDirty editorData =
+    formChanged editorData.form
+
+
+isExpertEditorDirty : ExpertEditorData -> Bool
+isExpertEditorDirty editorData =
+    formChanged editorData.form
+
+
+updateKMEditorData : EditorState -> KnowledgeModelForm -> KMEditorData -> KMEditorData
+updateKMEditorData newState form editorData =
+    let
+        newKM =
+            updateKnowledgeModelWithForm editorData.knowledgeModel form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , knowledgeModel = newKM
+        , chapters = Children.cleanDirty editorData.chapters
+        , form = initKnowledgeModelFrom newKM
+    }
+
+
+updateChapterEditorData : EditorState -> ChapterForm -> ChapterEditorData -> ChapterEditorData
+updateChapterEditorData newState form editorData =
+    let
+        newChapter =
+            updateChapterWithForm editorData.chapter form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , chapter = newChapter
+        , questions = Children.cleanDirty editorData.questions
+        , form = initChapterForm newChapter
+    }
+
+
+updateQuestionEditorData : EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
+updateQuestionEditorData newState form editorData =
+    let
+        newQuestion =
+            updateQuestionWithForm editorData.question form
+
+        newAnswers =
+            if newQuestion.type_ == "options" then
+                Children.cleanDirty editorData.answers
+            else
+                Children.init []
+
+        newAnswerItemTemplateQuestions =
+            if newQuestion.type_ == "list" then
+                Children.cleanDirty editorData.answerItemTemplateQuestions
+            else
+                Children.init []
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , question = newQuestion
+        , answers = newAnswers
+        , answerItemTemplateQuestions = newAnswerItemTemplateQuestions
+        , references = Children.cleanDirty editorData.references
+        , experts = Children.cleanDirty editorData.experts
+        , form = initQuestionForm newQuestion
+    }
+
+
+updateAnswerEditorData : EditorState -> AnswerForm -> AnswerEditorData -> AnswerEditorData
+updateAnswerEditorData newState form editorData =
+    let
+        newAnswer =
+            updateAnswerWithForm editorData.answer form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , answer = newAnswer
+        , followUps = Children.cleanDirty editorData.followUps
+        , form = initAnswerForm newAnswer
+    }
+
+
+updateReferenceEditorData : EditorState -> ReferenceForm -> ReferenceEditorData -> ReferenceEditorData
+updateReferenceEditorData newState form editorData =
+    let
+        newReference =
+            updateReferenceWithForm editorData.reference form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , reference = newReference
+        , form = initReferenceForm newReference
+    }
+
+
+updateExpertEditorData : EditorState -> ExpertForm -> ExpertEditorData -> ExpertEditorData
+updateExpertEditorData newState form editorData =
+    let
+        newExpert =
+            updateExpertWithForm editorData.expert form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , expert = updateExpertWithForm editorData.expert form
+        , form = initExpertForm newExpert
+    }
+
+
+addKMChapter : Chapter -> KMEditorData -> Editor
+addKMChapter chapter editorData =
+    KMEditor
+        { editorData
+            | chapters = Children.addChild chapter.uuid editorData.chapters
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
+
+
+addChapterQuestion : Question -> ChapterEditorData -> Editor
+addChapterQuestion question editorData =
+    ChapterEditor
+        { editorData
+            | questions = Children.addChild question.uuid editorData.questions
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
+
+
+addQuestionAnswer : Answer -> QuestionEditorData -> Editor
+addQuestionAnswer answer editorData =
     QuestionEditor
-        { editorState = inititalEditorState
-        , active = active
-        , form = form
-        , question = question
-        , answerItemTemplateQuestions = answerItemTemplateQuestions
-        , answerItemTemplateQuestionsDirty = False
-        , answers = answers
-        , answersDirty = False
-        , references = references
-        , referencesDirty = False
-        , experts = experts
-        , expertsDirty = False
-        , order = order
+        { editorData
+            | answers = Children.addChild answer.uuid editorData.answers
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
         }
 
 
-getQuestionUuid : QuestionEditor -> String
-getQuestionUuid (QuestionEditor questionEditor) =
-    questionEditor.question.uuid
+addQuestionAnswerItemTemplateQuestion : Question -> QuestionEditorData -> Editor
+addQuestionAnswerItemTemplateQuestion question editorData =
+    QuestionEditor
+        { editorData
+            | answerItemTemplateQuestions = Children.addChild question.uuid editorData.answerItemTemplateQuestions
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
 
 
-getQuestionEditorName : QuestionEditor -> String
-getQuestionEditorName (QuestionEditor ce) =
-    (Form.getFieldAsString "title" ce.form).value |> Maybe.withDefault ""
+addQuestionReference : Reference -> QuestionEditorData -> Editor
+addQuestionReference reference editorData =
+    QuestionEditor
+        { editorData
+            | references = Children.addChild reference.uuid editorData.references
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
 
 
-activateQuestion : QuestionEditor -> QuestionEditor
-activateQuestion (QuestionEditor questionEditor) =
-    QuestionEditor { questionEditor | active = True }
+addQuestionExpert : Expert -> QuestionEditorData -> Editor
+addQuestionExpert expert editorData =
+    QuestionEditor
+        { editorData
+            | experts = Children.addChild expert.uuid editorData.experts
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
 
 
-matchQuestion : String -> QuestionEditor -> Bool
-matchQuestion uuid (QuestionEditor questionEditor) =
-    questionEditor.question.uuid == uuid
-
-
-getActiveQuestionEditor : List QuestionEditor -> Maybe QuestionEditor
-getActiveQuestionEditor =
-    List.find (\(QuestionEditor qe) -> qe.active)
-
-
-isQuestionEditorDirty : QuestionEditor -> Bool
-isQuestionEditorDirty (QuestionEditor qe) =
-    formChanged qe.form || qe.answerItemTemplateQuestionsDirty || qe.answersDirty || qe.referencesDirty || qe.expertsDirty
-
-
-
-{- Answer -}
-
-
-createAnswerEditor : Bool -> Int -> Answer -> AnswerEditor
-createAnswerEditor active order answer =
-    let
-        form =
-            answerFormInitials answer
-                |> initForm answerFormValidation
-
-        createFollowUps (FollowUps questions) =
-            List.indexedMap (createQuestionEditor False) questions
-    in
+addAnswerFollowUp : Question -> AnswerEditorData -> Editor
+addAnswerFollowUp followUp editorData =
     AnswerEditor
-        { editorState = inititalEditorState
-        , active = active
-        , form = form
-        , answer = answer
-        , followUps = createFollowUps answer.followUps
-        , followUpsDirty = False
-        , order = order
+        { editorData
+            | followUps = Children.addChild followUp.uuid editorData.followUps
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
         }
-
-
-getAnswerUuid : AnswerEditor -> String
-getAnswerUuid (AnswerEditor answerEditor) =
-    answerEditor.answer.uuid
-
-
-getAnswerEditorName : AnswerEditor -> String
-getAnswerEditorName (AnswerEditor ae) =
-    (Form.getFieldAsString "label" ae.form).value |> Maybe.withDefault ""
-
-
-activateAnswer : AnswerEditor -> AnswerEditor
-activateAnswer (AnswerEditor answerEditor) =
-    AnswerEditor { answerEditor | active = True }
-
-
-matchAnswer : String -> AnswerEditor -> Bool
-matchAnswer uuid (AnswerEditor answerEditor) =
-    answerEditor.answer.uuid == uuid
-
-
-getActiveAnswerEditor : List AnswerEditor -> Maybe AnswerEditor
-getActiveAnswerEditor =
-    List.find (\(AnswerEditor ae) -> ae.active)
-
-
-isAnswerEditorDirty : AnswerEditor -> Bool
-isAnswerEditorDirty (AnswerEditor ae) =
-    formChanged ae.form || ae.followUpsDirty
-
-
-
-{- Reference -}
-
-
-createReferenceEditor : Bool -> Int -> Reference -> ReferenceEditor
-createReferenceEditor active order reference =
-    let
-        form =
-            referenceFormInitials reference
-                |> initForm referenceFormValidation
-    in
-    ReferenceEditor
-        { editorState = inititalEditorState
-        , active = active
-        , form = form
-        , reference = reference
-        , order = order
-        }
-
-
-getReferenceUuid : ReferenceEditor -> String
-getReferenceUuid (ReferenceEditor referenceEditor) =
-    referenceEditor.reference.uuid
-
-
-getReferenceEditorName : ReferenceEditor -> String
-getReferenceEditorName (ReferenceEditor re) =
-    (Form.getFieldAsString "chapter" re.form).value |> Maybe.withDefault ""
-
-
-activateReference : ReferenceEditor -> ReferenceEditor
-activateReference (ReferenceEditor referenceEditor) =
-    ReferenceEditor { referenceEditor | active = True }
-
-
-matchReference : String -> ReferenceEditor -> Bool
-matchReference uuid (ReferenceEditor referenceEditor) =
-    referenceEditor.reference.uuid == uuid
-
-
-getActiveReferenceEditor : List ReferenceEditor -> Maybe ReferenceEditor
-getActiveReferenceEditor =
-    List.find (\(ReferenceEditor re) -> re.active)
-
-
-isReferenceEditorDirty : ReferenceEditor -> Bool
-isReferenceEditorDirty (ReferenceEditor re) =
-    formChanged re.form
-
-
-
-{- Expert -}
-
-
-createExpertEditor : Bool -> Int -> Expert -> ExpertEditor
-createExpertEditor active order expert =
-    let
-        form =
-            expertFormInitials expert
-                |> initForm expertFormValidation
-    in
-    ExpertEditor
-        { editorState = inititalEditorState
-        , active = active
-        , form = form
-        , expert = expert
-        , order = order
-        }
-
-
-getExpertUuid : ExpertEditor -> String
-getExpertUuid (ExpertEditor expertEditor) =
-    expertEditor.expert.uuid
-
-
-getExpertEditorName : ExpertEditor -> String
-getExpertEditorName (ExpertEditor ee) =
-    (Form.getFieldAsString "name" ee.form).value |> Maybe.withDefault ""
-
-
-activateExpert : ExpertEditor -> ExpertEditor
-activateExpert (ExpertEditor expertEditor) =
-    ExpertEditor { expertEditor | active = True }
-
-
-matchExpert : String -> ExpertEditor -> Bool
-matchExpert uuid (ExpertEditor expertEditor) =
-    expertEditor.expert.uuid == uuid
-
-
-getActiveExpertEditor : List ExpertEditor -> Maybe ExpertEditor
-getActiveExpertEditor =
-    List.find (\(ExpertEditor re) -> re.active)
-
-
-isExpertEditorDirty : ExpertEditor -> Bool
-isExpertEditorDirty (ExpertEditor ee) =
-    formChanged ee.form
-
-
-
-{- Helpers -}
-
-
-inititalEditorState : EditorState
-inititalEditorState =
-    { treeOpen = False }
-
-
-formChanged : Form CustomFormError a -> Bool
-formChanged form =
-    Set.size (Form.getChangedFields form) > 0
