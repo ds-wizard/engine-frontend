@@ -3,7 +3,7 @@ module Common.Models exposing (..)
 import Common.Types exposing (ActionResult(Error))
 import Http exposing (Error(BadStatus), Response)
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, optional, required)
 import Jwt
 
 
@@ -17,7 +17,7 @@ errorDecoder : Decoder ServerError
 errorDecoder =
     decode ServerError
         |> required "message" Decode.string
-        |> required "fieldErrors" (Decode.list <| fieldErrorDecoder)
+        |> optional "fieldErrors" (Decode.list <| fieldErrorDecoder) []
 
 
 fieldErrorDecoder : Decoder ( String, String )
