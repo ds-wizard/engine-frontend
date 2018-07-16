@@ -2,8 +2,10 @@
 
 .index-table {
     .table-actions {
-        a {
-            margin-right: 15px;
+        a, .btn-group {
+            &:not(:last-child) {
+                margin-right: 20px;
+            }
         }
     }
 
@@ -33,6 +35,12 @@
     }
 
     td {
-        vertical-align: baseline;
+        &, .btn, .btn-group {
+            vertical-align: baseline;
+        }
+
+        .btn-link {
+            padding: 0.375rem 0;
+        }
     }
 }

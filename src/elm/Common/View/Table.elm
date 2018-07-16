@@ -28,6 +28,7 @@ type TableActionLabel
 type TableAction a msg
     = TableActionMsg ((msg -> Msgs.Msg) -> a -> Msgs.Msg)
     | TableActionLink (a -> Routing.Route)
+    | TableActionButtonLink (a -> Routing.Route)
     | TableActionExternalLink (a -> String)
     | TableActionCustom ((msg -> Msgs.Msg) -> a -> Html Msgs.Msg)
 
@@ -125,6 +126,9 @@ tableAction wrapMsg item actionConfig =
 
         TableActionLink getRoute ->
             linkTo (getRoute item) [] [ actionLabel ]
+
+        TableActionButtonLink getRoute ->
+            linkTo (getRoute item) [ class "btn btn-outline-primary" ] [ actionLabel ]
 
         TableActionExternalLink getUrl ->
             a [ href (getUrl item), target "_blank" ] [ actionLabel ]
