@@ -44,10 +44,10 @@ update msg wrapMsg seed session model =
 
         EditorMsg msg ->
             let
-                ( newSeed, editorModel, cmd ) =
-                    KMEditor.Editor.Update.update msg (wrapMsg << EditorMsg) seed session model.editorModel
+                ( newSeed, editor2Model, cmd ) =
+                    KMEditor.Editor.Update.update msg (wrapMsg << EditorMsg) seed session model.editor2Model
             in
-            ( newSeed, { model | editorModel = editorModel }, cmd )
+            ( newSeed, { model | editor2Model = editor2Model }, cmd )
 
         IndexMsg msg ->
             let

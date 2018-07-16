@@ -2,9 +2,84 @@
 @import "../../mixins";
 
 .KMEditor__Editor {
-    h3 {
-        margin-top: 30px;
+    margin-top: -20px;
+    margin-bottom: -20px;
+
+    .editor-header {
+        background: $dark;
+        color: $white;
+        width:100%;
+        height: 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 15px;
+    }
+
+    .editor-breadcrumbs {
+        width: 100%;
+        height: 40px;
+        background: $gray-200;
+        border-bottom: 1px solid $gray-400;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        .breadcrumb {
+            margin: 0;
+            background: none;
+            width: 100%;
+        }
+
+        .breadcrumb-item {
+            max-width: 17%;
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+
+            &.with-link {
+                color: $primary;
+            }
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "〉";
+            padding: 0;
+        }
+    }
+
+    .tree-col {
+        background: $gray-200;
+        overflow: auto;
+        padding: 0;
+        border-right: 1px solid $gray-400;
+        height: 100%;
+        width: 100%;
+    }
+
+    .editor-form-view {
+        height: calc(100vh - 100px);
+        overflow: auto;
+        padding: 25px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .editor-title {
         margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h3 {
+            margin: 0;
+        }
+    }
+
+    .pane-container {
+        height: calc(100vh - 90px) !important;
     }
 
     .form-group {
@@ -63,10 +138,5 @@
         margin-bottom: 50px;
     }
 
-    .diff-tree-col {
-        h4 {
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-    }
+
 }

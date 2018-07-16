@@ -21,7 +21,7 @@ moduleRoot =
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> stringParam "selected")
-    , map (wrapRoute << Editor) (s moduleRoot </> s "edit" </> string)
+    , map (wrapRoute << Editor) (s moduleRoot </> s "edit2" </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
     , map (wrapRoute << Migration) (s moduleRoot </> s "migration" </> string)
     , map (wrapRoute << Publish) (s moduleRoot </> s "publish" </> string)
@@ -40,7 +40,7 @@ toUrl route =
                     [ moduleRoot, "create" ]
 
         Editor uuid ->
-            [ moduleRoot, "edit", uuid ]
+            [ moduleRoot, "edit2", uuid ]
 
         Index ->
             [ moduleRoot ]

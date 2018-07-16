@@ -219,6 +219,17 @@ getQuestion km questionUuid =
         |> List.find (\q -> q.uuid == questionUuid)
 
 
+getAnswerItemTemplateQuestions : Question -> List Question
+getAnswerItemTemplateQuestions question =
+    let
+        unwrap (AnswerItemTemplateQuestions questions) =
+            questions
+    in
+    question.answerItemTemplate
+        |> Maybe.map (.questions >> unwrap)
+        |> Maybe.withDefault []
+
+
 getFollowUpQuestions : Answer -> List Question
 getFollowUpQuestions answer =
     let

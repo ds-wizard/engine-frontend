@@ -13,7 +13,7 @@ import Html.Attributes exposing (..)
 import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..), kmMatchState)
 import KMEditor.Index.Models exposing (..)
 import KMEditor.Index.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(Create, Editor, Migration, Publish))
+import KMEditor.Routing exposing (Route(..))
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))

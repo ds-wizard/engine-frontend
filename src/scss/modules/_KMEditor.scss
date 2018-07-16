@@ -1,22 +1,51 @@
+@import "~bootswatch/dist/united/variables";
 @import "KMEditor/Editor";
 @import "KMEditor/Migration";
 @import "KMEditor/Publish";
 
+$indent-step: 20px;
+
+@mixin indent($level, $maxLevel) {
+    ul li {
+        &::after {
+            width: calc(100% + #{$indent-step * $level});
+            margin-left: -($level * $indent-step);
+        }
+
+        @if $level < $maxLevel {
+            @include indent($level + 1, $maxLevel)
+        }
+    }
+}
+
 .diff-tree {
+    @include indent(0, 20);
+
+    display: inline-block;
+    margin: 20px 0;
+    width: 100%;
+
     ul {
         margin: 0;
         padding: 0;
 
         li {
             list-style: none;
-            padding: 2px 0;
+            padding: 0 0 0 20px;
+            position: relative;
 
-            &.answer, &.expert, &.reference, &.answer .question {
-                padding-left: 20px;
+            &.knowledge-model {
+                padding-left: 0;
             }
 
-            &.chapter {
-                margin-bottom: 15px;
+            &.active::after {
+                height: 27px;
+                position: absolute;
+                left: 0;
+                top: -3px;
+                background: $gray-400;
+                content: " ";
+                z-index: 0;
             }
 
             .fa {
@@ -24,8 +53,50 @@
                 margin-top: 3px;
             }
 
-            span {
-                display: flex;
+            a {
+                white-space: nowrap;
+                padding: 1px 0;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: $body-color !important;
+                width: 100%;
+                text-decoration: none;
+
+                &:hover {
+                    text-decoration: none !important;
+
+                    span {
+                        text-decoration: underline;
+                    }
+                }
+            }
+
+            .caret {
+                position: absolute;
+                left: 0;
+                width: 25px;
+                text-align: center;
+                color: $gray-900;
+                z-index: 1;
+
+                &:hover {
+                    color: $gray-600;
+                }
+            }
+
+            &.state-edited > a > span {
+                color: $blue !important;
+            }
+
+            &.state-added > a > span {
+                color: $green !important;
+            }
+
+            &.state-deleted > a > span {
+                color: #c00 !important;
+                text-decoration: line-through;
+                cursor: default;
             }
         }
     }

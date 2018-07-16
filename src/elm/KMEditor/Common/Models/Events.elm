@@ -5,10 +5,8 @@ import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode as Encode exposing (..)
 import Json.Encode.Extra exposing (maybe)
 import KMEditor.Common.Models.Entities exposing (..)
-import KMEditor.Editor.Models.Editors exposing (..)
+import KMEditor.Common.Models.Path exposing (..)
 import List.Extra as List
-import Random.Pcg exposing (Seed)
-import Utils exposing (getUuid)
 
 
 type Event
@@ -147,17 +145,6 @@ type alias DeleteExpertEventData =
     }
 
 
-type PathNode
-    = KMPathNode String
-    | ChapterPathNode String
-    | QuestionPathNode String
-    | AnswerPathNode String
-
-
-type alias Path =
-    List PathNode
-
-
 type alias EventField a =
     { changed : Bool
     , value : Maybe a
@@ -167,265 +154,6 @@ type alias EventField a =
 type alias AnswerItemTemplateData =
     { title : String
     , questionIds : List String
-    }
-
-
-
-{- Creating events -}
-
-
-createEvent : (CommonEventData -> Event) -> Path -> Seed -> ( Event, Seed )
-createEvent create path seed =
-    let
-        ( uuid, newSeed ) =
-            getUuid seed
-
-        event =
-            create
-                { uuid = uuid
-                , path = path
-                }
-    in
-    ( event, newSeed )
-
-
-createEditKnowledgeModelEvent : KnowledgeModelEditor -> Seed -> ( Event, Seed )
-createEditKnowledgeModelEvent (KnowledgeModelEditor kme) =
-    let
-        chapterIds =
-            List.map (\(ChapterEditor ce) -> ce.chapter.uuid) kme.chapters
-
-        data =
-            { kmUuid = kme.knowledgeModel.uuid
-            , name = createEventField kme.knowledgeModel.name
-            , chapterIds = createEventField chapterIds
-            }
-    in
-    createEvent (EditKnowledgeModelEvent data) []
-
-
-createAddChapterEvent : Chapter -> Path -> Seed -> ( Event, Seed )
-createAddChapterEvent chapter =
-    let
-        data =
-            { chapterUuid = chapter.uuid
-            , title = chapter.title
-            , text = chapter.text
-            }
-    in
-    createEvent (AddChapterEvent data)
-
-
-createEditChapterEvent : ChapterEditor -> Path -> Seed -> ( Event, Seed )
-createEditChapterEvent (ChapterEditor ce) =
-    let
-        questionIds =
-            List.map (\(QuestionEditor qe) -> qe.question.uuid) ce.questions
-
-        data =
-            { chapterUuid = ce.chapter.uuid
-            , title = createEventField ce.chapter.title
-            , text = createEventField ce.chapter.text
-            , questionIds = createEventField questionIds
-            }
-    in
-    createEvent (EditChapterEvent data)
-
-
-createDeleteChapterEvent : String -> Path -> Seed -> ( Event, Seed )
-createDeleteChapterEvent chapterUuid =
-    let
-        data =
-            { chapterUuid = chapterUuid
-            }
-    in
-    createEvent (DeleteChapterEvent data)
-
-
-createAddQuestionEvent : Question -> Path -> Seed -> ( Event, Seed )
-createAddQuestionEvent question =
-    let
-        data =
-            { questionUuid = question.uuid
-            , type_ = question.type_
-            , title = question.title
-            , shortQuestionUuid = question.shortUuid
-            , text = question.text
-            , answerItemTemplate = Nothing
-            }
-    in
-    createEvent (AddQuestionEvent data)
-
-
-createEditQuestionEvent : QuestionEditor -> Path -> Seed -> ( Event, Seed )
-createEditQuestionEvent (QuestionEditor qe) =
-    let
-        maybeAnswerIds =
-            case qe.question.type_ of
-                "options" ->
-                    Just <| List.map (\(AnswerEditor ae) -> ae.answer.uuid) qe.answers
-
-                _ ->
-                    Nothing
-
-        maybeAnswerItemTemplate =
-            case qe.question.type_ of
-                "list" ->
-                    let
-                        questionIds =
-                            List.map (\(QuestionEditor qe) -> qe.question.uuid) qe.answerItemTemplateQuestions
-                    in
-                    qe.question.answerItemTemplate |> Maybe.map (createAnswerItemTemplateData questionIds)
-
-                _ ->
-                    Nothing
-
-        referenceIds =
-            List.map (\(ReferenceEditor re) -> re.reference.uuid) qe.references
-
-        expertIds =
-            List.map (\(ExpertEditor ee) -> ee.expert.uuid) qe.experts
-
-        data =
-            { questionUuid = qe.question.uuid
-            , type_ = createEventField qe.question.type_
-            , title = createEventField qe.question.title
-            , shortQuestionUuid = createEventField qe.question.shortUuid
-            , text = createEventField qe.question.text
-            , answerItemTemplate = createEventField maybeAnswerItemTemplate
-            , answerIds = createEventField maybeAnswerIds
-            , referenceIds = createEventField referenceIds
-            , expertIds = createEventField expertIds
-            }
-    in
-    createEvent (EditQuestionEvent data)
-
-
-createDeleteQuestionEvent : String -> Path -> Seed -> ( Event, Seed )
-createDeleteQuestionEvent questionUuid =
-    let
-        data =
-            { questionUuid = questionUuid
-            }
-    in
-    createEvent (DeleteQuestionEvent data)
-
-
-createAddAnswerEvent : Answer -> Path -> Seed -> ( Event, Seed )
-createAddAnswerEvent answer =
-    let
-        data =
-            { answerUuid = answer.uuid
-            , label = answer.label
-            , advice = answer.advice
-            }
-    in
-    createEvent (AddAnswerEvent data)
-
-
-createEditAnswerEvent : AnswerEditor -> Path -> Seed -> ( Event, Seed )
-createEditAnswerEvent (AnswerEditor ae) =
-    let
-        followUpIds =
-            List.map (\(QuestionEditor qe) -> qe.question.uuid) ae.followUps
-
-        data =
-            { answerUuid = ae.answer.uuid
-            , label = createEventField ae.answer.label
-            , advice = createEventField ae.answer.advice
-            , followUpIds = createEventField followUpIds
-            }
-    in
-    createEvent (EditAnswerEvent data)
-
-
-createDeleteAnswerEvent : String -> Path -> Seed -> ( Event, Seed )
-createDeleteAnswerEvent answerUuid =
-    let
-        data =
-            { answerUuid = answerUuid
-            }
-    in
-    createEvent (DeleteAnswerEvent data)
-
-
-createAddReferenceEvent : Reference -> Path -> Seed -> ( Event, Seed )
-createAddReferenceEvent reference =
-    let
-        data =
-            { referenceUuid = reference.uuid
-            , chapter = reference.chapter
-            }
-    in
-    createEvent (AddReferenceEvent data)
-
-
-createEditReferenceEvent : Reference -> Path -> Seed -> ( Event, Seed )
-createEditReferenceEvent reference =
-    let
-        data =
-            { referenceUuid = reference.uuid
-            , chapter = createEventField reference.chapter
-            }
-    in
-    createEvent (EditReferenceEvent data)
-
-
-createDeleteReferenceEvent : String -> Path -> Seed -> ( Event, Seed )
-createDeleteReferenceEvent referenceUuid =
-    let
-        data =
-            { referenceUuid = referenceUuid
-            }
-    in
-    createEvent (DeleteReferenceEvent data)
-
-
-createAddExpertEvent : Expert -> Path -> Seed -> ( Event, Seed )
-createAddExpertEvent expert =
-    let
-        data =
-            { expertUuid = expert.uuid
-            , name = expert.name
-            , email = expert.email
-            }
-    in
-    createEvent (AddExpertEvent data)
-
-
-createEditExpertEvent : Expert -> Path -> Seed -> ( Event, Seed )
-createEditExpertEvent expert =
-    let
-        data =
-            { expertUuid = expert.uuid
-            , name = createEventField expert.name
-            , email = createEventField expert.email
-            }
-    in
-    createEvent (EditExpertEvent data)
-
-
-createDeleteExpertEvent : String -> Path -> Seed -> ( Event, Seed )
-createDeleteExpertEvent expertUuid =
-    let
-        data =
-            { expertUuid = expertUuid
-            }
-    in
-    createEvent (DeleteExpertEvent data)
-
-
-createEventField : a -> EventField a
-createEventField value =
-    { changed = True
-    , value = Just value
-    }
-
-
-createAnswerItemTemplateData : List String -> AnswerItemTemplate -> AnswerItemTemplateData
-createAnswerItemTemplateData questionIds answerItemTemplate =
-    { title = answerItemTemplate.title
-    , questionIds = questionIds
     }
 
 
@@ -642,30 +370,6 @@ encodeDeleteExpertEvent data =
     [ ( "eventType", Encode.string "DeleteExpertEvent" )
     , ( "expertUuid", Encode.string data.expertUuid )
     ]
-
-
-encodePathNode : PathNode -> Encode.Value
-encodePathNode node =
-    case node of
-        KMPathNode uuid ->
-            createEncodedPathNode "km" uuid
-
-        ChapterPathNode uuid ->
-            createEncodedPathNode "chapter" uuid
-
-        QuestionPathNode uuid ->
-            createEncodedPathNode "question" uuid
-
-        AnswerPathNode uuid ->
-            createEncodedPathNode "answer" uuid
-
-
-createEncodedPathNode : String -> String -> Encode.Value
-createEncodedPathNode pathNodeType uuid =
-    Encode.object
-        [ ( "type", Encode.string pathNodeType )
-        , ( "uuid", Encode.string uuid )
-        ]
 
 
 encodeEventField : (a -> Encode.Value) -> EventField a -> Encode.Value
@@ -888,41 +592,6 @@ deleteExpertEventDecoder : Decoder DeleteExpertEventData
 deleteExpertEventDecoder =
     decode DeleteExpertEventData
         |> required "expertUuid" Decode.string
-
-
-pathDecoder : Decoder Path
-pathDecoder =
-    Decode.list pathNodeDecoder
-
-
-pathNodeDecoder : Decoder PathNode
-pathNodeDecoder =
-    Decode.field "type" Decode.string
-        |> Decode.andThen pathNodeDecoderByType
-
-
-pathNodeDecoderByType : String -> Decoder PathNode
-pathNodeDecoderByType pathNodeType =
-    case pathNodeType of
-        "km" ->
-            Decode.map KMPathNode pathNodeUuidDecoder
-
-        "chapter" ->
-            Decode.map ChapterPathNode pathNodeUuidDecoder
-
-        "question" ->
-            Decode.map QuestionPathNode pathNodeUuidDecoder
-
-        "answer" ->
-            Decode.map AnswerPathNode pathNodeUuidDecoder
-
-        _ ->
-            Decode.fail <| "Unknown path node type: " ++ pathNodeType
-
-
-pathNodeUuidDecoder : Decoder String
-pathNodeUuidDecoder =
-    Decode.field "uuid" Decode.string
 
 
 eventFieldDecoder : Decoder a -> Decoder (EventField a)

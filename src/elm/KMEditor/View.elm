@@ -20,7 +20,7 @@ view route wrapMsg maybeJwt model =
             KMEditor.Create.View.view (wrapMsg << CreateMsg) model.createModel
 
         Editor _ ->
-            KMEditor.Editor.View.view (wrapMsg << EditorMsg) model.editorModel
+            KMEditor.Editor.View.view (wrapMsg << EditorMsg) model.editor2Model
 
         Index ->
             KMEditor.Index.View.view (wrapMsg << IndexMsg) maybeJwt model.indexModel
