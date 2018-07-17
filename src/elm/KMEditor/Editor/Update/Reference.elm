@@ -29,6 +29,7 @@ withGenerateReferenceEditEvent =
         , createAddEvent = createAddReferenceEvent
         , createEditEvent = createEditReferenceEvent
         , updateEditorData = updateReferenceEditorData
+        , updateEditors = Nothing
         }
 
 

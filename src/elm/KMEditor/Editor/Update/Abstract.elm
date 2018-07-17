@@ -57,6 +57,7 @@ type alias GenerateEventConfig editorData e form =
     , createAddEvent : form -> editorData -> Seed -> ( Event, Seed )
     , createEditEvent : form -> editorData -> Seed -> ( Event, Seed )
     , updateEditorData : EditorState -> form -> editorData -> editorData
+    , updateEditors : Maybe (editorData -> editorData -> Dict String Editor -> Dict String Editor)
     }
 
 
@@ -79,10 +80,25 @@ withGenerateEvent cfg seed model editorData callback =
                     newEditorData =
                         cfg.updateEditorData newState form editorData
 
+                    updatedEditors =
+                        case cfg.updateEditors of
+                            Just updateEditors ->
+                                updateEditors newEditorData editorData model.editors
+
+                            Nothing ->
+                                model.editors
+
+                    newEditor =
+                        cfg.createEditor newEditorData
+
+                    newEditors =
+                        Dict.insert editorData.uuid newEditor updatedEditors
+
                     newModel =
-                        model
-                            |> addEvent event
-                            |> insertEditor (cfg.createEditor newEditorData)
+                        { model
+                            | events = model.events ++ [ event ]
+                            , editors = newEditors
+                        }
                 in
                 callback newSeed newModel newEditorData
 

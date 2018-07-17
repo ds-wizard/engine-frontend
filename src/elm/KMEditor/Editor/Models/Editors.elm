@@ -257,6 +257,81 @@ createExpertEditor path editorState expert editors =
 
 
 
+{- deleting editors -}
+
+
+deleteEditors : Children -> Dict String Editor -> Dict String Editor
+deleteEditors children editors =
+    List.foldl deleteEditor editors (children.list ++ children.deleted)
+
+
+deleteEditor : String -> Dict String Editor -> Dict String Editor
+deleteEditor uuid editors =
+    case Dict.get uuid editors of
+        Just (KMEditor editorData) ->
+            deleteKMEditor editorData editors
+
+        Just (ChapterEditor editorData) ->
+            deleteChapterEditor editorData editors
+
+        Just (QuestionEditor editorData) ->
+            deleteQuestionEditor editorData editors
+
+        Just (AnswerEditor editorData) ->
+            deleteAnswerEditor editorData editors
+
+        Just (ReferenceEditor editorData) ->
+            deleteReferenceEditor editorData editors
+
+        Just (ExpertEditor editorData) ->
+            deleteExpertEditor editorData editors
+
+        _ ->
+            editors
+
+
+deleteKMEditor : KMEditorData -> Dict String Editor -> Dict String Editor
+deleteKMEditor editorData editors =
+    editors
+        |> deleteEditors editorData.chapters
+        |> Dict.remove editorData.uuid
+
+
+deleteChapterEditor : ChapterEditorData -> Dict String Editor -> Dict String Editor
+deleteChapterEditor editorData editors =
+    editors
+        |> deleteEditors editorData.questions
+        |> Dict.remove editorData.uuid
+
+
+deleteQuestionEditor : QuestionEditorData -> Dict String Editor -> Dict String Editor
+deleteQuestionEditor editorData editors =
+    editors
+        |> deleteEditors editorData.answers
+        |> deleteEditors editorData.answerItemTemplateQuestions
+        |> deleteEditors editorData.references
+        |> deleteEditors editorData.experts
+        |> Dict.remove editorData.uuid
+
+
+deleteAnswerEditor : AnswerEditorData -> Dict String Editor -> Dict String Editor
+deleteAnswerEditor editorData editors =
+    editors
+        |> deleteEditors editorData.followUps
+        |> Dict.remove editorData.uuid
+
+
+deleteReferenceEditor : ReferenceEditorData -> Dict String Editor -> Dict String Editor
+deleteReferenceEditor editorData editors =
+    Dict.remove editorData.uuid editors
+
+
+deleteExpertEditor : ExpertEditorData -> Dict String Editor -> Dict String Editor
+deleteExpertEditor editorData editors =
+    Dict.remove editorData.uuid editors
+
+
+
 {- utils -}
 
 
@@ -472,6 +547,21 @@ updateQuestionEditorData newState form editorData =
         , experts = Children.cleanDirty editorData.experts
         , form = initQuestionForm newQuestion
     }
+
+
+updateEditorsWithQuestion : QuestionEditorData -> QuestionEditorData -> Dict String Editor -> Dict String Editor
+updateEditorsWithQuestion newEditorData oldEditorData editors =
+    case newEditorData.question.type_ of
+        "options" ->
+            deleteEditors oldEditorData.answerItemTemplateQuestions editors
+
+        "list" ->
+            deleteEditors oldEditorData.answers editors
+
+        _ ->
+            editors
+                |> deleteEditors oldEditorData.answerItemTemplateQuestions
+                |> deleteEditors oldEditorData.answers
 
 
 updateAnswerEditorData : EditorState -> AnswerForm -> AnswerEditorData -> AnswerEditorData

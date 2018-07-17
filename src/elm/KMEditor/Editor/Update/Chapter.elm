@@ -31,6 +31,7 @@ withGenerateChapterEditEvent =
         , createAddEvent = createAddChapterEvent
         , createEditEvent = createEditChapterEvent
         , updateEditorData = updateChapterEditorData
+        , updateEditors = Nothing
         }
 
 

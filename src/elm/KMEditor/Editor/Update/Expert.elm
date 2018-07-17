@@ -29,6 +29,7 @@ withGenerateExpertEditEvent =
         , createAddEvent = createAddExpertEvent
         , createEditEvent = createEditExpertEvent
         , updateEditorData = updateExpertEditorData
+        , updateEditors = Nothing
         }
 
 

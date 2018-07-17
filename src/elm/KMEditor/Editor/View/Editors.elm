@@ -136,6 +136,10 @@ questionEditorView model editorData =
                 , inputGroup editorData.form "shortUuid" "Short UUID"
                 , textAreaGroup editorData.form "text" "Text"
                 , selectGroup questionTypeOptions editorData.form "type_" "Question Type"
+                , p [ class "form-text text-muted" ]
+                    [ fa "warning"
+                    , text "By changing the type answers or items might be removed."
+                    ]
                 ]
 
         answersOrItem =

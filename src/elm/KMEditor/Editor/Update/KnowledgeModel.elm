@@ -30,6 +30,7 @@ withGenerateKMEditEvent =
         , createAddEvent = createEditKnowledgeModelEvent
         , createEditEvent = createEditKnowledgeModelEvent
         , updateEditorData = updateKMEditorData
+        , updateEditors = Nothing
         }
 
 

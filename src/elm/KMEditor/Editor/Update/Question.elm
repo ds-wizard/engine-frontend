@@ -31,6 +31,7 @@ withGenerateQuestionEditEvent =
         , createAddEvent = createAddQuestionEvent
         , createEditEvent = createEditQuestionEvent
         , updateEditorData = updateQuestionEditorData
+        , updateEditors = Just updateEditorsWithQuestion
         }
 
 

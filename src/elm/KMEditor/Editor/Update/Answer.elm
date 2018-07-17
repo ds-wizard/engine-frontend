@@ -31,6 +31,7 @@ withGenerateAnswerEditEvent =
         , createAddEvent = createAddAnswerEvent
         , createEditEvent = createEditAnswerEvent
         , updateEditorData = updateAnswerEditorData
+        , updateEditors = Nothing
         }
 
 
