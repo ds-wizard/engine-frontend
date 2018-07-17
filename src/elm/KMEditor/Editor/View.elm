@@ -34,11 +34,20 @@ editorView wrapMsg model kmUuid =
 
                 _ ->
                     emptyNode
+
+        unsavedChanges =
+            if List.length model.events > 0 then
+                text "(unsaved changes)"
+            else
+                emptyNode
     in
     div [ class "row" ]
         [ div [ class "editor-header" ]
             [ text "Knowledge Model Editor"
-            , actionButton ( "Save", model.submitting, wrapMsg Submit )
+            , div []
+                [ unsavedChanges
+                , actionButton ( "Save", model.submitting, wrapMsg Submit )
+                ]
             ]
         , div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
