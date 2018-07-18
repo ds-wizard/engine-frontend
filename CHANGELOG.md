@@ -1,3 +1,22 @@
+# 0.5.0
+
+## Features
+
+- Reworked Knowledge Model Editor
+    - Better navigation through the Knowledge Model
+    - More accurate generating of events
+    - Fixed bugs with list of items question type
+
+## Fixes
+
+- Fixed server error parsing when there were no `fieldErrors`
+
+## Other
+
+- Make fill questionnaire action more significant
+- Add more info in the welcome page
+
+
 # 0.4.0
 
 ## Features
