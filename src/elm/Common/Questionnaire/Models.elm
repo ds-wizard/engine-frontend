@@ -26,8 +26,7 @@ type alias Model =
 
 
 type alias FormExtraData =
-    { shortUuid : Maybe String
-    }
+    {}
 
 
 initialModel : QuestionnaireDetail -> Model
@@ -151,7 +150,7 @@ createFormItemDescriptor question =
     { name = question.uuid
     , label = question.title
     , text = Just question.text
-    , extraData = Just { shortUuid = question.shortUuid }
+    , extraData = Just {}
     }
 
 

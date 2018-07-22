@@ -267,19 +267,19 @@ viewDeleteChapterDiff chapter =
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewAddQuestionDiff : { a | title : String, shortQuestionUuid : Maybe String, text : String } -> Html Msgs.Msg
+viewAddQuestionDiff : { a | title : String, text : String } -> Html Msgs.Msg
 viewAddQuestionDiff event =
     let
         fields =
             List.map2 (,)
-                [ "Title", "Short UUID", "Text" ]
-                [ event.title, event.shortQuestionUuid |> Maybe.withDefault "", event.text ]
+                [ "Title", "Text" ]
+                [ event.title, event.text ]
     in
     div []
         (viewAdd fields)
 
 
-viewEditQuestionDiff : { a | title : EventField String, shortQuestionUuid : EventField (Maybe String), text : EventField String, answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
+viewEditQuestionDiff : { a | title : EventField String, text : EventField String, answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
 viewEditQuestionDiff event question =
     let
         originalAnswers =
@@ -302,10 +302,9 @@ viewEditQuestionDiff event question =
 
         fields =
             List.map3 (,,)
-                [ "Title", "Short UUID", "Text" ]
-                [ question.title, question.shortUuid |> Maybe.withDefault "", question.text ]
+                [ "Title", "Text" ]
+                [ question.title, question.text ]
                 [ getEventFieldValueWithDefault event.title question.title
-                , getEventFieldValueWithDefault event.shortQuestionUuid question.shortUuid |> Maybe.withDefault ""
                 , getEventFieldValueWithDefault event.text question.text
                 ]
 
@@ -335,8 +334,8 @@ viewDeleteQuestionDiff question =
     let
         fields =
             List.map2 (,)
-                [ "Title", "Short UUID", "Text" ]
-                [ question.title, question.shortUuid |> Maybe.withDefault "", question.text ]
+                [ "Title", "Text" ]
+                [ question.title, question.text ]
 
         fieldDiff =
             viewDelete fields

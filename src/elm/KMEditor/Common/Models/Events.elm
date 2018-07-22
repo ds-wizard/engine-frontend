@@ -65,7 +65,6 @@ type alias AddQuestionEventData =
     { questionUuid : String
     , type_ : String
     , title : String
-    , shortQuestionUuid : Maybe String
     , text : String
     , answerItemTemplate : Maybe AnswerItemTemplateData
     }
@@ -75,7 +74,6 @@ type alias EditQuestionEventData =
     { questionUuid : String
     , type_ : EventField String
     , title : EventField String
-    , shortQuestionUuid : EventField (Maybe String)
     , text : EventField String
     , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
     , answerIds : EventField (Maybe (List String))
@@ -310,7 +308,6 @@ encodeAddQuestionEvent data =
     , ( "questionUuid", Encode.string data.questionUuid )
     , ( "type", Encode.string data.type_ )
     , ( "title", Encode.string data.title )
-    , ( "shortQuestionUuid", maybe Encode.string data.shortQuestionUuid )
     , ( "text", Encode.string data.text )
     , ( "answerItemTemplate", maybe encodeAnswerItemTemplateData data.answerItemTemplate )
     ]
@@ -322,7 +319,6 @@ encodeEditQuestionEvent data =
     , ( "questionUuid", Encode.string data.questionUuid )
     , ( "type", encodeEventField Encode.string data.type_ )
     , ( "title", encodeEventField Encode.string data.title )
-    , ( "shortQuestionUuid", encodeEventField (maybe Encode.string) data.shortQuestionUuid )
     , ( "text", encodeEventField Encode.string data.text )
     , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
     , ( "answerIds", encodeEventField (maybe (Encode.list << List.map Encode.string)) data.answerIds )
@@ -601,7 +597,6 @@ addQuestionEventDecoder =
         |> required "questionUuid" Decode.string
         |> required "type" Decode.string
         |> required "title" Decode.string
-        |> required "shortQuestionUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
         |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
 
@@ -612,7 +607,6 @@ editQuestionEventDecoder =
         |> required "questionUuid" Decode.string
         |> required "type" (eventFieldDecoder Decode.string)
         |> required "title" (eventFieldDecoder Decode.string)
-        |> required "shortQuestionUuid" (eventFieldDecoder (Decode.nullable Decode.string))
         |> required "text" (eventFieldDecoder Decode.string)
         |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
         |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))

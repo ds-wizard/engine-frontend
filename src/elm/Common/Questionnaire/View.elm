@@ -56,17 +56,7 @@ chapterHeader maybeChapter =
 
 viewExtraData : FormExtraData -> Html msg
 viewExtraData data =
-    case data.shortUuid of
-        Just uuid ->
-            p [ class "extra-data" ]
-                [ a [ href <| "/book-references/" ++ uuid, target "_blank" ]
-                    [ i [ class "fa fa-book" ] []
-                    , text <| "Book Reference #" ++ uuid
-                    ]
-                ]
-
-        Nothing ->
-            emptyNode
+    emptyNode
 
 
 formConfig : FormViewConfig CustomFormMessage FormExtraData

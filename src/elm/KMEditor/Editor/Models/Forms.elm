@@ -22,7 +22,6 @@ type alias ChapterForm =
 type alias QuestionForm =
     { title : String
     , type_ : String
-    , shortUuid : Maybe String
     , text : String
     , itemName : String
     }
@@ -129,10 +128,9 @@ initQuestionForm =
 
 questionFormValidation : Validation CustomFormError QuestionForm
 questionFormValidation =
-    Validate.map5 QuestionForm
+    Validate.map4 QuestionForm
         (Validate.field "title" Validate.string)
         (Validate.field "type_" Validate.string)
-        (Validate.field "shortUuid" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
         (Validate.field "text" Validate.string)
         (Validate.field "itemName" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
 
@@ -141,7 +139,6 @@ questionFormInitials : Question -> List ( String, Field.Field )
 questionFormInitials question =
     [ ( "title", Field.string question.title )
     , ( "type_", Field.string question.type_ )
-    , ( "shortUuid", Field.string (question.shortUuid |> Maybe.withDefault "") )
     , ( "text", Field.string question.text )
     , ( "itemName", Field.string (question.answerItemTemplate |> Maybe.map .title |> Maybe.withDefault "") )
     ]
@@ -162,7 +159,6 @@ updateQuestionWithForm question questionForm =
     { question
         | title = questionForm.title
         , text = questionForm.text
-        , shortUuid = questionForm.shortUuid
         , type_ = questionForm.type_
         , answerItemTemplate = answerItemTemplate
     }

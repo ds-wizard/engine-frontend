@@ -133,7 +133,6 @@ questionEditorView model editorData =
         form =
             div []
                 [ inputGroup editorData.form "title" "Title"
-                , inputGroup editorData.form "shortUuid" "Short UUID"
                 , textAreaGroup editorData.form "text" "Text"
                 , selectGroup questionTypeOptions editorData.form "type_" "Question Type"
                 , p [ class "form-text text-muted" ]

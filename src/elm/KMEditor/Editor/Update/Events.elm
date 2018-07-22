@@ -72,7 +72,6 @@ createAddQuestionEvent form editorData =
             { questionUuid = editorData.question.uuid
             , type_ = form.type_
             , title = form.title
-            , shortQuestionUuid = form.shortUuid
             , text = form.text
             , answerItemTemplate = maybeAnswerItemTemlate
             }
@@ -108,7 +107,6 @@ createEditQuestionEvent form editorData =
             { questionUuid = editorData.question.uuid
             , type_ = createEventField form.type_ (editorData.question.type_ /= form.type_)
             , title = createEventField form.title (editorData.question.title /= form.title)
-            , shortQuestionUuid = createEventField form.shortUuid (editorData.question.shortUuid /= form.shortUuid)
             , text = createEventField form.text (editorData.question.text /= form.text)
             , answerItemTemplate = createEventField maybeAnswerItemTemlate answerItemTemplateChanged
             , answerIds = createEventField maybeAnswerIds answerIdsChanged
