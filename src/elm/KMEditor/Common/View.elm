@@ -168,7 +168,7 @@ diffTreeNodeReference events reference =
     li [ class (divClass ++ " reference") ]
         [ span []
             [ i [ class "fa fa-book" ] []
-            , text reference.chapter
+            , text <| getReferenceVisibleName reference
             ]
         ]
 
@@ -179,14 +179,14 @@ diffTreeNodeNewReference events event =
         AddReferenceEvent eventData _ ->
             let
                 dummyReference =
-                    newReference eventData.referenceUuid
+                    newReference <| getAddReferenceUuid eventData
             in
             if List.any (isDeleteReference dummyReference) events then
                 emptyNode
             else
-                List.find (isEditReference (newReference eventData.referenceUuid)) events
+                List.find (isEditReference (newReference (getAddReferenceUuid eventData))) events
                     |> Maybe.andThen getEventEntityVisibleName
-                    |> Maybe.withDefault eventData.chapter
+                    |> Maybe.withDefault "Reference"
                     |> diffTreeNewNode "reference" "fa-book"
 
         _ ->

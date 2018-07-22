@@ -1,6 +1,6 @@
 module Common.Questionnaire.View exposing (..)
 
-import Common.Html exposing (emptyNode)
+import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models exposing (Feedback, FeedbackForm, FormExtraData, Model)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
 import Common.Types exposing (ActionResult(Success, Unset))
@@ -56,17 +56,48 @@ chapterHeader maybeChapter =
 
 viewExtraData : FormExtraData -> Html msg
 viewExtraData data =
-    case data.shortUuid of
-        Just uuid ->
-            p [ class "extra-data" ]
-                [ a [ href <| "/book-references/" ++ uuid, target "_blank" ]
-                    [ i [ class "fa fa-book" ] []
-                    , text <| "Book Reference #" ++ uuid
-                    ]
-                ]
+    p [ class "extra-data" ]
+        [ viewResourcePageReferences data.resourcePageReferences
+        , viewUrlReferences data.urlReferences
+        ]
 
-        Nothing ->
-            emptyNode
+
+viewResourcePageReferences : List String -> Html msg
+viewResourcePageReferences references =
+    if List.length references == 0 then
+        emptyNode
+    else
+        span []
+            ([ fa "book"
+             , span [] [ text "Data Stewardship for Open Science:" ]
+             ]
+                ++ List.map viewResourcePageReference references
+            )
+
+
+viewResourcePageReference : String -> Html msg
+viewResourcePageReference shortUuid =
+    a [ href <| "/book-references/" ++ shortUuid, target "_blank" ]
+        [ text shortUuid ]
+
+
+viewUrlReferences : List ( String, String ) -> Html msg
+viewUrlReferences references =
+    if List.length references == 0 then
+        emptyNode
+    else
+        span []
+            ([ fa "external-link"
+             , span [] [ text "External links:" ]
+             ]
+                ++ List.map viewUrlReference references
+            )
+
+
+viewUrlReference : ( String, String ) -> Html msg
+viewUrlReference ( anchor, url ) =
+    a [ href url, target "_blank" ]
+        [ text anchor ]
 
 
 formConfig : FormViewConfig CustomFormMessage FormExtraData

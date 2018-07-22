@@ -1,6 +1,7 @@
 module KMEditor.Common.Models.Entities exposing (..)
 
 import Json.Decode as Decode exposing (..)
+import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
 import List.Extra as List
 
@@ -24,7 +25,6 @@ type alias Question =
     { uuid : String
     , type_ : String
     , title : String
-    , shortUuid : Maybe String
     , text : String
     , answerItemTemplate : Maybe AnswerItemTemplate
     , answers : Maybe (List Answer)
@@ -55,9 +55,29 @@ type FollowUps
     = FollowUps (List Question)
 
 
-type alias Reference =
+type Reference
+    = ResourcePageReference ResourcePageReferenceData
+    | URLReference URLReferenceData
+    | CrossReference CrossReferenceData
+
+
+type alias ResourcePageReferenceData =
     { uuid : String
-    , chapter : String
+    , shortUuid : String
+    }
+
+
+type alias URLReferenceData =
+    { uuid : String
+    , url : String
+    , anchor : String
+    }
+
+
+type alias CrossReferenceData =
+    { uuid : String
+    , targetUuid : String
+    , description : String
     }
 
 
@@ -91,7 +111,6 @@ questionDecoder =
         |> required "uuid" Decode.string
         |> required "type" Decode.string
         |> required "title" Decode.string
-        |> required "shortUuid" (Decode.nullable Decode.string)
         |> required "text" Decode.string
         |> required "answerItemTemplate" (Decode.nullable <| Decode.lazy (\_ -> answerItemTemplateDecoder))
         |> required "answers" (Decode.nullable <| Decode.lazy (\_ -> Decode.list answerDecoder))
@@ -117,19 +136,52 @@ answerDecoder =
         |> required "uuid" Decode.string
         |> required "label" Decode.string
         |> required "advice" (Decode.nullable Decode.string)
-        |> required "followUps" followupsDecoder
+        |> required "followUps" (Decode.lazy (\_ -> followupsDecoder))
 
 
 followupsDecoder : Decoder FollowUps
 followupsDecoder =
-    Decode.map FollowUps (Decode.lazy (\_ -> Decode.list questionDecoder))
+    Decode.map FollowUps (Decode.list questionDecoder)
 
 
 referenceDecoder : Decoder Reference
 referenceDecoder =
-    decode Reference
+    Decode.oneOf
+        [ when referenceType ((==) "ResourcePageReference") resourcePageReferenceDecoder
+        , when referenceType ((==) "URLReference") urlReferenceDecoder
+        , when referenceType ((==) "CrossReference") crossReferenceDecoder
+        ]
+
+
+referenceType : Decoder String
+referenceType =
+    Decode.field "referenceType" Decode.string
+
+
+resourcePageReferenceDecoder : Decoder Reference
+resourcePageReferenceDecoder =
+    decode ResourcePageReferenceData
         |> required "uuid" Decode.string
-        |> required "chapter" Decode.string
+        |> required "shortUuid" Decode.string
+        |> Decode.map ResourcePageReference
+
+
+urlReferenceDecoder : Decoder Reference
+urlReferenceDecoder =
+    decode URLReferenceData
+        |> required "uuid" Decode.string
+        |> required "url" Decode.string
+        |> required "anchor" Decode.string
+        |> Decode.map URLReference
+
+
+crossReferenceDecoder : Decoder Reference
+crossReferenceDecoder =
+    decode CrossReferenceData
+        |> required "uuid" Decode.string
+        |> required "targetUuid" Decode.string
+        |> required "description" Decode.string
+        |> Decode.map CrossReference
 
 
 expertDecoder : Decoder Expert
@@ -154,7 +206,6 @@ newQuestion uuid =
     { uuid = uuid
     , type_ = "options"
     , title = "New question"
-    , shortUuid = Nothing
     , text = "Question text"
     , answerItemTemplate = Nothing
     , answers = Nothing
@@ -174,9 +225,11 @@ newAnswer uuid =
 
 newReference : String -> Reference
 newReference uuid =
-    { uuid = uuid
-    , chapter = "New reference"
-    }
+    URLReference
+        { uuid = uuid
+        , url = "http://example.com"
+        , anchor = "See also"
+        }
 
 
 newExpert : String -> Expert
@@ -252,6 +305,16 @@ getAnswer km answerUuid =
         |> List.find (\a -> a.uuid == answerUuid)
 
 
+getReferenceUuid : Reference -> String
+getReferenceUuid =
+    referenceByType .uuid .uuid .uuid
+
+
+getReferenceVisibleName : Reference -> String
+getReferenceVisibleName =
+    referenceByType .shortUuid .anchor .targetUuid
+
+
 getReferences : KnowledgeModel -> List Reference
 getReferences km =
     getQuestions km
@@ -262,7 +325,7 @@ getReferences km =
 getReference : KnowledgeModel -> String -> Maybe Reference
 getReference km referenceUuid =
     getReferences km
-        |> List.find (\r -> r.uuid == referenceUuid)
+        |> List.find (\r -> getReferenceUuid r == referenceUuid)
 
 
 getExperts : KnowledgeModel -> List Expert
@@ -276,3 +339,16 @@ getExpert : KnowledgeModel -> String -> Maybe Expert
 getExpert km expertUuid =
     getExperts km
         |> List.find (\e -> e.uuid == expertUuid)
+
+
+referenceByType : (ResourcePageReferenceData -> a) -> (URLReferenceData -> a) -> (CrossReferenceData -> a) -> Reference -> a
+referenceByType resourcePageReference urlReference crossReference reference =
+    case reference of
+        ResourcePageReference data ->
+            resourcePageReference data
+
+        URLReference data ->
+            urlReference data
+
+        CrossReference data ->
+            crossReference data

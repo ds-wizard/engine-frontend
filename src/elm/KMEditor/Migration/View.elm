@@ -155,7 +155,7 @@ getEventView wrapMsg model migration event =
                 |> viewEvent wrapMsg model "Add reference"
 
         EditReferenceEvent eventData _ ->
-            getReference migration.currentKnowledgeModel eventData.referenceUuid
+            getReference migration.currentKnowledgeModel (getEditReferenceUuid eventData)
                 |> Maybe.map (viewEditReferenceDiff eventData)
                 |> Maybe.map (viewEvent wrapMsg model "Edit reference")
                 |> Maybe.withDefault errorMessage
@@ -267,19 +267,19 @@ viewDeleteChapterDiff chapter =
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewAddQuestionDiff : { a | title : String, shortQuestionUuid : Maybe String, text : String } -> Html Msgs.Msg
+viewAddQuestionDiff : { a | title : String, text : String } -> Html Msgs.Msg
 viewAddQuestionDiff event =
     let
         fields =
             List.map2 (,)
-                [ "Title", "Short UUID", "Text" ]
-                [ event.title, event.shortQuestionUuid |> Maybe.withDefault "", event.text ]
+                [ "Title", "Text" ]
+                [ event.title, event.text ]
     in
     div []
         (viewAdd fields)
 
 
-viewEditQuestionDiff : { a | title : EventField String, shortQuestionUuid : EventField (Maybe String), text : EventField String, answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
+viewEditQuestionDiff : { a | title : EventField String, text : EventField String, answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
 viewEditQuestionDiff event question =
     let
         originalAnswers =
@@ -289,10 +289,10 @@ viewEditQuestionDiff event question =
             Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) (question.answers |> Maybe.withDefault [])
 
         originalReferences =
-            List.map .uuid question.references
+            List.map getReferenceUuid question.references
 
         referenceNames =
-            Dict.fromList <| List.map (\r -> ( r.uuid, r.chapter )) question.references
+            Dict.fromList <| List.map (\r -> ( getReferenceUuid r, getReferenceVisibleName r )) question.references
 
         originalExperts =
             List.map .uuid question.experts
@@ -302,10 +302,9 @@ viewEditQuestionDiff event question =
 
         fields =
             List.map3 (,,)
-                [ "Title", "Short UUID", "Text" ]
-                [ question.title, question.shortUuid |> Maybe.withDefault "", question.text ]
+                [ "Title", "Text" ]
+                [ question.title, question.text ]
                 [ getEventFieldValueWithDefault event.title question.title
-                , getEventFieldValueWithDefault event.shortQuestionUuid question.shortUuid |> Maybe.withDefault ""
                 , getEventFieldValueWithDefault event.text question.text
                 ]
 
@@ -335,8 +334,8 @@ viewDeleteQuestionDiff question =
     let
         fields =
             List.map2 (,)
-                [ "Title", "Short UUID", "Text" ]
-                [ question.title, question.shortUuid |> Maybe.withDefault "", question.text ]
+                [ "Title", "Text" ]
+                [ question.title, question.text ]
 
         fieldDiff =
             viewDelete fields
@@ -345,7 +344,7 @@ viewDeleteQuestionDiff question =
             viewDeletedChildren "Answers" <| List.map .label (question.answers |> Maybe.withDefault [])
 
         referencesDiff =
-            viewDeletedChildren "References" <| List.map .chapter question.references
+            viewDeletedChildren "References" <| List.map getReferenceVisibleName question.references
 
         expertsDiff =
             viewDeletedChildren "Experts" <| List.map .name question.experts
@@ -409,26 +408,138 @@ viewDeleteAnswerDiff answer =
 
 
 viewAddReferenceDiff : AddReferenceEventData -> Html Msgs.Msg
-viewAddReferenceDiff event =
+viewAddReferenceDiff =
+    addReferenceEventDataByType
+        viewAddResourcePageReferenceDiff
+        viewAddURLReferenceDiff
+        viewAddCrossReferenceDiff
+
+
+viewAddResourcePageReferenceDiff : AddResourcePageReferenceEventData -> Html Msgs.Msg
+viewAddResourcePageReferenceDiff data =
     div []
-        (viewAdd <| List.map2 (,) [ "Chapter" ] [ event.chapter ])
+        (viewAdd <| List.map2 (,) [ "Short UUID" ] [ data.shortUuid ])
+
+
+viewAddURLReferenceDiff : AddURLReferenceEventData -> Html Msgs.Msg
+viewAddURLReferenceDiff data =
+    div []
+        (viewAdd <| List.map2 (,) [ "URL", "Anchor" ] [ data.url, data.anchor ])
+
+
+viewAddCrossReferenceDiff : AddCrossReferenceEventData -> Html Msgs.Msg
+viewAddCrossReferenceDiff data =
+    div []
+        (viewAdd <| List.map2 (,) [ "Target UUID", "Description" ] [ data.targetUuid, data.description ])
 
 
 viewEditReferenceDiff : EditReferenceEventData -> Reference -> Html Msgs.Msg
 viewEditReferenceDiff event reference =
+    case ( event, reference ) of
+        ( EditResourcePageReferenceEvent eventData, ResourcePageReference referenceData ) ->
+            div []
+                (viewDiff <|
+                    List.map3 (,,)
+                        [ "Short UUID" ]
+                        [ referenceData.shortUuid ]
+                        [ getEventFieldValueWithDefault eventData.shortUuid referenceData.shortUuid ]
+                )
+
+        ( EditURLReferenceEvent eventData, URLReference referenceData ) ->
+            div []
+                (viewDiff <|
+                    List.map3 (,,)
+                        [ "URL", "Anchor" ]
+                        [ referenceData.url, referenceData.anchor ]
+                        [ getEventFieldValueWithDefault eventData.url referenceData.url
+                        , getEventFieldValueWithDefault eventData.anchor referenceData.anchor
+                        ]
+                )
+
+        ( EditCrossReferenceEvent eventData, CrossReference referenceData ) ->
+            div []
+                (viewDiff <|
+                    List.map3 (,,)
+                        [ "Target UUID", "Description" ]
+                        [ referenceData.targetUuid, referenceData.description ]
+                        [ getEventFieldValueWithDefault eventData.targetUuid referenceData.targetUuid
+                        , getEventFieldValueWithDefault eventData.description referenceData.description
+                        ]
+                )
+
+        ( otherEvent, otherReference ) ->
+            let
+                deleteReference =
+                    viewDeleteReferenceDiff otherReference
+
+                addReference =
+                    editReferenceEventDataByType
+                        viewEditResourcePageReferenceDiff
+                        viewEditURLReferenceDiff
+                        viewEditCrossReferenceDiff
+                        otherEvent
+            in
+            div [] [ deleteReference, addReference ]
+
+
+viewEditResourcePageReferenceDiff : EditResourcePageReferenceEventData -> Html Msgs.Msg
+viewEditResourcePageReferenceDiff data =
     div []
-        (viewDiff <|
-            List.map3 (,,)
-                [ "Chapter" ]
-                [ reference.chapter ]
-                [ getEventFieldValueWithDefault event.chapter reference.chapter ]
+        (viewAdd <|
+            List.map2 (,)
+                [ "Short UUID" ]
+                [ getEventFieldValueWithDefault data.shortUuid "" ]
+        )
+
+
+viewEditURLReferenceDiff : EditURLReferenceEventData -> Html Msgs.Msg
+viewEditURLReferenceDiff data =
+    div []
+        (viewAdd <|
+            List.map2 (,)
+                [ "URL", "Anchor" ]
+                [ getEventFieldValueWithDefault data.url ""
+                , getEventFieldValueWithDefault data.anchor ""
+                ]
+        )
+
+
+viewEditCrossReferenceDiff : EditCrossReferenceEventData -> Html Msgs.Msg
+viewEditCrossReferenceDiff data =
+    div []
+        (viewAdd <|
+            List.map2 (,)
+                [ "Target UUID", "Description" ]
+                [ getEventFieldValueWithDefault data.targetUuid ""
+                , getEventFieldValueWithDefault data.description ""
+                ]
         )
 
 
 viewDeleteReferenceDiff : Reference -> Html Msgs.Msg
-viewDeleteReferenceDiff reference =
+viewDeleteReferenceDiff =
+    referenceByType
+        viewDeleteResourcePageReferenceDiff
+        viewDeleteURLReferenceDiff
+        viewDeleteCrossReferenceDiff
+
+
+viewDeleteResourcePageReferenceDiff : ResourcePageReferenceData -> Html Msgs.Msg
+viewDeleteResourcePageReferenceDiff data =
     div []
-        (viewDelete <| List.map2 (,) [ "Chapter" ] [ reference.chapter ])
+        (viewDelete <| List.map2 (,) [ "Short UUID" ] [ data.shortUuid ])
+
+
+viewDeleteURLReferenceDiff : URLReferenceData -> Html Msgs.Msg
+viewDeleteURLReferenceDiff data =
+    div []
+        (viewDelete <| List.map2 (,) [ "URL", "Anchor" ] [ data.url, data.anchor ])
+
+
+viewDeleteCrossReferenceDiff : CrossReferenceData -> Html Msgs.Msg
+viewDeleteCrossReferenceDiff data =
+    div []
+        (viewDelete <| List.map2 (,) [ "Target UUID", "Description" ] [ data.targetUuid, data.description ])
 
 
 viewAddExpertDiff : AddExpertEventData -> Html Msgs.Msg

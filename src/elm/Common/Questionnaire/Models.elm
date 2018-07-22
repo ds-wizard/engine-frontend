@@ -26,7 +26,8 @@ type alias Model =
 
 
 type alias FormExtraData =
-    { shortUuid : Maybe String
+    { resourcePageReferences : List String
+    , urlReferences : List ( String, String )
     }
 
 
@@ -151,8 +152,33 @@ createFormItemDescriptor question =
     { name = question.uuid
     , label = question.title
     , text = Just question.text
-    , extraData = Just { shortUuid = question.shortUuid }
+    , extraData = createQuestionExtraData question
     }
+
+
+createQuestionExtraData : Question -> Maybe FormExtraData
+createQuestionExtraData question =
+    if List.length question.references == 0 then
+        Nothing
+    else
+        let
+            foldReferences reference extraData =
+                case reference of
+                    ResourcePageReference data ->
+                        { extraData | resourcePageReferences = extraData.resourcePageReferences ++ [ data.shortUuid ] }
+
+                    URLReference data ->
+                        { extraData | urlReferences = extraData.urlReferences ++ [ ( data.anchor, data.url ) ] }
+
+                    _ ->
+                        extraData
+
+            extraData =
+                { resourcePageReferences = []
+                , urlReferences = []
+                }
+        in
+        Just <| List.foldl foldReferences extraData question.references
 
 
 createAnswerOption : Answer -> Option FormExtraData

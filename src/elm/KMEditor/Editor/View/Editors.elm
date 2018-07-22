@@ -10,7 +10,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import KMEditor.Editor.Models exposing (Model, getActiveEditor)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Forms exposing (questionTypeOptions)
+import KMEditor.Editor.Models.Forms exposing (questionTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
 import String exposing (toLower)
@@ -133,7 +133,6 @@ questionEditorView model editorData =
         form =
             div []
                 [ inputGroup editorData.form "title" "Title"
-                , inputGroup editorData.form "shortUuid" "Short UUID"
                 , textAreaGroup editorData.form "text" "Text"
                 , selectGroup questionTypeOptions editorData.form "type_" "Question Type"
                 , p [ class "form-text text-muted" ]
@@ -274,9 +273,30 @@ referenceEditorView editorData =
             , deleteAction = DeleteReference editorData.uuid |> ReferenceEditorMsg |> EditorMsg |> Just
             }
 
+        formFields =
+            case (Form.getFieldAsString "referenceType" editorData.form).value of
+                Just "ResourcePageReference" ->
+                    [ inputGroup editorData.form "shortUuid" "Short UUID"
+                    ]
+
+                Just "URLReference" ->
+                    [ inputGroup editorData.form "url" "URL"
+                    , inputGroup editorData.form "anchor" "Anchor"
+                    ]
+
+                Just "CrossReference" ->
+                    [ inputGroup editorData.form "targetUuid" "Target UUID"
+                    , inputGroup editorData.form "description" "Description"
+                    ]
+
+                _ ->
+                    []
+
         form =
             div []
-                [ inputGroup editorData.form "chapter" "Chapter" ]
+                ([ selectGroup referenceTypeOptions editorData.form "referenceType" "Type" ]
+                    ++ formFields
+                )
     in
     ( editorData.uuid
     , div [ class editorClass ]
