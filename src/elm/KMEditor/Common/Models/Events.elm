@@ -109,15 +109,55 @@ type alias DeleteAnswerEventData =
     }
 
 
-type alias AddReferenceEventData =
+type AddReferenceEventData
+    = AddResourcePageReferenceEvent AddResourcePageReferenceEventData
+    | AddURLReferenceEvent AddURLReferenceEventData
+    | AddCrossReferenceEvent AddCrossReferenceEventData
+
+
+type alias AddResourcePageReferenceEventData =
     { referenceUuid : String
-    , chapter : String
+    , shortUuid : String
     }
 
 
-type alias EditReferenceEventData =
+type alias AddURLReferenceEventData =
     { referenceUuid : String
-    , chapter : EventField String
+    , url : String
+    , anchor : String
+    }
+
+
+type alias AddCrossReferenceEventData =
+    { referenceUuid : String
+    , targetUuid : String
+    , description : String
+    }
+
+
+type EditReferenceEventData
+    = EditResourcePageReferenceEvent EditResourcePageReferenceEventData
+    | EditURLReferenceEvent EditURLReferenceEventData
+    | EditCrossReferenceEvent EditCrossReferenceEventData
+
+
+type alias EditResourcePageReferenceEventData =
+    { referenceUuid : String
+    , shortUuid : EventField String
+    }
+
+
+type alias EditURLReferenceEventData =
+    { referenceUuid : String
+    , url : EventField String
+    , anchor : EventField String
+    }
+
+
+type alias EditCrossReferenceEventData =
+    { referenceUuid : String
+    , targetUuid : EventField String
+    , description : EventField String
     }
 
 
@@ -326,17 +366,74 @@ encodeDeleteAnswerEvent data =
 
 encodeAddReferenceEvent : AddReferenceEventData -> List ( String, Encode.Value )
 encodeAddReferenceEvent data =
-    [ ( "eventType", Encode.string "AddReferenceEvent" )
+    let
+        eventData =
+            addReferenceEventDataByType
+                encodeAddResourcePageReferenceEvent
+                encodeAddURLReferenceEvent
+                encodeAddCrossReferenceEvent
+                data
+    in
+    [ ( "eventType", Encode.string "AddReferenceEvent" ) ] ++ eventData
+
+
+encodeAddResourcePageReferenceEvent : AddResourcePageReferenceEventData -> List ( String, Encode.Value )
+encodeAddResourcePageReferenceEvent data =
+    [ ( "referenceType", Encode.string "ResourcePageReference" )
     , ( "referenceUuid", Encode.string data.referenceUuid )
-    , ( "chapter", Encode.string data.chapter )
+    , ( "shortUuid", Encode.string data.shortUuid )
+    ]
+
+
+encodeAddURLReferenceEvent : AddURLReferenceEventData -> List ( String, Encode.Value )
+encodeAddURLReferenceEvent data =
+    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    , ( "url", Encode.string data.url )
+    , ( "anchor", Encode.string data.anchor )
+    ]
+
+
+encodeAddCrossReferenceEvent : AddCrossReferenceEventData -> List ( String, Encode.Value )
+encodeAddCrossReferenceEvent data =
+    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    , ( "targetUuid", Encode.string data.targetUuid )
+    , ( "description", Encode.string data.description )
     ]
 
 
 encodeEditReferenceEvent : EditReferenceEventData -> List ( String, Encode.Value )
 encodeEditReferenceEvent data =
-    [ ( "eventType", Encode.string "EditReferenceEvent" )
-    , ( "referenceUuid", Encode.string data.referenceUuid )
-    , ( "chapter", encodeEventField Encode.string data.chapter )
+    let
+        eventData =
+            editReferenceEventDataByType
+                encodeEditResourcePageReferenceEvent
+                encodeEditURLReferenceEvent
+                encodeEditCrossReferenceEvent
+                data
+    in
+    [ ( "eventType", Encode.string "EditReferenceEvent" ) ] ++ eventData
+
+
+encodeEditResourcePageReferenceEvent : EditResourcePageReferenceEventData -> List ( String, Encode.Value )
+encodeEditResourcePageReferenceEvent data =
+    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    , ( "shortUuid", encodeEventField Encode.string data.shortUuid )
+    ]
+
+
+encodeEditURLReferenceEvent : EditURLReferenceEventData -> List ( String, Encode.Value )
+encodeEditURLReferenceEvent data =
+    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    , ( "url", encodeEventField Encode.string data.url )
+    , ( "anchor", encodeEventField Encode.string data.anchor )
+    ]
+
+
+encodeEditCrossReferenceEvent : EditCrossReferenceEventData -> List ( String, Encode.Value )
+encodeEditCrossReferenceEvent data =
+    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    , ( "targetUuid", encodeEventField Encode.string data.targetUuid )
+    , ( "description", encodeEventField Encode.string data.description )
     ]
 
 
@@ -554,16 +651,92 @@ deleteAnswerEventDecoder =
 
 addReferenceEventDecoder : Decoder AddReferenceEventData
 addReferenceEventDecoder =
-    decode AddReferenceEventData
+    Decode.field "referenceType" Decode.string
+        |> Decode.andThen addReferenceEventDecoderByType
+
+
+addReferenceEventDecoderByType : String -> Decoder AddReferenceEventData
+addReferenceEventDecoderByType referenceType =
+    case referenceType of
+        "ResourcePageReference" ->
+            Decode.map AddResourcePageReferenceEvent addResourcePageReferenceEventDecoder
+
+        "URLReference" ->
+            Decode.map AddURLReferenceEvent addURLReferenceEventDecoder
+
+        "CrossReference" ->
+            Decode.map AddCrossReferenceEvent addCrossReferenceEventDecoder
+
+        _ ->
+            Decode.fail <| "Unknown reference type: " ++ referenceType
+
+
+addResourcePageReferenceEventDecoder : Decoder AddResourcePageReferenceEventData
+addResourcePageReferenceEventDecoder =
+    decode AddResourcePageReferenceEventData
         |> required "referenceUuid" Decode.string
-        |> required "chapter" Decode.string
+        |> required "shortUuid" Decode.string
+
+
+addURLReferenceEventDecoder : Decoder AddURLReferenceEventData
+addURLReferenceEventDecoder =
+    decode AddURLReferenceEventData
+        |> required "referenceUuid" Decode.string
+        |> required "url" Decode.string
+        |> required "anchor" Decode.string
+
+
+addCrossReferenceEventDecoder : Decoder AddCrossReferenceEventData
+addCrossReferenceEventDecoder =
+    decode AddCrossReferenceEventData
+        |> required "referenceUuid" Decode.string
+        |> required "targetUuid" Decode.string
+        |> required "description" Decode.string
 
 
 editReferenceEventDecoder : Decoder EditReferenceEventData
 editReferenceEventDecoder =
-    decode EditReferenceEventData
+    Decode.field "referenceType" Decode.string
+        |> Decode.andThen editReferenceEventDecoderByType
+
+
+editReferenceEventDecoderByType : String -> Decoder EditReferenceEventData
+editReferenceEventDecoderByType referenceType =
+    case referenceType of
+        "ResourcePageReference" ->
+            Decode.map EditResourcePageReferenceEvent editResourcePageReferenceEventDecoder
+
+        "URLReference" ->
+            Decode.map EditURLReferenceEvent editURLReferenceEventDecoder
+
+        "CrossReference" ->
+            Decode.map EditCrossReferenceEvent editCrossReferenceEventDecoder
+
+        _ ->
+            Decode.fail <| "Unknown reference type: " ++ referenceType
+
+
+editResourcePageReferenceEventDecoder : Decoder EditResourcePageReferenceEventData
+editResourcePageReferenceEventDecoder =
+    decode EditResourcePageReferenceEventData
         |> required "referenceUuid" Decode.string
-        |> required "chapter" (eventFieldDecoder Decode.string)
+        |> required "shortUuid" (eventFieldDecoder Decode.string)
+
+
+editURLReferenceEventDecoder : Decoder EditURLReferenceEventData
+editURLReferenceEventDecoder =
+    decode EditURLReferenceEventData
+        |> required "referenceUuid" Decode.string
+        |> required "url" (eventFieldDecoder Decode.string)
+        |> required "anchor" (eventFieldDecoder Decode.string)
+
+
+editCrossReferenceEventDecoder : Decoder EditCrossReferenceEventData
+editCrossReferenceEventDecoder =
+    decode EditCrossReferenceEventData
+        |> required "referenceUuid" Decode.string
+        |> required "targetUuid" (eventFieldDecoder Decode.string)
+        |> required "description" (eventFieldDecoder Decode.string)
 
 
 deleteReferenceEventDecoder : Decoder DeleteReferenceEventData
@@ -702,10 +875,10 @@ getEventEntityVisibleName event =
             getEventFieldValue eventData.label
 
         AddReferenceEvent eventData _ ->
-            Just eventData.chapter
+            getAddReferenceEventEntityVisibleName eventData
 
         EditReferenceEvent eventData _ ->
-            getEventFieldValue eventData.chapter
+            getEditReferenceEventEntityVisibleName eventData
 
         AddExpertEvent eventData _ ->
             Just eventData.name
@@ -715,6 +888,58 @@ getEventEntityVisibleName event =
 
         _ ->
             Nothing
+
+
+getAddReferenceEventEntityVisibleName : AddReferenceEventData -> Maybe String
+getAddReferenceEventEntityVisibleName data =
+    case data of
+        AddResourcePageReferenceEvent data ->
+            Just data.shortUuid
+
+        AddURLReferenceEvent data ->
+            Just data.anchor
+
+        AddCrossReferenceEvent data ->
+            Just data.targetUuid
+
+
+getEditReferenceEventEntityVisibleName : EditReferenceEventData -> Maybe String
+getEditReferenceEventEntityVisibleName data =
+    case data of
+        EditResourcePageReferenceEvent data ->
+            getEventFieldValue data.shortUuid
+
+        EditURLReferenceEvent data ->
+            getEventFieldValue data.anchor
+
+        EditCrossReferenceEvent data ->
+            getEventFieldValue data.targetUuid
+
+
+getAddReferenceUuid : AddReferenceEventData -> String
+getAddReferenceUuid data =
+    case data of
+        AddResourcePageReferenceEvent data ->
+            data.referenceUuid
+
+        AddURLReferenceEvent data ->
+            data.referenceUuid
+
+        AddCrossReferenceEvent data ->
+            data.referenceUuid
+
+
+getEditReferenceUuid : EditReferenceEventData -> String
+getEditReferenceUuid data =
+    case data of
+        EditResourcePageReferenceEvent data ->
+            data.referenceUuid
+
+        EditURLReferenceEvent data ->
+            data.referenceUuid
+
+        EditCrossReferenceEvent data ->
+            data.referenceUuid
 
 
 isEditChapter : Chapter -> Event -> Bool
@@ -781,7 +1006,7 @@ isEditReference : Reference -> Event -> Bool
 isEditReference reference event =
     case event of
         EditReferenceEvent eventData _ ->
-            eventData.referenceUuid == reference.uuid
+            getEditReferenceUuid eventData == getReferenceUuid reference
 
         _ ->
             False
@@ -791,7 +1016,7 @@ isDeleteReference : Reference -> Event -> Bool
 isDeleteReference reference event =
     case event of
         DeleteReferenceEvent eventData _ ->
-            eventData.referenceUuid == reference.uuid
+            eventData.referenceUuid == getReferenceUuid reference
 
         _ ->
             False
@@ -890,3 +1115,29 @@ isAddReference question event =
 
         _ ->
             False
+
+
+addReferenceEventDataByType : (AddResourcePageReferenceEventData -> a) -> (AddURLReferenceEventData -> a) -> (AddCrossReferenceEventData -> a) -> AddReferenceEventData -> a
+addReferenceEventDataByType resourcePageReference urlReference crossReference reference =
+    case reference of
+        AddResourcePageReferenceEvent data ->
+            resourcePageReference data
+
+        AddURLReferenceEvent data ->
+            urlReference data
+
+        AddCrossReferenceEvent data ->
+            crossReference data
+
+
+editReferenceEventDataByType : (EditResourcePageReferenceEventData -> a) -> (EditURLReferenceEventData -> a) -> (EditCrossReferenceEventData -> a) -> EditReferenceEventData -> a
+editReferenceEventDataByType resourcePageReference urlReference crossReference reference =
+    case reference of
+        EditResourcePageReferenceEvent data ->
+            resourcePageReference data
+
+        EditURLReferenceEvent data ->
+            urlReference data
+
+        EditCrossReferenceEvent data ->
+            crossReference data

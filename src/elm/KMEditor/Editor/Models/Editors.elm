@@ -172,7 +172,7 @@ createQuestionEditor path editorState question editors =
                 , form = initQuestionForm question
                 , answers = Children.init answers
                 , answerItemTemplateQuestions = Children.init answerItemTemplateQuestions
-                , references = Children.init <| List.map .uuid question.references
+                , references = Children.init <| List.map getReferenceUuid question.references
                 , experts = Children.init <| List.map .uuid question.experts
                 , treeOpen = False
                 , editorState = editorState
@@ -227,9 +227,12 @@ createAnswerEditor path editorState answer editors =
 createReferenceEditor : Path -> EditorState -> Reference -> Dict String Editor -> Dict String Editor
 createReferenceEditor path editorState reference editors =
     let
+        referenceUuid =
+            getReferenceUuid reference
+
         editor =
             ReferenceEditor
-                { uuid = reference.uuid
+                { uuid = referenceUuid
                 , reference = reference
                 , form = initReferenceForm reference
                 , treeOpen = False
@@ -237,7 +240,7 @@ createReferenceEditor path editorState reference editors =
                 , path = path
                 }
     in
-    Dict.insert reference.uuid editor editors
+    Dict.insert referenceUuid editor editors
 
 
 createExpertEditor : Path -> EditorState -> Expert -> Dict String Editor -> Dict String Editor
@@ -351,7 +354,7 @@ getEditorTitle editor =
             data.answer.label
 
         ReferenceEditor data ->
-            data.reference.chapter
+            getReferenceVisibleName data.reference
 
         ExpertEditor data ->
             data.expert.name
@@ -373,7 +376,7 @@ getEditorUuid editor =
             data.answer.uuid
 
         ReferenceEditor data ->
-            data.reference.uuid
+            getReferenceUuid data.reference
 
         ExpertEditor data ->
             data.expert.uuid
@@ -648,7 +651,7 @@ addQuestionReference : Reference -> QuestionEditorData -> Editor
 addQuestionReference reference editorData =
     QuestionEditor
         { editorData
-            | references = Children.addChild reference.uuid editorData.references
+            | references = Children.addChild (getReferenceUuid reference) editorData.references
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }

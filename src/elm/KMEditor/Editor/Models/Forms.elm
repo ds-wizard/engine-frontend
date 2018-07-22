@@ -2,6 +2,7 @@ module KMEditor.Editor.Models.Forms exposing (..)
 
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
+import Form.Error as Error exposing (ErrorValue(InvalidString))
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
@@ -33,8 +34,15 @@ type alias AnswerForm =
     }
 
 
+type ReferenceFormType
+    = ResourcePageReferenceFormType String
+    | URLReferenceFormType String String
+    | CrossReferenceFormType String String
+
+
 type alias ReferenceForm =
-    { chapter : String }
+    { reference : ReferenceFormType
+    }
 
 
 type alias ExpertForm =
@@ -210,18 +218,82 @@ initReferenceForm =
 
 referenceFormValidation : Validation CustomFormError ReferenceForm
 referenceFormValidation =
-    Validate.map ReferenceForm
-        (Validate.field "chapter" Validate.string)
+    Validate.succeed ReferenceForm
+        |> Validate.andMap (Validate.field "referenceType" Validate.string |> Validate.andThen validateReference)
+
+
+validateReference : String -> Validation CustomFormError ReferenceFormType
+validateReference referenceType =
+    case referenceType of
+        "ResourcePageReference" ->
+            Validate.succeed ResourcePageReferenceFormType
+                |> Validate.andMap (Validate.field "shortUuid" Validate.string)
+
+        "URLReference" ->
+            Validate.succeed URLReferenceFormType
+                |> Validate.andMap (Validate.field "url" Validate.string)
+                |> Validate.andMap (Validate.field "anchor" Validate.string)
+
+        "CrossReference" ->
+            Validate.succeed CrossReferenceFormType
+                |> Validate.andMap (Validate.field "targetUuid" Validate.string)
+                |> Validate.andMap (Validate.field "description" Validate.string)
+
+        _ ->
+            Validate.fail <| Error.value InvalidString
 
 
 referenceFormInitials : Reference -> List ( String, Field.Field )
 referenceFormInitials reference =
-    [ ( "chapter", Field.string reference.chapter ) ]
+    case reference of
+        ResourcePageReference data ->
+            [ ( "referenceType", Field.string "ResourcePageReference" )
+            , ( "shortUuid", Field.string data.shortUuid )
+            ]
+
+        URLReference data ->
+            [ ( "referenceType", Field.string "URLReference" )
+            , ( "url", Field.string data.url )
+            , ( "anchor", Field.string data.anchor )
+            ]
+
+        CrossReference data ->
+            [ ( "referenceType", Field.string "CrossReference" )
+            , ( "targetUuid", Field.string data.targetUuid )
+            , ( "description", Field.string data.description )
+            ]
 
 
 updateReferenceWithForm : Reference -> ReferenceForm -> Reference
 updateReferenceWithForm reference referenceForm =
-    { reference | chapter = referenceForm.chapter }
+    case referenceForm.reference of
+        ResourcePageReferenceFormType shortUuid ->
+            ResourcePageReference
+                { uuid = getReferenceUuid reference
+                , shortUuid = shortUuid
+                }
+
+        URLReferenceFormType url anchor ->
+            URLReference
+                { uuid = getReferenceUuid reference
+                , url = url
+                , anchor = anchor
+                }
+
+        CrossReferenceFormType targetUuid description ->
+            CrossReference
+                { uuid = getReferenceUuid reference
+                , targetUuid = targetUuid
+                , description = description
+                }
+
+
+referenceTypeOptions : List ( String, String )
+referenceTypeOptions =
+    [ ( "ResourcePageReference", "Resource Page" )
+    , ( "URLReference", "URL" )
+    , ( "CrossReference", "Cross Reference" )
+    ]
 
 
 

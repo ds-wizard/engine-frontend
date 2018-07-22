@@ -1,5 +1,6 @@
 module KMEditor.Editor.Update.Events exposing (..)
 
+import KMEditor.Common.Models.Entities exposing (Reference(..), getReferenceUuid)
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
@@ -167,9 +168,26 @@ createAddReferenceEvent : ReferenceForm -> ReferenceEditorData -> Seed -> ( Even
 createAddReferenceEvent form editorData =
     let
         data =
-            { referenceUuid = editorData.reference.uuid
-            , chapter = form.chapter
-            }
+            case form.reference of
+                ResourcePageReferenceFormType shortUuid ->
+                    AddResourcePageReferenceEvent
+                        { referenceUuid = getReferenceUuid editorData.reference
+                        , shortUuid = shortUuid
+                        }
+
+                URLReferenceFormType url anchor ->
+                    AddURLReferenceEvent
+                        { referenceUuid = getReferenceUuid editorData.reference
+                        , url = url
+                        , anchor = anchor
+                        }
+
+                CrossReferenceFormType targetUuid description ->
+                    AddCrossReferenceEvent
+                        { referenceUuid = getReferenceUuid editorData.reference
+                        , targetUuid = targetUuid
+                        , description = description
+                        }
     in
     createEvent (AddReferenceEvent data) editorData.path
 
@@ -177,10 +195,63 @@ createAddReferenceEvent form editorData =
 createEditReferenceEvent : ReferenceForm -> ReferenceEditorData -> Seed -> ( Event, Seed )
 createEditReferenceEvent form editorData =
     let
+        resourcePageEventField field newValue =
+            let
+                changed =
+                    case editorData.reference of
+                        ResourcePageReference data ->
+                            field data /= newValue
+
+                        _ ->
+                            True
+            in
+            createEventField newValue changed
+
+        urlEventField field newValue =
+            let
+                changed =
+                    case editorData.reference of
+                        URLReference data ->
+                            field data /= newValue
+
+                        _ ->
+                            True
+            in
+            createEventField newValue changed
+
+        crossEventField field newValue =
+            let
+                changed =
+                    case editorData.reference of
+                        CrossReference data ->
+                            field data /= newValue
+
+                        _ ->
+                            True
+            in
+            createEventField newValue changed
+
         data =
-            { referenceUuid = editorData.reference.uuid
-            , chapter = createEventField form.chapter (editorData.reference.chapter /= form.chapter)
-            }
+            case form.reference of
+                ResourcePageReferenceFormType shortUuid ->
+                    EditResourcePageReferenceEvent
+                        { referenceUuid = getReferenceUuid editorData.reference
+                        , shortUuid = resourcePageEventField .shortUuid shortUuid
+                        }
+
+                URLReferenceFormType url anchor ->
+                    EditURLReferenceEvent
+                        { referenceUuid = getReferenceUuid editorData.reference
+                        , url = urlEventField .url url
+                        , anchor = urlEventField .anchor anchor
+                        }
+
+                CrossReferenceFormType targetUuid description ->
+                    EditCrossReferenceEvent
+                        { referenceUuid = getReferenceUuid editorData.reference
+                        , targetUuid = crossEventField .targetUuid targetUuid
+                        , description = crossEventField .description description
+                        }
     in
     createEvent (EditReferenceEvent data) editorData.path
 

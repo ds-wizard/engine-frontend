@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import KMEditor.Common.Models.Entities exposing (getReferenceVisibleName)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Msgs exposing (Msg(..))
 
@@ -116,7 +117,7 @@ treeNodeReference activeUuid editors editorData =
         config =
             { editorData = editorData
             , icon = "bookmark-o"
-            , label = editorData.reference.chapter
+            , label = getReferenceVisibleName editorData.reference
             , children = []
             }
     in
