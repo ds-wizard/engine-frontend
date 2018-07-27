@@ -9,6 +9,7 @@ import Jwt
 
 type CustomFormError
     = ConfirmationError
+    | InvalidUuid
     | ServerValidationError String
 
 

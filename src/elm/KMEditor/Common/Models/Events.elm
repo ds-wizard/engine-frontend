@@ -383,7 +383,8 @@ encodeAddResourcePageReferenceEvent data =
 
 encodeAddURLReferenceEvent : AddURLReferenceEventData -> List ( String, Encode.Value )
 encodeAddURLReferenceEvent data =
-    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    [ ( "referenceType", Encode.string "URLReference" )
+    , ( "referenceUuid", Encode.string data.referenceUuid )
     , ( "url", Encode.string data.url )
     , ( "anchor", Encode.string data.anchor )
     ]
@@ -391,7 +392,8 @@ encodeAddURLReferenceEvent data =
 
 encodeAddCrossReferenceEvent : AddCrossReferenceEventData -> List ( String, Encode.Value )
 encodeAddCrossReferenceEvent data =
-    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    [ ( "referenceType", Encode.string "CrossReference" )
+    , ( "referenceUuid", Encode.string data.referenceUuid )
     , ( "targetUuid", Encode.string data.targetUuid )
     , ( "description", Encode.string data.description )
     ]
@@ -413,13 +415,15 @@ encodeEditReferenceEvent data =
 encodeEditResourcePageReferenceEvent : EditResourcePageReferenceEventData -> List ( String, Encode.Value )
 encodeEditResourcePageReferenceEvent data =
     [ ( "referenceType", Encode.string "ResourcePageReference" )
+    , ( "referenceUuid", Encode.string data.referenceUuid )
     , ( "shortUuid", encodeEventField Encode.string data.shortUuid )
     ]
 
 
 encodeEditURLReferenceEvent : EditURLReferenceEventData -> List ( String, Encode.Value )
 encodeEditURLReferenceEvent data =
-    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    [ ( "referenceType", Encode.string "URLReference" )
+    , ( "referenceUuid", Encode.string data.referenceUuid )
     , ( "url", encodeEventField Encode.string data.url )
     , ( "anchor", encodeEventField Encode.string data.anchor )
     ]
@@ -427,7 +431,8 @@ encodeEditURLReferenceEvent data =
 
 encodeEditCrossReferenceEvent : EditCrossReferenceEventData -> List ( String, Encode.Value )
 encodeEditCrossReferenceEvent data =
-    [ ( "referenceType", Encode.string "ResourcePageReference" )
+    [ ( "referenceType", Encode.string "CrossReference" )
+    , ( "referenceUuid", Encode.string data.referenceUuid )
     , ( "targetUuid", encodeEventField Encode.string data.targetUuid )
     , ( "description", encodeEventField Encode.string data.description )
     ]

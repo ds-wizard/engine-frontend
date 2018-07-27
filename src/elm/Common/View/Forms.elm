@@ -135,6 +135,9 @@ toReadable error labelText =
                 ConfirmationError ->
                     "Passwords don't match"
 
+                InvalidUuid ->
+                    "This is not a valid UUID"
+
                 ServerValidationError msg ->
                     msg
 

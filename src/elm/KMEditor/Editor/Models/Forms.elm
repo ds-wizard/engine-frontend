@@ -1,6 +1,7 @@
 module KMEditor.Editor.Models.Forms exposing (..)
 
 import Common.Form exposing (CustomFormError)
+import Common.Form.Validate exposing (validateUuid)
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(InvalidString))
 import Form.Field as Field
@@ -232,7 +233,7 @@ validateReference referenceType =
 
         "CrossReference" ->
             Validate.succeed CrossReferenceFormType
-                |> Validate.andMap (Validate.field "targetUuid" Validate.string)
+                |> Validate.andMap (Validate.field "targetUuid" validateUuid)
                 |> Validate.andMap (Validate.field "description" Validate.string)
 
         _ ->
