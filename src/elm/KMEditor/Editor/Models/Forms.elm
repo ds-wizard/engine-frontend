@@ -7,6 +7,8 @@ import Form.Error as Error exposing (ErrorValue(InvalidString))
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
+import List.Extra as List
 import Set
 
 
@@ -31,6 +33,20 @@ type alias QuestionForm =
 type alias AnswerForm =
     { label : String
     , advice : Maybe String
+    , metricMeasures : List MetricMeasureForm
+    }
+
+
+type alias MetricMeasureForm =
+    { enabled : Bool
+    , metricUuid : String
+    , values : Maybe MetricMeasureValues
+    }
+
+
+type alias MetricMeasureValues =
+    { weight : Float
+    , measure : Float
     }
 
 
@@ -180,28 +196,95 @@ questionTypeOptions =
 {- Answer -}
 
 
-initAnswerForm : Answer -> Form CustomFormError AnswerForm
-initAnswerForm =
-    answerFormInitials >> initForm answerFormValidation
+initAnswerForm : EditorContext -> Answer -> Form CustomFormError AnswerForm
+initAnswerForm editorContext =
+    answerFormInitials editorContext >> initForm answerFormValidation
 
 
 answerFormValidation : Validation CustomFormError AnswerForm
 answerFormValidation =
-    Validate.map2 AnswerForm
+    Validate.map3 AnswerForm
         (Validate.field "label" Validate.string)
         (Validate.field "advice" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+        (Validate.field "metricMeasures" (Validate.list metricMeasureValidation))
 
 
-answerFormInitials : Answer -> List ( String, Field.Field )
-answerFormInitials answer =
+metricMeasureValidation : Validation CustomFormError MetricMeasureForm
+metricMeasureValidation =
+    Validate.map3 MetricMeasureForm
+        (Validate.field "enabled" Validate.bool)
+        (Validate.field "metricUuid" Validate.string)
+        (Validate.field "enabled" Validate.bool |> Validate.andThen validateMetricMeasureValues)
+
+
+validateMetricMeasureValues : Bool -> Validation CustomFormError (Maybe MetricMeasureValues)
+validateMetricMeasureValues enabled =
+    if enabled then
+        Validate.succeed MetricMeasureValues
+            |> Validate.andMap (Validate.field "weight" validateMeasureValue)
+            |> Validate.andMap (Validate.field "measure" validateMeasureValue)
+            |> map Just
+    else
+        Validate.succeed Nothing
+
+
+validateMeasureValue : Validation e Float
+validateMeasureValue =
+    Validate.float
+        |> Validate.andThen (Validate.minFloat 0)
+        |> Validate.andThen (Validate.maxFloat 1)
+
+
+answerFormInitials : EditorContext -> Answer -> List ( String, Field.Field )
+answerFormInitials editorContext answer =
     [ ( "label", Field.string answer.label )
     , ( "advice", Field.string (answer.advice |> Maybe.withDefault "") )
+    , ( "metricMeasures", Field.list (List.map (metricMeasureFormInitials answer.metricMeasures) editorContext.metrics) )
     ]
+
+
+metricMeasureFormInitials : List MetricMeasure -> Metric -> Field.Field
+metricMeasureFormInitials metricMeasures metric =
+    case List.find (.metricUuid >> (==) metric.uuid) metricMeasures of
+        Just metricMeasure ->
+            Field.group
+                [ ( "enabled", Field.bool True )
+                , ( "metricUuid", Field.string metric.uuid )
+                , ( "weight", Field.string (toString metricMeasure.weight) )
+                , ( "measure", Field.string (toString metricMeasure.measure) )
+                ]
+
+        Nothing ->
+            Field.group
+                [ ( "enabled", Field.bool False )
+                , ( "metricUuid", Field.string metric.uuid )
+                , ( "weight", Field.string (toString 1) )
+                , ( "measure", Field.string (toString 1) )
+                ]
 
 
 updateAnswerWithForm : Answer -> AnswerForm -> Answer
 updateAnswerWithForm answer answerForm =
-    { answer | label = answerForm.label, advice = answerForm.advice }
+    { answer
+        | label = answerForm.label
+        , advice = answerForm.advice
+        , metricMeasures = getMetricMesures answerForm
+    }
+
+
+getMetricMesures : AnswerForm -> List MetricMeasure
+getMetricMesures answerForm =
+    answerForm.metricMeasures
+        |> List.filter .enabled
+        |> List.map metricMeasureFormToMetricMeasure
+
+
+metricMeasureFormToMetricMeasure : MetricMeasureForm -> MetricMeasure
+metricMeasureFormToMetricMeasure form =
+    { metricUuid = form.metricUuid
+    , measure = form.values |> Maybe.map .measure |> Maybe.withDefault 0
+    , weight = form.values |> Maybe.map .weight |> Maybe.withDefault 0
+    }
 
 
 

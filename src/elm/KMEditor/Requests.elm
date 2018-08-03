@@ -39,6 +39,11 @@ getKnowledgeModelData uuid session =
     Requests.get session ("/branches/" ++ uuid ++ "/km") Editor.knowledgeModelDecoder
 
 
+getMetrics : Session -> Http.Request (List Editor.Metric)
+getMetrics session =
+    Requests.get session "/metrics" Editor.metricListDecoder
+
+
 postEventsBulk : Session -> String -> Value -> Http.Request String
 postEventsBulk session uuid data =
     Requests.post data session ("/branches/" ++ uuid ++ "/events/_bulk")

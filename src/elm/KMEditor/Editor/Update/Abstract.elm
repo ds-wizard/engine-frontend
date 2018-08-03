@@ -5,8 +5,9 @@ import Form
 import Form.Validate exposing (Validation)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Common.Models.Path exposing (Path, PathNode, getParentUuid)
-import KMEditor.Editor.Models exposing (Model, addEvent, insertEditor, setAlert)
+import KMEditor.Editor.Models exposing (Model, addEvent, getEditorContext, insertEditor, setAlert)
 import KMEditor.Editor.Models.Children as Children exposing (Children)
+import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.Models.Editors exposing (Editor, EditorLike, EditorState(..), getNewState)
 import Msgs
 import Random.Pcg exposing (Seed)
@@ -18,7 +19,7 @@ import Utils exposing (getUuid)
 
 type alias AddEntityConfig entity editorData =
     { newEntity : String -> entity
-    , createEntityEditor : Path -> EditorState -> entity -> Dict String Editor -> Dict String Editor
+    , createEntityEditor : EditorContext -> Path -> EditorState -> entity -> Dict String Editor -> Dict String Editor
     , createPathNode : String -> PathNode
     , addEntity : entity -> editorData -> Editor
     }
@@ -34,7 +35,7 @@ addEntity cfg seed model editorData =
             cfg.newEntity newUuid
 
         editorsWithEntity =
-            cfg.createEntityEditor (editorData.path ++ [ cfg.createPathNode editorData.uuid ]) Added entity model.editors
+            cfg.createEntityEditor (getEditorContext model) (editorData.path ++ [ cfg.createPathNode editorData.uuid ]) Added entity model.editors
 
         newParentEditor =
             cfg.addEntity entity editorData
@@ -56,7 +57,7 @@ type alias GenerateEventConfig editorData e form =
     , alert : String
     , createAddEvent : form -> editorData -> Seed -> ( Event, Seed )
     , createEditEvent : form -> editorData -> Seed -> ( Event, Seed )
-    , updateEditorData : EditorState -> form -> editorData -> editorData
+    , updateEditorData : EditorContext -> EditorState -> form -> editorData -> editorData
     , updateEditors : Maybe (editorData -> editorData -> Dict String Editor -> Dict String Editor)
     }
 
@@ -78,7 +79,7 @@ withGenerateEvent cfg seed model editorData callback =
                             )
 
                     newEditorData =
-                        cfg.updateEditorData newState form editorData
+                        cfg.updateEditorData (getEditorContext model) newState form editorData
 
                     updatedEditors =
                         case cfg.updateEditors of

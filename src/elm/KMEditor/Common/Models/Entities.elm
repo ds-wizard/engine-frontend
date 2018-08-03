@@ -3,6 +3,7 @@ module KMEditor.Common.Models.Entities exposing (..)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Encode as Encode exposing (..)
 import List.Extra as List
 
 
@@ -47,6 +48,7 @@ type alias Answer =
     { uuid : String
     , label : String
     , advice : Maybe String
+    , metricMeasures : List MetricMeasure
     , followUps : FollowUps
     }
 
@@ -86,6 +88,24 @@ type alias Expert =
     , name : String
     , email : String
     }
+
+
+type alias Metric =
+    { uuid : String
+    , title : String
+    , abbreviation : String
+    }
+
+
+type alias MetricMeasure =
+    { metricUuid : String
+    , measure : Float
+    , weight : Float
+    }
+
+
+
+{- Decoders -}
 
 
 knowledgeModelDecoder : Decoder KnowledgeModel
@@ -136,6 +156,7 @@ answerDecoder =
         |> required "uuid" Decode.string
         |> required "label" Decode.string
         |> required "advice" (Decode.nullable Decode.string)
+        |> required "metricMeasures" (Decode.list metricMeasureDecoder)
         |> required "followUps" (Decode.lazy (\_ -> followupsDecoder))
 
 
@@ -192,6 +213,40 @@ expertDecoder =
         |> required "email" Decode.string
 
 
+metricDecoder : Decoder Metric
+metricDecoder =
+    decode Metric
+        |> required "uuid" Decode.string
+        |> required "title" Decode.string
+        |> required "abbreviation" Decode.string
+
+
+metricListDecoder : Decoder (List Metric)
+metricListDecoder =
+    Decode.list metricDecoder
+
+
+metricMeasureDecoder : Decoder MetricMeasure
+metricMeasureDecoder =
+    decode MetricMeasure
+        |> required "metricUuid" Decode.string
+        |> required "measure" Decode.float
+        |> required "weight" Decode.float
+
+
+metricMeasureEncoder : MetricMeasure -> Encode.Value
+metricMeasureEncoder metricMeasure =
+    Encode.object
+        [ ( "metricUuid", Encode.string metricMeasure.metricUuid )
+        , ( "measure", Encode.float metricMeasure.measure )
+        , ( "weight", Encode.float metricMeasure.weight )
+        ]
+
+
+
+{- New entities -}
+
+
 newChapter : String -> Chapter
 newChapter uuid =
     { uuid = uuid
@@ -220,6 +275,7 @@ newAnswer uuid =
     , label = "New answer"
     , advice = Nothing
     , followUps = FollowUps []
+    , metricMeasures = []
     }
 
 
@@ -238,6 +294,10 @@ newExpert uuid =
     , name = "New expert"
     , email = "expert@example.com"
     }
+
+
+
+{- Helpers -}
 
 
 getChapters : KnowledgeModel -> List Chapter

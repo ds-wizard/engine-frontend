@@ -9,6 +9,7 @@ import SplitPane
 
 type Msg
     = GetKnowledgeModelCompleted (Result Jwt.JwtError KnowledgeModel)
+    | GetMetricsCompleted (Result Jwt.JwtError (List Metric))
     | ToggleOpen String
     | SetActiveEditor String
     | EditorMsg EditorMsg

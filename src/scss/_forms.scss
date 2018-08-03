@@ -43,6 +43,9 @@ textarea {
     }
 }
 
+.form-control:disabled {
+    color: $gray-500;
+}
 
 .form-check {
     position: relative;

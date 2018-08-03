@@ -2,7 +2,7 @@ module KMEditor.Editor.Update exposing (..)
 
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(Loading, Success), mapSuccess)
+import Common.Types exposing (ActionResult(Loading, Success), combine, mapSuccess)
 import Dom.Scroll
 import Jwt
 import KMEditor.Common.Models.Events exposing (encodeEvents)
@@ -17,7 +17,7 @@ import KMEditor.Editor.Update.Expert exposing (..)
 import KMEditor.Editor.Update.KnowledgeModel exposing (..)
 import KMEditor.Editor.Update.Question exposing (..)
 import KMEditor.Editor.Update.Reference exposing (..)
-import KMEditor.Requests exposing (getKnowledgeModelData, postEventsBulk)
+import KMEditor.Requests exposing (getKnowledgeModelData, getMetrics, postEventsBulk)
 import KMEditor.Routing exposing (Route(Index))
 import Msgs
 import Random.Pcg exposing (Seed)
@@ -31,8 +31,23 @@ import Utils exposing (pair)
 
 fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
 fetchData wrapMsg uuid session =
+    Cmd.batch
+        [ fetchKnowledgeModel wrapMsg uuid session
+        , fetchMetrics wrapMsg session
+        ]
+
+
+fetchKnowledgeModel : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
+fetchKnowledgeModel wrapMsg uuid session =
     getKnowledgeModelData uuid session
         |> Jwt.send GetKnowledgeModelCompleted
+        |> Cmd.map wrapMsg
+
+
+fetchMetrics : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
+fetchMetrics wrapMsg session =
+    getMetrics session
+        |> Jwt.send GetMetricsCompleted
         |> Cmd.map wrapMsg
 
 
@@ -104,7 +119,7 @@ update msg wrapMsg seed session model =
                             { model
                                 | activeEditorUuid = Just knowledgeModel.uuid
                                 , kmUuid = Success knowledgeModel.uuid
-                                , editors = createKnowledgeModelEditor knowledgeModel model.editors
+                                , knowledgeModel = Success knowledgeModel
                             }
 
                         Err error ->
@@ -115,7 +130,22 @@ update msg wrapMsg seed session model =
                 cmd =
                     getResultCmd result
             in
-            ( seed, newModel, cmd )
+            ( seed, createEditors newModel, cmd )
+
+        GetMetricsCompleted result ->
+            let
+                newModel =
+                    case result of
+                        Ok metrics ->
+                            { model | metrics = Success metrics }
+
+                        Err error ->
+                            { model | metrics = getServerErrorJwt error "Unable to get metrics" }
+
+                cmd =
+                    getResultCmd result
+            in
+            ( seed, createEditors newModel, cmd )
 
         ToggleOpen uuid ->
             let
@@ -316,3 +346,13 @@ setActiveEditor wrapMsg uuid seed model _ =
                 |> Cmd.map wrapMsg
     in
     ( seed, { model | activeEditorUuid = Just uuid }, cmd )
+
+
+createEditors : Model -> Model
+createEditors model =
+    case combine model.knowledgeModel model.metrics of
+        Success ( knowledgeModel, metrics ) ->
+            { model | editors = createKnowledgeModelEditor (getEditorContext model) knowledgeModel model.editors }
+
+        _ ->
+            model
