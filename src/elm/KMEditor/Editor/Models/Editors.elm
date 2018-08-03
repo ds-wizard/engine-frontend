@@ -6,6 +6,7 @@ import Form exposing (Form)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import KMEditor.Editor.Models.Children as Children exposing (Children)
+import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.Models.Forms exposing (..)
 
 
@@ -107,8 +108,8 @@ type alias ExpertEditorData =
 {- constructors -}
 
 
-createKnowledgeModelEditor : KnowledgeModel -> Dict String Editor -> Dict String Editor
-createKnowledgeModelEditor km editors =
+createKnowledgeModelEditor : EditorContext -> KnowledgeModel -> Dict String Editor -> Dict String Editor
+createKnowledgeModelEditor editorContext km editors =
     let
         editor =
             KMEditor
@@ -125,13 +126,13 @@ createKnowledgeModelEditor km editors =
             [ KMPathNode km.uuid ]
 
         withChapters =
-            List.foldl (createChapterEditor currentPath Initial) editors km.chapters
+            List.foldl (createChapterEditor editorContext currentPath Initial) editors km.chapters
     in
     Dict.insert km.uuid editor withChapters
 
 
-createChapterEditor : Path -> EditorState -> Chapter -> Dict String Editor -> Dict String Editor
-createChapterEditor path editorState chapter editors =
+createChapterEditor : EditorContext -> Path -> EditorState -> Chapter -> Dict String Editor -> Dict String Editor
+createChapterEditor editorContext path editorState chapter editors =
     let
         editor =
             ChapterEditor
@@ -148,13 +149,13 @@ createChapterEditor path editorState chapter editors =
             path ++ [ ChapterPathNode chapter.uuid ]
 
         withQuestions =
-            List.foldl (createQuestionEditor currentPath Initial) editors chapter.questions
+            List.foldl (createQuestionEditor editorContext currentPath Initial) editors chapter.questions
     in
     Dict.insert chapter.uuid editor withQuestions
 
 
-createQuestionEditor : Path -> EditorState -> Question -> Dict String Editor -> Dict String Editor
-createQuestionEditor path editorState question editors =
+createQuestionEditor : EditorContext -> Path -> EditorState -> Question -> Dict String Editor -> Dict String Editor
+createQuestionEditor editorContext path editorState question editors =
     let
         answers =
             question.answers
@@ -183,22 +184,22 @@ createQuestionEditor path editorState question editors =
             path ++ [ QuestionPathNode question.uuid ]
 
         withAnswers =
-            List.foldl (createAnswerEditor currentPath Initial) editors <| Maybe.withDefault [] <| question.answers
+            List.foldl (createAnswerEditor editorContext currentPath Initial) editors <| Maybe.withDefault [] <| question.answers
 
         withAnswerItemTemplateQuestions =
-            List.foldl (createQuestionEditor currentPath Initial) withAnswers <| getAnswerItemTemplateQuestions question
+            List.foldl (createQuestionEditor editorContext currentPath Initial) withAnswers <| getAnswerItemTemplateQuestions question
 
         withReferences =
-            List.foldl (createReferenceEditor currentPath Initial) withAnswerItemTemplateQuestions question.references
+            List.foldl (createReferenceEditor editorContext currentPath Initial) withAnswerItemTemplateQuestions question.references
 
         withExperts =
-            List.foldl (createExpertEditor currentPath Initial) withReferences question.experts
+            List.foldl (createExpertEditor editorContext currentPath Initial) withReferences question.experts
     in
     Dict.insert question.uuid editor withExperts
 
 
-createAnswerEditor : Path -> EditorState -> Answer -> Dict String Editor -> Dict String Editor
-createAnswerEditor path editorState answer editors =
+createAnswerEditor : EditorContext -> Path -> EditorState -> Answer -> Dict String Editor -> Dict String Editor
+createAnswerEditor editorContext path editorState answer editors =
     let
         followUps =
             getFollowUpQuestions answer
@@ -208,7 +209,7 @@ createAnswerEditor path editorState answer editors =
             AnswerEditor
                 { uuid = answer.uuid
                 , answer = answer
-                , form = initAnswerForm answer
+                , form = initAnswerForm editorContext answer
                 , followUps = Children.init followUps
                 , treeOpen = False
                 , editorState = editorState
@@ -219,13 +220,13 @@ createAnswerEditor path editorState answer editors =
             path ++ [ AnswerPathNode answer.uuid ]
 
         withFollowUps =
-            List.foldl (createQuestionEditor currentPath Initial) editors <| getFollowUpQuestions answer
+            List.foldl (createQuestionEditor editorContext currentPath Initial) editors <| getFollowUpQuestions answer
     in
     Dict.insert answer.uuid editor withFollowUps
 
 
-createReferenceEditor : Path -> EditorState -> Reference -> Dict String Editor -> Dict String Editor
-createReferenceEditor path editorState reference editors =
+createReferenceEditor : EditorContext -> Path -> EditorState -> Reference -> Dict String Editor -> Dict String Editor
+createReferenceEditor editorContext path editorState reference editors =
     let
         referenceUuid =
             getReferenceUuid reference
@@ -243,8 +244,8 @@ createReferenceEditor path editorState reference editors =
     Dict.insert referenceUuid editor editors
 
 
-createExpertEditor : Path -> EditorState -> Expert -> Dict String Editor -> Dict String Editor
-createExpertEditor path editorState expert editors =
+createExpertEditor : EditorContext -> Path -> EditorState -> Expert -> Dict String Editor -> Dict String Editor
+createExpertEditor editorContext path editorState expert editors =
     let
         editor =
             ExpertEditor
@@ -495,8 +496,8 @@ isExpertEditorDirty editorData =
     formChanged editorData.form
 
 
-updateKMEditorData : EditorState -> KnowledgeModelForm -> KMEditorData -> KMEditorData
-updateKMEditorData newState form editorData =
+updateKMEditorData : EditorContext -> EditorState -> KnowledgeModelForm -> KMEditorData -> KMEditorData
+updateKMEditorData editorContext newState form editorData =
     let
         newKM =
             updateKnowledgeModelWithForm editorData.knowledgeModel form
@@ -509,8 +510,8 @@ updateKMEditorData newState form editorData =
     }
 
 
-updateChapterEditorData : EditorState -> ChapterForm -> ChapterEditorData -> ChapterEditorData
-updateChapterEditorData newState form editorData =
+updateChapterEditorData : EditorContext -> EditorState -> ChapterForm -> ChapterEditorData -> ChapterEditorData
+updateChapterEditorData editorContext newState form editorData =
     let
         newChapter =
             updateChapterWithForm editorData.chapter form
@@ -523,8 +524,8 @@ updateChapterEditorData newState form editorData =
     }
 
 
-updateQuestionEditorData : EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
-updateQuestionEditorData newState form editorData =
+updateQuestionEditorData : EditorContext -> EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
+updateQuestionEditorData editorContext newState form editorData =
     let
         newQuestion =
             updateQuestionWithForm editorData.question form
@@ -567,8 +568,8 @@ updateEditorsWithQuestion newEditorData oldEditorData editors =
                 |> deleteEditors oldEditorData.answers
 
 
-updateAnswerEditorData : EditorState -> AnswerForm -> AnswerEditorData -> AnswerEditorData
-updateAnswerEditorData newState form editorData =
+updateAnswerEditorData : EditorContext -> EditorState -> AnswerForm -> AnswerEditorData -> AnswerEditorData
+updateAnswerEditorData editorContext newState form editorData =
     let
         newAnswer =
             updateAnswerWithForm editorData.answer form
@@ -577,12 +578,12 @@ updateAnswerEditorData newState form editorData =
         | editorState = getNewState editorData.editorState newState
         , answer = newAnswer
         , followUps = Children.cleanDirty editorData.followUps
-        , form = initAnswerForm newAnswer
+        , form = initAnswerForm editorContext newAnswer
     }
 
 
-updateReferenceEditorData : EditorState -> ReferenceForm -> ReferenceEditorData -> ReferenceEditorData
-updateReferenceEditorData newState form editorData =
+updateReferenceEditorData : EditorContext -> EditorState -> ReferenceForm -> ReferenceEditorData -> ReferenceEditorData
+updateReferenceEditorData editorContext newState form editorData =
     let
         newReference =
             updateReferenceWithForm editorData.reference form
@@ -594,8 +595,8 @@ updateReferenceEditorData newState form editorData =
     }
 
 
-updateExpertEditorData : EditorState -> ExpertForm -> ExpertEditorData -> ExpertEditorData
-updateExpertEditorData newState form editorData =
+updateExpertEditorData : EditorContext -> EditorState -> ExpertForm -> ExpertEditorData -> ExpertEditorData
+updateExpertEditorData editorContext newState form editorData =
     let
         newExpert =
             updateExpertWithForm editorData.expert form

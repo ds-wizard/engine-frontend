@@ -1,16 +1,20 @@
 module KMEditor.Editor.View.Editors exposing (activeEditor)
 
+import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
+import Common.Types exposing (ActionResult(Success), mapSuccess, withDefault)
 import Common.View exposing (fullPageMessage)
-import Common.View.Forms exposing (inputGroup, selectGroup, textAreaGroup)
+import Common.View.Forms exposing (formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
 import Dict exposing (Dict)
-import Form
+import Form exposing (Form)
+import Form.Input as Input exposing (baseInput)
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
+import KMEditor.Common.Models.Entities exposing (Metric)
 import KMEditor.Editor.Models exposing (Model, getActiveEditor)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Forms exposing (questionTypeOptions, referenceTypeOptions)
+import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
 import String exposing (toLower)
@@ -239,6 +243,11 @@ answerEditorView model editorData =
             , deleteAction = DeleteAnswer editorData.uuid |> AnswerEditorMsg |> EditorMsg |> Just
             }
 
+        metrics =
+            model.metrics
+                |> mapSuccess (metricsView editorData)
+                |> withDefault emptyNode
+
         followUpsConfig =
             { childName = "Follow-up Question"
             , reorderableState = model.reorderableState
@@ -260,9 +269,48 @@ answerEditorView model editorData =
     , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
+        , metrics
         , inputChildren followUpsConfig
         ]
     )
+
+
+metricsView : AnswerEditorData -> List Metric -> Html Msg
+metricsView editorData metrics =
+    div [ class "form-group" ]
+        [ label [ class "control-label" ] [ text "Metrics" ]
+        , table [ class "table table-hover table-metrics" ]
+            [ thead []
+                [ tr []
+                    [ th [] []
+                    , th [] [ text "Weight" ]
+                    , th [] [ text "Measure" ]
+                    ]
+                ]
+            , tbody [] (List.indexedMap (metricView editorData.form) metrics)
+            ]
+        ]
+        |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
+
+
+metricView : Form CustomFormError AnswerForm -> Int -> Metric -> Html Form.Msg
+metricView form i metric =
+    let
+        enabled =
+            Form.getFieldAsBool ("metricMeasures." ++ toString i ++ ".enabled") form
+                |> .value
+                |> Maybe.withDefault False
+    in
+    tr [ classList [ ( "disabled", not enabled ) ] ]
+        [ td [] [ toggleGroup form ("metricMeasures." ++ toString i ++ ".enabled") metric.title ]
+        , td [] [ metricInput form ("metricMeasures." ++ toString i ++ ".weight") enabled ]
+        , td [] [ metricInput form ("metricMeasures." ++ toString i ++ ".measure") enabled ]
+        ]
+
+
+metricInput : Form CustomFormError o -> String -> Bool -> Html Form.Msg
+metricInput form fieldName enabled =
+    formGroup Input.textInput [ disabled (not enabled) ] form fieldName ""
 
 
 referenceEditorView : ReferenceEditorData -> ( String, Html Msg )

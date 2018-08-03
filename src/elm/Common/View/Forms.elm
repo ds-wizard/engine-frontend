@@ -18,8 +18,8 @@ import Routing exposing (Route)
 
 {-| Create Html for a form field using the given input field.
 -}
-formGroup : Input.Input CustomFormError String -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-formGroup input form fieldName labelText =
+formGroup : Input.Input CustomFormError String -> List (Attribute Form.Msg) -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+formGroup input attrs form fieldName labelText =
     let
         field =
             Form.getFieldAsString fieldName form
@@ -29,7 +29,7 @@ formGroup input form fieldName labelText =
     in
     div [ class "form-group" ]
         [ label [ for fieldName ] [ text labelText ]
-        , input field [ class <| "form-control " ++ errorClass, id fieldName, name fieldName ]
+        , input field (attrs ++ [ class <| "form-control " ++ errorClass, id fieldName, name fieldName ])
         , error
         ]
 
@@ -38,28 +38,28 @@ formGroup input form fieldName labelText =
 -}
 inputGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 inputGroup =
-    formGroup Input.textInput
+    formGroup Input.textInput []
 
 
 {-| Helper for creating form group with password input field.
 -}
 passwordGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 passwordGroup =
-    formGroup Input.passwordInput
+    formGroup Input.passwordInput []
 
 
 {-| Helper for creating form group with select field.
 -}
 selectGroup : List ( String, String ) -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 selectGroup options =
-    formGroup (Input.selectInput options)
+    formGroup (Input.selectInput options) []
 
 
 {-| Helper for creating form group with textarea.
 -}
 textAreaGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 textAreaGroup =
-    formGroup Input.textArea
+    formGroup Input.textArea []
 
 
 {-| Helper for creating form group with toggle
@@ -129,6 +129,15 @@ toReadable error labelText =
 
         InvalidEmail ->
             "This is not a valid email"
+
+        InvalidFloat ->
+            "This is not a valid number"
+
+        SmallerFloatThan n ->
+            "This should not be less than " ++ toString n
+
+        GreaterFloatThan n ->
+            "This should not be more than " ++ toString n
 
         CustomError err ->
             case err of

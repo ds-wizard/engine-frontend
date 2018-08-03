@@ -7,7 +7,6 @@ module Common.Types exposing (..)
 -}
 
 
-{-| -}
 type ActionResult a
     = Unset
     | Loading
@@ -29,3 +28,38 @@ mapSuccess fn actionResult =
 
         Error err ->
             Error err
+
+
+withDefault : a -> ActionResult a -> a
+withDefault default result =
+    case result of
+        Success a ->
+            a
+
+        _ ->
+            default
+
+
+combine : ActionResult a -> ActionResult b -> ActionResult ( a, b )
+combine actionResult1 actionResult2 =
+    case ( actionResult1, actionResult2 ) of
+        ( Success a, Success b ) ->
+            Success ( a, b )
+
+        ( Unset, _ ) ->
+            Unset
+
+        ( _, Unset ) ->
+            Unset
+
+        ( Loading, _ ) ->
+            Loading
+
+        ( _, Loading ) ->
+            Loading
+
+        ( Error a, _ ) ->
+            Error a
+
+        ( _, Error b ) ->
+            Error b

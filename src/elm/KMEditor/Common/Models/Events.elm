@@ -91,6 +91,7 @@ type alias AddAnswerEventData =
     { answerUuid : String
     , label : String
     , advice : Maybe String
+    , metricMeasures : List MetricMeasure
     }
 
 
@@ -98,6 +99,7 @@ type alias EditAnswerEventData =
     { answerUuid : String
     , label : EventField String
     , advice : EventField (Maybe String)
+    , metricMeasures : EventField (List MetricMeasure)
     , followUpIds : EventField (List String)
     }
 
@@ -340,6 +342,7 @@ encodeAddAnswerEvent data =
     , ( "answerUuid", Encode.string data.answerUuid )
     , ( "label", Encode.string data.label )
     , ( "advice", maybe Encode.string data.advice )
+    , ( "metricMeasures", Encode.list <| List.map metricMeasureEncoder data.metricMeasures )
     ]
 
 
@@ -349,6 +352,7 @@ encodeEditAnswerEvent data =
     , ( "answerUuid", Encode.string data.answerUuid )
     , ( "label", encodeEventField Encode.string data.label )
     , ( "advice", encodeEventField (maybe Encode.string) data.advice )
+    , ( "metricMeasures", encodeEventField (Encode.list << List.map metricMeasureEncoder) data.metricMeasures )
     , ( "followUpIds", encodeEventField (Encode.list << List.map Encode.string) data.followUpIds )
     ]
 
@@ -631,6 +635,7 @@ addAnswerEventDecoder =
         |> required "answerUuid" Decode.string
         |> required "label" Decode.string
         |> required "advice" (Decode.nullable Decode.string)
+        |> required "metricMeasures" (Decode.list metricMeasureDecoder)
 
 
 editAnswerEventDecoder : Decoder EditAnswerEventData
@@ -639,6 +644,7 @@ editAnswerEventDecoder =
         |> required "answerUuid" Decode.string
         |> required "label" (eventFieldDecoder Decode.string)
         |> required "advice" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "metricMeasures" (eventFieldDecoder (Decode.list metricMeasureDecoder))
         |> required "followUpIds" (eventFieldDecoder (Decode.list Decode.string))
 
 

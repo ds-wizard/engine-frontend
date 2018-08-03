@@ -134,6 +134,7 @@ createAddAnswerEvent form editorData =
             { answerUuid = editorData.answer.uuid
             , label = form.label
             , advice = form.advice
+            , metricMeasures = getMetricMesures form
             }
     in
     createEvent (AddAnswerEvent data) editorData.path
@@ -142,10 +143,14 @@ createAddAnswerEvent form editorData =
 createEditAnswerEvent : AnswerForm -> AnswerEditorData -> Seed -> ( Event, Seed )
 createEditAnswerEvent form editorData =
     let
+        metricMeasures =
+            getMetricMesures form
+
         data =
             { answerUuid = editorData.answer.uuid
             , label = createEventField form.label (editorData.answer.label /= form.label)
             , advice = createEventField form.advice (editorData.answer.advice /= form.advice)
+            , metricMeasures = createEventField metricMeasures (editorData.answer.metricMeasures /= metricMeasures)
             , followUpIds = createEventField editorData.followUps.list editorData.followUps.dirty
             }
     in

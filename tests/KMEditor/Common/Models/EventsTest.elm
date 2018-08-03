@@ -4,11 +4,12 @@ import Expect
 import Json.Decode as Decode exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
 import Test exposing (..)
+import TestUtils exposing (expectDecoder)
 
 
 eventDecoderTests : Test
 eventDecoderTests =
-    describe "eventDecoderTests"
+    describe "eventDecoder"
         [ test "should decode EditKnowledgeModelEvent" <|
             \_ ->
                 let
@@ -45,10 +46,5 @@ eventDecoderTests =
                             , path = []
                             }
                 in
-                case decodeString eventDecoder rawEvent of
-                    Ok event ->
-                        Expect.equal event expectedEvent
-
-                    Err err ->
-                        Expect.fail err
+                expectDecoder eventDecoder rawEvent expectedEvent
         ]
