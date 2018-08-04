@@ -1,25 +1,69 @@
 module Common.Questionnaire.Update exposing (..)
 
-import Common.Models exposing (getServerError)
+import Auth.Models exposing (Session)
+import Common.Models exposing (getServerError, getServerErrorJwt)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
-import Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback)
+import Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback, postForSummaryReport)
 import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
+import FormEngine.Model exposing (encodeFormValues)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import Http
+import Jwt
 import KMEditor.Common.Models.Entities exposing (Chapter)
+import KMEditor.Requests exposing (getMetrics)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Maybe Session -> Model -> ( Model, Cmd Msg )
+update msg maybeSession model =
     case msg of
         FormMsg msg ->
             handleFormMsg msg model
 
         SetActiveChapter chapter ->
             ( handleSetActiveChapter chapter model, Cmd.none )
+
+        ViewSummaryReport ->
+            case maybeSession of
+                Just session ->
+                    let
+                        newModel =
+                            updateReplies model
+
+                        cmd =
+                            Cmd.batch
+                                [ postForSummaryReportCmd session newModel
+                                , getMetricsCmd session
+                                ]
+                    in
+                    ( { newModel
+                        | activePage = PageSummaryReport
+                        , metrics = Loading
+                        , summaryReport = Loading
+                      }
+                    , cmd
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        GetMetricsCompleted result ->
+            case result of
+                Ok metrics ->
+                    ( { model | metrics = Success metrics }, Cmd.none )
+
+                Err error ->
+                    ( { model | metrics = getServerErrorJwt error "Unable to get metrics" }, Cmd.none )
+
+        PostForSummaryReportCompleted result ->
+            case result of
+                Ok summaryReport ->
+                    ( { model | summaryReport = Success summaryReport }, Cmd.none )
+
+                Err error ->
+                    ( { model | summaryReport = getServerErrorJwt error "Unable to get summary report" }, Cmd.none )
 
         CloseFeedback ->
             ( { model | feedback = Unset, feedbackQuestionUuid = Nothing }, Cmd.none )
@@ -49,8 +93,8 @@ update msg model =
 
 handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> Model -> ( Model, Cmd Msg )
 handleFormMsg msg model =
-    case model.activeChapterForm of
-        Just form ->
+    case model.activePage of
+        PageChapter chapter form ->
             case msg of
                 FormEngine.Msgs.CustomQuestionMsg questionUuid customMsg ->
                     case customMsg of
@@ -66,7 +110,12 @@ handleFormMsg msg model =
                             )
 
                 _ ->
-                    ( { model | activeChapterForm = Just <| updateForm msg form }, Cmd.none )
+                    ( { model
+                        | activePage = PageChapter chapter (updateForm msg form)
+                        , dirty = True
+                      }
+                    , Cmd.none
+                    )
 
         _ ->
             ( model, Cmd.none )
@@ -77,7 +126,6 @@ handleSetActiveChapter chapter model =
     model
         |> updateReplies
         |> setActiveChapter chapter
-        |> setActiveChapterForm
 
 
 handleSendFeedbackForm : Model -> ( Model, Cmd Msg )
@@ -109,6 +157,19 @@ handlePostFeedbackCompleted result model =
 
         Err error ->
             { model | sendingFeedback = getServerError error "Feedback could not be sent." }
+
+
+getMetricsCmd : Session -> Cmd Msg
+getMetricsCmd session =
+    Jwt.send GetMetricsCompleted <| getMetrics session
+
+
+postForSummaryReportCmd : Session -> Model -> Cmd Msg
+postForSummaryReportCmd session model =
+    model.questionnaire.replies
+        |> encodeFormValues
+        |> postForSummaryReport session model.questionnaire.uuid
+        |> Jwt.send PostForSummaryReportCompleted
 
 
 postFeedbackCmd : FeedbackForm -> String -> String -> Cmd Msg

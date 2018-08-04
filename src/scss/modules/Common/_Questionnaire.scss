@@ -23,7 +23,7 @@
         margin-top: -10px;
         color: $gray-600;
 
-        &>span {
+        & > span {
             margin-right: 15px;
             display: block;
 
@@ -45,9 +45,42 @@
                 }
             }
         }
+    }
 
+    .summary-report {
+        h3 {
+            margin-top: 50px;
+        }
 
+        .table-metrics-report {
+            tbody {
+                tr {
+                    td:nth-child(1) {
+                        width: 30%;
+                    }
 
+                    td:nth-child(2) {
+                        width: 10%;
+                    }
+
+                    td:nth-child(3) {
+                       width: 60%;
+                    }
+                }
+            }
+        }
+
+        .indication {
+            margin-bottom: 2rem;
+
+            p {
+                margin-bottom: 0;
+            }
+
+            .progress {
+                height: 10px;
+            }
+        }
     }
 }
 

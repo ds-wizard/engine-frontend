@@ -6,7 +6,6 @@ import Common.View.Forms exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Msgs exposing (Msg)
 
 
 pageHeader : String -> List (Html msg) -> Html msg
@@ -44,7 +43,7 @@ fullPageMessage icon error =
         ]
 
 
-fullPageActionResultView : (a -> Html Msgs.Msg) -> ActionResult a -> Html Msgs.Msg
+fullPageActionResultView : (a -> Html msg) -> ActionResult a -> Html msg
 fullPageActionResultView viewContent actionResult =
     case actionResult of
         Unset ->

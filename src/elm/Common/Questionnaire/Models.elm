@@ -1,6 +1,7 @@
 module Common.Questionnaire.Models exposing (..)
 
 import Common.Form exposing (CustomFormError)
+import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Common.Types exposing (ActionResult(Unset))
 import Form
 import Form.Validate as Validate exposing (..)
@@ -15,14 +16,22 @@ import List.Extra as List
 
 type alias Model =
     { questionnaire : QuestionnaireDetail
-    , activeChapter : Maybe Chapter
-    , activeChapterForm : Maybe (Form FormExtraData)
+    , activePage : ActivePage
     , feedback : ActionResult (List Feedback)
     , feedbackQuestionUuid : Maybe String
     , feedbackForm : Form.Form CustomFormError FeedbackForm
     , sendingFeedback : ActionResult String
     , feedbackResult : Maybe Feedback
+    , metrics : ActionResult (List Metric)
+    , summaryReport : ActionResult SummaryReport
+    , dirty : Bool
     }
+
+
+type ActivePage
+    = PageNone
+    | PageChapter Chapter (Form FormExtraData)
+    | PageSummaryReport
 
 
 type alias FormExtraData =
@@ -34,18 +43,25 @@ type alias FormExtraData =
 initialModel : QuestionnaireDetail -> Model
 initialModel questionnaire =
     let
-        model =
-            { questionnaire = questionnaire
-            , activeChapter = List.head questionnaire.knowledgeModel.chapters
-            , activeChapterForm = Nothing
-            , feedback = Unset
-            , feedbackQuestionUuid = Nothing
-            , feedbackForm = initEmptyFeedbackFrom
-            , sendingFeedback = Unset
-            , feedbackResult = Nothing
-            }
+        activePage =
+            case List.head questionnaire.knowledgeModel.chapters of
+                Just chapter ->
+                    PageChapter chapter (createChapterForm chapter questionnaire.replies)
+
+                Nothing ->
+                    PageNone
     in
-    setActiveChapterForm model
+    { questionnaire = questionnaire
+    , activePage = activePage
+    , feedback = Unset
+    , feedbackQuestionUuid = Nothing
+    , feedbackForm = initEmptyFeedbackFrom
+    , sendingFeedback = Unset
+    , feedbackResult = Nothing
+    , metrics = Unset
+    , summaryReport = Unset
+    , dirty = False
+    }
 
 
 type alias QuestionnaireDetail =
@@ -233,8 +249,8 @@ updateReplies : Model -> Model
 updateReplies model =
     let
         replies =
-            case ( model.activeChapterForm, model.activeChapter ) of
-                ( Just form, Just chapter ) ->
+            case model.activePage of
+                PageChapter chapter form ->
                     getFormValues [ chapter.uuid ] form
                         ++ model.questionnaire.replies
                         |> List.uniqueBy .path
@@ -252,14 +268,17 @@ updateQuestionnaireReplies replies questionnaire =
 
 setActiveChapter : Chapter -> Model -> Model
 setActiveChapter chapter model =
-    { model | activeChapter = Just chapter }
+    { model
+        | activePage = PageChapter chapter (createChapterForm chapter model.questionnaire.replies)
+    }
 
 
-setActiveChapterForm : Model -> Model
-setActiveChapterForm model =
-    case model.activeChapter of
-        Just chapter ->
-            { model | activeChapterForm = Just <| createChapterForm chapter model.questionnaire.replies }
 
-        _ ->
-            model
+--setActiveChapterForm : Model -> Model
+--setActiveChapterForm model =
+--    case model.activeChapter of
+--        Just chapter ->
+--            { model | activeChapterForm = Just <| createChapterForm chapter model.questionnaire.replies }
+--
+--        _ ->
+--            model

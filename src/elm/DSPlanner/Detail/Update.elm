@@ -31,7 +31,7 @@ update msg wrapMsg session model =
             handleGetQuestionnaireCompleted model result
 
         QuestionnaireMsg msg ->
-            handleQuestionnaireMsg wrapMsg msg model
+            handleQuestionnaireMsg wrapMsg msg session model
 
         Save ->
             handleSave wrapMsg session model
@@ -57,15 +57,15 @@ handleGetQuestionnaireCompleted model result =
     ( newModel, cmd )
 
 
-handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> Model -> ( Model, Cmd Msgs.Msg )
-handleQuestionnaireMsg wrapMsg msg model =
+handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleQuestionnaireMsg wrapMsg msg session model =
     let
         ( newQuestionnaireModel, cmd ) =
             case model.questionnaireModel of
                 Success qm ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Common.Questionnaire.Update.update msg qm
+                            Common.Questionnaire.Update.update msg (Just session) qm
                     in
                     ( Success questionnaireModel, questionnaireCmd )
 

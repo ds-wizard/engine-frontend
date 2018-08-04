@@ -15,7 +15,7 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "Public__Questionnaire" ]
         [ info
-        , fullPageActionResultView (viewQuestionnaire >> Html.map (QuestionnaireMsg >> wrapMsg)) model.questionnaireModel
+        , fullPageActionResultView (viewQuestionnaire { showExtraActions = False } >> Html.map (QuestionnaireMsg >> wrapMsg)) model.questionnaireModel
         ]
 
 

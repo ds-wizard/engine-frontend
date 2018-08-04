@@ -51,7 +51,7 @@ handleQuestionnaireMsg wrapMsg msg model =
                 Success qm ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Common.Questionnaire.Update.update msg qm
+                            Common.Questionnaire.Update.update msg Nothing qm
                     in
                     ( Success questionnaireModel, questionnaireCmd )
 
