@@ -22,6 +22,7 @@
     .extra-data {
         margin-top: -10px;
         color: $gray-600;
+        line-height: 1.6;
 
         & > span {
             margin-right: 15px;
@@ -29,10 +30,10 @@
 
             .fa {
                 color: $gray-700;
+                margin-right: 7px;
             }
 
             a, span {
-                margin-left: 7px;
                 font-style: italic;
             }
 
@@ -43,6 +44,14 @@
                 &:hover {
                     color: $primary;
                 }
+            }
+
+            .caption, .separator {
+                margin-right: 5px;
+            }
+
+            .caption {
+                font-style: normal;
             }
         }
     }
@@ -64,7 +73,7 @@
                     }
 
                     td:nth-child(3) {
-                       width: 60%;
+                        width: 60%;
                     }
                 }
             }

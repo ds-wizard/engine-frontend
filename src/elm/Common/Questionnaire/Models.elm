@@ -35,8 +35,9 @@ type ActivePage
 
 
 type alias FormExtraData =
-    { resourcePageReferences : List String
-    , urlReferences : List ( String, String )
+    { resourcePageReferences : List ResourcePageReferenceData
+    , urlReferences : List URLReferenceData
+    , experts : List Expert
     }
 
 
@@ -174,27 +175,25 @@ createFormItemDescriptor question =
 
 createQuestionExtraData : Question -> Maybe FormExtraData
 createQuestionExtraData question =
-    if List.length question.references == 0 then
-        Nothing
-    else
-        let
-            foldReferences reference extraData =
-                case reference of
-                    ResourcePageReference data ->
-                        { extraData | resourcePageReferences = extraData.resourcePageReferences ++ [ data.shortUuid ] }
+    let
+        foldReferences reference extraData =
+            case reference of
+                ResourcePageReference data ->
+                    { extraData | resourcePageReferences = extraData.resourcePageReferences ++ [ data ] }
 
-                    URLReference data ->
-                        { extraData | urlReferences = extraData.urlReferences ++ [ ( data.anchor, data.url ) ] }
+                URLReference data ->
+                    { extraData | urlReferences = extraData.urlReferences ++ [ data ] }
 
-                    _ ->
-                        extraData
+                _ ->
+                    extraData
 
-            extraData =
-                { resourcePageReferences = []
-                , urlReferences = []
-                }
-        in
-        Just <| List.foldl foldReferences extraData question.references
+        extraData =
+            { resourcePageReferences = []
+            , urlReferences = []
+            , experts = question.experts
+            }
+    in
+    Just <| List.foldl foldReferences extraData question.references
 
 
 createAnswerOption : Answer -> Option FormExtraData
@@ -271,14 +270,3 @@ setActiveChapter chapter model =
     { model
         | activePage = PageChapter chapter (createChapterForm chapter model.questionnaire.replies)
     }
-
-
-
---setActiveChapterForm : Model -> Model
---setActiveChapterForm model =
---    case model.activeChapter of
---        Just chapter ->
---            { model | activeChapterForm = Just <| createChapterForm chapter model.questionnaire.replies }
---
---        _ ->
---            model

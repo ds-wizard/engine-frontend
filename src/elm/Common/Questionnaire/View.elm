@@ -11,7 +11,7 @@ import FormEngine.View exposing (FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Chapter, Metric)
+import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
 
 
@@ -110,45 +110,86 @@ viewExtraData data =
     p [ class "extra-data" ]
         [ viewResourcePageReferences data.resourcePageReferences
         , viewUrlReferences data.urlReferences
+        , viewExperts data.experts
         ]
 
 
-viewResourcePageReferences : List String -> Html msg
-viewResourcePageReferences references =
-    if List.length references == 0 then
+type alias ViewExtraItemsConfig a msg =
+    { icon : String
+    , label : String
+    , viewItem : a -> Html msg
+    }
+
+
+viewExtraItems : ViewExtraItemsConfig a msg -> List a -> Html msg
+viewExtraItems cfg list =
+    if List.length list == 0 then
         emptyNode
     else
+        let
+            items =
+                List.map cfg.viewItem list
+                    |> List.intersperse (span [ class "separator" ] [ text ", " ])
+        in
         span []
-            ([ fa "book"
-             , span [] [ text "Data Stewardship for Open Science:" ]
-             ]
-                ++ List.map viewResourcePageReference references
-            )
+            (span [ class "caption" ] [ fa cfg.icon, text (cfg.label ++ ": ") ] :: items)
 
 
-viewResourcePageReference : String -> Html msg
-viewResourcePageReference shortUuid =
-    a [ href <| "/book-references/" ++ shortUuid, target "_blank" ]
-        [ text shortUuid ]
+viewResourcePageReferences : List ResourcePageReferenceData -> Html msg
+viewResourcePageReferences =
+    viewExtraItems
+        { icon = "book"
+        , label = "Data Stewardship for Open Science"
+        , viewItem = viewResourcePageReference
+        }
 
 
-viewUrlReferences : List ( String, String ) -> Html msg
-viewUrlReferences references =
-    if List.length references == 0 then
+viewResourcePageReference : ResourcePageReferenceData -> Html msg
+viewResourcePageReference data =
+    a [ href <| "/book-references/" ++ data.shortUuid, target "_blank" ]
+        [ text data.shortUuid ]
+
+
+viewUrlReferences : List URLReferenceData -> Html msg
+viewUrlReferences =
+    viewExtraItems
+        { icon = "external-link"
+        , label = "External Links"
+        , viewItem = viewUrlReference
+        }
+
+
+viewUrlReference : URLReferenceData -> Html msg
+viewUrlReference data =
+    a [ href data.url, target "_blank" ]
+        [ text data.anchor ]
+
+
+viewExperts : List Expert -> Html msg
+viewExperts =
+    viewExtraItems
+        { icon = "address-book-o"
+        , label = "Experts"
+        , viewItem = viewExpert
+        }
+
+
+viewExpert : Expert -> Html msg
+viewExpert expert =
+    span []
+        [ text expert.name
+        , text " ("
+        , a [ href <| "mailto:" ++ expert.email ] [ text expert.email ]
+        , text ")"
+        ]
+
+
+ifNotEmpty : List a -> (List a -> Html msg) -> Html msg
+ifNotEmpty list fn =
+    if List.length list == 0 then
         emptyNode
     else
-        span []
-            ([ fa "external-link"
-             , span [] [ text "External links:" ]
-             ]
-                ++ List.map viewUrlReference references
-            )
-
-
-viewUrlReference : ( String, String ) -> Html msg
-viewUrlReference ( anchor, url ) =
-    a [ href url, target "_blank" ]
-        [ text anchor ]
+        fn list
 
 
 viewSummary : Model -> ( List Metric, SummaryReport ) -> Html Msg
