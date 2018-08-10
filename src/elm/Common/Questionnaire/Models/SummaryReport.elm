@@ -17,7 +17,7 @@ type alias ChapterReport =
 
 
 type alias MetricReport =
-    { uuid : String
+    { metricUuid : String
     , measure : Float
     }
 
@@ -27,8 +27,8 @@ type IndicationReport
 
 
 type alias AnsweredIndicationData =
-    { answered : Int
-    , unanswered : Int
+    { answeredQuestions : Int
+    , unansweredQuestions : Int
     }
 
 
@@ -49,7 +49,7 @@ chapterReportDecoder =
 metricReportDecoder : Decoder MetricReport
 metricReportDecoder =
     decode MetricReport
-        |> required "uuid" Decode.string
+        |> required "metricUuid" Decode.string
         |> required "measure" Decode.float
 
 
@@ -67,6 +67,6 @@ indicationType =
 answeredIndicationDecoder : Decoder IndicationReport
 answeredIndicationDecoder =
     decode AnsweredIndicationData
-        |> required "answered" Decode.int
-        |> required "unanswered" Decode.int
+        |> required "answeredQuestions" Decode.int
+        |> required "unansweredQuestions" Decode.int
         |> Decode.map AnsweredIndication

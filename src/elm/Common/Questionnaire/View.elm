@@ -238,10 +238,10 @@ viewAnsweredIndication : AnsweredIndicationData -> Html Msg
 viewAnsweredIndication data =
     let
         progress =
-            toFloat data.answered / (toFloat <| data.answered + data.unanswered)
+            toFloat data.answeredQuestions / (toFloat <| data.answeredQuestions + data.unansweredQuestions)
     in
     div [ class "indication" ]
-        [ p [] [ text <| "Answered: " ++ toString data.answered ++ "/" ++ (toString <| data.answered + data.unanswered) ]
+        [ p [] [ text <| "Answered: " ++ toString data.answeredQuestions ++ "/" ++ (toString <| data.answeredQuestions + data.unansweredQuestions) ]
         , viewProgressBar "bg-info" progress
         ]
 
@@ -263,7 +263,7 @@ viewMetrics metrics chapterReport =
 viewMetricReportRow : List Metric -> MetricReport -> Html Msg
 viewMetricReportRow metrics metricReport =
     tr []
-        [ td [] [ text <| getTitleByUuid metrics metricReport.uuid ]
+        [ td [] [ text <| getTitleByUuid metrics metricReport.metricUuid ]
         , td [] [ text <| toString metricReport.measure ]
         , td [] [ viewProgressBarWithColors metricReport.measure ]
         ]
