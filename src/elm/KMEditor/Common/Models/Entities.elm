@@ -94,6 +94,7 @@ type alias Metric =
     { uuid : String
     , title : String
     , abbreviation : String
+    , description : String
     }
 
 
@@ -219,6 +220,7 @@ metricDecoder =
         |> required "uuid" Decode.string
         |> required "title" Decode.string
         |> required "abbreviation" Decode.string
+        |> required "description" Decode.string
 
 
 metricListDecoder : Decoder (List Metric)

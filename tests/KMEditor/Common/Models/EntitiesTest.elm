@@ -571,7 +571,8 @@ metricDecoderTest =
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "title": "Fairness",
-                            "abbreviation": "F"
+                            "abbreviation": "F",
+                            "description": "Fairness describe how fair it is"
                         }
                         """
 
@@ -579,6 +580,7 @@ metricDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , title = "Fairness"
                         , abbreviation = "F"
+                        , description = "Fairness describe how fair it is"
                         }
                 in
                 expectDecoder metricDecoder raw expected

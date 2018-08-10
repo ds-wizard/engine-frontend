@@ -5,10 +5,10 @@
         margin-bottom: 40px;
 
         &:last-child {
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
 
-        &>label {
+        & > label {
             display: flex;
             width: 100%;
             justify-content: space-between;
@@ -39,6 +39,7 @@
 
     .alert {
         margin-bottom: 0;
+        margin-top: 10px;
     }
 
     .expand-icon {
@@ -64,6 +65,19 @@
             &:hover {
                 color: $gray-700;
             }
+        }
+    }
+
+    a.clear-answer {
+        color: $gray-600;
+        display: inline-block;
+
+        &:hover {
+            text-decoration: none;
+        }
+
+        .fa {
+            margin-right: 10px;
         }
     }
 }
