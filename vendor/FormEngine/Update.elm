@@ -10,6 +10,9 @@ updateForm msg form =
         Input path value ->
             { elements = List.map (updateElement (updateElementValue value) path) form.elements }
 
+        Clear path ->
+            { elements = List.map (updateElement clearElementValue path) form.elements }
+
         GroupItemAdd path ->
             { elements = List.map (updateElement updateGroupItemAdd path) form.elements }
 
@@ -92,6 +95,25 @@ updateElementValue value element =
 
         ChoiceFormElement descriptor options state ->
             ChoiceFormElement descriptor options { state | value = Just value }
+
+        _ ->
+            element
+
+
+clearElementValue : FormElement a -> FormElement a
+clearElementValue element =
+    case element of
+        StringFormElement descriptor state ->
+            StringFormElement descriptor { state | value = Nothing }
+
+        NumberFormElement descriptor state ->
+            NumberFormElement descriptor { state | value = Nothing }
+
+        TextFormElement descriptor state ->
+            TextFormElement descriptor { state | value = Nothing }
+
+        ChoiceFormElement descriptor options state ->
+            ChoiceFormElement descriptor options { state | value = Nothing }
 
         _ ->
             element

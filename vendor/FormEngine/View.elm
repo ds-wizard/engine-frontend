@@ -52,6 +52,7 @@ viewFormElement config path formItem =
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
                 , div [] (List.map (viewChoice (path ++ [ descriptor.name ]) descriptor state) options)
+                , viewClearAnswer (state.value /= Nothing) (path ++ [ descriptor.name ])
                 , viewAdvice state.value options
                 , viewFollowUps config (path ++ [ descriptor.name ]) state.value options
                 ]
@@ -86,6 +87,17 @@ viewExtraData config extraData =
 
         _ ->
             text ""
+
+
+viewClearAnswer : Bool -> List String -> Html (Msg msg)
+viewClearAnswer answered path =
+    if answered then
+        a [ class "clear-answer", onClick <| Clear path ]
+            [ i [ class "fa fa-undo" ] []
+            , text "Clear answer"
+            ]
+    else
+        text ""
 
 
 viewGroupItem : FormViewConfig msg a -> List String -> Int -> Int -> ItemElement a -> Html (Msg msg)
