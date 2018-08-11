@@ -92,7 +92,7 @@ deleteModal wrapMsg model =
             , actionResult = model.deletingUser
             , actionName = "Delete"
             , actionMsg = wrapMsg DeleteUser
-            , cancelMsg = wrapMsg <| ShowHideDeleteUser Nothing
+            , cancelMsg = Just <| wrapMsg <| ShowHideDeleteUser Nothing
             }
     in
     modalView modalConfig

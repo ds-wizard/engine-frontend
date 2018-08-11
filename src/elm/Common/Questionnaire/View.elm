@@ -405,13 +405,13 @@ feedbackModal model =
                 _ ->
                     feedbackModalContent model
 
-        ( actionName, actionMsg ) =
+        ( actionName, actionMsg, cancelMsg ) =
             case model.sendingFeedback of
                 Success _ ->
-                    ( "Done", CloseFeedback )
+                    ( "Done", CloseFeedback, Nothing )
 
                 _ ->
-                    ( "Send", SendFeedbackForm )
+                    ( "Send", SendFeedbackForm, Just <| CloseFeedback )
 
         modalConfig =
             { modalTitle = "Feedback"
@@ -420,7 +420,7 @@ feedbackModal model =
             , actionResult = model.sendingFeedback
             , actionName = actionName
             , actionMsg = actionMsg
-            , cancelMsg = CloseFeedback
+            , cancelMsg = cancelMsg
             }
     in
     modalView modalConfig

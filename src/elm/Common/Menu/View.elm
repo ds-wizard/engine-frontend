@@ -34,7 +34,7 @@ viewReportIssueModal isOpen =
             , actionResult = Unset
             , actionName = "Ok"
             , actionMsg = Msgs.MenuMsg <| SetReportIssueOpen False
-            , cancelMsg = Msgs.MenuMsg <| SetReportIssueOpen False
+            , cancelMsg = Nothing
             }
     in
     modalView modalConfig
