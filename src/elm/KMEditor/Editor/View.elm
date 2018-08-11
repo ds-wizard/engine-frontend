@@ -3,7 +3,7 @@ module KMEditor.Editor.View exposing (..)
 import Common.Html exposing (emptyNode)
 import Common.Types exposing (combine3)
 import Common.View exposing (AlertConfig, alertView, fullPageActionResultView)
-import Common.View.Forms exposing (actionButton)
+import Common.View.Forms exposing (actionButton, formErrorResultView)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, id)
 import Html.Keyed
@@ -46,6 +46,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
     div [ class "row" ]
         [ div [ class "editor-header" ]
             [ text "Knowledge Model Editor"
+            , formErrorResultView model.submitting
             , div []
                 [ unsavedChanges
                 , actionButton ( "Save", model.submitting, wrapMsg Submit )

@@ -238,6 +238,16 @@ formSuccessResultView result =
             emptyNode
 
 
+formErrorResultView : ActionResult String -> Html msg
+formErrorResultView result =
+    case result of
+        Error msg ->
+            errorView msg
+
+        _ ->
+            emptyNode
+
+
 errorView : String -> Html msg
 errorView =
     statusView "alert-danger" "fa-exclamation-triangle"
