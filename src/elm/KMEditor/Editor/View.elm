@@ -1,13 +1,13 @@
 module KMEditor.Editor.View exposing (..)
 
 import Common.Html exposing (emptyNode)
-import Common.Types exposing (combine)
+import Common.Types exposing (combine3)
 import Common.View exposing (AlertConfig, alertView, fullPageActionResultView)
 import Common.View.Forms exposing (actionButton)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, id)
 import Html.Keyed
-import KMEditor.Common.Models.Entities exposing (Metric)
+import KMEditor.Common.Models.Entities exposing (Level, Metric)
 import KMEditor.Editor.Models exposing (..)
 import KMEditor.Editor.Msgs exposing (..)
 import KMEditor.Editor.View.Breadcrumbs exposing (breadcrumbs)
@@ -21,13 +21,13 @@ import SplitPane exposing (ViewConfig, createViewConfig)
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col KMEditor__Editor" ]
-        [ fullPageActionResultView (editorView wrapMsg model) (combine model.kmUuid model.metrics)
+        [ fullPageActionResultView (editorView wrapMsg model) (combine3 model.kmUuid model.metrics model.levels)
         , alertView (alertConfig model) |> Html.map wrapMsg
         ]
 
 
-editorView : (Msg -> Msgs.Msg) -> Model -> ( String, List Metric ) -> Html Msgs.Msg
-editorView wrapMsg model ( kmUuid, metrics ) =
+editorView : (Msg -> Msgs.Msg) -> Model -> ( String, List Metric, List Level ) -> Html Msgs.Msg
+editorView wrapMsg model ( kmUuid, _, _ ) =
     let
         breadcrumbsView =
             case model.activeEditorUuid of

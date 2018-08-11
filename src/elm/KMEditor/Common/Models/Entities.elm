@@ -27,6 +27,7 @@ type alias Question =
     , type_ : String
     , title : String
     , text : String
+    , requiredLevel : Maybe Int
     , answerItemTemplate : Maybe AnswerItemTemplate
     , answers : Maybe (List Answer)
     , references : List Reference
@@ -105,6 +106,12 @@ type alias MetricMeasure =
     }
 
 
+type alias Level =
+    { level : Int
+    , title : String
+    }
+
+
 
 {- Decoders -}
 
@@ -133,6 +140,7 @@ questionDecoder =
         |> required "type" Decode.string
         |> required "title" Decode.string
         |> required "text" Decode.string
+        |> required "requiredLevel" (Decode.nullable Decode.int)
         |> required "answerItemTemplate" (Decode.nullable <| Decode.lazy (\_ -> answerItemTemplateDecoder))
         |> required "answers" (Decode.nullable <| Decode.lazy (\_ -> Decode.list answerDecoder))
         |> required "references" (Decode.list referenceDecoder)
@@ -245,6 +253,18 @@ metricMeasureEncoder metricMeasure =
         ]
 
 
+levelDecoder : Decoder Level
+levelDecoder =
+    decode Level
+        |> required "level" Decode.int
+        |> required "title" Decode.string
+
+
+levelListDecoder : Decoder (List Level)
+levelListDecoder =
+    Decode.list levelDecoder
+
+
 
 {- New entities -}
 
@@ -264,6 +284,7 @@ newQuestion uuid =
     , type_ = "options"
     , title = "New question"
     , text = "Question text"
+    , requiredLevel = Nothing
     , answerItemTemplate = Nothing
     , answers = Nothing
     , references = []

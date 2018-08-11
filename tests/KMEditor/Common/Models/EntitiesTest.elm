@@ -35,17 +35,17 @@ knowledgeModelDecoderTest =
                 let
                     raw =
                         """
-                          {
-                              "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                              "name": "My knowledge model",
-                              "chapters": [{
-                                    "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                    "title": "Chapter 1",
-                                    "text": "This chapter is empty",
-                                    "questions": []
-                              }]
-                          }
-                          """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "name": "My knowledge model",
+                            "chapters": [{
+                                "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
+                                "title": "Chapter 1",
+                                "text": "This chapter is empty",
+                                "questions": []
+                            }]
+                        }
+                        """
 
                     expected =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
@@ -97,14 +97,15 @@ chapterDecoderTest =
                             "title": "Chapter 1",
                             "text": "This chapter is empty",
                             "questions": [{
-                                  "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                  "type": "string",
-                                  "title": "What's your name?",
-                                  "text": "Fill in your name",
-                                  "answerItemTemplate": null,
-                                  "answers": null,
-                                  "references": [],
-                                  "experts": []
+                                "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
+                                "type": "string",
+                                "title": "What's your name?",
+                                "text": "Fill in your name",
+                                "requiredLevel": null,
+                                "answerItemTemplate": null,
+                                "answers": null,
+                                "references": [],
+                                "experts": []
                             }]
                         }
                         """
@@ -118,6 +119,7 @@ chapterDecoderTest =
                               , type_ = "string"
                               , title = "What's your name?"
                               , text = "Fill in your name"
+                              , requiredLevel = Nothing
                               , answerItemTemplate = Nothing
                               , answers = Nothing
                               , references = []
@@ -143,6 +145,7 @@ questionDecoderTest =
                             "type": "$type",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
+                            "requiredLevel": 1,
                             "answerItemTemplate": null,
                             "answers": null,
                             "references": [],
@@ -156,6 +159,7 @@ questionDecoderTest =
                         , type_ = type_
                         , title = "Can you answer this question?"
                         , text = "Please answer the question"
+                        , requiredLevel = Just 1
                         , answerItemTemplate = Nothing
                         , answers = Nothing
                         , references = []
@@ -173,6 +177,7 @@ questionDecoderTest =
                             "type": "string",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
+                            "requiredLevel": null,
                             "answerItemTemplate": null,
                             "answers": null,
                             "references": [{
@@ -189,6 +194,7 @@ questionDecoderTest =
                         , type_ = "string"
                         , title = "Can you answer this question?"
                         , text = "Please answer the question"
+                        , requiredLevel = Nothing
                         , answerItemTemplate = Nothing
                         , answers = Nothing
                         , references =
@@ -211,6 +217,7 @@ questionDecoderTest =
                             "type": "string",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
+                            "requiredLevel": 2,
                             "answerItemTemplate": null,
                             "answers": null,
                             "references": [],
@@ -227,6 +234,7 @@ questionDecoderTest =
                         , type_ = "string"
                         , title = "Can you answer this question?"
                         , text = "Please answer the question"
+                        , requiredLevel = Just 2
                         , answerItemTemplate = Nothing
                         , answers = Nothing
                         , references = []
@@ -244,29 +252,31 @@ questionDecoderTest =
                 let
                     raw =
                         """
-                               {
-                                   "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                                   "type": "options",
-                                   "title": "Can you answer this question?",
-                                   "text": "Please answer the question",
-                                   "answerItemTemplate": null,
-                                   "answers": [{
-                                       "uuid": "64217c4e-50b3-4230-9224-bf65c4220ab6",
-                                       "label": "Yes",
-                                       "advice": null,
-                                       "metricMeasures": [],
-                                       "followUps": []
-                                   }],
-                                   "references": [],
-                                   "experts": []
-                               }
-                               """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "type": "options",
+                            "title": "Can you answer this question?",
+                            "text": "Please answer the question",
+                            "requiredLevel": null,
+                            "answerItemTemplate": null,
+                            "answers": [{
+                                "uuid": "64217c4e-50b3-4230-9224-bf65c4220ab6",
+                                "label": "Yes",
+                                "advice": null,
+                                "metricMeasures": [],
+                                "followUps": []
+                            }],
+                            "references": [],
+                            "experts": []
+                        }
+                        """
 
                     expected =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , type_ = "options"
                         , title = "Can you answer this question?"
                         , text = "Please answer the question"
+                        , requiredLevel = Nothing
                         , answerItemTemplate = Nothing
                         , answers =
                             Just
@@ -292,17 +302,19 @@ questionDecoderTest =
                             "type": "list",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
+                            "requiredLevel": null,
                             "answerItemTemplate": {
                                 "title": "Item",
                                 "questions": [{
-                                      "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                      "type": "string",
-                                      "title": "What's your name?",
-                                      "text": "Fill in your name",
-                                      "answerItemTemplate": null,
-                                      "answers": null,
-                                      "references": [],
-                                      "experts": []
+                                    "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
+                                    "type": "string",
+                                    "title": "What's your name?",
+                                    "text": "Fill in your name",
+                                    "requiredLevel": null,
+                                    "answerItemTemplate": null,
+                                    "answers": null,
+                                    "references": [],
+                                    "experts": []
                                 }]
                             },
                             "answers": null,
@@ -316,6 +328,7 @@ questionDecoderTest =
                         , type_ = "list"
                         , title = "Can you answer this question?"
                         , text = "Please answer the question"
+                        , requiredLevel = Nothing
                         , answerItemTemplate =
                             Just
                                 { title = "Item"
@@ -325,6 +338,7 @@ questionDecoderTest =
                                           , type_ = "string"
                                           , title = "What's your name?"
                                           , text = "Fill in your name"
+                                          , requiredLevel = Nothing
                                           , answerItemTemplate = Nothing
                                           , answers = Nothing
                                           , references = []
@@ -395,18 +409,18 @@ answerDecoderTest =
                 let
                     raw =
                         """
-                          {
-                              "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                              "label": "Yes",
-                              "advice": null,
-                              "metricMeasures": [{
-                                  "metricUuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                  "measure": 0.3,
-                                  "weight": 0.8
-                              }],
-                              "followUps": []
-                          }
-                          """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "label": "Yes",
+                            "advice": null,
+                            "metricMeasures": [{
+                                "metricUuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
+                                "measure": 0.3,
+                                "weight": 0.8
+                            }],
+                            "followUps": []
+                        }
+                        """
 
                     expected =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
@@ -427,23 +441,24 @@ answerDecoderTest =
                 let
                     raw =
                         """
-                          {
-                              "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                              "label": "Yes",
-                              "advice": null,
-                              "metricMeasures": [],
-                              "followUps": [{
-                                  "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                  "type": "string",
-                                  "title": "What's your name?",
-                                  "text": "Fill in your name",
-                                  "answerItemTemplate": null,
-                                  "answers": null,
-                                  "references": [],
-                                  "experts": []
-                              }]
-                          }
-                          """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "label": "Yes",
+                            "advice": null,
+                            "metricMeasures": [],
+                            "followUps": [{
+                                "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
+                                "type": "string",
+                                "title": "What's your name?",
+                                "text": "Fill in your name",
+                                "requiredLevel": null,
+                                "answerItemTemplate": null,
+                                "answers": null,
+                                "references": [],
+                                "experts": []
+                            }]
+                        }
+                        """
 
                     expected =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
@@ -456,6 +471,7 @@ answerDecoderTest =
                                   , type_ = "string"
                                   , title = "What's your name?"
                                   , text = "Fill in your name"
+                                  , requiredLevel = Nothing
                                   , answerItemTemplate = Nothing
                                   , answers = Nothing
                                   , references = []

@@ -73,6 +73,7 @@ createAddQuestionEvent form editorData =
             , type_ = form.type_
             , title = form.title
             , text = form.text
+            , requiredLevel = form.requiredLevel
             , answerItemTemplate = maybeAnswerItemTemlate
             }
     in
@@ -108,6 +109,7 @@ createEditQuestionEvent form editorData =
             , type_ = createEventField form.type_ (editorData.question.type_ /= form.type_)
             , title = createEventField form.title (editorData.question.title /= form.title)
             , text = createEventField form.text (editorData.question.text /= form.text)
+            , requiredLevel = createEventField form.requiredLevel (editorData.question.requiredLevel /= form.requiredLevel)
             , answerItemTemplate = createEventField maybeAnswerItemTemlate answerItemTemplateChanged
             , answerIds = createEventField maybeAnswerIds answerIdsChanged
             , referenceIds = createEventField editorData.references.list editorData.references.dirty

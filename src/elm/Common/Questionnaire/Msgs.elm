@@ -11,6 +11,7 @@ import KMEditor.Common.Models.Entities exposing (Chapter, Metric)
 
 type Msg
     = FormMsg (FormEngine.Msgs.Msg CustomFormMessage)
+    | SetLevel String
     | SetActiveChapter Chapter
     | ViewSummaryReport
     | GetMetricsCompleted (Result Jwt.JwtError (List Metric))

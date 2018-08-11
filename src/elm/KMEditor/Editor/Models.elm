@@ -2,7 +2,7 @@ module KMEditor.Editor.Models exposing (..)
 
 import Common.Types exposing (ActionResult(Loading, Unset), withDefault)
 import Dict exposing (Dict)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Metric)
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid)
@@ -15,6 +15,7 @@ type alias Model =
     , kmUuid : ActionResult String
     , knowledgeModel : ActionResult KnowledgeModel
     , metrics : ActionResult (List Metric)
+    , levels : ActionResult (List Level)
     , activeEditorUuid : Maybe String
     , editors : Dict String Editor
     , reorderableState : Reorderable.State
@@ -31,6 +32,7 @@ initialModel branchUuid =
     , kmUuid = Loading
     , knowledgeModel = Loading
     , metrics = Loading
+    , levels = Loading
     , activeEditorUuid = Nothing
     , editors = Dict.fromList []
     , reorderableState = Reorderable.initialState
@@ -77,4 +79,5 @@ setAlert alert model =
 getEditorContext : Model -> EditorContext
 getEditorContext model =
     { metrics = model.metrics |> withDefault []
+    , levels = model.levels |> withDefault []
     }

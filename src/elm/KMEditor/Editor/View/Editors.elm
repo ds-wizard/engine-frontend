@@ -11,7 +11,7 @@ import Form.Input as Input exposing (baseInput)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Metric)
+import KMEditor.Common.Models.Entities exposing (Level, Metric)
 import KMEditor.Editor.Models exposing (Model, getActiveEditor)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
@@ -143,6 +143,7 @@ questionEditorView model editorData =
                     [ fa "warning"
                     , text "By changing the type answers or items might be removed."
                     ]
+                , questionRequiredLevelSelectGroup editorData <| withDefault [] <| model.levels
                 ]
 
         answersOrItem =
@@ -165,6 +166,22 @@ questionEditorView model editorData =
         , questionEditorExpertsView model editorData
         ]
     )
+
+
+questionRequiredLevelSelectGroup : QuestionEditorData -> List Level -> Html Form.Msg
+questionRequiredLevelSelectGroup editorData levels =
+    let
+        options =
+            levels
+                |> List.map createLevelOption
+                |> (::) ( "", "Never" )
+    in
+    selectGroup options editorData.form "requiredLevel" "When does this question become desirable?"
+
+
+createLevelOption : Level -> ( String, String )
+createLevelOption level =
+    ( toString level.level, level.title )
 
 
 questionEditorAnswersView : Model -> QuestionEditorData -> Html Msg

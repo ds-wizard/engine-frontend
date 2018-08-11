@@ -2,16 +2,17 @@ module DSPlanner.Detail.Update exposing (..)
 
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail, initialModel, updateReplies)
+import Common.Questionnaire.Models exposing (QuestionnaireDetail, encodeQuestionnaireDetail, initialModel, updateReplies)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
 import Common.Types exposing (ActionResult(..))
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
-import DSPlanner.Requests exposing (getQuestionnaire, putReplies)
+import DSPlanner.Requests exposing (getQuestionnaire, putQuestionnaire)
 import DSPlanner.Routing exposing (Route(Index))
-import FormEngine.Model exposing (..)
 import Jwt
+import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Requests exposing (getLevels)
 import Msgs
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
@@ -19,8 +20,23 @@ import Routing exposing (cmdNavigate)
 
 fetchData : (Msg -> Msgs.Msg) -> Session -> String -> Cmd Msgs.Msg
 fetchData wrapMsg session uuid =
+    Cmd.batch
+        [ fetchQuestionnaire wrapMsg session uuid
+        , fetchLevels wrapMsg session
+        ]
+
+
+fetchQuestionnaire : (Msg -> Msgs.Msg) -> Session -> String -> Cmd Msgs.Msg
+fetchQuestionnaire wrapMsg session uuid =
     getQuestionnaire uuid session
         |> Jwt.send GetQuestionnaireCompleted
+        |> Cmd.map wrapMsg
+
+
+fetchLevels : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
+fetchLevels wrapMsg session =
+    getLevels session
+        |> Jwt.send GetLevelsCompleted
         |> Cmd.map wrapMsg
 
 
@@ -29,6 +45,9 @@ update msg wrapMsg session model =
     case msg of
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted model result
+
+        GetLevelsCompleted result ->
+            handleGetLevelsCompleted model result
 
         QuestionnaireMsg msg ->
             handleQuestionnaireMsg wrapMsg msg session model
@@ -50,6 +69,23 @@ handleGetQuestionnaireCompleted model result =
 
                 Err error ->
                     { model | questionnaireModel = getServerErrorJwt error "Unable to get questionnaire." }
+
+        cmd =
+            getResultCmd result
+    in
+    ( newModel, cmd )
+
+
+handleGetLevelsCompleted : Model -> Result Jwt.JwtError (List Level) -> ( Model, Cmd Msgs.Msg )
+handleGetLevelsCompleted model result =
+    let
+        newModel =
+            case result of
+                Ok levels ->
+                    { model | levels = Success levels }
+
+                Err error ->
+                    { model | levels = getServerErrorJwt error "Unable to get levels." }
 
         cmd =
             getResultCmd result
@@ -106,8 +142,7 @@ handlePutRepliesCompleted model result =
 
 putRepliesCmd : (Msg -> Msgs.Msg) -> Session -> String -> QuestionnaireDetail -> Cmd Msgs.Msg
 putRepliesCmd wrapMsg session uuid questionnaire =
-    questionnaire.replies
-        |> encodeFormValues
-        |> putReplies uuid session
+    encodeQuestionnaireDetail questionnaire
+        |> putQuestionnaire uuid session
         |> Jwt.send PutRepliesCompleted
         |> Cmd.map wrapMsg

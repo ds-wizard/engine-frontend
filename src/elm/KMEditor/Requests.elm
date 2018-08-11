@@ -44,6 +44,11 @@ getMetrics session =
     Requests.get session "/metrics" Editor.metricListDecoder
 
 
+getLevels : Session -> Http.Request (List Editor.Level)
+getLevels session =
+    Requests.get session "/levels" Editor.levelListDecoder
+
+
 postEventsBulk : Session -> String -> Value -> Http.Request String
 postEventsBulk session uuid data =
     Requests.post data session ("/branches/" ++ uuid ++ "/events/_bulk")

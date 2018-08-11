@@ -10,6 +10,7 @@ import SplitPane
 type Msg
     = GetKnowledgeModelCompleted (Result Jwt.JwtError KnowledgeModel)
     | GetMetricsCompleted (Result Jwt.JwtError (List Metric))
+    | GetLevelsCompleted (Result Jwt.JwtError (List Level))
     | ToggleOpen String
     | SetActiveEditor String
     | EditorMsg EditorMsg

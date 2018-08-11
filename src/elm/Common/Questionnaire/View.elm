@@ -10,20 +10,29 @@ import Common.View.Forms exposing (inputGroup, textAreaGroup)
 import FormEngine.View exposing (FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Metric, ResourcePageReferenceData, URLReferenceData)
+import Html.Events exposing (onClick, onInput)
+import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
 import Round
 
 
 type alias ViewQuestionnaireConfig =
     { showExtraActions : Bool
+    , levels : Maybe (List Level)
     }
 
 
 viewQuestionnaire : ViewQuestionnaireConfig -> Model -> Html Msg
 viewQuestionnaire cfg model =
     let
+        levels =
+            case cfg.levels of
+                Just levels ->
+                    levelSelection levels model.questionnaire.level
+
+                Nothing ->
+                    emptyNode
+
         extraActions =
             if cfg.showExtraActions then
                 extraNavigation model.activePage
@@ -32,13 +41,31 @@ viewQuestionnaire cfg model =
     in
     div [ class "Questionnaire row" ]
         [ div [ class "col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
-            [ chapterList model
+            [ levels
+            , chapterList model
             , extraActions
             ]
         , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
-            (pageView model)
+            (pageView (cfg.levels |> Maybe.withDefault []) model)
         , feedbackModal model
         ]
+
+
+levelSelection : List Level -> Int -> Html Msg
+levelSelection levels selectedLevel =
+    div [ class "level-selection card bg-light" ]
+        [ div [ class "card-body" ]
+            [ label [] [ text "Current Phase" ]
+            , select [ class "form-control", onInput SetLevel ]
+                (List.map (levelSelectionOption selectedLevel) levels)
+            ]
+        ]
+
+
+levelSelectionOption : Int -> Level -> Html Msg
+levelSelectionOption selectedLevel level =
+    option [ value (toString level.level), selected (selectedLevel == level.level) ]
+        [ text level.title ]
 
 
 chapterList : Model -> Html Msg
@@ -71,7 +98,7 @@ viewChapterAnsweredIndication : Model -> Chapter -> Html Msg
 viewChapterAnsweredIndication model chapter =
     let
         unanswered =
-            calculateUnansweredQuestions model.questionnaire.replies chapter
+            calculateUnansweredQuestions model.questionnaire.level model.questionnaire.replies chapter
     in
     if unanswered > 0 then
         span [ class "badge badge-light badge-pill" ] [ text <| toString unanswered ]
@@ -90,15 +117,15 @@ extraNavigation activePage =
         ]
 
 
-pageView : Model -> List (Html Msg)
-pageView model =
+pageView : List Level -> Model -> List (Html Msg)
+pageView levels model =
     case model.activePage of
         PageNone ->
             [ emptyNode ]
 
         PageChapter chapter form ->
             [ chapterHeader chapter
-            , viewForm formConfig form |> Html.map FormMsg
+            , viewForm (formConfig levels) form |> Html.map FormMsg
             ]
 
         PageSummaryReport ->
@@ -113,20 +140,37 @@ chapterHeader chapter =
         ]
 
 
-formConfig : FormViewConfig CustomFormMessage FormExtraData
-formConfig =
+formConfig : List Level -> FormViewConfig CustomFormMessage FormExtraData
+formConfig levels =
     { customActions = [ ( "fa-exclamation-circle", FeedbackMsg ) ]
-    , viewExtraData = Just viewExtraData
+    , viewExtraData = Just (viewExtraData levels)
     }
 
 
-viewExtraData : FormExtraData -> Html msg
-viewExtraData data =
+viewExtraData : List Level -> FormExtraData -> Html msg
+viewExtraData levels data =
     p [ class "extra-data" ]
-        [ viewResourcePageReferences data.resourcePageReferences
+        [ viewRequiredLevel levels data.requiredLevel
+        , viewResourcePageReferences data.resourcePageReferences
         , viewUrlReferences data.urlReferences
         , viewExperts data.experts
         ]
+
+
+viewRequiredLevel : List Level -> Maybe Int -> Html msg
+viewRequiredLevel levels questionLevel =
+    case List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels of
+        Just level ->
+            span []
+                [ span [ class "caption" ]
+                    [ fa "check-square-o"
+                    , text "Desirable: "
+                    , span [] [ text level.title ]
+                    ]
+                ]
+
+        Nothing ->
+            emptyNode
 
 
 type alias ViewExtraItemsConfig a msg =

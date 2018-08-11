@@ -14,6 +14,7 @@ import Http
 import Jwt
 import KMEditor.Common.Models.Entities exposing (Chapter)
 import KMEditor.Requests exposing (getMetrics)
+import Utils exposing (stringToInt)
 
 
 update : Msg -> Maybe Session -> Model -> ( Model, Cmd Msg )
@@ -21,6 +22,14 @@ update msg maybeSession model =
     case msg of
         FormMsg msg ->
             handleFormMsg msg model
+
+        SetLevel level ->
+            ( { model
+                | questionnaire = setLevel model.questionnaire <| stringToInt level
+                , dirty = True
+              }
+            , Cmd.none
+            )
 
         SetActiveChapter chapter ->
             ( handleSetActiveChapter chapter model, Cmd.none )

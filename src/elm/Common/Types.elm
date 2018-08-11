@@ -63,3 +63,19 @@ combine actionResult1 actionResult2 =
 
         ( _, Error b ) ->
             Error b
+
+
+combine3 : ActionResult a -> ActionResult b -> ActionResult c -> ActionResult ( a, b, c )
+combine3 actionResult1 actionResult2 actionResult3 =
+    case combine (combine actionResult1 actionResult2) actionResult3 of
+        Unset ->
+            Unset
+
+        Loading ->
+            Loading
+
+        Error e ->
+            Error e
+
+        Success ( ( a, b ), c ) ->
+            Success ( a, b, c )
