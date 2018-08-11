@@ -68,3 +68,13 @@ replace : String -> String -> String -> String
 replace from to str =
     String.split from str
         |> String.join to
+
+
+stringToInt : String -> Int
+stringToInt str =
+    case String.toInt str of
+        Ok value ->
+            value
+
+        Err _ ->
+            0

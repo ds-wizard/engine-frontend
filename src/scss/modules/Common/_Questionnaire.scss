@@ -16,6 +16,9 @@
 
         a {
             word-wrap: break-word;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     }
 
