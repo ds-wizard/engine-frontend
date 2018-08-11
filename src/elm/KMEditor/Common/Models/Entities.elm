@@ -26,7 +26,7 @@ type alias Question =
     { uuid : String
     , type_ : String
     , title : String
-    , text : String
+    , text : Maybe String
     , requiredLevel : Maybe Int
     , answerItemTemplate : Maybe AnswerItemTemplate
     , answers : Maybe (List Answer)
@@ -139,7 +139,7 @@ questionDecoder =
         |> required "uuid" Decode.string
         |> required "type" Decode.string
         |> required "title" Decode.string
-        |> required "text" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
         |> required "answerItemTemplate" (Decode.nullable <| Decode.lazy (\_ -> answerItemTemplateDecoder))
         |> required "answers" (Decode.nullable <| Decode.lazy (\_ -> Decode.list answerDecoder))
@@ -283,7 +283,7 @@ newQuestion uuid =
     { uuid = uuid
     , type_ = "options"
     , title = "New question"
-    , text = "Question text"
+    , text = Nothing
     , requiredLevel = Nothing
     , answerItemTemplate = Nothing
     , answers = Nothing

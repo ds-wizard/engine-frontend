@@ -267,19 +267,19 @@ viewDeleteChapterDiff chapter =
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewAddQuestionDiff : { a | title : String, text : String } -> Html Msgs.Msg
+viewAddQuestionDiff : { a | title : String, text : Maybe String } -> Html Msgs.Msg
 viewAddQuestionDiff event =
     let
         fields =
             List.map2 (,)
                 [ "Title", "Text" ]
-                [ event.title, event.text ]
+                [ event.title, event.text |> Maybe.withDefault "" ]
     in
     div []
         (viewAdd fields)
 
 
-viewEditQuestionDiff : { a | title : EventField String, text : EventField String, answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
+viewEditQuestionDiff : { a | title : EventField String, text : EventField (Maybe String), answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
 viewEditQuestionDiff event question =
     let
         originalAnswers =
@@ -303,9 +303,9 @@ viewEditQuestionDiff event question =
         fields =
             List.map3 (,,)
                 [ "Title", "Text" ]
-                [ question.title, question.text ]
+                [ question.title, question.text |> Maybe.withDefault "" ]
                 [ getEventFieldValueWithDefault event.title question.title
-                , getEventFieldValueWithDefault event.text question.text
+                , getEventFieldValueWithDefault event.text question.text |> Maybe.withDefault ""
                 ]
 
         fieldDiff =
@@ -335,7 +335,7 @@ viewDeleteQuestionDiff question =
         fields =
             List.map2 (,)
                 [ "Title", "Text" ]
-                [ question.title, question.text ]
+                [ question.title, question.text |> Maybe.withDefault "" ]
 
         fieldDiff =
             viewDelete fields

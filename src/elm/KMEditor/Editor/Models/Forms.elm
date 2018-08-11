@@ -25,7 +25,7 @@ type alias ChapterForm =
 type alias QuestionForm =
     { title : String
     , type_ : String
-    , text : String
+    , text : Maybe String
     , requiredLevel : Maybe Int
     , itemName : String
     }
@@ -149,7 +149,7 @@ questionFormValidation =
     Validate.map5 QuestionForm
         (Validate.field "title" Validate.string)
         (Validate.field "type_" Validate.string)
-        (Validate.field "text" Validate.string)
+        (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
         (Validate.field "requiredLevel" (Validate.maybe Validate.int))
         (Validate.field "itemName" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
 
@@ -158,7 +158,7 @@ questionFormInitials : Question -> List ( String, Field.Field )
 questionFormInitials question =
     [ ( "title", Field.string question.title )
     , ( "type_", Field.string question.type_ )
-    , ( "text", Field.string question.text )
+    , ( "text", Field.string (question.text |> Maybe.withDefault "") )
     , ( "requiredLevel", Field.string (question.requiredLevel |> Maybe.map toString |> Maybe.withDefault "") )
     , ( "itemName", Field.string (question.answerItemTemplate |> Maybe.map .title |> Maybe.withDefault "") )
     ]

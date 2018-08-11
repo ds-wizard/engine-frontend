@@ -180,7 +180,7 @@ createFormItemDescriptor : Question -> FormItemDescriptor FormExtraData
 createFormItemDescriptor question =
     { name = question.uuid
     , label = question.title
-    , text = Just question.text
+    , text = question.text
     , extraData = createQuestionExtraData question
     }
 
