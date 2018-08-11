@@ -39,6 +39,7 @@ type alias FormExtraData =
     { resourcePageReferences : List ResourcePageReferenceData
     , urlReferences : List URLReferenceData
     , experts : List Expert
+    , requiredLevel : Maybe Int
     }
 
 
@@ -202,6 +203,7 @@ createQuestionExtraData question =
             { resourcePageReferences = []
             , urlReferences = []
             , experts = question.experts
+            , requiredLevel = question.requiredLevel
             }
     in
     Just <| List.foldl foldReferences extraData question.references

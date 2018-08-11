@@ -46,7 +46,7 @@ viewQuestionnaire cfg model =
             , extraActions
             ]
         , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
-            (pageView model)
+            (pageView (cfg.levels |> Maybe.withDefault []) model)
         , feedbackModal model
         ]
 
@@ -117,15 +117,15 @@ extraNavigation activePage =
         ]
 
 
-pageView : Model -> List (Html Msg)
-pageView model =
+pageView : List Level -> Model -> List (Html Msg)
+pageView levels model =
     case model.activePage of
         PageNone ->
             [ emptyNode ]
 
         PageChapter chapter form ->
             [ chapterHeader chapter
-            , viewForm formConfig form |> Html.map FormMsg
+            , viewForm (formConfig levels) form |> Html.map FormMsg
             ]
 
         PageSummaryReport ->
@@ -140,20 +140,37 @@ chapterHeader chapter =
         ]
 
 
-formConfig : FormViewConfig CustomFormMessage FormExtraData
-formConfig =
+formConfig : List Level -> FormViewConfig CustomFormMessage FormExtraData
+formConfig levels =
     { customActions = [ ( "fa-exclamation-circle", FeedbackMsg ) ]
-    , viewExtraData = Just viewExtraData
+    , viewExtraData = Just (viewExtraData levels)
     }
 
 
-viewExtraData : FormExtraData -> Html msg
-viewExtraData data =
+viewExtraData : List Level -> FormExtraData -> Html msg
+viewExtraData levels data =
     p [ class "extra-data" ]
-        [ viewResourcePageReferences data.resourcePageReferences
+        [ viewRequiredLevel levels data.requiredLevel
+        , viewResourcePageReferences data.resourcePageReferences
         , viewUrlReferences data.urlReferences
         , viewExperts data.experts
         ]
+
+
+viewRequiredLevel : List Level -> Maybe Int -> Html msg
+viewRequiredLevel levels questionLevel =
+    case List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels of
+        Just level ->
+            span []
+                [ span [ class "caption" ]
+                    [ fa "check-square-o"
+                    , text "Desirable: "
+                    , span [] [ text level.title ]
+                    ]
+                ]
+
+        Nothing ->
+            emptyNode
 
 
 type alias ViewExtraItemsConfig a msg =
