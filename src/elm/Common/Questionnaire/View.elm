@@ -13,6 +13,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
+import Round
 
 
 type alias ViewQuestionnaireConfig =
@@ -278,7 +279,7 @@ viewMetricReportRow : List Metric -> MetricReport -> Html Msg
 viewMetricReportRow metrics metricReport =
     tr []
         [ td [] [ text <| getTitleByUuid metrics metricReport.metricUuid ]
-        , td [] [ text <| toString metricReport.measure ]
+        , td [] [ text <| Round.round 2 metricReport.measure ]
         , td [] [ viewProgressBarWithColors metricReport.measure ]
         ]
 
