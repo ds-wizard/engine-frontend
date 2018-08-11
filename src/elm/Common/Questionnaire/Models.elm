@@ -72,6 +72,7 @@ type alias QuestionnaireDetail =
     , package : PackageDetail
     , knowledgeModel : KnowledgeModel
     , replies : FormValues
+    , level : Int
     }
 
 
@@ -83,6 +84,15 @@ questionnaireDetailDecoder =
         |> required "package" packageDetailDecoder
         |> required "knowledgeModel" knowledgeModelDecoder
         |> required "replies" decodeFormValues
+        |> required "level" Decode.int
+
+
+encodeQuestionnaireDetail : QuestionnaireDetail -> Encode.Value
+encodeQuestionnaireDetail questionnaire =
+    Encode.object
+        [ ( "replies", encodeFormValues questionnaire.replies )
+        , ( "level", Encode.int questionnaire.level )
+        ]
 
 
 type alias FeedbackForm =
@@ -272,6 +282,11 @@ setActiveChapter chapter model =
     { model
         | activePage = PageChapter chapter (createChapterForm chapter model.questionnaire.replies)
     }
+
+
+setLevel : QuestionnaireDetail -> Int -> QuestionnaireDetail
+setLevel questionnaire level =
+    { questionnaire | level = level }
 
 
 

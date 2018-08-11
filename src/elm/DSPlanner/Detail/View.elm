@@ -3,27 +3,34 @@ module DSPlanner.Detail.View exposing (..)
 import Common.Html exposing (emptyNode, linkTo)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
-import Common.Types exposing (ActionResult)
+import Common.Types exposing (ActionResult, combine)
 import Common.View exposing (fullPageActionResultView, pageHeader)
 import Common.View.Forms exposing (actionButton, formResultView)
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import KMEditor.Common.Models.Entities exposing (Level)
 import Msgs
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    fullPageActionResultView (content wrapMsg model) model.questionnaireModel
+    fullPageActionResultView (content wrapMsg model) <| combine model.questionnaireModel model.levels
 
 
-content : (Msg -> Msgs.Msg) -> Model -> Common.Questionnaire.Models.Model -> Html Msgs.Msg
-content wrapMsg model questionnaireModel =
+content : (Msg -> Msgs.Msg) -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msgs.Msg
+content wrapMsg model ( questionnaireModel, levels ) =
+    let
+        questionnaireCfg =
+            { showExtraActions = True
+            , levels = Just levels
+            }
+    in
     div [ class "col DSPlanner__Detail" ]
         [ questionnaireHeader wrapMsg model.savingQuestionnaire questionnaireModel
         , formResultView model.savingQuestionnaire
-        , viewQuestionnaire { showExtraActions = True } questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg)
+        , viewQuestionnaire questionnaireCfg questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg)
         ]
 
 

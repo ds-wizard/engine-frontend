@@ -22,6 +22,15 @@
         }
     }
 
+    .level-selection {
+        margin-bottom: 35px;
+        border: none;
+
+        .card-body {
+            padding: 1rem;
+        }
+    }
+
     .extra-data {
         margin-top: -10px;
         color: $gray-600;

@@ -10,20 +10,29 @@ import Common.View.Forms exposing (inputGroup, textAreaGroup)
 import FormEngine.View exposing (FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Metric, ResourcePageReferenceData, URLReferenceData)
+import Html.Events exposing (onClick, onInput)
+import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
 import Round
 
 
 type alias ViewQuestionnaireConfig =
     { showExtraActions : Bool
+    , levels : Maybe (List Level)
     }
 
 
 viewQuestionnaire : ViewQuestionnaireConfig -> Model -> Html Msg
 viewQuestionnaire cfg model =
     let
+        levels =
+            case cfg.levels of
+                Just levels ->
+                    levelSelection levels model.questionnaire.level
+
+                Nothing ->
+                    emptyNode
+
         extraActions =
             if cfg.showExtraActions then
                 extraNavigation model.activePage
@@ -32,13 +41,31 @@ viewQuestionnaire cfg model =
     in
     div [ class "Questionnaire row" ]
         [ div [ class "col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
-            [ chapterList model
+            [ levels
+            , chapterList model
             , extraActions
             ]
         , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
             (pageView model)
         , feedbackModal model
         ]
+
+
+levelSelection : List Level -> Int -> Html Msg
+levelSelection levels selectedLevel =
+    div [ class "level-selection card bg-light" ]
+        [ div [ class "card-body" ]
+            [ label [] [ text "Current Phase" ]
+            , select [ class "form-control", onInput SetLevel ]
+                (List.map (levelSelectionOption selectedLevel) levels)
+            ]
+        ]
+
+
+levelSelectionOption : Int -> Level -> Html Msg
+levelSelectionOption selectedLevel level =
+    option [ value (toString level.level), selected (selectedLevel == level.level) ]
+        [ text level.title ]
 
 
 chapterList : Model -> Html Msg
