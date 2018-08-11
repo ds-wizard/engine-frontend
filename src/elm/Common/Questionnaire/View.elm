@@ -98,7 +98,7 @@ viewChapterAnsweredIndication : Model -> Chapter -> Html Msg
 viewChapterAnsweredIndication model chapter =
     let
         unanswered =
-            calculateUnansweredQuestions model.questionnaire.replies chapter
+            calculateUnansweredQuestions model.questionnaire.level model.questionnaire.replies chapter
     in
     if unanswered > 0 then
         span [ class "badge badge-light badge-pill" ] [ text <| toString unanswered ]

@@ -293,10 +293,10 @@ setLevel questionnaire level =
 {- Indications calculations -}
 
 
-calculateUnansweredQuestions : FormValues -> Chapter -> Int
-calculateUnansweredQuestions replies chapter =
+calculateUnansweredQuestions : Int -> FormValues -> Chapter -> Int
+calculateUnansweredQuestions currentLevel replies chapter =
     chapter.questions
-        |> List.map (evaluateQuestion replies [ chapter.uuid ])
+        |> List.map (evaluateQuestion currentLevel replies [ chapter.uuid ])
         |> List.foldl (+) 0
 
 
@@ -306,11 +306,14 @@ getReply replies path =
         |> Maybe.map .value
 
 
-evaluateQuestion : FormValues -> List String -> Question -> Int
-evaluateQuestion replies path question =
+evaluateQuestion : Int -> FormValues -> List String -> Question -> Int
+evaluateQuestion currentLevel replies path question =
     let
         currentPath =
             path ++ [ question.uuid ]
+
+        requiredNow =
+            (question.requiredLevel |> Maybe.withDefault 100) <= currentLevel
     in
     case getReply replies (String.join "." currentPath) of
         Just value ->
@@ -319,7 +322,7 @@ evaluateQuestion replies path question =
                     question.answers
                         |> Maybe.withDefault []
                         |> List.find (.uuid >> (==) value)
-                        |> Maybe.map (evaluateFollowups replies currentPath)
+                        |> Maybe.map (evaluateFollowups currentLevel replies currentPath)
                         |> Maybe.withDefault 1
 
                 "list" ->
@@ -331,33 +334,36 @@ evaluateQuestion replies path question =
                             stringToInt value
                     in
                     List.range 0 (itemCount - 1)
-                        |> List.map (evaluateAnswerItem replies currentPath questions)
+                        |> List.map (evaluateAnswerItem currentLevel replies currentPath questions)
                         |> List.foldl (+) 0
 
                 _ ->
                     0
 
         Nothing ->
-            1
+            if requiredNow then
+                1
+            else
+                0
 
 
-evaluateFollowups : FormValues -> List String -> Answer -> Int
-evaluateFollowups replies path answer =
+evaluateFollowups : Int -> FormValues -> List String -> Answer -> Int
+evaluateFollowups currentLevel replies path answer =
     let
         currentPath =
             path ++ [ answer.uuid ]
     in
     getFollowUpQuestions answer
-        |> List.map (evaluateQuestion replies currentPath)
+        |> List.map (evaluateQuestion currentLevel replies currentPath)
         |> List.foldl (+) 0
 
 
-evaluateAnswerItem : FormValues -> List String -> List Question -> Int -> Int
-evaluateAnswerItem replies path questions index =
+evaluateAnswerItem : Int -> FormValues -> List String -> List Question -> Int -> Int
+evaluateAnswerItem currentLevel replies path questions index =
     let
         currentPath =
             path ++ [ toString index ]
     in
     questions
-        |> List.map (evaluateQuestion replies currentPath)
+        |> List.map (evaluateQuestion currentLevel replies currentPath)
         |> List.foldl (+) 0
