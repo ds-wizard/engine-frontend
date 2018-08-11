@@ -2,7 +2,7 @@ module KMEditor.Editor.Update exposing (..)
 
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(Loading, Success), combine, mapSuccess)
+import Common.Types exposing (ActionResult(Loading, Success), combine3, mapSuccess)
 import Dom.Scroll
 import Jwt
 import KMEditor.Common.Models.Events exposing (encodeEvents)
@@ -17,7 +17,7 @@ import KMEditor.Editor.Update.Expert exposing (..)
 import KMEditor.Editor.Update.KnowledgeModel exposing (..)
 import KMEditor.Editor.Update.Question exposing (..)
 import KMEditor.Editor.Update.Reference exposing (..)
-import KMEditor.Requests exposing (getKnowledgeModelData, getMetrics, postEventsBulk)
+import KMEditor.Requests exposing (getKnowledgeModelData, getLevels, getMetrics, postEventsBulk)
 import KMEditor.Routing exposing (Route(Index))
 import Msgs
 import Random.Pcg exposing (Seed)
@@ -34,6 +34,7 @@ fetchData wrapMsg uuid session =
     Cmd.batch
         [ fetchKnowledgeModel wrapMsg uuid session
         , fetchMetrics wrapMsg session
+        , fetchLevels wrapMsg session
         ]
 
 
@@ -48,6 +49,13 @@ fetchMetrics : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
 fetchMetrics wrapMsg session =
     getMetrics session
         |> Jwt.send GetMetricsCompleted
+        |> Cmd.map wrapMsg
+
+
+fetchLevels : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
+fetchLevels wrapMsg session =
+    getLevels session
+        |> Jwt.send GetLevelsCompleted
         |> Cmd.map wrapMsg
 
 
@@ -141,6 +149,21 @@ update msg wrapMsg seed session model =
 
                         Err error ->
                             { model | metrics = getServerErrorJwt error "Unable to get metrics" }
+
+                cmd =
+                    getResultCmd result
+            in
+            ( seed, createEditors newModel, cmd )
+
+        GetLevelsCompleted result ->
+            let
+                newModel =
+                    case result of
+                        Ok levels ->
+                            { model | levels = Success levels }
+
+                        Err error ->
+                            { model | levels = getServerErrorJwt error "Unable to get levels" }
 
                 cmd =
                     getResultCmd result
@@ -350,8 +373,8 @@ setActiveEditor wrapMsg uuid seed model _ =
 
 createEditors : Model -> Model
 createEditors model =
-    case combine model.knowledgeModel model.metrics of
-        Success ( knowledgeModel, metrics ) ->
+    case combine3 model.knowledgeModel model.metrics model.levels of
+        Success ( knowledgeModel, metrics, levels ) ->
             { model | editors = createKnowledgeModelEditor (getEditorContext model) knowledgeModel model.editors }
 
         _ ->

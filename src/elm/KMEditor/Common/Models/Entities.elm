@@ -105,6 +105,12 @@ type alias MetricMeasure =
     }
 
 
+type alias Level =
+    { level : Int
+    , title : String
+    }
+
+
 
 {- Decoders -}
 
@@ -243,6 +249,18 @@ metricMeasureEncoder metricMeasure =
         , ( "measure", Encode.float metricMeasure.measure )
         , ( "weight", Encode.float metricMeasure.weight )
         ]
+
+
+levelDecoder : Decoder Level
+levelDecoder =
+    decode Level
+        |> required "level" Decode.int
+        |> required "title" Decode.string
+
+
+levelListDecoder : Decoder (List Level)
+levelListDecoder =
+    Decode.list levelDecoder
 
 
 
