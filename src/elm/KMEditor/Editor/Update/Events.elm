@@ -180,11 +180,11 @@ createAddReferenceEvent form editorData =
                         , shortUuid = shortUuid
                         }
 
-                URLReferenceFormType url anchor ->
+                URLReferenceFormType url label ->
                     AddURLReferenceEvent
                         { referenceUuid = getReferenceUuid editorData.reference
                         , url = url
-                        , anchor = anchor
+                        , label = label
                         }
 
                 CrossReferenceFormType targetUuid description ->
@@ -244,11 +244,11 @@ createEditReferenceEvent form editorData =
                         , shortUuid = resourcePageEventField .shortUuid shortUuid
                         }
 
-                URLReferenceFormType url anchor ->
+                URLReferenceFormType url label ->
                     EditURLReferenceEvent
                         { referenceUuid = getReferenceUuid editorData.reference
                         , url = urlEventField .url url
-                        , anchor = urlEventField .anchor anchor
+                        , label = urlEventField .label label
                         }
 
                 CrossReferenceFormType targetUuid description ->

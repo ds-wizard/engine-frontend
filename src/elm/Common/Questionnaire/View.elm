@@ -221,7 +221,7 @@ viewUrlReferences =
 viewUrlReference : URLReferenceData -> Html msg
 viewUrlReference data =
     a [ href data.url, target "_blank" ]
-        [ text data.anchor ]
+        [ text data.label ]
 
 
 viewExperts : List Expert -> Html msg

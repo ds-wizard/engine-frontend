@@ -316,7 +316,7 @@ validateReference referenceType =
         "URLReference" ->
             Validate.succeed URLReferenceFormType
                 |> Validate.andMap (Validate.field "url" Validate.string)
-                |> Validate.andMap (Validate.field "anchor" Validate.string)
+                |> Validate.andMap (Validate.field "label" Validate.string)
 
         "CrossReference" ->
             Validate.succeed CrossReferenceFormType
@@ -338,7 +338,7 @@ referenceFormInitials reference =
         URLReference data ->
             [ ( "referenceType", Field.string "URLReference" )
             , ( "url", Field.string data.url )
-            , ( "anchor", Field.string data.anchor )
+            , ( "label", Field.string data.label )
             ]
 
         CrossReference data ->
@@ -357,11 +357,11 @@ updateReferenceWithForm reference referenceForm =
                 , shortUuid = shortUuid
                 }
 
-        URLReferenceFormType url anchor ->
+        URLReferenceFormType url label ->
             URLReference
                 { uuid = getReferenceUuid reference
                 , url = url
-                , anchor = anchor
+                , label = label
                 }
 
         CrossReferenceFormType targetUuid description ->

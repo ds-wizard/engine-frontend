@@ -118,7 +118,7 @@ chapterDecoderTest =
                             [ { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
                               , type_ = "string"
                               , title = "What's your name?"
-                              , text = "Fill in your name"
+                              , text = Just "Fill in your name"
                               , requiredLevel = Nothing
                               , answerItemTemplate = Nothing
                               , answers = Nothing
@@ -144,7 +144,7 @@ questionDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "type": "$type",
                             "title": "Can you answer this question?",
-                            "text": "Please answer the question",
+                            "text": null,
                             "requiredLevel": 1,
                             "answerItemTemplate": null,
                             "answers": null,
@@ -158,7 +158,7 @@ questionDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , type_ = type_
                         , title = "Can you answer this question?"
-                        , text = "Please answer the question"
+                        , text = Nothing
                         , requiredLevel = Just 1
                         , answerItemTemplate = Nothing
                         , answers = Nothing
@@ -193,7 +193,7 @@ questionDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , type_ = "string"
                         , title = "Can you answer this question?"
-                        , text = "Please answer the question"
+                        , text = Just "Please answer the question"
                         , requiredLevel = Nothing
                         , answerItemTemplate = Nothing
                         , answers = Nothing
@@ -233,7 +233,7 @@ questionDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , type_ = "string"
                         , title = "Can you answer this question?"
-                        , text = "Please answer the question"
+                        , text = Just "Please answer the question"
                         , requiredLevel = Just 2
                         , answerItemTemplate = Nothing
                         , answers = Nothing
@@ -275,7 +275,7 @@ questionDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , type_ = "options"
                         , title = "Can you answer this question?"
-                        , text = "Please answer the question"
+                        , text = Just "Please answer the question"
                         , requiredLevel = Nothing
                         , answerItemTemplate = Nothing
                         , answers =
@@ -327,7 +327,7 @@ questionDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , type_ = "list"
                         , title = "Can you answer this question?"
-                        , text = "Please answer the question"
+                        , text = Just "Please answer the question"
                         , requiredLevel = Nothing
                         , answerItemTemplate =
                             Just
@@ -337,7 +337,7 @@ questionDecoderTest =
                                         [ { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
                                           , type_ = "string"
                                           , title = "What's your name?"
-                                          , text = "Fill in your name"
+                                          , text = Just "Fill in your name"
                                           , requiredLevel = Nothing
                                           , answerItemTemplate = Nothing
                                           , answers = Nothing
@@ -470,7 +470,7 @@ answerDecoderTest =
                                 [ { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
                                   , type_ = "string"
                                   , title = "What's your name?"
-                                  , text = "Fill in your name"
+                                  , text = Just "Fill in your name"
                                   , requiredLevel = Nothing
                                   , answerItemTemplate = Nothing
                                   , answers = Nothing
@@ -515,7 +515,7 @@ referenceDecoderTest =
                             "referenceType": "URLReference",
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "url": "http://example.com",
-                            "anchor": "See also"
+                            "label": "See also"
                         }
                         """
 
@@ -523,7 +523,7 @@ referenceDecoderTest =
                         URLReference
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , url = "http://example.com"
-                            , anchor = "See also"
+                            , label = "See also"
                             }
                 in
                 expectDecoder referenceDecoder raw expected

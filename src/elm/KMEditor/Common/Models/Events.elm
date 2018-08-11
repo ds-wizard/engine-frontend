@@ -126,7 +126,7 @@ type alias AddResourcePageReferenceEventData =
 type alias AddURLReferenceEventData =
     { referenceUuid : String
     , url : String
-    , anchor : String
+    , label : String
     }
 
 
@@ -152,7 +152,7 @@ type alias EditResourcePageReferenceEventData =
 type alias EditURLReferenceEventData =
     { referenceUuid : String
     , url : EventField String
-    , anchor : EventField String
+    , label : EventField String
     }
 
 
@@ -394,7 +394,7 @@ encodeAddURLReferenceEvent data =
     [ ( "referenceType", Encode.string "URLReference" )
     , ( "referenceUuid", Encode.string data.referenceUuid )
     , ( "url", Encode.string data.url )
-    , ( "anchor", Encode.string data.anchor )
+    , ( "label", Encode.string data.label )
     ]
 
 
@@ -433,7 +433,7 @@ encodeEditURLReferenceEvent data =
     [ ( "referenceType", Encode.string "URLReference" )
     , ( "referenceUuid", Encode.string data.referenceUuid )
     , ( "url", encodeEventField Encode.string data.url )
-    , ( "anchor", encodeEventField Encode.string data.anchor )
+    , ( "label", encodeEventField Encode.string data.label )
     ]
 
 
@@ -694,7 +694,7 @@ addURLReferenceEventDecoder =
     decode AddURLReferenceEventData
         |> required "referenceUuid" Decode.string
         |> required "url" Decode.string
-        |> required "anchor" Decode.string
+        |> required "label" Decode.string
 
 
 addCrossReferenceEventDecoder : Decoder AddCrossReferenceEventData
@@ -739,7 +739,7 @@ editURLReferenceEventDecoder =
     decode EditURLReferenceEventData
         |> required "referenceUuid" Decode.string
         |> required "url" (eventFieldDecoder Decode.string)
-        |> required "anchor" (eventFieldDecoder Decode.string)
+        |> required "label" (eventFieldDecoder Decode.string)
 
 
 editCrossReferenceEventDecoder : Decoder EditCrossReferenceEventData
@@ -908,7 +908,7 @@ getAddReferenceEventEntityVisibleName data =
             Just data.shortUuid
 
         AddURLReferenceEvent data ->
-            Just data.anchor
+            Just data.label
 
         AddCrossReferenceEvent data ->
             Just data.targetUuid
@@ -921,7 +921,7 @@ getEditReferenceEventEntityVisibleName data =
             getEventFieldValue data.shortUuid
 
         EditURLReferenceEvent data ->
-            getEventFieldValue data.anchor
+            getEventFieldValue data.label
 
         EditCrossReferenceEvent data ->
             getEventFieldValue data.targetUuid

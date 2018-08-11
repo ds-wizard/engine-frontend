@@ -73,7 +73,7 @@ type alias ResourcePageReferenceData =
 type alias URLReferenceData =
     { uuid : String
     , url : String
-    , anchor : String
+    , label : String
     }
 
 
@@ -201,7 +201,7 @@ urlReferenceDecoder =
     decode URLReferenceData
         |> required "uuid" Decode.string
         |> required "url" Decode.string
-        |> required "anchor" Decode.string
+        |> required "label" Decode.string
         |> Decode.map URLReference
 
 
@@ -307,7 +307,7 @@ newReference uuid =
     URLReference
         { uuid = uuid
         , url = "http://example.com"
-        , anchor = "See also"
+        , label = "See also"
         }
 
 
@@ -395,7 +395,7 @@ getReferenceUuid =
 
 getReferenceVisibleName : Reference -> String
 getReferenceVisibleName =
-    referenceByType .shortUuid .anchor .targetUuid
+    referenceByType .shortUuid .label .targetUuid
 
 
 getReferences : KnowledgeModel -> List Reference

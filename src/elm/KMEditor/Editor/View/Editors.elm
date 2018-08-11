@@ -346,7 +346,7 @@ referenceEditorView editorData =
 
                 Just "URLReference" ->
                     [ inputGroup editorData.form "url" "URL"
-                    , inputGroup editorData.form "anchor" "Anchor"
+                    , inputGroup editorData.form "label" "Label"
                     ]
 
                 Just "CrossReference" ->

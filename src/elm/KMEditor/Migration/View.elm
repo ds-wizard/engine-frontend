@@ -424,7 +424,7 @@ viewAddResourcePageReferenceDiff data =
 viewAddURLReferenceDiff : AddURLReferenceEventData -> Html Msgs.Msg
 viewAddURLReferenceDiff data =
     div []
-        (viewAdd <| List.map2 (,) [ "URL", "Anchor" ] [ data.url, data.anchor ])
+        (viewAdd <| List.map2 (,) [ "URL", "Label" ] [ data.url, data.label ])
 
 
 viewAddCrossReferenceDiff : AddCrossReferenceEventData -> Html Msgs.Msg
@@ -449,10 +449,10 @@ viewEditReferenceDiff event reference =
             div []
                 (viewDiff <|
                     List.map3 (,,)
-                        [ "URL", "Anchor" ]
-                        [ referenceData.url, referenceData.anchor ]
+                        [ "URL", "Label" ]
+                        [ referenceData.url, referenceData.label ]
                         [ getEventFieldValueWithDefault eventData.url referenceData.url
-                        , getEventFieldValueWithDefault eventData.anchor referenceData.anchor
+                        , getEventFieldValueWithDefault eventData.label referenceData.label
                         ]
                 )
 
@@ -497,9 +497,9 @@ viewEditURLReferenceDiff data =
     div []
         (viewAdd <|
             List.map2 (,)
-                [ "URL", "Anchor" ]
+                [ "URL", "Label" ]
                 [ getEventFieldValueWithDefault data.url ""
-                , getEventFieldValueWithDefault data.anchor ""
+                , getEventFieldValueWithDefault data.label ""
                 ]
         )
 
@@ -533,7 +533,7 @@ viewDeleteResourcePageReferenceDiff data =
 viewDeleteURLReferenceDiff : URLReferenceData -> Html Msgs.Msg
 viewDeleteURLReferenceDiff data =
     div []
-        (viewDelete <| List.map2 (,) [ "URL", "Anchor" ] [ data.url, data.anchor ])
+        (viewDelete <| List.map2 (,) [ "URL", "Label" ] [ data.url, data.label ])
 
 
 viewDeleteCrossReferenceDiff : CrossReferenceData -> Html Msgs.Msg
