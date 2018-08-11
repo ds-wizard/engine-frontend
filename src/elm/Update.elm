@@ -2,6 +2,7 @@ module Update exposing (..)
 
 import Auth.Models exposing (setSidebarCollapsed)
 import Auth.Update
+import Common.Menu.Update
 import DSPlanner.Update
 import KMEditor.Update
 import KMPackages.Update
@@ -62,6 +63,9 @@ update msg model =
                     { model | session = setSidebarCollapsed model.session collapsed }
             in
             ( newModel, Ports.storeSession <| Just newModel.session )
+
+        Msgs.MenuMsg msg ->
+            ( { model | menuModel = Common.Menu.Update.update msg model.menuModel }, Cmd.none )
 
         Msgs.DSPlannerMsg msg ->
             let

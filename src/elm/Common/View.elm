@@ -66,7 +66,7 @@ type alias ModalConfig msg =
     , actionResult : ActionResult String
     , actionName : String
     , actionMsg : msg
-    , cancelMsg : msg
+    , cancelMsg : Maybe msg
     }
 
 
@@ -83,6 +83,15 @@ modalView cfg =
 
                 _ ->
                     False
+
+        cancelButton =
+            case cfg.cancelMsg of
+                Just cancelMsg ->
+                    button [ onClick cancelMsg, disabled cancelDisabled, class "btn btn-secondary" ]
+                        [ text "Cancel" ]
+
+                Nothing ->
+                    emptyNode
     in
     div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
         [ div [ class "modal-dialog" ]
@@ -93,9 +102,8 @@ modalView cfg =
                 , div [ class "modal-body" ]
                     content
                 , div [ class "modal-footer" ]
-                    [ button [ onClick cfg.cancelMsg, disabled cancelDisabled, class "btn btn-secondary" ]
-                        [ text "Cancel" ]
-                    , actionButton ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
+                    [ actionButton ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
+                    , cancelButton
                     ]
                 ]
             ]

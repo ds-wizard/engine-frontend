@@ -80,6 +80,7 @@
     .modal-footer {
         display: flex;
         justify-content: space-between;
+        flex-direction: row-reverse;
 
         &::before, &::after {
             display: none;

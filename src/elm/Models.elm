@@ -1,6 +1,7 @@
 module Models exposing (..)
 
 import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, sessionExists)
+import Common.Menu.Models
 import DSPlanner.Models
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -18,6 +19,7 @@ type alias Model =
     , seed : Seed
     , session : Session
     , jwt : Maybe JwtToken
+    , menuModel : Common.Menu.Models.Model
     , organizationModel : Organization.Models.Model
     , kmEditorModel : KMEditor.Models.Model
     , kmPackagesModel : KMPackages.Models.Model
@@ -33,6 +35,7 @@ initialModel route seed session jwt =
     , seed = initialSeed seed
     , session = session
     , jwt = jwt
+    , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , kmEditorModel = KMEditor.Models.initialModel
     , kmPackagesModel = KMPackages.Models.initialModel

@@ -127,7 +127,7 @@ deleteVersionModal wrapMsg model =
             , actionResult = model.deletingVersion
             , actionName = "Delete"
             , actionMsg = wrapMsg DeleteVersion
-            , cancelMsg = wrapMsg <| ShowHideDeleteVersion Nothing
+            , cancelMsg = Just <| wrapMsg <| ShowHideDeleteVersion Nothing
             }
     in
     modalView modalConfig

@@ -132,7 +132,7 @@ deleteModal wrapMsg model =
             , actionResult = model.deletingQuestionnaire
             , actionName = "Delete"
             , actionMsg = wrapMsg DeleteQuestionnaire
-            , cancelMsg = wrapMsg <| ShowHideDeleteQuestionnaire Nothing
+            , cancelMsg = Just <| wrapMsg <| ShowHideDeleteQuestionnaire Nothing
             }
     in
     modalView modalConfig

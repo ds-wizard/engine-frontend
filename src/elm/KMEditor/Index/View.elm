@@ -172,7 +172,7 @@ deleteModal wrapMsg model =
             , actionResult = model.deletingKnowledgeModel
             , actionName = "Delete"
             , actionMsg = wrapMsg DeleteKnowledgeModel
-            , cancelMsg = wrapMsg <| ShowHideDeleteKnowledgeModal Nothing
+            , cancelMsg = Just <| wrapMsg <| ShowHideDeleteKnowledgeModal Nothing
             }
     in
     modalView modalConfig
@@ -225,7 +225,7 @@ upgradeModal wrapMsg model =
             , actionResult = model.creatingMigration
             , actionName = "Create"
             , actionMsg = wrapMsg <| UpgradeFormMsg Form.Submit
-            , cancelMsg = wrapMsg <| ShowHideUpgradeModal Nothing
+            , cancelMsg = Just <| wrapMsg <| ShowHideUpgradeModal Nothing
             }
     in
     modalView modalConfig
