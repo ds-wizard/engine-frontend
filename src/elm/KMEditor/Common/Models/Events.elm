@@ -66,6 +66,7 @@ type alias AddQuestionEventData =
     , type_ : String
     , title : String
     , text : String
+    , requiredLevel : Maybe Int
     , answerItemTemplate : Maybe AnswerItemTemplateData
     }
 
@@ -75,6 +76,7 @@ type alias EditQuestionEventData =
     , type_ : EventField String
     , title : EventField String
     , text : EventField String
+    , requiredLevel : EventField (Maybe Int)
     , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
     , answerIds : EventField (Maybe (List String))
     , expertIds : EventField (List String)
@@ -311,6 +313,7 @@ encodeAddQuestionEvent data =
     , ( "type", Encode.string data.type_ )
     , ( "title", Encode.string data.title )
     , ( "text", Encode.string data.text )
+    , ( "requiredLevel", maybe Encode.int data.requiredLevel )
     , ( "answerItemTemplate", maybe encodeAnswerItemTemplateData data.answerItemTemplate )
     ]
 
@@ -322,6 +325,7 @@ encodeEditQuestionEvent data =
     , ( "type", encodeEventField Encode.string data.type_ )
     , ( "title", encodeEventField Encode.string data.title )
     , ( "text", encodeEventField Encode.string data.text )
+    , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
     , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
     , ( "answerIds", encodeEventField (maybe (Encode.list << List.map Encode.string)) data.answerIds )
     , ( "expertIds", encodeEventField (Encode.list << List.map Encode.string) data.expertIds )
@@ -607,6 +611,7 @@ addQuestionEventDecoder =
         |> required "type" Decode.string
         |> required "title" Decode.string
         |> required "text" Decode.string
+        |> required "requiredLevel" (Decode.nullable Decode.int)
         |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
 
 
@@ -617,6 +622,7 @@ editQuestionEventDecoder =
         |> required "type" (eventFieldDecoder Decode.string)
         |> required "title" (eventFieldDecoder Decode.string)
         |> required "text" (eventFieldDecoder Decode.string)
+        |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
         |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
         |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
         |> required "expertIds" (eventFieldDecoder (Decode.list Decode.string))

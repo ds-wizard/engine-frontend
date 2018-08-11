@@ -26,6 +26,7 @@ type alias QuestionForm =
     { title : String
     , type_ : String
     , text : String
+    , requiredLevel : Maybe Int
     , itemName : String
     }
 
@@ -145,10 +146,11 @@ initQuestionForm =
 
 questionFormValidation : Validation CustomFormError QuestionForm
 questionFormValidation =
-    Validate.map4 QuestionForm
+    Validate.map5 QuestionForm
         (Validate.field "title" Validate.string)
         (Validate.field "type_" Validate.string)
         (Validate.field "text" Validate.string)
+        (Validate.field "requiredLevel" (Validate.maybe Validate.int))
         (Validate.field "itemName" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
 
 
@@ -157,6 +159,7 @@ questionFormInitials question =
     [ ( "title", Field.string question.title )
     , ( "type_", Field.string question.type_ )
     , ( "text", Field.string question.text )
+    , ( "requiredLevel", Field.string (question.requiredLevel |> Maybe.map toString |> Maybe.withDefault "") )
     , ( "itemName", Field.string (question.answerItemTemplate |> Maybe.map .title |> Maybe.withDefault "") )
     ]
 
@@ -177,6 +180,7 @@ updateQuestionWithForm question questionForm =
         | title = questionForm.title
         , text = questionForm.text
         , type_ = questionForm.type_
+        , requiredLevel = questionForm.requiredLevel
         , answerItemTemplate = answerItemTemplate
     }
 
