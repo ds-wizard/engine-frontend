@@ -1,12 +1,57 @@
 module Common.Menu.View exposing (..)
 
-import Common.Html exposing (fa)
-import Common.Menu.Msgs exposing (Msg(SetReportIssueOpen))
+import Auth.Msgs
+import Bootstrap.Button as Button
+import Bootstrap.Dropdown as Dropdown
+import Common.Html exposing (fa, linkToAttributes)
+import Common.Html.Events exposing (onLinkClick)
+import Common.Menu.Msgs exposing (Msg(ProfileMenuDropdownMsg, SetReportIssueOpen))
 import Common.Types exposing (ActionResult(Unset))
 import Common.View exposing (modalView)
-import Html exposing (Html, a, p, text)
+import Html exposing (Html, a, p, span, text)
 import Html.Attributes exposing (class, href, target)
 import Msgs
+import Routing exposing (Route(Users))
+import Users.Common.Models exposing (User)
+import Users.Routing
+
+
+viewProfileMenu : Maybe User -> Dropdown.State -> Html Msgs.Msg
+viewProfileMenu maybeUser dropDownState =
+    let
+        ( name, initials ) =
+            case maybeUser of
+                Just user ->
+                    ( user.name ++ " " ++ user.surname
+                    , String.left 1 user.name ++ String.left 1 user.surname
+                    )
+
+                Nothing ->
+                    ( "", "" )
+    in
+    Dropdown.dropdown dropDownState
+        { options = [ Dropdown.dropRight ]
+        , toggleMsg = Msgs.MenuMsg << ProfileMenuDropdownMsg
+        , toggleButton =
+            Dropdown.toggle [ Button.roleLink ]
+                [ span [ class "full-name" ] [ text name, fa "angle-right" ]
+                , span [ class "initials" ] [ text initials ]
+                ]
+        , items =
+            [ Dropdown.anchorItem (linkToAttributes (Users <| Users.Routing.Edit "current"))
+                [ fa "user-circle-o"
+                , text "Edit profile"
+                ]
+            , Dropdown.anchorItem [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetReportIssueOpen True) ]
+                [ fa "exclamation-circle"
+                , text "Report issue"
+                ]
+            , Dropdown.anchorItem [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
+                [ fa "sign-out"
+                , text "Logout"
+                ]
+            ]
+        }
 
 
 viewReportIssueModal : Bool -> Html Msgs.Msg

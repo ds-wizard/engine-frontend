@@ -5,7 +5,7 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.Msgs
-import Common.Menu.View exposing (viewReportIssueModal)
+import Common.Menu.View exposing (viewProfileMenu, viewReportIssueModal)
 import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -141,26 +141,6 @@ profileInfo model =
                     [ fa "angle-double-left" ]
     in
     div [ class "profile-info" ]
-        [ ul [ class "menu" ]
-            [ li []
-                [ linkTo (Users <| Users.Routing.Edit "current")
-                    []
-                    [ fa "user-circle-o"
-                    , span [ class "sidebar-link" ] [ text name ]
-                    ]
-                ]
-            , li []
-                [ a [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetReportIssueOpen True) ]
-                    [ fa "exclamation-circle"
-                    , span [ class "sidebar-link" ] [ text "Report Issue" ]
-                    ]
-                ]
-            , li []
-                [ a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
-                    [ fa "sign-out"
-                    , span [ class "sidebar-link" ] [ text "Logout" ]
-                    ]
-                ]
-            ]
+        [ viewProfileMenu model.session.user model.menuModel.profileMenuDropdownState
         , collapseLink
         ]

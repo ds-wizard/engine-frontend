@@ -9,3 +9,6 @@ update msg model =
     case msg of
         SetReportIssueOpen open ->
             { model | reportIssueOpen = open }
+
+        ProfileMenuDropdownMsg state ->
+            { model | profileMenuDropdownState = state }
