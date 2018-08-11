@@ -10,7 +10,6 @@ import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (getQuestionnaire, putQuestionnaire)
 import DSPlanner.Routing exposing (Route(Index))
-import FormEngine.Model exposing (..)
 import Jwt
 import KMEditor.Common.Models.Entities exposing (Level)
 import KMEditor.Requests exposing (getLevels)

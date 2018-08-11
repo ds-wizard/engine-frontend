@@ -1,7 +1,6 @@
 module Common.Form.Validate exposing (..)
 
 import Common.Form exposing (CustomFormError(ConfirmationError, InvalidUuid))
-import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
 import Regex exposing (Regex)
 
