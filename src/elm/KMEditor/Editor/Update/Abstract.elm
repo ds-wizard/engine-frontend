@@ -25,8 +25,8 @@ type alias AddEntityConfig entity editorData =
     }
 
 
-addEntity : AddEntityConfig b (EditorLike a e o) -> Seed -> Model -> EditorLike a e o -> ( Seed, Model, Cmd Msgs.Msg )
-addEntity cfg seed model editorData =
+addEntity : AddEntityConfig b (EditorLike a e o) -> Cmd Msgs.Msg -> Seed -> Model -> EditorLike a e o -> ( Seed, Model, Cmd Msgs.Msg )
+addEntity cfg cmd seed model editorData =
     let
         ( newUuid, newSeed ) =
             getUuid seed
@@ -43,7 +43,7 @@ addEntity cfg seed model editorData =
         newEditors =
             Dict.insert editorData.uuid newParentEditor editorsWithEntity
     in
-    ( newSeed, { model | editors = newEditors, activeEditorUuid = Just newUuid }, Cmd.none )
+    ( newSeed, { model | editors = newEditors, activeEditorUuid = Just newUuid }, cmd )
 
 
 

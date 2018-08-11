@@ -59,7 +59,7 @@ updateIfChapterEditor update editor =
             editor
 
 
-addAnswer : Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addAnswer : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addAnswer =
     addEntity
         { newEntity = newAnswer
@@ -69,7 +69,7 @@ addAnswer =
         }
 
 
-addAnswerItemTemplateQuestion : Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addAnswerItemTemplateQuestion : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addAnswerItemTemplateQuestion =
     addEntity
         { newEntity = newQuestion
@@ -79,7 +79,7 @@ addAnswerItemTemplateQuestion =
         }
 
 
-addReference : Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addReference : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addReference =
     addEntity
         { newEntity = newReference
@@ -89,7 +89,7 @@ addReference =
         }
 
 
-addExpert : Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addExpert : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addExpert =
     addEntity
         { newEntity = newExpert

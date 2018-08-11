@@ -227,7 +227,7 @@ update msg wrapMsg seed session model =
                                 |> withNoCmd
 
                         AddChapter ->
-                            addChapter
+                            addChapter (scrollTopCmd wrapMsg)
                                 |> withGenerateKMEditEvent seed model editorData
 
                 ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
@@ -248,7 +248,7 @@ update msg wrapMsg seed session model =
                                 |> withNoCmd
 
                         AddQuestion ->
-                            addQuestion
+                            addQuestion (scrollTopCmd wrapMsg)
                                 |> withGenerateChapterEditEvent seed model editorData
 
                 ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
@@ -269,7 +269,7 @@ update msg wrapMsg seed session model =
                                 |> withNoCmd
 
                         AddAnswer ->
-                            addAnswer
+                            addAnswer (scrollTopCmd wrapMsg)
                                 |> withGenerateQuestionEditEvent seed model editorData
 
                         ReorderAnswerItemTemplateQuestions answerItemTemplateQuestionList ->
@@ -279,7 +279,7 @@ update msg wrapMsg seed session model =
                                 |> withNoCmd
 
                         AddAnswerItemTemplateQuestion ->
-                            addAnswerItemTemplateQuestion
+                            addAnswerItemTemplateQuestion (scrollTopCmd wrapMsg)
                                 |> withGenerateQuestionEditEvent seed model editorData
 
                         ReorderReferences referenceList ->
@@ -289,7 +289,7 @@ update msg wrapMsg seed session model =
                                 |> withNoCmd
 
                         AddReference ->
-                            addReference
+                            addReference (scrollTopCmd wrapMsg)
                                 |> withGenerateQuestionEditEvent seed model editorData
 
                         ReorderExperts expertList ->
@@ -299,7 +299,7 @@ update msg wrapMsg seed session model =
                                 |> withNoCmd
 
                         AddExpert ->
-                            addExpert
+                            addExpert (scrollTopCmd wrapMsg)
                                 |> withGenerateQuestionEditEvent seed model editorData
 
                 ( AnswerEditorMsg answerEditorMsg, Just (AnswerEditor editorData) ) ->
@@ -320,7 +320,7 @@ update msg wrapMsg seed session model =
                                 |> withNoCmd
 
                         AddFollowUp ->
-                            addFollowUp
+                            addFollowUp (scrollTopCmd wrapMsg)
                                 |> withGenerateAnswerEditEvent seed model editorData
 
                 ( ReferenceEditorMsg referenceEditorMsg, Just (ReferenceEditor editorData) ) ->
@@ -362,13 +362,7 @@ withNoCmd ( a, b ) =
 
 setActiveEditor : (Msg -> Msgs.Msg) -> String -> Seed -> Model -> a -> ( Seed, Model, Cmd Msgs.Msg )
 setActiveEditor wrapMsg uuid seed model _ =
-    let
-        cmd =
-            Dom.Scroll.toTop "editor-view"
-                |> Task.attempt (always NoOp)
-                |> Cmd.map wrapMsg
-    in
-    ( seed, { model | activeEditorUuid = Just uuid }, cmd )
+    ( seed, { model | activeEditorUuid = Just uuid }, scrollTopCmd wrapMsg )
 
 
 createEditors : Model -> Model
@@ -379,3 +373,10 @@ createEditors model =
 
         _ ->
             model
+
+
+scrollTopCmd : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
+scrollTopCmd wrapMsg =
+    Dom.Scroll.toTop "editor-view"
+        |> Task.attempt (always NoOp)
+        |> Cmd.map wrapMsg

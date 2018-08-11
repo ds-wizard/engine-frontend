@@ -59,7 +59,7 @@ updateIfKMEditor update editor =
             editor
 
 
-addQuestion : Seed -> Model -> ChapterEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addQuestion : Cmd Msgs.Msg -> Seed -> Model -> ChapterEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addQuestion =
     addEntity
         { newEntity = newQuestion

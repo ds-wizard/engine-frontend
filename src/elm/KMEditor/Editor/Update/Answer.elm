@@ -59,7 +59,7 @@ updateIfQuestion update editor =
             editor
 
 
-addFollowUp : Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addFollowUp : Cmd Msgs.Msg -> Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addFollowUp =
     addEntity
         { newEntity = newQuestion

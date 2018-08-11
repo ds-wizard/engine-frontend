@@ -34,7 +34,7 @@ withGenerateKMEditEvent =
         }
 
 
-addChapter : Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addChapter : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addChapter =
     addEntity
         { newEntity = newChapter
