@@ -110,10 +110,11 @@ handleFormMsg msg model =
                             )
 
                 _ ->
-                    ( { model
-                        | activePage = PageChapter chapter (updateForm msg form)
-                        , dirty = True
-                      }
+                    ( updateReplies
+                        { model
+                            | activePage = PageChapter chapter (updateForm msg form)
+                            , dirty = True
+                        }
                     , Cmd.none
                     )
 

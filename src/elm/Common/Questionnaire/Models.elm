@@ -12,6 +12,7 @@ import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
+import Utils exposing (stringToInt)
 
 
 type alias Model =
@@ -253,6 +254,7 @@ updateReplies model =
                     getFormValues [ chapter.uuid ] form
                         ++ model.questionnaire.replies
                         |> List.uniqueBy .path
+                        |> List.filter (.value >> (/=) "")
 
                 _ ->
                     model.questionnaire.replies
@@ -270,3 +272,77 @@ setActiveChapter chapter model =
     { model
         | activePage = PageChapter chapter (createChapterForm chapter model.questionnaire.replies)
     }
+
+
+
+{- Indications calculations -}
+
+
+calculateUnansweredQuestions : FormValues -> Chapter -> Int
+calculateUnansweredQuestions replies chapter =
+    chapter.questions
+        |> List.map (evaluateQuestion replies [ chapter.uuid ])
+        |> List.foldl (+) 0
+
+
+getReply : FormValues -> String -> Maybe String
+getReply replies path =
+    List.find (.path >> (==) path) replies
+        |> Maybe.map .value
+
+
+evaluateQuestion : FormValues -> List String -> Question -> Int
+evaluateQuestion replies path question =
+    let
+        currentPath =
+            path ++ [ question.uuid ]
+    in
+    case getReply replies (String.join "." currentPath) of
+        Just value ->
+            case question.type_ of
+                "options" ->
+                    question.answers
+                        |> Maybe.withDefault []
+                        |> List.find (.uuid >> (==) value)
+                        |> Maybe.map (evaluateFollowups replies currentPath)
+                        |> Maybe.withDefault 1
+
+                "list" ->
+                    let
+                        questions =
+                            getAnswerItemTemplateQuestions question
+
+                        itemCount =
+                            stringToInt value
+                    in
+                    List.range 0 (itemCount - 1)
+                        |> List.map (evaluateAnswerItem replies currentPath questions)
+                        |> List.foldl (+) 0
+
+                _ ->
+                    0
+
+        Nothing ->
+            1
+
+
+evaluateFollowups : FormValues -> List String -> Answer -> Int
+evaluateFollowups replies path answer =
+    let
+        currentPath =
+            path ++ [ answer.uuid ]
+    in
+    getFollowUpQuestions answer
+        |> List.map (evaluateQuestion replies currentPath)
+        |> List.foldl (+) 0
+
+
+evaluateAnswerItem : FormValues -> List String -> List Question -> Int -> Int
+evaluateAnswerItem replies path questions index =
+    let
+        currentPath =
+            path ++ [ toString index ]
+    in
+    questions
+        |> List.map (evaluateQuestion replies currentPath)
+        |> List.foldl (+) 0

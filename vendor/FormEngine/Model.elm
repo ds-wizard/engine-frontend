@@ -338,8 +338,8 @@ applyFieldValue values key state =
         Just value ->
             values ++ [ { path = key, value = valueToString value } ]
 
-        _ ->
-            values
+        Nothing ->
+            values ++ [ { path = key, value = "" } ]
 
 
 valueToString : a -> String

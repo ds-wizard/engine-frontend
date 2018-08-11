@@ -1,7 +1,7 @@
 module Common.Questionnaire.View exposing (..)
 
 import Common.Html exposing (emptyNode, fa)
-import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail)
+import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(AnsweredIndication), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
 import Common.Types exposing (ActionResult(Success, Unset), combine)
@@ -30,7 +30,7 @@ viewQuestionnaire cfg model =
                 emptyNode
     in
     div [ class "Questionnaire row" ]
-        [ div [ class "col-sm-12 col-md-3 col-lg-3 col-xl-3" ]
+        [ div [ class "col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
             [ chapterList model
             , extraActions
             ]
@@ -52,16 +52,30 @@ chapterList model =
                     Nothing
     in
     div [ class "nav nav-pills flex-column" ]
-        (List.map (chapterListChapter activeChapter) model.questionnaire.knowledgeModel.chapters)
+        (List.map (chapterListChapter model activeChapter) model.questionnaire.knowledgeModel.chapters)
 
 
-chapterListChapter : Maybe Chapter -> Chapter -> Html Msg
-chapterListChapter activeChapter chapter =
+chapterListChapter : Model -> Maybe Chapter -> Chapter -> Html Msg
+chapterListChapter model activeChapter chapter =
     a
         [ classList [ ( "nav-link", True ), ( "active", activeChapter == Just chapter ) ]
         , onClick <| SetActiveChapter chapter
         ]
-        [ text chapter.title ]
+        [ text chapter.title
+        , viewChapterAnsweredIndication model chapter
+        ]
+
+
+viewChapterAnsweredIndication : Model -> Chapter -> Html Msg
+viewChapterAnsweredIndication model chapter =
+    let
+        unanswered =
+            calculateUnansweredQuestions model.questionnaire.replies chapter
+    in
+    if unanswered > 0 then
+        span [ class "badge badge-light badge-pill" ] [ text <| toString unanswered ]
+    else
+        fa "check"
 
 
 extraNavigation : ActivePage -> Html Msg
