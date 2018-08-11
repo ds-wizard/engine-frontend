@@ -2,8 +2,10 @@ module Common.View.Layout exposing (appView, publicView)
 
 import Auth.Msgs
 import Auth.Permission as Perm exposing (hasPerm)
-import Common.Html exposing (linkTo)
+import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
+import Common.Menu.Msgs
+import Common.Menu.View exposing (viewReportIssueModal)
 import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -56,6 +58,7 @@ appView model content =
         [ menu model
         , div [ class "page row justify-content-center" ]
             [ content ]
+        , viewReportIssueModal model.menuModel.reportIssueOpen
         ]
 
 
@@ -132,25 +135,29 @@ profileInfo model =
         collapseLink =
             if model.session.sidebarCollapsed then
                 a [ onLinkClick (Msgs.SetSidebarCollapsed False), class "collapse" ]
-                    [ i [ class "fa fa-angle-double-right" ] []
-                    ]
+                    [ fa "angle-double-right" ]
             else
                 a [ onLinkClick (Msgs.SetSidebarCollapsed True), class "collapse" ]
-                    [ i [ class "fa fa-angle-double-left" ] []
-                    ]
+                    [ fa "angle-double-left" ]
     in
     div [ class "profile-info" ]
         [ ul [ class "menu" ]
             [ li []
                 [ linkTo (Users <| Users.Routing.Edit "current")
                     []
-                    [ i [ class "fa fa-user-circle-o" ] []
+                    [ fa "user-circle-o"
                     , span [ class "sidebar-link" ] [ text name ]
                     ]
                 ]
             , li []
+                [ a [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetReportIssueOpen True) ]
+                    [ fa "exclamation-circle"
+                    , span [ class "sidebar-link" ] [ text "Report Issue" ]
+                    ]
+                ]
+            , li []
                 [ a [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
-                    [ i [ class "fa fa-sign-out" ] []
+                    [ fa "sign-out"
                     , span [ class "sidebar-link" ] [ text "Logout" ]
                     ]
                 ]
