@@ -1,3 +1,26 @@
+# 0.6.0
+
+## Features
+
+- References types
+- Metrics & Indications
+- Phases
+- Improved questionnaire
+    - Summary report
+    - All related entities displayed by the question
+    - Unsaved changes warning
+    - Clear answer button
+    - Answered questions indication for each chapter with respect to phase
+
+## Fixes
+
+- Question text is now optional
+
+## Other
+
+- Question short uuid was removed and reference with proper type is used instead
+
+
 # 0.5.0
 
 ## Features
