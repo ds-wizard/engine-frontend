@@ -316,8 +316,22 @@ evaluateQuestion currentLevel replies path question =
 
         requiredNow =
             (question.requiredLevel |> Maybe.withDefault 100) <= currentLevel
+
+        rawValue =
+            getReply replies (String.join "." currentPath)
+
+        adjustedValue =
+            if question.type_ == "list" then
+                case rawValue of
+                    Nothing ->
+                        Just "1"
+
+                    _ ->
+                        rawValue
+            else
+                rawValue
     in
-    case getReply replies (String.join "." currentPath) of
+    case adjustedValue of
         Just value ->
             case question.type_ of
                 "options" ->
