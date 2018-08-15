@@ -1,3 +1,10 @@
+# 0.6.1
+
+## Changes
+
+- Temporarily removed PDF export button
+
+
 # 0.6.0
 
 ## Features
