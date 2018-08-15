@@ -76,7 +76,6 @@ exportFormats : List ( String, String )
 exportFormats =
     [ ( "json", "JSON Data" )
     , ( "html", "HTML Document" )
-    , ( "pdf", "PDF Document" )
     , ( "latex", "LaTeX Document" )
     , ( "docx", "MS Word Document" )
     , ( "odt", "OpenDocument Text" )
