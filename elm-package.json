@@ -1,5 +1,5 @@
 {
-    "version": "0.6.1",
+    "version": "0.6.2",
     "summary": "Elixir DSW Client",
     "repository": "https://github.com/DataStewardshipWizard/dsw-client.git",
     "license": "BSD3",
