@@ -1,3 +1,10 @@
+# 0.6.2
+
+## Changes
+
+- PDF export button returned
+
+
 # 0.6.1
 
 ## Changes
