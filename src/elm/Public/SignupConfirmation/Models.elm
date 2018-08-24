@@ -1,6 +1,6 @@
 module Public.SignupConfirmation.Models exposing (..)
 
-import Common.Types exposing (ActionResult(..))
+import ActionResult exposing (ActionResult(..))
 
 
 type alias Model =

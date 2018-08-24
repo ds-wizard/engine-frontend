@@ -1,8 +1,8 @@
 module Public.ForgottenPasswordConfirmation.View exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, linkTo)
-import Common.Types exposing (ActionResult(..))
 import Common.View.Forms exposing (errorView, passwordGroup, submitButton)
 import Form exposing (Form)
 import Html exposing (..)

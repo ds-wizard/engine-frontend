@@ -1,11 +1,11 @@
 module Common.Questionnaire.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerError, getServerErrorJwt)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
 import Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback, postForSummaryReport)
-import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import FormEngine.Model exposing (encodeFormValues)
 import FormEngine.Msgs

@@ -1,9 +1,9 @@
 module KMEditor.Index.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (formResultView, selectGroup)
 import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon, TableActionText), TableConfig, TableFieldValue(HtmlValue, TextValue), indexTable)

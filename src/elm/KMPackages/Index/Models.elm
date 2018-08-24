@@ -1,6 +1,6 @@
 module KMPackages.Index.Models exposing (..)
 
-import Common.Types exposing (ActionResult(..))
+import ActionResult exposing (ActionResult(..))
 import KMPackages.Common.Models exposing (Package)
 
 

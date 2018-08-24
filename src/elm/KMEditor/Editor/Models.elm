@@ -1,6 +1,6 @@
 module KMEditor.Editor.Models exposing (..)
 
-import Common.Types exposing (ActionResult(Loading, Unset), withDefault)
+import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Common.Models.Events exposing (Event)
@@ -78,6 +78,6 @@ setAlert alert model =
 
 getEditorContext : Model -> EditorContext
 getEditorContext model =
-    { metrics = model.metrics |> withDefault []
-    , levels = model.levels |> withDefault []
+    { metrics = model.metrics |> ActionResult.withDefault []
+    , levels = model.levels |> ActionResult.withDefault []
     }

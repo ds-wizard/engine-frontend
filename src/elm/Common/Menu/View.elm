@@ -1,12 +1,12 @@
 module Common.Menu.View exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Msgs
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (fa, linkToAttributes)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.Msgs exposing (Msg(ProfileMenuDropdownMsg, SetReportIssueOpen))
-import Common.Types exposing (ActionResult(Unset))
 import Common.View exposing (modalView)
 import Html exposing (Html, a, p, span, text)
 import Html.Attributes exposing (class, href, target)

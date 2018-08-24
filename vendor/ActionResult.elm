@@ -1,10 +1,15 @@
-module Common.Types exposing (..)
-
-{-|
-
-@docs ActionResult
-
--}
+module ActionResult
+    exposing
+        ( ActionResult(..)
+        , combine
+        , combine3
+        , isError
+        , isLoading
+        , isSuccess
+        , isUnset
+        , map
+        , withDefault
+        )
 
 
 type ActionResult a
@@ -14,8 +19,48 @@ type ActionResult a
     | Error String
 
 
-mapSuccess : (a -> b) -> ActionResult a -> ActionResult b
-mapSuccess fn actionResult =
+isUnset : ActionResult a -> Bool
+isUnset actionResult =
+    case actionResult of
+        Unset ->
+            True
+
+        _ ->
+            False
+
+
+isLoading : ActionResult a -> Bool
+isLoading actionResult =
+    case actionResult of
+        Loading ->
+            True
+
+        _ ->
+            False
+
+
+isSuccess : ActionResult a -> Bool
+isSuccess actionResult =
+    case actionResult of
+        Success _ ->
+            True
+
+        _ ->
+            False
+
+
+isError : ActionResult a -> Bool
+isError actionResult =
+    case actionResult of
+        Error _ ->
+            True
+
+        _ ->
+            False
+
+
+map : (a -> b) -> ActionResult a -> ActionResult b
+map fn actionResult =
     case actionResult of
         Success value ->
             Success <| fn value

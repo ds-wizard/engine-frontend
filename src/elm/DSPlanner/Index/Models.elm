@@ -1,7 +1,7 @@
 module DSPlanner.Index.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Common.Types exposing (ActionResult(..))
 import DSPlanner.Common.Models exposing (Questionnaire)
 
 

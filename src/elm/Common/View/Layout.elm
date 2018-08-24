@@ -1,10 +1,8 @@
 module Common.View.Layout exposing (appView, publicView)
 
-import Auth.Msgs
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
-import Common.Menu.Msgs
 import Common.Menu.View exposing (viewProfileMenu, viewReportIssueModal)
 import DSPlanner.Routing
 import Html exposing (..)

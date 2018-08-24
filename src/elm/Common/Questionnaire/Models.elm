@@ -1,8 +1,8 @@
 module Common.Questionnaire.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
-import Common.Types exposing (ActionResult(Unset))
 import Form
 import Form.Validate as Validate exposing (..)
 import FormEngine.Model exposing (..)

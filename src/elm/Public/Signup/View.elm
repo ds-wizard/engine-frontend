@@ -1,7 +1,7 @@
 module Public.Signup.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)

@@ -1,14 +1,8 @@
 module Organization.Update exposing (getCurrentOrganizationCmd, update)
 
-{-|
-
-@docs update, getCurrentOrganizationCmd
-
--}
-
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
 import Msgs
@@ -18,7 +12,6 @@ import Organization.Requests exposing (..)
 import Requests exposing (getResultCmd, toCmd)
 
 
-{-| -}
 getCurrentOrganizationCmd : Session -> Cmd Msgs.Msg
 getCurrentOrganizationCmd session =
     getCurrentOrganization session
