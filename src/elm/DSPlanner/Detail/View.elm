@@ -1,9 +1,9 @@
 module DSPlanner.Detail.View exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, linkTo)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
-import Common.Types exposing (ActionResult, combine)
 import Common.View exposing (fullPageActionResultView, pageHeader)
 import Common.View.Forms exposing (actionButton, formResultView)
 import DSPlanner.Detail.Models exposing (Model)
@@ -16,7 +16,7 @@ import Msgs
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    fullPageActionResultView (content wrapMsg model) <| combine model.questionnaireModel model.levels
+    fullPageActionResultView (content wrapMsg model) <| ActionResult.combine model.questionnaireModel model.levels
 
 
 content : (Msg -> Msgs.Msg) -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msgs.Msg

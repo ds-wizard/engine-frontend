@@ -1,7 +1,7 @@
 module KMEditor.Migration.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (..)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (formResultView)
 import Dict exposing (Dict)

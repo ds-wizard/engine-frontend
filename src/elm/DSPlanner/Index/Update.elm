@@ -1,9 +1,9 @@
 module DSPlanner.Index.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Bootstrap.Dropdown as Dropdown
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Index.Models exposing (Model, QuestionnaireRow, initQuestionnaireRow)
 import DSPlanner.Index.Msgs exposing (Msg(..))

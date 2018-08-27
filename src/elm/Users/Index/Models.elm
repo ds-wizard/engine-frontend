@@ -1,6 +1,6 @@
 module Users.Index.Models exposing (..)
 
-import Common.Types exposing (ActionResult(..))
+import ActionResult exposing (ActionResult(..))
 import Users.Common.Models exposing (User)
 
 

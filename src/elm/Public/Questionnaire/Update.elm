@@ -1,10 +1,10 @@
 module Public.Questionnaire.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Models exposing (getServerError)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, initialModel)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
-import Common.Types exposing (ActionResult(Success))
 import Http
 import Msgs
 import Public.Questionnaire.Models exposing (Model)

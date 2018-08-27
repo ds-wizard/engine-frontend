@@ -1,6 +1,6 @@
 module KMPackages.Import.Models exposing (..)
 
-import Common.Types exposing (ActionResult(..))
+import ActionResult exposing (ActionResult(..))
 import FileReader exposing (NativeFile)
 
 

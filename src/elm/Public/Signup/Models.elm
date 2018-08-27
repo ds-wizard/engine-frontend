@@ -1,8 +1,8 @@
 module Public.Signup.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (..)
-import Common.Types exposing (ActionResult(Unset))
 import Form exposing (Form)
 import Form.Error as Error exposing (Error, ErrorValue(Empty))
 import Form.Field as Field exposing (Field, FieldValue(..))

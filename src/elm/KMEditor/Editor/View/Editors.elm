@@ -1,8 +1,8 @@
 module KMEditor.Editor.View.Editors exposing (activeEditor)
 
+import ActionResult
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
-import Common.Types exposing (ActionResult(Success), mapSuccess, withDefault)
 import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
 import Dict exposing (Dict)
@@ -143,7 +143,7 @@ questionEditorView model editorData =
                     [ fa "warning"
                     , text "By changing the type answers or items might be removed."
                     ]
-                , questionRequiredLevelSelectGroup editorData <| withDefault [] <| model.levels
+                , questionRequiredLevelSelectGroup editorData <| ActionResult.withDefault [] <| model.levels
                 ]
 
         answersOrItem =
@@ -262,8 +262,8 @@ answerEditorView model editorData =
 
         metrics =
             model.metrics
-                |> mapSuccess (metricsView editorData)
-                |> withDefault emptyNode
+                |> ActionResult.map (metricsView editorData)
+                |> ActionResult.withDefault emptyNode
 
         followUpsConfig =
             { childName = "Follow-up Question"

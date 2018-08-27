@@ -1,7 +1,7 @@
 module KMPackages.Import.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (detailContainerClassWith)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (actionButton, formResultView)
 import DragDrop exposing (onDragEnter, onDragLeave, onDragOver, onDrop)

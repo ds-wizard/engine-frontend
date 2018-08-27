@@ -1,8 +1,8 @@
 module Common.View.Forms exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError(..))
 import Common.Html exposing (..)
-import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
 import Form.Input as Input

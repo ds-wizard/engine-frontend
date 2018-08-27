@@ -1,11 +1,11 @@
 module DSPlanner.Detail.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, encodeQuestionnaireDetail, initialModel, updateReplies)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
-import Common.Types exposing (ActionResult(..))
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (getQuestionnaire, putQuestionnaire)

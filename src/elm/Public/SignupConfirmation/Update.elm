@@ -1,7 +1,7 @@
 module Public.SignupConfirmation.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Models exposing (getServerError)
-import Common.Types exposing (ActionResult(..))
 import Http
 import Msgs
 import Public.SignupConfirmation.Models exposing (Model)

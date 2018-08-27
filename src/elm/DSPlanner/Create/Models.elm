@@ -1,7 +1,7 @@
 module DSPlanner.Create.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
