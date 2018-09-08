@@ -13,7 +13,10 @@ stages:
   - tag
 
 env:
-  - IMAGE="datastewardshipwizard/client" IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest"
+  - IMAGE="datastewardshipwizard/client"
+  - IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT"
+  - IMAGE_TAG_DEVELOP="$IMAGE:develop"
+  - IMAGE_TAG_LATEST="$IMAGE:latest"
 
 install:
   - npm install
@@ -24,9 +27,6 @@ cache:
     - elm-stuff
     - tests/elm-stuff
 
-before_script:
-  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-
 jobs:
   include:
     - stage: build
@@ -34,22 +34,27 @@ jobs:
         - npm run build
         - npm test
         - docker build -t $IMAGE_TAG .
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "$REGISTRY"
         - docker push $IMAGE_TAG
 
     - stage: tag
       if: (branch = develop) AND (NOT (type IN (pull_request)))
       install: false
       script:
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "$REGISTRY"
         - docker pull $IMAGE_TAG
         - docker image tag $IMAGE_TAG $IMAGE_TAG_DEVELOP
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
         - docker push $IMAGE_TAG_DEVELOP
 
     - stage: tag
       if: (branch = master) AND (NOT (type IN (pull_request)))
       install: false
       script:
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "$REGISTRY"
         - docker pull $IMAGE_TAG
         - docker image tag $IMAGE_TAG $IMAGE_TAG_LATEST
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
         - docker push $IMAGE_TAG_LATEST
 
     - stage: tag
@@ -62,7 +67,9 @@ jobs:
         - IMAGE_TAG_MINOR="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v(.*)\..*/\1/g"`
         - IMAGE_TAG_PATCH="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v//g"`
       script:
+        - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "$REGISTRY"
         - docker pull $IMAGE_TAG
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
         - docker image tag $IMAGE_TAG $IMAGE_TAG_MAJOR
         - docker push $IMAGE_TAG_MAJOR
         - docker image tag $IMAGE_TAG $IMAGE_TAG_MINOR
