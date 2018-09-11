@@ -13,7 +13,7 @@ stages:
   - tag
 
 env:
-  - PRIVATE_IMAGE="$REGISTRY/elixir/dsw-client" IMAGE="datastewardshipwizard/client" PRIVATE_IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest"
+  - PRIVATE_IMAGE="$REGISTRY/elixir/dsw-client" IMAGE="datastewardshipwizard/client" IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest"
 
 install:
   - npm install
@@ -23,7 +23,7 @@ cache:
     - node_modules
     - elm-stuff
     - tests/elm-stuff
-    
+
 before_script:
   - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
   - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "$REGISTRY"
@@ -34,23 +34,23 @@ jobs:
       script:
         - npm run build
         - npm test
-        - docker build -t $PRIVATE_IMAGE_TAG .
-        - docker push $PRIVATE_IMAGE_TAG
+        - docker build -t $IMAGE_TAG .
+        - docker push $IMAGE_TAG
 
     - stage: tag
       if: (branch = develop) AND (NOT (type IN (pull_request)))
       install: false
       script:
-        - docker pull $PRIVATE_IMAGE_TAG
-        - docker image tag $PRIVATE_IMAGE_TAG $IMAGE_TAG_DEVELOP
+        - docker pull $IMAGE_TAG
+        - docker image tag $IMAGE_TAG $IMAGE_TAG_DEVELOP
         - docker push $IMAGE_TAG_DEVELOP
 
     - stage: tag
       if: (branch = master) AND (NOT (type IN (pull_request)))
       install: false
       script:
-        - docker pull $PRIVATE_IMAGE_TAG
-        - docker image tag $PRIVATE_IMAGE_TAG $IMAGE_TAG_LATEST
+        - docker pull $IMAGE_TAG
+        - docker image tag $IMAGE_TAG $IMAGE_TAG_LATEST
         - docker push $IMAGE_TAG_LATEST
 
     - stage: tag
@@ -63,10 +63,10 @@ jobs:
         - IMAGE_TAG_MINOR="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v(.*)\..*/\1/g"`
         - IMAGE_TAG_PATCH="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v//g"`
       script:
-        - docker pull $REGISTRY/$IMAGE_TAG
-        - docker image tag $PRIVATE_IMAGE_TAG $IMAGE_TAG_MAJOR
+        - docker pull $IMAGE_TAG
+        - docker image tag $IMAGE_TAG $IMAGE_TAG_MAJOR
         - docker push $IMAGE_TAG_MAJOR
-        - docker image tag $PRIVATE_IMAGE_TAG $IMAGE_TAG_MINOR
+        - docker image tag $IMAGE_TAG $IMAGE_TAG_MINOR
         - docker push $IMAGE_TAG_MINOR
-        - docker image tag $PRIVATE_IMAGE_TAG $IMAGE_TAG_PATCH
+        - docker image tag $IMAGE_TAG $IMAGE_TAG_PATCH
         - docker push $IMAGE_TAG_PATCH
