@@ -13,10 +13,7 @@ stages:
   - tag
 
 env:
-  - IMAGE="datastewardshipwizard/client"
-  - IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT"
-  - IMAGE_TAG_DEVELOP="$IMAGE:develop"
-  - IMAGE_TAG_LATEST="$IMAGE:latest"
+  - IMAGE="datastewardshipwizard/client" IMAGE_TAG="$IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest"
 
 install:
   - npm install
