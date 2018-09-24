@@ -155,6 +155,20 @@ toReadable error labelText =
 
 
 
+-- Other form views
+
+
+formText : String -> Html msg
+formText str =
+    p [ class "form-text text-muted" ] [ text str ]
+
+
+formTextAfter : String -> Html msg
+formTextAfter str =
+    p [ class "form-text form-text-after text-muted" ] [ text str ]
+
+
+
 -- Form Actions
 
 

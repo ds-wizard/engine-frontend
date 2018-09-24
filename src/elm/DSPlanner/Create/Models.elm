@@ -29,6 +29,7 @@ initialModel selectedPackage =
 type alias QuestionnaireCreateForm =
     { name : String
     , packageId : String
+    , private : Bool
     }
 
 
@@ -42,15 +43,19 @@ initQuestionnaireCreateForm selectedPackage =
 
                 _ ->
                     []
+
+        initialsWithPrivate =
+            initials ++ [ ( "private", Field.bool True ) ]
     in
-    Form.initial initials questionnaireCreateFormValidation
+    Form.initial initialsWithPrivate questionnaireCreateFormValidation
 
 
 questionnaireCreateFormValidation : Validation CustomFormError QuestionnaireCreateForm
 questionnaireCreateFormValidation =
-    Validate.map2 QuestionnaireCreateForm
+    Validate.map3 QuestionnaireCreateForm
         (Validate.field "name" Validate.string)
         (Validate.field "packageId" Validate.string)
+        (Validate.field "private" Validate.bool)
 
 
 encodeQuestionnaireCreateForm : QuestionnaireCreateForm -> Encode.Value
@@ -58,4 +63,5 @@ encodeQuestionnaireCreateForm form =
     Encode.object
         [ ( "name", Encode.string form.name )
         , ( "packageId", Encode.string form.packageId )
+        , ( "private", Encode.bool form.private )
         ]
