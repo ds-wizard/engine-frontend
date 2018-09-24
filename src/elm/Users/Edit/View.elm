@@ -106,7 +106,7 @@ userFormView form current =
             if current then
                 emptyNode
             else
-                toggleGroup form "isActive" "Active"
+                toggleGroup form "active" "Active"
 
         formHtml =
             div []
