@@ -8,6 +8,7 @@ type alias Package =
     { name : String
     , organizationId : String
     , kmId : String
+    , latestVersion : String
     }
 
 
@@ -17,6 +18,7 @@ packageDecoder =
         |> required "name" Decode.string
         |> required "organizationId" Decode.string
         |> required "kmId" Decode.string
+        |> required "latestVersion" Decode.string
 
 
 packageListDecoder : Decoder (List Package)

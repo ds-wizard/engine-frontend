@@ -52,6 +52,9 @@ tableConfig jwt =
         , { label = "Knowledge Model ID"
           , getValue = TextValue .kmId
           }
+        , { label = "Latest Version"
+          , getValue = TextValue .latestVersion
+          }
         ]
     , actions =
         [ { label = TableActionIcon "fa fa-trash-o"
