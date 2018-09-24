@@ -46,7 +46,7 @@ tableConfig =
           , getValue = TextValue .role
           }
         , { label = "Active"
-          , getValue = BoolValue .isActive
+          , getValue = BoolValue .active
           }
         ]
     , actions =
