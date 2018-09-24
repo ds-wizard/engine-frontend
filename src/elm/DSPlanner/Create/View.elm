@@ -3,12 +3,13 @@ module DSPlanner.Create.View exposing (..)
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
 import Common.View exposing (fullPageActionResultView, pageHeader)
-import Common.View.Forms exposing (formActions, formResultView, inputGroup, selectGroup)
+import Common.View.Forms exposing (formActions, formResultView, formText, inputGroup, selectGroup, toggleGroup)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
 import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Routing
 import Form exposing (Form)
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing
@@ -41,6 +42,8 @@ formView form packages =
             div []
                 [ inputGroup form "name" "Name"
                 , selectGroup packageOptions form "packageId" "Package"
+                , toggleGroup form "private" "Private"
+                , formText "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
                 ]
     in
     formHtml
