@@ -65,7 +65,11 @@ update msg model =
             ( newModel, Ports.storeSession <| Just newModel.session )
 
         Msgs.MenuMsg msg ->
-            ( { model | menuModel = Common.Menu.Update.update msg model.menuModel }, Cmd.none )
+            let
+                ( menuModel, cmd ) =
+                    Common.Menu.Update.update Msgs.MenuMsg msg model.menuModel
+            in
+            ( { model | menuModel = menuModel }, cmd )
 
         Msgs.DSPlannerMsg msg ->
             let
