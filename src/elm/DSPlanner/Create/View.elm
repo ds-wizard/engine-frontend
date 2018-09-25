@@ -9,7 +9,6 @@ import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Routing
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (class)
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing

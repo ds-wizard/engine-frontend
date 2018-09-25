@@ -32,6 +32,7 @@ jobs:
   include:
     - stage: build
       script:
+        - ./scripts/build_info.sh
         - npm run build
         - npm test
         - docker build -t $IMAGE_TAG .

@@ -6,10 +6,11 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (fa, linkToAttributes)
 import Common.Html.Events exposing (onLinkClick)
-import Common.Menu.Msgs exposing (Msg(ProfileMenuDropdownMsg, SetReportIssueOpen))
-import Common.View exposing (modalView)
-import Html exposing (Html, a, p, span, text)
-import Html.Attributes exposing (class, href, target)
+import Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
+import Common.Menu.Msgs exposing (Msg(ProfileMenuDropdownMsg, SetAboutOpen, SetReportIssueOpen))
+import Common.View exposing (fullPageActionResultView, modalView)
+import Html exposing (..)
+import Html.Attributes exposing (class, colspan, href, target)
 import Msgs
 import Routing exposing (Route(Users))
 import Users.Common.Models exposing (User)
@@ -42,10 +43,16 @@ viewProfileMenu maybeUser dropDownState =
                 [ fa "user-circle-o"
                 , text "Edit profile"
                 ]
+            , Dropdown.divider
             , Dropdown.anchorItem [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetReportIssueOpen True) ]
                 [ fa "exclamation-circle"
                 , text "Report issue"
                 ]
+            , Dropdown.anchorItem [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetAboutOpen True) ]
+                [ fa "info-circle"
+                , text "About"
+                ]
+            , Dropdown.divider
             , Dropdown.anchorItem [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
                 [ fa "sign-out"
                 , text "Logout"
@@ -83,3 +90,50 @@ viewReportIssueModal isOpen =
             }
     in
     modalView modalConfig
+
+
+viewAboutModal : Bool -> ActionResult BuildInfo -> Html Msgs.Msg
+viewAboutModal isOpen serverBuildInfoActionResult =
+    let
+        modalContent =
+            fullPageActionResultView viewAboutModalContent serverBuildInfoActionResult
+
+        modalConfig =
+            { modalTitle = "About"
+            , modalContent = [ modalContent ]
+            , visible = isOpen
+            , actionResult = Unset
+            , actionName = "Ok"
+            , actionMsg = Msgs.MenuMsg <| SetAboutOpen False
+            , cancelMsg = Nothing
+            }
+    in
+    modalView modalConfig
+
+
+viewAboutModalContent : BuildInfo -> Html Msgs.Msg
+viewAboutModalContent serverBuildInfo =
+    div []
+        [ viewBuildInfo "Client" clientBuildInfo
+        , viewBuildInfo "Server" serverBuildInfo
+        ]
+
+
+viewBuildInfo : String -> BuildInfo -> Html Msgs.Msg
+viewBuildInfo name buildInfo =
+    table [ class "table table-borderless table-build-info" ]
+        [ thead []
+            [ tr []
+                [ th [ colspan 2 ] [ text name ] ]
+            ]
+        , tbody []
+            [ tr []
+                [ td [] [ text "Version" ]
+                , td [] [ code [] [ text buildInfo.version ] ]
+                ]
+            , tr []
+                [ td [] [ text "Built at" ]
+                , td [] [ em [] [ text buildInfo.builtAt ] ]
+                ]
+            ]
+        ]

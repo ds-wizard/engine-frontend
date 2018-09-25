@@ -3,7 +3,7 @@ module Common.View.Layout exposing (appView, publicView)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
-import Common.Menu.View exposing (viewProfileMenu, viewReportIssueModal)
+import Common.Menu.View exposing (viewAboutModal, viewProfileMenu, viewReportIssueModal)
 import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -57,6 +57,7 @@ appView model content =
         , div [ class "page row justify-content-center" ]
             [ content ]
         , viewReportIssueModal model.menuModel.reportIssueOpen
+        , viewAboutModal model.menuModel.aboutOpen model.menuModel.apiBuildInfo
         ]
 
 

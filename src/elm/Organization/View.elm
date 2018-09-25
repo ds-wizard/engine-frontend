@@ -7,7 +7,6 @@ import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Msgs
 import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))

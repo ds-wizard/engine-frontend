@@ -6,7 +6,6 @@ import Common.View exposing (defaultFullPageError, fullPageActionResultView, ful
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (class)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(Index))
