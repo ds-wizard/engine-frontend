@@ -21,8 +21,8 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "row KMEditor__Migration" ]
-        [ div [ class "col-xs-12" ] [ pageHeader "Migration" [] ]
+    div [ class "col KMEditor__Migration" ]
+        [ div [] [ pageHeader "Migration" [] ]
         , formResultView model.conflict
         , fullPageActionResultView (migrationView wrapMsg model) model.migration
         ]
@@ -32,16 +32,12 @@ migrationView : (Msg -> Msgs.Msg) -> Model -> Migration -> Html Msgs.Msg
 migrationView wrapMsg model migration =
     let
         errorMessage =
-            div [ class "col-xs-12" ]
-                [ div [ class "alert alert-danger" ]
-                    [ text "Migration state is corrupted." ]
-                ]
+            div [ class "alert alert-danger" ]
+                [ text "Migration state is corrupted." ]
 
         runningStateMessage =
-            div [ class "col-xs-12" ]
-                [ div [ class "alert alert-warning" ]
-                    [ text "Migration is still running, try again later." ]
-                ]
+            div [ class "alert alert-warning" ]
+                [ text "Migration is still running, try again later." ]
 
         view =
             case migration.migrationState.stateType of
@@ -50,16 +46,16 @@ migrationView wrapMsg model migration =
                         conflictView =
                             migration.migrationState.targetEvent
                                 |> Maybe.map (getEventView wrapMsg model migration)
-                                |> Maybe.map (List.singleton >> div [ class "col-xs-8" ])
+                                |> Maybe.map (List.singleton >> div [ class "col-8" ])
                                 |> Maybe.withDefault errorMessage
 
                         diffTree =
                             migration.migrationState.targetEvent
                                 |> Maybe.map (List.singleton >> diffTreeView migration.currentKnowledgeModel)
-                                |> Maybe.map (List.singleton >> div [ class "col-xs-4" ])
+                                |> Maybe.map (List.singleton >> div [ class "col-4" ])
                                 |> Maybe.withDefault emptyNode
                     in
-                    div []
+                    div [ class "row" ]
                         [ migrationSummary migration, conflictView, diffTree ]
 
                 CompletedState ->
@@ -76,7 +72,7 @@ migrationView wrapMsg model migration =
 
 migrationSummary : Migration -> Html Msgs.Msg
 migrationSummary migration =
-    div [ class "col-xs-12" ]
+    div [ class "col-12" ]
         [ p []
             [ text "Migration of "
             , strong [] [ text migration.currentKnowledgeModel.name ]
@@ -187,9 +183,11 @@ viewEvent : (Msg -> Msgs.Msg) -> Model -> String -> Html Msgs.Msg -> Html Msgs.M
 viewEvent wrapMsg model name diffView =
     div []
         [ h3 [] [ text name ]
-        , div [ class "well" ]
-            [ diffView
-            , formActions wrapMsg model
+        , div [ class "card bg-light" ]
+            [ div [ class "card-body" ]
+                [ diffView
+                , formActions wrapMsg model
+                ]
             ]
         ]
 
