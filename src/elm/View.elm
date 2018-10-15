@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import Common.Html exposing (detailContainerClass, linkTo)
+import Common.Html exposing (detailContainerClassWith, linkTo)
 import Common.View exposing (defaultFullPageError, fullPageMessage, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
 import DSPlanner.View
@@ -58,13 +58,10 @@ view model =
         NotFound ->
             appView model notFoundView
 
-        DataManagementPlans ->
-            appView model dataManagementPlansView
-
 
 welcomeView : Html Msg
 welcomeView =
-    div [ detailContainerClass ]
+    div [ detailContainerClassWith "Welcome" ]
         [ div [ class "alert alert-warning" ]
             [ h4 [ class "alert-heading" ] [ text "Warning" ]
             , p [ class "mb-0" ] [ text "DSW is currently under intensive development. As such, we cannot guarantee DS plans compatibility in future versions." ]
@@ -77,14 +74,6 @@ welcomeView =
                 ]
             ]
         , fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
-        ]
-
-
-dataManagementPlansView : Html Msg
-dataManagementPlansView =
-    div [ detailContainerClass ]
-        [ pageHeader "Data Management Plans" []
-        , fullPageMessage "fa-book" "Data Management Plans are not implemented yet."
         ]
 
 

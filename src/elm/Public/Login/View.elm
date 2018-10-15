@@ -13,7 +13,7 @@ import Routing exposing (Route(Public))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "row justify-content-center" ]
+    div [ class "row justify-content-center Public__Login" ]
         [ loginForm wrapMsg model ]
 
 

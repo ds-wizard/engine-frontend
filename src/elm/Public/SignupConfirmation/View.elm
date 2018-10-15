@@ -28,7 +28,7 @@ view model =
                 Success _ ->
                     successView
     in
-    div [ class "row justify-content-center" ]
+    div [ class "row justify-content-center Public__SignupConfirmation" ]
         [ content ]
 
 
