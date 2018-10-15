@@ -26,7 +26,7 @@ view wrapMsg model =
                 _ ->
                     signupForm wrapMsg model
     in
-    div [ class "row justify-content-center" ]
+    div [ class "row justify-content-center Public_ForgottenPasswordConfirmation" ]
         [ content ]
 
 

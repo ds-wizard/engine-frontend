@@ -21,7 +21,6 @@ type Route
     | Users Users.Routing.Route
     | NotAllowed
     | NotFound
-    | DataManagementPlans
 
 
 matchers : Parser (Route -> a) a
@@ -36,7 +35,6 @@ matchers =
                 ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
                    , map Organization (s "organization")
-                   , map DataManagementPlans (s "data-management-plans")
                    ]
     in
     oneOf parsers
@@ -77,9 +75,6 @@ isAllowed route maybeJwt =
         NotFound ->
             True
 
-        DataManagementPlans ->
-            hasPerm maybeJwt Perm.dataManagementPlan
-
         _ ->
             False
 
@@ -109,9 +104,6 @@ toUrl route =
 
                 Users route ->
                     Users.Routing.toUrl route
-
-                DataManagementPlans ->
-                    [ "data-management-plans" ]
 
                 _ ->
                     []

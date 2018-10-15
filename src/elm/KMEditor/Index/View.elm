@@ -21,7 +21,7 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
-    div [ class "col" ]
+    div [ class "col KMEditor__Index" ]
         [ pageHeader "Knowledge Model Editor" indexActions
         , formResultView model.deletingMigration
         , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels

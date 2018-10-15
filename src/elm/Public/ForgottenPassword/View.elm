@@ -24,7 +24,7 @@ view wrapMsg model =
                 _ ->
                     forgottenPasswordForm wrapMsg model
     in
-    div [ class "row justify-content-center" ]
+    div [ class "row justify-content-center Public__ForgottenPassword" ]
         [ content ]
 
 
