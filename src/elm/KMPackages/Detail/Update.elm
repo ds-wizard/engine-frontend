@@ -1,9 +1,9 @@
 module KMPackages.Detail.Update exposing (fetchData, update)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Bootstrap.Dropdown as Dropdown
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import Jwt
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Detail.Models exposing (..)

@@ -1,7 +1,7 @@
 module Public.Common.View exposing (..)
 
+import ActionResult exposing (ActionResult)
 import Common.Html exposing (emptyNode, linkTo)
-import Common.Types exposing (ActionResult)
 import Common.View.Forms exposing (formResultView, submitButton)
 import Html exposing (..)
 import Html.Attributes exposing (class)

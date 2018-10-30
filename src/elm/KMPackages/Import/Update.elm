@@ -1,8 +1,8 @@
 module KMPackages.Import.Update exposing (update)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import FileReader exposing (NativeFile)
 import Json.Decode as Decode
 import Jwt

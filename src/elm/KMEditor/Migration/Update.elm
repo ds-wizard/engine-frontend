@@ -1,8 +1,8 @@
 module KMEditor.Migration.Update exposing (fetchData, update)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import Jwt
 import KMEditor.Common.Models.Events exposing (getEventUuid)
 import KMEditor.Common.Models.Migration exposing (Migration, MigrationResolution, encodeMigrationResolution, newApplyMigrationResolution, newRejectMigrationResolution)

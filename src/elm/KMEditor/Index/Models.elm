@@ -1,7 +1,7 @@
 module KMEditor.Index.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)

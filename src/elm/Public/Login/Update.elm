@@ -1,9 +1,9 @@
 module Public.Login.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (parseJwt)
 import Auth.Msgs
 import Common.Models exposing (getServerError)
-import Common.Types exposing (ActionResult(..))
 import Http
 import Msgs
 import Public.Login.Models exposing (Model)

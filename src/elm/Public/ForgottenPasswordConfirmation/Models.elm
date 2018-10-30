@@ -1,8 +1,8 @@
 module Public.ForgottenPasswordConfirmation.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (validateConfirmation)
-import Common.Types exposing (ActionResult(Unset))
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as Encode exposing (..)

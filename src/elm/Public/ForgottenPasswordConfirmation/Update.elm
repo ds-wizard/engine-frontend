@@ -1,8 +1,8 @@
 module Public.ForgottenPasswordConfirmation.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (setFormErrors)
 import Common.Models exposing (getServerError)
-import Common.Types exposing (ActionResult(..))
 import Form
 import Http
 import Msgs

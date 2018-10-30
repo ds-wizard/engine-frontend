@@ -1,7 +1,7 @@
 module KMPackages.Detail.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Common.Types exposing (ActionResult(..))
 import KMPackages.Common.Models exposing (PackageDetail)
 
 

@@ -18,7 +18,7 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
-    div [ class "col" ]
+    div [ class "col KMPackages__Index" ]
         [ pageHeader "Knowledge Model Packages" (indexActions jwt)
         , formSuccessResultView model.deletingPackage
         , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.packages
@@ -51,6 +51,9 @@ tableConfig jwt =
           }
         , { label = "Knowledge Model ID"
           , getValue = TextValue .kmId
+          }
+        , { label = "Latest Version"
+          , getValue = TextValue .latestVersion
           }
         ]
     , actions =

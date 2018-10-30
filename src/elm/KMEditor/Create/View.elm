@@ -6,7 +6,6 @@ import Common.View exposing (defaultFullPageError, fullPageActionResultView, ful
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (class)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(Index))
@@ -42,8 +41,7 @@ formView wrapMsg form packages =
             div []
                 [ inputGroup form "name" "Name"
                 , inputGroup form "kmId" "Knowledge Model ID"
-                , p [ class "help-block help-block-after" ]
-                    [ text "Knowledge Model ID can contain alfanumeric characters and dash but cannot start or end with dash." ]
+                , formTextAfter "Knowledge Model ID can contain alfanumeric characters and dash but cannot start or end with dash."
                 , selectGroup parentOptions form "parentPackageId" "Parent Package"
                 ]
     in

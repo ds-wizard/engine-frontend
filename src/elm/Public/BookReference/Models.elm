@@ -1,6 +1,6 @@
 module Public.BookReference.Models exposing (..)
 
-import Common.Types exposing (ActionResult(Loading))
+import ActionResult exposing (ActionResult(..))
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, required)
 

@@ -1,7 +1,7 @@
 module Public.BookReference.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Models exposing (getServerError)
-import Common.Types exposing (ActionResult(Success))
 import Http
 import Msgs
 import Public.BookReference.Models exposing (BookReference, Model)

@@ -1,8 +1,8 @@
 module Common.View.Forms exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError(..))
 import Common.Html exposing (..)
-import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
 import Form.Input as Input
@@ -152,6 +152,20 @@ toReadable error labelText =
 
         _ ->
             toString error
+
+
+
+-- Other form views
+
+
+formText : String -> Html msg
+formText str =
+    p [ class "form-text text-muted" ] [ text str ]
+
+
+formTextAfter : String -> Html msg
+formTextAfter str =
+    p [ class "form-text form-text-after text-muted" ] [ text str ]
 
 
 

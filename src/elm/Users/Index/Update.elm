@@ -1,8 +1,8 @@
 module Users.Index.Update exposing (fetchData, update)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import Jwt
 import Msgs
 import Requests exposing (getResultCmd)

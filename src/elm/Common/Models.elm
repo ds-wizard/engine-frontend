@@ -1,6 +1,6 @@
 module Common.Models exposing (..)
 
-import Common.Types exposing (ActionResult(Error))
+import ActionResult exposing (ActionResult(..))
 import Http exposing (Error(BadStatus), Response)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (decode, optional, required)

@@ -1,8 +1,8 @@
 module KMEditor.Editor.Update exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(Loading, Success), combine3, mapSuccess)
 import Dom.Scroll
 import Jwt
 import KMEditor.Common.Models.Events exposing (encodeEvents)
@@ -367,7 +367,7 @@ setActiveEditor wrapMsg uuid seed model _ =
 
 createEditors : Model -> Model
 createEditors model =
-    case combine3 model.knowledgeModel model.metrics model.levels of
+    case ActionResult.combine3 model.knowledgeModel model.metrics model.levels of
         Success ( knowledgeModel, metrics, levels ) ->
             { model | editors = createKnowledgeModelEditor (getEditorContext model) knowledgeModel model.editors }
 

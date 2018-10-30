@@ -1,6 +1,6 @@
 module Common.View.FormsTest exposing (..)
 
-import Common.Types exposing (ActionResult(..))
+import ActionResult exposing (ActionResult(..))
 import Common.View.Forms exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (string)

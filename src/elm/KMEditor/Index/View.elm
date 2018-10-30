@@ -1,9 +1,9 @@
 module KMEditor.Index.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (formResultView, selectGroup)
 import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon, TableActionText), TableConfig, TableFieldValue(HtmlValue, TextValue), indexTable)
@@ -21,7 +21,7 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
-    div [ class "col" ]
+    div [ class "col KMEditor__Index" ]
         [ pageHeader "Knowledge Model Editor" indexActions
         , formResultView model.deletingMigration
         , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels

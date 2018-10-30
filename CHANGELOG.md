@@ -1,3 +1,21 @@
+# 1.0.0
+
+## Features
+
+- Option to create private questionnaire
+- Information about current version of the client and server
+- Latest package version is now visible in KM packages list
+
+## Fixes
+
+- Fixed KM migration view
+
+## Other
+
+- Travis build now push only latest, develop and tagged images into Docker Hub
+
+
+
 # 0.6.2
 
 ## Changes

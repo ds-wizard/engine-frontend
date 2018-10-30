@@ -1,13 +1,12 @@
 module Organization.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (..)
 import Msgs
 import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))
@@ -48,8 +47,7 @@ formView form =
             div []
                 [ inputGroup form "name" "Organization name"
                 , inputGroup form "organizationId" "Organization ID"
-                , p [ class "form-text text-muted form-text-after" ]
-                    [ text "Organization ID can contain alfanumeric characters and dot but cannot start or end with dot." ]
+                , formTextAfter "Organization ID can contain alfanumeric characters and dot but cannot start or end with dot."
                 ]
     in
     formHtml |> Html.map (FormMsg >> Msgs.OrganizationMsg)

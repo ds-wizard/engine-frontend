@@ -1,9 +1,9 @@
 module Public.ForgottenPassword.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (fullPageMessage)
-import Common.View.Forms exposing (errorView, inputGroup, submitButton)
+import Common.View.Forms exposing (errorView, formTextAfter, inputGroup, submitButton)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
@@ -24,7 +24,7 @@ view wrapMsg model =
                 _ ->
                     forgottenPasswordForm wrapMsg model
     in
-    div [ class "row justify-content-center" ]
+    div [ class "row justify-content-center Public__ForgottenPassword" ]
         [ content ]
 
 
@@ -47,8 +47,7 @@ formView : Form CustomFormError ForgottenPasswordForm -> Html Form.Msg
 formView form =
     div []
         [ inputGroup form "email" "Email"
-        , p [ class "form-text text-muted form-text-after" ]
-            [ text "Enter the email you use to log in and we will send you a recover link." ]
+        , formTextAfter "Enter the email you use to log in and we will send you a recover link."
         ]
 
 

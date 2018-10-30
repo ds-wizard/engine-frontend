@@ -1,8 +1,8 @@
 module KMPackages.Index.Update exposing (fetchData, update)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import Jwt
 import KMPackages.Common.Models exposing (Package)
 import KMPackages.Index.Models exposing (Model)

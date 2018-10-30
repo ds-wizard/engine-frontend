@@ -1,6 +1,6 @@
 module Public.Login.Msgs exposing (..)
 
-import Common.Types exposing (ActionResult)
+import ActionResult exposing (ActionResult)
 import Http
 
 

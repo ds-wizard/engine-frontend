@@ -1,6 +1,6 @@
 module KMEditor.Migration.Models exposing (..)
 
-import Common.Types exposing (ActionResult(..))
+import ActionResult exposing (ActionResult(..))
 import KMEditor.Common.Models.Migration exposing (Migration)
 
 

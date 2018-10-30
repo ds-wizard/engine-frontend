@@ -1,7 +1,7 @@
 module Public.SignupConfirmation.View exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, linkTo)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -28,7 +28,7 @@ view model =
                 Success _ ->
                     successView
     in
-    div [ class "row justify-content-center" ]
+    div [ class "row justify-content-center Public__SignupConfirmation" ]
         [ content ]
 
 

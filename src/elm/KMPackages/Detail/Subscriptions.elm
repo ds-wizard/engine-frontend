@@ -1,7 +1,7 @@
 module KMPackages.Detail.Subscriptions exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Common.Types exposing (ActionResult(Success))
 import KMPackages.Detail.Models exposing (Model, PackageDetailRow)
 import KMPackages.Detail.Msgs exposing (Msg(DropdownMsg))
 import Msgs

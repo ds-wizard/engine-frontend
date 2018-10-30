@@ -1,8 +1,8 @@
 module Users.Edit.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.Types exposing (ActionResult(..))
 import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
 import Form exposing (Form)
@@ -106,7 +106,7 @@ userFormView form current =
             if current then
                 emptyNode
             else
-                toggleGroup form "isActive" "Active"
+                toggleGroup form "active" "Active"
 
         formHtml =
             div []

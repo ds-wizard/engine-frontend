@@ -1,7 +1,7 @@
 module Public.Questionnaire.Models exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Questionnaire.Models
-import Common.Types exposing (ActionResult(Loading))
 
 
 type alias Model =

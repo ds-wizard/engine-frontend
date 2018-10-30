@@ -1,9 +1,9 @@
 module KMEditor.Create.Update exposing (fetchData, update)
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Form exposing (setFormErrorsJwt)
 import Common.Models exposing (getServerErrorJwt)
-import Common.Types exposing (ActionResult(..))
 import Form exposing (Form)
 import Jwt
 import KMEditor.Create.Models exposing (..)
