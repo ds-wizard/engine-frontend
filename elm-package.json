@@ -1,8 +1,8 @@
 {
-    "version": "0.6.2",
-    "summary": "Elixir DSW Client",
+    "version": "1.0.0",
+    "summary": "DSW Client",
     "repository": "https://github.com/DataStewardshipWizard/dsw-client.git",
-    "license": "BSD3",
+    "license": "Apache-2.0",
     "source-directories": [
         "src/elm",
         "vendor"
