@@ -3,7 +3,7 @@ sudo: required
 language: node_js
 
 node_js:
-  - "8.0.0"
+  - "8.12.0"
 
 services:
   - docker
@@ -16,6 +16,7 @@ env:
   - PRIVATE_IMAGE="$REGISTRY/elixir/dsw-client" IMAGE="datastewardshipwizard/client" IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest"
 
 install:
+  - npm install -g npx
   - npm install
 
 cache:
