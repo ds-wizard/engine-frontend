@@ -14,7 +14,6 @@ import Html.Events exposing (custom)
 import Json.Decode as Decode
 
 
-{-| -}
 onLinkClick : msg -> Attribute msg
 onLinkClick message =
     let

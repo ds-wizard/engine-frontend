@@ -62,7 +62,11 @@ update msg model =
                     ( model, pushUrl model.state.key (Url.toString url) )
 
                 Browser.External url ->
-                    ( model, load url )
+                    if url == "" then
+                        ( model, Cmd.none )
+
+                    else
+                        ( model, load url )
 
         Msgs.AuthMsg authMsg ->
             Auth.Update.update authMsg model
