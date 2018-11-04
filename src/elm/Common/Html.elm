@@ -15,7 +15,6 @@ linkTo route attributes children =
 linkToAttributes : Route -> List (Attribute Msg)
 linkToAttributes route =
     [ href <| Routing.toUrl route
-    , onLinkClick <| Msgs.ChangeLocation <| Routing.toUrl route
     ]
 
 

@@ -46,9 +46,6 @@ fetchData model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Msgs.ChangeLocation path ->
-            ( model, pushUrl model.state.key path )
-
         Msgs.OnUrlChange location ->
             let
                 newModel =

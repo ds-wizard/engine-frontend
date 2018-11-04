@@ -13,8 +13,7 @@ import Users.Msgs
 
 
 type Msg
-    = ChangeLocation String
-    | OnUrlChange Url
+    = OnUrlChange Url
     | OnUrlRequest UrlRequest
     | AuthMsg Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
