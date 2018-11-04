@@ -1,4 +1,4 @@
-module Common.Menu.Update exposing (..)
+module Common.Menu.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Menu.Models exposing (Model)

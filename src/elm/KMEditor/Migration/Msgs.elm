@@ -1,4 +1,4 @@
-module KMEditor.Migration.Msgs exposing (..)
+module KMEditor.Migration.Msgs exposing (Msg(..))
 
 import Jwt
 import KMEditor.Common.Models.Migration exposing (Migration)

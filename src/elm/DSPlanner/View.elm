@@ -1,4 +1,4 @@
-module DSPlanner.View exposing (..)
+module DSPlanner.View exposing (view)
 
 import DSPlanner.Create.View
 import DSPlanner.Detail.View

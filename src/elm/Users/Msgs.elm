@@ -1,4 +1,4 @@
-module Users.Msgs exposing (..)
+module Users.Msgs exposing (Msg(..))
 
 import Users.Create.Msgs
 import Users.Edit.Msgs

@@ -21,9 +21,10 @@ module FormEngine.Model
         )
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import List.Extra as List
+import String exposing (fromInt, fromFloat)
 
 
 {- Types definitions -}
@@ -111,14 +112,14 @@ decodeFormValues =
 
 decodeFormValue : Decoder FormValue
 decodeFormValue =
-    decode FormValue
+    Decode.succeed FormValue
         |> required "path" Decode.string
         |> required "value" Decode.string
 
 
 encodeFormValues : FormValues -> Encode.Value
 encodeFormValues formValues =
-    Encode.list <| List.map encodeFormValue formValues
+    Encode.list encodeFormValue formValues
 
 
 encodeFormValue : FormValue -> Encode.Value
@@ -236,14 +237,14 @@ setInitialValue formValues path element =
                         |> initialValueToInt
                         |> Maybe.withDefault 1
 
-                itemElements =
+                newItemElements =
                     List.repeat numberOfItems (createItemElement items)
                         |> List.indexedMap (setInitialValuesItems formValues (path ++ [ descriptor.name ]))
 
                 newState =
                     { state | value = Just numberOfItems }
             in
-            GroupFormElement descriptor items itemElements newState
+            GroupFormElement descriptor items newItemElements newState
 
 
 getInitialValue : FormValues -> List String -> String -> Maybe String
@@ -258,7 +259,7 @@ getInitialValue formValues path current =
 
 initialValueToInt : Maybe String -> Maybe Int
 initialValueToInt =
-    Maybe.map (String.toInt >> Result.withDefault 0)
+    Maybe.map (String.toInt >> Maybe.withDefault 0)
 
 
 setInitialValuesOption : FormValues -> List String -> OptionElement a -> OptionElement a
@@ -273,7 +274,7 @@ setInitialValuesOption formValues path option =
 
 setInitialValuesItems : FormValues -> List String -> Int -> ItemElement a -> ItemElement a
 setInitialValuesItems formValues path index itemElement =
-    List.map (setInitialValue formValues (path ++ [ toString index ])) itemElement
+    List.map (setInitialValue formValues (path ++ [ fromInt index ])) itemElement
 
 
 
@@ -289,25 +290,25 @@ getFieldValue : List String -> FormElement a -> FormValues -> FormValues
 getFieldValue path element values =
     case element of
         StringFormElement descriptor state ->
-            applyFieldValue values (pathToKey path descriptor.name) state
+            applyFieldValue values (pathToKey path descriptor.name) state.value
 
         NumberFormElement descriptor state ->
-            applyFieldValue values (pathToKey path descriptor.name) state
+            applyFieldValue values (pathToKey path descriptor.name) (Maybe.map fromInt state.value)
 
         TextFormElement descriptor state ->
-            applyFieldValue values (pathToKey path descriptor.name) state
+            applyFieldValue values (pathToKey path descriptor.name) state.value
 
         ChoiceFormElement descriptor options state ->
             let
                 newValues =
-                    applyFieldValue values (pathToKey path descriptor.name) state
+                    applyFieldValue values (pathToKey path descriptor.name) state.value
             in
             List.foldl (getOptionValues (path ++ [ descriptor.name ])) newValues options
 
         GroupFormElement descriptor items itemElements state ->
             let
                 newValues =
-                    applyFieldValue values (pathToKey path descriptor.name) state
+                    applyFieldValue values (pathToKey path descriptor.name) (Maybe.map fromInt state.value)
             in
             List.indexedFoldl (getItemValues (path ++ [ descriptor.name ])) newValues itemElements
 
@@ -324,7 +325,7 @@ getOptionValues path option values =
 
 getItemValues : List String -> Int -> ItemElement a -> FormValues -> FormValues
 getItemValues path index item values =
-    List.foldl (getFieldValue (path ++ [ toString index ])) values item
+    List.foldl (getFieldValue (path ++ [ fromInt index ])) values item
 
 
 pathToKey : List String -> String -> String
@@ -332,23 +333,23 @@ pathToKey path current =
     String.join "." (path ++ [ current ])
 
 
-applyFieldValue : FormValues -> String -> FormElementState a -> FormValues
-applyFieldValue values key state =
-    case state.value of
+applyFieldValue : FormValues -> String -> Maybe String -> FormValues
+applyFieldValue values key stringValue =
+    case stringValue of
         Just value ->
-            values ++ [ { path = key, value = valueToString value } ]
+            values ++ [ { path = key, value = value } ]
 
         Nothing ->
             values ++ [ { path = key, value = "" } ]
 
 
-valueToString : a -> String
-valueToString value =
-    let
-        str =
-            toString value
-    in
-    if String.left 1 str == "\"" then
-        String.dropRight 1 (String.dropLeft 1 str)
-    else
-        str
+-- valueToString : a -> String
+-- valueToString value =
+--     let
+--         str =
+--             toString value
+--     in
+--     if String.left 1 str == "\"" then
+--         String.dropRight 1 (String.dropLeft 1 str)
+--     else
+--         str

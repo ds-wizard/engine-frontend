@@ -10,7 +10,7 @@ import Html.Attributes exposing (class)
 import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.ForgottenPassword.Models exposing (ForgottenPasswordForm, Model)
-import Public.ForgottenPassword.Msgs exposing (Msg(FormMsg))
+import Public.ForgottenPassword.Msgs exposing (Msg(..))
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg

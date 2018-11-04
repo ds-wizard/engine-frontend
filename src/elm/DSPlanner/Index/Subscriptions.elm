@@ -1,9 +1,9 @@
-module DSPlanner.Index.Subscriptions exposing (..)
+module DSPlanner.Index.Subscriptions exposing (rowSubscriptions, subscriptions)
 
-import ActionResult exposing (ActionResult(Success))
+import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import DSPlanner.Index.Models exposing (Model, QuestionnaireRow)
-import DSPlanner.Index.Msgs exposing (Msg(DropdownMsg))
+import DSPlanner.Index.Msgs exposing (Msg(..))
 import Msgs
 
 

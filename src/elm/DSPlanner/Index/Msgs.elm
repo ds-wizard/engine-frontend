@@ -1,4 +1,4 @@
-module DSPlanner.Index.Msgs exposing (..)
+module DSPlanner.Index.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
 import DSPlanner.Common.Models exposing (Questionnaire)

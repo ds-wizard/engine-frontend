@@ -1,12 +1,12 @@
-module KMPackages.Import.Models exposing (..)
+module KMPackages.Import.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import FileReader exposing (NativeFile)
+-- import FileReader exposing (NativeFile)
 
 
 type alias Model =
     { dnd : Int
-    , files : List NativeFile
+    -- , files : List NativeFile
     , importing : ActionResult String
     }
 
@@ -14,6 +14,6 @@ type alias Model =
 initialModel : Model
 initialModel =
     { dnd = 0
-    , files = []
+    -- , files = []
     , importing = Unset
     }

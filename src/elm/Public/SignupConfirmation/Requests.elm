@@ -1,4 +1,4 @@
-module Public.SignupConfirmation.Requests exposing (..)
+module Public.SignupConfirmation.Requests exposing (activateBody, putUserActivation)
 
 import Http
 import Json.Encode as Encode exposing (Value)

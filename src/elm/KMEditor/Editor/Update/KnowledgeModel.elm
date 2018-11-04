@@ -1,15 +1,15 @@
-module KMEditor.Editor.Update.KnowledgeModel exposing (..)
+module KMEditor.Editor.Update.KnowledgeModel exposing (addChapter, updateKMForm, withGenerateKMEditEvent)
 
 import Form
 import KMEditor.Common.Models.Entities exposing (newChapter)
-import KMEditor.Common.Models.Path exposing (PathNode(KMPathNode))
+import KMEditor.Common.Models.Path exposing (PathNode(..))
 import KMEditor.Editor.Models exposing (Model)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (knowledgeModelFormValidation)
 import KMEditor.Editor.Update.Abstract exposing (addEntity, updateForm, withGenerateEvent)
 import KMEditor.Editor.Update.Events exposing (createEditKnowledgeModelEvent)
 import Msgs
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 
 
 updateKMForm : Model -> Form.Msg -> KMEditorData -> Model

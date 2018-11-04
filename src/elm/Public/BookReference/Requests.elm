@@ -1,4 +1,4 @@
-module Public.BookReference.Requests exposing (..)
+module Public.BookReference.Requests exposing (getBookReference)
 
 import Http
 import Public.BookReference.Models exposing (BookReference, bookReferenceDecoder)

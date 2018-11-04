@@ -1,4 +1,4 @@
-module DSPlanner.Index.View exposing (..)
+module DSPlanner.Index.View exposing (deleteModal, exportAction, exportFormats, exportItem, getExportUrl, indexActions, tableActionDelete, tableConfig, view)
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
@@ -9,7 +9,7 @@ import Common.View.Table exposing (..)
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Index.Models exposing (Model, QuestionnaireRow)
 import DSPlanner.Index.Msgs exposing (Msg(..))
-import DSPlanner.Routing exposing (Route(Create, Detail))
+import DSPlanner.Routing exposing (Route(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs

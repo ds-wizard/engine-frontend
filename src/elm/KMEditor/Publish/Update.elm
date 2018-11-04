@@ -10,6 +10,7 @@ import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model, encod
 import KMEditor.Publish.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (getKnowledgeModel, putKnowledgeModelVersion)
 import KMPackages.Routing
+import Models exposing (State)
 import Msgs
 import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
@@ -22,17 +23,17 @@ fetchData wrapMsg uuid session =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         GetKnowledgeModelCompleted result ->
             getKnowledgeModelCompleted model result
 
-        FormMsg msg ->
-            handleForm msg wrapMsg session model
+        FormMsg formMsg ->
+            handleForm formMsg wrapMsg state.session model
 
         PutKnowledgeModelVersionCompleted result ->
-            putKnowledgeModelVersionCompleted model result
+            putKnowledgeModelVersionCompleted state model result
 
 
 getKnowledgeModelCompleted : Model -> Result Jwt.JwtError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
@@ -81,11 +82,11 @@ putKnowledgeModelVersionCmd wrapMsg session form uuid =
         |> Cmd.map wrapMsg
 
 
-putKnowledgeModelVersionCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-putKnowledgeModelVersionCompleted model result =
+putKnowledgeModelVersionCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+putKnowledgeModelVersionCompleted state model result =
     case result of
         Ok version ->
-            ( model, cmdNavigate (KMPackages KMPackages.Routing.Index) )
+            ( model, cmdNavigate state.key (KMPackages KMPackages.Routing.Index) )
 
         Err error ->
             ( { model | publishingKnowledgeModel = getServerErrorJwt error "Publishing new version failed" }

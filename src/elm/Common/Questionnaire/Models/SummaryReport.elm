@@ -1,8 +1,8 @@
-module Common.Questionnaire.Models.SummaryReport exposing (..)
+module Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport, answeredIndicationDecoder, chapterReportDecoder, indicationReportDecoder, indicationType, metricReportDecoder, summaryReportDecoder)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 
 
 type alias SummaryReport =
@@ -34,13 +34,13 @@ type alias AnsweredIndicationData =
 
 summaryReportDecoder : Decoder SummaryReport
 summaryReportDecoder =
-    decode SummaryReport
+    Decode.succeed SummaryReport
         |> required "chapterReports" (Decode.list chapterReportDecoder)
 
 
 chapterReportDecoder : Decoder ChapterReport
 chapterReportDecoder =
-    decode ChapterReport
+    Decode.succeed ChapterReport
         |> required "chapterUuid" Decode.string
         |> required "metrics" (Decode.list metricReportDecoder)
         |> required "indications" (Decode.list indicationReportDecoder)
@@ -48,7 +48,7 @@ chapterReportDecoder =
 
 metricReportDecoder : Decoder MetricReport
 metricReportDecoder =
-    decode MetricReport
+    Decode.succeed MetricReport
         |> required "metricUuid" Decode.string
         |> required "measure" Decode.float
 
@@ -66,7 +66,7 @@ indicationType =
 
 answeredIndicationDecoder : Decoder IndicationReport
 answeredIndicationDecoder =
-    decode AnsweredIndicationData
+    Decode.succeed AnsweredIndicationData
         |> required "answeredQuestions" Decode.int
         |> required "unansweredQuestions" Decode.int
         |> Decode.map AnsweredIndication

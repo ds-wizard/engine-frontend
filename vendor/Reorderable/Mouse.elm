@@ -1,15 +1,9 @@
-effect module Reorderable.Mouse
-    where { subscription = MySub }
-    exposing
-        ( MouseEvent
-        , Position
-        , clicks
-        , downs
-        , mouseEvent
-        , mouseEventDecoder
-        , moves
-        , ups
-        )
+-- module Reorderable.Mouse exposing (..)
+
+effect module Reorderable.Mouse where { subscription = MySub } exposing
+    ( Position, MouseEvent, mouseEvent, mouseEventDecoder
+    , clicks, moves, downs, ups
+    )
 
 {-|
 
@@ -30,6 +24,7 @@ import Dom.LowLevel as Dom
 import Json.Decode as Json
 import Process
 import Task exposing (Task)
+
 
 
 -- POSITIONS

@@ -1,4 +1,4 @@
-module KMEditor.Create.Models exposing (..)
+module KMEditor.Create.Models exposing (KnowledgeModelCreateForm, Model, encodeKnowledgeCreateModelForm, initKnowledgeModelCreateForm, initialModel, knowledgeModelCreateFormValidation)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)

@@ -1,4 +1,4 @@
-module Public.Login.Update exposing (..)
+module Public.Login.Update exposing (loginCmd, loginCompleted, update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (parseJwt)
@@ -21,7 +21,7 @@ update msg wrapMsg model =
         Password password ->
             ( { model | password = password }, Cmd.none )
 
-        Login ->
+        DoLogin ->
             ( { model | loggingIn = Loading }, loginCmd wrapMsg model )
 
         LoginCompleted result ->

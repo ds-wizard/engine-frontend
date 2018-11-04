@@ -1,7 +1,7 @@
-module Auth.Models exposing (..)
+module Auth.Models exposing (JwtToken, Session, initialSession, jwtDecoder, parseJwt, sessionDecoder, sessionExists, setSidebarCollapsed, setToken, setUser)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, optional, required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Jwt exposing (decodeToken)
 import Users.Common.Models exposing (User, userDecoder)
 
@@ -46,7 +46,7 @@ setSidebarCollapsed session collapsed =
 
 sessionDecoder : Decoder Session
 sessionDecoder =
-    decode Session
+    Decode.succeed Session
         |> required "token" Decode.string
         |> required "user" (Decode.nullable userDecoder)
         |> optional "sidebarCollapsed" Decode.bool False
@@ -73,5 +73,5 @@ parseJwt token =
 
 jwtDecoder : Decoder JwtToken
 jwtDecoder =
-    decode JwtToken
+    Decode.succeed JwtToken
         |> required "permissions" (Decode.list Decode.string)

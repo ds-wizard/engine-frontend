@@ -1,8 +1,9 @@
-module Users.Update exposing (..)
+module Users.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
+import Models exposing (State)
 import Msgs
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 import Users.Create.Update
 import Users.Edit.Update
 import Users.Index.Update
@@ -24,26 +25,26 @@ fetchData route wrapMsg session =
             Cmd.none
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg seed session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
-        CreateMsg msg ->
+        CreateMsg createMsg ->
             let
                 ( newSeed, createModel, cmd ) =
-                    Users.Create.Update.update msg (wrapMsg << CreateMsg) seed session model.createModel
+                    Users.Create.Update.update createMsg (wrapMsg << CreateMsg) state model.createModel
             in
-            ( seed, { model | createModel = createModel }, cmd )
+            ( newSeed, { model | createModel = createModel }, cmd )
 
-        EditMsg msg ->
+        EditMsg editMsg ->
             let
                 ( editModel, cmd ) =
-                    Users.Edit.Update.update msg (wrapMsg << EditMsg) session model.editModel
+                    Users.Edit.Update.update editMsg (wrapMsg << EditMsg) state.session model.editModel
             in
-            ( seed, { model | editModel = editModel }, cmd )
+            ( state.seed, { model | editModel = editModel }, cmd )
 
-        IndexMsg msg ->
+        IndexMsg indexMsg ->
             let
                 ( indexModel, cmd ) =
-                    Users.Index.Update.update msg (wrapMsg << IndexMsg) session model.indexModel
+                    Users.Index.Update.update indexMsg (wrapMsg << IndexMsg) state.session model.indexModel
             in
-            ( seed, { model | indexModel = indexModel }, cmd )
+            ( state.seed, { model | indexModel = indexModel }, cmd )

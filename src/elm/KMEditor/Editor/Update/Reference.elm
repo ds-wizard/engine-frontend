@@ -1,14 +1,14 @@
-module KMEditor.Editor.Update.Reference exposing (..)
+module KMEditor.Editor.Update.Reference exposing (deleteReference, removeReference, updateIfQuestion, updateReferenceForm, withGenerateReferenceEditEvent)
 
 import Form
 import KMEditor.Editor.Models exposing (Model)
 import KMEditor.Editor.Models.Children as Children exposing (Children)
-import KMEditor.Editor.Models.Editors exposing (Editor(QuestionEditor, ReferenceEditor), QuestionEditorData, ReferenceEditorData, isReferenceEditorDirty, updateReferenceEditorData)
+import KMEditor.Editor.Models.Editors exposing (Editor(..), QuestionEditorData, ReferenceEditorData, isReferenceEditorDirty, updateReferenceEditorData)
 import KMEditor.Editor.Models.Forms exposing (referenceFormValidation)
 import KMEditor.Editor.Update.Abstract exposing (deleteEntity, updateForm, withGenerateEvent)
 import KMEditor.Editor.Update.Events exposing (createAddReferenceEvent, createDeleteReferenceEvent, createEditReferenceEvent)
 import Msgs
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 
 
 updateReferenceForm : Model -> Form.Msg -> ReferenceEditorData -> Model

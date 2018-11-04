@@ -1,4 +1,4 @@
-module Public.SignupConfirmation.Models exposing (..)
+module Public.SignupConfirmation.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 

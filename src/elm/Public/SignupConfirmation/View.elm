@@ -1,4 +1,4 @@
-module Public.SignupConfirmation.View exposing (..)
+module Public.SignupConfirmation.View exposing (successView, view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, linkTo)
@@ -6,7 +6,7 @@ import Common.View exposing (defaultFullPageError, fullPageLoader)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
-import Public.Routing exposing (Route(Login))
+import Public.Routing exposing (Route(..))
 import Public.SignupConfirmation.Models exposing (Model)
 import Routing
 

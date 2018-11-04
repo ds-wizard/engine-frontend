@@ -1,8 +1,8 @@
-module Users.Routing exposing (..)
+module Users.Routing exposing (Route(..), isAllowed, moduleRoot, parses, toUrl)
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
-import UrlParser exposing (..)
+import Url.Parser exposing (..)
 
 
 type Route

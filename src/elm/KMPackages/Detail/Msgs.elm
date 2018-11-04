@@ -1,4 +1,4 @@
-module KMPackages.Detail.Msgs exposing (..)
+module KMPackages.Detail.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
 import Jwt

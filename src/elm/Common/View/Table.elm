@@ -1,4 +1,4 @@
-module Common.View.Table exposing (..)
+module Common.View.Table exposing (TableAction(..), TableActionConfig, TableActionLabel(..), TableConfig, TableFieldConfig, TableFieldValue(..), bodyField, getBoolIcon, headerField, indexTable, tableAction, tableBody, tableEmpty, tableHeader, tableRow, tableRowActions)
 
 import Common.Html exposing (emptyNode, linkTo)
 import Html exposing (..)

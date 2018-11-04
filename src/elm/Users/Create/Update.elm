@@ -5,8 +5,9 @@ import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
 import Form exposing (Form)
 import Jwt
+import Models exposing (State)
 import Msgs
-import Random.Pcg exposing (Seed, step)
+import Random exposing (Seed, step)
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 import Users.Create.Models exposing (..)
@@ -17,14 +18,14 @@ import Utils exposing (tuplePrepend)
 import Uuid
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg seed session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg seed session model
+            handleForm formMsg wrapMsg state.seed state.session model
 
         PostUserCompleted result ->
-            postUserCompleted model result |> tuplePrepend seed
+            postUserCompleted state model result |> tuplePrepend state.seed
 
 
 handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
@@ -58,11 +59,11 @@ postUserCmd session form uuid =
         |> Jwt.send PostUserCompleted
 
 
-postUserCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-postUserCompleted model result =
+postUserCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+postUserCompleted state model result =
     case result of
         Ok user ->
-            ( model, cmdNavigate <| Routing.Users Index )
+            ( model, cmdNavigate state.key <| Routing.Users Index )
 
         Err error ->
             ( { model | savingUser = getServerErrorJwt error "User could not be created." }

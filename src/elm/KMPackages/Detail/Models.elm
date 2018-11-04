@@ -1,4 +1,4 @@
-module KMPackages.Detail.Models exposing (..)
+module KMPackages.Detail.Models exposing (Model, PackageDetailRow, currentPackage, initPackageDetailRow, initialModel, packagesLength)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown

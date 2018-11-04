@@ -1,4 +1,4 @@
-module Auth.Requests exposing (..)
+module Auth.Requests exposing (getCurrentUser)
 
 import Auth.Models exposing (Session)
 import Http

@@ -1,4 +1,4 @@
-module KMPackages.View exposing (..)
+module KMPackages.View exposing (view)
 
 import Auth.Models exposing (JwtToken)
 import Html exposing (Html)

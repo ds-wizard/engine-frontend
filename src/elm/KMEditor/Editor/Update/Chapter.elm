@@ -1,8 +1,8 @@
-module KMEditor.Editor.Update.Chapter exposing (..)
+module KMEditor.Editor.Update.Chapter exposing (addQuestion, deleteChapter, removeChapter, updateChapterForm, updateIfKMEditor, withGenerateChapterEditEvent)
 
 import Form
 import KMEditor.Common.Models.Entities exposing (newQuestion)
-import KMEditor.Common.Models.Path exposing (PathNode(ChapterPathNode))
+import KMEditor.Common.Models.Path exposing (PathNode(..))
 import KMEditor.Editor.Models exposing (Model)
 import KMEditor.Editor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.Models.Editors exposing (..)
@@ -10,7 +10,7 @@ import KMEditor.Editor.Models.Forms exposing (chapterFormValidation)
 import KMEditor.Editor.Update.Abstract exposing (addEntity, deleteEntity, updateForm, withGenerateEvent)
 import KMEditor.Editor.Update.Events exposing (createAddChapterEvent, createDeleteChapterEvent, createEditChapterEvent)
 import Msgs
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 
 
 updateChapterForm : Model -> Form.Msg -> ChapterEditorData -> Model

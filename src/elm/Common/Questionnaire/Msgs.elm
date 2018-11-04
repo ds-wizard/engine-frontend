@@ -1,4 +1,4 @@
-module Common.Questionnaire.Msgs exposing (..)
+module Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 
 import Common.Questionnaire.Models exposing (Feedback)
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)

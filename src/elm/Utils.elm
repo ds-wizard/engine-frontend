@@ -1,9 +1,9 @@
-module Utils exposing (..)
+module Utils exposing (dispatch, getUuid, pair, replace, splitVersion, stringToInt, tuplePrepend, validateRegex, versionIsGreater)
 
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
 import List.Extra as List
-import Random.Pcg exposing (Seed, step)
+import Random exposing (Seed, step)
 import Regex exposing (Regex)
 import Task
 import Uuid
@@ -23,7 +23,7 @@ validateRegex : String -> Validation e String
 validateRegex regex =
     Validate.string
         |> Validate.andThen
-            (\s -> Validate.format (Regex.regex regex) s |> mapError (\_ -> Error.value InvalidFormat))
+            (\s -> Validate.format (createRegex regex) s |> mapError (\_ -> Error.value InvalidFormat))
 
 
 getUuid : Seed -> ( String, Seed )
@@ -49,7 +49,7 @@ splitVersion : String -> Maybe ( Int, Int, Int )
 splitVersion version =
     let
         parts =
-            String.split "." version |> List.map (String.toInt >> Result.withDefault 0)
+            String.split "." version |> List.map (String.toInt >> Maybe.withDefault 0)
     in
     case ( List.getAt 0 parts, List.getAt 1 parts, List.getAt 2 parts ) of
         ( Just major, Just minor, Just patch ) ->
@@ -71,10 +71,10 @@ replace from to str =
 
 
 stringToInt : String -> Int
-stringToInt str =
-    case String.toInt str of
-        Ok value ->
-            value
+stringToInt =
+    String.toInt >> Maybe.withDefault 0
 
-        Err _ ->
-            0
+
+createRegex : String -> Regex
+createRegex regex =
+    Maybe.withDefault Regex.never <| Regex.fromString regex

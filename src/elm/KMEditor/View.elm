@@ -1,4 +1,4 @@
-module KMEditor.View exposing (..)
+module KMEditor.View exposing (view)
 
 import Auth.Models exposing (JwtToken)
 import Html exposing (Html)

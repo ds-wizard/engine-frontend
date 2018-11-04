@@ -1,4 +1,4 @@
-module Public.ForgottenPasswordConfirmation.Msgs exposing (..)
+module Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
 
 import Form
 import Http

@@ -1,4 +1,4 @@
-module DSPlanner.Index.Models exposing (..)
+module DSPlanner.Index.Models exposing (Model, QuestionnaireRow, initQuestionnaireRow, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown

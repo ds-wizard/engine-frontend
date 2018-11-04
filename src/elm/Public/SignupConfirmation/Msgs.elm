@@ -1,4 +1,4 @@
-module Public.SignupConfirmation.Msgs exposing (..)
+module Public.SignupConfirmation.Msgs exposing (Msg(..))
 
 import Http
 

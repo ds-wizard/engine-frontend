@@ -1,8 +1,8 @@
-module KMPackages.Routing exposing (..)
+module KMPackages.Routing exposing (Route(..), detail, isAllowed, moduleRoot, parsers, toUrl)
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
-import UrlParser exposing (..)
+import Url.Parser exposing (..)
 
 
 type Route

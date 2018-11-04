@@ -1,4 +1,4 @@
-module KMEditor.Editor.Models.Children exposing (..)
+module KMEditor.Editor.Models.Children exposing (Children, addChild, cleanDirty, deleteChild, init, removeChild, updateList)
 
 import List.Extra as List
 

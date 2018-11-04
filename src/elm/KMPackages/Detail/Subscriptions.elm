@@ -1,9 +1,9 @@
-module KMPackages.Detail.Subscriptions exposing (..)
+module KMPackages.Detail.Subscriptions exposing (rowSubscriptions, subscriptions)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import KMPackages.Detail.Models exposing (Model, PackageDetailRow)
-import KMPackages.Detail.Msgs exposing (Msg(DropdownMsg))
+import KMPackages.Detail.Msgs exposing (Msg(..))
 import Msgs
 
 

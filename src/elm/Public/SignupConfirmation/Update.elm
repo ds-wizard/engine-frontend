@@ -1,4 +1,4 @@
-module Public.SignupConfirmation.Update exposing (..)
+module Public.SignupConfirmation.Update exposing (fetchData, handleSendConfirmationCompleted, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Models exposing (getServerError)

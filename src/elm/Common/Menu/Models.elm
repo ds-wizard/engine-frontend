@@ -1,9 +1,9 @@
-module Common.Menu.Models exposing (..)
+module Common.Menu.Models exposing (BuildInfo, Model, buildInfoDecoder, clientBuildInfo, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 
 
 type alias Model =
@@ -38,6 +38,6 @@ clientBuildInfo =
 
 buildInfoDecoder : Decoder BuildInfo
 buildInfoDecoder =
-    decode BuildInfo
+    Decode.succeed BuildInfo
         |> required "version" Decode.string
         |> required "builtAt" Decode.string

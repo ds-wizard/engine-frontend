@@ -1,9 +1,9 @@
-module KMPackages.Subscriptions exposing (..)
+module KMPackages.Subscriptions exposing (subscriptions)
 
 import KMPackages.Detail.Subscriptions
 import KMPackages.Models exposing (Model)
-import KMPackages.Msgs exposing (Msg(DetailMsg))
-import KMPackages.Routing exposing (Route(Detail))
+import KMPackages.Msgs exposing (Msg(..))
+import KMPackages.Routing exposing (Route(..))
 import Msgs
 
 

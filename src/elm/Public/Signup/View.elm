@@ -10,10 +10,10 @@ import Html exposing (..)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Msgs
 import Public.Common.View exposing (publicForm)
-import Public.Routing exposing (Route(Login))
+import Public.Routing exposing (Route(..))
 import Public.Signup.Models exposing (..)
-import Public.Signup.Msgs exposing (Msg(FormMsg))
-import Routing exposing (Route(Public))
+import Public.Signup.Msgs exposing (Msg(..))
+import Routing exposing (Route(..))
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg

@@ -1,4 +1,4 @@
-module Common.Html exposing (..)
+module Common.Html exposing (detailContainerClass, detailContainerClassWith, emptyNode, fa, linkTo, linkToAttributes)
 
 import Common.Html.Events exposing (onLinkClick)
 import Html exposing (..)

@@ -1,4 +1,4 @@
-module Users.Create.Msgs exposing (..)
+module Users.Create.Msgs exposing (Msg(..))
 
 import Form
 import Jwt

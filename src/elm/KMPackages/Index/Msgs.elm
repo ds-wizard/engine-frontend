@@ -1,4 +1,4 @@
-module KMPackages.Index.Msgs exposing (..)
+module KMPackages.Index.Msgs exposing (Msg(..))
 
 import Jwt
 import KMPackages.Common.Models exposing (Package)

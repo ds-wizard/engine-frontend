@@ -5,6 +5,7 @@ import FormEngine.Msgs exposing (Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import String exposing (fromInt)
 
 
 type alias FormViewConfig msg a =
@@ -41,7 +42,7 @@ viewFormElement config path formItem =
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
                 [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
-                , input [ class "form-control", type_ "number", value (state.value |> Maybe.map toString |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
+                , input [ class "form-control", type_ "number", value (state.value |> Maybe.map fromInt |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
                 ]
@@ -113,7 +114,7 @@ viewGroupItem config path numberOfItems index itemElement =
     div [ class "card bg-light item mb-5" ]
         [ div [ class "card-body" ] <|
             [ deleteButton ]
-                ++ List.map (viewFormElement config (path ++ [ toString index ])) itemElement
+                ++ List.map (viewFormElement config (path ++ [ fromInt index ])) itemElement
         ]
 
 

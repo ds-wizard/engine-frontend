@@ -1,4 +1,4 @@
-module DSPlanner.Index.Update exposing (..)
+module DSPlanner.Index.Update exposing (deleteQuestionnaireCompleted, fetchData, getQuestionnairesCompleted, handleDeleteQuestionnaire, handleDropdownToggle, update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)

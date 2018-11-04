@@ -10,7 +10,7 @@ module Common.Html.Events exposing (onLinkClick)
 -}
 
 import Html exposing (Attribute)
-import Html.Events exposing (onWithOptions)
+import Html.Events exposing (custom)
 import Json.Decode as Decode
 
 
@@ -19,8 +19,9 @@ onLinkClick : msg -> Attribute msg
 onLinkClick message =
     let
         options =
-            { stopPropagation = False
+            { message = message
+            , stopPropagation = False
             , preventDefault = True
             }
     in
-    onWithOptions "click" options (Decode.succeed message)
+    custom "click" (Decode.succeed options)

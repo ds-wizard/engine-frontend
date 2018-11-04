@@ -1,4 +1,4 @@
-module Common.Questionnaire.Requests exposing (..)
+module Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback, postForSummaryReport)
 
 import Auth.Models exposing (Session)
 import Common.Questionnaire.Models exposing (Feedback, feedbackDecoder, feedbackListDecoder)

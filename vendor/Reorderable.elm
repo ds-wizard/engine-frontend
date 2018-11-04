@@ -50,7 +50,7 @@ Check out the [examples] to see how it works
 
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class, style)
-import Html.Events exposing (on, onWithOptions)
+import Html.Events exposing (on)
 import Html.Keyed as Keyed
 import Json.Decode as Json
 import Reorderable.Helpers as Helpers
@@ -193,7 +193,7 @@ your view.
 -}
 ol : Config data msg -> State -> List data -> Html msg
 ol ((Config { listClass }) as config) state list =
-    Keyed.ol [ class listClass, style [ ( "position", "relative" ) ] ] <| List.concatMap (childView Html.li config list state) list
+    Keyed.ol [ class listClass, style "position" "relative" ] <| List.concatMap (childView Html.li config list state) list
 
 
 {-| Takes a list and turn it into an html, drag and drop re-orderable
@@ -206,7 +206,7 @@ your view.
 -}
 ul : Config data msg -> State -> List data -> Html msg
 ul ((Config { listClass }) as config) state list =
-    Keyed.ul [ class listClass, style [ ( "position", "relative" ) ] ] <| List.concatMap (childView Html.li config list state) list
+    Keyed.ul [ class listClass, style "position" "relative" ] <| List.concatMap (childView Html.li config list state) list
 
 
 {-| Takes a list and turn it into an html, drag and drop re-orderable
@@ -219,7 +219,7 @@ your view.
 -}
 div : Config data msg -> State -> List data -> Html msg
 div ((Config { listClass }) as config) state list =
-    Keyed.node "div" [ class listClass, style [ ( "position", "relative" ) ] ] <| List.concatMap (childView Html.div config list state) list
+    Keyed.node "div" [ class listClass, style "position" "relative" ] <| List.concatMap (childView Html.div config list state) list
 
 
 includeDragged : HtmlElement msg -> Config data msg -> State -> data -> List ( String, Html msg )
@@ -283,14 +283,12 @@ draggingView element (Config config) draggedItem data =
     in
     ( "__draggedItem"
     , element
-        [ style
-            [ "position" => "absolute"
-            , "display" => "block"
-            , "left" => px x
-            , "top" => px y
-            , "pointer-events" => "none"
-            , "cursor" => "pointer"
-            ]
+        [ (\( a, b ) -> style a b) ("position", "absolute")
+        , (\( a, b ) -> style a b) ("display", "block")
+        , (\( a, b ) -> style a b) ("left", px x)
+        , (\( a, b ) -> style a b) ("top", px y)
+        , (\( a, b ) -> style a b) ("pointer-events", "none")
+        , (\( a, b ) -> style a b) ("cursor", "pointer")
         , class config.itemClass
         ]
         [ config.itemView (ignoreDrag config.toMsg) data ]
@@ -421,11 +419,6 @@ fullConfig =
 
 
 -- HELPERS
-
-
-(=>) : String -> String -> ( String, String )
-(=>) =
-    (,)
 
 
 px : number -> String

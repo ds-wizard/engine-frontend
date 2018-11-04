@@ -1,6 +1,6 @@
-module Common.Form.Validate exposing (..)
+module Common.Form.Validate exposing (uuidPattern, validateConfirmation, validateRegexWithCustomError, validateUuid)
 
-import Common.Form exposing (CustomFormError(ConfirmationError, InvalidUuid))
+import Common.Form exposing (CustomFormError(..))
 import Form.Validate as Validate exposing (..)
 import Regex exposing (Regex)
 
@@ -35,8 +35,11 @@ validateRegexWithCustomError regex customFormError =
 
 uuidPattern : Regex
 uuidPattern =
-    Regex.regex "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-        |> Regex.caseInsensitive
+    let
+        regex = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        options = { caseInsensitive = True, multiline = False }
+    in
+    Maybe.withDefault Regex.never <| Regex.fromStringWith  options regex
 
 
 validateUuid : Validation CustomFormError String

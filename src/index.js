@@ -6,11 +6,14 @@ require('./img/book-preview.png')
 
 
 // initialize elm app
-var Elm = require('./elm/Main.elm')
+var program = require('./elm/Main.elm')
 
-var app = Elm.Main.fullscreen({
-    seed: Math.floor(Math.random() * 0xFFFFFFFF),
-    session: JSON.parse(localStorage.session || null)
+var app = program.Elm.Main.init({
+    node: document.body,
+    flags: {
+        seed: Math.floor(Math.random() * 0xFFFFFFFF),
+        session: JSON.parse(localStorage.session || null)
+    }
 })
 
 // initialize ports to use local storage

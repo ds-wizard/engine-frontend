@@ -1,4 +1,15 @@
-module DragDrop exposing (..)
+module DragDrop
+    exposing
+        ( HoverState(..)
+        , Model
+        , defs
+        , onDragEnter
+        , onDragFunctionDecodeFiles
+        , onDragFunctionIgnoreFiles
+        , onDragLeave
+        , onDragOver
+        , onDrop
+        )
 
 {-| Based on original code from Daniel Bachler (danyx23)
 

@@ -1,4 +1,4 @@
-module Requests exposing (..)
+module Requests exposing (apiRoot, apiUrl, delete, emptyResponseRequest, get, getResultCmd, post, postEmpty, put, toCmd)
 
 import Auth.Models exposing (Session)
 import Auth.Msgs

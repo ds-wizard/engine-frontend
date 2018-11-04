@@ -1,4 +1,4 @@
-module KMPackages.Update exposing (..)
+module KMPackages.Update exposing (fetchData, update)
 
 import Auth.Models exposing (Session)
 import KMPackages.Detail.Update
@@ -7,6 +7,7 @@ import KMPackages.Index.Update
 import KMPackages.Models exposing (Model)
 import KMPackages.Msgs exposing (Msg(..))
 import KMPackages.Routing exposing (Route(..))
+import Models exposing (State)
 import Msgs
 
 
@@ -23,26 +24,26 @@ fetchData route wrapMsg session =
             Cmd.none
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
-        DetailMsg msg ->
+        DetailMsg dMsg ->
             let
                 ( detailModel, cmd ) =
-                    KMPackages.Detail.Update.update msg (wrapMsg << DetailMsg) session model.detailModel
+                    KMPackages.Detail.Update.update dMsg (wrapMsg << DetailMsg) state model.detailModel
             in
             ( { model | detailModel = detailModel }, cmd )
 
-        ImportMsg msg ->
+        ImportMsg impMsg ->
             let
                 ( importModel, cmd ) =
-                    KMPackages.Import.Update.update msg (wrapMsg << ImportMsg) session model.importModel
+                    KMPackages.Import.Update.update impMsg (wrapMsg << ImportMsg) state model.importModel
             in
             ( { model | importModel = importModel }, cmd )
 
-        IndexMsg msg ->
+        IndexMsg iMsg ->
             let
                 ( indexModel, cmd ) =
-                    KMPackages.Index.Update.update msg (wrapMsg << IndexMsg) session model.indexModel
+                    KMPackages.Index.Update.update iMsg (wrapMsg << IndexMsg) state.session model.indexModel
             in
             ( { model | indexModel = indexModel }, cmd )

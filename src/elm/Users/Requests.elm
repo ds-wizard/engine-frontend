@@ -1,4 +1,4 @@
-module Users.Requests exposing (..)
+module Users.Requests exposing (deleteUser, getUser, getUsers, postUser, putUser, putUserPassword)
 
 import Auth.Models exposing (Session)
 import Http

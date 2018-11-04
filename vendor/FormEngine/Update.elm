@@ -2,6 +2,7 @@ module FormEngine.Update exposing (updateForm)
 
 import FormEngine.Model exposing (..)
 import FormEngine.Msgs exposing (Msg(..))
+import String exposing (fromInt)
 
 
 updateForm : Msg msg -> Form a -> Form a
@@ -29,12 +30,14 @@ updateElement updateFunction path element =
         head :: [] ->
             if (getDescriptor element).name /= head then
                 element
+
             else
                 updateFunction element
 
         head :: tail ->
             if (getDescriptor element).name /= head then
                 element
+
             else
                 case element of
                     ChoiceFormElement descriptor options state ->
@@ -56,6 +59,7 @@ updateOption updateFunction path option =
         head :: tail ->
             if (getOptionDescriptor option).name /= head then
                 option
+
             else
                 case option of
                     SimpleOptionElement _ ->
@@ -72,8 +76,9 @@ updateItem : (FormElement a -> FormElement a) -> List String -> Int -> ItemEleme
 updateItem updateFunction path index item =
     case path of
         head :: tail ->
-            if toString index /= head then
+            if fromInt index /= head then
                 item
+
             else
                 List.map (updateElement updateFunction tail) item
 
@@ -88,7 +93,7 @@ updateElementValue value element =
             StringFormElement descriptor { state | value = Just value }
 
         NumberFormElement descriptor state ->
-            NumberFormElement descriptor { state | value = Just <| Result.withDefault 0 (String.toInt value) }
+            NumberFormElement descriptor { state | value = Just <| Maybe.withDefault 0 (String.toInt value) }
 
         TextFormElement descriptor state ->
             TextFormElement descriptor { state | value = Just value }

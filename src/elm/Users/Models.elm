@@ -1,4 +1,4 @@
-module Users.Models exposing (..)
+module Users.Models exposing (Model, initLocalModel, initialModel)
 
 import Users.Create.Models
 import Users.Edit.Models

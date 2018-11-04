@@ -1,9 +1,11 @@
-module KMEditor.Editor.Update exposing (..)
+module KMEditor.Editor.Update exposing (createEditors, fetchData, fetchKnowledgeModel, fetchLevels, fetchMetrics, scrollTopCmd, sendEventsCmd, setActiveEditor, update, withNoCmd)
+
+-- import Dom.Scroll
+-- import Reorderable
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
-import Dom.Scroll
 import Jwt
 import KMEditor.Common.Models.Events exposing (encodeEvents)
 import KMEditor.Editor.Models exposing (..)
@@ -18,10 +20,10 @@ import KMEditor.Editor.Update.KnowledgeModel exposing (..)
 import KMEditor.Editor.Update.Question exposing (..)
 import KMEditor.Editor.Update.Reference exposing (..)
 import KMEditor.Requests exposing (getKnowledgeModelData, getLevels, getMetrics, postEventsBulk)
-import KMEditor.Routing exposing (Route(Index))
+import KMEditor.Routing exposing (Route(..))
+import Models exposing (State)
 import Msgs
-import Random.Pcg exposing (Seed)
-import Reorderable
+import Random exposing (Seed)
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 import SplitPane
@@ -67,57 +69,57 @@ sendEventsCmd wrapMsg session model =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg seed session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         Submit ->
             let
-                send seed model a =
-                    ( seed, { model | submitting = Loading }, sendEventsCmd wrapMsg session model )
+                send seed newModel a =
+                    ( seed, { newModel | submitting = Loading }, sendEventsCmd wrapMsg state.session model )
             in
             case getActiveEditor model of
                 Just editor ->
                     case editor of
                         KMEditor data ->
                             send
-                                |> withGenerateKMEditEvent seed model data
+                                |> withGenerateKMEditEvent state.seed model data
 
                         ChapterEditor data ->
                             send
-                                |> withGenerateChapterEditEvent seed model data
+                                |> withGenerateChapterEditEvent state.seed model data
 
                         QuestionEditor data ->
                             send
-                                |> withGenerateQuestionEditEvent seed model data
+                                |> withGenerateQuestionEditEvent state.seed model data
 
                         AnswerEditor data ->
                             send
-                                |> withGenerateAnswerEditEvent seed model data
+                                |> withGenerateAnswerEditEvent state.seed model data
 
                         ReferenceEditor data ->
                             send
-                                |> withGenerateReferenceEditEvent seed model data
+                                |> withGenerateReferenceEditEvent state.seed model data
 
                         ExpertEditor data ->
                             send
-                                |> withGenerateExpertEditEvent seed model data
+                                |> withGenerateExpertEditEvent state.seed model data
 
                 _ ->
-                    send seed model ()
+                    send state.seed model ()
 
         SubmitCompleted result ->
             case result of
                 Ok _ ->
-                    ( seed, model, cmdNavigate <| Routing.KMEditor Index )
+                    ( state.seed, model, cmdNavigate state.key <| Routing.KMEditor Index )
 
                 Err error ->
-                    ( seed
+                    ( state.seed
                     , { model | submitting = getServerErrorJwt error "Knowledge model could not be saved" }
                     , getResultCmd result
                     )
 
         PaneMsg paneMsg ->
-            ( seed, { model | splitPane = SplitPane.update paneMsg model.splitPane }, Cmd.none )
+            ( state.seed, { model | splitPane = SplitPane.update paneMsg model.splitPane }, Cmd.none )
 
         GetKnowledgeModelCompleted result ->
             let
@@ -138,7 +140,7 @@ update msg wrapMsg seed session model =
                 cmd =
                     getResultCmd result
             in
-            ( seed, createEditors newModel, cmd )
+            ( state.seed, createEditors newModel, cmd )
 
         GetMetricsCompleted result ->
             let
@@ -153,7 +155,7 @@ update msg wrapMsg seed session model =
                 cmd =
                     getResultCmd result
             in
-            ( seed, createEditors newModel, cmd )
+            ( state.seed, createEditors newModel, cmd )
 
         GetLevelsCompleted result ->
             let
@@ -168,17 +170,17 @@ update msg wrapMsg seed session model =
                 cmd =
                     getResultCmd result
             in
-            ( seed, createEditors newModel, cmd )
+            ( state.seed, createEditors newModel, cmd )
 
         ToggleOpen uuid ->
             let
                 newEditors =
                     updateEditor model.editors toggleEditorOpen uuid
             in
-            ( seed, { model | editors = newEditors }, Cmd.none )
+            ( state.seed, { model | editors = newEditors }, Cmd.none )
 
         CloseAlert ->
-            ( seed, { model | alert = Nothing }, Cmd.none )
+            ( state.seed, { model | alert = Nothing }, Cmd.none )
 
         SetActiveEditor uuid ->
             case getActiveEditor model of
@@ -186,30 +188,30 @@ update msg wrapMsg seed session model =
                     case editor of
                         KMEditor data ->
                             setActiveEditor wrapMsg uuid
-                                |> withGenerateKMEditEvent seed model data
+                                |> withGenerateKMEditEvent state.seed model data
 
                         ChapterEditor data ->
                             setActiveEditor wrapMsg uuid
-                                |> withGenerateChapterEditEvent seed model data
+                                |> withGenerateChapterEditEvent state.seed model data
 
                         QuestionEditor data ->
                             setActiveEditor wrapMsg uuid
-                                |> withGenerateQuestionEditEvent seed model data
+                                |> withGenerateQuestionEditEvent state.seed model data
 
                         AnswerEditor data ->
                             setActiveEditor wrapMsg uuid
-                                |> withGenerateAnswerEditEvent seed model data
+                                |> withGenerateAnswerEditEvent state.seed model data
 
                         ReferenceEditor data ->
                             setActiveEditor wrapMsg uuid
-                                |> withGenerateReferenceEditEvent seed model data
+                                |> withGenerateReferenceEditEvent state.seed model data
 
                         ExpertEditor data ->
                             setActiveEditor wrapMsg uuid
-                                |> withGenerateExpertEditEvent seed model data
+                                |> withGenerateExpertEditEvent state.seed model data
 
                 _ ->
-                    setActiveEditor wrapMsg uuid seed model ()
+                    setActiveEditor wrapMsg uuid state.seed model ()
 
         EditorMsg editorMsg ->
             case ( editorMsg, getActiveEditor model ) of
@@ -217,142 +219,141 @@ update msg wrapMsg seed session model =
                     case kmEditorMsg of
                         KMEditorFormMsg formMsg ->
                             updateKMForm model formMsg editorData
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         ReorderChapters chapterList ->
                             model
                                 |> insertEditor (KMEditor { editorData | chapters = Children.updateList chapterList editorData.chapters })
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         AddChapter ->
                             addChapter (scrollTopCmd wrapMsg)
-                                |> withGenerateKMEditEvent seed model editorData
+                                |> withGenerateKMEditEvent state.seed model editorData
 
                 ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
                     case chapterEditorMsg of
                         ChapterFormMsg formMsg ->
                             updateChapterForm model formMsg editorData
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         DeleteChapter uuid ->
-                            deleteChapter seed model uuid editorData
+                            deleteChapter state.seed model uuid editorData
                                 |> withNoCmd
 
                         ReorderQuestions questionList ->
                             model
                                 |> insertEditor (ChapterEditor { editorData | questions = Children.updateList questionList editorData.questions })
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         AddQuestion ->
                             addQuestion (scrollTopCmd wrapMsg)
-                                |> withGenerateChapterEditEvent seed model editorData
+                                |> withGenerateChapterEditEvent state.seed model editorData
 
                 ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
                     case questionEditorMsg of
                         QuestionFormMsg formMsg ->
                             updateQuestionForm model formMsg editorData
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         DeleteQuestion uuid ->
-                            deleteQuestion seed model uuid editorData
+                            deleteQuestion state.seed model uuid editorData
                                 |> withNoCmd
 
                         ReorderAnswers answerList ->
                             model
                                 |> insertEditor (QuestionEditor { editorData | answers = Children.updateList answerList editorData.answers })
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         AddAnswer ->
                             addAnswer (scrollTopCmd wrapMsg)
-                                |> withGenerateQuestionEditEvent seed model editorData
+                                |> withGenerateQuestionEditEvent state.seed model editorData
 
                         ReorderAnswerItemTemplateQuestions answerItemTemplateQuestionList ->
                             model
                                 |> insertEditor (QuestionEditor { editorData | answerItemTemplateQuestions = Children.updateList answerItemTemplateQuestionList editorData.answerItemTemplateQuestions })
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         AddAnswerItemTemplateQuestion ->
                             addAnswerItemTemplateQuestion (scrollTopCmd wrapMsg)
-                                |> withGenerateQuestionEditEvent seed model editorData
+                                |> withGenerateQuestionEditEvent state.seed model editorData
 
                         ReorderReferences referenceList ->
                             model
                                 |> insertEditor (QuestionEditor { editorData | references = Children.updateList referenceList editorData.references })
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         AddReference ->
                             addReference (scrollTopCmd wrapMsg)
-                                |> withGenerateQuestionEditEvent seed model editorData
+                                |> withGenerateQuestionEditEvent state.seed model editorData
 
                         ReorderExperts expertList ->
                             model
                                 |> insertEditor (QuestionEditor { editorData | experts = Children.updateList expertList editorData.experts })
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         AddExpert ->
                             addExpert (scrollTopCmd wrapMsg)
-                                |> withGenerateQuestionEditEvent seed model editorData
+                                |> withGenerateQuestionEditEvent state.seed model editorData
 
                 ( AnswerEditorMsg answerEditorMsg, Just (AnswerEditor editorData) ) ->
                     case answerEditorMsg of
                         AnswerFormMsg formMsg ->
                             updateAnswerForm model formMsg editorData
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         DeleteAnswer uuid ->
-                            deleteAnswer seed model uuid editorData
+                            deleteAnswer state.seed model uuid editorData
                                 |> withNoCmd
 
                         ReorderFollowUps followUpList ->
                             model
                                 |> insertEditor (AnswerEditor { editorData | followUps = Children.updateList followUpList editorData.followUps })
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         AddFollowUp ->
                             addFollowUp (scrollTopCmd wrapMsg)
-                                |> withGenerateAnswerEditEvent seed model editorData
+                                |> withGenerateAnswerEditEvent state.seed model editorData
 
                 ( ReferenceEditorMsg referenceEditorMsg, Just (ReferenceEditor editorData) ) ->
                     case referenceEditorMsg of
                         ReferenceFormMsg formMsg ->
                             updateReferenceForm model formMsg editorData
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         DeleteReference uuid ->
-                            deleteReference seed model uuid editorData
+                            deleteReference state.seed model uuid editorData
                                 |> withNoCmd
 
                 ( ExpertEditorMsg expertEditorMsg, Just (ExpertEditor editorData) ) ->
                     case expertEditorMsg of
                         ExpertFormMsg formMsg ->
                             updateExpertForm model formMsg editorData
-                                |> pair seed
+                                |> pair state.seed
                                 |> withNoCmd
 
                         DeleteExpert uuid ->
-                            deleteExpert seed model uuid editorData
+                            deleteExpert state.seed model uuid editorData
                                 |> withNoCmd
 
                 _ ->
-                    ( seed, model, Cmd.none )
+                    ( state.seed, model, Cmd.none )
 
-        ReorderableMsg reorderableMsg ->
-            ( seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
-
+        -- ReorderableMsg reorderableMsg ->
+        --     ( state.seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
         NoOp ->
-            ( seed, model, Cmd.none )
+            ( state.seed, model, Cmd.none )
 
 
 withNoCmd : ( a, b ) -> ( a, b, Cmd msg )
@@ -377,6 +378,11 @@ createEditors model =
 
 scrollTopCmd : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
 scrollTopCmd wrapMsg =
-    Dom.Scroll.toTop "editor-view"
-        |> Task.attempt (always NoOp)
-        |> Cmd.map wrapMsg
+    -- TODO scroll top
+    Cmd.none
+
+
+
+-- Dom.Scroll.toTop "editor-view"
+-- |> Task.attempt (always NoOp)
+-- |> Cmd.map wrapMsg
