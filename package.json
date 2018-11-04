@@ -8,11 +8,16 @@
     "clean": "rm -rf elm-stuff/"
   },
   "devDependencies": {
+    "bootswatch": "^4.1.1",
     "css-loader": "^0.28.11",
-    "elm-test": "^0.18.12",
+    "elm": "^0.19.0-bugfix2",
+    "elm-format": "^0.8.1",
+    "elm-test": "^0.19.0-beta4",
+    "elm-upgrade": "^0.19.6",
     "elm-webpack-loader": "^5.0.0",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^0.11.2",
+    "font-awesome": "^4.7.0",
     "font-awesome-sass-loader": "^2.0.1",
     "html-webpack-plugin": "^3.2.0",
     "node-sass": "^4.9.4",
@@ -22,13 +27,6 @@
     "url-loader": "^0.5.9",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.2"
-  },
-  "dependencies": {
-    "bootswatch": "^4.1.1",
-    "elm": "^0.19.0-bugfix2",
-    "elm-format": "^0.8.1",
-    "elm-upgrade": "^0.19.6",
-    "font-awesome": "^4.7.0"
   },
   "false": {}
 }
