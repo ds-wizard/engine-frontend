@@ -22,8 +22,6 @@ install:
 cache:
   directories:
     - node_modules
-    - elm-stuff
-    - tests/elm-stuff
 
 before_script:
   - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
