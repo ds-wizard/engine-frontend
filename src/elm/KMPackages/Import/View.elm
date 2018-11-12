@@ -1,8 +1,5 @@
 module KMPackages.Import.View exposing (view)
 
--- import DragDrop exposing (onDragEnter, onDragLeave, onDragOver, onDrop)
--- import FileReader exposing (..)
-
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (detailContainerClassWith)
 import Common.View exposing (pageHeader)
@@ -18,19 +15,19 @@ import Msgs
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    -- let
-    --     content =
-    --         case List.head model.files of
-    --             Just file ->
-    --                 fileView wrapMsg model file.name
-    --             Nothing ->
-    --                 dropzone model |> Html.map wrapMsg
-    -- in
-    div [ detailContainerClassWith "KMPackages__Import" ]
+    let
+        content =
+            case model.file of
+                Just file ->
+                    fileView wrapMsg model file.filename
+
+                Nothing ->
+                    dropzone model |> Html.map wrapMsg
+    in
+    div [ detailContainerClassWith "KMPackages__Import", id dropzoneId ]
         [ pageHeader "Import package" []
         , formResultView model.importing
-
-        -- , content
+        , content
         ]
 
 
@@ -61,34 +58,39 @@ fileView wrapMsg model fileName =
 
 dropzone : Model -> Html Msg
 dropzone model =
-    -- div (dropzoneAttributes model)
-    div []
+    div (dropzoneAttributes model)
         [ label [ class "btn btn-secondary btn-file" ]
             [ text "Choose file"
-
-            -- , input [ type_ "file", onchange FilesSelect ] []
+            , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected) ] []
             ]
         , p [] [ text "or just drop it here" ]
         ]
 
 
+dropzoneAttributes : Model -> List (Attribute Msg)
+dropzoneAttributes model =
+    let
+        cssClass =
+            case model.dnd of
+                0 ->
+                    ""
 
--- dropzoneAttributes : Model -> List (Attribute Msg)
--- dropzoneAttributes model =
---     let
---         cssClass =
---             case model.dnd of
---                 0 ->
---                     ""
---                 _ ->
---                     "active"
---     in
---     class ("dropzone " ++ cssClass)
---         :: [ onDragEnter DragEnter
---            , onDragOver DragOver
---            , onDragLeave DragLeave
---            , onDrop Drop
---            ]
--- onchange : (List NativeFile -> value) -> Attribute value
--- onchange action =
---     on "change" (Decode.map action parseSelectedFiles)
+                _ ->
+                    "active"
+    in
+    [ class ("dropzone " ++ cssClass)
+    , id dropzoneId
+    , onDragEvent "dragenter" DragEnter
+    , onDragEvent "dragover" DragOver
+    , onDragEvent "dragleave" DragLeave
+    ]
+
+
+onDragEvent : String -> Msg -> Attribute Msg
+onDragEvent event msg =
+    custom event <|
+        Decode.succeed
+            { stopPropagation = True
+            , preventDefault = True
+            , message = msg
+            }

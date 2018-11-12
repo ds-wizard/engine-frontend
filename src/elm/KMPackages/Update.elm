@@ -17,11 +17,11 @@ fetchData route wrapMsg session =
         Detail organizationId kmId ->
             KMPackages.Detail.Update.fetchData (wrapMsg << DetailMsg) organizationId kmId session
 
+        Import ->
+            KMPackages.Import.Update.fetchData
+
         Index ->
             KMPackages.Index.Update.fetchData (wrapMsg << IndexMsg) session
-
-        _ ->
-            Cmd.none
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )

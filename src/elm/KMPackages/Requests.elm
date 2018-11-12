@@ -1,12 +1,11 @@
 module KMPackages.Requests exposing (deletePackage, deletePackageVersion, exportPackageUrl, getPackages, getPackagesFiltered, getPackagesUnique, importPackage)
 
--- import FileReader exposing (NativeFile)
-
 import Auth.Models exposing (Session)
-import Http
+import Http exposing (stringPart)
 import Json.Decode as Decode
 import Jwt
 import KMPackages.Common.Models exposing (..)
+import Ports exposing (FilePortData)
 import Requests exposing (apiUrl)
 
 
@@ -35,18 +34,13 @@ deletePackageVersion packageId session =
     Requests.delete session ("/packages/" ++ packageId)
 
 
-
--- importPackage : NativeFile -> Session -> Http.Request Decode.Value
-
-
-importPackage : a -> Session -> Http.Request Decode.Value
+importPackage : FilePortData -> Session -> Http.Request Decode.Value
 importPackage file session =
     let
         body =
-            -- Http.multipartBody [ FileReader.filePart "file" file ]
-            Http.multipartBody []
+            Http.stringBody "application/json" file.contents
     in
-    Jwt.post session.token (apiUrl "/import") body Decode.value
+    Jwt.post session.token (apiUrl "/packages") body Decode.value
 
 
 exportPackageUrl : String -> String

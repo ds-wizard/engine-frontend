@@ -15,6 +15,7 @@ validateConfirmation confirmationField =
                         (\confirmation ->
                             if original == confirmation then
                                 Validate.succeed confirmation
+
                             else
                                 Validate.fail (customError ConfirmationError)
                         )
@@ -36,10 +37,13 @@ validateRegexWithCustomError regex customFormError =
 uuidPattern : Regex
 uuidPattern =
     let
-        regex = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-        options = { caseInsensitive = True, multiline = False }
+        regex =
+            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+
+        options =
+            { caseInsensitive = True, multiline = False }
     in
-    Maybe.withDefault Regex.never <| Regex.fromStringWith  options regex
+    Maybe.withDefault Regex.never <| Regex.fromStringWith options regex
 
 
 validateUuid : Validation CustomFormError String
