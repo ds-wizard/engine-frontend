@@ -1,4 +1,4 @@
-module DSPlanner.Detail.Models exposing (..)
+module DSPlanner.Detail.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Questionnaire.Models

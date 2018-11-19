@@ -1,4 +1,4 @@
-module KMEditor.Editor.Msgs exposing (..)
+module KMEditor.Editor.Msgs exposing (AnswerEditorMsg(..), ChapterEditorMsg(..), EditorMsg(..), ExpertEditorMsg(..), KMEditorMsg(..), Msg(..), QuestionEditorMsg(..), ReferenceEditorMsg(..))
 
 import Form
 import Jwt

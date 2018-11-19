@@ -1,4 +1,4 @@
-module Common.Menu.Msgs exposing (..)
+module Common.Menu.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
 import Common.Menu.Models exposing (BuildInfo)

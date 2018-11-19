@@ -1,4 +1,4 @@
-module Public.Login.Requests exposing (..)
+module Public.Login.Requests exposing (encodeCredentials, login, tokenDecoder)
 
 import Http
 import Json.Decode as Decode exposing (..)

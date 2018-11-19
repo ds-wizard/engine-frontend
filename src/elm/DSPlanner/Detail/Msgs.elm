@@ -1,4 +1,4 @@
-module DSPlanner.Detail.Msgs exposing (..)
+module DSPlanner.Detail.Msgs exposing (Msg(..))
 
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.Msgs

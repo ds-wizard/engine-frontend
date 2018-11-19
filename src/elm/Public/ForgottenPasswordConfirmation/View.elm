@@ -1,4 +1,4 @@
-module Public.ForgottenPasswordConfirmation.View exposing (..)
+module Public.ForgottenPasswordConfirmation.View exposing (formView, signupForm, successView, view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
@@ -10,8 +10,8 @@ import Html.Attributes exposing (class)
 import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.ForgottenPasswordConfirmation.Models exposing (..)
-import Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(FormMsg))
-import Public.Routing exposing (Route(Login))
+import Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
+import Public.Routing exposing (Route(..))
 import Routing
 
 

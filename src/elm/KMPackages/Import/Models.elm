@@ -1,12 +1,17 @@
-module KMPackages.Import.Models exposing (..)
+module KMPackages.Import.Models exposing
+    ( Model
+    , dropzoneId
+    , fileInputId
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
-import FileReader exposing (NativeFile)
+import Ports exposing (FilePortData)
 
 
 type alias Model =
     { dnd : Int
-    , files : List NativeFile
+    , file : Maybe FilePortData
     , importing : ActionResult String
     }
 
@@ -14,6 +19,16 @@ type alias Model =
 initialModel : Model
 initialModel =
     { dnd = 0
-    , files = []
+    , file = Nothing
     , importing = Unset
     }
+
+
+dropzoneId : String
+dropzoneId =
+    "km-import-dropzone"
+
+
+fileInputId : String
+fileInputId =
+    "km-import-input"

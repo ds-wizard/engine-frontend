@@ -1,4 +1,4 @@
-module Public.ForgottenPasswordConfirmation.Models exposing (..)
+module Public.ForgottenPasswordConfirmation.Models exposing (Model, PasswordForm, encodePasswordForm, initEmptyPasswordForm, initialModel, passwordFormValidation)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)

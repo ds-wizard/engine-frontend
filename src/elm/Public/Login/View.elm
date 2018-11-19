@@ -7,8 +7,8 @@ import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.Login.Models exposing (Model)
 import Public.Login.Msgs exposing (Msg(..))
-import Public.Routing exposing (Route(ForgottenPassword))
-import Routing exposing (Route(Public))
+import Public.Routing exposing (Route(..))
+import Routing exposing (Route(..))
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -34,7 +34,7 @@ loginForm wrapMsg model =
 
         formConfig =
             { title = "Log in"
-            , submitMsg = wrapMsg Login
+            , submitMsg = wrapMsg DoLogin
             , actionResult = model.loggingIn
             , submitLabel = "Log in"
             , formContent = formContent

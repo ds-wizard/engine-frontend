@@ -1,4 +1,4 @@
-module Public.BookReference.View exposing (..)
+module Public.BookReference.View exposing (bookUrl, crcUrl, view, viewBookReference)
 
 import Common.View exposing (fullPageActionResultView)
 import Html exposing (..)

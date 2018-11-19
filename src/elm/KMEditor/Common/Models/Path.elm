@@ -1,4 +1,4 @@
-module KMEditor.Common.Models.Path exposing (..)
+module KMEditor.Common.Models.Path exposing (Path, PathNode(..), createEncodedPathNode, encodePathNode, getNodeUuid, getParentUuid, pathDecoder, pathNodeDecoder, pathNodeDecoderByType, pathNodeUuidDecoder)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (..)

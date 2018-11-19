@@ -6,7 +6,7 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (formResultView, selectGroup)
-import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon, TableActionText), TableConfig, TableFieldValue(HtmlValue, TextValue), indexTable)
+import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)

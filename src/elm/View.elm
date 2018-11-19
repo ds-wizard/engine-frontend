@@ -1,5 +1,6 @@
 module View exposing (view)
 
+import Browser exposing (Document)
 import Common.Html exposing (detailContainerClassWith, linkTo)
 import Common.View exposing (defaultFullPageError, fullPageMessage, pageHeader)
 import Common.View.Layout exposing (appView, publicView)
@@ -16,9 +17,9 @@ import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
 import Users.View
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-    case model.route of
+    case model.state.route of
         Welcome ->
             appView model welcomeView
 
@@ -29,12 +30,12 @@ view model =
 
         KMEditor route ->
             model.kmEditorModel
-                |> KMEditor.View.view route KMEditorMsg model.jwt
+                |> KMEditor.View.view route KMEditorMsg model.state.jwt
                 |> appView model
 
         KMPackages route ->
             model.kmPackagesModel
-                |> KMPackages.View.view route KMPackagesMsg model.jwt
+                |> KMPackages.View.view route KMPackagesMsg model.state.jwt
                 |> appView model
 
         Organization ->

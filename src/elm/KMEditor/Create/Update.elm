@@ -9,11 +9,12 @@ import Jwt
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (postKnowledgeModel)
-import KMEditor.Routing exposing (Route(Editor, Index))
+import KMEditor.Routing exposing (Route(..))
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
+import Models exposing (State)
 import Msgs
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (getUuid, tuplePrepend)
@@ -26,17 +27,17 @@ fetchData wrapMsg session =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg seed session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         GetPackagesCompleted result ->
-            getPackageCompleted model result |> tuplePrepend seed
+            getPackageCompleted model result |> tuplePrepend state.seed
 
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg seed session model
+            handleForm formMsg wrapMsg state.seed state.session model
 
         PostKnowledgeModelCompleted result ->
-            postKmCompleted model result |> tuplePrepend seed
+            postKmCompleted state model result |> tuplePrepend state.seed
 
 
 getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
@@ -62,6 +63,7 @@ setSelectedPackage model packages =
         Just id ->
             if List.any (.id >> (==) id) packages then
                 { model | form = initKnowledgeModelCreateForm model.selectedPackage }
+
             else
                 model
 
@@ -99,14 +101,14 @@ postKmCmd wrapMsg session form uuid =
         |> Cmd.map wrapMsg
 
 
-postKmCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-postKmCompleted model result =
+postKmCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+postKmCompleted state model result =
     case result of
         Ok km ->
             ( model
             , Maybe.map (Routing.KMEditor << Editor) model.newUuid
                 |> Maybe.withDefault (Routing.KMEditor Index)
-                |> cmdNavigate
+                |> cmdNavigate state.key
             )
 
         Err error ->

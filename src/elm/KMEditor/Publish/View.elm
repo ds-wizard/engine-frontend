@@ -12,7 +12,7 @@ import Html.Attributes exposing (..)
 import KMEditor.Common.Models exposing (KnowledgeModel, kmLastVersion)
 import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model)
 import KMEditor.Publish.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(Index))
+import KMEditor.Routing exposing (Route(..))
 import Msgs
 import Routing exposing (Route(..))
 
@@ -21,12 +21,12 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ detailContainerClassWith "KMEditor__Publish" ]
         [ pageHeader "Publish new version" []
-        , fullPageActionResultView (content wrapMsg model) model.knowledgeModel
+        , fullPageActionResultView (contentView wrapMsg model) model.knowledgeModel
         ]
 
 
-content : (Msg -> Msgs.Msg) -> Model -> KnowledgeModel -> Html Msgs.Msg
-content wrapMsg model knowledgeModel =
+contentView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModel -> Html Msgs.Msg
+contentView wrapMsg model knowledgeModel =
     div []
         [ formResultView model.publishingKnowledgeModel
         , formView wrapMsg model.form knowledgeModel

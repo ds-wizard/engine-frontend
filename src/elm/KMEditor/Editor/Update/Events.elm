@@ -1,11 +1,11 @@
-module KMEditor.Editor.Update.Events exposing (..)
+module KMEditor.Editor.Update.Events exposing (createAddAnswerEvent, createAddChapterEvent, createAddExpertEvent, createAddQuestionEvent, createAddReferenceEvent, createDeleteAnswerEvent, createDeleteChapterEvent, createDeleteExpertEvent, createDeleteQuestionEvent, createDeleteReferenceEvent, createEditAnswerEvent, createEditChapterEvent, createEditExpertEvent, createEditKnowledgeModelEvent, createEditQuestionEvent, createEditReferenceEvent, createEvent, createEventField)
 
 import KMEditor.Common.Models.Entities exposing (Reference(..), getReferenceUuid)
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (..)
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 import Utils exposing (getUuid)
 
 
@@ -204,8 +204,8 @@ createEditReferenceEvent form editorData =
             let
                 changed =
                     case editorData.reference of
-                        ResourcePageReference data ->
-                            field data /= newValue
+                        ResourcePageReference resourcePageData ->
+                            field resourcePageData /= newValue
 
                         _ ->
                             True
@@ -216,8 +216,8 @@ createEditReferenceEvent form editorData =
             let
                 changed =
                     case editorData.reference of
-                        URLReference data ->
-                            field data /= newValue
+                        URLReference urlData ->
+                            field urlData /= newValue
 
                         _ ->
                             True
@@ -228,8 +228,8 @@ createEditReferenceEvent form editorData =
             let
                 changed =
                     case editorData.reference of
-                        CrossReference data ->
-                            field data /= newValue
+                        CrossReference crossReferenceData ->
+                            field crossReferenceData /= newValue
 
                         _ ->
                             True

@@ -1,9 +1,9 @@
-module DSPlanner.Subscriptions exposing (..)
+module DSPlanner.Subscriptions exposing (subscriptions)
 
 import DSPlanner.Index.Subscriptions
 import DSPlanner.Models exposing (Model)
-import DSPlanner.Msgs exposing (Msg(IndexMsg))
-import DSPlanner.Routing exposing (Route(Index))
+import DSPlanner.Msgs exposing (Msg(..))
+import DSPlanner.Routing exposing (Route(..))
 import Msgs
 
 

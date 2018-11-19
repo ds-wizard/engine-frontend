@@ -1,4 +1,4 @@
-module Public.Questionnaire.Msgs exposing (..)
+module Public.Questionnaire.Msgs exposing (Msg(..))
 
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.Msgs

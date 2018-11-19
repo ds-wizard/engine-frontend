@@ -1,6 +1,6 @@
-module Public.Routing exposing (..)
+module Public.Routing exposing (Route(..), forgottenPasswordConfirmation, parsers, signupConfirmation, toUrl)
 
-import UrlParser exposing (..)
+import Url.Parser exposing (..)
 
 
 type Route

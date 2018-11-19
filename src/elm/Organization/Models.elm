@@ -1,4 +1,4 @@
-module Organization.Models exposing (..)
+module Organization.Models exposing (Model, Organization, OrganizationForm, encodeOrganizationForm, initEmptyOrganizationForm, initOrganizationForm, initialModel, organizationDecoder, organizationFormValidation, organizationToFormInitials)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
@@ -6,7 +6,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import Utils exposing (validateRegex)
 
@@ -41,7 +41,7 @@ initialModel =
 
 organizationDecoder : Decoder Organization
 organizationDecoder =
-    decode Organization
+    Decode.succeed Organization
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "organizationId" Decode.string

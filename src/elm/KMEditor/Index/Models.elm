@@ -1,4 +1,4 @@
-module KMEditor.Index.Models exposing (..)
+module KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeKnowledgeModelUpgradeForm, initKnowledgeModelUpgradeForm, initialModel, knowledgeModelUpgradeFormValidation)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)

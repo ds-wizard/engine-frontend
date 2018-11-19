@@ -1,7 +1,7 @@
-module KMPackages.Common.Models exposing (..)
+module KMPackages.Common.Models exposing (Package, PackageDetail, packageDecoder, packageDetailDecoder, packageDetailListDecoder, packageListDecoder)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 
 
 type alias Package =
@@ -14,7 +14,7 @@ type alias Package =
 
 packageDecoder : Decoder Package
 packageDecoder =
-    decode Package
+    Decode.succeed Package
         |> required "name" Decode.string
         |> required "organizationId" Decode.string
         |> required "kmId" Decode.string
@@ -38,7 +38,7 @@ type alias PackageDetail =
 
 packageDetailDecoder : Decoder PackageDetail
 packageDetailDecoder =
-    decode PackageDetail
+    Decode.succeed PackageDetail
         |> required "name" Decode.string
         |> required "id" Decode.string
         |> required "organizationId" Decode.string

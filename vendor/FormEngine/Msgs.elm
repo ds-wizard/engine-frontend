@@ -1,4 +1,4 @@
-module FormEngine.Msgs exposing (..)
+module FormEngine.Msgs exposing (Msg(..))
 
 
 type Msg a

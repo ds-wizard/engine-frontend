@@ -1,4 +1,4 @@
-module KMEditor.Publish.Models exposing (..)
+module KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model, encodeKnowledgeModelPublishForm, initKnowledgeModelPublishForm, initialModel, knowledgeModelPublishFormValidation)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
@@ -6,7 +6,7 @@ import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models exposing (..)
-
+import String exposing (fromInt)
 
 type alias Model =
     { knowledgeModel : ActionResult KnowledgeModel
@@ -49,7 +49,7 @@ encodeKnowledgeModelPublishForm : KnowledgeModelPublishForm -> ( String, Encode.
 encodeKnowledgeModelPublishForm form =
     let
         version =
-            String.join "." <| List.map toString [ form.major, form.minor, form.patch ]
+            String.join "." <| List.map fromInt [ form.major, form.minor, form.patch ]
 
         object =
             Encode.object [ ( "description", Encode.string form.description ) ]

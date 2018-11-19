@@ -9,10 +9,11 @@ import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (deleteKnowledgeModel, deleteMigration, getKnowledgeModels, postMigration)
-import KMEditor.Routing exposing (Route(Index, Migration))
+import KMEditor.Routing exposing (Route(..))
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackagesFiltered)
 import List.Extra as List
+import Models exposing (State)
 import Msgs
 import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
@@ -26,8 +27,8 @@ fetchData wrapMsg session =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         GetKnowledgeModelsCompleted result ->
             getKnowledgeModelsCompleted model result
@@ -36,28 +37,28 @@ update msg wrapMsg session model =
             ( { model | kmToBeDeleted = km, deletingKnowledgeModel = Unset }, Cmd.none )
 
         DeleteKnowledgeModel ->
-            handleDeleteKM wrapMsg session model
+            handleDeleteKM wrapMsg state.session model
 
         DeleteKnowledgeModelCompleted result ->
-            deleteKnowledgeModelCompleted model result
+            deleteKnowledgeModelCompleted state model result
 
         PostMigrationCompleted result ->
-            postMigrationCompleted model result
+            postMigrationCompleted state model result
 
         ShowHideUpgradeModal km ->
-            handleShowHideUpgradeModal wrapMsg km model session
+            handleShowHideUpgradeModal wrapMsg km model state.session
 
-        UpgradeFormMsg msg ->
-            handleUpgradeForm msg wrapMsg session model
+        UpgradeFormMsg formMsg ->
+            handleUpgradeForm formMsg wrapMsg state.session model
 
         GetPackagesCompleted result ->
             handleGetPackagesCompleted model result
 
         DeleteMigration uuid ->
-            handleDeleteMigration wrapMsg uuid session model
+            handleDeleteMigration wrapMsg uuid state.session model
 
         DeleteMigrationCompleted result ->
-            deleteMigrationCompleted wrapMsg session model result
+            deleteMigrationCompleted wrapMsg state.session model result
 
 
 getKnowledgeModelsCompleted : Model -> Result Jwt.JwtError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
@@ -96,11 +97,11 @@ deleteKnowledgeModelCmd wrapMsg kmId session =
         |> Cmd.map wrapMsg
 
 
-deleteKnowledgeModelCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteKnowledgeModelCompleted model result =
+deleteKnowledgeModelCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+deleteKnowledgeModelCompleted state model result =
     case result of
         Ok km ->
-            ( model, cmdNavigate <| KMEditor Index )
+            ( model, cmdNavigate state.key <| KMEditor Index )
 
         Err error ->
             ( { model | deletingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be deleted" }
@@ -108,8 +109,8 @@ deleteKnowledgeModelCompleted model result =
             )
 
 
-postMigrationCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-postMigrationCompleted model result =
+postMigrationCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+postMigrationCompleted state model result =
     case result of
         Ok migration ->
             let
@@ -118,7 +119,7 @@ postMigrationCompleted model result =
                         |> Maybe.andThen (\km -> Just km.uuid)
                         |> Maybe.withDefault ""
             in
-            ( model, cmdNavigate <| KMEditor <| Migration kmUuid )
+            ( model, cmdNavigate state.key <| KMEditor <| Migration kmUuid )
 
         Err error ->
             ( { model | creatingMigration = getServerErrorJwt error "Migration could not be created" }

@@ -1,13 +1,27 @@
-module Routing exposing (..)
+module Routing exposing
+    ( Route(..)
+    , appRoute
+    , cmdNavigate
+    , homeRoute
+    , isAllowed
+    , loginRoute
+    , matchers
+    , parseLocation
+    , questionnaireDemoRoute
+    , routeIfAllowed
+    , signupRoute
+    , toUrl
+    )
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
+import Browser.Navigation exposing (Key, pushUrl)
 import DSPlanner.Routing
 import KMEditor.Routing
 import KMPackages.Routing
-import Navigation exposing (Location)
 import Public.Routing
-import UrlParser exposing (..)
+import Url exposing (Url)
+import Url.Parser exposing (..)
 import Users.Routing
 
 
@@ -44,6 +58,7 @@ routeIfAllowed : Maybe JwtToken -> Route -> Route
 routeIfAllowed maybeJwt route =
     if isAllowed route maybeJwt then
         route
+
     else
         NotAllowed
 
@@ -54,14 +69,14 @@ isAllowed route maybeJwt =
         Welcome ->
             True
 
-        DSPlanner route ->
-            DSPlanner.Routing.isAllowed route maybeJwt
+        DSPlanner dsPlannerRoute ->
+            DSPlanner.Routing.isAllowed dsPlannerRoute maybeJwt
 
-        KMEditor route ->
-            KMEditor.Routing.isAllowed route maybeJwt
+        KMEditor kmEditorRoute ->
+            KMEditor.Routing.isAllowed kmEditorRoute maybeJwt
 
-        KMPackages route ->
-            KMPackages.Routing.isAllowed route maybeJwt
+        KMPackages kmPackagesRoute ->
+            KMPackages.Routing.isAllowed kmPackagesRoute maybeJwt
 
         Organization ->
             hasPerm maybeJwt Perm.organization
@@ -69,8 +84,8 @@ isAllowed route maybeJwt =
         Public _ ->
             True
 
-        Users route ->
-            Users.Routing.isAllowed route maybeJwt
+        Users usersRoute ->
+            Users.Routing.isAllowed usersRoute maybeJwt
 
         NotFound ->
             True
@@ -87,23 +102,23 @@ toUrl route =
                 Welcome ->
                     [ "welcome" ]
 
-                DSPlanner route ->
-                    DSPlanner.Routing.toUrl route
+                DSPlanner dsPlannerRoute ->
+                    DSPlanner.Routing.toUrl dsPlannerRoute
 
-                KMEditor route ->
-                    KMEditor.Routing.toUrl route
+                KMEditor kmEditorRoute ->
+                    KMEditor.Routing.toUrl kmEditorRoute
 
-                KMPackages route ->
-                    KMPackages.Routing.toUrl route
+                KMPackages kmPackagesRoute ->
+                    KMPackages.Routing.toUrl kmPackagesRoute
 
                 Organization ->
                     [ "organization" ]
 
-                Public route ->
-                    Public.Routing.toUrl route
+                Public publicRoute ->
+                    Public.Routing.toUrl publicRoute
 
-                Users route ->
-                    Users.Routing.toUrl route
+                Users usersRoute ->
+                    Users.Routing.toUrl usersRoute
 
                 _ ->
                     []
@@ -114,9 +129,9 @@ toUrl route =
         |> String.join "?"
 
 
-parseLocation : Location -> Route
-parseLocation location =
-    case UrlParser.parsePath matchers location of
+parseLocation : Url -> Route
+parseLocation url =
+    case Url.Parser.parse matchers url of
         Just route ->
             route
 
@@ -124,9 +139,9 @@ parseLocation location =
             NotFound
 
 
-cmdNavigate : Route -> Cmd msg
-cmdNavigate =
-    Navigation.newUrl << toUrl
+cmdNavigate : Key -> Route -> Cmd msg
+cmdNavigate key =
+    pushUrl key << toUrl
 
 
 homeRoute : Route

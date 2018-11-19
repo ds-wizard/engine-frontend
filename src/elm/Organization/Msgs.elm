@@ -1,4 +1,4 @@
-module Organization.Msgs exposing (..)
+module Organization.Msgs exposing (Msg(..))
 
 import Form
 import Jwt

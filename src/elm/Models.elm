@@ -1,24 +1,34 @@
-module Models exposing (..)
+module Models exposing
+    ( Flags
+    , Model
+    , State
+    , flagsDecoder
+    , initLocalModel
+    , initialModel
+    , setJwt
+    , setRoute
+    , setSeed
+    , setSession
+    , userLoggedIn
+    )
 
 import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, sessionExists)
+import Browser.Navigation exposing (Key)
 import Common.Menu.Models
 import DSPlanner.Models
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import KMEditor.Models
 import KMPackages.Models
 import Organization.Models
 import Public.Models
-import Random.Pcg exposing (Seed, initialSeed)
+import Random exposing (Seed, initialSeed)
 import Routing exposing (Route(..))
 import Users.Models
 
 
 type alias Model =
-    { route : Route
-    , seed : Seed
-    , session : Session
-    , jwt : Maybe JwtToken
+    { state : State
     , menuModel : Common.Menu.Models.Model
     , organizationModel : Organization.Models.Model
     , kmEditorModel : KMEditor.Models.Model
@@ -29,12 +39,24 @@ type alias Model =
     }
 
 
-initialModel : Route -> Int -> Session -> Maybe JwtToken -> Model
-initialModel route seed session jwt =
-    { route = route
-    , seed = initialSeed seed
-    , session = session
-    , jwt = jwt
+type alias State =
+    { route : Route
+    , seed : Seed
+    , session : Session
+    , jwt : Maybe JwtToken
+    , key : Key
+    }
+
+
+initialModel : Route -> Int -> Session -> Maybe JwtToken -> Key -> Model
+initialModel route seed session jwt key =
+    { state =
+        { route = route
+        , seed = initialSeed seed
+        , session = session
+        , jwt = jwt
+        , key = key
+        }
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , kmEditorModel = KMEditor.Models.initialModel
@@ -45,9 +67,57 @@ initialModel route seed session jwt =
     }
 
 
+setSession : Session -> Model -> Model
+setSession session model =
+    let
+        state =
+            model.state
+
+        newState =
+            { state | session = session }
+    in
+    { model | state = newState }
+
+
+setJwt : Maybe JwtToken -> Model -> Model
+setJwt jwt model =
+    let
+        state =
+            model.state
+
+        newState =
+            { state | jwt = jwt }
+    in
+    { model | state = newState }
+
+
+setRoute : Route -> Model -> Model
+setRoute route model =
+    let
+        state =
+            model.state
+
+        newState =
+            { state | route = route }
+    in
+    { model | state = newState }
+
+
+setSeed : Seed -> Model -> Model
+setSeed seed model =
+    let
+        state =
+            model.state
+
+        newState =
+            { state | seed = seed }
+    in
+    { model | state = newState }
+
+
 initLocalModel : Model -> Model
 initLocalModel model =
-    case model.route of
+    case model.state.route of
         Organization ->
             { model | organizationModel = Organization.Models.initialModel }
 
@@ -72,7 +142,7 @@ initLocalModel model =
 
 userLoggedIn : Model -> Bool
 userLoggedIn model =
-    sessionExists model.session
+    sessionExists model.state.session
 
 
 type alias Flags =
@@ -83,6 +153,6 @@ type alias Flags =
 
 flagsDecoder : Decoder Flags
 flagsDecoder =
-    decode Flags
+    Decode.succeed Flags
         |> required "session" (Decode.nullable sessionDecoder)
         |> required "seed" Decode.int

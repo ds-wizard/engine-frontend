@@ -10,6 +10,7 @@ import KMPackages.Detail.Models exposing (..)
 import KMPackages.Detail.Msgs exposing (Msg(..))
 import KMPackages.Requests exposing (..)
 import KMPackages.Routing exposing (Route(..))
+import Models exposing (State)
 import Msgs
 import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
@@ -22,8 +23,8 @@ fetchData wrapMsg organizationId kmId session =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         GetPackageCompleted result ->
             getPackageCompleted model result
@@ -32,13 +33,13 @@ update msg wrapMsg session model =
             ( { model | versionToBeDeleted = version, deletingVersion = Unset }, Cmd.none )
 
         DeleteVersion ->
-            handleDeleteVersion wrapMsg session model
+            handleDeleteVersion wrapMsg state.session model
 
         DeleteVersionCompleted result ->
-            deleteVersionCompleted model result
+            deleteVersionCompleted state model result
 
-        DropdownMsg packageDetail state ->
-            handleDropdownToggle model packageDetail state
+        DropdownMsg packageDetail dropdownState ->
+            handleDropdownToggle model packageDetail dropdownState
 
 
 getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
@@ -77,8 +78,8 @@ deletePackageVersionCmd wrapMsg packageId session =
         |> Cmd.map wrapMsg
 
 
-deleteVersionCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteVersionCompleted model result =
+deleteVersionCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+deleteVersionCompleted state model result =
     case result of
         Ok version ->
             let
@@ -90,7 +91,7 @@ deleteVersionCompleted model result =
                         _ ->
                             KMPackages Index
             in
-            ( model, cmdNavigate route )
+            ( model, cmdNavigate state.key route )
 
         Err error ->
             ( { model
@@ -108,6 +109,7 @@ handleDropdownToggle model packageDetail state =
                 replaceWith row =
                     if row.packageDetail == packageDetail then
                         { row | dropdownState = state }
+
                     else
                         row
 

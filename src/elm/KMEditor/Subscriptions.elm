@@ -1,4 +1,4 @@
-module KMEditor.Subscriptions exposing (..)
+module KMEditor.Subscriptions exposing (subscriptions)
 
 import KMEditor.Editor.Subscriptions
 import KMEditor.Models exposing (Model)

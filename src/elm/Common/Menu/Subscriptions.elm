@@ -1,8 +1,8 @@
-module Common.Menu.Subscriptions exposing (..)
+module Common.Menu.Subscriptions exposing (subscriptions)
 
 import Bootstrap.Dropdown as Dropdown
 import Common.Menu.Models exposing (Model)
-import Common.Menu.Msgs exposing (Msg(ProfileMenuDropdownMsg))
+import Common.Menu.Msgs exposing (Msg(..))
 import Msgs
 
 

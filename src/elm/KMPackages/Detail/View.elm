@@ -50,6 +50,7 @@ versionView wrapMsg jwt row =
         actions =
             if hasPerm jwt packageManagementWrite then
                 versionViewActions wrapMsg row
+
             else
                 versionViewActionsJustCreateDSButton row.packageDetail
     in
@@ -106,8 +107,8 @@ deleteVersionModal wrapMsg model =
     let
         ( version, visible ) =
             case model.versionToBeDeleted of
-                Just version ->
-                    ( version, True )
+                Just value ->
+                    ( value, True )
 
                 Nothing ->
                     ( "", False )

@@ -1,19 +1,20 @@
-module Msgs exposing (..)
+module Msgs exposing (Msg(..))
 
 import Auth.Msgs
+import Browser exposing (UrlRequest)
 import Common.Menu.Msgs
 import DSPlanner.Msgs
 import KMEditor.Msgs
 import KMPackages.Msgs
-import Navigation exposing (Location)
 import Organization.Msgs
 import Public.Msgs
+import Url exposing (Url)
 import Users.Msgs
 
 
 type Msg
-    = ChangeLocation String
-    | OnLocationChange Location
+    = OnUrlChange Url
+    | OnUrlRequest UrlRequest
     | AuthMsg Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
     | MenuMsg Common.Menu.Msgs.Msg

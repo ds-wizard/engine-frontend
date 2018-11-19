@@ -10,7 +10,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs
-import Routing exposing (Route(Users))
+import Routing exposing (Route(..))
 import Users.Common.Models exposing (roles)
 import Users.Edit.Models exposing (..)
 import Users.Edit.Msgs exposing (Msg(..))

@@ -1,4 +1,4 @@
-module KMEditor.Editor.Update.Abstract exposing (..)
+module KMEditor.Editor.Update.Abstract exposing (AddEntityConfig, DeleteEntityConfig, GenerateEventConfig, UpdateFormConfig, addEntity, deleteEntity, updateEditor, updateForm, withGenerateEvent)
 
 import Dict exposing (Dict)
 import Form
@@ -10,7 +10,7 @@ import KMEditor.Editor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.Models.Editors exposing (Editor, EditorLike, EditorState(..), getNewState)
 import Msgs
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 import Utils exposing (getUuid)
 
 
@@ -200,5 +200,5 @@ updateForm cfg model formMsg editorData =
 updateEditor : Dict String Editor -> (Editor -> Editor) -> String -> Dict String Editor
 updateEditor editors update uuid =
     Dict.get uuid editors
-        |> Maybe.map (update >> flip (Dict.insert uuid) editors)
+        |> Maybe.map (update >> (\a -> Dict.insert uuid a editors))
         |> Maybe.withDefault editors

@@ -1,4 +1,4 @@
-module Public.Signup.Requests exposing (..)
+module Public.Signup.Requests exposing (postSignup)
 
 import Http
 import Json.Encode exposing (Value)

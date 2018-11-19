@@ -1,4 +1,4 @@
-module DSPlanner.Create.Msgs exposing (..)
+module DSPlanner.Create.Msgs exposing (Msg(..))
 
 import Form
 import Jwt

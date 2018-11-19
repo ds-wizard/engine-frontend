@@ -1,4 +1,4 @@
-module KMPackages.Models exposing (..)
+module KMPackages.Models exposing (Model, initLocalModel, initialModel)
 
 import KMPackages.Detail.Models
 import KMPackages.Import.Models

@@ -1,4 +1,4 @@
-module KMEditor.Editor.View exposing (..)
+module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig, viewEditor, viewTree)
 
 import ActionResult
 import Common.Html exposing (emptyNode)

@@ -1,4 +1,4 @@
-module Auth.Permission exposing (..)
+module Auth.Permission exposing (dataManagementPlan, hasPerm, knowledgeModel, knowledgeModelPublish, knowledgeModelUpgrade, organization, packageManagementRead, packageManagementWrite, questionnaire, userManagement)
 
 import Auth.Models exposing (JwtToken)
 

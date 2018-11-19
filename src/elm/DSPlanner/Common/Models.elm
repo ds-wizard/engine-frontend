@@ -1,7 +1,7 @@
-module DSPlanner.Common.Models exposing (..)
+module DSPlanner.Common.Models exposing (Questionnaire, questionnaireDecoder, questionnaireListDecoder)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
 
 
@@ -14,7 +14,7 @@ type alias Questionnaire =
 
 questionnaireDecoder : Decoder Questionnaire
 questionnaireDecoder =
-    decode Questionnaire
+    Decode.succeed Questionnaire
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "package" packageDetailDecoder

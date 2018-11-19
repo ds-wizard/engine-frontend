@@ -1,4 +1,4 @@
-module Common.Html exposing (..)
+module Common.Html exposing (detailContainerClass, detailContainerClassWith, emptyNode, fa, linkTo, linkToAttributes)
 
 import Common.Html.Events exposing (onLinkClick)
 import Html exposing (..)
@@ -15,7 +15,6 @@ linkTo route attributes children =
 linkToAttributes : Route -> List (Attribute Msg)
 linkToAttributes route =
     [ href <| Routing.toUrl route
-    , onLinkClick <| Msgs.ChangeLocation <| Routing.toUrl route
     ]
 
 

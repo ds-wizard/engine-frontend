@@ -1,4 +1,55 @@
-module KMEditor.Editor.Models.Editors exposing (..)
+module KMEditor.Editor.Models.Editors exposing
+    ( AnswerEditorData
+    , ChapterEditorData
+    , Editor(..)
+    , EditorLike
+    , EditorState(..)
+    , ExpertEditorData
+    , KMEditorData
+    , QuestionEditorData
+    , ReferenceEditorData
+    , addAnswerFollowUp
+    , addChapterQuestion
+    , addKMChapter
+    , addQuestionAnswer
+    , addQuestionAnswerItemTemplateQuestion
+    , addQuestionExpert
+    , addQuestionReference
+    , createAnswerEditor
+    , createChapterEditor
+    , createExpertEditor
+    , createKnowledgeModelEditor
+    , createQuestionEditor
+    , createReferenceEditor
+    , deleteAnswerEditor
+    , deleteChapterEditor
+    , deleteEditor
+    , deleteEditors
+    , deleteExpertEditor
+    , deleteKMEditor
+    , deleteQuestionEditor
+    , deleteReferenceEditor
+    , editorNotDeleted
+    , getEditorPath
+    , getEditorTitle
+    , getEditorUuid
+    , getNewState
+    , isAnswerEditorDirty
+    , isChapterEditorDirty
+    , isEditorDeleted
+    , isExpertEditorDirty
+    , isKMEditorDirty
+    , isQuestionEditorDirty
+    , isReferenceEditorDirty
+    , toggleEditorOpen
+    , updateAnswerEditorData
+    , updateChapterEditorData
+    , updateEditorsWithQuestion
+    , updateExpertEditorData
+    , updateKMEditorData
+    , updateQuestionEditorData
+    , updateReferenceEditorData
+    )
 
 import Common.Form exposing (CustomFormError)
 import Dict exposing (Dict)
@@ -409,8 +460,10 @@ getNewState : EditorState -> EditorState -> EditorState
 getNewState originalState newState =
     if newState == Deleted then
         Deleted
+
     else if (originalState == Added || originalState == AddedEdited) && newState == Edited then
         AddedEdited
+
     else
         newState
 
@@ -533,12 +586,14 @@ updateQuestionEditorData editorContext newState form editorData =
         newAnswers =
             if newQuestion.type_ == "options" then
                 Children.cleanDirty editorData.answers
+
             else
                 Children.init []
 
         newAnswerItemTemplateQuestions =
             if newQuestion.type_ == "list" then
                 Children.cleanDirty editorData.answerItemTemplateQuestions
+
             else
                 Children.init []
     in

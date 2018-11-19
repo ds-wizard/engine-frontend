@@ -1,4 +1,4 @@
-module Common.Menu.View exposing (..)
+module Common.Menu.View exposing (viewAboutModal, viewAboutModalContent, viewBuildInfo, viewProfileMenu, viewReportIssueModal)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Msgs
@@ -7,12 +7,12 @@ import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (fa, linkToAttributes)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
-import Common.Menu.Msgs exposing (Msg(ProfileMenuDropdownMsg, SetAboutOpen, SetReportIssueOpen))
+import Common.Menu.Msgs exposing (Msg(..))
 import Common.View exposing (fullPageActionResultView, modalView)
 import Html exposing (..)
 import Html.Attributes exposing (class, colspan, href, target)
 import Msgs
-import Routing exposing (Route(Users))
+import Routing exposing (Route(..))
 import Users.Common.Models exposing (User)
 import Users.Routing
 

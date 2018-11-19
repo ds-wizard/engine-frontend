@@ -1,4 +1,4 @@
-module Organization.Requests exposing (..)
+module Organization.Requests exposing (getCurrentOrganization, putCurrentOrganization)
 
 {-|
 

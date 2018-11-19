@@ -1,4 +1,4 @@
-module DSPlanner.Requests exposing (..)
+module DSPlanner.Requests exposing (deleteQuestionnaire, getQuestionnaire, getQuestionnaires, postQuestionnaire, putQuestionnaire)
 
 import Auth.Models exposing (Session)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)

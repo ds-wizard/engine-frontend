@@ -1,4 +1,4 @@
-module KMEditor.Editor.Models exposing (..)
+module KMEditor.Editor.Models exposing (Model, addEvent, getActiveEditor, getEditorContext, initialModel, insertEditor, setAlert)
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
@@ -7,7 +7,7 @@ import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid)
 import Reorderable
-import SplitPane exposing (Orientation(Horizontal), configureSplitter, percentage)
+import SplitPane exposing (Orientation(..), configureSplitter, percentage)
 
 
 type alias Model =
