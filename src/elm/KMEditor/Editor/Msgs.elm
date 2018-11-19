@@ -3,7 +3,7 @@ module KMEditor.Editor.Msgs exposing (AnswerEditorMsg(..), ChapterEditorMsg(..),
 import Form
 import Jwt
 import KMEditor.Common.Models.Entities exposing (..)
--- import Reorderable
+import Reorderable
 import SplitPane
 
 
@@ -14,7 +14,7 @@ type Msg
     | ToggleOpen String
     | SetActiveEditor String
     | EditorMsg EditorMsg
-    -- | ReorderableMsg Reorderable.Msg
+    | ReorderableMsg Reorderable.Msg
     | CloseAlert
     | Submit
     | SubmitCompleted (Result Jwt.JwtError String)

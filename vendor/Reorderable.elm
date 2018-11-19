@@ -1,71 +1,33 @@
-module Reorderable
-    exposing
-        ( Config
-        , Event(..)
-        , HtmlWrapper
-        , Msg(..)
-        , State
-        , div
-        , fullConfig
-        , initialState
-        , ol
-        , simpleConfig
-        , subscriptions
-        , ul
-        , update
-        , updateWithEvents
-        )
+module Reorderable exposing
+    ( HtmlWrapper
+    , Msg
+    , State
+    , ViewConfig
+    , initialState
+    , subscriptions
+    , update
+    , view
+    )
 
-{-| This library helps you create drag and drop re-orderable html lists
-
-Check out the [examples] to see how it works
-[examples]: <https://github.com/rohanorton/elm-reorderable-list/tree/master/examples>
-
-
-# View
-
-@docs ul, ol, div
-
-
-# Config
-
-@docs Config, HtmlWrapper, simpleConfig, fullConfig
-
-
-# State
-
-@docs State, initialState
-
-
-# Subscriptions
-
-@docs subscriptions
-
-
-# Updates
-
-@docs Msg, update, updateWithEvents, Event
-
--}
-
-import Html exposing (Attribute, Html, text)
+import Browser.Events exposing (onMouseMove, onMouseUp)
+import Html exposing (Attribute, Html, li, ul)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (on)
-import Html.Keyed as Keyed
-import Json.Decode as Json
-import Reorderable.Helpers as Helpers
-import Reorderable.Mouse as Mouse exposing (MouseEvent, Position)
+import Json.Decode as D exposing (Decoder)
+import List.Extra as List
 
 
--- MODEL
+
+{- Types -}
 
 
-{-| Internal state of the re-orderable component.
+type Msg
+    = DragStart String MouseEvent
+    | DragEnd
+    | DragMove MouseEvent
+    | MouseOverIgnored Bool
 
-Tracks which element is being dragged and whether mouse is over an ignored
-element.
 
--}
 type State
     = State
         { dragging : Maybe DraggedItem
@@ -79,8 +41,41 @@ type alias DraggedItem =
     }
 
 
-{-| Create the inital state for your re-orderable component.
--}
+type alias Position =
+    { x : Int
+    , y : Int
+    }
+
+
+type alias MouseEvent =
+    { startingPosition : Position
+    , movement : Position
+    }
+
+
+type alias ViewConfig a msg =
+    { toId : a -> String
+    , toMsg : Msg -> msg
+    , itemView : HtmlWrapper msg -> a -> Html msg
+    , placeholderView : Html msg
+    , listClass : String
+    , itemClass : String
+    , placeholderClass : String
+    , updateList : List a -> msg
+    }
+
+
+type alias HtmlWrapper msg =
+    (List (Attribute msg) -> List (Html msg) -> Html msg)
+    -> List (Attribute msg)
+    -> List (Html msg)
+    -> Html msg
+
+
+
+{- Model -}
+
+
 initialState : State
 initialState =
     State
@@ -90,340 +85,187 @@ initialState =
 
 
 
--- UPDATE
+{- Subscriptions -}
 
 
-{-| Messages sent to internal update command used for updating the internal
-component state.
--}
-type Msg
-    = MouseOverIgnored Bool
-    | InternalDragStart String MouseEvent
-    | InternalDragMove MouseEvent
-    | InternalDragEnd
+subscriptions : State -> Sub Msg
+subscriptions (State state) =
+    if state.dragging /= Nothing then
+        Sub.batch
+            [ onMouseMove (D.map DragMove mouseEventDecoder)
+            , onMouseUp (D.succeed DragEnd)
+            ]
+
+    else
+        Sub.none
 
 
-{-| Update function for updating the state of the component.
--}
+
+{- Update -}
+
+
 update : Msg -> State -> State
-update msg state =
-    updateWithEvents msg state
-        |> Tuple.first
-
-
-{-| Events returned by `updateWithEvents` function.
--}
-type Event
-    = DragEnd
-    | DragStart String
-    | DragMove
-
-
-{-| Update function for updating the state of the component, but also returns
-some events `DragEnd`, `DragStart` and `DragMove`.
--}
-updateWithEvents : Msg -> State -> ( State, Maybe Event )
-updateWithEvents msg (State state) =
+update msg (State state) =
     case msg of
-        MouseOverIgnored mouseOverIgnored ->
-            ( State { state | mouseOverIgnored = mouseOverIgnored }
-            , Nothing
-            )
+        DragStart id event ->
+            State
+                { state
+                    | dragging =
+                        Just
+                            { id = id
+                            , position = event.startingPosition
+                            }
+                }
 
-        InternalDragStart id ev ->
-            let
-                dragging =
-                    DraggedItem id ev.startingPosition
-            in
-            ( State { state | dragging = Just dragging }
-            , Just <| DragStart id
-            )
+        DragEnd ->
+            State { state | dragging = Nothing }
 
-        InternalDragMove ev ->
+        DragMove event ->
             let
                 dragging =
                     state.dragging
                         |> Maybe.map
                             (\dragged ->
                                 { dragged
-                                    | position = move dragged.position ev.movement
+                                    | position = move dragged.position event.movement
                                 }
                             )
             in
-            ( State { state | dragging = dragging }
-            , Nothing
-            )
+            State { state | dragging = dragging }
 
-        InternalDragEnd ->
-            ( State { state | dragging = Nothing }
-            , Just <| DragEnd
-            )
+        MouseOverIgnored mouseOverIgnored ->
+            State { state | mouseOverIgnored = mouseOverIgnored }
 
 
 
--- SUBSCRIPTIONS
+{- View -}
 
 
-{-| Subscriptions function
--}
-subscriptions : (Msg -> msg) -> State -> Sub msg
-subscriptions toMsg (State state) =
-    case state.dragging of
-        Nothing ->
-            Sub.batch []
-
-        Just _ ->
-            Sub.batch
-                [ Mouse.moves <| toMsg << InternalDragMove
-                , Mouse.ups <| always <| toMsg InternalDragEnd
-                ]
+view : ViewConfig a msg -> State -> List a -> Html msg
+view config state list =
+    let
+        views =
+            List.concatMap (viewItem config state list) list
+    in
+    ul [ class config.listClass, style "position" "relative" ]
+        views
 
 
-
--- VIEW
-
-
-{-| Takes a list and turn it into an html, drag and drop re-orderable
-ordered-list. `Config` is configuration for the component, describing how the
-data should be displayed and how to handle events.
-
-**Note:** `State` and `List data` belong in your `Model`. `Config` belongs in
-your view.
-
--}
-ol : Config data msg -> State -> List data -> Html msg
-ol ((Config { listClass }) as config) state list =
-    Keyed.ol [ class listClass, style "position" "relative" ] <| List.concatMap (childView Html.li config list state) list
-
-
-{-| Takes a list and turn it into an html, drag and drop re-orderable
-unordered-list. `Config` is configuration for the component, describing how the
-data should be displayed and how to handle events.
-
-**Note:** `State` and `List data` belong in your `Model`. `Config` belongs in
-your view.
-
--}
-ul : Config data msg -> State -> List data -> Html msg
-ul ((Config { listClass }) as config) state list =
-    Keyed.ul [ class listClass, style "position" "relative" ] <| List.concatMap (childView Html.li config list state) list
-
-
-{-| Takes a list and turn it into an html, drag and drop re-orderable
-divs. `Config` is configuration for the component, describing how the
-data should be displayed and how to handle events.
-
-**Note:** `State` and `List data` belong in your `Model`. `Config` belongs in
-your view.
-
--}
-div : Config data msg -> State -> List data -> Html msg
-div ((Config { listClass }) as config) state list =
-    Keyed.node "div" [ class listClass, style "position" "relative" ] <| List.concatMap (childView Html.div config list state) list
-
-
-includeDragged : HtmlElement msg -> Config data msg -> State -> data -> List ( String, Html msg )
-includeDragged element (Config config) (State state) data =
-    case state.dragging of
-        Nothing ->
-            []
-
-        Just dragged ->
-            if dragged.id == config.toId data then
-                [ draggingView element (Config config) dragged data ]
-            else
-                []
-
-
-type alias HtmlElement msg =
-    List (Attribute msg) -> List (Html msg) -> Html msg
-
-
-childView : HtmlElement msg -> Config data msg -> List data -> State -> data -> List ( String, Html msg )
-childView element (Config config) list (State state) data =
+viewItem : ViewConfig a msg -> State -> List a -> a -> List (Html msg)
+viewItem config (State state) list item =
     let
         id =
-            config.toId data
+            config.toId item
 
-        ( childView, childClass ) =
-            if isDragging then
-                ( config.placeholderView data, config.placeholderClass )
-            else
-                ( config.itemView (ignoreDrag config.toMsg) data, config.itemClass )
-
-        isDragging =
+        isBeingDragged =
             state.dragging
-                |> Maybe.map .id
-                |> Maybe.map ((==) id)
+                |> Maybe.map (.id >> (==) id)
                 |> Maybe.withDefault False
 
-        dragged =
-            includeDragged element (Config config) (State state) data
+        ( itemView, itemClass ) =
+            if isBeingDragged then
+                ( config.placeholderView, config.placeholderClass )
+
+            else
+                ( config.itemView (ignoreDrag config.toMsg) item, config.itemClass )
+
+        draggedItemView =
+            case ( isBeingDragged, state.dragging ) of
+                ( True, Just draggedItem ) ->
+                    [ viewDraggedItem config draggedItem item ]
+
+                _ ->
+                    []
+
+        attrs =
+            [ class itemClass ]
+                ++ [ onDragStart state.mouseOverIgnored (config.toMsg << DragStart id)
+                   , onDragOver
+                        config.updateList
+                        (\() -> updateList config.toId id (Maybe.map .id state.dragging) list)
+                        (state.dragging /= Nothing)
+                   ]
     in
-    ( id
-    , element
-        [ onDragStart state.mouseOverIgnored <| config.toMsg << InternalDragStart id
-        , onDragOver config.updateList
-            (\() ->
-                Helpers.updateList config.toId id (Maybe.map .id state.dragging) list
-            )
-            (state.dragging /= Nothing)
-        , class childClass
+    li attrs [ itemView ]
+        :: draggedItemView
+
+
+viewDraggedItem : ViewConfig a msg -> DraggedItem -> a -> Html msg
+viewDraggedItem config draggedItem item =
+    li
+        [ class config.itemClass
+        , style "position" "absolute"
+        , style "left" <| px draggedItem.position.x
+        , style "top" <| px draggedItem.position.y
+        , style "pointer-events" "none"
+        , style "display" "block"
         ]
-        [ childView ]
-    )
-        :: dragged
+        [ config.itemView (ignoreDrag config.toMsg) item ]
 
 
-draggingView : HtmlElement msg -> Config data msg -> DraggedItem -> data -> ( String, Html msg )
-draggingView element (Config config) draggedItem data =
-    let
-        { x, y } =
-            draggedItem.position
-    in
-    ( "__draggedItem"
-    , element
-        [ (\( a, b ) -> style a b) ("position", "absolute")
-        , (\( a, b ) -> style a b) ("display", "block")
-        , (\( a, b ) -> style a b) ("left", px x)
-        , (\( a, b ) -> style a b) ("top", px y)
-        , (\( a, b ) -> style a b) ("pointer-events", "none")
-        , (\( a, b ) -> style a b) ("cursor", "pointer")
-        , class config.itemClass
-        ]
-        [ config.itemView (ignoreDrag config.toMsg) data ]
-    )
-
-
-onDragStart : Bool -> (MouseEvent -> msg) -> Attribute msg
-onDragStart ignored tagger =
-    Mouse.mouseEventDecoder
-        |> Json.andThen (decodeWhen <| not ignored)
-        |> Json.map tagger
-        |> on "mousedown"
-
-
-decodeWhen : Bool -> a -> Json.Decoder a
-decodeWhen condition x =
-    if condition then
-        Json.succeed x
-    else
-        Json.fail "Not this time"
-
-
-onDragEnd : msg -> Attribute msg
-onDragEnd msg =
-    on "mouseup" <| Json.succeed msg
-
-
-onDragOver : (List a -> msg) -> (() -> List a) -> Bool -> Attribute msg
-onDragOver updateList listThunk isDragging =
-    Json.succeed ()
-        |> Json.andThen (decodeWhen isDragging)
-        |> Json.andThen (Json.succeed << updateList << listThunk)
-        |> on "mouseover"
+viewPlaceholder : ViewConfig a msg -> Html msg
+viewPlaceholder config =
+    li [ class config.placeholderClass ] [ config.placeholderView ]
 
 
 ignoreDrag : (Msg -> msg) -> HtmlWrapper msg
 ignoreDrag toMsg elem attr children =
     elem
         (attr
-            ++ [ on "mouseenter" <| Json.succeed <| toMsg <| MouseOverIgnored True
-               , on "mouseleave" <| Json.succeed <| toMsg <| MouseOverIgnored False
+            ++ [ on "mouseenter" <| D.succeed <| toMsg <| MouseOverIgnored True
+               , on "mouseleave" <| D.succeed <| toMsg <| MouseOverIgnored False
                ]
         )
         children
 
 
 
--- CONFIG
+{- Mouse Events -}
 
 
-{-| Configuration for your re-orderable list.
-
-**Note:** Your `Config` should _never_ be held in your model.
-It should only appear in `view` code.
-
--}
-type Config data msg
-    = Config
-        { toId : data -> String
-        , toMsg : Msg -> msg
-        , itemView : HtmlWrapper msg -> data -> Html msg
-        , placeholderView : data -> Html msg
-        , listClass : String
-        , itemClass : String
-        , placeholderClass : String
-        , draggable : Bool
-        , updateList : List data -> msg
-        }
-
-
-{-| This type alias is to simplify the definition of a function that takes a
-standard html function and its arguments to return a Html msg
-
-This doesn't make much sense in the abstract, check out the ignoreDrag function
-for an example
-
--}
-type alias HtmlWrapper msg =
-    (List (Attribute msg) -> List (Html msg) -> Html msg)
-    -> List (Attribute msg)
-    -> List (Html msg)
-    -> Html msg
-
-
-{-| A really really simple re-orderable list.
-
-For creating a basic reorderable ul or ol from a list of strings. It's
-painfully simple and probably a bit useless!
-
--}
-simpleConfig : { toMsg : Msg -> msg, updateList : List String -> msg } -> Config String msg
-simpleConfig { toMsg, updateList } =
-    Config
-        { toId = identity
-        , toMsg = toMsg
-        , itemView = always text
-        , listClass = ""
-        , itemClass = ""
-        , placeholderClass = ""
-        , placeholderView = text
-        , draggable = True
-        , updateList = updateList
-        }
-
-
-{-| Provides all the bells and whistles that this library has to offer at this
-time.
-
-  - toId: Converts your data into an ID string. This _must_ be a unique ID for
-    the component to work effectively!
-
--}
-fullConfig :
-    { toId : data -> String
-    , toMsg : Msg -> msg
-    , itemView : HtmlWrapper msg -> data -> Html msg
-    , placeholderView : data -> Html msg
-    , listClass : String
-    , itemClass : String
-    , placeholderClass : String
-    , draggable : Bool
-    , updateList : List data -> msg
+mouseEvent : Int -> Int -> Int -> Int -> MouseEvent
+mouseEvent elemOffsetX elemOffsetY movementX movementY =
+    { startingPosition = Position elemOffsetX elemOffsetY
+    , movement = Position movementX movementY
     }
-    -> Config data msg
-fullConfig =
-    Config
+
+
+mouseEventDecoder : Decoder MouseEvent
+mouseEventDecoder =
+    D.map4 mouseEvent
+        (D.at [ "srcElement", "offsetLeft" ] D.int)
+        (D.at [ "srcElement", "offsetTop" ] D.int)
+        (D.field "movementX" D.int)
+        (D.field "movementY" D.int)
+
+
+onDragStart : Bool -> (MouseEvent -> msg) -> Attribute msg
+onDragStart ignored toMsg =
+    mouseEventDecoder
+        |> D.andThen (decodeWhen <| not ignored)
+        |> D.map toMsg
+        |> on "mousedown"
+
+
+onDragOver : (List a -> msg) -> (() -> List a) -> Bool -> Attribute msg
+onDragOver configUpdateList listThunk isDragging =
+    D.succeed ()
+        |> D.andThen (decodeWhen isDragging)
+        |> D.andThen (D.succeed << configUpdateList << listThunk)
+        |> on "mouseover"
 
 
 
--- HELPERS
+{- Helpers -}
 
 
-px : number -> String
-px num =
-    toString num ++ "px"
+decodeWhen : Bool -> a -> Decoder a
+decodeWhen condition x =
+    if condition then
+        D.succeed x
+
+    else
+        D.fail "Not this time"
 
 
 move : Position -> Position -> Position
@@ -431,3 +273,65 @@ move currentPos movement =
     { x = currentPos.x + movement.x
     , y = currentPos.y + movement.y
     }
+
+
+px : Int -> String
+px i =
+    String.fromInt i ++ "px"
+
+
+moveTo : Int -> Int -> List a -> List a
+moveTo startIndex destIndex list =
+    let
+        maybeElem =
+            list
+                |> List.getAt startIndex
+
+        setElemToNewPosition xs =
+            maybeElem
+                |> Maybe.map (\x -> insertAt destIndex x xs)
+                |> Maybe.withDefault xs
+    in
+    if destIndex >= List.length list then
+        list
+
+    else
+        list
+            |> List.removeAt startIndex
+            |> setElemToNewPosition
+
+
+insertAt : Int -> a -> List a -> List a
+insertAt index elem list =
+    if index == 0 then
+        elem :: list
+
+    else
+        case list of
+            [] ->
+                []
+
+            head :: tail ->
+                head :: insertAt (index - 1) elem tail
+
+
+updateList : (a -> String) -> String -> Maybe String -> List a -> List a
+updateList toId overId dragging list =
+    case dragging of
+        Nothing ->
+            list
+
+        Just draggedId ->
+            let
+                indexEqualTo id =
+                    list
+                        |> List.findIndex (\a -> toId a == id)
+                        |> Maybe.withDefault 0
+
+                overIndex =
+                    indexEqualTo overId
+
+                draggedIndex =
+                    indexEqualTo draggedId
+            in
+            list |> moveTo draggedIndex overIndex

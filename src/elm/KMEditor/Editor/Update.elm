@@ -1,7 +1,6 @@
 module KMEditor.Editor.Update exposing (createEditors, fetchData, fetchKnowledgeModel, fetchLevels, fetchMetrics, scrollTopCmd, sendEventsCmd, setActiveEditor, update, withNoCmd)
 
 -- import Dom.Scroll
--- import Reorderable
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
@@ -24,6 +23,7 @@ import KMEditor.Routing exposing (Route(..))
 import Models exposing (State)
 import Msgs
 import Random exposing (Seed)
+import Reorderable
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 import SplitPane
@@ -350,8 +350,9 @@ update msg wrapMsg state model =
                 _ ->
                     ( state.seed, model, Cmd.none )
 
-        -- ReorderableMsg reorderableMsg ->
-        --     ( state.seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
+        ReorderableMsg reorderableMsg ->
+            ( state.seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
+
         NoOp ->
             ( state.seed, model, Cmd.none )
 

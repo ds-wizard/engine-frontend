@@ -6,7 +6,7 @@ import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid)
--- import Reorderable
+import Reorderable
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
 
 
@@ -18,7 +18,7 @@ type alias Model =
     , levels : ActionResult (List Level)
     , activeEditorUuid : Maybe String
     , editors : Dict String Editor
-    -- , reorderableState : Reorderable.State
+    , reorderableState : Reorderable.State
     , events : List Event
     , alert : Maybe String
     , submitting : ActionResult String
@@ -35,7 +35,7 @@ initialModel branchUuid =
     , levels = Loading
     , activeEditorUuid = Nothing
     , editors = Dict.fromList []
-    -- , reorderableState = Reorderable.initialState
+    , reorderableState = Reorderable.initialState
     , events = []
     , alert = Nothing
     , submitting = Unset

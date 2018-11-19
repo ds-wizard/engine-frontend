@@ -18,6 +18,7 @@ import KMEditor.Editor.Models exposing (Model, getActiveEditor)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
+import Reorderable
 import String exposing (fromInt, toLower)
 
 
@@ -70,8 +71,7 @@ kmEditorView model editorData =
 
         chaptersConfig =
             { childName = "Chapter"
-
-            -- , reorderableState = model.reorderableState
+            , reorderableState = model.reorderableState
             , children = editorData.chapters.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderChapters >> KMEditorMsg >> EditorMsg
             , addMsg = AddChapter |> KMEditorMsg |> EditorMsg
@@ -104,8 +104,7 @@ chapterEditorView model editorData =
 
         questionsConfig =
             { childName = "Question"
-
-            -- , reorderableState = model.reorderableState
+            , reorderableState = model.reorderableState
             , children = editorData.questions.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderQuestions >> ChapterEditorMsg >> EditorMsg
             , addMsg = AddQuestion |> ChapterEditorMsg |> EditorMsg
@@ -191,8 +190,7 @@ questionEditorAnswersView : Model -> QuestionEditorData -> Html Msg
 questionEditorAnswersView model editorData =
     inputChildren
         { childName = "Answer"
-
-        -- , reorderableState = model.reorderableState
+        , reorderableState = model.reorderableState
         , children = editorData.answers.list |> List.filter (editorNotDeleted model.editors)
         , reorderMsg = ReorderAnswers >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddAnswer |> QuestionEditorMsg |> EditorMsg
@@ -207,8 +205,7 @@ questionEditorAnswerItemTemplateView model editorData =
     let
         config =
             { childName = "Item Question"
-
-            -- , reorderableState = model.reorderableState
+            , reorderableState = model.reorderableState
             , children = editorData.answerItemTemplateQuestions.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderAnswerItemTemplateQuestions >> QuestionEditorMsg >> EditorMsg
             , addMsg = AddAnswerItemTemplateQuestion |> QuestionEditorMsg >> EditorMsg
@@ -233,8 +230,7 @@ questionEditorReferencesView : Model -> QuestionEditorData -> Html Msg
 questionEditorReferencesView model editorData =
     inputChildren
         { childName = "Reference"
-
-        -- , reorderableState = model.reorderableState
+        , reorderableState = model.reorderableState
         , children = editorData.references.list |> List.filter (editorNotDeleted model.editors)
         , reorderMsg = ReorderReferences >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddReference |> QuestionEditorMsg |> EditorMsg
@@ -248,8 +244,7 @@ questionEditorExpertsView : Model -> QuestionEditorData -> Html Msg
 questionEditorExpertsView model editorData =
     inputChildren
         { childName = "Expert"
-
-        -- , reorderableState = model.reorderableState
+        , reorderableState = model.reorderableState
         , children = editorData.experts.list |> List.filter (editorNotDeleted model.editors)
         , reorderMsg = ReorderExperts >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddExpert |> QuestionEditorMsg |> EditorMsg
@@ -274,8 +269,7 @@ answerEditorView model editorData =
 
         followUpsConfig =
             { childName = "Follow-up Question"
-
-            -- , reorderableState = model.reorderableState
+            , reorderableState = model.reorderableState
             , children = editorData.followUps.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderFollowUps >> AnswerEditorMsg >> EditorMsg
             , addMsg = AddFollowUp |> AnswerEditorMsg |> EditorMsg
@@ -429,8 +423,7 @@ editorTitle config =
 
 type alias InputChildrenConfig a =
     { childName : String
-
-    -- , reorderableState : Reorderable.State
+    , reorderableState : Reorderable.State
     , children : List a
     , reorderMsg : List a -> Msg
     , addMsg : Msg
@@ -444,22 +437,18 @@ inputChildren : InputChildrenConfig a -> Html Msg
 inputChildren config =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text (config.childName ++ "s") ]
-
-        -- , Reorderable.ul
-        --     (Reorderable.fullConfig
-        --         { toId = config.toId
-        --         , toMsg = ReorderableMsg
-        --         , draggable = True
-        --         , updateList = config.reorderMsg
-        --         , itemView = inputChild config.getName config.viewMsg
-        --         , placeholderView = placeholderView
-        --         , listClass = "input-children"
-        --         , itemClass = "input-child"
-        --         , placeholderClass = "input-child input-child-placeholder"
-        --         }
-        --     )
-        --     config.reorderableState
-        --     config.children
+        , Reorderable.view
+            { toId = config.toId
+            , toMsg = ReorderableMsg
+            , updateList = config.reorderMsg
+            , itemView = inputChild config.getName config.viewMsg
+            , placeholderView = placeholderView
+            , listClass = "input-children"
+            , itemClass = "input-child"
+            , placeholderClass = "input-child input-child-placeholder"
+            }
+            config.reorderableState
+            config.children
         , a [ onClick config.addMsg, class "link-with-icon link-add-child" ]
             [ i [ class "fa fa-plus" ] []
             , text ("Add " ++ toLower config.childName)
@@ -467,16 +456,15 @@ inputChildren config =
         ]
 
 
+inputChild : (a -> String) -> (a -> Msg) -> Reorderable.HtmlWrapper Msg -> a -> Html Msg
+inputChild getName viewMsg ignoreDrag item =
+    div []
+        [ ignoreDrag a
+            [ onClick <| viewMsg item ]
+            [ text <| getName item ]
+        ]
 
--- inputChild : (a -> String) -> (a -> Msg) -> Reorderable.HtmlWrapper Msg -> a -> Html Msg
--- inputChild getName viewMsg ignoreDrag item =
---     div []
---         [ ignoreDrag a
---             [ onClick <| viewMsg item ]
---             [ text <| getName item ]
---         ]
 
-
-placeholderView : a -> Html msg
-placeholderView _ =
+placeholderView : Html msg
+placeholderView =
     div [] [ text "-" ]
