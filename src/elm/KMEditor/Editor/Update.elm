@@ -22,6 +22,7 @@ import KMEditor.Requests exposing (getKnowledgeModelData, getLevels, getMetrics,
 import KMEditor.Routing exposing (Route(..))
 import Models exposing (State)
 import Msgs
+import Ports
 import Random exposing (Seed)
 import Reorderable
 import Requests exposing (getResultCmd)
@@ -379,11 +380,4 @@ createEditors model =
 
 scrollTopCmd : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
 scrollTopCmd wrapMsg =
-    -- TODO scroll top
-    Cmd.none
-
-
-
--- Dom.Scroll.toTop "editor-view"
--- |> Task.attempt (always NoOp)
--- |> Cmd.map wrapMsg
+    Ports.scrollToTop "editor-view"

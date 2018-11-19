@@ -5,11 +5,16 @@ port module Ports exposing
     , fileContentRead
     , fileSelected
     , onSessionChange
+    , scrollToTop
     , storeSession
     )
 
 import Auth.Models exposing (Session)
 import Json.Encode exposing (Value)
+
+
+
+-- Session
 
 
 port storeSession : Maybe Session -> Cmd msg
@@ -19,6 +24,10 @@ port clearSession : () -> Cmd msg
 
 
 port onSessionChange : (Value -> msg) -> Sub msg
+
+
+
+-- Import
 
 
 type alias FilePortData =
@@ -34,3 +43,10 @@ port fileContentRead : (FilePortData -> msg) -> Sub msg
 
 
 port createDropzone : String -> Cmd msg
+
+
+
+-- Scroll
+
+
+port scrollToTop : String -> Cmd msg
