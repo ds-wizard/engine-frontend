@@ -52,7 +52,12 @@ publicHeader model =
     nav [ class "navbar navbar-expand-sm bg-primary fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
-                [ linkTo homeRoute [ class "navbar-brand" ] [ text "Data Stewardship Wizard" ] ]
+                [ linkTo homeRoute
+                    [ class "navbar-brand" ]
+                    [ img [ src "/img/dsw-logo.svg" ] []
+                    , text "Data Stewardship Wizard"
+                    ]
+                ]
             , ul [ class "nav navbar-nav ml-auto" ] links
             ]
         ]
@@ -88,16 +93,17 @@ menu model =
 logo : Model -> Html Msg
 logo model =
     let
-        heading =
+        logoImg =
             if model.state.session.sidebarCollapsed then
-                "DSW"
+                img [ src "/img/dsw-logo.svg" ] []
 
             else
-                "Data Stewardship Wizard"
+                span [ class "logo-full" ]
+                    [ img [ src "/img/dsw-logo.svg" ] []
+                    , span [] [ text "DS Wizard" ]
+                    ]
     in
-    linkTo Welcome
-        [ class "logo" ]
-        [ text heading ]
+    linkTo Welcome [ class "logo" ] [ logoImg ]
 
 
 type MenuItem

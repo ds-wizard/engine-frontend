@@ -1,9 +1,5 @@
 'use strict';
 
-// get images to the build
-require('./img/crc-logo.png');
-require('./img/book-preview.png');
-
 
 // initialize elm app
 var program = require('./elm/Main.elm');
