@@ -65,6 +65,7 @@ createAddQuestionEvent form editorData =
                     { title = form.itemName
                     , questionIds = editorData.answerItemTemplateQuestions.list
                     }
+
             else
                 Nothing
 
@@ -86,23 +87,27 @@ createEditQuestionEvent form editorData =
         maybeAnswerIds =
             if form.type_ == "options" then
                 Just editorData.answers.list
+
             else
                 Nothing
 
         answerIdsChanged =
             editorData.answers.dirty || ((form.type_ == "options" || editorData.question.type_ == "options") && form.type_ /= editorData.question.type_)
 
-        maybeAnswerItemTemlate =
+        maybeAnswerItemTemplate =
             if form.type_ == "list" then
                 Just
                     { title = form.itemName
                     , questionIds = editorData.answerItemTemplateQuestions.list
                     }
+
             else
                 Nothing
 
         answerItemTemplateChanged =
-            editorData.answerItemTemplateQuestions.dirty || ((form.type_ == "list" || editorData.question.type_ == "list") && form.type_ /= editorData.question.type_)
+            questionItemNameChanged editorData.form
+                || editorData.answerItemTemplateQuestions.dirty
+                || ((form.type_ == "list" || editorData.question.type_ == "list") && form.type_ /= editorData.question.type_)
 
         data =
             { questionUuid = editorData.question.uuid
@@ -110,7 +115,7 @@ createEditQuestionEvent form editorData =
             , title = createEventField form.title (editorData.question.title /= form.title)
             , text = createEventField form.text (editorData.question.text /= form.text)
             , requiredLevel = createEventField form.requiredLevel (editorData.question.requiredLevel /= form.requiredLevel)
-            , answerItemTemplate = createEventField maybeAnswerItemTemlate answerItemTemplateChanged
+            , answerItemTemplate = createEventField maybeAnswerItemTemplate answerItemTemplateChanged
             , answerIds = createEventField maybeAnswerIds answerIdsChanged
             , referenceIds = createEventField editorData.references.list editorData.references.dirty
             , expertIds = createEventField editorData.experts.list editorData.experts.dirty
@@ -326,6 +331,7 @@ createEventField value changed =
         v =
             if changed then
                 Just value
+
             else
                 Nothing
     in

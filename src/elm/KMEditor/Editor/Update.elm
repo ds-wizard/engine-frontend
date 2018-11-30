@@ -76,7 +76,7 @@ update msg wrapMsg state model =
         Submit ->
             let
                 send seed newModel a =
-                    ( seed, { newModel | submitting = Loading }, sendEventsCmd wrapMsg state.session model )
+                    ( seed, { newModel | submitting = Loading }, sendEventsCmd wrapMsg state.session newModel )
             in
             case getActiveEditor model of
                 Just editor ->

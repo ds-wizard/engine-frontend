@@ -1,4 +1,50 @@
-module KMEditor.Editor.Models.Forms exposing (AnswerForm, ChapterForm, ExpertForm, KnowledgeModelForm, MetricMeasureForm, MetricMeasureValues, QuestionForm, ReferenceForm, ReferenceFormType(..), answerFormInitials, answerFormValidation, chapterFormInitials, chapterFormValidation, expertFormInitials, expertFormValidation, formChanged, getMetricMesures, initAnswerForm, initChapterForm, initExpertForm, initForm, initKnowledgeModelFrom, initQuestionForm, initReferenceForm, knowledgeModelFormInitials, knowledgeModelFormValidation, metricMeasureFormInitials, metricMeasureFormToMetricMeasure, metricMeasureValidation, questionFormInitials, questionFormValidation, questionTypeOptions, referenceFormInitials, referenceFormValidation, referenceTypeOptions, updateAnswerWithForm, updateChapterWithForm, updateExpertWithForm, updateKnowledgeModelWithForm, updateQuestionWithForm, updateReferenceWithForm, validateMeasureValue, validateMetricMeasureValues, validateReference)
+module KMEditor.Editor.Models.Forms exposing
+    ( AnswerForm
+    , ChapterForm
+    , ExpertForm
+    , KnowledgeModelForm
+    , MetricMeasureForm
+    , MetricMeasureValues
+    , QuestionForm
+    , ReferenceForm
+    , ReferenceFormType(..)
+    , answerFormInitials
+    , answerFormValidation
+    , chapterFormInitials
+    , chapterFormValidation
+    , expertFormInitials
+    , expertFormValidation
+    , formChanged
+    , getMetricMesures
+    , initAnswerForm
+    , initChapterForm
+    , initExpertForm
+    , initForm
+    , initKnowledgeModelFrom
+    , initQuestionForm
+    , initReferenceForm
+    , knowledgeModelFormInitials
+    , knowledgeModelFormValidation
+    , metricMeasureFormInitials
+    , metricMeasureFormToMetricMeasure
+    , metricMeasureValidation
+    , questionFormInitials
+    , questionFormValidation
+    , questionItemNameChanged
+    , questionTypeOptions
+    , referenceFormInitials
+    , referenceFormValidation
+    , referenceTypeOptions
+    , updateAnswerWithForm
+    , updateChapterWithForm
+    , updateExpertWithForm
+    , updateKnowledgeModelWithForm
+    , updateQuestionWithForm
+    , updateReferenceWithForm
+    , validateMeasureValue
+    , validateMetricMeasureValues
+    , validateReference
+    )
 
 import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (validateUuid)
@@ -10,7 +56,7 @@ import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import List.Extra as List
 import Set
-import String exposing (fromInt, fromFloat)
+import String exposing (fromFloat, fromInt)
 
 
 type alias KnowledgeModelForm =
@@ -174,6 +220,7 @@ updateQuestionWithForm question questionForm =
                     { title = questionForm.itemName
                     , questions = AnswerItemTemplateQuestions []
                     }
+
             else
                 Nothing
     in
@@ -195,6 +242,11 @@ questionTypeOptions =
     , ( "date", "Date" )
     , ( "text", "Long text" )
     ]
+
+
+questionItemNameChanged : Form CustomFormError a -> Bool
+questionItemNameChanged questionForm =
+    Set.member "itemName" (Form.getChangedFields questionForm)
 
 
 
@@ -229,6 +281,7 @@ validateMetricMeasureValues enabled =
             |> Validate.andMap (Validate.field "weight" validateMeasureValue)
             |> Validate.andMap (Validate.field "measure" validateMeasureValue)
             |> map Just
+
     else
         Validate.succeed Nothing
 
