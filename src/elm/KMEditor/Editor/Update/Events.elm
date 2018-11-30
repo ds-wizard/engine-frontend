@@ -65,6 +65,7 @@ createAddQuestionEvent form editorData =
                     { title = form.itemName
                     , questionIds = editorData.answerItemTemplateQuestions.list
                     }
+
             else
                 Nothing
 
@@ -86,6 +87,7 @@ createEditQuestionEvent form editorData =
         maybeAnswerIds =
             if form.type_ == "options" then
                 Just editorData.answers.list
+
             else
                 Nothing
 
@@ -98,6 +100,7 @@ createEditQuestionEvent form editorData =
                     { title = form.itemName
                     , questionIds = editorData.answerItemTemplateQuestions.list
                     }
+
             else
                 Nothing
 
@@ -326,6 +329,7 @@ createEventField value changed =
         v =
             if changed then
                 Just value
+
             else
                 Nothing
     in

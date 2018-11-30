@@ -88,16 +88,17 @@ menu model =
 logo : Model -> Html Msg
 logo model =
     let
-        heading =
+        logoImg =
             if model.state.session.sidebarCollapsed then
-                "DSW"
+                img [ src "/img/dsw-logo.svg" ] []
 
             else
-                "Data Stewardship Wizard"
+                span [ class "logo-full" ]
+                    [ img [ src "/img/dsw-logo.svg" ] []
+                    , span [] [ text "DS Wizard" ]
+                    ]
     in
-    linkTo Welcome
-        [ class "logo" ]
-        [ text heading ]
+    linkTo Welcome [ class "logo" ] [ logoImg ]
 
 
 type MenuItem

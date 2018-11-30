@@ -1,4 +1,5 @@
 var path = require('path')
+var CopyWebpackPlugin = require('copy-webpack-plugin')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 
@@ -22,11 +23,6 @@ module.exports = {
         test: /\.html$/,
         exclude: /node_modules/,
         loader: 'file-loader?name=[name].[ext]'
-      },
-      {
-        test: /\.png$/,
-        exclude: /node_modules/,
-        loader: 'file-loader?name=img/[name].[ext]'
       },
       {
         test: /\.elm$/,
@@ -53,7 +49,11 @@ module.exports = {
     new ExtractTextPlugin({
       filename: '[name].[chunkhash].css',
       allChunks: true
-    })
+    }),
+    new CopyWebpackPlugin([{
+        from: 'src/img',
+        to: 'img'
+    }])
   ],
 
   devServer: {

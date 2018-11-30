@@ -10,7 +10,7 @@ import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import List.Extra as List
 import Set
-import String exposing (fromInt, fromFloat)
+import String exposing (fromFloat, fromInt)
 
 
 type alias KnowledgeModelForm =
@@ -174,6 +174,7 @@ updateQuestionWithForm question questionForm =
                     { title = questionForm.itemName
                     , questions = AnswerItemTemplateQuestions []
                     }
+
             else
                 Nothing
     in
@@ -229,6 +230,7 @@ validateMetricMeasureValues enabled =
             |> Validate.andMap (Validate.field "weight" validateMeasureValue)
             |> Validate.andMap (Validate.field "measure" validateMeasureValue)
             |> map Just
+
     else
         Validate.succeed Nothing
 
