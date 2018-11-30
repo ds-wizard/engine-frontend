@@ -9,6 +9,11 @@
 
     .navbar-brand {
         color: $white;
+
+        img {
+            height: 25px;
+            margin-right: 10px;
+        }
     }
 
     .navbar-expand-sm {

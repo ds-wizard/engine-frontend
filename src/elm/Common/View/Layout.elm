@@ -52,7 +52,12 @@ publicHeader model =
     nav [ class "navbar navbar-expand-sm bg-primary fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
-                [ linkTo homeRoute [ class "navbar-brand" ] [ text "Data Stewardship Wizard" ] ]
+                [ linkTo homeRoute
+                    [ class "navbar-brand" ]
+                    [ img [ src "/img/dsw-logo.svg" ] []
+                    , text "Data Stewardship Wizard"
+                    ]
+                ]
             , ul [ class "nav navbar-nav ml-auto" ] links
             ]
         ]
