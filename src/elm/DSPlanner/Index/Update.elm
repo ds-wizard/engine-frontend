@@ -97,6 +97,7 @@ handleDropdownToggle model questionnaire state =
                 replaceWith row =
                     if row.questionnaire == questionnaire then
                         { row | dropdownState = state }
+
                     else
                         row
 

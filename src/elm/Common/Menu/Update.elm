@@ -27,6 +27,7 @@ update wrapMsg msg model =
                 ( apiBuildInfo, cmd ) =
                     if open then
                         ( Loading, fetchData wrapMsg )
+
                     else
                         ( Unset, Cmd.none )
             in

@@ -46,6 +46,7 @@ getServerError error defaultMessage =
         Just err ->
             if String.isEmpty err.message then
                 Error defaultMessage
+
             else
                 Error err.message
 

@@ -53,6 +53,7 @@ validateAcceptField : Field -> Result (Error customError) Bool
 validateAcceptField v =
     if Field.asBool v |> Maybe.withDefault False then
         Ok True
+
     else
         Err (Error.value Empty)
 

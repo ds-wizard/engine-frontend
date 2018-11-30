@@ -99,12 +99,14 @@ userFormView form current =
         roleSelect =
             if current then
                 emptyNode
+
             else
                 selectGroup roleOptions form "role" "Role"
 
         activeToggle =
             if current then
                 emptyNode
+
             else
                 toggleGroup form "active" "Active"
 
@@ -151,5 +153,6 @@ getClass : Bool -> String -> String
 getClass condition class =
     if condition then
         class
+
     else
         ""

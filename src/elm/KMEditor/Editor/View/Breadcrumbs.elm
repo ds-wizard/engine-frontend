@@ -63,5 +63,6 @@ addTooLongNode : Bool -> List ( Maybe String, String ) -> List ( Maybe String, S
 addTooLongNode tooLong list =
     if tooLong then
         [ ( Nothing, "..." ) ] ++ list
+
     else
         list

@@ -40,6 +40,7 @@ questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
         unsavedChanges =
             if questionnaireModel.dirty then
                 text "(unsaved changes)"
+
             else
                 emptyNode
     in

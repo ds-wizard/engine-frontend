@@ -1,30 +1,30 @@
-module FormEngine.Model
-    exposing
-        ( Form
-        , FormElement(..)
-        , FormElementState
-        , FormItem(..)
-        , FormItemDescriptor
-        , FormTree
-        , FormValues
-        , ItemElement
-        , Option(..)
-        , OptionDescriptor
-        , OptionElement(..)
-        , createForm
-        , createItemElement
-        , decodeFormValues
-        , encodeFormValues
-        , getDescriptor
-        , getFormValues
-        , getOptionDescriptor
-        )
+module FormEngine.Model exposing
+    ( Form
+    , FormElement(..)
+    , FormElementState
+    , FormItem(..)
+    , FormItemDescriptor
+    , FormTree
+    , FormValues
+    , ItemElement
+    , Option(..)
+    , OptionDescriptor
+    , OptionElement(..)
+    , createForm
+    , createItemElement
+    , decodeFormValues
+    , encodeFormValues
+    , getDescriptor
+    , getFormValues
+    , getOptionDescriptor
+    )
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import List.Extra as List
-import String exposing (fromInt, fromFloat)
+import String exposing (fromFloat, fromInt)
+
 
 
 {- Types definitions -}
@@ -341,6 +341,7 @@ applyFieldValue values key stringValue =
 
         Nothing ->
             values ++ [ { path = key, value = "" } ]
+
 
 
 -- valueToString : a -> String

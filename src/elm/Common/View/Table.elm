@@ -82,6 +82,7 @@ tableBody : TableConfig a msg -> (msg -> Msgs.Msg) -> List a -> Html Msgs.Msg
 tableBody config wrapMsg data =
     if List.isEmpty data then
         tableEmpty config
+
     else
         tbody [] (List.map (tableRow config wrapMsg) data)
 
@@ -158,6 +159,7 @@ getBoolIcon : Bool -> Html Msgs.Msg
 getBoolIcon bool =
     if bool then
         i [ class "fa fa-check" ] []
+
     else
         i [ class "fa fa-times" ] []
 

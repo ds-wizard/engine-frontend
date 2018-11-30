@@ -13,8 +13,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
-import String exposing (fromInt, fromFloat)
 import Round
+import String exposing (fromFloat, fromInt)
 
 
 type alias ViewQuestionnaireConfig =
@@ -37,6 +37,7 @@ viewQuestionnaire cfg model =
         extraActions =
             if cfg.showExtraActions then
                 extraNavigation model.activePage
+
             else
                 emptyNode
     in
@@ -103,6 +104,7 @@ viewChapterAnsweredIndication model chapter =
     in
     if unanswered > 0 then
         span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]
+
     else
         fa "check"
 
@@ -185,6 +187,7 @@ viewExtraItems : ViewExtraItemsConfig a msg -> List a -> Html msg
 viewExtraItems cfg list =
     if List.length list == 0 then
         emptyNode
+
     else
         let
             items =
@@ -248,6 +251,7 @@ ifNotEmpty : List a -> (List a -> Html msg) -> Html msg
 ifNotEmpty list fn =
     if List.length list == 0 then
         emptyNode
+
     else
         fn list
 
@@ -335,8 +339,10 @@ viewProgressBarWithColors value =
         colorClass =
             if value < 0.33 then
                 "bg-danger"
+
             else if value < 0.66 then
                 "bg-warning"
+
             else
                 "bg-success"
     in
@@ -439,6 +445,7 @@ feedbackModalContent model =
                                 [ text "There are already some issues reported with this question" ]
                             , ul [] (List.map feedbackIssue feedbacks)
                             ]
+
                     else
                         emptyNode
 

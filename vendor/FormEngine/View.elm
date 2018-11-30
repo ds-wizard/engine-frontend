@@ -97,6 +97,7 @@ viewClearAnswer answered path =
             [ i [ class "fa fa-undo" ] []
             , text "Clear answer"
             ]
+
     else
         text ""
 
@@ -107,6 +108,7 @@ viewGroupItem config path numberOfItems index itemElement =
         deleteButton =
             if numberOfItems == 1 then
                 text ""
+
             else
                 button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
                     [ i [ class "fa fa-trash-o" ] [] ]

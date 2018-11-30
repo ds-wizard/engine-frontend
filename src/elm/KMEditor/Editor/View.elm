@@ -40,6 +40,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
         unsavedChanges =
             if List.length model.events > 0 then
                 text "(unsaved changes)"
+
             else
                 emptyNode
     in

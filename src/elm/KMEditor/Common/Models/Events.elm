@@ -854,6 +854,7 @@ getEventFieldValue : EventField a -> Maybe a
 getEventFieldValue eventField =
     if eventField.changed then
         eventField.value
+
     else
         Nothing
 

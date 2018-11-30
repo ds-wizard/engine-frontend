@@ -8,6 +8,7 @@ import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models exposing (..)
 import String exposing (fromInt)
 
+
 type alias Model =
     { knowledgeModel : ActionResult KnowledgeModel
     , publishingKnowledgeModel : ActionResult String

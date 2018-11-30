@@ -43,6 +43,7 @@ isAllowed route maybeJwt =
         Edit uuid ->
             if uuid == "current" then
                 True
+
             else
                 hasPerm maybeJwt Perm.userManagement
 

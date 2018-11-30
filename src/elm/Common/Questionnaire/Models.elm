@@ -329,6 +329,7 @@ evaluateQuestion currentLevel replies path question =
 
                     _ ->
                         rawValue
+
             else
                 rawValue
     in
@@ -360,6 +361,7 @@ evaluateQuestion currentLevel replies path question =
         Nothing ->
             if requiredNow then
                 1
+
             else
                 0
 

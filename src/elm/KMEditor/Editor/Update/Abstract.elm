@@ -14,6 +14,7 @@ import Random exposing (Seed)
 import Utils exposing (getUuid)
 
 
+
 {- Add -}
 
 
@@ -73,6 +74,7 @@ withGenerateEvent cfg seed model editorData callback =
                             ( cfg.createAddEvent form editorData seed
                             , AddedEdited
                             )
+
                         else
                             ( cfg.createEditEvent form editorData seed
                             , Edited
@@ -117,6 +119,7 @@ withGenerateEvent cfg seed model editorData callback =
                             |> setAlert cfg.alert
                 in
                 ( seed, newModel, Cmd.none )
+
     else
         callback seed model editorData
 
@@ -147,6 +150,7 @@ deleteEntity cfg seed model uuid editorData =
                     |> Maybe.withDefault newEditors
         in
         ( seed, { model | editors = editorsWithKm, activeEditorUuid = parentUuid } )
+
     else
         let
             newEditor =
