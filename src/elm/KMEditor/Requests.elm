@@ -19,9 +19,9 @@ getKnowledgeModels session =
     Requests.get session "/branches" knowledgeModelListDecoder
 
 
-postKnowledgeModel : Session -> Value -> Http.Request String
+postKnowledgeModel : Session -> Value -> Http.Request Models.KnowledgeModel
 postKnowledgeModel session knowledgeModel =
-    Requests.post knowledgeModel session "/branches"
+    Requests.postWithResponse knowledgeModel session "/branches" Models.knowledgeModelDecoder
 
 
 deleteKnowledgeModel : String -> Session -> Http.Request String

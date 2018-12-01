@@ -14,7 +14,6 @@ type alias Model =
     { packages : ActionResult (List PackageDetail)
     , savingKnowledgeModel : ActionResult String
     , form : Form CustomFormError KnowledgeModelCreateForm
-    , newUuid : Maybe String
     , selectedPackage : Maybe String
     }
 
@@ -24,7 +23,6 @@ initialModel selectedPackage =
     { packages = Loading
     , savingKnowledgeModel = Unset
     , form = initKnowledgeModelCreateForm Nothing
-    , newUuid = Nothing
     , selectedPackage = selectedPackage
     }
 
@@ -58,8 +56,8 @@ knowledgeModelCreateFormValidation =
         (Validate.field "parentPackageId" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
 
 
-encodeKnowledgeCreateModelForm : String -> KnowledgeModelCreateForm -> Encode.Value
-encodeKnowledgeCreateModelForm uuid form =
+encodeKnowledgeCreateModelForm : KnowledgeModelCreateForm -> Encode.Value
+encodeKnowledgeCreateModelForm form =
     let
         parentPackage =
             case form.parentPackageId of
@@ -70,10 +68,8 @@ encodeKnowledgeCreateModelForm uuid form =
                     Encode.null
     in
     Encode.object
-        [ ( "uuid", Encode.string uuid )
-        , ( "name", Encode.string form.name )
+        [ ( "name", Encode.string form.name )
         , ( "kmId", Encode.string form.kmId )
         , ( "parentPackageId", parentPackage )
-        , ( "lastAppliedParentPackageId", parentPackage )
         , ( "organizationId", Encode.string "" )
         ]
