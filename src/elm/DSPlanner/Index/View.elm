@@ -39,6 +39,9 @@ tableConfig model =
         [ { label = "Name"
           , getValue = TextValue (.questionnaire >> .name)
           }
+        , { label = "Visibility"
+          , getValue = HtmlValue tableFieldVisibility
+          }
         , { label = "Package Name"
           , getValue = TextValue (.questionnaire >> .package >> .name)
           }
@@ -65,6 +68,17 @@ tableConfig model =
         ]
     , sortBy = .questionnaire >> .name
     }
+
+
+tableFieldVisibility : QuestionnaireRow -> Html Msgs.Msg
+tableFieldVisibility row =
+    if row.questionnaire.private then
+        span [ class "badge badge-danger" ]
+            [ text "private" ]
+
+    else
+        span [ class "badge badge-info" ]
+            [ text "public" ]
 
 
 tableActionDelete : (Msg -> Msgs.Msg) -> QuestionnaireRow -> Msgs.Msg

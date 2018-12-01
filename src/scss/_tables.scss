@@ -2,6 +2,8 @@
 
 .index-table {
     .table-actions {
+        white-space: nowrap;
+
         a, .btn-group {
             &:not(:last-child) {
                 margin-right: 20px;
@@ -17,8 +19,7 @@
     }
 
     td:not(.table-actions):not(.td-bool) {
-        .badge {
-            font-weight: normal;
+        span + .badge {
             margin-left: 10px;
         }
 

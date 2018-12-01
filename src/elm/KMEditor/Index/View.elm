@@ -106,7 +106,7 @@ tableFieldName km =
                     emptyNode
     in
     span []
-        [ text km.name
+        [ span [] [ text km.name ]
         , extra
         ]
 

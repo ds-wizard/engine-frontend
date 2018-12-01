@@ -9,6 +9,7 @@ type alias Questionnaire =
     { uuid : String
     , name : String
     , package : PackageDetail
+    , private : Bool
     }
 
 
@@ -18,6 +19,7 @@ questionnaireDecoder =
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "package" packageDetailDecoder
+        |> required "private" Decode.bool
 
 
 questionnaireListDecoder : Decoder (List Questionnaire)
