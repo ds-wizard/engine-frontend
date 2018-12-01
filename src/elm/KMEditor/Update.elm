@@ -38,10 +38,10 @@ update msg wrapMsg state model =
     case msg of
         CreateMsg cMsg ->
             let
-                ( newSeed, createModel, cmd ) =
+                ( createModel, cmd ) =
                     KMEditor.Create.Update.update cMsg (wrapMsg << CreateMsg) state model.createModel
             in
-            ( newSeed, { model | createModel = createModel }, cmd )
+            ( state.seed, { model | createModel = createModel }, cmd )
 
         EditorMsg eMsg ->
             let

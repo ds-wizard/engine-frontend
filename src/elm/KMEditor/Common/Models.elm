@@ -1,7 +1,7 @@
 module KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..), kmLastVersion, kmMatchState, knowledgeModelDecoder, knowledgeModelListDecoder, knowledgeModelStateDecoder)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import List.Extra as List
 
 
@@ -33,7 +33,7 @@ knowledgeModelDecoder =
         |> required "kmId" Decode.string
         |> required "parentPackageId" (Decode.nullable Decode.string)
         |> required "lastAppliedParentPackageId" (Decode.nullable Decode.string)
-        |> required "stateType" knowledgeModelStateDecoder
+        |> optional "stateType" knowledgeModelStateDecoder Default
 
 
 knowledgeModelStateDecoder : Decoder KnowledgeModelState

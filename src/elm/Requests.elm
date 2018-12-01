@@ -1,4 +1,16 @@
-module Requests exposing (apiRoot, apiUrl, delete, emptyResponseRequest, get, getResultCmd, post, postEmpty, put, toCmd)
+module Requests exposing
+    ( apiRoot
+    , apiUrl
+    , delete
+    , emptyResponseRequest
+    , get
+    , getResultCmd
+    , post
+    , postEmpty
+    , postWithResponse
+    , put
+    , toCmd
+    )
 
 import Auth.Models exposing (Session)
 import Auth.Msgs
@@ -35,6 +47,11 @@ get session url decoder =
 post : Value -> Session -> String -> Http.Request String
 post body =
     emptyResponseRequest "POST" (Http.jsonBody body)
+
+
+postWithResponse : Value -> Session -> String -> Decoder a -> Http.Request a
+postWithResponse body session url decoder =
+    Jwt.post session.token (apiUrl url) (Http.jsonBody body) decoder
 
 
 postEmpty : Session -> String -> Http.Request String
