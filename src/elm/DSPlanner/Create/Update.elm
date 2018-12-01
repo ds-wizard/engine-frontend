@@ -3,6 +3,7 @@ module DSPlanner.Create.Update exposing (fetchData, getPackagesCompleted, handle
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
+import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, initQuestionnaireCreateForm, questionnaireCreateFormValidation)
 import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (postQuestionnaire)
@@ -95,11 +96,13 @@ postQuestionnaireCmd wrapMsg session form =
         |> Cmd.map wrapMsg
 
 
-postQuestionnaireCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+postQuestionnaireCompleted : State -> Model -> Result Jwt.JwtError Questionnaire -> ( Model, Cmd Msgs.Msg )
 postQuestionnaireCompleted state model result =
     case result of
-        Ok user ->
-            ( model, cmdNavigate state.key <| Routing.DSPlanner Index )
+        Ok questionnaire ->
+            ( model
+            , cmdNavigate state.key <| Routing.DSPlanner <| DSPlanner.Routing.Detail questionnaire.uuid
+            )
 
         Err error ->
             ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be created." }
