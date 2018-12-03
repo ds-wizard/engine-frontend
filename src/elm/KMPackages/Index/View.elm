@@ -19,7 +19,7 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
     div [ class "col KMPackages__Index" ]
-        [ pageHeader "Knowledge Model Packages" (indexActions jwt)
+        [ pageHeader "Knowledge Models" (indexActions jwt)
         , formSuccessResultView model.deletingPackage
         , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.packages
         , deleteModal wrapMsg model

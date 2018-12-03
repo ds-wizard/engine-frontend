@@ -42,7 +42,7 @@ formView wrapMsg form packages =
                 [ inputGroup form "name" "Name"
                 , inputGroup form "kmId" "Knowledge Model ID"
                 , formTextAfter "Knowledge Model ID can contain alfanumeric characters and dash but cannot start or end with dash."
-                , selectGroup parentOptions form "parentPackageId" "Parent Package"
+                , selectGroup parentOptions form "parentPackageId" "Parent Knowledge Model"
                 ]
     in
     formHtml |> Html.map (wrapMsg << FormMsg)

@@ -48,7 +48,7 @@ tableConfig jwt =
         , { label = "Knowledge Model ID"
           , getValue = TextValue .kmId
           }
-        , { label = "Parent Package ID"
+        , { label = "Parent Knowledge Model"
           , getValue = TextValue (Maybe.withDefault "-" << .lastAppliedParentPackageId)
           }
         ]
