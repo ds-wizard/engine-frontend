@@ -25,7 +25,7 @@ view wrapMsg model =
                     dropzone model |> Html.map wrapMsg
     in
     div [ detailContainerClassWith "KMPackages__Import", id dropzoneId ]
-        [ pageHeader "Import package" []
+        [ pageHeader "Import Knowledge Model" []
         , formResultView model.importing
         , content
         ]

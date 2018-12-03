@@ -86,10 +86,10 @@ versionViewActions wrapMsg row =
             , items =
                 [ Dropdown.anchorItem
                     (linkToAttributes (Routing.KMEditor <| KMEditor.Routing.Create <| Just id))
-                    [ text "Create KM Editor" ]
+                    [ text "Fork Knowledge Model" ]
                 , Dropdown.anchorItem
                     (linkToAttributes (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just id))
-                    [ text "Create DS Planner" ]
+                    [ text "Create Questionnaire" ]
                 ]
             }
         ]
