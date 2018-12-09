@@ -1,4 +1,15 @@
-module Utils exposing (dispatch, getUuid, pair, replace, splitVersion, stringToInt, tuplePrepend, validateRegex, versionIsGreater)
+module Utils exposing
+    ( boolToInt
+    , dispatch
+    , getUuid
+    , pair
+    , replace
+    , splitVersion
+    , stringToInt
+    , tuplePrepend
+    , validateRegex
+    , versionIsGreater
+    )
 
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
@@ -78,3 +89,12 @@ stringToInt =
 createRegex : String -> Regex
 createRegex regex =
     Maybe.withDefault Regex.never <| Regex.fromString regex
+
+
+boolToInt : Bool -> Int
+boolToInt bool =
+    if bool then
+        1
+
+    else
+        0
