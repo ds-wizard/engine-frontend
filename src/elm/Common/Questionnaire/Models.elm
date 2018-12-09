@@ -13,7 +13,7 @@ import KMEditor.Common.Models.Entities exposing (..)
 import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
 import String exposing (fromInt)
-import Utils exposing (stringToInt)
+import Utils exposing (boolToInt, stringToInt)
 
 
 type alias Model =
@@ -352,7 +352,7 @@ evaluateQuestion currentLevel replies path question =
                             stringToInt value
                     in
                     List.range 0 (itemCount - 1)
-                        |> List.map (evaluateAnswerItem currentLevel replies currentPath questions)
+                        |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow questions)
                         |> List.foldl (+) 0
 
                 _ ->
@@ -377,12 +377,23 @@ evaluateFollowups currentLevel replies path answer =
         |> List.foldl (+) 0
 
 
-evaluateAnswerItem : Int -> FormValues -> List String -> List Question -> Int -> Int
-evaluateAnswerItem currentLevel replies path questions index =
+evaluateAnswerItem : Int -> FormValues -> List String -> Bool -> List Question -> Int -> Int
+evaluateAnswerItem currentLevel replies path requiredNow questions index =
     let
         currentPath =
             path ++ [ fromInt index ]
+
+        answerItem =
+            if requiredNow then
+                getReply replies (String.join "." <| currentPath ++ [ "itemName" ])
+                    |> Maybe.map String.isEmpty
+                    |> Maybe.withDefault True
+                    |> boolToInt
+
+            else
+                0
     in
     questions
         |> List.map (evaluateQuestion currentLevel replies currentPath)
         |> List.foldl (+) 0
+        |> (+) answerItem
