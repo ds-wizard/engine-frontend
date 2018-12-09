@@ -20,9 +20,9 @@ getFeedbacks packageId questionUuid =
 
 
 postForSummaryReport : Session -> String -> Value -> Http.Request SummaryReport
-postForSummaryReport session questionnaireUuid replies =
-    Jwt.post
-        session.token
-        (apiUrl <| "/questionnaires/" ++ questionnaireUuid ++ "/report/preview")
-        (Http.jsonBody replies)
+postForSummaryReport session questionnaireUuid questionnaire =
+    Requests.postWithResponse
+        questionnaire
+        session
+        ("/questionnaires/" ++ questionnaireUuid ++ "/report/preview")
         summaryReportDecoder

@@ -176,8 +176,7 @@ getMetricsCmd session =
 
 postForSummaryReportCmd : Session -> Model -> Cmd Msg
 postForSummaryReportCmd session model =
-    model.questionnaire.replies
-        |> encodeFormValues
+    encodeQuestionnaireDetail model.questionnaire
         |> postForSummaryReport session model.questionnaire.uuid
         |> Jwt.send PostForSummaryReportCompleted
 
