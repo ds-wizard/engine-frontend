@@ -63,8 +63,8 @@ viewFormElement config path formItem =
                 [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
-                , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ]) (List.length items)) items)
-                , button [ class "btn btn-secondary", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [] ]
+                , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ])) items)
+                , button [ class "btn btn-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
                 ]
 
 
@@ -102,16 +102,12 @@ viewClearAnswer answered path =
         text ""
 
 
-viewGroupItem : FormViewConfig msg a -> List String -> Int -> Int -> ItemElement a -> Html (Msg msg)
-viewGroupItem config path numberOfItems index itemElement =
+viewGroupItem : FormViewConfig msg a -> List String -> Int -> ItemElement a -> Html (Msg msg)
+viewGroupItem config path index itemElement =
     let
         deleteButton =
-            if numberOfItems == 1 then
-                text ""
-
-            else
-                button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
-                    [ i [ class "fa fa-trash-o" ] [] ]
+            button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
+                [ i [ class "fa fa-trash-o" ] [] ]
     in
     div [ class "card bg-light item mb-5" ]
         [ div [ class "card-body" ] <|

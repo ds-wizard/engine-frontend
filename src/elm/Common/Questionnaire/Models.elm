@@ -325,7 +325,7 @@ evaluateQuestion currentLevel replies path question =
             if question.type_ == "list" then
                 case rawValue of
                     Nothing ->
-                        Just "1"
+                        Just "0"
 
                     _ ->
                         rawValue
@@ -351,9 +351,13 @@ evaluateQuestion currentLevel replies path question =
                         itemCount =
                             stringToInt value
                     in
-                    List.range 0 (itemCount - 1)
-                        |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow questions)
-                        |> List.foldl (+) 0
+                    if itemCount > 0 then
+                        List.range 0 (itemCount - 1)
+                            |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow questions)
+                            |> List.foldl (+) 0
+
+                    else
+                        boolToInt requiredNow
 
                 _ ->
                     0

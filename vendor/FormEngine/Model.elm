@@ -235,7 +235,7 @@ setInitialValue formValues path element =
                 numberOfItems =
                     getInitialValue formValues path descriptor.name
                         |> initialValueToInt
-                        |> Maybe.withDefault 1
+                        |> Maybe.withDefault 0
 
                 newItemElements =
                     List.repeat numberOfItems (createItemElement items)
@@ -341,16 +341,3 @@ applyFieldValue values key stringValue =
 
         Nothing ->
             values ++ [ { path = key, value = "" } ]
-
-
-
--- valueToString : a -> String
--- valueToString value =
---     let
---         str =
---             toString value
---     in
---     if String.left 1 str == "\"" then
---         String.dropRight 1 (String.dropLeft 1 str)
---     else
---         str
