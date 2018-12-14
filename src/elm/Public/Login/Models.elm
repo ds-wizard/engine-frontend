@@ -1,4 +1,4 @@
-module Public.Login.Models exposing (..)
+module Public.Login.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 

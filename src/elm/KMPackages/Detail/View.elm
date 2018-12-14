@@ -1,7 +1,7 @@
 module KMPackages.Detail.View exposing (view)
 
 import Auth.Models exposing (JwtToken)
-import Auth.Permission exposing (hasPerm, packageManagementWrite)
+import Auth.Permission as Perm exposing (hasPerm)
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (detailContainerClassWith, emptyNode, linkTo, linkToAttributes)
@@ -46,59 +46,72 @@ packageDetail wrapMsg jwt packages =
 
 versionView : (Msg -> Msgs.Msg) -> Maybe JwtToken -> PackageDetailRow -> Html Msgs.Msg
 versionView wrapMsg jwt row =
-    let
-        actions =
-            if hasPerm jwt packageManagementWrite then
-                versionViewActions wrapMsg row
-            else
-                versionViewActionsJustCreateDSButton row.packageDetail
-    in
     div [ class "card bg-light mb-3" ]
         [ div [ class "card-body row" ]
             [ div [ class "col-4 labels" ]
                 [ strong [] [ text row.packageDetail.version ] ]
             , div [ class "col-8 text-right actions" ]
-                [ actions ]
+                [ versionViewActions wrapMsg jwt row ]
             , div [ class "col-12" ] [ text row.packageDetail.description ]
             ]
         ]
 
 
-versionViewActions : (Msg -> Msgs.Msg) -> PackageDetailRow -> Html Msgs.Msg
-versionViewActions wrapMsg row =
+versionViewActions : (Msg -> Msgs.Msg) -> Maybe JwtToken -> PackageDetailRow -> Html Msgs.Msg
+versionViewActions wrapMsg jwt row =
     let
         id =
             row.packageDetail.id
 
-        url =
-            exportPackageUrl id
-    in
-    div [ class "btn-group" ]
-        [ a [ class "btn btn-outline-primary link-with-icon", href url, target "_blank" ]
-            [ i [ class "fa fa-download" ] [], text "Export" ]
-        , a [ class "btn btn-outline-primary", onClick (wrapMsg <| ShowHideDeleteVersion <| Just id) ]
-            [ i [ class "fa fa-trash-o" ] [] ]
-        , Dropdown.dropdown row.dropdownState
-            { options = [ Dropdown.alignMenuRight ]
-            , toggleMsg = wrapMsg << DropdownMsg row.packageDetail
-            , toggleButton = Dropdown.toggle [ Button.outlinePrimary ] []
-            , items =
+        exportAndDeleteButtons =
+            if hasPerm jwt Perm.packageManagementWrite then
+                [ a [ class "btn btn-outline-primary link-with-icon", href <| exportPackageUrl id, target "_blank" ]
+                    [ i [ class "fa fa-download" ] [], text "Export" ]
+                , a [ class "btn btn-outline-primary", onClick (wrapMsg <| ShowHideDeleteVersion <| Just id) ]
+                    [ i [ class "fa fa-trash-o" ] [] ]
+                ]
+
+            else
+                []
+
+        forkKMItem =
+            if hasPerm jwt Perm.knowledgeModel then
                 [ Dropdown.anchorItem
                     (linkToAttributes (Routing.KMEditor <| KMEditor.Routing.Create <| Just id))
-                    [ text "Create KM Editor" ]
-                , Dropdown.anchorItem
-                    (linkToAttributes (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just id))
-                    [ text "Create DS Planner" ]
+                    [ text "Fork Knowledge Model" ]
                 ]
-            }
-        ]
 
+            else
+                []
 
-versionViewActionsJustCreateDSButton : PackageDetail -> Html Msgs.Msg
-versionViewActionsJustCreateDSButton detail =
-    linkTo (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just detail.id)
-        [ class "btn btn-outline-primary" ]
-        [ text "Create DS Planner" ]
+        createQuestionnaireItem =
+            if hasPerm jwt Perm.questionnaire then
+                [ Dropdown.anchorItem
+                    (linkToAttributes (Routing.DSPlanner <| DSPlanner.Routing.Create <| Just id))
+                    [ text "Create Questionnaire" ]
+                ]
+
+            else
+                []
+
+        items =
+            forkKMItem ++ createQuestionnaireItem
+
+        dropdown =
+            if List.length items > 0 then
+                [ Dropdown.dropdown row.dropdownState
+                    { options = [ Dropdown.alignMenuRight ]
+                    , toggleMsg = wrapMsg << DropdownMsg row.packageDetail
+                    , toggleButton = Dropdown.toggle [ Button.outlinePrimary ] []
+                    , items = items
+                    }
+                ]
+
+            else
+                []
+    in
+    div [ class "btn-group" ]
+        (exportAndDeleteButtons ++ dropdown)
 
 
 deleteVersionModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -106,8 +119,8 @@ deleteVersionModal wrapMsg model =
     let
         ( version, visible ) =
             case model.versionToBeDeleted of
-                Just version ->
-                    ( version, True )
+                Just value ->
+                    ( value, True )
 
                 Nothing ->
                     ( "", False )

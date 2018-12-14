@@ -3,7 +3,7 @@ module Users.Index.View exposing (view)
 import Common.Html exposing (..)
 import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
 import Common.View.Forms exposing (formSuccessResultView)
-import Common.View.Table exposing (TableAction(TableActionLink, TableActionMsg), TableActionLabel(TableActionIcon), TableConfig, TableFieldValue(BoolValue, TextValue), indexTable)
+import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs

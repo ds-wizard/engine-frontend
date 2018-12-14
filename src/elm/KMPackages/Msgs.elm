@@ -1,4 +1,4 @@
-module KMPackages.Msgs exposing (..)
+module KMPackages.Msgs exposing (Msg(..))
 
 import KMPackages.Detail.Msgs
 import KMPackages.Import.Msgs

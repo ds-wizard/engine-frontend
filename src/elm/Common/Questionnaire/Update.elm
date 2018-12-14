@@ -1,10 +1,10 @@
-module Common.Questionnaire.Update exposing (..)
+module Common.Questionnaire.Update exposing (getFeedbacksCmd, getMetricsCmd, handleFormMsg, handlePostFeedbackCompleted, handleSendFeedbackForm, handleSetActiveChapter, postFeedbackCmd, postForSummaryReportCmd, update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerError, getServerErrorJwt)
 import Common.Questionnaire.Models exposing (..)
-import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
+import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback, postForSummaryReport)
 import Form exposing (Form)
 import FormEngine.Model exposing (encodeFormValues)
@@ -20,8 +20,8 @@ import Utils exposing (stringToInt)
 update : Msg -> Maybe Session -> Model -> ( Model, Cmd Msg )
 update msg maybeSession model =
     case msg of
-        FormMsg msg ->
-            handleFormMsg msg model
+        FormMsg formMsg ->
+            handleFormMsg formMsg model
 
         SetLevel level ->
             ( { model
@@ -176,8 +176,7 @@ getMetricsCmd session =
 
 postForSummaryReportCmd : Session -> Model -> Cmd Msg
 postForSummaryReportCmd session model =
-    model.questionnaire.replies
-        |> encodeFormValues
+    encodeQuestionnaireDetail model.questionnaire
         |> postForSummaryReport session model.questionnaire.uuid
         |> Jwt.send PostForSummaryReportCompleted
 

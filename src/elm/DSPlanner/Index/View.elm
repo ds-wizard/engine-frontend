@@ -1,4 +1,4 @@
-module DSPlanner.Index.View exposing (..)
+module DSPlanner.Index.View exposing (deleteModal, exportAction, exportFormats, exportItem, getExportUrl, indexActions, tableActionDelete, tableConfig, view)
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
@@ -9,7 +9,7 @@ import Common.View.Table exposing (..)
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Index.Models exposing (Model, QuestionnaireRow)
 import DSPlanner.Index.Msgs exposing (Msg(..))
-import DSPlanner.Routing exposing (Route(Create, Detail))
+import DSPlanner.Routing exposing (Route(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
@@ -20,7 +20,7 @@ import Routing
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col DSPlanner__Index" ]
-        [ pageHeader "Data Stewardship Planner" indexActions
+        [ pageHeader "Questionnaires" indexActions
         , formSuccessResultView model.deletingQuestionnaire
         , fullPageActionResultView (indexTable (tableConfig model) wrapMsg) model.questionnaires
         , deleteModal wrapMsg model
@@ -39,14 +39,11 @@ tableConfig model =
         [ { label = "Name"
           , getValue = TextValue (.questionnaire >> .name)
           }
-        , { label = "Package Name"
-          , getValue = TextValue (.questionnaire >> .package >> .name)
+        , { label = "Visibility"
+          , getValue = HtmlValue tableFieldVisibility
           }
-        , { label = "Package Version"
-          , getValue = TextValue (.questionnaire >> .package >> .version)
-          }
-        , { label = "Package ID"
-          , getValue = TextValue (.questionnaire >> .package >> .id)
+        , { label = "Knowledge Model"
+          , getValue = HtmlValue tableFieldKnowledgeModel
           }
         ]
     , actions =
@@ -65,6 +62,29 @@ tableConfig model =
         ]
     , sortBy = .questionnaire >> .name
     }
+
+
+tableFieldVisibility : QuestionnaireRow -> Html msg
+tableFieldVisibility row =
+    if row.questionnaire.private then
+        span [ class "badge badge-danger" ]
+            [ text "private" ]
+
+    else
+        span [ class "badge badge-info" ]
+            [ text "public" ]
+
+
+tableFieldKnowledgeModel : QuestionnaireRow -> Html msg
+tableFieldKnowledgeModel row =
+    span []
+        [ text row.questionnaire.package.name
+        , text ", "
+        , text row.questionnaire.package.version
+        , text " ("
+        , code [] [ text row.questionnaire.package.id ]
+        , text ")"
+        ]
 
 
 tableActionDelete : (Msg -> Msgs.Msg) -> QuestionnaireRow -> Msgs.Msg

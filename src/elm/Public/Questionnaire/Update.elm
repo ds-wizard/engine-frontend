@@ -1,4 +1,4 @@
-module Public.Questionnaire.Update exposing (..)
+module Public.Questionnaire.Update exposing (fetchData, handleGetQuestionnaireCompleted, handleQuestionnaireMsg, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Models exposing (getServerError)
@@ -25,8 +25,8 @@ update msg wrapMsg model =
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted model result
 
-        QuestionnaireMsg msg ->
-            handleQuestionnaireMsg wrapMsg msg model
+        QuestionnaireMsg questionnaireMsg ->
+            handleQuestionnaireMsg wrapMsg questionnaireMsg model
 
 
 handleGetQuestionnaireCompleted : Model -> Result Http.Error QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )

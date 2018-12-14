@@ -1,4 +1,4 @@
-module Public.Questionnaire.Models exposing (..)
+module Public.Questionnaire.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Questionnaire.Models

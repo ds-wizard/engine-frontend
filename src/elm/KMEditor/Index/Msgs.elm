@@ -1,4 +1,4 @@
-module KMEditor.Index.Msgs exposing (..)
+module KMEditor.Index.Msgs exposing (Msg(..))
 
 import Form
 import Jwt

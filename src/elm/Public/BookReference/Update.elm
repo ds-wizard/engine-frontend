@@ -1,4 +1,4 @@
-module Public.BookReference.Update exposing (..)
+module Public.BookReference.Update exposing (fetchData, handleGetBookReferenceCompleted, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Models exposing (getServerError)
@@ -32,10 +32,6 @@ handleGetBookReferenceCompleted model result =
                     { model | bookReference = Success bookReference }
 
                 Err error ->
-                    let
-                        a =
-                            Debug.log "error" error
-                    in
                     { model | bookReference = getServerError error "Unable to get book reference" }
     in
     ( newModel, Cmd.none )

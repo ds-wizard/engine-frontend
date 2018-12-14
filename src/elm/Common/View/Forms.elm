@@ -1,4 +1,4 @@
-module Common.View.Forms exposing (..)
+module Common.View.Forms exposing (actionButton, actionButtonView, codeGroup, errorView, formActionOnly, formActions, formErrorResultView, formGroup, formResultView, formSuccessResultView, formText, formTextAfter, getErrors, inputGroup, passwordGroup, plainGroup, selectGroup, statusView, submitButton, successView, textAreaGroup, textGroup, toReadable, toggleGroup)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError(..))
@@ -11,6 +11,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs exposing (Msg)
 import Routing exposing (Route)
+import String exposing (fromFloat)
+
 
 
 -- Form fields
@@ -134,10 +136,10 @@ toReadable error labelText =
             "This is not a valid number"
 
         SmallerFloatThan n ->
-            "This should not be less than " ++ toString n
+            "This should not be less than " ++ fromFloat n
 
         GreaterFloatThan n ->
-            "This should not be more than " ++ toString n
+            "This should not be more than " ++ fromFloat n
 
         CustomError err ->
             case err of
@@ -151,7 +153,7 @@ toReadable error labelText =
                     msg
 
         _ ->
-            toString error
+            "Invalid value"
 
 
 
@@ -279,5 +281,6 @@ statusView className icon msg =
             [ i [ class ("fa " ++ icon) ] []
             , text msg
             ]
+
     else
         text ""

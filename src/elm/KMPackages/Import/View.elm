@@ -4,8 +4,6 @@ import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (detailContainerClassWith)
 import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (actionButton, formResultView)
-import DragDrop exposing (onDragEnter, onDragLeave, onDragOver, onDrop)
-import FileReader exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -19,15 +17,15 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     let
         content =
-            case List.head model.files of
+            case model.file of
                 Just file ->
-                    fileView wrapMsg model file.name
+                    fileView wrapMsg model file.filename
 
                 Nothing ->
                     dropzone model |> Html.map wrapMsg
     in
-    div [ detailContainerClassWith "KMPackages__Import" ]
-        [ pageHeader "Import package" []
+    div [ detailContainerClassWith "KMPackages__Import", id dropzoneId ]
+        [ pageHeader "Import Knowledge Model" []
         , formResultView model.importing
         , content
         ]
@@ -63,7 +61,7 @@ dropzone model =
     div (dropzoneAttributes model)
         [ label [ class "btn btn-secondary btn-file" ]
             [ text "Choose file"
-            , input [ type_ "file", onchange FilesSelect ] []
+            , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected) ] []
             ]
         , p [] [ text "or just drop it here" ]
         ]
@@ -80,14 +78,19 @@ dropzoneAttributes model =
                 _ ->
                     "active"
     in
-    class ("dropzone " ++ cssClass)
-        :: [ onDragEnter DragEnter
-           , onDragOver DragOver
-           , onDragLeave DragLeave
-           , onDrop Drop
-           ]
+    [ class ("dropzone " ++ cssClass)
+    , id dropzoneId
+    , onDragEvent "dragenter" DragEnter
+    , onDragEvent "dragover" DragOver
+    , onDragEvent "dragleave" DragLeave
+    ]
 
 
-onchange : (List NativeFile -> value) -> Attribute value
-onchange action =
-    on "change" (Decode.map action parseSelectedFiles)
+onDragEvent : String -> Msg -> Attribute Msg
+onDragEvent event msg =
+    custom event <|
+        Decode.succeed
+            { stopPropagation = True
+            , preventDefault = True
+            , message = msg
+            }

@@ -1,4 +1,4 @@
-module Public.Questionnaire.Requests exposing (..)
+module Public.Questionnaire.Requests exposing (getQuestionnaire)
 
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
 import Http

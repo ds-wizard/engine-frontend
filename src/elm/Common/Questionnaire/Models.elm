@@ -1,4 +1,4 @@
-module Common.Questionnaire.Models exposing (..)
+module Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions, createAnswerOption, createChapterForm, createFormItemDescriptor, createGroupItems, createOptionFormDescriptor, createQuestionExtraData, createQuestionFormItem, encodeFeedbackFrom, encodeQuestionnaireDetail, evaluateAnswerItem, evaluateFollowups, evaluateQuestion, feedbackDecoder, feedbackFormValidation, feedbackListDecoder, getQuestions, getReply, initEmptyFeedbackFrom, initialModel, questionnaireDetailDecoder, setActiveChapter, setLevel, updateQuestionnaireReplies, updateReplies)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
@@ -7,12 +7,13 @@ import Form
 import Form.Validate as Validate exposing (..)
 import FormEngine.Model exposing (..)
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
-import Utils exposing (stringToInt)
+import String exposing (fromInt)
+import Utils exposing (boolToInt, stringToInt)
 
 
 type alias Model =
@@ -79,7 +80,7 @@ type alias QuestionnaireDetail =
 
 questionnaireDetailDecoder : Decoder QuestionnaireDetail
 questionnaireDetailDecoder =
-    decode QuestionnaireDetail
+    Decode.succeed QuestionnaireDetail
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "package" packageDetailDecoder
@@ -133,7 +134,7 @@ type alias Feedback =
 
 feedbackDecoder : Decoder Feedback
 feedbackDecoder =
-    decode Feedback
+    Decode.succeed Feedback
         |> required "title" Decode.string
         |> required "issueId" Decode.int
         |> required "issueUrl" Decode.string
@@ -199,14 +200,14 @@ createQuestionExtraData question =
                 _ ->
                     extraData
 
-        extraData =
+        newExtraData =
             { resourcePageReferences = []
             , urlReferences = []
             , experts = question.experts
             , requiredLevel = question.requiredLevel
             }
     in
-    Just <| List.foldl foldReferences extraData question.references
+    Just <| List.foldl foldReferences newExtraData question.references
 
 
 createAnswerOption : Answer -> Option FormExtraData
@@ -324,10 +325,11 @@ evaluateQuestion currentLevel replies path question =
             if question.type_ == "list" then
                 case rawValue of
                     Nothing ->
-                        Just "1"
+                        Just "0"
 
                     _ ->
                         rawValue
+
             else
                 rawValue
     in
@@ -349,9 +351,13 @@ evaluateQuestion currentLevel replies path question =
                         itemCount =
                             stringToInt value
                     in
-                    List.range 0 (itemCount - 1)
-                        |> List.map (evaluateAnswerItem currentLevel replies currentPath questions)
-                        |> List.foldl (+) 0
+                    if itemCount > 0 then
+                        List.range 0 (itemCount - 1)
+                            |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow questions)
+                            |> List.foldl (+) 0
+
+                    else
+                        boolToInt requiredNow
 
                 _ ->
                     0
@@ -359,6 +365,7 @@ evaluateQuestion currentLevel replies path question =
         Nothing ->
             if requiredNow then
                 1
+
             else
                 0
 
@@ -374,12 +381,23 @@ evaluateFollowups currentLevel replies path answer =
         |> List.foldl (+) 0
 
 
-evaluateAnswerItem : Int -> FormValues -> List String -> List Question -> Int -> Int
-evaluateAnswerItem currentLevel replies path questions index =
+evaluateAnswerItem : Int -> FormValues -> List String -> Bool -> List Question -> Int -> Int
+evaluateAnswerItem currentLevel replies path requiredNow questions index =
     let
         currentPath =
-            path ++ [ toString index ]
+            path ++ [ fromInt index ]
+
+        answerItem =
+            if requiredNow then
+                getReply replies (String.join "." <| currentPath ++ [ "itemName" ])
+                    |> Maybe.map String.isEmpty
+                    |> Maybe.withDefault True
+                    |> boolToInt
+
+            else
+                0
     in
     questions
         |> List.map (evaluateQuestion currentLevel replies currentPath)
         |> List.foldl (+) 0
+        |> (+) answerItem

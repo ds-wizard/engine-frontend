@@ -5,6 +5,7 @@ import FormEngine.Msgs exposing (Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import String exposing (fromInt)
 
 
 type alias FormViewConfig msg a =
@@ -41,7 +42,7 @@ viewFormElement config path formItem =
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
                 [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
-                , input [ class "form-control", type_ "number", value (state.value |> Maybe.map toString |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
+                , input [ class "form-control", type_ "number", value (state.value |> Maybe.map fromInt |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
                 ]
@@ -62,8 +63,8 @@ viewFormElement config path formItem =
                 [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
-                , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ]) (List.length items)) items)
-                , button [ class "btn btn-secondary", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [] ]
+                , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ])) items)
+                , button [ class "btn btn-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
                 ]
 
 
@@ -96,24 +97,22 @@ viewClearAnswer answered path =
             [ i [ class "fa fa-undo" ] []
             , text "Clear answer"
             ]
+
     else
         text ""
 
 
-viewGroupItem : FormViewConfig msg a -> List String -> Int -> Int -> ItemElement a -> Html (Msg msg)
-viewGroupItem config path numberOfItems index itemElement =
+viewGroupItem : FormViewConfig msg a -> List String -> Int -> ItemElement a -> Html (Msg msg)
+viewGroupItem config path index itemElement =
     let
         deleteButton =
-            if numberOfItems == 1 then
-                text ""
-            else
-                button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
-                    [ i [ class "fa fa-trash-o" ] [] ]
+            button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
+                [ i [ class "fa fa-trash-o" ] [] ]
     in
     div [ class "card bg-light item mb-5" ]
         [ div [ class "card-body" ] <|
             [ deleteButton ]
-                ++ List.map (viewFormElement config (path ++ [ toString index ])) itemElement
+                ++ List.map (viewFormElement config (path ++ [ fromInt index ])) itemElement
         ]
 
 

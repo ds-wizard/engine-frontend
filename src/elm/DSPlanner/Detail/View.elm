@@ -1,4 +1,4 @@
-module DSPlanner.Detail.View exposing (..)
+module DSPlanner.Detail.View exposing (content, questionnaireHeader, questionnaireTitle, view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, linkTo)
@@ -40,6 +40,7 @@ questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
         unsavedChanges =
             if questionnaireModel.dirty then
                 text "(unsaved changes)"
+
             else
                 emptyNode
     in

@@ -1,7 +1,7 @@
-module Users.Common.Models exposing (..)
+module Users.Common.Models exposing (User, roles, userDecoder, userListDecoder)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (required)
 
 
 type alias User =
@@ -16,7 +16,7 @@ type alias User =
 
 userDecoder : Decoder User
 userDecoder =
-    decode User
+    Decode.succeed User
         |> required "uuid" Decode.string
         |> required "email" Decode.string
         |> required "name" Decode.string

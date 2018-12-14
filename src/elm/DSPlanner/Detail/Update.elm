@@ -1,4 +1,4 @@
-module DSPlanner.Detail.Update exposing (..)
+module DSPlanner.Detail.Update exposing (fetchData, fetchLevels, fetchQuestionnaire, handleGetLevelsCompleted, handleGetQuestionnaireCompleted, handlePutRepliesCompleted, handleQuestionnaireMsg, handleSave, putRepliesCmd, update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
@@ -9,10 +9,11 @@ import Common.Questionnaire.Update
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (getQuestionnaire, putQuestionnaire)
-import DSPlanner.Routing exposing (Route(Index))
+import DSPlanner.Routing exposing (Route(..))
 import Jwt
 import KMEditor.Common.Models.Entities exposing (Level)
 import KMEditor.Requests exposing (getLevels)
+import Models exposing (State)
 import Msgs
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
@@ -40,8 +41,8 @@ fetchLevels wrapMsg session =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted model result
@@ -49,14 +50,14 @@ update msg wrapMsg session model =
         GetLevelsCompleted result ->
             handleGetLevelsCompleted model result
 
-        QuestionnaireMsg msg ->
-            handleQuestionnaireMsg wrapMsg msg session model
+        QuestionnaireMsg qMsg ->
+            handleQuestionnaireMsg wrapMsg qMsg state.session model
 
         Save ->
-            handleSave wrapMsg session model
+            handleSave wrapMsg state.session model
 
         PutRepliesCompleted result ->
-            handlePutRepliesCompleted model result
+            handlePutRepliesCompleted state model result
 
 
 handleGetQuestionnaireCompleted : Model -> Result Jwt.JwtError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
@@ -128,11 +129,11 @@ handleSave wrapMsg session model =
             ( model, Cmd.none )
 
 
-handlePutRepliesCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-handlePutRepliesCompleted model result =
+handlePutRepliesCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+handlePutRepliesCompleted state model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate <| Routing.DSPlanner Index )
+            ( model, cmdNavigate state.key <| Routing.DSPlanner Index )
 
         Err error ->
             ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be saved." }

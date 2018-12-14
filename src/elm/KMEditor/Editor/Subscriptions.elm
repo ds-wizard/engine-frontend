@@ -10,6 +10,6 @@ import SplitPane
 subscriptions : (Msg -> Msgs.Msg) -> Model -> Sub Msgs.Msg
 subscriptions wrapMsg model =
     Sub.batch
-        [ Reorderable.subscriptions (wrapMsg << ReorderableMsg) model.reorderableState
+        [ Reorderable.subscriptions model.reorderableState |> Sub.map (wrapMsg << ReorderableMsg)
         , SplitPane.subscriptions model.splitPane |> Sub.map (wrapMsg << PaneMsg)
         ]

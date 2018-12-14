@@ -1,8 +1,8 @@
-module KMEditor.Common.Models.Entities exposing (..)
+module KMEditor.Common.Models.Entities exposing (Answer, AnswerItemTemplate, AnswerItemTemplateQuestions(..), Chapter, CrossReferenceData, Expert, FollowUps(..), KnowledgeModel, Level, Metric, MetricMeasure, Question, Reference(..), ResourcePageReferenceData, URLReferenceData, answerDecoder, answerItemTemplateDecoder, answerItemTemplateQuestionsDecoder, chapterDecoder, crossReferenceDecoder, expertDecoder, followupsDecoder, getAnswer, getAnswerItemTemplateQuestions, getAnswers, getChapter, getChapters, getExpert, getExperts, getFollowUpQuestions, getQuestion, getQuestions, getReference, getReferenceUuid, getReferenceVisibleName, getReferences, knowledgeModelDecoder, levelDecoder, levelListDecoder, metricDecoder, metricListDecoder, metricMeasureDecoder, metricMeasureEncoder, newAnswer, newChapter, newExpert, newQuestion, newReference, questionDecoder, referenceByType, referenceDecoder, referenceType, resourcePageReferenceDecoder, urlReferenceDecoder)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as Encode exposing (..)
 import List.Extra as List
 
@@ -118,7 +118,7 @@ type alias Level =
 
 knowledgeModelDecoder : Decoder KnowledgeModel
 knowledgeModelDecoder =
-    decode KnowledgeModel
+    Decode.succeed KnowledgeModel
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "chapters" (Decode.list chapterDecoder)
@@ -126,7 +126,7 @@ knowledgeModelDecoder =
 
 chapterDecoder : Decoder Chapter
 chapterDecoder =
-    decode Chapter
+    Decode.succeed Chapter
         |> required "uuid" Decode.string
         |> required "title" Decode.string
         |> required "text" Decode.string
@@ -135,7 +135,7 @@ chapterDecoder =
 
 questionDecoder : Decoder Question
 questionDecoder =
-    decode Question
+    Decode.succeed Question
         |> required "uuid" Decode.string
         |> required "type" Decode.string
         |> required "title" Decode.string
@@ -149,7 +149,7 @@ questionDecoder =
 
 answerItemTemplateDecoder : Decoder AnswerItemTemplate
 answerItemTemplateDecoder =
-    decode AnswerItemTemplate
+    Decode.succeed AnswerItemTemplate
         |> required "title" Decode.string
         |> required "questions" (Decode.lazy (\_ -> answerItemTemplateQuestionsDecoder))
 
@@ -161,7 +161,7 @@ answerItemTemplateQuestionsDecoder =
 
 answerDecoder : Decoder Answer
 answerDecoder =
-    decode Answer
+    Decode.succeed Answer
         |> required "uuid" Decode.string
         |> required "label" Decode.string
         |> required "advice" (Decode.nullable Decode.string)
@@ -190,7 +190,7 @@ referenceType =
 
 resourcePageReferenceDecoder : Decoder Reference
 resourcePageReferenceDecoder =
-    decode ResourcePageReferenceData
+    Decode.succeed ResourcePageReferenceData
         |> required "uuid" Decode.string
         |> required "shortUuid" Decode.string
         |> Decode.map ResourcePageReference
@@ -198,7 +198,7 @@ resourcePageReferenceDecoder =
 
 urlReferenceDecoder : Decoder Reference
 urlReferenceDecoder =
-    decode URLReferenceData
+    Decode.succeed URLReferenceData
         |> required "uuid" Decode.string
         |> required "url" Decode.string
         |> required "label" Decode.string
@@ -207,7 +207,7 @@ urlReferenceDecoder =
 
 crossReferenceDecoder : Decoder Reference
 crossReferenceDecoder =
-    decode CrossReferenceData
+    Decode.succeed CrossReferenceData
         |> required "uuid" Decode.string
         |> required "targetUuid" Decode.string
         |> required "description" Decode.string
@@ -216,7 +216,7 @@ crossReferenceDecoder =
 
 expertDecoder : Decoder Expert
 expertDecoder =
-    decode Expert
+    Decode.succeed Expert
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "email" Decode.string
@@ -224,7 +224,7 @@ expertDecoder =
 
 metricDecoder : Decoder Metric
 metricDecoder =
-    decode Metric
+    Decode.succeed Metric
         |> required "uuid" Decode.string
         |> required "title" Decode.string
         |> required "abbreviation" Decode.string
@@ -238,7 +238,7 @@ metricListDecoder =
 
 metricMeasureDecoder : Decoder MetricMeasure
 metricMeasureDecoder =
-    decode MetricMeasure
+    Decode.succeed MetricMeasure
         |> required "metricUuid" Decode.string
         |> required "measure" Decode.float
         |> required "weight" Decode.float
@@ -255,7 +255,7 @@ metricMeasureEncoder metricMeasure =
 
 levelDecoder : Decoder Level
 levelDecoder =
-    decode Level
+    Decode.succeed Level
         |> required "level" Decode.int
         |> required "title" Decode.string
 

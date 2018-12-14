@@ -1,5 +1,6 @@
-module Public.Update exposing (..)
+module Public.Update exposing (fetchData, update)
 
+import Models exposing (State)
 import Msgs
 import Public.BookReference.Update
 import Public.ForgottenPassword.Update
@@ -8,10 +9,10 @@ import Public.Login.Update
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
 import Public.Questionnaire.Update
-import Public.Routing exposing (Route(BookReference, Questionnaire, SignupConfirmation))
+import Public.Routing exposing (Route(..))
 import Public.Signup.Update
 import Public.SignupConfirmation.Update
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 
 
 fetchData : Route -> (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
@@ -30,54 +31,54 @@ fetchData route wrapMsg =
             Cmd.none
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Seed -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg seed model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
-        BookReferenceMsg msg ->
+        BookReferenceMsg brMsg ->
             let
                 ( bookReferenceModel, cmd ) =
-                    Public.BookReference.Update.update msg (wrapMsg << BookReferenceMsg) model.bookReferenceModel
+                    Public.BookReference.Update.update brMsg (wrapMsg << BookReferenceMsg) model.bookReferenceModel
             in
-            ( seed, { model | bookReferenceModel = bookReferenceModel }, cmd )
+            ( state.seed, { model | bookReferenceModel = bookReferenceModel }, cmd )
 
-        ForgottenPasswordMsg msg ->
+        ForgottenPasswordMsg fpMsg ->
             let
                 ( forgottenPasswordModel, cmd ) =
-                    Public.ForgottenPassword.Update.update msg (wrapMsg << ForgottenPasswordMsg) model.forgottenPasswordModel
+                    Public.ForgottenPassword.Update.update fpMsg (wrapMsg << ForgottenPasswordMsg) model.forgottenPasswordModel
             in
-            ( seed, { model | forgottenPasswordModel = forgottenPasswordModel }, cmd )
+            ( state.seed, { model | forgottenPasswordModel = forgottenPasswordModel }, cmd )
 
-        ForgottenPasswordConfirmationMsg msg ->
+        ForgottenPasswordConfirmationMsg fpcMsg ->
             let
                 ( forgottenPasswordConfirmationModel, cmd ) =
-                    Public.ForgottenPasswordConfirmation.Update.update msg (wrapMsg << ForgottenPasswordConfirmationMsg) model.forgottenPasswordConfirmationModel
+                    Public.ForgottenPasswordConfirmation.Update.update fpcMsg (wrapMsg << ForgottenPasswordConfirmationMsg) model.forgottenPasswordConfirmationModel
             in
-            ( seed, { model | forgottenPasswordConfirmationModel = forgottenPasswordConfirmationModel }, cmd )
+            ( state.seed, { model | forgottenPasswordConfirmationModel = forgottenPasswordConfirmationModel }, cmd )
 
-        LoginMsg msg ->
+        LoginMsg lMsg ->
             let
                 ( loginModel, cmd ) =
-                    Public.Login.Update.update msg (wrapMsg << LoginMsg) model.loginModel
+                    Public.Login.Update.update lMsg (wrapMsg << LoginMsg) model.loginModel
             in
-            ( seed, { model | loginModel = loginModel }, cmd )
+            ( state.seed, { model | loginModel = loginModel }, cmd )
 
-        QuestionnaireMsg msg ->
+        QuestionnaireMsg qMsg ->
             let
                 ( questionnaireModel, cmd ) =
-                    Public.Questionnaire.Update.update msg (wrapMsg << QuestionnaireMsg) model.questionnaireModel
+                    Public.Questionnaire.Update.update qMsg (wrapMsg << QuestionnaireMsg) model.questionnaireModel
             in
-            ( seed, { model | questionnaireModel = questionnaireModel }, cmd )
+            ( state.seed, { model | questionnaireModel = questionnaireModel }, cmd )
 
-        SignupMsg msg ->
+        SignupMsg sMsg ->
             let
                 ( newSeed, signupModel, cmd ) =
-                    Public.Signup.Update.update msg (wrapMsg << SignupMsg) seed model.signupModel
+                    Public.Signup.Update.update sMsg (wrapMsg << SignupMsg) state.seed model.signupModel
             in
             ( newSeed, { model | signupModel = signupModel }, cmd )
 
-        SignupConfirmationMsg msg ->
+        SignupConfirmationMsg scMsg ->
             let
                 ( signupConfirmationModel, cmd ) =
-                    Public.SignupConfirmation.Update.update msg model.signupConfirmationModel
+                    Public.SignupConfirmation.Update.update scMsg model.signupConfirmationModel
             in
-            ( seed, { model | signupConfirmationModel = signupConfirmationModel }, Cmd.none )
+            ( state.seed, { model | signupConfirmationModel = signupConfirmationModel }, Cmd.none )

@@ -1,4 +1,4 @@
-module KMEditor.Models exposing (..)
+module KMEditor.Models exposing (Model, initLocalModel, initialModel)
 
 import KMEditor.Create.Models
 import KMEditor.Editor.Models

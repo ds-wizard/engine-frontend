@@ -1,4 +1,4 @@
-module ActionResultTest exposing (..)
+module ActionResultTest exposing (Combine3Test(..), combine3Tests, combineTests, isErrorTests, isLoadingTests, isSuccessTests, isUnsetTests, mapTests, withDefaultTests)
 
 import ActionResult exposing (ActionResult(..))
 import Expect exposing (Expectation)
@@ -122,17 +122,21 @@ combineTests =
         ]
 
 
+type Combine3Test
+    = Combine3Test (ActionResult Int) (ActionResult Int) (ActionResult Int) (ActionResult ( Int, Int, Int ))
+
+
 combine3Tests : Test
 combine3Tests =
     describe "combine3"
         [ parametrized
-            [ ( Success 1, Success 2, Success 3, Success ( 1, 2, 3 ) )
-            , ( Unset, Success 2, Loading, Unset )
-            , ( Success 1, Loading, Success 2, Loading )
-            , ( Success 1, Success 2, Error "err", Error "err" )
+            [ Combine3Test (Success 1) (Success 2) (Success 3) (Success ( 1, 2, 3 ))
+            , Combine3Test Unset (Success 2) Loading Unset
+            , Combine3Test (Success 1) Loading (Success 2) Loading
+            , Combine3Test (Success 1) (Success 2) (Error "err") (Error "err")
             ]
             "should work"
           <|
-            \( ar1, ar2, ar3, expected ) ->
+            \(Combine3Test ar1 ar2 ar3 expected) ->
                 Expect.equal (ActionResult.combine3 ar1 ar2 ar3) expected
         ]

@@ -1,4 +1,4 @@
-module KMEditor.Msgs exposing (..)
+module KMEditor.Msgs exposing (Msg(..))
 
 import KMEditor.Create.Msgs
 import KMEditor.Editor.Msgs

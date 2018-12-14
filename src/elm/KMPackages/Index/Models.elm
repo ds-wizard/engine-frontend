@@ -1,4 +1,4 @@
-module KMPackages.Index.Models exposing (..)
+module KMPackages.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import KMPackages.Common.Models exposing (Package)

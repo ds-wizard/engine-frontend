@@ -1,4 +1,4 @@
-module DSPlanner.Models exposing (..)
+module DSPlanner.Models exposing (Model, initLocalModel, initialModel)
 
 import DSPlanner.Create.Models
 import DSPlanner.Detail.Models

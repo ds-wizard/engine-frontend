@@ -1,16 +1,18 @@
-module DSPlanner.Create.Update exposing (..)
+module DSPlanner.Create.Update exposing (fetchData, getPackagesCompleted, handleForm, postQuestionnaireCmd, postQuestionnaireCompleted, setSelectedPackage, update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
 import Common.Models exposing (getServerErrorJwt)
+import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, initQuestionnaireCreateForm, questionnaireCreateFormValidation)
 import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Requests exposing (postQuestionnaire)
-import DSPlanner.Routing exposing (Route(Index))
+import DSPlanner.Routing exposing (Route(..))
 import Form
 import Jwt
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
+import Models exposing (State)
 import Msgs
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
@@ -23,17 +25,17 @@ fetchData wrapMsg session =
         |> Cmd.map wrapMsg
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg state model =
     case msg of
         GetPackagesCompleted result ->
             getPackagesCompleted model result
 
-        FormMsg msg ->
-            handleForm msg wrapMsg session model
+        FormMsg formMsg ->
+            handleForm formMsg wrapMsg state.session model
 
         PostQuestionnaireCompleted result ->
-            postQuestionnaireCompleted model result
+            postQuestionnaireCompleted state model result
 
 
 getPackagesCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
@@ -59,6 +61,7 @@ setSelectedPackage model packages =
         Just id ->
             if List.any (.id >> (==) id) packages then
                 { model | form = initQuestionnaireCreateForm model.selectedPackage }
+
             else
                 model
 
@@ -93,11 +96,13 @@ postQuestionnaireCmd wrapMsg session form =
         |> Cmd.map wrapMsg
 
 
-postQuestionnaireCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-postQuestionnaireCompleted model result =
+postQuestionnaireCompleted : State -> Model -> Result Jwt.JwtError Questionnaire -> ( Model, Cmd Msgs.Msg )
+postQuestionnaireCompleted state model result =
     case result of
-        Ok user ->
-            ( model, cmdNavigate <| Routing.DSPlanner Index )
+        Ok questionnaire ->
+            ( model
+            , cmdNavigate state.key <| Routing.DSPlanner <| DSPlanner.Routing.Detail questionnaire.uuid
+            )
 
         Err error ->
             ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be created." }

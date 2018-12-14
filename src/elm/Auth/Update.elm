@@ -3,9 +3,10 @@ module Auth.Update exposing (update)
 import Auth.Models as AuthModel exposing (initialSession, parseJwt, setToken, setUser)
 import Auth.Msgs as AuthMsgs
 import Auth.Requests exposing (..)
+import Browser.Navigation exposing (Key)
 import Common.Models exposing (getServerErrorJwt)
 import Jwt
-import Models exposing (Model)
+import Models exposing (Model, setJwt, setSession)
 import Msgs exposing (Msg)
 import Ports
 import Public.Login.Msgs
@@ -21,8 +22,13 @@ update msg model =
     case msg of
         AuthMsgs.Token token jwt ->
             let
+                state =
+                    model.state
+
                 newModel =
-                    { model | session = setToken model.session token, jwt = Just jwt }
+                    model
+                        |> setSession (setToken model.state.session token)
+                        |> setJwt (Just jwt)
             in
             ( newModel, getCurrentUserCmd newModel )
 
@@ -35,7 +41,7 @@ update msg model =
 
 getCurrentUserCmd : Model -> Cmd Msg
 getCurrentUserCmd model =
-    getCurrentUser model.session
+    getCurrentUser model.state.session
         |> toCmd AuthMsgs.GetCurrentUserCompleted Msgs.AuthMsg
 
 
@@ -44,13 +50,13 @@ getCurrentUserCompleted model result =
     case result of
         Ok user ->
             let
-                newModel =
-                    { model | session = setUser model.session user }
+                session =
+                    setUser model.state.session user
             in
-            ( newModel
+            ( setSession session model
             , Cmd.batch
-                [ Ports.storeSession <| Just newModel.session
-                , cmdNavigate Welcome
+                [ Ports.storeSession <| Just session
+                , cmdNavigate model.state.key Welcome
                 ]
             )
 
@@ -69,6 +75,6 @@ logout : Model -> ( Model, Cmd Msg )
 logout model =
     let
         cmd =
-            Cmd.batch [ Ports.clearSession (), cmdNavigate homeRoute ]
+            Cmd.batch [ Ports.clearSession (), cmdNavigate model.state.key homeRoute ]
     in
-    ( { model | session = initialSession }, cmd )
+    ( setSession initialSession model, cmd )

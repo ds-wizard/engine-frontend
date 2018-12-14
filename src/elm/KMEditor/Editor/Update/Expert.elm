@@ -1,14 +1,14 @@
-module KMEditor.Editor.Update.Expert exposing (..)
+module KMEditor.Editor.Update.Expert exposing (deleteExpert, removeExpert, updateExpertForm, updateIfQuestion, withGenerateExpertEditEvent)
 
 import Form
 import KMEditor.Editor.Models exposing (Model)
 import KMEditor.Editor.Models.Children as Children exposing (Children)
-import KMEditor.Editor.Models.Editors exposing (Editor(ExpertEditor, QuestionEditor), ExpertEditorData, QuestionEditorData, isExpertEditorDirty, updateExpertEditorData)
+import KMEditor.Editor.Models.Editors exposing (Editor(..), ExpertEditorData, QuestionEditorData, isExpertEditorDirty, updateExpertEditorData)
 import KMEditor.Editor.Models.Forms exposing (expertFormValidation)
 import KMEditor.Editor.Update.Abstract exposing (deleteEntity, updateForm, withGenerateEvent)
 import KMEditor.Editor.Update.Events exposing (createAddExpertEvent, createDeleteExpertEvent, createEditExpertEvent)
 import Msgs
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 
 
 updateExpertForm : Model -> Form.Msg -> ExpertEditorData -> Model

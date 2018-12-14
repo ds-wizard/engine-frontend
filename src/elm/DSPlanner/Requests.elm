@@ -1,4 +1,10 @@
-module DSPlanner.Requests exposing (..)
+module DSPlanner.Requests exposing
+    ( deleteQuestionnaire
+    , getQuestionnaire
+    , getQuestionnaires
+    , postQuestionnaire
+    , putQuestionnaire
+    )
 
 import Auth.Models exposing (Session)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
@@ -23,9 +29,9 @@ deleteQuestionnaire uuid session =
     Requests.delete session ("/questionnaires/" ++ uuid)
 
 
-postQuestionnaire : Session -> Value -> Http.Request String
+postQuestionnaire : Session -> Value -> Http.Request Questionnaire
 postQuestionnaire session questionnaire =
-    Requests.post questionnaire session "/questionnaires"
+    Requests.postWithResponse questionnaire session "/questionnaires" questionnaireDecoder
 
 
 putQuestionnaire : String -> Session -> Value -> Http.Request String

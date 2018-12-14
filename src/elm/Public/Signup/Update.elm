@@ -1,4 +1,4 @@
-module Public.Signup.Update exposing (..)
+module Public.Signup.Update exposing (handleForm, handlePostSignupCompleted, postSignupCmd, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (setFormErrors)
@@ -9,7 +9,7 @@ import Msgs
 import Public.Signup.Models exposing (..)
 import Public.Signup.Msgs exposing (Msg(..))
 import Public.Signup.Requests exposing (postSignup)
-import Random.Pcg exposing (Seed, step)
+import Random exposing (Seed, step)
 import Utils exposing (tuplePrepend)
 import Uuid
 

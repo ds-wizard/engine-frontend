@@ -1,4 +1,4 @@
-module Subscriptions exposing (..)
+module Subscriptions exposing (subscriptions)
 
 import Common.Menu.Subscriptions
 import DSPlanner.Subscriptions
@@ -13,7 +13,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     let
         currentViewSubscriptions =
-            case model.route of
+            case model.state.route of
                 DSPlanner route ->
                     DSPlanner.Subscriptions.subscriptions DSPlannerMsg route model.dsPlannerModel
 

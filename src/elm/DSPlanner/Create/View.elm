@@ -1,4 +1,4 @@
-module DSPlanner.Create.View exposing (..)
+module DSPlanner.Create.View exposing (content, createOption, formView, view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
@@ -17,7 +17,7 @@ import Routing
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ detailContainerClassWith "DSPlanner__Create" ]
-        [ pageHeader "Create questionnaire" []
+        [ pageHeader "Create Questionnaire" []
         , fullPageActionResultView (content wrapMsg model) model.packages
         ]
 
@@ -40,7 +40,7 @@ formView form packages =
         formHtml =
             div []
                 [ inputGroup form "name" "Name"
-                , selectGroup packageOptions form "packageId" "Package"
+                , selectGroup packageOptions form "packageId" "Knowledge Model"
                 , toggleGroup form "private" "Private"
                 , formText "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
                 ]

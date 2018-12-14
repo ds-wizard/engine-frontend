@@ -1,4 +1,4 @@
-module Common.View.Table exposing (..)
+module Common.View.Table exposing (TableAction(..), TableActionConfig, TableActionLabel(..), TableConfig, TableFieldConfig, TableFieldValue(..), bodyField, getBoolIcon, headerField, indexTable, tableAction, tableBody, tableEmpty, tableHeader, tableRow, tableRowActions)
 
 import Common.Html exposing (emptyNode, linkTo)
 import Html exposing (..)
@@ -82,6 +82,7 @@ tableBody : TableConfig a msg -> (msg -> Msgs.Msg) -> List a -> Html Msgs.Msg
 tableBody config wrapMsg data =
     if List.isEmpty data then
         tableEmpty config
+
     else
         tbody [] (List.map (tableRow config wrapMsg) data)
 
@@ -158,6 +159,7 @@ getBoolIcon : Bool -> Html Msgs.Msg
 getBoolIcon bool =
     if bool then
         i [ class "fa fa-check" ] []
+
     else
         i [ class "fa fa-times" ] []
 

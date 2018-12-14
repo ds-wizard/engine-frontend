@@ -8,7 +8,7 @@ import Form exposing (Form)
 import Html exposing (..)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(Index))
+import KMEditor.Routing exposing (Route(..))
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))
@@ -42,7 +42,7 @@ formView wrapMsg form packages =
                 [ inputGroup form "name" "Name"
                 , inputGroup form "kmId" "Knowledge Model ID"
                 , formTextAfter "Knowledge Model ID can contain alfanumeric characters and dash but cannot start or end with dash."
-                , selectGroup parentOptions form "parentPackageId" "Parent Package"
+                , selectGroup parentOptions form "parentPackageId" "Parent Knowledge Model"
                 ]
     in
     formHtml |> Html.map (wrapMsg << FormMsg)

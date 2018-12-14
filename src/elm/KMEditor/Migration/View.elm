@@ -14,7 +14,7 @@ import KMEditor.Common.Models.Migration exposing (Migration, MigrationStateType(
 import KMEditor.Common.View exposing (diffTreeView)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(Publish))
+import KMEditor.Routing exposing (Route(..))
 import Msgs
 import Routing exposing (Route(..))
 
@@ -39,7 +39,7 @@ migrationView wrapMsg model migration =
             div [ class "alert alert-warning" ]
                 [ text "Migration is still running, try again later." ]
 
-        view =
+        currentView =
             case migration.migrationState.stateType of
                 ConflictState ->
                     let
@@ -67,7 +67,7 @@ migrationView wrapMsg model migration =
                 _ ->
                     errorMessage
     in
-    view
+    currentView
 
 
 migrationSummary : Migration -> Html Msgs.Msg
@@ -202,7 +202,7 @@ viewEditKnowledgeModelDiff event km =
             Dict.fromList <| List.map (\c -> ( c.uuid, c.title )) km.chapters
 
         fieldDiff =
-            viewDiff <| List.map3 (,,) [ "Name" ] [ km.name ] [ getEventFieldValueWithDefault event.name km.name ]
+            viewDiff <| List.map3 (\a b c -> ( a, b, c )) [ "Name" ] [ km.name ] [ getEventFieldValueWithDefault event.name km.name ]
 
         chaptersDiff =
             viewDiffChildren "Chapters" originalChapters (getEventFieldValueWithDefault event.chapterIds originalChapters) chapterNames
@@ -215,7 +215,7 @@ viewAddChapterDiff : AddChapterEventData -> Html Msgs.Msg
 viewAddChapterDiff event =
     let
         fields =
-            List.map2 (,) [ "Title", "Text" ] [ event.title, event.text ]
+            List.map2 (\a b -> ( a, b )) [ "Title", "Text" ] [ event.title, event.text ]
     in
     div []
         (viewAdd fields)
@@ -232,7 +232,7 @@ viewEditChapterDiff event chapter =
 
         fieldDiff =
             viewDiff <|
-                List.map3 (,,)
+                List.map3 (\a b c -> ( a, b, c ))
                     [ "Title", "Text" ]
                     [ chapter.title, chapter.text ]
                     [ getEventFieldValueWithDefault event.title chapter.title
@@ -256,7 +256,7 @@ viewDeleteChapterDiff chapter =
             List.map (\q -> q.title) chapter.questions
 
         fieldDiff =
-            viewDelete <| List.map2 (,) [ "Title", "Text" ] [ chapter.title, chapter.text ]
+            viewDelete <| List.map2 (\a b -> ( a, b )) [ "Title", "Text" ] [ chapter.title, chapter.text ]
 
         questionsDiff =
             viewDeletedChildren "Questions" questionNames
@@ -269,7 +269,7 @@ viewAddQuestionDiff : { a | title : String, text : Maybe String } -> Html Msgs.M
 viewAddQuestionDiff event =
     let
         fields =
-            List.map2 (,)
+            List.map2 (\a b -> ( a, b ))
                 [ "Title", "Text" ]
                 [ event.title, event.text |> Maybe.withDefault "" ]
     in
@@ -299,7 +299,7 @@ viewEditQuestionDiff event question =
             Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) question.experts
 
         fields =
-            List.map3 (,,)
+            List.map3 (\a b c -> ( a, b, c ))
                 [ "Title", "Text" ]
                 [ question.title, question.text |> Maybe.withDefault "" ]
                 [ getEventFieldValueWithDefault event.title question.title
@@ -331,7 +331,7 @@ viewDeleteQuestionDiff : Question -> Html Msgs.Msg
 viewDeleteQuestionDiff question =
     let
         fields =
-            List.map2 (,)
+            List.map2 (\a b -> ( a, b ))
                 [ "Title", "Text" ]
                 [ question.title, question.text |> Maybe.withDefault "" ]
 
@@ -355,7 +355,7 @@ viewAddAnswerDiff : AddAnswerEventData -> Html Msgs.Msg
 viewAddAnswerDiff event =
     let
         fields =
-            List.map2 (,) [ "Label", "Advice" ] [ event.label, event.advice |> Maybe.withDefault "" ]
+            List.map2 (\a b -> ( a, b )) [ "Label", "Advice" ] [ event.label, event.advice |> Maybe.withDefault "" ]
     in
     div []
         (viewAdd fields)
@@ -372,7 +372,7 @@ viewEditAnswerDiff event answer =
 
         fieldDiff =
             viewDiff <|
-                List.map3 (,,)
+                List.map3 (\a b c -> ( a, b, c ))
                     [ "Label", "Advice" ]
                     [ answer.label, answer.advice |> Maybe.withDefault "" ]
                     [ getEventFieldValueWithDefault event.label answer.label
@@ -396,7 +396,7 @@ viewDeleteAnswerDiff answer =
             List.map (\q -> q.title) <| getFollowUpQuestions answer
 
         fieldDiff =
-            viewDelete <| List.map2 (,) [ "Label", "Advice" ] [ answer.label, answer.advice |> Maybe.withDefault "" ]
+            viewDelete <| List.map2 (\a b -> ( a, b )) [ "Label", "Advice" ] [ answer.label, answer.advice |> Maybe.withDefault "" ]
 
         questionsDiff =
             viewDeletedChildren "Questions" questionNames
@@ -416,19 +416,19 @@ viewAddReferenceDiff =
 viewAddResourcePageReferenceDiff : AddResourcePageReferenceEventData -> Html Msgs.Msg
 viewAddResourcePageReferenceDiff data =
     div []
-        (viewAdd <| List.map2 (,) [ "Short UUID" ] [ data.shortUuid ])
+        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "Short UUID" ] [ data.shortUuid ])
 
 
 viewAddURLReferenceDiff : AddURLReferenceEventData -> Html Msgs.Msg
 viewAddURLReferenceDiff data =
     div []
-        (viewAdd <| List.map2 (,) [ "URL", "Label" ] [ data.url, data.label ])
+        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "URL", "Label" ] [ data.url, data.label ])
 
 
 viewAddCrossReferenceDiff : AddCrossReferenceEventData -> Html Msgs.Msg
 viewAddCrossReferenceDiff data =
     div []
-        (viewAdd <| List.map2 (,) [ "Target UUID", "Description" ] [ data.targetUuid, data.description ])
+        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "Target UUID", "Description" ] [ data.targetUuid, data.description ])
 
 
 viewEditReferenceDiff : EditReferenceEventData -> Reference -> Html Msgs.Msg
@@ -437,7 +437,7 @@ viewEditReferenceDiff event reference =
         ( EditResourcePageReferenceEvent eventData, ResourcePageReference referenceData ) ->
             div []
                 (viewDiff <|
-                    List.map3 (,,)
+                    List.map3 (\a b c -> ( a, b, c ))
                         [ "Short UUID" ]
                         [ referenceData.shortUuid ]
                         [ getEventFieldValueWithDefault eventData.shortUuid referenceData.shortUuid ]
@@ -446,7 +446,7 @@ viewEditReferenceDiff event reference =
         ( EditURLReferenceEvent eventData, URLReference referenceData ) ->
             div []
                 (viewDiff <|
-                    List.map3 (,,)
+                    List.map3 (\a b c -> ( a, b, c ))
                         [ "URL", "Label" ]
                         [ referenceData.url, referenceData.label ]
                         [ getEventFieldValueWithDefault eventData.url referenceData.url
@@ -457,7 +457,7 @@ viewEditReferenceDiff event reference =
         ( EditCrossReferenceEvent eventData, CrossReference referenceData ) ->
             div []
                 (viewDiff <|
-                    List.map3 (,,)
+                    List.map3 (\a b c -> ( a, b, c ))
                         [ "Target UUID", "Description" ]
                         [ referenceData.targetUuid, referenceData.description ]
                         [ getEventFieldValueWithDefault eventData.targetUuid referenceData.targetUuid
@@ -484,7 +484,7 @@ viewEditResourcePageReferenceDiff : EditResourcePageReferenceEventData -> Html M
 viewEditResourcePageReferenceDiff data =
     div []
         (viewAdd <|
-            List.map2 (,)
+            List.map2 (\a b -> ( a, b ))
                 [ "Short UUID" ]
                 [ getEventFieldValueWithDefault data.shortUuid "" ]
         )
@@ -494,7 +494,7 @@ viewEditURLReferenceDiff : EditURLReferenceEventData -> Html Msgs.Msg
 viewEditURLReferenceDiff data =
     div []
         (viewAdd <|
-            List.map2 (,)
+            List.map2 (\a b -> ( a, b ))
                 [ "URL", "Label" ]
                 [ getEventFieldValueWithDefault data.url ""
                 , getEventFieldValueWithDefault data.label ""
@@ -506,7 +506,7 @@ viewEditCrossReferenceDiff : EditCrossReferenceEventData -> Html Msgs.Msg
 viewEditCrossReferenceDiff data =
     div []
         (viewAdd <|
-            List.map2 (,)
+            List.map2 (\a b -> ( a, b ))
                 [ "Target UUID", "Description" ]
                 [ getEventFieldValueWithDefault data.targetUuid ""
                 , getEventFieldValueWithDefault data.description ""
@@ -525,32 +525,32 @@ viewDeleteReferenceDiff =
 viewDeleteResourcePageReferenceDiff : ResourcePageReferenceData -> Html Msgs.Msg
 viewDeleteResourcePageReferenceDiff data =
     div []
-        (viewDelete <| List.map2 (,) [ "Short UUID" ] [ data.shortUuid ])
+        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "Short UUID" ] [ data.shortUuid ])
 
 
 viewDeleteURLReferenceDiff : URLReferenceData -> Html Msgs.Msg
 viewDeleteURLReferenceDiff data =
     div []
-        (viewDelete <| List.map2 (,) [ "URL", "Label" ] [ data.url, data.label ])
+        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "URL", "Label" ] [ data.url, data.label ])
 
 
 viewDeleteCrossReferenceDiff : CrossReferenceData -> Html Msgs.Msg
 viewDeleteCrossReferenceDiff data =
     div []
-        (viewDelete <| List.map2 (,) [ "Target UUID", "Description" ] [ data.targetUuid, data.description ])
+        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "Target UUID", "Description" ] [ data.targetUuid, data.description ])
 
 
 viewAddExpertDiff : AddExpertEventData -> Html Msgs.Msg
 viewAddExpertDiff event =
     div []
-        (viewAdd <| List.map2 (,) [ "Name", "Email" ] [ event.name, event.email ])
+        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "Name", "Email" ] [ event.name, event.email ])
 
 
 viewEditExpertDiff : EditExpertEventData -> Expert -> Html Msgs.Msg
 viewEditExpertDiff event expert =
     div []
         (viewDiff <|
-            List.map3 (,,)
+            List.map3 (\a b c -> ( a, b, c ))
                 [ "Name", "Email" ]
                 [ expert.name, expert.email ]
                 [ getEventFieldValueWithDefault event.name expert.name
@@ -562,7 +562,7 @@ viewEditExpertDiff event expert =
 viewDeleteExpertDiff : Expert -> Html Msgs.Msg
 viewDeleteExpertDiff expert =
     div []
-        (viewDelete <| List.map2 (,) [ "Name", "Email" ] [ expert.name, expert.email ])
+        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "Name", "Email" ] [ expert.name, expert.email ])
 
 
 viewDiff : List ( String, String, String ) -> List (Html Msgs.Msg)
@@ -573,6 +573,7 @@ viewDiff changes =
                 content =
                     if originalValue == newValue then
                         [ div [ class "form-value" ] [ text originalValue ] ]
+
                     else
                         [ div [ class "form-value" ]
                             [ div [] [ del [] [ text originalValue ] ]
@@ -637,10 +638,12 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
         diff =
             if List.length originalOrder == 0 then
                 div [ class "form-value" ] [ text "-" ]
+
             else if originalOrder == newOrder then
                 div [ class "form-value" ]
                     [ viewChildren "" originalOrder
                     ]
+
             else
                 div [ class "form-value" ]
                     [ viewChildren "del" originalOrder
@@ -700,7 +703,7 @@ viewCompletedMigration model =
                 [ linkTo (KMEditor <| Publish model.branchUuid)
                     [ class "btn btn-primary" ]
                     [ text "Publish"
-                    , i [ class "fa fa-long-arrow-right", style [ ( "margin-left", "10px" ) ] ] []
+                    , i [ class "fa fa-long-arrow-right", style "margin-left" "10px" ] []
                     ]
                 ]
             ]

@@ -1,4 +1,4 @@
-module Public.Login.Msgs exposing (..)
+module Public.Login.Msgs exposing (Msg(..))
 
 import ActionResult exposing (ActionResult)
 import Http
@@ -7,6 +7,6 @@ import Http
 type Msg
     = Email String
     | Password String
-    | Login
+    | DoLogin
     | LoginCompleted (Result Http.Error String)
     | GetProfileInfoFailed (ActionResult String)

@@ -1,7 +1,7 @@
-module KMEditor.Common.Models.Migration exposing (..)
+module KMEditor.Common.Models.Migration exposing (Migration, MigrationResolution, MigrationState, MigrationStateType(..), encodeMigrationResolution, migrationDecoder, migrationStateDecoder, migrationStateTypeDecoder, newApplyMigrationResolution, newMigrationResolution, newRejectMigrationResolution)
 
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (decode, optional, required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
 import KMEditor.Common.Models.Events exposing (Event, eventDecoder)
@@ -37,7 +37,7 @@ type alias MigrationResolution =
 
 migrationDecoder : Decoder Migration
 migrationDecoder =
-    decode Migration
+    Decode.succeed Migration
         |> required "branchUuid" Decode.string
         |> required "migrationState" migrationStateDecoder
         |> required "branchParentId" Decode.string
@@ -47,7 +47,7 @@ migrationDecoder =
 
 migrationStateDecoder : Decoder MigrationState
 migrationStateDecoder =
-    decode MigrationState
+    Decode.succeed MigrationState
         |> required "stateType" migrationStateTypeDecoder
         |> optional "targetEvent" (Decode.maybe eventDecoder) Nothing
 

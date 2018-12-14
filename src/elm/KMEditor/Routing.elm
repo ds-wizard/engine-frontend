@@ -1,8 +1,9 @@
-module KMEditor.Routing exposing (..)
+module KMEditor.Routing exposing (Route(..), isAllowed, moduleRoot, parsers, toUrl)
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
-import UrlParser exposing (..)
+import Url.Parser exposing (..)
+import Url.Parser.Query as Query
 
 
 type Route
@@ -20,7 +21,7 @@ moduleRoot =
 
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
-    [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> stringParam "selected")
+    [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> Query.string "selected")
     , map (wrapRoute << Editor) (s moduleRoot </> s "edit" </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
     , map (wrapRoute << Migration) (s moduleRoot </> s "migration" </> string)

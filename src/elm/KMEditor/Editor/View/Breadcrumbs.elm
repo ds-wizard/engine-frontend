@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Path exposing (getNodeUuid)
 import KMEditor.Editor.Models.Editors exposing (Editor, getEditorPath, getEditorTitle)
-import KMEditor.Editor.Msgs exposing (Msg(SetActiveEditor))
+import KMEditor.Editor.Msgs exposing (Msg(..))
 import List.Extra as List
 
 
@@ -24,7 +24,7 @@ breadcrumbs activeUuid editors =
                         |> List.splitAt (List.length path - 4)
                         |> Tuple.second
                         |> List.map (getNodeUuid >> mapIntoLabel editors)
-                        |> flip List.append [ ( Nothing, getEditorTitle editor ) ]
+                        |> (\a -> List.append a [ ( Nothing, getEditorTitle editor ) ])
                         |> addTooLongNode (List.length path > 4)
                         |> List.map breadcrumbNode
             in
@@ -63,5 +63,6 @@ addTooLongNode : Bool -> List ( Maybe String, String ) -> List ( Maybe String, S
 addTooLongNode tooLong list =
     if tooLong then
         [ ( Nothing, "..." ) ] ++ list
+
     else
         list

@@ -1,10 +1,10 @@
-module Public.Signup.Models exposing (..)
+module Public.Signup.Models exposing (Model, SignupForm, encodeSignupForm, initEmptySignupForm, initialModel, signupFormValidation, validateAcceptField)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (..)
 import Form exposing (Form)
-import Form.Error as Error exposing (Error, ErrorValue(Empty))
+import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
@@ -53,6 +53,7 @@ validateAcceptField : Field -> Result (Error customError) Bool
 validateAcceptField v =
     if Field.asBool v |> Maybe.withDefault False then
         Ok True
+
     else
         Err (Error.value Empty)
 

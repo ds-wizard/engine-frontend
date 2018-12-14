@@ -1,4 +1,4 @@
-module Auth.Msgs exposing (..)
+module Auth.Msgs exposing (Msg(..))
 
 import Auth.Models exposing (JwtToken)
 import Jwt

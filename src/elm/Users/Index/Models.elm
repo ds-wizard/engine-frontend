@@ -1,4 +1,4 @@
-module Users.Index.Models exposing (..)
+module Users.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import Users.Common.Models exposing (User)

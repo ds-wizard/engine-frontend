@@ -1,4 +1,4 @@
-module Public.Signup.Msgs exposing (..)
+module Public.Signup.Msgs exposing (Msg(..))
 
 import Form
 import Http

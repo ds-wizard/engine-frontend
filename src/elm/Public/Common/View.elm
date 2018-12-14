@@ -1,4 +1,4 @@
-module Public.Common.View exposing (..)
+module Public.Common.View exposing (FormConfig, publicForm)
 
 import ActionResult exposing (ActionResult)
 import Common.Html exposing (emptyNode, linkTo)

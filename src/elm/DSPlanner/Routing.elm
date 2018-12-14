@@ -1,8 +1,9 @@
-module DSPlanner.Routing exposing (..)
+module DSPlanner.Routing exposing (Route(..), isAllowed, moduleRoot, parses, toUrl)
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
-import UrlParser exposing (..)
+import Url.Parser exposing (..)
+import Url.Parser.Query as Query
 
 
 type Route
@@ -18,7 +19,7 @@ moduleRoot =
 
 parses : (Route -> a) -> List (Parser (a -> c) c)
 parses wrapRoute =
-    [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> stringParam "selected")
+    [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> Query.string "selected")
     , map (wrapRoute << Detail) (s moduleRoot </> s "detail" </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
     ]

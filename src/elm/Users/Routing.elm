@@ -1,8 +1,8 @@
-module Users.Routing exposing (..)
+module Users.Routing exposing (Route(..), isAllowed, moduleRoot, parses, toUrl)
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
-import UrlParser exposing (..)
+import Url.Parser exposing (..)
 
 
 type Route
@@ -43,6 +43,7 @@ isAllowed route maybeJwt =
         Edit uuid ->
             if uuid == "current" then
                 True
+
             else
                 hasPerm maybeJwt Perm.userManagement
 

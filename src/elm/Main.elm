@@ -1,26 +1,28 @@
 module Main exposing (main)
 
 import Auth.Models exposing (Session, initialSession, parseJwt)
+import Browser
+import Browser.Navigation exposing (Key)
 import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
-import Navigation exposing (Location)
 import Public.Routing
 import Routing exposing (Route(..), cmdNavigate, homeRoute, routeIfAllowed)
 import Subscriptions exposing (subscriptions)
 import Update exposing (fetchData, update)
+import Url exposing (Url)
 import View exposing (view)
 
 
-init : Value -> Location -> ( Model, Cmd Msg )
-init val location =
+init : Value -> Url -> Key -> ( Model, Cmd Msg )
+init val location key =
     let
         ( session, jwt, seed ) =
             case decodeFlagsFromJson val of
                 Just flags ->
                     case flags.session of
-                        Just session ->
-                            ( session, parseJwt session.token, flags.seed )
+                        Just flagsSession ->
+                            ( flagsSession, parseJwt flagsSession.token, flags.seed )
 
                         Nothing ->
                             ( initialSession, Nothing, flags.seed )
@@ -34,7 +36,7 @@ init val location =
                 |> routeIfAllowed jwt
 
         model =
-            initialModel route seed session jwt
+            initialModel route seed session jwt key
     in
     ( initLocalModel model, decideInitialRoute model route )
 
@@ -56,7 +58,7 @@ decideInitialRoute model route =
                     fetchData model
 
                 ( True, _ ) ->
-                    cmdNavigate Welcome
+                    cmdNavigate model.state.key Welcome
 
                 _ ->
                     fetchData model
@@ -64,14 +66,17 @@ decideInitialRoute model route =
         _ ->
             if userLoggedIn model then
                 fetchData model
+
             else
-                cmdNavigate homeRoute
+                cmdNavigate model.state.key homeRoute
 
 
 main : Program Value Model Msg
 main =
-    Navigation.programWithFlags Msgs.OnLocationChange
+    Browser.application
         { init = init
+        , onUrlChange = Msgs.OnUrlChange
+        , onUrlRequest = Msgs.OnUrlRequest
         , view = view
         , update = update
         , subscriptions = subscriptions

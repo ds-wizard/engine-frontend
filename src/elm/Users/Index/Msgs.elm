@@ -1,4 +1,4 @@
-module Users.Index.Msgs exposing (..)
+module Users.Index.Msgs exposing (Msg(..))
 
 import Jwt
 import Users.Common.Models exposing (User)

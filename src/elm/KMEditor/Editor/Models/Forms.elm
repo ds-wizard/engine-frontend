@@ -1,15 +1,62 @@
-module KMEditor.Editor.Models.Forms exposing (..)
+module KMEditor.Editor.Models.Forms exposing
+    ( AnswerForm
+    , ChapterForm
+    , ExpertForm
+    , KnowledgeModelForm
+    , MetricMeasureForm
+    , MetricMeasureValues
+    , QuestionForm
+    , ReferenceForm
+    , ReferenceFormType(..)
+    , answerFormInitials
+    , answerFormValidation
+    , chapterFormInitials
+    , chapterFormValidation
+    , expertFormInitials
+    , expertFormValidation
+    , formChanged
+    , getMetricMesures
+    , initAnswerForm
+    , initChapterForm
+    , initExpertForm
+    , initForm
+    , initKnowledgeModelFrom
+    , initQuestionForm
+    , initReferenceForm
+    , knowledgeModelFormInitials
+    , knowledgeModelFormValidation
+    , metricMeasureFormInitials
+    , metricMeasureFormToMetricMeasure
+    , metricMeasureValidation
+    , questionFormInitials
+    , questionFormValidation
+    , questionItemNameChanged
+    , questionTypeOptions
+    , referenceFormInitials
+    , referenceFormValidation
+    , referenceTypeOptions
+    , updateAnswerWithForm
+    , updateChapterWithForm
+    , updateExpertWithForm
+    , updateKnowledgeModelWithForm
+    , updateQuestionWithForm
+    , updateReferenceWithForm
+    , validateMeasureValue
+    , validateMetricMeasureValues
+    , validateReference
+    )
 
 import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (validateUuid)
 import Form exposing (Form)
-import Form.Error as Error exposing (ErrorValue(InvalidString))
+import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
 import List.Extra as List
 import Set
+import String exposing (fromFloat, fromInt)
 
 
 type alias KnowledgeModelForm =
@@ -159,7 +206,7 @@ questionFormInitials question =
     [ ( "title", Field.string question.title )
     , ( "type_", Field.string question.type_ )
     , ( "text", Field.string (question.text |> Maybe.withDefault "") )
-    , ( "requiredLevel", Field.string (question.requiredLevel |> Maybe.map toString |> Maybe.withDefault "") )
+    , ( "requiredLevel", Field.string (question.requiredLevel |> Maybe.map fromInt |> Maybe.withDefault "") )
     , ( "itemName", Field.string (question.answerItemTemplate |> Maybe.map .title |> Maybe.withDefault "") )
     ]
 
@@ -173,6 +220,7 @@ updateQuestionWithForm question questionForm =
                     { title = questionForm.itemName
                     , questions = AnswerItemTemplateQuestions []
                     }
+
             else
                 Nothing
     in
@@ -194,6 +242,11 @@ questionTypeOptions =
     , ( "date", "Date" )
     , ( "text", "Long text" )
     ]
+
+
+questionItemNameChanged : Form CustomFormError a -> Bool
+questionItemNameChanged questionForm =
+    Set.member "itemName" (Form.getChangedFields questionForm)
 
 
 
@@ -228,6 +281,7 @@ validateMetricMeasureValues enabled =
             |> Validate.andMap (Validate.field "weight" validateMeasureValue)
             |> Validate.andMap (Validate.field "measure" validateMeasureValue)
             |> map Just
+
     else
         Validate.succeed Nothing
 
@@ -254,16 +308,16 @@ metricMeasureFormInitials metricMeasures metric =
             Field.group
                 [ ( "enabled", Field.bool True )
                 , ( "metricUuid", Field.string metric.uuid )
-                , ( "weight", Field.string (toString metricMeasure.weight) )
-                , ( "measure", Field.string (toString metricMeasure.measure) )
+                , ( "weight", Field.string (fromFloat metricMeasure.weight) )
+                , ( "measure", Field.string (fromFloat metricMeasure.measure) )
                 ]
 
         Nothing ->
             Field.group
                 [ ( "enabled", Field.bool False )
                 , ( "metricUuid", Field.string metric.uuid )
-                , ( "weight", Field.string (toString 1) )
-                , ( "measure", Field.string (toString 1) )
+                , ( "weight", Field.string (fromFloat 1) )
+                , ( "measure", Field.string (fromFloat 1) )
                 ]
 
 

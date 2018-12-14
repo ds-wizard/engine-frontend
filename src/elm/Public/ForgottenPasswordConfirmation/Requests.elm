@@ -1,4 +1,4 @@
-module Public.ForgottenPasswordConfirmation.Requests exposing (..)
+module Public.ForgottenPasswordConfirmation.Requests exposing (putUserPassword)
 
 import Http
 import Json.Encode exposing (Value)

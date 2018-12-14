@@ -1,4 +1,4 @@
-module Public.Models exposing (..)
+module Public.Models exposing (Model, initLocalModel, initialModel)
 
 import Public.BookReference.Models
 import Public.ForgottenPassword.Models

@@ -1,3 +1,23 @@
+# 1.1.0
+
+## Features
+
+- Add redirect to a questionnaire after it is created
+- Add information whether the questionnaire is private or public
+- Data Steward can now import/export packages
+- Update terminology in menu and buttons to be more descriptive
+- Remove default item for list questions in questionnaire
+
+## Fixes
+
+- Fix that itemTitle could not be changed
+- Fix event generation when saving in editor (causing last event to be lost sometimes)
+
+## Other
+
+- Migrate to Elm 0.19
+
+
 # 1.0.0
 
 ## Features

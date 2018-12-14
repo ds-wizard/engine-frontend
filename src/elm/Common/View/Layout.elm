@@ -1,6 +1,7 @@
 module Common.View.Layout exposing (appView, publicView)
 
 import Auth.Permission as Perm exposing (hasPerm)
+import Browser exposing (Document)
 import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.View exposing (viewAboutModal, viewProfileMenu, viewReportIssueModal)
@@ -15,13 +16,19 @@ import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, questionnai
 import Users.Routing
 
 
-publicView : Model -> Html Msg -> Html Msg
+publicView : Model -> Html Msg -> Document Msg
 publicView model content =
-    div [ class "public" ]
-        [ publicHeader model
-        , div [ class "container" ]
-            [ content ]
-        ]
+    let
+        html =
+            div [ class "public" ]
+                [ publicHeader model
+                , div [ class "container" ]
+                    [ content ]
+                ]
+    in
+    { title = "Data Stewardship Wizard"
+    , body = [ html ]
+    }
 
 
 publicHeader : Model -> Html Msg
@@ -35,6 +42,7 @@ publicHeader model =
                 [ questionnaireDemoLink
                 , li [ class "nav-item" ] [ linkTo appRoute [ class "nav-link" ] [ text "Go to App" ] ]
                 ]
+
             else
                 [ questionnaireDemoLink
                 , li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
@@ -44,26 +52,37 @@ publicHeader model =
     nav [ class "navbar navbar-expand-sm bg-primary fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
-                [ linkTo homeRoute [ class "navbar-brand" ] [ text "Data Stewardship Wizard" ] ]
+                [ linkTo homeRoute
+                    [ class "navbar-brand" ]
+                    [ img [ src "/img/dsw-logo.svg" ] []
+                    , text "Data Stewardship Wizard"
+                    ]
+                ]
             , ul [ class "nav navbar-nav ml-auto" ] links
             ]
         ]
 
 
-appView : Model -> Html Msg -> Html Msg
+appView : Model -> Html Msg -> Document Msg
 appView model content =
-    div [ class "app-view", classList [ ( "side-navigation-collapsed", model.session.sidebarCollapsed ) ] ]
-        [ menu model
-        , div [ class "page row justify-content-center" ]
-            [ content ]
-        , viewReportIssueModal model.menuModel.reportIssueOpen
-        , viewAboutModal model.menuModel.aboutOpen model.menuModel.apiBuildInfo
-        ]
+    let
+        html =
+            div [ class "app-view", classList [ ( "side-navigation-collapsed", model.state.session.sidebarCollapsed ) ] ]
+                [ menu model
+                , div [ class "page row justify-content-center" ]
+                    [ content ]
+                , viewReportIssueModal model.menuModel.reportIssueOpen
+                , viewAboutModal model.menuModel.aboutOpen model.menuModel.apiBuildInfo
+                ]
+    in
+    { title = "Data Stewardship Wizard"
+    , body = [ html ]
+    }
 
 
 menu : Model -> Html Msg
 menu model =
-    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.session.sidebarCollapsed ) ] ]
+    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.state.session.sidebarCollapsed ) ] ]
         [ logo model
         , ul [ class "menu" ]
             (createMenu model)
@@ -74,40 +93,47 @@ menu model =
 logo : Model -> Html Msg
 logo model =
     let
-        heading =
-            if model.session.sidebarCollapsed then
-                "DSW"
+        logoImg =
+            if model.state.session.sidebarCollapsed then
+                img [ src "/img/dsw-logo.svg" ] []
+
             else
-                "Data Stewardship Wizard"
+                span [ class "logo-full" ]
+                    [ img [ src "/img/dsw-logo.svg" ] []
+                    , span [] [ text "DS Wizard" ]
+                    ]
     in
-    linkTo Welcome
-        [ class "logo" ]
-        [ text heading ]
+    linkTo Welcome [ class "logo" ] [ logoImg ]
+
+
+type MenuItem
+    = MenuItem String String Route String
 
 
 createMenu : Model -> List (Html Msg)
 createMenu model =
     menuItems
-        |> List.filter (\( _, _, _, perm ) -> hasPerm model.jwt perm)
+        |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.state.jwt perm)
         |> List.map (menuItem model)
 
 
-menuItems : List ( String, String, Route, String )
+menuItems : List MenuItem
 menuItems =
-    [ ( "Organization", "fa-building", Organization, Perm.organization )
-    , ( "Users", "fa-users", Users Users.Routing.Index, Perm.userManagement )
-    , ( "KM Editor", "fa-edit", KMEditor KMEditor.Routing.Index, Perm.knowledgeModel )
-    , ( "KM Packages", "fa-cubes", KMPackages KMPackages.Routing.Index, Perm.packageManagementRead )
-    , ( "DS Planner", "fa-list-alt", DSPlanner DSPlanner.Routing.Index, Perm.questionnaire )
+    [ MenuItem "Organization" "fa-building" Organization Perm.organization
+    , MenuItem "Users" "fa-users" (Users Users.Routing.Index) Perm.userManagement
+    , MenuItem "Knowledge Models" "fa-cubes" (KMPackages KMPackages.Routing.Index) Perm.packageManagementRead
+    , MenuItem "Questionnaires" "fa-list-alt" (DSPlanner DSPlanner.Routing.Index) Perm.questionnaire
+    , MenuItem "KM Editor" "fa-edit" (KMEditor KMEditor.Routing.Index) Perm.knowledgeModel
     ]
 
 
-menuItem : Model -> ( String, String, Route, String ) -> Html Msg
-menuItem model ( label, icon, route, perm ) =
+menuItem : Model -> MenuItem -> Html Msg
+menuItem model (MenuItem label icon route perm) =
     let
         activeClass =
-            if model.route == route then
+            if model.state.route == route then
                 "active"
+
             else
                 ""
     in
@@ -124,7 +150,7 @@ profileInfo : Model -> Html Msg
 profileInfo model =
     let
         name =
-            case model.session.user of
+            case model.state.session.user of
                 Just user ->
                     user.name ++ " " ++ user.surname
 
@@ -132,14 +158,15 @@ profileInfo model =
                     ""
 
         collapseLink =
-            if model.session.sidebarCollapsed then
+            if model.state.session.sidebarCollapsed then
                 a [ onLinkClick (Msgs.SetSidebarCollapsed False), class "collapse" ]
                     [ fa "angle-double-right" ]
+
             else
                 a [ onLinkClick (Msgs.SetSidebarCollapsed True), class "collapse" ]
                     [ fa "angle-double-left" ]
     in
     div [ class "profile-info" ]
-        [ viewProfileMenu model.session.user model.menuModel.profileMenuDropdownState
+        [ viewProfileMenu model.state.session.user model.menuModel.profileMenuDropdownState
         , collapseLink
         ]

@@ -1,5 +1,7 @@
 module KMEditor.Editor.View.Editors exposing (activeEditor)
 
+-- import Reorderable
+
 import ActionResult
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
@@ -17,7 +19,7 @@ import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
-import String exposing (toLower)
+import String exposing (fromInt, toLower)
 
 
 activeEditor : Model -> ( String, Html Msg )
@@ -181,7 +183,7 @@ questionRequiredLevelSelectGroup editorData levels =
 
 createLevelOption : Level -> ( String, String )
 createLevelOption level =
-    ( toString level.level, level.title )
+    ( fromInt level.level, level.title )
 
 
 questionEditorAnswersView : Model -> QuestionEditorData -> Html Msg
@@ -314,14 +316,14 @@ metricView : Form CustomFormError AnswerForm -> Int -> Metric -> Html Form.Msg
 metricView form i metric =
     let
         enabled =
-            Form.getFieldAsBool ("metricMeasures." ++ toString i ++ ".enabled") form
+            Form.getFieldAsBool ("metricMeasures." ++ fromInt i ++ ".enabled") form
                 |> .value
                 |> Maybe.withDefault False
     in
     tr [ classList [ ( "disabled", not enabled ) ] ]
-        [ td [] [ toggleGroup form ("metricMeasures." ++ toString i ++ ".enabled") metric.title ]
-        , td [] [ metricInput form ("metricMeasures." ++ toString i ++ ".weight") enabled ]
-        , td [] [ metricInput form ("metricMeasures." ++ toString i ++ ".measure") enabled ]
+        [ td [] [ toggleGroup form ("metricMeasures." ++ fromInt i ++ ".enabled") metric.title ]
+        , td [] [ metricInput form ("metricMeasures." ++ fromInt i ++ ".weight") enabled ]
+        , td [] [ metricInput form ("metricMeasures." ++ fromInt i ++ ".measure") enabled ]
         ]
 
 
@@ -435,19 +437,16 @@ inputChildren : InputChildrenConfig a -> Html Msg
 inputChildren config =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text (config.childName ++ "s") ]
-        , Reorderable.ul
-            (Reorderable.fullConfig
-                { toId = config.toId
-                , toMsg = ReorderableMsg
-                , draggable = True
-                , updateList = config.reorderMsg
-                , itemView = inputChild config.getName config.viewMsg
-                , placeholderView = placeholderView
-                , listClass = "input-children"
-                , itemClass = "input-child"
-                , placeholderClass = "input-child input-child-placeholder"
-                }
-            )
+        , Reorderable.view
+            { toId = config.toId
+            , toMsg = ReorderableMsg
+            , updateList = config.reorderMsg
+            , itemView = inputChild config.getName config.viewMsg
+            , placeholderView = placeholderView
+            , listClass = "input-children"
+            , itemClass = "input-child"
+            , placeholderClass = "input-child input-child-placeholder"
+            }
             config.reorderableState
             config.children
         , a [ onClick config.addMsg, class "link-with-icon link-add-child" ]
@@ -466,6 +465,6 @@ inputChild getName viewMsg ignoreDrag item =
         ]
 
 
-placeholderView : a -> Html msg
-placeholderView _ =
+placeholderView : Html msg
+placeholderView =
     div [] [ text "-" ]

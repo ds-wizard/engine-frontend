@@ -1,4 +1,4 @@
-module Public.ForgottenPassword.Update exposing (..)
+module Public.ForgottenPassword.Update exposing (handleForm, handlePostPasswordActionKeyCompleted, postPasswordActionKeyCmd, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (setFormErrors)

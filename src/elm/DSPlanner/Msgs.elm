@@ -1,4 +1,4 @@
-module DSPlanner.Msgs exposing (..)
+module DSPlanner.Msgs exposing (Msg(..))
 
 import DSPlanner.Create.Msgs
 import DSPlanner.Detail.Msgs

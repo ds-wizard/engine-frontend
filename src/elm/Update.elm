@@ -1,41 +1,43 @@
-module Update exposing (..)
+module Update exposing (fetchData, update)
 
 import Auth.Models exposing (setSidebarCollapsed)
 import Auth.Update
+import Browser
+import Browser.Navigation exposing (load, pushUrl)
 import Common.Menu.Update
 import DSPlanner.Update
 import KMEditor.Update
 import KMPackages.Update
-import Models exposing (Model, initLocalModel)
+import Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
 import Msgs exposing (Msg)
-import Navigation exposing (Location)
 import Organization.Update
 import Ports
 import Public.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
+import Url exposing (Url)
 import Users.Update
 
 
 fetchData : Model -> Cmd Msg
 fetchData model =
-    case model.route of
+    case model.state.route of
         DSPlanner route ->
-            DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.session
+            DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.state.session
 
         KMEditor route ->
-            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.session
+            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.state.session
 
         KMPackages route ->
-            KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.session
+            KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.state.session
 
         Organization ->
-            Organization.Update.getCurrentOrganizationCmd model.session
+            Organization.Update.getCurrentOrganizationCmd model.state.session
 
         Public route ->
             Public.Update.fetchData route Msgs.PublicMsg
 
         Users route ->
-            Users.Update.fetchData route Msgs.UsersMsg model.session
+            Users.Update.fetchData route Msgs.UsersMsg model.state.session
 
         _ ->
             Cmd.none
@@ -44,71 +46,83 @@ fetchData model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Msgs.ChangeLocation path ->
-            ( model, Navigation.newUrl path )
-
-        Msgs.OnLocationChange location ->
+        Msgs.OnUrlChange location ->
             let
                 newModel =
-                    { model | route = parseLocation location }
+                    setRoute (parseLocation location) model
             in
             ( initLocalModel newModel, fetchData newModel )
 
-        Msgs.AuthMsg msg ->
-            Auth.Update.update msg model
+        Msgs.OnUrlRequest urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, pushUrl model.state.key (Url.toString url) )
+
+                Browser.External url ->
+                    if url == "" then
+                        ( model, Cmd.none )
+
+                    else
+                        ( model, load url )
+
+        Msgs.AuthMsg authMsg ->
+            Auth.Update.update authMsg model
 
         Msgs.SetSidebarCollapsed collapsed ->
             let
-                newModel =
-                    { model | session = setSidebarCollapsed model.session collapsed }
-            in
-            ( newModel, Ports.storeSession <| Just newModel.session )
+                newSession =
+                    setSidebarCollapsed model.state.session collapsed
 
-        Msgs.MenuMsg msg ->
+                newModel =
+                    setSession newSession model
+            in
+            ( newModel, Ports.storeSession <| Just newSession )
+
+        Msgs.MenuMsg menuMsg ->
             let
                 ( menuModel, cmd ) =
-                    Common.Menu.Update.update Msgs.MenuMsg msg model.menuModel
+                    Common.Menu.Update.update Msgs.MenuMsg menuMsg model.menuModel
             in
             ( { model | menuModel = menuModel }, cmd )
 
-        Msgs.DSPlannerMsg msg ->
+        Msgs.DSPlannerMsg dsPlannerMsg ->
             let
                 ( dsPlannerModel, cmd ) =
-                    DSPlanner.Update.update msg Msgs.DSPlannerMsg model.session model.dsPlannerModel
+                    DSPlanner.Update.update dsPlannerMsg Msgs.DSPlannerMsg model.state model.dsPlannerModel
             in
             ( { model | dsPlannerModel = dsPlannerModel }, cmd )
 
-        Msgs.KMEditorMsg msg ->
+        Msgs.KMEditorMsg kmEditorMsg ->
             let
                 ( seed, kmEditorModel, cmd ) =
-                    KMEditor.Update.update msg Msgs.KMEditorMsg model.seed model.session model.kmEditorModel
+                    KMEditor.Update.update kmEditorMsg Msgs.KMEditorMsg model.state model.kmEditorModel
             in
-            ( { model | seed = seed, kmEditorModel = kmEditorModel }, cmd )
+            ( setSeed seed { model | kmEditorModel = kmEditorModel }, cmd )
 
-        Msgs.KMPackagesMsg msg ->
+        Msgs.KMPackagesMsg kmPackagesMsg ->
             let
                 ( kmPackagesModel, cmd ) =
-                    KMPackages.Update.update msg Msgs.KMPackagesMsg model.session model.kmPackagesModel
+                    KMPackages.Update.update kmPackagesMsg Msgs.KMPackagesMsg model.state model.kmPackagesModel
             in
             ( { model | kmPackagesModel = kmPackagesModel }, cmd )
 
-        Msgs.OrganizationMsg msg ->
+        Msgs.OrganizationMsg organizationMsg ->
             let
                 ( organizationModel, cmd ) =
-                    Organization.Update.update msg model.session model.organizationModel
+                    Organization.Update.update organizationMsg model.state.session model.organizationModel
             in
             ( { model | organizationModel = organizationModel }, cmd )
 
-        Msgs.PublicMsg msg ->
+        Msgs.PublicMsg publicMsg ->
             let
                 ( seed, publicModel, cmd ) =
-                    Public.Update.update msg Msgs.PublicMsg model.seed model.publicModel
+                    Public.Update.update publicMsg Msgs.PublicMsg model.state model.publicModel
             in
-            ( { model | seed = seed, publicModel = publicModel }, cmd )
+            ( setSeed seed { model | publicModel = publicModel }, cmd )
 
-        Msgs.UsersMsg msg ->
+        Msgs.UsersMsg usersMsg ->
             let
                 ( seed, users, cmd ) =
-                    Users.Update.update msg Msgs.UsersMsg model.seed model.session model.users
+                    Users.Update.update usersMsg Msgs.UsersMsg model.state model.users
             in
-            ( { model | seed = seed, users = users }, cmd )
+            ( setSeed seed { model | users = users }, cmd )

@@ -1,4 +1,4 @@
-module Public.Msgs exposing (..)
+module Public.Msgs exposing (Msg(..))
 
 import Public.BookReference.Msgs
 import Public.ForgottenPassword.Msgs

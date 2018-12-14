@@ -1,4 +1,4 @@
-module KMEditor.Editor.View exposing (..)
+module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig, viewEditor, viewTree)
 
 import ActionResult
 import Common.Html exposing (emptyNode)
@@ -40,6 +40,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
         unsavedChanges =
             if List.length model.events > 0 then
                 text "(unsaved changes)"
+
             else
                 emptyNode
     in

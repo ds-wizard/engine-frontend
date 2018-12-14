@@ -1,11 +1,11 @@
-module KMEditor.Editor.Update.Events exposing (..)
+module KMEditor.Editor.Update.Events exposing (createAddAnswerEvent, createAddChapterEvent, createAddExpertEvent, createAddQuestionEvent, createAddReferenceEvent, createDeleteAnswerEvent, createDeleteChapterEvent, createDeleteExpertEvent, createDeleteQuestionEvent, createDeleteReferenceEvent, createEditAnswerEvent, createEditChapterEvent, createEditExpertEvent, createEditKnowledgeModelEvent, createEditQuestionEvent, createEditReferenceEvent, createEvent, createEventField)
 
 import KMEditor.Common.Models.Entities exposing (Reference(..), getReferenceUuid)
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (..)
-import Random.Pcg exposing (Seed)
+import Random exposing (Seed)
 import Utils exposing (getUuid)
 
 
@@ -65,6 +65,7 @@ createAddQuestionEvent form editorData =
                     { title = form.itemName
                     , questionIds = editorData.answerItemTemplateQuestions.list
                     }
+
             else
                 Nothing
 
@@ -86,23 +87,27 @@ createEditQuestionEvent form editorData =
         maybeAnswerIds =
             if form.type_ == "options" then
                 Just editorData.answers.list
+
             else
                 Nothing
 
         answerIdsChanged =
             editorData.answers.dirty || ((form.type_ == "options" || editorData.question.type_ == "options") && form.type_ /= editorData.question.type_)
 
-        maybeAnswerItemTemlate =
+        maybeAnswerItemTemplate =
             if form.type_ == "list" then
                 Just
                     { title = form.itemName
                     , questionIds = editorData.answerItemTemplateQuestions.list
                     }
+
             else
                 Nothing
 
         answerItemTemplateChanged =
-            editorData.answerItemTemplateQuestions.dirty || ((form.type_ == "list" || editorData.question.type_ == "list") && form.type_ /= editorData.question.type_)
+            questionItemNameChanged editorData.form
+                || editorData.answerItemTemplateQuestions.dirty
+                || ((form.type_ == "list" || editorData.question.type_ == "list") && form.type_ /= editorData.question.type_)
 
         data =
             { questionUuid = editorData.question.uuid
@@ -110,7 +115,7 @@ createEditQuestionEvent form editorData =
             , title = createEventField form.title (editorData.question.title /= form.title)
             , text = createEventField form.text (editorData.question.text /= form.text)
             , requiredLevel = createEventField form.requiredLevel (editorData.question.requiredLevel /= form.requiredLevel)
-            , answerItemTemplate = createEventField maybeAnswerItemTemlate answerItemTemplateChanged
+            , answerItemTemplate = createEventField maybeAnswerItemTemplate answerItemTemplateChanged
             , answerIds = createEventField maybeAnswerIds answerIdsChanged
             , referenceIds = createEventField editorData.references.list editorData.references.dirty
             , expertIds = createEventField editorData.experts.list editorData.experts.dirty
@@ -204,8 +209,8 @@ createEditReferenceEvent form editorData =
             let
                 changed =
                     case editorData.reference of
-                        ResourcePageReference data ->
-                            field data /= newValue
+                        ResourcePageReference resourcePageData ->
+                            field resourcePageData /= newValue
 
                         _ ->
                             True
@@ -216,8 +221,8 @@ createEditReferenceEvent form editorData =
             let
                 changed =
                     case editorData.reference of
-                        URLReference data ->
-                            field data /= newValue
+                        URLReference urlData ->
+                            field urlData /= newValue
 
                         _ ->
                             True
@@ -228,8 +233,8 @@ createEditReferenceEvent form editorData =
             let
                 changed =
                     case editorData.reference of
-                        CrossReference data ->
-                            field data /= newValue
+                        CrossReference crossReferenceData ->
+                            field crossReferenceData /= newValue
 
                         _ ->
                             True
@@ -326,6 +331,7 @@ createEventField value changed =
         v =
             if changed then
                 Just value
+
             else
                 Nothing
     in

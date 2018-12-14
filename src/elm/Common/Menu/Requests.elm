@@ -1,4 +1,4 @@
-module Common.Menu.Requests exposing (..)
+module Common.Menu.Requests exposing (getBuildInfo)
 
 import Common.Menu.Models exposing (BuildInfo, buildInfoDecoder)
 import Http

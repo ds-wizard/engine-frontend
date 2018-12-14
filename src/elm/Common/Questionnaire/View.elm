@@ -1,10 +1,10 @@
-module Common.Questionnaire.View exposing (..)
+module Common.Questionnaire.View exposing (ViewExtraItemsConfig, ViewQuestionnaireConfig, chapterHeader, chapterList, chapterListChapter, extraNavigation, feedbackIssue, feedbackModal, feedbackModalContent, formConfig, getTitleByUuid, ifNotEmpty, levelSelection, levelSelectionOption, pageView, viewAnsweredIndication, viewChapterAnsweredIndication, viewChapterReport, viewChapters, viewExpert, viewExperts, viewExtraData, viewExtraItems, viewIndication, viewIndications, viewMetricDescription, viewMetricReportRow, viewMetrics, viewMetricsDescriptions, viewProgressBar, viewProgressBarWithColors, viewQuestionnaire, viewRequiredLevel, viewResourcePageReference, viewResourcePageReferences, viewSummary, viewUrlReference, viewUrlReferences)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions)
-import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(AnsweredIndication), MetricReport, SummaryReport)
-import Common.Questionnaire.Msgs exposing (CustomFormMessage(FeedbackMsg), Msg(..))
+import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
+import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Common.View exposing (fullPageActionResultView, modalView)
 import Common.View.Forms exposing (inputGroup, textAreaGroup)
 import FormEngine.View exposing (FormViewConfig, viewForm)
@@ -14,6 +14,7 @@ import Html.Events exposing (onClick, onInput)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
 import Round
+import String exposing (fromFloat, fromInt)
 
 
 type alias ViewQuestionnaireConfig =
@@ -25,7 +26,7 @@ type alias ViewQuestionnaireConfig =
 viewQuestionnaire : ViewQuestionnaireConfig -> Model -> Html Msg
 viewQuestionnaire cfg model =
     let
-        levels =
+        level =
             case cfg.levels of
                 Just levels ->
                     levelSelection levels model.questionnaire.level
@@ -36,12 +37,13 @@ viewQuestionnaire cfg model =
         extraActions =
             if cfg.showExtraActions then
                 extraNavigation model.activePage
+
             else
                 emptyNode
     in
     div [ class "Questionnaire row" ]
         [ div [ class "col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
-            [ levels
+            [ level
             , chapterList model
             , extraActions
             ]
@@ -64,7 +66,7 @@ levelSelection levels selectedLevel =
 
 levelSelectionOption : Int -> Level -> Html Msg
 levelSelectionOption selectedLevel level =
-    option [ value (toString level.level), selected (selectedLevel == level.level) ]
+    option [ value (fromInt level.level), selected (selectedLevel == level.level) ]
         [ text level.title ]
 
 
@@ -101,7 +103,8 @@ viewChapterAnsweredIndication model chapter =
             calculateUnansweredQuestions model.questionnaire.level model.questionnaire.replies chapter
     in
     if unanswered > 0 then
-        span [ class "badge badge-light badge-pill" ] [ text <| toString unanswered ]
+        span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]
+
     else
         fa "check"
 
@@ -184,6 +187,7 @@ viewExtraItems : ViewExtraItemsConfig a msg -> List a -> Html msg
 viewExtraItems cfg list =
     if List.length list == 0 then
         emptyNode
+
     else
         let
             items =
@@ -247,6 +251,7 @@ ifNotEmpty : List a -> (List a -> Html msg) -> Html msg
 ifNotEmpty list fn =
     if List.length list == 0 then
         emptyNode
+
     else
         fn list
 
@@ -300,7 +305,7 @@ viewAnsweredIndication data =
             toFloat data.answeredQuestions / (toFloat <| data.answeredQuestions + data.unansweredQuestions)
     in
     div [ class "indication" ]
-        [ p [] [ text <| "Answered: " ++ toString data.answeredQuestions ++ "/" ++ (toString <| data.answeredQuestions + data.unansweredQuestions) ]
+        [ p [] [ text <| "Answered: " ++ fromInt data.answeredQuestions ++ "/" ++ (fromInt <| data.answeredQuestions + data.unansweredQuestions) ]
         , viewProgressBar "bg-info" progress
         ]
 
@@ -334,8 +339,10 @@ viewProgressBarWithColors value =
         colorClass =
             if value < 0.33 then
                 "bg-danger"
+
             else if value < 0.66 then
                 "bg-warning"
+
             else
                 "bg-success"
     in
@@ -346,10 +353,10 @@ viewProgressBar : String -> Float -> Html msg
 viewProgressBar colorClass value =
     let
         width =
-            (toString <| value * 100) ++ "%"
+            (fromFloat <| value * 100) ++ "%"
     in
     div [ class "progress" ]
-        [ div [ class <| "progress-bar " ++ colorClass, style [ ( "width", width ) ] ] [] ]
+        [ div [ class <| "progress-bar " ++ colorClass, style "width" width ] [] ]
 
 
 getTitleByUuid : List { a | uuid : String, title : String } -> String -> String
@@ -394,7 +401,7 @@ feedbackModal model =
                             [ p []
                                 [ text "You can follow the GitHub "
                                 , a [ href feedback.issueUrl, target "_blank" ]
-                                    [ text <| "issue " ++ toString feedback.issueId ]
+                                    [ text <| "issue " ++ fromInt feedback.issueId ]
                                 , text "."
                                 ]
                             ]
@@ -438,6 +445,7 @@ feedbackModalContent model =
                                 [ text "There are already some issues reported with this question" ]
                             , ul [] (List.map feedbackIssue feedbacks)
                             ]
+
                     else
                         emptyNode
 

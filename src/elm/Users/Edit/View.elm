@@ -10,7 +10,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs
-import Routing exposing (Route(Users))
+import Routing exposing (Route(..))
 import Users.Common.Models exposing (roles)
 import Users.Edit.Models exposing (..)
 import Users.Edit.Msgs exposing (Msg(..))
@@ -99,12 +99,14 @@ userFormView form current =
         roleSelect =
             if current then
                 emptyNode
+
             else
                 selectGroup roleOptions form "role" "Role"
 
         activeToggle =
             if current then
                 emptyNode
+
             else
                 toggleGroup form "active" "Active"
 
@@ -151,5 +153,6 @@ getClass : Bool -> String -> String
 getClass condition class =
     if condition then
         class
+
     else
         ""
