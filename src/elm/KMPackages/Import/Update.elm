@@ -1,4 +1,4 @@
-module KMPackages.Import.Update exposing (fetchData, update)
+module KMPackages.Import.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
@@ -16,16 +16,11 @@ import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
-fetchData : Cmd Msgs.Msg
-fetchData =
-    createDropzone dropzoneId
-
-
 update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg state model =
     case msg of
         DragEnter ->
-            ( { model | dnd = model.dnd + 1 }, Cmd.none )
+            ( { model | dnd = model.dnd + 1 }, createDropzone dropzoneId )
 
         DragLeave ->
             ( { model | dnd = model.dnd - 1 }, Cmd.none )
