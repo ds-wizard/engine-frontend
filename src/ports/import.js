@@ -19,12 +19,12 @@ module.exports = function (app) {
             return;
         }
 
-        node.addEventListener("drop", function (event) {
+        node.ondrop = function (event) {
             event.preventDefault();
             event.stopPropagation();
             var file = getDroppedFile(event);
             readFile(file);
-        });
+        };
     }
 
 
