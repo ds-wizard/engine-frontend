@@ -6,7 +6,6 @@
         background: #eee;
         @include border-radius(5px);
         padding: 20px;
-        width: 200px;
         margin: auto;
 
         .icon {
@@ -20,6 +19,7 @@
 
         .email {
             margin-bottom: 10px;
+            word-break: break-all;
         }
     }
 }
