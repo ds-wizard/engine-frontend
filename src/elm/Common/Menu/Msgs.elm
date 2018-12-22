@@ -9,4 +9,5 @@ type Msg
     = SetReportIssueOpen Bool
     | SetAboutOpen Bool
     | GetBuildInfoCompleted (Result Http.Error BuildInfo)
+    | HelpMenuDropdownMsg Dropdown.State
     | ProfileMenuDropdownMsg Dropdown.State

@@ -92,10 +92,7 @@
         left: 0;
         right: 0;
         border-top: 1px solid darken($primary, 10%);
-
-        .menu {
-            margin-top: 0;
-        }
+        padding-top: 5px;
 
         .name {
             display: block;
@@ -104,13 +101,19 @@
 
         .btn-group {
             width: 100%;
+            padding: 1px 3px;
+
 
             button {
                 width: 100%;
                 color: $white;
-                border-radius: 0;
                 text-decoration: none;
-                padding: 8px 18px;
+                padding: 10px;
+                @include border-radius(5px);
+                transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+                display: flex;
+                align-items: baseline;
+                border: 0;
 
                 &::after {
                     display: none;
@@ -120,15 +123,17 @@
                     background: darken($primary, 15%);
                 }
 
-                .full-name {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: baseline;
+                .fa {
+                    display: inline-block;
+                    width: 30px;
+                    text-align: center
                 }
 
-                .initials {
-                    display: none;
-                    text-align: center;
+                &>span {
+                    flex: 1;
+                    display: flex;
+                    align-items: baseline;
+                    justify-content: space-between;
                 }
             }
 
@@ -149,13 +154,15 @@
 
                     .fa {
                         width: 20px;
+                        text-align: center;
+                        margin-right: 5px;
                     }
                 }
             }
         }
 
         .collapse {
-            margin: 0;
+            margin: 5px 0 0 0;
             padding: 5px;
             border-top: 1px solid darken($primary, 10%);
             display: block;
@@ -174,7 +181,7 @@
         width: 50px;
 
         .sidebar-link {
-            display: none;
+            display: none !important;
         }
 
         .menu {
@@ -188,15 +195,9 @@
 
         .profile-info .btn-group {
             button {
-                padding: 8px 0;
-
-                .full-name {
-                    display: none;
-                }
-
-                .initials {
-                    display: block;
-                }
+                padding: 10px 0;
+                text-align: center;
+                display: inline-block;
             }
         }
     }
