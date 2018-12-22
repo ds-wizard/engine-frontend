@@ -41,5 +41,8 @@ update wrapMsg msg model =
                 Err error ->
                     ( { model | apiBuildInfo = getServerError error "Cannot get build info" }, Cmd.none )
 
+        HelpMenuDropdownMsg state ->
+            ( { model | helpMenuDropdownState = state }, Cmd.none )
+
         ProfileMenuDropdownMsg state ->
             ( { model | profileMenuDropdownState = state }, Cmd.none )

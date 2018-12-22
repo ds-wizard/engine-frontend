@@ -4,7 +4,7 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Browser exposing (Document)
 import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
-import Common.Menu.View exposing (viewAboutModal, viewProfileMenu, viewReportIssueModal)
+import Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
 import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -119,11 +119,11 @@ createMenu model =
 
 menuItems : List MenuItem
 menuItems =
-    [ MenuItem "Organization" "fa-building" Organization Perm.organization
-    , MenuItem "Users" "fa-users" (Users Users.Routing.Index) Perm.userManagement
-    , MenuItem "Knowledge Models" "fa-cubes" (KMPackages KMPackages.Routing.Index) Perm.packageManagementRead
-    , MenuItem "Questionnaires" "fa-list-alt" (DSPlanner DSPlanner.Routing.Index) Perm.questionnaire
-    , MenuItem "KM Editor" "fa-edit" (KMEditor KMEditor.Routing.Index) Perm.knowledgeModel
+    [ MenuItem "Organization" "building" Organization Perm.organization
+    , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
+    , MenuItem "Knowledge Models" "cubes" (KMPackages KMPackages.Routing.Index) Perm.packageManagementRead
+    , MenuItem "Questionnaires" "list-alt" (DSPlanner DSPlanner.Routing.Index) Perm.questionnaire
+    , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.Index) Perm.knowledgeModel
     ]
 
 
@@ -140,7 +140,7 @@ menuItem model (MenuItem label icon route perm) =
     li []
         [ linkTo route
             [ class activeClass ]
-            [ i [ class ("fa " ++ icon) ] []
+            [ fa icon
             , span [ class "sidebar-link" ] [ text label ]
             ]
         ]
@@ -167,6 +167,7 @@ profileInfo model =
                     [ fa "angle-double-left" ]
     in
     div [ class "profile-info" ]
-        [ viewProfileMenu model.state.session.user model.menuModel.profileMenuDropdownState
+        [ viewHelpMenu model.menuModel.helpMenuDropdownState
+        , viewProfileMenu model.state.session.user model.menuModel.profileMenuDropdownState
         , collapseLink
         ]
