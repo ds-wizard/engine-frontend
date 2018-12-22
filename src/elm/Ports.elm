@@ -1,11 +1,14 @@
 port module Ports exposing
     ( FilePortData
+    , alert
     , clearSession
+    , clearUnloadMessage
     , createDropzone
     , fileContentRead
     , fileSelected
     , onSessionChange
     , scrollToTop
+    , setUnloadMessage
     , storeSession
     )
 
@@ -50,3 +53,16 @@ port createDropzone : String -> Cmd msg
 
 
 port scrollToTop : String -> Cmd msg
+
+
+
+-- Page Unload
+
+
+port setUnloadMessage : String -> Cmd msg
+
+
+port clearUnloadMessage : () -> Cmd msg
+
+
+port alert : String -> Cmd msg

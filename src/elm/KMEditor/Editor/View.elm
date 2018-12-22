@@ -6,6 +6,7 @@ import Common.View exposing (AlertConfig, alertView, fullPageActionResultView)
 import Common.View.Forms exposing (actionButton, formErrorResultView)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, id)
+import Html.Events exposing (onClick)
 import Html.Keyed
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
 import KMEditor.Editor.Models exposing (..)
@@ -39,7 +40,11 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
 
         unsavedChanges =
             if List.length model.events > 0 then
-                text "(unsaved changes)"
+                div []
+                    [ text "(unsaved changes)"
+                    , button [ onClick <| wrapMsg Discard, class "btn btn-secondary btn-with-loader" ] [ text "Discard" ]
+                    , actionButton ( "Save", model.submitting, wrapMsg Submit )
+                    ]
 
             else
                 emptyNode
@@ -48,10 +53,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
         [ div [ class "editor-header" ]
             [ text "Knowledge Model Editor"
             , formErrorResultView model.submitting
-            , div []
-                [ unsavedChanges
-                , actionButton ( "Save", model.submitting, wrapMsg Submit )
-                ]
+            , unsavedChanges
             ]
         , div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
