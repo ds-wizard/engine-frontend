@@ -10,16 +10,22 @@ module FormEngine.Model exposing
     , Option(..)
     , OptionDescriptor
     , OptionElement(..)
+    , ReplyValue(..)
     , createForm
     , createItemElement
     , decodeFormValues
     , encodeFormValues
+    , getAnswerUuid
     , getDescriptor
     , getFormValues
+    , getItemListCount
     , getOptionDescriptor
+    , getStringReply
+    , isEmptyReply
     )
 
 import Json.Decode as Decode exposing (..)
+import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import List.Extra as List
@@ -63,8 +69,8 @@ type alias FormTree a =
     }
 
 
-type alias FormElementState value =
-    { value : Maybe value
+type alias FormElementState =
+    { value : Maybe ReplyValue
     , valid : Bool
     }
 
@@ -79,16 +85,23 @@ type alias ItemElement a =
 
 
 type FormElement a
-    = StringFormElement (FormItemDescriptor a) (FormElementState String)
-    | NumberFormElement (FormItemDescriptor a) (FormElementState Int)
-    | TextFormElement (FormItemDescriptor a) (FormElementState String)
-    | ChoiceFormElement (FormItemDescriptor a) (List (OptionElement a)) (FormElementState String)
-    | GroupFormElement (FormItemDescriptor a) (List (FormItem a)) (List (ItemElement a)) (FormElementState Int)
+    = StringFormElement (FormItemDescriptor a) FormElementState
+    | NumberFormElement (FormItemDescriptor a) FormElementState
+    | TextFormElement (FormItemDescriptor a) FormElementState
+    | ChoiceFormElement (FormItemDescriptor a) (List (OptionElement a)) FormElementState
+    | GroupFormElement (FormItemDescriptor a) (List (FormItem a)) (List (ItemElement a)) FormElementState
 
 
 type alias Form a =
     { elements : List (FormElement a)
     }
+
+
+type ReplyValue
+    = StringReply String
+    | AnswerReply String
+    | ItemListReply Int
+    | EmptyReply
 
 
 type alias FormValues =
@@ -97,7 +110,7 @@ type alias FormValues =
 
 type alias FormValue =
     { path : String
-    , value : String
+    , value : ReplyValue
     }
 
 
@@ -114,7 +127,39 @@ decodeFormValue : Decoder FormValue
 decodeFormValue =
     Decode.succeed FormValue
         |> required "path" Decode.string
+        |> required "value" decodeReplyValue
+
+
+decodeReplyValue : Decoder ReplyValue
+decodeReplyValue =
+    Decode.oneOf
+        [ when replyValueType ((==) "StringReply") decodeStringReply
+        , when replyValueType ((==) "AnswerReply") decodeAnswerReply
+        , when replyValueType ((==) "ItemListReply") decodeItemListReply
+        ]
+
+
+replyValueType : Decoder String
+replyValueType =
+    Decode.field "type" Decode.string
+
+
+decodeStringReply : Decoder ReplyValue
+decodeStringReply =
+    Decode.succeed StringReply
         |> required "value" Decode.string
+
+
+decodeAnswerReply : Decoder ReplyValue
+decodeAnswerReply =
+    Decode.succeed AnswerReply
+        |> required "value" Decode.string
+
+
+decodeItemListReply : Decoder ReplyValue
+decodeItemListReply =
+    Decode.succeed ItemListReply
+        |> required "value" Decode.int
 
 
 encodeFormValues : FormValues -> Encode.Value
@@ -126,8 +171,33 @@ encodeFormValue : FormValue -> Encode.Value
 encodeFormValue formValue =
     Encode.object
         [ ( "path", Encode.string formValue.path )
-        , ( "value", Encode.string formValue.value )
+        , ( "value", encodeReplyValue formValue.value )
         ]
+
+
+encodeReplyValue : ReplyValue -> Encode.Value
+encodeReplyValue replyValue =
+    case replyValue of
+        StringReply string ->
+            Encode.object
+                [ ( "type", Encode.string "StringReply" )
+                , ( "value", Encode.string string )
+                ]
+
+        AnswerReply uuid ->
+            Encode.object
+                [ ( "type", Encode.string "AnswerReply" )
+                , ( "value", Encode.string uuid )
+                ]
+
+        ItemListReply count ->
+            Encode.object
+                [ ( "type", Encode.string "ItemListReply" )
+                , ( "value", Encode.int count )
+                ]
+
+        EmptyReply ->
+            Encode.null
 
 
 
@@ -163,6 +233,46 @@ getDescriptor element =
             descriptor
 
 
+getItemListCount : ReplyValue -> Int
+getItemListCount replyValue =
+    case replyValue of
+        ItemListReply count ->
+            count
+
+        _ ->
+            0
+
+
+getAnswerUuid : ReplyValue -> String
+getAnswerUuid replyValue =
+    case replyValue of
+        AnswerReply uuid ->
+            uuid
+
+        _ ->
+            ""
+
+
+getStringReply : ReplyValue -> String
+getStringReply replyValue =
+    case replyValue of
+        StringReply string ->
+            string
+
+        _ ->
+            ""
+
+
+isEmptyReply : ReplyValue -> Bool
+isEmptyReply replyValue =
+    case replyValue of
+        EmptyReply ->
+            True
+
+        _ ->
+            False
+
+
 
 {- Form creation -}
 
@@ -191,7 +301,7 @@ createFormElement item =
             GroupFormElement descriptor items [ createItemElement items ] emptyFormElementState
 
 
-emptyFormElementState : FormElementState a
+emptyFormElementState : FormElementState
 emptyFormElementState =
     { value = Nothing, valid = True }
 
@@ -218,7 +328,7 @@ setInitialValue formValues path element =
             StringFormElement descriptor { state | value = getInitialValue formValues path descriptor.name }
 
         NumberFormElement descriptor state ->
-            NumberFormElement descriptor { state | value = initialValueToInt <| getInitialValue formValues path descriptor.name }
+            NumberFormElement descriptor { state | value = getInitialValue formValues path descriptor.name }
 
         TextFormElement descriptor state ->
             TextFormElement descriptor { state | value = getInitialValue formValues path descriptor.name }
@@ -234,7 +344,7 @@ setInitialValue formValues path element =
             let
                 numberOfItems =
                     getInitialValue formValues path descriptor.name
-                        |> initialValueToInt
+                        |> Maybe.map getItemListCount
                         |> Maybe.withDefault 0
 
                 newItemElements =
@@ -242,12 +352,12 @@ setInitialValue formValues path element =
                         |> List.indexedMap (setInitialValuesItems formValues (path ++ [ descriptor.name ]))
 
                 newState =
-                    { state | value = Just numberOfItems }
+                    { state | value = Just <| ItemListReply numberOfItems }
             in
             GroupFormElement descriptor items newItemElements newState
 
 
-getInitialValue : FormValues -> List String -> String -> Maybe String
+getInitialValue : FormValues -> List String -> String -> Maybe ReplyValue
 getInitialValue formValues path current =
     let
         key =
@@ -255,11 +365,6 @@ getInitialValue formValues path current =
     in
     List.find (.path >> (==) key) formValues
         |> Maybe.map .value
-
-
-initialValueToInt : Maybe String -> Maybe Int
-initialValueToInt =
-    Maybe.map (String.toInt >> Maybe.withDefault 0)
 
 
 setInitialValuesOption : FormValues -> List String -> OptionElement a -> OptionElement a
@@ -293,7 +398,7 @@ getFieldValue path element values =
             applyFieldValue values (pathToKey path descriptor.name) state.value
 
         NumberFormElement descriptor state ->
-            applyFieldValue values (pathToKey path descriptor.name) (Maybe.map fromInt state.value)
+            applyFieldValue values (pathToKey path descriptor.name) state.value
 
         TextFormElement descriptor state ->
             applyFieldValue values (pathToKey path descriptor.name) state.value
@@ -308,7 +413,7 @@ getFieldValue path element values =
         GroupFormElement descriptor items itemElements state ->
             let
                 newValues =
-                    applyFieldValue values (pathToKey path descriptor.name) (Maybe.map fromInt state.value)
+                    applyFieldValue values (pathToKey path descriptor.name) state.value
             in
             List.indexedFoldl (getItemValues (path ++ [ descriptor.name ])) newValues itemElements
 
@@ -333,11 +438,11 @@ pathToKey path current =
     String.join "." (path ++ [ current ])
 
 
-applyFieldValue : FormValues -> String -> Maybe String -> FormValues
-applyFieldValue values key stringValue =
-    case stringValue of
+applyFieldValue : FormValues -> String -> Maybe ReplyValue -> FormValues
+applyFieldValue values key replyValue =
+    case replyValue of
         Just value ->
             values ++ [ { path = key, value = value } ]
 
         Nothing ->
-            values ++ [ { path = key, value = "" } ]
+            values ++ [ { path = key, value = EmptyReply } ]
