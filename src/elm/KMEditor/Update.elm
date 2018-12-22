@@ -2,6 +2,7 @@ module KMEditor.Update exposing (fetchData, isGuarded, update)
 
 import Auth.Models exposing (Session)
 import KMEditor.Create.Update
+import KMEditor.Editor.Models exposing (containsChanges)
 import KMEditor.Editor.Update
 import KMEditor.Index.Update
 import KMEditor.Migration.Update
@@ -21,7 +22,7 @@ fetchData route wrapMsg model session =
             KMEditor.Create.Update.fetchData (wrapMsg << CreateMsg) session
 
         Editor uuid ->
-            if model.editorModel.branchUuid == uuid then
+            if model.editorModel.branchUuid == uuid && containsChanges model.editorModel then
                 Cmd.none
 
             else

@@ -1,11 +1,20 @@
-module KMEditor.Editor.Models exposing (Model, addEvent, getActiveEditor, getEditorContext, initialModel, insertEditor, setAlert)
+module KMEditor.Editor.Models exposing
+    ( Model
+    , addEvent
+    , containsChanges
+    , getActiveEditor
+    , getEditorContext
+    , initialModel
+    , insertEditor
+    , setAlert
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
-import KMEditor.Editor.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid)
+import KMEditor.Editor.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid, isEditorDirty)
 import Reorderable
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
 
@@ -81,3 +90,17 @@ getEditorContext model =
     { metrics = model.metrics |> ActionResult.withDefault []
     , levels = model.levels |> ActionResult.withDefault []
     }
+
+
+containsChanges : Model -> Bool
+containsChanges model =
+    let
+        activeEditorDirty =
+            getActiveEditor model
+                |> Maybe.map isEditorDirty
+                |> Maybe.withDefault False
+
+        hasEvents =
+            List.length model.events > 0
+    in
+    activeEditorDirty || hasEvents

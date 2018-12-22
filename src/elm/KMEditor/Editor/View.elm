@@ -39,7 +39,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
                     emptyNode
 
         unsavedChanges =
-            if List.length model.events > 0 then
+            if containsChanges model then
                 div []
                     [ text "(unsaved changes)"
                     , button [ onClick <| wrapMsg Discard, class "btn btn-secondary btn-with-loader" ] [ text "Discard" ]

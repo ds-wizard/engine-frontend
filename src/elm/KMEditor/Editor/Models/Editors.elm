@@ -37,6 +37,7 @@ module KMEditor.Editor.Models.Editors exposing
     , isAnswerEditorDirty
     , isChapterEditorDirty
     , isEditorDeleted
+    , isEditorDirty
     , isExpertEditorDirty
     , isKMEditorDirty
     , isQuestionEditorDirty
@@ -517,6 +518,28 @@ isEditorDeleted editor =
 
         ExpertEditor data ->
             data.editorState == Deleted
+
+
+isEditorDirty : Editor -> Bool
+isEditorDirty editor =
+    case editor of
+        KMEditor data ->
+            isKMEditorDirty data
+
+        ChapterEditor data ->
+            isChapterEditorDirty data
+
+        QuestionEditor data ->
+            isQuestionEditorDirty data
+
+        AnswerEditor data ->
+            isAnswerEditorDirty data
+
+        ReferenceEditor data ->
+            isReferenceEditorDirty data
+
+        ExpertEditor data ->
+            isExpertEditorDirty data
 
 
 isKMEditorDirty : KMEditorData -> Bool

@@ -66,7 +66,7 @@ fetchLevels wrapMsg session =
 
 isGuarded : Model -> Maybe String
 isGuarded model =
-    if List.length model.events > 0 then
+    if containsChanges model then
         Just unsavedChangesMsg
 
     else
@@ -393,7 +393,7 @@ withSetUnloadMsgCmd : ( a, Model, Cmd msg ) -> ( a, Model, Cmd msg )
 withSetUnloadMsgCmd ( a, model, cmd ) =
     let
         newCmd =
-            if List.length model.events > 0 then
+            if containsChanges model then
                 Cmd.batch [ cmd, Ports.setUnloadMessage unsavedChangesMsg ]
 
             else
