@@ -13,7 +13,7 @@ stages:
   - tag
 
 env:
-  - PRIVATE_IMAGE="$REGISTRY/elixir/dsw-client" IMAGE="datastewardshipwizard/client" IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest"
+  - PRIVATE_IMAGE="$REGISTRY/dsw-client" IMAGE="datastewardshipwizard/client" IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT" IMAGE_TAG_DEVELOP="$IMAGE:develop" IMAGE_TAG_LATEST="$IMAGE:latest"
 
 install:
   - npm install -g npx
@@ -57,7 +57,7 @@ jobs:
       if: tag =~ ^v
       install: false
       env:
-        - PRIVATE_IMAGE="$REGISTRY/elixir/dsw-client"
+        - PRIVATE_IMAGE="$REGISTRY/dsw-client"
         - IMAGE="datastewardshipwizard/client"
         - IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT"
         - IMAGE_TAG_MAJOR="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v(.*)\..*\..*/\1/g"`
