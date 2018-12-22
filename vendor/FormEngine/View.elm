@@ -20,13 +20,18 @@ viewForm config form =
         (List.map (viewFormElement config []) form.elements)
 
 
+stateValueToString : FormElementState -> String
+stateValueToString =
+    .value >> Maybe.map getStringReply >> Maybe.withDefault ""
+
+
 viewFormElement : FormViewConfig msg a -> List String -> FormElement a -> Html (Msg msg)
 viewFormElement config path formItem =
     case formItem of
         StringFormElement descriptor state ->
             div [ class "form-group" ]
                 [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
-                , input [ class "form-control", type_ "text", value (state.value |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
+                , input [ class "form-control", type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
                 ]
@@ -34,7 +39,7 @@ viewFormElement config path formItem =
         TextFormElement descriptor state ->
             div [ class "form-group" ]
                 [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
-                , textarea [ class "form-control", value (state.value |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
+                , textarea [ class "form-control", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
                 ]
@@ -42,7 +47,7 @@ viewFormElement config path formItem =
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
                 [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
-                , input [ class "form-control", type_ "number", value (state.value |> Maybe.map fromInt |> Maybe.withDefault ""), onInput (Input (path ++ [ descriptor.name ])) ] []
+                , input [ class "form-control", type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
                 , viewExtraData config descriptor.extraData
                 ]
@@ -116,7 +121,7 @@ viewGroupItem config path index itemElement =
         ]
 
 
-viewChoice : List String -> FormItemDescriptor a -> FormElementState String -> OptionElement a -> Html (Msg msg)
+viewChoice : List String -> FormItemDescriptor a -> FormElementState -> OptionElement a -> Html (Msg msg)
 viewChoice path parentDescriptor parentState optionElement =
     let
         radioName =
@@ -133,13 +138,13 @@ viewChoice path parentDescriptor parentState optionElement =
     in
     case optionElement of
         SimpleOptionElement { name, label } ->
-            viewOption label name (text "")
+            viewOption label (AnswerReply name) (text "")
 
         DetailedOptionElement { name, label } _ ->
-            viewOption label name (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] [])
+            viewOption label (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] [])
 
 
-viewAdvice : Maybe String -> List (OptionElement a) -> Html (Msg msg)
+viewAdvice : Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)
 viewAdvice value options =
     let
         getDescriptor option =
@@ -153,7 +158,7 @@ viewAdvice value options =
         isSelected descriptor =
             case ( value, descriptor ) of
                 ( Just v, { name } ) ->
-                    name == v
+                    name == getAnswerUuid v
 
                 _ ->
                     False
@@ -181,13 +186,13 @@ adviceElement maybeAdvice =
             text ""
 
 
-viewFollowUps : FormViewConfig msg a -> List String -> Maybe String -> List (OptionElement a) -> Html (Msg msg)
+viewFollowUps : FormViewConfig msg a -> List String -> Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)
 viewFollowUps config path value options =
     let
         isSelected option =
             case ( value, option ) of
                 ( Just v, DetailedOptionElement { name } _ ) ->
-                    name == v
+                    name == getAnswerUuid v
 
                 _ ->
                     False

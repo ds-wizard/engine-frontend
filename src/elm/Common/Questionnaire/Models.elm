@@ -267,7 +267,7 @@ updateReplies model =
                     getFormValues [ chapter.uuid ] form
                         ++ model.questionnaire.replies
                         |> List.uniqueBy .path
-                        |> List.filter (.value >> (/=) "")
+                        |> List.filter (.value >> isEmptyReply >> not)
 
                 _ ->
                     model.questionnaire.replies
@@ -303,7 +303,7 @@ calculateUnansweredQuestions currentLevel replies chapter =
         |> List.foldl (+) 0
 
 
-getReply : FormValues -> String -> Maybe String
+getReply : FormValues -> String -> Maybe ReplyValue
 getReply replies path =
     List.find (.path >> (==) path) replies
         |> Maybe.map .value
@@ -325,7 +325,7 @@ evaluateQuestion currentLevel replies path question =
             if question.type_ == "list" then
                 case rawValue of
                     Nothing ->
-                        Just "0"
+                        Just <| ItemListReply 0
 
                     _ ->
                         rawValue
@@ -339,7 +339,7 @@ evaluateQuestion currentLevel replies path question =
                 "options" ->
                     question.answers
                         |> Maybe.withDefault []
-                        |> List.find (.uuid >> (==) value)
+                        |> List.find (.uuid >> (==) (getAnswerUuid value))
                         |> Maybe.map (evaluateFollowups currentLevel replies currentPath)
                         |> Maybe.withDefault 1
 
@@ -349,7 +349,7 @@ evaluateQuestion currentLevel replies path question =
                             getAnswerItemTemplateQuestions question
 
                         itemCount =
-                            stringToInt value
+                            getItemListCount value
                     in
                     if itemCount > 0 then
                         List.range 0 (itemCount - 1)
@@ -390,7 +390,7 @@ evaluateAnswerItem currentLevel replies path requiredNow questions index =
         answerItem =
             if requiredNow then
                 getReply replies (String.join "." <| currentPath ++ [ "itemName" ])
-                    |> Maybe.map String.isEmpty
+                    |> Maybe.map isEmptyReply
                     |> Maybe.withDefault True
                     |> boolToInt
 
