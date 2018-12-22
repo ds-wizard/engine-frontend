@@ -10,7 +10,7 @@ import KMEditor.Routing exposing (Route(..))
 
 type alias Model =
     { createModel : KMEditor.Create.Models.Model
-    , editor2Model : KMEditor.Editor.Models.Model
+    , editorModel : KMEditor.Editor.Models.Model
     , indexModel : KMEditor.Index.Models.Model
     , migrationModel : KMEditor.Migration.Models.Model
     , publishModel : KMEditor.Publish.Models.Model
@@ -20,7 +20,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { createModel = KMEditor.Create.Models.initialModel Nothing
-    , editor2Model = KMEditor.Editor.Models.initialModel ""
+    , editorModel = KMEditor.Editor.Models.initialModel ""
     , indexModel = KMEditor.Index.Models.initialModel
     , migrationModel = KMEditor.Migration.Models.initialModel ""
     , publishModel = KMEditor.Publish.Models.initialModel
@@ -34,7 +34,11 @@ initLocalModel route model =
             { model | createModel = KMEditor.Create.Models.initialModel selectedPackage }
 
         Editor uuid ->
-            { model | editor2Model = KMEditor.Editor.Models.initialModel uuid }
+            if model.editorModel.branchUuid == uuid then
+                model
+
+            else
+                { model | editorModel = KMEditor.Editor.Models.initialModel uuid }
 
         Index ->
             { model | indexModel = KMEditor.Index.Models.initialModel }

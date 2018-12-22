@@ -18,8 +18,8 @@ type Msg
     | CloseAlert
     | Submit
     | SubmitCompleted (Result Jwt.JwtError String)
+    | Discard
     | PaneMsg SplitPane.Msg
-    | NoOp
 
 
 type EditorMsg
