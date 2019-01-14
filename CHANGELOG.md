@@ -1,3 +1,20 @@
+# 1.2.0
+
+## Features
+
+- Add alert when leaving editor with unsaved changes
+- Split user menu to separate Help
+
+## Fixes
+
+- Fix user delete modal email overflow
+
+## Other
+
+- Update questionnaire replies structure
+
+
+
 # 1.1.0
 
 ## Features
