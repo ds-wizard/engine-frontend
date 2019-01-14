@@ -25,7 +25,7 @@ fetchData model =
             DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.state.session
 
         KMEditor route ->
-            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.state.session
+            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.state.session
 
         KMPackages route ->
             KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.state.session
@@ -43,6 +43,16 @@ fetchData model =
             Cmd.none
 
 
+isGuarded : Model -> Maybe String
+isGuarded model =
+    case model.state.route of
+        KMEditor route ->
+            KMEditor.Update.isGuarded route model.kmEditorModel
+
+        _ ->
+            Nothing
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -56,7 +66,12 @@ update msg model =
         Msgs.OnUrlRequest urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, pushUrl model.state.key (Url.toString url) )
+                    case isGuarded model of
+                        Just guardMsg ->
+                            ( model, Ports.alert guardMsg )
+
+                        Nothing ->
+                            ( model, pushUrl model.state.key (Url.toString url) )
 
                 Browser.External url ->
                     if url == "" then

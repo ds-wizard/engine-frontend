@@ -86,14 +86,14 @@ updateItem updateFunction path index item =
             item
 
 
-updateElementValue : String -> FormElement a -> FormElement a
+updateElementValue : ReplyValue -> FormElement a -> FormElement a
 updateElementValue value element =
     case element of
         StringFormElement descriptor state ->
             StringFormElement descriptor { state | value = Just value }
 
         NumberFormElement descriptor state ->
-            NumberFormElement descriptor { state | value = Just <| Maybe.withDefault 0 (String.toInt value) }
+            NumberFormElement descriptor { state | value = Just value }
 
         TextFormElement descriptor state ->
             TextFormElement descriptor { state | value = Just value }
@@ -132,7 +132,7 @@ updateGroupItemAdd element =
                 newElementItems =
                     elementItems ++ [ createItemElement items ]
             in
-            GroupFormElement descriptor items newElementItems { state | value = Just <| List.length newElementItems }
+            GroupFormElement descriptor items newElementItems { state | value = Just <| ItemListReply <| List.length newElementItems }
 
         _ ->
             element
@@ -146,7 +146,7 @@ updateGroupItemRemove index element =
                 newElementItems =
                     removeFromList index elementItems
             in
-            GroupFormElement descriptor items newElementItems { state | value = Just <| List.length newElementItems }
+            GroupFormElement descriptor items newElementItems { state | value = Just <| ItemListReply <| List.length newElementItems }
 
         _ ->
             element

@@ -1,10 +1,9 @@
 # Data Stewardship Wizard - Web Client
 
-[![Build Status](https://travis-ci.org/DataStewardshipWizard/dsw-client.svg?branch=master)](https://travis-ci.org/DataStewardshipWizard/dsw-client)
+[![Build Status](https://travis-ci.org/ds-wizard/dsw-client.svg?branch=master)](https://travis-ci.org/ds-wizard/dsw-client)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 
-This is a web client for the Data Stewardship Wizard which is part of
-the Interoperability platform at [ELIXIR CZ](https://www.elixir-czech.cz).
+This is a web client for the Data Stewardship Wizard.
 
 [Data Stewardship Wizard - Server Application](https://github.com/DataStewardshipWizard/dsw-server)
 is the backend providing the API this client is using.
@@ -84,7 +83,7 @@ files build by webpack.
 
 ### Configuration
 
-When running the container with the DSP Client, you have to set ENV variable
+When running the container with the DSW Client, you have to set ENV variable
 `API_URL` which should contain absolute URL to the API backend without the
 trailing slash.
 
@@ -93,10 +92,13 @@ Here is example docker compose configuration
 ```
 version: '3'
 services:
-  dsp_client:
-    image: elixir/dsp-client
+  dsw_client:
+    image: datastewardshipwizard/client
+    restart: always
+    ports:
+      - 80:80
     environment:
-      - API_URL=https://dsp-api.example.com
+      - API_URL=https://api.example.com
 ```
 
 ### Other deployment possibilities

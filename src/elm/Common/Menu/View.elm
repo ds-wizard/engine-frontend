@@ -1,4 +1,11 @@
-module Common.Menu.View exposing (viewAboutModal, viewAboutModalContent, viewBuildInfo, viewProfileMenu, viewReportIssueModal)
+module Common.Menu.View exposing
+    ( viewAboutModal
+    , viewAboutModalContent
+    , viewBuildInfo
+    , viewHelpMenu
+    , viewProfileMenu
+    , viewReportIssueModal
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Msgs
@@ -17,42 +24,53 @@ import Users.Common.Models exposing (User)
 import Users.Routing
 
 
+viewHelpMenu : Dropdown.State -> Html Msgs.Msg
+viewHelpMenu dropdownState =
+    Dropdown.dropdown dropdownState
+        { options = [ Dropdown.dropRight ]
+        , toggleMsg = Msgs.MenuMsg << HelpMenuDropdownMsg
+        , toggleButton =
+            Dropdown.toggle [ Button.roleLink ]
+                [ fa "question-circle"
+                , span [ class "sidebar-link" ] [ text "Help", fa "angle-right" ]
+                ]
+        , items =
+            [ Dropdown.anchorItem [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetAboutOpen True) ]
+                [ fa "info"
+                , text "About"
+                ]
+            , Dropdown.anchorItem [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetReportIssueOpen True) ]
+                [ fa "exclamation-triangle"
+                , text "Report issue"
+                ]
+            ]
+        }
+
+
 viewProfileMenu : Maybe User -> Dropdown.State -> Html Msgs.Msg
-viewProfileMenu maybeUser dropDownState =
+viewProfileMenu maybeUser dropdownState =
     let
-        ( name, initials ) =
+        name =
             case maybeUser of
                 Just user ->
-                    ( user.name ++ " " ++ user.surname
-                    , String.left 1 user.name ++ String.left 1 user.surname
-                    )
+                    user.name ++ " " ++ user.surname
 
                 Nothing ->
-                    ( "", "" )
+                    ""
     in
-    Dropdown.dropdown dropDownState
+    Dropdown.dropdown dropdownState
         { options = [ Dropdown.dropRight ]
         , toggleMsg = Msgs.MenuMsg << ProfileMenuDropdownMsg
         , toggleButton =
             Dropdown.toggle [ Button.roleLink ]
-                [ span [ class "full-name" ] [ text name, fa "angle-right" ]
-                , span [ class "initials" ] [ text initials ]
+                [ fa "user-circle"
+                , span [ class "sidebar-link" ] [ text name, fa "angle-right" ]
                 ]
         , items =
             [ Dropdown.anchorItem (linkToAttributes (Users <| Users.Routing.Edit "current"))
-                [ fa "user-circle-o"
+                [ fa "user"
                 , text "Edit profile"
                 ]
-            , Dropdown.divider
-            , Dropdown.anchorItem [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetReportIssueOpen True) ]
-                [ fa "exclamation-circle"
-                , text "Report issue"
-                ]
-            , Dropdown.anchorItem [ onLinkClick (Msgs.MenuMsg <| Common.Menu.Msgs.SetAboutOpen True) ]
-                [ fa "info-circle"
-                , text "About"
-                ]
-            , Dropdown.divider
             , Dropdown.anchorItem [ onLinkClick (Msgs.AuthMsg Auth.Msgs.Logout) ]
                 [ fa "sign-out"
                 , text "Logout"
@@ -65,7 +83,7 @@ viewReportIssueModal : Bool -> Html Msgs.Msg
 viewReportIssueModal isOpen =
     let
         modalContent =
-            [ p [] [ text "If you find any problem with the Wizard, the best way to report it, is to open an issue in our GitHub repository" ]
+            [ p [] [ text "If you find any problem with the Wizard, the best way to report it is to open an issue in our GitHub repository" ]
             , p []
                 [ a [ class "link-with-icon", href "https://github.com/DataStewardshipWizard/dsw-common/issues", target "_blank" ]
                     [ fa "github"

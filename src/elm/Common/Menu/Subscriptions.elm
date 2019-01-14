@@ -8,4 +8,7 @@ import Msgs
 
 subscriptions : Model -> Sub Msgs.Msg
 subscriptions model =
-    Dropdown.subscriptions model.profileMenuDropdownState (Msgs.MenuMsg << ProfileMenuDropdownMsg)
+    Sub.batch
+        [ Dropdown.subscriptions model.helpMenuDropdownState (Msgs.MenuMsg << HelpMenuDropdownMsg)
+        , Dropdown.subscriptions model.profileMenuDropdownState (Msgs.MenuMsg << ProfileMenuDropdownMsg)
+        ]

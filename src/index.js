@@ -6,6 +6,7 @@ var program = require('./elm/Main.elm');
 var registerImportPorts = require('./ports/import');
 var registerSessionPorts = require('./ports/session');
 var registerScrollPorts = require('./ports/scroll');
+var registerPageUnloadPorts = require('./ports/page-unload');
 
 var app = program.Elm.Main.init({
     node: document.body,
@@ -18,3 +19,4 @@ var app = program.Elm.Main.init({
 registerSessionPorts(app);
 registerImportPorts(app);
 registerScrollPorts(app);
+registerPageUnloadPorts(app);

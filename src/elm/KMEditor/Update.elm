@@ -1,7 +1,8 @@
-module KMEditor.Update exposing (fetchData, update)
+module KMEditor.Update exposing (fetchData, isGuarded, update)
 
 import Auth.Models exposing (Session)
 import KMEditor.Create.Update
+import KMEditor.Editor.Models exposing (containsChanges)
 import KMEditor.Editor.Update
 import KMEditor.Index.Update
 import KMEditor.Migration.Update
@@ -14,14 +15,18 @@ import Msgs
 import Random exposing (Seed)
 
 
-fetchData : Route -> (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchData route wrapMsg session =
+fetchData : Route -> (Msg -> Msgs.Msg) -> Model -> Session -> Cmd Msgs.Msg
+fetchData route wrapMsg model session =
     case route of
         Create _ ->
             KMEditor.Create.Update.fetchData (wrapMsg << CreateMsg) session
 
         Editor uuid ->
-            KMEditor.Editor.Update.fetchData (wrapMsg << EditorMsg) uuid session
+            if model.editorModel.branchUuid == uuid && containsChanges model.editorModel then
+                Cmd.none
+
+            else
+                KMEditor.Editor.Update.fetchData (wrapMsg << EditorMsg) uuid session
 
         Index ->
             KMEditor.Index.Update.fetchData (wrapMsg << IndexMsg) session
@@ -31,6 +36,16 @@ fetchData route wrapMsg session =
 
         Publish uuid ->
             KMEditor.Publish.Update.fetchData (wrapMsg << PublishMsg) uuid session
+
+
+isGuarded : Route -> Model -> Maybe String
+isGuarded route model =
+    case route of
+        Editor uuid ->
+            KMEditor.Editor.Update.isGuarded model.editorModel
+
+        _ ->
+            Nothing
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
@@ -45,10 +60,10 @@ update msg wrapMsg state model =
 
         EditorMsg eMsg ->
             let
-                ( newSeed, editor2Model, cmd ) =
-                    KMEditor.Editor.Update.update eMsg (wrapMsg << EditorMsg) state model.editor2Model
+                ( newSeed, editorModel, cmd ) =
+                    KMEditor.Editor.Update.update eMsg (wrapMsg << EditorMsg) state model.editorModel
             in
-            ( newSeed, { model | editor2Model = editor2Model }, cmd )
+            ( newSeed, { model | editorModel = editorModel }, cmd )
 
         IndexMsg iMsg ->
             let
