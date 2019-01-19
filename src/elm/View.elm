@@ -70,7 +70,7 @@ welcomeView =
         , div [ class "alert alert-info" ]
             [ p [ class "mb-0" ]
                 [ text "This is a demonstration DSW installment. To deploy your local DSW copy, follow the instructions in "
-                , a [ href "https://docs.dsw.fairdata.solutions", target "_blank" ] [ text "docs.dsw.fairdata.solutions" ]
+                , a [ href "https://docs.ds-wizard.org", target "_blank" ] [ text "docs.ds-wizard.org" ]
                 , text "."
                 ]
             ]
