@@ -65,7 +65,7 @@ formView form =
                 [ label [ for "accept" ]
                     [ Input.checkboxInput acceptField [ id "accept", name "accept" ]
                     , text "I have read "
-                    , a [ href "https://dsw.fairdata.solutions/privacy.html", target "_blank" ]
+                    , a [ href "https://ds-wizard.org/privacy.html", target "_blank" ]
                         [ text "Privacy" ]
                     , text "."
                     ]
