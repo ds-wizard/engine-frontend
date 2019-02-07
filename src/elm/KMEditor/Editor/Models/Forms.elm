@@ -8,6 +8,7 @@ module KMEditor.Editor.Models.Forms exposing
     , QuestionForm
     , ReferenceForm
     , ReferenceFormType(..)
+    , TagForm
     , answerFormInitials
     , answerFormValidation
     , chapterFormInitials
@@ -23,6 +24,7 @@ module KMEditor.Editor.Models.Forms exposing
     , initKnowledgeModelFrom
     , initQuestionForm
     , initReferenceForm
+    , initTagForm
     , knowledgeModelFormInitials
     , knowledgeModelFormValidation
     , metricMeasureFormInitials
@@ -35,12 +37,14 @@ module KMEditor.Editor.Models.Forms exposing
     , referenceFormInitials
     , referenceFormValidation
     , referenceTypeOptions
+    , tagFormValidation
     , updateAnswerWithForm
     , updateChapterWithForm
     , updateExpertWithForm
     , updateKnowledgeModelWithForm
     , updateQuestionWithForm
     , updateReferenceWithForm
+    , updateTagWithForm
     , validateMeasureValue
     , validateMetricMeasureValues
     , validateReference
@@ -61,6 +65,13 @@ import String exposing (fromFloat, fromInt)
 
 type alias KnowledgeModelForm =
     { name : String }
+
+
+type alias TagForm =
+    { name : String
+    , description : Maybe String
+    , color : String
+    }
 
 
 type alias ChapterForm =
@@ -152,6 +163,40 @@ knowledgeModelFormInitials knowledgeModel =
 updateKnowledgeModelWithForm : KnowledgeModel -> KnowledgeModelForm -> KnowledgeModel
 updateKnowledgeModelWithForm knowledgeModel knowledgeModelForm =
     { knowledgeModel | name = knowledgeModelForm.name }
+
+
+
+{- Tag -}
+
+
+initTagForm : Tag -> Form CustomFormError TagForm
+initTagForm =
+    tagFormInitials >> initForm tagFormValidation
+
+
+tagFormValidation : Validation CustomFormError TagForm
+tagFormValidation =
+    Validate.map3 TagForm
+        (Validate.field "name" Validate.string)
+        (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+        (Validate.field "color" Validate.string)
+
+
+tagFormInitials : Tag -> List ( String, Field.Field )
+tagFormInitials tag =
+    [ ( "name", Field.string tag.name )
+    , ( "description", Field.string (tag.description |> Maybe.withDefault "") )
+    , ( "color", Field.string tag.color )
+    ]
+
+
+updateTagWithForm : Tag -> TagForm -> Tag
+updateTagWithForm tag tagForm =
+    { tag
+        | name = tagForm.name
+        , description = tagForm.description
+        , color = tagForm.color
+    }
 
 
 

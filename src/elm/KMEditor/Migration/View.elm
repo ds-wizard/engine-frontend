@@ -98,6 +98,22 @@ getEventView wrapMsg model migration event =
                 |> viewEditKnowledgeModelDiff eventData
                 |> viewEvent wrapMsg model "Edit knowledge model"
 
+        AddTagEvent eventData _ ->
+            viewAddTagDiff eventData
+                |> viewEvent wrapMsg model "Add tag"
+
+        EditTagEvent eventData _ ->
+            getTag migration.currentKnowledgeModel eventData.tagUuid
+                |> Maybe.map (viewEditTagDiff eventData)
+                |> Maybe.map (viewEvent wrapMsg model "Edit tag")
+                |> Maybe.withDefault errorMessage
+
+        DeleteTagEvent eventData _ ->
+            getTag migration.currentKnowledgeModel eventData.tagUuid
+                |> Maybe.map viewDeleteTagDiff
+                |> Maybe.map (viewEvent wrapMsg model "Delete tag")
+                |> Maybe.withDefault errorMessage
+
         AddChapterEvent eventData _ ->
             viewAddChapterDiff eventData
                 |> viewEvent wrapMsg model "Add chapter"
@@ -209,6 +225,42 @@ viewEditKnowledgeModelDiff event km =
     in
     div []
         (fieldDiff ++ [ chaptersDiff ])
+
+
+viewAddTagDiff : AddTagEventData -> Html Msgs.Msg
+viewAddTagDiff event =
+    let
+        fields =
+            List.map2 (\a b -> ( a, b )) [ "Name", "Description", "Color" ] [ event.name, event.description |> Maybe.withDefault "", event.color ]
+    in
+    div []
+        (viewAdd fields)
+
+
+viewEditTagDiff : EditTagEventData -> Tag -> Html Msgs.Msg
+viewEditTagDiff event tag =
+    let
+        fieldDiff =
+            List.map3 (\a b c -> ( a, b, c ))
+                [ "Name", "Description", "Color" ]
+                [ tag.name, Maybe.withDefault "" tag.description, tag.color ]
+                [ getEventFieldValueWithDefault event.name tag.name
+                , getEventFieldValueWithDefault event.description tag.description |> Maybe.withDefault ""
+                , getEventFieldValueWithDefault event.color tag.color
+                ]
+    in
+    div []
+        (viewDiff fieldDiff)
+
+
+viewDeleteTagDiff : Tag -> Html Msgs.Msg
+viewDeleteTagDiff tag =
+    let
+        fieldDiff =
+            List.map2 (\a b -> ( a, b )) [ "Name", "Description", "Color" ] [ tag.name, tag.description |> Maybe.withDefault "", tag.color ]
+    in
+    div []
+        (viewDelete fieldDiff)
 
 
 viewAddChapterDiff : AddChapterEventData -> Html Msgs.Msg

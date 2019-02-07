@@ -1,6 +1,115 @@
-module KMEditor.Common.Models.Events exposing (AddAnswerEventData, AddChapterEventData, AddCrossReferenceEventData, AddExpertEventData, AddQuestionEventData, AddReferenceEventData(..), AddResourcePageReferenceEventData, AddURLReferenceEventData, AnswerItemTemplateData, CommonEventData, DeleteAnswerEventData, DeleteChapterEventData, DeleteExpertEventData, DeleteQuestionEventData, DeleteReferenceEventData, EditAnswerEventData, EditChapterEventData, EditCrossReferenceEventData, EditExpertEventData, EditKnowledgeModelEventData, EditQuestionEventData, EditReferenceEventData(..), EditResourcePageReferenceEventData, EditURLReferenceEventData, Event(..), EventField, addAnswerEventDecoder, addChapterEventDecoder, addCrossReferenceEventDecoder, addExpertEventDecoder, addQuestionEventDecoder, addReferenceEventDataByType, addReferenceEventDecoder, addReferenceEventDecoderByType, addResourcePageReferenceEventDecoder, addURLReferenceEventDecoder, answerItemTemplateDecoder, commonEventDataDecoder, deleteAnswerEventDecoder, deleteChapterEventDecoder, deleteExpertEventDecoder, deleteQuestionEventDecoder, deleteReferenceEventDecoder, editAnswerEventDecoder, editChapterEventDecoder, editCrossReferenceEventDecoder, editExpertEventDecoder, editKnowledgeModelEventDecoder, editQuestionEventDecoder, editReferenceEventDataByType, editReferenceEventDecoder, editReferenceEventDecoderByType, editResourcePageReferenceEventDecoder, editURLReferenceEventDecoder, encodeAddAnswerEvent, encodeAddChapterEvent, encodeAddCrossReferenceEvent, encodeAddExpertEvent, encodeAddQuestionEvent, encodeAddReferenceEvent, encodeAddResourcePageReferenceEvent, encodeAddURLReferenceEvent, encodeAnswerItemTemplateData, encodeCommonData, encodeDeleteAnswerEvent, encodeDeleteChapterEvent, encodeDeleteExpertEvent, encodeDeleteQuestionEvent, encodeDeleteReferenceEvent, encodeEditAnswerEvent, encodeEditChapterEvent, encodeEditCrossReferenceEvent, encodeEditExpertEvent, encodeEditKnowledgeModelEvent, encodeEditQuestionEvent, encodeEditReferenceEvent, encodeEditResourcePageReferenceEvent, encodeEditURLReferenceEvent, encodeEvent, encodeEventField, encodeEvents, eventDecoder, eventDecoderByType, eventFieldDecoder, getAddReferenceEventEntityVisibleName, getAddReferenceUuid, getEditReferenceEventEntityVisibleName, getEditReferenceUuid, getEventEntityVisibleName, getEventFieldValue, getEventFieldValueWithDefault, getEventUuid, isAddAnswer, isAddChapter, isAddExpert, isAddQuestion, isAddReference, isDeleteAnswer, isDeleteChapter, isDeleteExpert, isDeleteQuestion, isDeleteReference, isEditAnswer, isEditChapter, isEditExpert, isEditQuestion, isEditReference)
-
---exposing (..)
+module KMEditor.Common.Models.Events exposing
+    ( AddAnswerEventData
+    , AddChapterEventData
+    , AddCrossReferenceEventData
+    , AddExpertEventData
+    , AddQuestionEventData
+    , AddReferenceEventData(..)
+    , AddResourcePageReferenceEventData
+    , AddTagEventData
+    , AddURLReferenceEventData
+    , AnswerItemTemplateData
+    , CommonEventData
+    , DeleteAnswerEventData
+    , DeleteChapterEventData
+    , DeleteExpertEventData
+    , DeleteQuestionEventData
+    , DeleteReferenceEventData
+    , DeleteTagEventData
+    , EditAnswerEventData
+    , EditChapterEventData
+    , EditCrossReferenceEventData
+    , EditExpertEventData
+    , EditKnowledgeModelEventData
+    , EditQuestionEventData
+    , EditReferenceEventData(..)
+    , EditResourcePageReferenceEventData
+    , EditTagEventData
+    , EditURLReferenceEventData
+    , Event(..)
+    , EventField
+    , addAnswerEventDecoder
+    , addChapterEventDecoder
+    , addCrossReferenceEventDecoder
+    , addExpertEventDecoder
+    , addQuestionEventDecoder
+    , addReferenceEventDataByType
+    , addReferenceEventDecoder
+    , addReferenceEventDecoderByType
+    , addResourcePageReferenceEventDecoder
+    , addURLReferenceEventDecoder
+    , answerItemTemplateDecoder
+    , commonEventDataDecoder
+    , deleteAnswerEventDecoder
+    , deleteChapterEventDecoder
+    , deleteExpertEventDecoder
+    , deleteQuestionEventDecoder
+    , deleteReferenceEventDecoder
+    , editAnswerEventDecoder
+    , editChapterEventDecoder
+    , editCrossReferenceEventDecoder
+    , editExpertEventDecoder
+    , editKnowledgeModelEventDecoder
+    , editQuestionEventDecoder
+    , editReferenceEventDataByType
+    , editReferenceEventDecoder
+    , editReferenceEventDecoderByType
+    , editResourcePageReferenceEventDecoder
+    , editURLReferenceEventDecoder
+    , encodeAddAnswerEvent
+    , encodeAddChapterEvent
+    , encodeAddCrossReferenceEvent
+    , encodeAddExpertEvent
+    , encodeAddQuestionEvent
+    , encodeAddReferenceEvent
+    , encodeAddResourcePageReferenceEvent
+    , encodeAddURLReferenceEvent
+    , encodeAnswerItemTemplateData
+    , encodeCommonData
+    , encodeDeleteAnswerEvent
+    , encodeDeleteChapterEvent
+    , encodeDeleteExpertEvent
+    , encodeDeleteQuestionEvent
+    , encodeDeleteReferenceEvent
+    , encodeEditAnswerEvent
+    , encodeEditChapterEvent
+    , encodeEditCrossReferenceEvent
+    , encodeEditExpertEvent
+    , encodeEditKnowledgeModelEvent
+    , encodeEditQuestionEvent
+    , encodeEditReferenceEvent
+    , encodeEditResourcePageReferenceEvent
+    , encodeEditURLReferenceEvent
+    , encodeEvent
+    , encodeEventField
+    , encodeEvents
+    , eventDecoder
+    , eventDecoderByType
+    , eventFieldDecoder
+    , getAddReferenceEventEntityVisibleName
+    , getAddReferenceUuid
+    , getEditReferenceEventEntityVisibleName
+    , getEditReferenceUuid
+    , getEventEntityVisibleName
+    , getEventFieldValue
+    , getEventFieldValueWithDefault
+    , getEventUuid
+    , isAddAnswer
+    , isAddChapter
+    , isAddExpert
+    , isAddQuestion
+    , isAddReference
+    , isDeleteAnswer
+    , isDeleteChapter
+    , isDeleteExpert
+    , isDeleteQuestion
+    , isDeleteReference
+    , isEditAnswer
+    , isEditChapter
+    , isEditExpert
+    , isEditQuestion
+    , isEditReference
+    )
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
@@ -13,6 +122,9 @@ import List.Extra as List
 
 type Event
     = EditKnowledgeModelEvent EditKnowledgeModelEventData CommonEventData
+    | AddTagEvent AddTagEventData CommonEventData
+    | EditTagEvent EditTagEventData CommonEventData
+    | DeleteTagEvent DeleteTagEventData CommonEventData
     | AddChapterEvent AddChapterEventData CommonEventData
     | EditChapterEvent EditChapterEventData CommonEventData
     | DeleteChapterEvent DeleteChapterEventData CommonEventData
@@ -40,6 +152,27 @@ type alias EditKnowledgeModelEventData =
     { kmUuid : String
     , name : EventField String
     , chapterIds : EventField (List String)
+    }
+
+
+type alias AddTagEventData =
+    { tagUuid : String
+    , name : String
+    , description : Maybe String
+    , color : String
+    }
+
+
+type alias EditTagEventData =
+    { tagUuid : String
+    , name : EventField String
+    , description : EventField (Maybe String)
+    , color : EventField String
+    }
+
+
+type alias DeleteTagEventData =
+    { tagUuid : String
     }
 
 
@@ -218,6 +351,15 @@ encodeEvent event =
                 EditKnowledgeModelEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeEditKnowledgeModelEvent eventData )
 
+                AddTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeAddTagEvent eventData )
+
+                EditTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeEditTagEvent eventData )
+
+                DeleteTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeDeleteTagEvent eventData )
+
                 AddChapterEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeAddChapterEvent eventData )
 
@@ -270,6 +412,33 @@ encodeCommonData : CommonEventData -> List ( String, Encode.Value )
 encodeCommonData data =
     [ ( "uuid", Encode.string data.uuid )
     , ( "path", Encode.list encodePathNode data.path )
+    ]
+
+
+encodeAddTagEvent : AddTagEventData -> List ( String, Encode.Value )
+encodeAddTagEvent data =
+    [ ( "eventType", Encode.string "AddTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    , ( "name", Encode.string data.name )
+    , ( "description", maybe Encode.string data.description )
+    , ( "color", Encode.string data.color )
+    ]
+
+
+encodeEditTagEvent : EditTagEventData -> List ( String, Encode.Value )
+encodeEditTagEvent data =
+    [ ( "eventType", Encode.string "EditTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    , ( "name", encodeEventField Encode.string data.name )
+    , ( "description", encodeEventField (maybe Encode.string) data.description )
+    , ( "color", encodeEventField Encode.string data.color )
+    ]
+
+
+encodeDeleteTagEvent : DeleteTagEventData -> List ( String, Encode.Value )
+encodeDeleteTagEvent data =
+    [ ( "eventType", Encode.string "DeleteTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
     ]
 
 
@@ -519,6 +688,15 @@ eventDecoderByType eventType =
         "EditKnowledgeModelEvent" ->
             Decode.map2 EditKnowledgeModelEvent editKnowledgeModelEventDecoder commonEventDataDecoder
 
+        "AddTagEvent" ->
+            Decode.map2 AddTagEvent addTagEventDecoder commonEventDataDecoder
+
+        "EditTagEvent" ->
+            Decode.map2 EditTagEvent editTagEventDecoder commonEventDataDecoder
+
+        "DeleteTagEvent" ->
+            Decode.map2 DeleteTagEvent deleteTagEventDecoder commonEventDataDecoder
+
         "AddChapterEvent" ->
             Decode.map2 AddChapterEvent addChapterEventDecoder commonEventDataDecoder
 
@@ -581,6 +759,30 @@ editKnowledgeModelEventDecoder =
         |> required "kmUuid" Decode.string
         |> required "name" (eventFieldDecoder Decode.string)
         |> required "chapterIds" (eventFieldDecoder (Decode.list Decode.string))
+
+
+addTagEventDecoder : Decoder AddTagEventData
+addTagEventDecoder =
+    Decode.succeed AddTagEventData
+        |> required "tagUuid" Decode.string
+        |> required "name" Decode.string
+        |> required "description" (Decode.nullable Decode.string)
+        |> required "color" Decode.string
+
+
+editTagEventDecoder : Decoder EditTagEventData
+editTagEventDecoder =
+    Decode.succeed EditTagEventData
+        |> required "tagUuid" Decode.string
+        |> required "name" (eventFieldDecoder Decode.string)
+        |> required "description" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "color" (eventFieldDecoder Decode.string)
+
+
+deleteTagEventDecoder : Decoder DeleteTagEventData
+deleteTagEventDecoder =
+    Decode.succeed DeleteTagEventData
+        |> required "tagUuid" Decode.string
 
 
 addChapterEventDecoder : Decoder AddChapterEventData
@@ -804,6 +1006,15 @@ getEventUuid event =
         EditKnowledgeModelEvent _ commonData ->
             commonData.uuid
 
+        AddTagEvent _ commonData ->
+            commonData.uuid
+
+        EditTagEvent _ commonData ->
+            commonData.uuid
+
+        DeleteTagEvent _ commonData ->
+            commonData.uuid
+
         AddChapterEvent _ commonData ->
             commonData.uuid
 
@@ -868,6 +1079,12 @@ getEventEntityVisibleName : Event -> Maybe String
 getEventEntityVisibleName event =
     case event of
         EditKnowledgeModelEvent eventData _ ->
+            getEventFieldValue eventData.name
+
+        AddTagEvent eventData _ ->
+            Just eventData.name
+
+        EditTagEvent eventData _ ->
             getEventFieldValue eventData.name
 
         AddChapterEvent eventData _ ->

@@ -1,7 +1,12 @@
-module KMEditor.Editor.Update.KnowledgeModel exposing (addChapter, updateKMForm, withGenerateKMEditEvent)
+module KMEditor.Editor.Update.KnowledgeModel exposing
+    ( addChapter
+    , addTag
+    , updateKMForm
+    , withGenerateKMEditEvent
+    )
 
 import Form
-import KMEditor.Common.Models.Entities exposing (newChapter)
+import KMEditor.Common.Models.Entities exposing (newChapter, newTag)
 import KMEditor.Common.Models.Path exposing (PathNode(..))
 import KMEditor.Editor.Models exposing (Model)
 import KMEditor.Editor.Models.Editors exposing (..)
@@ -41,4 +46,14 @@ addChapter =
         , createEntityEditor = createChapterEditor
         , createPathNode = KMPathNode
         , addEntity = addKMChapter
+        }
+
+
+addTag : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
+addTag =
+    addEntity
+        { newEntity = newTag
+        , createEntityEditor = createTagEditor
+        , createPathNode = KMPathNode
+        , addEntity = addKMTag
         }

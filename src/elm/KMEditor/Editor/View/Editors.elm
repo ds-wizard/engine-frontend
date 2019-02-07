@@ -1,12 +1,10 @@
 module KMEditor.Editor.View.Editors exposing (activeEditor)
 
--- import Reorderable
-
 import ActionResult
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
 import Common.View exposing (fullPageMessage)
-import Common.View.Forms exposing (formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
+import Common.View.Forms exposing (colorGroup, formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input exposing (baseInput)
@@ -29,6 +27,9 @@ activeEditor model =
             case editor of
                 KMEditor data ->
                     kmEditorView model data
+
+                TagEditor data ->
+                    tagEditorView model data
 
                 ChapterEditor data ->
                     chapterEditorView model data
@@ -80,6 +81,17 @@ kmEditorView model editorData =
             , viewMsg = SetActiveEditor
             }
 
+        tagsConfig =
+            { childName = "Tag"
+            , reorderableState = model.reorderableState
+            , children = editorData.tags.list |> List.filter (editorNotDeleted model.editors)
+            , reorderMsg = ReorderTags >> KMEditorMsg >> EditorMsg
+            , addMsg = AddTag |> KMEditorMsg |> EditorMsg
+            , toId = identity
+            , getName = getChildName model.editors
+            , viewMsg = SetActiveEditor
+            }
+
         form =
             div []
                 [ inputGroup editorData.form "name" "Name"
@@ -90,6 +102,30 @@ kmEditorView model editorData =
         [ editorTitle editorTitleConfig
         , form |> Html.map (KMEditorFormMsg >> KMEditorMsg >> EditorMsg)
         , inputChildren chaptersConfig
+        , inputChildren tagsConfig
+        ]
+    )
+
+
+tagEditorView : Model -> TagEditorData -> ( String, Html Msg )
+tagEditorView model editorData =
+    let
+        editorTitleConfig =
+            { title = "Tag"
+            , deleteAction = DeleteTag editorData.uuid |> TagEditorMsg |> EditorMsg |> Just
+            }
+
+        form =
+            div []
+                [ inputGroup editorData.form "name" "Name"
+                , textAreaGroup editorData.form "description" "Description"
+                , colorGroup editorData.form "color" "Color"
+                ]
+    in
+    ( editorData.uuid
+    , div [ class editorClass ]
+        [ editorTitle editorTitleConfig
+        , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
         ]
     )
 

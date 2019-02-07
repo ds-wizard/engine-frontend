@@ -1,4 +1,26 @@
-module KMEditor.Editor.Update.Events exposing (createAddAnswerEvent, createAddChapterEvent, createAddExpertEvent, createAddQuestionEvent, createAddReferenceEvent, createDeleteAnswerEvent, createDeleteChapterEvent, createDeleteExpertEvent, createDeleteQuestionEvent, createDeleteReferenceEvent, createEditAnswerEvent, createEditChapterEvent, createEditExpertEvent, createEditKnowledgeModelEvent, createEditQuestionEvent, createEditReferenceEvent, createEvent, createEventField)
+module KMEditor.Editor.Update.Events exposing
+    ( createAddAnswerEvent
+    , createAddChapterEvent
+    , createAddExpertEvent
+    , createAddQuestionEvent
+    , createAddReferenceEvent
+    , createAddTagEvent
+    , createDeleteAnswerEvent
+    , createDeleteChapterEvent
+    , createDeleteExpertEvent
+    , createDeleteQuestionEvent
+    , createDeleteReferenceEvent
+    , createDeleteTagEvent
+    , createEditAnswerEvent
+    , createEditChapterEvent
+    , createEditExpertEvent
+    , createEditKnowledgeModelEvent
+    , createEditQuestionEvent
+    , createEditReferenceEvent
+    , createEditTagEvent
+    , createEvent
+    , createEventField
+    )
 
 import KMEditor.Common.Models.Entities exposing (Reference(..), getReferenceUuid)
 import KMEditor.Common.Models.Events exposing (..)
@@ -19,6 +41,42 @@ createEditKnowledgeModelEvent form editorData =
             }
     in
     createEvent (EditKnowledgeModelEvent data) editorData.path
+
+
+createAddTagEvent : TagForm -> TagEditorData -> Seed -> ( Event, Seed )
+createAddTagEvent form editorData =
+    let
+        data =
+            { tagUuid = editorData.tag.uuid
+            , name = form.name
+            , description = form.description
+            , color = form.color
+            }
+    in
+    createEvent (AddTagEvent data) editorData.path
+
+
+createEditTagEvent : TagForm -> TagEditorData -> Seed -> ( Event, Seed )
+createEditTagEvent form editorData =
+    let
+        data =
+            { tagUuid = editorData.tag.uuid
+            , name = createEventField form.name (editorData.tag.name /= form.name)
+            , description = createEventField form.description (editorData.tag.description /= form.description)
+            , color = createEventField form.color (editorData.tag.color /= form.color)
+            }
+    in
+    createEvent (EditTagEvent data) editorData.path
+
+
+createDeleteTagEvent : String -> Path -> Seed -> ( Event, Seed )
+createDeleteTagEvent tagUuid =
+    let
+        data =
+            { tagUuid = tagUuid
+            }
+    in
+    createEvent (DeleteTagEvent data)
 
 
 createAddChapterEvent : ChapterForm -> ChapterEditorData -> Seed -> ( Event, Seed )

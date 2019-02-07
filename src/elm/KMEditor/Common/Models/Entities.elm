@@ -1,4 +1,62 @@
-module KMEditor.Common.Models.Entities exposing (Answer, AnswerItemTemplate, AnswerItemTemplateQuestions(..), Chapter, CrossReferenceData, Expert, FollowUps(..), KnowledgeModel, Level, Metric, MetricMeasure, Question, Reference(..), ResourcePageReferenceData, URLReferenceData, answerDecoder, answerItemTemplateDecoder, answerItemTemplateQuestionsDecoder, chapterDecoder, crossReferenceDecoder, expertDecoder, followupsDecoder, getAnswer, getAnswerItemTemplateQuestions, getAnswers, getChapter, getChapters, getExpert, getExperts, getFollowUpQuestions, getQuestion, getQuestions, getReference, getReferenceUuid, getReferenceVisibleName, getReferences, knowledgeModelDecoder, levelDecoder, levelListDecoder, metricDecoder, metricListDecoder, metricMeasureDecoder, metricMeasureEncoder, newAnswer, newChapter, newExpert, newQuestion, newReference, questionDecoder, referenceByType, referenceDecoder, referenceType, resourcePageReferenceDecoder, urlReferenceDecoder)
+module KMEditor.Common.Models.Entities exposing
+    ( Answer
+    , AnswerItemTemplate
+    , AnswerItemTemplateQuestions(..)
+    , Chapter
+    , CrossReferenceData
+    , Expert
+    , FollowUps(..)
+    , KnowledgeModel
+    , Level
+    , Metric
+    , MetricMeasure
+    , Question
+    , Reference(..)
+    , ResourcePageReferenceData
+    , Tag
+    , URLReferenceData
+    , answerDecoder
+    , answerItemTemplateDecoder
+    , answerItemTemplateQuestionsDecoder
+    , chapterDecoder
+    , crossReferenceDecoder
+    , expertDecoder
+    , followupsDecoder
+    , getAnswer
+    , getAnswerItemTemplateQuestions
+    , getAnswers
+    , getChapter
+    , getChapters
+    , getExpert
+    , getExperts
+    , getFollowUpQuestions
+    , getQuestion
+    , getQuestions
+    , getReference
+    , getReferenceUuid
+    , getReferenceVisibleName
+    , getReferences
+    , getTag
+    , knowledgeModelDecoder
+    , levelDecoder
+    , levelListDecoder
+    , metricDecoder
+    , metricListDecoder
+    , metricMeasureDecoder
+    , metricMeasureEncoder
+    , newAnswer
+    , newChapter
+    , newExpert
+    , newQuestion
+    , newReference
+    , newTag
+    , questionDecoder
+    , referenceByType
+    , referenceDecoder
+    , referenceType
+    , resourcePageReferenceDecoder
+    , urlReferenceDecoder
+    )
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
@@ -11,6 +69,15 @@ type alias KnowledgeModel =
     { uuid : String
     , name : String
     , chapters : List Chapter
+    , tags : List Tag
+    }
+
+
+type alias Tag =
+    { uuid : String
+    , name : String
+    , description : Maybe String
+    , color : String
     }
 
 
@@ -122,6 +189,16 @@ knowledgeModelDecoder =
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "chapters" (Decode.list chapterDecoder)
+        |> required "tags" (Decode.list tagDecoder)
+
+
+tagDecoder : Decoder Tag
+tagDecoder =
+    Decode.succeed Tag
+        |> required "uuid" Decode.string
+        |> required "name" Decode.string
+        |> required "description" (Decode.nullable Decode.string)
+        |> required "color" Decode.string
 
 
 chapterDecoder : Decoder Chapter
@@ -269,6 +346,15 @@ levelListDecoder =
 {- New entities -}
 
 
+newTag : String -> Tag
+newTag uuid =
+    { uuid = uuid
+    , name = "New Tag"
+    , description = Nothing
+    , color = ""
+    }
+
+
 newChapter : String -> Chapter
 newChapter uuid =
     { uuid = uuid
@@ -321,6 +407,11 @@ newExpert uuid =
 
 
 {- Helpers -}
+
+
+getTag : KnowledgeModel -> String -> Maybe Tag
+getTag km tagUuid =
+    List.find (\t -> t.uuid == tagUuid) km.tags
 
 
 getChapters : KnowledgeModel -> List Chapter

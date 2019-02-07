@@ -1,10 +1,37 @@
-module Common.View.Forms exposing (actionButton, actionButtonView, codeGroup, errorView, formActionOnly, formActions, formErrorResultView, formGroup, formResultView, formSuccessResultView, formText, formTextAfter, getErrors, inputGroup, passwordGroup, plainGroup, selectGroup, statusView, submitButton, successView, textAreaGroup, textGroup, toReadable, toggleGroup)
+module Common.View.Forms exposing
+    ( actionButton
+    , actionButtonView
+    , codeGroup
+    , colorGroup
+    , errorView
+    , formActionOnly
+    , formActions
+    , formErrorResultView
+    , formGroup
+    , formResultView
+    , formSuccessResultView
+    , formText
+    , formTextAfter
+    , getErrors
+    , inputGroup
+    , passwordGroup
+    , plainGroup
+    , selectGroup
+    , statusView
+    , submitButton
+    , successView
+    , textAreaGroup
+    , textGroup
+    , toReadable
+    , toggleGroup
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError(..))
 import Common.Html exposing (..)
 import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
+import Form.Field as Field
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -78,6 +105,13 @@ toggleGroup form fieldName labelText =
             , span [] [ text labelText ]
             ]
         ]
+
+
+{-| Helper for creating form group with color input field
+-}
+colorGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+colorGroup =
+    formGroup (Input.baseInput "color" Field.String Form.Text) []
 
 
 {-| Plain group is same Html as formGroup but without any input fields. It only
