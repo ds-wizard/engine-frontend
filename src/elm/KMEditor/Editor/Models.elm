@@ -97,7 +97,6 @@ getTags : Model -> List String -> List Tag
 getTags model uuids =
     List.map (getTagByTagEditorUuid model) uuids
         |> listFilterJust
-        |> List.sortBy .name
 
 
 getTagByTagEditorUuid : Model -> String -> Maybe Tag

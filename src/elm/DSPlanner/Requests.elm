@@ -2,6 +2,7 @@ module DSPlanner.Requests exposing
     ( deleteQuestionnaire
     , getQuestionnaire
     , getQuestionnaires
+    , postForPreview
     , postQuestionnaire
     , putQuestionnaire
     )
@@ -10,7 +11,8 @@ import Auth.Models exposing (Session)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
 import DSPlanner.Common.Models exposing (..)
 import Http
-import Json.Encode exposing (Value)
+import Json.Encode as Encode exposing (Value)
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
 import Requests
 
 
@@ -37,3 +39,16 @@ postQuestionnaire session questionnaire =
 putQuestionnaire : String -> Session -> Value -> Http.Request String
 putQuestionnaire uuid session questionnaire =
     Requests.put questionnaire session ("/questionnaires/" ++ uuid)
+
+
+postForPreview : String -> Session -> Http.Request KnowledgeModel
+postForPreview packageId session =
+    let
+        data =
+            Encode.object
+                [ ( "packageId", Encode.string packageId )
+                , ( "events", Encode.list Encode.string [] )
+                , ( "tagUuids", Encode.list Encode.string [] )
+                ]
+    in
+    Requests.postWithResponse data session "/knowledge-models/preview" knowledgeModelDecoder

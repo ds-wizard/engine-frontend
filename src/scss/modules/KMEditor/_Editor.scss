@@ -185,21 +185,4 @@
             }
         }
     }
-
-    .tag {
-        display: inline-block;
-        margin-bottom: 0.5rem;
-        margin-right: 0.5rem;
-
-        .tag-label {
-            border-radius: 0.25rem;
-            padding: 0.375rem 0.75rem;
-            font-weight: normal;
-            cursor: pointer;
-
-            input {
-                margin-right: 0.5rem;
-            }
-        }
-    }
 }

@@ -5,6 +5,7 @@ import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
 import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (colorGroup, formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
+import Common.View.Tags exposing (tagList)
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input exposing (baseInput)
@@ -213,44 +214,16 @@ questionTagList model editorData =
     let
         tags =
             getCurrentTags model
+
+        tagListConfig =
+            { selected = editorData.tagUuids
+            , addMsg = AddQuestionTag >> QuestionEditorMsg >> EditorMsg
+            , removeMsg = RemoveQuestionTag >> QuestionEditorMsg >> EditorMsg
+            }
     in
     div [ class "form-group" ]
         [ label [] [ text "Tags" ]
-        , div []
-            (List.map (tagView editorData) tags)
-        ]
-
-
-tagView : QuestionEditorData -> Tag -> Html Msg
-tagView editorData tag =
-    let
-        selected =
-            List.member tag.uuid editorData.tagUuids
-
-        msgConstructor =
-            if selected then
-                RemoveQuestionTag
-
-            else
-                AddQuestionTag
-
-        msg =
-            msgConstructor tag.uuid |> QuestionEditorMsg |> EditorMsg
-    in
-    div [ class "tag" ]
-        [ label
-            [ class "tag-label"
-            , style "background" tag.color
-            , style "color" <| getContrastColorHex tag.color
-            ]
-            [ input
-                [ type_ "checkbox"
-                , checked selected
-                , onClick msg
-                ]
-                []
-            , text tag.name
-            ]
+        , tagList tagListConfig tags
         ]
 
 

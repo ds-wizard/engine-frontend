@@ -1,4 +1,4 @@
-module DSPlanner.Create.Update exposing (fetchData, getPackagesCompleted, handleForm, postQuestionnaireCmd, postQuestionnaireCompleted, setSelectedPackage, update)
+module DSPlanner.Create.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
@@ -6,10 +6,11 @@ import Common.Models exposing (getServerErrorJwt)
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, initQuestionnaireCreateForm, questionnaireCreateFormValidation)
 import DSPlanner.Create.Msgs exposing (Msg(..))
-import DSPlanner.Requests exposing (postQuestionnaire)
+import DSPlanner.Requests exposing (postForPreview, postQuestionnaire)
 import DSPlanner.Routing exposing (Route(..))
 import Form
 import Jwt
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
 import Models exposing (State)
@@ -28,8 +29,17 @@ fetchData wrapMsg session =
 update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg state model =
     case msg of
+        AddTag tagUuid ->
+            ( { model | selectedTags = tagUuid :: model.selectedTags }, Cmd.none )
+
+        RemoveTag tagUuid ->
+            ( { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }, Cmd.none )
+
         GetPackagesCompleted result ->
             getPackagesCompleted model result
+
+        GetKnowledgeModelPreviewCompleted result ->
+            getKnowledgeModelPreviewCompleted model result
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg state.session model
@@ -48,6 +58,23 @@ getPackagesCompleted model result =
 
                 Err error ->
                     { model | packages = getServerErrorJwt error "Unable to get package list" }
+
+        cmd =
+            getResultCmd result
+    in
+    ( newModel, cmd )
+
+
+getKnowledgeModelPreviewCompleted : Model -> Result Jwt.JwtError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
+getKnowledgeModelPreviewCompleted model result =
+    let
+        newModel =
+            case result of
+                Ok knowledgeModel ->
+                    { model | knowledgeModelPreview = Success knowledgeModel }
+
+                Err error ->
+                    { model | knowledgeModelPreview = getServerErrorJwt error "Unable to get package tags" }
 
         cmd =
             getResultCmd result
@@ -75,7 +102,7 @@ handleForm formMsg wrapMsg session model =
         ( Form.Submit, Just form ) ->
             let
                 cmd =
-                    postQuestionnaireCmd wrapMsg session form
+                    postQuestionnaireCmd wrapMsg session model.selectedTags form
             in
             ( { model | savingQuestionnaire = Loading }, cmd )
 
@@ -84,13 +111,44 @@ handleForm formMsg wrapMsg session model =
                 newModel =
                     { model | form = Form.update questionnaireCreateFormValidation formMsg model.form }
             in
-            ( newModel, Cmd.none )
+            case getSelectedPackageId newModel of
+                Just packageId ->
+                    if needFetchKnowledgeModelPreview model packageId then
+                        ( { newModel
+                            | lastFetchedPreview = Just packageId
+                            , knowledgeModelPreview = Loading
+                            , selectedTags = []
+                          }
+                        , fetchKnowledgeModelPreview wrapMsg packageId session
+                        )
+
+                    else
+                        ( newModel, Cmd.none )
+
+                Nothing ->
+                    ( newModel, Cmd.none )
 
 
-postQuestionnaireCmd : (Msg -> Msgs.Msg) -> Session -> QuestionnaireCreateForm -> Cmd Msgs.Msg
-postQuestionnaireCmd wrapMsg session form =
-    form
-        |> encodeQuestionnaireCreateForm
+getSelectedPackageId : Model -> Maybe String
+getSelectedPackageId model =
+    (Form.getFieldAsString "packageId" model.form).value
+
+
+needFetchKnowledgeModelPreview : Model -> String -> Bool
+needFetchKnowledgeModelPreview model packageId =
+    model.lastFetchedPreview /= Just packageId
+
+
+fetchKnowledgeModelPreview : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
+fetchKnowledgeModelPreview wrapMsg packageId session =
+    postForPreview packageId session
+        |> Jwt.send GetKnowledgeModelPreviewCompleted
+        |> Cmd.map wrapMsg
+
+
+postQuestionnaireCmd : (Msg -> Msgs.Msg) -> Session -> List String -> QuestionnaireCreateForm -> Cmd Msgs.Msg
+postQuestionnaireCmd wrapMsg session tagUuids form =
+    encodeQuestionnaireCreateForm tagUuids form
         |> postQuestionnaire session
         |> Jwt.send PostQuestionnaireCompleted
         |> Cmd.map wrapMsg

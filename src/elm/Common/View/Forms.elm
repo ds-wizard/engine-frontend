@@ -13,6 +13,7 @@ module Common.View.Forms exposing
     , formText
     , formTextAfter
     , getErrors
+    , infoView
     , inputGroup
     , passwordGroup
     , plainGroup
@@ -306,6 +307,11 @@ errorView =
 successView : String -> Html msg
 successView =
     statusView "alert-success" "fa-check"
+
+
+infoView : String -> Html msg
+infoView =
+    statusView "alert-info" "fa-info-circle"
 
 
 statusView : String -> String -> String -> Html msg

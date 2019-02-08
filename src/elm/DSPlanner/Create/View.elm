@@ -1,14 +1,17 @@
 module DSPlanner.Create.View exposing (content, createOption, formView, view)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith)
+import Common.Html exposing (detailContainerClassWith, emptyNode, inlineLoader)
 import Common.View exposing (fullPageActionResultView, pageHeader)
-import Common.View.Forms exposing (formActions, formResultView, formText, inputGroup, selectGroup, toggleGroup)
+import Common.View.Forms exposing (errorView, formActions, formResultView, formText, inputGroup, selectGroup, toggleGroup)
+import Common.View.Tags exposing (tagList)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
 import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Routing
 import Form exposing (Form)
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import KMPackages.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing
@@ -27,6 +30,7 @@ content wrapMsg model packages =
     div []
         [ formResultView model.savingQuestionnaire
         , formView model.form packages |> Html.map (wrapMsg << FormMsg)
+        , tagsView wrapMsg model
         , formActions (Routing.DSPlanner DSPlanner.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
         ]
 
@@ -46,6 +50,47 @@ formView form packages =
                 ]
     in
     formHtml
+
+
+tagsView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+tagsView wrapMsg model =
+    let
+        tagsContent =
+            case model.knowledgeModelPreview of
+                Unset ->
+                    div [ class "alert alert-light" ]
+                        [ i [] [ text "Select the knowledge model first" ] ]
+
+                Loading ->
+                    inlineLoader
+
+                Error err ->
+                    errorView err
+
+                Success knowledgeModel ->
+                    let
+                        tagListConfig =
+                            { selected = model.selectedTags
+                            , addMsg = AddTag >> wrapMsg
+                            , removeMsg = RemoveTag >> wrapMsg
+                            }
+
+                        extraText =
+                            if List.length knowledgeModel.tags > 0 then
+                                formText "You can filter questions in the questionnaire by selecting only some tags. If no tags are selected, all questions will be used."
+
+                            else
+                                emptyNode
+                    in
+                    div []
+                        [ tagList tagListConfig knowledgeModel.tags
+                        , extraText
+                        ]
+    in
+    div [ class "form-group form-group-tags" ]
+        [ label [] [ text "Tags" ]
+        , div [] [ tagsContent ]
+        ]
 
 
 createOption : PackageDetail -> ( String, String )
