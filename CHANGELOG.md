@@ -1,3 +1,8 @@
+# 1.3.0
+
+- There were no changes for this release
+
+
 # 1.2.0
 
 ## Features
