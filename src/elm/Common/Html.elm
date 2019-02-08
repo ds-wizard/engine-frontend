@@ -1,4 +1,12 @@
-module Common.Html exposing (detailContainerClass, detailContainerClassWith, emptyNode, fa, linkTo, linkToAttributes)
+module Common.Html exposing
+    ( detailContainerClass
+    , detailContainerClassWith
+    , emptyNode
+    , fa
+    , inlineLoader
+    , linkTo
+    , linkToAttributes
+    )
 
 import Common.Html.Events exposing (onLinkClick)
 import Html exposing (..)
@@ -36,3 +44,11 @@ detailContainerClass =
 fa : String -> Html msg
 fa icon =
     i [ class <| "fa fa-" ++ icon ] []
+
+
+inlineLoader : Html msg
+inlineLoader =
+    div [ class "alert alert-inline-loader" ]
+        [ i [ class "fa fa-spinner fa-spin" ] []
+        , text "Loading..."
+        ]
