@@ -9,15 +9,16 @@ import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input exposing (baseInput)
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, disabled)
+import Html.Attributes exposing (checked, class, classList, disabled, style, type_)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Level, Metric)
-import KMEditor.Editor.Models exposing (Model, getActiveEditor)
+import KMEditor.Common.Models.Entities exposing (Level, Metric, Tag)
+import KMEditor.Editor.Models exposing (Model, getActiveEditor, getCurrentTags, getKMEditor)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
 import String exposing (fromInt, toLower)
+import Utils exposing (getContrastColorHex)
 
 
 activeEditor : Model -> ( String, Html Msg )
@@ -107,29 +108,6 @@ kmEditorView model editorData =
     )
 
 
-tagEditorView : Model -> TagEditorData -> ( String, Html Msg )
-tagEditorView model editorData =
-    let
-        editorTitleConfig =
-            { title = "Tag"
-            , deleteAction = DeleteTag editorData.uuid |> TagEditorMsg |> EditorMsg |> Just
-            }
-
-        form =
-            div []
-                [ inputGroup editorData.form "name" "Name"
-                , textAreaGroup editorData.form "description" "Description"
-                , colorGroup editorData.form "color" "Color"
-                ]
-    in
-    ( editorData.uuid
-    , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
-        , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
-        ]
-    )
-
-
 chapterEditorView : Model -> ChapterEditorData -> ( String, Html Msg )
 chapterEditorView model editorData =
     let
@@ -160,6 +138,29 @@ chapterEditorView model editorData =
         [ editorTitle editorTitleConfig
         , form |> Html.map (ChapterFormMsg >> ChapterEditorMsg >> EditorMsg)
         , inputChildren questionsConfig
+        ]
+    )
+
+
+tagEditorView : Model -> TagEditorData -> ( String, Html Msg )
+tagEditorView model editorData =
+    let
+        editorTitleConfig =
+            { title = "Tag"
+            , deleteAction = DeleteTag editorData.uuid |> TagEditorMsg |> EditorMsg |> Just
+            }
+
+        form =
+            div []
+                [ inputGroup editorData.form "name" "Name"
+                , textAreaGroup editorData.form "description" "Description"
+                , colorGroup editorData.form "color" "Color"
+                ]
+    in
+    ( editorData.uuid
+    , div [ class editorClass ]
+        [ editorTitle editorTitleConfig
+        , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
         ]
     )
 
@@ -199,11 +200,58 @@ questionEditorView model editorData =
     , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+        , questionTagList model editorData
         , answersOrItem
         , questionEditorReferencesView model editorData
         , questionEditorExpertsView model editorData
         ]
     )
+
+
+questionTagList : Model -> QuestionEditorData -> Html Msg
+questionTagList model editorData =
+    let
+        tags =
+            getCurrentTags model
+    in
+    div [ class "form-group" ]
+        [ label [] [ text "Tags" ]
+        , div []
+            (List.map (tagView editorData) tags)
+        ]
+
+
+tagView : QuestionEditorData -> Tag -> Html Msg
+tagView editorData tag =
+    let
+        selected =
+            List.member tag.uuid editorData.tagUuids
+
+        msgConstructor =
+            if selected then
+                RemoveQuestionTag
+
+            else
+                AddQuestionTag
+
+        msg =
+            msgConstructor tag.uuid |> QuestionEditorMsg |> EditorMsg
+    in
+    div [ class "tag" ]
+        [ label
+            [ class "tag-label"
+            , style "background" tag.color
+            , style "color" <| getContrastColorHex tag.color
+            ]
+            [ input
+                [ type_ "checkbox"
+                , checked selected
+                , onClick msg
+                ]
+                []
+            , text tag.name
+            ]
+        ]
 
 
 questionRequiredLevelSelectGroup : QuestionEditorData -> List Level -> Html Form.Msg

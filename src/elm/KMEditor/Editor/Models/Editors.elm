@@ -132,6 +132,7 @@ type alias QuestionEditorData =
     { uuid : String
     , question : Question
     , form : Form CustomFormError QuestionForm
+    , tagUuids : List String
     , answers : Children
     , answerItemTemplateQuestions : Children
     , references : Children
@@ -204,22 +205,6 @@ createKnowledgeModelEditor editorContext km editors =
     Dict.insert km.uuid editor withTags
 
 
-createTagEditor : EditorContext -> Path -> EditorState -> Tag -> Dict String Editor -> Dict String Editor
-createTagEditor editorContext path editorState tag editors =
-    let
-        editor =
-            TagEditor
-                { uuid = tag.uuid
-                , tag = tag
-                , form = initTagForm tag
-                , treeOpen = False
-                , editorState = editorState
-                , path = path
-                }
-    in
-    Dict.insert tag.uuid editor editors
-
-
 createChapterEditor : EditorContext -> Path -> EditorState -> Chapter -> Dict String Editor -> Dict String Editor
 createChapterEditor editorContext path editorState chapter editors =
     let
@@ -243,6 +228,22 @@ createChapterEditor editorContext path editorState chapter editors =
     Dict.insert chapter.uuid editor withQuestions
 
 
+createTagEditor : EditorContext -> Path -> EditorState -> Tag -> Dict String Editor -> Dict String Editor
+createTagEditor editorContext path editorState tag editors =
+    let
+        editor =
+            TagEditor
+                { uuid = tag.uuid
+                , tag = tag
+                , form = initTagForm tag
+                , treeOpen = False
+                , editorState = editorState
+                , path = path
+                }
+    in
+    Dict.insert tag.uuid editor editors
+
+
 createQuestionEditor : EditorContext -> Path -> EditorState -> Question -> Dict String Editor -> Dict String Editor
 createQuestionEditor editorContext path editorState question editors =
     let
@@ -260,6 +261,7 @@ createQuestionEditor editorContext path editorState question editors =
                 { uuid = question.uuid
                 , question = question
                 , form = initQuestionForm question
+                , tagUuids = question.tagUuids
                 , answers = Children.init answers
                 , answerItemTemplateQuestions = Children.init answerItemTemplateQuestions
                 , references = Children.init <| List.map getReferenceUuid question.references
@@ -364,11 +366,11 @@ deleteEditor uuid editors =
         Just (KMEditor editorData) ->
             deleteKMEditor editorData editors
 
-        Just (TagEditor editorData) ->
-            deleteTagEditor editorData editors
-
         Just (ChapterEditor editorData) ->
             deleteChapterEditor editorData editors
+
+        Just (TagEditor editorData) ->
+            deleteTagEditor editorData editors
 
         Just (QuestionEditor editorData) ->
             deleteQuestionEditor editorData editors
@@ -393,16 +395,16 @@ deleteKMEditor editorData editors =
         |> Dict.remove editorData.uuid
 
 
-deleteTagEditor : TagEditorData -> Dict String Editor -> Dict String Editor
-deleteTagEditor editorData editors =
-    Dict.remove editorData.uuid editors
-
-
 deleteChapterEditor : ChapterEditorData -> Dict String Editor -> Dict String Editor
 deleteChapterEditor editorData editors =
     editors
         |> deleteEditors editorData.questions
         |> Dict.remove editorData.uuid
+
+
+deleteTagEditor : TagEditorData -> Dict String Editor -> Dict String Editor
+deleteTagEditor editorData editors =
+    Dict.remove editorData.uuid editors
 
 
 deleteQuestionEditor : QuestionEditorData -> Dict String Editor -> Dict String Editor
@@ -442,11 +444,11 @@ getEditorTitle editor =
         KMEditor data ->
             data.knowledgeModel.name
 
-        TagEditor data ->
-            data.tag.name
-
         ChapterEditor data ->
             data.chapter.title
+
+        TagEditor data ->
+            data.tag.name
 
         QuestionEditor data ->
             data.question.title
@@ -467,11 +469,11 @@ getEditorUuid editor =
         KMEditor data ->
             data.knowledgeModel.uuid
 
-        TagEditor data ->
-            data.tag.uuid
-
         ChapterEditor data ->
             data.chapter.uuid
+
+        TagEditor data ->
+            data.tag.uuid
 
         QuestionEditor data ->
             data.question.uuid
@@ -492,10 +494,10 @@ getEditorPath editor =
         KMEditor data ->
             data.path
 
-        TagEditor data ->
+        ChapterEditor data ->
             data.path
 
-        ChapterEditor data ->
+        TagEditor data ->
             data.path
 
         QuestionEditor data ->
@@ -529,11 +531,11 @@ toggleEditorOpen editor =
         KMEditor data ->
             KMEditor { data | treeOpen = not data.treeOpen }
 
-        TagEditor data ->
-            TagEditor { data | treeOpen = not data.treeOpen }
-
         ChapterEditor data ->
             ChapterEditor { data | treeOpen = not data.treeOpen }
+
+        TagEditor data ->
+            TagEditor { data | treeOpen = not data.treeOpen }
 
         QuestionEditor data ->
             QuestionEditor { data | treeOpen = not data.treeOpen }
@@ -561,10 +563,10 @@ isEditorDeleted editor =
         KMEditor data ->
             data.editorState == Deleted
 
-        TagEditor data ->
+        ChapterEditor data ->
             data.editorState == Deleted
 
-        ChapterEditor data ->
+        TagEditor data ->
             data.editorState == Deleted
 
         QuestionEditor data ->
@@ -586,11 +588,11 @@ isEditorDirty editor =
         KMEditor data ->
             isKMEditorDirty data
 
-        TagEditor data ->
-            isTagEditorDirty data
-
         ChapterEditor data ->
             isChapterEditorDirty data
+
+        TagEditor data ->
+            isTagEditorDirty data
 
         QuestionEditor data ->
             isQuestionEditorDirty data
@@ -610,19 +612,24 @@ isKMEditorDirty editorData =
     formChanged editorData.form || editorData.chapters.dirty
 
 
-isTagEditorDirty : TagEditorData -> Bool
-isTagEditorDirty editorData =
-    formChanged editorData.form
-
-
 isChapterEditorDirty : ChapterEditorData -> Bool
 isChapterEditorDirty editorData =
     formChanged editorData.form || editorData.questions.dirty
 
 
+isTagEditorDirty : TagEditorData -> Bool
+isTagEditorDirty editorData =
+    formChanged editorData.form
+
+
 isQuestionEditorDirty : QuestionEditorData -> Bool
 isQuestionEditorDirty editorData =
-    formChanged editorData.form || editorData.answers.dirty || editorData.answerItemTemplateQuestions.dirty || editorData.references.dirty || editorData.experts.dirty
+    formChanged editorData.form
+        || (editorData.question.tagUuids /= editorData.tagUuids)
+        || editorData.answers.dirty
+        || editorData.answerItemTemplateQuestions.dirty
+        || editorData.references.dirty
+        || editorData.experts.dirty
 
 
 isAnswerEditorDirty : AnswerEditorData -> Bool
@@ -654,19 +661,6 @@ updateKMEditorData editorContext newState form editorData =
     }
 
 
-updateTagEditorData : EditorContext -> EditorState -> TagForm -> TagEditorData -> TagEditorData
-updateTagEditorData editorContext newState form editorData =
-    let
-        newTag =
-            updateTagWithForm editorData.tag form
-    in
-    { editorData
-        | editorState = getNewState editorData.editorState newState
-        , tag = newTag
-        , form = initTagForm newTag
-    }
-
-
 updateChapterEditorData : EditorContext -> EditorState -> ChapterForm -> ChapterEditorData -> ChapterEditorData
 updateChapterEditorData editorContext newState form editorData =
     let
@@ -678,6 +672,19 @@ updateChapterEditorData editorContext newState form editorData =
         , chapter = newChapter
         , questions = Children.cleanDirty editorData.questions
         , form = initChapterForm newChapter
+    }
+
+
+updateTagEditorData : EditorContext -> EditorState -> TagForm -> TagEditorData -> TagEditorData
+updateTagEditorData editorContext newState form editorData =
+    let
+        newTag =
+            updateTagWithForm editorData.tag form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , tag = newTag
+        , form = initTagForm newTag
     }
 
 

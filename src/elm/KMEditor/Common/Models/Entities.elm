@@ -55,6 +55,7 @@ module KMEditor.Common.Models.Entities exposing
     , referenceDecoder
     , referenceType
     , resourcePageReferenceDecoder
+    , tagDecoder
     , urlReferenceDecoder
     )
 
@@ -95,6 +96,7 @@ type alias Question =
     , title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
+    , tagUuids : List String
     , answerItemTemplate : Maybe AnswerItemTemplate
     , answers : Maybe (List Answer)
     , references : List Reference
@@ -192,15 +194,6 @@ knowledgeModelDecoder =
         |> required "tags" (Decode.list tagDecoder)
 
 
-tagDecoder : Decoder Tag
-tagDecoder =
-    Decode.succeed Tag
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-        |> required "description" (Decode.nullable Decode.string)
-        |> required "color" Decode.string
-
-
 chapterDecoder : Decoder Chapter
 chapterDecoder =
     Decode.succeed Chapter
@@ -208,6 +201,15 @@ chapterDecoder =
         |> required "title" Decode.string
         |> required "text" Decode.string
         |> required "questions" (Decode.list questionDecoder)
+
+
+tagDecoder : Decoder Tag
+tagDecoder =
+    Decode.succeed Tag
+        |> required "uuid" Decode.string
+        |> required "name" Decode.string
+        |> required "description" (Decode.nullable Decode.string)
+        |> required "color" Decode.string
 
 
 questionDecoder : Decoder Question
@@ -218,6 +220,7 @@ questionDecoder =
         |> required "title" Decode.string
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
         |> required "answerItemTemplate" (Decode.nullable <| Decode.lazy (\_ -> answerItemTemplateDecoder))
         |> required "answers" (Decode.nullable <| Decode.lazy (\_ -> Decode.list answerDecoder))
         |> required "references" (Decode.list referenceDecoder)
@@ -346,21 +349,21 @@ levelListDecoder =
 {- New entities -}
 
 
-newTag : String -> Tag
-newTag uuid =
-    { uuid = uuid
-    , name = "New Tag"
-    , description = Nothing
-    , color = ""
-    }
-
-
 newChapter : String -> Chapter
 newChapter uuid =
     { uuid = uuid
     , title = "New chapter"
     , text = "Chapter text"
     , questions = []
+    }
+
+
+newTag : String -> Tag
+newTag uuid =
+    { uuid = uuid
+    , name = "New Tag"
+    , description = Nothing
+    , color = "#000000"
     }
 
 
@@ -371,6 +374,7 @@ newQuestion uuid =
     , title = "New question"
     , text = Nothing
     , requiredLevel = Nothing
+    , tagUuids = []
     , answerItemTemplate = Nothing
     , answers = Nothing
     , references = []
@@ -409,11 +413,6 @@ newExpert uuid =
 {- Helpers -}
 
 
-getTag : KnowledgeModel -> String -> Maybe Tag
-getTag km tagUuid =
-    List.find (\t -> t.uuid == tagUuid) km.tags
-
-
 getChapters : KnowledgeModel -> List Chapter
 getChapters km =
     km.chapters
@@ -423,6 +422,11 @@ getChapter : KnowledgeModel -> String -> Maybe Chapter
 getChapter km chapterUuid =
     getChapters km
         |> List.find (\c -> c.uuid == chapterUuid)
+
+
+getTag : KnowledgeModel -> String -> Maybe Tag
+getTag km tagUuid =
+    List.find (\t -> t.uuid == tagUuid) km.tags
 
 
 getQuestions : KnowledgeModel -> List Question

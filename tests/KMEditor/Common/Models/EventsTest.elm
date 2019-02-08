@@ -1,4 +1,4 @@
-module KMEditor.Common.Models.EventsTest exposing (..)
+module KMEditor.Common.Models.EventsTest exposing (eventDecoderTests)
 
 import Expect
 import Json.Decode as Decode exposing (..)
@@ -26,6 +26,9 @@ eventDecoderTests =
                             },
                             "chapterIds": {
                                 "changed": false
+                            },
+                            "tagIds": {
+                                "changed": false
                             }
                         }
                         """
@@ -38,6 +41,10 @@ eventDecoderTests =
                                 , value = Just "My Knowledge Model"
                                 }
                             , chapterIds =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , tagIds =
                                 { changed = False
                                 , value = Nothing
                                 }

@@ -50,11 +50,6 @@ type KMEditorMsg
     | AddTag
 
 
-type TagEditorMsg
-    = TagFormMsg Form.Msg
-    | DeleteTag String
-
-
 type ChapterEditorMsg
     = ChapterFormMsg Form.Msg
     | DeleteChapter String
@@ -62,8 +57,15 @@ type ChapterEditorMsg
     | AddQuestion
 
 
+type TagEditorMsg
+    = TagFormMsg Form.Msg
+    | DeleteTag String
+
+
 type QuestionEditorMsg
     = QuestionFormMsg Form.Msg
+    | AddQuestionTag String
+    | RemoveQuestionTag String
     | DeleteQuestion String
     | ReorderAnswers (List String)
     | AddAnswer

@@ -38,9 +38,45 @@ createEditKnowledgeModelEvent form editorData =
             { kmUuid = editorData.knowledgeModel.uuid
             , name = createEventField form.name (editorData.knowledgeModel.name /= form.name)
             , chapterIds = createEventField editorData.chapters.list editorData.chapters.dirty
+            , tagIds = createEventField editorData.tags.list editorData.tags.dirty
             }
     in
     createEvent (EditKnowledgeModelEvent data) editorData.path
+
+
+createAddChapterEvent : ChapterForm -> ChapterEditorData -> Seed -> ( Event, Seed )
+createAddChapterEvent form editorData =
+    let
+        data =
+            { chapterUuid = editorData.chapter.uuid
+            , title = form.title
+            , text = form.text
+            }
+    in
+    createEvent (AddChapterEvent data) editorData.path
+
+
+createEditChapterEvent : ChapterForm -> ChapterEditorData -> Seed -> ( Event, Seed )
+createEditChapterEvent form editorData =
+    let
+        data =
+            { chapterUuid = editorData.chapter.uuid
+            , title = createEventField form.title (editorData.chapter.title /= form.title)
+            , text = createEventField form.text (editorData.chapter.text /= form.text)
+            , questionIds = createEventField editorData.questions.list editorData.questions.dirty
+            }
+    in
+    createEvent (EditChapterEvent data) editorData.path
+
+
+createDeleteChapterEvent : String -> Path -> Seed -> ( Event, Seed )
+createDeleteChapterEvent chapterUuid =
+    let
+        data =
+            { chapterUuid = chapterUuid
+            }
+    in
+    createEvent (DeleteChapterEvent data)
 
 
 createAddTagEvent : TagForm -> TagEditorData -> Seed -> ( Event, Seed )
@@ -79,41 +115,6 @@ createDeleteTagEvent tagUuid =
     createEvent (DeleteTagEvent data)
 
 
-createAddChapterEvent : ChapterForm -> ChapterEditorData -> Seed -> ( Event, Seed )
-createAddChapterEvent form editorData =
-    let
-        data =
-            { chapterUuid = editorData.chapter.uuid
-            , title = form.title
-            , text = form.text
-            }
-    in
-    createEvent (AddChapterEvent data) editorData.path
-
-
-createEditChapterEvent : ChapterForm -> ChapterEditorData -> Seed -> ( Event, Seed )
-createEditChapterEvent form editorData =
-    let
-        data =
-            { chapterUuid = editorData.chapter.uuid
-            , title = createEventField form.title (editorData.chapter.title /= form.title)
-            , text = createEventField form.text (editorData.chapter.text /= form.text)
-            , questionIds = createEventField editorData.questions.list editorData.questions.dirty
-            }
-    in
-    createEvent (EditChapterEvent data) editorData.path
-
-
-createDeleteChapterEvent : String -> Path -> Seed -> ( Event, Seed )
-createDeleteChapterEvent chapterUuid =
-    let
-        data =
-            { chapterUuid = chapterUuid
-            }
-    in
-    createEvent (DeleteChapterEvent data)
-
-
 createAddQuestionEvent : QuestionForm -> QuestionEditorData -> Seed -> ( Event, Seed )
 createAddQuestionEvent form editorData =
     let
@@ -133,6 +134,7 @@ createAddQuestionEvent form editorData =
             , title = form.title
             , text = form.text
             , requiredLevel = form.requiredLevel
+            , tagUuids = editorData.tagUuids
             , answerItemTemplate = maybeAnswerItemTemlate
             }
     in
@@ -173,6 +175,7 @@ createEditQuestionEvent form editorData =
             , title = createEventField form.title (editorData.question.title /= form.title)
             , text = createEventField form.text (editorData.question.text /= form.text)
             , requiredLevel = createEventField form.requiredLevel (editorData.question.requiredLevel /= form.requiredLevel)
+            , tagUuids = createEventField editorData.tagUuids (editorData.question.tagUuids /= editorData.tagUuids)
             , answerItemTemplate = createEventField maybeAnswerItemTemplate answerItemTemplateChanged
             , answerIds = createEventField maybeAnswerIds answerIdsChanged
             , referenceIds = createEventField editorData.references.list editorData.references.dirty

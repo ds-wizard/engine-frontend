@@ -122,12 +122,12 @@ import List.Extra as List
 
 type Event
     = EditKnowledgeModelEvent EditKnowledgeModelEventData CommonEventData
-    | AddTagEvent AddTagEventData CommonEventData
-    | EditTagEvent EditTagEventData CommonEventData
-    | DeleteTagEvent DeleteTagEventData CommonEventData
     | AddChapterEvent AddChapterEventData CommonEventData
     | EditChapterEvent EditChapterEventData CommonEventData
     | DeleteChapterEvent DeleteChapterEventData CommonEventData
+    | AddTagEvent AddTagEventData CommonEventData
+    | EditTagEvent EditTagEventData CommonEventData
+    | DeleteTagEvent DeleteTagEventData CommonEventData
     | AddQuestionEvent AddQuestionEventData CommonEventData
     | EditQuestionEvent EditQuestionEventData CommonEventData
     | DeleteQuestionEvent DeleteQuestionEventData CommonEventData
@@ -152,6 +152,27 @@ type alias EditKnowledgeModelEventData =
     { kmUuid : String
     , name : EventField String
     , chapterIds : EventField (List String)
+    , tagIds : EventField (List String)
+    }
+
+
+type alias AddChapterEventData =
+    { chapterUuid : String
+    , title : String
+    , text : String
+    }
+
+
+type alias EditChapterEventData =
+    { chapterUuid : String
+    , title : EventField String
+    , text : EventField String
+    , questionIds : EventField (List String)
+    }
+
+
+type alias DeleteChapterEventData =
+    { chapterUuid : String
     }
 
 
@@ -176,32 +197,13 @@ type alias DeleteTagEventData =
     }
 
 
-type alias AddChapterEventData =
-    { chapterUuid : String
-    , title : String
-    , text : String
-    }
-
-
-type alias EditChapterEventData =
-    { chapterUuid : String
-    , title : EventField String
-    , text : EventField String
-    , questionIds : EventField (List String)
-    }
-
-
-type alias DeleteChapterEventData =
-    { chapterUuid : String
-    }
-
-
 type alias AddQuestionEventData =
     { questionUuid : String
     , type_ : String
     , title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
+    , tagUuids : List String
     , answerItemTemplate : Maybe AnswerItemTemplateData
     }
 
@@ -212,6 +214,7 @@ type alias EditQuestionEventData =
     , title : EventField String
     , text : EventField (Maybe String)
     , requiredLevel : EventField (Maybe Int)
+    , tagUuids : EventField (List String)
     , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
     , answerIds : EventField (Maybe (List String))
     , expertIds : EventField (List String)
@@ -351,15 +354,6 @@ encodeEvent event =
                 EditKnowledgeModelEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeEditKnowledgeModelEvent eventData )
 
-                AddTagEvent eventData commonData ->
-                    ( encodeCommonData commonData, encodeAddTagEvent eventData )
-
-                EditTagEvent eventData commonData ->
-                    ( encodeCommonData commonData, encodeEditTagEvent eventData )
-
-                DeleteTagEvent eventData commonData ->
-                    ( encodeCommonData commonData, encodeDeleteTagEvent eventData )
-
                 AddChapterEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeAddChapterEvent eventData )
 
@@ -368,6 +362,15 @@ encodeEvent event =
 
                 DeleteChapterEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeDeleteChapterEvent eventData )
+
+                AddTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeAddTagEvent eventData )
+
+                EditTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeEditTagEvent eventData )
+
+                DeleteTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeDeleteTagEvent eventData )
 
                 AddQuestionEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeAddQuestionEvent eventData )
@@ -415,39 +418,13 @@ encodeCommonData data =
     ]
 
 
-encodeAddTagEvent : AddTagEventData -> List ( String, Encode.Value )
-encodeAddTagEvent data =
-    [ ( "eventType", Encode.string "AddTagEvent" )
-    , ( "tagUuid", Encode.string data.tagUuid )
-    , ( "name", Encode.string data.name )
-    , ( "description", maybe Encode.string data.description )
-    , ( "color", Encode.string data.color )
-    ]
-
-
-encodeEditTagEvent : EditTagEventData -> List ( String, Encode.Value )
-encodeEditTagEvent data =
-    [ ( "eventType", Encode.string "EditTagEvent" )
-    , ( "tagUuid", Encode.string data.tagUuid )
-    , ( "name", encodeEventField Encode.string data.name )
-    , ( "description", encodeEventField (maybe Encode.string) data.description )
-    , ( "color", encodeEventField Encode.string data.color )
-    ]
-
-
-encodeDeleteTagEvent : DeleteTagEventData -> List ( String, Encode.Value )
-encodeDeleteTagEvent data =
-    [ ( "eventType", Encode.string "DeleteTagEvent" )
-    , ( "tagUuid", Encode.string data.tagUuid )
-    ]
-
-
 encodeEditKnowledgeModelEvent : EditKnowledgeModelEventData -> List ( String, Encode.Value )
 encodeEditKnowledgeModelEvent data =
     [ ( "eventType", Encode.string "EditKnowledgeModelEvent" )
     , ( "kmUuid", Encode.string data.kmUuid )
     , ( "name", encodeEventField Encode.string data.name )
     , ( "chapterIds", encodeEventField (Encode.list Encode.string) data.chapterIds )
+    , ( "tagIds", encodeEventField (Encode.list Encode.string) data.tagIds )
     ]
 
 
@@ -477,6 +454,33 @@ encodeDeleteChapterEvent data =
     ]
 
 
+encodeAddTagEvent : AddTagEventData -> List ( String, Encode.Value )
+encodeAddTagEvent data =
+    [ ( "eventType", Encode.string "AddTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    , ( "name", Encode.string data.name )
+    , ( "description", maybe Encode.string data.description )
+    , ( "color", Encode.string data.color )
+    ]
+
+
+encodeEditTagEvent : EditTagEventData -> List ( String, Encode.Value )
+encodeEditTagEvent data =
+    [ ( "eventType", Encode.string "EditTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    , ( "name", encodeEventField Encode.string data.name )
+    , ( "description", encodeEventField (maybe Encode.string) data.description )
+    , ( "color", encodeEventField Encode.string data.color )
+    ]
+
+
+encodeDeleteTagEvent : DeleteTagEventData -> List ( String, Encode.Value )
+encodeDeleteTagEvent data =
+    [ ( "eventType", Encode.string "DeleteTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    ]
+
+
 encodeAddQuestionEvent : AddQuestionEventData -> List ( String, Encode.Value )
 encodeAddQuestionEvent data =
     [ ( "eventType", Encode.string "AddQuestionEvent" )
@@ -485,6 +489,7 @@ encodeAddQuestionEvent data =
     , ( "title", Encode.string data.title )
     , ( "text", maybe Encode.string data.text )
     , ( "requiredLevel", maybe Encode.int data.requiredLevel )
+    , ( "tagUuids", Encode.list Encode.string data.tagUuids )
     , ( "answerItemTemplate", maybe encodeAnswerItemTemplateData data.answerItemTemplate )
     ]
 
@@ -497,6 +502,7 @@ encodeEditQuestionEvent data =
     , ( "title", encodeEventField Encode.string data.title )
     , ( "text", encodeEventField (maybe Encode.string) data.text )
     , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
     , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
     , ( "answerIds", encodeEventField (maybe (Encode.list Encode.string)) data.answerIds )
     , ( "expertIds", encodeEventField (Encode.list Encode.string) data.expertIds )
@@ -688,15 +694,6 @@ eventDecoderByType eventType =
         "EditKnowledgeModelEvent" ->
             Decode.map2 EditKnowledgeModelEvent editKnowledgeModelEventDecoder commonEventDataDecoder
 
-        "AddTagEvent" ->
-            Decode.map2 AddTagEvent addTagEventDecoder commonEventDataDecoder
-
-        "EditTagEvent" ->
-            Decode.map2 EditTagEvent editTagEventDecoder commonEventDataDecoder
-
-        "DeleteTagEvent" ->
-            Decode.map2 DeleteTagEvent deleteTagEventDecoder commonEventDataDecoder
-
         "AddChapterEvent" ->
             Decode.map2 AddChapterEvent addChapterEventDecoder commonEventDataDecoder
 
@@ -705,6 +702,15 @@ eventDecoderByType eventType =
 
         "DeleteChapterEvent" ->
             Decode.map2 DeleteChapterEvent deleteChapterEventDecoder commonEventDataDecoder
+
+        "AddTagEvent" ->
+            Decode.map2 AddTagEvent addTagEventDecoder commonEventDataDecoder
+
+        "EditTagEvent" ->
+            Decode.map2 EditTagEvent editTagEventDecoder commonEventDataDecoder
+
+        "DeleteTagEvent" ->
+            Decode.map2 DeleteTagEvent deleteTagEventDecoder commonEventDataDecoder
 
         "AddQuestionEvent" ->
             Decode.map2 AddQuestionEvent addQuestionEventDecoder commonEventDataDecoder
@@ -759,6 +765,30 @@ editKnowledgeModelEventDecoder =
         |> required "kmUuid" Decode.string
         |> required "name" (eventFieldDecoder Decode.string)
         |> required "chapterIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "tagIds" (eventFieldDecoder (Decode.list Decode.string))
+
+
+addChapterEventDecoder : Decoder AddChapterEventData
+addChapterEventDecoder =
+    Decode.succeed AddChapterEventData
+        |> required "chapterUuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" Decode.string
+
+
+editChapterEventDecoder : Decoder EditChapterEventData
+editChapterEventDecoder =
+    Decode.succeed EditChapterEventData
+        |> required "chapterUuid" Decode.string
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "text" (eventFieldDecoder Decode.string)
+        |> required "questionIds" (eventFieldDecoder (Decode.list Decode.string))
+
+
+deleteChapterEventDecoder : Decoder DeleteChapterEventData
+deleteChapterEventDecoder =
+    Decode.succeed DeleteChapterEventData
+        |> required "chapterUuid" Decode.string
 
 
 addTagEventDecoder : Decoder AddTagEventData
@@ -785,29 +815,6 @@ deleteTagEventDecoder =
         |> required "tagUuid" Decode.string
 
 
-addChapterEventDecoder : Decoder AddChapterEventData
-addChapterEventDecoder =
-    Decode.succeed AddChapterEventData
-        |> required "chapterUuid" Decode.string
-        |> required "title" Decode.string
-        |> required "text" Decode.string
-
-
-editChapterEventDecoder : Decoder EditChapterEventData
-editChapterEventDecoder =
-    Decode.succeed EditChapterEventData
-        |> required "chapterUuid" Decode.string
-        |> required "title" (eventFieldDecoder Decode.string)
-        |> required "text" (eventFieldDecoder Decode.string)
-        |> required "questionIds" (eventFieldDecoder (Decode.list Decode.string))
-
-
-deleteChapterEventDecoder : Decoder DeleteChapterEventData
-deleteChapterEventDecoder =
-    Decode.succeed DeleteChapterEventData
-        |> required "chapterUuid" Decode.string
-
-
 addQuestionEventDecoder : Decoder AddQuestionEventData
 addQuestionEventDecoder =
     Decode.succeed AddQuestionEventData
@@ -816,6 +823,7 @@ addQuestionEventDecoder =
         |> required "title" Decode.string
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
         |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
 
 
@@ -827,6 +835,7 @@ editQuestionEventDecoder =
         |> required "title" (eventFieldDecoder Decode.string)
         |> required "text" (eventFieldDecoder (Decode.nullable Decode.string))
         |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
         |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
         |> required "expertIds" (eventFieldDecoder (Decode.list Decode.string))

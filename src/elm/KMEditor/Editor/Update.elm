@@ -279,17 +279,6 @@ update msg wrapMsg state model =
                                     addTag (scrollTopCmd wrapMsg)
                                         |> withGenerateKMEditEvent state.seed model editorData
 
-                        ( TagEditorMsg tagEditorMsg, Just (TagEditor editorData) ) ->
-                            case tagEditorMsg of
-                                TagFormMsg formMsg ->
-                                    updateTagForm model formMsg editorData
-                                        |> pair state.seed
-                                        |> withNoCmd
-
-                                DeleteTag uuid ->
-                                    deleteTag state.seed model uuid editorData
-                                        |> withNoCmd
-
                         ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
                             case chapterEditorMsg of
                                 ChapterFormMsg formMsg ->
@@ -311,10 +300,31 @@ update msg wrapMsg state model =
                                     addQuestion (scrollTopCmd wrapMsg)
                                         |> withGenerateChapterEditEvent state.seed model editorData
 
+                        ( TagEditorMsg tagEditorMsg, Just (TagEditor editorData) ) ->
+                            case tagEditorMsg of
+                                TagFormMsg formMsg ->
+                                    updateTagForm model formMsg editorData
+                                        |> pair state.seed
+                                        |> withNoCmd
+
+                                DeleteTag uuid ->
+                                    deleteTag state.seed model uuid editorData
+                                        |> withNoCmd
+
                         ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
                             case questionEditorMsg of
                                 QuestionFormMsg formMsg ->
                                     updateQuestionForm model formMsg editorData
+                                        |> pair state.seed
+                                        |> withNoCmd
+
+                                AddQuestionTag uuid ->
+                                    addQuestionTag model uuid editorData
+                                        |> pair state.seed
+                                        |> withNoCmd
+
+                                RemoveQuestionTag uuid ->
+                                    removeQuestionTag model uuid editorData
                                         |> pair state.seed
                                         |> withNoCmd
 

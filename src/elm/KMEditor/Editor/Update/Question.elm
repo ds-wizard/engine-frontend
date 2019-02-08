@@ -1,9 +1,21 @@
-module KMEditor.Editor.Update.Question exposing (addAnswer, addAnswerItemTemplateQuestion, addExpert, addReference, deleteQuestion, removeQuestion, updateIfChapterEditor, updateQuestionForm, withGenerateQuestionEditEvent)
+module KMEditor.Editor.Update.Question exposing
+    ( addAnswer
+    , addAnswerItemTemplateQuestion
+    , addExpert
+    , addQuestionTag
+    , addReference
+    , deleteQuestion
+    , removeQuestion
+    , removeQuestionTag
+    , updateIfChapterEditor
+    , updateQuestionForm
+    , withGenerateQuestionEditEvent
+    )
 
 import Form
 import KMEditor.Common.Models.Entities exposing (newAnswer, newExpert, newQuestion, newReference)
 import KMEditor.Common.Models.Path exposing (PathNode(..))
-import KMEditor.Editor.Models exposing (Model)
+import KMEditor.Editor.Models exposing (Model, getCurrentTags, insertEditor)
 import KMEditor.Editor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (questionFormValidation)
@@ -19,6 +31,39 @@ updateQuestionForm =
         { formValidation = questionFormValidation
         , createEditor = QuestionEditor
         }
+
+
+addQuestionTag : Model -> String -> QuestionEditorData -> Model
+addQuestionTag model uuid editorData =
+    let
+        newEditor =
+            QuestionEditor
+                { editorData
+                    | tagUuids = filterTagUuids model <| uuid :: editorData.tagUuids
+                }
+    in
+    insertEditor newEditor model
+
+
+removeQuestionTag : Model -> String -> QuestionEditorData -> Model
+removeQuestionTag model uuid editorData =
+    let
+        newEditor =
+            QuestionEditor
+                { editorData
+                    | tagUuids = filterTagUuids model <| List.filter ((/=) uuid) editorData.tagUuids
+                }
+    in
+    insertEditor newEditor model
+
+
+filterTagUuids : Model -> List String -> List String
+filterTagUuids model uuids =
+    let
+        currentTagUuids =
+            getCurrentTags model |> List.map .uuid
+    in
+    List.filter (\uuid -> List.member uuid currentTagUuids) uuids
 
 
 withGenerateQuestionEditEvent : Seed -> Model -> QuestionEditorData -> (Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
