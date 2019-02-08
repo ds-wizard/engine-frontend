@@ -1,4 +1,26 @@
-module KMEditor.Editor.Update.Events exposing (createAddAnswerEvent, createAddChapterEvent, createAddExpertEvent, createAddQuestionEvent, createAddReferenceEvent, createDeleteAnswerEvent, createDeleteChapterEvent, createDeleteExpertEvent, createDeleteQuestionEvent, createDeleteReferenceEvent, createEditAnswerEvent, createEditChapterEvent, createEditExpertEvent, createEditKnowledgeModelEvent, createEditQuestionEvent, createEditReferenceEvent, createEvent, createEventField)
+module KMEditor.Editor.Update.Events exposing
+    ( createAddAnswerEvent
+    , createAddChapterEvent
+    , createAddExpertEvent
+    , createAddQuestionEvent
+    , createAddReferenceEvent
+    , createAddTagEvent
+    , createDeleteAnswerEvent
+    , createDeleteChapterEvent
+    , createDeleteExpertEvent
+    , createDeleteQuestionEvent
+    , createDeleteReferenceEvent
+    , createDeleteTagEvent
+    , createEditAnswerEvent
+    , createEditChapterEvent
+    , createEditExpertEvent
+    , createEditKnowledgeModelEvent
+    , createEditQuestionEvent
+    , createEditReferenceEvent
+    , createEditTagEvent
+    , createEvent
+    , createEventField
+    )
 
 import KMEditor.Common.Models.Entities exposing (Reference(..), getReferenceUuid)
 import KMEditor.Common.Models.Events exposing (..)
@@ -16,6 +38,7 @@ createEditKnowledgeModelEvent form editorData =
             { kmUuid = editorData.knowledgeModel.uuid
             , name = createEventField form.name (editorData.knowledgeModel.name /= form.name)
             , chapterIds = createEventField editorData.chapters.list editorData.chapters.dirty
+            , tagIds = createEventField editorData.tags.list editorData.tags.dirty
             }
     in
     createEvent (EditKnowledgeModelEvent data) editorData.path
@@ -56,6 +79,42 @@ createDeleteChapterEvent chapterUuid =
     createEvent (DeleteChapterEvent data)
 
 
+createAddTagEvent : TagForm -> TagEditorData -> Seed -> ( Event, Seed )
+createAddTagEvent form editorData =
+    let
+        data =
+            { tagUuid = editorData.tag.uuid
+            , name = form.name
+            , description = form.description
+            , color = form.color
+            }
+    in
+    createEvent (AddTagEvent data) editorData.path
+
+
+createEditTagEvent : TagForm -> TagEditorData -> Seed -> ( Event, Seed )
+createEditTagEvent form editorData =
+    let
+        data =
+            { tagUuid = editorData.tag.uuid
+            , name = createEventField form.name (editorData.tag.name /= form.name)
+            , description = createEventField form.description (editorData.tag.description /= form.description)
+            , color = createEventField form.color (editorData.tag.color /= form.color)
+            }
+    in
+    createEvent (EditTagEvent data) editorData.path
+
+
+createDeleteTagEvent : String -> Path -> Seed -> ( Event, Seed )
+createDeleteTagEvent tagUuid =
+    let
+        data =
+            { tagUuid = tagUuid
+            }
+    in
+    createEvent (DeleteTagEvent data)
+
+
 createAddQuestionEvent : QuestionForm -> QuestionEditorData -> Seed -> ( Event, Seed )
 createAddQuestionEvent form editorData =
     let
@@ -75,6 +134,7 @@ createAddQuestionEvent form editorData =
             , title = form.title
             , text = form.text
             , requiredLevel = form.requiredLevel
+            , tagUuids = editorData.tagUuids
             , answerItemTemplate = maybeAnswerItemTemlate
             }
     in
@@ -115,6 +175,7 @@ createEditQuestionEvent form editorData =
             , title = createEventField form.title (editorData.question.title /= form.title)
             , text = createEventField form.text (editorData.question.text /= form.text)
             , requiredLevel = createEventField form.requiredLevel (editorData.question.requiredLevel /= form.requiredLevel)
+            , tagUuids = createEventField editorData.tagUuids (editorData.question.tagUuids /= editorData.tagUuids)
             , answerItemTemplate = createEventField maybeAnswerItemTemplate answerItemTemplateChanged
             , answerIds = createEventField maybeAnswerIds answerIdsChanged
             , referenceIds = createEventField editorData.references.list editorData.references.dirty

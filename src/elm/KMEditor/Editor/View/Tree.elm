@@ -22,6 +22,9 @@ treeNodeEditor activeUuid editors editorUuid =
         Just (KMEditor data) ->
             treeNodeKM activeUuid editors data
 
+        Just (TagEditor data) ->
+            treeNodeTag activeUuid editors data
+
         Just (ChapterEditor data) ->
             treeNodeChapter activeUuid editors data
 
@@ -44,11 +47,30 @@ treeNodeEditor activeUuid editors editorUuid =
 treeNodeKM : String -> Dict String Editor -> KMEditorData -> Html Msg
 treeNodeKM activeUuid editors editorData =
     let
+        chapters =
+            editorData.chapters.list ++ editorData.chapters.deleted
+
+        tags =
+            editorData.tags.list ++ editorData.tags.deleted
+
         config =
             { editorData = editorData
             , icon = "database"
             , label = editorData.knowledgeModel.name
-            , children = editorData.chapters.list ++ editorData.chapters.deleted
+            , children = chapters ++ tags
+            }
+    in
+    treeNode config activeUuid editors
+
+
+treeNodeTag : String -> Dict String Editor -> TagEditorData -> Html Msg
+treeNodeTag activeUuid editors editorData =
+    let
+        config =
+            { editorData = editorData
+            , icon = "tag"
+            , label = editorData.tag.name
+            , children = []
             }
     in
     treeNode config activeUuid editors
@@ -73,12 +95,14 @@ treeNodeQuestion activeUuid editors editorData =
         answerItemTemplateQuestions =
             if editorData.question.type_ == "list" then
                 editorData.answerItemTemplateQuestions.list ++ editorData.answerItemTemplateQuestions.deleted
+
             else
                 []
 
         answers =
             if editorData.question.type_ == "options" then
                 editorData.answers.list ++ editorData.answers.deleted
+
             else
                 []
 
@@ -151,18 +175,21 @@ treeNode config activeUuid editors =
         caret =
             if List.length config.children > 0 && config.editorData.editorState /= Deleted then
                 treeNodeCaret (ToggleOpen config.editorData.uuid) config.editorData.treeOpen
+
             else
                 emptyNode
 
         children =
             if config.editorData.treeOpen then
                 ul [] (List.map (treeNodeEditor activeUuid editors) config.children)
+
             else
                 emptyNode
 
         link =
             if config.editorData.editorState == Deleted then
                 a []
+
             else
                 a [ onClick <| SetActiveEditor config.editorData.uuid ]
     in

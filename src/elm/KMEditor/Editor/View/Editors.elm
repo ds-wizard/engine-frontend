@@ -1,25 +1,24 @@
 module KMEditor.Editor.View.Editors exposing (activeEditor)
 
--- import Reorderable
-
 import ActionResult
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
 import Common.View exposing (fullPageMessage)
-import Common.View.Forms exposing (formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
+import Common.View.Forms exposing (colorGroup, formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input exposing (baseInput)
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, disabled)
+import Html.Attributes exposing (checked, class, classList, disabled, style, type_)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Level, Metric)
-import KMEditor.Editor.Models exposing (Model, getActiveEditor)
+import KMEditor.Common.Models.Entities exposing (Level, Metric, Tag)
+import KMEditor.Editor.Models exposing (Model, getActiveEditor, getCurrentTags, getKMEditor)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
 import String exposing (fromInt, toLower)
+import Utils exposing (getContrastColorHex)
 
 
 activeEditor : Model -> ( String, Html Msg )
@@ -29,6 +28,9 @@ activeEditor model =
             case editor of
                 KMEditor data ->
                     kmEditorView model data
+
+                TagEditor data ->
+                    tagEditorView model data
 
                 ChapterEditor data ->
                     chapterEditorView model data
@@ -80,6 +82,17 @@ kmEditorView model editorData =
             , viewMsg = SetActiveEditor
             }
 
+        tagsConfig =
+            { childName = "Tag"
+            , reorderableState = model.reorderableState
+            , children = editorData.tags.list |> List.filter (editorNotDeleted model.editors)
+            , reorderMsg = ReorderTags >> KMEditorMsg >> EditorMsg
+            , addMsg = AddTag |> KMEditorMsg |> EditorMsg
+            , toId = identity
+            , getName = getChildName model.editors
+            , viewMsg = SetActiveEditor
+            }
+
         form =
             div []
                 [ inputGroup editorData.form "name" "Name"
@@ -90,6 +103,7 @@ kmEditorView model editorData =
         [ editorTitle editorTitleConfig
         , form |> Html.map (KMEditorFormMsg >> KMEditorMsg >> EditorMsg)
         , inputChildren chaptersConfig
+        , inputChildren tagsConfig
         ]
     )
 
@@ -124,6 +138,29 @@ chapterEditorView model editorData =
         [ editorTitle editorTitleConfig
         , form |> Html.map (ChapterFormMsg >> ChapterEditorMsg >> EditorMsg)
         , inputChildren questionsConfig
+        ]
+    )
+
+
+tagEditorView : Model -> TagEditorData -> ( String, Html Msg )
+tagEditorView model editorData =
+    let
+        editorTitleConfig =
+            { title = "Tag"
+            , deleteAction = DeleteTag editorData.uuid |> TagEditorMsg |> EditorMsg |> Just
+            }
+
+        form =
+            div []
+                [ inputGroup editorData.form "name" "Name"
+                , textAreaGroup editorData.form "description" "Description"
+                , colorGroup editorData.form "color" "Color"
+                ]
+    in
+    ( editorData.uuid
+    , div [ class editorClass ]
+        [ editorTitle editorTitleConfig
+        , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
         ]
     )
 
@@ -163,11 +200,58 @@ questionEditorView model editorData =
     , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+        , questionTagList model editorData
         , answersOrItem
         , questionEditorReferencesView model editorData
         , questionEditorExpertsView model editorData
         ]
     )
+
+
+questionTagList : Model -> QuestionEditorData -> Html Msg
+questionTagList model editorData =
+    let
+        tags =
+            getCurrentTags model
+    in
+    div [ class "form-group" ]
+        [ label [] [ text "Tags" ]
+        , div []
+            (List.map (tagView editorData) tags)
+        ]
+
+
+tagView : QuestionEditorData -> Tag -> Html Msg
+tagView editorData tag =
+    let
+        selected =
+            List.member tag.uuid editorData.tagUuids
+
+        msgConstructor =
+            if selected then
+                RemoveQuestionTag
+
+            else
+                AddQuestionTag
+
+        msg =
+            msgConstructor tag.uuid |> QuestionEditorMsg |> EditorMsg
+    in
+    div [ class "tag" ]
+        [ label
+            [ class "tag-label"
+            , style "background" tag.color
+            , style "color" <| getContrastColorHex tag.color
+            ]
+            [ input
+                [ type_ "checkbox"
+                , checked selected
+                , onClick msg
+                ]
+                []
+            , text tag.name
+            ]
+        ]
 
 
 questionRequiredLevelSelectGroup : QuestionEditorData -> List Level -> Html Form.Msg

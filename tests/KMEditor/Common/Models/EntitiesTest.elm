@@ -1,4 +1,4 @@
-module KMEditor.Common.Models.EntitiesTest exposing (..)
+module KMEditor.Common.Models.EntitiesTest exposing (answerDecoderTest, chapterDecoderTest, expertDecoderTest, knowledgeModelDecoderTest, metricDecoderTest, metricMeasureDecoderTest, questionDecoderTest, referenceDecoderTest)
 
 import Expect
 import Json.Decode as Decode exposing (..)
@@ -19,7 +19,8 @@ knowledgeModelDecoderTest =
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "name": "My knowledge model",
-                            "chapters": []
+                            "chapters": [],
+                            "tags": []
                         }
                         """
 
@@ -27,10 +28,11 @@ knowledgeModelDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , name = "My knowledge model"
                         , chapters = []
+                        , tags = []
                         }
                 in
                 expectDecoder knowledgeModelDecoder raw expected
-        , test "should decode knowledge model with questions" <|
+        , test "should decode knowledge model with chapters" <|
             \_ ->
                 let
                     raw =
@@ -43,7 +45,8 @@ knowledgeModelDecoderTest =
                                 "title": "Chapter 1",
                                 "text": "This chapter is empty",
                                 "questions": []
-                            }]
+                            }],
+                            "tags": []
                         }
                         """
 
@@ -57,9 +60,69 @@ knowledgeModelDecoderTest =
                               , questions = []
                               }
                             ]
+                        , tags = []
                         }
                 in
                 expectDecoder knowledgeModelDecoder raw expected
+        , test "should decode knowledge model with tags" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "name": "My knowledge model",
+                            "chapters": [],
+                            "tags": [{
+                                "uuid": "b5b6ed23-2afa-11e9-b210-d663bd873d93",
+                                "name": "Science",
+                                "description": null,
+                                "color": "#F5A623"
+                            }]
+                        }
+                        """
+
+                    expected =
+                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                        , name = "My knowledge model"
+                        , chapters = []
+                        , tags =
+                            [ { uuid = "b5b6ed23-2afa-11e9-b210-d663bd873d93"
+                              , name = "Science"
+                              , description = Nothing
+                              , color = "#F5A623"
+                              }
+                            ]
+                        }
+                in
+                expectDecoder knowledgeModelDecoder raw expected
+        ]
+
+
+tagDecoderTest : Test
+tagDecoderTest =
+    describe "tagDecoder"
+        [ test "should decode tag" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "b5b6ed23-2afa-11e9-b210-d663bd873d93",
+                            "name": "Science",
+                            "description": null,
+                            "color": "#F5A623"
+                        }
+                        """
+
+                    expected =
+                        { uuid = "b5b6ed23-2afa-11e9-b210-d663bd873d93"
+                        , name = "Science"
+                        , description = Nothing
+                        , color = "#F5A623"
+                        }
+                in
+                expectDecoder tagDecoder raw expected
         ]
 
 
@@ -102,6 +165,7 @@ chapterDecoderTest =
                                 "title": "What's your name?",
                                 "text": "Fill in your name",
                                 "requiredLevel": null,
+                                "tagUuids": [],
                                 "answerItemTemplate": null,
                                 "answers": null,
                                 "references": [],
@@ -120,6 +184,7 @@ chapterDecoderTest =
                               , title = "What's your name?"
                               , text = Just "Fill in your name"
                               , requiredLevel = Nothing
+                              , tagUuids = []
                               , answerItemTemplate = Nothing
                               , answers = Nothing
                               , references = []
@@ -146,6 +211,7 @@ questionDecoderTest =
                             "title": "Can you answer this question?",
                             "text": null,
                             "requiredLevel": 1,
+                            "tagUuids": [],
                             "answerItemTemplate": null,
                             "answers": null,
                             "references": [],
@@ -160,6 +226,40 @@ questionDecoderTest =
                         , title = "Can you answer this question?"
                         , text = Nothing
                         , requiredLevel = Just 1
+                        , tagUuids = []
+                        , answerItemTemplate = Nothing
+                        , answers = Nothing
+                        , references = []
+                        , experts = []
+                        }
+                in
+                expectDecoder questionDecoder raw expected
+        , test "should decode question with tag UUIDs" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "type": "string",
+                            "title": "Can you answer this question?",
+                            "text": null,
+                            "requiredLevel": 1,
+                            "tagUuids": ["563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93"],
+                            "answerItemTemplate": null,
+                            "answers": null,
+                            "references": [],
+                            "experts": []
+                        }
+                        """
+
+                    expected =
+                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                        , type_ = "string"
+                        , title = "Can you answer this question?"
+                        , text = Nothing
+                        , requiredLevel = Just 1
+                        , tagUuids = [ "563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93" ]
                         , answerItemTemplate = Nothing
                         , answers = Nothing
                         , references = []
@@ -178,6 +278,7 @@ questionDecoderTest =
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": null,
+                            "tagUuids": [],
                             "answerItemTemplate": null,
                             "answers": null,
                             "references": [{
@@ -195,6 +296,7 @@ questionDecoderTest =
                         , title = "Can you answer this question?"
                         , text = Just "Please answer the question"
                         , requiredLevel = Nothing
+                        , tagUuids = []
                         , answerItemTemplate = Nothing
                         , answers = Nothing
                         , references =
@@ -218,6 +320,7 @@ questionDecoderTest =
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": 2,
+                            "tagUuids": [],
                             "answerItemTemplate": null,
                             "answers": null,
                             "references": [],
@@ -235,6 +338,7 @@ questionDecoderTest =
                         , title = "Can you answer this question?"
                         , text = Just "Please answer the question"
                         , requiredLevel = Just 2
+                        , tagUuids = []
                         , answerItemTemplate = Nothing
                         , answers = Nothing
                         , references = []
@@ -258,6 +362,7 @@ questionDecoderTest =
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": null,
+                            "tagUuids": [],
                             "answerItemTemplate": null,
                             "answers": [{
                                 "uuid": "64217c4e-50b3-4230-9224-bf65c4220ab6",
@@ -277,6 +382,7 @@ questionDecoderTest =
                         , title = "Can you answer this question?"
                         , text = Just "Please answer the question"
                         , requiredLevel = Nothing
+                        , tagUuids = []
                         , answerItemTemplate = Nothing
                         , answers =
                             Just
@@ -303,6 +409,7 @@ questionDecoderTest =
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": null,
+                            "tagUuids": [],
                             "answerItemTemplate": {
                                 "title": "Item",
                                 "questions": [{
@@ -312,6 +419,7 @@ questionDecoderTest =
                                     "text": "Fill in your name",
                                     "requiredLevel": null,
                                     "answerItemTemplate": null,
+                                    "tagUuids": [],
                                     "answers": null,
                                     "references": [],
                                     "experts": []
@@ -329,6 +437,7 @@ questionDecoderTest =
                         , title = "Can you answer this question?"
                         , text = Just "Please answer the question"
                         , requiredLevel = Nothing
+                        , tagUuids = []
                         , answerItemTemplate =
                             Just
                                 { title = "Item"
@@ -340,6 +449,7 @@ questionDecoderTest =
                                           , text = Just "Fill in your name"
                                           , requiredLevel = Nothing
                                           , answerItemTemplate = Nothing
+                                          , tagUuids = []
                                           , answers = Nothing
                                           , references = []
                                           , experts = []
@@ -453,6 +563,7 @@ answerDecoderTest =
                                 "text": "Fill in your name",
                                 "requiredLevel": null,
                                 "answerItemTemplate": null,
+                                "tagUuids": [],
                                 "answers": null,
                                 "references": [],
                                 "experts": []
@@ -473,6 +584,7 @@ answerDecoderTest =
                                   , text = Just "Fill in your name"
                                   , requiredLevel = Nothing
                                   , answerItemTemplate = Nothing
+                                  , tagUuids = []
                                   , answers = Nothing
                                   , references = []
                                   , experts = []

@@ -1,4 +1,14 @@
-module KMEditor.Editor.Msgs exposing (AnswerEditorMsg(..), ChapterEditorMsg(..), EditorMsg(..), ExpertEditorMsg(..), KMEditorMsg(..), Msg(..), QuestionEditorMsg(..), ReferenceEditorMsg(..))
+module KMEditor.Editor.Msgs exposing
+    ( AnswerEditorMsg(..)
+    , ChapterEditorMsg(..)
+    , EditorMsg(..)
+    , ExpertEditorMsg(..)
+    , KMEditorMsg(..)
+    , Msg(..)
+    , QuestionEditorMsg(..)
+    , ReferenceEditorMsg(..)
+    , TagEditorMsg(..)
+    )
 
 import Form
 import Jwt
@@ -24,6 +34,7 @@ type Msg
 
 type EditorMsg
     = KMEditorMsg KMEditorMsg
+    | TagEditorMsg TagEditorMsg
     | ChapterEditorMsg ChapterEditorMsg
     | QuestionEditorMsg QuestionEditorMsg
     | AnswerEditorMsg AnswerEditorMsg
@@ -35,6 +46,8 @@ type KMEditorMsg
     = KMEditorFormMsg Form.Msg
     | ReorderChapters (List String)
     | AddChapter
+    | ReorderTags (List String)
+    | AddTag
 
 
 type ChapterEditorMsg
@@ -44,8 +57,15 @@ type ChapterEditorMsg
     | AddQuestion
 
 
+type TagEditorMsg
+    = TagFormMsg Form.Msg
+    | DeleteTag String
+
+
 type QuestionEditorMsg
     = QuestionFormMsg Form.Msg
+    | AddQuestionTag String
+    | RemoveQuestionTag String
     | DeleteQuestion String
     | ReorderAnswers (List String)
     | AddAnswer

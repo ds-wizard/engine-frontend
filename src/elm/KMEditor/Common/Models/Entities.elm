@@ -1,4 +1,63 @@
-module KMEditor.Common.Models.Entities exposing (Answer, AnswerItemTemplate, AnswerItemTemplateQuestions(..), Chapter, CrossReferenceData, Expert, FollowUps(..), KnowledgeModel, Level, Metric, MetricMeasure, Question, Reference(..), ResourcePageReferenceData, URLReferenceData, answerDecoder, answerItemTemplateDecoder, answerItemTemplateQuestionsDecoder, chapterDecoder, crossReferenceDecoder, expertDecoder, followupsDecoder, getAnswer, getAnswerItemTemplateQuestions, getAnswers, getChapter, getChapters, getExpert, getExperts, getFollowUpQuestions, getQuestion, getQuestions, getReference, getReferenceUuid, getReferenceVisibleName, getReferences, knowledgeModelDecoder, levelDecoder, levelListDecoder, metricDecoder, metricListDecoder, metricMeasureDecoder, metricMeasureEncoder, newAnswer, newChapter, newExpert, newQuestion, newReference, questionDecoder, referenceByType, referenceDecoder, referenceType, resourcePageReferenceDecoder, urlReferenceDecoder)
+module KMEditor.Common.Models.Entities exposing
+    ( Answer
+    , AnswerItemTemplate
+    , AnswerItemTemplateQuestions(..)
+    , Chapter
+    , CrossReferenceData
+    , Expert
+    , FollowUps(..)
+    , KnowledgeModel
+    , Level
+    , Metric
+    , MetricMeasure
+    , Question
+    , Reference(..)
+    , ResourcePageReferenceData
+    , Tag
+    , URLReferenceData
+    , answerDecoder
+    , answerItemTemplateDecoder
+    , answerItemTemplateQuestionsDecoder
+    , chapterDecoder
+    , crossReferenceDecoder
+    , expertDecoder
+    , followupsDecoder
+    , getAnswer
+    , getAnswerItemTemplateQuestions
+    , getAnswers
+    , getChapter
+    , getChapters
+    , getExpert
+    , getExperts
+    , getFollowUpQuestions
+    , getQuestion
+    , getQuestions
+    , getReference
+    , getReferenceUuid
+    , getReferenceVisibleName
+    , getReferences
+    , getTag
+    , knowledgeModelDecoder
+    , levelDecoder
+    , levelListDecoder
+    , metricDecoder
+    , metricListDecoder
+    , metricMeasureDecoder
+    , metricMeasureEncoder
+    , newAnswer
+    , newChapter
+    , newExpert
+    , newQuestion
+    , newReference
+    , newTag
+    , questionDecoder
+    , referenceByType
+    , referenceDecoder
+    , referenceType
+    , resourcePageReferenceDecoder
+    , tagDecoder
+    , urlReferenceDecoder
+    )
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
@@ -11,6 +70,15 @@ type alias KnowledgeModel =
     { uuid : String
     , name : String
     , chapters : List Chapter
+    , tags : List Tag
+    }
+
+
+type alias Tag =
+    { uuid : String
+    , name : String
+    , description : Maybe String
+    , color : String
     }
 
 
@@ -28,6 +96,7 @@ type alias Question =
     , title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
+    , tagUuids : List String
     , answerItemTemplate : Maybe AnswerItemTemplate
     , answers : Maybe (List Answer)
     , references : List Reference
@@ -122,6 +191,7 @@ knowledgeModelDecoder =
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "chapters" (Decode.list chapterDecoder)
+        |> required "tags" (Decode.list tagDecoder)
 
 
 chapterDecoder : Decoder Chapter
@@ -133,6 +203,15 @@ chapterDecoder =
         |> required "questions" (Decode.list questionDecoder)
 
 
+tagDecoder : Decoder Tag
+tagDecoder =
+    Decode.succeed Tag
+        |> required "uuid" Decode.string
+        |> required "name" Decode.string
+        |> required "description" (Decode.nullable Decode.string)
+        |> required "color" Decode.string
+
+
 questionDecoder : Decoder Question
 questionDecoder =
     Decode.succeed Question
@@ -141,6 +220,7 @@ questionDecoder =
         |> required "title" Decode.string
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
         |> required "answerItemTemplate" (Decode.nullable <| Decode.lazy (\_ -> answerItemTemplateDecoder))
         |> required "answers" (Decode.nullable <| Decode.lazy (\_ -> Decode.list answerDecoder))
         |> required "references" (Decode.list referenceDecoder)
@@ -278,6 +358,15 @@ newChapter uuid =
     }
 
 
+newTag : String -> Tag
+newTag uuid =
+    { uuid = uuid
+    , name = "New Tag"
+    , description = Nothing
+    , color = "#000000"
+    }
+
+
 newQuestion : String -> Question
 newQuestion uuid =
     { uuid = uuid
@@ -285,6 +374,7 @@ newQuestion uuid =
     , title = "New question"
     , text = Nothing
     , requiredLevel = Nothing
+    , tagUuids = []
     , answerItemTemplate = Nothing
     , answers = Nothing
     , references = []
@@ -332,6 +422,11 @@ getChapter : KnowledgeModel -> String -> Maybe Chapter
 getChapter km chapterUuid =
     getChapters km
         |> List.find (\c -> c.uuid == chapterUuid)
+
+
+getTag : KnowledgeModel -> String -> Maybe Tag
+getTag km tagUuid =
+    List.find (\t -> t.uuid == tagUuid) km.tags
 
 
 getQuestions : KnowledgeModel -> List Question

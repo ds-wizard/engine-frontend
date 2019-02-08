@@ -20,6 +20,7 @@ import KMEditor.Editor.Update.Expert exposing (..)
 import KMEditor.Editor.Update.KnowledgeModel exposing (..)
 import KMEditor.Editor.Update.Question exposing (..)
 import KMEditor.Editor.Update.Reference exposing (..)
+import KMEditor.Editor.Update.Tag exposing (deleteTag, updateTagForm, withGenerateTagEditEvent)
 import KMEditor.Requests exposing (getKnowledgeModelData, getLevels, getMetrics, postEventsBulk)
 import KMEditor.Routing exposing (Route(..))
 import Models exposing (State)
@@ -102,6 +103,10 @@ update msg wrapMsg state model =
                                 KMEditor data ->
                                     send
                                         |> withGenerateKMEditEvent state.seed model data
+
+                                TagEditor data ->
+                                    send
+                                        |> withGenerateTagEditEvent state.seed model data
 
                                 ChapterEditor data ->
                                     send
@@ -218,6 +223,10 @@ update msg wrapMsg state model =
                                     setActiveEditor wrapMsg uuid
                                         |> withGenerateKMEditEvent state.seed model data
 
+                                TagEditor data ->
+                                    setActiveEditor wrapMsg uuid
+                                        |> withGenerateTagEditEvent state.seed model data
+
                                 ChapterEditor data ->
                                     setActiveEditor wrapMsg uuid
                                         |> withGenerateChapterEditEvent state.seed model data
@@ -260,6 +269,16 @@ update msg wrapMsg state model =
                                     addChapter (scrollTopCmd wrapMsg)
                                         |> withGenerateKMEditEvent state.seed model editorData
 
+                                ReorderTags tagList ->
+                                    model
+                                        |> insertEditor (KMEditor { editorData | tags = Children.updateList tagList editorData.tags })
+                                        |> pair state.seed
+                                        |> withNoCmd
+
+                                AddTag ->
+                                    addTag (scrollTopCmd wrapMsg)
+                                        |> withGenerateKMEditEvent state.seed model editorData
+
                         ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
                             case chapterEditorMsg of
                                 ChapterFormMsg formMsg ->
@@ -281,10 +300,31 @@ update msg wrapMsg state model =
                                     addQuestion (scrollTopCmd wrapMsg)
                                         |> withGenerateChapterEditEvent state.seed model editorData
 
+                        ( TagEditorMsg tagEditorMsg, Just (TagEditor editorData) ) ->
+                            case tagEditorMsg of
+                                TagFormMsg formMsg ->
+                                    updateTagForm model formMsg editorData
+                                        |> pair state.seed
+                                        |> withNoCmd
+
+                                DeleteTag uuid ->
+                                    deleteTag state.seed model uuid editorData
+                                        |> withNoCmd
+
                         ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
                             case questionEditorMsg of
                                 QuestionFormMsg formMsg ->
                                     updateQuestionForm model formMsg editorData
+                                        |> pair state.seed
+                                        |> withNoCmd
+
+                                AddQuestionTag uuid ->
+                                    addQuestionTag model uuid editorData
+                                        |> pair state.seed
+                                        |> withNoCmd
+
+                                RemoveQuestionTag uuid ->
+                                    removeQuestionTag model uuid editorData
                                         |> pair state.seed
                                         |> withNoCmd
 

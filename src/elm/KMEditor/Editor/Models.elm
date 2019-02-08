@@ -3,7 +3,9 @@ module KMEditor.Editor.Models exposing
     , addEvent
     , containsChanges
     , getActiveEditor
+    , getCurrentTags
     , getEditorContext
+    , getKMEditor
     , initialModel
     , insertEditor
     , setAlert
@@ -11,12 +13,13 @@ module KMEditor.Editor.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, Tag)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
-import KMEditor.Editor.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid, isEditorDirty)
+import KMEditor.Editor.Models.Editors exposing (Editor(..), KMEditorData, getEditorTitle, getEditorUuid, isEditorDirty)
 import Reorderable
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
+import Utils exposing (listFilterJust)
 
 
 type alias Model =
@@ -64,6 +67,52 @@ getActiveEditor model =
 
         Nothing ->
             Nothing
+
+
+getKMEditor : Model -> Maybe Editor
+getKMEditor model =
+    model.kmUuid
+        |> ActionResult.map (\uuid -> Dict.get uuid model.editors)
+        |> ActionResult.withDefault Nothing
+
+
+getCurrentTags : Model -> List Tag
+getCurrentTags model =
+    getKMEditor model
+        |> Maybe.map (getTagEditorsUuids model >> getTags model)
+        |> Maybe.withDefault []
+
+
+getTagEditorsUuids : Model -> Editor -> List String
+getTagEditorsUuids model editor =
+    case editor of
+        KMEditor kmEditorData ->
+            kmEditorData.tags.list
+
+        _ ->
+            []
+
+
+getTags : Model -> List String -> List Tag
+getTags model uuids =
+    List.map (getTagByTagEditorUuid model) uuids
+        |> listFilterJust
+        |> List.sortBy .name
+
+
+getTagByTagEditorUuid : Model -> String -> Maybe Tag
+getTagByTagEditorUuid model uuid =
+    Dict.get uuid model.editors
+        |> Maybe.map
+            (\t ->
+                case t of
+                    TagEditor tagEditorData ->
+                        Just tagEditorData.tag
+
+                    _ ->
+                        Nothing
+            )
+        |> Maybe.withDefault Nothing
 
 
 addEvent : Event -> Model -> Model
