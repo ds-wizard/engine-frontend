@@ -1285,7 +1285,7 @@ isDeleteExpert expert event =
 isAddChapter : KnowledgeModel -> Event -> Bool
 isAddChapter km event =
     case event of
-        AddChapterEvent eventData commonData ->
+        AddChapterEvent _ commonData ->
             case List.last commonData.path of
                 Just (KMPathNode uuid) ->
                     uuid == km.uuid
@@ -1300,7 +1300,7 @@ isAddChapter km event =
 isAddQuestion : String -> Event -> Bool
 isAddQuestion parentUuid event =
     case event of
-        AddQuestionEvent eventData commonData ->
+        AddQuestionEvent _ commonData ->
             case List.last commonData.path of
                 Just (ChapterPathNode uuid) ->
                     uuid == parentUuid
@@ -1315,7 +1315,7 @@ isAddQuestion parentUuid event =
 isAddAnswer : Question -> Event -> Bool
 isAddAnswer question event =
     case event of
-        AddAnswerEvent eventData commonData ->
+        AddAnswerEvent _ commonData ->
             case List.last commonData.path of
                 Just (QuestionPathNode uuid) ->
                     uuid == question.uuid
@@ -1330,7 +1330,7 @@ isAddAnswer question event =
 isAddExpert : Question -> Event -> Bool
 isAddExpert question event =
     case event of
-        AddExpertEvent eventData commonData ->
+        AddExpertEvent _ commonData ->
             case List.last commonData.path of
                 Just (QuestionPathNode uuid) ->
                     uuid == question.uuid
@@ -1345,7 +1345,7 @@ isAddExpert question event =
 isAddReference : Question -> Event -> Bool
 isAddReference question event =
     case event of
-        AddReferenceEvent eventData commonData ->
+        AddReferenceEvent _ commonData ->
             case List.last commonData.path of
                 Just (QuestionPathNode uuid) ->
                     uuid == question.uuid

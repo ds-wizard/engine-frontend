@@ -1,7 +1,12 @@
-module TestUtils exposing (expectDecoder, parametrized)
+module TestUtils exposing
+    ( expectDecoder
+    , expectEncodeDecode
+    , parametrized
+    )
 
 import Expect exposing (Expectation)
 import Json.Decode exposing (Decoder, decodeString, errorToString)
+import Json.Encode as Encode exposing (Value)
 import String exposing (fromInt)
 import Test exposing (Test, describe, test)
 
@@ -20,3 +25,12 @@ expectDecoder decoder raw expected =
 
         Err err ->
             Expect.fail <| errorToString err
+
+
+expectEncodeDecode : (a -> Value) -> Decoder a -> a -> Expectation
+expectEncodeDecode encode decoder expected =
+    let
+        raw =
+            Encode.encode 0 <| encode expected
+    in
+    expectDecoder decoder raw expected
