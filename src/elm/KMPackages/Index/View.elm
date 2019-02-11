@@ -3,8 +3,8 @@ module KMPackages.Index.View exposing (view)
 import Auth.Models exposing (JwtToken)
 import Auth.Permission exposing (hasPerm, packageManagementWrite)
 import Common.Html exposing (..)
-import Common.View exposing (modalView)
 import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
 import Html exposing (..)
@@ -111,4 +111,4 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeletePackage Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig

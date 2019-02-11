@@ -4,8 +4,8 @@ import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
-import Common.View exposing (modalView)
 import Common.View.Forms exposing (formResultView, selectGroup)
+import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
 import Form
@@ -176,7 +176,7 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteKnowledgeModal Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 upgradeModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -229,7 +229,7 @@ upgradeModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideUpgradeModal Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 createOption : PackageDetail -> ( String, String )

@@ -2,8 +2,8 @@ module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig,
 
 import ActionResult
 import Common.Html exposing (emptyNode)
-import Common.View exposing (AlertConfig, alertView)
 import Common.View.Forms exposing (actionButton, formErrorResultView)
+import Common.View.Modal as Modal exposing (AlertConfig)
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class, id)
@@ -24,7 +24,7 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col KMEditor__Editor" ]
         [ Page.actionResultView (editorView wrapMsg model) (ActionResult.combine3 model.kmUuid model.metrics model.levels)
-        , alertView (alertConfig model) |> Html.map wrapMsg
+        , Modal.alert (alertConfig model) |> Html.map wrapMsg
         ]
 
 

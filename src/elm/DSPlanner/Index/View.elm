@@ -3,8 +3,8 @@ module DSPlanner.Index.View exposing (deleteModal, exportAction, exportFormats, 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (linkTo)
-import Common.View exposing (modalView)
 import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (..)
 import DSPlanner.Common.Models exposing (Questionnaire)
@@ -156,4 +156,4 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteQuestionnaire Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig

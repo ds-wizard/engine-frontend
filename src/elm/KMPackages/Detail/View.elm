@@ -5,8 +5,8 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (detailContainerClassWith, emptyNode, linkToAttributes)
-import Common.View exposing (modalView)
 import Common.View.Forms exposing (codeGroup)
+import Common.View.Modal as Modal
 import Common.View.Page as Page
 import DSPlanner.Routing
 import Html exposing (..)
@@ -143,4 +143,4 @@ deleteVersionModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteVersion Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig

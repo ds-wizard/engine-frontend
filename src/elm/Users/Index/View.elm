@@ -1,8 +1,8 @@
 module Users.Index.View exposing (view)
 
 import Common.Html exposing (..)
-import Common.View exposing (modalView)
 import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
 import Html exposing (..)
@@ -96,7 +96,7 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteUser Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 userCard : User -> Html Msgs.Msg
