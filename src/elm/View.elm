@@ -2,7 +2,7 @@ module View exposing (view)
 
 import Browser exposing (Document)
 import Common.Html.Attribute exposing (detailClass)
-import Common.View.Layout exposing (appView, publicView)
+import Common.View.Layout as Layout
 import Common.View.Page as Page
 import DSPlanner.View
 import Html exposing (..)
@@ -21,43 +21,43 @@ view : Model -> Document Msg
 view model =
     case model.state.route of
         Welcome ->
-            appView model welcomeView
+            Layout.app model welcomeView
 
         DSPlanner route ->
             model.dsPlannerModel
                 |> DSPlanner.View.view route DSPlannerMsg
-                |> appView model
+                |> Layout.app model
 
         KMEditor route ->
             model.kmEditorModel
                 |> KMEditor.View.view route KMEditorMsg model.state.jwt
-                |> appView model
+                |> Layout.app model
 
         KMPackages route ->
             model.kmPackagesModel
                 |> KMPackages.View.view route KMPackagesMsg model.state.jwt
-                |> appView model
+                |> Layout.app model
 
         Organization ->
             model.organizationModel
                 |> Organization.View.view
-                |> appView model
+                |> Layout.app model
 
         Public route ->
             model.publicModel
                 |> Public.View.view route PublicMsg
-                |> publicView model
+                |> Layout.public model
 
         Users route ->
             model.users
                 |> Users.View.view route UsersMsg
-                |> appView model
+                |> Layout.app model
 
         NotAllowed ->
-            appView model notAllowedView
+            Layout.app model notAllowedView
 
         NotFound ->
-            appView model notFoundView
+            Layout.app model notFoundView
 
 
 welcomeView : Html Msg
