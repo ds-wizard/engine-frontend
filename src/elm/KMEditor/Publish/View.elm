@@ -1,7 +1,7 @@
 module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith)
+import Common.Html.Attribute exposing (detailClass)
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
@@ -22,7 +22,7 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "KMEditor__Publish" ]
+    div [ detailClass "KMEditor__Publish" ]
         [ Page.header "Publish new version" []
         , Page.actionResultView (contentView wrapMsg model) model.knowledgeModel
         ]

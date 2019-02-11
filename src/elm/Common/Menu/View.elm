@@ -11,7 +11,8 @@ import ActionResult exposing (ActionResult(..))
 import Auth.Msgs
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Common.Html exposing (fa, linkToAttributes)
+import Common.Html exposing (fa)
+import Common.Html.Attribute exposing (linkToAttributes)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
 import Common.Menu.Msgs exposing (Msg(..))

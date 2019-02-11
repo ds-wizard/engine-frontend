@@ -4,7 +4,8 @@ import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Common.Html exposing (detailContainerClassWith, emptyNode, linkToAttributes)
+import Common.Html exposing (emptyNode)
+import Common.Html.Attribute exposing (detailClass, linkToAttributes)
 import Common.View.FormGroup as FormGroup
 import Common.View.Modal as Modal
 import Common.View.Page as Page
@@ -22,7 +23,7 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
-    div [ detailContainerClassWith "KMPackages__Detail" ]
+    div [ detailClass "KMPackages__Detail" ]
         [ Page.actionResultView (packageDetail wrapMsg jwt) model.packages
         , deleteVersionModal wrapMsg model
         ]

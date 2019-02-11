@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import Browser exposing (Document)
-import Common.Html exposing (detailContainerClassWith)
+import Common.Html.Attribute exposing (detailClass)
 import Common.View.Layout exposing (appView, publicView)
 import Common.View.Page as Page
 import DSPlanner.View
@@ -62,7 +62,7 @@ view model =
 
 welcomeView : Html Msg
 welcomeView =
-    div [ detailContainerClassWith "Welcome" ]
+    div [ detailClass "Welcome" ]
         [ div [ class "alert alert-warning" ]
             [ h4 [ class "alert-heading" ] [ text "Warning" ]
             , p [ class "mb-0" ] [ text "DSW is currently under intensive development. As such, we cannot guarantee DS plans compatibility in future versions." ]

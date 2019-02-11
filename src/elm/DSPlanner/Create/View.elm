@@ -2,7 +2,8 @@ module DSPlanner.Create.View exposing (content, createOption, formView, view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode)
+import Common.Html exposing (emptyNode)
+import Common.Html.Attribute exposing (detailClass)
 import Common.View.Flash as Flash
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
@@ -23,7 +24,7 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "DSPlanner__Create" ]
+    div [ detailClass "DSPlanner__Create" ]
         [ Page.header "Create Questionnaire" []
         , Page.actionResultView (content wrapMsg model) model.packages
         ]

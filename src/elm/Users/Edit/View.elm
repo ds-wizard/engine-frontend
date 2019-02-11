@@ -2,7 +2,8 @@ module Users.Edit.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode)
+import Common.Html exposing (emptyNode)
+import Common.Html.Attribute exposing (detailClass)
 import Common.View.FormActions as FormActions
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
@@ -21,7 +22,7 @@ import Users.Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "Users__Edit" ]
+    div [ detailClass "Users__Edit" ]
         [ Page.header "Edit user profile" []
         , Page.actionResultView (profileView wrapMsg model) model.user
         ]

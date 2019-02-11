@@ -1,7 +1,7 @@
 module Organization.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith)
+import Common.Html.Attribute exposing (detailClass)
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
@@ -16,7 +16,7 @@ import Organization.Msgs exposing (Msg(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ detailContainerClassWith "Organization" ]
+    div [ detailClass "Organization" ]
         [ Page.header "Organization" []
         , Page.actionResultView (viewOrganization model) model.organization
         ]
