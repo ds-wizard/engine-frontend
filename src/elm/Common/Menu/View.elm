@@ -15,7 +15,8 @@ import Common.Html exposing (fa, linkToAttributes)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
 import Common.Menu.Msgs exposing (Msg(..))
-import Common.View exposing (fullPageActionResultView, modalView)
+import Common.View exposing (modalView)
+import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class, colspan, href, target)
 import Msgs
@@ -114,7 +115,7 @@ viewAboutModal : Bool -> ActionResult BuildInfo -> Html Msgs.Msg
 viewAboutModal isOpen serverBuildInfoActionResult =
     let
         modalContent =
-            fullPageActionResultView viewAboutModalContent serverBuildInfoActionResult
+            Page.actionResultView viewAboutModalContent serverBuildInfoActionResult
 
         modalConfig =
             { modalTitle = "About"

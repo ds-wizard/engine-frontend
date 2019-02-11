@@ -3,8 +3,9 @@ module KMPackages.Index.View exposing (view)
 import Auth.Models exposing (JwtToken)
 import Auth.Permission exposing (hasPerm, packageManagementWrite)
 import Common.Html exposing (..)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
+import Common.View exposing (modalView)
 import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -19,9 +20,9 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
     div [ class "col KMPackages__Index" ]
-        [ pageHeader "Knowledge Models" (indexActions jwt)
+        [ Page.header "Knowledge Models" (indexActions jwt)
         , formSuccessResultView model.deletingPackage
-        , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.packages
+        , Page.actionResultView (indexTable (tableConfig jwt) wrapMsg) model.packages
         , deleteModal wrapMsg model
         ]
 

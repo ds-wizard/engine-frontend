@@ -2,8 +2,8 @@ module Public.Signup.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (..)
+import Common.View.Page as Page
 import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (..)
@@ -22,7 +22,7 @@ view wrapMsg model =
         content =
             case model.signingUp of
                 Success _ ->
-                    successView
+                    Page.success "Sign up was successful. Check your email for activation link."
 
                 _ ->
                     signupForm wrapMsg model
@@ -80,8 +80,3 @@ formView form =
         , passwordGroup form "passwordConfirmation" "Password again"
         , acceptGroup
         ]
-
-
-successView : Html Msgs.Msg
-successView =
-    fullPageMessage "fa-check" "Sign up was successful. Check your email for activation link."

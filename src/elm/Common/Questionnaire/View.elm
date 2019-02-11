@@ -5,8 +5,9 @@ import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Common.View exposing (fullPageActionResultView, modalView)
+import Common.View exposing (modalView)
 import Common.View.Forms exposing (inputGroup, textAreaGroup)
+import Common.View.Page as Page
 import FormEngine.View exposing (FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -132,7 +133,7 @@ pageView levels model =
             ]
 
         PageSummaryReport ->
-            [ fullPageActionResultView (viewSummary model) (ActionResult.combine model.metrics model.summaryReport) ]
+            [ Page.actionResultView (viewSummary model) (ActionResult.combine model.metrics model.summaryReport) ]
 
 
 chapterHeader : Chapter -> Html Msg

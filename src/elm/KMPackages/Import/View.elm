@@ -2,8 +2,8 @@ module KMPackages.Import.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (detailContainerClassWith)
-import Common.View exposing (pageHeader)
 import Common.View.Forms exposing (actionButton, formResultView)
+import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -25,7 +25,7 @@ view wrapMsg model =
                     dropzone model |> Html.map wrapMsg
     in
     div [ detailContainerClassWith "KMPackages__Import", id dropzoneId ]
-        [ pageHeader "Import Knowledge Model" []
+        [ Page.header "Import Knowledge Model" []
         , formResultView model.importing
         , content
         ]

@@ -1,9 +1,9 @@
 module KMEditor.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
+import Common.Html exposing (detailContainerClassWith)
 import Common.View.Forms exposing (..)
+import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
 import KMEditor.Create.Models exposing (..)
@@ -17,8 +17,8 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ detailContainerClassWith "KMEditor__Create" ]
-        [ pageHeader "Create Knowledge Model" []
-        , fullPageActionResultView (content wrapMsg model) model.packages
+        [ Page.header "Create Knowledge Model" []
+        , Page.actionResultView (content wrapMsg model) model.packages
         ]
 
 

@@ -1,6 +1,6 @@
 module Public.BookReference.View exposing (bookUrl, crcUrl, view, viewBookReference)
 
-import Common.View exposing (fullPageActionResultView)
+import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Markdown
@@ -10,7 +10,7 @@ import Public.BookReference.Models exposing (BookReference, Model)
 
 view : Model -> Html Msgs.Msg
 view model =
-    fullPageActionResultView viewBookReference model.bookReference
+    Page.actionResultView viewBookReference model.bookReference
 
 
 bookUrl : String

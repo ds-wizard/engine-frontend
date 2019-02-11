@@ -1,9 +1,9 @@
 module View exposing (view)
 
 import Browser exposing (Document)
-import Common.Html exposing (detailContainerClassWith, linkTo)
-import Common.View exposing (defaultFullPageError, fullPageMessage, pageHeader)
+import Common.Html exposing (detailContainerClassWith)
 import Common.View.Layout exposing (appView, publicView)
+import Common.View.Page as Page
 import DSPlanner.View
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
@@ -13,7 +13,7 @@ import Models exposing (Model)
 import Msgs exposing (Msg(..))
 import Organization.View
 import Public.View
-import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
+import Routing exposing (Route(..))
 import Users.View
 
 
@@ -74,15 +74,15 @@ welcomeView =
                 , text "."
                 ]
             ]
-        , fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+        , Page.message "hand-spock-o" "Welcome to the Data Stewardship Wizard!"
         ]
 
 
 notFoundView : Html msg
 notFoundView =
-    fullPageMessage "fa-file-o" "The page was not found"
+    Page.message "file-o" "The page was not found"
 
 
 notAllowedView : Html msg
 notAllowedView =
-    fullPageMessage "fa-ban" "You don't have a permission to view this page"
+    Page.message "ban" "You don't have a permission to view this page"

@@ -3,15 +3,15 @@ module Users.Edit.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.View exposing (defaultFullPageError, fullPageLoader, pageHeader)
 import Common.View.Forms exposing (..)
+import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs
 import Routing exposing (Route(..))
-import Users.Common.Models exposing (roles)
+import Users.Common.Models exposing (User, roles)
 import Users.Edit.Models exposing (..)
 import Users.Edit.Msgs exposing (Msg(..))
 import Users.Routing
@@ -20,38 +20,13 @@ import Users.Routing
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ detailContainerClassWith "Users__Edit" ]
-        [ pageHeader "Edit user profile" []
-        , content wrapMsg model
+        [ Page.header "Edit user profile" []
+        , Page.actionResultView (profileView wrapMsg model) model.user
         ]
 
 
-content : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-content wrapMsg model =
-    case model.user of
-        Unset ->
-            emptyNode
-
-        Loading ->
-            fullPageLoader
-
-        Error err ->
-            defaultFullPageError err
-
-        Success user ->
-            profileView wrapMsg model
-
-
-profileView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-profileView wrapMsg model =
-    let
-        currentView =
-            case model.currentView of
-                Profile ->
-                    userView wrapMsg model
-
-                Password ->
-                    passwordView wrapMsg model
-    in
+profileView : (Msg -> Msgs.Msg) -> Model -> User -> Html Msgs.Msg
+profileView wrapMsg model _ =
     div []
         [ navbar wrapMsg model
         , userView wrapMsg model

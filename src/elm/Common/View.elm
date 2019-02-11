@@ -1,4 +1,17 @@
-module Common.View exposing (AlertConfig, ModalConfig, alertView, defaultFullPageError, fullPageActionResultView, fullPageLoader, fullPageMessage, modalView, pageActions, pageHeader)
+module Common.View exposing
+    ( AlertConfig
+    , ModalConfig
+    ,  alertView
+       --    , defaultFullPageError
+       --    , fullPageActionResultView
+       --    , fullPageLoader
+       --    , fullPageMessage
+
+    ,  modalView
+       --    , pageActions
+       --    , pageHeader
+
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode)
@@ -8,55 +21,56 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 
 
-pageHeader : String -> List (Html msg) -> Html msg
-pageHeader title actions =
-    div [ class "header" ]
-        [ h2 [] [ text title ]
-        , pageActions actions
-        ]
 
-
-pageActions : List (Html msg) -> Html msg
-pageActions actions =
-    div [ class "actions" ]
-        actions
-
-
-fullPageLoader : Html msg
-fullPageLoader =
-    div [ class "full-page-loader" ]
-        [ i [ class "fa fa-spinner fa-spin" ] []
-        , div [] [ text "Loading..." ]
-        ]
-
-
-defaultFullPageError : String -> Html msg
-defaultFullPageError =
-    fullPageMessage "fa-frown-o"
-
-
-fullPageMessage : String -> String -> Html msg
-fullPageMessage icon error =
-    div [ class "jumbotron full-page-message" ]
-        [ h1 [ class "display-3" ] [ i [ class ("fa " ++ icon) ] [] ]
-        , p [ class "lead" ] [ text error ]
-        ]
-
-
-fullPageActionResultView : (a -> Html msg) -> ActionResult a -> Html msg
-fullPageActionResultView viewContent actionResult =
-    case actionResult of
-        Unset ->
-            emptyNode
-
-        Loading ->
-            fullPageLoader
-
-        Error err ->
-            defaultFullPageError err
-
-        Success result ->
-            viewContent result
+--pageHeader : String -> List (Html msg) -> Html msg
+--pageHeader title actions =
+--    div [ class "header" ]
+--        [ h2 [] [ text title ]
+--        , pageActions actions
+--        ]
+--
+--
+--pageActions : List (Html msg) -> Html msg
+--pageActions actions =
+--    div [ class "actions" ]
+--        actions
+--
+--
+--fullPageLoader : Html msg
+--fullPageLoader =
+--    div [ class "full-page-loader" ]
+--        [ i [ class "fa fa-spinner fa-spin" ] []
+--        , div [] [ text "Loading..." ]
+--        ]
+--
+--
+--defaultFullPageError : String -> Html msg
+--defaultFullPageError =
+--    fullPageMessage "fa-frown-o"
+--
+--
+--fullPageMessage : String -> String -> Html msg
+--fullPageMessage icon error =
+--    div [ class "jumbotron full-page-message" ]
+--        [ h1 [ class "display-3" ] [ i [ class ("fa " ++ icon) ] [] ]
+--        , p [ class "lead" ] [ text error ]
+--        ]
+--
+--
+--fullPageActionResultView : (a -> Html msg) -> ActionResult a -> Html msg
+--fullPageActionResultView viewContent actionResult =
+--    case actionResult of
+--        Unset ->
+--            emptyNode
+--
+--        Loading ->
+--            fullPageLoader
+--
+--        Error err ->
+--            defaultFullPageError err
+--
+--        Success result ->
+--            viewContent result
 
 
 type alias ModalConfig msg =

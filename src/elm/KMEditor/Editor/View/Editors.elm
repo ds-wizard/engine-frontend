@@ -3,23 +3,22 @@ module KMEditor.Editor.View.Editors exposing (activeEditor)
 import ActionResult
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
-import Common.View exposing (fullPageMessage)
 import Common.View.Forms exposing (colorGroup, formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
+import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import Dict exposing (Dict)
 import Form exposing (Form)
-import Form.Input as Input exposing (baseInput)
+import Form.Input as Input
 import Html exposing (..)
-import Html.Attributes exposing (checked, class, classList, disabled, style, type_)
+import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Entities exposing (Level, Metric, Tag)
-import KMEditor.Editor.Models exposing (Model, getActiveEditor, getCurrentTags, getKMEditor)
+import KMEditor.Editor.Models exposing (Model, getActiveEditor, getCurrentTags)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
 import String exposing (fromInt, toLower)
-import Utils exposing (getContrastColorHex)
 
 
 activeEditor : Model -> ( String, Html Msg )
@@ -49,7 +48,7 @@ activeEditor model =
                     expertEditorView data
 
         Nothing ->
-            ( "nothing", fullPageMessage "fa-long-arrow-left" "Select what you want to edit" )
+            ( "nothing", Page.message "long-arrow-left" "Select what you want to edit" )
 
 
 getChildName : Dict String Editor -> String -> String

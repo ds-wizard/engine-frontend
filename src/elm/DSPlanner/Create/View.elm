@@ -3,8 +3,8 @@ module DSPlanner.Create.View exposing (content, createOption, formView, view)
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode, inlineLoader)
-import Common.View exposing (fullPageActionResultView, pageHeader)
 import Common.View.Forms exposing (errorView, formActions, formResultView, formText, inputGroup, selectGroup, toggleGroup)
+import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
 import DSPlanner.Create.Msgs exposing (Msg(..))
@@ -20,8 +20,8 @@ import Routing
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ detailContainerClassWith "DSPlanner__Create" ]
-        [ pageHeader "Create Questionnaire" []
-        , fullPageActionResultView (content wrapMsg model) model.packages
+        [ Page.header "Create Questionnaire" []
+        , Page.actionResultView (content wrapMsg model) model.packages
         ]
 
 

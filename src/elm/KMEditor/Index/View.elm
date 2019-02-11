@@ -4,8 +4,9 @@ import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
+import Common.View exposing (modalView)
 import Common.View.Forms exposing (formResultView, selectGroup)
+import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
 import Form
 import Html exposing (..)
@@ -22,9 +23,9 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
     div [ class "col KMEditor__Index" ]
-        [ pageHeader "Knowledge Model Editor" indexActions
+        [ Page.header "Knowledge Model Editor" indexActions
         , formResultView model.deletingMigration
-        , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels
+        , Page.actionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]
@@ -203,7 +204,7 @@ upgradeModal wrapMsg model =
                     [ emptyNode ]
 
                 Loading ->
-                    [ fullPageLoader ]
+                    [ Page.loader ]
 
                 Error error ->
                     [ p [ class "alert alert-danger" ] [ text error ] ]

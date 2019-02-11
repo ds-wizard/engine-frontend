@@ -2,9 +2,10 @@ module DSPlanner.Index.View exposing (deleteModal, exportAction, exportFormats, 
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Common.Html exposing (detailContainerClass, emptyNode, linkTo)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
+import Common.Html exposing (linkTo)
+import Common.View exposing (modalView)
 import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.Page as Page
 import Common.View.Table exposing (..)
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Index.Models exposing (Model, QuestionnaireRow)
@@ -20,9 +21,9 @@ import Routing
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col DSPlanner__Index" ]
-        [ pageHeader "Questionnaires" indexActions
+        [ Page.header "Questionnaires" indexActions
         , formSuccessResultView model.deletingQuestionnaire
-        , fullPageActionResultView (indexTable (tableConfig model) wrapMsg) model.questionnaires
+        , Page.actionResultView (indexTable (tableConfig model) wrapMsg) model.questionnaires
         , deleteModal wrapMsg model
         ]
 

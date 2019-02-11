@@ -1,8 +1,7 @@
 module Public.SignupConfirmation.View exposing (successView, view)
 
-import ActionResult exposing (ActionResult(..))
-import Common.Html exposing (emptyNode, linkTo)
-import Common.View exposing (defaultFullPageError, fullPageLoader)
+import Common.Html exposing (linkTo)
+import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
@@ -13,27 +12,12 @@ import Routing
 
 view : Model -> Html Msgs.Msg
 view model =
-    let
-        content =
-            case model.confirmation of
-                Unset ->
-                    emptyNode
-
-                Loading ->
-                    fullPageLoader
-
-                Error err ->
-                    defaultFullPageError err
-
-                Success _ ->
-                    successView
-    in
     div [ class "row justify-content-center Public__SignupConfirmation" ]
-        [ content ]
+        [ Page.actionResultView successView model.confirmation ]
 
 
-successView : Html Msgs.Msg
-successView =
+successView : String -> Html Msgs.Msg
+successView _ =
     div [ class "jumbotron full-page-error" ]
         [ h1 [ class "display-3" ] [ i [ class "fa fa-check" ] [] ]
         , p [ class "lead" ]

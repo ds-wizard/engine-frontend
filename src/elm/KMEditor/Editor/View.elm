@@ -2,10 +2,11 @@ module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig,
 
 import ActionResult
 import Common.Html exposing (emptyNode)
-import Common.View exposing (AlertConfig, alertView, fullPageActionResultView)
+import Common.View exposing (AlertConfig, alertView)
 import Common.View.Forms exposing (actionButton, formErrorResultView)
+import Common.View.Page as Page
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
@@ -22,7 +23,7 @@ import SplitPane exposing (ViewConfig, createViewConfig)
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col KMEditor__Editor" ]
-        [ fullPageActionResultView (editorView wrapMsg model) (ActionResult.combine3 model.kmUuid model.metrics model.levels)
+        [ Page.actionResultView (editorView wrapMsg model) (ActionResult.combine3 model.kmUuid model.metrics model.levels)
         , alertView (alertConfig model) |> Html.map wrapMsg
         ]
 

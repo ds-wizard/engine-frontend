@@ -1,9 +1,9 @@
 module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
+import Common.Html exposing (detailContainerClassWith)
 import Common.View.Forms exposing (..)
+import Common.View.Page as Page
 import Form exposing (Form)
 import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Input as Input
@@ -20,8 +20,8 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ detailContainerClassWith "KMEditor__Publish" ]
-        [ pageHeader "Publish new version" []
-        , fullPageActionResultView (contentView wrapMsg model) model.knowledgeModel
+        [ Page.header "Publish new version" []
+        , Page.actionResultView (contentView wrapMsg model) model.knowledgeModel
         ]
 
 
