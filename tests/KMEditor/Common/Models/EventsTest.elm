@@ -103,11 +103,11 @@ editKnowledgeModelEvent =
             { changed = True
             , value = Just "My Knowledge Model"
             }
-        , chapterIds =
+        , chapterUuids =
             { changed = False
             , value = Nothing
             }
-        , tagIds =
+        , tagUuids =
             { changed = False
             , value = Nothing
             }
@@ -136,11 +136,11 @@ editKnowledgeModelEventTest =
                                 { changed = False
                                 , value = Nothing
                                 }
-                            , chapterIds =
+                            , chapterUuids =
                                 { changed = False
                                 , value = Nothing
                                 }
-                            , tagIds =
+                            , tagUuids =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -199,7 +199,7 @@ editChapterEvent =
             { changed = False
             , value = Nothing
             }
-        , questionIds =
+        , questionUuids =
             { changed = True
             , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
             }
@@ -232,7 +232,7 @@ editChapterEventTest =
                                 { changed = False
                                 , value = Nothing
                                 }
-                            , questionIds =
+                            , questionUuids =
                                 { changed = True
                                 , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
                                 }
@@ -468,7 +468,7 @@ editAnswerEvent =
             { changed = False
             , value = Nothing
             }
-        , followUpIds =
+        , followUpUuids =
             { changed = True
             , value =
                 Just
@@ -514,7 +514,7 @@ editAnswerEventTest =
                                 { changed = False
                                 , value = Nothing
                                 }
-                            , followUpIds =
+                            , followUpUuids =
                                 { changed = True
                                 , value =
                                     Just

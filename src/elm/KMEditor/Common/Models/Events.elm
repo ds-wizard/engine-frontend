@@ -151,8 +151,8 @@ type alias CommonEventData =
 type alias EditKnowledgeModelEventData =
     { kmUuid : String
     , name : EventField String
-    , chapterIds : EventField (List String)
-    , tagIds : EventField (List String)
+    , chapterUuids : EventField (List String)
+    , tagUuids : EventField (List String)
     }
 
 
@@ -167,7 +167,7 @@ type alias EditChapterEventData =
     { chapterUuid : String
     , title : EventField String
     , text : EventField String
-    , questionIds : EventField (List String)
+    , questionUuids : EventField (List String)
     }
 
 
@@ -216,9 +216,9 @@ type alias EditQuestionEventData =
     , requiredLevel : EventField (Maybe Int)
     , tagUuids : EventField (List String)
     , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
-    , answerIds : EventField (Maybe (List String))
-    , expertIds : EventField (List String)
-    , referenceIds : EventField (List String)
+    , answerUuids : EventField (Maybe (List String))
+    , referenceUuids : EventField (List String)
+    , expertUuids : EventField (List String)
     }
 
 
@@ -240,7 +240,7 @@ type alias EditAnswerEventData =
     , label : EventField String
     , advice : EventField (Maybe String)
     , metricMeasures : EventField (List MetricMeasure)
-    , followUpIds : EventField (List String)
+    , followUpUuids : EventField (List String)
     }
 
 
@@ -333,7 +333,7 @@ type alias EventField a =
 
 type alias AnswerItemTemplateData =
     { title : String
-    , questionIds : List String
+    , questionUuids : List String
     }
 
 
@@ -423,8 +423,8 @@ encodeEditKnowledgeModelEvent data =
     [ ( "eventType", Encode.string "EditKnowledgeModelEvent" )
     , ( "kmUuid", Encode.string data.kmUuid )
     , ( "name", encodeEventField Encode.string data.name )
-    , ( "chapterIds", encodeEventField (Encode.list Encode.string) data.chapterIds )
-    , ( "tagIds", encodeEventField (Encode.list Encode.string) data.tagIds )
+    , ( "chapterUuids", encodeEventField (Encode.list Encode.string) data.chapterUuids )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
     ]
 
 
@@ -443,7 +443,7 @@ encodeEditChapterEvent data =
     , ( "chapterUuid", Encode.string data.chapterUuid )
     , ( "title", encodeEventField Encode.string data.title )
     , ( "text", encodeEventField Encode.string data.text )
-    , ( "questionIds", encodeEventField (Encode.list Encode.string) data.questionIds )
+    , ( "questionUuids", encodeEventField (Encode.list Encode.string) data.questionUuids )
     ]
 
 
@@ -504,9 +504,9 @@ encodeEditQuestionEvent data =
     , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
     , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
     , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
-    , ( "answerIds", encodeEventField (maybe (Encode.list Encode.string)) data.answerIds )
-    , ( "expertIds", encodeEventField (Encode.list Encode.string) data.expertIds )
-    , ( "referenceIds", encodeEventField (Encode.list Encode.string) data.referenceIds )
+    , ( "answerUuids", encodeEventField (maybe (Encode.list Encode.string)) data.answerUuids )
+    , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
+    , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
     ]
 
 
@@ -534,7 +534,7 @@ encodeEditAnswerEvent data =
     , ( "label", encodeEventField Encode.string data.label )
     , ( "advice", encodeEventField (maybe Encode.string) data.advice )
     , ( "metricMeasures", encodeEventField (Encode.list metricMeasureEncoder) data.metricMeasures )
-    , ( "followUpIds", encodeEventField (Encode.list Encode.string) data.followUpIds )
+    , ( "followUpUuids", encodeEventField (Encode.list Encode.string) data.followUpUuids )
     ]
 
 
@@ -674,7 +674,7 @@ encodeAnswerItemTemplateData : AnswerItemTemplateData -> Encode.Value
 encodeAnswerItemTemplateData data =
     Encode.object
         [ ( "title", Encode.string data.title )
-        , ( "questionIds", Encode.list Encode.string data.questionIds )
+        , ( "questionUuids", Encode.list Encode.string data.questionUuids )
         ]
 
 
@@ -764,8 +764,8 @@ editKnowledgeModelEventDecoder =
     Decode.succeed EditKnowledgeModelEventData
         |> required "kmUuid" Decode.string
         |> required "name" (eventFieldDecoder Decode.string)
-        |> required "chapterIds" (eventFieldDecoder (Decode.list Decode.string))
-        |> required "tagIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "chapterUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 addChapterEventDecoder : Decoder AddChapterEventData
@@ -782,7 +782,7 @@ editChapterEventDecoder =
         |> required "chapterUuid" Decode.string
         |> required "title" (eventFieldDecoder Decode.string)
         |> required "text" (eventFieldDecoder Decode.string)
-        |> required "questionIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "questionUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 deleteChapterEventDecoder : Decoder DeleteChapterEventData
@@ -837,9 +837,9 @@ editQuestionEventDecoder =
         |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
         |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
-        |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
-        |> required "expertIds" (eventFieldDecoder (Decode.list Decode.string))
-        |> required "referenceIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "answerUuids" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
+        |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 deleteQuestionEventDecoder : Decoder DeleteQuestionEventData
@@ -864,7 +864,7 @@ editAnswerEventDecoder =
         |> required "label" (eventFieldDecoder Decode.string)
         |> required "advice" (eventFieldDecoder (Decode.nullable Decode.string))
         |> required "metricMeasures" (eventFieldDecoder (Decode.list metricMeasureDecoder))
-        |> required "followUpIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "followUpUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 deleteAnswerEventDecoder : Decoder DeleteAnswerEventData
@@ -1002,7 +1002,7 @@ answerItemTemplateDecoder : Decoder AnswerItemTemplateData
 answerItemTemplateDecoder =
     Decode.succeed AnswerItemTemplateData
         |> required "title" Decode.string
-        |> required "questionIds" (Decode.list Decode.string)
+        |> required "questionUuids" (Decode.list Decode.string)
 
 
 
