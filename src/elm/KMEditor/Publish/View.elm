@@ -4,6 +4,7 @@ import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
@@ -30,7 +31,7 @@ view wrapMsg model =
 contentView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModel -> Html Msgs.Msg
 contentView wrapMsg model knowledgeModel =
     div []
-        [ formResultView model.publishingKnowledgeModel
+        [ FormResult.view model.publishingKnowledgeModel
         , formView wrapMsg model.form knowledgeModel
         , formActions (KMEditor Index) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]

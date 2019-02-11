@@ -3,7 +3,7 @@ module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig,
 import ActionResult
 import Common.Html exposing (emptyNode)
 import Common.View.ActionButton as ActionButton
-import Common.View.Forms exposing (formErrorResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal exposing (AlertConfig)
 import Common.View.Page as Page
 import Html exposing (..)
@@ -54,7 +54,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
     div [ class "row" ]
         [ div [ class "editor-header" ]
             [ text "Knowledge Model Editor"
-            , formErrorResultView model.submitting
+            , FormResult.errorOnlyView model.submitting
             , unsavedChanges
             ]
         , div [ class "editor-breadcrumbs" ]

@@ -5,7 +5,7 @@ import Common.Html exposing (emptyNode)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.ActionButton as ActionButton
-import Common.View.Forms exposing (formResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
@@ -30,7 +30,7 @@ content wrapMsg model ( questionnaireModel, levels ) =
     in
     div [ class "col DSPlanner__Detail" ]
         [ questionnaireHeader wrapMsg model.savingQuestionnaire questionnaireModel
-        , formResultView model.savingQuestionnaire
+        , FormResult.view model.savingQuestionnaire
         , viewQuestionnaire questionnaireCfg questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg)
         ]
 

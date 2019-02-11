@@ -2,7 +2,7 @@ module KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (..)
-import Common.View.Forms exposing (formResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Dict exposing (Dict)
 import Html exposing (..)
@@ -23,7 +23,7 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col KMEditor__Migration" ]
         [ div [] [ Page.header "Migration" [] ]
-        , formResultView model.conflict
+        , FormResult.view model.conflict
         , Page.actionResultView (migrationView wrapMsg model) model.migration
         ]
 

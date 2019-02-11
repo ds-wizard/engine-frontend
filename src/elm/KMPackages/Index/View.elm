@@ -3,7 +3,7 @@ module KMPackages.Index.View exposing (view)
 import Auth.Models exposing (JwtToken)
 import Auth.Permission exposing (hasPerm, packageManagementWrite)
 import Common.Html exposing (..)
-import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
@@ -21,7 +21,7 @@ view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
     div [ class "col KMPackages__Index" ]
         [ Page.header "Knowledge Models" (indexActions jwt)
-        , formSuccessResultView model.deletingPackage
+        , FormResult.successOnlyView model.deletingPackage
         , Page.actionResultView (indexTable (tableConfig jwt) wrapMsg) model.packages
         , deleteModal wrapMsg model
         ]

@@ -6,7 +6,8 @@ import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.View.Flash as Flash
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
-import Common.View.Forms exposing (formActions, formResultView)
+import Common.View.FormResult as FormResult
+import Common.View.Forms exposing (formActions)
 import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
@@ -31,7 +32,7 @@ view wrapMsg model =
 content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
 content wrapMsg model packages =
     div []
-        [ formResultView model.savingQuestionnaire
+        [ FormResult.view model.savingQuestionnaire
         , formView model.form packages |> Html.map (wrapMsg << FormMsg)
         , tagsView wrapMsg model
         , formActions (Routing.DSPlanner DSPlanner.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )

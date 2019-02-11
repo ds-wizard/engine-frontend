@@ -8,7 +8,7 @@ module Common.View.Modal exposing
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode)
 import Common.View.ActionButton as ActionButton
-import Common.View.Forms exposing (..)
+import Common.View.FormResult as FormResult
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -29,7 +29,7 @@ confirm : ConfirmConfig msg -> Html msg
 confirm cfg =
     let
         content =
-            formResultView cfg.actionResult :: cfg.modalContent
+            FormResult.view cfg.actionResult :: cfg.modalContent
 
         cancelDisabled =
             case cfg.actionResult of

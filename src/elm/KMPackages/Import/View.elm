@@ -3,7 +3,7 @@ module KMPackages.Import.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (detailContainerClassWith)
 import Common.View.ActionButton as ActionButton
-import Common.View.Forms exposing (formResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -27,7 +27,7 @@ view wrapMsg model =
     in
     div [ detailContainerClassWith "KMPackages__Import", id dropzoneId ]
         [ Page.header "Import Knowledge Model" []
-        , formResultView model.importing
+        , FormResult.view model.importing
         , content
         ]
 

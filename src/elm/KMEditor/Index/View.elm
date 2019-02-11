@@ -5,7 +5,7 @@ import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
 import Common.View.FormGroup as FormGroup
-import Common.View.Forms exposing (formResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
@@ -25,7 +25,7 @@ view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
     div [ class "col KMEditor__Index" ]
         [ Page.header "Knowledge Model Editor" indexActions
-        , formResultView model.deletingMigration
+        , FormResult.view model.deletingMigration
         , Page.actionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model

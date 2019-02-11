@@ -1,7 +1,7 @@
 module Users.Index.View exposing (view)
 
 import Common.Html exposing (..)
-import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
@@ -19,7 +19,7 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col Users__Index" ]
         [ Page.header "Users" indexActions
-        , formSuccessResultView model.deletingUser
+        , FormResult.successOnlyView model.deletingUser
         , Page.actionResultView (indexTable tableConfig wrapMsg) model.users
         , deleteModal wrapMsg model
         ]

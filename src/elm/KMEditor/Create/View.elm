@@ -4,6 +4,7 @@ import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
@@ -27,7 +28,7 @@ view wrapMsg model =
 content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
 content wrapMsg model packages =
     div []
-        [ formResultView model.savingKnowledgeModel
+        [ FormResult.view model.savingKnowledgeModel
         , formView wrapMsg model.form packages
         , formActions (KMEditor Index) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]

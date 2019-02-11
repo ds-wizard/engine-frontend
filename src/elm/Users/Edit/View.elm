@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
@@ -60,7 +61,7 @@ navbar wrapMsg model =
 userView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 userView wrapMsg model =
     div [ class <| getClass (model.currentView /= Profile) "hidden" ]
-        [ formResultView model.savingUser
+        [ FormResult.view model.savingUser
         , userFormView model.userForm (model.uuid == "current") |> Html.map (wrapMsg << EditFormMsg)
         , formActionsView model ( "Save", model.savingUser, wrapMsg <| EditFormMsg Form.Submit )
         ]
@@ -101,7 +102,7 @@ userFormView form current =
 passwordView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 passwordView wrapMsg model =
     div [ class <| getClass (model.currentView /= Password) "hidden" ]
-        [ formResultView model.savingPassword
+        [ FormResult.view model.savingPassword
         , passwordFormView model.passwordForm |> Html.map (wrapMsg << PasswordFormMsg)
         , formActionsView model ( "Save", model.savingPassword, wrapMsg <| PasswordFormMsg Form.Submit )
         ]

@@ -3,7 +3,7 @@ module DSPlanner.Index.View exposing (deleteModal, exportAction, exportFormats, 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (linkTo)
-import Common.View.Forms exposing (formSuccessResultView)
+import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (..)
@@ -22,7 +22,7 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col DSPlanner__Index" ]
         [ Page.header "Questionnaires" indexActions
-        , formSuccessResultView model.deletingQuestionnaire
+        , FormResult.successOnlyView model.deletingQuestionnaire
         , Page.actionResultView (indexTable (tableConfig model) wrapMsg) model.questionnaires
         , deleteModal wrapMsg model
         ]
