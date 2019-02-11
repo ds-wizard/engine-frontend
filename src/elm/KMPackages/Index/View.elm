@@ -6,7 +6,7 @@ import Common.Html exposing (..)
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMPackages.Common.Models exposing (..)
@@ -22,7 +22,7 @@ view wrapMsg jwt model =
     div [ class "col KMPackages__Index" ]
         [ Page.header "Knowledge Models" (indexActions jwt)
         , FormResult.successOnlyView model.deletingPackage
-        , Page.actionResultView (indexTable (tableConfig jwt) wrapMsg) model.packages
+        , Page.actionResultView (Table.view (tableConfig jwt) wrapMsg) model.packages
         , deleteModal wrapMsg model
         ]
 

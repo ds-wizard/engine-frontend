@@ -8,7 +8,7 @@ import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -26,7 +26,7 @@ view wrapMsg jwt model =
     div [ class "col KMEditor__Index" ]
         [ Page.header "Knowledge Model Editor" indexActions
         , FormResult.view model.deletingMigration
-        , Page.actionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels
+        , Page.actionResultView (Table.view (tableConfig jwt) wrapMsg) model.knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]

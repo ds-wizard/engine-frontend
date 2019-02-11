@@ -5,16 +5,7 @@ module Common.View.Table exposing
     , TableConfig
     , TableFieldConfig
     , TableFieldValue(..)
-    , bodyField
-    , getBoolIcon
-    , headerField
-    , indexTable
-    , tableAction
-    , tableBody
-    , tableEmpty
-    , tableHeader
-    , tableRow
-    , tableRowActions
+    , view
     )
 
 import Common.Html exposing (linkTo)
@@ -65,8 +56,8 @@ type alias TableConfig a msg =
     }
 
 
-indexTable : TableConfig a msg -> (msg -> Msgs.Msg) -> List a -> Html Msgs.Msg
-indexTable config wrapMsg data =
+view : TableConfig a msg -> (msg -> Msgs.Msg) -> List a -> Html Msgs.Msg
+view config wrapMsg data =
     let
         tableData =
             List.sortBy config.sortBy data

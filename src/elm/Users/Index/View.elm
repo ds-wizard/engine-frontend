@@ -4,7 +4,7 @@ import Common.Html exposing (..)
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
@@ -20,7 +20,7 @@ view wrapMsg model =
     div [ class "col Users__Index" ]
         [ Page.header "Users" indexActions
         , FormResult.successOnlyView model.deletingUser
-        , Page.actionResultView (indexTable tableConfig wrapMsg) model.users
+        , Page.actionResultView (Table.view tableConfig wrapMsg) model.users
         , deleteModal wrapMsg model
         ]
 

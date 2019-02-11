@@ -6,7 +6,7 @@ import Common.Html exposing (linkTo)
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import Common.View.Table exposing (..)
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Index.Models exposing (Model, QuestionnaireRow)
 import DSPlanner.Index.Msgs exposing (Msg(..))
@@ -23,7 +23,7 @@ view wrapMsg model =
     div [ class "col DSPlanner__Index" ]
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
-        , Page.actionResultView (indexTable (tableConfig model) wrapMsg) model.questionnaires
+        , Page.actionResultView (Table.view (tableConfig model) wrapMsg) model.questionnaires
         , deleteModal wrapMsg model
         ]
 
