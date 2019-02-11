@@ -5,7 +5,7 @@ import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
 import Common.View.FormGroup as FormGroup
 import Common.View.Page as Page
-import Common.View.Tags exposing (tagList)
+import Common.View.Tag as Tag
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input
@@ -222,7 +222,7 @@ questionTagList model editorData =
     in
     div [ class "form-group" ]
         [ label [] [ text "Tags" ]
-        , tagList tagListConfig tags
+        , Tag.list tagListConfig tags
         ]
 
 

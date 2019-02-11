@@ -9,7 +9,7 @@ import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
 import Common.View.Page as Page
-import Common.View.Tags exposing (tagList)
+import Common.View.Tag as Tag
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
 import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Routing
@@ -87,7 +87,7 @@ tagsView wrapMsg model =
                                 emptyNode
                     in
                     div []
-                        [ tagList tagListConfig knowledgeModel.tags
+                        [ Tag.list tagListConfig knowledgeModel.tags
                         , extraText
                         ]
     in

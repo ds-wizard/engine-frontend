@@ -1,4 +1,4 @@
-module Common.View.Tags exposing (tagList)
+module Common.View.Tag exposing (TagListConfig, list)
 
 import Common.View.Flash as Flash
 import Html exposing (Html, div, input, label, text)
@@ -15,8 +15,8 @@ type alias TagListConfig msg =
     }
 
 
-tagList : TagListConfig msg -> List Tag -> Html msg
-tagList config tags =
+list : TagListConfig msg -> List Tag -> Html msg
+list config tags =
     let
         content =
             if List.length tags > 0 then
