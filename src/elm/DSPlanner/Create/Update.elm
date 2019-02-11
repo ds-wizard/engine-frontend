@@ -19,11 +19,23 @@ import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg session =
-    getPackages session
-        |> Jwt.send GetPackagesCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
+fetchData wrapMsg session model =
+    let
+        getPackagesCmd =
+            getPackages session
+                |> Jwt.send GetPackagesCompleted
+                |> Cmd.map wrapMsg
+
+        fetchTagsCmd =
+            case model.selectedPackage of
+                Just packageId ->
+                    fetchKnowledgeModelPreview wrapMsg packageId session
+
+                Nothing ->
+                    Cmd.none
+    in
+    Cmd.batch [ getPackagesCmd, fetchTagsCmd ]
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )

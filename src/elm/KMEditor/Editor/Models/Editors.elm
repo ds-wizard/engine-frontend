@@ -609,7 +609,7 @@ isEditorDirty editor =
 
 isKMEditorDirty : KMEditorData -> Bool
 isKMEditorDirty editorData =
-    formChanged editorData.form || editorData.chapters.dirty
+    formChanged editorData.form || editorData.chapters.dirty || editorData.tags.dirty
 
 
 isChapterEditorDirty : ChapterEditorData -> Bool
