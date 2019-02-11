@@ -1,6 +1,6 @@
 module Common.View.Tags exposing (tagList)
 
-import Common.View.Forms exposing (infoView)
+import Common.View.Flash as Flash
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (checked, class, style, type_)
 import Html.Events exposing (onClick)
@@ -23,7 +23,7 @@ tagList config tags =
                 List.map (tagView config) (List.sortBy .name tags)
 
             else
-                [ infoView "There are no tags configured for the Knowledge Model" ]
+                [ Flash.info "There are no tags configured for the Knowledge Model" ]
     in
     div [ class "tag-list" ] content
 

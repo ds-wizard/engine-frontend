@@ -2,10 +2,11 @@ module DSPlanner.Create.View exposing (content, createOption, formView, view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode, inlineLoader)
+import Common.Html exposing (detailContainerClassWith, emptyNode)
+import Common.View.Flash as Flash
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
-import Common.View.Forms exposing (errorView, formActions, formResultView)
+import Common.View.Forms exposing (formActions, formResultView)
 import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
@@ -64,10 +65,10 @@ tagsView wrapMsg model =
                         [ i [] [ text "Select the knowledge model first" ] ]
 
                 Loading ->
-                    inlineLoader
+                    Flash.loader
 
                 Error err ->
-                    errorView err
+                    Flash.error err
 
                 Success knowledgeModel ->
                     let
