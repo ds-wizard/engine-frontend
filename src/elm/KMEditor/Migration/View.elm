@@ -221,7 +221,7 @@ viewEditKnowledgeModelDiff event km =
             viewDiff <| List.map3 (\a b c -> ( a, b, c )) [ "Name" ] [ km.name ] [ getEventFieldValueWithDefault event.name km.name ]
 
         chaptersDiff =
-            viewDiffChildren "Chapters" originalChapters (getEventFieldValueWithDefault event.chapterIds originalChapters) chapterNames
+            viewDiffChildren "Chapters" originalChapters (getEventFieldValueWithDefault event.chapterUuids originalChapters) chapterNames
     in
     div []
         (fieldDiff ++ [ chaptersDiff ])
@@ -292,7 +292,7 @@ viewEditChapterDiff event chapter =
                     ]
 
         questionsDiff =
-            viewDiffChildren "Questions" originalQuestions (getEventFieldValueWithDefault event.questionIds originalQuestions) questionNames
+            viewDiffChildren "Questions" originalQuestions (getEventFieldValueWithDefault event.questionUuids originalQuestions) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
@@ -329,7 +329,7 @@ viewAddQuestionDiff event =
         (viewAdd fields)
 
 
-viewEditQuestionDiff : { a | title : EventField String, text : EventField (Maybe String), answerIds : EventField (Maybe (List String)), referenceIds : EventField (List String), expertIds : EventField (List String) } -> Question -> Html Msgs.Msg
+viewEditQuestionDiff : { a | title : EventField String, text : EventField (Maybe String), answerUuids : EventField (Maybe (List String)), referenceUuids : EventField (List String), expertUuids : EventField (List String) } -> Question -> Html Msgs.Msg
 viewEditQuestionDiff event question =
     let
         originalAnswers =
@@ -362,18 +362,18 @@ viewEditQuestionDiff event question =
             viewDiff fields
 
         answersDiff =
-            case getEventFieldValueWithDefault event.answerIds (Just originalAnswers) of
-                Just answerIds ->
-                    viewDiffChildren "Answers" originalAnswers answerIds answerNames
+            case getEventFieldValueWithDefault event.answerUuids (Just originalAnswers) of
+                Just answerUuids ->
+                    viewDiffChildren "Answers" originalAnswers answerUuids answerNames
 
                 _ ->
                     emptyNode
 
         referencesDiff =
-            viewDiffChildren "References" originalReferences (getEventFieldValueWithDefault event.referenceIds originalReferences) referenceNames
+            viewDiffChildren "References" originalReferences (getEventFieldValueWithDefault event.referenceUuids originalReferences) referenceNames
 
         expertsDiff =
-            viewDiffChildren "Experts" originalExperts (getEventFieldValueWithDefault event.expertIds originalExperts) expertNames
+            viewDiffChildren "Experts" originalExperts (getEventFieldValueWithDefault event.expertUuids originalExperts) expertNames
     in
     div []
         (fieldDiff ++ [ answersDiff, referencesDiff, expertsDiff ])
@@ -432,7 +432,7 @@ viewEditAnswerDiff event answer =
                     ]
 
         questionsDiff =
-            viewDiffChildren "Questions" originalQuestions (getEventFieldValueWithDefault event.followUpIds originalQuestions) questionNames
+            viewDiffChildren "Questions" originalQuestions (getEventFieldValueWithDefault event.followUpUuids originalQuestions) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])

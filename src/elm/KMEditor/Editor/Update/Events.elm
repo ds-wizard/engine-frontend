@@ -37,8 +37,8 @@ createEditKnowledgeModelEvent form editorData =
         data =
             { kmUuid = editorData.knowledgeModel.uuid
             , name = createEventField form.name (editorData.knowledgeModel.name /= form.name)
-            , chapterIds = createEventField editorData.chapters.list editorData.chapters.dirty
-            , tagIds = createEventField editorData.tags.list editorData.tags.dirty
+            , chapterUuids = createEventField editorData.chapters.list editorData.chapters.dirty
+            , tagUuids = createEventField editorData.tags.list editorData.tags.dirty
             }
     in
     createEvent (EditKnowledgeModelEvent data) editorData.path
@@ -63,7 +63,7 @@ createEditChapterEvent form editorData =
             { chapterUuid = editorData.chapter.uuid
             , title = createEventField form.title (editorData.chapter.title /= form.title)
             , text = createEventField form.text (editorData.chapter.text /= form.text)
-            , questionIds = createEventField editorData.questions.list editorData.questions.dirty
+            , questionUuids = createEventField editorData.questions.list editorData.questions.dirty
             }
     in
     createEvent (EditChapterEvent data) editorData.path
@@ -122,7 +122,7 @@ createAddQuestionEvent form editorData =
             if form.type_ == "list" then
                 Just
                     { title = form.itemName
-                    , questionIds = editorData.answerItemTemplateQuestions.list
+                    , questionUuids = editorData.answerItemTemplateQuestions.list
                     }
 
             else
@@ -144,21 +144,21 @@ createAddQuestionEvent form editorData =
 createEditQuestionEvent : QuestionForm -> QuestionEditorData -> Seed -> ( Event, Seed )
 createEditQuestionEvent form editorData =
     let
-        maybeAnswerIds =
+        maybeAnswerUuids =
             if form.type_ == "options" then
                 Just editorData.answers.list
 
             else
                 Nothing
 
-        answerIdsChanged =
+        answerUuidsChanged =
             editorData.answers.dirty || ((form.type_ == "options" || editorData.question.type_ == "options") && form.type_ /= editorData.question.type_)
 
         maybeAnswerItemTemplate =
             if form.type_ == "list" then
                 Just
                     { title = form.itemName
-                    , questionIds = editorData.answerItemTemplateQuestions.list
+                    , questionUuids = editorData.answerItemTemplateQuestions.list
                     }
 
             else
@@ -177,9 +177,9 @@ createEditQuestionEvent form editorData =
             , requiredLevel = createEventField form.requiredLevel (editorData.question.requiredLevel /= form.requiredLevel)
             , tagUuids = createEventField editorData.tagUuids (editorData.question.tagUuids /= editorData.tagUuids)
             , answerItemTemplate = createEventField maybeAnswerItemTemplate answerItemTemplateChanged
-            , answerIds = createEventField maybeAnswerIds answerIdsChanged
-            , referenceIds = createEventField editorData.references.list editorData.references.dirty
-            , expertIds = createEventField editorData.experts.list editorData.experts.dirty
+            , answerUuids = createEventField maybeAnswerUuids answerUuidsChanged
+            , referenceUuids = createEventField editorData.references.list editorData.references.dirty
+            , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
             }
     in
     createEvent (EditQuestionEvent data) editorData.path
@@ -219,7 +219,7 @@ createEditAnswerEvent form editorData =
             , label = createEventField form.label (editorData.answer.label /= form.label)
             , advice = createEventField form.advice (editorData.answer.advice /= form.advice)
             , metricMeasures = createEventField metricMeasures (editorData.answer.metricMeasures /= metricMeasures)
-            , followUpIds = createEventField editorData.followUps.list editorData.followUps.dirty
+            , followUpUuids = createEventField editorData.followUps.list editorData.followUps.dirty
             }
     in
     createEvent (EditAnswerEvent data) editorData.path
