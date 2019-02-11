@@ -1,4 +1,4 @@
-module Public.ForgottenPasswordConfirmation.View exposing (formView, signupForm, successView, view)
+module Public.ForgottenPasswordConfirmation.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)

@@ -1,4 +1,4 @@
-module DSPlanner.Create.View exposing (content, createOption, formView, view)
+module DSPlanner.Create.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)

@@ -1,4 +1,4 @@
-module Public.Questionnaire.View exposing (info, view)
+module Public.Questionnaire.View exposing (view)
 
 import Common.Html exposing (linkTo)
 import Common.Questionnaire.View exposing (viewQuestionnaire)

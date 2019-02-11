@@ -1,4 +1,4 @@
-module DSPlanner.Detail.View exposing (content, questionnaireHeader, questionnaireTitle, view)
+module DSPlanner.Detail.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode)

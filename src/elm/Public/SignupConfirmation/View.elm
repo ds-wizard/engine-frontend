@@ -1,4 +1,4 @@
-module Public.SignupConfirmation.View exposing (successView, view)
+module Public.SignupConfirmation.View exposing (view)
 
 import Common.Html exposing (linkTo)
 import Common.View.Page as Page

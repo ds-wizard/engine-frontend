@@ -1,4 +1,4 @@
-module DSPlanner.Index.View exposing (deleteModal, exportAction, exportFormats, exportItem, getExportUrl, indexActions, tableActionDelete, tableConfig, view)
+module DSPlanner.Index.View exposing (view)
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
