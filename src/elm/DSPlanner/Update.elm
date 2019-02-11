@@ -11,11 +11,11 @@ import Models exposing (State)
 import Msgs
 
 
-fetchData : Route -> (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchData route wrapMsg session =
+fetchData : Route -> (Msg -> Msgs.Msg) -> Session -> Model -> Cmd Msgs.Msg
+fetchData route wrapMsg session model =
     case route of
         Create _ ->
-            DSPlanner.Create.Update.fetchData (wrapMsg << CreateMsg) session
+            DSPlanner.Create.Update.fetchData (wrapMsg << CreateMsg) session model.createModel
 
         Detail uuid ->
             DSPlanner.Detail.Update.fetchData (wrapMsg << DetailMsg) session uuid
