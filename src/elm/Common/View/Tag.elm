@@ -1,6 +1,6 @@
-module Common.View.Tags exposing (tagList)
+module Common.View.Tag exposing (TagListConfig, list)
 
-import Common.View.Forms exposing (infoView)
+import Common.View.Flash as Flash
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (checked, class, style, type_)
 import Html.Events exposing (onClick)
@@ -15,15 +15,15 @@ type alias TagListConfig msg =
     }
 
 
-tagList : TagListConfig msg -> List Tag -> Html msg
-tagList config tags =
+list : TagListConfig msg -> List Tag -> Html msg
+list config tags =
     let
         content =
             if List.length tags > 0 then
                 List.map (tagView config) (List.sortBy .name tags)
 
             else
-                [ infoView "There are no tags configured for the Knowledge Model" ]
+                [ Flash.info "There are no tags configured for the Knowledge Model" ]
     in
     div [ class "tag-list" ] content
 

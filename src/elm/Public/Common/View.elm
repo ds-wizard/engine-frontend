@@ -1,8 +1,9 @@
 module Public.Common.View exposing (FormConfig, publicForm)
 
 import ActionResult exposing (ActionResult)
-import Common.Html exposing (emptyNode, linkTo)
-import Common.View.Forms exposing (formResultView, submitButton)
+import Common.Html exposing (linkTo)
+import Common.View.ActionButton as ActionButton
+import Common.View.FormResult as FormResult
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
@@ -35,11 +36,11 @@ publicForm formConfig =
         [ form [ onSubmit formConfig.submitMsg, class "card bg-light" ]
             [ div [ class "card-header" ] [ text formConfig.title ]
             , div [ class "card-body" ]
-                [ formResultView formConfig.actionResult
+                [ FormResult.view formConfig.actionResult
                 , formConfig.formContent
                 , div [ class "form-group d-flex align-items-baseline justify-content-between" ]
                     [ link
-                    , submitButton ( formConfig.submitLabel, formConfig.actionResult )
+                    , ActionButton.submit ( formConfig.submitLabel, formConfig.actionResult )
                     ]
                 ]
             ]

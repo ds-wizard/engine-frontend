@@ -1,9 +1,9 @@
 module View exposing (view)
 
 import Browser exposing (Document)
-import Common.Html exposing (detailContainerClassWith, linkTo)
-import Common.View exposing (defaultFullPageError, fullPageMessage, pageHeader)
-import Common.View.Layout exposing (appView, publicView)
+import Common.Html.Attribute exposing (detailClass)
+import Common.View.Layout as Layout
+import Common.View.Page as Page
 import DSPlanner.View
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
@@ -13,7 +13,7 @@ import Models exposing (Model)
 import Msgs exposing (Msg(..))
 import Organization.View
 import Public.View
-import Routing exposing (Route(..), homeRoute, loginRoute, signupRoute)
+import Routing exposing (Route(..))
 import Users.View
 
 
@@ -21,48 +21,48 @@ view : Model -> Document Msg
 view model =
     case model.state.route of
         Welcome ->
-            appView model welcomeView
+            Layout.app model welcomeView
 
         DSPlanner route ->
             model.dsPlannerModel
                 |> DSPlanner.View.view route DSPlannerMsg
-                |> appView model
+                |> Layout.app model
 
         KMEditor route ->
             model.kmEditorModel
                 |> KMEditor.View.view route KMEditorMsg model.state.jwt
-                |> appView model
+                |> Layout.app model
 
         KMPackages route ->
             model.kmPackagesModel
                 |> KMPackages.View.view route KMPackagesMsg model.state.jwt
-                |> appView model
+                |> Layout.app model
 
         Organization ->
             model.organizationModel
                 |> Organization.View.view
-                |> appView model
+                |> Layout.app model
 
         Public route ->
             model.publicModel
                 |> Public.View.view route PublicMsg
-                |> publicView model
+                |> Layout.public model
 
         Users route ->
             model.users
                 |> Users.View.view route UsersMsg
-                |> appView model
+                |> Layout.app model
 
         NotAllowed ->
-            appView model notAllowedView
+            Layout.app model notAllowedView
 
         NotFound ->
-            appView model notFoundView
+            Layout.app model notFoundView
 
 
 welcomeView : Html Msg
 welcomeView =
-    div [ detailContainerClassWith "Welcome" ]
+    div [ detailClass "Welcome" ]
         [ div [ class "alert alert-warning" ]
             [ h4 [ class "alert-heading" ] [ text "Warning" ]
             , p [ class "mb-0" ] [ text "DSW is currently under intensive development. As such, we cannot guarantee DS plans compatibility in future versions." ]
@@ -74,15 +74,15 @@ welcomeView =
                 , text "."
                 ]
             ]
-        , fullPageMessage "fa-hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+        , Page.message "hand-spock-o" "Welcome to the Data Stewardship Wizard!"
         ]
 
 
 notFoundView : Html msg
 notFoundView =
-    fullPageMessage "fa-file-o" "The page was not found"
+    Page.message "file-o" "The page was not found"
 
 
 notAllowedView : Html msg
 notAllowedView =
-    fullPageMessage "fa-ban" "You don't have a permission to view this page"
+    Page.message "ban" "You don't have a permission to view this page"

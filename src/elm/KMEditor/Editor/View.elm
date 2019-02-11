@@ -1,11 +1,13 @@
-module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig, viewEditor, viewTree)
+module KMEditor.Editor.View exposing (view)
 
 import ActionResult
 import Common.Html exposing (emptyNode)
-import Common.View exposing (AlertConfig, alertView, fullPageActionResultView)
-import Common.View.Forms exposing (actionButton, formErrorResultView)
+import Common.View.ActionButton as ActionButton
+import Common.View.FormResult as FormResult
+import Common.View.Modal as Modal exposing (AlertConfig)
+import Common.View.Page as Page
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
@@ -22,8 +24,8 @@ import SplitPane exposing (ViewConfig, createViewConfig)
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col KMEditor__Editor" ]
-        [ fullPageActionResultView (editorView wrapMsg model) (ActionResult.combine3 model.kmUuid model.metrics model.levels)
-        , alertView (alertConfig model) |> Html.map wrapMsg
+        [ Page.actionResultView (editorView wrapMsg model) (ActionResult.combine3 model.kmUuid model.metrics model.levels)
+        , Modal.alert (alertConfig model) |> Html.map wrapMsg
         ]
 
 
@@ -43,7 +45,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
                 div []
                     [ text "(unsaved changes)"
                     , button [ onClick <| wrapMsg Discard, class "btn btn-secondary btn-with-loader" ] [ text "Discard" ]
-                    , actionButton ( "Save", model.submitting, wrapMsg Submit )
+                    , ActionButton.button ( "Save", model.submitting, wrapMsg Submit )
                     ]
 
             else
@@ -52,7 +54,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
     div [ class "row" ]
         [ div [ class "editor-header" ]
             [ text "Knowledge Model Editor"
-            , formErrorResultView model.submitting
+            , FormResult.errorOnlyView model.submitting
             , unsavedChanges
             ]
         , div [ class "editor-breadcrumbs" ]

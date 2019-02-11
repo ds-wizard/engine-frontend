@@ -1,7 +1,7 @@
 module Public.Login.View exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, disabled, for, id, placeholder, type_)
+import Html.Attributes exposing (class, for, id, placeholder, type_)
 import Html.Events exposing (..)
 import Msgs
 import Public.Common.View exposing (publicForm)

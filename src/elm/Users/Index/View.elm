@@ -1,9 +1,10 @@
 module Users.Index.View exposing (view)
 
 import Common.Html exposing (..)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
-import Common.View.Forms exposing (formSuccessResultView)
-import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
+import Common.View.FormResult as FormResult
+import Common.View.Modal as Modal
+import Common.View.Page as Page
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
@@ -17,9 +18,9 @@ import Users.Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col Users__Index" ]
-        [ pageHeader "Users" indexActions
-        , formSuccessResultView model.deletingUser
-        , fullPageActionResultView (indexTable tableConfig wrapMsg) model.users
+        [ Page.header "Users" indexActions
+        , FormResult.successOnlyView model.deletingUser
+        , Page.actionResultView (Table.view tableConfig wrapMsg) model.users
         , deleteModal wrapMsg model
         ]
 
@@ -81,7 +82,7 @@ deleteModal wrapMsg model =
 
         modalContent =
             [ p []
-                [ text "Are you sure you want to permamently delete the following user?" ]
+                [ text "Are you sure you want to permanently delete the following user?" ]
             , userHtml
             ]
 
@@ -95,7 +96,7 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteUser Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 userCard : User -> Html Msgs.Msg

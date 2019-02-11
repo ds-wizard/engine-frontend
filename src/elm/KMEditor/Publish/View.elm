@@ -1,9 +1,12 @@
 module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
-import Common.View.Forms exposing (..)
+import Common.Html.Attribute exposing (detailClass)
+import Common.View.FormActions as FormActions
+import Common.View.FormExtra as FormExtra
+import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
+import Common.View.Page as Page
 import Form exposing (Form)
 import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Input as Input
@@ -19,30 +22,30 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "KMEditor__Publish" ]
-        [ pageHeader "Publish new version" []
-        , fullPageActionResultView (contentView wrapMsg model) model.knowledgeModel
+    div [ detailClass "KMEditor__Publish" ]
+        [ Page.header "Publish new version" []
+        , Page.actionResultView (contentView wrapMsg model) model.knowledgeModel
         ]
 
 
 contentView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModel -> Html Msgs.Msg
 contentView wrapMsg model knowledgeModel =
     div []
-        [ formResultView model.publishingKnowledgeModel
+        [ FormResult.view model.publishingKnowledgeModel
         , formView wrapMsg model.form knowledgeModel
-        , formActions (KMEditor Index) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (KMEditor Index) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]
 
 
 formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelPublishForm -> KnowledgeModel -> Html Msgs.Msg
 formView wrapMsg form knowledgeModel =
     div []
-        [ textGroup knowledgeModel.name "Knowledge Model"
-        , codeGroup knowledgeModel.kmId "Knowledge Model ID"
+        [ FormGroup.textView knowledgeModel.name "Knowledge Model"
+        , FormGroup.codeView knowledgeModel.kmId "Knowledge Model ID"
         , lastVersion (kmLastVersion knowledgeModel)
         , versionInputGroup form
-        , textAreaGroup form "description" "Description"
-        , formTextAfter "Describe what has changed in the new version."
+        , FormGroup.textarea form "description" "Description"
+        , FormExtra.textAfter "Describe what has changed in the new version."
         ]
         |> Html.map (wrapMsg << FormMsg)
 
@@ -54,7 +57,7 @@ lastVersion version =
             version
                 |> Maybe.withDefault "No version of this package has been published yet."
     in
-    textGroup content "Last version"
+    FormGroup.textView content "Last version"
 
 
 versionInputGroup : Form e o -> Html Form.Msg
@@ -86,5 +89,5 @@ versionInputGroup form =
             , text "."
             , Input.baseInput "number" String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
             ]
-        , formText "Version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes and number X indicate major change."
+        , FormExtra.text "Version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes and number X indicate major change."
         ]

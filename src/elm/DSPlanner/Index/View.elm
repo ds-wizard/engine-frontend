@@ -1,11 +1,12 @@
-module DSPlanner.Index.View exposing (deleteModal, exportAction, exportFormats, exportItem, getExportUrl, indexActions, tableActionDelete, tableConfig, view)
+module DSPlanner.Index.View exposing (view)
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Common.Html exposing (detailContainerClass, emptyNode, linkTo)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
-import Common.View.Forms exposing (formSuccessResultView)
-import Common.View.Table exposing (..)
+import Common.Html exposing (linkTo)
+import Common.View.FormResult as FormResult
+import Common.View.Modal as Modal
+import Common.View.Page as Page
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Index.Models exposing (Model, QuestionnaireRow)
 import DSPlanner.Index.Msgs exposing (Msg(..))
@@ -20,9 +21,9 @@ import Routing
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col DSPlanner__Index" ]
-        [ pageHeader "Questionnaires" indexActions
-        , formSuccessResultView model.deletingQuestionnaire
-        , fullPageActionResultView (indexTable (tableConfig model) wrapMsg) model.questionnaires
+        [ Page.header "Questionnaires" indexActions
+        , FormResult.successOnlyView model.deletingQuestionnaire
+        , Page.actionResultView (Table.view (tableConfig model) wrapMsg) model.questionnaires
         , deleteModal wrapMsg model
         ]
 
@@ -155,4 +156,4 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteQuestionnaire Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig

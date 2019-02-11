@@ -1,12 +1,51 @@
-module Common.Questionnaire.View exposing (ViewExtraItemsConfig, ViewQuestionnaireConfig, chapterHeader, chapterList, chapterListChapter, extraNavigation, feedbackIssue, feedbackModal, feedbackModalContent, formConfig, getTitleByUuid, ifNotEmpty, levelSelection, levelSelectionOption, pageView, viewAnsweredIndication, viewChapterAnsweredIndication, viewChapterReport, viewChapters, viewExpert, viewExperts, viewExtraData, viewExtraItems, viewIndication, viewIndications, viewMetricDescription, viewMetricReportRow, viewMetrics, viewMetricsDescriptions, viewProgressBar, viewProgressBarWithColors, viewQuestionnaire, viewRequiredLevel, viewResourcePageReference, viewResourcePageReferences, viewSummary, viewUrlReference, viewUrlReferences)
+module Common.Questionnaire.View exposing
+    ( ViewExtraItemsConfig
+    , ViewQuestionnaireConfig
+    , chapterHeader
+    , chapterList
+    , chapterListChapter
+    , extraNavigation
+    , feedbackIssue
+    , feedbackModal
+    , feedbackModalContent
+    , formConfig
+    , getTitleByUuid
+    , levelSelection
+    , levelSelectionOption
+    , pageView
+    , viewAnsweredIndication
+    , viewChapterAnsweredIndication
+    , viewChapterReport
+    , viewChapters
+    , viewExpert
+    , viewExperts
+    , viewExtraData
+    , viewExtraItems
+    , viewIndication
+    , viewIndications
+    , viewMetricDescription
+    , viewMetricReportRow
+    , viewMetrics
+    , viewMetricsDescriptions
+    , viewProgressBar
+    , viewProgressBarWithColors
+    , viewQuestionnaire
+    , viewRequiredLevel
+    , viewResourcePageReference
+    , viewResourcePageReferences
+    , viewSummary
+    , viewUrlReference
+    , viewUrlReferences
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Common.View exposing (fullPageActionResultView, modalView)
-import Common.View.Forms exposing (inputGroup, textAreaGroup)
+import Common.View.FormGroup as FormGroup
+import Common.View.Modal as Modal
+import Common.View.Page as Page
 import FormEngine.View exposing (FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -132,7 +171,7 @@ pageView levels model =
             ]
 
         PageSummaryReport ->
-            [ fullPageActionResultView (viewSummary model) (ActionResult.combine model.metrics model.summaryReport) ]
+            [ Page.actionResultView (viewSummary model) (ActionResult.combine model.metrics model.summaryReport) ]
 
 
 chapterHeader : Chapter -> Html Msg
@@ -245,15 +284,6 @@ viewExpert expert =
         , a [ href <| "mailto:" ++ expert.email ] [ text expert.email ]
         , text ")"
         ]
-
-
-ifNotEmpty : List a -> (List a -> Html msg) -> Html msg
-ifNotEmpty list fn =
-    if List.length list == 0 then
-        emptyNode
-
-    else
-        fn list
 
 
 viewSummary : Model -> ( List Metric, SummaryReport ) -> Html Msg
@@ -430,7 +460,7 @@ feedbackModal model =
             , cancelMsg = cancelMsg
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 feedbackModalContent : Model -> List (Html Msg)
@@ -455,8 +485,8 @@ feedbackModalContent model =
     [ div [ class "alert alert-info" ]
         [ text "If you found something wrong with the question, you can send us your feedback how to improve it." ]
     , feedbackList
-    , inputGroup model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
-    , textAreaGroup model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
+    , FormGroup.input model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
+    , FormGroup.textarea model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
     ]
 
 

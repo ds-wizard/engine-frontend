@@ -2,8 +2,8 @@ module KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (..)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
-import Common.View.Forms exposing (formResultView)
+import Common.View.FormResult as FormResult
+import Common.View.Page as Page
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -22,9 +22,9 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "col KMEditor__Migration" ]
-        [ div [] [ pageHeader "Migration" [] ]
-        , formResultView model.conflict
-        , fullPageActionResultView (migrationView wrapMsg model) model.migration
+        [ div [] [ Page.header "Migration" [] ]
+        , FormResult.view model.conflict
+        , Page.actionResultView (migrationView wrapMsg model) model.migration
         ]
 
 

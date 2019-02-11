@@ -1,16 +1,12 @@
 module Common.Html exposing
-    ( detailContainerClass
-    , detailContainerClassWith
-    , emptyNode
+    ( emptyNode
     , fa
-    , inlineLoader
     , linkTo
-    , linkToAttributes
     )
 
-import Common.Html.Events exposing (onLinkClick)
+import Common.Html.Attribute exposing (linkToAttributes)
 import Html exposing (..)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class)
 import Msgs exposing (Msg)
 import Routing exposing (Route)
 
@@ -20,35 +16,11 @@ linkTo route attributes children =
     a (attributes ++ linkToAttributes route) children
 
 
-linkToAttributes : Route -> List (Attribute Msg)
-linkToAttributes route =
-    [ href <| Routing.toUrl route
-    ]
-
-
 emptyNode : Html msg
 emptyNode =
     text ""
 
 
-detailContainerClassWith : String -> Html.Attribute msg
-detailContainerClassWith otherClass =
-    class <| "col-sm-12 col-md-10 col-lg-8 col-xl-6 " ++ otherClass
-
-
-detailContainerClass : Html.Attribute msg
-detailContainerClass =
-    detailContainerClassWith ""
-
-
 fa : String -> Html msg
 fa icon =
     i [ class <| "fa fa-" ++ icon ] []
-
-
-inlineLoader : Html msg
-inlineLoader =
-    div [ class "alert alert-inline-loader" ]
-        [ i [ class "fa fa-spinner fa-spin" ] []
-        , text "Loading..."
-        ]

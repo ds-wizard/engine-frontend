@@ -1,9 +1,11 @@
 module Users.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith)
-import Common.View exposing (pageHeader)
-import Common.View.Forms exposing (..)
+import Common.Html.Attribute exposing (detailClass)
+import Common.View.FormActions as FormActions
+import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
+import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
 import Msgs
@@ -16,11 +18,11 @@ import Users.Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "Users__Create" ]
-        [ pageHeader "Create user" []
-        , formResultView model.savingUser
+    div [ detailClass "Users__Create" ]
+        [ Page.header "Create user" []
+        , FormResult.view model.savingUser
         , formView model.form |> Html.map (wrapMsg << FormMsg)
-        , formActions (Routing.Users Index) ( "Save", model.savingUser, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (Routing.Users Index) ( "Save", model.savingUser, wrapMsg <| FormMsg Form.Submit )
         ]
 
 
@@ -32,11 +34,11 @@ formView form =
 
         formHtml =
             div []
-                [ inputGroup form "email" "Email"
-                , inputGroup form "name" "Name"
-                , inputGroup form "surname" "Surname"
-                , selectGroup roleOptions form "role" "Role"
-                , passwordGroup form "password" "Password"
+                [ FormGroup.input form "email" "Email"
+                , FormGroup.input form "name" "Name"
+                , FormGroup.input form "surname" "Surname"
+                , FormGroup.select roleOptions form "role" "Role"
+                , FormGroup.password form "password" "Password"
                 ]
     in
     formHtml

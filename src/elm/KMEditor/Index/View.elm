@@ -4,9 +4,11 @@ import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
-import Common.View.Forms exposing (formResultView, selectGroup)
-import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
+import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
+import Common.View.Modal as Modal
+import Common.View.Page as Page
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -22,9 +24,9 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
     div [ class "col KMEditor__Index" ]
-        [ pageHeader "Knowledge Model Editor" indexActions
-        , formResultView model.deletingMigration
-        , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels
+        [ Page.header "Knowledge Model Editor" indexActions
+        , FormResult.view model.deletingMigration
+        , Page.actionResultView (Table.view (tableConfig jwt) wrapMsg) model.knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]
@@ -175,7 +177,7 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteKnowledgeModal Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 upgradeModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -203,7 +205,7 @@ upgradeModal wrapMsg model =
                     [ emptyNode ]
 
                 Loading ->
-                    [ fullPageLoader ]
+                    [ Page.loader ]
 
                 Error error ->
                     [ p [ class "alert alert-danger" ] [ text error ] ]
@@ -214,7 +216,7 @@ upgradeModal wrapMsg model =
                         , strong [] [ text name ]
                         , text " to."
                         ]
-                    , selectGroup options model.kmUpgradeForm "targetPackageId" "New parent package"
+                    , FormGroup.select options model.kmUpgradeForm "targetPackageId" "New parent package"
                         |> Html.map (wrapMsg << UpgradeFormMsg)
                     ]
 
@@ -228,7 +230,7 @@ upgradeModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideUpgradeModal Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 createOption : PackageDetail -> ( String, String )

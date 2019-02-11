@@ -4,15 +4,16 @@ import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Common.Html exposing (detailContainerClassWith, emptyNode, linkTo, linkToAttributes)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
-import Common.View.Forms exposing (codeGroup)
+import Common.Html exposing (emptyNode)
+import Common.Html.Attribute exposing (detailClass, linkToAttributes)
+import Common.View.FormGroup as FormGroup
+import Common.View.Modal as Modal
+import Common.View.Page as Page
 import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import KMEditor.Routing
-import KMPackages.Common.Models exposing (..)
 import KMPackages.Detail.Models exposing (..)
 import KMPackages.Detail.Msgs exposing (..)
 import KMPackages.Requests exposing (exportPackageUrl)
@@ -22,8 +23,8 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
-    div [ detailContainerClassWith "KMPackages__Detail" ]
-        [ fullPageActionResultView (packageDetail wrapMsg jwt) model.packages
+    div [ detailClass "KMPackages__Detail" ]
+        [ Page.actionResultView (packageDetail wrapMsg jwt) model.packages
         , deleteVersionModal wrapMsg model
         ]
 
@@ -33,9 +34,9 @@ packageDetail wrapMsg jwt packages =
     case List.head packages of
         Just package ->
             div []
-                [ pageHeader package.packageDetail.name []
-                , codeGroup package.packageDetail.organizationId "Organization ID"
-                , codeGroup package.packageDetail.kmId "Knowledge Model ID"
+                [ Page.header package.packageDetail.name []
+                , FormGroup.codeView package.packageDetail.organizationId "Organization ID"
+                , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
                 , h3 [] [ text "Versions" ]
                 , div [] (List.map (versionView wrapMsg jwt) packages)
                 ]
@@ -143,4 +144,4 @@ deleteVersionModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteVersion Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig

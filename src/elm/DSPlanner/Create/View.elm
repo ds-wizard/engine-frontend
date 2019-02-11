@@ -1,11 +1,16 @@
-module DSPlanner.Create.View exposing (content, createOption, formView, view)
+module DSPlanner.Create.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode, inlineLoader)
-import Common.View exposing (fullPageActionResultView, pageHeader)
-import Common.View.Forms exposing (errorView, formActions, formResultView, formText, inputGroup, selectGroup, toggleGroup)
-import Common.View.Tags exposing (tagList)
+import Common.Html exposing (emptyNode)
+import Common.Html.Attribute exposing (detailClass)
+import Common.View.Flash as Flash
+import Common.View.FormActions as FormActions
+import Common.View.FormExtra as FormExtra
+import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
+import Common.View.Page as Page
+import Common.View.Tag as Tag
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
 import DSPlanner.Create.Msgs exposing (Msg(..))
 import DSPlanner.Routing
@@ -19,19 +24,19 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "DSPlanner__Create" ]
-        [ pageHeader "Create Questionnaire" []
-        , fullPageActionResultView (content wrapMsg model) model.packages
+    div [ detailClass "DSPlanner__Create" ]
+        [ Page.header "Create Questionnaire" []
+        , Page.actionResultView (content wrapMsg model) model.packages
         ]
 
 
 content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
 content wrapMsg model packages =
     div []
-        [ formResultView model.savingQuestionnaire
+        [ FormResult.view model.savingQuestionnaire
         , formView model.form packages |> Html.map (wrapMsg << FormMsg)
         , tagsView wrapMsg model
-        , formActions (Routing.DSPlanner DSPlanner.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (Routing.DSPlanner DSPlanner.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
         ]
 
 
@@ -43,10 +48,10 @@ formView form packages =
 
         formHtml =
             div []
-                [ inputGroup form "name" "Name"
-                , selectGroup packageOptions form "packageId" "Knowledge Model"
-                , toggleGroup form "private" "Private"
-                , formText "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
+                [ FormGroup.input form "name" "Name"
+                , FormGroup.select packageOptions form "packageId" "Knowledge Model"
+                , FormGroup.toggle form "private" "Private"
+                , FormExtra.text "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
                 ]
     in
     formHtml
@@ -62,10 +67,10 @@ tagsView wrapMsg model =
                         [ i [] [ text "Select the knowledge model first" ] ]
 
                 Loading ->
-                    inlineLoader
+                    Flash.loader
 
                 Error err ->
-                    errorView err
+                    Flash.error err
 
                 Success knowledgeModel ->
                     let
@@ -77,13 +82,13 @@ tagsView wrapMsg model =
 
                         extraText =
                             if List.length knowledgeModel.tags > 0 then
-                                formText "You can filter questions in the questionnaire by selecting only some tags. If no tags are selected, all questions will be used."
+                                FormExtra.text "You can filter questions in the questionnaire by selecting only some tags. If no tags are selected, all questions will be used."
 
                             else
                                 emptyNode
                     in
                     div []
-                        [ tagList tagListConfig knowledgeModel.tags
+                        [ Tag.list tagListConfig knowledgeModel.tags
                         , extraText
                         ]
     in
