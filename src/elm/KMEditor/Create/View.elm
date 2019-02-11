@@ -2,10 +2,10 @@ module KMEditor.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
+import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
-import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
@@ -30,7 +30,7 @@ content wrapMsg model packages =
     div []
         [ FormResult.view model.savingKnowledgeModel
         , formView wrapMsg model.form packages
-        , formActions (KMEditor Index) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (KMEditor Index) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]
 
 

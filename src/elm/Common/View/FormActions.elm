@@ -1,7 +1,4 @@
-module Common.View.Forms exposing
-    ( formActionOnly
-    , formActions
-    )
+module Common.View.FormActions exposing (view, viewActionOnly)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (..)
@@ -19,17 +16,17 @@ import String
   - Action button invokes specified message when clicked
 
 -}
-formActions : Route -> ( String, ActionResult a, Msg ) -> Html Msg
-formActions cancelRoute actionButtonSettings =
+view : Route -> ( String, ActionResult a, Msg ) -> Html Msg
+view cancelRoute actionButtonSettings =
     div [ class "form-actions" ]
         [ linkTo cancelRoute [ class "btn btn-secondary" ] [ text "Cancel" ]
         , ActionButton.button actionButtonSettings
         ]
 
 
-{-| Similar to formActions, but it contains only the action button.
+{-| Similar to previous, but it contains only the action button.
 -}
-formActionOnly : ( String, ActionResult a, msg ) -> Html msg
-formActionOnly actionButtonSettings =
+viewActionOnly : ( String, ActionResult a, msg ) -> Html msg
+viewActionOnly actionButtonSettings =
     div [ class "text-right" ]
         [ ActionButton.button actionButtonSettings ]

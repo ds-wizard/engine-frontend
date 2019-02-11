@@ -3,9 +3,9 @@ module Users.Edit.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
+import Common.View.FormActions as FormActions
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
-import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
@@ -120,10 +120,10 @@ formActionsView : Model -> ( String, ActionResult a, Msgs.Msg ) -> Html Msgs.Msg
 formActionsView { uuid } actionButtonSettings =
     case uuid of
         "current" ->
-            formActionOnly actionButtonSettings
+            FormActions.viewActionOnly actionButtonSettings
 
         _ ->
-            formActions (Users Users.Routing.Index) actionButtonSettings
+            FormActions.view (Users Users.Routing.Index) actionButtonSettings
 
 
 getClass : Bool -> String -> String

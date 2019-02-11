@@ -4,10 +4,10 @@ import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
 import Common.View.Flash as Flash
+import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
-import Common.View.Forms exposing (formActions)
 import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
@@ -35,7 +35,7 @@ content wrapMsg model packages =
         [ FormResult.view model.savingQuestionnaire
         , formView model.form packages |> Html.map (wrapMsg << FormMsg)
         , tagsView wrapMsg model
-        , formActions (Routing.DSPlanner DSPlanner.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (Routing.DSPlanner DSPlanner.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
         ]
 
 

@@ -2,10 +2,10 @@ module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
+import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
-import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
 import Form.Field as Field exposing (Field, FieldValue(..))
@@ -33,7 +33,7 @@ contentView wrapMsg model knowledgeModel =
     div []
         [ FormResult.view model.publishingKnowledgeModel
         , formView wrapMsg model.form knowledgeModel
-        , formActions (KMEditor Index) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (KMEditor Index) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]
 
 
