@@ -2,7 +2,8 @@ module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig,
 
 import ActionResult
 import Common.Html exposing (emptyNode)
-import Common.View.Forms exposing (actionButton, formErrorResultView)
+import Common.View.ActionButton as ActionButton
+import Common.View.Forms exposing (formErrorResultView)
 import Common.View.Modal as Modal exposing (AlertConfig)
 import Common.View.Page as Page
 import Html exposing (..)
@@ -44,7 +45,7 @@ editorView wrapMsg model ( kmUuid, _, _ ) =
                 div []
                     [ text "(unsaved changes)"
                     , button [ onClick <| wrapMsg Discard, class "btn btn-secondary btn-with-loader" ] [ text "Discard" ]
-                    , actionButton ( "Save", model.submitting, wrapMsg Submit )
+                    , ActionButton.button ( "Save", model.submitting, wrapMsg Submit )
                     ]
 
             else

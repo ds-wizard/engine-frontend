@@ -4,7 +4,8 @@ import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
-import Common.View.Forms exposing (actionButton, formResultView)
+import Common.View.ActionButton as ActionButton
+import Common.View.Forms exposing (formResultView)
 import Common.View.Page as Page
 import DSPlanner.Detail.Models exposing (Model)
 import DSPlanner.Detail.Msgs exposing (Msg(..))
@@ -49,7 +50,7 @@ questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
             [ text <| questionnaireTitle questionnaireModel.questionnaire
             , div []
                 [ unsavedChanges
-                , actionButton ( "Save", savingQuestionnaire, wrapMsg <| Save )
+                , ActionButton.button ( "Save", savingQuestionnaire, wrapMsg <| Save )
                 ]
             ]
         ]

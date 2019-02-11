@@ -7,6 +7,7 @@ module Common.View.Modal exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode)
+import Common.View.ActionButton as ActionButton
 import Common.View.Forms exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -56,7 +57,7 @@ confirm cfg =
                 , div [ class "modal-body" ]
                     content
                 , div [ class "modal-footer" ]
-                    [ actionButton ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
+                    [ ActionButton.button ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
                     , cancelButton
                     ]
                 ]

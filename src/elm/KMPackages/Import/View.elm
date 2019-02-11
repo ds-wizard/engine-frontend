@@ -2,7 +2,8 @@ module KMPackages.Import.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (detailContainerClassWith)
-import Common.View.Forms exposing (actionButton, formResultView)
+import Common.View.ActionButton as ActionButton
+import Common.View.Forms exposing (formResultView)
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -51,7 +52,7 @@ fileView wrapMsg model fileName =
         , div [ class "actions" ]
             [ button [ disabled cancelDisabled, onClick (wrapMsg Cancel), class "btn btn-secondary" ]
                 [ text "Cancel" ]
-            , actionButton ( "Upload", model.importing, wrapMsg Submit )
+            , ActionButton.button ( "Upload", model.importing, wrapMsg Submit )
             ]
         ]
 

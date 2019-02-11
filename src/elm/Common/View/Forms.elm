@@ -1,7 +1,5 @@
 module Common.View.Forms exposing
-    ( actionButton
-    , actionButtonView
-    , errorView
+    ( errorView
     , formActionOnly
     , formActions
     , formErrorResultView
@@ -9,15 +7,14 @@ module Common.View.Forms exposing
     , formSuccessResultView
     , infoView
     , statusView
-    , submitButton
     , successView
     )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (..)
+import Common.View.ActionButton as ActionButton
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Msgs exposing (Msg)
 import Routing exposing (Route)
 import String
@@ -33,7 +30,7 @@ formActions : Route -> ( String, ActionResult a, Msg ) -> Html Msg
 formActions cancelRoute actionButtonSettings =
     div [ class "form-actions" ]
         [ linkTo cancelRoute [ class "btn btn-secondary" ] [ text "Cancel" ]
-        , actionButton actionButtonSettings
+        , ActionButton.button actionButtonSettings
         ]
 
 
@@ -42,42 +39,7 @@ formActions cancelRoute actionButtonSettings =
 formActionOnly : ( String, ActionResult a, msg ) -> Html msg
 formActionOnly actionButtonSettings =
     div [ class "text-right" ]
-        [ actionButton actionButtonSettings ]
-
-
-{-| Action button invokes a message when clicked. It's state is defined by
-the ActionResult. If the state is Loading action button is disabled and
-a loader is shown instead of action name.
--}
-actionButton : ( String, ActionResult a, msg ) -> Html msg
-actionButton ( label, result, msg ) =
-    actionButtonView [ onClick msg ] label result
-
-
-submitButton : ( String, ActionResult a ) -> Html msg
-submitButton ( label, result ) =
-    actionButtonView [ type_ "submit" ] label result
-
-
-actionButtonView : List (Attribute msg) -> String -> ActionResult a -> Html msg
-actionButtonView attributes label result =
-    let
-        buttonContent =
-            case result of
-                Loading ->
-                    i [ class "fa fa-spinner fa-spin" ] []
-
-                _ ->
-                    text label
-
-        buttonAttributes =
-            [ class "btn btn-primary btn-with-loader", disabled (result == Loading) ] ++ attributes
-    in
-    button buttonAttributes [ buttonContent ]
-
-
-
--- Status Views
+        [ ActionButton.button actionButtonSettings ]
 
 
 formResultView : ActionResult String -> Html msg
