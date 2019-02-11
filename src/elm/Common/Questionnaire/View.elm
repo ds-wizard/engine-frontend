@@ -43,7 +43,7 @@ import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Common.View.Forms exposing (inputGroup, textAreaGroup)
+import Common.View.FormGroup as FormGroup
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import FormEngine.View exposing (FormViewConfig, viewForm)
@@ -485,8 +485,8 @@ feedbackModalContent model =
     [ div [ class "alert alert-info" ]
         [ text "If you found something wrong with the question, you can send us your feedback how to improve it." ]
     , feedbackList
-    , inputGroup model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
-    , textAreaGroup model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
+    , FormGroup.input model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
+    , FormGroup.textarea model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
     ]
 
 

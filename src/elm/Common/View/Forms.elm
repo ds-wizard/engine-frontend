@@ -1,194 +1,28 @@
 module Common.View.Forms exposing
     ( actionButton
     , actionButtonView
-    , codeGroup
-    , colorGroup
     , errorView
     , formActionOnly
     , formActions
     , formErrorResultView
-    , formGroup
     , formResultView
     , formSuccessResultView
     , formText
     , formTextAfter
-    , getErrors
     , infoView
-    , inputGroup
-    , passwordGroup
-    , plainGroup
-    , selectGroup
     , statusView
     , submitButton
     , successView
-    , textAreaGroup
-    , textGroup
-    , toReadable
-    , toggleGroup
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Form exposing (CustomFormError(..))
 import Common.Html exposing (..)
-import Form exposing (Form)
-import Form.Error exposing (ErrorValue(..))
-import Form.Field as Field
-import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Msgs exposing (Msg)
 import Routing exposing (Route)
-import String exposing (fromFloat)
-
-
-
--- Form fields
-
-
-{-| Create Html for a form field using the given input field.
--}
-formGroup : Input.Input CustomFormError String -> List (Attribute Form.Msg) -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-formGroup input attrs form fieldName labelText =
-    let
-        field =
-            Form.getFieldAsString fieldName form
-
-        ( error, errorClass ) =
-            getErrors field labelText
-    in
-    div [ class "form-group" ]
-        [ label [ for fieldName ] [ text labelText ]
-        , input field (attrs ++ [ class <| "form-control " ++ errorClass, id fieldName, name fieldName ])
-        , error
-        ]
-
-
-{-| Helper for creating form group with text input field.
--}
-inputGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-inputGroup =
-    formGroup Input.textInput []
-
-
-{-| Helper for creating form group with password input field.
--}
-passwordGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-passwordGroup =
-    formGroup Input.passwordInput []
-
-
-{-| Helper for creating form group with select field.
--}
-selectGroup : List ( String, String ) -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-selectGroup options =
-    formGroup (Input.selectInput options) []
-
-
-{-| Helper for creating form group with textarea.
--}
-textAreaGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-textAreaGroup =
-    formGroup Input.textArea []
-
-
-{-| Helper for creating form group with toggle
--}
-toggleGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-toggleGroup form fieldName labelText =
-    let
-        field =
-            Form.getFieldAsBool fieldName form
-    in
-    div [ class "form-check" ]
-        [ label [ class "form-check-label form-check-toggle" ]
-            [ Input.checkboxInput field [ class "form-check-input" ]
-            , span [] [ text labelText ]
-            ]
-        ]
-
-
-{-| Helper for creating form group with color input field
--}
-colorGroup : Form CustomFormError o -> String -> String -> Html.Html Form.Msg
-colorGroup =
-    formGroup (Input.baseInput "color" Field.String Form.Text) []
-
-
-{-| Plain group is same Html as formGroup but without any input fields. It only
-shows label with read only Html value.
--}
-plainGroup : Html.Html msg -> String -> Html.Html msg
-plainGroup valueHtml labelText =
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text labelText ]
-        , valueHtml
-        ]
-
-
-{-| Helper for creating plain group with text value.
--}
-textGroup : String -> String -> Html.Html msg
-textGroup value =
-    plainGroup <|
-        p [ class "form-value" ] [ text value ]
-
-
-{-| Helper for creating plain group with code block.
--}
-codeGroup : String -> String -> Html.Html msg
-codeGroup value =
-    plainGroup <|
-        code [] [ text value ]
-
-
-{-| Get Html and form group error class for a given field. If the field
-contains no errors, the returned Html and error class are empty.
--}
-getErrors : Form.FieldState CustomFormError String -> String -> ( Html msg, String )
-getErrors field labelText =
-    case field.liveError of
-        Just error ->
-            ( p [ class "invalid-feedback" ] [ text (toReadable error labelText) ], "is-invalid" )
-
-        Nothing ->
-            ( text "", "" )
-
-
-toReadable : ErrorValue CustomFormError -> String -> String
-toReadable error labelText =
-    case error of
-        Empty ->
-            labelText ++ " cannot be empty"
-
-        InvalidString ->
-            labelText ++ " cannot be empty"
-
-        InvalidEmail ->
-            "This is not a valid email"
-
-        InvalidFloat ->
-            "This is not a valid number"
-
-        SmallerFloatThan n ->
-            "This should not be less than " ++ fromFloat n
-
-        GreaterFloatThan n ->
-            "This should not be more than " ++ fromFloat n
-
-        CustomError err ->
-            case err of
-                ConfirmationError ->
-                    "Passwords don't match"
-
-                InvalidUuid ->
-                    "This is not a valid UUID"
-
-                ServerValidationError msg ->
-                    msg
-
-        _ ->
-            "Invalid value"
+import String
 
 
 

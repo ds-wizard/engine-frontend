@@ -3,7 +3,7 @@ module KMEditor.Editor.View.Editors exposing (activeEditor)
 import ActionResult
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
-import Common.View.Forms exposing (colorGroup, formGroup, inputGroup, selectGroup, textAreaGroup, toggleGroup)
+import Common.View.FormGroup as FormGroup
 import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import Dict exposing (Dict)
@@ -95,7 +95,7 @@ kmEditorView model editorData =
 
         form =
             div []
-                [ inputGroup editorData.form "name" "Name"
+                [ FormGroup.input editorData.form "name" "Name"
                 ]
     in
     ( editorData.uuid
@@ -129,8 +129,8 @@ chapterEditorView model editorData =
 
         form =
             div []
-                [ inputGroup editorData.form "title" "Title"
-                , textAreaGroup editorData.form "text" "Text"
+                [ FormGroup.input editorData.form "title" "Title"
+                , FormGroup.textarea editorData.form "text" "Text"
                 ]
     in
     ( editorData.uuid
@@ -152,9 +152,9 @@ tagEditorView model editorData =
 
         form =
             div []
-                [ inputGroup editorData.form "name" "Name"
-                , textAreaGroup editorData.form "description" "Description"
-                , colorGroup editorData.form "color" "Color"
+                [ FormGroup.input editorData.form "name" "Name"
+                , FormGroup.textarea editorData.form "description" "Description"
+                , FormGroup.color editorData.form "color" "Color"
                 ]
     in
     ( editorData.uuid
@@ -175,9 +175,9 @@ questionEditorView model editorData =
 
         form =
             div []
-                [ inputGroup editorData.form "title" "Title"
-                , textAreaGroup editorData.form "text" "Text"
-                , selectGroup questionTypeOptions editorData.form "type_" "Question Type"
+                [ FormGroup.input editorData.form "title" "Title"
+                , FormGroup.textarea editorData.form "text" "Text"
+                , FormGroup.select questionTypeOptions editorData.form "type_" "Question Type"
                 , p [ class "form-text text-muted" ]
                     [ fa "warning"
                     , text "By changing the type answers or items might be removed."
@@ -234,7 +234,7 @@ questionRequiredLevelSelectGroup editorData levels =
                 |> List.map createLevelOption
                 |> (::) ( "", "Never" )
     in
-    selectGroup options editorData.form "requiredLevel" "When does this question become desirable?"
+    FormGroup.select options editorData.form "requiredLevel" "When does this question become desirable?"
 
 
 createLevelOption : Level -> ( String, String )
@@ -275,7 +275,7 @@ questionEditorAnswerItemTemplateView model editorData =
             [ text "Item template" ]
         , div [ class "card-body" ]
             [ div [ class "form-group" ]
-                [ inputGroup editorData.form "itemName" "Item Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+                [ FormGroup.input editorData.form "itemName" "Item Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
                 ]
             , inputChildren config
             ]
@@ -336,8 +336,8 @@ answerEditorView model editorData =
 
         form =
             div []
-                [ inputGroup editorData.form "label" "Label"
-                , textAreaGroup editorData.form "advice" "Advice"
+                [ FormGroup.input editorData.form "label" "Label"
+                , FormGroup.textarea editorData.form "advice" "Advice"
                 ]
     in
     ( editorData.uuid
@@ -377,7 +377,7 @@ metricView form i metric =
                 |> Maybe.withDefault False
     in
     tr [ classList [ ( "disabled", not enabled ) ] ]
-        [ td [] [ toggleGroup form ("metricMeasures." ++ fromInt i ++ ".enabled") metric.title ]
+        [ td [] [ FormGroup.toggle form ("metricMeasures." ++ fromInt i ++ ".enabled") metric.title ]
         , td [] [ metricInput form ("metricMeasures." ++ fromInt i ++ ".weight") enabled ]
         , td [] [ metricInput form ("metricMeasures." ++ fromInt i ++ ".measure") enabled ]
         ]
@@ -385,7 +385,7 @@ metricView form i metric =
 
 metricInput : Form CustomFormError o -> String -> Bool -> Html Form.Msg
 metricInput form fieldName enabled =
-    formGroup Input.textInput [ disabled (not enabled) ] form fieldName ""
+    FormGroup.formGroup Input.textInput [ disabled (not enabled) ] form fieldName ""
 
 
 referenceEditorView : ReferenceEditorData -> ( String, Html Msg )
@@ -399,17 +399,17 @@ referenceEditorView editorData =
         formFields =
             case (Form.getFieldAsString "referenceType" editorData.form).value of
                 Just "ResourcePageReference" ->
-                    [ inputGroup editorData.form "shortUuid" "Short UUID"
+                    [ FormGroup.input editorData.form "shortUuid" "Short UUID"
                     ]
 
                 Just "URLReference" ->
-                    [ inputGroup editorData.form "url" "URL"
-                    , inputGroup editorData.form "label" "Label"
+                    [ FormGroup.input editorData.form "url" "URL"
+                    , FormGroup.input editorData.form "label" "Label"
                     ]
 
                 Just "CrossReference" ->
-                    [ inputGroup editorData.form "targetUuid" "Target UUID"
-                    , inputGroup editorData.form "description" "Description"
+                    [ FormGroup.input editorData.form "targetUuid" "Target UUID"
+                    , FormGroup.input editorData.form "description" "Description"
                     ]
 
                 _ ->
@@ -417,7 +417,7 @@ referenceEditorView editorData =
 
         form =
             div []
-                ([ selectGroup referenceTypeOptions editorData.form "referenceType" "Type" ]
+                ([ FormGroup.select referenceTypeOptions editorData.form "referenceType" "Type" ]
                     ++ formFields
                 )
     in
@@ -439,8 +439,8 @@ expertEditorView editorData =
 
         form =
             div []
-                [ inputGroup editorData.form "name" "Name"
-                , inputGroup editorData.form "email" "Email"
+                [ FormGroup.input editorData.form "name" "Name"
+                , FormGroup.input editorData.form "email" "Email"
                 ]
     in
     ( editorData.uuid

@@ -5,7 +5,7 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Html exposing (detailContainerClassWith, emptyNode, linkToAttributes)
-import Common.View.Forms exposing (codeGroup)
+import Common.View.FormGroup as FormGroup
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import DSPlanner.Routing
@@ -34,8 +34,8 @@ packageDetail wrapMsg jwt packages =
         Just package ->
             div []
                 [ Page.header package.packageDetail.name []
-                , codeGroup package.packageDetail.organizationId "Organization ID"
-                , codeGroup package.packageDetail.kmId "Knowledge Model ID"
+                , FormGroup.codeView package.packageDetail.organizationId "Organization ID"
+                , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
                 , h3 [] [ text "Versions" ]
                 , div [] (List.map (versionView wrapMsg jwt) packages)
                 ]

@@ -2,6 +2,7 @@ module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
+import Common.View.FormGroup as FormGroup
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
@@ -37,11 +38,11 @@ contentView wrapMsg model knowledgeModel =
 formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelPublishForm -> KnowledgeModel -> Html Msgs.Msg
 formView wrapMsg form knowledgeModel =
     div []
-        [ textGroup knowledgeModel.name "Knowledge Model"
-        , codeGroup knowledgeModel.kmId "Knowledge Model ID"
+        [ FormGroup.textView knowledgeModel.name "Knowledge Model"
+        , FormGroup.codeView knowledgeModel.kmId "Knowledge Model ID"
         , lastVersion (kmLastVersion knowledgeModel)
         , versionInputGroup form
-        , textAreaGroup form "description" "Description"
+        , FormGroup.textarea form "description" "Description"
         , formTextAfter "Describe what has changed in the new version."
         ]
         |> Html.map (wrapMsg << FormMsg)
@@ -54,7 +55,7 @@ lastVersion version =
             version
                 |> Maybe.withDefault "No version of this package has been published yet."
     in
-    textGroup content "Last version"
+    FormGroup.textView content "Last version"
 
 
 versionInputGroup : Form e o -> Html Form.Msg

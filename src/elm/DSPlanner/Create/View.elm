@@ -3,7 +3,8 @@ module DSPlanner.Create.View exposing (content, createOption, formView, view)
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode, inlineLoader)
-import Common.View.Forms exposing (errorView, formActions, formResultView, formText, inputGroup, selectGroup, toggleGroup)
+import Common.View.FormGroup as FormGroup
+import Common.View.Forms exposing (errorView, formActions, formResultView, formText)
 import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
@@ -43,9 +44,9 @@ formView form packages =
 
         formHtml =
             div []
-                [ inputGroup form "name" "Name"
-                , selectGroup packageOptions form "packageId" "Knowledge Model"
-                , toggleGroup form "private" "Private"
+                [ FormGroup.input form "name" "Name"
+                , FormGroup.select packageOptions form "packageId" "Knowledge Model"
+                , FormGroup.toggle form "private" "Private"
                 , formText "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
                 ]
     in

@@ -2,6 +2,7 @@ module Users.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
+import Common.View.FormGroup as FormGroup
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
@@ -32,11 +33,11 @@ formView form =
 
         formHtml =
             div []
-                [ inputGroup form "email" "Email"
-                , inputGroup form "name" "Name"
-                , inputGroup form "surname" "Surname"
-                , selectGroup roleOptions form "role" "Role"
-                , passwordGroup form "password" "Password"
+                [ FormGroup.input form "email" "Email"
+                , FormGroup.input form "name" "Name"
+                , FormGroup.input form "surname" "Surname"
+                , FormGroup.select roleOptions form "role" "Role"
+                , FormGroup.password form "password" "Password"
                 ]
     in
     formHtml

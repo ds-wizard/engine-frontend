@@ -3,6 +3,7 @@ module Users.Edit.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode)
+import Common.View.FormGroup as FormGroup
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
@@ -76,20 +77,20 @@ userFormView form current =
                 emptyNode
 
             else
-                selectGroup roleOptions form "role" "Role"
+                FormGroup.select roleOptions form "role" "Role"
 
         activeToggle =
             if current then
                 emptyNode
 
             else
-                toggleGroup form "active" "Active"
+                FormGroup.toggle form "active" "Active"
 
         formHtml =
             div []
-                [ inputGroup form "email" "Email"
-                , inputGroup form "name" "Name"
-                , inputGroup form "surname" "Surname"
+                [ FormGroup.input form "email" "Email"
+                , FormGroup.input form "name" "Name"
+                , FormGroup.input form "surname" "Surname"
                 , roleSelect
                 , activeToggle
                 ]
@@ -109,8 +110,8 @@ passwordView wrapMsg model =
 passwordFormView : Form CustomFormError UserPasswordForm -> Html Form.Msg
 passwordFormView form =
     div []
-        [ passwordGroup form "password" "New password"
-        , passwordGroup form "passwordConfirmation" "New password again"
+        [ FormGroup.password form "password" "New password"
+        , FormGroup.password form "passwordConfirmation" "New password again"
         ]
 
 

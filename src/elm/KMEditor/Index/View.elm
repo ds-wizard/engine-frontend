@@ -4,7 +4,8 @@ import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
-import Common.View.Forms exposing (formResultView, selectGroup)
+import Common.View.FormGroup as FormGroup
+import Common.View.Forms exposing (formResultView)
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
@@ -215,7 +216,7 @@ upgradeModal wrapMsg model =
                         , strong [] [ text name ]
                         , text " to."
                         ]
-                    , selectGroup options model.kmUpgradeForm "targetPackageId" "New parent package"
+                    , FormGroup.select options model.kmUpgradeForm "targetPackageId" "New parent package"
                         |> Html.map (wrapMsg << UpgradeFormMsg)
                     ]
 

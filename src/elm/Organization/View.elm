@@ -1,8 +1,8 @@
 module Organization.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode)
+import Common.Html exposing (detailContainerClassWith)
+import Common.View.FormGroup as FormGroup
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
 import Form exposing (Form)
@@ -34,8 +34,8 @@ formView form =
     let
         formHtml =
             div []
-                [ inputGroup form "name" "Organization name"
-                , inputGroup form "organizationId" "Organization ID"
+                [ FormGroup.input form "name" "Organization name"
+                , FormGroup.input form "organizationId" "Organization ID"
                 , formTextAfter "Organization ID can contain alfanumeric characters and dot but cannot start or end with dot."
                 ]
     in

@@ -2,7 +2,7 @@ module Public.Signup.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.View.Forms exposing (..)
+import Common.View.FormGroup as FormGroup
 import Common.View.Page as Page
 import Form exposing (Form)
 import Form.Input as Input
@@ -73,10 +73,10 @@ formView form =
                 ]
     in
     div []
-        [ inputGroup form "email" "Email"
-        , inputGroup form "name" "Name"
-        , inputGroup form "surname" "Surname"
-        , passwordGroup form "password" "Password"
-        , passwordGroup form "passwordConfirmation" "Password again"
+        [ FormGroup.input form "email" "Email"
+        , FormGroup.input form "name" "Name"
+        , FormGroup.input form "surname" "Surname"
+        , FormGroup.password form "password" "Password"
+        , FormGroup.password form "passwordConfirmation" "Password again"
         , acceptGroup
         ]
