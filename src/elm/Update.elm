@@ -60,8 +60,9 @@ update msg model =
             let
                 newModel =
                     setRoute (parseLocation location) model
+                        |> initLocalModel
             in
-            ( initLocalModel newModel, fetchData newModel )
+            ( newModel, fetchData newModel )
 
         Msgs.OnUrlRequest urlRequest ->
             case urlRequest of

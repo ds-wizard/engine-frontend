@@ -37,8 +37,9 @@ init val location key =
 
         model =
             initialModel route seed session jwt key
+                |> initLocalModel
     in
-    ( initLocalModel model, decideInitialRoute model route )
+    ( model, decideInitialRoute model route )
 
 
 decodeFlagsFromJson : Value -> Maybe Flags

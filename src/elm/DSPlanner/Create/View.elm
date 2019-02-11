@@ -82,7 +82,7 @@ tagsView wrapMsg model =
 
                         extraText =
                             if List.length knowledgeModel.tags > 0 then
-                                FormExtra.text "You can filter questions in the questionnaire by selecting only some tags. If no tags are selected, all questions will be used."
+                                FormExtra.text "You can filter questions in the questionnaire by tags. If no tags are selected, all questions will be used."
 
                             else
                                 emptyNode
