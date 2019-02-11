@@ -3,8 +3,8 @@ module Public.ForgottenPasswordConfirmation.View exposing (formView, signupForm,
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (linkTo)
+import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
-import Common.View.Forms exposing (formText)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
@@ -49,7 +49,7 @@ signupForm wrapMsg model =
 formView : Form CustomFormError PasswordForm -> Html Form.Msg
 formView form =
     div []
-        [ formText "Enter a new password you want to use to log in."
+        [ FormExtra.text "Enter a new password you want to use to log in."
         , FormGroup.password form "password" "New password"
         , FormGroup.password form "passwordConfirmation" "New password again"
         ]

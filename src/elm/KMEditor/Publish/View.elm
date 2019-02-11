@@ -2,6 +2,7 @@ module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
+import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
@@ -43,7 +44,7 @@ formView wrapMsg form knowledgeModel =
         , lastVersion (kmLastVersion knowledgeModel)
         , versionInputGroup form
         , FormGroup.textarea form "description" "Description"
-        , formTextAfter "Describe what has changed in the new version."
+        , FormExtra.textAfter "Describe what has changed in the new version."
         ]
         |> Html.map (wrapMsg << FormMsg)
 
@@ -87,5 +88,5 @@ versionInputGroup form =
             , text "."
             , Input.baseInput "number" String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
             ]
-        , formText "Version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes and number X indicate major change."
+        , FormExtra.text "Version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes and number X indicate major change."
         ]

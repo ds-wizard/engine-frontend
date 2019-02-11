@@ -7,8 +7,6 @@ module Common.View.Forms exposing
     , formErrorResultView
     , formResultView
     , formSuccessResultView
-    , formText
-    , formTextAfter
     , infoView
     , statusView
     , submitButton
@@ -23,24 +21,6 @@ import Html.Events exposing (onClick)
 import Msgs exposing (Msg)
 import Routing exposing (Route)
 import String
-
-
-
--- Other form views
-
-
-formText : String -> Html msg
-formText str =
-    p [ class "form-text text-muted" ] [ text str ]
-
-
-formTextAfter : String -> Html msg
-formTextAfter str =
-    p [ class "form-text form-text-after text-muted" ] [ text str ]
-
-
-
--- Form Actions
 
 
 {-| Helper to show action buttons below the form.

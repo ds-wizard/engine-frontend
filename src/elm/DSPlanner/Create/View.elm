@@ -3,8 +3,9 @@ module DSPlanner.Create.View exposing (content, createOption, formView, view)
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith, emptyNode, inlineLoader)
+import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
-import Common.View.Forms exposing (errorView, formActions, formResultView, formText)
+import Common.View.Forms exposing (errorView, formActions, formResultView)
 import Common.View.Page as Page
 import Common.View.Tags exposing (tagList)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm)
@@ -47,7 +48,7 @@ formView form packages =
                 [ FormGroup.input form "name" "Name"
                 , FormGroup.select packageOptions form "packageId" "Knowledge Model"
                 , FormGroup.toggle form "private" "Private"
-                , formText "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
+                , FormExtra.text "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
                 ]
     in
     formHtml
@@ -78,7 +79,7 @@ tagsView wrapMsg model =
 
                         extraText =
                             if List.length knowledgeModel.tags > 0 then
-                                formText "You can filter questions in the questionnaire by selecting only some tags. If no tags are selected, all questions will be used."
+                                FormExtra.text "You can filter questions in the questionnaire by selecting only some tags. If no tags are selected, all questions will be used."
 
                             else
                                 emptyNode

@@ -2,6 +2,7 @@ module KMEditor.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (detailContainerClassWith)
+import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.Forms exposing (..)
 import Common.View.Page as Page
@@ -42,7 +43,7 @@ formView wrapMsg form packages =
             div []
                 [ FormGroup.input form "name" "Name"
                 , FormGroup.input form "kmId" "Knowledge Model ID"
-                , formTextAfter "Knowledge Model ID can contain alfanumeric characters and dash but cannot start or end with dash."
+                , FormExtra.textAfter "Knowledge Model ID can contain alphanumeric characters and dash but cannot start or end with dash."
                 , FormGroup.select parentOptions form "parentPackageId" "Parent Knowledge Model"
                 ]
     in
