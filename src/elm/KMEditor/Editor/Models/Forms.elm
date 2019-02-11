@@ -178,7 +178,7 @@ tagFormValidation : Validation CustomFormError TagForm
 tagFormValidation =
     Validate.map3 TagForm
         (Validate.field "name" Validate.string)
-        (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+        (Validate.field "description" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
         (Validate.field "color" Validate.string)
 
 
