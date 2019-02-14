@@ -1,11 +1,20 @@
-module KMEditor.Common.Models.EntitiesTest exposing (answerDecoderTest, chapterDecoderTest, expertDecoderTest, knowledgeModelDecoderTest, metricDecoderTest, metricMeasureDecoderTest, questionDecoderTest, referenceDecoderTest)
+module KMEditor.Common.Models.EntitiesTest exposing
+    ( answerDecoderTest
+    , chapterDecoderTest
+    , expertDecoderTest
+    , knowledgeModelDecoderTest
+    , metricDecoderTest
+    ,  metricMeasureDecoderTest
+       --    , questionDecoderTest
 
-import Expect
-import Json.Decode as Decode exposing (..)
+    , questionDecoderTest
+    , referenceDecoderTest
+    , tagDecoderTest
+    )
+
 import KMEditor.Common.Models.Entities exposing (..)
 import Test exposing (..)
 import TestUtils exposing (expectDecoder, parametrized)
-import Utils exposing (replace)
 
 
 knowledgeModelDecoderTest : Test
@@ -161,13 +170,12 @@ chapterDecoderTest =
                             "text": "This chapter is empty",
                             "questions": [{
                                 "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                "type": "string",
+                                "questionType": "ValueQuestion",
+                                "valueType": "StringValue",
                                 "title": "What's your name?",
                                 "text": "Fill in your name",
                                 "requiredLevel": null,
                                 "tagUuids": [],
-                                "answerItemTemplate": null,
-                                "answers": null,
                                 "references": [],
                                 "experts": []
                             }]
@@ -179,17 +187,16 @@ chapterDecoderTest =
                         , title = "Chapter 1"
                         , text = "This chapter is empty"
                         , questions =
-                            [ { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
-                              , type_ = "string"
-                              , title = "What's your name?"
-                              , text = Just "Fill in your name"
-                              , requiredLevel = Nothing
-                              , tagUuids = []
-                              , answerItemTemplate = Nothing
-                              , answers = Nothing
-                              , references = []
-                              , experts = []
-                              }
+                            [ ValueQuestion
+                                { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
+                                , title = "What's your name?"
+                                , text = Just "Fill in your name"
+                                , requiredLevel = Nothing
+                                , tagUuids = []
+                                , references = []
+                                , experts = []
+                                , valueType = StringValueType
+                                }
                             ]
                         }
                 in
@@ -200,38 +207,39 @@ chapterDecoderTest =
 questionDecoderTest : Test
 questionDecoderTest =
     describe "questionDecoder"
-        [ parametrized [ "string", "number", "date", "text" ] "should decode simple types question" <|
-            \type_ ->
+        [ parametrized
+            [ ( "StringValue", StringValueType ), ( "NumberValue", NumberValueType ), ( "DateValue", DateValueType ), ( "TextValue", TextValueType ) ]
+            "should decode value types question"
+          <|
+            \( jsonType, parsedType ) ->
                 let
                     raw =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "type": "$type",
+                            "questionType": "ValueQuestion",
+                            "valueType": "$type",
                             "title": "Can you answer this question?",
                             "text": null,
                             "requiredLevel": 1,
                             "tagUuids": [],
-                            "answerItemTemplate": null,
-                            "answers": null,
                             "references": [],
                             "experts": []
                         }
                         """
-                            |> replace "$type" type_
+                            |> String.replace "$type" jsonType
 
                     expected =
-                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , type_ = type_
-                        , title = "Can you answer this question?"
-                        , text = Nothing
-                        , requiredLevel = Just 1
-                        , tagUuids = []
-                        , answerItemTemplate = Nothing
-                        , answers = Nothing
-                        , references = []
-                        , experts = []
-                        }
+                        ValueQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Nothing
+                            , requiredLevel = Just 1
+                            , tagUuids = []
+                            , references = []
+                            , experts = []
+                            , valueType = parsedType
+                            }
                 in
                 expectDecoder questionDecoder raw expected
         , test "should decode question with tag UUIDs" <|
@@ -241,7 +249,8 @@ questionDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "type": "string",
+                            "questionType": "ValueQuestion",
+                            "valueType": "StringValue",
                             "title": "Can you answer this question?",
                             "text": null,
                             "requiredLevel": 1,
@@ -254,17 +263,16 @@ questionDecoderTest =
                         """
 
                     expected =
-                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , type_ = "string"
-                        , title = "Can you answer this question?"
-                        , text = Nothing
-                        , requiredLevel = Just 1
-                        , tagUuids = [ "563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93" ]
-                        , answerItemTemplate = Nothing
-                        , answers = Nothing
-                        , references = []
-                        , experts = []
-                        }
+                        ValueQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Nothing
+                            , requiredLevel = Just 1
+                            , tagUuids = [ "563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93" ]
+                            , references = []
+                            , experts = []
+                            , valueType = StringValueType
+                            }
                 in
                 expectDecoder questionDecoder raw expected
         , test "should decode question with references" <|
@@ -274,7 +282,8 @@ questionDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "type": "string",
+                            "questionType": "ValueQuestion",
+                            "valueType": "StringValue",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": null,
@@ -291,22 +300,21 @@ questionDecoderTest =
                         """
 
                     expected =
-                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , type_ = "string"
-                        , title = "Can you answer this question?"
-                        , text = Just "Please answer the question"
-                        , requiredLevel = Nothing
-                        , tagUuids = []
-                        , answerItemTemplate = Nothing
-                        , answers = Nothing
-                        , references =
-                            [ ResourcePageReference
-                                { uuid = "64217c4e-50b3-4230-9224-bf65c4220ab6"
-                                , shortUuid = "atq"
-                                }
-                            ]
-                        , experts = []
-                        }
+                        ValueQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Just "Please answer the question"
+                            , requiredLevel = Nothing
+                            , tagUuids = []
+                            , references =
+                                [ ResourcePageReference
+                                    { uuid = "64217c4e-50b3-4230-9224-bf65c4220ab6"
+                                    , shortUuid = "atq"
+                                    }
+                                ]
+                            , experts = []
+                            , valueType = StringValueType
+                            }
                 in
                 expectDecoder questionDecoder raw expected
         , test "should decode question with experts" <|
@@ -316,13 +324,12 @@ questionDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "type": "string",
+                            "questionType": "ValueQuestion",
+                            "valueType": "StringValue",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": 2,
                             "tagUuids": [],
-                            "answerItemTemplate": null,
-                            "answers": null,
                             "references": [],
                             "experts": [{
                                 "uuid": "64217c4e-50b3-4230-9224-bf65c4220ab6",
@@ -333,22 +340,21 @@ questionDecoderTest =
                         """
 
                     expected =
-                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , type_ = "string"
-                        , title = "Can you answer this question?"
-                        , text = Just "Please answer the question"
-                        , requiredLevel = Just 2
-                        , tagUuids = []
-                        , answerItemTemplate = Nothing
-                        , answers = Nothing
-                        , references = []
-                        , experts =
-                            [ { uuid = "64217c4e-50b3-4230-9224-bf65c4220ab6"
-                              , name = "John Example"
-                              , email = "expert@example.com"
-                              }
-                            ]
-                        }
+                        ValueQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Just "Please answer the question"
+                            , requiredLevel = Just 2
+                            , tagUuids = []
+                            , references = []
+                            , experts =
+                                [ { uuid = "64217c4e-50b3-4230-9224-bf65c4220ab6"
+                                  , name = "John Example"
+                                  , email = "expert@example.com"
+                                  }
+                                ]
+                            , valueType = StringValueType
+                            }
                 in
                 expectDecoder questionDecoder raw expected
         , test "should decode options question type" <|
@@ -358,12 +364,11 @@ questionDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "type": "options",
+                            "questionType": "OptionsQuestion",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": null,
                             "tagUuids": [],
-                            "answerItemTemplate": null,
                             "answers": [{
                                 "uuid": "64217c4e-50b3-4230-9224-bf65c4220ab6",
                                 "label": "Yes",
@@ -377,15 +382,15 @@ questionDecoderTest =
                         """
 
                     expected =
-                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , type_ = "options"
-                        , title = "Can you answer this question?"
-                        , text = Just "Please answer the question"
-                        , requiredLevel = Nothing
-                        , tagUuids = []
-                        , answerItemTemplate = Nothing
-                        , answers =
-                            Just
+                        OptionsQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Just "Please answer the question"
+                            , requiredLevel = Nothing
+                            , tagUuids = []
+                            , references = []
+                            , experts = []
+                            , answers =
                                 [ { uuid = "64217c4e-50b3-4230-9224-bf65c4220ab6"
                                   , label = "Yes"
                                   , advice = Nothing
@@ -393,9 +398,7 @@ questionDecoderTest =
                                   , followUps = FollowUps []
                                   }
                                 ]
-                        , references = []
-                        , experts = []
-                        }
+                            }
                 in
                 expectDecoder questionDecoder raw expected
         , test "should decode list question type" <|
@@ -405,61 +408,51 @@ questionDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "type": "list",
+                            "questionType": "ListQuestion",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": null,
                             "tagUuids": [],
-                            "answerItemTemplate": {
-                                "title": "Item",
-                                "questions": [{
-                                    "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                    "type": "string",
-                                    "title": "What's your name?",
-                                    "text": "Fill in your name",
-                                    "requiredLevel": null,
-                                    "answerItemTemplate": null,
-                                    "tagUuids": [],
-                                    "answers": null,
-                                    "references": [],
-                                    "experts": []
-                                }]
-                            },
-                            "answers": null,
+                            "itemTitle": "Item",
+                            "itemQuestions": [{
+                                "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
+                                "questionType": "ValueQuestion",
+                                "valueType": "StringValue",
+                                "title": "What's your name?",
+                                "text": "Fill in your name",
+                                "requiredLevel": null,
+                                "tagUuids": [],
+                                "references": [],
+                                "experts": []
+                            }],
                             "references": [],
                             "experts": []
                         }
                         """
 
                     expected =
-                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , type_ = "list"
-                        , title = "Can you answer this question?"
-                        , text = Just "Please answer the question"
-                        , requiredLevel = Nothing
-                        , tagUuids = []
-                        , answerItemTemplate =
-                            Just
-                                { title = "Item"
-                                , questions =
-                                    AnswerItemTemplateQuestions
-                                        [ { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
-                                          , type_ = "string"
-                                          , title = "What's your name?"
-                                          , text = Just "Fill in your name"
-                                          , requiredLevel = Nothing
-                                          , answerItemTemplate = Nothing
-                                          , tagUuids = []
-                                          , answers = Nothing
-                                          , references = []
-                                          , experts = []
-                                          }
-                                        ]
-                                }
-                        , answers = Nothing
-                        , references = []
-                        , experts = []
-                        }
+                        ListQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Just "Please answer the question"
+                            , requiredLevel = Nothing
+                            , tagUuids = []
+                            , itemTitle = "Item"
+                            , itemQuestions =
+                                [ ValueQuestion
+                                    { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
+                                    , title = "What's your name?"
+                                    , text = Just "Fill in your name"
+                                    , requiredLevel = Nothing
+                                    , tagUuids = []
+                                    , references = []
+                                    , experts = []
+                                    , valueType = StringValueType
+                                    }
+                                ]
+                            , references = []
+                            , experts = []
+                            }
                 in
                 expectDecoder questionDecoder raw expected
         ]
@@ -558,13 +551,12 @@ answerDecoderTest =
                             "metricMeasures": [],
                             "followUps": [{
                                 "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
-                                "type": "string",
+                                "questionType": "ValueQuestion",
+                                "valueType": "StringValue",
                                 "title": "What's your name?",
                                 "text": "Fill in your name",
                                 "requiredLevel": null,
-                                "answerItemTemplate": null,
                                 "tagUuids": [],
-                                "answers": null,
                                 "references": [],
                                 "experts": []
                             }]
@@ -578,17 +570,16 @@ answerDecoderTest =
                         , metricMeasures = []
                         , followUps =
                             FollowUps
-                                [ { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
-                                  , type_ = "string"
-                                  , title = "What's your name?"
-                                  , text = Just "Fill in your name"
-                                  , requiredLevel = Nothing
-                                  , answerItemTemplate = Nothing
-                                  , tagUuids = []
-                                  , answers = Nothing
-                                  , references = []
-                                  , experts = []
-                                  }
+                                [ ValueQuestion
+                                    { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
+                                    , title = "What's your name?"
+                                    , text = Just "Fill in your name"
+                                    , requiredLevel = Nothing
+                                    , tagUuids = []
+                                    , references = []
+                                    , experts = []
+                                    , valueType = StringValueType
+                                    }
                                 ]
                         }
                 in

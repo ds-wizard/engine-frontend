@@ -15,7 +15,7 @@ import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Entities exposing (Level, Metric, Tag)
 import KMEditor.Editor.Models exposing (Model, getActiveEditor, getCurrentTags)
 import KMEditor.Editor.Models.Editors exposing (..)
-import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, referenceTypeOptions)
+import KMEditor.Editor.Models.Forms exposing (AnswerForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.Msgs exposing (..)
 import Reorderable
 import String exposing (fromInt, toLower)
@@ -173,38 +173,67 @@ questionEditorView model editorData =
             , deleteAction = DeleteQuestion editorData.uuid |> QuestionEditorMsg |> EditorMsg |> Just
             }
 
-        form =
-            div []
-                [ FormGroup.input editorData.form "title" "Title"
-                , FormGroup.textarea editorData.form "text" "Text"
-                , FormGroup.select questionTypeOptions editorData.form "type_" "Question Type"
-                , p [ class "form-text text-muted" ]
-                    [ fa "warning"
-                    , text "By changing the type answers or items might be removed."
-                    ]
-                , questionRequiredLevelSelectGroup editorData <| ActionResult.withDefault [] <| model.levels
+        formFields =
+            [ FormGroup.select questionTypeOptions editorData.form "questionType" "Question Type"
+            , p [ class "form-text text-muted" ]
+                [ fa "warning"
+                , text "By changing the type answers or items might be removed."
                 ]
+            , FormGroup.input editorData.form "title" "Title"
+            , FormGroup.textarea editorData.form "text" "Text"
+            , questionRequiredLevelSelectGroup editorData <| ActionResult.withDefault [] <| model.levels
+            ]
 
-        answersOrItem =
-            case (Form.getFieldAsString "type_" editorData.form).value of
-                Just "options" ->
-                    questionEditorAnswersView model editorData
+        ( form, extra ) =
+            case (Form.getFieldAsString "questionType" editorData.form).value of
+                Just "OptionsQuestion" ->
+                    let
+                        formData =
+                            div [] formFields
 
-                Just "list" ->
-                    questionEditorAnswerItemTemplateView model editorData
+                        extraData =
+                            [ questionEditorAnswersView model editorData ]
+                    in
+                    ( formData, extraData )
+
+                Just "ListQuestion" ->
+                    let
+                        formData =
+                            div [] formFields
+
+                        extraData =
+                            [ questionEditorItemView model editorData ]
+                    in
+                    ( formData, extraData )
+
+                Just "ValueQuestion" ->
+                    let
+                        formData =
+                            div []
+                                (formFields
+                                    ++ [ FormGroup.select questionValueTypeOptions editorData.form "valueType" "Value Type"
+                                       ]
+                                )
+
+                        extraData =
+                            []
+                    in
+                    ( formData, extraData )
 
                 _ ->
-                    emptyNode
+                    ( emptyNode, [] )
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
-        , form |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
-        , questionTagList model editorData
-        , answersOrItem
-        , questionEditorReferencesView model editorData
-        , questionEditorExpertsView model editorData
-        ]
+        ([ editorTitle editorTitleConfig
+         , form |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+         , questionTagList model editorData
+         ]
+            ++ extra
+            ++ [ questionEditorReferencesView model editorData
+               , questionEditorExpertsView model editorData
+               ]
+        )
     )
 
 
@@ -256,14 +285,14 @@ questionEditorAnswersView model editorData =
         }
 
 
-questionEditorAnswerItemTemplateView : Model -> QuestionEditorData -> Html Msg
-questionEditorAnswerItemTemplateView model editorData =
+questionEditorItemView : Model -> QuestionEditorData -> Html Msg
+questionEditorItemView model editorData =
     let
         config =
             { childName = "Item Question"
             , reorderableState = model.reorderableState
-            , children = editorData.answerItemTemplateQuestions.list |> List.filter (editorNotDeleted model.editors)
-            , reorderMsg = ReorderAnswerItemTemplateQuestions >> QuestionEditorMsg >> EditorMsg
+            , children = editorData.itemQuestions.list |> List.filter (editorNotDeleted model.editors)
+            , reorderMsg = ReorderItemQuestions >> QuestionEditorMsg >> EditorMsg
             , addMsg = AddAnswerItemTemplateQuestion |> QuestionEditorMsg >> EditorMsg
             , toId = identity
             , getName = getChildName model.editors
@@ -275,7 +304,7 @@ questionEditorAnswerItemTemplateView model editorData =
             [ text "Item template" ]
         , div [ class "card-body" ]
             [ div [ class "form-group" ]
-                [ FormGroup.input editorData.form "itemName" "Item Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+                [ FormGroup.input editorData.form "itemTitle" "Item Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
                 ]
             , inputChildren config
             ]

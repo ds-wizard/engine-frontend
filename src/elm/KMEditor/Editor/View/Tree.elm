@@ -5,7 +5,7 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (getReferenceVisibleName)
+import KMEditor.Common.Models.Entities exposing (getQuestionTitle, getReferenceVisibleName, isQuestionList, isQuestionOptions)
 import KMEditor.Editor.Models.Editors exposing (..)
 import KMEditor.Editor.Msgs exposing (Msg(..))
 
@@ -92,15 +92,15 @@ treeNodeChapter activeUuid editors editorData =
 treeNodeQuestion : String -> Dict String Editor -> QuestionEditorData -> Html Msg
 treeNodeQuestion activeUuid editors editorData =
     let
-        answerItemTemplateQuestions =
-            if editorData.question.type_ == "list" then
-                editorData.answerItemTemplateQuestions.list ++ editorData.answerItemTemplateQuestions.deleted
+        itemQuestions =
+            if isQuestionList editorData.question then
+                editorData.itemQuestions.list ++ editorData.itemQuestions.deleted
 
             else
                 []
 
         answers =
-            if editorData.question.type_ == "options" then
+            if isQuestionOptions editorData.question then
                 editorData.answers.list ++ editorData.answers.deleted
 
             else
@@ -115,8 +115,8 @@ treeNodeQuestion activeUuid editors editorData =
         config =
             { editorData = editorData
             , icon = "comment-o"
-            , label = editorData.question.title
-            , children = answerItemTemplateQuestions ++ answers ++ references ++ experts
+            , label = getQuestionTitle editorData.question
+            , children = itemQuestions ++ answers ++ references ++ experts
             }
     in
     treeNode config activeUuid editors

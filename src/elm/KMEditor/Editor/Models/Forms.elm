@@ -4,16 +4,13 @@ module KMEditor.Editor.Models.Forms exposing
     , ExpertForm
     , KnowledgeModelForm
     , MetricMeasureForm
-    , MetricMeasureValues
     , QuestionForm
+    , QuestionFormType(..)
     , ReferenceForm
     , ReferenceFormType(..)
     , TagForm
-    , answerFormInitials
     , answerFormValidation
-    , chapterFormInitials
     , chapterFormValidation
-    , expertFormInitials
     , expertFormValidation
     , formChanged
     , getMetricMesures
@@ -25,16 +22,11 @@ module KMEditor.Editor.Models.Forms exposing
     , initQuestionForm
     , initReferenceForm
     , initTagForm
-    , knowledgeModelFormInitials
     , knowledgeModelFormValidation
-    , metricMeasureFormInitials
-    , metricMeasureFormToMetricMeasure
     , metricMeasureValidation
-    , questionFormInitials
     , questionFormValidation
-    , questionItemNameChanged
     , questionTypeOptions
-    , referenceFormInitials
+    , questionValueTypeOptions
     , referenceFormValidation
     , referenceTypeOptions
     , tagFormValidation
@@ -45,9 +37,6 @@ module KMEditor.Editor.Models.Forms exposing
     , updateQuestionWithForm
     , updateReferenceWithForm
     , updateTagWithForm
-    , validateMeasureValue
-    , validateMetricMeasureValues
-    , validateReference
     )
 
 import Common.Form exposing (CustomFormError)
@@ -81,11 +70,35 @@ type alias ChapterForm =
 
 
 type alias QuestionForm =
+    { question : QuestionFormType }
+
+
+type QuestionFormType
+    = OptionsQuestionForm OptionsQuestionFormData
+    | ListQuestionForm ListQuestionFormData
+    | ValueQuestionForm ValueQuestionFormData
+
+
+type alias OptionsQuestionFormData =
     { title : String
-    , type_ : String
     , text : Maybe String
     , requiredLevel : Maybe Int
-    , itemName : String
+    }
+
+
+type alias ListQuestionFormData =
+    { title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , itemTitle : String
+    }
+
+
+type alias ValueQuestionFormData =
+    { title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , valueType : ValueQuestionType
     }
 
 
@@ -238,60 +251,145 @@ initQuestionForm =
 
 questionFormValidation : Validation CustomFormError QuestionForm
 questionFormValidation =
-    Validate.map5 QuestionForm
-        (Validate.field "title" Validate.string)
-        (Validate.field "type_" Validate.string)
-        (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-        (Validate.field "requiredLevel" (Validate.maybe Validate.int))
-        (Validate.field "itemName" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
+    Validate.succeed QuestionForm
+        |> Validate.andMap (Validate.field "questionType" Validate.string |> Validate.andThen validateQuestion)
+
+
+validateQuestion : String -> Validation CustomFormError QuestionFormType
+validateQuestion questionType =
+    case questionType of
+        "OptionsQuestion" ->
+            Validate.map3 OptionsQuestionFormData
+                (Validate.field "title" Validate.string)
+                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                |> Validate.map OptionsQuestionForm
+
+        "ListQuestion" ->
+            Validate.map4 ListQuestionFormData
+                (Validate.field "title" Validate.string)
+                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "itemTitle" Validate.string)
+                |> Validate.map ListQuestionForm
+
+        "ValueQuestion" ->
+            Validate.map4 ValueQuestionFormData
+                (Validate.field "title" Validate.string)
+                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "valueType" validateValueType)
+                |> Validate.map ValueQuestionForm
+
+        _ ->
+            Validate.fail <| Error.value InvalidString
+
+
+validateValueType : Validation CustomFormError ValueQuestionType
+validateValueType =
+    Validate.string
+        |> Validate.andThen
+            (\valueType ->
+                case valueType of
+                    "StringValue" ->
+                        Validate.succeed StringValueType
+
+                    "DateValue" ->
+                        Validate.succeed DateValueType
+
+                    "NumberValue" ->
+                        Validate.succeed NumberValueType
+
+                    "TextValue" ->
+                        Validate.succeed TextValueType
+
+                    _ ->
+                        Validate.fail <| Error.value InvalidString
+            )
 
 
 questionFormInitials : Question -> List ( String, Field.Field )
 questionFormInitials question =
-    [ ( "title", Field.string question.title )
-    , ( "type_", Field.string question.type_ )
-    , ( "text", Field.string (question.text |> Maybe.withDefault "") )
-    , ( "requiredLevel", Field.string (question.requiredLevel |> Maybe.map fromInt |> Maybe.withDefault "") )
-    , ( "itemName", Field.string (question.answerItemTemplate |> Maybe.map .title |> Maybe.withDefault "") )
-    ]
+    case question of
+        OptionsQuestion _ ->
+            [ ( "questionType", Field.string "OptionsQuestion" )
+            , ( "title", Field.string <| getQuestionTitle question )
+            , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
+            , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
+            ]
+
+        ListQuestion _ ->
+            [ ( "questionType", Field.string "ListQuestion" )
+            , ( "title", Field.string <| getQuestionTitle question )
+            , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
+            , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
+            , ( "itemTitle", Field.string <| getQuestionItemTitle question )
+            ]
+
+        ValueQuestion _ ->
+            [ ( "questionType", Field.string "ValueQuestion" )
+            , ( "title", Field.string <| getQuestionTitle question )
+            , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
+            , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
+            ]
 
 
 updateQuestionWithForm : Question -> QuestionForm -> Question
 updateQuestionWithForm question questionForm =
-    let
-        answerItemTemplate =
-            if questionForm.type_ == "list" then
-                Just
-                    { title = questionForm.itemName
-                    , questions = AnswerItemTemplateQuestions []
-                    }
+    case questionForm.question of
+        OptionsQuestionForm formData ->
+            OptionsQuestion
+                { uuid = getQuestionUuid question
+                , title = formData.title
+                , text = formData.text
+                , requiredLevel = formData.requiredLevel
+                , tagUuids = getQuestionTagUuids question
+                , references = getQuestionReferences question
+                , experts = getQuestionExperts question
+                , answers = getQuestionAnswers question
+                }
 
-            else
-                Nothing
-    in
-    { question
-        | title = questionForm.title
-        , text = questionForm.text
-        , type_ = questionForm.type_
-        , requiredLevel = questionForm.requiredLevel
-        , answerItemTemplate = answerItemTemplate
-    }
+        ListQuestionForm formData ->
+            ListQuestion
+                { uuid = getQuestionUuid question
+                , title = formData.title
+                , text = formData.text
+                , requiredLevel = formData.requiredLevel
+                , tagUuids = getQuestionTagUuids question
+                , references = getQuestionReferences question
+                , experts = getQuestionExperts question
+                , itemTitle = formData.itemTitle
+                , itemQuestions = getQuestionItemQuestions question
+                }
+
+        ValueQuestionForm formData ->
+            ValueQuestion
+                { uuid = getQuestionUuid question
+                , title = formData.title
+                , text = formData.text
+                , requiredLevel = formData.requiredLevel
+                , tagUuids = getQuestionTagUuids question
+                , references = getQuestionReferences question
+                , experts = getQuestionExperts question
+                , valueType = formData.valueType
+                }
 
 
 questionTypeOptions : List ( String, String )
 questionTypeOptions =
-    [ ( "options", "Options" )
-    , ( "list", "List of items" )
-    , ( "string", "String" )
-    , ( "number", "Number" )
-    , ( "date", "Date" )
-    , ( "text", "Long text" )
+    [ ( "OptionsQuestion", "Options" )
+    , ( "ListQuestion", "List of items" )
+    , ( "ValueQuestion", "Value" )
     ]
 
 
-questionItemNameChanged : Form CustomFormError a -> Bool
-questionItemNameChanged questionForm =
-    Set.member "itemName" (Form.getChangedFields questionForm)
+questionValueTypeOptions : List ( String, String )
+questionValueTypeOptions =
+    [ ( "StringValue", "String" )
+    , ( "DateValue", "Date" )
+    , ( "NumberValue", "Number" )
+    , ( "TextValue", "Text" )
+    ]
 
 
 
