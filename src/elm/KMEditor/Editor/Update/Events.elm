@@ -18,11 +18,9 @@ module KMEditor.Editor.Update.Events exposing
     , createEditQuestionEvent
     , createEditReferenceEvent
     , createEditTagEvent
-    , createEvent
-    , createEventField
     )
 
-import KMEditor.Common.Models.Entities exposing (Reference(..), getReferenceUuid)
+import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (Path)
 import KMEditor.Editor.Models.Editors exposing (..)
@@ -118,25 +116,36 @@ createDeleteTagEvent tagUuid =
 createAddQuestionEvent : QuestionForm -> QuestionEditorData -> Seed -> ( Event, Seed )
 createAddQuestionEvent form editorData =
     let
-        maybeAnswerItemTemlate =
-            if form.type_ == "list" then
-                Just
-                    { title = form.itemName
-                    , questionUuids = editorData.answerItemTemplateQuestions.list
-                    }
-
-            else
-                Nothing
-
         data =
-            { questionUuid = editorData.question.uuid
-            , type_ = form.type_
-            , title = form.title
-            , text = form.text
-            , requiredLevel = form.requiredLevel
-            , tagUuids = editorData.tagUuids
-            , answerItemTemplate = maybeAnswerItemTemlate
-            }
+            case form.question of
+                OptionsQuestionForm formData ->
+                    AddOptionsQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = formData.title
+                        , text = formData.text
+                        , requiredLevel = formData.requiredLevel
+                        , tagUuids = editorData.tagUuids
+                        }
+
+                ListQuestionForm formData ->
+                    AddListQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = formData.title
+                        , text = formData.text
+                        , requiredLevel = formData.requiredLevel
+                        , tagUuids = editorData.tagUuids
+                        , itemTitle = formData.itemTitle
+                        }
+
+                ValueQuestionForm formData ->
+                    AddValueQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = formData.title
+                        , text = formData.text
+                        , requiredLevel = formData.requiredLevel
+                        , tagUuids = editorData.tagUuids
+                        , valueType = formData.valueType
+                        }
     in
     createEvent (AddQuestionEvent data) editorData.path
 
@@ -144,43 +153,44 @@ createAddQuestionEvent form editorData =
 createEditQuestionEvent : QuestionForm -> QuestionEditorData -> Seed -> ( Event, Seed )
 createEditQuestionEvent form editorData =
     let
-        maybeAnswerUuids =
-            if form.type_ == "options" then
-                Just editorData.answers.list
-
-            else
-                Nothing
-
-        answerUuidsChanged =
-            editorData.answers.dirty || ((form.type_ == "options" || editorData.question.type_ == "options") && form.type_ /= editorData.question.type_)
-
-        maybeAnswerItemTemplate =
-            if form.type_ == "list" then
-                Just
-                    { title = form.itemName
-                    , questionUuids = editorData.answerItemTemplateQuestions.list
-                    }
-
-            else
-                Nothing
-
-        answerItemTemplateChanged =
-            questionItemNameChanged editorData.form
-                || editorData.answerItemTemplateQuestions.dirty
-                || ((form.type_ == "list" || editorData.question.type_ == "list") && form.type_ /= editorData.question.type_)
-
         data =
-            { questionUuid = editorData.question.uuid
-            , type_ = createEventField form.type_ (editorData.question.type_ /= form.type_)
-            , title = createEventField form.title (editorData.question.title /= form.title)
-            , text = createEventField form.text (editorData.question.text /= form.text)
-            , requiredLevel = createEventField form.requiredLevel (editorData.question.requiredLevel /= form.requiredLevel)
-            , tagUuids = createEventField editorData.tagUuids (editorData.question.tagUuids /= editorData.tagUuids)
-            , answerItemTemplate = createEventField maybeAnswerItemTemplate answerItemTemplateChanged
-            , answerUuids = createEventField maybeAnswerUuids answerUuidsChanged
-            , referenceUuids = createEventField editorData.references.list editorData.references.dirty
-            , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
-            }
+            case form.question of
+                OptionsQuestionForm formData ->
+                    EditOptionsQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = createEventField formData.title (getQuestionTitle editorData.question /= formData.title)
+                        , text = createEventField formData.text (getQuestionText editorData.question /= formData.text)
+                        , requiredLevel = createEventField formData.requiredLevel (getQuestionRequiredLevel editorData.question /= formData.requiredLevel)
+                        , tagUuids = createEventField editorData.tagUuids (getQuestionTagUuids editorData.question /= editorData.tagUuids)
+                        , referenceUuids = createEventField editorData.references.list editorData.references.dirty
+                        , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
+                        , answerUuids = createEventField editorData.answers.list editorData.answers.dirty
+                        }
+
+                ListQuestionForm formData ->
+                    EditListQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = createEventField formData.title (getQuestionTitle editorData.question /= formData.title)
+                        , text = createEventField formData.text (getQuestionText editorData.question /= formData.text)
+                        , requiredLevel = createEventField formData.requiredLevel (getQuestionRequiredLevel editorData.question /= formData.requiredLevel)
+                        , tagUuids = createEventField editorData.tagUuids (getQuestionTagUuids editorData.question /= editorData.tagUuids)
+                        , referenceUuids = createEventField editorData.references.list editorData.references.dirty
+                        , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
+                        , itemTitle = createEventField formData.itemTitle (getQuestionItemTitle editorData.question /= formData.itemTitle)
+                        , itemQuestionUuids = createEventField editorData.itemQuestions.list editorData.itemQuestions.dirty
+                        }
+
+                ValueQuestionForm formData ->
+                    EditValueQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = createEventField formData.title (getQuestionTitle editorData.question /= formData.title)
+                        , text = createEventField formData.text (getQuestionText editorData.question /= formData.text)
+                        , requiredLevel = createEventField formData.requiredLevel (getQuestionRequiredLevel editorData.question /= formData.requiredLevel)
+                        , tagUuids = createEventField editorData.tagUuids (getQuestionTagUuids editorData.question /= editorData.tagUuids)
+                        , referenceUuids = createEventField editorData.references.list editorData.references.dirty
+                        , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
+                        , valueType = createEventField formData.valueType (getQuestionValueType editorData.question /= Just formData.valueType)
+                        }
     in
     createEvent (EditQuestionEvent data) editorData.path
 

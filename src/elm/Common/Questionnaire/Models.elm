@@ -1,4 +1,23 @@
-module Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions, createAnswerOption, createChapterForm, createFormItemDescriptor, createGroupItems, createOptionFormDescriptor, createQuestionExtraData, createQuestionFormItem, encodeFeedbackFrom, encodeQuestionnaireDetail, evaluateAnswerItem, evaluateFollowups, evaluateQuestion, feedbackDecoder, feedbackFormValidation, feedbackListDecoder, getQuestions, getReply, initEmptyFeedbackFrom, initialModel, questionnaireDetailDecoder, setActiveChapter, setLevel, updateQuestionnaireReplies, updateReplies)
+module Common.Questionnaire.Models exposing
+    ( ActivePage(..)
+    , Feedback
+    , FeedbackForm
+    , FormExtraData
+    , Model
+    , QuestionnaireDetail
+    , calculateUnansweredQuestions
+    , encodeFeedbackFrom
+    , encodeQuestionnaireDetail
+    , feedbackDecoder
+    , feedbackFormValidation
+    , feedbackListDecoder
+    , initEmptyFeedbackFrom
+    , initialModel
+    , questionnaireDetailDecoder
+    , setActiveChapter
+    , setLevel
+    , updateReplies
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
@@ -13,7 +32,7 @@ import KMEditor.Common.Models.Entities exposing (..)
 import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
 import String exposing (fromInt)
-import Utils exposing (boolToInt, stringToInt)
+import Utils exposing (boolToInt)
 
 
 type alias Model =
@@ -160,28 +179,30 @@ createQuestionFormItem question =
         descriptor =
             createFormItemDescriptor question
     in
-    case question.type_ of
-        "options" ->
-            ChoiceFormItem descriptor (List.map createAnswerOption (question.answers |> Maybe.withDefault []))
+    case question of
+        OptionsQuestion data ->
+            ChoiceFormItem descriptor (List.map createAnswerOption data.answers)
 
-        "list" ->
-            GroupFormItem descriptor (createGroupItems question)
+        ListQuestion data ->
+            GroupFormItem descriptor (createGroupItems data)
 
-        "number" ->
-            NumberFormItem descriptor
+        ValueQuestion data ->
+            case data.valueType of
+                NumberValueType ->
+                    NumberFormItem descriptor
 
-        "text" ->
-            TextFormItem descriptor
+                TextValueType ->
+                    TextFormItem descriptor
 
-        _ ->
-            StringFormItem descriptor
+                _ ->
+                    StringFormItem descriptor
 
 
 createFormItemDescriptor : Question -> FormItemDescriptor FormExtraData
 createFormItemDescriptor question =
-    { name = question.uuid
-    , label = question.title
-    , text = question.text
+    { name = getQuestionUuid question
+    , label = getQuestionTitle question
+    , text = getQuestionText question
     , extraData = createQuestionExtraData question
     }
 
@@ -203,11 +224,11 @@ createQuestionExtraData question =
         newExtraData =
             { resourcePageReferences = []
             , urlReferences = []
-            , experts = question.experts
-            , requiredLevel = question.requiredLevel
+            , experts = getQuestionExperts question
+            , requiredLevel = getQuestionRequiredLevel question
             }
     in
-    Just <| List.foldl foldReferences newExtraData question.references
+    Just <| List.foldl foldReferences newExtraData <| getQuestionReferences question
 
 
 createAnswerOption : Answer -> Option FormExtraData
@@ -232,26 +253,16 @@ createOptionFormDescriptor answer =
     }
 
 
-createGroupItems : Question -> List (FormItem FormExtraData)
-createGroupItems question =
-    case question.answerItemTemplate of
-        Just answerItemTemplate ->
-            let
-                itemName =
-                    StringFormItem { name = "itemName", label = answerItemTemplate.title, text = Nothing, extraData = Nothing }
+createGroupItems : ListQuestionData -> List (FormItem FormExtraData)
+createGroupItems questionData =
+    let
+        itemName =
+            StringFormItem { name = "itemName", label = questionData.itemTitle, text = Nothing, extraData = Nothing }
 
-                questions =
-                    List.map createQuestionFormItem <| getQuestions answerItemTemplate.questions
-            in
-            itemName :: questions
-
-        _ ->
-            []
-
-
-getQuestions : AnswerItemTemplateQuestions -> List Question
-getQuestions (AnswerItemTemplateQuestions questions) =
-    questions
+        questions =
+            List.map createQuestionFormItem questionData.itemQuestions
+    in
+    itemName :: questions
 
 
 
@@ -313,16 +324,16 @@ evaluateQuestion : Int -> FormValues -> List String -> Question -> Int
 evaluateQuestion currentLevel replies path question =
     let
         currentPath =
-            path ++ [ question.uuid ]
+            path ++ [ getQuestionUuid question ]
 
         requiredNow =
-            (question.requiredLevel |> Maybe.withDefault 100) <= currentLevel
+            (getQuestionRequiredLevel question |> Maybe.withDefault 100) <= currentLevel
 
         rawValue =
             getReply replies (String.join "." currentPath)
 
         adjustedValue =
-            if question.type_ == "list" then
+            if isQuestionList question then
                 case rawValue of
                     Nothing ->
                         Just <| ItemListReply 0
@@ -335,25 +346,21 @@ evaluateQuestion currentLevel replies path question =
     in
     case adjustedValue of
         Just value ->
-            case question.type_ of
-                "options" ->
-                    question.answers
-                        |> Maybe.withDefault []
+            case question of
+                OptionsQuestion data ->
+                    data.answers
                         |> List.find (.uuid >> (==) (getAnswerUuid value))
                         |> Maybe.map (evaluateFollowups currentLevel replies currentPath)
                         |> Maybe.withDefault 1
 
-                "list" ->
+                ListQuestion data ->
                     let
-                        questions =
-                            getAnswerItemTemplateQuestions question
-
                         itemCount =
                             getItemListCount value
                     in
                     if itemCount > 0 then
                         List.range 0 (itemCount - 1)
-                            |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow questions)
+                            |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow data.itemQuestions)
                             |> List.foldl (+) 0
 
                     else

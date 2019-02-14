@@ -342,9 +342,9 @@ update msg wrapMsg state model =
                                     addAnswer (scrollTopCmd wrapMsg)
                                         |> withGenerateQuestionEditEvent state.seed model editorData
 
-                                ReorderAnswerItemTemplateQuestions answerItemTemplateQuestionList ->
+                                ReorderItemQuestions itemQuestionList ->
                                     model
-                                        |> insertEditor (QuestionEditor { editorData | answerItemTemplateQuestions = Children.updateList answerItemTemplateQuestionList editorData.answerItemTemplateQuestions })
+                                        |> insertEditor (QuestionEditor { editorData | itemQuestions = Children.updateList itemQuestionList editorData.itemQuestions })
                                         |> pair state.seed
                                         |> withNoCmd
 

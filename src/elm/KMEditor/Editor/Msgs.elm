@@ -69,7 +69,7 @@ type QuestionEditorMsg
     | DeleteQuestion String
     | ReorderAnswers (List String)
     | AddAnswer
-    | ReorderAnswerItemTemplateQuestions (List String)
+    | ReorderItemQuestions (List String)
     | AddAnswerItemTemplateQuestion
     | ReorderReferences (List String)
     | AddReference

@@ -135,7 +135,7 @@ getEventView wrapMsg model migration event =
                 |> viewEvent wrapMsg model "Add question"
 
         EditQuestionEvent eventData _ ->
-            getQuestion migration.currentKnowledgeModel eventData.questionUuid
+            getQuestion migration.currentKnowledgeModel (getEditQuestionUuid eventData)
                 |> Maybe.map (viewEditQuestionDiff eventData)
                 |> Maybe.map (viewEvent wrapMsg model "Edit question")
                 |> Maybe.withDefault errorMessage
@@ -277,10 +277,10 @@ viewEditChapterDiff : EditChapterEventData -> Chapter -> Html Msgs.Msg
 viewEditChapterDiff event chapter =
     let
         originalQuestions =
-            List.map .uuid chapter.questions
+            List.map getQuestionUuid chapter.questions
 
         questionNames =
-            Dict.fromList <| List.map (\q -> ( q.uuid, q.title )) chapter.questions
+            Dict.fromList <| List.map (\q -> ( getQuestionUuid q, getQuestionTitle q )) chapter.questions
 
         fieldDiff =
             viewDiff <|
@@ -301,11 +301,8 @@ viewEditChapterDiff event chapter =
 viewDeleteChapterDiff : Chapter -> Html Msgs.Msg
 viewDeleteChapterDiff chapter =
     let
-        originalQuestions =
-            List.map .uuid chapter.questions
-
         questionNames =
-            List.map (\q -> q.title) chapter.questions
+            List.map getQuestionTitle chapter.questions
 
         fieldDiff =
             viewDelete <| List.map2 (\a b -> ( a, b )) [ "Title", "Text" ] [ chapter.title, chapter.text ]
@@ -317,8 +314,16 @@ viewDeleteChapterDiff chapter =
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewAddQuestionDiff : { a | title : String, text : Maybe String } -> Html Msgs.Msg
-viewAddQuestionDiff event =
+viewAddQuestionDiff : AddQuestionEventData -> Html Msgs.Msg
+viewAddQuestionDiff =
+    mapAddQuestionEventData
+        viewAddAnyQuestionDiff
+        viewAddAnyQuestionDiff
+        viewAddAnyQuestionDiff
+
+
+viewAddAnyQuestionDiff : { a | title : String, text : Maybe String } -> Html Msgs.Msg
+viewAddAnyQuestionDiff event =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
@@ -329,51 +334,67 @@ viewAddQuestionDiff event =
         (viewAdd fields)
 
 
-viewEditQuestionDiff : { a | title : EventField String, text : EventField (Maybe String), answerUuids : EventField (Maybe (List String)), referenceUuids : EventField (List String), expertUuids : EventField (List String) } -> Question -> Html Msgs.Msg
+viewEditQuestionDiff : EditQuestionEventData -> Question -> Html Msgs.Msg
 viewEditQuestionDiff event question =
     let
+        title =
+            mapEditQuestionEventData .title .title .title event
+
+        questionText =
+            mapEditQuestionEventData .text .text .text event
+
         originalAnswers =
-            List.map .uuid (question.answers |> Maybe.withDefault [])
+            List.map .uuid <| getQuestionAnswers question
 
         answerNames =
-            Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) (question.answers |> Maybe.withDefault [])
+            Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) <| getQuestionAnswers question
 
         originalReferences =
-            List.map getReferenceUuid question.references
+            List.map getReferenceUuid <| getQuestionReferences question
+
+        referenceUuids =
+            mapEditQuestionEventData .referenceUuids .referenceUuids .referenceUuids event
 
         referenceNames =
-            Dict.fromList <| List.map (\r -> ( getReferenceUuid r, getReferenceVisibleName r )) question.references
+            Dict.fromList <| List.map (\r -> ( getReferenceUuid r, getReferenceVisibleName r )) <| getQuestionReferences question
 
         originalExperts =
-            List.map .uuid question.experts
+            List.map .uuid <| getQuestionExperts question
+
+        expertUuids =
+            mapEditQuestionEventData .expertUuids .expertUuids .expertUuids event
 
         expertNames =
-            Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) question.experts
+            Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) <| getQuestionExperts question
 
         fields =
             List.map3 (\a b c -> ( a, b, c ))
                 [ "Title", "Text" ]
-                [ question.title, question.text |> Maybe.withDefault "" ]
-                [ getEventFieldValueWithDefault event.title question.title
-                , getEventFieldValueWithDefault event.text question.text |> Maybe.withDefault ""
+                [ getQuestionTitle question, getQuestionText question |> Maybe.withDefault "" ]
+                [ getEventFieldValueWithDefault title <| getQuestionTitle question
+                , getEventFieldValueWithDefault questionText (getQuestionText question) |> Maybe.withDefault ""
                 ]
 
         fieldDiff =
             viewDiff fields
 
         answersDiff =
-            case getEventFieldValueWithDefault event.answerUuids (Just originalAnswers) of
-                Just answerUuids ->
+            case event of
+                EditOptionsQuestionEvent eventData ->
+                    let
+                        answerUuids =
+                            getEventFieldValueWithDefault eventData.answerUuids originalAnswers
+                    in
                     viewDiffChildren "Answers" originalAnswers answerUuids answerNames
 
                 _ ->
                     emptyNode
 
         referencesDiff =
-            viewDiffChildren "References" originalReferences (getEventFieldValueWithDefault event.referenceUuids originalReferences) referenceNames
+            viewDiffChildren "References" originalReferences (getEventFieldValueWithDefault referenceUuids originalReferences) referenceNames
 
         expertsDiff =
-            viewDiffChildren "Experts" originalExperts (getEventFieldValueWithDefault event.expertUuids originalExperts) expertNames
+            viewDiffChildren "Experts" originalExperts (getEventFieldValueWithDefault expertUuids originalExperts) expertNames
     in
     div []
         (fieldDiff ++ [ answersDiff, referencesDiff, expertsDiff ])
@@ -385,19 +406,19 @@ viewDeleteQuestionDiff question =
         fields =
             List.map2 (\a b -> ( a, b ))
                 [ "Title", "Text" ]
-                [ question.title, question.text |> Maybe.withDefault "" ]
+                [ getQuestionTitle question, getQuestionText question |> Maybe.withDefault "" ]
 
         fieldDiff =
             viewDelete fields
 
         answersDiff =
-            viewDeletedChildren "Answers" <| List.map .label (question.answers |> Maybe.withDefault [])
+            viewDeletedChildren "Answers" <| List.map .label <| getQuestionAnswers question
 
         referencesDiff =
-            viewDeletedChildren "References" <| List.map getReferenceVisibleName question.references
+            viewDeletedChildren "References" <| List.map getReferenceVisibleName <| getQuestionReferences question
 
         expertsDiff =
-            viewDeletedChildren "Experts" <| List.map .name question.experts
+            viewDeletedChildren "Experts" <| List.map .name <| getQuestionExperts question
     in
     div []
         (fieldDiff ++ [ answersDiff, referencesDiff, expertsDiff ])
@@ -417,10 +438,10 @@ viewEditAnswerDiff : EditAnswerEventData -> Answer -> Html Msgs.Msg
 viewEditAnswerDiff event answer =
     let
         originalQuestions =
-            List.map .uuid <| getFollowUpQuestions answer
+            List.map getQuestionUuid <| getFollowUpQuestions answer
 
         questionNames =
-            Dict.fromList <| List.map (\q -> ( q.uuid, q.title )) <| getFollowUpQuestions answer
+            Dict.fromList <| List.map (\q -> ( getQuestionUuid q, getQuestionTitle q )) <| getFollowUpQuestions answer
 
         fieldDiff =
             viewDiff <|
@@ -441,11 +462,8 @@ viewEditAnswerDiff event answer =
 viewDeleteAnswerDiff : Answer -> Html Msgs.Msg
 viewDeleteAnswerDiff answer =
     let
-        originalQuestions =
-            List.map .uuid <| getFollowUpQuestions answer
-
         questionNames =
-            List.map (\q -> q.title) <| getFollowUpQuestions answer
+            List.map getQuestionTitle <| getFollowUpQuestions answer
 
         fieldDiff =
             viewDelete <| List.map2 (\a b -> ( a, b )) [ "Label", "Advice" ] [ answer.label, answer.advice |> Maybe.withDefault "" ]
@@ -459,7 +477,7 @@ viewDeleteAnswerDiff answer =
 
 viewAddReferenceDiff : AddReferenceEventData -> Html Msgs.Msg
 viewAddReferenceDiff =
-    addReferenceEventDataByType
+    mapAddReferenceEventData
         viewAddResourcePageReferenceDiff
         viewAddURLReferenceDiff
         viewAddCrossReferenceDiff
@@ -523,7 +541,7 @@ viewEditReferenceDiff event reference =
                     viewDeleteReferenceDiff otherReference
 
                 addReference =
-                    editReferenceEventDataByType
+                    mapEditReferenceEventData
                         viewEditResourcePageReferenceDiff
                         viewEditURLReferenceDiff
                         viewEditCrossReferenceDiff
@@ -568,7 +586,7 @@ viewEditCrossReferenceDiff data =
 
 viewDeleteReferenceDiff : Reference -> Html Msgs.Msg
 viewDeleteReferenceDiff =
-    referenceByType
+    mapReferenceData
         viewDeleteResourcePageReferenceDiff
         viewDeleteURLReferenceDiff
         viewDeleteCrossReferenceDiff

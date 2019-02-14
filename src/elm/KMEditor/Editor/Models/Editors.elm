@@ -134,7 +134,7 @@ type alias QuestionEditorData =
     , form : Form CustomFormError QuestionForm
     , tagUuids : List String
     , answers : Children
-    , answerItemTemplateQuestions : Children
+    , itemQuestions : Children
     , references : Children
     , experts : Children
     , treeOpen : Bool
@@ -213,7 +213,7 @@ createChapterEditor editorContext path editorState chapter editors =
                 { uuid = chapter.uuid
                 , chapter = chapter
                 , form = initChapterForm chapter
-                , questions = Children.init <| List.map .uuid chapter.questions
+                , questions = Children.init <| List.map getQuestionUuid chapter.questions
                 , treeOpen = False
                 , editorState = editorState
                 , path = path
@@ -247,46 +247,48 @@ createTagEditor editorContext path editorState tag editors =
 createQuestionEditor : EditorContext -> Path -> EditorState -> Question -> Dict String Editor -> Dict String Editor
 createQuestionEditor editorContext path editorState question editors =
     let
+        questionUuid =
+            getQuestionUuid question
+
         answers =
-            question.answers
-                |> Maybe.withDefault []
+            getQuestionAnswers question
                 |> List.map .uuid
 
-        answerItemTemplateQuestions =
-            getAnswerItemTemplateQuestions question
-                |> List.map .uuid
+        itemQuestions =
+            getQuestionItemQuestions question
+                |> List.map getQuestionUuid
 
         editor =
             QuestionEditor
-                { uuid = question.uuid
+                { uuid = questionUuid
                 , question = question
                 , form = initQuestionForm question
-                , tagUuids = question.tagUuids
+                , tagUuids = getQuestionTagUuids question
                 , answers = Children.init answers
-                , answerItemTemplateQuestions = Children.init answerItemTemplateQuestions
-                , references = Children.init <| List.map getReferenceUuid question.references
-                , experts = Children.init <| List.map .uuid question.experts
+                , itemQuestions = Children.init itemQuestions
+                , references = Children.init <| List.map getReferenceUuid <| getQuestionReferences question
+                , experts = Children.init <| List.map .uuid <| getQuestionExperts question
                 , treeOpen = False
                 , editorState = editorState
                 , path = path
                 }
 
         currentPath =
-            path ++ [ QuestionPathNode question.uuid ]
+            path ++ [ QuestionPathNode questionUuid ]
 
         withAnswers =
-            List.foldl (createAnswerEditor editorContext currentPath Initial) editors <| Maybe.withDefault [] <| question.answers
+            List.foldl (createAnswerEditor editorContext currentPath Initial) editors <| getQuestionAnswers question
 
         withAnswerItemTemplateQuestions =
-            List.foldl (createQuestionEditor editorContext currentPath Initial) withAnswers <| getAnswerItemTemplateQuestions question
+            List.foldl (createQuestionEditor editorContext currentPath Initial) withAnswers <| getQuestionItemQuestions question
 
         withReferences =
-            List.foldl (createReferenceEditor editorContext currentPath Initial) withAnswerItemTemplateQuestions question.references
+            List.foldl (createReferenceEditor editorContext currentPath Initial) withAnswerItemTemplateQuestions <| getQuestionReferences question
 
         withExperts =
-            List.foldl (createExpertEditor editorContext currentPath Initial) withReferences question.experts
+            List.foldl (createExpertEditor editorContext currentPath Initial) withReferences <| getQuestionExperts question
     in
-    Dict.insert question.uuid editor withExperts
+    Dict.insert questionUuid editor withExperts
 
 
 createAnswerEditor : EditorContext -> Path -> EditorState -> Answer -> Dict String Editor -> Dict String Editor
@@ -294,7 +296,7 @@ createAnswerEditor editorContext path editorState answer editors =
     let
         followUps =
             getFollowUpQuestions answer
-                |> List.map .uuid
+                |> List.map getQuestionUuid
 
         editor =
             AnswerEditor
@@ -411,7 +413,7 @@ deleteQuestionEditor : QuestionEditorData -> Dict String Editor -> Dict String E
 deleteQuestionEditor editorData editors =
     editors
         |> deleteEditors editorData.answers
-        |> deleteEditors editorData.answerItemTemplateQuestions
+        |> deleteEditors editorData.itemQuestions
         |> deleteEditors editorData.references
         |> deleteEditors editorData.experts
         |> Dict.remove editorData.uuid
@@ -451,7 +453,7 @@ getEditorTitle editor =
             data.tag.name
 
         QuestionEditor data ->
-            data.question.title
+            getQuestionTitle data.question
 
         AnswerEditor data ->
             data.answer.label
@@ -476,7 +478,7 @@ getEditorUuid editor =
             data.tag.uuid
 
         QuestionEditor data ->
-            data.question.uuid
+            getQuestionUuid data.question
 
         AnswerEditor data ->
             data.answer.uuid
@@ -625,9 +627,9 @@ isTagEditorDirty editorData =
 isQuestionEditorDirty : QuestionEditorData -> Bool
 isQuestionEditorDirty editorData =
     formChanged editorData.form
-        || (editorData.question.tagUuids /= editorData.tagUuids)
+        || (getQuestionTagUuids editorData.question /= editorData.tagUuids)
         || editorData.answers.dirty
-        || editorData.answerItemTemplateQuestions.dirty
+        || editorData.itemQuestions.dirty
         || editorData.references.dirty
         || editorData.experts.dirty
 
@@ -695,15 +697,15 @@ updateQuestionEditorData editorContext newState form editorData =
             updateQuestionWithForm editorData.question form
 
         newAnswers =
-            if newQuestion.type_ == "options" then
+            if isQuestionOptions newQuestion then
                 Children.cleanDirty editorData.answers
 
             else
                 Children.init []
 
         newAnswerItemTemplateQuestions =
-            if newQuestion.type_ == "list" then
-                Children.cleanDirty editorData.answerItemTemplateQuestions
+            if isQuestionList newQuestion then
+                Children.cleanDirty editorData.itemQuestions
 
             else
                 Children.init []
@@ -712,7 +714,7 @@ updateQuestionEditorData editorContext newState form editorData =
         | editorState = getNewState editorData.editorState newState
         , question = newQuestion
         , answers = newAnswers
-        , answerItemTemplateQuestions = newAnswerItemTemplateQuestions
+        , itemQuestions = newAnswerItemTemplateQuestions
         , references = Children.cleanDirty editorData.references
         , experts = Children.cleanDirty editorData.experts
         , form = initQuestionForm newQuestion
@@ -721,16 +723,16 @@ updateQuestionEditorData editorContext newState form editorData =
 
 updateEditorsWithQuestion : QuestionEditorData -> QuestionEditorData -> Dict String Editor -> Dict String Editor
 updateEditorsWithQuestion newEditorData oldEditorData editors =
-    case newEditorData.question.type_ of
-        "options" ->
-            deleteEditors oldEditorData.answerItemTemplateQuestions editors
+    case newEditorData.question of
+        OptionsQuestion _ ->
+            deleteEditors oldEditorData.itemQuestions editors
 
-        "list" ->
+        ListQuestion _ ->
             deleteEditors oldEditorData.answers editors
 
         _ ->
             editors
-                |> deleteEditors oldEditorData.answerItemTemplateQuestions
+                |> deleteEditors oldEditorData.itemQuestions
                 |> deleteEditors oldEditorData.answers
 
 
@@ -798,7 +800,7 @@ addChapterQuestion : Question -> ChapterEditorData -> Editor
 addChapterQuestion question editorData =
     ChapterEditor
         { editorData
-            | questions = Children.addChild question.uuid editorData.questions
+            | questions = Children.addChild (getQuestionUuid question) editorData.questions
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }
@@ -818,7 +820,7 @@ addQuestionAnswerItemTemplateQuestion : Question -> QuestionEditorData -> Editor
 addQuestionAnswerItemTemplateQuestion question editorData =
     QuestionEditor
         { editorData
-            | answerItemTemplateQuestions = Children.addChild question.uuid editorData.answerItemTemplateQuestions
+            | itemQuestions = Children.addChild (getQuestionUuid question) editorData.itemQuestions
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }
@@ -848,7 +850,7 @@ addAnswerFollowUp : Question -> AnswerEditorData -> Editor
 addAnswerFollowUp followUp editorData =
     AnswerEditor
         { editorData
-            | followUps = Children.addChild followUp.uuid editorData.followUps
+            | followUps = Children.addChild (getQuestionUuid followUp) editorData.followUps
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }

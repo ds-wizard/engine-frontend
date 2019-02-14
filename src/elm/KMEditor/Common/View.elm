@@ -51,6 +51,7 @@ diffTreeNodeNewChapter events event =
             in
             if List.any (isDeleteChapter dummyChapter) events then
                 emptyNode
+
             else
                 List.find (isEditChapter dummyChapter) events
                     |> Maybe.andThen getEventEntityVisibleName
@@ -85,27 +86,28 @@ diffTreeNodeQuestion events question =
     li [ class (divClass ++ " question") ]
         [ span []
             [ i [ class "fa fa-comment-o" ] []
-            , text question.title
+            , text (getQuestionTitle question)
             ]
         , ul []
-            (List.map (diffTreeNodeAnswer events) (question.answers |> Maybe.withDefault []) ++ newAnswers)
+            (List.map (diffTreeNodeAnswer events) (getQuestionAnswers question) ++ newAnswers)
         , ul []
-            (List.map (diffTreeNodeReference events) question.references ++ newReferences)
+            (List.map (diffTreeNodeReference events) (getQuestionReferences question) ++ newReferences)
         , ul []
-            (List.map (diffTreeNodeExpert events) question.experts ++ newExperts)
+            (List.map (diffTreeNodeExpert events) (getQuestionExperts question) ++ newExperts)
         ]
 
 
 diffTreeNodeNewQuestion : List Event -> Event -> Html msg
 diffTreeNodeNewQuestion events event =
     let
-        getNode { questionUuid, title } =
+        getNode questionUuid title =
             let
                 dummyQuestion =
                     newQuestion questionUuid
             in
             if List.any (isDeleteQuestion dummyQuestion) events then
                 emptyNode
+
             else
                 List.find (isEditQuestion dummyQuestion) events
                     |> Maybe.andThen getEventEntityVisibleName
@@ -114,7 +116,7 @@ diffTreeNodeNewQuestion events event =
     in
     case event of
         AddQuestionEvent eventData _ ->
-            getNode eventData
+            getNode (getAddQuestionUuid eventData) (getAddQuestionEventEntityVisibleName eventData |> Maybe.withDefault "")
 
         _ ->
             emptyNode
@@ -149,6 +151,7 @@ diffTreeNodeNewAnswer events event =
             in
             if List.any (isDeleteAnswer dummyAnswer) events then
                 emptyNode
+
             else
                 List.find (isEditAnswer dummyAnswer) events
                     |> Maybe.andThen getEventEntityVisibleName
@@ -183,6 +186,7 @@ diffTreeNodeNewReference events event =
             in
             if List.any (isDeleteReference dummyReference) events then
                 emptyNode
+
             else
                 List.find (isEditReference (newReference (getAddReferenceUuid eventData))) events
                     |> Maybe.andThen getEventEntityVisibleName
@@ -217,6 +221,7 @@ diffTreeNodeNewExpert events event =
             in
             if List.any (isDeleteExpert dummyExpert) events then
                 emptyNode
+
             else
                 List.find (isEditExpert (newExpert eventData.expertUuid)) events
                     |> Maybe.andThen getEventEntityVisibleName
@@ -241,8 +246,10 @@ getClass : (a -> Event -> Bool) -> (a -> Event -> Bool) -> List Event -> a -> St
 getClass isDelete isEdit events entity =
     if List.any (isDelete entity) events then
         "del"
+
     else if List.any (isEdit entity) events then
         "edited"
+
     else
         ""
 
