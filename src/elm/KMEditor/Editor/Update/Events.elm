@@ -394,18 +394,3 @@ createEvent create path seed =
                 }
     in
     ( event, newSeed )
-
-
-createEventField : a -> Bool -> EventField a
-createEventField value changed =
-    let
-        v =
-            if changed then
-                Just value
-
-            else
-                Nothing
-    in
-    { changed = changed
-    , value = v
-    }

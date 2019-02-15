@@ -7,11 +7,12 @@ import Url.Parser.Query as Query
 
 
 type Route
-    = Create (Maybe String)
-    | Editor String
-    | Index
-    | Migration String
-    | Publish String
+    = CreateRoute (Maybe String)
+    | EditorRoute String
+    | TagEditorRoute String
+    | IndexRoute
+    | MigrationRoute String
+    | PublishRoute String
 
 
 moduleRoot : String
@@ -21,18 +22,19 @@ moduleRoot =
 
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
-    [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> Query.string "selected")
-    , map (wrapRoute << Editor) (s moduleRoot </> s "edit" </> string)
-    , map (wrapRoute <| Index) (s moduleRoot)
-    , map (wrapRoute << Migration) (s moduleRoot </> s "migration" </> string)
-    , map (wrapRoute << Publish) (s moduleRoot </> s "publish" </> string)
+    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s "create" <?> Query.string "selected")
+    , map (wrapRoute << EditorRoute) (s moduleRoot </> s "edit" </> string)
+    , map (wrapRoute << TagEditorRoute) (s moduleRoot </> s "edit-tags" </> string)
+    , map (wrapRoute <| IndexRoute) (s moduleRoot)
+    , map (wrapRoute << MigrationRoute) (s moduleRoot </> s "migration" </> string)
+    , map (wrapRoute << PublishRoute) (s moduleRoot </> s "publish" </> string)
     ]
 
 
 toUrl : Route -> List String
 toUrl route =
     case route of
-        Create selected ->
+        CreateRoute selected ->
             case selected of
                 Just id ->
                     [ moduleRoot, "create", "?selected=" ++ id ]
@@ -40,33 +42,39 @@ toUrl route =
                 Nothing ->
                     [ moduleRoot, "create" ]
 
-        Editor uuid ->
+        EditorRoute uuid ->
             [ moduleRoot, "edit", uuid ]
 
-        Index ->
+        TagEditorRoute uuid ->
+            [ moduleRoot, "edit-tags", uuid ]
+
+        IndexRoute ->
             [ moduleRoot ]
 
-        Migration uuid ->
+        MigrationRoute uuid ->
             [ moduleRoot, "migration", uuid ]
 
-        Publish uuid ->
+        PublishRoute uuid ->
             [ moduleRoot, "publish", uuid ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
-        Create _ ->
+        CreateRoute _ ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        Editor uuid ->
+        EditorRoute uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        Index ->
+        TagEditorRoute uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        Migration uuid ->
+        IndexRoute ->
+            hasPerm maybeJwt Perm.knowledgeModel
+
+        MigrationRoute uuid ->
             hasPerm maybeJwt Perm.knowledgeModelUpgrade
 
-        Publish uuid ->
+        PublishRoute uuid ->
             hasPerm maybeJwt Perm.knowledgeModelPublish

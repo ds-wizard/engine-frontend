@@ -103,7 +103,7 @@ postKmCompleted state model result =
     case result of
         Ok km ->
             ( model
-            , cmdNavigate state.key (Routing.KMEditor <| Editor km.uuid)
+            , cmdNavigate state.key (Routing.KMEditor <| EditorRoute km.uuid)
             )
 
         Err error ->

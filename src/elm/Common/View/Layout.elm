@@ -123,7 +123,7 @@ menuItems =
     , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
     , MenuItem "Knowledge Models" "cubes" (KMPackages KMPackages.Routing.Index) Perm.packageManagementRead
     , MenuItem "Questionnaires" "list-alt" (DSPlanner DSPlanner.Routing.Index) Perm.questionnaire
-    , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.Index) Perm.knowledgeModel
+    , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.IndexRoute) Perm.knowledgeModel
     ]
 
 

@@ -770,7 +770,7 @@ viewCompletedMigration model =
                 , text "You can publish the new version now."
                 ]
             , div [ class "text-right" ]
-                [ linkTo (KMEditor <| Publish model.branchUuid)
+                [ linkTo (KMEditor <| PublishRoute model.branchUuid)
                     [ class "btn btn-primary" ]
                     [ text "Publish"
                     , i [ class "fa fa-long-arrow-right", style "margin-left" "10px" ] []

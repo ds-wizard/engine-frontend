@@ -33,7 +33,7 @@ contentView wrapMsg model knowledgeModel =
     div []
         [ FormResult.view model.publishingKnowledgeModel
         , formView wrapMsg model.form knowledgeModel
-        , FormActions.view (KMEditor Index) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (KMEditor IndexRoute) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]
 
 

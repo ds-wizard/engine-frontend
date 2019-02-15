@@ -6,11 +6,13 @@ import KMEditor.Index.Models
 import KMEditor.Migration.Models
 import KMEditor.Publish.Models
 import KMEditor.Routing exposing (Route(..))
+import KMEditor.TagEditor.Models
 
 
 type alias Model =
     { createModel : KMEditor.Create.Models.Model
     , editorModel : KMEditor.Editor.Models.Model
+    , tagEditorModel : KMEditor.TagEditor.Models.Model
     , indexModel : KMEditor.Index.Models.Model
     , migrationModel : KMEditor.Migration.Models.Model
     , publishModel : KMEditor.Publish.Models.Model
@@ -21,6 +23,7 @@ initialModel : Model
 initialModel =
     { createModel = KMEditor.Create.Models.initialModel Nothing
     , editorModel = KMEditor.Editor.Models.initialModel ""
+    , tagEditorModel = KMEditor.TagEditor.Models.initialModel ""
     , indexModel = KMEditor.Index.Models.initialModel
     , migrationModel = KMEditor.Migration.Models.initialModel ""
     , publishModel = KMEditor.Publish.Models.initialModel
@@ -30,21 +33,28 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        Create selectedPackage ->
+        CreateRoute selectedPackage ->
             { model | createModel = KMEditor.Create.Models.initialModel selectedPackage }
 
-        Editor uuid ->
+        EditorRoute uuid ->
             if model.editorModel.branchUuid == uuid then
                 model
 
             else
                 { model | editorModel = KMEditor.Editor.Models.initialModel uuid }
 
-        Index ->
+        TagEditorRoute uuid ->
+            if model.tagEditorModel.branchUuid == uuid then
+                model
+
+            else
+                { model | tagEditorModel = KMEditor.TagEditor.Models.initialModel uuid }
+
+        IndexRoute ->
             { model | indexModel = KMEditor.Index.Models.initialModel }
 
-        Migration uuid ->
+        MigrationRoute uuid ->
             { model | migrationModel = KMEditor.Migration.Models.initialModel uuid }
 
-        Publish uuid ->
+        PublishRoute uuid ->
             { model | publishModel = KMEditor.Publish.Models.initialModel }

@@ -10,23 +10,27 @@ import KMEditor.Models exposing (Model)
 import KMEditor.Msgs exposing (Msg(..))
 import KMEditor.Publish.View
 import KMEditor.Routing exposing (Route(..))
+import KMEditor.TagEditor.View
 import Msgs
 
 
 view : Route -> (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view route wrapMsg maybeJwt model =
     case route of
-        Create _ ->
+        CreateRoute _ ->
             KMEditor.Create.View.view (wrapMsg << CreateMsg) model.createModel
 
-        Editor _ ->
+        EditorRoute _ ->
             KMEditor.Editor.View.view (wrapMsg << EditorMsg) model.editorModel
 
-        Index ->
+        TagEditorRoute _ ->
+            KMEditor.TagEditor.View.view (wrapMsg << TagEditorMsg) model.tagEditorModel
+
+        IndexRoute ->
             KMEditor.Index.View.view (wrapMsg << IndexMsg) maybeJwt model.indexModel
 
-        Migration _ ->
+        MigrationRoute _ ->
             KMEditor.Migration.View.view (wrapMsg << MigrationMsg) model.migrationModel
 
-        Publish _ ->
+        PublishRoute _ ->
             KMEditor.Publish.View.view (wrapMsg << PublishMsg) model.publishModel

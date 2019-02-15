@@ -101,7 +101,7 @@ deleteKnowledgeModelCompleted : State -> Model -> Result Jwt.JwtError String -> 
 deleteKnowledgeModelCompleted state model result =
     case result of
         Ok km ->
-            ( model, cmdNavigate state.key <| KMEditor Index )
+            ( model, cmdNavigate state.key <| KMEditor IndexRoute )
 
         Err error ->
             ( { model | deletingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be deleted" }
@@ -119,7 +119,7 @@ postMigrationCompleted state model result =
                         |> Maybe.andThen (\km -> Just km.uuid)
                         |> Maybe.withDefault ""
             in
-            ( model, cmdNavigate state.key <| KMEditor <| Migration kmUuid )
+            ( model, cmdNavigate state.key <| KMEditor <| MigrationRoute kmUuid )
 
         Err error ->
             ( { model | creatingMigration = getServerErrorJwt error "Migration could not be created" }

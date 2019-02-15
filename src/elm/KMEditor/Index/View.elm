@@ -34,7 +34,7 @@ view wrapMsg jwt model =
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo (Routing.KMEditor <| Create Nothing)
+    [ linkTo (Routing.KMEditor <| CreateRoute Nothing)
         [ class "btn btn-primary" ]
         [ text "Create" ]
     ]
@@ -60,11 +60,15 @@ tableConfig jwt =
           , visible = always True
           }
         , { label = TableActionIcon "fa fa-edit"
-          , action = TableActionLink (Routing.KMEditor << Editor << .uuid)
+          , action = TableActionLink (Routing.KMEditor << EditorRoute << .uuid)
+          , visible = kmMatchState [ Default, Edited, Outdated ]
+          }
+        , { label = TableActionText "Edit Tags"
+          , action = TableActionLink (Routing.KMEditor << TagEditorRoute << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]
           }
         , { label = TableActionText "Publish"
-          , action = TableActionLink (Routing.KMEditor << Publish << .uuid)
+          , action = TableActionLink (Routing.KMEditor << PublishRoute << .uuid)
           , visible = tableActionPublishVisible jwt
           }
         , { label = TableActionText "Upgrade"
@@ -72,7 +76,7 @@ tableConfig jwt =
           , visible = tableActionUpgradeVisible jwt
           }
         , { label = TableActionText "Continue Migration"
-          , action = TableActionLink (Routing.KMEditor << Migration << .uuid)
+          , action = TableActionLink (Routing.KMEditor << MigrationRoute << .uuid)
           , visible = tableActionContinueMigrationVisible jwt
           }
         , { label = TableActionText "Cancel Migration"

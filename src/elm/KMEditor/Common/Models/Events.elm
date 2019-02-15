@@ -31,6 +31,8 @@ module KMEditor.Common.Models.Events exposing
     , EditValueQuestionEventData
     , Event(..)
     , EventField
+    , createEmptyEventField
+    , createEventField
     , encodeEvent
     , encodeEventField
     , encodeEvents
@@ -1259,6 +1261,28 @@ getEventFieldValue eventField =
 getEventFieldValueWithDefault : EventField a -> a -> a
 getEventFieldValueWithDefault eventField default =
     getEventFieldValue eventField |> Maybe.withDefault default
+
+
+createEventField : a -> Bool -> EventField a
+createEventField value changed =
+    let
+        v =
+            if changed then
+                Just value
+
+            else
+                Nothing
+    in
+    { changed = changed
+    , value = v
+    }
+
+
+createEmptyEventField : EventField a
+createEmptyEventField =
+    { changed = False
+    , value = Nothing
+    }
 
 
 getEventEntityVisibleName : Event -> Maybe String
