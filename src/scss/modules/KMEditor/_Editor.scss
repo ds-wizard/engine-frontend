@@ -147,6 +147,12 @@
         display: inline-block;
     }
 
+    .card-item-template {
+        .card-header {
+            font-weight: bold;
+        }
+    }
+
     .table-metrics {
         th {
             border-top: none;

@@ -90,7 +90,7 @@ type alias ListQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
-    , itemTitle : String
+    , itemTemplateTitle : String
     }
 
 
@@ -270,7 +270,7 @@ validateQuestion questionType =
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
                 (Validate.field "requiredLevel" (Validate.maybe Validate.int))
-                (Validate.field "itemTitle" Validate.string)
+                (Validate.field "itemTemplateTitle" Validate.string)
                 |> Validate.map ListQuestionForm
 
         "ValueQuestion" ->
@@ -323,7 +323,7 @@ questionFormInitials question =
             , ( "title", Field.string <| getQuestionTitle question )
             , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
             , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
-            , ( "itemTitle", Field.string <| getQuestionItemTitle question )
+            , ( "itemTemplateTitle", Field.string <| getQuestionItemTitle question )
             ]
 
         ValueQuestion _ ->
@@ -358,8 +358,8 @@ updateQuestionWithForm question questionForm =
                 , tagUuids = getQuestionTagUuids question
                 , references = getQuestionReferences question
                 , experts = getQuestionExperts question
-                , itemTitle = formData.itemTitle
-                , itemQuestions = getQuestionItemQuestions question
+                , itemTemplateTitle = formData.itemTemplateTitle
+                , itemTemplateQuestions = getQuestionItemQuestions question
                 }
 
         ValueQuestionForm formData ->

@@ -127,8 +127,8 @@ type alias ListQuestionData =
     , tagUuids : List String
     , references : List Reference
     , experts : List Expert
-    , itemTitle : String
-    , itemQuestions : List Question
+    , itemTemplateTitle : String
+    , itemTemplateQuestions : List Question
     }
 
 
@@ -301,8 +301,8 @@ listQuestionDataDecoder =
         |> required "tagUuids" (Decode.list Decode.string)
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
-        |> required "itemTitle" Decode.string
-        |> required "itemQuestions" (Decode.lazy (\_ -> Decode.list questionDecoder))
+        |> required "itemTemplateTitle" Decode.string
+        |> required "itemTemplateQuestions" (Decode.lazy (\_ -> Decode.list questionDecoder))
 
 
 valueQuestionDataDecoder : Decoder ValueQuestionData
@@ -526,7 +526,7 @@ getAllQuestions km =
                     [ question ] ++ List.foldl (\a acc -> acc ++ foldAnswerQuestions a) [] questionData.answers
 
                 ListQuestion questionData ->
-                    [ question ] ++ List.foldl (\q acc -> acc ++ foldQuestion q) [] questionData.itemQuestions
+                    [ question ] ++ List.foldl (\q acc -> acc ++ foldQuestion q) [] questionData.itemTemplateQuestions
 
                 ValueQuestion _ ->
                     [ question ]
@@ -703,7 +703,7 @@ getQuestionItemTitle : Question -> String
 getQuestionItemTitle question =
     case question of
         ListQuestion listQuestionData ->
-            listQuestionData.itemTitle
+            listQuestionData.itemTemplateTitle
 
         _ ->
             ""
@@ -713,7 +713,7 @@ getQuestionItemQuestions : Question -> List Question
 getQuestionItemQuestions question =
     case question of
         ListQuestion listQuestionData ->
-            listQuestionData.itemQuestions
+            listQuestionData.itemTemplateQuestions
 
         _ ->
             []

@@ -413,8 +413,8 @@ questionDecoderTest =
                             "text": "Please answer the question",
                             "requiredLevel": null,
                             "tagUuids": [],
-                            "itemTitle": "Item",
-                            "itemQuestions": [{
+                            "itemTemplateTitle": "Item",
+                            "itemTemplateQuestions": [{
                                 "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
                                 "questionType": "ValueQuestion",
                                 "valueType": "StringValue",
@@ -437,8 +437,8 @@ questionDecoderTest =
                             , text = Just "Please answer the question"
                             , requiredLevel = Nothing
                             , tagUuids = []
-                            , itemTitle = "Item"
-                            , itemQuestions =
+                            , itemTemplateTitle = "Item"
+                            , itemTemplateQuestions =
                                 [ ValueQuestion
                                     { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
                                     , title = "What's your name?"

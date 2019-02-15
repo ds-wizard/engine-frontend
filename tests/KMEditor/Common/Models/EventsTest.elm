@@ -425,7 +425,7 @@ addListQuestionEvent =
             , text = Just "Just answer the question!"
             , requiredLevel = Just 2
             , tagUuids = []
-            , itemTitle = "My Item"
+            , itemTemplateTitle = "My Item"
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -513,7 +513,7 @@ editListQuestionEvent =
             , tagUuids = { changed = False, value = Nothing }
             , referenceUuids = { changed = True, value = Just [ "f749367c-3046-11e9-b210-d663bd873d93" ] }
             , expertUuids = { changed = False, value = Nothing }
-            , itemTitle = { changed = True, value = Just "My Item" }
+            , itemTemplateTitle = { changed = True, value = Just "My Item" }
             , itemQuestionUuids = { changed = True, value = Just [ "b2c867fc-3046-11e9-b210-d663bd873d93" ] }
             }
         )

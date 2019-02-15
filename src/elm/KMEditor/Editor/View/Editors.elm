@@ -289,9 +289,9 @@ questionEditorItemView : Model -> QuestionEditorData -> Html Msg
 questionEditorItemView model editorData =
     let
         config =
-            { childName = "Item Question"
+            { childName = "Question"
             , reorderableState = model.reorderableState
-            , children = editorData.itemQuestions.list |> List.filter (editorNotDeleted model.editors)
+            , children = editorData.itemTemplateQuestions.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderItemQuestions >> QuestionEditorMsg >> EditorMsg
             , addMsg = AddAnswerItemTemplateQuestion |> QuestionEditorMsg >> EditorMsg
             , toId = identity
@@ -299,12 +299,12 @@ questionEditorItemView model editorData =
             , viewMsg = SetActiveEditor
             }
     in
-    div [ class "card card-border-light mb-3" ]
+    div [ class "card card-border-light card-item-template mb-3" ]
         [ div [ class "card-header" ]
-            [ text "Item template" ]
+            [ text "Item Template" ]
         , div [ class "card-body" ]
             [ div [ class "form-group" ]
-                [ FormGroup.input editorData.form "itemTitle" "Item Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+                [ FormGroup.input editorData.form "itemTemplateTitle" "Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
                 ]
             , inputChildren config
             ]

@@ -92,9 +92,9 @@ treeNodeChapter activeUuid editors editorData =
 treeNodeQuestion : String -> Dict String Editor -> QuestionEditorData -> Html Msg
 treeNodeQuestion activeUuid editors editorData =
     let
-        itemQuestions =
+        itemTemplateQuestions =
             if isQuestionList editorData.question then
-                editorData.itemQuestions.list ++ editorData.itemQuestions.deleted
+                editorData.itemTemplateQuestions.list ++ editorData.itemTemplateQuestions.deleted
 
             else
                 []
@@ -116,7 +116,7 @@ treeNodeQuestion activeUuid editors editorData =
             { editorData = editorData
             , icon = "comment-o"
             , label = getQuestionTitle editorData.question
-            , children = itemQuestions ++ answers ++ references ++ experts
+            , children = itemTemplateQuestions ++ answers ++ references ++ experts
             }
     in
     treeNode config activeUuid editors

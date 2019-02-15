@@ -257,10 +257,10 @@ createGroupItems : ListQuestionData -> List (FormItem FormExtraData)
 createGroupItems questionData =
     let
         itemName =
-            StringFormItem { name = "itemName", label = questionData.itemTitle, text = Nothing, extraData = Nothing }
+            StringFormItem { name = "itemName", label = questionData.itemTemplateTitle, text = Nothing, extraData = Nothing }
 
         questions =
-            List.map createQuestionFormItem questionData.itemQuestions
+            List.map createQuestionFormItem questionData.itemTemplateQuestions
     in
     itemName :: questions
 
@@ -360,7 +360,7 @@ evaluateQuestion currentLevel replies path question =
                     in
                     if itemCount > 0 then
                         List.range 0 (itemCount - 1)
-                            |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow data.itemQuestions)
+                            |> List.map (evaluateAnswerItem currentLevel replies currentPath requiredNow data.itemTemplateQuestions)
                             |> List.foldl (+) 0
 
                     else

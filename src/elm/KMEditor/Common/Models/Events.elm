@@ -178,7 +178,7 @@ type alias AddListQuestionEventData =
     , text : Maybe String
     , requiredLevel : Maybe Int
     , tagUuids : List String
-    , itemTitle : String
+    , itemTemplateTitle : String
     }
 
 
@@ -218,7 +218,7 @@ type alias EditListQuestionEventData =
     , tagUuids : EventField (List String)
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
-    , itemTitle : EventField String
+    , itemTemplateTitle : EventField String
     , itemQuestionUuids : EventField (List String)
     }
 
@@ -526,7 +526,7 @@ encodeAddListQuestionEvent data =
     , ( "text", maybe Encode.string data.text )
     , ( "requiredLevel", maybe Encode.int data.requiredLevel )
     , ( "tagUuids", Encode.list Encode.string data.tagUuids )
-    , ( "itemTitle", Encode.string data.itemTitle )
+    , ( "itemTemplateTitle", Encode.string data.itemTemplateTitle )
     ]
 
 
@@ -579,7 +579,7 @@ encodeEditListQuestionEvent data =
     , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
     , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
     , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
-    , ( "itemTitle", encodeEventField Encode.string data.itemTitle )
+    , ( "itemTemplateTitle", encodeEventField Encode.string data.itemTemplateTitle )
     , ( "itemQuestionUuids", encodeEventField (Encode.list Encode.string) data.itemQuestionUuids )
     ]
 
@@ -952,7 +952,7 @@ addListQuestionEventDecoder =
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
         |> required "tagUuids" (Decode.list Decode.string)
-        |> required "itemTitle" Decode.string
+        |> required "itemTemplateTitle" Decode.string
 
 
 addValueQuestionEventDecoder : Decoder AddValueQuestionEventData
@@ -1011,7 +1011,7 @@ editListQuestionEventDecoder =
         |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
-        |> required "itemTitle" (eventFieldDecoder Decode.string)
+        |> required "itemTemplateTitle" (eventFieldDecoder Decode.string)
         |> required "itemQuestionUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
