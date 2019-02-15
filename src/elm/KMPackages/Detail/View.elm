@@ -78,7 +78,7 @@ versionViewActions wrapMsg jwt row =
         forkKMItem =
             if hasPerm jwt Perm.knowledgeModel then
                 [ Dropdown.anchorItem
-                    (linkToAttributes (Routing.KMEditor <| KMEditor.Routing.Create <| Just id))
+                    (linkToAttributes (Routing.KMEditor <| KMEditor.Routing.CreateRoute <| Just id))
                     [ text "Fork Knowledge Model" ]
                 ]
 

@@ -31,7 +31,6 @@ import Reorderable
 import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 import SplitPane
-import Task
 import Utils exposing (pair)
 
 
@@ -136,7 +135,7 @@ update msg wrapMsg state model =
                         Ok _ ->
                             ( state.seed
                             , initialModel ""
-                            , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate state.key <| Routing.KMEditor Index ]
+                            , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate state.key <| Routing.KMEditor IndexRoute ]
                             )
 
                         Err error ->
@@ -148,7 +147,7 @@ update msg wrapMsg state model =
                 Discard ->
                     ( state.seed
                     , initialModel ""
-                    , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate state.key <| Routing.KMEditor Index ]
+                    , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate state.key <| Routing.KMEditor IndexRoute ]
                     )
 
                 PaneMsg paneMsg ->

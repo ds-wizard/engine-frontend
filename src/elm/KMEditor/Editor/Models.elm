@@ -16,7 +16,7 @@ import Dict exposing (Dict)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, Tag)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
-import KMEditor.Editor.Models.Editors exposing (Editor(..), KMEditorData, getEditorTitle, getEditorUuid, isEditorDirty)
+import KMEditor.Editor.Models.Editors exposing (Editor(..), KMEditorData, getEditorUuid, isEditorDirty)
 import Reorderable
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
 import Utils exposing (listFilterJust)

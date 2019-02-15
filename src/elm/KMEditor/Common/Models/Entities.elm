@@ -19,7 +19,9 @@ module KMEditor.Common.Models.Entities exposing
     , ValueQuestionType(..)
     , answerDecoder
     , chapterDecoder
+    , createPathMap
     , expertDecoder
+    , getAllQuestions
     , getAnswer
     , getAnswers
     , getChapter
@@ -66,10 +68,12 @@ module KMEditor.Common.Models.Entities exposing
     , valueTypeDecoder
     )
 
+import Dict exposing (Dict)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
+import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import List.Extra as List
 
 
@@ -508,6 +512,96 @@ newExpert uuid =
 
 
 {- Helpers -}
+
+
+getAllQuestions : KnowledgeModel -> List Question
+getAllQuestions km =
+    let
+        foldAnswerQuestions answer =
+            List.foldl (\q acc -> acc ++ foldQuestion q) [] (getFollowUpQuestions answer)
+
+        foldQuestion question =
+            case question of
+                OptionsQuestion questionData ->
+                    [ question ] ++ List.foldl (\a acc -> acc ++ foldAnswerQuestions a) [] questionData.answers
+
+                ListQuestion questionData ->
+                    [ question ] ++ List.foldl (\q acc -> acc ++ foldQuestion q) [] questionData.itemQuestions
+
+                ValueQuestion _ ->
+                    [ question ]
+
+        foldChapter chapter =
+            List.foldl (\q acc -> acc ++ foldQuestion q) [] chapter.questions
+    in
+    List.foldl (\c acc -> acc ++ foldChapter c) [] km.chapters
+
+
+createPathMap : KnowledgeModel -> Dict String Path
+createPathMap knowledgeModel =
+    let
+        foldKm path km dict =
+            let
+                nextPath =
+                    path ++ [ KMPathNode km.uuid ]
+
+                withChapters =
+                    List.foldl (foldChapter nextPath) dict km.chapters
+
+                withTags =
+                    List.foldl (foldTag nextPath) withChapters km.tags
+            in
+            Dict.insert km.uuid path withTags
+
+        foldChapter path chapter dict =
+            let
+                nextPath =
+                    path ++ [ ChapterPathNode chapter.uuid ]
+
+                withQuestions =
+                    List.foldl (foldQuestion nextPath) dict chapter.questions
+            in
+            Dict.insert chapter.uuid path withQuestions
+
+        foldTag path tag dict =
+            Dict.insert tag.uuid path dict
+
+        foldQuestion path question dict =
+            let
+                nextPath =
+                    path ++ [ QuestionPathNode (getQuestionUuid question) ]
+
+                withAnswers =
+                    List.foldl (foldAnswer nextPath) dict <| getQuestionAnswers question
+
+                withItemQuestions =
+                    List.foldl (foldQuestion nextPath) withAnswers <| getQuestionItemQuestions question
+
+                withReferences =
+                    List.foldl (foldReference nextPath) withItemQuestions <| getQuestionReferences question
+
+                withExperts =
+                    List.foldl (foldExpert nextPath) withReferences <| getQuestionExperts question
+            in
+            Dict.insert (getQuestionUuid question) path withExperts
+
+        foldAnswer path answer dict =
+            let
+                nextPath =
+                    path ++ [ AnswerPathNode answer.uuid ]
+
+                withFollowUps =
+                    List.foldl (foldQuestion nextPath) dict <| getFollowUpQuestions answer
+            in
+            Dict.insert answer.uuid path withFollowUps
+
+        foldExpert path expert dict =
+            Dict.insert expert.uuid path dict
+
+        foldReference path reference dict =
+            Dict.insert (getReferenceUuid reference) path dict
+    in
+    foldKm [] knowledgeModel Dict.empty
 
 
 getChapters : KnowledgeModel -> List Chapter

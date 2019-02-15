@@ -30,7 +30,7 @@ content wrapMsg model packages =
     div []
         [ FormResult.view model.savingKnowledgeModel
         , formView wrapMsg model.form packages
-        , FormActions.view (KMEditor Index) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (KMEditor IndexRoute) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]
 
 

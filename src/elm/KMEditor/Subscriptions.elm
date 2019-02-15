@@ -10,7 +10,7 @@ import Msgs
 subscriptions : (Msg -> Msgs.Msg) -> Route -> Model -> Sub Msgs.Msg
 subscriptions wrapMsg route model =
     case route of
-        Editor _ ->
+        EditorRoute _ ->
             KMEditor.Editor.Subscriptions.subscriptions (wrapMsg << EditorMsg) model.editorModel
 
         _ ->

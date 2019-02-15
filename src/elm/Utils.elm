@@ -13,7 +13,8 @@ module Utils exposing
     , versionIsGreater
     )
 
-import Color.Accessibility exposing (luminance)
+import Color
+import Color.Accessibility exposing (contrastRatio)
 import Color.Convert exposing (hexToColor)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
@@ -122,7 +123,14 @@ getContrastColorHex : String -> String
 getContrastColorHex colorHex =
     case hexToColor colorHex of
         Ok color ->
-            if luminance color > 0.179 then
+            let
+                blackContrast =
+                    contrastRatio Color.black color
+
+                whiteContrast =
+                    contrastRatio Color.white color
+            in
+            if blackContrast > whiteContrast then
                 "#000000"
 
             else
