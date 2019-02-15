@@ -172,7 +172,7 @@ generateQuestionEvent model question path seed =
                             , tagUuids = createEventField newTags True
                             , referenceUuids = createEmptyEventField
                             , expertUuids = createEmptyEventField
-                            , itemTitle = createEmptyEventField
+                            , itemTemplateTitle = createEmptyEventField
                             , itemQuestionUuids = createEmptyEventField
                             }
 

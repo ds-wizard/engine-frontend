@@ -104,7 +104,7 @@ foldQuestion model indent tags question =
             List.foldl
                 (\q rows -> rows ++ foldQuestion model (indent + 2) tags q)
                 (questionRow ++ [ trItemTemplate (indent + 1) tags ])
-                questionData.itemQuestions
+                questionData.itemTemplateQuestions
 
         ValueQuestion _ ->
             questionRow

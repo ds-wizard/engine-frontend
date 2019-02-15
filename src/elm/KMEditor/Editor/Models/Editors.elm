@@ -134,7 +134,7 @@ type alias QuestionEditorData =
     , form : Form CustomFormError QuestionForm
     , tagUuids : List String
     , answers : Children
-    , itemQuestions : Children
+    , itemTemplateQuestions : Children
     , references : Children
     , experts : Children
     , treeOpen : Bool
@@ -254,7 +254,7 @@ createQuestionEditor editorContext path editorState question editors =
             getQuestionAnswers question
                 |> List.map .uuid
 
-        itemQuestions =
+        itemTemplateQuestions =
             getQuestionItemQuestions question
                 |> List.map getQuestionUuid
 
@@ -265,7 +265,7 @@ createQuestionEditor editorContext path editorState question editors =
                 , form = initQuestionForm question
                 , tagUuids = getQuestionTagUuids question
                 , answers = Children.init answers
-                , itemQuestions = Children.init itemQuestions
+                , itemTemplateQuestions = Children.init itemTemplateQuestions
                 , references = Children.init <| List.map getReferenceUuid <| getQuestionReferences question
                 , experts = Children.init <| List.map .uuid <| getQuestionExperts question
                 , treeOpen = False
@@ -413,7 +413,7 @@ deleteQuestionEditor : QuestionEditorData -> Dict String Editor -> Dict String E
 deleteQuestionEditor editorData editors =
     editors
         |> deleteEditors editorData.answers
-        |> deleteEditors editorData.itemQuestions
+        |> deleteEditors editorData.itemTemplateQuestions
         |> deleteEditors editorData.references
         |> deleteEditors editorData.experts
         |> Dict.remove editorData.uuid
@@ -629,7 +629,7 @@ isQuestionEditorDirty editorData =
     formChanged editorData.form
         || (getQuestionTagUuids editorData.question /= editorData.tagUuids)
         || editorData.answers.dirty
-        || editorData.itemQuestions.dirty
+        || editorData.itemTemplateQuestions.dirty
         || editorData.references.dirty
         || editorData.experts.dirty
 
@@ -705,7 +705,7 @@ updateQuestionEditorData editorContext newState form editorData =
 
         newAnswerItemTemplateQuestions =
             if isQuestionList newQuestion then
-                Children.cleanDirty editorData.itemQuestions
+                Children.cleanDirty editorData.itemTemplateQuestions
 
             else
                 Children.init []
@@ -714,7 +714,7 @@ updateQuestionEditorData editorContext newState form editorData =
         | editorState = getNewState editorData.editorState newState
         , question = newQuestion
         , answers = newAnswers
-        , itemQuestions = newAnswerItemTemplateQuestions
+        , itemTemplateQuestions = newAnswerItemTemplateQuestions
         , references = Children.cleanDirty editorData.references
         , experts = Children.cleanDirty editorData.experts
         , form = initQuestionForm newQuestion
@@ -725,14 +725,14 @@ updateEditorsWithQuestion : QuestionEditorData -> QuestionEditorData -> Dict Str
 updateEditorsWithQuestion newEditorData oldEditorData editors =
     case newEditorData.question of
         OptionsQuestion _ ->
-            deleteEditors oldEditorData.itemQuestions editors
+            deleteEditors oldEditorData.itemTemplateQuestions editors
 
         ListQuestion _ ->
             deleteEditors oldEditorData.answers editors
 
         _ ->
             editors
-                |> deleteEditors oldEditorData.itemQuestions
+                |> deleteEditors oldEditorData.itemTemplateQuestions
                 |> deleteEditors oldEditorData.answers
 
 
@@ -820,7 +820,7 @@ addQuestionAnswerItemTemplateQuestion : Question -> QuestionEditorData -> Editor
 addQuestionAnswerItemTemplateQuestion question editorData =
     QuestionEditor
         { editorData
-            | itemQuestions = Children.addChild (getQuestionUuid question) editorData.itemQuestions
+            | itemTemplateQuestions = Children.addChild (getQuestionUuid question) editorData.itemTemplateQuestions
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }

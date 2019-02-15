@@ -343,7 +343,7 @@ update msg wrapMsg state model =
 
                                 ReorderItemQuestions itemQuestionList ->
                                     model
-                                        |> insertEditor (QuestionEditor { editorData | itemQuestions = Children.updateList itemQuestionList editorData.itemQuestions })
+                                        |> insertEditor (QuestionEditor { editorData | itemTemplateQuestions = Children.updateList itemQuestionList editorData.itemTemplateQuestions })
                                         |> pair state.seed
                                         |> withNoCmd
 
