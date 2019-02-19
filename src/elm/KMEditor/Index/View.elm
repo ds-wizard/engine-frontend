@@ -67,6 +67,10 @@ tableConfig jwt =
           , action = TableActionLink (Routing.KMEditor << TagEditorRoute << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]
           }
+        , { label = TableActionText "Preview Questionnaire"
+          , action = TableActionLink (Routing.KMEditor << PreviewRoute << .uuid)
+          , visible = kmMatchState [ Default, Edited, Outdated ]
+          }
         , { label = TableActionText "Publish"
           , action = TableActionLink (Routing.KMEditor << PublishRoute << .uuid)
           , visible = tableActionPublishVisible jwt

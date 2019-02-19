@@ -58,6 +58,7 @@ import String exposing (fromFloat, fromInt)
 
 type alias ViewQuestionnaireConfig =
     { showExtraActions : Bool
+    , showExtraNavigation : Bool
     , levels : Maybe (List Level)
     }
 
@@ -74,7 +75,7 @@ viewQuestionnaire cfg model =
                     emptyNode
 
         extraActions =
-            if cfg.showExtraActions then
+            if cfg.showExtraNavigation then
                 extraNavigation model.activePage
 
             else
@@ -87,7 +88,7 @@ viewQuestionnaire cfg model =
             , extraActions
             ]
         , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
-            (pageView (cfg.levels |> Maybe.withDefault []) model)
+            (pageView cfg model)
         , feedbackModal model
         ]
 
@@ -159,15 +160,15 @@ extraNavigation activePage =
         ]
 
 
-pageView : List Level -> Model -> List (Html Msg)
-pageView levels model =
+pageView : ViewQuestionnaireConfig -> Model -> List (Html Msg)
+pageView cfg model =
     case model.activePage of
         PageNone ->
             [ emptyNode ]
 
         PageChapter chapter form ->
             [ chapterHeader chapter
-            , viewForm (formConfig levels) form |> Html.map FormMsg
+            , viewForm (formConfig cfg) form |> Html.map FormMsg
             ]
 
         PageSummaryReport ->
@@ -182,10 +183,15 @@ chapterHeader chapter =
         ]
 
 
-formConfig : List Level -> FormViewConfig CustomFormMessage FormExtraData
-formConfig levels =
-    { customActions = [ ( "fa-exclamation-circle", FeedbackMsg ) ]
-    , viewExtraData = Just (viewExtraData levels)
+formConfig : ViewQuestionnaireConfig -> FormViewConfig CustomFormMessage FormExtraData
+formConfig cfg =
+    { customActions =
+        if cfg.showExtraActions then
+            [ ( "fa-exclamation-circle", FeedbackMsg ) ]
+
+        else
+            []
+    , viewExtraData = Just <| viewExtraData <| Maybe.withDefault [] cfg.levels
     }
 
 
