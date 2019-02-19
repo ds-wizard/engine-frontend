@@ -8,6 +8,7 @@ import KMEditor.Index.Update
 import KMEditor.Migration.Update
 import KMEditor.Models exposing (Model)
 import KMEditor.Msgs exposing (Msg(..))
+import KMEditor.Preview.Update
 import KMEditor.Publish.Update
 import KMEditor.Routing exposing (Route(..))
 import KMEditor.TagEditor.Models
@@ -30,21 +31,24 @@ fetchData route wrapMsg model session =
             else
                 KMEditor.Editor.Update.fetchData (wrapMsg << EditorMsg) uuid session
 
-        TagEditorRoute uuid ->
-            if model.tagEditorModel.branchUuid == uuid && KMEditor.TagEditor.Models.containsChanges model.tagEditorModel then
-                Cmd.none
-
-            else
-                KMEditor.TagEditor.Update.fetchData (wrapMsg << TagEditorMsg) uuid session
-
         IndexRoute ->
             KMEditor.Index.Update.fetchData (wrapMsg << IndexMsg) session
 
         MigrationRoute uuid ->
             KMEditor.Migration.Update.fetchData (wrapMsg << MigrationMsg) uuid session
 
+        PreviewRoute uuid ->
+            KMEditor.Preview.Update.fetchData (wrapMsg << PreviewMsg) uuid session
+
         PublishRoute uuid ->
             KMEditor.Publish.Update.fetchData (wrapMsg << PublishMsg) uuid session
+
+        TagEditorRoute uuid ->
+            if model.tagEditorModel.branchUuid == uuid && KMEditor.TagEditor.Models.containsChanges model.tagEditorModel then
+                Cmd.none
+
+            else
+                KMEditor.TagEditor.Update.fetchData (wrapMsg << TagEditorMsg) uuid session
 
 
 isGuarded : Route -> Model -> Maybe String
@@ -74,13 +78,6 @@ update msg wrapMsg state model =
             in
             ( newSeed, { model | editorModel = editorModel }, cmd )
 
-        TagEditorMsg teMsg ->
-            let
-                ( newSeed, tagEditorModel, cmd ) =
-                    KMEditor.TagEditor.Update.update teMsg (wrapMsg << TagEditorMsg) state model.tagEditorModel
-            in
-            ( newSeed, { model | tagEditorModel = tagEditorModel }, cmd )
-
         IndexMsg iMsg ->
             let
                 ( indexModel, cmd ) =
@@ -95,9 +92,23 @@ update msg wrapMsg state model =
             in
             ( state.seed, { model | migrationModel = migrationModel }, cmd )
 
+        PreviewMsg previewMsg ->
+            let
+                ( previewModel, cmd ) =
+                    KMEditor.Preview.Update.update previewMsg (wrapMsg << PreviewMsg) state model.previewModel
+            in
+            ( state.seed, { model | previewModel = previewModel }, cmd )
+
         PublishMsg pMsg ->
             let
                 ( publishModel, cmd ) =
                     KMEditor.Publish.Update.update pMsg (wrapMsg << PublishMsg) state model.publishModel
             in
             ( state.seed, { model | publishModel = publishModel }, cmd )
+
+        TagEditorMsg teMsg ->
+            let
+                ( newSeed, tagEditorModel, cmd ) =
+                    KMEditor.TagEditor.Update.update teMsg (wrapMsg << TagEditorMsg) state model.tagEditorModel
+            in
+            ( newSeed, { model | tagEditorModel = tagEditorModel }, cmd )

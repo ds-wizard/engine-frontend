@@ -9,10 +9,11 @@ import Url.Parser.Query as Query
 type Route
     = CreateRoute (Maybe String)
     | EditorRoute String
-    | TagEditorRoute String
     | IndexRoute
     | MigrationRoute String
     | PublishRoute String
+    | PreviewRoute String
+    | TagEditorRoute String
 
 
 moduleRoot : String
@@ -24,10 +25,11 @@ parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     [ map (wrapRoute << CreateRoute) (s moduleRoot </> s "create" <?> Query.string "selected")
     , map (wrapRoute << EditorRoute) (s moduleRoot </> s "edit" </> string)
-    , map (wrapRoute << TagEditorRoute) (s moduleRoot </> s "edit-tags" </> string)
     , map (wrapRoute <| IndexRoute) (s moduleRoot)
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s "migration" </> string)
+    , map (wrapRoute << PreviewRoute) (s moduleRoot </> s "preview" </> string)
     , map (wrapRoute << PublishRoute) (s moduleRoot </> s "publish" </> string)
+    , map (wrapRoute << TagEditorRoute) (s moduleRoot </> s "edit-tags" </> string)
     ]
 
 
@@ -45,17 +47,20 @@ toUrl route =
         EditorRoute uuid ->
             [ moduleRoot, "edit", uuid ]
 
-        TagEditorRoute uuid ->
-            [ moduleRoot, "edit-tags", uuid ]
-
         IndexRoute ->
             [ moduleRoot ]
 
         MigrationRoute uuid ->
             [ moduleRoot, "migration", uuid ]
 
+        PreviewRoute uuid ->
+            [ moduleRoot, "preview", uuid ]
+
         PublishRoute uuid ->
             [ moduleRoot, "publish", uuid ]
+
+        TagEditorRoute uuid ->
+            [ moduleRoot, "edit-tags", uuid ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool
@@ -67,14 +72,17 @@ isAllowed route maybeJwt =
         EditorRoute uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        TagEditorRoute uuid ->
-            hasPerm maybeJwt Perm.knowledgeModel
-
         IndexRoute ->
             hasPerm maybeJwt Perm.knowledgeModel
 
         MigrationRoute uuid ->
             hasPerm maybeJwt Perm.knowledgeModelUpgrade
 
+        PreviewRoute uuid ->
+            hasPerm maybeJwt Perm.knowledgeModel
+
         PublishRoute uuid ->
             hasPerm maybeJwt Perm.knowledgeModelPublish
+
+        TagEditorRoute uuid ->
+            hasPerm maybeJwt Perm.knowledgeModel
