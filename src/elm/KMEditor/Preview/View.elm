@@ -5,8 +5,10 @@ import Common.Html exposing (emptyNode, linkTo)
 import Common.Questionnaire.Models
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Page as Page
-import Html exposing (Html, div, text)
+import Common.View.Tag as Tag
+import Html exposing (Html, a, button, div, strong, text)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Entities exposing (Level)
 import KMEditor.Preview.Models exposing (Model)
 import KMEditor.Preview.Msgs exposing (Msg(..))
@@ -35,6 +37,7 @@ content wrapMsg model ( questionnaireModel, levels ) =
     in
     div [ class "col KMEditor__Preview" ]
         [ questionnaireHeader model.branchUuid
+        , tagSelection model.tags questionnaireModel |> Html.map wrapMsg
         , questionnaire
         ]
 
@@ -47,4 +50,23 @@ questionnaireHeader uuid =
             , div []
                 [ linkTo (KMEditor <| EditorRoute uuid) [ class "btn btn-primary" ] [ text "Edit Knowledge Model" ] ]
             ]
+        ]
+
+
+tagSelection : List String -> Common.Questionnaire.Models.Model -> Html Msg
+tagSelection selected questionnaireModel =
+    let
+        tagListConfig =
+            { selected = selected
+            , addMsg = AddTag
+            , removeMsg = RemoveTag
+            }
+    in
+    div [ class "tag-selection" ]
+        [ div [ class "tag-selection-header" ]
+            [ strong [] [ text "Tags" ]
+            , a [ onClick SelectAllTags ] [ text "Select All" ]
+            , a [ onClick SelectNoneTags ] [ text "Select None" ]
+            ]
+        , Tag.list tagListConfig questionnaireModel.questionnaire.knowledgeModel.tags
         ]

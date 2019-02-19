@@ -21,6 +21,7 @@ module KMEditor.Common.Models.Entities exposing
     , chapterDecoder
     , createPathMap
     , expertDecoder
+    , filterKnowledgModelWithTags
     , getAllQuestions
     , getAnswer
     , getAnswers
@@ -818,3 +819,62 @@ mapReferenceData resourcePageReference urlReference crossReference reference =
 
         CrossReference data ->
             crossReference data
+
+
+filterKnowledgModelWithTags : List String -> KnowledgeModel -> KnowledgeModel
+filterKnowledgModelWithTags selectedTags originalKM =
+    let
+        mapKM tags km =
+            { km
+                | chapters =
+                    km.chapters
+                        |> List.map (mapChapter tags)
+                        |> List.filter filterEmptyChapter
+            }
+
+        filterEmptyChapter chapter =
+            List.length chapter.questions > 0
+
+        mapChapter tags chapter =
+            { chapter
+                | questions =
+                    chapter.questions
+                        |> List.filter (filterQuestion tags)
+                        |> List.map (mapQuestion tags)
+            }
+
+        filterQuestion tags question =
+            getQuestionTagUuids question |> List.any (\t -> List.member t tags)
+
+        mapQuestion tags question =
+            case question of
+                OptionsQuestion data ->
+                    OptionsQuestion
+                        { data | answers = List.map (mapAnswer tags) data.answers }
+
+                ListQuestion data ->
+                    ListQuestion
+                        { data
+                            | itemTemplateQuestions =
+                                data.itemTemplateQuestions
+                                    |> List.filter (filterQuestion tags)
+                                    |> List.map (mapQuestion tags)
+                        }
+
+                _ ->
+                    question
+
+        mapAnswer tags answer =
+            { answer
+                | followUps =
+                    getFollowUpQuestions answer
+                        |> List.filter (filterQuestion tags)
+                        |> List.map (mapQuestion tags)
+                        |> FollowUps
+            }
+    in
+    if List.isEmpty selectedTags then
+        originalKM
+
+    else
+        mapKM selectedTags originalKM

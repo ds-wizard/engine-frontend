@@ -9,7 +9,7 @@ import Common.Models exposing (getServerErrorJwt)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
 import Jwt
-import KMEditor.Preview.Models exposing (Model, setKnowledgeModel)
+import KMEditor.Preview.Models exposing (..)
 import KMEditor.Preview.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (getKnowledgeModelData, getLevels)
 import Models exposing (State)
@@ -64,6 +64,18 @@ update msg wrapMsg state model =
 
         QuestionnaireMsg questionnaireMsg ->
             handleQuestionnaireMsg wrapMsg questionnaireMsg model
+
+        AddTag uuid ->
+            ( addTag uuid model, Cmd.none )
+
+        RemoveTag uuid ->
+            ( removeTag uuid model, Cmd.none )
+
+        SelectAllTags ->
+            ( selectAllTags model, Cmd.none )
+
+        SelectNoneTags ->
+            ( selectNoneTags model, Cmd.none )
 
 
 handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> Model -> ( Model, Cmd Msgs.Msg )

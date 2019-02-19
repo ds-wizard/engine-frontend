@@ -2,7 +2,7 @@
 
 
 .KMEditor__Preview {
-    margin-top: 60px;
+    margin-top: 30px;
 
     .questionnaire-header {
         position: fixed;
@@ -25,6 +25,21 @@
                 margin-left: 20px;
             }
 
+        }
+    }
+
+    .tag-selection {
+        margin: 0 -15px 20px;
+        padding: 20px;
+        background: $gray-200;
+        border-bottom: 1px solid $gray-400;
+
+        .tag-selection-header {
+            margin-bottom: 1rem;
+
+            a {
+                margin-left: 1rem;
+            }
         }
     }
 }

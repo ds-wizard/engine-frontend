@@ -9,3 +9,7 @@ type Msg
     = GetKnowledgeModelCompleted (Result Jwt.JwtError KnowledgeModel)
     | GetLevelsCompleted (Result Jwt.JwtError (List Level))
     | QuestionnaireMsg Common.Questionnaire.Msgs.Msg
+    | AddTag String
+    | RemoveTag String
+    | SelectAllTags
+    | SelectNoneTags
