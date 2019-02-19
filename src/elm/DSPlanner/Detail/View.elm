@@ -25,6 +25,7 @@ content wrapMsg model ( questionnaireModel, levels ) =
     let
         questionnaireCfg =
             { showExtraActions = True
+            , showExtraNavigation = True
             , levels = Just levels
             }
     in

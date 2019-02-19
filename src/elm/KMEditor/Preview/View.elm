@@ -27,6 +27,7 @@ content wrapMsg model ( questionnaireModel, levels ) =
         questionnaire =
             viewQuestionnaire
                 { showExtraActions = False
+                , showExtraNavigation = False
                 , levels = Just levels
                 }
                 questionnaireModel
