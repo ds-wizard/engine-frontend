@@ -63,6 +63,10 @@ tableConfig jwt =
           , action = TableActionLink (Routing.KMEditor << EditorRoute << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]
           }
+        , { label = TableActionText "Editor2"
+          , action = TableActionLink (Routing.KMEditor << Editor2Route << .uuid)
+          , visible = kmMatchState [ Default, Edited, Outdated ]
+          }
         , { label = TableActionText "Edit Tags"
           , action = TableActionLink (Routing.KMEditor << TagEditorRoute << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]

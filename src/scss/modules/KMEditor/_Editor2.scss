@@ -1,0 +1,68 @@
+@import "~bootswatch/dist/united/variables";
+@import "../../mixins";
+
+.KMEditor__Editor2 {
+    width: 100%;
+    margin-top: -20px;
+    margin-bottom: -20px;
+
+    .editor-header {
+        width: 100%;
+        height: 50px;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid $gray-300;
+        padding: 0 0.5rem;
+
+        &>div {
+            display: flex;
+            align-items: center;
+        }
+
+        .undo {
+            padding: 0 1rem;
+            justify-content: space-around;
+
+            a {
+                color: $gray-700;
+                padding: 0.5rem;
+
+                &:hover {
+                    color: $primary;
+                }
+
+                &.disabled {
+                    color: $gray-300;
+                }
+            }
+        }
+
+        .nav {
+            .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 0.5rem 1.5rem;
+                text-transform: uppercase;
+
+                &:not(.active) {
+                    color: $gray-700;
+                }
+
+                &:hover {
+                    text-decoration: none;
+                    color: $primary;
+                }
+
+                .fa {
+                    margin-right: 10px;
+                }
+            }
+        }
+
+        .actions {
+            flex-grow: 1;
+            justify-content: flex-end;
+        }
+    }
+
+}

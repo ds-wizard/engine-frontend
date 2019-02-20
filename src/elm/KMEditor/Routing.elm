@@ -9,6 +9,7 @@ import Url.Parser.Query as Query
 type Route
     = CreateRoute (Maybe String)
     | EditorRoute String
+    | Editor2Route String
     | IndexRoute
     | MigrationRoute String
     | PublishRoute String
@@ -25,6 +26,7 @@ parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     [ map (wrapRoute << CreateRoute) (s moduleRoot </> s "create" <?> Query.string "selected")
     , map (wrapRoute << EditorRoute) (s moduleRoot </> s "edit" </> string)
+    , map (wrapRoute << Editor2Route) (s moduleRoot </> s "edit2" </> string)
     , map (wrapRoute <| IndexRoute) (s moduleRoot)
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s "migration" </> string)
     , map (wrapRoute << PreviewRoute) (s moduleRoot </> s "preview" </> string)
@@ -46,6 +48,9 @@ toUrl route =
 
         EditorRoute uuid ->
             [ moduleRoot, "edit", uuid ]
+
+        Editor2Route uuid ->
+            [ moduleRoot, "edit2", uuid ]
 
         IndexRoute ->
             [ moduleRoot ]
@@ -70,6 +75,9 @@ isAllowed route maybeJwt =
             hasPerm maybeJwt Perm.knowledgeModel
 
         EditorRoute uuid ->
+            hasPerm maybeJwt Perm.knowledgeModel
+
+        Editor2Route uuid ->
             hasPerm maybeJwt Perm.knowledgeModel
 
         IndexRoute ->

@@ -4,6 +4,7 @@ import Auth.Models exposing (Session)
 import KMEditor.Create.Update
 import KMEditor.Editor.Models
 import KMEditor.Editor.Update
+import KMEditor.Editor2.Update
 import KMEditor.Index.Update
 import KMEditor.Migration.Update
 import KMEditor.Models exposing (Model)
@@ -30,6 +31,9 @@ fetchData route wrapMsg model session =
 
             else
                 KMEditor.Editor.Update.fetchData (wrapMsg << EditorMsg) uuid session
+
+        Editor2Route uuid ->
+            KMEditor.Editor2.Update.fetchData (wrapMsg << Editor2Msg) uuid session
 
         IndexRoute ->
             KMEditor.Index.Update.fetchData (wrapMsg << IndexMsg) session
@@ -77,6 +81,13 @@ update msg wrapMsg state model =
                     KMEditor.Editor.Update.update eMsg (wrapMsg << EditorMsg) state model.editorModel
             in
             ( newSeed, { model | editorModel = editorModel }, cmd )
+
+        Editor2Msg e2Msg ->
+            let
+                ( newSeed, editor2Model, cmd ) =
+                    KMEditor.Editor2.Update.update e2Msg (wrapMsg << Editor2Msg) state model.editor2Model
+            in
+            ( newSeed, { model | editor2Model = editor2Model }, cmd )
 
         IndexMsg iMsg ->
             let
