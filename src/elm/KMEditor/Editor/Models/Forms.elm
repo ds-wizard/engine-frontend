@@ -327,7 +327,7 @@ questionFormInitials question =
     , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
     , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
     , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| getQuestionItemTitle question )
-    , ( "valueType", Field.string <| valueTypeToString StringValueType )
+    , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringValueType <| getQuestionValueType question )
     ]
 
 
