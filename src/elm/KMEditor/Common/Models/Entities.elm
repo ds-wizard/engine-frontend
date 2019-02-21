@@ -700,14 +700,14 @@ getQuestionAnswers question =
             []
 
 
-getQuestionItemTitle : Question -> String
+getQuestionItemTitle : Question -> Maybe String
 getQuestionItemTitle question =
     case question of
         ListQuestion listQuestionData ->
-            listQuestionData.itemTemplateTitle
+            Just listQuestionData.itemTemplateTitle
 
         _ ->
-            ""
+            Nothing
 
 
 getQuestionItemQuestions : Question -> List Question
