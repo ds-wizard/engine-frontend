@@ -310,28 +310,25 @@ validateValueType =
 
 questionFormInitials : Question -> List ( String, Field.Field )
 questionFormInitials question =
-    case question of
-        OptionsQuestion _ ->
-            [ ( "questionType", Field.string "OptionsQuestion" )
-            , ( "title", Field.string <| getQuestionTitle question )
-            , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
-            , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
-            ]
+    let
+        questionType =
+            case question of
+                OptionsQuestion _ ->
+                    "OptionsQuestion"
 
-        ListQuestion _ ->
-            [ ( "questionType", Field.string "ListQuestion" )
-            , ( "title", Field.string <| getQuestionTitle question )
-            , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
-            , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
-            , ( "itemTemplateTitle", Field.string <| getQuestionItemTitle question )
-            ]
+                ListQuestion _ ->
+                    "ListQuestion"
 
-        ValueQuestion _ ->
-            [ ( "questionType", Field.string "ValueQuestion" )
-            , ( "title", Field.string <| getQuestionTitle question )
-            , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
-            , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
-            ]
+                ValueQuestion _ ->
+                    "ValueQuestion"
+    in
+    [ ( "questionType", Field.string questionType )
+    , ( "title", Field.string <| getQuestionTitle question )
+    , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
+    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
+    , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| getQuestionItemTitle question )
+    , ( "valueType", Field.string <| valueTypeToString StringValueType )
+    ]
 
 
 updateQuestionWithForm : Question -> QuestionForm -> Question
@@ -381,6 +378,22 @@ questionTypeOptions =
     , ( "ListQuestion", "List of items" )
     , ( "ValueQuestion", "Value" )
     ]
+
+
+valueTypeToString : ValueQuestionType -> String
+valueTypeToString valueType =
+    case valueType of
+        StringValueType ->
+            "StringValue"
+
+        DateValueType ->
+            "DateValue"
+
+        NumberValueType ->
+            "NumberValue"
+
+        TextValueType ->
+            "TextValue"
 
 
 questionValueTypeOptions : List ( String, String )

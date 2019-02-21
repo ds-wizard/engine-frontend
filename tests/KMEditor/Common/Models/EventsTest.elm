@@ -514,7 +514,7 @@ editListQuestionEvent =
             , referenceUuids = { changed = True, value = Just [ "f749367c-3046-11e9-b210-d663bd873d93" ] }
             , expertUuids = { changed = False, value = Nothing }
             , itemTemplateTitle = { changed = True, value = Just "My Item" }
-            , itemQuestionUuids = { changed = True, value = Just [ "b2c867fc-3046-11e9-b210-d663bd873d93" ] }
+            , itemTemplateQuestionUuids = { changed = True, value = Just [ "b2c867fc-3046-11e9-b210-d663bd873d93" ] }
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"

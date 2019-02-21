@@ -173,7 +173,7 @@ generateQuestionEvent model question path seed =
                             , referenceUuids = createEmptyEventField
                             , expertUuids = createEmptyEventField
                             , itemTemplateTitle = createEmptyEventField
-                            , itemQuestionUuids = createEmptyEventField
+                            , itemTemplateQuestionUuids = createEmptyEventField
                             }
 
                     ValueQuestion _ ->
