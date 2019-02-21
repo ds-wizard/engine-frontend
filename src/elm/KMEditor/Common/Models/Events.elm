@@ -219,7 +219,7 @@ type alias EditListQuestionEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , itemTemplateTitle : EventField String
-    , itemQuestionUuids : EventField (List String)
+    , itemTemplateQuestionUuids : EventField (List String)
     }
 
 
@@ -580,7 +580,7 @@ encodeEditListQuestionEvent data =
     , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
     , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
     , ( "itemTemplateTitle", encodeEventField Encode.string data.itemTemplateTitle )
-    , ( "itemQuestionUuids", encodeEventField (Encode.list Encode.string) data.itemQuestionUuids )
+    , ( "itemTemplateQuestionUuids", encodeEventField (Encode.list Encode.string) data.itemTemplateQuestionUuids )
     ]
 
 
@@ -1012,7 +1012,7 @@ editListQuestionEventDecoder =
         |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "itemTemplateTitle" (eventFieldDecoder Decode.string)
-        |> required "itemQuestionUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "itemTemplateQuestionUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 editValueQuestionEventDecoder : Decoder EditValueQuestionEventData

@@ -177,7 +177,7 @@ createEditQuestionEvent form editorData =
                         , referenceUuids = createEventField editorData.references.list editorData.references.dirty
                         , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
                         , itemTemplateTitle = createEventField formData.itemTemplateTitle (getQuestionItemTitle editorData.question /= formData.itemTemplateTitle)
-                        , itemQuestionUuids = createEventField editorData.itemTemplateQuestions.list editorData.itemTemplateQuestions.dirty
+                        , itemTemplateQuestionUuids = createEventField editorData.itemTemplateQuestions.list editorData.itemTemplateQuestions.dirty
                         }
 
                 ValueQuestionForm formData ->
