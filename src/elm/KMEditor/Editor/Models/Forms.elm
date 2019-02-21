@@ -331,6 +331,7 @@ questionFormInitials question =
             , ( "title", Field.string <| getQuestionTitle question )
             , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
             , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
+            , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringValueType <| getQuestionValueType question )
             ]
 
 
@@ -381,6 +382,22 @@ questionTypeOptions =
     , ( "ListQuestion", "List of items" )
     , ( "ValueQuestion", "Value" )
     ]
+
+
+valueTypeToString : ValueQuestionType -> String
+valueTypeToString valueType =
+    case valueType of
+        StringValueType ->
+            "StringValue"
+
+        DateValueType ->
+            "DateValue"
+
+        NumberValueType ->
+            "NumberValue"
+
+        TextValueType ->
+            "TextValue"
 
 
 questionValueTypeOptions : List ( String, String )
