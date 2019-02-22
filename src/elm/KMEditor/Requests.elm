@@ -1,10 +1,27 @@
-module KMEditor.Requests exposing (deleteKnowledgeModel, deleteMigration, getKnowledgeModel, getKnowledgeModelData, getKnowledgeModels, getLevels, getMetrics, getMigration, postEventsBulk, postKnowledgeModel, postMigration, postMigrationConflict, putKnowledgeModelVersion)
+module KMEditor.Requests exposing
+    ( deleteKnowledgeModel
+    , deleteMigration
+    , getBranch
+    , getKnowledgeModel
+    , getKnowledgeModelData
+    , getKnowledgeModels
+    , getLevels
+    , getMetrics
+    , getMigration
+    , postEventsBulk
+    , postForPreview
+    , postKnowledgeModel
+    , postMigration
+    , postMigrationConflict
+    , putKnowledgeModelVersion
+    )
 
 import Auth.Models exposing (Session)
 import Http
 import Json.Encode as Encode exposing (Value)
 import KMEditor.Common.Models as Models exposing (KnowledgeModel, knowledgeModelDecoder, knowledgeModelListDecoder)
 import KMEditor.Common.Models.Entities as Editor exposing (KnowledgeModel, knowledgeModelDecoder)
+import KMEditor.Common.Models.Events exposing (Event, encodeEvent)
 import KMEditor.Common.Models.Migration exposing (Migration, migrationDecoder)
 import Requests
 
@@ -12,6 +29,11 @@ import Requests
 getKnowledgeModel : String -> Session -> Http.Request Models.KnowledgeModel
 getKnowledgeModel uuid session =
     Requests.get session ("/branches/" ++ uuid) Models.knowledgeModelDecoder
+
+
+getBranch : String -> Session -> Http.Request Models.Branch
+getBranch uuid session =
+    Requests.get session ("/branches/" ++ uuid) Models.branchDecoder
 
 
 getKnowledgeModels : Session -> Http.Request (List Models.KnowledgeModel)
@@ -72,3 +94,16 @@ postMigrationConflict uuid session data =
 deleteMigration : String -> Session -> Http.Request String
 deleteMigration uuid session =
     Requests.delete session ("/branches/" ++ uuid ++ "/migrations/current")
+
+
+postForPreview : Maybe String -> List Event -> List String -> Session -> Http.Request KnowledgeModel
+postForPreview packageId events tagUuids session =
+    let
+        data =
+            Encode.object
+                [ ( "packageId", packageId |> Maybe.map Encode.string |> Maybe.withDefault Encode.null )
+                , ( "events", Encode.list encodeEvent events )
+                , ( "tagUuids", Encode.list Encode.string tagUuids )
+                ]
+    in
+    Requests.postWithResponse data session "/knowledge-models/preview" knowledgeModelDecoder
