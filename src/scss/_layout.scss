@@ -1,6 +1,11 @@
 @import "~bootswatch/dist/united/variables";
 @import "mixins";
 
+
+body {
+    overscroll-behavior-y: none;
+}
+
 .app-view {
     margin-left: 240px;
 

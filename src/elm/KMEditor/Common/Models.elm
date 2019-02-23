@@ -18,7 +18,9 @@ type alias KnowledgeModel =
 
 
 type alias Branch =
-    { parentPackageId : Maybe String
+    { name : String
+    , kmId : String
+    , parentPackageId : Maybe String
     , events : List Event
     }
 
@@ -77,6 +79,8 @@ knowledgeModelListDecoder =
 branchDecoder : Decoder Branch
 branchDecoder =
     Decode.succeed Branch
+        |> required "name" Decode.string
+        |> required "kmId" Decode.string
         |> required "parentPackageId" (Decode.nullable Decode.string)
         |> required "events" (Decode.list eventDecoder)
 

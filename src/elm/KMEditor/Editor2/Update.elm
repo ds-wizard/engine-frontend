@@ -6,15 +6,19 @@ import Common.Models exposing (getServerErrorJwt)
 import Jwt
 import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Events exposing (Event)
-import KMEditor.Editor2.Models exposing (Model)
+import KMEditor.Editor2.Models exposing (EditorType(..), Model, applyCurrentEditorChanges)
 import KMEditor.Editor2.Msgs exposing (Msg(..))
 import KMEditor.Editor2.Preview.Models
 import KMEditor.Editor2.Preview.Update
-import KMEditor.Requests exposing (getBranch, getLevels, getMetrics, postForPreview)
+import KMEditor.Editor2.TagEditor.Models as TagEditorModel
+import KMEditor.Editor2.TagEditor.Update
+import KMEditor.Requests exposing (getBranch, getLevels, getMetrics, postForPreview, putBranch)
+import KMEditor.Routing exposing (Route(..))
 import Models exposing (State)
 import Msgs
 import Random exposing (Seed)
 import Requests exposing (getResultCmd)
+import Routing exposing (cmdNavigate)
 
 
 fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
@@ -98,6 +102,7 @@ update msg wrapMsg state model =
                             { model
                                 | preview = Success km
                                 , previewEditorModel = Just <| KMEditor.Editor2.Preview.Models.initialModel km
+                                , tagEditorModel = Just <| TagEditorModel.initialModel km
                             }
 
                         Err error ->
@@ -110,10 +115,13 @@ update msg wrapMsg state model =
 
         OpenEditor editor ->
             let
+                ( newSeed, modelWithEvents ) =
+                    applyCurrentEditorChanges state.seed model
+
                 ( newModel, cmd ) =
-                    fetchPreview wrapMsg state.session { model | currentEditor = editor }
+                    fetchPreview wrapMsg state.session { modelWithEvents | currentEditor = editor }
             in
-            ( state.seed, newModel, cmd )
+            ( newSeed, newModel, cmd )
 
         PreviewEditorMsg previewMsg ->
             let
@@ -122,6 +130,37 @@ update msg wrapMsg state model =
                         |> Maybe.map (KMEditor.Editor2.Preview.Update.update previewMsg)
             in
             ( state.seed, { model | previewEditorModel = previewEditorModel }, Cmd.none )
+
+        TagEditorMsg tagMsg ->
+            let
+                tagEditorModel =
+                    model.tagEditorModel
+                        |> Maybe.map (KMEditor.Editor2.TagEditor.Update.update tagMsg)
+            in
+            ( state.seed, { model | tagEditorModel = tagEditorModel }, Cmd.none )
+
+        Save ->
+            let
+                ( newSeed, newModel ) =
+                    applyCurrentEditorChanges state.seed model
+
+                cmd =
+                    model.branch
+                        |> ActionResult.map (putBranchCmd wrapMsg state.session newModel)
+                        |> ActionResult.withDefault Cmd.none
+            in
+            ( newSeed, { newModel | saving = Loading }, cmd )
+
+        SaveCompleted result ->
+            case result of
+                Ok _ ->
+                    ( state.seed, model, cmdNavigate state.key <| Routing.KMEditor IndexRoute )
+
+                Err error ->
+                    ( state.seed
+                    , { model | saving = getServerErrorJwt error "Knowledge model could not be saved" }
+                    , getResultCmd result
+                    )
 
 
 fetchPreview : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
@@ -134,6 +173,13 @@ fetchPreview wrapMsg session model =
 
         _ ->
             ( model, Cmd.none )
+
+
+putBranchCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Branch -> Cmd Msgs.Msg
+putBranchCmd wrapMsg session model branch =
+    putBranch model.branchUuid branch.name branch.kmId model.sessionEvents session
+        |> Jwt.send SaveCompleted
+        |> Cmd.map wrapMsg
 
 
 createPreviewRequest : Branch -> List Event -> Session -> Cmd Msg

@@ -13,6 +13,7 @@ module KMEditor.Requests exposing
     , postKnowledgeModel
     , postMigration
     , postMigrationConflict
+    , putBranch
     , putKnowledgeModelVersion
     )
 
@@ -34,6 +35,19 @@ getKnowledgeModel uuid session =
 getBranch : String -> Session -> Http.Request Models.Branch
 getBranch uuid session =
     Requests.get session ("/branches/" ++ uuid) Models.branchDecoder
+
+
+putBranch : String -> String -> String -> List Event -> Session -> Http.Request String
+putBranch uuid name kmId events session =
+    let
+        data =
+            Encode.object
+                [ ( "name", Encode.string name )
+                , ( "kmId", Encode.string kmId )
+                , ( "events", Encode.list encodeEvent events )
+                ]
+    in
+    Requests.put data session ("/branches/" ++ uuid)
 
 
 getKnowledgeModels : Session -> Http.Request (List Models.KnowledgeModel)

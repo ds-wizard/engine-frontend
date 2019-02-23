@@ -5,6 +5,7 @@ import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Editor2.Models exposing (EditorType)
 import KMEditor.Editor2.Preview.Msgs
+import KMEditor.Editor2.TagEditor.Msgs
 
 
 type Msg
@@ -14,3 +15,6 @@ type Msg
     | GetPreviewCompleted (Result Jwt.JwtError KnowledgeModel)
     | OpenEditor EditorType
     | PreviewEditorMsg KMEditor.Editor2.Preview.Msgs.Msg
+    | TagEditorMsg KMEditor.Editor2.TagEditor.Msgs.Msg
+    | Save
+    | SaveCompleted (Result Jwt.JwtError String)

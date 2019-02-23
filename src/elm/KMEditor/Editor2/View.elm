@@ -1,16 +1,19 @@
 module KMEditor.Editor2.View exposing (view)
 
 import ActionResult
-import Common.Html exposing (fa)
+import Common.Html exposing (emptyNode, fa)
+import Common.View.ActionButton as ActionButton
+import Common.View.Flash as Flash
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
-import KMEditor.Editor2.Models exposing (EditorType(..), Model)
+import KMEditor.Editor2.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
 import KMEditor.Editor2.Msgs exposing (Msg(..))
 import KMEditor.Editor2.Preview.View
+import KMEditor.Editor2.TagEditor.View
 import Msgs
 
 
@@ -29,7 +32,7 @@ editorView wrapMsg model ( branch, metric, levels ) =
                     kmEditorView
 
                 TagsEditor ->
-                    tagsEditorView
+                    tagsEditorView wrapMsg model
 
                 PreviewEditor ->
                     previewView wrapMsg model levels branch
@@ -38,50 +41,67 @@ editorView wrapMsg model ( branch, metric, levels ) =
                     historyView
     in
     div [ class "KMEditor__Editor2" ]
-        [ editorHeader wrapMsg model.currentEditor
-        , div [ class "editor-body" ]
+        [ editorHeader wrapMsg model
+        , div [ class "editor-body", classList [ ( "with-error", hasSavingError model ) ] ]
             [ Page.actionResultView content model.preview
             ]
         ]
 
 
-editorHeader : (Msg -> Msgs.Msg) -> EditorType -> Html Msgs.Msg
-editorHeader wrapMsg activeEditor =
-    div [ class "editor-header" ]
-        [ div [ class "undo" ]
-            [ a [] [ fa "undo" ]
-            , a [ class "disabled" ] [ fa "repeat" ]
+editorHeader : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+editorHeader wrapMsg model =
+    let
+        actions =
+            if containsChanges model then
+                [ text "(unsaved changes)"
+                , ActionButton.button ( "Save", model.saving, wrapMsg Save )
+                ]
+
+            else
+                []
+
+        errorMsg =
+            if hasSavingError model then
+                Flash.error <| getSavingError model
+
+            else
+                emptyNode
+    in
+    div [ class "editor-header", classList [ ( "with-error", hasSavingError model ) ] ]
+        [ div [ class "navigation" ]
+            [ div [ class "undo" ]
+                [ a [] [ fa "undo" ]
+                , a [ class "disabled" ] [ fa "repeat" ]
+                ]
+            , ul [ class "nav" ]
+                [ a
+                    [ class "nav-link"
+                    , classList [ ( "active", model.currentEditor == KMEditor ) ]
+                    , onClick <| wrapMsg <| OpenEditor KMEditor
+                    ]
+                    [ fa "sitemap", text "Knowledge Model" ]
+                , a
+                    [ class "nav-link"
+                    , classList [ ( "active", model.currentEditor == TagsEditor ) ]
+                    , onClick <| wrapMsg <| OpenEditor TagsEditor
+                    ]
+                    [ fa "tags", text "Tags" ]
+                , a
+                    [ class "nav-link"
+                    , classList [ ( "active", model.currentEditor == PreviewEditor ) ]
+                    , onClick <| wrapMsg <| OpenEditor PreviewEditor
+                    ]
+                    [ fa "eye", text "Preview" ]
+                , a
+                    [ class "nav-link"
+                    , classList [ ( "active", model.currentEditor == HistoryEditor ) ]
+                    , onClick <| wrapMsg <| OpenEditor HistoryEditor
+                    ]
+                    [ fa "history", text "History" ]
+                ]
+            , div [ class "actions" ] actions
             ]
-        , ul [ class "nav" ]
-            [ a
-                [ class "nav-link"
-                , classList [ ( "active", activeEditor == KMEditor ) ]
-                , onClick <| wrapMsg <| OpenEditor KMEditor
-                ]
-                [ fa "sitemap", text "Knowledge Model" ]
-            , a
-                [ class "nav-link"
-                , classList [ ( "active", activeEditor == TagsEditor ) ]
-                , onClick <| wrapMsg <| OpenEditor TagsEditor
-                ]
-                [ fa "tags", text "Tags" ]
-            , a
-                [ class "nav-link"
-                , classList [ ( "active", activeEditor == PreviewEditor ) ]
-                , onClick <| wrapMsg <| OpenEditor PreviewEditor
-                ]
-                [ fa "eye", text "Preview" ]
-            , a
-                [ class "nav-link"
-                , classList [ ( "active", activeEditor == HistoryEditor ) ]
-                , onClick <| wrapMsg <| OpenEditor HistoryEditor
-                ]
-                [ fa "history", text "History" ]
-            ]
-        , div [ class "actions" ]
-            [ button [ class "btn btn-primary btn-with-loader" ]
-                [ text "Save" ]
-            ]
+        , errorMsg
         ]
 
 
@@ -90,9 +110,11 @@ kmEditorView =
     div [] [ text "Knowledge Model Editor" ]
 
 
-tagsEditorView : Html Msgs.Msg
-tagsEditorView =
-    div [] [ text "Tags Editor" ]
+tagsEditorView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+tagsEditorView wrapMsg model =
+    model.tagEditorModel
+        |> Maybe.map (KMEditor.Editor2.TagEditor.View.view (wrapMsg << TagEditorMsg))
+        |> Maybe.withDefault (Page.error "Error opening tag editor")
 
 
 previewView : (Msg -> Msgs.Msg) -> Model -> List Level -> Branch -> Html Msgs.Msg
