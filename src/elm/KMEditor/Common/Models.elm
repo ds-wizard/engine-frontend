@@ -1,7 +1,8 @@
-module KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..), kmLastVersion, kmMatchState, knowledgeModelDecoder, knowledgeModelListDecoder, knowledgeModelStateDecoder)
+module KMEditor.Common.Models exposing (Branch, KnowledgeModel, KnowledgeModelState(..), branchDecoder, kmLastVersion, kmMatchState, knowledgeModelDecoder, knowledgeModelListDecoder, knowledgeModelStateDecoder)
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (optional, required)
+import KMEditor.Common.Models.Events exposing (Event, eventDecoder)
 import List.Extra as List
 
 
@@ -13,6 +14,14 @@ type alias KnowledgeModel =
     , parentPackageId : Maybe String
     , lastAppliedParentPackageId : Maybe String
     , stateType : KnowledgeModelState
+    }
+
+
+type alias Branch =
+    { name : String
+    , kmId : String
+    , parentPackageId : Maybe String
+    , events : List Event
     }
 
 
@@ -65,6 +74,15 @@ knowledgeModelStateDecoder =
 knowledgeModelListDecoder : Decoder (List KnowledgeModel)
 knowledgeModelListDecoder =
     Decode.list knowledgeModelDecoder
+
+
+branchDecoder : Decoder Branch
+branchDecoder =
+    Decode.succeed Branch
+        |> required "name" Decode.string
+        |> required "kmId" Decode.string
+        |> required "parentPackageId" (Decode.nullable Decode.string)
+        |> required "events" (Decode.list eventDecoder)
 
 
 kmMatchState : List KnowledgeModelState -> KnowledgeModel -> Bool

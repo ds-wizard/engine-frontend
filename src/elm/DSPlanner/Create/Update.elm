@@ -6,11 +6,12 @@ import Common.Models exposing (getServerErrorJwt)
 import DSPlanner.Common.Models exposing (Questionnaire)
 import DSPlanner.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, initQuestionnaireCreateForm, questionnaireCreateFormValidation)
 import DSPlanner.Create.Msgs exposing (Msg(..))
-import DSPlanner.Requests exposing (postForPreview, postQuestionnaire)
+import DSPlanner.Requests exposing (postQuestionnaire)
 import DSPlanner.Routing exposing (Route(..))
 import Form
 import Jwt
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
+import KMEditor.Requests exposing (postForPreview)
 import KMPackages.Common.Models exposing (PackageDetail)
 import KMPackages.Requests exposing (getPackages)
 import Models exposing (State)
@@ -153,7 +154,7 @@ needFetchKnowledgeModelPreview model packageId =
 
 fetchKnowledgeModelPreview : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
 fetchKnowledgeModelPreview wrapMsg packageId session =
-    postForPreview packageId session
+    postForPreview (Just packageId) [] [] session
         |> Jwt.send GetKnowledgeModelPreviewCompleted
         |> Cmd.map wrapMsg
 

@@ -4,10 +4,8 @@ import KMEditor.Create.Models
 import KMEditor.Editor.Models
 import KMEditor.Index.Models
 import KMEditor.Migration.Models
-import KMEditor.Preview.Models
 import KMEditor.Publish.Models
 import KMEditor.Routing exposing (Route(..))
-import KMEditor.TagEditor.Models
 
 
 type alias Model =
@@ -15,9 +13,7 @@ type alias Model =
     , editorModel : KMEditor.Editor.Models.Model
     , indexModel : KMEditor.Index.Models.Model
     , migrationModel : KMEditor.Migration.Models.Model
-    , previewModel : KMEditor.Preview.Models.Model
     , publishModel : KMEditor.Publish.Models.Model
-    , tagEditorModel : KMEditor.TagEditor.Models.Model
     }
 
 
@@ -27,9 +23,7 @@ initialModel =
     , editorModel = KMEditor.Editor.Models.initialModel ""
     , indexModel = KMEditor.Index.Models.initialModel
     , migrationModel = KMEditor.Migration.Models.initialModel ""
-    , previewModel = KMEditor.Preview.Models.initialModel ""
     , publishModel = KMEditor.Publish.Models.initialModel
-    , tagEditorModel = KMEditor.TagEditor.Models.initialModel ""
     }
 
 
@@ -52,15 +46,5 @@ initLocalModel route model =
         MigrationRoute uuid ->
             { model | migrationModel = KMEditor.Migration.Models.initialModel uuid }
 
-        PreviewRoute uuid ->
-            { model | previewModel = KMEditor.Preview.Models.initialModel uuid }
-
         PublishRoute uuid ->
             { model | publishModel = KMEditor.Publish.Models.initialModel }
-
-        TagEditorRoute uuid ->
-            if model.tagEditorModel.branchUuid == uuid then
-                model
-
-            else
-                { model | tagEditorModel = KMEditor.TagEditor.Models.initialModel uuid }

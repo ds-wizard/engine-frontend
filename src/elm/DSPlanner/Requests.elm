@@ -2,7 +2,6 @@ module DSPlanner.Requests exposing
     ( deleteQuestionnaire
     , getQuestionnaire
     , getQuestionnaires
-    , postForPreview
     , postQuestionnaire
     , putQuestionnaire
     )
@@ -39,16 +38,3 @@ postQuestionnaire session questionnaire =
 putQuestionnaire : String -> Session -> Value -> Http.Request String
 putQuestionnaire uuid session questionnaire =
     Requests.put questionnaire session ("/questionnaires/" ++ uuid)
-
-
-postForPreview : String -> Session -> Http.Request KnowledgeModel
-postForPreview packageId session =
-    let
-        data =
-            Encode.object
-                [ ( "packageId", Encode.string packageId )
-                , ( "events", Encode.list Encode.string [] )
-                , ( "tagUuids", Encode.list Encode.string [] )
-                ]
-    in
-    Requests.postWithResponse data session "/knowledge-models/preview" knowledgeModelDecoder
