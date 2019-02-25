@@ -611,22 +611,29 @@ isEditorDirty editor =
 
 isKMEditorDirty : KMEditorData -> Bool
 isKMEditorDirty editorData =
-    formChanged editorData.form || editorData.chapters.dirty || editorData.tags.dirty
+    (editorData.editorState == Added)
+        || formChanged editorData.form
+        || editorData.chapters.dirty
+        || editorData.tags.dirty
 
 
 isChapterEditorDirty : ChapterEditorData -> Bool
 isChapterEditorDirty editorData =
-    formChanged editorData.form || editorData.questions.dirty
+    (editorData.editorState == Added)
+        || formChanged editorData.form
+        || editorData.questions.dirty
 
 
 isTagEditorDirty : TagEditorData -> Bool
 isTagEditorDirty editorData =
-    formChanged editorData.form
+    (editorData.editorState == Added)
+        || formChanged editorData.form
 
 
 isQuestionEditorDirty : QuestionEditorData -> Bool
 isQuestionEditorDirty editorData =
-    formChanged editorData.form
+    (editorData.editorState == Added)
+        || formChanged editorData.form
         || (getQuestionTagUuids editorData.question /= editorData.tagUuids)
         || editorData.answers.dirty
         || editorData.itemTemplateQuestions.dirty
@@ -636,17 +643,21 @@ isQuestionEditorDirty editorData =
 
 isAnswerEditorDirty : AnswerEditorData -> Bool
 isAnswerEditorDirty editorData =
-    formChanged editorData.form || editorData.followUps.dirty
+    (editorData.editorState == Added)
+        || formChanged editorData.form
+        || editorData.followUps.dirty
 
 
 isReferenceEditorDirty : ReferenceEditorData -> Bool
 isReferenceEditorDirty editorData =
-    formChanged editorData.form
+    (editorData.editorState == Added)
+        || formChanged editorData.form
 
 
 isExpertEditorDirty : ExpertEditorData -> Bool
 isExpertEditorDirty editorData =
-    formChanged editorData.form
+    (editorData.editorState == Added)
+        || formChanged editorData.form
 
 
 updateKMEditorData : EditorContext -> EditorState -> KnowledgeModelForm -> KMEditorData -> KMEditorData
