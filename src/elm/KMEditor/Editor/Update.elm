@@ -8,7 +8,7 @@ import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.KMEditor.Models
 import KMEditor.Editor.KMEditor.Update exposing (generateEvents)
-import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, initialModel)
+import KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, initialModel)
 import KMEditor.Editor.Msgs exposing (Msg(..))
 import KMEditor.Editor.Preview.Models
 import KMEditor.Editor.Preview.Update
@@ -16,6 +16,7 @@ import KMEditor.Editor.TagEditor.Models as TagEditorModel
 import KMEditor.Editor.TagEditor.Update
 import KMEditor.Requests exposing (getBranch, getLevels, getMetrics, postForPreview, putBranch)
 import KMEditor.Routing exposing (Route(..))
+import Maybe.Extra exposing (isJust)
 import Models exposing (State)
 import Msgs
 import Ports
@@ -187,12 +188,18 @@ update msg wrapMsg state model =
                         ( newSeed, newModel ) =
                             applyCurrentEditorChanges state.seed model
 
-                        cmd =
-                            model.branch
-                                |> ActionResult.map (putBranchCmd wrapMsg state.session newModel)
-                                |> ActionResult.withDefault Cmd.none
+                        ( newModel2, cmd ) =
+                            if hasKMEditorAlert newModel.editorModel then
+                                ( newModel, Cmd.none )
+
+                            else
+                                ( { newModel | saving = Loading }
+                                , model.branch
+                                    |> ActionResult.map (putBranchCmd wrapMsg state.session newModel)
+                                    |> ActionResult.withDefault Cmd.none
+                                )
                     in
-                    ( newSeed, { newModel | saving = Loading }, cmd )
+                    ( newSeed, newModel2, cmd )
 
                 SaveCompleted result ->
                     case result of
@@ -241,27 +248,39 @@ createPreviewRequest branch sessionEvents session =
 
 applyCurrentEditorChanges : Seed -> Model -> ( Seed, Model )
 applyCurrentEditorChanges seed model =
-    let
-        ( newSeed, newEvents ) =
-            case ( model.currentEditor, model.preview ) of
-                ( TagsEditor, Success km ) ->
+    case ( model.currentEditor, model.preview ) of
+        ( TagsEditor, Success km ) ->
+            let
+                ( newSeed, newEvents ) =
                     model.tagEditorModel
                         |> Maybe.map (TagEditorModel.generateEvents seed km)
                         |> Maybe.withDefault ( seed, [] )
+            in
+            ( newSeed, addSessionEvents newEvents model )
 
-                ( KMEditor, Success km ) ->
-                    let
-                        map ( mapSeed, editorModel, _ ) =
-                            ( mapSeed, editorModel.events )
-                    in
+        ( KMEditor, Success km ) ->
+            let
+                map ( mapSeed, editorModel, _ ) =
+                    ( mapSeed, editorModel.events, Just editorModel )
+
+                ( newSeed, newEvents, newEditorModel ) =
                     model.editorModel
                         |> Maybe.map (map << generateEvents seed)
-                        |> Maybe.withDefault ( seed, [] )
+                        |> Maybe.withDefault ( seed, [], model.editorModel )
+            in
+            if hasKMEditorAlert newEditorModel then
+                ( newSeed, { model | editorModel = newEditorModel } )
 
-                _ ->
-                    ( seed, [] )
-    in
-    ( newSeed, { model | sessionEvents = model.sessionEvents ++ newEvents } )
+            else
+                ( newSeed, addSessionEvents newEvents model )
+
+        _ ->
+            ( seed, model )
+
+
+hasKMEditorAlert : Maybe KMEditor.Editor.KMEditor.Models.Model -> Bool
+hasKMEditorAlert =
+    Maybe.map (.alert >> isJust) >> Maybe.withDefault False
 
 
 withSetUnloadMsgCmd : ( a, Model, Cmd msg ) -> ( a, Model, Cmd msg )

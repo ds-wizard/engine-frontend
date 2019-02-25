@@ -1,6 +1,7 @@
 module KMEditor.Editor.Models exposing
     ( EditorType(..)
     , Model
+    , addSessionEvents
     , containsChanges
     , getSavingError
     , hasSavingError
@@ -68,6 +69,11 @@ containsChanges model =
                 |> Maybe.withDefault False
     in
     List.length model.sessionEvents > 0 || tagEditorDirty || kmEditorDirty
+
+
+addSessionEvents : List Event -> Model -> Model
+addSessionEvents events model =
+    { model | sessionEvents = model.sessionEvents ++ events }
 
 
 hasSavingError : Model -> Bool
