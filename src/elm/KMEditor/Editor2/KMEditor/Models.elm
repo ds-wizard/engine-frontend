@@ -12,9 +12,9 @@ module KMEditor.Editor2.KMEditor.Models exposing
 
 import Dict exposing (Dict)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, Tag)
-import KMEditor.Common.Models.Events exposing (Event)
+import KMEditor.Common.Models.Events exposing (Event(..), getEventEntityUuid)
 import KMEditor.Editor2.KMEditor.Models.EditorContext exposing (EditorContext)
-import KMEditor.Editor2.KMEditor.Models.Editors exposing (Editor(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, isEditorDirty)
+import KMEditor.Editor2.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
 import Reorderable
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
 import Utils exposing (listFilterJust)
@@ -34,7 +34,7 @@ type alias Model =
     }
 
 
-initialModel : KnowledgeModel -> List Metric -> List Level -> Model
+initialModel : KnowledgeModel -> List Metric -> List Level -> List Event -> Model
 initialModel knowledgeModel metrics levels =
     createEditors
         { kmUuid = knowledgeModel.uuid
@@ -50,9 +50,97 @@ initialModel knowledgeModel metrics levels =
         }
 
 
-createEditors : Model -> Model
-createEditors model =
-    { model | editors = createKnowledgeModelEditor (getEditorContext model) model.knowledgeModel model.editors }
+createEditors : Model -> List Event -> Model
+createEditors model events =
+    { model | editors = createKnowledgeModelEditor (getEditorContext model) (getEditorState (createEditorStateDict events)) model.knowledgeModel model.editors }
+
+
+getEditorState : Dict String EditorState -> String -> EditorState
+getEditorState editorStateDict uuid =
+    Dict.get uuid editorStateDict
+        |> Maybe.withDefault Initial
+
+
+createEditorStateDict : List Event -> Dict String EditorState
+createEditorStateDict events =
+    List.foldl
+        (\event dict ->
+            let
+                entityUuid =
+                    getEventEntityUuid event
+
+                eventState =
+                    eventToEditorState event
+
+                currentState =
+                    Dict.get entityUuid dict
+                        |> Maybe.withDefault Initial
+            in
+            Dict.insert entityUuid (getNewState currentState eventState) dict
+        )
+        Dict.empty
+        events
+
+
+eventToEditorState : Event -> EditorState
+eventToEditorState event =
+    case event of
+        EditKnowledgeModelEvent _ _ ->
+            Edited
+
+        AddChapterEvent _ _ ->
+            Added
+
+        EditChapterEvent _ _ ->
+            Edited
+
+        DeleteChapterEvent _ _ ->
+            Deleted
+
+        AddTagEvent _ _ ->
+            Added
+
+        EditTagEvent _ _ ->
+            Edited
+
+        DeleteTagEvent _ _ ->
+            Deleted
+
+        AddQuestionEvent _ _ ->
+            Added
+
+        EditQuestionEvent _ _ ->
+            Edited
+
+        DeleteQuestionEvent _ _ ->
+            Deleted
+
+        AddAnswerEvent _ _ ->
+            Added
+
+        EditAnswerEvent _ _ ->
+            Edited
+
+        DeleteAnswerEvent _ _ ->
+            Deleted
+
+        AddReferenceEvent _ _ ->
+            Added
+
+        EditReferenceEvent _ _ ->
+            Edited
+
+        DeleteReferenceEvent _ _ ->
+            Deleted
+
+        AddExpertEvent _ _ ->
+            Added
+
+        EditExpertEvent _ _ ->
+            Edited
+
+        DeleteExpertEvent _ _ ->
+            Deleted
 
 
 

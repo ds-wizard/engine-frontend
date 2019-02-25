@@ -30,7 +30,7 @@ import Utils exposing (getUuid)
 
 type alias AddEntityConfig entity editorData =
     { newEntity : String -> entity
-    , createEntityEditor : EditorContext -> Path -> EditorState -> entity -> Dict String Editor -> Dict String Editor
+    , createEntityEditor : EditorContext -> Path -> (String -> EditorState) -> entity -> Dict String Editor -> Dict String Editor
     , createPathNode : String -> PathNode
     , addEntity : entity -> editorData -> Editor
     }
@@ -46,7 +46,7 @@ addEntity cfg cmd seed model editorData =
             cfg.newEntity newUuid
 
         editorsWithEntity =
-            cfg.createEntityEditor (getEditorContext model) (editorData.path ++ [ cfg.createPathNode editorData.uuid ]) Added entity model.editors
+            cfg.createEntityEditor (getEditorContext model) (editorData.path ++ [ cfg.createPathNode editorData.uuid ]) (\_ -> Added) entity model.editors
 
         newParentEditor =
             cfg.addEntity entity editorData

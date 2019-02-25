@@ -46,6 +46,7 @@ module KMEditor.Common.Models.Events exposing
     , getEditQuestionUuid
     , getEditReferenceEventEntityVisibleName
     , getEditReferenceUuid
+    , getEventEntityUuid
     , getEventEntityVisibleName
     , getEventFieldValue
     , getEventFieldValueWithDefault
@@ -1247,6 +1248,67 @@ getEventUuid event =
 
         DeleteExpertEvent _ commonData ->
             commonData.uuid
+
+
+getEventEntityUuid : Event -> String
+getEventEntityUuid event =
+    case event of
+        EditKnowledgeModelEvent eventData _ ->
+            eventData.kmUuid
+
+        AddTagEvent eventData _ ->
+            eventData.tagUuid
+
+        EditTagEvent eventData _ ->
+            eventData.tagUuid
+
+        DeleteTagEvent eventData _ ->
+            eventData.tagUuid
+
+        AddChapterEvent eventData _ ->
+            eventData.chapterUuid
+
+        EditChapterEvent eventData _ ->
+            eventData.chapterUuid
+
+        DeleteChapterEvent eventData _ ->
+            eventData.chapterUuid
+
+        AddQuestionEvent eventData _ ->
+            getAddQuestionUuid eventData
+
+        EditQuestionEvent eventData _ ->
+            getEditQuestionUuid eventData
+
+        DeleteQuestionEvent eventData _ ->
+            eventData.questionUuid
+
+        AddAnswerEvent eventData _ ->
+            eventData.answerUuid
+
+        EditAnswerEvent eventData _ ->
+            eventData.answerUuid
+
+        DeleteAnswerEvent eventData _ ->
+            eventData.answerUuid
+
+        AddReferenceEvent eventData _ ->
+            getAddReferenceUuid eventData
+
+        EditReferenceEvent eventData _ ->
+            getEditReferenceUuid eventData
+
+        DeleteReferenceEvent eventData _ ->
+            eventData.referenceUuid
+
+        AddExpertEvent eventData _ ->
+            eventData.expertUuid
+
+        EditExpertEvent eventData _ ->
+            eventData.expertUuid
+
+        DeleteExpertEvent eventData _ ->
+            eventData.expertUuid
 
 
 getEventFieldValue : EventField a -> Maybe a

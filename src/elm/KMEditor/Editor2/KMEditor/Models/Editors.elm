@@ -178,8 +178,8 @@ type alias ExpertEditorData =
 {- constructors -}
 
 
-createKnowledgeModelEditor : EditorContext -> KnowledgeModel -> Dict String Editor -> Dict String Editor
-createKnowledgeModelEditor editorContext km editors =
+createKnowledgeModelEditor : EditorContext -> (String -> EditorState) -> KnowledgeModel -> Dict String Editor -> Dict String Editor
+createKnowledgeModelEditor editorContext getEditorState km editors =
     let
         editor =
             KMEditor
@@ -189,7 +189,7 @@ createKnowledgeModelEditor editorContext km editors =
                 , chapters = Children.init <| List.map .uuid km.chapters
                 , tags = Children.init <| List.map .uuid km.tags
                 , treeOpen = True
-                , editorState = Initial
+                , editorState = getEditorState km.uuid
                 , path = []
                 }
 
@@ -197,16 +197,16 @@ createKnowledgeModelEditor editorContext km editors =
             [ KMPathNode km.uuid ]
 
         withChapters =
-            List.foldl (createChapterEditor editorContext currentPath Initial) editors km.chapters
+            List.foldl (createChapterEditor editorContext currentPath getEditorState) editors km.chapters
 
         withTags =
-            List.foldl (createTagEditor editorContext currentPath Initial) withChapters km.tags
+            List.foldl (createTagEditor editorContext currentPath getEditorState) withChapters km.tags
     in
     Dict.insert km.uuid editor withTags
 
 
-createChapterEditor : EditorContext -> Path -> EditorState -> Chapter -> Dict String Editor -> Dict String Editor
-createChapterEditor editorContext path editorState chapter editors =
+createChapterEditor : EditorContext -> Path -> (String -> EditorState) -> Chapter -> Dict String Editor -> Dict String Editor
+createChapterEditor editorContext path getEditorState chapter editors =
     let
         editor =
             ChapterEditor
@@ -215,7 +215,7 @@ createChapterEditor editorContext path editorState chapter editors =
                 , form = initChapterForm chapter
                 , questions = Children.init <| List.map getQuestionUuid chapter.questions
                 , treeOpen = False
-                , editorState = editorState
+                , editorState = getEditorState chapter.uuid
                 , path = path
                 }
 
@@ -223,13 +223,13 @@ createChapterEditor editorContext path editorState chapter editors =
             path ++ [ ChapterPathNode chapter.uuid ]
 
         withQuestions =
-            List.foldl (createQuestionEditor editorContext currentPath Initial) editors chapter.questions
+            List.foldl (createQuestionEditor editorContext currentPath getEditorState) editors chapter.questions
     in
     Dict.insert chapter.uuid editor withQuestions
 
 
-createTagEditor : EditorContext -> Path -> EditorState -> Tag -> Dict String Editor -> Dict String Editor
-createTagEditor editorContext path editorState tag editors =
+createTagEditor : EditorContext -> Path -> (String -> EditorState) -> Tag -> Dict String Editor -> Dict String Editor
+createTagEditor editorContext path getEditorState tag editors =
     let
         editor =
             TagEditor
@@ -237,15 +237,15 @@ createTagEditor editorContext path editorState tag editors =
                 , tag = tag
                 , form = initTagForm tag
                 , treeOpen = False
-                , editorState = editorState
+                , editorState = getEditorState tag.uuid
                 , path = path
                 }
     in
     Dict.insert tag.uuid editor editors
 
 
-createQuestionEditor : EditorContext -> Path -> EditorState -> Question -> Dict String Editor -> Dict String Editor
-createQuestionEditor editorContext path editorState question editors =
+createQuestionEditor : EditorContext -> Path -> (String -> EditorState) -> Question -> Dict String Editor -> Dict String Editor
+createQuestionEditor editorContext path getEditorState question editors =
     let
         questionUuid =
             getQuestionUuid question
@@ -269,7 +269,7 @@ createQuestionEditor editorContext path editorState question editors =
                 , references = Children.init <| List.map getReferenceUuid <| getQuestionReferences question
                 , experts = Children.init <| List.map .uuid <| getQuestionExperts question
                 , treeOpen = False
-                , editorState = editorState
+                , editorState = getEditorState questionUuid
                 , path = path
                 }
 
@@ -277,22 +277,22 @@ createQuestionEditor editorContext path editorState question editors =
             path ++ [ QuestionPathNode questionUuid ]
 
         withAnswers =
-            List.foldl (createAnswerEditor editorContext currentPath Initial) editors <| getQuestionAnswers question
+            List.foldl (createAnswerEditor editorContext currentPath getEditorState) editors <| getQuestionAnswers question
 
         withAnswerItemTemplateQuestions =
-            List.foldl (createQuestionEditor editorContext currentPath Initial) withAnswers <| getQuestionItemQuestions question
+            List.foldl (createQuestionEditor editorContext currentPath getEditorState) withAnswers <| getQuestionItemQuestions question
 
         withReferences =
-            List.foldl (createReferenceEditor editorContext currentPath Initial) withAnswerItemTemplateQuestions <| getQuestionReferences question
+            List.foldl (createReferenceEditor editorContext currentPath getEditorState) withAnswerItemTemplateQuestions <| getQuestionReferences question
 
         withExperts =
-            List.foldl (createExpertEditor editorContext currentPath Initial) withReferences <| getQuestionExperts question
+            List.foldl (createExpertEditor editorContext currentPath getEditorState) withReferences <| getQuestionExperts question
     in
     Dict.insert questionUuid editor withExperts
 
 
-createAnswerEditor : EditorContext -> Path -> EditorState -> Answer -> Dict String Editor -> Dict String Editor
-createAnswerEditor editorContext path editorState answer editors =
+createAnswerEditor : EditorContext -> Path -> (String -> EditorState) -> Answer -> Dict String Editor -> Dict String Editor
+createAnswerEditor editorContext path getEditorState answer editors =
     let
         followUps =
             getFollowUpQuestions answer
@@ -305,7 +305,7 @@ createAnswerEditor editorContext path editorState answer editors =
                 , form = initAnswerForm editorContext answer
                 , followUps = Children.init followUps
                 , treeOpen = False
-                , editorState = editorState
+                , editorState = getEditorState answer.uuid
                 , path = path
                 }
 
@@ -313,13 +313,13 @@ createAnswerEditor editorContext path editorState answer editors =
             path ++ [ AnswerPathNode answer.uuid ]
 
         withFollowUps =
-            List.foldl (createQuestionEditor editorContext currentPath Initial) editors <| getFollowUpQuestions answer
+            List.foldl (createQuestionEditor editorContext currentPath getEditorState) editors <| getFollowUpQuestions answer
     in
     Dict.insert answer.uuid editor withFollowUps
 
 
-createReferenceEditor : EditorContext -> Path -> EditorState -> Reference -> Dict String Editor -> Dict String Editor
-createReferenceEditor editorContext path editorState reference editors =
+createReferenceEditor : EditorContext -> Path -> (String -> EditorState) -> Reference -> Dict String Editor -> Dict String Editor
+createReferenceEditor editorContext path getEditorState reference editors =
     let
         referenceUuid =
             getReferenceUuid reference
@@ -330,15 +330,15 @@ createReferenceEditor editorContext path editorState reference editors =
                 , reference = reference
                 , form = initReferenceForm reference
                 , treeOpen = False
-                , editorState = editorState
+                , editorState = getEditorState referenceUuid
                 , path = path
                 }
     in
     Dict.insert referenceUuid editor editors
 
 
-createExpertEditor : EditorContext -> Path -> EditorState -> Expert -> Dict String Editor -> Dict String Editor
-createExpertEditor editorContext path editorState expert editors =
+createExpertEditor : EditorContext -> Path -> (String -> EditorState) -> Expert -> Dict String Editor -> Dict String Editor
+createExpertEditor editorContext path getEditorState expert editors =
     let
         editor =
             ExpertEditor
@@ -346,7 +346,7 @@ createExpertEditor editorContext path editorState expert editors =
                 , expert = expert
                 , form = initExpertForm expert
                 , treeOpen = False
-                , editorState = editorState
+                , editorState = getEditorState expert.uuid
                 , path = path
                 }
     in

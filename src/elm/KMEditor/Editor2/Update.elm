@@ -117,7 +117,13 @@ update msg wrapMsg state model =
                                         | preview = Success km
                                         , previewEditorModel = Just <| KMEditor.Editor2.Preview.Models.initialModel km
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
-                                        , editorModel = Just <| KMEditor.Editor2.KMEditor.Models.initialModel km (ActionResult.withDefault [] model.metrics) (ActionResult.withDefault [] model.levels)
+                                        , editorModel =
+                                            Just <|
+                                                KMEditor.Editor2.KMEditor.Models.initialModel
+                                                    km
+                                                    (ActionResult.withDefault [] model.metrics)
+                                                    (ActionResult.withDefault [] model.levels)
+                                                    ((ActionResult.withDefault [] <| ActionResult.map .events model.branch) ++ model.sessionEvents)
                                     }
 
                                 Err error ->
