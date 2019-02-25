@@ -198,7 +198,7 @@ update msg wrapMsg state model =
                     case result of
                         Ok _ ->
                             ( state.seed
-                            , model
+                            , initialModel ""
                             , Cmd.batch
                                 [ Ports.clearUnloadMessage ()
                                 , cmdNavigate state.key <| Routing.KMEditor IndexRoute
