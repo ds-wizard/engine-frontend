@@ -25,6 +25,10 @@ $highlight-transition: background-color 0.1s ease-in-out;
 
 
 .KMEditor__Editor__TagEditor {
+    &>.alert {
+        margin: 5rem 1rem 1rem;
+    }
+
     .editor-table-container {
         overflow: auto;
         height: calc(100vh - #{$editor-header-height});

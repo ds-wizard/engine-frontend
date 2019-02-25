@@ -1,6 +1,7 @@
 module KMEditor.Editor.TagEditor.View exposing (view)
 
 import Common.Html exposing (fa)
+import Common.View.Flash as Flash
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
@@ -13,22 +14,34 @@ import Utils exposing (getContrastColorHex)
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
+    let
+        content =
+            if List.length model.knowledgeModel.tags > 0 then
+                tagEditorTable model
+
+            else
+                Flash.info "There are no tags, create them first in the Knowledge Model editor."
+    in
     div [ class "KMEditor__Editor__TagEditor" ]
-        [ div [ class "editor-table-container" ]
-            [ table []
-                [ thead []
-                    [ tr []
-                        ([ th [ class "top-left" ]
-                            [ div [] [] ]
-                         ]
-                            ++ (List.map (thTag model) <| List.sortBy .name model.knowledgeModel.tags)
-                        )
-                    ]
-                , tbody [] (foldKMRows model)
+        [ content ]
+        |> Html.map wrapMsg
+
+
+tagEditorTable : Model -> Html Msg
+tagEditorTable model =
+    div [ class "editor-table-container" ]
+        [ table []
+            [ thead []
+                [ tr []
+                    ([ th [ class "top-left" ]
+                        [ div [] [] ]
+                     ]
+                        ++ (List.map (thTag model) <| List.sortBy .name model.knowledgeModel.tags)
+                    )
                 ]
+            , tbody [] (foldKMRows model)
             ]
         ]
-        |> Html.map wrapMsg
 
 
 thTag : Model -> Tag -> Html Msg
