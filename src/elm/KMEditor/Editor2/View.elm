@@ -10,6 +10,7 @@ import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import KMEditor.Editor2.KMEditor.View
 import KMEditor.Editor2.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
 import KMEditor.Editor2.Msgs exposing (Msg(..))
 import KMEditor.Editor2.Preview.View
@@ -29,7 +30,7 @@ editorView wrapMsg model ( branch, metric, levels ) =
         content _ =
             case model.currentEditor of
                 KMEditor ->
-                    kmEditorView
+                    kmEditorView wrapMsg model
 
                 TagsEditor ->
                     tagsEditorView wrapMsg model
@@ -54,6 +55,7 @@ editorHeader wrapMsg model =
         actions =
             if containsChanges model then
                 [ text "(unsaved changes)"
+                , button [ onClick <| wrapMsg Discard, class "btn btn-outline-danger btn-with-loader" ] [ text "Discard" ]
                 , ActionButton.button ( "Save", model.saving, wrapMsg Save )
                 ]
 
@@ -105,9 +107,11 @@ editorHeader wrapMsg model =
         ]
 
 
-kmEditorView : Html Msgs.Msg
-kmEditorView =
-    div [] [ text "Knowledge Model Editor" ]
+kmEditorView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+kmEditorView wrapMsg model =
+    model.editorModel
+        |> Maybe.map (KMEditor.Editor2.KMEditor.View.view (wrapMsg << KMEditorMsg))
+        |> Maybe.withDefault (Page.error "Error opening knowledge model editor")
 
 
 tagsEditorView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg

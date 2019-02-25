@@ -61,6 +61,9 @@ isGuarded route model =
         EditorRoute uuid ->
             KMEditor.Editor.Update.isGuarded model.editorModel
 
+        Editor2Route _ ->
+            KMEditor.Editor2.Update.isGuarded model.editor2Model
+
         _ ->
             Nothing
 

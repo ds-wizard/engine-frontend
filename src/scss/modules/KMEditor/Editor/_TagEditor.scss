@@ -1,4 +1,5 @@
 @import "~bootswatch/dist/united/variables";
+@import "variables";
 
 $separator-color: $gray-300;
 $highlight-color: $gray-200;
@@ -17,7 +18,7 @@ $highlight-transition: background-color 0.1s ease-in-out;
 .with-error {
     .KMEditor__Editor__TagEditor {
         .editor-table-container {
-            height: calc(100vh - 100px);
+            height: calc(100vh - #{$editor-header-height + $editor-header-error-height});
         }
     }
 }
@@ -26,7 +27,7 @@ $highlight-transition: background-color 0.1s ease-in-out;
 .KMEditor__Editor__TagEditor {
     .editor-table-container {
         overflow: auto;
-        height: calc(100vh - 50px);
+        height: calc(100vh - #{$editor-header-height});
         width: 100%;
 
         table {

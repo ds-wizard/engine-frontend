@@ -1,7 +1,6 @@
 module KMEditor.Editor2.Models exposing
     ( EditorType(..)
     , Model
-    , applyCurrentEditorChanges
     , containsChanges
     , getSavingError
     , hasSavingError
@@ -12,9 +11,9 @@ import ActionResult exposing (ActionResult(..))
 import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Common.Models.Events exposing (Event)
+import KMEditor.Editor2.KMEditor.Models as KMEditorModel
 import KMEditor.Editor2.Preview.Models
 import KMEditor.Editor2.TagEditor.Models as TagEditorModel
-import Random exposing (Seed)
 
 
 type EditorType
@@ -34,6 +33,7 @@ type alias Model =
     , sessionEvents : List Event
     , previewEditorModel : Maybe KMEditor.Editor2.Preview.Models.Model
     , tagEditorModel : Maybe TagEditorModel.Model
+    , editorModel : Maybe KMEditorModel.Model
     , saving : ActionResult String
     }
 
@@ -49,6 +49,7 @@ initialModel branchUuid =
     , sessionEvents = []
     , previewEditorModel = Nothing
     , tagEditorModel = Nothing
+    , editorModel = Nothing
     , saving = Unset
     }
 
@@ -60,24 +61,13 @@ containsChanges model =
             model.tagEditorModel
                 |> Maybe.map TagEditorModel.containsChanges
                 |> Maybe.withDefault False
+
+        kmEditorDirty =
+            model.editorModel
+                |> Maybe.map KMEditorModel.containsChanges
+                |> Maybe.withDefault False
     in
-    List.length model.sessionEvents > 0 || tagEditorDirty
-
-
-applyCurrentEditorChanges : Seed -> Model -> ( Seed, Model )
-applyCurrentEditorChanges seed model =
-    let
-        ( newSeed, newEvents ) =
-            case ( model.currentEditor, model.preview ) of
-                ( TagsEditor, Success km ) ->
-                    model.tagEditorModel
-                        |> Maybe.map (TagEditorModel.generateEvents seed km)
-                        |> Maybe.withDefault ( seed, [] )
-
-                _ ->
-                    ( seed, [] )
-    in
-    ( newSeed, { model | sessionEvents = model.sessionEvents ++ newEvents } )
+    List.length model.sessionEvents > 0 || tagEditorDirty || kmEditorDirty
 
 
 hasSavingError : Model -> Bool
