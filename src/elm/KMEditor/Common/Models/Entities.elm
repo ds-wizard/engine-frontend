@@ -466,7 +466,7 @@ newTag uuid =
     { uuid = uuid
     , name = "New Tag"
     , description = Nothing
-    , color = "#000000"
+    , color = "#3498DB"
     }
 
 

@@ -11,13 +11,16 @@ module Common.View.FormGroup exposing
     )
 
 import Common.Form exposing (CustomFormError(..))
-import Form exposing (Form)
+import Common.Html exposing (emptyNode, fa)
+import Form exposing (Form, InputType(..), Msg(..))
 import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
-import Html exposing (Html, code, div, label, p, span, text)
-import Html.Attributes exposing (class, for, id, name)
+import Html exposing (Html, a, code, div, label, p, span, text)
+import Html.Attributes exposing (class, classList, for, id, name, style)
+import Html.Events exposing (onClick)
 import String exposing (fromFloat)
+import Utils exposing (getContrastColorHex)
 
 
 {-| Helper for creating form group with text input field.
@@ -67,8 +70,67 @@ toggle form fieldName labelText =
 {-| Helper for creating form group with color input field
 -}
 color : Form CustomFormError o -> String -> String -> Html Form.Msg
-color =
-    formGroup (Input.baseInput "color" Field.String Form.Text) []
+color form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        colorButtons =
+            List.map (colorButton field.value fieldName) colorOptions
+    in
+    div [ class "form-group form-group-color-picker" ]
+        [ label [] [ text labelText ]
+        , Input.textInput field []
+        , div [ class "color-buttons" ] colorButtons
+        ]
+
+
+colorOptions : List String
+colorOptions =
+    [ "#1ABC9C"
+    , "#2ECC71"
+    , "#3498DB"
+    , "#9B59B6"
+    , "#34495E"
+    , "#16A085"
+    , "#27AE60"
+    , "#2980B9"
+    , "#8E44AD"
+    , "#2C3E50"
+    , "#F1C40F"
+    , "#E67E22"
+    , "#E74C3C"
+    , "#ECF0F1"
+    , "#95A5A6"
+    , "#F39C12"
+    , "#D35400"
+    , "#C0392B"
+    , "#BDC3C7"
+    , "#7F8C8D"
+    ]
+
+
+colorButton : Maybe String -> String -> String -> Html Form.Msg
+colorButton maybeValue fieldName colorHex =
+    let
+        isSelected =
+            maybeValue == Just colorHex
+
+        check =
+            if isSelected then
+                fa "check"
+
+            else
+                emptyNode
+    in
+    a
+        [ onClick (Input fieldName Text (Field.String colorHex))
+        , style "background" colorHex
+        , style "color" <| getContrastColorHex colorHex
+        , style "border-color" <| getContrastColorHex colorHex
+        , classList [ ( "selected", isSelected ) ]
+        ]
+        [ check ]
 
 
 {-| Create Html for a form field using the given input field.
