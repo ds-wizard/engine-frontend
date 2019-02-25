@@ -17,7 +17,11 @@ view wrapMsg model =
     let
         content =
             if List.length model.knowledgeModel.tags > 0 then
-                tagEditorTable model
+                if (List.length <| getAllQuestions model.knowledgeModel) > 0 then
+                    tagEditorTable model
+
+                else
+                    Flash.info "There are no questions, create them first in the Knowledge Model editor."
 
             else
                 Flash.info "There are no tags, create them first in the Knowledge Model editor."
