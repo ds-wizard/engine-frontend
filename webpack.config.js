@@ -1,7 +1,8 @@
 var path = require('path')
 var CopyWebpackPlugin = require('copy-webpack-plugin')
-var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
+var MiniCssExtractPlugin = require('mini-css-extract-plugin')
+var OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
 
 module.exports = {
@@ -17,7 +18,10 @@ module.exports = {
         rules: [
             {
                 test: /\.(scss|css)$/,
-                loader: ExtractTextPlugin.extract(['css-loader?{discardComments:{removeAll:true}}', 'sass-loader'])
+                use: [{ loader: MiniCssExtractPlugin.loader },
+                    'css-loader',
+                    'sass-loader'
+                ]
             },
             {
                 test: /\.html$/,
@@ -46,19 +50,24 @@ module.exports = {
         new HtmlWebpackPlugin({
             title: 'Data Stewardship Wizard'
         }),
-        new ExtractTextPlugin({
+        new MiniCssExtractPlugin({
             filename: '[name].[chunkhash].css',
             allChunks: true
         }),
+        new OptimizeCssAssetsPlugin({
+            cssProcessorPluginOptions: {
+                preset: ['default', { discardComments: { removeAll: true } }]
+            }
+        }),
         new CopyWebpackPlugin([
-            {from: 'src/img', to: 'img'},
-            {from: 'src/favicon.ico', to: 'favicon.ico'}
+            { from: 'src/img', to: 'img' },
+            { from: 'src/favicon.ico', to: 'favicon.ico' }
         ])
     ],
 
     devServer: {
         inline: true,
-        stats: {colors: true},
+        stats: { colors: true },
         historyApiFallback: true
     }
 }
