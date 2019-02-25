@@ -228,7 +228,7 @@ fetchPreview wrapMsg session model =
 
 putBranchCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Branch -> Cmd Msgs.Msg
 putBranchCmd wrapMsg session model branch =
-    putBranch model.branchUuid branch.name branch.kmId model.sessionEvents session
+    putBranch model.branchUuid branch.name branch.kmId (branch.events ++ model.sessionEvents) session
         |> Jwt.send SaveCompleted
         |> Cmd.map wrapMsg
 
