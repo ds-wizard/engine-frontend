@@ -82,7 +82,8 @@ import List.Extra as List
 
 
 type Event
-    = EditKnowledgeModelEvent EditKnowledgeModelEventData CommonEventData
+    = AddKnowledgeModelEvent AddKnowledgeModelEventData CommonEventData
+    | EditKnowledgeModelEvent EditKnowledgeModelEventData CommonEventData
     | AddChapterEvent AddChapterEventData CommonEventData
     | EditChapterEvent EditChapterEventData CommonEventData
     | DeleteChapterEvent DeleteChapterEventData CommonEventData
@@ -106,6 +107,12 @@ type Event
 type alias CommonEventData =
     { uuid : String
     , path : Path
+    }
+
+
+type alias AddKnowledgeModelEventData =
+    { kmUuid : String
+    , name : String
     }
 
 
@@ -365,6 +372,9 @@ encodeEvent event =
     let
         ( encodedCommonData, encodedEventData ) =
             case event of
+                AddKnowledgeModelEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeAddKnowledgeModelEvent eventData )
+
                 EditKnowledgeModelEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeEditKnowledgeModelEvent eventData )
 
@@ -429,6 +439,14 @@ encodeCommonData : CommonEventData -> List ( String, Encode.Value )
 encodeCommonData data =
     [ ( "uuid", Encode.string data.uuid )
     , ( "path", Encode.list encodePathNode data.path )
+    ]
+
+
+encodeAddKnowledgeModelEvent : AddKnowledgeModelEventData -> List ( String, Encode.Value )
+encodeAddKnowledgeModelEvent data =
+    [ ( "eventType", Encode.string "AddKnowledgeModelEvent" )
+    , ( "kmUuid", Encode.string data.kmUuid )
+    , ( "name", Encode.string data.name )
     ]
 
 
@@ -789,6 +807,9 @@ eventDecoder =
 eventDecoderByType : String -> Decoder Event
 eventDecoderByType eventType =
     case eventType of
+        "AddKnowledgeModelEvent" ->
+            Decode.map2 AddKnowledgeModelEvent addKnowledgeModelEventDecoder commonEventDataDecoder
+
         "EditKnowledgeModelEvent" ->
             Decode.map2 EditKnowledgeModelEvent editKnowledgeModelEventDecoder commonEventDataDecoder
 
@@ -855,6 +876,13 @@ commonEventDataDecoder =
     Decode.succeed CommonEventData
         |> required "uuid" Decode.string
         |> required "path" pathDecoder
+
+
+addKnowledgeModelEventDecoder : Decoder AddKnowledgeModelEventData
+addKnowledgeModelEventDecoder =
+    Decode.succeed AddKnowledgeModelEventData
+        |> required "kmUuid" Decode.string
+        |> required "name" Decode.string
 
 
 editKnowledgeModelEventDecoder : Decoder EditKnowledgeModelEventData
@@ -1192,6 +1220,9 @@ eventFieldDecoder decoder =
 getEventUuid : Event -> String
 getEventUuid event =
     case event of
+        AddKnowledgeModelEvent _ commonData ->
+            commonData.uuid
+
         EditKnowledgeModelEvent _ commonData ->
             commonData.uuid
 
@@ -1253,6 +1284,9 @@ getEventUuid event =
 getEventEntityUuid : Event -> String
 getEventEntityUuid event =
     case event of
+        AddKnowledgeModelEvent eventData _ ->
+            eventData.kmUuid
+
         EditKnowledgeModelEvent eventData _ ->
             eventData.kmUuid
 
@@ -1350,6 +1384,9 @@ createEmptyEventField =
 getEventEntityVisibleName : Event -> Maybe String
 getEventEntityVisibleName event =
     case event of
+        AddKnowledgeModelEvent eventData _ ->
+            Just eventData.name
+
         EditKnowledgeModelEvent eventData _ ->
             getEventFieldValue eventData.name
 

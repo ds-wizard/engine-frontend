@@ -93,6 +93,10 @@ getEventView wrapMsg model migration event =
                 [ text "The event is not connected to any entity in the knowledge model." ]
     in
     case event of
+        AddKnowledgeModelEvent _ _ ->
+            -- AddKnowledgeModelEvent should never appear in migrations
+            emptyNode
+
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
                 |> viewEditKnowledgeModelDiff eventData

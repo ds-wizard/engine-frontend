@@ -85,6 +85,9 @@ createEditorStateDict events =
 eventToEditorState : Event -> EditorState
 eventToEditorState event =
     case event of
+        AddKnowledgeModelEvent _ _ ->
+            Added
+
         EditKnowledgeModelEvent _ _ ->
             Edited
 
