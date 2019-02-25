@@ -86,13 +86,13 @@ eventToEditorState : Event -> EditorState
 eventToEditorState event =
     case event of
         AddKnowledgeModelEvent _ _ ->
-            Added
+            AddedEdited
 
         EditKnowledgeModelEvent _ _ ->
             Edited
 
         AddChapterEvent _ _ ->
-            Added
+            AddedEdited
 
         EditChapterEvent _ _ ->
             Edited
@@ -101,7 +101,7 @@ eventToEditorState event =
             Deleted
 
         AddTagEvent _ _ ->
-            Added
+            AddedEdited
 
         EditTagEvent _ _ ->
             Edited
@@ -110,7 +110,7 @@ eventToEditorState event =
             Deleted
 
         AddQuestionEvent _ _ ->
-            Added
+            AddedEdited
 
         EditQuestionEvent _ _ ->
             Edited
@@ -119,7 +119,7 @@ eventToEditorState event =
             Deleted
 
         AddAnswerEvent _ _ ->
-            Added
+            AddedEdited
 
         EditAnswerEvent _ _ ->
             Edited
@@ -128,7 +128,7 @@ eventToEditorState event =
             Deleted
 
         AddReferenceEvent _ _ ->
-            Added
+            AddedEdited
 
         EditReferenceEvent _ _ ->
             Edited
@@ -137,7 +137,7 @@ eventToEditorState event =
             Deleted
 
         AddExpertEvent _ _ ->
-            Added
+            AddedEdited
 
         EditExpertEvent _ _ ->
             Edited
