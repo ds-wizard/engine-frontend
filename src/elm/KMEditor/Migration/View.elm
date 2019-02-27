@@ -328,9 +328,17 @@ viewAddQuestionDiff event =
                 , mapAddQuestionEventData .title .title .title event
                 , mapAddQuestionEventData .text .text .text event |> Maybe.withDefault ""
                 ]
+
+        valueField =
+            case event of
+                AddValueQuestionEvent data ->
+                    [ ( "Value Type", valueQuestionTypeString data.valueType ) ]
+
+                _ ->
+                    []
     in
     div []
-        (viewAdd fields)
+        (viewAdd (fields ++ valueField))
 
 
 viewEditQuestionDiff : EditQuestionEventData -> Question -> Html Msgs.Msg
@@ -378,8 +386,26 @@ viewEditQuestionDiff event question =
                 , getEventFieldValueWithDefault questionText (getQuestionText question) |> Maybe.withDefault ""
                 ]
 
+        originalValueType =
+            getQuestionValueType question
+
+        valueType =
+            mapEditQuestionEventData (\_ -> Nothing) (\_ -> Nothing) (\data -> getEventFieldValue data.valueType) event
+
+        valueDiff =
+            case ( originalValueType, valueType ) of
+                ( Nothing, Nothing ) ->
+                    []
+
+                ( original, new ) ->
+                    [ ( "Value Type"
+                      , Maybe.withDefault "" <| Maybe.map valueQuestionTypeString original
+                      , Maybe.withDefault "" <| Maybe.map valueQuestionTypeString new
+                      )
+                    ]
+
         fieldDiff =
-            viewDiff fields
+            viewDiff (fields ++ valueDiff)
 
         answersDiff =
             case event of
@@ -411,8 +437,16 @@ viewDeleteQuestionDiff question =
                 [ "Title", "Text" ]
                 [ getQuestionTitle question, getQuestionText question |> Maybe.withDefault "" ]
 
+        valueField =
+            case question of
+                ValueQuestion data ->
+                    [ ( "Value Type", valueQuestionTypeString data.valueType ) ]
+
+                _ ->
+                    []
+
         fieldDiff =
-            viewDelete fields
+            viewDelete (fields ++ valueField)
 
         answersDiff =
             viewDeletedChildren "Answers" <| List.map .label <| getQuestionAnswers question

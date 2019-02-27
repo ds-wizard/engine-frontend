@@ -66,6 +66,7 @@ module KMEditor.Common.Models.Entities exposing
     , questionDecoder
     , referenceDecoder
     , tagDecoder
+    , valueQuestionTypeString
     , valueTypeDecoder
     )
 
@@ -721,6 +722,22 @@ getQuestionTypeString =
         (\_ -> "Options")
         (\_ -> "List")
         (\_ -> "Value")
+
+
+valueQuestionTypeString : ValueQuestionType -> String
+valueQuestionTypeString valueType =
+    case valueType of
+        StringValueType ->
+            "String"
+
+        DateValueType ->
+            "Date"
+
+        NumberValueType ->
+            "Number"
+
+        TextValueType ->
+            "Text"
 
 
 isQuestionOptions : Question -> Bool
