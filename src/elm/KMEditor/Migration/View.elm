@@ -47,7 +47,7 @@ migrationView wrapMsg model migration =
                             migration.migrationState.targetEvent
                                 |> Maybe.map (getEventView wrapMsg model migration)
                                 |> Maybe.map (List.singleton >> div [ class "col-8" ])
-                                |> Maybe.withDefault errorMessage
+                                |> Maybe.withDefault (div [ class "col-12" ] [ errorMessage ])
 
                         diffTree =
                             migration.migrationState.targetEvent

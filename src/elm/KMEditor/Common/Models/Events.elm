@@ -56,16 +56,19 @@ module KMEditor.Common.Models.Events exposing
     , isAddExpert
     , isAddQuestion
     , isAddReference
+    , isAddTag
     , isDeleteAnswer
     , isDeleteChapter
     , isDeleteExpert
     , isDeleteQuestion
     , isDeleteReference
+    , isDeleteTag
     , isEditAnswer
     , isEditChapter
     , isEditExpert
     , isEditQuestion
     , isEditReference
+    , isEditTag
     , mapAddQuestionEventData
     , mapAddReferenceEventData
     , mapEditQuestionEventData
@@ -1490,6 +1493,26 @@ isDeleteChapter chapter event =
             False
 
 
+isEditTag : Tag -> Event -> Bool
+isEditTag tag event =
+    case event of
+        EditTagEvent eventData _ ->
+            eventData.tagUuid == tag.uuid
+
+        _ ->
+            False
+
+
+isDeleteTag : Tag -> Event -> Bool
+isDeleteTag tag event =
+    case event of
+        DeleteTagEvent eventData _ ->
+            eventData.tagUuid == tag.uuid
+
+        _ ->
+            False
+
+
 isEditQuestion : Question -> Event -> Bool
 isEditQuestion question event =
     case event of
@@ -1574,6 +1597,21 @@ isAddChapter : KnowledgeModel -> Event -> Bool
 isAddChapter km event =
     case event of
         AddChapterEvent _ commonData ->
+            case List.last commonData.path of
+                Just (KMPathNode uuid) ->
+                    uuid == km.uuid
+
+                _ ->
+                    False
+
+        _ ->
+            False
+
+
+isAddTag : KnowledgeModel -> Event -> Bool
+isAddTag km event =
+    case event of
+        AddTagEvent _ commonData ->
             case List.last commonData.path of
                 Just (KMPathNode uuid) ->
                     uuid == km.uuid
