@@ -39,10 +39,12 @@ module KMEditor.Common.Models.Events exposing
     , eventDecoder
     , eventFieldDecoder
     , getAddQuestionEventEntityVisibleName
+    , getAddQuestionEventQuestionTypeString
     , getAddQuestionUuid
     , getAddReferenceEventEntityVisibleName
     , getAddReferenceUuid
     , getEditQuestionEventEntityVisibleName
+    , getEditQuestionEventQuestionTypeString
     , getEditQuestionUuid
     , getEditReferenceEventEntityVisibleName
     , getEditReferenceUuid
@@ -1733,3 +1735,19 @@ mapEditReferenceEventData resourcePageReference urlReference crossReference refe
 
         EditCrossReferenceEvent data ->
             crossReference data
+
+
+getAddQuestionEventQuestionTypeString : AddQuestionEventData -> String
+getAddQuestionEventQuestionTypeString =
+    mapAddQuestionEventData
+        (\_ -> "Options")
+        (\_ -> "List")
+        (\_ -> "Value")
+
+
+getEditQuestionEventQuestionTypeString : EditQuestionEventData -> String
+getEditQuestionEventQuestionTypeString =
+    mapEditQuestionEventData
+        (\_ -> "Options")
+        (\_ -> "List")
+        (\_ -> "Value")

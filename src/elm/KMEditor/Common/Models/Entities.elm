@@ -39,6 +39,7 @@ module KMEditor.Common.Models.Entities exposing
     , getQuestionTagUuids
     , getQuestionText
     , getQuestionTitle
+    , getQuestionTypeString
     , getQuestionUuid
     , getQuestionValueType
     , getQuestions
@@ -712,6 +713,14 @@ getQuestionValueType question =
 
         _ ->
             Nothing
+
+
+getQuestionTypeString : Question -> String
+getQuestionTypeString =
+    mapQuestionData
+        (\_ -> "Options")
+        (\_ -> "List")
+        (\_ -> "Value")
 
 
 isQuestionOptions : Question -> Bool
