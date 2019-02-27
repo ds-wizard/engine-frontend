@@ -226,9 +226,18 @@ viewEditKnowledgeModelDiff event km =
 
         chaptersDiff =
             viewDiffChildren "Chapters" originalChapters (getEventFieldValueWithDefault event.chapterUuids originalChapters) chapterNames
+
+        originalTags =
+            List.map .uuid km.tags
+
+        tagNames =
+            Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) km.tags
+
+        tagsDiff =
+            viewDiffChildren "Tags" originalTags (getEventFieldValueWithDefault event.tagUuids originalTags) tagNames
     in
     div []
-        (fieldDiff ++ [ chaptersDiff ])
+        (fieldDiff ++ [ chaptersDiff, tagsDiff ])
 
 
 viewAddTagDiff : AddTagEventData -> Html Msgs.Msg
