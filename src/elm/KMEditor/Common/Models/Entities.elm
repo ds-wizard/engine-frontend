@@ -22,7 +22,6 @@ module KMEditor.Common.Models.Entities exposing
     , createPathMap
     , expertDecoder
     , filterKnowledgModelWithTags
-    , getAllQuestions
     , getAnswer
     , getAnswers
     , getChapter
@@ -515,29 +514,6 @@ newExpert uuid =
 {- Helpers -}
 
 
-getAllQuestions : KnowledgeModel -> List Question
-getAllQuestions km =
-    let
-        foldAnswerQuestions answer =
-            List.foldl (\q acc -> acc ++ foldQuestion q) [] (getFollowUpQuestions answer)
-
-        foldQuestion question =
-            case question of
-                OptionsQuestion questionData ->
-                    [ question ] ++ List.foldl (\a acc -> acc ++ foldAnswerQuestions a) [] questionData.answers
-
-                ListQuestion questionData ->
-                    [ question ] ++ List.foldl (\q acc -> acc ++ foldQuestion q) [] questionData.itemTemplateQuestions
-
-                ValueQuestion _ ->
-                    [ question ]
-
-        foldChapter chapter =
-            List.foldl (\q acc -> acc ++ foldQuestion q) [] chapter.questions
-    in
-    List.foldl (\c acc -> acc ++ foldChapter c) [] km.chapters
-
-
 createPathMap : KnowledgeModel -> Dict String Path
 createPathMap knowledgeModel =
     let
@@ -624,16 +600,24 @@ getTag km tagUuid =
 getQuestions : KnowledgeModel -> List Question
 getQuestions km =
     let
-        nestedQuestions question =
-            List.map getFollowUpQuestions (getQuestionAnswers question)
-                |> List.concat
-                |> (::) question
+        foldAnswerQuestions answer =
+            List.foldl (\q acc -> acc ++ foldQuestion q) [] (getFollowUpQuestions answer)
+
+        foldQuestion question =
+            case question of
+                OptionsQuestion questionData ->
+                    [ question ] ++ List.foldl (\a acc -> acc ++ foldAnswerQuestions a) [] questionData.answers
+
+                ListQuestion questionData ->
+                    [ question ] ++ List.foldl (\q acc -> acc ++ foldQuestion q) [] questionData.itemTemplateQuestions
+
+                ValueQuestion _ ->
+                    [ question ]
+
+        foldChapter chapter =
+            List.foldl (\q acc -> acc ++ foldQuestion q) [] chapter.questions
     in
-    getChapters km
-        |> List.map .questions
-        |> List.concat
-        |> List.map nestedQuestions
-        |> List.concat
+    List.foldl (\c acc -> acc ++ foldChapter c) [] km.chapters
 
 
 getQuestion : KnowledgeModel -> String -> Maybe Question

@@ -10,7 +10,7 @@ module KMEditor.Editor.TagEditor.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Question(..), createPathMap, getAllQuestions, getQuestionTagUuids, getQuestionUuid)
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Question(..), createPathMap, getQuestionTagUuids, getQuestionUuid, getQuestions)
 import KMEditor.Common.Models.Events exposing (EditQuestionEventData(..), Event(..), EventField, createEmptyEventField, createEventField)
 import KMEditor.Common.Models.Path exposing (Path)
 import Random exposing (Seed)
@@ -87,7 +87,7 @@ containsChanges =
 
 initQuestionTagsDict : KnowledgeModel -> Dict String (List String)
 initQuestionTagsDict km =
-    List.foldl (\q dict -> Dict.insert (getQuestionUuid q) (getQuestionTagUuids q) dict) Dict.empty (getAllQuestions km)
+    List.foldl (\q dict -> Dict.insert (getQuestionUuid q) (getQuestionTagUuids q) dict) Dict.empty (getQuestions km)
 
 
 generateEvents : Seed -> KnowledgeModel -> Model -> ( Seed, List Event )
@@ -96,7 +96,7 @@ generateEvents seed knowledgeModel model =
         pathMap =
             createPathMap knowledgeModel
     in
-    getAllQuestions knowledgeModel
+    getQuestions knowledgeModel
         |> List.foldl
             (\q ( s, events ) ->
                 let

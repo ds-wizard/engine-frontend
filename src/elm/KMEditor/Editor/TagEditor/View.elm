@@ -17,7 +17,7 @@ view wrapMsg model =
     let
         content =
             if List.length model.knowledgeModel.tags > 0 then
-                if (List.length <| getAllQuestions model.knowledgeModel) > 0 then
+                if (List.length <| getQuestions model.knowledgeModel) > 0 then
                     tagEditorTable model
 
                 else
