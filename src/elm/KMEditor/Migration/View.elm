@@ -398,11 +398,14 @@ viewEditQuestionDiff event question =
                     []
 
                 ( original, new ) ->
-                    [ ( "Value Type"
-                      , Maybe.withDefault "" <| Maybe.map valueQuestionTypeString original
-                      , Maybe.withDefault "" <| Maybe.map valueQuestionTypeString new
-                      )
-                    ]
+                    let
+                        originalStr =
+                            Maybe.withDefault "" <| Maybe.map valueQuestionTypeString original
+
+                        newStr =
+                            Maybe.withDefault originalStr <| Maybe.map valueQuestionTypeString new
+                    in
+                    [ ( "Value Type", originalStr, newStr ) ]
 
         fieldDiff =
             viewDiff (fields ++ valueDiff)
