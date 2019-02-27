@@ -22,6 +22,8 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , initQuestionForm
     , initReferenceForm
     , initTagForm
+    , isListQuestionForm
+    , isOptionsQuestionForm
     , knowledgeModelFormValidation
     , metricMeasureValidation
     , questionFormValidation
@@ -403,6 +405,41 @@ questionValueTypeOptions =
     , ( "NumberValue", "Number" )
     , ( "TextValue", "Text" )
     ]
+
+
+isOptionsQuestionForm : Form CustomFormError QuestionForm -> Bool
+isOptionsQuestionForm =
+    let
+        detectForm questionForm =
+            case questionForm of
+                OptionsQuestionForm _ ->
+                    True
+
+                _ ->
+                    False
+    in
+    isFormType detectForm
+
+
+isListQuestionForm : Form CustomFormError QuestionForm -> Bool
+isListQuestionForm =
+    let
+        detectForm questionForm =
+            case questionForm of
+                ListQuestionForm _ ->
+                    True
+
+                _ ->
+                    False
+    in
+    isFormType detectForm
+
+
+isFormType : (QuestionFormType -> Bool) -> Form CustomFormError QuestionForm -> Bool
+isFormType detectForm form =
+    Form.getOutput form
+        |> Maybe.map (.question >> detectForm)
+        |> Maybe.withDefault False
 
 
 

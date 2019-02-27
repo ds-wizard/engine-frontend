@@ -5,8 +5,9 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (getQuestionTitle, getReferenceVisibleName, isQuestionList, isQuestionOptions)
+import KMEditor.Common.Models.Entities exposing (getQuestionTitle, getReferenceVisibleName)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
+import KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isOptionsQuestionForm)
 import KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
 
 
@@ -93,14 +94,14 @@ treeNodeQuestion : String -> Dict String Editor -> QuestionEditorData -> Html Ms
 treeNodeQuestion activeUuid editors editorData =
     let
         itemTemplateQuestions =
-            if isQuestionList editorData.question then
+            if isListQuestionForm editorData.form then
                 editorData.itemTemplateQuestions.list ++ editorData.itemTemplateQuestions.deleted
 
             else
                 []
 
         answers =
-            if isQuestionOptions editorData.question then
+            if isOptionsQuestionForm editorData.form then
                 editorData.answers.list ++ editorData.answers.deleted
 
             else
