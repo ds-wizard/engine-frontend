@@ -4,7 +4,7 @@ set -e
 
 
 # File with build info
-BUILD_INFO_FILE=$(dirname $0)/../src/elm/Common/Menu/Models.elm
+BUILD_INFO_FILE=$(dirname $0)/../dist/main.*.js
 
 
 # Create version based on git tag or branch
@@ -23,5 +23,5 @@ builtAt=`date +"%Y/%m/%d %TZ"`
 
 
 # Replace values
-sed -i "s#{version}#$version#" $BUILD_INFO_FILE
-sed -i "s#{builtAt}#$builtAt#" $BUILD_INFO_FILE
+sed -i.bak "s#{version}#$version#" $BUILD_INFO_FILE && rm $BUILD_INFO_FILE".bak"
+sed -i.bak "s#{builtAt}#$builtAt#" $BUILD_INFO_FILE && rm $BUILD_INFO_FILE".bak"
