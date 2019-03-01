@@ -135,12 +135,12 @@ getEventView wrapMsg model migration event =
                 |> Maybe.withDefault errorMessage
 
         AddQuestionEvent eventData _ ->
-            viewAddQuestionDiff eventData
+            viewAddQuestionDiff migration.currentKnowledgeModel eventData
                 |> viewEvent wrapMsg model "Add question"
 
         EditQuestionEvent eventData _ ->
             getQuestion migration.currentKnowledgeModel (getEditQuestionUuid eventData)
-                |> Maybe.map (viewEditQuestionDiff eventData)
+                |> Maybe.map (viewEditQuestionDiff migration.currentKnowledgeModel eventData)
                 |> Maybe.map (viewEvent wrapMsg model "Edit question")
                 |> Maybe.withDefault errorMessage
 
@@ -327,12 +327,12 @@ viewDeleteChapterDiff chapter =
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewAddQuestionDiff : AddQuestionEventData -> Html Msgs.Msg
-viewAddQuestionDiff event =
+viewAddQuestionDiff : KnowledgeModel -> AddQuestionEventData -> Html Msgs.Msg
+viewAddQuestionDiff km event =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ "Type", "Title", "Text" ]
+                [ "Type", "Title", "Text", "Tags" ]
                 [ getAddQuestionEventQuestionTypeString event
                 , mapAddQuestionEventData .title .title .title event
                 , mapAddQuestionEventData .text .text .text event |> Maybe.withDefault ""
@@ -345,13 +345,25 @@ viewAddQuestionDiff event =
 
                 _ ->
                     []
+
+        tagUuids =
+            mapAddQuestionEventData .tagUuids .tagUuids .tagUuids event
+
+        tagNames =
+            Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) <| km.tags
+
+        originalTags =
+            List.map (\_ -> "") tagUuids
+
+        tagsDiff =
+            viewDiffChildren "Tags" originalTags tagUuids tagNames
     in
     div []
-        (viewAdd (fields ++ valueField))
+        (viewAdd (fields ++ valueField) ++ [ tagsDiff ])
 
 
-viewEditQuestionDiff : EditQuestionEventData -> Question -> Html Msgs.Msg
-viewEditQuestionDiff event question =
+viewEditQuestionDiff : KnowledgeModel -> EditQuestionEventData -> Question -> Html Msgs.Msg
+viewEditQuestionDiff km event question =
     let
         title =
             mapEditQuestionEventData .title .title .title event
@@ -419,6 +431,18 @@ viewEditQuestionDiff event question =
         fieldDiff =
             viewDiff (fields ++ valueDiff)
 
+        originalTags =
+            getQuestionTagUuids question
+
+        tagUuids =
+            getEventFieldValueWithDefault (mapEditQuestionEventData .tagUuids .tagUuids .tagUuids event) originalTags
+
+        tagNames =
+            Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) <| km.tags
+
+        tagsDiff =
+            viewDiffChildren "Tags" originalTags tagUuids tagNames
+
         answersDiff =
             case event of
                 EditOptionsQuestionEvent eventData ->
@@ -438,7 +462,7 @@ viewEditQuestionDiff event question =
             viewDiffChildren "Experts" originalExperts (getEventFieldValueWithDefault expertUuids originalExperts) expertNames
     in
     div []
-        (fieldDiff ++ [ answersDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ tagsDiff, answersDiff, referencesDiff, expertsDiff ])
 
 
 viewDeleteQuestionDiff : Question -> Html Msgs.Msg
