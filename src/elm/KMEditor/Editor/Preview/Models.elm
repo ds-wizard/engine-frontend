@@ -82,6 +82,7 @@ createQuestionnaireModel km =
             , kmId = ""
             , version = ""
             , description = ""
+            , metamodelVersion = 0
             }
         , knowledgeModel = km
         , replies = []

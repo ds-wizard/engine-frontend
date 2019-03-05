@@ -37,6 +37,7 @@ packageDetail wrapMsg jwt packages =
                 [ Page.header package.packageDetail.name []
                 , FormGroup.codeView package.packageDetail.organizationId "Organization ID"
                 , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
+                , FormGroup.codeView (String.fromInt package.packageDetail.metamodelVersion) "Metamodel Version"
                 , h3 [] [ text "Versions" ]
                 , div [] (List.map (versionView wrapMsg jwt) packages)
                 ]

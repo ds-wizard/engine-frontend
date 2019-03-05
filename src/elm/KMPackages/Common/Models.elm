@@ -33,6 +33,7 @@ type alias PackageDetail =
     , kmId : String
     , version : String
     , description : String
+    , metamodelVersion : Int
     }
 
 
@@ -45,6 +46,7 @@ packageDetailDecoder =
         |> required "kmId" Decode.string
         |> required "version" Decode.string
         |> required "description" Decode.string
+        |> required "metamodelVersion" Decode.int
 
 
 packageDetailListDecoder : Decoder (List PackageDetail)
