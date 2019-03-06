@@ -52,6 +52,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
+import Roman exposing (toRomanNumber)
 import Round
 import String exposing (fromFloat, fromInt)
 
@@ -122,16 +123,16 @@ chapterList model =
                     Nothing
     in
     div [ class "nav nav-pills flex-column" ]
-        (List.map (chapterListChapter model activeChapter) model.questionnaire.knowledgeModel.chapters)
+        (List.indexedMap (chapterListChapter model activeChapter) model.questionnaire.knowledgeModel.chapters)
 
 
-chapterListChapter : Model -> Maybe Chapter -> Chapter -> Html Msg
-chapterListChapter model activeChapter chapter =
+chapterListChapter : Model -> Maybe Chapter -> Int -> Chapter -> Html Msg
+chapterListChapter model activeChapter order chapter =
     a
         [ classList [ ( "nav-link", True ), ( "active", activeChapter == Just chapter ) ]
         , onClick <| SetActiveChapter chapter
         ]
-        [ text chapter.title
+        [ text <| (toRomanNumber <| order + 1) ++ ". " ++ chapter.title
         , viewChapterAnsweredIndication model chapter
         ]
 
@@ -167,7 +168,7 @@ pageView cfg model =
             [ emptyNode ]
 
         PageChapter chapter form ->
-            [ chapterHeader chapter
+            [ chapterHeader model chapter
             , viewForm (formConfig cfg) form |> Html.map FormMsg
             ]
 
@@ -175,10 +176,19 @@ pageView cfg model =
             [ Page.actionResultView (viewSummary model) (ActionResult.combine model.metrics model.summaryReport) ]
 
 
-chapterHeader : Chapter -> Html Msg
-chapterHeader chapter =
+chapterHeader : Model -> Chapter -> Html Msg
+chapterHeader model chapter =
+    let
+        chapterNumber =
+            model.questionnaire.knowledgeModel.chapters
+                |> List.indexedMap (\i c -> ( i, c ))
+                |> List.find (\( i, c ) -> c.uuid == chapter.uuid)
+                |> Maybe.map (\( i, c ) -> i + 1)
+                |> Maybe.withDefault 1
+                |> toRomanNumber
+    in
     div []
-        [ h2 [] [ text chapter.title ]
+        [ h2 [] [ text <| chapterNumber ++ ". " ++ chapter.title ]
         , p [ class "chapter-description" ] [ text chapter.text ]
         ]
 
