@@ -53,7 +53,7 @@ jobs:
         - docker push $IMAGE_TAG_LATEST
 
     - stage: tag
-      if: tag =~ ^v
+      if: (tag =~ ^v\d+\.\d+\.\d+$)
       install: false
       env:
         - PRIVATE_IMAGE="$REGISTRY/dsw-client"
@@ -70,3 +70,16 @@ jobs:
         - docker push $IMAGE_TAG_MINOR
         - docker image tag $IMAGE_TAG $IMAGE_TAG_PATCH
         - docker push $IMAGE_TAG_PATCH
+
+    - stage: tag
+      if: (tag =~ ^v\d+\.\d+\.\d+-rc\.\d+$)
+      install: false
+      env:
+        - PRIVATE_IMAGE="$REGISTRY/dsw-client"
+        - IMAGE="datastewardshipwizard/client"
+        - IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT"
+        - IMAGE_TAG_RC="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v//g"`
+      script:
+        - docker pull $IMAGE_TAG
+        - docker image tag $IMAGE_TAG $IMAGE_TAG_RC
+        - docker push $IMAGE_TAG_RC
