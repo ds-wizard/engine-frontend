@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "../../../variables";
 @import "variables";
 
 $separator-color: $gray-300;
@@ -45,7 +45,7 @@ $highlight-transition: background-color 0.1s ease-in-out;
                     position: -webkit-sticky;
                     position: sticky;
                     top: 0;
-                    background: #fff;
+                    background: $white;
                     z-index: 2;
                     padding: 0;
                     transition: $highlight-transition;
@@ -143,7 +143,7 @@ $highlight-transition: background-color 0.1s ease-in-out;
                         padding: 0;
 
                         div {
-                            background: #fff;
+                            background: $white;
                             border-right: $border-thick;
                             transition: $highlight-transition;
                             padding: 5px;

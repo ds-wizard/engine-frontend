@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "variables";
 @import "mixins";
 
 a {
@@ -15,7 +15,7 @@ a {
 
     &.disabled {
         text-decoration: none;
-        color: #aaa;
+        color: $gray-500;
     }
 }
 
@@ -70,20 +70,20 @@ label {
 }
 
 del, .del {
-    color: #900;
-    background: #fee;
+    color: $text-deleted-color;
+    background: $text-delete-bg;
     text-decoration: line-through;
 }
 
 ins, .ins {
-    color: #090;
-    background: #efe;
+    color: $text-inserted-color;
+    background: $text-inserted-bg;
     text-decoration: none;
 }
 
 .edited {
-    color: #990;
-    background: #ffe;
+    color: $text-edited-color;
+    background: $text-edited-bg;
 }
 
 .nav-tabs {
@@ -119,7 +119,7 @@ ins, .ins {
 }
 
 code {
-    background-color: #f9f2f4;
+    background-color: $code-block-bg;
 }
 
 .dropdown-menu-right {

@@ -1,11 +1,11 @@
-@import "~bootswatch/dist/united/variables";
+@import "../../variables";
 @import "../../mixins";
 
 .KMPackages__Import {
     .dropzone {
         height: 300px;
         margin: auto;
-        border: 10px dashed #eee;
+        border: 10px dashed $gray-200;
         @include transition(border-color 0.1s ease-in);
         display: flex;
         justify-content: center;
@@ -26,8 +26,8 @@
     .file-view {
         height: 300px;
         margin: auto;
-        border: 10px solid #eee;
-        background: #eee;
+        border: 10px solid $gray-200;
+        background: $gray-200;
         display: flex;
         justify-content: center;
         align-items: center;

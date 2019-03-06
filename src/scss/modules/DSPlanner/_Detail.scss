@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "../../variables";
 
 .DSPlanner__Detail {
     margin-top: 60px;
@@ -6,7 +6,7 @@
     .questionnaire-header {
         position: fixed;
         top: 0;
-        left: 240px;
+        left: $side-navigation-width;
         right: 0;
         z-index: 1000;
 
@@ -31,7 +31,7 @@
 .side-navigation-collapsed {
     .DSPlanner__Detail {
         .questionnaire-header {
-            left: 50px;
+            left: $side-navigation-width-collapsed;
         }
     }
 }

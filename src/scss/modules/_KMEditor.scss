@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "../variables";
 @import "KMEditor/Editor";
 @import "KMEditor/Migration";
 @import "KMEditor/Publish";
@@ -94,7 +94,7 @@ $indent-step: 20px;
             }
 
             &.state-deleted > a > span {
-                color: #c00 !important;
+                color: $red !important;
                 text-decoration: line-through;
                 cursor: default;
             }

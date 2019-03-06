@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "variables";
 @import "mixins";
 
 
@@ -7,10 +7,10 @@ body {
 }
 
 .app-view {
-    margin-left: 240px;
+    margin-left: $side-navigation-width;
 
     &.side-navigation-collapsed {
-        margin-left: 50px;
+        margin-left: $side-navigation-width-collapsed;
     }
 }
 
@@ -19,8 +19,8 @@ body {
 }
 
 .side-navigation {
-    background-color: $primary;
-    width: 240px;
+    background-color: $side-navigation-bg;
+    width: $side-navigation-width;
     position: fixed;
     top: 0;
     left: 0;
@@ -28,12 +28,12 @@ body {
     z-index: 20;
 
     .logo {
-        color: $white;
+        color: $side-navigation-title-color;
         font-size: 18px;
         display: flex;
         width: 100%;
         text-decoration: none;
-        border-bottom: 1px solid darken($primary, 10%);
+        border-bottom: 1px solid $side-navigation-border-color;
         height: 50px;
         justify-content: center;
         align-items: center;
@@ -67,18 +67,18 @@ body {
                 display: inline-block;
                 width: 100%;
                 padding: 10px;
-                color: #fff;
+                color: $side-navigation-link-color;
                 text-decoration: none;
                 @include border-radius(5px);
                 transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
 
                 &.active {
-                    background: darken($primary, 10%) !important;
+                    background: $side-navigation-link-active-bg !important;
                 }
 
                 &:hover {
-                    background: darken($primary, 15%);
-                    color: $white;
+                    background: $side-navigation-link-hover-bg;
+                    color: $side-navigation-link-color;
                     text-decoration: none;
                 }
 
@@ -96,7 +96,7 @@ body {
         bottom: 0;
         left: 0;
         right: 0;
-        border-top: 1px solid darken($primary, 10%);
+        border-top: 1px solid $side-navigation-border-color;
         padding-top: 5px;
 
         .name {
@@ -111,7 +111,7 @@ body {
 
             button {
                 width: 100%;
-                color: $white;
+                color: $side-navigation-link-color;
                 text-decoration: none;
                 padding: 10px;
                 @include border-radius(5px);
@@ -125,7 +125,7 @@ body {
                 }
 
                 &:hover {
-                    background: darken($primary, 15%);
+                    background: $side-navigation-link-hover-bg;
                 }
 
                 .fa {
@@ -146,7 +146,6 @@ body {
                 top: auto !important;
                 bottom: 0 !important;
                 min-width: 200px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 
                 .dropdown-item {
                     padding: 0.25rem 0.75rem;
@@ -154,7 +153,6 @@ body {
 
                     &:hover {
                         text-decoration: none;
-                        background: rgba(0, 0, 0, 0.075);
                     }
 
                     .fa {
@@ -169,21 +167,21 @@ body {
         .collapse {
             margin: 5px 0 0 0;
             padding: 5px;
-            border-top: 1px solid darken($primary, 10%);
+            border-top: 1px solid $side-navigation-border-color;
             display: block;
             text-align: center;
-            color: $white;
+            color: $side-navigation-link-color;
 
             &:hover {
                 text-decoration: none;
-                background: darken($primary, 5%);
-                color: $white;
+                background: $side-navigation-collapse-hover;
+                color: $side-navigation-link-color;
             }
         }
     }
 
     &.side-navigation-collapsed {
-        width: 50px;
+        width: $side-navigation-width-collapsed;
 
         .sidebar-link {
             display: none !important;

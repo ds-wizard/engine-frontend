@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "variables";
 
 .form-engine-form {
     .form-group {
@@ -17,7 +17,7 @@
 
     .followups-group {
         margin-top: 20px;
-        border-left: 5px #ddd solid;
+        border-left: 5px $gray-300 solid;
         padding-left: 10px;
         padding-top: 10px;
         padding-bottom: 10px;
@@ -44,7 +44,7 @@
 
     .expand-icon {
         margin-left: 10px;
-        color: #bbb;
+        color: $gray-500;
     }
 
     input[type="radio"] {

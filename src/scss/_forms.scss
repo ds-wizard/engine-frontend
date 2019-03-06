@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "variables";
 
 textarea {
     resize: vertical;
@@ -66,7 +66,7 @@ textarea {
                 border-radius: 5px;
 
                 &.selected {
-                    border: 2px solid $black;
+                    border: 2px solid;
                 }
 
                 &:hover {
@@ -122,8 +122,8 @@ textarea {
             display: inline-block;
             height: 20px;
             width: 40px;
-            background: #FFF;
-            border: solid 1px #ccc;
+            background: $white;
+            border: solid 1px $gray-400;
             transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
             border-radius: 15px;
         }
@@ -138,12 +138,12 @@ textarea {
             left: 0;
             top: 0;
             display: block;
-            background: #FFF;
+            background: $white;
             transition: margin-left 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             text-align: center;
             font-weight: bold;
             content: '';
-            border: solid 1px #ccc;
+            border: solid 1px $gray-400;
         }
     }
 
