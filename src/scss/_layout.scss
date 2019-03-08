@@ -37,22 +37,18 @@ body {
         height: 50px;
         justify-content: center;
         align-items: center;
+        background: $side-navigation-logo-url;
+        background-repeat: no-repeat;
+        background-size: 35px;
+        background-position: 15px center;
+        padding-left: 50px;
 
-        img {
-            height: 25px;
-        }
 
         .logo-full {
             width: 100%;
-            padding: 0 15px;
+            padding: 0 10px;
             display: flex;
             justify-content: space-between;
-
-            span {
-                flex: 1;
-                text-align: left;
-                padding-left: 10px;
-            }
         }
     }
 
@@ -182,6 +178,16 @@ body {
 
     &.side-navigation-collapsed {
         width: $side-navigation-width-collapsed;
+
+        .logo {
+            background-position: center center;
+
+            .logo-full {
+                span {
+                    display: none;
+                }
+            }
+        }
 
         .sidebar-link {
             display: none !important;

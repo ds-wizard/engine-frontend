@@ -94,14 +94,8 @@ logo : Model -> Html Msg
 logo model =
     let
         logoImg =
-            if model.state.session.sidebarCollapsed then
-                img [ src "/img/dsw-logo.svg" ] []
-
-            else
-                span [ class "logo-full" ]
-                    [ img [ src "/img/dsw-logo.svg" ] []
-                    , span [] [ text "DS Wizard" ]
-                    ]
+            span [ class "logo-full" ]
+                [ span [] [ text "DS Wizard" ] ]
     in
     linkTo Welcome [ class "logo" ] [ logoImg ]
 
