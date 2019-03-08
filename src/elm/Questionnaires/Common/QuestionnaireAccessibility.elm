@@ -1,4 +1,4 @@
-module Questionnaires.Common.Models.QuestionnaireAccessibility exposing
+module Questionnaires.Common.QuestionnaireAccessibility exposing
     ( QuestionnaireAccessibility(..)
     , decoder
     , encode
@@ -9,8 +9,8 @@ module Questionnaires.Common.Models.QuestionnaireAccessibility exposing
 
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as Validate exposing (Validation)
-import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
+import Json.Decode as D exposing (Decoder)
+import Json.Encode as E
 
 
 type QuestionnaireAccessibility
@@ -32,28 +32,28 @@ toString questionnaireAccessibility =
             "PrivateQuestionnaire"
 
 
-encode : QuestionnaireAccessibility -> Encode.Value
+encode : QuestionnaireAccessibility -> E.Value
 encode =
-    Encode.string << toString
+    E.string << toString
 
 
 decoder : Decoder QuestionnaireAccessibility
 decoder =
-    Decode.string
-        |> Decode.andThen
+    D.string
+        |> D.andThen
             (\str ->
                 case str of
                     "PublicQuestionnaire" ->
-                        Decode.succeed PublicQuestionnaire
+                        D.succeed PublicQuestionnaire
 
                     "PrivateQuestionnaire" ->
-                        Decode.succeed PrivateQuestionnaire
+                        D.succeed PrivateQuestionnaire
 
                     "PublicReadOnlyQuestionnaire" ->
-                        Decode.succeed PublicReadOnlyQuestionnaire
+                        D.succeed PublicReadOnlyQuestionnaire
 
                     valueType ->
-                        Decode.fail <| "Unknown questionnaire accessibility: " ++ valueType
+                        D.fail <| "Unknown questionnaire accessibility: " ++ valueType
             )
 
 

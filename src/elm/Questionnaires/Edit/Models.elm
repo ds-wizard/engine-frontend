@@ -15,7 +15,7 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import FormEngine.Model exposing (encodeFormValues)
 import Json.Encode as Encode
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
+import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
 
 
 type alias Model =

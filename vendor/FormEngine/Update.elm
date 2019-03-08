@@ -14,7 +14,7 @@ debounceConfig =
     }
 
 
-updateForm : Msg msg err -> Form a -> (String -> String -> (Result err (List TypeHint) -> Msg msg err) -> Cmd (Msg msg err)) -> ( Form a, Cmd (Msg msg err) )
+updateForm : Msg msg err -> Form question option -> (String -> String -> (Result err (List TypeHint) -> Msg msg err) -> Cmd (Msg msg err)) -> ( Form question option, Cmd (Msg msg err) )
 updateForm msg form loadTypeHints =
     case msg of
         Input path value ->
@@ -98,7 +98,7 @@ updateForm msg form loadTypeHints =
             ( form, Cmd.none )
 
 
-updateElement : (FormElement a -> FormElement a) -> List String -> FormElement a -> FormElement a
+updateElement : (FormElement question option -> FormElement question option) -> List String -> FormElement question option -> FormElement question option
 updateElement updateFunction path element =
     case path of
         head :: [] ->
@@ -127,7 +127,7 @@ updateElement updateFunction path element =
             element
 
 
-updateOption : (FormElement a -> FormElement a) -> List String -> OptionElement a -> OptionElement a
+updateOption : (FormElement question option -> FormElement question option) -> List String -> OptionElement question option -> OptionElement question option
 updateOption updateFunction path option =
     case path of
         head :: tail ->
@@ -146,7 +146,7 @@ updateOption updateFunction path option =
             option
 
 
-updateItem : (FormElement a -> FormElement a) -> List String -> Int -> ItemElement a -> ItemElement a
+updateItem : (FormElement question option -> FormElement question option) -> List String -> Int -> ItemElement question option -> ItemElement question option
 updateItem updateFunction path index item =
     case path of
         head :: tail ->
@@ -160,7 +160,7 @@ updateItem updateFunction path index item =
             item
 
 
-updateElementValue : ReplyValue -> FormElement a -> FormElement a
+updateElementValue : ReplyValue -> FormElement question option -> FormElement question option
 updateElementValue value element =
     case element of
         StringFormElement descriptor state ->
@@ -182,7 +182,7 @@ updateElementValue value element =
             element
 
 
-clearElementValue : FormElement a -> FormElement a
+clearElementValue : FormElement question option -> FormElement question option
 clearElementValue element =
     case element of
         StringFormElement descriptor state ->
@@ -204,7 +204,7 @@ clearElementValue element =
             element
 
 
-updateGroupItemAdd : FormElement a -> FormElement a
+updateGroupItemAdd : FormElement question option -> FormElement question option
 updateGroupItemAdd element =
     case element of
         GroupFormElement descriptor items elementItems state ->
@@ -218,7 +218,7 @@ updateGroupItemAdd element =
             element
 
 
-updateGroupItemRemove : Int -> FormElement a -> FormElement a
+updateGroupItemRemove : Int -> FormElement question option -> FormElement question option
 updateGroupItemRemove index element =
     case element of
         GroupFormElement descriptor items elementItems state ->

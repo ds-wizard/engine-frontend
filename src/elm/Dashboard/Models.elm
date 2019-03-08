@@ -2,7 +2,7 @@ module Dashboard.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import KMEditor.Common.Models.Entities exposing (Level)
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type alias Model =

@@ -147,7 +147,7 @@ handleGetPackagesCompleted : Model -> Result ApiError PackageDetail -> ( Model, 
 handleGetPackagesCompleted model result =
     applyResult
         { setResult = setPackage
-        , defaultError = "Unable to get package list."
+        , defaultError = "Unable to get knowledge model list."
         , model = model
         , result = result
         }

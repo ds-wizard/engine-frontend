@@ -7,12 +7,14 @@ module Common.Questionnaire.Models exposing
     , QuestionnaireDetail
     , calculateUnansweredQuestions
     , chapterReportCanvasId
+    , createChapterForm
     , createChartConfig
     , encodeFeedbackFrom
     , encodeQuestionnaireDetail
     , feedbackDecoder
     , feedbackFormValidation
     , feedbackListDecoder
+    , getReply
     , initEmptyFeedbackFrom
     , initialModel
     , questionnaireDetailDecoder
@@ -36,7 +38,7 @@ import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (Event)
 import KnowledgeModels.Common.Package as Package exposing (Package)
 import List.Extra as List
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
+import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
 import String exposing (fromInt)
 import Utils exposing (boolToInt)
 
@@ -58,7 +60,7 @@ type alias Model =
 
 type ActivePage
     = PageNone
-    | PageChapter Chapter (Form FormExtraData)
+    | PageChapter Chapter (Form Question Answer)
     | PageSummaryReport
 
 
@@ -104,6 +106,7 @@ type alias QuestionnaireDetail =
     , level : Int
     , accessibility : QuestionnaireAccessibility
     , ownerUuid : Maybe String
+    , selectedTagUuids : List String
     }
 
 
@@ -118,6 +121,7 @@ questionnaireDetailDecoder =
         |> required "level" Decode.int
         |> required "accessibility" QuestionnaireAccessibility.decoder
         |> required "ownerUuid" (Decode.maybe Decode.string)
+        |> required "selectedTagUuids" (Decode.list Decode.string)
 
 
 encodeQuestionnaireDetail : QuestionnaireDetail -> Encode.Value
@@ -182,12 +186,12 @@ feedbackListDecoder =
 {- Form creation -}
 
 
-createChapterForm : AppState -> KnowledgeModel -> List Metric -> QuestionnaireDetail -> Chapter -> Form FormExtraData
+createChapterForm : AppState -> KnowledgeModel -> List Metric -> QuestionnaireDetail -> Chapter -> Form Question Answer
 createChapterForm appState km metrics questionnaire chapter =
     createForm { items = List.map (createQuestionFormItem appState km metrics) chapter.questions } questionnaire.replies [ chapter.uuid ]
 
 
-createQuestionFormItem : AppState -> KnowledgeModel -> List Metric -> Question -> FormItem FormExtraData
+createQuestionFormItem : AppState -> KnowledgeModel -> List Metric -> Question -> FormItem Question Answer
 createQuestionFormItem appState km metrics question =
     let
         descriptor =
@@ -217,44 +221,18 @@ createQuestionFormItem appState km metrics question =
                 |> Maybe.withDefault (TextFormItem descriptor)
 
 
-createFormItemDescriptor : Question -> FormItemDescriptor FormExtraData
+createFormItemDescriptor : Question -> FormItemDescriptor Question
 createFormItemDescriptor question =
     { name = getQuestionUuid question
-    , label = getQuestionTitle question
-    , text = getQuestionText question
-    , extraData = createQuestionExtraData question
+    , question = question
     }
 
 
-createQuestionExtraData : Question -> Maybe FormExtraData
-createQuestionExtraData question =
-    let
-        foldReferences reference extraData =
-            case reference of
-                ResourcePageReference data ->
-                    { extraData | resourcePageReferences = extraData.resourcePageReferences ++ [ data ] }
-
-                URLReference data ->
-                    { extraData | urlReferences = extraData.urlReferences ++ [ data ] }
-
-                _ ->
-                    extraData
-
-        newExtraData =
-            { resourcePageReferences = []
-            , urlReferences = []
-            , experts = getQuestionExperts question
-            , requiredLevel = getQuestionRequiredLevel question
-            }
-    in
-    Just <| List.foldl foldReferences newExtraData <| getQuestionReferences question
-
-
-createAnswerOption : AppState -> KnowledgeModel -> List Metric -> Answer -> Option FormExtraData
+createAnswerOption : AppState -> KnowledgeModel -> List Metric -> Answer -> Option Question Answer
 createAnswerOption appState km metrics answer =
     let
         descriptor =
-            createOptionFormDescriptor metrics answer
+            createOptionFormDescriptor answer
     in
     case answer.followUps of
         FollowUps [] ->
@@ -264,57 +242,30 @@ createAnswerOption appState km metrics answer =
             DetailedOption descriptor (List.map (createQuestionFormItem appState km metrics) followUps)
 
 
-createOptionFormDescriptor : List Metric -> Answer -> OptionDescriptor
-createOptionFormDescriptor metrics answer =
+createOptionFormDescriptor : Answer -> OptionDescriptor Answer
+createOptionFormDescriptor answer =
     { name = answer.uuid
-    , label = answer.label
-    , text = answer.advice
-    , badges = createBadges metrics answer
+    , option = answer
     }
 
 
-createBadges : List Metric -> Answer -> Maybe (List ( String, String ))
-createBadges metrics answer =
-    let
-        getMetricName uuid =
-            List.find ((==) uuid << .uuid) metrics
-                |> Maybe.map .title
-                |> Maybe.withDefault "Unknown"
-
-        getBadgeClass value =
-            (++) "badge-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
-
-        createBadge metricMeasure =
-            ( getBadgeClass metricMeasure.measure, getMetricName metricMeasure.metricUuid )
-
-        metricExists measure =
-            List.find ((==) measure.metricUuid << .uuid) metrics /= Nothing
-    in
-    if List.isEmpty answer.metricMeasures then
-        Nothing
-
-    else
-        List.filter metricExists answer.metricMeasures
-            |> List.map createBadge
-            |> Just
-
-
-createGroupItems : AppState -> KnowledgeModel -> List Metric -> ListQuestionData -> List (FormItem FormExtraData)
+createGroupItems : AppState -> KnowledgeModel -> List Metric -> ListQuestionData -> List (FormItem Question Answer)
 createGroupItems appState km metrics questionData =
     let
-        itemNameExtraData =
-            { resourcePageReferences = []
-            , urlReferences = []
-            , experts = []
-            , requiredLevel = questionData.requiredLevel
-            }
-
         itemName =
             StringFormItem
                 { name = "itemName"
-                , label = questionData.itemTemplateTitle
-                , text = Nothing
-                , extraData = Just itemNameExtraData
+                , question =
+                    ValueQuestion
+                        { uuid = "itemName"
+                        , title = questionData.itemTemplateTitle
+                        , text = Nothing
+                        , requiredLevel = Nothing
+                        , tagUuids = []
+                        , references = []
+                        , experts = []
+                        , valueType = StringQuestionValueType
+                        }
                 }
 
         questions =

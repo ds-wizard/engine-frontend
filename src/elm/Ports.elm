@@ -7,6 +7,7 @@ port module Ports exposing
     , drawMetricsChart
     , fileContentRead
     , fileSelected
+    , scrollIntoView
     , scrollToTop
     , setUnloadMessage
     , storeSession
@@ -47,6 +48,9 @@ port createDropzone : String -> Cmd msg
 
 
 -- Scroll
+
+
+port scrollIntoView : String -> Cmd msg
 
 
 port scrollToTop : String -> Cmd msg

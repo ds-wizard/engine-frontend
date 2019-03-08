@@ -3,9 +3,11 @@ module Questionnaires.Update exposing (fetchData, update)
 import Common.AppState exposing (AppState)
 import Msgs
 import Questionnaires.Create.Update
+import Questionnaires.CreateMigration.Update
 import Questionnaires.Detail.Update
 import Questionnaires.Edit.Update
 import Questionnaires.Index.Update
+import Questionnaires.Migration.Update
 import Questionnaires.Models exposing (Model)
 import Questionnaires.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
@@ -17,6 +19,10 @@ fetchData route wrapMsg appState model =
         Create _ ->
             Questionnaires.Create.Update.fetchData (wrapMsg << CreateMsg) appState model.createModel
 
+        CreateMigration uuid ->
+            Cmd.map (wrapMsg << CreateMigrationMsg) <|
+                Questionnaires.CreateMigration.Update.fetchData appState uuid
+
         Detail uuid ->
             Questionnaires.Detail.Update.fetchData (wrapMsg << DetailMsg) appState uuid
 
@@ -25,6 +31,10 @@ fetchData route wrapMsg appState model =
 
         Index ->
             Questionnaires.Index.Update.fetchData (wrapMsg << IndexMsg) appState
+
+        Migration uuid ->
+            Cmd.map (wrapMsg << MigrationMsg) <|
+                Questionnaires.Migration.Update.fetchData appState uuid
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -36,6 +46,13 @@ update msg wrapMsg appState model =
                     Questionnaires.Create.Update.update cMsg (wrapMsg << CreateMsg) appState model.createModel
             in
             ( { model | createModel = createModel }, cmd )
+
+        CreateMigrationMsg cmMsg ->
+            let
+                ( createMigrationModel, cmd ) =
+                    Questionnaires.CreateMigration.Update.update cmMsg (wrapMsg << CreateMigrationMsg) appState model.createMigrationModel
+            in
+            ( { model | createMigrationModel = createMigrationModel }, cmd )
 
         DetailMsg dMsg ->
             let
@@ -57,3 +74,10 @@ update msg wrapMsg appState model =
                     Questionnaires.Index.Update.update iMsg (wrapMsg << IndexMsg) appState model.indexModel
             in
             ( { model | indexModel = indexModel }, cmd )
+
+        MigrationMsg mMsg ->
+            let
+                ( migrationModel, cmd ) =
+                    Questionnaires.Migration.Update.update mMsg (wrapMsg << MigrationMsg) appState model.migrationModel
+            in
+            ( { model | migrationModel = migrationModel }, cmd )

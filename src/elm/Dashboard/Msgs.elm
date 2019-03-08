@@ -2,7 +2,7 @@ module Dashboard.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
 import KMEditor.Common.Models.Entities exposing (Level)
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type Msg

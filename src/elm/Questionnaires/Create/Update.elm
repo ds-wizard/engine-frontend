@@ -11,7 +11,7 @@ import Form
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, initQuestionnaireCreateForm, questionnaireCreateFormValidation)
 import Questionnaires.Create.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))

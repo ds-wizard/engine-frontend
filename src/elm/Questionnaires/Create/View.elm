@@ -1,25 +1,20 @@
 module Questionnaires.Create.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
-import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
 import Common.View.ActionButton as ActionResult
-import Common.View.Flash as Flash
 import Common.View.FormActions as FormActions
-import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Common.View.Tag as Tag
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (class)
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Common.Version as Version
 import Msgs
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility
+import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility
 import Questionnaires.Create.Models exposing (Model, QuestionnaireCreateForm)
 import Questionnaires.Create.Msgs exposing (Msg(..))
 import Questionnaires.Routing
@@ -80,42 +75,13 @@ formView appState model packages =
 tagsView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 tagsView wrapMsg model =
     let
-        tagsContent =
-            case model.knowledgeModelPreview of
-                Unset ->
-                    div [ class "alert alert-light" ]
-                        [ i [] [ text "Select the knowledge model first" ] ]
-
-                Loading ->
-                    Flash.loader
-
-                Error err ->
-                    Flash.error err
-
-                Success knowledgeModel ->
-                    let
-                        tagListConfig =
-                            { selected = model.selectedTags
-                            , addMsg = AddTag >> wrapMsg
-                            , removeMsg = RemoveTag >> wrapMsg
-                            }
-
-                        extraText =
-                            if List.length knowledgeModel.tags > 0 then
-                                FormExtra.text "You can filter questions in the questionnaire by tags. If no tags are selected, all questions will be used."
-
-                            else
-                                emptyNode
-                    in
-                    div []
-                        [ Tag.list tagListConfig knowledgeModel.tags
-                        , extraText
-                        ]
+        tagListConfig =
+            { selected = model.selectedTags
+            , addMsg = AddTag >> wrapMsg
+            , removeMsg = RemoveTag >> wrapMsg
+            }
     in
-    div [ class "form-group form-group-tags" ]
-        [ label [] [ text "Tags" ]
-        , div [] [ tagsContent ]
-        ]
+    Tag.selection tagListConfig model.knowledgeModelPreview
 
 
 createOption : Package -> ( String, String )

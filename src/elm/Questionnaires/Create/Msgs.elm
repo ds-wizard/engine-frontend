@@ -4,7 +4,7 @@ import Common.ApiError exposing (ApiError)
 import Form
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type Msg

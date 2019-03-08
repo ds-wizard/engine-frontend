@@ -14,7 +14,7 @@ import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (Html, div)
 import Msgs
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
+import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
 import Questionnaires.Edit.Models exposing (Model, QuestionnaireEditForm)
 import Questionnaires.Edit.Msgs exposing (Msg(..))
 import Questionnaires.Routing
