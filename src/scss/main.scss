@@ -1,7 +1,9 @@
 @import "variables";
 @import "~bootstrap/scss/bootstrap";
 @import "~bootswatch/dist/united/bootswatch";
-@import "~font-awesome/css/font-awesome.css";
+
+$fa-font-path: "~font-awesome/fonts/";
+@import "~font-awesome/scss/font-awesome.scss";
 
 @import "animations";
 @import "common";
