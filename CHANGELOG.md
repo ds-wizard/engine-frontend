@@ -1,6 +1,22 @@
+# 1.4.0
+
+## Features
+
+- Add tags to the Knowledge Model
+    - Knowledge Model now has a list of tags
+    - Tags can be assigned to questions
+    - When creating a questionnaire, the questions can be filtered with these tags
+- Knowledge Model editor update, it now has three views
+    - The original editor for editing KM entities
+    - Tag editor for quick tag assignment
+    - Questionnaire preview to see immediately how the questionnaire would look like
+
+
+
 # 1.3.0
 
 - There were no changes for this release
+
 
 
 # 1.2.0
@@ -40,6 +56,7 @@
 - Migrate to Elm 0.19
 
 
+
 # 1.0.0
 
 ## Features
@@ -65,11 +82,13 @@
 - PDF export button returned
 
 
+
 # 0.6.1
 
 ## Changes
 
 - Temporarily removed PDF export button
+
 
 
 # 0.6.0
@@ -95,6 +114,7 @@
 - Question short uuid was removed and reference with proper type is used instead
 
 
+
 # 0.5.0
 
 ## Features
@@ -114,6 +134,7 @@
 - Add more info in the welcome page
 
 
+
 # 0.4.0
 
 ## Features
@@ -126,6 +147,7 @@
 
 - Fix flag colors for KM editor states
 - Tables are now sorted
+
 
 
 # 0.3.0
@@ -143,11 +165,13 @@
 - Cache busting
 
 
+
 # 0.2.1
 
 ## Fixes
 
 - Fix a bug when switching the chapter in questionnaire without saving it first caused loosing the replies data
+
 
 
 # 0.2.0
@@ -171,6 +195,7 @@
 ## Other
 
 - KMEditor module new structure
+
 
 
 # 0.1.0
