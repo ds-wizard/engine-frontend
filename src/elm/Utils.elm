@@ -1,7 +1,9 @@
 module Utils exposing
     ( boolToInt
     , dispatch
+    , getContrastColorHex
     , getUuid
+    , listFilterJust
     , pair
     , replace
     , splitVersion
@@ -11,6 +13,9 @@ module Utils exposing
     , versionIsGreater
     )
 
+import Color
+import Color.Accessibility exposing (contrastRatio)
+import Color.Convert exposing (hexToColor)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
 import List.Extra as List
@@ -98,3 +103,38 @@ boolToInt bool =
 
     else
         0
+
+
+listFilterJust : List (Maybe a) -> List a
+listFilterJust =
+    let
+        fold item currentList =
+            case item of
+                Just value ->
+                    value :: currentList
+
+                Nothing ->
+                    currentList
+    in
+    List.foldl fold []
+
+
+getContrastColorHex : String -> String
+getContrastColorHex colorHex =
+    case hexToColor colorHex of
+        Ok color ->
+            let
+                blackContrast =
+                    contrastRatio Color.black color
+
+                whiteContrast =
+                    contrastRatio Color.white color
+            in
+            if blackContrast > whiteContrast then
+                "#000000"
+
+            else
+                "#ffffff"
+
+        _ ->
+            "#000000"

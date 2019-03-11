@@ -8,6 +8,7 @@
     "dependencies": {
         "direct": {
             "NoRedInk/elm-json-decode-pipeline": "1.0.0",
+            "avh4/elm-color": "1.0.0",
             "danyx23/elm-mimetype": "4.0.1",
             "danyx23/elm-uuid": "2.1.2",
             "elm/browser": "1.0.1",
@@ -26,14 +27,15 @@
             "etaque/elm-form": "4.0.0",
             "krisajenkins/remotedata": "5.0.0",
             "myrho/elm-round": "1.0.4",
+            "noahzgordon/elm-color-extra": "1.0.1",
             "rundis/elm-bootstrap": "5.0.0",
             "simonh1000/elm-jwt": "6.0.0"
         },
         "indirect": {
-            "avh4/elm-color": "1.0.0",
             "elm/parser": "1.1.0",
             "elm/time": "1.0.0",
             "elm/virtual-dom": "1.0.2",
+            "fredcy/elm-parseint": "2.0.1",
             "rtfeldman/elm-iso8601-date-strings": "1.1.2",
             "truqu/elm-base64": "2.0.4"
         }

@@ -1,4 +1,4 @@
-module Common.View.Layout exposing (appView, publicView)
+module Common.View.Layout exposing (app, public)
 
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser exposing (Document)
@@ -16,8 +16,8 @@ import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, questionnai
 import Users.Routing
 
 
-publicView : Model -> Html Msg -> Document Msg
-publicView model content =
+public : Model -> Html Msg -> Document Msg
+public model content =
     let
         html =
             div [ class "public" ]
@@ -63,8 +63,8 @@ publicHeader model =
         ]
 
 
-appView : Model -> Html Msg -> Document Msg
-appView model content =
+app : Model -> Html Msg -> Document Msg
+app model content =
     let
         html =
             div [ class "app-view", classList [ ( "side-navigation-collapsed", model.state.session.sidebarCollapsed ) ] ]
@@ -123,7 +123,7 @@ menuItems =
     , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
     , MenuItem "Knowledge Models" "cubes" (KMPackages KMPackages.Routing.Index) Perm.packageManagementRead
     , MenuItem "Questionnaires" "list-alt" (DSPlanner DSPlanner.Routing.Index) Perm.questionnaire
-    , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.Index) Perm.knowledgeModel
+    , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.IndexRoute) Perm.knowledgeModel
     ]
 
 

@@ -1,9 +1,12 @@
 module KMEditor.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
-import Common.Html exposing (detailContainerClassWith, emptyNode)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, pageHeader)
-import Common.View.Forms exposing (..)
+import Common.Html.Attribute exposing (detailClass)
+import Common.View.FormActions as FormActions
+import Common.View.FormExtra as FormExtra
+import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
+import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
 import KMEditor.Create.Models exposing (..)
@@ -16,18 +19,18 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailContainerClassWith "KMEditor__Create" ]
-        [ pageHeader "Create Knowledge Model" []
-        , fullPageActionResultView (content wrapMsg model) model.packages
+    div [ detailClass "KMEditor__Create" ]
+        [ Page.header "Create Knowledge Model" []
+        , Page.actionResultView (content wrapMsg model) model.packages
         ]
 
 
 content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
 content wrapMsg model packages =
     div []
-        [ formResultView model.savingKnowledgeModel
+        [ FormResult.view model.savingKnowledgeModel
         , formView wrapMsg model.form packages
-        , formActions (KMEditor Index) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view (KMEditor IndexRoute) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
         ]
 
 
@@ -39,10 +42,10 @@ formView wrapMsg form packages =
 
         formHtml =
             div []
-                [ inputGroup form "name" "Name"
-                , inputGroup form "kmId" "Knowledge Model ID"
-                , formTextAfter "Knowledge Model ID can contain alfanumeric characters and dash but cannot start or end with dash."
-                , selectGroup parentOptions form "parentPackageId" "Parent Knowledge Model"
+                [ FormGroup.input form "name" "Name"
+                , FormGroup.input form "kmId" "Knowledge Model ID"
+                , FormExtra.textAfter "Knowledge Model ID can contain alphanumeric characters and dash but cannot start or end with dash."
+                , FormGroup.select parentOptions form "parentPackageId" "Parent Knowledge Model"
                 ]
     in
     formHtml |> Html.map (wrapMsg << FormMsg)

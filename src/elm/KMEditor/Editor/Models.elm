@@ -1,106 +1,91 @@
 module KMEditor.Editor.Models exposing
-    ( Model
-    , addEvent
+    ( EditorType(..)
+    , Model
+    , addSessionEvents
     , containsChanges
-    , getActiveEditor
-    , getEditorContext
+    , getSavingError
+    , hasSavingError
     , initialModel
-    , insertEditor
-    , setAlert
     )
 
 import ActionResult exposing (ActionResult(..))
-import Dict exposing (Dict)
+import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Common.Models.Events exposing (Event)
-import KMEditor.Editor.Models.EditorContext exposing (EditorContext)
-import KMEditor.Editor.Models.Editors exposing (Editor, KMEditorData, getEditorTitle, getEditorUuid, isEditorDirty)
-import Reorderable
-import SplitPane exposing (Orientation(..), configureSplitter, percentage)
+import KMEditor.Editor.KMEditor.Models as KMEditorModel
+import KMEditor.Editor.Preview.Models
+import KMEditor.Editor.TagEditor.Models as TagEditorModel
+
+
+type EditorType
+    = KMEditor
+    | TagsEditor
+    | PreviewEditor
+    | HistoryEditor
 
 
 type alias Model =
     { branchUuid : String
-    , kmUuid : ActionResult String
-    , knowledgeModel : ActionResult KnowledgeModel
+    , branch : ActionResult Branch
     , metrics : ActionResult (List Metric)
     , levels : ActionResult (List Level)
-    , activeEditorUuid : Maybe String
-    , editors : Dict String Editor
-    , reorderableState : Reorderable.State
-    , events : List Event
-    , alert : Maybe String
-    , submitting : ActionResult String
-    , splitPane : SplitPane.State
+    , preview : ActionResult KnowledgeModel
+    , currentEditor : EditorType
+    , sessionEvents : List Event
+    , previewEditorModel : Maybe KMEditor.Editor.Preview.Models.Model
+    , tagEditorModel : Maybe TagEditorModel.Model
+    , editorModel : Maybe KMEditorModel.Model
+    , saving : ActionResult String
     }
 
 
 initialModel : String -> Model
 initialModel branchUuid =
     { branchUuid = branchUuid
-    , kmUuid = Loading
-    , knowledgeModel = Loading
+    , branch = Loading
     , metrics = Loading
     , levels = Loading
-    , activeEditorUuid = Nothing
-    , editors = Dict.fromList []
-    , reorderableState = Reorderable.initialState
-    , events = []
-    , alert = Nothing
-    , submitting = Unset
-    , splitPane = SplitPane.init Horizontal |> configureSplitter (percentage 0.2 (Just ( 0.05, 0.7 )))
-    }
-
-
-
-{- Model helpers -}
-
-
-getActiveEditor : Model -> Maybe Editor
-getActiveEditor model =
-    case model.activeEditorUuid of
-        Just uuid ->
-            Dict.get uuid model.editors
-
-        Nothing ->
-            Nothing
-
-
-addEvent : Event -> Model -> Model
-addEvent event model =
-    { model | events = model.events ++ [ event ] }
-
-
-insertEditor : Editor -> Model -> Model
-insertEditor editor model =
-    let
-        newEditors =
-            Dict.insert (getEditorUuid editor) editor model.editors
-    in
-    { model | editors = newEditors }
-
-
-setAlert : String -> Model -> Model
-setAlert alert model =
-    { model | alert = Just alert }
-
-
-getEditorContext : Model -> EditorContext
-getEditorContext model =
-    { metrics = model.metrics |> ActionResult.withDefault []
-    , levels = model.levels |> ActionResult.withDefault []
+    , preview = Unset
+    , currentEditor = KMEditor
+    , sessionEvents = []
+    , previewEditorModel = Nothing
+    , tagEditorModel = Nothing
+    , editorModel = Nothing
+    , saving = Unset
     }
 
 
 containsChanges : Model -> Bool
 containsChanges model =
     let
-        activeEditorDirty =
-            getActiveEditor model
-                |> Maybe.map isEditorDirty
+        tagEditorDirty =
+            model.tagEditorModel
+                |> Maybe.map TagEditorModel.containsChanges
                 |> Maybe.withDefault False
 
-        hasEvents =
-            List.length model.events > 0
+        kmEditorDirty =
+            model.editorModel
+                |> Maybe.map KMEditorModel.containsChanges
+                |> Maybe.withDefault False
     in
-    activeEditorDirty || hasEvents
+    List.length model.sessionEvents > 0 || tagEditorDirty || kmEditorDirty
+
+
+addSessionEvents : List Event -> Model -> Model
+addSessionEvents events model =
+    { model | sessionEvents = model.sessionEvents ++ events }
+
+
+hasSavingError : Model -> Bool
+hasSavingError =
+    .saving >> ActionResult.isError
+
+
+getSavingError : Model -> String
+getSavingError model =
+    case model.saving of
+        Error err ->
+            err
+
+        _ ->
+            ""

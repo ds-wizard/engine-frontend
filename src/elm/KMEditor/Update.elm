@@ -2,7 +2,7 @@ module KMEditor.Update exposing (fetchData, isGuarded, update)
 
 import Auth.Models exposing (Session)
 import KMEditor.Create.Update
-import KMEditor.Editor.Models exposing (containsChanges)
+import KMEditor.Editor.Models
 import KMEditor.Editor.Update
 import KMEditor.Index.Update
 import KMEditor.Migration.Update
@@ -18,30 +18,30 @@ import Random exposing (Seed)
 fetchData : Route -> (Msg -> Msgs.Msg) -> Model -> Session -> Cmd Msgs.Msg
 fetchData route wrapMsg model session =
     case route of
-        Create _ ->
+        CreateRoute _ ->
             KMEditor.Create.Update.fetchData (wrapMsg << CreateMsg) session
 
-        Editor uuid ->
-            if model.editorModel.branchUuid == uuid && containsChanges model.editorModel then
+        EditorRoute uuid ->
+            if model.editorModel.branchUuid == uuid && KMEditor.Editor.Models.containsChanges model.editorModel then
                 Cmd.none
 
             else
                 KMEditor.Editor.Update.fetchData (wrapMsg << EditorMsg) uuid session
 
-        Index ->
+        IndexRoute ->
             KMEditor.Index.Update.fetchData (wrapMsg << IndexMsg) session
 
-        Migration uuid ->
+        MigrationRoute uuid ->
             KMEditor.Migration.Update.fetchData (wrapMsg << MigrationMsg) uuid session
 
-        Publish uuid ->
+        PublishRoute uuid ->
             KMEditor.Publish.Update.fetchData (wrapMsg << PublishMsg) uuid session
 
 
 isGuarded : Route -> Model -> Maybe String
 isGuarded route model =
     case route of
-        Editor uuid ->
+        EditorRoute _ ->
             KMEditor.Editor.Update.isGuarded model.editorModel
 
         _ ->
@@ -58,10 +58,10 @@ update msg wrapMsg state model =
             in
             ( state.seed, { model | createModel = createModel }, cmd )
 
-        EditorMsg eMsg ->
+        EditorMsg e2Msg ->
             let
                 ( newSeed, editorModel, cmd ) =
-                    KMEditor.Editor.Update.update eMsg (wrapMsg << EditorMsg) state model.editorModel
+                    KMEditor.Editor.Update.update e2Msg (wrapMsg << EditorMsg) state model.editorModel
             in
             ( newSeed, { model | editorModel = editorModel }, cmd )
 

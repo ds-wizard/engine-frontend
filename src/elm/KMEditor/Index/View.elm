@@ -4,9 +4,11 @@ import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
-import Common.View exposing (defaultFullPageError, fullPageActionResultView, fullPageLoader, modalView, pageHeader)
-import Common.View.Forms exposing (formResultView, selectGroup)
-import Common.View.Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..), indexTable)
+import Common.View.FormGroup as FormGroup
+import Common.View.FormResult as FormResult
+import Common.View.Modal as Modal
+import Common.View.Page as Page
+import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -22,9 +24,9 @@ import Routing exposing (Route(..))
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
     div [ class "col KMEditor__Index" ]
-        [ pageHeader "Knowledge Model Editor" indexActions
-        , formResultView model.deletingMigration
-        , fullPageActionResultView (indexTable (tableConfig jwt) wrapMsg) model.knowledgeModels
+        [ Page.header "Knowledge Model Editor" indexActions
+        , FormResult.view model.deletingMigration
+        , Page.actionResultView (Table.view (tableConfig jwt) wrapMsg) model.knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]
@@ -32,7 +34,7 @@ view wrapMsg jwt model =
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo (Routing.KMEditor <| Create Nothing)
+    [ linkTo (Routing.KMEditor <| CreateRoute Nothing)
         [ class "btn btn-primary" ]
         [ text "Create" ]
     ]
@@ -49,7 +51,7 @@ tableConfig jwt =
           , getValue = TextValue .kmId
           }
         , { label = "Parent Knowledge Model"
-          , getValue = TextValue (Maybe.withDefault "-" << .lastAppliedParentPackageId)
+          , getValue = TextValue (Maybe.withDefault "-" << .parentPackageId)
           }
         ]
     , actions =
@@ -58,11 +60,11 @@ tableConfig jwt =
           , visible = always True
           }
         , { label = TableActionIcon "fa fa-edit"
-          , action = TableActionLink (Routing.KMEditor << Editor << .uuid)
+          , action = TableActionLink (Routing.KMEditor << EditorRoute << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]
           }
         , { label = TableActionText "Publish"
-          , action = TableActionLink (Routing.KMEditor << Publish << .uuid)
+          , action = TableActionLink (Routing.KMEditor << PublishRoute << .uuid)
           , visible = tableActionPublishVisible jwt
           }
         , { label = TableActionText "Upgrade"
@@ -70,7 +72,7 @@ tableConfig jwt =
           , visible = tableActionUpgradeVisible jwt
           }
         , { label = TableActionText "Continue Migration"
-          , action = TableActionLink (Routing.KMEditor << Migration << .uuid)
+          , action = TableActionLink (Routing.KMEditor << MigrationRoute << .uuid)
           , visible = tableActionContinueMigrationVisible jwt
           }
         , { label = TableActionText "Cancel Migration"
@@ -175,7 +177,7 @@ deleteModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteKnowledgeModal Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 upgradeModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -203,7 +205,7 @@ upgradeModal wrapMsg model =
                     [ emptyNode ]
 
                 Loading ->
-                    [ fullPageLoader ]
+                    [ Page.loader ]
 
                 Error error ->
                     [ p [ class "alert alert-danger" ] [ text error ] ]
@@ -214,7 +216,7 @@ upgradeModal wrapMsg model =
                         , strong [] [ text name ]
                         , text " to."
                         ]
-                    , selectGroup options model.kmUpgradeForm "targetPackageId" "New parent package"
+                    , FormGroup.select options model.kmUpgradeForm "targetPackageId" "New parent package"
                         |> Html.map (wrapMsg << UpgradeFormMsg)
                     ]
 
@@ -228,7 +230,7 @@ upgradeModal wrapMsg model =
             , cancelMsg = Just <| wrapMsg <| ShowHideUpgradeModal Nothing
             }
     in
-    modalView modalConfig
+    Modal.confirm modalConfig
 
 
 createOption : PackageDetail -> ( String, String )

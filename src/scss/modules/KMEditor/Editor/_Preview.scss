@@ -1,0 +1,19 @@
+@import "../../../../../node_modules/bootswatch/dist/united/variables";
+
+
+.KMEditor__Editor__Preview {
+    .tag-selection {
+        margin: 0 -15px 20px;
+        padding: 20px;
+        background: $gray-200;
+        border-bottom: 1px solid $gray-400;
+
+        .tag-selection-header {
+            margin-bottom: 1rem;
+
+            a {
+                margin-left: 1rem;
+            }
+        }
+    }
+}

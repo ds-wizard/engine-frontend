@@ -1,6 +1,81 @@
-module KMEditor.Common.Models.Events exposing (AddAnswerEventData, AddChapterEventData, AddCrossReferenceEventData, AddExpertEventData, AddQuestionEventData, AddReferenceEventData(..), AddResourcePageReferenceEventData, AddURLReferenceEventData, AnswerItemTemplateData, CommonEventData, DeleteAnswerEventData, DeleteChapterEventData, DeleteExpertEventData, DeleteQuestionEventData, DeleteReferenceEventData, EditAnswerEventData, EditChapterEventData, EditCrossReferenceEventData, EditExpertEventData, EditKnowledgeModelEventData, EditQuestionEventData, EditReferenceEventData(..), EditResourcePageReferenceEventData, EditURLReferenceEventData, Event(..), EventField, addAnswerEventDecoder, addChapterEventDecoder, addCrossReferenceEventDecoder, addExpertEventDecoder, addQuestionEventDecoder, addReferenceEventDataByType, addReferenceEventDecoder, addReferenceEventDecoderByType, addResourcePageReferenceEventDecoder, addURLReferenceEventDecoder, answerItemTemplateDecoder, commonEventDataDecoder, deleteAnswerEventDecoder, deleteChapterEventDecoder, deleteExpertEventDecoder, deleteQuestionEventDecoder, deleteReferenceEventDecoder, editAnswerEventDecoder, editChapterEventDecoder, editCrossReferenceEventDecoder, editExpertEventDecoder, editKnowledgeModelEventDecoder, editQuestionEventDecoder, editReferenceEventDataByType, editReferenceEventDecoder, editReferenceEventDecoderByType, editResourcePageReferenceEventDecoder, editURLReferenceEventDecoder, encodeAddAnswerEvent, encodeAddChapterEvent, encodeAddCrossReferenceEvent, encodeAddExpertEvent, encodeAddQuestionEvent, encodeAddReferenceEvent, encodeAddResourcePageReferenceEvent, encodeAddURLReferenceEvent, encodeAnswerItemTemplateData, encodeCommonData, encodeDeleteAnswerEvent, encodeDeleteChapterEvent, encodeDeleteExpertEvent, encodeDeleteQuestionEvent, encodeDeleteReferenceEvent, encodeEditAnswerEvent, encodeEditChapterEvent, encodeEditCrossReferenceEvent, encodeEditExpertEvent, encodeEditKnowledgeModelEvent, encodeEditQuestionEvent, encodeEditReferenceEvent, encodeEditResourcePageReferenceEvent, encodeEditURLReferenceEvent, encodeEvent, encodeEventField, encodeEvents, eventDecoder, eventDecoderByType, eventFieldDecoder, getAddReferenceEventEntityVisibleName, getAddReferenceUuid, getEditReferenceEventEntityVisibleName, getEditReferenceUuid, getEventEntityVisibleName, getEventFieldValue, getEventFieldValueWithDefault, getEventUuid, isAddAnswer, isAddChapter, isAddExpert, isAddQuestion, isAddReference, isDeleteAnswer, isDeleteChapter, isDeleteExpert, isDeleteQuestion, isDeleteReference, isEditAnswer, isEditChapter, isEditExpert, isEditQuestion, isEditReference)
-
---exposing (..)
+module KMEditor.Common.Models.Events exposing
+    ( AddAnswerEventData
+    , AddChapterEventData
+    , AddCrossReferenceEventData
+    , AddExpertEventData
+    , AddQuestionEventData(..)
+    , AddReferenceEventData(..)
+    , AddResourcePageReferenceEventData
+    , AddTagEventData
+    , AddURLReferenceEventData
+    , AnswerItemTemplateData
+    , CommonEventData
+    , DeleteAnswerEventData
+    , DeleteChapterEventData
+    , DeleteExpertEventData
+    , DeleteQuestionEventData
+    , DeleteReferenceEventData
+    , DeleteTagEventData
+    , EditAnswerEventData
+    , EditChapterEventData
+    , EditCrossReferenceEventData
+    , EditExpertEventData
+    , EditKnowledgeModelEventData
+    , EditListQuestionEventData
+    , EditOptionsQuestionEventData
+    , EditQuestionEventData(..)
+    , EditReferenceEventData(..)
+    , EditResourcePageReferenceEventData
+    , EditTagEventData
+    , EditURLReferenceEventData
+    , EditValueQuestionEventData
+    , Event(..)
+    , EventField
+    , createEmptyEventField
+    , createEventField
+    , encodeEvent
+    , encodeEventField
+    , encodeEvents
+    , eventDecoder
+    , eventFieldDecoder
+    , getAddQuestionEventEntityVisibleName
+    , getAddQuestionEventQuestionTypeString
+    , getAddQuestionUuid
+    , getAddReferenceEventEntityVisibleName
+    , getAddReferenceUuid
+    , getEditQuestionEventEntityVisibleName
+    , getEditQuestionEventQuestionTypeString
+    , getEditQuestionUuid
+    , getEditReferenceEventEntityVisibleName
+    , getEditReferenceUuid
+    , getEventEntityUuid
+    , getEventEntityVisibleName
+    , getEventFieldValue
+    , getEventFieldValueWithDefault
+    , getEventUuid
+    , isAddAnswer
+    , isAddChapter
+    , isAddExpert
+    , isAddQuestion
+    , isAddReference
+    , isAddTag
+    , isDeleteAnswer
+    , isDeleteChapter
+    , isDeleteExpert
+    , isDeleteQuestion
+    , isDeleteReference
+    , isDeleteTag
+    , isEditAnswer
+    , isEditChapter
+    , isEditExpert
+    , isEditQuestion
+    , isEditReference
+    , isEditTag
+    , mapAddQuestionEventData
+    , mapAddReferenceEventData
+    , mapEditQuestionEventData
+    , mapEditReferenceEventData
+    )
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
@@ -12,10 +87,14 @@ import List.Extra as List
 
 
 type Event
-    = EditKnowledgeModelEvent EditKnowledgeModelEventData CommonEventData
+    = AddKnowledgeModelEvent AddKnowledgeModelEventData CommonEventData
+    | EditKnowledgeModelEvent EditKnowledgeModelEventData CommonEventData
     | AddChapterEvent AddChapterEventData CommonEventData
     | EditChapterEvent EditChapterEventData CommonEventData
     | DeleteChapterEvent DeleteChapterEventData CommonEventData
+    | AddTagEvent AddTagEventData CommonEventData
+    | EditTagEvent EditTagEventData CommonEventData
+    | DeleteTagEvent DeleteTagEventData CommonEventData
     | AddQuestionEvent AddQuestionEventData CommonEventData
     | EditQuestionEvent EditQuestionEventData CommonEventData
     | DeleteQuestionEvent DeleteQuestionEventData CommonEventData
@@ -36,10 +115,17 @@ type alias CommonEventData =
     }
 
 
+type alias AddKnowledgeModelEventData =
+    { kmUuid : String
+    , name : String
+    }
+
+
 type alias EditKnowledgeModelEventData =
     { kmUuid : String
     , name : EventField String
-    , chapterIds : EventField (List String)
+    , chapterUuids : EventField (List String)
+    , tagUuids : EventField (List String)
     }
 
 
@@ -54,7 +140,7 @@ type alias EditChapterEventData =
     { chapterUuid : String
     , title : EventField String
     , text : EventField String
-    , questionIds : EventField (List String)
+    , questionUuids : EventField (List String)
     }
 
 
@@ -63,26 +149,102 @@ type alias DeleteChapterEventData =
     }
 
 
-type alias AddQuestionEventData =
-    { questionUuid : String
-    , type_ : String
-    , title : String
-    , text : Maybe String
-    , requiredLevel : Maybe Int
-    , answerItemTemplate : Maybe AnswerItemTemplateData
+type alias AddTagEventData =
+    { tagUuid : String
+    , name : String
+    , description : Maybe String
+    , color : String
     }
 
 
-type alias EditQuestionEventData =
+type alias EditTagEventData =
+    { tagUuid : String
+    , name : EventField String
+    , description : EventField (Maybe String)
+    , color : EventField String
+    }
+
+
+type alias DeleteTagEventData =
+    { tagUuid : String
+    }
+
+
+type AddQuestionEventData
+    = AddOptionsQuestionEvent AddOptionsQuestionEventData
+    | AddListQuestionEvent AddListQuestionEventData
+    | AddValueQuestionEvent AddValueQuestionEventData
+
+
+type alias AddOptionsQuestionEventData =
     { questionUuid : String
-    , type_ : EventField String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    }
+
+
+type alias AddListQuestionEventData =
+    { questionUuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    , itemTemplateTitle : String
+    }
+
+
+type alias AddValueQuestionEventData =
+    { questionUuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    , valueType : ValueQuestionType
+    }
+
+
+type EditQuestionEventData
+    = EditOptionsQuestionEvent EditOptionsQuestionEventData
+    | EditListQuestionEvent EditListQuestionEventData
+    | EditValueQuestionEvent EditValueQuestionEventData
+
+
+type alias EditOptionsQuestionEventData =
+    { questionUuid : String
     , title : EventField String
     , text : EventField (Maybe String)
     , requiredLevel : EventField (Maybe Int)
-    , answerItemTemplate : EventField (Maybe AnswerItemTemplateData)
-    , answerIds : EventField (Maybe (List String))
-    , expertIds : EventField (List String)
-    , referenceIds : EventField (List String)
+    , tagUuids : EventField (List String)
+    , referenceUuids : EventField (List String)
+    , expertUuids : EventField (List String)
+    , answerUuids : EventField (List String)
+    }
+
+
+type alias EditListQuestionEventData =
+    { questionUuid : String
+    , title : EventField String
+    , text : EventField (Maybe String)
+    , requiredLevel : EventField (Maybe Int)
+    , tagUuids : EventField (List String)
+    , referenceUuids : EventField (List String)
+    , expertUuids : EventField (List String)
+    , itemTemplateTitle : EventField String
+    , itemTemplateQuestionUuids : EventField (List String)
+    }
+
+
+type alias EditValueQuestionEventData =
+    { questionUuid : String
+    , title : EventField String
+    , text : EventField (Maybe String)
+    , requiredLevel : EventField (Maybe Int)
+    , tagUuids : EventField (List String)
+    , referenceUuids : EventField (List String)
+    , expertUuids : EventField (List String)
+    , valueType : EventField ValueQuestionType
     }
 
 
@@ -104,7 +266,7 @@ type alias EditAnswerEventData =
     , label : EventField String
     , advice : EventField (Maybe String)
     , metricMeasures : EventField (List MetricMeasure)
-    , followUpIds : EventField (List String)
+    , followUpUuids : EventField (List String)
     }
 
 
@@ -197,7 +359,7 @@ type alias EventField a =
 
 type alias AnswerItemTemplateData =
     { title : String
-    , questionIds : List String
+    , questionUuids : List String
     }
 
 
@@ -215,6 +377,9 @@ encodeEvent event =
     let
         ( encodedCommonData, encodedEventData ) =
             case event of
+                AddKnowledgeModelEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeAddKnowledgeModelEvent eventData )
+
                 EditKnowledgeModelEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeEditKnowledgeModelEvent eventData )
 
@@ -226,6 +391,15 @@ encodeEvent event =
 
                 DeleteChapterEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeDeleteChapterEvent eventData )
+
+                AddTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeAddTagEvent eventData )
+
+                EditTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeEditTagEvent eventData )
+
+                DeleteTagEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeDeleteTagEvent eventData )
 
                 AddQuestionEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeAddQuestionEvent eventData )
@@ -273,12 +447,21 @@ encodeCommonData data =
     ]
 
 
+encodeAddKnowledgeModelEvent : AddKnowledgeModelEventData -> List ( String, Encode.Value )
+encodeAddKnowledgeModelEvent data =
+    [ ( "eventType", Encode.string "AddKnowledgeModelEvent" )
+    , ( "kmUuid", Encode.string data.kmUuid )
+    , ( "name", Encode.string data.name )
+    ]
+
+
 encodeEditKnowledgeModelEvent : EditKnowledgeModelEventData -> List ( String, Encode.Value )
 encodeEditKnowledgeModelEvent data =
     [ ( "eventType", Encode.string "EditKnowledgeModelEvent" )
     , ( "kmUuid", Encode.string data.kmUuid )
     , ( "name", encodeEventField Encode.string data.name )
-    , ( "chapterIds", encodeEventField (Encode.list Encode.string) data.chapterIds )
+    , ( "chapterUuids", encodeEventField (Encode.list Encode.string) data.chapterUuids )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
     ]
 
 
@@ -297,7 +480,7 @@ encodeEditChapterEvent data =
     , ( "chapterUuid", Encode.string data.chapterUuid )
     , ( "title", encodeEventField Encode.string data.title )
     , ( "text", encodeEventField Encode.string data.text )
-    , ( "questionIds", encodeEventField (Encode.list Encode.string) data.questionIds )
+    , ( "questionUuids", encodeEventField (Encode.list Encode.string) data.questionUuids )
     ]
 
 
@@ -308,30 +491,134 @@ encodeDeleteChapterEvent data =
     ]
 
 
+encodeAddTagEvent : AddTagEventData -> List ( String, Encode.Value )
+encodeAddTagEvent data =
+    [ ( "eventType", Encode.string "AddTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    , ( "name", Encode.string data.name )
+    , ( "description", maybe Encode.string data.description )
+    , ( "color", Encode.string data.color )
+    ]
+
+
+encodeEditTagEvent : EditTagEventData -> List ( String, Encode.Value )
+encodeEditTagEvent data =
+    [ ( "eventType", Encode.string "EditTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    , ( "name", encodeEventField Encode.string data.name )
+    , ( "description", encodeEventField (maybe Encode.string) data.description )
+    , ( "color", encodeEventField Encode.string data.color )
+    ]
+
+
+encodeDeleteTagEvent : DeleteTagEventData -> List ( String, Encode.Value )
+encodeDeleteTagEvent data =
+    [ ( "eventType", Encode.string "DeleteTagEvent" )
+    , ( "tagUuid", Encode.string data.tagUuid )
+    ]
+
+
 encodeAddQuestionEvent : AddQuestionEventData -> List ( String, Encode.Value )
 encodeAddQuestionEvent data =
-    [ ( "eventType", Encode.string "AddQuestionEvent" )
+    let
+        eventData =
+            mapAddQuestionEventData
+                encodeAddOptionsQuestionEvent
+                encodeAddListQuestionEvent
+                encodeAddValueQuestionEvent
+                data
+    in
+    [ ( "eventType", Encode.string "AddQuestionEvent" ) ] ++ eventData
+
+
+encodeAddOptionsQuestionEvent : AddOptionsQuestionEventData -> List ( String, Encode.Value )
+encodeAddOptionsQuestionEvent data =
+    [ ( "questionType", Encode.string "OptionsQuestion" )
     , ( "questionUuid", Encode.string data.questionUuid )
-    , ( "type", Encode.string data.type_ )
     , ( "title", Encode.string data.title )
     , ( "text", maybe Encode.string data.text )
     , ( "requiredLevel", maybe Encode.int data.requiredLevel )
-    , ( "answerItemTemplate", maybe encodeAnswerItemTemplateData data.answerItemTemplate )
+    , ( "tagUuids", Encode.list Encode.string data.tagUuids )
+    ]
+
+
+encodeAddListQuestionEvent : AddListQuestionEventData -> List ( String, Encode.Value )
+encodeAddListQuestionEvent data =
+    [ ( "questionType", Encode.string "ListQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", Encode.string data.title )
+    , ( "text", maybe Encode.string data.text )
+    , ( "requiredLevel", maybe Encode.int data.requiredLevel )
+    , ( "tagUuids", Encode.list Encode.string data.tagUuids )
+    , ( "itemTemplateTitle", Encode.string data.itemTemplateTitle )
+    ]
+
+
+encodeAddValueQuestionEvent : AddValueQuestionEventData -> List ( String, Encode.Value )
+encodeAddValueQuestionEvent data =
+    [ ( "questionType", Encode.string "ValueQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", Encode.string data.title )
+    , ( "text", maybe Encode.string data.text )
+    , ( "requiredLevel", maybe Encode.int data.requiredLevel )
+    , ( "tagUuids", Encode.list Encode.string data.tagUuids )
+    , ( "valueType", encodeValueType data.valueType )
     ]
 
 
 encodeEditQuestionEvent : EditQuestionEventData -> List ( String, Encode.Value )
 encodeEditQuestionEvent data =
-    [ ( "eventType", Encode.string "EditQuestionEvent" )
+    let
+        eventData =
+            mapEditQuestionEventData
+                encodeEditOptionsQuestionEvent
+                encodeEditListQuestionEvent
+                encodeEditValueQuestionEvent
+                data
+    in
+    [ ( "eventType", Encode.string "EditQuestionEvent" ) ] ++ eventData
+
+
+encodeEditOptionsQuestionEvent : EditOptionsQuestionEventData -> List ( String, Encode.Value )
+encodeEditOptionsQuestionEvent data =
+    [ ( "questionType", Encode.string "OptionsQuestion" )
     , ( "questionUuid", Encode.string data.questionUuid )
-    , ( "type", encodeEventField Encode.string data.type_ )
     , ( "title", encodeEventField Encode.string data.title )
     , ( "text", encodeEventField (maybe Encode.string) data.text )
     , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
-    , ( "answerItemTemplate", encodeEventField (maybe encodeAnswerItemTemplateData) data.answerItemTemplate )
-    , ( "answerIds", encodeEventField (maybe (Encode.list Encode.string)) data.answerIds )
-    , ( "expertIds", encodeEventField (Encode.list Encode.string) data.expertIds )
-    , ( "referenceIds", encodeEventField (Encode.list Encode.string) data.referenceIds )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
+    , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
+    , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
+    , ( "answerUuids", encodeEventField (Encode.list Encode.string) data.answerUuids )
+    ]
+
+
+encodeEditListQuestionEvent : EditListQuestionEventData -> List ( String, Encode.Value )
+encodeEditListQuestionEvent data =
+    [ ( "questionType", Encode.string "ListQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", encodeEventField Encode.string data.title )
+    , ( "text", encodeEventField (maybe Encode.string) data.text )
+    , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
+    , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
+    , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
+    , ( "itemTemplateTitle", encodeEventField Encode.string data.itemTemplateTitle )
+    , ( "itemTemplateQuestionUuids", encodeEventField (Encode.list Encode.string) data.itemTemplateQuestionUuids )
+    ]
+
+
+encodeEditValueQuestionEvent : EditValueQuestionEventData -> List ( String, Encode.Value )
+encodeEditValueQuestionEvent data =
+    [ ( "questionType", Encode.string "ValueQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", encodeEventField Encode.string data.title )
+    , ( "text", encodeEventField (maybe Encode.string) data.text )
+    , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
+    , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
+    , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
+    , ( "valueType", encodeEventField encodeValueType data.valueType )
     ]
 
 
@@ -340,6 +627,23 @@ encodeDeleteQuestionEvent data =
     [ ( "eventType", Encode.string "DeleteQuestionEvent" )
     , ( "questionUuid", Encode.string data.questionUuid )
     ]
+
+
+encodeValueType : ValueQuestionType -> Encode.Value
+encodeValueType valueType =
+    Encode.string <|
+        case valueType of
+            StringValueType ->
+                "StringValue"
+
+            DateValueType ->
+                "DateValue"
+
+            NumberValueType ->
+                "NumberValue"
+
+            TextValueType ->
+                "TextValue"
 
 
 encodeAddAnswerEvent : AddAnswerEventData -> List ( String, Encode.Value )
@@ -359,7 +663,7 @@ encodeEditAnswerEvent data =
     , ( "label", encodeEventField Encode.string data.label )
     , ( "advice", encodeEventField (maybe Encode.string) data.advice )
     , ( "metricMeasures", encodeEventField (Encode.list metricMeasureEncoder) data.metricMeasures )
-    , ( "followUpIds", encodeEventField (Encode.list Encode.string) data.followUpIds )
+    , ( "followUpUuids", encodeEventField (Encode.list Encode.string) data.followUpUuids )
     ]
 
 
@@ -374,7 +678,7 @@ encodeAddReferenceEvent : AddReferenceEventData -> List ( String, Encode.Value )
 encodeAddReferenceEvent data =
     let
         eventData =
-            addReferenceEventDataByType
+            mapAddReferenceEventData
                 encodeAddResourcePageReferenceEvent
                 encodeAddURLReferenceEvent
                 encodeAddCrossReferenceEvent
@@ -413,7 +717,7 @@ encodeEditReferenceEvent : EditReferenceEventData -> List ( String, Encode.Value
 encodeEditReferenceEvent data =
     let
         eventData =
-            editReferenceEventDataByType
+            mapEditReferenceEventData
                 encodeEditResourcePageReferenceEvent
                 encodeEditURLReferenceEvent
                 encodeEditCrossReferenceEvent
@@ -495,14 +799,6 @@ encodeEventField encode field =
                 ]
 
 
-encodeAnswerItemTemplateData : AnswerItemTemplateData -> Encode.Value
-encodeAnswerItemTemplateData data =
-    Encode.object
-        [ ( "title", Encode.string data.title )
-        , ( "questionIds", Encode.list Encode.string data.questionIds )
-        ]
-
-
 
 {- Decoders -}
 
@@ -516,6 +812,9 @@ eventDecoder =
 eventDecoderByType : String -> Decoder Event
 eventDecoderByType eventType =
     case eventType of
+        "AddKnowledgeModelEvent" ->
+            Decode.map2 AddKnowledgeModelEvent addKnowledgeModelEventDecoder commonEventDataDecoder
+
         "EditKnowledgeModelEvent" ->
             Decode.map2 EditKnowledgeModelEvent editKnowledgeModelEventDecoder commonEventDataDecoder
 
@@ -527,6 +826,15 @@ eventDecoderByType eventType =
 
         "DeleteChapterEvent" ->
             Decode.map2 DeleteChapterEvent deleteChapterEventDecoder commonEventDataDecoder
+
+        "AddTagEvent" ->
+            Decode.map2 AddTagEvent addTagEventDecoder commonEventDataDecoder
+
+        "EditTagEvent" ->
+            Decode.map2 EditTagEvent editTagEventDecoder commonEventDataDecoder
+
+        "DeleteTagEvent" ->
+            Decode.map2 DeleteTagEvent deleteTagEventDecoder commonEventDataDecoder
 
         "AddQuestionEvent" ->
             Decode.map2 AddQuestionEvent addQuestionEventDecoder commonEventDataDecoder
@@ -575,12 +883,20 @@ commonEventDataDecoder =
         |> required "path" pathDecoder
 
 
+addKnowledgeModelEventDecoder : Decoder AddKnowledgeModelEventData
+addKnowledgeModelEventDecoder =
+    Decode.succeed AddKnowledgeModelEventData
+        |> required "kmUuid" Decode.string
+        |> required "name" Decode.string
+
+
 editKnowledgeModelEventDecoder : Decoder EditKnowledgeModelEventData
 editKnowledgeModelEventDecoder =
     Decode.succeed EditKnowledgeModelEventData
         |> required "kmUuid" Decode.string
         |> required "name" (eventFieldDecoder Decode.string)
-        |> required "chapterIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "chapterUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 addChapterEventDecoder : Decoder AddChapterEventData
@@ -597,7 +913,7 @@ editChapterEventDecoder =
         |> required "chapterUuid" Decode.string
         |> required "title" (eventFieldDecoder Decode.string)
         |> required "text" (eventFieldDecoder Decode.string)
-        |> required "questionIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "questionUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 deleteChapterEventDecoder : Decoder DeleteChapterEventData
@@ -606,29 +922,144 @@ deleteChapterEventDecoder =
         |> required "chapterUuid" Decode.string
 
 
+addTagEventDecoder : Decoder AddTagEventData
+addTagEventDecoder =
+    Decode.succeed AddTagEventData
+        |> required "tagUuid" Decode.string
+        |> required "name" Decode.string
+        |> required "description" (Decode.nullable Decode.string)
+        |> required "color" Decode.string
+
+
+editTagEventDecoder : Decoder EditTagEventData
+editTagEventDecoder =
+    Decode.succeed EditTagEventData
+        |> required "tagUuid" Decode.string
+        |> required "name" (eventFieldDecoder Decode.string)
+        |> required "description" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "color" (eventFieldDecoder Decode.string)
+
+
+deleteTagEventDecoder : Decoder DeleteTagEventData
+deleteTagEventDecoder =
+    Decode.succeed DeleteTagEventData
+        |> required "tagUuid" Decode.string
+
+
 addQuestionEventDecoder : Decoder AddQuestionEventData
 addQuestionEventDecoder =
-    Decode.succeed AddQuestionEventData
+    Decode.field "questionType" Decode.string
+        |> Decode.andThen addQuestionEventDecoderByType
+
+
+addQuestionEventDecoderByType : String -> Decoder AddQuestionEventData
+addQuestionEventDecoderByType questionType =
+    case questionType of
+        "OptionsQuestion" ->
+            Decode.map AddOptionsQuestionEvent addOptionsQuestionEventDecoder
+
+        "ListQuestion" ->
+            Decode.map AddListQuestionEvent addListQuestionEventDecoder
+
+        "ValueQuestion" ->
+            Decode.map AddValueQuestionEvent addValueQuestionEventDecoder
+
+        _ ->
+            Decode.fail <| "Unknown question type: " ++ questionType
+
+
+addOptionsQuestionEventDecoder : Decoder AddOptionsQuestionEventData
+addOptionsQuestionEventDecoder =
+    Decode.succeed AddOptionsQuestionEventData
         |> required "questionUuid" Decode.string
-        |> required "type" Decode.string
         |> required "title" Decode.string
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
-        |> required "answerItemTemplate" (Decode.nullable answerItemTemplateDecoder)
+        |> required "tagUuids" (Decode.list Decode.string)
+
+
+addListQuestionEventDecoder : Decoder AddListQuestionEventData
+addListQuestionEventDecoder =
+    Decode.succeed AddListQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+        |> required "itemTemplateTitle" Decode.string
+
+
+addValueQuestionEventDecoder : Decoder AddValueQuestionEventData
+addValueQuestionEventDecoder =
+    Decode.succeed AddValueQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+        |> required "valueType" valueTypeDecoder
 
 
 editQuestionEventDecoder : Decoder EditQuestionEventData
 editQuestionEventDecoder =
-    Decode.succeed EditQuestionEventData
+    Decode.field "questionType" Decode.string
+        |> Decode.andThen editQuestionEventDecoderByType
+
+
+editQuestionEventDecoderByType : String -> Decoder EditQuestionEventData
+editQuestionEventDecoderByType questionType =
+    case questionType of
+        "OptionsQuestion" ->
+            Decode.map EditOptionsQuestionEvent editOptionsQuestionEventDecoder
+
+        "ListQuestion" ->
+            Decode.map EditListQuestionEvent editListQuestionEventDecoder
+
+        "ValueQuestion" ->
+            Decode.map EditValueQuestionEvent editValueQuestionEventDecoder
+
+        _ ->
+            Decode.fail <| "Unknown question type: " ++ questionType
+
+
+editOptionsQuestionEventDecoder : Decoder EditOptionsQuestionEventData
+editOptionsQuestionEventDecoder =
+    Decode.succeed EditOptionsQuestionEventData
         |> required "questionUuid" Decode.string
-        |> required "type" (eventFieldDecoder Decode.string)
         |> required "title" (eventFieldDecoder Decode.string)
         |> required "text" (eventFieldDecoder (Decode.nullable Decode.string))
         |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
-        |> required "answerItemTemplate" (eventFieldDecoder (Decode.nullable answerItemTemplateDecoder))
-        |> required "answerIds" (eventFieldDecoder (Decode.nullable (Decode.list Decode.string)))
-        |> required "expertIds" (eventFieldDecoder (Decode.list Decode.string))
-        |> required "referenceIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "answerUuids" (eventFieldDecoder (Decode.list Decode.string))
+
+
+editListQuestionEventDecoder : Decoder EditListQuestionEventData
+editListQuestionEventDecoder =
+    Decode.succeed EditListQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "text" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "itemTemplateTitle" (eventFieldDecoder Decode.string)
+        |> required "itemTemplateQuestionUuids" (eventFieldDecoder (Decode.list Decode.string))
+
+
+editValueQuestionEventDecoder : Decoder EditValueQuestionEventData
+editValueQuestionEventDecoder =
+    Decode.succeed EditValueQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "text" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "valueType" (eventFieldDecoder valueTypeDecoder)
 
 
 deleteQuestionEventDecoder : Decoder DeleteQuestionEventData
@@ -653,7 +1084,7 @@ editAnswerEventDecoder =
         |> required "label" (eventFieldDecoder Decode.string)
         |> required "advice" (eventFieldDecoder (Decode.nullable Decode.string))
         |> required "metricMeasures" (eventFieldDecoder (Decode.list metricMeasureDecoder))
-        |> required "followUpIds" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "followUpUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 deleteAnswerEventDecoder : Decoder DeleteAnswerEventData
@@ -787,13 +1218,6 @@ eventFieldDecoder decoder =
         |> optional "value" (Decode.nullable decoder) Nothing
 
 
-answerItemTemplateDecoder : Decoder AnswerItemTemplateData
-answerItemTemplateDecoder =
-    Decode.succeed AnswerItemTemplateData
-        |> required "title" Decode.string
-        |> required "questionIds" (Decode.list Decode.string)
-
-
 
 {- Helpers -}
 
@@ -801,7 +1225,19 @@ answerItemTemplateDecoder =
 getEventUuid : Event -> String
 getEventUuid event =
     case event of
+        AddKnowledgeModelEvent _ commonData ->
+            commonData.uuid
+
         EditKnowledgeModelEvent _ commonData ->
+            commonData.uuid
+
+        AddTagEvent _ commonData ->
+            commonData.uuid
+
+        EditTagEvent _ commonData ->
+            commonData.uuid
+
+        DeleteTagEvent _ commonData ->
             commonData.uuid
 
         AddChapterEvent _ commonData ->
@@ -850,6 +1286,70 @@ getEventUuid event =
             commonData.uuid
 
 
+getEventEntityUuid : Event -> String
+getEventEntityUuid event =
+    case event of
+        AddKnowledgeModelEvent eventData _ ->
+            eventData.kmUuid
+
+        EditKnowledgeModelEvent eventData _ ->
+            eventData.kmUuid
+
+        AddTagEvent eventData _ ->
+            eventData.tagUuid
+
+        EditTagEvent eventData _ ->
+            eventData.tagUuid
+
+        DeleteTagEvent eventData _ ->
+            eventData.tagUuid
+
+        AddChapterEvent eventData _ ->
+            eventData.chapterUuid
+
+        EditChapterEvent eventData _ ->
+            eventData.chapterUuid
+
+        DeleteChapterEvent eventData _ ->
+            eventData.chapterUuid
+
+        AddQuestionEvent eventData _ ->
+            getAddQuestionUuid eventData
+
+        EditQuestionEvent eventData _ ->
+            getEditQuestionUuid eventData
+
+        DeleteQuestionEvent eventData _ ->
+            eventData.questionUuid
+
+        AddAnswerEvent eventData _ ->
+            eventData.answerUuid
+
+        EditAnswerEvent eventData _ ->
+            eventData.answerUuid
+
+        DeleteAnswerEvent eventData _ ->
+            eventData.answerUuid
+
+        AddReferenceEvent eventData _ ->
+            getAddReferenceUuid eventData
+
+        EditReferenceEvent eventData _ ->
+            getEditReferenceUuid eventData
+
+        DeleteReferenceEvent eventData _ ->
+            eventData.referenceUuid
+
+        AddExpertEvent eventData _ ->
+            eventData.expertUuid
+
+        EditExpertEvent eventData _ ->
+            eventData.expertUuid
+
+        DeleteExpertEvent eventData _ ->
+            eventData.expertUuid
+
+
 getEventFieldValue : EventField a -> Maybe a
 getEventFieldValue eventField =
     if eventField.changed then
@@ -864,10 +1364,41 @@ getEventFieldValueWithDefault eventField default =
     getEventFieldValue eventField |> Maybe.withDefault default
 
 
+createEventField : a -> Bool -> EventField a
+createEventField value changed =
+    let
+        v =
+            if changed then
+                Just value
+
+            else
+                Nothing
+    in
+    { changed = changed
+    , value = v
+    }
+
+
+createEmptyEventField : EventField a
+createEmptyEventField =
+    { changed = False
+    , value = Nothing
+    }
+
+
 getEventEntityVisibleName : Event -> Maybe String
 getEventEntityVisibleName event =
     case event of
+        AddKnowledgeModelEvent eventData _ ->
+            Just eventData.name
+
         EditKnowledgeModelEvent eventData _ ->
+            getEventFieldValue eventData.name
+
+        AddTagEvent eventData _ ->
+            Just eventData.name
+
+        EditTagEvent eventData _ ->
             getEventFieldValue eventData.name
 
         AddChapterEvent eventData _ ->
@@ -877,10 +1408,10 @@ getEventEntityVisibleName event =
             getEventFieldValue eventData.title
 
         AddQuestionEvent eventData _ ->
-            Just eventData.title
+            getAddQuestionEventEntityVisibleName eventData
 
         EditQuestionEvent eventData _ ->
-            getEventFieldValue eventData.title
+            getEditQuestionEventEntityVisibleName eventData
 
         AddAnswerEvent eventData _ ->
             Just eventData.label
@@ -904,56 +1435,44 @@ getEventEntityVisibleName event =
             Nothing
 
 
+getAddQuestionEventEntityVisibleName : AddQuestionEventData -> Maybe String
+getAddQuestionEventEntityVisibleName =
+    Just << mapAddQuestionEventData .title .title .title
+
+
+getEditQuestionEventEntityVisibleName : EditQuestionEventData -> Maybe String
+getEditQuestionEventEntityVisibleName =
+    getEventFieldValue << mapEditQuestionEventData .title .title .title
+
+
 getAddReferenceEventEntityVisibleName : AddReferenceEventData -> Maybe String
-getAddReferenceEventEntityVisibleName eventData =
-    case eventData of
-        AddResourcePageReferenceEvent data ->
-            Just data.shortUuid
-
-        AddURLReferenceEvent data ->
-            Just data.label
-
-        AddCrossReferenceEvent data ->
-            Just data.targetUuid
+getAddReferenceEventEntityVisibleName =
+    Just << mapAddReferenceEventData .shortUuid .label .targetUuid
 
 
 getEditReferenceEventEntityVisibleName : EditReferenceEventData -> Maybe String
-getEditReferenceEventEntityVisibleName eventData =
-    case eventData of
-        EditResourcePageReferenceEvent data ->
-            getEventFieldValue data.shortUuid
+getEditReferenceEventEntityVisibleName =
+    getEventFieldValue << mapEditReferenceEventData .shortUuid .label .targetUuid
 
-        EditURLReferenceEvent data ->
-            getEventFieldValue data.label
 
-        EditCrossReferenceEvent data ->
-            getEventFieldValue data.targetUuid
+getAddQuestionUuid : AddQuestionEventData -> String
+getAddQuestionUuid =
+    mapAddQuestionEventData .questionUuid .questionUuid .questionUuid
+
+
+getEditQuestionUuid : EditQuestionEventData -> String
+getEditQuestionUuid =
+    mapEditQuestionEventData .questionUuid .questionUuid .questionUuid
 
 
 getAddReferenceUuid : AddReferenceEventData -> String
-getAddReferenceUuid eventData =
-    case eventData of
-        AddResourcePageReferenceEvent data ->
-            data.referenceUuid
-
-        AddURLReferenceEvent data ->
-            data.referenceUuid
-
-        AddCrossReferenceEvent data ->
-            data.referenceUuid
+getAddReferenceUuid =
+    mapAddReferenceEventData .referenceUuid .referenceUuid .referenceUuid
 
 
 getEditReferenceUuid : EditReferenceEventData -> String
-getEditReferenceUuid eventData =
-    case eventData of
-        EditResourcePageReferenceEvent data ->
-            data.referenceUuid
-
-        EditURLReferenceEvent data ->
-            data.referenceUuid
-
-        EditCrossReferenceEvent data ->
-            data.referenceUuid
+getEditReferenceUuid =
+    mapEditReferenceEventData .referenceUuid .referenceUuid .referenceUuid
 
 
 isEditChapter : Chapter -> Event -> Bool
@@ -976,11 +1495,31 @@ isDeleteChapter chapter event =
             False
 
 
+isEditTag : Tag -> Event -> Bool
+isEditTag tag event =
+    case event of
+        EditTagEvent eventData _ ->
+            eventData.tagUuid == tag.uuid
+
+        _ ->
+            False
+
+
+isDeleteTag : Tag -> Event -> Bool
+isDeleteTag tag event =
+    case event of
+        DeleteTagEvent eventData _ ->
+            eventData.tagUuid == tag.uuid
+
+        _ ->
+            False
+
+
 isEditQuestion : Question -> Event -> Bool
 isEditQuestion question event =
     case event of
         EditQuestionEvent eventData _ ->
-            eventData.questionUuid == question.uuid
+            getEditQuestionUuid eventData == getQuestionUuid question
 
         _ ->
             False
@@ -990,7 +1529,7 @@ isDeleteQuestion : Question -> Event -> Bool
 isDeleteQuestion question event =
     case event of
         DeleteQuestionEvent eventData _ ->
-            eventData.questionUuid == question.uuid
+            eventData.questionUuid == getQuestionUuid question
 
         _ ->
             False
@@ -1059,7 +1598,22 @@ isDeleteExpert expert event =
 isAddChapter : KnowledgeModel -> Event -> Bool
 isAddChapter km event =
     case event of
-        AddChapterEvent eventData commonData ->
+        AddChapterEvent _ commonData ->
+            case List.last commonData.path of
+                Just (KMPathNode uuid) ->
+                    uuid == km.uuid
+
+                _ ->
+                    False
+
+        _ ->
+            False
+
+
+isAddTag : KnowledgeModel -> Event -> Bool
+isAddTag km event =
+    case event of
+        AddTagEvent _ commonData ->
             case List.last commonData.path of
                 Just (KMPathNode uuid) ->
                     uuid == km.uuid
@@ -1074,7 +1628,7 @@ isAddChapter km event =
 isAddQuestion : String -> Event -> Bool
 isAddQuestion parentUuid event =
     case event of
-        AddQuestionEvent eventData commonData ->
+        AddQuestionEvent _ commonData ->
             case List.last commonData.path of
                 Just (ChapterPathNode uuid) ->
                     uuid == parentUuid
@@ -1089,10 +1643,10 @@ isAddQuestion parentUuid event =
 isAddAnswer : Question -> Event -> Bool
 isAddAnswer question event =
     case event of
-        AddAnswerEvent eventData commonData ->
+        AddAnswerEvent _ commonData ->
             case List.last commonData.path of
                 Just (QuestionPathNode uuid) ->
-                    uuid == question.uuid
+                    uuid == getQuestionUuid question
 
                 _ ->
                     False
@@ -1104,10 +1658,10 @@ isAddAnswer question event =
 isAddExpert : Question -> Event -> Bool
 isAddExpert question event =
     case event of
-        AddExpertEvent eventData commonData ->
+        AddExpertEvent _ commonData ->
             case List.last commonData.path of
                 Just (QuestionPathNode uuid) ->
-                    uuid == question.uuid
+                    uuid == getQuestionUuid question
 
                 _ ->
                     False
@@ -1119,10 +1673,10 @@ isAddExpert question event =
 isAddReference : Question -> Event -> Bool
 isAddReference question event =
     case event of
-        AddReferenceEvent eventData commonData ->
+        AddReferenceEvent _ commonData ->
             case List.last commonData.path of
                 Just (QuestionPathNode uuid) ->
-                    uuid == question.uuid
+                    uuid == getQuestionUuid question
 
                 _ ->
                     False
@@ -1131,8 +1685,34 @@ isAddReference question event =
             False
 
 
-addReferenceEventDataByType : (AddResourcePageReferenceEventData -> a) -> (AddURLReferenceEventData -> a) -> (AddCrossReferenceEventData -> a) -> AddReferenceEventData -> a
-addReferenceEventDataByType resourcePageReference urlReference crossReference reference =
+mapAddQuestionEventData : (AddOptionsQuestionEventData -> a) -> (AddListQuestionEventData -> a) -> (AddValueQuestionEventData -> a) -> AddQuestionEventData -> a
+mapAddQuestionEventData optionsQuestion listQuestion valueQuestion question =
+    case question of
+        AddOptionsQuestionEvent data ->
+            optionsQuestion data
+
+        AddListQuestionEvent data ->
+            listQuestion data
+
+        AddValueQuestionEvent data ->
+            valueQuestion data
+
+
+mapEditQuestionEventData : (EditOptionsQuestionEventData -> a) -> (EditListQuestionEventData -> a) -> (EditValueQuestionEventData -> a) -> EditQuestionEventData -> a
+mapEditQuestionEventData optionsQuestion listQuestion valueQuestion question =
+    case question of
+        EditOptionsQuestionEvent data ->
+            optionsQuestion data
+
+        EditListQuestionEvent data ->
+            listQuestion data
+
+        EditValueQuestionEvent data ->
+            valueQuestion data
+
+
+mapAddReferenceEventData : (AddResourcePageReferenceEventData -> a) -> (AddURLReferenceEventData -> a) -> (AddCrossReferenceEventData -> a) -> AddReferenceEventData -> a
+mapAddReferenceEventData resourcePageReference urlReference crossReference reference =
     case reference of
         AddResourcePageReferenceEvent data ->
             resourcePageReference data
@@ -1144,8 +1724,8 @@ addReferenceEventDataByType resourcePageReference urlReference crossReference re
             crossReference data
 
 
-editReferenceEventDataByType : (EditResourcePageReferenceEventData -> a) -> (EditURLReferenceEventData -> a) -> (EditCrossReferenceEventData -> a) -> EditReferenceEventData -> a
-editReferenceEventDataByType resourcePageReference urlReference crossReference reference =
+mapEditReferenceEventData : (EditResourcePageReferenceEventData -> a) -> (EditURLReferenceEventData -> a) -> (EditCrossReferenceEventData -> a) -> EditReferenceEventData -> a
+mapEditReferenceEventData resourcePageReference urlReference crossReference reference =
     case reference of
         EditResourcePageReferenceEvent data ->
             resourcePageReference data
@@ -1155,3 +1735,19 @@ editReferenceEventDataByType resourcePageReference urlReference crossReference r
 
         EditCrossReferenceEvent data ->
             crossReference data
+
+
+getAddQuestionEventQuestionTypeString : AddQuestionEventData -> String
+getAddQuestionEventQuestionTypeString =
+    mapAddQuestionEventData
+        (\_ -> "Options")
+        (\_ -> "List")
+        (\_ -> "Value")
+
+
+getEditQuestionEventQuestionTypeString : EditQuestionEventData -> String
+getEditQuestionEventQuestionTypeString =
+    mapEditQuestionEventData
+        (\_ -> "Options")
+        (\_ -> "List")
+        (\_ -> "Value")

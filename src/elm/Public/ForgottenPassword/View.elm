@@ -2,8 +2,9 @@ module Public.ForgottenPassword.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.View exposing (fullPageMessage)
-import Common.View.Forms exposing (errorView, formTextAfter, inputGroup, submitButton)
+import Common.View.FormExtra as FormExtra
+import Common.View.FormGroup as FormGroup
+import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
@@ -19,7 +20,7 @@ view wrapMsg model =
         content =
             case model.submitting of
                 Success _ ->
-                    successView
+                    Page.success "We've sent you a recover link. Follow the instructions in your email."
 
                 _ ->
                     forgottenPasswordForm wrapMsg model
@@ -46,11 +47,6 @@ forgottenPasswordForm wrapMsg model =
 formView : Form CustomFormError ForgottenPasswordForm -> Html Form.Msg
 formView form =
     div []
-        [ inputGroup form "email" "Email"
-        , formTextAfter "Enter the email you use to log in and we will send you a recover link."
+        [ FormGroup.input form "email" "Email"
+        , FormExtra.textAfter "Enter the email you use to log in and we will send you a recover link."
         ]
-
-
-successView : Html Msgs.Msg
-successView =
-    fullPageMessage "fa-check" "We've sent you a recover link. Follow the instructions in your email."

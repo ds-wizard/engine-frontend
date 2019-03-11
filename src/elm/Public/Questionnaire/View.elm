@@ -1,8 +1,8 @@
-module Public.Questionnaire.View exposing (info, view)
+module Public.Questionnaire.View exposing (view)
 
 import Common.Html exposing (linkTo)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
-import Common.View exposing (fullPageActionResultView)
+import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Msgs
@@ -15,7 +15,7 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     div [ class "Public__Questionnaire" ]
         [ info
-        , fullPageActionResultView (viewQuestionnaire { showExtraActions = False, levels = Nothing } >> Html.map (QuestionnaireMsg >> wrapMsg)) model.questionnaireModel
+        , Page.actionResultView (viewQuestionnaire { showExtraActions = True, showExtraNavigation = False, levels = Nothing } >> Html.map (QuestionnaireMsg >> wrapMsg)) model.questionnaireModel
         ]
 
 

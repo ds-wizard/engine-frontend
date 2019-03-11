@@ -1,9 +1,81 @@
-module KMEditor.Common.Models.Entities exposing (Answer, AnswerItemTemplate, AnswerItemTemplateQuestions(..), Chapter, CrossReferenceData, Expert, FollowUps(..), KnowledgeModel, Level, Metric, MetricMeasure, Question, Reference(..), ResourcePageReferenceData, URLReferenceData, answerDecoder, answerItemTemplateDecoder, answerItemTemplateQuestionsDecoder, chapterDecoder, crossReferenceDecoder, expertDecoder, followupsDecoder, getAnswer, getAnswerItemTemplateQuestions, getAnswers, getChapter, getChapters, getExpert, getExperts, getFollowUpQuestions, getQuestion, getQuestions, getReference, getReferenceUuid, getReferenceVisibleName, getReferences, knowledgeModelDecoder, levelDecoder, levelListDecoder, metricDecoder, metricListDecoder, metricMeasureDecoder, metricMeasureEncoder, newAnswer, newChapter, newExpert, newQuestion, newReference, questionDecoder, referenceByType, referenceDecoder, referenceType, resourcePageReferenceDecoder, urlReferenceDecoder)
+module KMEditor.Common.Models.Entities exposing
+    ( Answer
+    , Chapter
+    , CrossReferenceData
+    , Expert
+    , FollowUps(..)
+    , KnowledgeModel
+    , Level
+    , ListQuestionData
+    , Metric
+    , MetricMeasure
+    , OptionsQuestionData
+    , Question(..)
+    , Reference(..)
+    , ResourcePageReferenceData
+    , Tag
+    , URLReferenceData
+    , ValueQuestionData
+    , ValueQuestionType(..)
+    , answerDecoder
+    , chapterDecoder
+    , createPathMap
+    , expertDecoder
+    , filterKnowledgModelWithTags
+    , getAnswer
+    , getAnswers
+    , getChapter
+    , getChapters
+    , getExpert
+    , getExperts
+    , getFollowUpQuestions
+    , getQuestion
+    , getQuestionAnswers
+    , getQuestionExperts
+    , getQuestionItemQuestions
+    , getQuestionItemTitle
+    , getQuestionReferences
+    , getQuestionRequiredLevel
+    , getQuestionTagUuids
+    , getQuestionText
+    , getQuestionTitle
+    , getQuestionTypeString
+    , getQuestionUuid
+    , getQuestionValueType
+    , getQuestions
+    , getReference
+    , getReferenceUuid
+    , getReferenceVisibleName
+    , getReferences
+    , getTag
+    , isQuestionList
+    , isQuestionOptions
+    , knowledgeModelDecoder
+    , levelListDecoder
+    , mapReferenceData
+    , metricDecoder
+    , metricListDecoder
+    , metricMeasureDecoder
+    , metricMeasureEncoder
+    , newAnswer
+    , newChapter
+    , newExpert
+    , newQuestion
+    , newReference
+    , newTag
+    , questionDecoder
+    , referenceDecoder
+    , tagDecoder
+    , valueQuestionTypeString
+    , valueTypeDecoder
+    )
 
+import Dict exposing (Dict)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
-import Json.Decode.Pipeline exposing (hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
+import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import List.Extra as List
 
 
@@ -11,6 +83,15 @@ type alias KnowledgeModel =
     { uuid : String
     , name : String
     , chapters : List Chapter
+    , tags : List Tag
+    }
+
+
+type alias Tag =
+    { uuid : String
+    , name : String
+    , description : Maybe String
+    , color : String
     }
 
 
@@ -22,27 +103,54 @@ type alias Chapter =
     }
 
 
-type alias Question =
+type Question
+    = OptionsQuestion OptionsQuestionData
+    | ListQuestion ListQuestionData
+    | ValueQuestion ValueQuestionData
+
+
+type alias OptionsQuestionData =
     { uuid : String
-    , type_ : String
     , title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
-    , answerItemTemplate : Maybe AnswerItemTemplate
-    , answers : Maybe (List Answer)
+    , tagUuids : List String
     , references : List Reference
     , experts : List Expert
+    , answers : List Answer
     }
 
 
-type alias AnswerItemTemplate =
-    { title : String
-    , questions : AnswerItemTemplateQuestions
+type alias ListQuestionData =
+    { uuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    , references : List Reference
+    , experts : List Expert
+    , itemTemplateTitle : String
+    , itemTemplateQuestions : List Question
     }
 
 
-type AnswerItemTemplateQuestions
-    = AnswerItemTemplateQuestions (List Question)
+type alias ValueQuestionData =
+    { uuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    , references : List Reference
+    , experts : List Expert
+    , valueType : ValueQuestionType
+    }
+
+
+type ValueQuestionType
+    = StringValueType
+    | DateValueType
+    | NumberValueType
+    | TextValueType
 
 
 type alias Answer =
@@ -122,6 +230,7 @@ knowledgeModelDecoder =
         |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "chapters" (Decode.list chapterDecoder)
+        |> required "tags" (Decode.list tagDecoder)
 
 
 chapterDecoder : Decoder Chapter
@@ -133,30 +242,105 @@ chapterDecoder =
         |> required "questions" (Decode.list questionDecoder)
 
 
+tagDecoder : Decoder Tag
+tagDecoder =
+    Decode.succeed Tag
+        |> required "uuid" Decode.string
+        |> required "name" Decode.string
+        |> required "description" (Decode.nullable Decode.string)
+        |> required "color" Decode.string
+
+
 questionDecoder : Decoder Question
 questionDecoder =
-    Decode.succeed Question
+    Decode.oneOf
+        [ when questionType ((==) "OptionsQuestion") optionsQuestionDecoder
+        , when questionType ((==) "ListQuestion") listQuestionDecoder
+        , when questionType ((==) "ValueQuestion") valueQuestionDecoder
+        ]
+
+
+questionType : Decoder String
+questionType =
+    Decode.field "questionType" Decode.string
+
+
+optionsQuestionDecoder : Decoder Question
+optionsQuestionDecoder =
+    Decode.map OptionsQuestion optionsQuestionDataDecoder
+
+
+listQuestionDecoder : Decoder Question
+listQuestionDecoder =
+    Decode.map ListQuestion listQuestionDataDecoder
+
+
+valueQuestionDecoder : Decoder Question
+valueQuestionDecoder =
+    Decode.map ValueQuestion valueQuestionDataDecoder
+
+
+optionsQuestionDataDecoder : Decoder OptionsQuestionData
+optionsQuestionDataDecoder =
+    Decode.succeed OptionsQuestionData
         |> required "uuid" Decode.string
-        |> required "type" Decode.string
         |> required "title" Decode.string
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
-        |> required "answerItemTemplate" (Decode.nullable <| Decode.lazy (\_ -> answerItemTemplateDecoder))
-        |> required "answers" (Decode.nullable <| Decode.lazy (\_ -> Decode.list answerDecoder))
+        |> required "tagUuids" (Decode.list Decode.string)
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
+        |> required "answers" (Decode.list answerDecoder)
 
 
-answerItemTemplateDecoder : Decoder AnswerItemTemplate
-answerItemTemplateDecoder =
-    Decode.succeed AnswerItemTemplate
+listQuestionDataDecoder : Decoder ListQuestionData
+listQuestionDataDecoder =
+    Decode.succeed ListQuestionData
+        |> required "uuid" Decode.string
         |> required "title" Decode.string
-        |> required "questions" (Decode.lazy (\_ -> answerItemTemplateQuestionsDecoder))
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+        |> required "references" (Decode.list referenceDecoder)
+        |> required "experts" (Decode.list expertDecoder)
+        |> required "itemTemplateTitle" Decode.string
+        |> required "itemTemplateQuestions" (Decode.lazy (\_ -> Decode.list questionDecoder))
 
 
-answerItemTemplateQuestionsDecoder : Decoder AnswerItemTemplateQuestions
-answerItemTemplateQuestionsDecoder =
-    Decode.map AnswerItemTemplateQuestions (Decode.list questionDecoder)
+valueQuestionDataDecoder : Decoder ValueQuestionData
+valueQuestionDataDecoder =
+    Decode.succeed ValueQuestionData
+        |> required "uuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+        |> required "references" (Decode.list referenceDecoder)
+        |> required "experts" (Decode.list expertDecoder)
+        |> required "valueType" valueTypeDecoder
+
+
+valueTypeDecoder : Decoder ValueQuestionType
+valueTypeDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\str ->
+                case str of
+                    "StringValue" ->
+                        Decode.succeed StringValueType
+
+                    "DateValue" ->
+                        Decode.succeed DateValueType
+
+                    "NumberValue" ->
+                        Decode.succeed NumberValueType
+
+                    "TextValue" ->
+                        Decode.succeed TextValueType
+
+                    valueType ->
+                        Decode.fail <| "Unknown value type: " ++ valueType
+            )
 
 
 answerDecoder : Decoder Answer
@@ -278,18 +462,27 @@ newChapter uuid =
     }
 
 
+newTag : String -> Tag
+newTag uuid =
+    { uuid = uuid
+    , name = "New Tag"
+    , description = Nothing
+    , color = "#3498DB"
+    }
+
+
 newQuestion : String -> Question
 newQuestion uuid =
-    { uuid = uuid
-    , type_ = "options"
-    , title = "New question"
-    , text = Nothing
-    , requiredLevel = Nothing
-    , answerItemTemplate = Nothing
-    , answers = Nothing
-    , references = []
-    , experts = []
-    }
+    OptionsQuestion
+        { uuid = uuid
+        , title = "New question"
+        , text = Nothing
+        , requiredLevel = Nothing
+        , tagUuids = []
+        , references = []
+        , experts = []
+        , answers = []
+        }
 
 
 newAnswer : String -> Answer
@@ -323,6 +516,73 @@ newExpert uuid =
 {- Helpers -}
 
 
+createPathMap : KnowledgeModel -> Dict String Path
+createPathMap knowledgeModel =
+    let
+        foldKm path km dict =
+            let
+                nextPath =
+                    path ++ [ KMPathNode km.uuid ]
+
+                withChapters =
+                    List.foldl (foldChapter nextPath) dict km.chapters
+
+                withTags =
+                    List.foldl (foldTag nextPath) withChapters km.tags
+            in
+            Dict.insert km.uuid path withTags
+
+        foldChapter path chapter dict =
+            let
+                nextPath =
+                    path ++ [ ChapterPathNode chapter.uuid ]
+
+                withQuestions =
+                    List.foldl (foldQuestion nextPath) dict chapter.questions
+            in
+            Dict.insert chapter.uuid path withQuestions
+
+        foldTag path tag dict =
+            Dict.insert tag.uuid path dict
+
+        foldQuestion path question dict =
+            let
+                nextPath =
+                    path ++ [ QuestionPathNode (getQuestionUuid question) ]
+
+                withAnswers =
+                    List.foldl (foldAnswer nextPath) dict <| getQuestionAnswers question
+
+                withItemQuestions =
+                    List.foldl (foldQuestion nextPath) withAnswers <| getQuestionItemQuestions question
+
+                withReferences =
+                    List.foldl (foldReference nextPath) withItemQuestions <| getQuestionReferences question
+
+                withExperts =
+                    List.foldl (foldExpert nextPath) withReferences <| getQuestionExperts question
+            in
+            Dict.insert (getQuestionUuid question) path withExperts
+
+        foldAnswer path answer dict =
+            let
+                nextPath =
+                    path ++ [ AnswerPathNode answer.uuid ]
+
+                withFollowUps =
+                    List.foldl (foldQuestion nextPath) dict <| getFollowUpQuestions answer
+            in
+            Dict.insert answer.uuid path withFollowUps
+
+        foldExpert path expert dict =
+            Dict.insert expert.uuid path dict
+
+        foldReference path reference dict =
+            Dict.insert (getReferenceUuid reference) path dict
+    in
+    foldKm [] knowledgeModel Dict.empty
+
+
 getChapters : KnowledgeModel -> List Chapter
 getChapters km =
     km.chapters
@@ -334,36 +594,170 @@ getChapter km chapterUuid =
         |> List.find (\c -> c.uuid == chapterUuid)
 
 
+getTag : KnowledgeModel -> String -> Maybe Tag
+getTag km tagUuid =
+    List.find (\t -> t.uuid == tagUuid) km.tags
+
+
 getQuestions : KnowledgeModel -> List Question
 getQuestions km =
     let
-        nestedQuestions question =
-            List.map getFollowUpQuestions (question.answers |> Maybe.withDefault [])
-                |> List.concat
-                |> (::) question
+        foldAnswerQuestions answer =
+            List.foldl (\q acc -> acc ++ foldQuestion q) [] (getFollowUpQuestions answer)
+
+        foldQuestion question =
+            case question of
+                OptionsQuestion questionData ->
+                    [ question ] ++ List.foldl (\a acc -> acc ++ foldAnswerQuestions a) [] questionData.answers
+
+                ListQuestion questionData ->
+                    [ question ] ++ List.foldl (\q acc -> acc ++ foldQuestion q) [] questionData.itemTemplateQuestions
+
+                ValueQuestion _ ->
+                    [ question ]
+
+        foldChapter chapter =
+            List.foldl (\q acc -> acc ++ foldQuestion q) [] chapter.questions
     in
-    getChapters km
-        |> List.map .questions
-        |> List.concat
-        |> List.map nestedQuestions
-        |> List.concat
+    List.foldl (\c acc -> acc ++ foldChapter c) [] km.chapters
 
 
 getQuestion : KnowledgeModel -> String -> Maybe Question
 getQuestion km questionUuid =
     getQuestions km
-        |> List.find (\q -> q.uuid == questionUuid)
+        |> List.find (\q -> getQuestionUuid q == questionUuid)
 
 
-getAnswerItemTemplateQuestions : Question -> List Question
-getAnswerItemTemplateQuestions question =
-    let
-        unwrap (AnswerItemTemplateQuestions questions) =
-            questions
-    in
-    question.answerItemTemplate
-        |> Maybe.map (.questions >> unwrap)
-        |> Maybe.withDefault []
+mapQuestionData : (OptionsQuestionData -> a) -> (ListQuestionData -> a) -> (ValueQuestionData -> a) -> Question -> a
+mapQuestionData fn1 fn2 fn3 question =
+    case question of
+        OptionsQuestion data ->
+            fn1 data
+
+        ListQuestion data ->
+            fn2 data
+
+        ValueQuestion data ->
+            fn3 data
+
+
+getQuestionUuid : Question -> String
+getQuestionUuid =
+    mapQuestionData .uuid .uuid .uuid
+
+
+getQuestionTitle : Question -> String
+getQuestionTitle =
+    mapQuestionData .title .title .title
+
+
+getQuestionText : Question -> Maybe String
+getQuestionText =
+    mapQuestionData .text .text .text
+
+
+getQuestionRequiredLevel : Question -> Maybe Int
+getQuestionRequiredLevel =
+    mapQuestionData .requiredLevel .requiredLevel .requiredLevel
+
+
+getQuestionTagUuids : Question -> List String
+getQuestionTagUuids =
+    mapQuestionData .tagUuids .tagUuids .tagUuids
+
+
+getQuestionExperts : Question -> List Expert
+getQuestionExperts =
+    mapQuestionData .experts .experts .experts
+
+
+getQuestionReferences : Question -> List Reference
+getQuestionReferences =
+    mapQuestionData .references .references .references
+
+
+getQuestionAnswers : Question -> List Answer
+getQuestionAnswers question =
+    case question of
+        OptionsQuestion optionsQuestionData ->
+            optionsQuestionData.answers
+
+        _ ->
+            []
+
+
+getQuestionItemTitle : Question -> Maybe String
+getQuestionItemTitle question =
+    case question of
+        ListQuestion listQuestionData ->
+            Just listQuestionData.itemTemplateTitle
+
+        _ ->
+            Nothing
+
+
+getQuestionItemQuestions : Question -> List Question
+getQuestionItemQuestions question =
+    case question of
+        ListQuestion listQuestionData ->
+            listQuestionData.itemTemplateQuestions
+
+        _ ->
+            []
+
+
+getQuestionValueType : Question -> Maybe ValueQuestionType
+getQuestionValueType question =
+    case question of
+        ValueQuestion valueQuestionData ->
+            Just valueQuestionData.valueType
+
+        _ ->
+            Nothing
+
+
+getQuestionTypeString : Question -> String
+getQuestionTypeString =
+    mapQuestionData
+        (\_ -> "Options")
+        (\_ -> "List")
+        (\_ -> "Value")
+
+
+valueQuestionTypeString : ValueQuestionType -> String
+valueQuestionTypeString valueType =
+    case valueType of
+        StringValueType ->
+            "String"
+
+        DateValueType ->
+            "Date"
+
+        NumberValueType ->
+            "Number"
+
+        TextValueType ->
+            "Text"
+
+
+isQuestionOptions : Question -> Bool
+isQuestionOptions question =
+    case question of
+        OptionsQuestion _ ->
+            True
+
+        _ ->
+            False
+
+
+isQuestionList : Question -> Bool
+isQuestionList question =
+    case question of
+        ListQuestion _ ->
+            True
+
+        _ ->
+            False
 
 
 getFollowUpQuestions : Answer -> List Question
@@ -378,7 +772,7 @@ getFollowUpQuestions answer =
 getAnswers : KnowledgeModel -> List Answer
 getAnswers km =
     getQuestions km
-        |> List.map (.answers >> Maybe.withDefault [])
+        |> List.map getQuestionAnswers
         |> List.concat
 
 
@@ -390,18 +784,18 @@ getAnswer km answerUuid =
 
 getReferenceUuid : Reference -> String
 getReferenceUuid =
-    referenceByType .uuid .uuid .uuid
+    mapReferenceData .uuid .uuid .uuid
 
 
 getReferenceVisibleName : Reference -> String
 getReferenceVisibleName =
-    referenceByType .shortUuid .label .targetUuid
+    mapReferenceData .shortUuid .label .targetUuid
 
 
 getReferences : KnowledgeModel -> List Reference
 getReferences km =
     getQuestions km
-        |> List.map .references
+        |> List.map getQuestionReferences
         |> List.concat
 
 
@@ -414,7 +808,7 @@ getReference km referenceUuid =
 getExperts : KnowledgeModel -> List Expert
 getExperts km =
     getQuestions km
-        |> List.map .experts
+        |> List.map getQuestionExperts
         |> List.concat
 
 
@@ -424,8 +818,8 @@ getExpert km expertUuid =
         |> List.find (\e -> e.uuid == expertUuid)
 
 
-referenceByType : (ResourcePageReferenceData -> a) -> (URLReferenceData -> a) -> (CrossReferenceData -> a) -> Reference -> a
-referenceByType resourcePageReference urlReference crossReference reference =
+mapReferenceData : (ResourcePageReferenceData -> a) -> (URLReferenceData -> a) -> (CrossReferenceData -> a) -> Reference -> a
+mapReferenceData resourcePageReference urlReference crossReference reference =
     case reference of
         ResourcePageReference data ->
             resourcePageReference data
@@ -435,3 +829,62 @@ referenceByType resourcePageReference urlReference crossReference reference =
 
         CrossReference data ->
             crossReference data
+
+
+filterKnowledgModelWithTags : List String -> KnowledgeModel -> KnowledgeModel
+filterKnowledgModelWithTags selectedTags originalKM =
+    let
+        mapKM tags km =
+            { km
+                | chapters =
+                    km.chapters
+                        |> List.map (mapChapter tags)
+                        |> List.filter filterEmptyChapter
+            }
+
+        filterEmptyChapter chapter =
+            List.length chapter.questions > 0
+
+        mapChapter tags chapter =
+            { chapter
+                | questions =
+                    chapter.questions
+                        |> List.filter (filterQuestion tags)
+                        |> List.map (mapQuestion tags)
+            }
+
+        filterQuestion tags question =
+            getQuestionTagUuids question |> List.any (\t -> List.member t tags)
+
+        mapQuestion tags question =
+            case question of
+                OptionsQuestion data ->
+                    OptionsQuestion
+                        { data | answers = List.map (mapAnswer tags) data.answers }
+
+                ListQuestion data ->
+                    ListQuestion
+                        { data
+                            | itemTemplateQuestions =
+                                data.itemTemplateQuestions
+                                    |> List.filter (filterQuestion tags)
+                                    |> List.map (mapQuestion tags)
+                        }
+
+                _ ->
+                    question
+
+        mapAnswer tags answer =
+            { answer
+                | followUps =
+                    getFollowUpQuestions answer
+                        |> List.filter (filterQuestion tags)
+                        |> List.map (mapQuestion tags)
+                        |> FollowUps
+            }
+    in
+    if List.isEmpty selectedTags then
+        originalKM
+
+    else
+        mapKM selectedTags originalKM

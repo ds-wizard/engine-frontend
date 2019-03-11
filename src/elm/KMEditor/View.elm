@@ -16,17 +16,17 @@ import Msgs
 view : Route -> (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view route wrapMsg maybeJwt model =
     case route of
-        Create _ ->
+        CreateRoute _ ->
             KMEditor.Create.View.view (wrapMsg << CreateMsg) model.createModel
 
-        Editor _ ->
+        EditorRoute _ ->
             KMEditor.Editor.View.view (wrapMsg << EditorMsg) model.editorModel
 
-        Index ->
+        IndexRoute ->
             KMEditor.Index.View.view (wrapMsg << IndexMsg) maybeJwt model.indexModel
 
-        Migration _ ->
+        MigrationRoute _ ->
             KMEditor.Migration.View.view (wrapMsg << MigrationMsg) model.migrationModel
 
-        Publish _ ->
+        PublishRoute _ ->
             KMEditor.Publish.View.view (wrapMsg << PublishMsg) model.publishModel

@@ -45,6 +45,36 @@ textarea {
         display: block;
         padding: 10px;
     }
+
+    &-color-picker {
+        input {
+            display: none;
+        }
+
+        .color-buttons {
+            display: grid;
+            grid-template-columns: 20% 20% 20% 20% 20%;
+            grid-row-gap: 5px;
+            grid-column-gap: 5px;
+
+            a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                height: 50px;
+                border-radius: 5px;
+
+                &.selected {
+                    border: 2px solid $black;
+                }
+
+                &:hover {
+                    text-decoration: none;
+                }
+            }
+        }
+    }
 }
 
 .form-control:disabled {
@@ -132,4 +162,9 @@ textarea {
             }
         }
     }
+}
+
+
+input[type=color] {
+    min-height: 30px;
 }

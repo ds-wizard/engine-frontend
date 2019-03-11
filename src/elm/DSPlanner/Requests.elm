@@ -10,7 +10,8 @@ import Auth.Models exposing (Session)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
 import DSPlanner.Common.Models exposing (..)
 import Http
-import Json.Encode exposing (Value)
+import Json.Encode as Encode exposing (Value)
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
 import Requests
 
 

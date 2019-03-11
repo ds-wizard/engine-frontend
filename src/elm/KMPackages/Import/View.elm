@@ -1,9 +1,10 @@
 module KMPackages.Import.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Html exposing (detailContainerClassWith)
-import Common.View exposing (pageHeader)
-import Common.View.Forms exposing (actionButton, formResultView)
+import Common.Html.Attribute exposing (detailClass)
+import Common.View.ActionButton as ActionButton
+import Common.View.FormResult as FormResult
+import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -24,9 +25,9 @@ view wrapMsg model =
                 Nothing ->
                     dropzone model |> Html.map wrapMsg
     in
-    div [ detailContainerClassWith "KMPackages__Import", id dropzoneId ]
-        [ pageHeader "Import Knowledge Model" []
-        , formResultView model.importing
+    div [ detailClass "KMPackages__Import", id dropzoneId ]
+        [ Page.header "Import Knowledge Model" []
+        , FormResult.view model.importing
         , content
         ]
 
@@ -51,7 +52,7 @@ fileView wrapMsg model fileName =
         , div [ class "actions" ]
             [ button [ disabled cancelDisabled, onClick (wrapMsg Cancel), class "btn btn-secondary" ]
                 [ text "Cancel" ]
-            , actionButton ( "Upload", model.importing, wrapMsg Submit )
+            , ActionButton.button ( "Upload", model.importing, wrapMsg Submit )
             ]
         ]
 

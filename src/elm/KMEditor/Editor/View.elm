@@ -1,93 +1,135 @@
-module KMEditor.Editor.View exposing (alertConfig, editorView, view, viewConfig, viewEditor, viewTree)
+module KMEditor.Editor.View exposing (view)
 
 import ActionResult
-import Common.Html exposing (emptyNode)
-import Common.View exposing (AlertConfig, alertView, fullPageActionResultView)
-import Common.View.Forms exposing (actionButton, formErrorResultView)
+import Common.Html exposing (emptyNode, fa)
+import Common.View.ActionButton as ActionButton
+import Common.View.Flash as Flash
+import Common.View.Page as Page
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Html.Keyed
+import KMEditor.Common.Models exposing (Branch)
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
-import KMEditor.Editor.Models exposing (..)
-import KMEditor.Editor.Msgs exposing (..)
-import KMEditor.Editor.View.Breadcrumbs exposing (breadcrumbs)
-import KMEditor.Editor.View.Editors exposing (activeEditor)
-import KMEditor.Editor.View.Tree exposing (treeView)
-import Maybe.Extra as Maybe
+import KMEditor.Editor.KMEditor.View
+import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
+import KMEditor.Editor.Msgs exposing (Msg(..))
+import KMEditor.Editor.Preview.View
+import KMEditor.Editor.TagEditor.View
 import Msgs
-import SplitPane exposing (ViewConfig, createViewConfig)
 
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "col KMEditor__Editor" ]
-        [ fullPageActionResultView (editorView wrapMsg model) (ActionResult.combine3 model.kmUuid model.metrics model.levels)
-        , alertView (alertConfig model) |> Html.map wrapMsg
+    Page.actionResultView (editorView wrapMsg model) <|
+        ActionResult.combine3 model.branch model.metrics model.levels
+
+
+editorView : (Msg -> Msgs.Msg) -> Model -> ( Branch, List Metric, List Level ) -> Html Msgs.Msg
+editorView wrapMsg model ( branch, metric, levels ) =
+    let
+        content _ =
+            case model.currentEditor of
+                KMEditor ->
+                    kmEditorView wrapMsg model
+
+                TagsEditor ->
+                    tagsEditorView wrapMsg model
+
+                PreviewEditor ->
+                    previewView wrapMsg model levels branch
+
+                HistoryEditor ->
+                    historyView
+    in
+    div [ class "KMEditor__Editor" ]
+        [ editorHeader wrapMsg model
+        , div [ class "editor-body", classList [ ( "with-error", hasSavingError model ) ] ]
+            [ Page.actionResultView content model.preview
+            ]
         ]
 
 
-editorView : (Msg -> Msgs.Msg) -> Model -> ( String, List Metric, List Level ) -> Html Msgs.Msg
-editorView wrapMsg model ( kmUuid, _, _ ) =
+editorHeader : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+editorHeader wrapMsg model =
     let
-        breadcrumbsView =
-            case model.activeEditorUuid of
-                Just activeUuid ->
-                    breadcrumbs activeUuid model.editors |> Html.map wrapMsg
-
-                _ ->
-                    emptyNode
-
-        unsavedChanges =
+        actions =
             if containsChanges model then
-                div []
-                    [ text "(unsaved changes)"
-                    , button [ onClick <| wrapMsg Discard, class "btn btn-secondary btn-with-loader" ] [ text "Discard" ]
-                    , actionButton ( "Save", model.submitting, wrapMsg Submit )
-                    ]
+                [ text "(unsaved changes)"
+                , button [ onClick <| wrapMsg Discard, class "btn btn-outline-danger btn-with-loader" ] [ text "Discard" ]
+                , ActionButton.button ( "Save", model.saving, wrapMsg Save )
+                ]
+
+            else
+                []
+
+        errorMsg =
+            if hasSavingError model then
+                Flash.error <| getSavingError model
 
             else
                 emptyNode
     in
-    div [ class "row" ]
-        [ div [ class "editor-header" ]
-            [ text "Knowledge Model Editor"
-            , formErrorResultView model.submitting
-            , unsavedChanges
+    div [ class "editor-header", classList [ ( "with-error", hasSavingError model ) ] ]
+        [ div [ class "navigation" ]
+            [ --            div [ class "undo" ]
+              --                [ a [] [ fa "undo" ]
+              --                , a [ class "disabled" ] [ fa "repeat" ]
+              --                ]
+              --            ,
+              ul [ class "nav" ]
+                [ a
+                    [ class "nav-link"
+                    , classList [ ( "active", model.currentEditor == KMEditor ) ]
+                    , onClick <| wrapMsg <| OpenEditor KMEditor
+                    ]
+                    [ fa "sitemap", text "Knowledge Model" ]
+                , a
+                    [ class "nav-link"
+                    , classList [ ( "active", model.currentEditor == TagsEditor ) ]
+                    , onClick <| wrapMsg <| OpenEditor TagsEditor
+                    ]
+                    [ fa "tags", text "Tags" ]
+                , a
+                    [ class "nav-link"
+                    , classList [ ( "active", model.currentEditor == PreviewEditor ) ]
+                    , onClick <| wrapMsg <| OpenEditor PreviewEditor
+                    ]
+                    [ fa "eye", text "Preview" ]
+
+                --                , a
+                --                    [ class "nav-link"
+                --                    , classList [ ( "active", model.currentEditor == HistoryEditor ) ]
+                --                    , onClick <| wrapMsg <| OpenEditor HistoryEditor
+                --                    ]
+                --                    [ fa "history", text "History" ]
+                ]
+            , div [ class "actions" ] actions
             ]
-        , div [ class "editor-breadcrumbs" ]
-            [ breadcrumbsView ]
-        , SplitPane.view viewConfig (viewTree model kmUuid) (viewEditor model) model.splitPane |> Html.map wrapMsg
+        , errorMsg
         ]
 
 
-viewConfig : ViewConfig Msg
-viewConfig =
-    createViewConfig
-        { toMsg = PaneMsg
-        , customSplitter = Nothing
-        }
+kmEditorView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+kmEditorView wrapMsg model =
+    model.editorModel
+        |> Maybe.map (KMEditor.Editor.KMEditor.View.view (wrapMsg << KMEditorMsg))
+        |> Maybe.withDefault (Page.error "Error opening knowledge model editor")
 
 
-viewTree : Model -> String -> Html Msg
-viewTree model kmUuid =
-    div [ class "tree-col" ]
-        [ treeView (Maybe.withDefault "" model.activeEditorUuid) model.editors kmUuid
-        ]
+tagsEditorView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+tagsEditorView wrapMsg model =
+    model.tagEditorModel
+        |> Maybe.map (KMEditor.Editor.TagEditor.View.view (wrapMsg << TagEditorMsg))
+        |> Maybe.withDefault (Page.error "Error opening tag editor")
 
 
-viewEditor : Model -> Html Msg
-viewEditor model =
-    Html.Keyed.node "div"
-        [ class "editor-form-view", id "editor-view" ]
-        [ activeEditor model
-        ]
+previewView : (Msg -> Msgs.Msg) -> Model -> List Level -> Branch -> Html Msgs.Msg
+previewView wrapMsg model levels branch =
+    model.previewEditorModel
+        |> Maybe.map (KMEditor.Editor.Preview.View.view (wrapMsg << PreviewEditorMsg) levels)
+        |> Maybe.withDefault (Page.error "Error opening preview")
 
 
-alertConfig : Model -> AlertConfig Msg
-alertConfig model =
-    { message = Maybe.withDefault "" model.alert
-    , visible = Maybe.isJust model.alert
-    , actionMsg = CloseAlert
-    , actionName = "Ok"
-    }
+historyView : Html Msgs.Msg
+historyView =
+    div [] [ text "History" ]

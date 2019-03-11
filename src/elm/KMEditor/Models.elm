@@ -30,21 +30,21 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        Create selectedPackage ->
+        CreateRoute selectedPackage ->
             { model | createModel = KMEditor.Create.Models.initialModel selectedPackage }
 
-        Editor uuid ->
+        EditorRoute uuid ->
             if model.editorModel.branchUuid == uuid then
                 model
 
             else
                 { model | editorModel = KMEditor.Editor.Models.initialModel uuid }
 
-        Index ->
+        IndexRoute ->
             { model | indexModel = KMEditor.Index.Models.initialModel }
 
-        Migration uuid ->
+        MigrationRoute uuid ->
             { model | migrationModel = KMEditor.Migration.Models.initialModel uuid }
 
-        Publish uuid ->
+        PublishRoute uuid ->
             { model | publishModel = KMEditor.Publish.Models.initialModel }
