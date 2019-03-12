@@ -54,8 +54,7 @@ publicHeader model =
             [ div [ class "navbar-header" ]
                 [ linkTo homeRoute
                     [ class "navbar-brand" ]
-                    [ img [ src "/img/dsw-logo.svg" ] []
-                    , text "Data Stewardship Wizard"
+                    [ text "Data Stewardship Wizard"
                     ]
                 ]
             , ul [ class "nav navbar-nav ml-auto" ] links
