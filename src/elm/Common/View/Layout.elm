@@ -49,7 +49,7 @@ publicHeader model =
                 , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
                 ]
     in
-    nav [ class "navbar navbar-expand-sm bg-primary fixed-top" ]
+    nav [ class "navbar navbar-expand-sm fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
                 [ linkTo homeRoute

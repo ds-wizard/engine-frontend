@@ -5,11 +5,11 @@ a {
     cursor: pointer;
 
     &:not([href]):not([tabindex]) {
-        color: $primary;
+        color: $link-color;
 
         &:hover, &:active, &:focus {
             text-decoration: underline;
-            color: darken($primary, 15%);
+            color: $link-hover-color;
         }
     }
 

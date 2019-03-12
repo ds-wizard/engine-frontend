@@ -9,7 +9,6 @@
 
     .navbar-brand {
         color: $side-navigation-title-color;
-        background-color: $side-navigation-bg;
         background-image: $side-navigation-logo-url;
         background-repeat: no-repeat;
         background-size: 35px;
@@ -18,6 +17,7 @@
     }
 
     .navbar-expand-sm {
+        background: $side-navigation-bg;
         z-index: 900;
 
         .navbar-nav {

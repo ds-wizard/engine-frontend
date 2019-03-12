@@ -10,13 +10,14 @@ $side-navigation-logo-url: url(/img/dsw-logo.svg) !default;
 $side-navigation-width: 240px !default;
 $side-navigation-width-collapsed: 50px !default;
 $side-navigation-bg: $primary !default;
-$side-navigation-title-color: $white !default;
-$side-navigation-icon-color: $white !default;
-$side-navigation-link-color: $white !default;
-$side-navigation-link-active-bg: darken($primary, 10%) !default;
-$side-navigation-link-hover-bg: darken($primary, 15%) !default;
-$side-navigation-border-color: darken($primary, 10%) !default;
-$side-navigation-collapse-hover: darken($primary, 5%) !default;
+$side-navigation-text-color: $white !default;
+$side-navigation-title-color: $side-navigation-text-color !default;
+$side-navigation-icon-color: $side-navigation-text-color !default;
+$side-navigation-link-color: $side-navigation-text-color !default;
+$side-navigation-link-active-bg: darken($side-navigation-bg, 10%) !default;
+$side-navigation-link-hover-bg: darken($side-navigation-bg, 15%) !default;
+$side-navigation-border-color: darken($side-navigation-bg, 10%) !default;
+$side-navigation-collapse-hover: darken($side-navigation-bg, 5%) !default;
 
 // special text colors
 
