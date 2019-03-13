@@ -41,19 +41,16 @@ update msg wrapMsg session model =
 
 getQuestionnairesCompleted : Model -> Result Jwt.JwtError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
 getQuestionnairesCompleted model result =
-    let
-        newModel =
-            case result of
-                Ok questionnaires ->
-                    { model | questionnaires = Success <| List.map initQuestionnaireRow questionnaires }
+    case result of
+        Ok questionnaires ->
+            ( { model | questionnaires = Success <| List.map initQuestionnaireRow questionnaires }
+            , Cmd.none
+            )
 
-                Err error ->
-                    { model | questionnaires = getServerErrorJwt error "Unable to fetch questionnaire list" }
-
-        cmd =
-            getResultCmd result
-    in
-    ( newModel, cmd )
+        Err error ->
+            ( { model | questionnaires = getServerErrorJwt error "Unable to fetch questionnaire list" }
+            , getResultCmd result
+            )
 
 
 handleDeleteQuestionnaire : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
