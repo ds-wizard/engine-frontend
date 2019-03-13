@@ -1,4 +1,11 @@
-module KMPackages.Common.Models exposing (Package, PackageDetail, packageDecoder, packageDetailDecoder, packageDetailListDecoder, packageListDecoder)
+module KMPackages.Common.Models exposing
+    ( Package
+    , PackageDetail
+    , packageDecoder
+    , packageDetailDecoder
+    , packageDetailListDecoder
+    , packageListDecoder
+    )
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)

@@ -39,7 +39,7 @@ packageDetail wrapMsg jwt packages =
                 , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
                 , FormGroup.codeView (String.fromInt package.packageDetail.metamodelVersion) "Metamodel Version"
                 , h3 [] [ text "Versions" ]
-                , div [] (List.map (versionView wrapMsg jwt) packages)
+                , div [] (List.map (versionView wrapMsg jwt) <| sortPackageDetailRowsByVersion packages)
                 ]
 
         Nothing ->
