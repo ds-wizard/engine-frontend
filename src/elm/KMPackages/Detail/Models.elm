@@ -1,8 +1,9 @@
-module KMPackages.Detail.Models exposing (Model, PackageDetailRow, currentPackage, initPackageDetailRow, initialModel, packagesLength)
+module KMPackages.Detail.Models exposing (Model, PackageDetailRow, currentPackage, initPackageDetailRow, initialModel, packagesLength, sortPackageDetailRowsByVersion)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import KMPackages.Common.Models exposing (PackageDetail)
+import Utils exposing (versionIsGreater)
 
 
 type alias Model =
@@ -51,3 +52,16 @@ packagesLength model =
 
         _ ->
             0
+
+
+sortPackageDetailRowsByVersion : List PackageDetailRow -> List PackageDetailRow
+sortPackageDetailRowsByVersion =
+    let
+        versionSort packageDetailRow1 packageDetailRow2 =
+            if versionIsGreater packageDetailRow2.packageDetail.version packageDetailRow1.packageDetail.version then
+                LT
+
+            else
+                GT
+    in
+    List.sortWith versionSort
