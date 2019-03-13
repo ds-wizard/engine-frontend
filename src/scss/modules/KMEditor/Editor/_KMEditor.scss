@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "../../../variables";
 @import "../../../mixins";
 @import "variables";
 
@@ -130,8 +130,8 @@ $breadcrumbs-height: 40px;
 
     .input-child-placeholder {
         border: 1px dashed $primary;
-        background: #fff;
-        color: #fff;
+        background: $white;
+        color: $white;
         @include not-selectable();
     }
 

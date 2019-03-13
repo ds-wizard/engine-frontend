@@ -1,0 +1,40 @@
+$font-size-base: 0.875rem !default;
+
+@import "~bootstrap/scss/functions";
+@import "~bootswatch/dist/united/variables";
+@import "~bootstrap/scss/variables";
+
+
+// side navigation
+$side-navigation-logo-url: url(/img/dsw-logo.svg) !default;
+$side-navigation-width: 240px !default;
+$side-navigation-width-collapsed: 50px !default;
+$side-navigation-bg: $primary !default;
+$side-navigation-text-color: $white !default;
+$side-navigation-title-color: $side-navigation-text-color !default;
+$side-navigation-icon-color: $side-navigation-text-color !default;
+$side-navigation-link-color: $side-navigation-text-color !default;
+$side-navigation-link-active-bg: darken($side-navigation-bg, 10%) !default;
+$side-navigation-link-hover-bg: darken($side-navigation-bg, 15%) !default;
+$side-navigation-border-color: darken($side-navigation-bg, 10%) !default;
+$side-navigation-collapse-hover: darken($side-navigation-bg, 5%) !default;
+
+// special text colors
+
+@function color-level($color, $level: 0) {
+    $color-base: if($level > 0, $black, $white);
+    $level: abs($level);
+    @return mix($color-base, $color, $level * $theme-color-interval);
+}
+
+$text-deleted-color: color-level($red, $alert-color-level) !default;
+$text-delete-bg: color-level($red, $alert-bg-level) !default;
+
+$text-inserted-color: color-level($green, $alert-color-level) !default;
+$text-inserted-bg: color-level($green, $alert-bg-level) !default;
+
+$text-edited-color: color-level($yellow, $alert-color-level) !default;
+$text-edited-bg: color-level($yellow, $alert-bg-level) !default;
+
+$code-block-bg-level: -12 !default;
+$code-block-bg: color-level($code-color, $code-block-bg-level)

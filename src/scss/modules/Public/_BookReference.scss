@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "../../variables";
 
 .Public__BookReference {
     margin-top: -60px;
@@ -24,7 +24,7 @@
 
             a {
                 img {
-                    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+                    box-shadow: $box-shadow-sm;
                     margin-right: 20px;
                     height: 75px;
                 }

@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "../../variables";
 @import "../../mixins";
 @import "Editor/KMEditor";
 @import "Editor/Preview";
@@ -12,10 +12,10 @@
     .editor-header {
         height: 50px;
         position: fixed;
-        left: 240px;
+        left: $side-navigation-width;
         top: 0;
         right: 0;
-        background: #fff;
+        background: $white;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
         z-index: 10;
 
@@ -109,7 +109,7 @@
 .side-navigation-collapsed {
     .KMEditor__Editor {
         .editor-header {
-            left: 50px;
+            left: $side-navigation-width-collapsed;
         }
     }
 }

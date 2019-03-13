@@ -1,4 +1,4 @@
-@import "~bootswatch/dist/united/variables";
+@import "../variables";
 @import "./Public/BookReference";
 @import "./Public/Questionnaire";
 @import "./Public/Signup";
@@ -8,21 +8,22 @@
     padding-bottom: 50px;
 
     .navbar-brand {
-        color: $white;
-
-        img {
-            height: 25px;
-            margin-right: 10px;
-        }
+        color: $side-navigation-title-color;
+        background-image: $side-navigation-logo-url;
+        background-repeat: no-repeat;
+        background-size: 35px;
+        background-position: left center;
+        padding-left: 45px;
     }
 
     .navbar-expand-sm {
+        background: $side-navigation-bg;
         z-index: 900;
 
         .navbar-nav {
             & > li {
                 a {
-                    color: $white;
+                    color: $side-navigation-title-color;
                     border-radius: 5px;
                     margin-left: 0.5rem;
                     padding-left: 1rem;
@@ -34,7 +35,7 @@
                 }
 
                 a:hover {
-                    background-color: darken($primary, 15%);
+                    background-color: $side-navigation-link-hover-bg;
                 }
             }
         }
