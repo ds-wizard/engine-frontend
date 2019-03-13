@@ -9,7 +9,7 @@ import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model, encodeKnowledgeModelPublishForm, knowledgeModelPublishFormValidation)
 import KMEditor.Publish.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (getKnowledgeModel, putKnowledgeModelVersion)
-import KMPackages.Routing
+import KnowledgeModels.Routing
 import Models exposing (State)
 import Msgs
 import Requests exposing (getResultCmd)
@@ -86,7 +86,7 @@ putKnowledgeModelVersionCompleted : State -> Model -> Result Jwt.JwtError String
 putKnowledgeModelVersionCompleted state model result =
     case result of
         Ok version ->
-            ( model, cmdNavigate state.key (KMPackages KMPackages.Routing.Index) )
+            ( model, cmdNavigate state.key (KnowledgeModels KnowledgeModels.Routing.Index) )
 
         Err error ->
             ( { model | publishingKnowledgeModel = getServerErrorJwt error "Publishing new version failed" }

@@ -16,10 +16,10 @@ module Routing exposing
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser.Navigation exposing (Key, pushUrl)
-import DSPlanner.Routing
 import KMEditor.Routing
-import KMPackages.Routing
+import KnowledgeModels.Routing
 import Public.Routing
+import Questionnaires.Routing
 import Url exposing (Url)
 import Url.Parser exposing (..)
 import Users.Routing
@@ -27,11 +27,11 @@ import Users.Routing
 
 type Route
     = Welcome
-    | DSPlanner DSPlanner.Routing.Route
     | KMEditor KMEditor.Routing.Route
-    | KMPackages KMPackages.Routing.Route
+    | KnowledgeModels KnowledgeModels.Routing.Route
     | Organization
     | Public Public.Routing.Route
+    | Questionnaires Questionnaires.Routing.Route
     | Users Users.Routing.Route
     | NotAllowed
     | NotFound
@@ -42,9 +42,9 @@ matchers =
     let
         parsers =
             []
-                ++ DSPlanner.Routing.parses DSPlanner
+                ++ Questionnaires.Routing.parses Questionnaires
                 ++ KMEditor.Routing.parsers KMEditor
-                ++ KMPackages.Routing.parsers KMPackages
+                ++ KnowledgeModels.Routing.parsers KnowledgeModels
                 ++ Public.Routing.parsers Public
                 ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
@@ -69,14 +69,14 @@ isAllowed route maybeJwt =
         Welcome ->
             True
 
-        DSPlanner dsPlannerRoute ->
-            DSPlanner.Routing.isAllowed dsPlannerRoute maybeJwt
+        Questionnaires dsPlannerRoute ->
+            Questionnaires.Routing.isAllowed dsPlannerRoute maybeJwt
 
         KMEditor kmEditorRoute ->
             KMEditor.Routing.isAllowed kmEditorRoute maybeJwt
 
-        KMPackages kmPackagesRoute ->
-            KMPackages.Routing.isAllowed kmPackagesRoute maybeJwt
+        KnowledgeModels kmPackagesRoute ->
+            KnowledgeModels.Routing.isAllowed kmPackagesRoute maybeJwt
 
         Organization ->
             hasPerm maybeJwt Perm.organization
@@ -102,14 +102,14 @@ toUrl route =
                 Welcome ->
                     [ "welcome" ]
 
-                DSPlanner dsPlannerRoute ->
-                    DSPlanner.Routing.toUrl dsPlannerRoute
+                Questionnaires dsPlannerRoute ->
+                    Questionnaires.Routing.toUrl dsPlannerRoute
 
                 KMEditor kmEditorRoute ->
                     KMEditor.Routing.toUrl kmEditorRoute
 
-                KMPackages kmPackagesRoute ->
-                    KMPackages.Routing.toUrl kmPackagesRoute
+                KnowledgeModels kmPackagesRoute ->
+                    KnowledgeModels.Routing.toUrl kmPackagesRoute
 
                 Organization ->
                     [ "organization" ]

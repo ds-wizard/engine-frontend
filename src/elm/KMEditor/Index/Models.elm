@@ -6,7 +6,7 @@ import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models exposing (KnowledgeModel)
-import KMPackages.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Models exposing (PackageDetail)
 
 
 type alias Model =

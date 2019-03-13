@@ -15,13 +15,13 @@ module Models exposing
 import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, sessionExists)
 import Browser.Navigation exposing (Key)
 import Common.Menu.Models
-import DSPlanner.Models
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
 import KMEditor.Models
-import KMPackages.Models
+import KnowledgeModels.Models
 import Organization.Models
 import Public.Models
+import Questionnaires.Models
 import Random exposing (Seed, initialSeed)
 import Routing exposing (Route(..))
 import Users.Models
@@ -32,9 +32,9 @@ type alias Model =
     , menuModel : Common.Menu.Models.Model
     , organizationModel : Organization.Models.Model
     , kmEditorModel : KMEditor.Models.Model
-    , kmPackagesModel : KMPackages.Models.Model
+    , kmPackagesModel : KnowledgeModels.Models.Model
     , publicModel : Public.Models.Model
-    , dsPlannerModel : DSPlanner.Models.Model
+    , dsPlannerModel : Questionnaires.Models.Model
     , users : Users.Models.Model
     }
 
@@ -60,8 +60,8 @@ initialModel route seed session jwt key =
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , kmEditorModel = KMEditor.Models.initialModel
-    , kmPackagesModel = KMPackages.Models.initialModel
-    , dsPlannerModel = DSPlanner.Models.initialModel
+    , kmPackagesModel = KnowledgeModels.Models.initialModel
+    , dsPlannerModel = Questionnaires.Models.initialModel
     , publicModel = Public.Models.initialModel
     , users = Users.Models.initialModel
     }
@@ -124,14 +124,14 @@ initLocalModel model =
         KMEditor route ->
             { model | kmEditorModel = KMEditor.Models.initLocalModel route model.kmEditorModel }
 
-        KMPackages route ->
-            { model | kmPackagesModel = KMPackages.Models.initLocalModel route model.kmPackagesModel }
+        KnowledgeModels route ->
+            { model | kmPackagesModel = KnowledgeModels.Models.initLocalModel route model.kmPackagesModel }
 
         Public route ->
             { model | publicModel = Public.Models.initLocalModel route model.publicModel }
 
-        DSPlanner route ->
-            { model | dsPlannerModel = DSPlanner.Models.initLocalModel route model.dsPlannerModel }
+        Questionnaires route ->
+            { model | dsPlannerModel = Questionnaires.Models.initLocalModel route model.dsPlannerModel }
 
         Users route ->
             { model | users = Users.Models.initLocalModel route model.users }

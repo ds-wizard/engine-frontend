@@ -5,14 +5,14 @@ import Auth.Update
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
 import Common.Menu.Update
-import DSPlanner.Update
 import KMEditor.Update
-import KMPackages.Update
+import KnowledgeModels.Update
 import Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
 import Msgs exposing (Msg)
 import Organization.Update
 import Ports
 import Public.Update
+import Questionnaires.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import Url exposing (Url)
 import Users.Update
@@ -21,14 +21,14 @@ import Users.Update
 fetchData : Model -> Cmd Msg
 fetchData model =
     case model.state.route of
-        DSPlanner route ->
-            DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.state.session model.dsPlannerModel
+        Questionnaires route ->
+            Questionnaires.Update.fetchData route Msgs.QuestionnairesMsg model.state.session model.dsPlannerModel
 
         KMEditor route ->
             KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.state.session
 
-        KMPackages route ->
-            KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.state.session
+        KnowledgeModels route ->
+            KnowledgeModels.Update.fetchData route Msgs.KnowledgeModelsMsg model.state.session
 
         Organization ->
             Organization.Update.getCurrentOrganizationCmd model.state.session
@@ -101,10 +101,10 @@ update msg model =
             in
             ( { model | menuModel = menuModel }, cmd )
 
-        Msgs.DSPlannerMsg dsPlannerMsg ->
+        Msgs.QuestionnairesMsg dsPlannerMsg ->
             let
                 ( dsPlannerModel, cmd ) =
-                    DSPlanner.Update.update dsPlannerMsg Msgs.DSPlannerMsg model.state model.dsPlannerModel
+                    Questionnaires.Update.update dsPlannerMsg Msgs.QuestionnairesMsg model.state model.dsPlannerModel
             in
             ( { model | dsPlannerModel = dsPlannerModel }, cmd )
 
@@ -115,10 +115,10 @@ update msg model =
             in
             ( setSeed seed { model | kmEditorModel = kmEditorModel }, cmd )
 
-        Msgs.KMPackagesMsg kmPackagesMsg ->
+        Msgs.KnowledgeModelsMsg kmPackagesMsg ->
             let
                 ( kmPackagesModel, cmd ) =
-                    KMPackages.Update.update kmPackagesMsg Msgs.KMPackagesMsg model.state model.kmPackagesModel
+                    KnowledgeModels.Update.update kmPackagesMsg Msgs.KnowledgeModelsMsg model.state model.kmPackagesModel
             in
             ( { model | kmPackagesModel = kmPackagesModel }, cmd )
 

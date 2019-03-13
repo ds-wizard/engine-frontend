@@ -5,13 +5,13 @@ import Browser exposing (Document)
 import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
-import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMEditor.Routing
-import KMPackages.Routing
+import KnowledgeModels.Routing
 import Models exposing (Model, userLoggedIn)
 import Msgs exposing (Msg)
+import Questionnaires.Routing
 import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, questionnaireDemoRoute, signupRoute)
 import Users.Routing
 
@@ -114,8 +114,8 @@ menuItems : List MenuItem
 menuItems =
     [ MenuItem "Organization" "building" Organization Perm.organization
     , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
-    , MenuItem "Knowledge Models" "cubes" (KMPackages KMPackages.Routing.Index) Perm.packageManagementRead
-    , MenuItem "Questionnaires" "list-alt" (DSPlanner DSPlanner.Routing.Index) Perm.questionnaire
+    , MenuItem "Knowledge Models" "cubes" (KnowledgeModels KnowledgeModels.Routing.Index) Perm.packageManagementRead
+    , MenuItem "Questionnaires" "list-alt" (Questionnaires Questionnaires.Routing.Index) Perm.questionnaire
     , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.IndexRoute) Perm.knowledgeModel
     ]
 

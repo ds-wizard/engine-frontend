@@ -1,11 +1,11 @@
 module Subscriptions exposing (subscriptions)
 
 import Common.Menu.Subscriptions
-import DSPlanner.Subscriptions
 import KMEditor.Subscriptions
-import KMPackages.Subscriptions
+import KnowledgeModels.Subscriptions
 import Models exposing (Model)
 import Msgs exposing (Msg(..))
+import Questionnaires.Subscriptions
 import Routing exposing (Route(..))
 
 
@@ -14,14 +14,14 @@ subscriptions model =
     let
         currentViewSubscriptions =
             case model.state.route of
-                DSPlanner route ->
-                    DSPlanner.Subscriptions.subscriptions DSPlannerMsg route model.dsPlannerModel
+                Questionnaires route ->
+                    Questionnaires.Subscriptions.subscriptions QuestionnairesMsg route model.dsPlannerModel
 
                 KMEditor route ->
                     KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel
 
-                KMPackages route ->
-                    KMPackages.Subscriptions.subscriptions KMPackagesMsg route model.kmPackagesModel
+                KnowledgeModels route ->
+                    KnowledgeModels.Subscriptions.subscriptions KnowledgeModelsMsg route model.kmPackagesModel
 
                 _ ->
                     Sub.none
