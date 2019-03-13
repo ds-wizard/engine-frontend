@@ -29,7 +29,7 @@ import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
-import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
+import KnowledgeModels.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
 import String exposing (fromInt)
 import Utils exposing (boolToInt)

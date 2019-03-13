@@ -10,8 +10,8 @@ import KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeK
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Requests exposing (deleteKnowledgeModel, deleteMigration, getKnowledgeModels, postMigration)
 import KMEditor.Routing exposing (Route(..))
-import KMPackages.Common.Models exposing (PackageDetail)
-import KMPackages.Requests exposing (getPackagesFiltered)
+import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Requests exposing (getPackagesFiltered)
 import List.Extra as List
 import Models exposing (State)
 import Msgs

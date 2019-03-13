@@ -1,0 +1,62 @@
+@import "../../variables";
+@import "../../mixins";
+
+.KnowledgeModels__Import {
+    .dropzone {
+        height: 300px;
+        margin: auto;
+        border: 10px dashed $gray-200;
+        @include transition(border-color 0.1s ease-in);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+
+        &.active {
+            border: 10px dashed $primary;
+        }
+
+        p {
+            padding: 20px;
+            font-size: 16px;
+            color: $secondary;
+        }
+    }
+
+    .file-view {
+        height: 300px;
+        margin: auto;
+        border: 10px solid $gray-200;
+        background: $gray-200;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        text-align: center;
+
+        .file {
+            .fa {
+                display: block;
+                font-size: 40px;
+            }
+
+            .filename {
+                margin-top: 20px;
+                font-size: 20px;
+            }
+        }
+
+        .actions {
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
+
+            .btn {
+                min-width: 100px;
+            }
+        }
+    }
+}

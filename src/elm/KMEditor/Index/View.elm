@@ -16,7 +16,7 @@ import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..),
 import KMEditor.Index.Models exposing (..)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KMPackages.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))
 

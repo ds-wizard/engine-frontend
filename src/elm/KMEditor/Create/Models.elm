@@ -6,7 +6,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
-import KMPackages.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Models exposing (PackageDetail)
 import Utils exposing (validateRegex)
 
 
