@@ -49,12 +49,16 @@ packageDetail wrapMsg jwt packages =
 versionView : (Msg -> Msgs.Msg) -> Maybe JwtToken -> PackageDetailRow -> Html Msgs.Msg
 versionView wrapMsg jwt row =
     div [ class "card bg-light mb-3" ]
-        [ div [ class "card-body row" ]
-            [ div [ class "col-4 labels" ]
-                [ strong [] [ text row.packageDetail.version ] ]
-            , div [ class "col-8 text-right actions" ]
-                [ versionViewActions wrapMsg jwt row ]
-            , div [ class "col-12" ] [ text row.packageDetail.description ]
+        [ div [ class "card-body" ]
+            [ div [ class "row align-items-center" ]
+                [ div [ class "col-4 labels" ]
+                    [ strong [] [ text row.packageDetail.version ] ]
+                , div [ class "col-8 text-right actions" ]
+                    [ versionViewActions wrapMsg jwt row ]
+                ]
+            , div [ class "row mt-3" ]
+                [ div [ class "col-12" ] [ text row.packageDetail.description ]
+                ]
             ]
         ]
 
