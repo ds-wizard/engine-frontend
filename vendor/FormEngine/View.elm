@@ -8,9 +8,16 @@ import Html.Events exposing (onClick, onInput)
 import String exposing (fromInt)
 
 
+type QuestionState
+    = Default
+    | Answered
+    | Desirable
+
+
 type alias FormViewConfig msg a =
     { customActions : List ( String, msg )
     , viewExtraData : Maybe (a -> Html (Msg msg))
+    , isDesirable : Maybe (a -> Bool)
     }
 
 
@@ -47,7 +54,7 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
     case formItem of
         StringFormElement descriptor state ->
             div [ class "form-group" ]
-                [ viewLabel config descriptor newHumanIdentifiers
+                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
@@ -55,7 +62,7 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
 
         TextFormElement descriptor state ->
             div [ class "form-group" ]
-                [ viewLabel config descriptor newHumanIdentifiers
+                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
                 , textarea [ class "form-control", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
@@ -63,7 +70,7 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
 
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
-                [ viewLabel config descriptor newHumanIdentifiers
+                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
@@ -71,7 +78,7 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
 
         ChoiceFormElement descriptor options state ->
             div [ class "form-group" ]
-                [ viewLabel config descriptor newHumanIdentifiers
+                [ viewLabel config descriptor (state.value /= Nothing) newHumanIdentifiers
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 , div [] (List.indexedMap (viewChoice (path ++ [ descriptor.name ]) descriptor state) options)
@@ -82,7 +89,7 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
 
         GroupFormElement descriptor _ items state ->
             div [ class "form-group" ]
-                [ viewLabel config descriptor newHumanIdentifiers
+                [ viewLabel config descriptor (List.length items > 0) newHumanIdentifiers
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
@@ -90,13 +97,44 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
                 ]
 
 
-viewLabel : FormViewConfig msg a -> FormItemDescriptor b -> List String -> Html (Msg msg)
-viewLabel config descriptor humanIdentifiers =
+viewLabel : FormViewConfig msg a -> FormItemDescriptor a -> Bool -> List String -> Html (Msg msg)
+viewLabel config descriptor answered humanIdentifiers =
+    let
+        questionState =
+            let
+                desirable =
+                    config.isDesirable
+                        |> Maybe.andThen (\isDesirable -> Maybe.map isDesirable descriptor.extraData)
+                        |> Maybe.withDefault False
+            in
+            case ( answered, desirable ) of
+                ( True, _ ) ->
+                    Answered
+
+                ( _, True ) ->
+                    Desirable
+
+                _ ->
+                    Default
+    in
     label []
         [ span []
-            [ span [ class "badge badge-secondary badge-human-identifier" ] [ text <| String.join "." humanIdentifiers ]
-            , br [] []
-            , text descriptor.label
+            [ span
+                [ class "badge badge-secondary badge-human-identifier"
+                , classList
+                    [ ( "badge-secondary", questionState == Default )
+                    , ( "badge-success", questionState == Answered )
+                    , ( "badge-danger", questionState == Desirable )
+                    ]
+                ]
+                [ text <| String.join "." humanIdentifiers ]
+            , span
+                [ classList
+                    [ ( "text-success", questionState == Answered )
+                    , ( "text-danger", questionState == Desirable )
+                    ]
+                ]
+                [ text descriptor.label ]
             ]
         , viewCustomActions descriptor.name config
         ]

@@ -256,8 +256,20 @@ createOptionFormDescriptor answer =
 createGroupItems : ListQuestionData -> List (FormItem FormExtraData)
 createGroupItems questionData =
     let
+        itemNameExtraData =
+            { resourcePageReferences = []
+            , urlReferences = []
+            , experts = []
+            , requiredLevel = questionData.requiredLevel
+            }
+
         itemName =
-            StringFormItem { name = "itemName", label = questionData.itemTemplateTitle, text = Nothing, extraData = Nothing }
+            StringFormItem
+                { name = "itemName"
+                , label = questionData.itemTemplateTitle
+                , text = Nothing
+                , extraData = Just itemNameExtraData
+                }
 
         questions =
             List.map createQuestionFormItem questionData.itemTemplateQuestions

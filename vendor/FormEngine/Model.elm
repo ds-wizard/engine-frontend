@@ -29,7 +29,7 @@ import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import List.Extra as List
-import String exposing (fromFloat, fromInt)
+import String exposing (fromInt)
 
 
 
