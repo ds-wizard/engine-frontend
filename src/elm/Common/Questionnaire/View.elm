@@ -1,41 +1,7 @@
 module Common.Questionnaire.View exposing
     ( ViewExtraItemsConfig
     , ViewQuestionnaireConfig
-    , chapterHeader
-    , chapterList
-    , chapterListChapter
-    , extraNavigation
-    , feedbackIssue
-    , feedbackModal
-    , feedbackModalContent
-    , formConfig
-    , getTitleByUuid
-    , levelSelection
-    , levelSelectionOption
-    , pageView
-    , viewAnsweredIndication
-    , viewChapterAnsweredIndication
-    , viewChapterReport
-    , viewChapters
-    , viewExpert
-    , viewExperts
-    , viewExtraData
-    , viewExtraItems
-    , viewIndication
-    , viewIndications
-    , viewMetricDescription
-    , viewMetricReportRow
-    , viewMetrics
-    , viewMetricsDescriptions
-    , viewProgressBar
-    , viewProgressBarWithColors
     , viewQuestionnaire
-    , viewRequiredLevel
-    , viewResourcePageReference
-    , viewResourcePageReferences
-    , viewSummary
-    , viewUrlReference
-    , viewUrlReferences
     )
 
 import ActionResult exposing (ActionResult(..))
@@ -169,7 +135,7 @@ pageView cfg model =
 
         PageChapter chapter form ->
             [ chapterHeader model chapter
-            , viewForm (formConfig cfg) form |> Html.map FormMsg
+            , viewForm (formConfig cfg model) form |> Html.map FormMsg
             ]
 
         PageSummaryReport ->
@@ -193,8 +159,8 @@ chapterHeader model chapter =
         ]
 
 
-formConfig : ViewQuestionnaireConfig -> FormViewConfig CustomFormMessage FormExtraData
-formConfig cfg =
+formConfig : ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData
+formConfig cfg model =
     { customActions =
         if cfg.showExtraActions then
             [ ( "fa-exclamation-circle", FeedbackMsg ) ]
@@ -202,6 +168,7 @@ formConfig cfg =
         else
             []
     , viewExtraData = Just <| viewExtraData <| Maybe.withDefault [] cfg.levels
+    , isDesirable = Just (.requiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
     }
 
 
