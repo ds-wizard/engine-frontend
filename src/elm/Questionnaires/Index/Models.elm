@@ -1,14 +1,14 @@
-module Questionnaires.Index.Models exposing (Model, QuestionnaireRow, initQuestionnaireRow, initialModel)
+module Questionnaires.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import Bootstrap.Dropdown as Dropdown
 import Questionnaires.Common.Models exposing (Questionnaire)
 
 
 type alias Model =
-    { questionnaires : ActionResult (List QuestionnaireRow)
+    { questionnaires : ActionResult (List Questionnaire)
     , questionnaireToBeDeleted : Maybe Questionnaire
     , deletingQuestionnaire : ActionResult String
+    , questionnaireToBeExported : Maybe Questionnaire
     }
 
 
@@ -17,15 +17,5 @@ initialModel =
     { questionnaires = Loading
     , questionnaireToBeDeleted = Nothing
     , deletingQuestionnaire = Unset
+    , questionnaireToBeExported = Nothing
     }
-
-
-type alias QuestionnaireRow =
-    { dropdownState : Dropdown.State
-    , questionnaire : Questionnaire
-    }
-
-
-initQuestionnaireRow : Questionnaire -> QuestionnaireRow
-initQuestionnaireRow =
-    QuestionnaireRow Dropdown.initialState

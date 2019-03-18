@@ -2,11 +2,48 @@
 
 .index-table {
     .table-actions {
+        position: relative;
         white-space: nowrap;
+        max-width: 10%;
 
         a, .btn-group {
             &:not(:last-child) {
                 margin-right: 20px;
+            }
+        }
+
+        .fa {
+            margin-right: 5px;
+        }
+
+        .table-actions-container {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            align-items: center;
+            padding: 0 20px;
+            background: $gray-200;
+
+            &:before {
+                content: ' ';
+                position: absolute;
+                left: -20px;
+                width: 20px;
+                top: 0;
+                bottom: 0;
+                background: linear-gradient(90deg, rgba(0, 0, 0, 0), $gray-200);
+            }
+        }
+    }
+
+    tbody {
+        tr:hover {
+            background: $gray-200;
+
+            .table-actions-container {
+                display: flex;
             }
         }
     }

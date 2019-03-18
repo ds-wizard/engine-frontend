@@ -1,13 +1,15 @@
-module Questionnaires.Index.Update exposing (deleteQuestionnaireCompleted, fetchData, getQuestionnairesCompleted, handleDeleteQuestionnaire, handleDropdownToggle, update)
+module Questionnaires.Index.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
-import Bootstrap.Dropdown as Dropdown
 import Common.Models exposing (getServerErrorJwt)
 import Jwt
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire)
-import Questionnaires.Index.Models exposing (Model, QuestionnaireRow, initQuestionnaireRow)
+import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
 import Questionnaires.Requests exposing (deleteQuestionnaire, getQuestionnaires)
 import Requests exposing (getResultCmd)
@@ -35,15 +37,15 @@ update msg wrapMsg session model =
         DeleteQuestionnaireCompleted result ->
             deleteQuestionnaireCompleted wrapMsg session model result
 
-        DropdownMsg questionnaire state ->
-            handleDropdownToggle model questionnaire state
+        ShowHideExportQuestionnaire questionnaire ->
+            ( { model | questionnaireToBeExported = questionnaire }, Cmd.none )
 
 
 getQuestionnairesCompleted : Model -> Result Jwt.JwtError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
 getQuestionnairesCompleted model result =
     case result of
         Ok questionnaires ->
-            ( { model | questionnaires = Success <| List.map initQuestionnaireRow questionnaires }
+            ( { model | questionnaires = Success questionnaires }
             , Cmd.none
             )
 
@@ -84,24 +86,3 @@ deleteQuestionnaireCompleted wrapMsg session model result =
             ( { model | deletingQuestionnaire = getServerErrorJwt error "Questionnaire could not be deleted" }
             , getResultCmd result
             )
-
-
-handleDropdownToggle : Model -> Questionnaire -> Dropdown.State -> ( Model, Cmd Msgs.Msg )
-handleDropdownToggle model questionnaire state =
-    case model.questionnaires of
-        Success questionnaireRows ->
-            let
-                replaceWith row =
-                    if row.questionnaire == questionnaire then
-                        { row | dropdownState = state }
-
-                    else
-                        row
-
-                newRows =
-                    List.map replaceWith questionnaireRows
-            in
-            ( { model | questionnaires = Success newRows }, Cmd.none )
-
-        _ ->
-            ( model, Cmd.none )
