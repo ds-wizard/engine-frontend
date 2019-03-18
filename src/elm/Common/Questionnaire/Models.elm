@@ -94,6 +94,7 @@ type alias QuestionnaireDetail =
     , knowledgeModel : KnowledgeModel
     , replies : FormValues
     , level : Int
+    , private : Bool
     }
 
 
@@ -106,12 +107,15 @@ questionnaireDetailDecoder =
         |> required "knowledgeModel" knowledgeModelDecoder
         |> required "replies" decodeFormValues
         |> required "level" Decode.int
+        |> required "private" Decode.bool
 
 
 encodeQuestionnaireDetail : QuestionnaireDetail -> Encode.Value
 encodeQuestionnaireDetail questionnaire =
     Encode.object
-        [ ( "replies", encodeFormValues questionnaire.replies )
+        [ ( "name", Encode.string questionnaire.name )
+        , ( "private", Encode.bool questionnaire.private )
+        , ( "replies", encodeFormValues questionnaire.replies )
         , ( "level", Encode.int questionnaire.level )
         ]
 

@@ -5,6 +5,7 @@ import Models exposing (State)
 import Msgs
 import Questionnaires.Create.Update
 import Questionnaires.Detail.Update
+import Questionnaires.Edit.Update
 import Questionnaires.Index.Update
 import Questionnaires.Models exposing (Model)
 import Questionnaires.Msgs exposing (Msg(..))
@@ -19,6 +20,9 @@ fetchData route wrapMsg session model =
 
         Detail uuid ->
             Questionnaires.Detail.Update.fetchData (wrapMsg << DetailMsg) session uuid
+
+        Edit uuid ->
+            Questionnaires.Edit.Update.fetchData (wrapMsg << EditMsg) session uuid
 
         Index ->
             Questionnaires.Index.Update.fetchData (wrapMsg << IndexMsg) session
@@ -40,6 +44,13 @@ update msg wrapMsg state model =
                     Questionnaires.Detail.Update.update dMsg (wrapMsg << DetailMsg) state model.detailModel
             in
             ( { model | detailModel = detailModel }, cmd )
+
+        EditMsg eMsg ->
+            let
+                ( editModel, cmd ) =
+                    Questionnaires.Edit.Update.update eMsg (wrapMsg << EditMsg) state model.editModel
+            in
+            ( { model | editModel = editModel }, cmd )
 
         IndexMsg iMsg ->
             let

@@ -75,6 +75,7 @@ createQuestionnaireModel km =
     Common.Questionnaire.Models.initialModel
         { uuid = ""
         , name = ""
+        , private = True
         , package =
             { name = ""
             , id = ""
