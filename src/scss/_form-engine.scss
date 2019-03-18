@@ -25,15 +25,15 @@
 
     .item {
         position: relative;
+        display: flex;
+        align-items: flex-start;
 
-        .btn-item-delete {
-            position: absolute;
-            right: -50px;
-            top: 0;
+        .card {
+            flex-grow: 1;
         }
 
-        .form-group {
-            margin-bottom: 1rem;
+        .btn-item-delete {
+            margin-left: 10px;
         }
     }
 

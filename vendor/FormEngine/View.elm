@@ -191,10 +191,12 @@ viewGroupItem config path humanIdentifiers index itemElement =
             button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
                 [ i [ class "fa fa-trash-o" ] [] ]
     in
-    div [ class "card bg-light item mb-5" ]
-        [ div [ class "card-body" ] <|
-            [ deleteButton ]
-                ++ List.indexedMap (viewFormElement config (path ++ [ fromInt index ]) newHumanIdentifiers True) itemElement
+    div [ class "item" ]
+        [ div [ class "card bg-light  mb-5" ]
+            [ div [ class "card-body" ] <|
+                List.indexedMap (viewFormElement config (path ++ [ fromInt index ]) newHumanIdentifiers True) itemElement
+            ]
+        , deleteButton
         ]
 
 

@@ -29,10 +29,11 @@ content wrapMsg model ( questionnaireModel, levels ) =
             , levels = Just levels
             }
     in
-    div [ class "col Questionnaires__Detail" ]
+    div [ class "Questionnaires__Detail" ]
         [ questionnaireHeader wrapMsg model.savingQuestionnaire questionnaireModel
         , FormResult.view model.savingQuestionnaire
-        , viewQuestionnaire questionnaireCfg questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg)
+        , div [ class "questionnaire-wrapper" ]
+            [ viewQuestionnaire questionnaireCfg questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg) ]
         ]
 
 
