@@ -59,13 +59,13 @@ tableConfig jwt =
           }
         ]
     , actions =
-        [ { label = TableActionIcon "fa fa-trash-o"
-          , action = TableActionMsg tableActionDelete
-          , visible = always <| hasPerm jwt packageManagementWrite
-          }
-        , { label = TableActionText "View detail"
+        [ { label = TableActionDefault "eye" "View detail"
           , action = TableActionLink tableActionViewDetail
           , visible = always True
+          }
+        , { label = TableActionDestructive "trash-o" "Delete"
+          , action = TableActionMsg tableActionDelete
+          , visible = always <| hasPerm jwt packageManagementWrite
           }
         ]
     , sortBy = .name

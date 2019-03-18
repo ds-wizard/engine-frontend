@@ -1,8 +1,7 @@
 module Questionnaires.Index.View exposing (view)
 
-import Bootstrap.Button as Button
-import Bootstrap.Dropdown as Dropdown
-import Common.Html exposing (linkTo)
+import ActionResult exposing (ActionResult(..))
+import Common.Html exposing (fa, linkTo)
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
@@ -11,7 +10,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire)
-import Questionnaires.Index.Models exposing (Model, QuestionnaireRow)
+import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
 import Requests exposing (apiUrl)
@@ -24,6 +23,7 @@ view wrapMsg model =
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
         , Page.actionResultView (Table.view (tableConfig model) wrapMsg) model.questionnaires
+        , exportModal wrapMsg model
         , deleteModal wrapMsg model
         ]
 
@@ -33,12 +33,12 @@ indexActions =
     [ linkTo (Routing.Questionnaires <| Create Nothing) [ class "btn btn-primary" ] [ text "Create" ] ]
 
 
-tableConfig : Model -> TableConfig QuestionnaireRow Msg
+tableConfig : Model -> TableConfig Questionnaire Msg
 tableConfig model =
     { emptyMessage = "There are no questionnaires"
     , fields =
         [ { label = "Name"
-          , getValue = TextValue (.questionnaire >> .name)
+          , getValue = TextValue .name
           }
         , { label = "Visibility"
           , getValue = HtmlValue tableFieldVisibility
@@ -48,30 +48,30 @@ tableConfig model =
           }
         ]
     , actions =
-        [ { label = TableActionText "Fill questionnaire"
-          , action = TableActionButtonLink (Routing.Questionnaires << Detail << .uuid << .questionnaire)
+        [ { label = TableActionPrimary "Fill questionnaire"
+          , action = TableActionLink (Routing.Questionnaires << Detail << .uuid)
           , visible = always True
           }
-        , { label = TableActionText "Edit"
-          , action = TableActionLink (Routing.Questionnaires << Edit << .uuid << .questionnaire)
+        , { label = TableActionDefault "download" "Export"
+          , action = TableActionMsg tableActionExport
           , visible = always True
           }
-        , { label = TableActionText ""
-          , action = TableActionCustom exportAction
+        , { label = TableActionDefault "edit" "Edit"
+          , action = TableActionLink (Routing.Questionnaires << Edit << .uuid)
           , visible = always True
           }
-        , { label = TableActionIcon "fa fa-trash-o"
+        , { label = TableActionDestructive "trash-o" "Delete"
           , action = TableActionMsg tableActionDelete
           , visible = always True
           }
         ]
-    , sortBy = .questionnaire >> .name
+    , sortBy = .name
     }
 
 
-tableFieldVisibility : QuestionnaireRow -> Html msg
-tableFieldVisibility row =
-    if row.questionnaire.private then
+tableFieldVisibility : Questionnaire -> Html msg
+tableFieldVisibility questionnaire =
+    if questionnaire.private then
         span [ class "badge badge-danger" ]
             [ text "private" ]
 
@@ -80,55 +80,78 @@ tableFieldVisibility row =
             [ text "public" ]
 
 
-tableFieldKnowledgeModel : QuestionnaireRow -> Html msg
-tableFieldKnowledgeModel row =
+tableFieldKnowledgeModel : Questionnaire -> Html msg
+tableFieldKnowledgeModel questionnaire =
     span []
-        [ text row.questionnaire.package.name
+        [ text questionnaire.package.name
         , text ", "
-        , text row.questionnaire.package.version
+        , text questionnaire.package.version
         , text " ("
-        , code [] [ text row.questionnaire.package.id ]
+        , code [] [ text questionnaire.package.id ]
         , text ")"
         ]
 
 
-tableActionDelete : (Msg -> Msgs.Msg) -> QuestionnaireRow -> Msgs.Msg
+tableActionExport : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
+tableActionExport wrapMsg =
+    wrapMsg << ShowHideExportQuestionnaire << Just
+
+
+tableActionDelete : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
 tableActionDelete wrapMsg =
-    wrapMsg << ShowHideDeleteQuestionnaire << Just << .questionnaire
+    wrapMsg << ShowHideDeleteQuestionnaire << Just
 
 
-exportFormats : List ( String, String )
+exportFormats : List ( String, String, String )
 exportFormats =
-    [ ( "json", "JSON Data" )
-    , ( "html", "HTML Document" )
-    , ( "pdf", "PDF Document" )
-    , ( "latex", "LaTeX Document" )
-    , ( "docx", "MS Word Document" )
-    , ( "odt", "OpenDocument Text" )
-    , ( "markdown", "Markdown Document" )
+    [ ( "file-pdf-o", "pdf", "PDF Document" )
+    , ( "file-text-o", "latex", "LaTeX Document" )
+    , ( "file-word-o", "docx", "MS Word Document" )
+    , ( "file-code-o", "html", "HTML Document" )
+    , ( "file-code-o", "json", "JSON Data" )
+    , ( "file-text-o", "odt", "OpenDocument Text" )
+    , ( "file-text-o", "markdown", "Markdown Document" )
     ]
 
 
-exportAction : (Msg -> Msgs.Msg) -> QuestionnaireRow -> Html Msgs.Msg
-exportAction wrapMsg questionnaireRow =
-    Dropdown.dropdown questionnaireRow.dropdownState
-        { options = [ Dropdown.alignMenuRight ]
-        , toggleMsg = wrapMsg << DropdownMsg questionnaireRow.questionnaire
-        , toggleButton = Dropdown.toggle [ Button.roleLink ] [ text "Export" ]
-        , items = List.map (exportItem questionnaireRow.questionnaire) exportFormats
-        }
+getExportUrl : String -> String -> String
+getExportUrl format uuid =
+    apiUrl "/questionnaires/" ++ uuid ++ "/dmp?format=" ++ format
 
 
-exportItem : Questionnaire -> ( String, String ) -> Dropdown.DropdownItem msg
-exportItem questionnaire ( format, formatLabel ) =
-    Dropdown.anchorItem
-        [ href <| getExportUrl format questionnaire, target "_blank" ]
-        [ text formatLabel ]
+exportItem : String -> ( String, String, String ) -> Html msg
+exportItem questionnaireUuid ( icon, format, formatLabel ) =
+    a [ class "export-link", href <| getExportUrl format questionnaireUuid, target "_blank" ]
+        [ fa icon
+        , text formatLabel
+        ]
 
 
-getExportUrl : String -> Questionnaire -> String
-getExportUrl format questionnaire =
-    apiUrl "/questionnaires/" ++ questionnaire.uuid ++ "/dmp?format=" ++ format
+exportModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
+exportModal wrapMsg model =
+    let
+        ( visible, questionnaireName, questionnaireUuid ) =
+            case model.questionnaireToBeExported of
+                Just questionnaire ->
+                    ( True, questionnaire.name, questionnaire.uuid )
+
+                Nothing ->
+                    ( False, "", "" )
+
+        modalContent =
+            List.map (exportItem questionnaireUuid) exportFormats
+
+        modalConfig =
+            { modalTitle = "Export " ++ questionnaireName
+            , modalContent = modalContent
+            , visible = visible
+            , actionResult = Unset
+            , actionName = "Done"
+            , actionMsg = wrapMsg <| ShowHideExportQuestionnaire Nothing
+            , cancelMsg = Nothing
+            }
+    in
+    Modal.confirm modalConfig
 
 
 deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg

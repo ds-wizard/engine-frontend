@@ -1,0 +1,27 @@
+@import "../../variables";
+
+.Questionnaires__Index {
+    .export-link {
+        display: block;
+        width: 100%;
+        border: 1px solid $gray-300;
+        padding: .75rem 1.25rem;
+        border-radius: .25rem;
+        margin-bottom: 0.25rem;
+        color: $body-color;
+        text-decoration: none;
+
+        .fa {
+            margin-right: 15px;
+        }
+
+        &:hover {
+            color: $primary;
+            border-color: $primary;
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
