@@ -49,12 +49,12 @@ viewQuestionnaire cfg model =
                 emptyNode
     in
     div [ class "Questionnaire row" ]
-        [ div [ class "col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
+        [ div [ class "col col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
             [ level
             , chapterList model
             , extraActions
             ]
-        , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
+        , div [ class "col col-sm-11 col-md-8 col-lg-8 col-xl-9" ]
             (pageView cfg model)
         , feedbackModal model
         ]
