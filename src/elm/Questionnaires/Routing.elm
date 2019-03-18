@@ -9,6 +9,7 @@ import Url.Parser.Query as Query
 type Route
     = Create (Maybe String)
     | Detail String
+    | Edit String
     | Index
 
 
@@ -21,6 +22,7 @@ parses : (Route -> a) -> List (Parser (a -> c) c)
 parses wrapRoute =
     [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> Query.string "selected")
     , map (wrapRoute << Detail) (s moduleRoot </> s "detail" </> string)
+    , map (wrapRoute << Edit) (s moduleRoot </> s "edit" </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
     ]
 
@@ -38,6 +40,9 @@ toUrl route =
 
         Detail uuid ->
             [ moduleRoot, "detail", uuid ]
+
+        Edit uuid ->
+            [ moduleRoot, "edit", uuid ]
 
         Index ->
             [ moduleRoot ]

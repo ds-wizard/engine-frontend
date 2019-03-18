@@ -52,6 +52,10 @@ tableConfig model =
           , action = TableActionButtonLink (Routing.Questionnaires << Detail << .uuid << .questionnaire)
           , visible = always True
           }
+        , { label = TableActionText "Edit"
+          , action = TableActionLink (Routing.Questionnaires << Edit << .uuid << .questionnaire)
+          , visible = always True
+          }
         , { label = TableActionText ""
           , action = TableActionCustom exportAction
           , visible = always True
