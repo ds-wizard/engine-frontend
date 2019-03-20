@@ -14,7 +14,6 @@ type Msg
     | SetLevel String
     | SetActiveChapter Chapter
     | ViewSummaryReport
-    | GetMetricsCompleted (Result Jwt.JwtError (List Metric))
     | PostForSummaryReportCompleted (Result Jwt.JwtError SummaryReport)
     | CloseFeedback
     | FeedbackFormMsg Form.Msg

@@ -35,7 +35,7 @@ handleGetQuestionnaireCompleted model result =
         newModel =
             case result of
                 Ok questionnaireDetail ->
-                    { model | questionnaireModel = Success <| initialModel questionnaireDetail }
+                    { model | questionnaireModel = Success <| initialModel questionnaireDetail [] }
 
                 Err error ->
                     { model | questionnaireModel = getServerError error "Unable to get questionnaire." }

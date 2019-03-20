@@ -77,7 +77,7 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
                 ]
 
         ChoiceFormElement descriptor options state ->
-            div [ class "form-group" ]
+            div [ class "form-group form-group-choices" ]
                 [ viewLabel config descriptor (state.value /= Nothing) newHumanIdentifiers
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
@@ -93,7 +93,7 @@ viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order fo
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
-                , button [ class "btn btn-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
+                , button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
                 ]
 
 
@@ -209,21 +209,33 @@ viewChoice path parentDescriptor parentState order optionElement =
         humanIndentifier =
             identifierToChar order
 
-        viewOption title value extra =
-            div [ class "radio" ]
+        viewBadge ( cssClass, title ) =
+            span [ class <| "badge " ++ cssClass ] [ text title ]
+
+        viewBadges mbBadges =
+            case mbBadges of
+                Just badges ->
+                    div [ class "badges" ] (List.map viewBadge badges)
+
+                Nothing ->
+                    text ""
+
+        viewOption title value extra badges =
+            div [ class "radio", classList [ ( "radio-selected", Just value == parentState.value ) ] ]
                 [ label []
                     [ input [ type_ "radio", name radioName, onClick (Input path value), checked (Just value == parentState.value) ] []
                     , text <| humanIndentifier ++ ". " ++ title
                     , extra
+                    , viewBadges badges
                     ]
                 ]
     in
     case optionElement of
-        SimpleOptionElement { name, label } ->
-            viewOption label (AnswerReply name) (text "")
+        SimpleOptionElement { name, label, badges } ->
+            viewOption label (AnswerReply name) (text "") badges
 
-        DetailedOptionElement { name, label } _ ->
-            viewOption label (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] [])
+        DetailedOptionElement { name, label, badges } _ ->
+            viewOption label (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] []) badges
 
 
 viewAdvice : Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)

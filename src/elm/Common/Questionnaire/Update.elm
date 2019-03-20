@@ -1,4 +1,4 @@
-module Common.Questionnaire.Update exposing (getFeedbacksCmd, getMetricsCmd, handleFormMsg, handlePostFeedbackCompleted, handleSendFeedbackForm, handleSetActiveChapter, postFeedbackCmd, postForSummaryReportCmd, update)
+module Common.Questionnaire.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
@@ -7,13 +7,11 @@ import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback, postForSummaryReport)
 import Form exposing (Form)
-import FormEngine.Model exposing (encodeFormValues)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import Http
 import Jwt
 import KMEditor.Common.Models.Entities exposing (Chapter)
-import KMEditor.Requests exposing (getMetrics)
 import Utils exposing (stringToInt)
 
 
@@ -40,31 +38,16 @@ update msg maybeSession model =
                     let
                         newModel =
                             updateReplies model
-
-                        cmd =
-                            Cmd.batch
-                                [ postForSummaryReportCmd session newModel
-                                , getMetricsCmd session
-                                ]
                     in
                     ( { newModel
                         | activePage = PageSummaryReport
-                        , metrics = Loading
                         , summaryReport = Loading
                       }
-                    , cmd
+                    , postForSummaryReportCmd session newModel
                     )
 
                 Nothing ->
                     ( model, Cmd.none )
-
-        GetMetricsCompleted result ->
-            case result of
-                Ok metrics ->
-                    ( { model | metrics = Success metrics }, Cmd.none )
-
-                Err error ->
-                    ( { model | metrics = getServerErrorJwt error "Unable to get metrics" }, Cmd.none )
 
         PostForSummaryReportCompleted result ->
             case result of
@@ -167,11 +150,6 @@ handlePostFeedbackCompleted result model =
 
         Err error ->
             { model | sendingFeedback = getServerError error "Feedback could not be sent." }
-
-
-getMetricsCmd : Session -> Cmd Msg
-getMetricsCmd session =
-    Jwt.send GetMetricsCompleted <| getMetrics session
 
 
 postForSummaryReportCmd : Session -> Model -> Cmd Msg

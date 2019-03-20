@@ -7,8 +7,8 @@ import Common.Questionnaire.Models exposing (QuestionnaireDetail, encodeQuestion
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
 import Jwt
-import KMEditor.Common.Models.Entities exposing (Level)
-import KMEditor.Requests exposing (getLevels)
+import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import KMEditor.Requests exposing (getLevels, getMetrics)
 import Models exposing (State)
 import Msgs
 import Questionnaires.Detail.Models exposing (Model)
@@ -24,6 +24,7 @@ fetchData wrapMsg session uuid =
     Cmd.batch
         [ fetchQuestionnaire wrapMsg session uuid
         , fetchLevels wrapMsg session
+        , fetchMetrics wrapMsg session
         ]
 
 
@@ -41,6 +42,13 @@ fetchLevels wrapMsg session =
         |> Cmd.map wrapMsg
 
 
+fetchMetrics : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
+fetchMetrics wrapMsg session =
+    getMetrics session
+        |> Jwt.send GetMetricsCompleted
+        |> Cmd.map wrapMsg
+
+
 update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg state model =
     case msg of
@@ -49,6 +57,9 @@ update msg wrapMsg state model =
 
         GetLevelsCompleted result ->
             handleGetLevelsCompleted model result
+
+        GetMetricsCompleted result ->
+            handleGetMetricsCompleted model result
 
         QuestionnaireMsg qMsg ->
             handleQuestionnaireMsg wrapMsg qMsg state.session model
@@ -66,15 +77,15 @@ handleGetQuestionnaireCompleted model result =
         newModel =
             case result of
                 Ok questionnaireDetail ->
-                    { model | questionnaireModel = Success <| initialModel questionnaireDetail }
+                    { model | questionnaireDetail = Success questionnaireDetail }
 
                 Err error ->
-                    { model | questionnaireModel = getServerErrorJwt error "Unable to get questionnaire." }
+                    { model | questionnaireDetail = getServerErrorJwt error "Unable to get questionnaire." }
 
         cmd =
             getResultCmd result
     in
-    ( newModel, cmd )
+    ( initQuestionnaireModel newModel, cmd )
 
 
 handleGetLevelsCompleted : Model -> Result Jwt.JwtError (List Level) -> ( Model, Cmd Msgs.Msg )
@@ -92,6 +103,39 @@ handleGetLevelsCompleted model result =
             getResultCmd result
     in
     ( newModel, cmd )
+
+
+initQuestionnaireModel : Model -> Model
+initQuestionnaireModel model =
+    case ( model.questionnaireDetail, model.metrics ) of
+        ( Success questionnaireDetail, Success metrics ) ->
+            { model | questionnaireModel = Success <| initialModel questionnaireDetail metrics }
+
+        ( Error err, _ ) ->
+            { model | questionnaireModel = Error err }
+
+        ( _, Error err ) ->
+            { model | questionnaireModel = Error err }
+
+        _ ->
+            model
+
+
+handleGetMetricsCompleted : Model -> Result Jwt.JwtError (List Metric) -> ( Model, Cmd Msgs.Msg )
+handleGetMetricsCompleted model result =
+    let
+        newModel =
+            case result of
+                Ok metrics ->
+                    { model | metrics = Success metrics }
+
+                Err error ->
+                    { model | metrics = getServerErrorJwt error "Unable to get metrics." }
+
+        cmd =
+            getResultCmd result
+    in
+    ( initQuestionnaireModel newModel, cmd )
 
 
 handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
