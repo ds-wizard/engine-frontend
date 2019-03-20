@@ -1,3 +1,4 @@
+@import "~bootstrap/scss/functions";
 @import "variables";
 @import "mixins";
 
@@ -128,4 +129,60 @@ code {
     left: auto !important;
     transform: none !important;
     margin-top: 35px;
+}
+
+
+.badge-value-100 {
+    background: $color-value-100;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-90 {
+    background: $color-value-90;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-80 {
+    background: $color-value-80;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-70 {
+    background: $color-value-70;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-60 {
+    background: $color-value-60;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-50 {
+    background: $color-value-50;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-40 {
+    background: $color-value-40;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-30 {
+    background: $color-value-30;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-20 {
+    background: $color-value-20;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-10 {
+    background: $color-value-10;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-0 {
+    background: $color-value-0;
+    color: color-yiq($color-value-100);
 }

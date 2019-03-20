@@ -1,8 +1,9 @@
 @import "variables";
+@import "mixins";
 
 .form-engine-form {
     .form-group {
-        margin-bottom: 40px;
+        margin-bottom: 60px;
 
         &:last-child {
             margin-bottom: 5px;
@@ -12,6 +13,13 @@
             display: flex;
             width: 100%;
             justify-content: space-between;
+            font-size: 120%;
+        }
+    }
+
+    .form-group-choices {
+        & > p {
+            margin-left: 25px;
         }
     }
 
@@ -29,11 +37,20 @@
         align-items: flex-start;
 
         .card {
+            background: $gray-100 !important;
             flex-grow: 1;
         }
 
         .btn-item-delete {
             margin-left: 10px;
+        }
+
+        .radio {
+            background: $gray-200;
+
+            &.radio-selected, &:hover {
+                background: $gray-300;
+            }
         }
     }
 
@@ -51,9 +68,45 @@
         margin-right: 10px;
     }
 
+    .card {
+        .radio {
+            border-color: $gray-400;
+        }
+    }
+
     .radio {
         label {
-            font-weight: normal;
+            padding: 10px 15px;
+            margin: 0;
+            display: block;
+            cursor: pointer;
+
+            .badges {
+                margin-left: 20px;
+                margin-top: 5px;
+            }
+
+            .badge {
+                margin-right: 5px;
+                opacity: 0.5;
+            }
+        }
+
+        @include transition(background-color 0.15s ease-in-out);
+        background: $gray-100;
+        border-radius: 0.25rem;
+        margin-bottom: 5px;
+
+        &:hover {
+            border-color: $primary;
+        }
+
+        &.radio-selected, &:hover {
+            background: $gray-200;
+
+            .badge {
+                opacity: 1;
+            }
         }
     }
 
@@ -71,6 +124,7 @@
     a.clear-answer {
         color: $gray-600;
         display: inline-block;
+        padding: 5px 15px;
 
         &:hover {
             text-decoration: none;

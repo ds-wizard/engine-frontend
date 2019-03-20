@@ -48,6 +48,7 @@ type alias OptionDescriptor =
     { name : String
     , label : String
     , text : Maybe String
+    , badges : Maybe (List ( String, String ))
     }
 
 

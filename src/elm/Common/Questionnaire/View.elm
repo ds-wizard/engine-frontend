@@ -139,7 +139,7 @@ pageView cfg model =
             ]
 
         PageSummaryReport ->
-            [ Page.actionResultView (viewSummary model) (ActionResult.combine model.metrics model.summaryReport) ]
+            [ Page.actionResultView (viewSummary model) model.summaryReport ]
 
 
 chapterHeader : Model -> Chapter -> Html Msg
@@ -269,17 +269,17 @@ viewExpert expert =
         ]
 
 
-viewSummary : Model -> ( List Metric, SummaryReport ) -> Html Msg
-viewSummary model ( metrics, summaryReport ) =
+viewSummary : Model -> SummaryReport -> Html Msg
+viewSummary model summaryReport =
     let
         title =
             [ h2 [] [ text "Summary report" ] ]
 
         chapters =
-            viewChapters model metrics summaryReport
+            viewChapters model model.metrics summaryReport
 
         metricDescriptions =
-            [ viewMetricsDescriptions metrics ]
+            [ viewMetricsDescriptions model.metrics ]
     in
     div [ class "summary-report" ]
         (List.concat [ title, chapters, metricDescriptions ])

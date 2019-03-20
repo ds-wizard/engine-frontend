@@ -116,7 +116,11 @@ update msg wrapMsg state model =
                                 Ok km ->
                                     { model
                                         | preview = Success km
-                                        , previewEditorModel = Just <| KMEditor.Editor.Preview.Models.initialModel km
+                                        , previewEditorModel =
+                                            Just <|
+                                                KMEditor.Editor.Preview.Models.initialModel
+                                                    km
+                                                    (ActionResult.withDefault [] model.metrics)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
                                         , editorModel =
                                             Just <|
