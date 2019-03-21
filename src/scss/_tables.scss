@@ -33,7 +33,7 @@
                 width: 20px;
                 top: 0;
                 bottom: 0;
-                background: linear-gradient(90deg, rgba(0, 0, 0, 0), $gray-200);
+                background: linear-gradient(90deg, rgba($gray-200, 0), $gray-200);
             }
         }
     }
