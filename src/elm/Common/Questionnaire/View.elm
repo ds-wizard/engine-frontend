@@ -6,7 +6,7 @@ module Common.Questionnaire.View exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, fa)
-import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions)
+import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions, chapterReportCanvasId)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Common.View.FormGroup as FormGroup
@@ -295,7 +295,10 @@ viewChapterReport model metrics chapterReport =
     div []
         [ h3 [] [ text <| getTitleByUuid model.questionnaire.knowledgeModel.chapters chapterReport.chapterUuid ]
         , viewIndications chapterReport.indications
-        , viewMetrics metrics chapterReport
+        , div [ class "row" ]
+            [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
+            , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
+            ]
         ]
 
 
@@ -323,8 +326,8 @@ viewAnsweredIndication data =
         ]
 
 
-viewMetrics : List Metric -> ChapterReport -> Html Msg
-viewMetrics metrics chapterReport =
+viewMetricsTable : List Metric -> ChapterReport -> Html Msg
+viewMetricsTable metrics chapterReport =
     table [ class "table table-metrics-report" ]
         [ thead []
             [ tr []
@@ -350,14 +353,7 @@ viewProgressBarWithColors : Float -> Html msg
 viewProgressBarWithColors value =
     let
         colorClass =
-            if value < 0.33 then
-                "bg-danger"
-
-            else if value < 0.66 then
-                "bg-warning"
-
-            else
-                "bg-success"
+            (++) "bg-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
     in
     viewProgressBar colorClass value
 
@@ -370,6 +366,12 @@ viewProgressBar colorClass value =
     in
     div [ class "progress" ]
         [ div [ class <| "progress-bar " ++ colorClass, style "width" width ] [] ]
+
+
+viewMetricsChart : List Metric -> ChapterReport -> Html Msg
+viewMetricsChart metrics chapterReport =
+    div [ class "metrics-chart" ]
+        [ canvas [ id <| chapterReportCanvasId chapterReport ] [] ]
 
 
 getTitleByUuid : List { a | uuid : String, title : String } -> String -> String

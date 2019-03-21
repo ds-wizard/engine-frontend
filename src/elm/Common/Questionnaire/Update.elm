@@ -2,6 +2,7 @@ module Common.Questionnaire.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
+import ChartJS exposing (encodeChartConfig)
 import Common.Models exposing (getServerError, getServerErrorJwt)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
@@ -12,6 +13,7 @@ import FormEngine.Update exposing (updateForm)
 import Http
 import Jwt
 import KMEditor.Common.Models.Entities exposing (Chapter)
+import Ports
 import Utils exposing (stringToInt)
 
 
@@ -52,7 +54,18 @@ update msg maybeSession model =
         PostForSummaryReportCompleted result ->
             case result of
                 Ok summaryReport ->
-                    ( { model | summaryReport = Success summaryReport }, Cmd.none )
+                    let
+                        cmds =
+                            List.map
+                                (Ports.drawMetricsChart
+                                    << encodeChartConfig
+                                    << createChartConfig model.metrics model.questionnaire.knowledgeModel.chapters
+                                )
+                                summaryReport.chapterReports
+                    in
+                    ( { model | summaryReport = Success summaryReport }
+                    , Cmd.batch cmds
+                    )
 
                 Err error ->
                     ( { model | summaryReport = getServerErrorJwt error "Unable to get summary report" }, Cmd.none )

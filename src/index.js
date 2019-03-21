@@ -3,10 +3,12 @@
 
 // initialize elm app
 var program = require('./elm/Main.elm');
+
+var registerChartPorts = require('./ports/chart');
 var registerImportPorts = require('./ports/import');
-var registerSessionPorts = require('./ports/session');
-var registerScrollPorts = require('./ports/scroll');
 var registerPageUnloadPorts = require('./ports/page-unload');
+var registerScrollPorts = require('./ports/scroll');
+var registerSessionPorts = require('./ports/session');
 
 var app = program.Elm.Main.init({
     node: document.body,
@@ -16,7 +18,8 @@ var app = program.Elm.Main.init({
     }
 });
 
-registerSessionPorts(app);
+registerChartPorts(app);
 registerImportPorts(app);
-registerScrollPorts(app);
 registerPageUnloadPorts(app);
+registerScrollPorts(app);
+registerSessionPorts(app);
