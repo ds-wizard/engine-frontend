@@ -98,7 +98,8 @@ chapterListChapter model activeChapter order chapter =
         [ classList [ ( "nav-link", True ), ( "active", activeChapter == Just chapter ) ]
         , onClick <| SetActiveChapter chapter
         ]
-        [ text <| (toRomanNumber <| order + 1) ++ ". " ++ chapter.title
+        [ span [ class "chapter-number" ] [ text <| (toRomanNumber <| order + 1) ++ ". " ]
+        , span [ class "chapter-name" ] [ text chapter.title ]
         , viewChapterAnsweredIndication model chapter
         ]
 

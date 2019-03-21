@@ -28,6 +28,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+
+            .chapter-number {
+                min-width: 1.5em;
+                text-align: right;
+            }
+
+            .chapter-name {
+                flex-grow: 1;
+                margin-left: 0.5em;
+                margin-right: 0.5em;
+            }
         }
     }
 
