@@ -6,6 +6,8 @@ module Common.Questionnaire.Models exposing
     , Model
     , QuestionnaireDetail
     , calculateUnansweredQuestions
+    , chapterReportCanvasId
+    , createChartConfig
     , encodeFeedbackFrom
     , encodeQuestionnaireDetail
     , feedbackDecoder
@@ -20,8 +22,9 @@ module Common.Questionnaire.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import ChartJS exposing (ChartConfig)
 import Common.Form exposing (CustomFormError)
-import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
+import Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport)
 import Form
 import Form.Validate as Validate exposing (..)
 import FormEngine.Model exposing (..)
@@ -451,3 +454,46 @@ evaluateAnswerItem currentLevel replies path requiredNow questions index =
         |> List.map (evaluateQuestion currentLevel replies currentPath)
         |> List.foldl (+) 0
         |> (+) answerItem
+
+
+createChartConfig : List Metric -> List Chapter -> ChapterReport -> ChartConfig
+createChartConfig metrics chapters chapterReport =
+    let
+        data =
+            List.map (createDataValue metrics) chapterReport.metrics
+
+        label =
+            List.find (.uuid >> (==) chapterReport.chapterUuid) chapters
+                |> Maybe.map .title
+                |> Maybe.withDefault "Chapter"
+    in
+    { targetId = chapterReportCanvasId chapterReport
+    , data =
+        { labels = List.map Tuple.first data
+        , datasets =
+            [ { label = label
+              , borderColor = "rgb(23, 162, 184)"
+              , backgroundColor = "rgba(23, 162, 184, 0.5)"
+              , pointBackgroundColor = "rgb(23, 162, 184)"
+              , data = List.map Tuple.second data
+              , stack = Nothing
+              }
+            ]
+        }
+    }
+
+
+createDataValue : List Metric -> MetricReport -> ( String, Float )
+createDataValue metrics report =
+    let
+        label =
+            List.find (.uuid >> (==) report.metricUuid) metrics
+                |> Maybe.map .title
+                |> Maybe.withDefault "Metric"
+    in
+    ( label, report.measure )
+
+
+chapterReportCanvasId : ChapterReport -> String
+chapterReportCanvasId chapterReport =
+    "chapter-report-" ++ chapterReport.chapterUuid
