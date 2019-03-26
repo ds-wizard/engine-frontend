@@ -1,7 +1,7 @@
 module KnowledgeModels.Index.View exposing (view)
 
-import Auth.Models exposing (JwtToken)
 import Auth.Permission exposing (hasPerm, packageManagementWrite)
+import Common.AppState exposing (AppState)
 import Common.Html exposing (..)
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
@@ -17,19 +17,19 @@ import Msgs
 import Routing exposing (Route(..))
 
 
-view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
-view wrapMsg jwt model =
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
     div [ class "col KnowledgeModels__Index" ]
-        [ Page.header "Knowledge Models" (indexActions jwt)
+        [ Page.header "Knowledge Models" (indexActions appState)
         , FormResult.successOnlyView model.deletingPackage
-        , Page.actionResultView (Table.view (tableConfig jwt) wrapMsg) model.packages
+        , Page.actionResultView (Table.view (tableConfig appState) wrapMsg) model.packages
         , deleteModal wrapMsg model
         ]
 
 
-indexActions : Maybe JwtToken -> List (Html Msgs.Msg)
-indexActions jwt =
-    if hasPerm jwt packageManagementWrite then
+indexActions : AppState -> List (Html Msgs.Msg)
+indexActions appState =
+    if hasPerm appState.jwt packageManagementWrite then
         [ linkTo (Routing.KnowledgeModels Import)
             [ class "btn btn-primary link-with-icon" ]
             [ i [ class "fa fa-cloud-upload" ] []
@@ -41,8 +41,8 @@ indexActions jwt =
         []
 
 
-tableConfig : Maybe JwtToken -> TableConfig Package Msg
-tableConfig jwt =
+tableConfig : AppState -> TableConfig Package Msg
+tableConfig appState =
     { emptyMessage = "There are no packages."
     , fields =
         [ { label = "Name"
@@ -65,7 +65,7 @@ tableConfig jwt =
           }
         , { label = TableActionDestructive "trash-o" "Delete"
           , action = TableActionMsg tableActionDelete
-          , visible = always <| hasPerm jwt packageManagementWrite
+          , visible = always <| hasPerm appState.jwt packageManagementWrite
           }
         ]
     , sortBy = .name

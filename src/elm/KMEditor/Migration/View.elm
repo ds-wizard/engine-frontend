@@ -33,7 +33,7 @@ migrationView wrapMsg model migration =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
-                [ text "Migration state is corrupted." ]
+                [ text "Migration appState is corrupted." ]
 
         runningStateMessage =
             div [ class "alert alert-warning" ]

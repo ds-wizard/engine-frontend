@@ -1,46 +1,42 @@
 module KMEditor.Create.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Form exposing (setFormErrorsJwt)
-import Common.Models exposing (getServerErrorJwt)
+import Common.Api exposing (getResultCmd)
+import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.Api.Packages as PackagesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
+import Common.Form exposing (setFormErrors)
 import Form exposing (Form)
-import Jwt
 import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
-import KMEditor.Requests exposing (postKnowledgeModel)
 import KMEditor.Routing exposing (Route(..))
 import KnowledgeModels.Common.Models exposing (PackageDetail)
-import KnowledgeModels.Requests exposing (getPackages)
-import Models exposing (State)
 import Msgs
-import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
-import Utils exposing (getUuid, tuplePrepend)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg session =
-    getPackages session
-        |> Jwt.send GetPackagesCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg appState =
+    Cmd.map wrapMsg <|
+        PackagesApi.getPackages appState GetPackagesCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetPackagesCompleted result ->
             getPackageCompleted model result
 
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg state.session model
+            handleForm formMsg wrapMsg appState model
 
         PostKnowledgeModelCompleted result ->
-            postKmCompleted state model result
+            postKmCompleted appState model result
 
 
-getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
+getPackageCompleted : Model -> Result ApiError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
 getPackageCompleted model result =
     let
         newModel =
@@ -49,7 +45,7 @@ getPackageCompleted model result =
                     setSelectedPackage { model | packages = Success packages } packages
 
                 Err error ->
-                    { model | packages = getServerErrorJwt error "Unable to get package list" }
+                    { model | packages = getServerError error "Unable to get package list" }
 
         cmd =
             getResultCmd result
@@ -71,13 +67,17 @@ setSelectedPackage model packages =
             model
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg session model =
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just kmCreateForm ) ->
             let
+                body =
+                    encodeKnowledgeCreateModelForm kmCreateForm
+
                 cmd =
-                    postKmCmd wrapMsg session kmCreateForm
+                    Cmd.map wrapMsg <|
+                        KnowledgeModelsApi.postKnowledgeModel body appState PostKnowledgeModelCompleted
             in
             ( { model | savingKnowledgeModel = Loading }, cmd )
 
@@ -89,27 +89,18 @@ handleForm formMsg wrapMsg session model =
             ( newModel, Cmd.none )
 
 
-postKmCmd : (Msg -> Msgs.Msg) -> Session -> KnowledgeModelCreateForm -> Cmd Msgs.Msg
-postKmCmd wrapMsg session form =
-    form
-        |> encodeKnowledgeCreateModelForm
-        |> postKnowledgeModel session
-        |> Jwt.send PostKnowledgeModelCompleted
-        |> Cmd.map wrapMsg
-
-
-postKmCompleted : State -> Model -> Result Jwt.JwtError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
-postKmCompleted state model result =
+postKmCompleted : AppState -> Model -> Result ApiError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
+postKmCompleted appState model result =
     case result of
         Ok km ->
             ( model
-            , cmdNavigate state.key (Routing.KMEditor <| EditorRoute km.uuid)
+            , cmdNavigate appState.key (Routing.KMEditor <| EditorRoute km.uuid)
             )
 
         Err error ->
             ( { model
-                | form = setFormErrorsJwt error model.form
-                , savingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be created."
+                | form = setFormErrors error model.form
+                , savingKnowledgeModel = getServerError error "Knowledge model could not be created."
               }
             , getResultCmd result
             )

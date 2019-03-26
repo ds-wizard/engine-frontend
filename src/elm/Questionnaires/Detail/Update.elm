@@ -1,56 +1,39 @@
-module Questionnaires.Detail.Update exposing (fetchData, fetchLevels, fetchQuestionnaire, handleGetLevelsCompleted, handleGetQuestionnaireCompleted, handlePutRepliesCompleted, handleQuestionnaireMsg, handleSave, putRepliesCmd, update)
+module Questionnaires.Detail.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
+import Common.Api exposing (getResultCmd)
+import Common.Api.Levels as LevelsApi
+import Common.Api.Metrics as MetricsApi
+import Common.Api.Questionnaires as QuestionnairesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, encodeQuestionnaireDetail, initialModel, updateReplies)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
-import Jwt
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
-import KMEditor.Requests exposing (getLevels, getMetrics)
-import Models exposing (State)
 import Msgs
 import Questionnaires.Detail.Models exposing (Model)
 import Questionnaires.Detail.Msgs exposing (Msg(..))
-import Questionnaires.Requests exposing (getQuestionnaire, putQuestionnaire)
 import Questionnaires.Routing exposing (Route(..))
-import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> String -> Cmd Msgs.Msg
-fetchData wrapMsg session uuid =
-    Cmd.batch
-        [ fetchQuestionnaire wrapMsg session uuid
-        , fetchLevels wrapMsg session
-        , fetchMetrics wrapMsg session
-        ]
+fetchData : (Msg -> Msgs.Msg) -> AppState -> String -> Cmd Msgs.Msg
+fetchData wrapMsg appState uuid =
+    Cmd.map wrapMsg <|
+        Cmd.batch
+            [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted
+            , LevelsApi.getLevels appState GetLevelsCompleted
+            , MetricsApi.getMetrics appState GetMetricsCompleted
+            ]
 
 
-fetchQuestionnaire : (Msg -> Msgs.Msg) -> Session -> String -> Cmd Msgs.Msg
-fetchQuestionnaire wrapMsg session uuid =
-    getQuestionnaire uuid session
-        |> Jwt.send GetQuestionnaireCompleted
-        |> Cmd.map wrapMsg
-
-
-fetchLevels : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchLevels wrapMsg session =
-    getLevels session
-        |> Jwt.send GetLevelsCompleted
-        |> Cmd.map wrapMsg
-
-
-fetchMetrics : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchMetrics wrapMsg session =
-    getMetrics session
-        |> Jwt.send GetMetricsCompleted
-        |> Cmd.map wrapMsg
-
-
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted model result
@@ -62,16 +45,16 @@ update msg wrapMsg state model =
             handleGetMetricsCompleted model result
 
         QuestionnaireMsg qMsg ->
-            handleQuestionnaireMsg wrapMsg qMsg state.session model
+            handleQuestionnaireMsg wrapMsg qMsg appState model
 
         Save ->
-            handleSave wrapMsg state.session model
+            handleSave wrapMsg appState model
 
         PutRepliesCompleted result ->
-            handlePutRepliesCompleted state model result
+            handlePutRepliesCompleted appState model result
 
 
-handleGetQuestionnaireCompleted : Model -> Result Jwt.JwtError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnaireCompleted : Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
 handleGetQuestionnaireCompleted model result =
     let
         newModel =
@@ -80,7 +63,7 @@ handleGetQuestionnaireCompleted model result =
                     { model | questionnaireDetail = Success questionnaireDetail }
 
                 Err error ->
-                    { model | questionnaireDetail = getServerErrorJwt error "Unable to get questionnaire." }
+                    { model | questionnaireDetail = getServerError error "Unable to get questionnaire." }
 
         cmd =
             getResultCmd result
@@ -88,7 +71,7 @@ handleGetQuestionnaireCompleted model result =
     ( initQuestionnaireModel newModel, cmd )
 
 
-handleGetLevelsCompleted : Model -> Result Jwt.JwtError (List Level) -> ( Model, Cmd Msgs.Msg )
+handleGetLevelsCompleted : Model -> Result ApiError (List Level) -> ( Model, Cmd Msgs.Msg )
 handleGetLevelsCompleted model result =
     let
         newModel =
@@ -97,7 +80,7 @@ handleGetLevelsCompleted model result =
                     { model | levels = Success levels }
 
                 Err error ->
-                    { model | levels = getServerErrorJwt error "Unable to get levels." }
+                    { model | levels = getServerError error "Unable to get levels." }
 
         cmd =
             getResultCmd result
@@ -121,7 +104,7 @@ initQuestionnaireModel model =
             model
 
 
-handleGetMetricsCompleted : Model -> Result Jwt.JwtError (List Metric) -> ( Model, Cmd Msgs.Msg )
+handleGetMetricsCompleted : Model -> Result ApiError (List Metric) -> ( Model, Cmd Msgs.Msg )
 handleGetMetricsCompleted model result =
     let
         newModel =
@@ -130,7 +113,7 @@ handleGetMetricsCompleted model result =
                     { model | metrics = Success metrics }
 
                 Err error ->
-                    { model | metrics = getServerErrorJwt error "Unable to get metrics." }
+                    { model | metrics = getServerError error "Unable to get metrics." }
 
         cmd =
             getResultCmd result
@@ -138,15 +121,15 @@ handleGetMetricsCompleted model result =
     ( initQuestionnaireModel newModel, cmd )
 
 
-handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleQuestionnaireMsg wrapMsg msg session model =
+handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleQuestionnaireMsg wrapMsg msg appState model =
     let
         ( newQuestionnaireModel, cmd ) =
             case model.questionnaireModel of
                 Success qm ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Common.Questionnaire.Update.update msg (Just session) qm
+                            Common.Questionnaire.Update.update msg appState qm
                     in
                     ( Success questionnaireModel, questionnaireCmd )
 
@@ -156,16 +139,20 @@ handleQuestionnaireMsg wrapMsg msg session model =
     ( { model | questionnaireModel = newQuestionnaireModel }, cmd |> Cmd.map (QuestionnaireMsg >> wrapMsg) )
 
 
-handleSave : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleSave wrapMsg session model =
+handleSave : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleSave wrapMsg appState model =
     case model.questionnaireModel of
         Success questionnaireModel ->
             let
                 newQuestionnaireModel =
                     updateReplies questionnaireModel
 
+                body =
+                    encodeQuestionnaireDetail newQuestionnaireModel.questionnaire
+
                 cmd =
-                    putRepliesCmd wrapMsg session model.uuid newQuestionnaireModel.questionnaire
+                    Cmd.map wrapMsg <|
+                        QuestionnairesApi.putQuestionnaire model.uuid body appState PutRepliesCompleted
             in
             ( { model | questionnaireModel = Success newQuestionnaireModel }, cmd )
 
@@ -173,21 +160,13 @@ handleSave wrapMsg session model =
             ( model, Cmd.none )
 
 
-handlePutRepliesCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-handlePutRepliesCompleted state model result =
+handlePutRepliesCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handlePutRepliesCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate state.key <| Routing.Questionnaires Index )
+            ( model, cmdNavigate appState.key <| Routing.Questionnaires Index )
 
         Err error ->
-            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be saved." }
+            ( { model | savingQuestionnaire = getServerError error "Questionnaire could not be saved." }
             , getResultCmd result
             )
-
-
-putRepliesCmd : (Msg -> Msgs.Msg) -> Session -> String -> QuestionnaireDetail -> Cmd Msgs.Msg
-putRepliesCmd wrapMsg session uuid questionnaire =
-    encodeQuestionnaireDetail questionnaire
-        |> putQuestionnaire uuid session
-        |> Jwt.send PutRepliesCompleted
-        |> Cmd.map wrapMsg

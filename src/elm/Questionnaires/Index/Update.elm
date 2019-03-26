@@ -4,26 +4,24 @@ module Questionnaires.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
-import Jwt
+import Common.Api exposing (getResultCmd)
+import Common.Api.Questionnaires as QuestionnairesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire)
 import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
-import Questionnaires.Requests exposing (deleteQuestionnaire, getQuestionnaires)
-import Requests exposing (getResultCmd)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg session =
-    getQuestionnaires session
-        |> Jwt.send GetQuestionnairesCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg appState =
+    Cmd.map wrapMsg <|
+        QuestionnairesApi.getQuestionnaires appState GetQuestionnairesCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetQuestionnairesCompleted result ->
             getQuestionnairesCompleted model result
@@ -32,16 +30,16 @@ update msg wrapMsg session model =
             ( { model | questionnaireToBeDeleted = questionnaire, deletingQuestionnaire = Unset }, Cmd.none )
 
         DeleteQuestionnaire ->
-            handleDeleteQuestionnaire wrapMsg session model
+            handleDeleteQuestionnaire wrapMsg appState model
 
         DeleteQuestionnaireCompleted result ->
-            deleteQuestionnaireCompleted wrapMsg session model result
+            deleteQuestionnaireCompleted wrapMsg appState model result
 
         ShowHideExportQuestionnaire questionnaire ->
             ( { model | questionnaireToBeExported = questionnaire }, Cmd.none )
 
 
-getQuestionnairesCompleted : Model -> Result Jwt.JwtError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
+getQuestionnairesCompleted : Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
 getQuestionnairesCompleted model result =
     case result of
         Ok questionnaires ->
@@ -50,13 +48,13 @@ getQuestionnairesCompleted model result =
             )
 
         Err error ->
-            ( { model | questionnaires = getServerErrorJwt error "Unable to fetch questionnaire list" }
+            ( { model | questionnaires = getServerError error "Unable to fetch questionnaire list" }
             , getResultCmd result
             )
 
 
-handleDeleteQuestionnaire : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeleteQuestionnaire wrapMsg session model =
+handleDeleteQuestionnaire : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteQuestionnaire wrapMsg appState model =
     case model.questionnaireToBeDeleted of
         Just questionnaire ->
             let
@@ -64,9 +62,8 @@ handleDeleteQuestionnaire wrapMsg session model =
                     { model | deletingQuestionnaire = Loading }
 
                 cmd =
-                    deleteQuestionnaire questionnaire.uuid session
-                        |> Jwt.send DeleteQuestionnaireCompleted
-                        |> Cmd.map wrapMsg
+                    Cmd.map wrapMsg <|
+                        QuestionnairesApi.deleteQuestionnaire questionnaire.uuid appState DeleteQuestionnaireCompleted
             in
             ( newModel, cmd )
 
@@ -74,15 +71,15 @@ handleDeleteQuestionnaire wrapMsg session model =
             ( model, Cmd.none )
 
 
-deleteQuestionnaireCompleted : (Msg -> Msgs.Msg) -> Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteQuestionnaireCompleted wrapMsg session model result =
+deleteQuestionnaireCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+deleteQuestionnaireCompleted wrapMsg appState model result =
     case result of
         Ok user ->
             ( { model | deletingQuestionnaire = Success "Questionnaire was sucessfully deleted", questionnaires = Loading, questionnaireToBeDeleted = Nothing }
-            , fetchData wrapMsg session
+            , fetchData wrapMsg appState
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = getServerErrorJwt error "Questionnaire could not be deleted" }
+            ( { model | deletingQuestionnaire = getServerError error "Questionnaire could not be deleted" }
             , getResultCmd result
             )

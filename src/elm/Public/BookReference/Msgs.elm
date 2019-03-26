@@ -1,8 +1,8 @@
 module Public.BookReference.Msgs exposing (Msg(..))
 
-import Http
+import Common.ApiError exposing (ApiError)
 import Public.BookReference.Models exposing (BookReference)
 
 
 type Msg
-    = GetBookReferenceCompleted (Result Http.Error BookReference)
+    = GetBookReferenceCompleted (Result ApiError BookReference)

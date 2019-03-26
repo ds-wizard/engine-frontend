@@ -1,11 +1,11 @@
 module Auth.Msgs exposing (Msg(..))
 
 import Auth.Models exposing (JwtToken)
-import Jwt
+import Common.ApiError exposing (ApiError)
 import Users.Common.Models exposing (User)
 
 
 type Msg
-    = GetCurrentUserCompleted (Result Jwt.JwtError User)
+    = GetCurrentUserCompleted (Result ApiError User)
     | Logout
     | Token String JwtToken

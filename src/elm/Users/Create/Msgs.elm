@@ -1,9 +1,10 @@
 module Users.Create.Msgs exposing (Msg(..))
 
+import Common.ApiError exposing (ApiError)
 import Form
-import Jwt
+import Result exposing (Result)
 
 
 type Msg
     = FormMsg Form.Msg
-    | PostUserCompleted (Result Jwt.JwtError String)
+    | PostUserCompleted (Result ApiError ())

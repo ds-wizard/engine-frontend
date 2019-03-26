@@ -1,27 +1,26 @@
 module Common.Questionnaire.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
 import ChartJS exposing (encodeChartConfig)
-import Common.Models exposing (getServerError, getServerErrorJwt)
+import Common.Api.Feedbacks as FeedbacksApi
+import Common.Api.Questionnaires as QuestionnairesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Common.Questionnaire.Requests exposing (getFeedbacks, postFeedback, postForSummaryReport)
 import Form exposing (Form)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
-import Http
-import Jwt
 import KMEditor.Common.Models.Entities exposing (Chapter)
 import Ports
 import Utils exposing (stringToInt)
 
 
-update : Msg -> Maybe Session -> Model -> ( Model, Cmd Msg )
-update msg maybeSession model =
+update : Msg -> AppState -> Model -> ( Model, Cmd Msg )
+update msg appState model =
     case msg of
         FormMsg formMsg ->
-            handleFormMsg formMsg model
+            handleFormMsg formMsg appState model
 
         SetLevel level ->
             ( { model
@@ -35,21 +34,22 @@ update msg maybeSession model =
             ( handleSetActiveChapter chapter model, Cmd.none )
 
         ViewSummaryReport ->
-            case maybeSession of
-                Just session ->
-                    let
-                        newModel =
-                            updateReplies model
-                    in
-                    ( { newModel
-                        | activePage = PageSummaryReport
-                        , summaryReport = Loading
-                      }
-                    , postForSummaryReportCmd session newModel
-                    )
+            let
+                newModel =
+                    updateReplies model
 
-                Nothing ->
-                    ( model, Cmd.none )
+                body =
+                    encodeQuestionnaireDetail newModel.questionnaire
+
+                cmd =
+                    QuestionnairesApi.fetchSummaryReport model.questionnaire.uuid body appState PostForSummaryReportCompleted
+            in
+            ( { newModel
+                | activePage = PageSummaryReport
+                , summaryReport = Loading
+              }
+            , cmd
+            )
 
         PostForSummaryReportCompleted result ->
             case result of
@@ -68,7 +68,7 @@ update msg maybeSession model =
                     )
 
                 Err error ->
-                    ( { model | summaryReport = getServerErrorJwt error "Unable to get summary report" }, Cmd.none )
+                    ( { model | summaryReport = getServerError error "Unable to get summary report" }, Cmd.none )
 
         CloseFeedback ->
             ( { model | feedback = Unset, feedbackQuestionUuid = Nothing }, Cmd.none )
@@ -77,7 +77,7 @@ update msg maybeSession model =
             ( { model | feedbackForm = Form.update feedbackFormValidation formMsg model.feedbackForm }, Cmd.none )
 
         SendFeedbackForm ->
-            handleSendFeedbackForm model
+            handleSendFeedbackForm appState model
 
         PostFeedbackCompleted result ->
             ( handlePostFeedbackCompleted result model, Cmd.none )
@@ -96,8 +96,8 @@ update msg maybeSession model =
                     ( model, Cmd.none )
 
 
-handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> Model -> ( Model, Cmd Msg )
-handleFormMsg msg model =
+handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> AppState -> Model -> ( Model, Cmd Msg )
+handleFormMsg msg appState model =
     case model.activePage of
         PageChapter chapter form ->
             case msg of
@@ -111,7 +111,7 @@ handleFormMsg msg model =
                                 , sendingFeedback = Unset
                                 , feedbackResult = Nothing
                               }
-                            , getFeedbacksCmd model.questionnaire.package.id questionUuid
+                            , FeedbacksApi.getFeedbacks model.questionnaire.package.id questionUuid appState GetFeedbacksCompleted
                             )
 
                 _ ->
@@ -134,8 +134,8 @@ handleSetActiveChapter chapter model =
         |> setActiveChapter chapter
 
 
-handleSendFeedbackForm : Model -> ( Model, Cmd Msg )
-handleSendFeedbackForm model =
+handleSendFeedbackForm : AppState -> Model -> ( Model, Cmd Msg )
+handleSendFeedbackForm appState model =
     let
         newFeedbackForm =
             Form.update feedbackFormValidation Form.Submit model.feedbackForm
@@ -143,8 +143,11 @@ handleSendFeedbackForm model =
     case Form.getOutput newFeedbackForm of
         Just feedbackForm ->
             let
+                body =
+                    encodeFeedbackFrom (model.feedbackQuestionUuid |> Maybe.withDefault "") model.questionnaire.package.id feedbackForm
+
                 cmd =
-                    postFeedbackCmd feedbackForm (model.feedbackQuestionUuid |> Maybe.withDefault "") model.questionnaire.package.id
+                    FeedbacksApi.postFeedback body appState PostFeedbackCompleted
             in
             ( { model | feedbackForm = newFeedbackForm, sendingFeedback = Loading }, cmd )
 
@@ -152,7 +155,7 @@ handleSendFeedbackForm model =
             ( { model | feedbackForm = newFeedbackForm }, Cmd.none )
 
 
-handlePostFeedbackCompleted : Result Http.Error Feedback -> Model -> Model
+handlePostFeedbackCompleted : Result ApiError Feedback -> Model -> Model
 handlePostFeedbackCompleted result model =
     case result of
         Ok feedback ->
@@ -163,24 +166,3 @@ handlePostFeedbackCompleted result model =
 
         Err error ->
             { model | sendingFeedback = getServerError error "Feedback could not be sent." }
-
-
-postForSummaryReportCmd : Session -> Model -> Cmd Msg
-postForSummaryReportCmd session model =
-    encodeQuestionnaireDetail model.questionnaire
-        |> postForSummaryReport session model.questionnaire.uuid
-        |> Jwt.send PostForSummaryReportCompleted
-
-
-postFeedbackCmd : FeedbackForm -> String -> String -> Cmd Msg
-postFeedbackCmd feedbackFrom questionUuid packageId =
-    feedbackFrom
-        |> encodeFeedbackFrom questionUuid packageId
-        |> postFeedback
-        |> Http.send PostFeedbackCompleted
-
-
-getFeedbacksCmd : String -> String -> Cmd Msg
-getFeedbacksCmd packageId questionUuid =
-    getFeedbacks packageId questionUuid
-        |> Http.send GetFeedbacksCompleted

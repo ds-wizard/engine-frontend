@@ -1,7 +1,7 @@
 module Public.SignupConfirmation.Msgs exposing (Msg(..))
 
-import Http
+import Common.ApiError exposing (ApiError)
 
 
 type Msg
-    = SendConfirmationCompleted (Result Http.Error String)
+    = SendConfirmationCompleted (Result ApiError ())

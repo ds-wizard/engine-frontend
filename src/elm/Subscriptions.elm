@@ -12,7 +12,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     let
         currentViewSubscriptions =
-            case model.state.route of
+            case model.appState.route of
                 KMEditor route ->
                     KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel
 

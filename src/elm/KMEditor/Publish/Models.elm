@@ -10,7 +10,7 @@ import String exposing (fromInt)
 
 
 type alias Model =
-    { knowledgeModel : ActionResult KnowledgeModel
+    { knowledgeModel : ActionResult KnowledgeModelDetail
     , publishingKnowledgeModel : ActionResult String
     , form : Form CustomFormError KnowledgeModelPublishForm
     }

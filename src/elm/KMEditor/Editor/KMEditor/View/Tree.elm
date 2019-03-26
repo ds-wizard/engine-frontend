@@ -197,9 +197,9 @@ treeNode config activeUuid editors =
     li
         [ classList
             [ ( "active", config.editorData.uuid == activeUuid )
-            , ( "state-edited", config.editorData.editorState == Edited )
-            , ( "state-deleted", config.editorData.editorState == Deleted )
-            , ( "state-added", config.editorData.editorState == Added || config.editorData.editorState == AddedEdited )
+            , ( "appState-edited", config.editorData.editorState == Edited )
+            , ( "appState-deleted", config.editorData.editorState == Deleted )
+            , ( "appState-added", config.editorData.editorState == Added || config.editorData.editorState == AddedEdited )
             ]
         ]
         [ caret

@@ -8,11 +8,11 @@ import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Form exposing (Form)
-import Form.Field as Field exposing (Field, FieldValue(..))
+import Form.Field exposing (Field, FieldValue(..))
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KMEditor.Common.Models exposing (KnowledgeModel, kmLastVersion)
+import KMEditor.Common.Models exposing (KnowledgeModelDetail, kmLastVersion)
 import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model)
 import KMEditor.Publish.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
@@ -28,7 +28,7 @@ view wrapMsg model =
         ]
 
 
-contentView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModel -> Html Msgs.Msg
+contentView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModelDetail -> Html Msgs.Msg
 contentView wrapMsg model knowledgeModel =
     div []
         [ FormResult.view model.publishingKnowledgeModel
@@ -37,7 +37,7 @@ contentView wrapMsg model knowledgeModel =
         ]
 
 
-formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelPublishForm -> KnowledgeModel -> Html Msgs.Msg
+formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelPublishForm -> KnowledgeModelDetail -> Html Msgs.Msg
 formView wrapMsg form knowledgeModel =
     div []
         [ FormGroup.textView knowledgeModel.name "Knowledge Model"

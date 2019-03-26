@@ -1,16 +1,17 @@
 module KMEditor.Editor.Preview.Update exposing (update)
 
+import Common.AppState exposing (AppState)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
 import KMEditor.Editor.Preview.Models exposing (..)
 import KMEditor.Editor.Preview.Msgs exposing (Msg(..))
 
 
-update : Msg -> Model -> Model
-update msg =
+update : Msg -> AppState -> Model -> Model
+update msg appState =
     case msg of
         QuestionnaireMsg questionnaireMsg ->
-            handleQuestionnaireMsg questionnaireMsg
+            handleQuestionnaireMsg questionnaireMsg appState
 
         AddTag uuid ->
             addTag uuid
@@ -25,10 +26,10 @@ update msg =
             selectNoneTags
 
 
-handleQuestionnaireMsg : Common.Questionnaire.Msgs.Msg -> Model -> Model
-handleQuestionnaireMsg msg model =
+handleQuestionnaireMsg : Common.Questionnaire.Msgs.Msg -> AppState -> Model -> Model
+handleQuestionnaireMsg msg appState model =
     let
         ( newQuestionnaireModel, _ ) =
-            Common.Questionnaire.Update.update msg Nothing model.questionnaireModel
+            Common.Questionnaire.Update.update msg appState model.questionnaireModel
     in
     { model | questionnaireModel = newQuestionnaireModel }

@@ -1,30 +1,27 @@
 module KnowledgeModels.Detail.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
 import Bootstrap.Dropdown as Dropdown
-import Common.Models exposing (getServerErrorJwt)
-import Jwt
+import Common.Api exposing (getResultCmd)
+import Common.Api.Packages as PackagesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import KnowledgeModels.Common.Models exposing (PackageDetail)
 import KnowledgeModels.Detail.Models exposing (..)
 import KnowledgeModels.Detail.Msgs exposing (Msg(..))
-import KnowledgeModels.Requests exposing (..)
 import KnowledgeModels.Routing exposing (Route(..))
-import Models exposing (State)
 import Msgs
-import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> String -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg organizationId kmId session =
-    getPackagesFiltered organizationId kmId session
-        |> Jwt.send GetPackageCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> String -> String -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg organizationId kmId appState =
+    Cmd.map wrapMsg <|
+        PackagesApi.getPackagesFiltered organizationId kmId appState GetPackageCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetPackageCompleted result ->
             getPackageCompleted model result
@@ -33,16 +30,16 @@ update msg wrapMsg state model =
             ( { model | versionToBeDeleted = version, deletingVersion = Unset }, Cmd.none )
 
         DeleteVersion ->
-            handleDeleteVersion wrapMsg state.session model
+            handleDeleteVersion wrapMsg appState model
 
         DeleteVersionCompleted result ->
-            deleteVersionCompleted state model result
+            deleteVersionCompleted appState model result
 
         DropdownMsg packageDetail dropdownState ->
             handleDropdownToggle model packageDetail dropdownState
 
 
-getPackageCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
+getPackageCompleted : Model -> Result ApiError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
 getPackageCompleted model result =
     let
         newModel =
@@ -51,7 +48,7 @@ getPackageCompleted model result =
                     { model | packages = Success <| List.map initPackageDetailRow packages }
 
                 Err error ->
-                    { model | packages = getServerErrorJwt error "Unable to get package detail" }
+                    { model | packages = getServerError error "Unable to get package detail" }
 
         cmd =
             getResultCmd result
@@ -59,27 +56,20 @@ getPackageCompleted model result =
     ( newModel, cmd )
 
 
-handleDeleteVersion : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeleteVersion wrapMsg session model =
+handleDeleteVersion : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteVersion wrapMsg appState model =
     case ( currentPackage model, model.versionToBeDeleted ) of
         ( Just package, Just version ) ->
             ( { model | deletingVersion = Loading }
-            , deletePackageVersionCmd wrapMsg version session
+            , Cmd.map wrapMsg <| PackagesApi.deletePackageVersion version appState DeleteVersionCompleted
             )
 
         _ ->
             ( model, Cmd.none )
 
 
-deletePackageVersionCmd : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
-deletePackageVersionCmd wrapMsg packageId session =
-    deletePackageVersion packageId session
-        |> Jwt.send DeleteVersionCompleted
-        |> Cmd.map wrapMsg
-
-
-deleteVersionCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteVersionCompleted state model result =
+deleteVersionCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+deleteVersionCompleted appState model result =
     case result of
         Ok version ->
             let
@@ -91,24 +81,24 @@ deleteVersionCompleted state model result =
                         _ ->
                             KnowledgeModels Index
             in
-            ( model, cmdNavigate state.key route )
+            ( model, cmdNavigate appState.key route )
 
         Err error ->
             ( { model
-                | deletingVersion = getServerErrorJwt error "Version could not be deleted"
+                | deletingVersion = getServerError error "Version could not be deleted"
               }
             , getResultCmd result
             )
 
 
 handleDropdownToggle : Model -> PackageDetail -> Dropdown.State -> ( Model, Cmd Msgs.Msg )
-handleDropdownToggle model packageDetail state =
+handleDropdownToggle model packageDetail appState =
     case model.packages of
         Success packageDetailRows ->
             let
                 replaceWith row =
                     if row.packageDetail == packageDetail then
-                        { row | dropdownState = state }
+                        { row | dropdownState = appState }
 
                     else
                         row

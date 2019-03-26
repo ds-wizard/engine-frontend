@@ -1,11 +1,11 @@
 module KMEditor.Migration.Msgs exposing (Msg(..))
 
-import Jwt
+import Common.ApiError exposing (ApiError)
 import KMEditor.Common.Models.Migration exposing (Migration)
 
 
 type Msg
-    = GetMigrationCompleted (Result Jwt.JwtError Migration)
+    = GetMigrationCompleted (Result ApiError Migration)
     | ApplyEvent
     | RejectEvent
-    | PostMigrationConflictCompleted (Result Jwt.JwtError String)
+    | PostMigrationConflictCompleted (Result ApiError ())

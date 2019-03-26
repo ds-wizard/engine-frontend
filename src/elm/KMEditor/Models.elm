@@ -34,7 +34,7 @@ initLocalModel route model =
             { model | createModel = KMEditor.Create.Models.initialModel selectedPackage }
 
         EditorRoute uuid ->
-            if model.editorModel.branchUuid == uuid then
+            if model.editorModel.kmUuid == uuid then
                 model
 
             else

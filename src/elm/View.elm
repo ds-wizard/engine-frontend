@@ -19,23 +19,23 @@ import Users.View
 
 view : Model -> Document Msg
 view model =
-    case model.state.route of
+    case model.appState.route of
         Welcome ->
             Layout.app model welcomeView
 
         Questionnaires route ->
             model.dsPlannerModel
-                |> Questionnaires.View.view route QuestionnairesMsg
+                |> Questionnaires.View.view route QuestionnairesMsg model.appState
                 |> Layout.app model
 
         KMEditor route ->
             model.kmEditorModel
-                |> KMEditor.View.view route KMEditorMsg model.state.jwt
+                |> KMEditor.View.view route KMEditorMsg model.appState.jwt
                 |> Layout.app model
 
         KnowledgeModels route ->
             model.kmPackagesModel
-                |> KnowledgeModels.View.view route KnowledgeModelsMsg model.state.jwt
+                |> KnowledgeModels.View.view route KnowledgeModelsMsg model.appState
                 |> Layout.app model
 
         Organization ->

@@ -1,11 +1,11 @@
 module KMEditor.Publish.Msgs exposing (Msg(..))
 
+import Common.ApiError exposing (ApiError)
 import Form
-import Jwt
-import KMEditor.Common.Models exposing (KnowledgeModel)
+import KMEditor.Common.Models exposing (KnowledgeModelDetail)
 
 
 type Msg
-    = GetKnowledgeModelCompleted (Result Jwt.JwtError KnowledgeModel)
+    = GetKnowledgeModelCompleted (Result ApiError KnowledgeModelDetail)
     | FormMsg Form.Msg
-    | PutKnowledgeModelVersionCompleted (Result Jwt.JwtError String)
+    | PutKnowledgeModelVersionCompleted (Result ApiError ())

@@ -59,7 +59,7 @@ decideInitialRoute model route =
                     fetchData model
 
                 ( True, _ ) ->
-                    cmdNavigate model.state.key Welcome
+                    cmdNavigate model.appState.key Welcome
 
                 _ ->
                     fetchData model
@@ -69,7 +69,7 @@ decideInitialRoute model route =
                 fetchData model
 
             else
-                cmdNavigate model.state.key homeRoute
+                cmdNavigate model.appState.key homeRoute
 
 
 main : Program Value Model Msg

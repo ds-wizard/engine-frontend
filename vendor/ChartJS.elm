@@ -6,6 +6,7 @@ module ChartJS exposing
     )
 
 import Json.Encode as Encode exposing (Value)
+import Json.Encode.Extra exposing (maybe)
 
 
 type alias ChartConfig =
@@ -54,15 +55,5 @@ encodeDataSet dataSet =
         , ( "backgroundColor", Encode.string dataSet.backgroundColor )
         , ( "pointBackgroundColor", Encode.string dataSet.pointBackgroundColor )
         , ( "data", Encode.list Encode.float dataSet.data )
-        , ( "stack", encodeMaybe Encode.string dataSet.stack )
+        , ( "stack", maybe Encode.string dataSet.stack )
         ]
-
-
-encodeMaybe : (a -> Value) -> Maybe a -> Value
-encodeMaybe encode maybe =
-    case maybe of
-        Just value ->
-            encode value
-
-        Nothing ->
-            Encode.null

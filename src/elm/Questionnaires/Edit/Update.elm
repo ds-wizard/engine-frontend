@@ -1,47 +1,52 @@
 module Questionnaires.Edit.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
+import Common.Api exposing (getResultCmd)
+import Common.Api.Questionnaires as QuestionnairesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Form
-import Jwt
-import Models exposing (State)
 import Msgs
 import Questionnaires.Edit.Models exposing (Model, QuestionnaireEditForm, encodeEditForm, initQuestionnaireEditForm, questionnaireEditFormValidation)
 import Questionnaires.Edit.Msgs exposing (Msg(..))
-import Questionnaires.Requests exposing (getQuestionnaire, putQuestionnaire)
 import Questionnaires.Routing exposing (Route(..))
-import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> String -> Cmd Msgs.Msg
-fetchData wrapMsg session uuid =
-    getQuestionnaire uuid session
-        |> Jwt.send GetQuestionnaireCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> String -> Cmd Msgs.Msg
+fetchData wrapMsg appState uuid =
+    Cmd.map wrapMsg <|
+        QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg state.session model
+            handleForm formMsg wrapMsg appState model
 
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted result model
 
         PutQuestionnaireCompleted result ->
-            handlePutQuestionnaireCompleted result state model
+            handlePutQuestionnaireCompleted result appState model
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg session model =
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.editForm, model.questionnaire ) of
         ( Form.Submit, Just editForm, Success questionnaire ) ->
+            let
+                body =
+                    encodeEditForm questionnaire editForm
+
+                cmd =
+                    Cmd.map wrapMsg <|
+                        QuestionnairesApi.putQuestionnaire model.uuid body appState PutQuestionnaireCompleted
+            in
             ( { model | savingQuestionnaire = Loading }
-            , putQuestionnaireCmd wrapMsg session model.uuid questionnaire editForm
+            , cmd
             )
 
         _ ->
@@ -52,7 +57,7 @@ handleForm formMsg wrapMsg session model =
             ( { model | editForm = editForm }, Cmd.none )
 
 
-handleGetQuestionnaireCompleted : Result Jwt.JwtError QuestionnaireDetail -> Model -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnaireCompleted : Result ApiError QuestionnaireDetail -> Model -> ( Model, Cmd Msgs.Msg )
 handleGetQuestionnaireCompleted result model =
     case result of
         Ok questionnaire ->
@@ -64,26 +69,18 @@ handleGetQuestionnaireCompleted result model =
             )
 
         Err error ->
-            ( { model | questionnaire = getServerErrorJwt error "Unable to get questionnaire detail." }
+            ( { model | questionnaire = getServerError error "Unable to get questionnaire detail." }
             , getResultCmd result
             )
 
 
-handlePutQuestionnaireCompleted : Result Jwt.JwtError String -> State -> Model -> ( Model, Cmd Msgs.Msg )
-handlePutQuestionnaireCompleted result state model =
+handlePutQuestionnaireCompleted : Result ApiError () -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handlePutQuestionnaireCompleted result appState model =
     case result of
         Ok _ ->
-            ( model, cmdNavigate state.key <| Routing.Questionnaires Index )
+            ( model, cmdNavigate appState.key <| Routing.Questionnaires Index )
 
         Err error ->
-            ( { model | savingQuestionnaire = getServerErrorJwt error "Questionnaire could not be saved." }
+            ( { model | savingQuestionnaire = getServerError error "Questionnaire could not be saved." }
             , getResultCmd result
             )
-
-
-putQuestionnaireCmd : (Msg -> Msgs.Msg) -> Session -> String -> QuestionnaireDetail -> QuestionnaireEditForm -> Cmd Msgs.Msg
-putQuestionnaireCmd wrapMsg session uuid questionnaire form =
-    encodeEditForm questionnaire form
-        |> putQuestionnaire uuid session
-        |> Jwt.send PutQuestionnaireCompleted
-        |> Cmd.map wrapMsg

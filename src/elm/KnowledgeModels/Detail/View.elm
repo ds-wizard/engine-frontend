@@ -1,9 +1,10 @@
 module KnowledgeModels.Detail.View exposing (view)
 
-import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.Packages exposing (exportPackageUrl)
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass, linkToAttributes)
 import Common.View.FormGroup as FormGroup
@@ -15,22 +16,21 @@ import Html.Events exposing (..)
 import KMEditor.Routing
 import KnowledgeModels.Detail.Models exposing (..)
 import KnowledgeModels.Detail.Msgs exposing (..)
-import KnowledgeModels.Requests exposing (exportPackageUrl)
 import Msgs
 import Questionnaires.Routing
 import Routing
 
 
-view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
-view wrapMsg jwt model =
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
     div [ detailClass "KnowledgeModels__Detail" ]
-        [ Page.actionResultView (packageDetail wrapMsg jwt) model.packages
+        [ Page.actionResultView (packageDetail wrapMsg appState) model.packages
         , deleteVersionModal wrapMsg model
         ]
 
 
-packageDetail : (Msg -> Msgs.Msg) -> Maybe JwtToken -> List PackageDetailRow -> Html Msgs.Msg
-packageDetail wrapMsg jwt packages =
+packageDetail : (Msg -> Msgs.Msg) -> AppState -> List PackageDetailRow -> Html Msgs.Msg
+packageDetail wrapMsg appState packages =
     case List.head packages of
         Just package ->
             div []
@@ -39,22 +39,22 @@ packageDetail wrapMsg jwt packages =
                 , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
                 , FormGroup.codeView (String.fromInt package.packageDetail.metamodelVersion) "Metamodel Version"
                 , h3 [] [ text "Versions" ]
-                , div [] (List.map (versionView wrapMsg jwt) <| sortPackageDetailRowsByVersion packages)
+                , div [] (List.map (versionView wrapMsg appState) <| sortPackageDetailRowsByVersion packages)
                 ]
 
         Nothing ->
             emptyNode
 
 
-versionView : (Msg -> Msgs.Msg) -> Maybe JwtToken -> PackageDetailRow -> Html Msgs.Msg
-versionView wrapMsg jwt row =
+versionView : (Msg -> Msgs.Msg) -> AppState -> PackageDetailRow -> Html Msgs.Msg
+versionView wrapMsg appState row =
     div [ class "card bg-light mb-3" ]
         [ div [ class "card-body" ]
             [ div [ class "row align-items-center" ]
                 [ div [ class "col-4 labels" ]
                     [ strong [] [ text row.packageDetail.version ] ]
                 , div [ class "col-8 text-right actions" ]
-                    [ versionViewActions wrapMsg jwt row ]
+                    [ versionViewActions wrapMsg appState row ]
                 ]
             , div [ class "row mt-3" ]
                 [ div [ class "col-12" ] [ text row.packageDetail.description ]
@@ -63,15 +63,15 @@ versionView wrapMsg jwt row =
         ]
 
 
-versionViewActions : (Msg -> Msgs.Msg) -> Maybe JwtToken -> PackageDetailRow -> Html Msgs.Msg
-versionViewActions wrapMsg jwt row =
+versionViewActions : (Msg -> Msgs.Msg) -> AppState -> PackageDetailRow -> Html Msgs.Msg
+versionViewActions wrapMsg appState row =
     let
         id =
             row.packageDetail.id
 
         exportAndDeleteButtons =
-            if hasPerm jwt Perm.packageManagementWrite then
-                [ a [ class "btn btn-outline-primary link-with-icon", href <| exportPackageUrl id, target "_blank" ]
+            if hasPerm appState.jwt Perm.packageManagementWrite then
+                [ a [ class "btn btn-outline-primary link-with-icon", href <| exportPackageUrl id appState, target "_blank" ]
                     [ i [ class "fa fa-download" ] [], text "Export" ]
                 , a [ class "btn btn-outline-primary", onClick (wrapMsg <| ShowHideDeleteVersion <| Just id) ]
                     [ i [ class "fa fa-trash-o" ] [] ]
@@ -81,7 +81,7 @@ versionViewActions wrapMsg jwt row =
                 []
 
         forkKMItem =
-            if hasPerm jwt Perm.knowledgeModel then
+            if hasPerm appState.jwt Perm.knowledgeModel then
                 [ Dropdown.anchorItem
                     (linkToAttributes (Routing.KMEditor <| KMEditor.Routing.CreateRoute <| Just id))
                     [ text "Fork Knowledge Model" ]
@@ -91,7 +91,7 @@ versionViewActions wrapMsg jwt row =
                 []
 
         createQuestionnaireItem =
-            if hasPerm jwt Perm.questionnaire then
+            if hasPerm appState.jwt Perm.questionnaire then
                 [ Dropdown.anchorItem
                     (linkToAttributes (Routing.Questionnaires <| Questionnaires.Routing.Create <| Just id))
                     [ text "Create Questionnaire" ]

@@ -66,7 +66,7 @@ app : Model -> Html Msg -> Document Msg
 app model content =
     let
         html =
-            div [ class "app-view", classList [ ( "side-navigation-collapsed", model.state.session.sidebarCollapsed ) ] ]
+            div [ class "app-view", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
                 [ menu model
                 , div [ class "page row justify-content-center" ]
                     [ content ]
@@ -81,7 +81,7 @@ app model content =
 
 menu : Model -> Html Msg
 menu model =
-    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.state.session.sidebarCollapsed ) ] ]
+    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
         [ logo model
         , ul [ class "menu" ]
             (createMenu model)
@@ -106,7 +106,7 @@ type MenuItem
 createMenu : Model -> List (Html Msg)
 createMenu model =
     menuItems
-        |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.state.jwt perm)
+        |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.appState.jwt perm)
         |> List.map (menuItem model)
 
 
@@ -124,7 +124,7 @@ menuItem : Model -> MenuItem -> Html Msg
 menuItem model (MenuItem label icon route perm) =
     let
         activeClass =
-            if model.state.route == route then
+            if model.appState.route == route then
                 "active"
 
             else
@@ -143,7 +143,7 @@ profileInfo : Model -> Html Msg
 profileInfo model =
     let
         name =
-            case model.state.session.user of
+            case model.appState.session.user of
                 Just user ->
                     user.name ++ " " ++ user.surname
 
@@ -151,7 +151,7 @@ profileInfo model =
                     ""
 
         collapseLink =
-            if model.state.session.sidebarCollapsed then
+            if model.appState.session.sidebarCollapsed then
                 a [ onLinkClick (Msgs.SetSidebarCollapsed False), class "collapse" ]
                     [ fa "angle-double-right" ]
 
@@ -161,6 +161,6 @@ profileInfo model =
     in
     div [ class "profile-info" ]
         [ viewHelpMenu model.menuModel.helpMenuDropdownState
-        , viewProfileMenu model.state.session.user model.menuModel.profileMenuDropdownState
+        , viewProfileMenu model.appState.session.user model.menuModel.profileMenuDropdownState
         , collapseLink
         ]

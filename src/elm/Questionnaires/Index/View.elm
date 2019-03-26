@@ -1,6 +1,8 @@
 module Questionnaires.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.Questionnaires as QuestionnairesApi
+import Common.AppState exposing (AppState)
 import Common.Html exposing (fa, linkTo)
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
@@ -13,17 +15,16 @@ import Questionnaires.Common.Models exposing (Questionnaire)
 import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
-import Requests exposing (apiUrl)
 import Routing
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
     div [ class "col Questionnaires__Index" ]
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
         , Page.actionResultView (Table.view (tableConfig model) wrapMsg) model.questionnaires
-        , exportModal wrapMsg model
+        , exportModal wrapMsg appState model
         , deleteModal wrapMsg model
         ]
 
@@ -114,21 +115,16 @@ exportFormats =
     ]
 
 
-getExportUrl : String -> String -> String
-getExportUrl format uuid =
-    apiUrl "/questionnaires/" ++ uuid ++ "/dmp?format=" ++ format
-
-
-exportItem : String -> ( String, String, String ) -> Html msg
-exportItem questionnaireUuid ( icon, format, formatLabel ) =
-    a [ class "export-link", href <| getExportUrl format questionnaireUuid, target "_blank" ]
+exportItem : AppState -> String -> ( String, String, String ) -> Html msg
+exportItem appState questionnaireUuid ( icon, format, formatLabel ) =
+    a [ class "export-link", href <| QuestionnairesApi.exportQuestionnaireUrl format questionnaireUuid appState, target "_blank" ]
         [ fa icon
         , text formatLabel
         ]
 
 
-exportModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-exportModal wrapMsg model =
+exportModal : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+exportModal wrapMsg appState model =
     let
         ( visible, questionnaireName, questionnaireUuid ) =
             case model.questionnaireToBeExported of
@@ -139,7 +135,7 @@ exportModal wrapMsg model =
                     ( False, "", "" )
 
         modalContent =
-            List.map (exportItem questionnaireUuid) exportFormats
+            List.map (exportItem appState questionnaireUuid) exportFormats
 
         modalConfig =
             { modalTitle = "Export " ++ questionnaireName

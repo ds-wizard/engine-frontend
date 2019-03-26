@@ -1,10 +1,23 @@
-module Common.Models exposing (ServerError, decodeError, errorDecoder, fieldErrorDecoder, getServerError, getServerErrorJwt)
+module Common.ApiError exposing
+    ( ApiError(..)
+    , ServerError
+    , decodeApiError
+    , errorDecoder
+    , fieldErrorDecoder
+    , getServerError
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Http exposing (Error(..), Response)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (optional, required)
-import Jwt
+
+
+type ApiError
+    = BadUrl String
+    | Timeout
+    | NetworkError
+    | BadStatus Int String
+    | BadBody String
 
 
 type alias ServerError =
@@ -25,11 +38,11 @@ fieldErrorDecoder =
     Decode.map2 (\a b -> ( a, b )) (index 0 Decode.string) (index 1 Decode.string)
 
 
-decodeError : Http.Error -> Maybe ServerError
-decodeError error =
+decodeApiError : ApiError -> Maybe ServerError
+decodeApiError error =
     case error of
-        BadStatus response ->
-            case decodeString errorDecoder response.body of
+        BadStatus _ response ->
+            case decodeString errorDecoder response of
                 Ok err ->
                     Just err
 
@@ -40,9 +53,9 @@ decodeError error =
             Nothing
 
 
-getServerError : Http.Error -> String -> ActionResult a
+getServerError : ApiError -> String -> ActionResult a
 getServerError error defaultMessage =
-    case decodeError error of
+    case decodeApiError error of
         Just err ->
             if String.isEmpty err.message then
                 Error defaultMessage
@@ -51,14 +64,4 @@ getServerError error defaultMessage =
                 Error err.message
 
         Nothing ->
-            Error defaultMessage
-
-
-getServerErrorJwt : Jwt.JwtError -> String -> ActionResult a
-getServerErrorJwt error defaultMessage =
-    case error of
-        Jwt.HttpError httpError ->
-            getServerError httpError defaultMessage
-
-        _ ->
             Error defaultMessage
