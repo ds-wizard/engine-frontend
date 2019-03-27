@@ -14,7 +14,8 @@ var app = program.Elm.Main.init({
     node: document.body,
     flags: {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
-        session: JSON.parse(localStorage.session || null)
+        session: JSON.parse(localStorage.session || null),
+        apiUrl: 'http://localhost:3000'
     }
 });
 

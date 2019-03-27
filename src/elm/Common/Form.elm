@@ -1,10 +1,11 @@
-module Common.Form exposing (CustomFormError(..), createFieldValidation, setFormError, setFormErrors, setFormErrorsJwt)
+module Common.Form exposing
+    ( CustomFormError(..)
+    , setFormErrors
+    )
 
-import Common.Models exposing (decodeError)
+import Common.ApiError exposing (ApiError, decodeApiError)
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
-import Http exposing (Error(..), Response)
-import Jwt
 
 
 type CustomFormError
@@ -13,21 +14,11 @@ type CustomFormError
     | ServerValidationError String
 
 
-setFormErrors : Http.Error -> Form CustomFormError a -> Form CustomFormError a
-setFormErrors rawError form =
-    case decodeError rawError of
+setFormErrors : ApiError -> Form CustomFormError a -> Form CustomFormError a
+setFormErrors apiError form =
+    case decodeApiError apiError of
         Just error ->
             List.foldl setFormError form error.fieldErrors
-
-        _ ->
-            form
-
-
-setFormErrorsJwt : Jwt.JwtError -> Form CustomFormError a -> Form CustomFormError a
-setFormErrorsJwt error form =
-    case error of
-        Jwt.HttpError httpError ->
-            setFormErrors httpError form
 
         _ ->
             form

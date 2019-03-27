@@ -1,4 +1,14 @@
-module KMEditor.Common.Models exposing (Branch, KnowledgeModel, KnowledgeModelState(..), branchDecoder, kmLastVersion, kmMatchState, knowledgeModelDecoder, knowledgeModelListDecoder, knowledgeModelStateDecoder)
+module KMEditor.Common.Models exposing
+    ( KnowledgeModel
+    , KnowledgeModelDetail
+    , KnowledgeModelState(..)
+    , kmLastVersion
+    , kmMatchState
+    , knowledgeModelDecoder
+    , knowledgeModelDetailDecoder
+    , knowledgeModelListDecoder
+    , knowledgeModelStateDecoder
+    )
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (optional, required)
@@ -17,9 +27,10 @@ type alias KnowledgeModel =
     }
 
 
-type alias Branch =
+type alias KnowledgeModelDetail =
     { name : String
     , kmId : String
+    , organizationId : String
     , parentPackageId : Maybe String
     , events : List Event
     }
@@ -67,7 +78,7 @@ knowledgeModelStateDecoder =
                         Decode.succeed Migrated
 
                     unknownState ->
-                        Decode.fail <| "Unknown knowledge model state " ++ unknownState
+                        Decode.fail <| "Unknown knowledge model appState " ++ unknownState
             )
 
 
@@ -76,11 +87,12 @@ knowledgeModelListDecoder =
     Decode.list knowledgeModelDecoder
 
 
-branchDecoder : Decoder Branch
-branchDecoder =
-    Decode.succeed Branch
+knowledgeModelDetailDecoder : Decoder KnowledgeModelDetail
+knowledgeModelDetailDecoder =
+    Decode.succeed KnowledgeModelDetail
         |> required "name" Decode.string
         |> required "kmId" Decode.string
+        |> required "organizationId" Decode.string
         |> required "parentPackageId" (Decode.nullable Decode.string)
         |> required "events" (Decode.list eventDecoder)
 
@@ -90,7 +102,7 @@ kmMatchState states knowledgeModel =
     List.any ((==) knowledgeModel.stateType) states
 
 
-kmLastVersion : KnowledgeModel -> Maybe String
+kmLastVersion : KnowledgeModelDetail -> Maybe String
 kmLastVersion km =
     let
         getVersion parent =

@@ -17,18 +17,19 @@ import View exposing (view)
 init : Value -> Url -> Key -> ( Model, Cmd Msg )
 init val location key =
     let
-        ( session, jwt, seed ) =
-            case decodeFlagsFromJson val of
-                Just flags ->
-                    case flags.session of
-                        Just flagsSession ->
-                            ( flagsSession, parseJwt flagsSession.token, flags.seed )
+        flags =
+            decodeFlagsFromJson val
+                |> Maybe.withDefault
+                    { session = Nothing
+                    , seed = 0
+                    , apiUrl = ""
+                    }
 
-                        Nothing ->
-                            ( initialSession, Nothing, flags.seed )
+        session =
+            Maybe.withDefault initialSession flags.session
 
-                Nothing ->
-                    ( initialSession, Nothing, 0 )
+        jwt =
+            Maybe.andThen (.token >> parseJwt) flags.session
 
         route =
             location
@@ -36,7 +37,7 @@ init val location key =
                 |> routeIfAllowed jwt
 
         model =
-            initialModel route seed session jwt key
+            initialModel route flags.seed session jwt key flags.apiUrl
                 |> initLocalModel
     in
     ( model, decideInitialRoute model route )
@@ -59,7 +60,7 @@ decideInitialRoute model route =
                     fetchData model
 
                 ( True, _ ) ->
-                    cmdNavigate model.state.key Welcome
+                    cmdNavigate model.appState.key Welcome
 
                 _ ->
                     fetchData model
@@ -69,7 +70,7 @@ decideInitialRoute model route =
                 fetchData model
 
             else
-                cmdNavigate model.state.key homeRoute
+                cmdNavigate model.appState.key homeRoute
 
 
 main : Program Value Model Msg

@@ -1,35 +1,34 @@
 module Public.Questionnaire.Update exposing (fetchData, handleGetQuestionnaireCompleted, handleQuestionnaireMsg, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Models exposing (getServerError)
+import Common.Api.Questionnaires as QuestionnairesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail, initialModel)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
-import Http
 import Msgs
 import Public.Questionnaire.Models exposing (Model)
 import Public.Questionnaire.Msgs exposing (Msg(..))
-import Public.Questionnaire.Requests exposing (getQuestionnaire)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
-fetchData wrapMsg =
-    getQuestionnaire
-        |> Http.send GetQuestionnaireCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg appState =
+    Cmd.map wrapMsg <|
+        QuestionnairesApi.getQuestionnairePublic appState GetQuestionnaireCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted model result
 
         QuestionnaireMsg questionnaireMsg ->
-            handleQuestionnaireMsg wrapMsg questionnaireMsg model
+            handleQuestionnaireMsg wrapMsg questionnaireMsg appState model
 
 
-handleGetQuestionnaireCompleted : Model -> Result Http.Error QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnaireCompleted : Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
 handleGetQuestionnaireCompleted model result =
     let
         newModel =
@@ -43,15 +42,15 @@ handleGetQuestionnaireCompleted model result =
     ( newModel, Cmd.none )
 
 
-handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> Model -> ( Model, Cmd Msgs.Msg )
-handleQuestionnaireMsg wrapMsg msg model =
+handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleQuestionnaireMsg wrapMsg msg appState model =
     let
         ( newQuestionnaireModel, cmd ) =
             case model.questionnaireModel of
                 Success qm ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Common.Questionnaire.Update.update msg Nothing qm
+                            Common.Questionnaire.Update.update msg appState qm
                     in
                     ( Success questionnaireModel, questionnaireCmd )
 

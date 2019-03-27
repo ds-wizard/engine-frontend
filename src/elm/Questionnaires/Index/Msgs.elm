@@ -1,12 +1,12 @@
 module Questionnaires.Index.Msgs exposing (Msg(..))
 
-import Jwt
+import Common.ApiError exposing (ApiError)
 import Questionnaires.Common.Models exposing (Questionnaire)
 
 
 type Msg
-    = GetQuestionnairesCompleted (Result Jwt.JwtError (List Questionnaire))
+    = GetQuestionnairesCompleted (Result ApiError (List Questionnaire))
     | ShowHideDeleteQuestionnaire (Maybe Questionnaire)
     | DeleteQuestionnaire
-    | DeleteQuestionnaireCompleted (Result Jwt.JwtError String)
+    | DeleteQuestionnaireCompleted (Result ApiError ())
     | ShowHideExportQuestionnaire (Maybe Questionnaire)

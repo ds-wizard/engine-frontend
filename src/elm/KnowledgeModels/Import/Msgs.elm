@@ -1,7 +1,6 @@
 module KnowledgeModels.Import.Msgs exposing (Msg(..))
 
-import Json.Decode
-import Jwt
+import Common.ApiError exposing (ApiError)
 import Ports exposing (FilePortData)
 
 
@@ -13,4 +12,4 @@ type Msg
     | FileRead FilePortData
     | Submit
     | Cancel
-    | ImportPackageCompleted (Result Jwt.JwtError Json.Decode.Value)
+    | ImportPackageCompleted (Result ApiError ())

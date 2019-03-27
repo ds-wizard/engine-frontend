@@ -1,6 +1,6 @@
-module Common.ModelsTest exposing (..)
+module Common.ApiErrorTest exposing (errorDecoderTests)
 
-import Common.Models exposing (errorDecoder)
+import Common.ApiError exposing (errorDecoder)
 import Expect
 import Json.Decode as Decode exposing (..)
 import Test exposing (..)

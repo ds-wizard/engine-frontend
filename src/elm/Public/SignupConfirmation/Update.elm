@@ -1,19 +1,18 @@
 module Public.SignupConfirmation.Update exposing (fetchData, handleSendConfirmationCompleted, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Models exposing (getServerError)
-import Http
+import Common.Api.Users as UsersApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Msgs
 import Public.SignupConfirmation.Models exposing (Model)
 import Public.SignupConfirmation.Msgs exposing (Msg(..))
-import Public.SignupConfirmation.Requests exposing (putUserActivation)
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> String -> Cmd Msgs.Msg
-fetchData wrapMsg userId hash =
-    putUserActivation userId hash
-        |> Http.send SendConfirmationCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> String -> String -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg uuid hash appState =
+    Cmd.map wrapMsg <|
+        UsersApi.putUserActivation uuid hash appState SendConfirmationCompleted
 
 
 update : Msg -> Model -> ( Model, Cmd Msgs.Msg )
@@ -23,7 +22,7 @@ update msg model =
             ( handleSendConfirmationCompleted result model, Cmd.none )
 
 
-handleSendConfirmationCompleted : Result Http.Error String -> Model -> Model
+handleSendConfirmationCompleted : Result ApiError () -> Model -> Model
 handleSendConfirmationCompleted result model =
     case result of
         Ok _ ->

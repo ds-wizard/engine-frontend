@@ -1,11 +1,10 @@
 module Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 
+import Common.ApiError exposing (ApiError)
 import Common.Questionnaire.Models exposing (Feedback)
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Form
 import FormEngine.Msgs
-import Http
-import Jwt
 import KMEditor.Common.Models.Entities exposing (Chapter, Metric)
 
 
@@ -14,12 +13,12 @@ type Msg
     | SetLevel String
     | SetActiveChapter Chapter
     | ViewSummaryReport
-    | PostForSummaryReportCompleted (Result Jwt.JwtError SummaryReport)
+    | PostForSummaryReportCompleted (Result ApiError SummaryReport)
     | CloseFeedback
     | FeedbackFormMsg Form.Msg
-    | PostFeedbackCompleted (Result Http.Error Feedback)
+    | PostFeedbackCompleted (Result ApiError Feedback)
     | SendFeedbackForm
-    | GetFeedbacksCompleted (Result Http.Error (List Feedback))
+    | GetFeedbacksCompleted (Result ApiError (List Feedback))
 
 
 type CustomFormMessage

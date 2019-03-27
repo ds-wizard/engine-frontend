@@ -1,5 +1,6 @@
 module Questionnaires.View exposing (view)
 
+import Common.AppState exposing (AppState)
 import Html exposing (Html)
 import Msgs
 import Questionnaires.Create.View
@@ -11,8 +12,8 @@ import Questionnaires.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
 
 
-view : Route -> (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view route wrapMsg model =
+view : Route -> (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view route wrapMsg appState model =
     case route of
         Create _ ->
             Questionnaires.Create.View.view (wrapMsg << CreateMsg) model.createModel
@@ -24,4 +25,4 @@ view route wrapMsg model =
             Questionnaires.Edit.View.view (wrapMsg << EditMsg) model.editModel
 
         Index ->
-            Questionnaires.Index.View.view (wrapMsg << IndexMsg) model.indexModel
+            Questionnaires.Index.View.view (wrapMsg << IndexMsg) appState model.indexModel

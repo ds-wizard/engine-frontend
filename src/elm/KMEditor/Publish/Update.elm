@@ -1,42 +1,39 @@
 module KMEditor.Publish.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
+import Common.Api exposing (getResultCmd)
+import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Form
-import Jwt
-import KMEditor.Common.Models exposing (KnowledgeModel)
+import KMEditor.Common.Models exposing (KnowledgeModelDetail)
 import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model, encodeKnowledgeModelPublishForm, knowledgeModelPublishFormValidation)
 import KMEditor.Publish.Msgs exposing (Msg(..))
-import KMEditor.Requests exposing (getKnowledgeModel, putKnowledgeModelVersion)
 import KnowledgeModels.Routing
-import Models exposing (State)
 import Msgs
-import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg uuid session =
-    getKnowledgeModel uuid session
-        |> Jwt.send GetKnowledgeModelCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg uuid appState =
+    Cmd.map wrapMsg <|
+        KnowledgeModelsApi.getKnowledgeModel uuid appState GetKnowledgeModelCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetKnowledgeModelCompleted result ->
             getKnowledgeModelCompleted model result
 
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg state.session model
+            handleForm formMsg wrapMsg appState model
 
         PutKnowledgeModelVersionCompleted result ->
-            putKnowledgeModelVersionCompleted state model result
+            putKnowledgeModelVersionCompleted appState model result
 
 
-getKnowledgeModelCompleted : Model -> Result Jwt.JwtError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
+getKnowledgeModelCompleted : Model -> Result ApiError KnowledgeModelDetail -> ( Model, Cmd Msgs.Msg )
 getKnowledgeModelCompleted model result =
     let
         newModel =
@@ -45,7 +42,7 @@ getKnowledgeModelCompleted model result =
                     { model | knowledgeModel = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModel = getServerErrorJwt error "Unable to get the knowledge model." }
+                    { model | knowledgeModel = getServerError error "Unable to get the knowledge model." }
 
         cmd =
             getResultCmd result
@@ -53,13 +50,17 @@ getKnowledgeModelCompleted model result =
     ( newModel, Cmd.none )
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg session model =
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.form, model.knowledgeModel ) of
         ( Form.Submit, Just form, Success km ) ->
             let
+                ( version, body ) =
+                    encodeKnowledgeModelPublishForm form
+
                 cmd =
-                    putKnowledgeModelVersionCmd wrapMsg session form km.uuid
+                    Cmd.map wrapMsg <|
+                        KnowledgeModelsApi.putVersion km.kmId version body appState PutKnowledgeModelVersionCompleted
             in
             ( { model | publishingKnowledgeModel = Loading }, cmd )
 
@@ -71,24 +72,13 @@ handleForm formMsg wrapMsg session model =
             ( { model | form = form }, Cmd.none )
 
 
-putKnowledgeModelVersionCmd : (Msg -> Msgs.Msg) -> Session -> KnowledgeModelPublishForm -> String -> Cmd Msgs.Msg
-putKnowledgeModelVersionCmd wrapMsg session form uuid =
-    let
-        ( version, data ) =
-            encodeKnowledgeModelPublishForm form
-    in
-    putKnowledgeModelVersion uuid version data session
-        |> Jwt.send PutKnowledgeModelVersionCompleted
-        |> Cmd.map wrapMsg
-
-
-putKnowledgeModelVersionCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-putKnowledgeModelVersionCompleted state model result =
+putKnowledgeModelVersionCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+putKnowledgeModelVersionCompleted appState model result =
     case result of
-        Ok version ->
-            ( model, cmdNavigate state.key (KnowledgeModels KnowledgeModels.Routing.Index) )
+        Ok _ ->
+            ( model, cmdNavigate appState.key (KnowledgeModels KnowledgeModels.Routing.Index) )
 
         Err error ->
-            ( { model | publishingKnowledgeModel = getServerErrorJwt error "Publishing new version failed" }
+            ( { model | publishingKnowledgeModel = getServerError error "Publishing new version failed" }
             , getResultCmd result
             )

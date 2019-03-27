@@ -1,37 +1,38 @@
 module Users.Edit.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
+import Common.Api exposing (getResultCmd)
+import Common.Api.Users as UsersApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Form exposing (Form)
-import Jwt
 import Msgs
-import Requests exposing (getResultCmd)
+import Result exposing (Result)
 import Users.Common.Models exposing (..)
 import Users.Edit.Models exposing (..)
 import Users.Edit.Msgs exposing (Msg(..))
-import Users.Requests exposing (..)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> String -> Cmd Msgs.Msg
-fetchData wrapMsg session uuid =
-    getUserCmd session uuid |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> String -> Cmd Msgs.Msg
+fetchData wrapMsg appState uuid =
+    Cmd.map wrapMsg <|
+        UsersApi.getUser uuid appState GetUserCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         ChangeView view ->
             ( { model | currentView = view }, Cmd.none )
 
         EditFormMsg formMsg ->
-            handleUserForm formMsg wrapMsg session model
+            handleUserForm formMsg wrapMsg appState model
 
         GetUserCompleted result ->
             getUserCompleted model result
 
         PasswordFormMsg formMsg ->
-            handlePasswordForm formMsg wrapMsg session model
+            handlePasswordForm formMsg wrapMsg appState model
 
         PutUserCompleted result ->
             putUserCompleted model result
@@ -40,18 +41,17 @@ update msg wrapMsg session model =
             putUserPasswordCompleted model result
 
 
-getUserCmd : Session -> String -> Cmd Msg
-getUserCmd session uuid =
-    getUser uuid session |> Jwt.send GetUserCompleted
-
-
-handleUserForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleUserForm formMsg wrapMsg session model =
+handleUserForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleUserForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.userForm ) of
         ( Form.Submit, Just userForm ) ->
             let
+                body =
+                    encodeUserEditForm model.uuid userForm
+
                 cmd =
-                    putUserCmd session userForm model.uuid |> Cmd.map wrapMsg
+                    Cmd.map wrapMsg <|
+                        UsersApi.putUser model.uuid body appState PutUserCompleted
             in
             ( { model | savingUser = Loading }, cmd )
 
@@ -63,15 +63,7 @@ handleUserForm formMsg wrapMsg session model =
             ( { model | userForm = userForm }, Cmd.none )
 
 
-putUserCmd : Session -> UserEditForm -> String -> Cmd Msg
-putUserCmd session form uuid =
-    form
-        |> encodeUserEditForm uuid
-        |> putUser uuid session
-        |> Jwt.send PutUserCompleted
-
-
-getUserCompleted : Model -> Result Jwt.JwtError User -> ( Model, Cmd Msgs.Msg )
+getUserCompleted : Model -> Result ApiError User -> ( Model, Cmd Msgs.Msg )
 getUserCompleted model result =
     let
         newModel =
@@ -92,13 +84,17 @@ getUserCompleted model result =
     ( newModel, cmd )
 
 
-handlePasswordForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handlePasswordForm formMsg wrapMsg session model =
+handlePasswordForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handlePasswordForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.passwordForm ) of
         ( Form.Submit, Just passwordForm ) ->
             let
+                body =
+                    encodeUserPasswordForm passwordForm
+
                 cmd =
-                    putUserPasswordCmd session passwordForm model.uuid |> Cmd.map wrapMsg
+                    Cmd.map wrapMsg <|
+                        UsersApi.putUserPassword model.uuid body appState PutUserPasswordCompleted
             in
             ( { model | savingPassword = Loading }, cmd )
 
@@ -110,20 +106,12 @@ handlePasswordForm formMsg wrapMsg session model =
             ( { model | passwordForm = passwordForm }, Cmd.none )
 
 
-putUserPasswordCmd : Session -> UserPasswordForm -> String -> Cmd Msg
-putUserPasswordCmd session form uuid =
-    form
-        |> encodeUserPasswordForm
-        |> putUserPassword uuid session
-        |> Jwt.send PutUserPasswordCompleted
-
-
-putUserCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+putUserCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
 putUserCompleted model result =
     let
         editResult =
             case result of
-                Ok user ->
+                Ok _ ->
                     Success "Profile was successfully updated"
 
                 Err error ->
@@ -135,16 +123,16 @@ putUserCompleted model result =
     ( { model | savingUser = editResult }, cmd )
 
 
-putUserPasswordCompleted : Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
+putUserPasswordCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
 putUserPasswordCompleted model result =
     let
         passwordResult =
             case result of
-                Ok password ->
+                Ok _ ->
                     Success "Password was successfully changed"
 
                 Err error ->
-                    getServerErrorJwt error "Password could not be changed."
+                    getServerError error "Password could not be changed."
 
         cmd =
             getResultCmd result

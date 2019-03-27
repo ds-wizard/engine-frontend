@@ -2,33 +2,31 @@ module KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
+import Common.Api exposing (getResultCmd)
+import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.Api.Packages as PackagesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Form
-import Jwt
 import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
 import KMEditor.Index.Msgs exposing (Msg(..))
-import KMEditor.Requests exposing (deleteKnowledgeModel, deleteMigration, getKnowledgeModels, postMigration)
 import KMEditor.Routing exposing (Route(..))
 import KnowledgeModels.Common.Models exposing (PackageDetail)
-import KnowledgeModels.Requests exposing (getPackagesFiltered)
 import List.Extra as List
-import Models exposing (State)
 import Msgs
-import Requests exposing (getResultCmd)
 import Routing exposing (Route(..), cmdNavigate)
 import Utils exposing (versionIsGreater)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg session =
-    getKnowledgeModels session
-        |> Jwt.send GetKnowledgeModelsCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg appState =
+    Cmd.map wrapMsg <|
+        KnowledgeModelsApi.getKnowledgeModels appState GetKnowledgeModelsCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetKnowledgeModelsCompleted result ->
             getKnowledgeModelsCompleted model result
@@ -37,31 +35,31 @@ update msg wrapMsg state model =
             ( { model | kmToBeDeleted = km, deletingKnowledgeModel = Unset }, Cmd.none )
 
         DeleteKnowledgeModel ->
-            handleDeleteKM wrapMsg state.session model
+            handleDeleteKM wrapMsg appState model
 
         DeleteKnowledgeModelCompleted result ->
-            deleteKnowledgeModelCompleted state model result
+            deleteKnowledgeModelCompleted appState model result
 
         PostMigrationCompleted result ->
-            postMigrationCompleted state model result
+            postMigrationCompleted appState model result
 
         ShowHideUpgradeModal km ->
-            handleShowHideUpgradeModal wrapMsg km model state.session
+            handleShowHideUpgradeModal wrapMsg km model appState
 
         UpgradeFormMsg formMsg ->
-            handleUpgradeForm formMsg wrapMsg state.session model
+            handleUpgradeForm formMsg wrapMsg appState model
 
         GetPackagesCompleted result ->
             handleGetPackagesCompleted model result
 
         DeleteMigration uuid ->
-            handleDeleteMigration wrapMsg uuid state.session model
+            handleDeleteMigration wrapMsg uuid appState model
 
         DeleteMigrationCompleted result ->
-            deleteMigrationCompleted wrapMsg state.session model result
+            deleteMigrationCompleted wrapMsg appState model result
 
 
-getKnowledgeModelsCompleted : Model -> Result Jwt.JwtError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
+getKnowledgeModelsCompleted : Model -> Result ApiError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
 getKnowledgeModelsCompleted model result =
     let
         newModel =
@@ -70,7 +68,7 @@ getKnowledgeModelsCompleted model result =
                     { model | knowledgeModels = Success knowledgeModels }
 
                 Err error ->
-                    { model | knowledgeModels = getServerErrorJwt error "Unable to fetch knowledge models" }
+                    { model | knowledgeModels = getServerError error "Unable to fetch knowledge models" }
 
         cmd =
             getResultCmd result
@@ -78,39 +76,32 @@ getKnowledgeModelsCompleted model result =
     ( newModel, cmd )
 
 
-handleDeleteKM : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeleteKM wrapMsg session model =
+handleDeleteKM : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteKM wrapMsg appState model =
     case model.kmToBeDeleted of
         Just km ->
             ( { model | deletingKnowledgeModel = Loading }
-            , deleteKnowledgeModelCmd wrapMsg km.uuid session
+            , Cmd.map wrapMsg <| KnowledgeModelsApi.deleteKnowledgeModel km.uuid appState DeleteKnowledgeModelCompleted
             )
 
         _ ->
             ( model, Cmd.none )
 
 
-deleteKnowledgeModelCmd : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
-deleteKnowledgeModelCmd wrapMsg kmId session =
-    deleteKnowledgeModel kmId session
-        |> Jwt.send DeleteKnowledgeModelCompleted
-        |> Cmd.map wrapMsg
-
-
-deleteKnowledgeModelCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteKnowledgeModelCompleted state model result =
+deleteKnowledgeModelCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+deleteKnowledgeModelCompleted appState model result =
     case result of
-        Ok km ->
-            ( model, cmdNavigate state.key <| KMEditor IndexRoute )
+        Ok _ ->
+            ( model, cmdNavigate appState.key <| KMEditor IndexRoute )
 
         Err error ->
-            ( { model | deletingKnowledgeModel = getServerErrorJwt error "Knowledge model could not be deleted" }
+            ( { model | deletingKnowledgeModel = getServerError error "Knowledge model could not be deleted" }
             , getResultCmd result
             )
 
 
-postMigrationCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-postMigrationCompleted state model result =
+postMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+postMigrationCompleted appState model result =
     case result of
         Ok migration ->
             let
@@ -119,21 +110,21 @@ postMigrationCompleted state model result =
                         |> Maybe.andThen (\km -> Just km.uuid)
                         |> Maybe.withDefault ""
             in
-            ( model, cmdNavigate state.key <| KMEditor <| MigrationRoute kmUuid )
+            ( model, cmdNavigate appState.key <| KMEditor <| MigrationRoute kmUuid )
 
         Err error ->
-            ( { model | creatingMigration = getServerErrorJwt error "Migration could not be created" }
+            ( { model | creatingMigration = getServerError error "Migration could not be created" }
             , getResultCmd result
             )
 
 
-handleShowHideUpgradeModal : (Msg -> Msgs.Msg) -> Maybe KnowledgeModel -> Model -> Session -> ( Model, Cmd Msgs.Msg )
-handleShowHideUpgradeModal wrapMsg maybeKm model session =
+handleShowHideUpgradeModal : (Msg -> Msgs.Msg) -> Maybe KnowledgeModel -> Model -> AppState -> ( Model, Cmd Msgs.Msg )
+handleShowHideUpgradeModal wrapMsg maybeKm model appState =
     let
         getPackages lastAppliedParentPackageId =
             let
                 cmd =
-                    getPackagesFilteredCmd wrapMsg lastAppliedParentPackageId session
+                    getPackagesFilteredCmd wrapMsg lastAppliedParentPackageId appState
             in
             Just ( { model | kmToBeUpgraded = maybeKm, packages = Loading }, cmd )
     in
@@ -143,28 +134,35 @@ handleShowHideUpgradeModal wrapMsg maybeKm model session =
         |> Maybe.withDefault ( { model | kmToBeUpgraded = Nothing, packages = Unset }, Cmd.none )
 
 
-getPackagesFilteredCmd : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
-getPackagesFilteredCmd wrapMsg lastAppliedParentPackageId session =
+getPackagesFilteredCmd : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
+getPackagesFilteredCmd wrapMsg lastAppliedParentPackageId appState =
     let
         parts =
             String.split ":" lastAppliedParentPackageId
     in
     case ( List.head parts, List.getAt 1 parts ) of
         ( Just organizationId, Just kmId ) ->
-            getPackagesFiltered organizationId kmId session
-                |> Jwt.send GetPackagesCompleted
-                |> Cmd.map wrapMsg
+            Cmd.map wrapMsg <|
+                PackagesApi.getPackagesFiltered organizationId kmId appState GetPackagesCompleted
 
         _ ->
             Cmd.none
 
 
-handleUpgradeForm : Form.Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleUpgradeForm formMsg wrapMsg session model =
+handleUpgradeForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleUpgradeForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.kmUpgradeForm, model.kmToBeUpgraded ) of
         ( Form.Submit, Just kmUpgradeForm, Just km ) ->
+            let
+                body =
+                    encodeKnowledgeModelUpgradeForm kmUpgradeForm
+
+                cmd =
+                    Cmd.map wrapMsg <|
+                        KnowledgeModelsApi.postMigration km.uuid body appState PostMigrationCompleted
+            in
             ( { model | creatingMigration = Loading }
-            , postMigrationCmd wrapMsg session kmUpgradeForm km.uuid
+            , cmd
             )
 
         _ ->
@@ -173,16 +171,7 @@ handleUpgradeForm formMsg wrapMsg session model =
             )
 
 
-postMigrationCmd : (Msg -> Msgs.Msg) -> Session -> KnowledgeModelUpgradeForm -> String -> Cmd Msgs.Msg
-postMigrationCmd wrapMsg session form uuid =
-    form
-        |> encodeKnowledgeModelUpgradeForm
-        |> postMigration session uuid
-        |> Jwt.send PostMigrationCompleted
-        |> Cmd.map wrapMsg
-
-
-handleGetPackagesCompleted : Model -> Result Jwt.JwtError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
+handleGetPackagesCompleted : Model -> Result ApiError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
 handleGetPackagesCompleted model result =
     case result of
         Ok packages ->
@@ -195,7 +184,7 @@ handleGetPackagesCompleted model result =
             ( { model | packages = Success packageList }, Cmd.none )
 
         Err error ->
-            ( { model | packages = getServerErrorJwt error "Unable to get package list" }
+            ( { model | packages = getServerError error "Unable to get package list" }
             , getResultCmd result
             )
 
@@ -211,27 +200,22 @@ filterPackages packageList knowledgeModel =
         |> Maybe.andThen (getFilteredList packageList)
 
 
-handleDeleteMigration : (Msg -> Msgs.Msg) -> String -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeleteMigration wrapMsg uuid session model =
-    ( { model | deletingMigration = Loading }, deleteMigrationCmd wrapMsg uuid session )
+handleDeleteMigration : (Msg -> Msgs.Msg) -> String -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteMigration wrapMsg uuid appState model =
+    ( { model | deletingMigration = Loading }
+    , Cmd.map wrapMsg <| KnowledgeModelsApi.deleteMigration uuid appState DeleteKnowledgeModelCompleted
+    )
 
 
-deleteMigrationCmd : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
-deleteMigrationCmd wrapMsg uuid session =
-    deleteMigration uuid session
-        |> Jwt.send DeleteKnowledgeModelCompleted
-        |> Cmd.map wrapMsg
-
-
-deleteMigrationCompleted : (Msg -> Msgs.Msg) -> Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deleteMigrationCompleted wrapMsg session model result =
+deleteMigrationCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+deleteMigrationCompleted wrapMsg appState model result =
     case result of
-        Ok km ->
+        Ok _ ->
             ( { model | deletingMigration = Success "Migration was successfully canceled", knowledgeModels = Loading }
-            , fetchData wrapMsg session
+            , fetchData wrapMsg appState
             )
 
         Err error ->
-            ( { model | deletingMigration = getServerErrorJwt error "Migration could not be deleted" }
+            ( { model | deletingMigration = getServerError error "Migration could not be deleted" }
             , getResultCmd result
             )

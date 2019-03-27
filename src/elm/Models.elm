@@ -1,7 +1,6 @@
 module Models exposing
     ( Flags
     , Model
-    , State
     , flagsDecoder
     , initLocalModel
     , initialModel
@@ -12,8 +11,9 @@ module Models exposing
     , userLoggedIn
     )
 
-import Auth.Models as AuthModels exposing (JwtToken, Session, sessionDecoder, sessionExists)
+import Auth.Models exposing (JwtToken, Session, sessionDecoder, sessionExists)
 import Browser.Navigation exposing (Key)
+import Common.AppState exposing (AppState)
 import Common.Menu.Models
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
@@ -28,7 +28,7 @@ import Users.Models
 
 
 type alias Model =
-    { state : State
+    { appState : AppState
     , menuModel : Common.Menu.Models.Model
     , organizationModel : Organization.Models.Model
     , kmEditorModel : KMEditor.Models.Model
@@ -39,23 +39,15 @@ type alias Model =
     }
 
 
-type alias State =
-    { route : Route
-    , seed : Seed
-    , session : Session
-    , jwt : Maybe JwtToken
-    , key : Key
-    }
-
-
-initialModel : Route -> Int -> Session -> Maybe JwtToken -> Key -> Model
-initialModel route seed session jwt key =
-    { state =
+initialModel : Route -> Int -> Session -> Maybe JwtToken -> Key -> String -> Model
+initialModel route seed session jwt key apiUrl =
+    { appState =
         { route = route
         , seed = initialSeed seed
         , session = session
         , jwt = jwt
         , key = key
+        , apiUrl = apiUrl
         }
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
@@ -70,54 +62,54 @@ initialModel route seed session jwt key =
 setSession : Session -> Model -> Model
 setSession session model =
     let
-        state =
-            model.state
+        appState =
+            model.appState
 
         newState =
-            { state | session = session }
+            { appState | session = session }
     in
-    { model | state = newState }
+    { model | appState = newState }
 
 
 setJwt : Maybe JwtToken -> Model -> Model
 setJwt jwt model =
     let
-        state =
-            model.state
+        appState =
+            model.appState
 
         newState =
-            { state | jwt = jwt }
+            { appState | jwt = jwt }
     in
-    { model | state = newState }
+    { model | appState = newState }
 
 
 setRoute : Route -> Model -> Model
 setRoute route model =
     let
-        state =
-            model.state
+        appState =
+            model.appState
 
         newState =
-            { state | route = route }
+            { appState | route = route }
     in
-    { model | state = newState }
+    { model | appState = newState }
 
 
 setSeed : Seed -> Model -> Model
 setSeed seed model =
     let
-        state =
-            model.state
+        appState =
+            model.appState
 
         newState =
-            { state | seed = seed }
+            { appState | seed = seed }
     in
-    { model | state = newState }
+    { model | appState = newState }
 
 
 initLocalModel : Model -> Model
 initLocalModel model =
-    case model.state.route of
+    case model.appState.route of
         Organization ->
             { model | organizationModel = Organization.Models.initialModel }
 
@@ -142,12 +134,13 @@ initLocalModel model =
 
 userLoggedIn : Model -> Bool
 userLoggedIn model =
-    sessionExists model.state.session
+    sessionExists model.appState.session
 
 
 type alias Flags =
     { session : Maybe Session
     , seed : Int
+    , apiUrl : String
     }
 
 
@@ -156,3 +149,4 @@ flagsDecoder =
     Decode.succeed Flags
         |> required "session" (Decode.nullable sessionDecoder)
         |> required "seed" Decode.int
+        |> required "apiUrl" Decode.string

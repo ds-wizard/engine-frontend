@@ -1,11 +1,12 @@
 module Users.Index.Msgs exposing (Msg(..))
 
-import Jwt
+import Common.ApiError exposing (ApiError)
+import Result exposing (Result)
 import Users.Common.Models exposing (User)
 
 
 type Msg
-    = GetUsersCompleted (Result Jwt.JwtError (List User))
+    = GetUsersCompleted (Result ApiError (List User))
     | ShowHideDeleteUser (Maybe User)
     | DeleteUser
-    | DeleteUserCompleted (Result Jwt.JwtError String)
+    | DeleteUserCompleted (Result ApiError ())

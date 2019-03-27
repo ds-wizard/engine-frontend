@@ -1,26 +1,24 @@
 module KnowledgeModels.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
-import Jwt
+import Common.Api exposing (getResultCmd)
+import Common.Api.Packages as PackagesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import KnowledgeModels.Common.Models exposing (Package)
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
-import KnowledgeModels.Requests exposing (deletePackage, getPackagesUnique)
 import Msgs
-import Requests exposing (getResultCmd)
 
 
-fetchData : (Msg -> Msgs.Msg) -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg session =
-    getPackagesUnique session
-        |> Jwt.send GetPackagesCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg appState =
+    Cmd.map wrapMsg <|
+        PackagesApi.getPackagesUnique appState GetPackagesCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetPackagesCompleted result ->
             getPackagesCompleted model result
@@ -29,13 +27,13 @@ update msg wrapMsg session model =
             ( { model | packageToBeDeleted = package, deletingPackage = Unset }, Cmd.none )
 
         DeletePackage ->
-            handleDeletePackage wrapMsg session model
+            handleDeletePackage wrapMsg appState model
 
         DeletePackageCompleted result ->
-            deletePackageCompleted wrapMsg session model result
+            deletePackageCompleted wrapMsg appState model result
 
 
-getPackagesCompleted : Model -> Result Jwt.JwtError (List Package) -> ( Model, Cmd Msgs.Msg )
+getPackagesCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
 getPackagesCompleted model result =
     let
         newModel =
@@ -44,7 +42,7 @@ getPackagesCompleted model result =
                     { model | packages = Success packages }
 
                 Err error ->
-                    { model | packages = getServerErrorJwt error "Unable to fetch package list" }
+                    { model | packages = getServerError error "Unable to fetch package list" }
 
         cmd =
             getResultCmd result
@@ -52,27 +50,21 @@ getPackagesCompleted model result =
     ( newModel, cmd )
 
 
-handleDeletePackage : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeletePackage wrapMsg session model =
+handleDeletePackage : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeletePackage wrapMsg appState model =
     case model.packageToBeDeleted of
         Just package ->
             ( { model | deletingPackage = Loading }
-            , deletePackageCmd wrapMsg package.organizationId package.kmId session
+            , Cmd.map wrapMsg <|
+                PackagesApi.deletePackage package.organizationId package.kmId appState DeletePackageCompleted
             )
 
         Nothing ->
             ( model, Cmd.none )
 
 
-deletePackageCmd : (Msg -> Msgs.Msg) -> String -> String -> Session -> Cmd Msgs.Msg
-deletePackageCmd wrapMsg organizationId kmId session =
-    deletePackage organizationId kmId session
-        |> Jwt.send DeletePackageCompleted
-        |> Cmd.map wrapMsg
-
-
-deletePackageCompleted : (Msg -> Msgs.Msg) -> Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-deletePackageCompleted wrapMsg session model result =
+deletePackageCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+deletePackageCompleted wrapMsg appState model result =
     case result of
         Ok package ->
             ( { model
@@ -80,10 +72,10 @@ deletePackageCompleted wrapMsg session model result =
                 , packages = Loading
                 , packageToBeDeleted = Nothing
               }
-            , fetchData wrapMsg session
+            , fetchData wrapMsg appState
             )
 
         Err error ->
-            ( { model | deletingPackage = getServerErrorJwt error "Package could not be deleted" }
+            ( { model | deletingPackage = getServerError error "Package could not be deleted" }
             , getResultCmd result
             )
