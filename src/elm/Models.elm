@@ -39,17 +39,15 @@ type alias Model =
     }
 
 
-initialModel : Route -> Int -> Session -> Maybe JwtToken -> Key -> Model
-initialModel route seed session jwt key =
+initialModel : Route -> Int -> Session -> Maybe JwtToken -> Key -> String -> Model
+initialModel route seed session jwt key apiUrl =
     { appState =
         { route = route
         , seed = initialSeed seed
         , session = session
         , jwt = jwt
         , key = key
-
-        --        , apiUrl = "http://localhost:3000"
-        , apiUrl = "https://api.staging.ds-wizard.org"
+        , apiUrl = apiUrl
         }
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
@@ -142,6 +140,7 @@ userLoggedIn model =
 type alias Flags =
     { session : Maybe Session
     , seed : Int
+    , apiUrl : String
     }
 
 
@@ -150,3 +149,4 @@ flagsDecoder =
     Decode.succeed Flags
         |> required "session" (Decode.nullable sessionDecoder)
         |> required "seed" Decode.int
+        |> required "apiUrl" Decode.string
