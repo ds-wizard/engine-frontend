@@ -60,7 +60,7 @@ handleForm formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        KnowledgeModelsApi.putVersion km.kmId version body appState PutKnowledgeModelVersionCompleted
+                        KnowledgeModelsApi.putVersion km.uuid version body appState PutKnowledgeModelVersionCompleted
             in
             ( { model | publishingKnowledgeModel = Loading }, cmd )
 

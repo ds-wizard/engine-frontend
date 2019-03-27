@@ -28,7 +28,8 @@ type alias KnowledgeModel =
 
 
 type alias KnowledgeModelDetail =
-    { name : String
+    { uuid : String
+    , name : String
     , kmId : String
     , organizationId : String
     , parentPackageId : Maybe String
@@ -90,6 +91,7 @@ knowledgeModelListDecoder =
 knowledgeModelDetailDecoder : Decoder KnowledgeModelDetail
 knowledgeModelDetailDecoder =
     Decode.succeed KnowledgeModelDetail
+        |> required "uuid" Decode.string
         |> required "name" Decode.string
         |> required "kmId" Decode.string
         |> required "organizationId" Decode.string
