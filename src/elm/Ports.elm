@@ -7,7 +7,6 @@ port module Ports exposing
     , drawMetricsChart
     , fileContentRead
     , fileSelected
-    , onSessionChange
     , scrollToTop
     , setUnloadMessage
     , storeSession
@@ -25,9 +24,6 @@ port storeSession : Maybe Session -> Cmd msg
 
 
 port clearSession : () -> Cmd msg
-
-
-port onSessionChange : (Value -> msg) -> Sub msg
 
 
 
