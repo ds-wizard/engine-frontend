@@ -48,7 +48,8 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Data Stewardship Wizard'
+            title: 'Data Stewardship Wizard',
+            template: 'src/index.ejs'
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[chunkhash].css',

@@ -39,6 +39,16 @@ Then navigate to [http://localhost:8080](http://localhost:8080) and you should
 see the client. During the development, the clients expects the backend running
 on localhost port 3000.
 
+With webpack dev server, the default API url is `http://localhost:3000`, if you
+want to set a different one, create a file `config.js` in the project root with
+the following content:
+
+```js
+window.dsw = {
+    apiUrl: 'http://localhost:3000' // change API url to whatever you need
+}
+``` 
+
 
 Use the following command to create a production minified build:
 
@@ -61,7 +71,7 @@ following subdirectories and files:
 - `elm` - Elm source code, organized into modules
 - `img` - images
 - `scss` - SCSS source code, split into files based on the functionality and modules
-- `index.html` - base HTML file where the app is loaded
+- `index.ejs` - template for Webpack HTML plugin
 - `index.js` - JavaScript that initializes the Elm app
 
 Source code in `vendor` directory contains Elm code that is from libraries
