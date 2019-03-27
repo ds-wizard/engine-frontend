@@ -52,7 +52,7 @@ putUserActivation uuid hash =
         body =
             Encode.object [ ( "active", Encode.bool True ) ]
     in
-    httpPut ("/users/" ++ uuid ++ "/appState?hash=" ++ hash) body
+    httpPut ("/users/" ++ uuid ++ "/state?hash=" ++ hash) body
 
 
 deleteUser : String -> AppState -> ToMsg () msg -> Cmd msg
