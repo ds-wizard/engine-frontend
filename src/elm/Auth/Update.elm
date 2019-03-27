@@ -19,16 +19,13 @@ update msg model =
     case msg of
         AuthMsgs.Token token jwt ->
             let
-                appState =
-                    model.appState
-
                 newModel =
                     model
                         |> setSession (setToken model.appState.session token)
                         |> setJwt (Just jwt)
             in
             ( newModel
-            , UsersApi.getCurrentUser model.appState (AuthMsgs.GetCurrentUserCompleted >> Msgs.AuthMsg)
+            , UsersApi.getCurrentUser newModel.appState (AuthMsgs.GetCurrentUserCompleted >> Msgs.AuthMsg)
             )
 
         AuthMsgs.GetCurrentUserCompleted result ->
