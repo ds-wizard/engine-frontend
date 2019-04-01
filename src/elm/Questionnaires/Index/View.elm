@@ -117,7 +117,7 @@ exportFormats =
 
 exportItem : AppState -> String -> ( String, String, String ) -> Html msg
 exportItem appState questionnaireUuid ( icon, format, formatLabel ) =
-    a [ class "export-link", href <| QuestionnairesApi.exportQuestionnaireUrl format questionnaireUuid appState, target "_blank" ]
+    a [ class "export-link", href <| QuestionnairesApi.exportQuestionnaireUrl questionnaireUuid format appState, target "_blank" ]
         [ fa icon
         , text formatLabel
         ]
