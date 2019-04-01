@@ -51,7 +51,7 @@ putKnowledgeModel uuid name kmId events =
 
 deleteKnowledgeModel : String -> AppState -> ToMsg () msg -> Cmd msg
 deleteKnowledgeModel uuid =
-    jwtDelete ("/branches" ++ uuid)
+    jwtDelete ("/branches/" ++ uuid)
 
 
 fetchPreview : Maybe String -> List Event -> List String -> AppState -> ToMsg KMEditor.Common.Models.Entities.KnowledgeModel msg -> Cmd msg
