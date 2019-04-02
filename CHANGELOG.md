@@ -1,3 +1,23 @@
+# 1.5.0
+
+## Features
+
+- Questionnaires
+    - Improve UI
+    - Add dynamically computed identifiers for questions and chapters
+    - Add indications of not completed questions
+    - Graphical visualisations of the report
+- Customizable look of the app
+- Improve UI of table actions
+
+## Other
+
+- Update dependencies with security issues
+- Minor UI fixes
+- Update URLs to reflect the menu terminology
+
+
+
 # 1.4.0
 
 ## Features
