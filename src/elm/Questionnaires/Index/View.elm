@@ -1,9 +1,7 @@
 module Questionnaires.Index.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
-import Common.Api.Questionnaires as QuestionnairesApi
 import Common.AppState exposing (AppState)
-import Common.Html exposing (fa, linkTo)
+import Common.Html exposing (linkTo)
 import Common.View.FormResult as FormResult
 import Common.View.Modal as Modal
 import Common.View.Page as Page
@@ -12,6 +10,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Index.ExportModal.View as ExportModal
 import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
@@ -24,7 +23,7 @@ view wrapMsg appState model =
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
         , Page.actionResultView (Table.view (tableConfig model) wrapMsg) model.questionnaires
-        , exportModal wrapMsg appState model
+        , ExportModal.view (wrapMsg << ExportModalMsg) appState model.exportModalModel
         , deleteModal wrapMsg model
         ]
 
@@ -95,59 +94,12 @@ tableFieldKnowledgeModel questionnaire =
 
 tableActionExport : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
 tableActionExport wrapMsg =
-    wrapMsg << ShowHideExportQuestionnaire << Just
+    wrapMsg << ShowExportQuestionnaire
 
 
 tableActionDelete : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
 tableActionDelete wrapMsg =
     wrapMsg << ShowHideDeleteQuestionnaire << Just
-
-
-exportFormats : List ( String, String, String )
-exportFormats =
-    [ ( "file-pdf-o", "pdf", "PDF Document" )
-    , ( "file-text-o", "latex", "LaTeX Document" )
-    , ( "file-word-o", "docx", "MS Word Document" )
-    , ( "file-code-o", "html", "HTML Document" )
-    , ( "file-code-o", "json", "JSON Data" )
-    , ( "file-text-o", "odt", "OpenDocument Text" )
-    , ( "file-text-o", "markdown", "Markdown Document" )
-    ]
-
-
-exportItem : AppState -> String -> ( String, String, String ) -> Html msg
-exportItem appState questionnaireUuid ( icon, format, formatLabel ) =
-    a [ class "export-link", href <| QuestionnairesApi.exportQuestionnaireUrl questionnaireUuid format appState, target "_blank" ]
-        [ fa icon
-        , text formatLabel
-        ]
-
-
-exportModal : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-exportModal wrapMsg appState model =
-    let
-        ( visible, questionnaireName, questionnaireUuid ) =
-            case model.questionnaireToBeExported of
-                Just questionnaire ->
-                    ( True, questionnaire.name, questionnaire.uuid )
-
-                Nothing ->
-                    ( False, "", "" )
-
-        modalContent =
-            List.map (exportItem appState questionnaireUuid) exportFormats
-
-        modalConfig =
-            { modalTitle = "Export " ++ questionnaireName
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = Unset
-            , actionName = "Done"
-            , actionMsg = wrapMsg <| ShowHideExportQuestionnaire Nothing
-            , cancelMsg = Nothing
-            }
-    in
-    Modal.confirm modalConfig
 
 
 deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg

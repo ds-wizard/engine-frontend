@@ -43,6 +43,12 @@ fetchSummaryReport questionnaireUuid =
     jwtFetch ("/questionnaires/" ++ questionnaireUuid ++ "/report/preview") summaryReportDecoder
 
 
-exportQuestionnaireUrl : String -> String -> AppState -> String
-exportQuestionnaireUrl uuid format appState =
-    appState.apiUrl ++ "/questionnaires/" ++ uuid ++ "/dmp?format=" ++ format
+exportQuestionnaireUrl : String -> String -> Maybe String -> AppState -> String
+exportQuestionnaireUrl uuid format templateUuid appState =
+    let
+        url =
+            appState.apiUrl ++ "/questionnaires/" ++ uuid ++ "/dmp?format=" ++ format
+    in
+    templateUuid
+        |> Maybe.map ((++) (url ++ "&template="))
+        |> Maybe.withDefault url
