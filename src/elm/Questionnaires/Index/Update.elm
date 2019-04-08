@@ -10,6 +10,8 @@ import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Index.ExportModal.Models exposing (setQuestionnaire)
+import Questionnaires.Index.ExportModal.Update as ExportModal
 import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
 
@@ -35,8 +37,17 @@ update msg wrapMsg appState model =
         DeleteQuestionnaireCompleted result ->
             deleteQuestionnaireCompleted wrapMsg appState model result
 
-        ShowHideExportQuestionnaire questionnaire ->
-            ( { model | questionnaireToBeExported = questionnaire }, Cmd.none )
+        ShowExportQuestionnaire questionnaire ->
+            ( { model | exportModalModel = setQuestionnaire questionnaire model.exportModalModel }
+            , Cmd.map (wrapMsg << ExportModalMsg) <| ExportModal.fetchData appState
+            )
+
+        ExportModalMsg exportModalMsg ->
+            let
+                ( exportModalModel, cmd ) =
+                    ExportModal.update exportModalMsg (wrapMsg << ExportModalMsg) appState model.exportModalModel
+            in
+            ( { model | exportModalModel = exportModalModel }, cmd )
 
 
 getQuestionnairesCompleted : Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )

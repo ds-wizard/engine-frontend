@@ -1,8 +1,10 @@
 module Common.View.Modal exposing
     ( AlertConfig
     , ConfirmConfig
+    , SimpleConfig
     , alert
     , confirm
+    , simple
     )
 
 import ActionResult exposing (ActionResult(..))
@@ -12,6 +14,22 @@ import Common.View.FormResult as FormResult
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+
+
+type alias SimpleConfig msg =
+    { modalContent : List (Html msg)
+    , visible : Bool
+    }
+
+
+simple : SimpleConfig msg -> Html msg
+simple cfg =
+    div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
+        [ div [ class "modal-dialog" ]
+            [ div [ class "modal-content" ]
+                cfg.modalContent
+            ]
+        ]
 
 
 type alias ConfirmConfig msg =
