@@ -4,6 +4,7 @@ module KMEditor.Common.Models.Entities exposing
     , CrossReferenceData
     , Expert
     , FollowUps(..)
+    , Integration
     , KnowledgeModel
     , Level
     , ListQuestionData
@@ -48,6 +49,7 @@ module KMEditor.Common.Models.Entities exposing
     , getReferenceVisibleName
     , getReferences
     , getTag
+    , integrationDecoder
     , isQuestionList
     , isQuestionOptions
     , knowledgeModelDecoder
@@ -60,6 +62,7 @@ module KMEditor.Common.Models.Entities exposing
     , newAnswer
     , newChapter
     , newExpert
+    , newIntegration
     , newQuestion
     , newReference
     , newTag
@@ -77,6 +80,7 @@ import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import List.Extra as List
+import Utils exposing (decodePair)
 
 
 type alias KnowledgeModel =
@@ -84,6 +88,7 @@ type alias KnowledgeModel =
     , name : String
     , chapters : List Chapter
     , tags : List Tag
+    , integrations : List Integration
     }
 
 
@@ -92,6 +97,20 @@ type alias Tag =
     , name : String
     , description : Maybe String
     , color : String
+    }
+
+
+type alias Integration =
+    { uuid : String
+    , id : String
+    , name : String
+    , props : List String
+    , requestMethod : String
+    , requestUrl : String
+    , requestHeaders : List ( String, String )
+    , responseListField : String
+    , responseIdField : String
+    , responseNameField : String
     }
 
 
@@ -231,6 +250,7 @@ knowledgeModelDecoder =
         |> required "name" Decode.string
         |> required "chapters" (Decode.list chapterDecoder)
         |> required "tags" (Decode.list tagDecoder)
+        |> required "integrations" (Decode.list integrationDecoder)
 
 
 chapterDecoder : Decoder Chapter
@@ -249,6 +269,21 @@ tagDecoder =
         |> required "name" Decode.string
         |> required "description" (Decode.nullable Decode.string)
         |> required "color" Decode.string
+
+
+integrationDecoder : Decoder Integration
+integrationDecoder =
+    Decode.succeed Integration
+        |> required "uuid" Decode.string
+        |> required "id" Decode.string
+        |> required "name" Decode.string
+        |> required "props" (Decode.list Decode.string)
+        |> required "requestMethod" Decode.string
+        |> required "requestUrl" Decode.string
+        |> required "requestHeaders" (Decode.list (decodePair Decode.string Decode.string))
+        |> required "responseListField" Decode.string
+        |> required "responseIdField" Decode.string
+        |> required "responseNameField" Decode.string
 
 
 questionDecoder : Decoder Question
@@ -471,6 +506,21 @@ newTag uuid =
     }
 
 
+newIntegration : String -> Integration
+newIntegration uuid =
+    { uuid = uuid
+    , id = "new-integration"
+    , name = "New Integration"
+    , props = []
+    , requestMethod = "GET"
+    , requestUrl = "/"
+    , requestHeaders = []
+    , responseListField = ""
+    , responseIdField = "id"
+    , responseNameField = "name"
+    }
+
+
 newQuestion : String -> Question
 newQuestion uuid =
     OptionsQuestion
@@ -529,8 +579,11 @@ createPathMap knowledgeModel =
 
                 withTags =
                     List.foldl (foldTag nextPath) withChapters km.tags
+
+                withIntegrations =
+                    List.foldl (foldIntegration nextPath) withTags km.integrations
             in
-            Dict.insert km.uuid path withTags
+            Dict.insert km.uuid path withIntegrations
 
         foldChapter path chapter dict =
             let
@@ -544,6 +597,9 @@ createPathMap knowledgeModel =
 
         foldTag path tag dict =
             Dict.insert tag.uuid path dict
+
+        foldIntegration path integration dict =
+            Dict.insert integration.id path dict
 
         foldQuestion path question dict =
             let

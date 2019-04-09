@@ -3,6 +3,7 @@ module KMEditor.Common.Models.Events exposing
     , AddChapterEventData
     , AddCrossReferenceEventData
     , AddExpertEventData
+    , AddIntegrationEventData
     , AddQuestionEventData(..)
     , AddReferenceEventData(..)
     , AddResourcePageReferenceEventData
@@ -13,6 +14,7 @@ module KMEditor.Common.Models.Events exposing
     , DeleteAnswerEventData
     , DeleteChapterEventData
     , DeleteExpertEventData
+    , DeleteIntegrationEventData
     , DeleteQuestionEventData
     , DeleteReferenceEventData
     , DeleteTagEventData
@@ -20,6 +22,7 @@ module KMEditor.Common.Models.Events exposing
     , EditChapterEventData
     , EditCrossReferenceEventData
     , EditExpertEventData
+    , EditIntegrationEventData
     , EditKnowledgeModelEventData
     , EditListQuestionEventData
     , EditOptionsQuestionEventData
@@ -84,6 +87,7 @@ import Json.Encode.Extra exposing (maybe)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Path exposing (..)
 import List.Extra as List
+import Utils exposing (decodePair, encodePair)
 
 
 type Event
@@ -95,6 +99,9 @@ type Event
     | AddTagEvent AddTagEventData CommonEventData
     | EditTagEvent EditTagEventData CommonEventData
     | DeleteTagEvent DeleteTagEventData CommonEventData
+    | AddIntegrationEvent AddIntegrationEventData CommonEventData
+    | EditIntegrationEvent EditIntegrationEventData CommonEventData
+    | DeleteIntegrationEvent DeleteIntegrationEventData CommonEventData
     | AddQuestionEvent AddQuestionEventData CommonEventData
     | EditQuestionEvent EditQuestionEventData CommonEventData
     | DeleteQuestionEvent DeleteQuestionEventData CommonEventData
@@ -167,6 +174,39 @@ type alias EditTagEventData =
 
 type alias DeleteTagEventData =
     { tagUuid : String
+    }
+
+
+type alias AddIntegrationEventData =
+    { integrationUuid : String
+    , id : String
+    , name : String
+    , props : List String
+    , requestMethod : String
+    , requestUrl : String
+    , requestHeaders : List ( String, String )
+    , responseListField : String
+    , responseIdField : String
+    , responseNameField : String
+    }
+
+
+type alias EditIntegrationEventData =
+    { integrationUuid : String
+    , id : EventField String
+    , name : EventField String
+    , props : EventField (List String)
+    , requestMethod : EventField String
+    , requestUrl : EventField String
+    , requestHeaders : EventField (List ( String, String ))
+    , responseListField : EventField String
+    , responseIdField : EventField String
+    , responseNameField : EventField String
+    }
+
+
+type alias DeleteIntegrationEventData =
+    { integrationUuid : String
     }
 
 
@@ -401,6 +441,15 @@ encodeEvent event =
                 DeleteTagEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeDeleteTagEvent eventData )
 
+                AddIntegrationEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeAddIntegrationEvent eventData )
+
+                EditIntegrationEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeEditIntegrationEvent eventData )
+
+                DeleteIntegrationEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeDeleteIntegrationEvent eventData )
+
                 AddQuestionEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeAddQuestionEvent eventData )
 
@@ -515,6 +564,45 @@ encodeDeleteTagEvent : DeleteTagEventData -> List ( String, Encode.Value )
 encodeDeleteTagEvent data =
     [ ( "eventType", Encode.string "DeleteTagEvent" )
     , ( "tagUuid", Encode.string data.tagUuid )
+    ]
+
+
+encodeAddIntegrationEvent : AddIntegrationEventData -> List ( String, Encode.Value )
+encodeAddIntegrationEvent data =
+    [ ( "eventType", Encode.string "AddIntegrationEvent" )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
+    , ( "id", Encode.string data.id )
+    , ( "name", Encode.string data.name )
+    , ( "props", Encode.list Encode.string data.props )
+    , ( "requestMethod", Encode.string data.requestMethod )
+    , ( "requestUrl", Encode.string data.requestUrl )
+    , ( "requestHeaders", Encode.list (encodePair Encode.string Encode.string) data.requestHeaders )
+    , ( "responseListField", Encode.string data.responseListField )
+    , ( "responseIdField", Encode.string data.responseIdField )
+    , ( "responseNameField", Encode.string data.responseNameField )
+    ]
+
+
+encodeEditIntegrationEvent : EditIntegrationEventData -> List ( String, Encode.Value )
+encodeEditIntegrationEvent data =
+    [ ( "eventType", Encode.string "EditIntegrationEvent" )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
+    , ( "id", encodeEventField Encode.string data.id )
+    , ( "name", encodeEventField Encode.string data.name )
+    , ( "props", encodeEventField (Encode.list Encode.string) data.props )
+    , ( "requestMethod", encodeEventField Encode.string data.requestMethod )
+    , ( "requestUrl", encodeEventField Encode.string data.requestUrl )
+    , ( "requestHeaders", encodeEventField (Encode.list (encodePair Encode.string Encode.string)) data.requestHeaders )
+    , ( "responseListField", encodeEventField Encode.string data.responseListField )
+    , ( "responseIdField", encodeEventField Encode.string data.responseIdField )
+    , ( "responseNameField", encodeEventField Encode.string data.responseNameField )
+    ]
+
+
+encodeDeleteIntegrationEvent : DeleteIntegrationEventData -> List ( String, Encode.Value )
+encodeDeleteIntegrationEvent data =
+    [ ( "eventType", Encode.string "DeleteIntegrationEvent" )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
     ]
 
 
@@ -836,6 +924,15 @@ eventDecoderByType eventType =
         "DeleteTagEvent" ->
             Decode.map2 DeleteTagEvent deleteTagEventDecoder commonEventDataDecoder
 
+        "AddIntegrationEvent" ->
+            Decode.map2 AddIntegrationEvent addIntegrationEventDecoder commonEventDataDecoder
+
+        "EditIntegrationEvent" ->
+            Decode.map2 EditIntegrationEvent editIntegrationEventDecoder commonEventDataDecoder
+
+        "DeleteIntegrationEvent" ->
+            Decode.map2 DeleteIntegrationEvent deleteIntegrationEventDecoder commonEventDataDecoder
+
         "AddQuestionEvent" ->
             Decode.map2 AddQuestionEvent addQuestionEventDecoder commonEventDataDecoder
 
@@ -944,6 +1041,42 @@ deleteTagEventDecoder : Decoder DeleteTagEventData
 deleteTagEventDecoder =
     Decode.succeed DeleteTagEventData
         |> required "tagUuid" Decode.string
+
+
+addIntegrationEventDecoder : Decoder AddIntegrationEventData
+addIntegrationEventDecoder =
+    Decode.succeed AddIntegrationEventData
+        |> required "integrationUuid" Decode.string
+        |> required "id" Decode.string
+        |> required "name" Decode.string
+        |> required "props" (Decode.list Decode.string)
+        |> required "requestMethod" Decode.string
+        |> required "requestUrl" Decode.string
+        |> required "requestHeaders" (Decode.list (decodePair Decode.string Decode.string))
+        |> required "responseListField" Decode.string
+        |> required "responseIdField" Decode.string
+        |> required "responseNameField" Decode.string
+
+
+editIntegrationEventDecoder : Decoder EditIntegrationEventData
+editIntegrationEventDecoder =
+    Decode.succeed EditIntegrationEventData
+        |> required "integrationUuid" Decode.string
+        |> required "id" (eventFieldDecoder Decode.string)
+        |> required "name" (eventFieldDecoder Decode.string)
+        |> required "props" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "requestMethod" (eventFieldDecoder Decode.string)
+        |> required "requestUrl" (eventFieldDecoder Decode.string)
+        |> required "requestHeaders" (eventFieldDecoder (Decode.list (decodePair Decode.string Decode.string)))
+        |> required "responseListField" (eventFieldDecoder Decode.string)
+        |> required "responseIdField" (eventFieldDecoder Decode.string)
+        |> required "responseNameField" (eventFieldDecoder Decode.string)
+
+
+deleteIntegrationEventDecoder : Decoder DeleteIntegrationEventData
+deleteIntegrationEventDecoder =
+    Decode.succeed DeleteIntegrationEventData
+        |> required "integrationUuid" Decode.string
 
 
 addQuestionEventDecoder : Decoder AddQuestionEventData
@@ -1240,6 +1373,15 @@ getEventUuid event =
         DeleteTagEvent _ commonData ->
             commonData.uuid
 
+        AddIntegrationEvent _ commonData ->
+            commonData.uuid
+
+        EditIntegrationEvent _ commonData ->
+            commonData.uuid
+
+        DeleteIntegrationEvent _ commonData ->
+            commonData.uuid
+
         AddChapterEvent _ commonData ->
             commonData.uuid
 
@@ -1303,6 +1445,15 @@ getEventEntityUuid event =
 
         DeleteTagEvent eventData _ ->
             eventData.tagUuid
+
+        AddIntegrationEvent eventData _ ->
+            eventData.integrationUuid
+
+        EditIntegrationEvent eventData _ ->
+            eventData.integrationUuid
+
+        DeleteIntegrationEvent eventData _ ->
+            eventData.integrationUuid
 
         AddChapterEvent eventData _ ->
             eventData.chapterUuid
@@ -1399,6 +1550,12 @@ getEventEntityVisibleName event =
             Just eventData.name
 
         EditTagEvent eventData _ ->
+            getEventFieldValue eventData.name
+
+        AddIntegrationEvent eventData _ ->
+            Just eventData.name
+
+        EditIntegrationEvent eventData _ ->
             getEventFieldValue eventData.name
 
         AddChapterEvent eventData _ ->

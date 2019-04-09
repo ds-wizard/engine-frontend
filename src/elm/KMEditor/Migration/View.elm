@@ -198,6 +198,10 @@ getEventView wrapMsg model migration event =
                 |> Maybe.map (viewEvent wrapMsg model "Delete expert")
                 |> Maybe.withDefault errorMessage
 
+        _ ->
+            -- TOOD
+            emptyNode
+
 
 viewEvent : (Msg -> Msgs.Msg) -> Model -> String -> Html Msgs.Msg -> Html Msgs.Msg
 viewEvent wrapMsg model name diffView =

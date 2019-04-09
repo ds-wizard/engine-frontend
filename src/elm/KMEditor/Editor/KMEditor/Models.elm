@@ -109,6 +109,15 @@ eventToEditorState event =
         DeleteTagEvent _ _ ->
             Deleted
 
+        AddIntegrationEvent _ _ ->
+            AddedEdited
+
+        EditIntegrationEvent _ _ ->
+            Edited
+
+        DeleteIntegrationEvent _ _ ->
+            Deleted
+
         AddQuestionEvent _ _ ->
             AddedEdited
 

@@ -2,6 +2,7 @@ module KMEditor.Common.Models.EntitiesTest exposing
     ( answerDecoderTest
     , chapterDecoderTest
     , expertDecoderTest
+    , integrationDecoderTest
     , knowledgeModelDecoderTest
     , metricDecoderTest
     ,  metricMeasureDecoderTest
@@ -29,7 +30,8 @@ knowledgeModelDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "name": "My knowledge model",
                             "chapters": [],
-                            "tags": []
+                            "tags": [],
+                            "integrations": []
                         }
                         """
 
@@ -38,6 +40,7 @@ knowledgeModelDecoderTest =
                         , name = "My knowledge model"
                         , chapters = []
                         , tags = []
+                        , integrations = []
                         }
                 in
                 expectDecoder knowledgeModelDecoder raw expected
@@ -55,7 +58,8 @@ knowledgeModelDecoderTest =
                                 "text": "This chapter is empty",
                                 "questions": []
                             }],
-                            "tags": []
+                            "tags": [],
+                            "integrations": []
                         }
                         """
 
@@ -70,6 +74,7 @@ knowledgeModelDecoderTest =
                               }
                             ]
                         , tags = []
+                        , integrations = []
                         }
                 in
                 expectDecoder knowledgeModelDecoder raw expected
@@ -87,7 +92,8 @@ knowledgeModelDecoderTest =
                                 "name": "Science",
                                 "description": null,
                                 "color": "#F5A623"
-                            }]
+                            }],
+                            "integrations": []
                         }
                         """
 
@@ -100,6 +106,53 @@ knowledgeModelDecoderTest =
                               , name = "Science"
                               , description = Nothing
                               , color = "#F5A623"
+                              }
+                            ]
+                        , integrations = []
+                        }
+                in
+                expectDecoder knowledgeModelDecoder raw expected
+        , test "should decode knowledge model with integrations" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "name": "My knowledge model",
+                            "chapters": [],
+                            "tags": [],
+                            "integrations": [{
+                                "uuid": "",
+                                "id": "service",
+                                "name": "Service",
+                                "props": ["kind", "category"],
+                                "requestMethod": "GET",
+                                "requestUrl": "/",
+                                "requestHeaders": [["X_USER", "user"]],
+                                "responseListField": "items",
+                                "responseIdField": "id",
+                                "responseNameField": "title"
+                            }]
+                        }
+                        """
+
+                    expected =
+                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                        , name = "My knowledge model"
+                        , chapters = []
+                        , tags = []
+                        , integrations =
+                            [ { uuid = ""
+                              , id = "service"
+                              , name = "Service"
+                              , props = [ "kind", "category" ]
+                              , requestMethod = "GET"
+                              , requestUrl = "/"
+                              , requestHeaders = [ ( "X_USER", "user" ) ]
+                              , responseListField = "items"
+                              , responseIdField = "id"
+                              , responseNameField = "title"
                               }
                             ]
                         }
@@ -132,6 +185,45 @@ tagDecoderTest =
                         }
                 in
                 expectDecoder tagDecoder raw expected
+        ]
+
+
+integrationDecoderTest : Test
+integrationDecoderTest =
+    describe "integrationDecoder"
+        [ test "should decode integration" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "",
+                            "id": "service",
+                            "name": "Service",
+                            "props": ["kind", "category"],
+                            "requestMethod": "GET",
+                            "requestUrl": "/",
+                            "requestHeaders": [["X_USER", "user"]],
+                            "responseListField": "",
+                            "responseIdField": "id",
+                            "responseNameField": "title"
+                        }
+                        """
+
+                    expected =
+                        { uuid = ""
+                        , id = "service"
+                        , name = "Service"
+                        , props = [ "kind", "category" ]
+                        , requestMethod = "GET"
+                        , requestUrl = "/"
+                        , requestHeaders = [ ( "X_USER", "user" ) ]
+                        , responseListField = ""
+                        , responseIdField = "id"
+                        , responseNameField = "title"
+                        }
+                in
+                expectDecoder integrationDecoder raw expected
         ]
 
 

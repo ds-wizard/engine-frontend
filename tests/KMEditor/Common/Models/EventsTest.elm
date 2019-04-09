@@ -2,18 +2,21 @@ module KMEditor.Common.Models.EventsTest exposing
     ( addAnswerEventTest
     , addChapterEventTest
     , addExpertEventTest
+    , addIntegrationEventTest
     , addQuestionEventTest
     , addReferenceEventTest
     , addTagEventTest
     , deleteAnswerEventTest
     , deleteChapterEventTest
     , deleteExpertEventTest
+    , deleteIntegrationEventTest
     , deleteQuestionEventTest
     , deleteReferenceEventTest
     , deleteTagEventTest
     , editAnswerEventTest
     , editChapterEventTest
     , editExpertEventTest
+    , editIntegrationEventTest
     , editKnowledgeModelEventTest
     , editQuestionEventTest
     , editReferenceEventTest
@@ -298,7 +301,8 @@ addTagEventTest : Test
 addTagEventTest =
     describe "AddTagEvent"
         [ test "should encode and decode" <|
-            \_ -> expectEventEncodeDecode addTagEvent
+            \_ ->
+                expectEventEncodeDecode addTagEvent
         , test "get event uuid" <|
             \_ ->
                 Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid addTagEvent)
@@ -390,6 +394,127 @@ deleteTagEventTest =
         , test "get entity visible name" <|
             \_ ->
                 Expect.equal Nothing (getEventEntityVisibleName deleteTagEvent)
+        ]
+
+
+
+{- integration events -}
+
+
+addIntegrationEvent : Event
+addIntegrationEvent =
+    AddIntegrationEvent
+        { integrationUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
+        , id = "service"
+        , name = "Service"
+        , props = [ "kind", "category" ]
+        , requestMethod = "GET"
+        , requestUrl = "/api/search"
+        , requestHeaders = [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
+        , responseListField = "items"
+        , responseIdField = "uuid"
+        , responseNameField = "title"
+        }
+        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        }
+
+
+addIntegrationEventTest : Test
+addIntegrationEventTest =
+    describe "AddIntegrationEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode addIntegrationEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid addIntegrationEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Service") (getEventEntityVisibleName addIntegrationEvent)
+        ]
+
+
+editIntegrationEvent : Event
+editIntegrationEvent =
+    EditIntegrationEvent
+        { integrationUuid = ""
+        , id =
+            { changed = True
+            , value = Just "service"
+            }
+        , name =
+            { changed = True
+            , value = Just "Service"
+            }
+        , props =
+            { changed = True
+            , value = Just [ "kind", "category" ]
+            }
+        , requestMethod =
+            { changed = True
+            , value = Just "GET"
+            }
+        , requestUrl =
+            { changed = False
+            , value = Nothing
+            }
+        , requestHeaders =
+            { changed = True
+            , value = Just [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
+            }
+        , responseListField =
+            { changed = False
+            , value = Nothing
+            }
+        , responseIdField =
+            { changed = False
+            , value = Nothing
+            }
+        , responseNameField =
+            { changed = True
+            , value = Just "title"
+            }
+        }
+        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        }
+
+
+editIntegrationEventTest : Test
+editIntegrationEventTest =
+    describe "EditIntegrationEventTest"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editIntegrationEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid editIntegrationEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Service") (getEventEntityVisibleName editIntegrationEvent)
+        ]
+
+
+deleteIntegrationEvent : Event
+deleteIntegrationEvent =
+    DeleteIntegrationEvent
+        { integrationUuid = ""
+        }
+        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        }
+
+
+deleteIntegrationEventTest : Test
+deleteIntegrationEventTest =
+    describe "DeleteIntegrationEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editIntegrationEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid deleteIntegrationEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (getEventEntityVisibleName deleteIntegrationEvent)
         ]
 
 
