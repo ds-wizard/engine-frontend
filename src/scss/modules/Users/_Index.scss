@@ -3,7 +3,7 @@
 .Users__Index {
     .user-card {
         text-align: center;
-        background: #eee;
+        background: $gray-200;
         @include border-radius(5px);
         padding: 20px;
         margin: auto;

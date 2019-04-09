@@ -1,9 +1,9 @@
 module Public.Signup.Msgs exposing (Msg(..))
 
+import Common.ApiError exposing (ApiError)
 import Form
-import Http
 
 
 type Msg
     = FormMsg Form.Msg
-    | PostSignupCompleted (Result Http.Error String)
+    | PostSignupCompleted (Result ApiError ())

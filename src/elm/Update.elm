@@ -5,14 +5,14 @@ import Auth.Update
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
 import Common.Menu.Update
-import DSPlanner.Update
 import KMEditor.Update
-import KMPackages.Update
+import KnowledgeModels.Update
 import Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
 import Msgs exposing (Msg)
 import Organization.Update
 import Ports
 import Public.Update
+import Questionnaires.Update
 import Routing exposing (Route(..), isAllowed, parseLocation)
 import Url exposing (Url)
 import Users.Update
@@ -20,24 +20,24 @@ import Users.Update
 
 fetchData : Model -> Cmd Msg
 fetchData model =
-    case model.state.route of
-        DSPlanner route ->
-            DSPlanner.Update.fetchData route Msgs.DSPlannerMsg model.state.session model.dsPlannerModel
+    case model.appState.route of
+        Questionnaires route ->
+            Questionnaires.Update.fetchData route Msgs.QuestionnairesMsg model.appState model.dsPlannerModel
 
         KMEditor route ->
-            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.state.session
+            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.appState
 
-        KMPackages route ->
-            KMPackages.Update.fetchData route Msgs.KMPackagesMsg model.state.session
+        KnowledgeModels route ->
+            KnowledgeModels.Update.fetchData route Msgs.KnowledgeModelsMsg model.appState
 
         Organization ->
-            Organization.Update.getCurrentOrganizationCmd model.state.session
+            Cmd.map Msgs.OrganizationMsg <| Organization.Update.fetchData model.appState
 
         Public route ->
-            Public.Update.fetchData route Msgs.PublicMsg
+            Public.Update.fetchData route Msgs.PublicMsg model.appState
 
         Users route ->
-            Users.Update.fetchData route Msgs.UsersMsg model.state.session
+            Users.Update.fetchData route Msgs.UsersMsg model.appState
 
         _ ->
             Cmd.none
@@ -45,7 +45,7 @@ fetchData model =
 
 isGuarded : Model -> Maybe String
 isGuarded model =
-    case model.state.route of
+    case model.appState.route of
         KMEditor route ->
             KMEditor.Update.isGuarded route model.kmEditorModel
 
@@ -72,7 +72,7 @@ update msg model =
                             ( model, Ports.alert guardMsg )
 
                         Nothing ->
-                            ( model, pushUrl model.state.key (Url.toString url) )
+                            ( model, pushUrl model.appState.key (Url.toString url) )
 
                 Browser.External url ->
                     if url == "" then
@@ -87,7 +87,7 @@ update msg model =
         Msgs.SetSidebarCollapsed collapsed ->
             let
                 newSession =
-                    setSidebarCollapsed model.state.session collapsed
+                    setSidebarCollapsed model.appState.session collapsed
 
                 newModel =
                     setSession newSession model
@@ -97,48 +97,48 @@ update msg model =
         Msgs.MenuMsg menuMsg ->
             let
                 ( menuModel, cmd ) =
-                    Common.Menu.Update.update Msgs.MenuMsg menuMsg model.menuModel
+                    Common.Menu.Update.update Msgs.MenuMsg menuMsg model.appState model.menuModel
             in
             ( { model | menuModel = menuModel }, cmd )
 
-        Msgs.DSPlannerMsg dsPlannerMsg ->
+        Msgs.QuestionnairesMsg dsPlannerMsg ->
             let
                 ( dsPlannerModel, cmd ) =
-                    DSPlanner.Update.update dsPlannerMsg Msgs.DSPlannerMsg model.state model.dsPlannerModel
+                    Questionnaires.Update.update dsPlannerMsg Msgs.QuestionnairesMsg model.appState model.dsPlannerModel
             in
             ( { model | dsPlannerModel = dsPlannerModel }, cmd )
 
         Msgs.KMEditorMsg kmEditorMsg ->
             let
                 ( seed, kmEditorModel, cmd ) =
-                    KMEditor.Update.update kmEditorMsg Msgs.KMEditorMsg model.state model.kmEditorModel
+                    KMEditor.Update.update kmEditorMsg Msgs.KMEditorMsg model.appState model.kmEditorModel
             in
             ( setSeed seed { model | kmEditorModel = kmEditorModel }, cmd )
 
-        Msgs.KMPackagesMsg kmPackagesMsg ->
+        Msgs.KnowledgeModelsMsg kmPackagesMsg ->
             let
                 ( kmPackagesModel, cmd ) =
-                    KMPackages.Update.update kmPackagesMsg Msgs.KMPackagesMsg model.state model.kmPackagesModel
+                    KnowledgeModels.Update.update kmPackagesMsg Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
             in
             ( { model | kmPackagesModel = kmPackagesModel }, cmd )
 
         Msgs.OrganizationMsg organizationMsg ->
             let
                 ( organizationModel, cmd ) =
-                    Organization.Update.update organizationMsg model.state.session model.organizationModel
+                    Organization.Update.update organizationMsg Msgs.OrganizationMsg model.appState model.organizationModel
             in
             ( { model | organizationModel = organizationModel }, cmd )
 
         Msgs.PublicMsg publicMsg ->
             let
                 ( seed, publicModel, cmd ) =
-                    Public.Update.update publicMsg Msgs.PublicMsg model.state model.publicModel
+                    Public.Update.update publicMsg Msgs.PublicMsg model.appState model.publicModel
             in
             ( setSeed seed { model | publicModel = publicModel }, cmd )
 
         Msgs.UsersMsg usersMsg ->
             let
                 ( seed, users, cmd ) =
-                    Users.Update.update usersMsg Msgs.UsersMsg model.state model.users
+                    Users.Update.update usersMsg Msgs.UsersMsg model.appState model.users
             in
             ( setSeed seed { model | users = users }, cmd )

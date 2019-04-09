@@ -1,0 +1,11 @@
+@import "../../variables";
+
+.KnowledgeModels__Detail {
+    .card {
+        background: $gray-200;
+
+        strong {
+            font-size: 18px;
+        }
+    }
+}

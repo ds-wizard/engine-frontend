@@ -8,7 +8,7 @@ module KMEditor.Editor.Preview.Models exposing
     )
 
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, filterKnowledgModelWithTags)
+import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, filterKnowledgModelWithTags)
 
 
 type alias Model =
@@ -18,9 +18,9 @@ type alias Model =
     }
 
 
-initialModel : KnowledgeModel -> Model
-initialModel km =
-    { questionnaireModel = createQuestionnaireModel km
+initialModel : KnowledgeModel -> List Metric -> Model
+initialModel km metrics =
+    { questionnaireModel = createQuestionnaireModel km metrics
     , knowledgeModel = km
     , tags = []
     }
@@ -62,7 +62,9 @@ createFilteredQuestionnaireModel : List String -> Model -> Model
 createFilteredQuestionnaireModel tags model =
     let
         questionnaireModel =
-            createQuestionnaireModel <| filterKnowledgModelWithTags tags model.knowledgeModel
+            createQuestionnaireModel
+                (filterKnowledgModelWithTags tags model.knowledgeModel)
+                model.questionnaireModel.metrics
     in
     { model
         | questionnaireModel = questionnaireModel
@@ -70,11 +72,12 @@ createFilteredQuestionnaireModel tags model =
     }
 
 
-createQuestionnaireModel : KnowledgeModel -> Common.Questionnaire.Models.Model
-createQuestionnaireModel km =
+createQuestionnaireModel : KnowledgeModel -> List Metric -> Common.Questionnaire.Models.Model
+createQuestionnaireModel km metrics =
     Common.Questionnaire.Models.initialModel
         { uuid = ""
         , name = ""
+        , private = True
         , package =
             { name = ""
             , id = ""
@@ -88,3 +91,4 @@ createQuestionnaireModel km =
         , replies = []
         , level = 0
         }
+        metrics

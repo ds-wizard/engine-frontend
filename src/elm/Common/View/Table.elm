@@ -8,7 +8,7 @@ module Common.View.Table exposing
     , view
     )
 
-import Common.Html exposing (linkTo)
+import Common.Html exposing (fa, linkTo)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -29,14 +29,14 @@ type alias TableFieldConfig a =
 
 
 type TableActionLabel
-    = TableActionText String
-    | TableActionIcon String
+    = TableActionPrimary String
+    | TableActionDefault String String
+    | TableActionDestructive String String
 
 
 type TableAction a msg
     = TableActionMsg ((msg -> Msgs.Msg) -> a -> Msgs.Msg)
     | TableActionLink (a -> Routing.Route)
-    | TableActionButtonLink (a -> Routing.Route)
     | TableActionExternalLink (a -> String)
     | TableActionCustom ((msg -> Msgs.Msg) -> a -> Html Msgs.Msg)
 
@@ -75,7 +75,7 @@ tableHeader config =
             List.map (headerField << .label) config.fields
 
         actionsField =
-            [ th [] [ text "Actions" ] ]
+            [ th [] [] ]
     in
     thead []
         [ tr [] (labelFields ++ actionsField) ]
@@ -115,32 +115,38 @@ tableRowActions config wrapMsg item =
                 |> List.filter (\a -> a.visible item)
                 |> List.map (tableAction wrapMsg item)
     in
-    td [ class "table-actions" ] actions
+    td [ class "table-actions" ]
+        [ div
+            [ class "table-actions-container" ]
+            actions
+        ]
 
 
 tableAction : (msg -> Msgs.Msg) -> a -> TableActionConfig a msg -> Html Msgs.Msg
 tableAction wrapMsg item actionConfig =
     let
-        actionLabel =
+        ( cssClass, actionLabel ) =
             case actionConfig.label of
-                TableActionText str ->
-                    text str
+                TableActionPrimary str ->
+                    ( "btn btn-outline-primary"
+                    , text str
+                    )
 
-                TableActionIcon iconClass ->
-                    i [ class iconClass ] []
+                TableActionDefault icon str ->
+                    ( "", span [] [ fa icon, text str ] )
+
+                TableActionDestructive icon str ->
+                    ( "text-danger", span [] [ fa icon, text str ] )
     in
     case actionConfig.action of
         TableActionMsg createMsg ->
-            a [ onClick <| createMsg wrapMsg item ] [ actionLabel ]
+            a [ class cssClass, onClick <| createMsg wrapMsg item ] [ actionLabel ]
 
         TableActionLink getRoute ->
-            linkTo (getRoute item) [] [ actionLabel ]
-
-        TableActionButtonLink getRoute ->
-            linkTo (getRoute item) [ class "btn btn-outline-primary" ] [ actionLabel ]
+            linkTo (getRoute item) [ class cssClass ] [ actionLabel ]
 
         TableActionExternalLink getUrl ->
-            a [ href (getUrl item), target "_blank" ] [ actionLabel ]
+            a [ class cssClass, href (getUrl item), target "_blank" ] [ actionLabel ]
 
         TableActionCustom getHtml ->
             getHtml wrapMsg item

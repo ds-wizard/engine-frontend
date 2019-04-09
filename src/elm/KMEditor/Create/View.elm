@@ -12,7 +12,7 @@ import Html exposing (..)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KMPackages.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))
 

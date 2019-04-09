@@ -4,16 +4,16 @@ port module Ports exposing
     , clearSession
     , clearUnloadMessage
     , createDropzone
+    , drawMetricsChart
     , fileContentRead
     , fileSelected
-    , onSessionChange
     , scrollToTop
     , setUnloadMessage
     , storeSession
     )
 
 import Auth.Models exposing (Session)
-import Json.Encode exposing (Value)
+import Json.Encode as Encode exposing (Value)
 
 
 
@@ -24,9 +24,6 @@ port storeSession : Maybe Session -> Cmd msg
 
 
 port clearSession : () -> Cmd msg
-
-
-port onSessionChange : (Value -> msg) -> Sub msg
 
 
 
@@ -66,3 +63,10 @@ port clearUnloadMessage : () -> Cmd msg
 
 
 port alert : String -> Cmd msg
+
+
+
+-- Charts
+
+
+port drawMetricsChart : Encode.Value -> Cmd msg

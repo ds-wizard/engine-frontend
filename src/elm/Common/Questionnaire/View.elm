@@ -1,46 +1,12 @@
 module Common.Questionnaire.View exposing
     ( ViewExtraItemsConfig
     , ViewQuestionnaireConfig
-    , chapterHeader
-    , chapterList
-    , chapterListChapter
-    , extraNavigation
-    , feedbackIssue
-    , feedbackModal
-    , feedbackModalContent
-    , formConfig
-    , getTitleByUuid
-    , levelSelection
-    , levelSelectionOption
-    , pageView
-    , viewAnsweredIndication
-    , viewChapterAnsweredIndication
-    , viewChapterReport
-    , viewChapters
-    , viewExpert
-    , viewExperts
-    , viewExtraData
-    , viewExtraItems
-    , viewIndication
-    , viewIndications
-    , viewMetricDescription
-    , viewMetricReportRow
-    , viewMetrics
-    , viewMetricsDescriptions
-    , viewProgressBar
-    , viewProgressBarWithColors
     , viewQuestionnaire
-    , viewRequiredLevel
-    , viewResourcePageReference
-    , viewResourcePageReferences
-    , viewSummary
-    , viewUrlReference
-    , viewUrlReferences
     )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, fa)
-import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions)
+import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions, chapterReportCanvasId)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Common.View.FormGroup as FormGroup
@@ -52,6 +18,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
+import Roman exposing (toRomanNumber)
 import Round
 import String exposing (fromFloat, fromInt)
 
@@ -82,12 +49,12 @@ viewQuestionnaire cfg model =
                 emptyNode
     in
     div [ class "Questionnaire row" ]
-        [ div [ class "col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
+        [ div [ class "col col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
             [ level
             , chapterList model
             , extraActions
             ]
-        , div [ class "col-sm-11 col-md-8 col-lg-8 col-xl-7" ]
+        , div [ class "col col-sm-11 col-md-8 col-lg-8 col-xl-9" ]
             (pageView cfg model)
         , feedbackModal model
         ]
@@ -122,16 +89,17 @@ chapterList model =
                     Nothing
     in
     div [ class "nav nav-pills flex-column" ]
-        (List.map (chapterListChapter model activeChapter) model.questionnaire.knowledgeModel.chapters)
+        (List.indexedMap (chapterListChapter model activeChapter) model.questionnaire.knowledgeModel.chapters)
 
 
-chapterListChapter : Model -> Maybe Chapter -> Chapter -> Html Msg
-chapterListChapter model activeChapter chapter =
+chapterListChapter : Model -> Maybe Chapter -> Int -> Chapter -> Html Msg
+chapterListChapter model activeChapter order chapter =
     a
         [ classList [ ( "nav-link", True ), ( "active", activeChapter == Just chapter ) ]
         , onClick <| SetActiveChapter chapter
         ]
-        [ text chapter.title
+        [ span [ class "chapter-number" ] [ text <| (toRomanNumber <| order + 1) ++ ". " ]
+        , span [ class "chapter-name" ] [ text chapter.title ]
         , viewChapterAnsweredIndication model chapter
         ]
 
@@ -167,24 +135,33 @@ pageView cfg model =
             [ emptyNode ]
 
         PageChapter chapter form ->
-            [ chapterHeader chapter
-            , viewForm (formConfig cfg) form |> Html.map FormMsg
+            [ chapterHeader model chapter
+            , viewForm (formConfig cfg model) form |> Html.map FormMsg
             ]
 
         PageSummaryReport ->
-            [ Page.actionResultView (viewSummary model) (ActionResult.combine model.metrics model.summaryReport) ]
+            [ Page.actionResultView (viewSummary model) model.summaryReport ]
 
 
-chapterHeader : Chapter -> Html Msg
-chapterHeader chapter =
+chapterHeader : Model -> Chapter -> Html Msg
+chapterHeader model chapter =
+    let
+        chapterNumber =
+            model.questionnaire.knowledgeModel.chapters
+                |> List.indexedMap (\i c -> ( i, c ))
+                |> List.find (\( i, c ) -> c.uuid == chapter.uuid)
+                |> Maybe.map (\( i, c ) -> i + 1)
+                |> Maybe.withDefault 1
+                |> toRomanNumber
+    in
     div []
-        [ h2 [] [ text chapter.title ]
+        [ h2 [] [ text <| chapterNumber ++ ". " ++ chapter.title ]
         , p [ class "chapter-description" ] [ text chapter.text ]
         ]
 
 
-formConfig : ViewQuestionnaireConfig -> FormViewConfig CustomFormMessage FormExtraData
-formConfig cfg =
+formConfig : ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData
+formConfig cfg model =
     { customActions =
         if cfg.showExtraActions then
             [ ( "fa-exclamation-circle", FeedbackMsg ) ]
@@ -192,6 +169,7 @@ formConfig cfg =
         else
             []
     , viewExtraData = Just <| viewExtraData <| Maybe.withDefault [] cfg.levels
+    , isDesirable = Just (.requiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
     }
 
 
@@ -292,17 +270,17 @@ viewExpert expert =
         ]
 
 
-viewSummary : Model -> ( List Metric, SummaryReport ) -> Html Msg
-viewSummary model ( metrics, summaryReport ) =
+viewSummary : Model -> SummaryReport -> Html Msg
+viewSummary model summaryReport =
     let
         title =
             [ h2 [] [ text "Summary report" ] ]
 
         chapters =
-            viewChapters model metrics summaryReport
+            viewChapters model model.metrics summaryReport
 
         metricDescriptions =
-            [ viewMetricsDescriptions metrics ]
+            [ viewMetricsDescriptions model.metrics ]
     in
     div [ class "summary-report" ]
         (List.concat [ title, chapters, metricDescriptions ])
@@ -318,7 +296,10 @@ viewChapterReport model metrics chapterReport =
     div []
         [ h3 [] [ text <| getTitleByUuid model.questionnaire.knowledgeModel.chapters chapterReport.chapterUuid ]
         , viewIndications chapterReport.indications
-        , viewMetrics metrics chapterReport
+        , div [ class "row" ]
+            [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
+            , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
+            ]
         ]
 
 
@@ -346,8 +327,8 @@ viewAnsweredIndication data =
         ]
 
 
-viewMetrics : List Metric -> ChapterReport -> Html Msg
-viewMetrics metrics chapterReport =
+viewMetricsTable : List Metric -> ChapterReport -> Html Msg
+viewMetricsTable metrics chapterReport =
     table [ class "table table-metrics-report" ]
         [ thead []
             [ tr []
@@ -373,14 +354,7 @@ viewProgressBarWithColors : Float -> Html msg
 viewProgressBarWithColors value =
     let
         colorClass =
-            if value < 0.33 then
-                "bg-danger"
-
-            else if value < 0.66 then
-                "bg-warning"
-
-            else
-                "bg-success"
+            (++) "bg-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
     in
     viewProgressBar colorClass value
 
@@ -393,6 +367,12 @@ viewProgressBar colorClass value =
     in
     div [ class "progress" ]
         [ div [ class <| "progress-bar " ++ colorClass, style "width" width ] [] ]
+
+
+viewMetricsChart : List Metric -> ChapterReport -> Html Msg
+viewMetricsChart metrics chapterReport =
+    div [ class "metrics-chart" ]
+        [ canvas [ id <| chapterReportCanvasId chapterReport ] [] ]
 
 
 getTitleByUuid : List { a | uuid : String, title : String } -> String -> String

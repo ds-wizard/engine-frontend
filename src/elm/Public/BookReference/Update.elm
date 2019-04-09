@@ -1,19 +1,18 @@
 module Public.BookReference.Update exposing (fetchData, handleGetBookReferenceCompleted, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Models exposing (getServerError)
-import Http
+import Common.Api.BookReferences as BookReferencesApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Msgs
 import Public.BookReference.Models exposing (BookReference, Model)
 import Public.BookReference.Msgs exposing (Msg(..))
-import Public.BookReference.Requests exposing (getBookReference)
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> Cmd Msgs.Msg
-fetchData wrapMsg uuid =
-    getBookReference uuid
-        |> Http.send GetBookReferenceCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg uuid appState =
+    Cmd.map wrapMsg <|
+        BookReferencesApi.getBookReference uuid appState GetBookReferenceCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
@@ -23,7 +22,7 @@ update msg wrapMsg model =
             handleGetBookReferenceCompleted model result
 
 
-handleGetBookReferenceCompleted : Model -> Result Http.Error BookReference -> ( Model, Cmd Msgs.Msg )
+handleGetBookReferenceCompleted : Model -> Result ApiError BookReference -> ( Model, Cmd Msgs.Msg )
 handleGetBookReferenceCompleted model result =
     let
         newModel =

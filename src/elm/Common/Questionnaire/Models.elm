@@ -6,6 +6,8 @@ module Common.Questionnaire.Models exposing
     , Model
     , QuestionnaireDetail
     , calculateUnansweredQuestions
+    , chapterReportCanvasId
+    , createChartConfig
     , encodeFeedbackFrom
     , encodeQuestionnaireDetail
     , feedbackDecoder
@@ -20,8 +22,9 @@ module Common.Questionnaire.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import ChartJS exposing (ChartConfig)
 import Common.Form exposing (CustomFormError)
-import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
+import Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport)
 import Form
 import Form.Validate as Validate exposing (..)
 import FormEngine.Model exposing (..)
@@ -29,7 +32,7 @@ import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
-import KMPackages.Common.Models exposing (PackageDetail, packageDetailDecoder)
+import KnowledgeModels.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
 import String exposing (fromInt)
 import Utils exposing (boolToInt)
@@ -43,7 +46,7 @@ type alias Model =
     , feedbackForm : Form.Form CustomFormError FeedbackForm
     , sendingFeedback : ActionResult String
     , feedbackResult : Maybe Feedback
-    , metrics : ActionResult (List Metric)
+    , metrics : List Metric
     , summaryReport : ActionResult SummaryReport
     , dirty : Bool
     }
@@ -63,13 +66,13 @@ type alias FormExtraData =
     }
 
 
-initialModel : QuestionnaireDetail -> Model
-initialModel questionnaire =
+initialModel : QuestionnaireDetail -> List Metric -> Model
+initialModel questionnaire metrics =
     let
         activePage =
             case List.head questionnaire.knowledgeModel.chapters of
                 Just chapter ->
-                    PageChapter chapter (createChapterForm chapter questionnaire.replies)
+                    PageChapter chapter (createChapterForm metrics questionnaire chapter)
 
                 Nothing ->
                     PageNone
@@ -81,7 +84,7 @@ initialModel questionnaire =
     , feedbackForm = initEmptyFeedbackFrom
     , sendingFeedback = Unset
     , feedbackResult = Nothing
-    , metrics = Unset
+    , metrics = metrics
     , summaryReport = Unset
     , dirty = False
     }
@@ -94,6 +97,7 @@ type alias QuestionnaireDetail =
     , knowledgeModel : KnowledgeModel
     , replies : FormValues
     , level : Int
+    , private : Bool
     }
 
 
@@ -106,12 +110,15 @@ questionnaireDetailDecoder =
         |> required "knowledgeModel" knowledgeModelDecoder
         |> required "replies" decodeFormValues
         |> required "level" Decode.int
+        |> required "private" Decode.bool
 
 
 encodeQuestionnaireDetail : QuestionnaireDetail -> Encode.Value
 encodeQuestionnaireDetail questionnaire =
     Encode.object
-        [ ( "replies", encodeFormValues questionnaire.replies )
+        [ ( "name", Encode.string questionnaire.name )
+        , ( "private", Encode.bool questionnaire.private )
+        , ( "replies", encodeFormValues questionnaire.replies )
         , ( "level", Encode.int questionnaire.level )
         ]
 
@@ -168,23 +175,23 @@ feedbackListDecoder =
 {- Form creation -}
 
 
-createChapterForm : Chapter -> FormValues -> Form FormExtraData
-createChapterForm chapter values =
-    createForm { items = List.map createQuestionFormItem chapter.questions } values [ chapter.uuid ]
+createChapterForm : List Metric -> QuestionnaireDetail -> Chapter -> Form FormExtraData
+createChapterForm metrics questionnaire chapter =
+    createForm { items = List.map (createQuestionFormItem metrics) chapter.questions } questionnaire.replies [ chapter.uuid ]
 
 
-createQuestionFormItem : Question -> FormItem FormExtraData
-createQuestionFormItem question =
+createQuestionFormItem : List Metric -> Question -> FormItem FormExtraData
+createQuestionFormItem metrics question =
     let
         descriptor =
             createFormItemDescriptor question
     in
     case question of
         OptionsQuestion data ->
-            ChoiceFormItem descriptor (List.map createAnswerOption data.answers)
+            ChoiceFormItem descriptor (List.map (createAnswerOption metrics) data.answers)
 
         ListQuestion data ->
-            GroupFormItem descriptor (createGroupItems data)
+            GroupFormItem descriptor (createGroupItems metrics data)
 
         ValueQuestion data ->
             case data.valueType of
@@ -231,36 +238,75 @@ createQuestionExtraData question =
     Just <| List.foldl foldReferences newExtraData <| getQuestionReferences question
 
 
-createAnswerOption : Answer -> Option FormExtraData
-createAnswerOption answer =
+createAnswerOption : List Metric -> Answer -> Option FormExtraData
+createAnswerOption metrics answer =
     let
         descriptor =
-            createOptionFormDescriptor answer
+            createOptionFormDescriptor metrics answer
     in
     case answer.followUps of
         FollowUps [] ->
             SimpleOption descriptor
 
         FollowUps followUps ->
-            DetailedOption descriptor (List.map createQuestionFormItem followUps)
+            DetailedOption descriptor (List.map (createQuestionFormItem metrics) followUps)
 
 
-createOptionFormDescriptor : Answer -> OptionDescriptor
-createOptionFormDescriptor answer =
+createOptionFormDescriptor : List Metric -> Answer -> OptionDescriptor
+createOptionFormDescriptor metrics answer =
     { name = answer.uuid
     , label = answer.label
     , text = answer.advice
+    , badges = createBadges metrics answer
     }
 
 
-createGroupItems : ListQuestionData -> List (FormItem FormExtraData)
-createGroupItems questionData =
+createBadges : List Metric -> Answer -> Maybe (List ( String, String ))
+createBadges metrics answer =
     let
+        getMetricName uuid =
+            List.find ((==) uuid << .uuid) metrics
+                |> Maybe.map .title
+                |> Maybe.withDefault "Unknown"
+
+        getBadgeClass value =
+            (++) "badge-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
+
+        createBadge metricMeasure =
+            ( getBadgeClass metricMeasure.measure, getMetricName metricMeasure.metricUuid )
+
+        metricExists measure =
+            List.find ((==) measure.metricUuid << .uuid) metrics /= Nothing
+    in
+    if List.isEmpty answer.metricMeasures then
+        Nothing
+
+    else
+        List.filter metricExists answer.metricMeasures
+            |> List.map createBadge
+            |> Just
+
+
+createGroupItems : List Metric -> ListQuestionData -> List (FormItem FormExtraData)
+createGroupItems metrics questionData =
+    let
+        itemNameExtraData =
+            { resourcePageReferences = []
+            , urlReferences = []
+            , experts = []
+            , requiredLevel = questionData.requiredLevel
+            }
+
         itemName =
-            StringFormItem { name = "itemName", label = questionData.itemTemplateTitle, text = Nothing, extraData = Nothing }
+            StringFormItem
+                { name = "itemName"
+                , label = questionData.itemTemplateTitle
+                , text = Nothing
+                , extraData = Just itemNameExtraData
+                }
 
         questions =
-            List.map createQuestionFormItem questionData.itemTemplateQuestions
+            List.map (createQuestionFormItem metrics) questionData.itemTemplateQuestions
     in
     itemName :: questions
 
@@ -294,7 +340,7 @@ updateQuestionnaireReplies replies questionnaire =
 setActiveChapter : Chapter -> Model -> Model
 setActiveChapter chapter model =
     { model
-        | activePage = PageChapter chapter (createChapterForm chapter model.questionnaire.replies)
+        | activePage = PageChapter chapter (createChapterForm model.metrics model.questionnaire chapter)
     }
 
 
@@ -408,3 +454,46 @@ evaluateAnswerItem currentLevel replies path requiredNow questions index =
         |> List.map (evaluateQuestion currentLevel replies currentPath)
         |> List.foldl (+) 0
         |> (+) answerItem
+
+
+createChartConfig : List Metric -> List Chapter -> ChapterReport -> ChartConfig
+createChartConfig metrics chapters chapterReport =
+    let
+        data =
+            List.map (createDataValue metrics) chapterReport.metrics
+
+        label =
+            List.find (.uuid >> (==) chapterReport.chapterUuid) chapters
+                |> Maybe.map .title
+                |> Maybe.withDefault "Chapter"
+    in
+    { targetId = chapterReportCanvasId chapterReport
+    , data =
+        { labels = List.map Tuple.first data
+        , datasets =
+            [ { label = label
+              , borderColor = "rgb(23, 162, 184)"
+              , backgroundColor = "rgba(23, 162, 184, 0.5)"
+              , pointBackgroundColor = "rgb(23, 162, 184)"
+              , data = List.map Tuple.second data
+              , stack = Nothing
+              }
+            ]
+        }
+    }
+
+
+createDataValue : List Metric -> MetricReport -> ( String, Float )
+createDataValue metrics report =
+    let
+        label =
+            List.find (.uuid >> (==) report.metricUuid) metrics
+                |> Maybe.map .title
+                |> Maybe.withDefault "Metric"
+    in
+    ( label, report.measure )
+
+
+chapterReportCanvasId : ChapterReport -> String
+chapterReportCanvasId chapterReport =
+    "chapter-report-" ++ chapterReport.chapterUuid

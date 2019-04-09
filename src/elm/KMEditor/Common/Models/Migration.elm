@@ -71,7 +71,7 @@ migrationStateTypeDecoder =
                         Decode.succeed RunningState
 
                     unknownStateType ->
-                        Decode.fail <| "Unknown migration state type " ++ unknownStateType
+                        Decode.fail <| "Unknown migration appState type " ++ unknownStateType
             )
 
 

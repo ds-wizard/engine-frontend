@@ -1,33 +1,37 @@
-module Public.ForgottenPassword.Update exposing (handleForm, handlePostPasswordActionKeyCompleted, postPasswordActionKeyCmd, update)
+module Public.ForgottenPassword.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ActionKeys as ActionKeysApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
-import Common.Models exposing (getServerError)
 import Form
-import Http
 import Msgs
 import Public.ForgottenPassword.Models exposing (..)
 import Public.ForgottenPassword.Msgs exposing (Msg(..))
-import Public.ForgottenPassword.Requests exposing (postPasswordActionKey)
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg model
+            handleForm formMsg wrapMsg appState model
 
         PostForgottenPasswordCompleted result ->
             handlePostPasswordActionKeyCompleted result model
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg model =
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just forgottenPasswordForm ) ->
             let
+                body =
+                    encodeForgottenPasswordForm forgottenPasswordForm
+
                 cmd =
-                    postPasswordActionKeyCmd forgottenPasswordForm |> Cmd.map wrapMsg
+                    Cmd.map wrapMsg <|
+                        ActionKeysApi.postActionKey body appState PostForgottenPasswordCompleted
             in
             ( { model | submitting = Loading }, cmd )
 
@@ -39,15 +43,7 @@ handleForm formMsg wrapMsg model =
             ( newModel, Cmd.none )
 
 
-postPasswordActionKeyCmd : ForgottenPasswordForm -> Cmd Msg
-postPasswordActionKeyCmd form =
-    form
-        |> encodeForgottenPasswordForm
-        |> postPasswordActionKey
-        |> Http.send PostForgottenPasswordCompleted
-
-
-handlePostPasswordActionKeyCompleted : Result Http.Error String -> Model -> ( Model, Cmd Msgs.Msg )
+handlePostPasswordActionKeyCompleted : Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
 handlePostPasswordActionKeyCompleted result model =
     case result of
         Ok _ ->

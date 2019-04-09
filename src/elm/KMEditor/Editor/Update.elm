@@ -1,11 +1,17 @@
-module KMEditor.Editor.Update exposing (fetchData, isGuarded, update)
+module KMEditor.Editor.Update exposing
+    ( fetchData
+    , isGuarded
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
-import Jwt
-import KMEditor.Common.Models exposing (Branch)
-import KMEditor.Common.Models.Events exposing (Event)
+import Common.Api exposing (getResultCmd)
+import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.Api.Levels as LevelsApi
+import Common.Api.Metrics as MetricsApi
+import Common.ApiError exposing (getServerError)
+import Common.AppState exposing (AppState)
+import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelDetail)
 import KMEditor.Editor.KMEditor.Models
 import KMEditor.Editor.KMEditor.Update exposing (generateEvents)
 import KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, initialModel)
@@ -14,43 +20,22 @@ import KMEditor.Editor.Preview.Models
 import KMEditor.Editor.Preview.Update
 import KMEditor.Editor.TagEditor.Models as TagEditorModel
 import KMEditor.Editor.TagEditor.Update
-import KMEditor.Requests exposing (getBranch, getLevels, getMetrics, postForPreview, putBranch)
 import KMEditor.Routing exposing (Route(..))
 import Maybe.Extra exposing (isJust)
-import Models exposing (State)
 import Msgs
 import Ports
 import Random exposing (Seed)
-import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg uuid session =
+fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg uuid appState =
     Cmd.map wrapMsg <|
         Cmd.batch
-            [ fetchBranch uuid session
-            , fetchMetrics session
-            , fetchLevels session
+            [ KnowledgeModelsApi.getKnowledgeModel uuid appState GetKnowledgeModelCompleted
+            , MetricsApi.getMetrics appState GetMetricsCompleted
+            , LevelsApi.getLevels appState GetLevelsCompleted
             ]
-
-
-fetchBranch : String -> Session -> Cmd Msg
-fetchBranch uuid session =
-    getBranch uuid session
-        |> Jwt.send GetBranchCompleted
-
-
-fetchMetrics : Session -> Cmd Msg
-fetchMetrics session =
-    getMetrics session
-        |> Jwt.send GetMetricsCompleted
-
-
-fetchLevels : Session -> Cmd Msg
-fetchLevels session =
-    getLevels session
-        |> Jwt.send GetLevelsCompleted
 
 
 isGuarded : Model -> Maybe String
@@ -62,52 +47,52 @@ isGuarded model =
         Nothing
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     let
         updateResult =
             case msg of
-                GetBranchCompleted result ->
+                GetKnowledgeModelCompleted result ->
                     let
                         ( newModel, cmd ) =
                             case result of
-                                Ok branch ->
-                                    fetchPreview wrapMsg state.session { model | branch = Success branch }
+                                Ok km ->
+                                    fetchPreview wrapMsg appState { model | km = Success km }
 
                                 Err error ->
-                                    ( { model | branch = getServerErrorJwt error "Unable to get Knowledge Model metadata" }
+                                    ( { model | km = getServerError error "Unable to get Knowledge Model metadata" }
                                     , getResultCmd result
                                     )
                     in
-                    ( state.seed, newModel, cmd )
+                    ( appState.seed, newModel, cmd )
 
                 GetMetricsCompleted result ->
                     let
                         ( newModel, cmd ) =
                             case result of
                                 Ok metrics ->
-                                    fetchPreview wrapMsg state.session { model | metrics = Success metrics }
+                                    fetchPreview wrapMsg appState { model | metrics = Success metrics }
 
                                 Err error ->
-                                    ( { model | metrics = getServerErrorJwt error "Unable to get metrics" }
+                                    ( { model | metrics = getServerError error "Unable to get metrics" }
                                     , getResultCmd result
                                     )
                     in
-                    ( state.seed, newModel, cmd )
+                    ( appState.seed, newModel, cmd )
 
                 GetLevelsCompleted result ->
                     let
                         ( newModel, cmd ) =
                             case result of
                                 Ok levels ->
-                                    fetchPreview wrapMsg state.session { model | levels = Success levels }
+                                    fetchPreview wrapMsg appState { model | levels = Success levels }
 
                                 Err error ->
-                                    ( { model | levels = getServerErrorJwt error "Unable to get levels" }
+                                    ( { model | levels = getServerError error "Unable to get levels" }
                                     , getResultCmd result
                                     )
                     in
-                    ( state.seed, newModel, cmd )
+                    ( appState.seed, newModel, cmd )
 
                 GetPreviewCompleted result ->
                     let
@@ -116,7 +101,11 @@ update msg wrapMsg state model =
                                 Ok km ->
                                     { model
                                         | preview = Success km
-                                        , previewEditorModel = Just <| KMEditor.Editor.Preview.Models.initialModel km
+                                        , previewEditorModel =
+                                            Just <|
+                                                KMEditor.Editor.Preview.Models.initialModel
+                                                    km
+                                                    (ActionResult.withDefault [] model.metrics)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
                                         , editorModel =
                                             Just <|
@@ -124,24 +113,24 @@ update msg wrapMsg state model =
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
                                                     (ActionResult.withDefault [] model.levels)
-                                                    ((ActionResult.withDefault [] <| ActionResult.map .events model.branch) ++ model.sessionEvents)
+                                                    ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
                                     }
 
                                 Err error ->
-                                    { model | preview = getServerErrorJwt error "Unable to get Knowledge Model" }
+                                    { model | preview = getServerError error "Unable to get Knowledge Model" }
 
                         cmd =
                             getResultCmd result
                     in
-                    ( state.seed, newModel, cmd )
+                    ( appState.seed, newModel, cmd )
 
                 OpenEditor editor ->
                     let
                         ( newSeed, modelWithEvents ) =
-                            applyCurrentEditorChanges state.seed model
+                            applyCurrentEditorChanges appState.seed model
 
                         ( newModel, cmd ) =
-                            fetchPreview wrapMsg state.session { modelWithEvents | currentEditor = editor }
+                            fetchPreview wrapMsg appState { modelWithEvents | currentEditor = editor }
                     in
                     ( newSeed, newModel, cmd )
 
@@ -149,9 +138,9 @@ update msg wrapMsg state model =
                     let
                         previewEditorModel =
                             model.previewEditorModel
-                                |> Maybe.map (KMEditor.Editor.Preview.Update.update previewMsg)
+                                |> Maybe.map (KMEditor.Editor.Preview.Update.update previewMsg appState)
                     in
-                    ( state.seed, { model | previewEditorModel = previewEditorModel }, Cmd.none )
+                    ( appState.seed, { model | previewEditorModel = previewEditorModel }, Cmd.none )
 
                 TagEditorMsg tagMsg ->
                     let
@@ -159,7 +148,7 @@ update msg wrapMsg state model =
                             model.tagEditorModel
                                 |> Maybe.map (KMEditor.Editor.TagEditor.Update.update tagMsg)
                     in
-                    ( state.seed, { model | tagEditorModel = tagEditorModel }, Cmd.none )
+                    ( appState.seed, { model | tagEditorModel = tagEditorModel }, Cmd.none )
 
                 KMEditorMsg editorMsg ->
                     let
@@ -168,25 +157,25 @@ update msg wrapMsg state model =
                                 Just editorModel ->
                                     let
                                         ( updatedSeed, updatedEditorModel, updateCmd ) =
-                                            KMEditor.Editor.KMEditor.Update.update editorMsg (wrapMsg << KMEditorMsg) state editorModel
+                                            KMEditor.Editor.KMEditor.Update.update editorMsg (wrapMsg << KMEditorMsg) appState editorModel
                                     in
                                     ( updatedSeed, Just updatedEditorModel, updateCmd )
 
                                 Nothing ->
-                                    ( state.seed, Nothing, Cmd.none )
+                                    ( appState.seed, Nothing, Cmd.none )
                     in
                     ( newSeed, { model | editorModel = newEditorModel }, cmd )
 
                 Discard ->
-                    ( state.seed
+                    ( appState.seed
                     , initialModel ""
-                    , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate state.key <| Routing.KMEditor IndexRoute ]
+                    , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate appState.key <| Routing.KMEditor IndexRoute ]
                     )
 
                 Save ->
                     let
                         ( newSeed, newModel ) =
-                            applyCurrentEditorChanges state.seed model
+                            applyCurrentEditorChanges appState.seed model
 
                         ( newModel2, cmd ) =
                             if hasKMEditorAlert newModel.editorModel then
@@ -194,8 +183,8 @@ update msg wrapMsg state model =
 
                             else
                                 ( { newModel | saving = Loading }
-                                , model.branch
-                                    |> ActionResult.map (putBranchCmd wrapMsg state.session newModel)
+                                , model.km
+                                    |> ActionResult.map (putBranchCmd wrapMsg appState newModel)
                                     |> ActionResult.withDefault Cmd.none
                                 )
                     in
@@ -204,46 +193,40 @@ update msg wrapMsg state model =
                 SaveCompleted result ->
                     case result of
                         Ok _ ->
-                            ( state.seed
+                            ( appState.seed
                             , initialModel ""
                             , Cmd.batch
                                 [ Ports.clearUnloadMessage ()
-                                , cmdNavigate state.key <| Routing.KMEditor IndexRoute
+                                , cmdNavigate appState.key <| Routing.KMEditor IndexRoute
                                 ]
                             )
 
                         Err error ->
-                            ( state.seed
-                            , { model | saving = getServerErrorJwt error "Knowledge model could not be saved" }
+                            ( appState.seed
+                            , { model | saving = getServerError error "Knowledge model could not be saved" }
                             , getResultCmd result
                             )
     in
     withSetUnloadMsgCmd updateResult
 
 
-fetchPreview : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-fetchPreview wrapMsg session model =
-    case ActionResult.combine3 model.branch model.metrics model.levels of
-        Success ( branch, _, _ ) ->
+fetchPreview : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+fetchPreview wrapMsg appState model =
+    case ActionResult.combine3 model.km model.metrics model.levels of
+        Success ( km, _, _ ) ->
             ( { model | preview = Loading }
-            , Cmd.map wrapMsg <| createPreviewRequest branch model.sessionEvents session
+            , Cmd.map wrapMsg <|
+                KnowledgeModelsApi.fetchPreview km.parentPackageId (km.events ++ model.sessionEvents) [] appState GetPreviewCompleted
             )
 
         _ ->
             ( model, Cmd.none )
 
 
-putBranchCmd : (Msg -> Msgs.Msg) -> Session -> Model -> Branch -> Cmd Msgs.Msg
-putBranchCmd wrapMsg session model branch =
-    putBranch model.branchUuid branch.name branch.kmId (branch.events ++ model.sessionEvents) session
-        |> Jwt.send SaveCompleted
-        |> Cmd.map wrapMsg
-
-
-createPreviewRequest : Branch -> List Event -> Session -> Cmd Msg
-createPreviewRequest branch sessionEvents session =
-    postForPreview branch.parentPackageId (branch.events ++ sessionEvents) [] session
-        |> Jwt.send GetPreviewCompleted
+putBranchCmd : (Msg -> Msgs.Msg) -> AppState -> Model -> KnowledgeModelDetail -> Cmd Msgs.Msg
+putBranchCmd wrapMsg appState model km =
+    Cmd.map wrapMsg <|
+        KnowledgeModelsApi.putKnowledgeModel model.kmUuid km.name km.kmId (km.events ++ model.sessionEvents) appState SaveCompleted
 
 
 applyCurrentEditorChanges : Seed -> Model -> ( Seed, Model )

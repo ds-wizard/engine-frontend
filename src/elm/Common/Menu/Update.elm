@@ -1,23 +1,22 @@
 module Common.Menu.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.BuildInfo as BuildInfoApi
+import Common.ApiError exposing (getServerError)
+import Common.AppState exposing (AppState)
 import Common.Menu.Models exposing (Model)
 import Common.Menu.Msgs exposing (Msg(..))
-import Common.Menu.Requests exposing (getBuildInfo)
-import Common.Models exposing (getServerError)
-import Http
 import Msgs
 
 
-fetchData : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
-fetchData wrapMsg =
-    getBuildInfo
-        |> Http.send GetBuildInfoCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg appState =
+    Cmd.map wrapMsg <|
+        BuildInfoApi.getBuildInfo appState GetBuildInfoCompleted
 
 
-update : (Msg -> Msgs.Msg) -> Msg -> Model -> ( Model, Cmd Msgs.Msg )
-update wrapMsg msg model =
+update : (Msg -> Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update wrapMsg msg appState model =
     case msg of
         SetReportIssueOpen open ->
             ( { model | reportIssueOpen = open }, Cmd.none )
@@ -26,7 +25,7 @@ update wrapMsg msg model =
             let
                 ( apiBuildInfo, cmd ) =
                     if open then
-                        ( Loading, fetchData wrapMsg )
+                        ( Loading, fetchData wrapMsg appState )
 
                     else
                         ( Unset, Cmd.none )
@@ -41,8 +40,8 @@ update wrapMsg msg model =
                 Err error ->
                     ( { model | apiBuildInfo = getServerError error "Cannot get build info" }, Cmd.none )
 
-        HelpMenuDropdownMsg state ->
-            ( { model | helpMenuDropdownState = state }, Cmd.none )
+        HelpMenuDropdownMsg dropdownState ->
+            ( { model | helpMenuDropdownState = dropdownState }, Cmd.none )
 
-        ProfileMenuDropdownMsg state ->
-            ( { model | profileMenuDropdownState = state }, Cmd.none )
+        ProfileMenuDropdownMsg dropdownState ->
+            ( { model | profileMenuDropdownState = dropdownState }, Cmd.none )

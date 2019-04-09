@@ -16,7 +16,7 @@ import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..),
 import KMEditor.Index.Models exposing (..)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KMPackages.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Models exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..))
 
@@ -55,29 +55,29 @@ tableConfig jwt =
           }
         ]
     , actions =
-        [ { label = TableActionIcon "fa fa-trash-o"
-          , action = TableActionMsg tableActionDelete
-          , visible = always True
-          }
-        , { label = TableActionIcon "fa fa-edit"
+        [ { label = TableActionPrimary "Open Editor"
           , action = TableActionLink (Routing.KMEditor << EditorRoute << .uuid)
           , visible = kmMatchState [ Default, Edited, Outdated ]
           }
-        , { label = TableActionText "Publish"
+        , { label = TableActionDefault "cloud-upload" "Publish"
           , action = TableActionLink (Routing.KMEditor << PublishRoute << .uuid)
           , visible = tableActionPublishVisible jwt
           }
-        , { label = TableActionText "Upgrade"
+        , { label = TableActionDefault "angle-double-up" "Upgrade"
           , action = TableActionMsg tableActionUpgrade
           , visible = tableActionUpgradeVisible jwt
           }
-        , { label = TableActionText "Continue Migration"
+        , { label = TableActionDefault "long-arrow-right" "Continue Migration"
           , action = TableActionLink (Routing.KMEditor << MigrationRoute << .uuid)
           , visible = tableActionContinueMigrationVisible jwt
           }
-        , { label = TableActionText "Cancel Migration"
+        , { label = TableActionDefault "ban" "Cancel Migration"
           , action = TableActionMsg tableActionCancelMigration
           , visible = tableActionCancelMigrationVisible jwt
+          }
+        , { label = TableActionDestructive "trash-o" "Delete"
+          , action = TableActionMsg tableActionDelete
+          , visible = always True
           }
         ]
     , sortBy = .name

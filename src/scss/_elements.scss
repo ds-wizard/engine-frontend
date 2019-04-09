@@ -1,21 +1,22 @@
-@import "~bootswatch/dist/united/variables";
+@import "~bootstrap/scss/functions";
+@import "variables";
 @import "mixins";
 
 a {
     cursor: pointer;
 
     &:not([href]):not([tabindex]) {
-        color: $primary;
+        color: $link-color;
 
         &:hover, &:active, &:focus {
             text-decoration: underline;
-            color: darken($primary, 15%);
+            color: $link-hover-color;
         }
     }
 
     &.disabled {
         text-decoration: none;
-        color: #aaa;
+        color: $gray-500;
     }
 }
 
@@ -70,20 +71,20 @@ label {
 }
 
 del, .del {
-    color: #900;
-    background: #fee;
+    color: $text-deleted-color;
+    background: $text-delete-bg;
     text-decoration: line-through;
 }
 
 ins, .ins {
-    color: #090;
-    background: #efe;
+    color: $text-inserted-color;
+    background: $text-inserted-bg;
     text-decoration: none;
 }
 
 .edited {
-    color: #990;
-    background: #ffe;
+    color: $text-edited-color;
+    background: $text-edited-bg;
 }
 
 .nav-tabs {
@@ -119,7 +120,7 @@ ins, .ins {
 }
 
 code {
-    background-color: #f9f2f4;
+    background-color: $code-block-bg;
 }
 
 .dropdown-menu-right {
@@ -128,4 +129,108 @@ code {
     left: auto !important;
     transform: none !important;
     margin-top: 35px;
+}
+
+
+.badge-value-100 {
+    background: $color-value-100;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-90 {
+    background: $color-value-90;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-80 {
+    background: $color-value-80;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-70 {
+    background: $color-value-70;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-60 {
+    background: $color-value-60;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-50 {
+    background: $color-value-50;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-40 {
+    background: $color-value-40;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-30 {
+    background: $color-value-30;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-20 {
+    background: $color-value-20;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-10 {
+    background: $color-value-10;
+    color: color-yiq($color-value-100);
+}
+
+.badge-value-0 {
+    background: $color-value-0;
+    color: color-yiq($color-value-100);
+}
+
+
+.bg-value-100 {
+    background: $color-value-100;
+}
+
+.bg-value-90 {
+    background: $color-value-90;
+}
+
+.bg-value-80 {
+    background: $color-value-80;
+}
+
+.bg-value-70 {
+    background: $color-value-70;
+}
+
+.bg-value-60 {
+    background: $color-value-60;
+}
+
+.bg-value-50 {
+    background: $color-value-50;
+}
+
+.bg-value-40 {
+    background: $color-value-40;
+}
+
+.bg-value-30 {
+    background: $color-value-30;
+}
+
+.bg-value-20 {
+    background: $color-value-20;
+    color: color-yiq($color-value-100);
+}
+
+.bg-value-10 {
+    background: $color-value-10;
+    color: color-yiq($color-value-100);
+}
+
+.bg-value-0 {
+    background: $color-value-0;
+    color: color-yiq($color-value-100);
 }

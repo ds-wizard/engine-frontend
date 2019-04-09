@@ -4,38 +4,38 @@ import Browser exposing (Document)
 import Common.Html.Attribute exposing (detailClass)
 import Common.View.Layout as Layout
 import Common.View.Page as Page
-import DSPlanner.View
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
 import KMEditor.View
-import KMPackages.View
+import KnowledgeModels.View
 import Models exposing (Model)
 import Msgs exposing (Msg(..))
 import Organization.View
 import Public.View
+import Questionnaires.View
 import Routing exposing (Route(..))
 import Users.View
 
 
 view : Model -> Document Msg
 view model =
-    case model.state.route of
+    case model.appState.route of
         Welcome ->
             Layout.app model welcomeView
 
-        DSPlanner route ->
+        Questionnaires route ->
             model.dsPlannerModel
-                |> DSPlanner.View.view route DSPlannerMsg
+                |> Questionnaires.View.view route QuestionnairesMsg model.appState
                 |> Layout.app model
 
         KMEditor route ->
             model.kmEditorModel
-                |> KMEditor.View.view route KMEditorMsg model.state.jwt
+                |> KMEditor.View.view route KMEditorMsg model.appState.jwt
                 |> Layout.app model
 
-        KMPackages route ->
+        KnowledgeModels route ->
             model.kmPackagesModel
-                |> KMPackages.View.view route KMPackagesMsg model.state.jwt
+                |> KnowledgeModels.View.view route KnowledgeModelsMsg model.appState
                 |> Layout.app model
 
         Organization ->

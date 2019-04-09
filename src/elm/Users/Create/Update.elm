@@ -1,45 +1,45 @@
 module Users.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
+import Common.Api exposing (getResultCmd)
+import Common.Api.Users as UsersApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Form exposing (Form)
-import Jwt
-import Models exposing (State)
 import Msgs
 import Random exposing (Seed, step)
-import Requests exposing (getResultCmd)
 import Routing exposing (cmdNavigate)
 import Users.Create.Models exposing (..)
 import Users.Create.Msgs exposing (Msg(..))
-import Users.Requests exposing (postUser)
 import Users.Routing exposing (Route(..))
 import Utils exposing (tuplePrepend)
 import Uuid
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> State -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg state model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg state.seed state.session model
+            handleForm formMsg wrapMsg appState.seed appState model
 
         PostUserCompleted result ->
-            postUserCompleted state model result |> tuplePrepend state.seed
+            postUserCompleted appState model result |> tuplePrepend appState.seed
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Seed -> Session -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg seed session model =
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Seed -> AppState -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+handleForm formMsg wrapMsg seed appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just userCreateForm ) ->
             let
                 ( newUuid, newSeed ) =
                     step Uuid.uuidGenerator seed
 
+                body =
+                    encodeUserCreateForm (Uuid.toString newUuid) userCreateForm
+
                 cmd =
-                    Uuid.toString newUuid
-                        |> postUserCmd session userCreateForm
-                        |> Cmd.map wrapMsg
+                    Cmd.map wrapMsg <|
+                        UsersApi.postUser body appState PostUserCompleted
             in
             ( newSeed, { model | savingUser = Loading }, cmd )
 
@@ -51,21 +51,13 @@ handleForm formMsg wrapMsg seed session model =
             ( seed, newModel, Cmd.none )
 
 
-postUserCmd : Session -> UserCreateForm -> String -> Cmd Msg
-postUserCmd session form uuid =
-    form
-        |> encodeUserCreateForm uuid
-        |> postUser session
-        |> Jwt.send PostUserCompleted
-
-
-postUserCompleted : State -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-postUserCompleted state model result =
+postUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+postUserCompleted appState model result =
     case result of
-        Ok user ->
-            ( model, cmdNavigate state.key <| Routing.Users Index )
+        Ok _ ->
+            ( model, cmdNavigate appState.key <| Routing.Users Index )
 
         Err error ->
-            ( { model | savingUser = getServerErrorJwt error "User could not be created." }
+            ( { model | savingUser = getServerError error "User could not be created." }
             , getResultCmd result
             )

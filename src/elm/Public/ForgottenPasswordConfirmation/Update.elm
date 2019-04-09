@@ -1,35 +1,37 @@
-module Public.ForgottenPasswordConfirmation.Update exposing (handleForm, handlePutUserPasswordCompleted, putUserPasswordCmd, update)
+module Public.ForgottenPasswordConfirmation.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.Users as UsersApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
-import Common.Models exposing (getServerError)
 import Form
-import Http
 import Msgs
 import Public.ForgottenPasswordConfirmation.Models exposing (..)
 import Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
-import Public.ForgottenPasswordConfirmation.Requests exposing (putUserPassword)
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg model
+            handleForm formMsg wrapMsg appState model
 
         PutPasswordCompleted result ->
             handlePutUserPasswordCompleted result model
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg model =
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just passwordForm ) ->
             let
+                body =
+                    encodePasswordForm passwordForm
+
                 cmd =
-                    passwordForm
-                        |> putUserPasswordCmd model
-                        |> Cmd.map wrapMsg
+                    Cmd.map wrapMsg <|
+                        UsersApi.putUserPasswordPublic model.userId model.hash body appState PutPasswordCompleted
             in
             ( { model | submitting = Loading }, cmd )
 
@@ -41,15 +43,7 @@ handleForm formMsg wrapMsg model =
             ( newModel, Cmd.none )
 
 
-putUserPasswordCmd : Model -> PasswordForm -> Cmd Msg
-putUserPasswordCmd { userId, hash } form =
-    form
-        |> encodePasswordForm
-        |> putUserPassword userId hash
-        |> Http.send PutPasswordCompleted
-
-
-handlePutUserPasswordCompleted : Result Http.Error String -> Model -> ( Model, Cmd Msgs.Msg )
+handlePutUserPasswordCompleted : Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
 handlePutUserPasswordCompleted result model =
     case result of
         Ok _ ->

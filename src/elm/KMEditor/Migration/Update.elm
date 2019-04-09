@@ -1,65 +1,63 @@
 module KMEditor.Migration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Models exposing (getServerErrorJwt)
-import Jwt
+import Common.Api exposing (getResultCmd)
+import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.ApiError exposing (ApiError, getServerError)
+import Common.AppState exposing (AppState)
 import KMEditor.Common.Models.Events exposing (getEventUuid)
 import KMEditor.Common.Models.Migration exposing (Migration, MigrationResolution, encodeMigrationResolution, newApplyMigrationResolution, newRejectMigrationResolution)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
-import KMEditor.Requests exposing (getMigration, postMigrationConflict)
 import Msgs
-import Requests exposing (getResultCmd)
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> Session -> Cmd Msgs.Msg
-fetchData wrapMsg uuid session =
-    getMigration uuid session
-        |> Jwt.send GetMigrationCompleted
-        |> Cmd.map wrapMsg
+fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
+fetchData wrapMsg uuid appState =
+    Cmd.map wrapMsg <|
+        KnowledgeModelsApi.getMigration uuid appState GetMigrationCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg session model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model =
     case msg of
         GetMigrationCompleted result ->
             handleGetMigrationCompleted model result
 
         ApplyEvent ->
-            handleAcceptChange wrapMsg session model
+            handleAcceptChange wrapMsg appState model
 
         RejectEvent ->
-            handleRejectChange wrapMsg session model
+            handleRejectChange wrapMsg appState model
 
         PostMigrationConflictCompleted result ->
-            handlePostMigrationConflictCompleted wrapMsg session model result
+            handlePostMigrationConflictCompleted wrapMsg appState model result
 
 
-handleGetMigrationCompleted : Model -> Result Jwt.JwtError Migration -> ( Model, Cmd Msgs.Msg )
+handleGetMigrationCompleted : Model -> Result ApiError Migration -> ( Model, Cmd Msgs.Msg )
 handleGetMigrationCompleted model result =
     case result of
         Ok migration ->
             ( { model | migration = Success migration }, Cmd.none )
 
         Err error ->
-            ( { model | migration = getServerErrorJwt error "Unable to get migration" }
+            ( { model | migration = getServerError error "Unable to get migration" }
             , getResultCmd result
             )
 
 
-handleAcceptChange : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleAcceptChange : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 handleAcceptChange =
     handleResolveChange newApplyMigrationResolution
 
 
-handleRejectChange : (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
+handleRejectChange : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 handleRejectChange =
     handleResolveChange newRejectMigrationResolution
 
 
-handleResolveChange : (String -> MigrationResolution) -> (Msg -> Msgs.Msg) -> Session -> Model -> ( Model, Cmd Msgs.Msg )
-handleResolveChange createMigrationResolution wrapMsg session model =
+handleResolveChange : (String -> MigrationResolution) -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleResolveChange createMigrationResolution wrapMsg appState model =
     let
         cmd =
             case model.migration of
@@ -67,7 +65,7 @@ handleResolveChange createMigrationResolution wrapMsg session model =
                     migration.migrationState.targetEvent
                         |> Maybe.map getEventUuid
                         |> Maybe.map createMigrationResolution
-                        |> Maybe.map (postMigrationConflictCmd wrapMsg model.branchUuid session)
+                        |> Maybe.map (postMigrationConflictCmd wrapMsg model.branchUuid appState)
                         |> Maybe.withDefault Cmd.none
 
                 _ ->
@@ -76,26 +74,27 @@ handleResolveChange createMigrationResolution wrapMsg session model =
     ( { model | conflict = Loading }, cmd )
 
 
-postMigrationConflictCmd : (Msg -> Msgs.Msg) -> String -> Session -> MigrationResolution -> Cmd Msgs.Msg
-postMigrationConflictCmd wrapMsg uuid session resolution =
-    resolution
-        |> encodeMigrationResolution
-        |> postMigrationConflict uuid session
-        |> Jwt.send PostMigrationConflictCompleted
-        |> Cmd.map wrapMsg
+postMigrationConflictCmd : (Msg -> Msgs.Msg) -> String -> AppState -> MigrationResolution -> Cmd Msgs.Msg
+postMigrationConflictCmd wrapMsg uuid appState resolution =
+    let
+        body =
+            encodeMigrationResolution resolution
+    in
+    Cmd.map wrapMsg <|
+        KnowledgeModelsApi.postMigrationConflict uuid body appState PostMigrationConflictCompleted
 
 
-handlePostMigrationConflictCompleted : (Msg -> Msgs.Msg) -> Session -> Model -> Result Jwt.JwtError String -> ( Model, Cmd Msgs.Msg )
-handlePostMigrationConflictCompleted wrapMsg session model result =
+handlePostMigrationConflictCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handlePostMigrationConflictCompleted wrapMsg appState model result =
     case result of
         Ok migration ->
             let
                 cmd =
-                    fetchData wrapMsg model.branchUuid session
+                    fetchData wrapMsg model.branchUuid appState
             in
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
         Err error ->
-            ( { model | conflict = getServerErrorJwt error "Unable to resolve conflict" }
+            ( { model | conflict = getServerError error "Unable to resolve conflict" }
             , getResultCmd result
             )

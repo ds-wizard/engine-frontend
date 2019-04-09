@@ -1,9 +1,9 @@
-$font-size-base: 0.875rem;
-
-@import "~bootswatch/dist/united/variables";
+@import "variables";
 @import "~bootstrap/scss/bootstrap";
 @import "~bootswatch/dist/united/bootswatch";
-@import "~font-awesome/css/font-awesome.css";
+
+$fa-font-path: "~font-awesome/fonts/" !default;
+@import "~font-awesome/scss/font-awesome.scss";
 
 @import "animations";
 @import "common";
@@ -14,8 +14,8 @@ $font-size-base: 0.875rem;
 @import "tables";
 
 @import "modules/Common";
-@import "modules/DSPlanner";
+@import "modules/Questionnaires";
 @import "modules/KMEditor";
-@import "modules/KMPackages";
+@import "modules/KnowledgeModels";
 @import "modules/Public";
 @import "modules/Users";

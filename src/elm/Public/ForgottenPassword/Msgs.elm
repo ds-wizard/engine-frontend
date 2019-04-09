@@ -1,9 +1,9 @@
 module Public.ForgottenPassword.Msgs exposing (Msg(..))
 
+import Common.ApiError exposing (ApiError)
 import Form
-import Http
 
 
 type Msg
     = FormMsg Form.Msg
-    | PostForgottenPasswordCompleted (Result Http.Error String)
+    | PostForgottenPasswordCompleted (Result ApiError ())

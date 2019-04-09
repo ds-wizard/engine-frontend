@@ -11,8 +11,8 @@ import Html.Events exposing (onClick)
 import String
 
 
-{-| Action button invokes a message when clicked. It's state is defined by
-the ActionResult. If the state is Loading action button is disabled and
+{-| Action button invokes a message when clicked. It's appState is defined by
+the ActionResult. If the appState is Loading action button is disabled and
 a loader is shown instead of action name.
 -}
 button : ( String, ActionResult a, msg ) -> Html msg

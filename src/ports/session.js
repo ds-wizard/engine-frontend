@@ -11,11 +11,4 @@ module.exports = function (app) {
     function clearSession() {
         localStorage.removeItem('session');
     }
-
-
-    window.addEventListener("storage", function (event) {
-        if (event.storageArea === localStorage && event.key === "session") {
-            app.ports.onSessionChange.send(event.newValue);
-        }
-    });
 };

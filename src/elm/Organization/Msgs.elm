@@ -1,11 +1,11 @@
 module Organization.Msgs exposing (Msg(..))
 
+import Common.ApiError exposing (ApiError)
 import Form
-import Jwt
 import Organization.Models exposing (Organization)
 
 
 type Msg
-    = GetCurrentOrganizationCompleted (Result Jwt.JwtError Organization)
-    | PutCurrentOrganizationCompleted (Result Jwt.JwtError String)
+    = GetCurrentOrganizationCompleted (Result ApiError Organization)
+    | PutCurrentOrganizationCompleted (Result ApiError ())
     | FormMsg Form.Msg

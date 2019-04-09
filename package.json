@@ -1,6 +1,6 @@
 {
   "name": "dsw-client",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "repository": "https://github.com/ds-wizard/dsw-client",
   "license": "Apache-2.0",
   "scripts": {
@@ -10,25 +10,28 @@
     "clean": "rm -rf elm-stuff/"
   },
   "devDependencies": {
-    "bootswatch": "^4.1.1",
+    "bootstrap": "^4.3.1",
+    "bootswatch": "^4.3.1",
+    "chart.js": "~2.7.3",
     "copy-webpack-plugin": "^4.6.0",
-    "css-loader": "^2.1.0",
+    "css-loader": "^2.1.1",
     "elm": "^0.19.0-bugfix6",
     "elm-format": "^0.8.1",
-    "elm-test": "^0.19.0-rev5",
+    "elm-test": "^0.19.0-rev6",
     "elm-webpack-loader": "^5.0.0",
     "file-loader": "^3.0.1",
     "font-awesome": "^4.7.0",
     "font-awesome-sass-loader": "^2.0.1",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.5.0",
+    "node-elm-compiler": "^5.0.3",
     "node-sass": "^4.11.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "uglify-js": "^3.4.9",
     "url-loader": "^1.1.2",
-    "webpack": "^4.29.5",
+    "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.2.1"
   }

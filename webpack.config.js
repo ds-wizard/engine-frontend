@@ -35,11 +35,11 @@ module.exports = {
             },
             {
                 test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader: 'url-loader?limit=10000&mimetype=application/font-woff'
+                loader: 'url-loader?limit=10000&mimetype=application/font-woff&name=[name].[ext]'
             },
             {
                 test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader: 'file-loader'
+                loader: 'file-loader?name=[name].[ext]'
             }
         ],
 
@@ -48,7 +48,8 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Data Stewardship Wizard'
+            title: 'Data Stewardship Wizard',
+            template: 'src/index.ejs'
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[chunkhash].css',

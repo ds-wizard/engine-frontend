@@ -8,16 +8,23 @@ import Html.Events exposing (onClick, onInput)
 import String exposing (fromInt)
 
 
+type QuestionState
+    = Default
+    | Answered
+    | Desirable
+
+
 type alias FormViewConfig msg a =
     { customActions : List ( String, msg )
     , viewExtraData : Maybe (a -> Html (Msg msg))
+    , isDesirable : Maybe (a -> Bool)
     }
 
 
 viewForm : FormViewConfig msg a -> Form a -> Html (Msg msg)
 viewForm config form =
     div [ class "form-engine-form" ]
-        (List.map (viewFormElement config []) form.elements)
+        (List.indexedMap (viewFormElement config [] [] False) form.elements)
 
 
 stateValueToString : FormElementState -> String
@@ -25,52 +32,119 @@ stateValueToString =
     .value >> Maybe.map getStringReply >> Maybe.withDefault ""
 
 
-viewFormElement : FormViewConfig msg a -> List String -> FormElement a -> Html (Msg msg)
-viewFormElement config path formItem =
+identifierToChar : Int -> String
+identifierToChar =
+    (+) 97 >> Char.fromCode >> String.fromChar
+
+
+viewFormElement : FormViewConfig msg a -> List String -> List String -> Bool -> Int -> FormElement a -> Html (Msg msg)
+viewFormElement config path humanIdentifiers ignoreFirstHumanIdentifier order formItem =
+    let
+        newHumanIdentifiers =
+            case ( ignoreFirstHumanIdentifier, order ) of
+                ( True, 0 ) ->
+                    humanIdentifiers
+
+                ( True, _ ) ->
+                    humanIdentifiers ++ [ String.fromInt order ]
+
+                ( False, _ ) ->
+                    humanIdentifiers ++ [ String.fromInt <| order + 1 ]
+    in
     case formItem of
         StringFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
+                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
-                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 ]
 
         TextFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
+                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
                 , textarea [ class "form-control", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
-                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 ]
 
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
+                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
-                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 ]
 
         ChoiceFormElement descriptor options state ->
-            div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
-                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+            div [ class "form-group form-group-choices" ]
+                [ viewLabel config descriptor (state.value /= Nothing) newHumanIdentifiers
+                , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
-                , div [] (List.map (viewChoice (path ++ [ descriptor.name ]) descriptor state) options)
+                , div [] (List.indexedMap (viewChoice (path ++ [ descriptor.name ]) descriptor state) options)
                 , viewClearAnswer (state.value /= Nothing) (path ++ [ descriptor.name ])
                 , viewAdvice state.value options
-                , viewFollowUps config (path ++ [ descriptor.name ]) state.value options
+                , viewFollowUps config (path ++ [ descriptor.name ]) newHumanIdentifiers state.value options
                 ]
 
         GroupFormElement descriptor _ items state ->
             div [ class "form-group" ]
-                [ label [] [ text descriptor.label, viewCustomActions descriptor.name config ]
-                , p [ class "form-text text-muted" ] [ text (descriptor.text |> Maybe.withDefault "") ]
+                [ viewLabel config descriptor (List.length items > 0) newHumanIdentifiers
+                , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
-                , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ])) items)
-                , button [ class "btn btn-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
+                , div [] (List.indexedMap (viewGroupItem config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
+                , button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
                 ]
+
+
+viewLabel : FormViewConfig msg a -> FormItemDescriptor a -> Bool -> List String -> Html (Msg msg)
+viewLabel config descriptor answered humanIdentifiers =
+    let
+        questionState =
+            let
+                desirable =
+                    config.isDesirable
+                        |> Maybe.andThen (\isDesirable -> Maybe.map isDesirable descriptor.extraData)
+                        |> Maybe.withDefault False
+            in
+            case ( answered, desirable ) of
+                ( True, _ ) ->
+                    Answered
+
+                ( _, True ) ->
+                    Desirable
+
+                _ ->
+                    Default
+    in
+    label []
+        [ span []
+            [ span
+                [ class "badge badge-secondary badge-human-identifier"
+                , classList
+                    [ ( "badge-secondary", questionState == Default )
+                    , ( "badge-success", questionState == Answered )
+                    , ( "badge-danger", questionState == Desirable )
+                    ]
+                ]
+                [ text <| String.join "." humanIdentifiers ]
+            , span
+                [ classList
+                    [ ( "text-success", questionState == Answered )
+                    , ( "text-danger", questionState == Desirable )
+                    ]
+                ]
+                [ text descriptor.label ]
+            ]
+        , viewCustomActions descriptor.name config
+        ]
+
+
+viewDescription : Maybe String -> Html (Msg msg)
+viewDescription descriptionText =
+    descriptionText
+        |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ text t ])
+        |> Maybe.withDefault (text "")
 
 
 viewCustomActions : String -> FormViewConfig msg a -> Html (Msg msg)
@@ -107,41 +181,61 @@ viewClearAnswer answered path =
         text ""
 
 
-viewGroupItem : FormViewConfig msg a -> List String -> Int -> ItemElement a -> Html (Msg msg)
-viewGroupItem config path index itemElement =
+viewGroupItem : FormViewConfig msg a -> List String -> List String -> Int -> ItemElement a -> Html (Msg msg)
+viewGroupItem config path humanIdentifiers index itemElement =
     let
+        newHumanIdentifiers =
+            humanIdentifiers ++ [ identifierToChar index ]
+
         deleteButton =
             button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
                 [ i [ class "fa fa-trash-o" ] [] ]
     in
-    div [ class "card bg-light item mb-5" ]
-        [ div [ class "card-body" ] <|
-            [ deleteButton ]
-                ++ List.map (viewFormElement config (path ++ [ fromInt index ])) itemElement
+    div [ class "item" ]
+        [ div [ class "card bg-light  mb-5" ]
+            [ div [ class "card-body" ] <|
+                List.indexedMap (viewFormElement config (path ++ [ fromInt index ]) newHumanIdentifiers True) itemElement
+            ]
+        , deleteButton
         ]
 
 
-viewChoice : List String -> FormItemDescriptor a -> FormElementState -> OptionElement a -> Html (Msg msg)
-viewChoice path parentDescriptor parentState optionElement =
+viewChoice : List String -> FormItemDescriptor a -> FormElementState -> Int -> OptionElement a -> Html (Msg msg)
+viewChoice path parentDescriptor parentState order optionElement =
     let
         radioName =
             String.join "." (path ++ [ parentDescriptor.name ])
 
-        viewOption title value extra =
-            div [ class "radio" ]
+        humanIndentifier =
+            identifierToChar order
+
+        viewBadge ( cssClass, title ) =
+            span [ class <| "badge " ++ cssClass ] [ text title ]
+
+        viewBadges mbBadges =
+            case mbBadges of
+                Just badges ->
+                    div [ class "badges" ] (List.map viewBadge badges)
+
+                Nothing ->
+                    text ""
+
+        viewOption title value extra badges =
+            div [ class "radio", classList [ ( "radio-selected", Just value == parentState.value ) ] ]
                 [ label []
                     [ input [ type_ "radio", name radioName, onClick (Input path value), checked (Just value == parentState.value) ] []
-                    , text title
+                    , text <| humanIndentifier ++ ". " ++ title
                     , extra
+                    , viewBadges badges
                     ]
                 ]
     in
     case optionElement of
-        SimpleOptionElement { name, label } ->
-            viewOption label (AnswerReply name) (text "")
+        SimpleOptionElement { name, label, badges } ->
+            viewOption label (AnswerReply name) (text "") badges
 
-        DetailedOptionElement { name, label } _ ->
-            viewOption label (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] [])
+        DetailedOptionElement { name, label, badges } _ ->
+            viewOption label (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] []) badges
 
 
 viewAdvice : Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)
@@ -186,10 +280,10 @@ adviceElement maybeAdvice =
             text ""
 
 
-viewFollowUps : FormViewConfig msg a -> List String -> Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)
-viewFollowUps config path value options =
+viewFollowUps : FormViewConfig msg a -> List String -> List String -> Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)
+viewFollowUps config path humanIdentifiers value options =
     let
-        isSelected option =
+        isSelected ( _, option ) =
             case ( value, option ) of
                 ( Just v, DetailedOptionElement { name } _ ) ->
                     name == getAnswerUuid v
@@ -198,12 +292,23 @@ viewFollowUps config path value options =
                     False
 
         selectedDetailedOption =
-            List.filter isSelected options |> List.head
+            options
+                |> List.indexedMap (\i o -> ( i, o ))
+                |> List.filter isSelected
+                |> List.head
     in
     case selectedDetailedOption of
-        Just (DetailedOptionElement descriptor items) ->
+        Just ( index, DetailedOptionElement descriptor items ) ->
             div [ class "followups-group" ]
-                (List.map (viewFormElement config (path ++ [ descriptor.name ])) items)
+                (List.indexedMap
+                    (viewFormElement
+                        config
+                        (path ++ [ descriptor.name ])
+                        (humanIdentifiers ++ [ identifierToChar index ])
+                        False
+                    )
+                    items
+                )
 
         _ ->
             text ""

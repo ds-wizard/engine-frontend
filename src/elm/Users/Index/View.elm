@@ -51,12 +51,12 @@ tableConfig =
           }
         ]
     , actions =
-        [ { label = TableActionIcon "fa fa-trash-o"
-          , action = TableActionMsg tableActionDelete
+        [ { label = TableActionDefault "edit" "Edit"
+          , action = TableActionLink (Routing.Users << Edit << .uuid)
           , visible = always True
           }
-        , { label = TableActionIcon "fa fa-edit"
-          , action = TableActionLink (Routing.Users << Edit << .uuid)
+        , { label = TableActionDestructive "trash-o" "Delete"
+          , action = TableActionMsg tableActionDelete
           , visible = always True
           }
         ]

@@ -8,7 +8,7 @@ import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models exposing (Branch)
+import KMEditor.Common.Models exposing (KnowledgeModelDetail)
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
 import KMEditor.Editor.KMEditor.View
 import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
@@ -21,11 +21,11 @@ import Msgs
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     Page.actionResultView (editorView wrapMsg model) <|
-        ActionResult.combine3 model.branch model.metrics model.levels
+        ActionResult.combine3 model.km model.metrics model.levels
 
 
-editorView : (Msg -> Msgs.Msg) -> Model -> ( Branch, List Metric, List Level ) -> Html Msgs.Msg
-editorView wrapMsg model ( branch, metric, levels ) =
+editorView : (Msg -> Msgs.Msg) -> Model -> ( KnowledgeModelDetail, List Metric, List Level ) -> Html Msgs.Msg
+editorView wrapMsg model ( km, metric, levels ) =
     let
         content _ =
             case model.currentEditor of
@@ -36,7 +36,7 @@ editorView wrapMsg model ( branch, metric, levels ) =
                     tagsEditorView wrapMsg model
 
                 PreviewEditor ->
-                    previewView wrapMsg model levels branch
+                    previewView wrapMsg model levels
 
                 HistoryEditor ->
                     historyView
@@ -123,8 +123,8 @@ tagsEditorView wrapMsg model =
         |> Maybe.withDefault (Page.error "Error opening tag editor")
 
 
-previewView : (Msg -> Msgs.Msg) -> Model -> List Level -> Branch -> Html Msgs.Msg
-previewView wrapMsg model levels branch =
+previewView : (Msg -> Msgs.Msg) -> Model -> List Level -> Html Msgs.Msg
+previewView wrapMsg model levels =
     model.previewEditorModel
         |> Maybe.map (KMEditor.Editor.Preview.View.view (wrapMsg << PreviewEditorMsg) levels)
         |> Maybe.withDefault (Page.error "Error opening preview")

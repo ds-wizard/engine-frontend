@@ -1,6 +1,15 @@
-@import "~bootswatch/dist/united/variables";
+@import "../../variables";
 
 .Questionnaire {
+    height: 100%;
+
+    .col {
+        height: 100%;
+        overflow: auto;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
     h3 {
         margin-top: 0;
         margin-bottom: 15px;
@@ -19,6 +28,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+
+            .chapter-number {
+                min-width: 1.5em;
+                text-align: right;
+            }
+
+            .chapter-name {
+                flex-grow: 1;
+                margin-left: 0.5em;
+                margin-right: 0.5em;
+            }
         }
     }
 
@@ -31,8 +51,12 @@
         }
     }
 
+    .form-text {
+        margin-bottom: 0;
+    }
+
     .extra-data {
-        margin-top: -10px;
+        margin-top: .25rem;
         color: $gray-600;
         line-height: 1.6;
 

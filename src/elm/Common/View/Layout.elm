@@ -5,13 +5,13 @@ import Browser exposing (Document)
 import Common.Html exposing (fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
-import DSPlanner.Routing
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMEditor.Routing
-import KMPackages.Routing
+import KnowledgeModels.Routing
 import Models exposing (Model, userLoggedIn)
 import Msgs exposing (Msg)
+import Questionnaires.Routing
 import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, questionnaireDemoRoute, signupRoute)
 import Users.Routing
 
@@ -49,13 +49,12 @@ publicHeader model =
                 , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
                 ]
     in
-    nav [ class "navbar navbar-expand-sm bg-primary fixed-top" ]
+    nav [ class "navbar navbar-expand-sm fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
                 [ linkTo homeRoute
                     [ class "navbar-brand" ]
-                    [ img [ src "/img/dsw-logo.svg" ] []
-                    , text "Data Stewardship Wizard"
+                    [ text "Data Stewardship Wizard"
                     ]
                 ]
             , ul [ class "nav navbar-nav ml-auto" ] links
@@ -67,7 +66,7 @@ app : Model -> Html Msg -> Document Msg
 app model content =
     let
         html =
-            div [ class "app-view", classList [ ( "side-navigation-collapsed", model.state.session.sidebarCollapsed ) ] ]
+            div [ class "app-view", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
                 [ menu model
                 , div [ class "page row justify-content-center" ]
                     [ content ]
@@ -82,7 +81,7 @@ app model content =
 
 menu : Model -> Html Msg
 menu model =
-    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.state.session.sidebarCollapsed ) ] ]
+    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
         [ logo model
         , ul [ class "menu" ]
             (createMenu model)
@@ -94,14 +93,8 @@ logo : Model -> Html Msg
 logo model =
     let
         logoImg =
-            if model.state.session.sidebarCollapsed then
-                img [ src "/img/dsw-logo.svg" ] []
-
-            else
-                span [ class "logo-full" ]
-                    [ img [ src "/img/dsw-logo.svg" ] []
-                    , span [] [ text "DS Wizard" ]
-                    ]
+            span [ class "logo-full" ]
+                [ span [] [ text "DS Wizard" ] ]
     in
     linkTo Welcome [ class "logo" ] [ logoImg ]
 
@@ -113,7 +106,7 @@ type MenuItem
 createMenu : Model -> List (Html Msg)
 createMenu model =
     menuItems
-        |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.state.jwt perm)
+        |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.appState.jwt perm)
         |> List.map (menuItem model)
 
 
@@ -121,8 +114,8 @@ menuItems : List MenuItem
 menuItems =
     [ MenuItem "Organization" "building" Organization Perm.organization
     , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
-    , MenuItem "Knowledge Models" "cubes" (KMPackages KMPackages.Routing.Index) Perm.packageManagementRead
-    , MenuItem "Questionnaires" "list-alt" (DSPlanner DSPlanner.Routing.Index) Perm.questionnaire
+    , MenuItem "Knowledge Models" "cubes" (KnowledgeModels KnowledgeModels.Routing.Index) Perm.packageManagementRead
+    , MenuItem "Questionnaires" "list-alt" (Questionnaires Questionnaires.Routing.Index) Perm.questionnaire
     , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.IndexRoute) Perm.knowledgeModel
     ]
 
@@ -131,7 +124,7 @@ menuItem : Model -> MenuItem -> Html Msg
 menuItem model (MenuItem label icon route perm) =
     let
         activeClass =
-            if model.state.route == route then
+            if model.appState.route == route then
                 "active"
 
             else
@@ -150,7 +143,7 @@ profileInfo : Model -> Html Msg
 profileInfo model =
     let
         name =
-            case model.state.session.user of
+            case model.appState.session.user of
                 Just user ->
                     user.name ++ " " ++ user.surname
 
@@ -158,7 +151,7 @@ profileInfo model =
                     ""
 
         collapseLink =
-            if model.state.session.sidebarCollapsed then
+            if model.appState.session.sidebarCollapsed then
                 a [ onLinkClick (Msgs.SetSidebarCollapsed False), class "collapse" ]
                     [ fa "angle-double-right" ]
 
@@ -168,6 +161,6 @@ profileInfo model =
     in
     div [ class "profile-info" ]
         [ viewHelpMenu model.menuModel.helpMenuDropdownState
-        , viewProfileMenu model.state.session.user model.menuModel.profileMenuDropdownState
+        , viewProfileMenu model.appState.session.user model.menuModel.profileMenuDropdownState
         , collapseLink
         ]
