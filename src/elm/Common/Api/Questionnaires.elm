@@ -50,5 +50,5 @@ exportQuestionnaireUrl uuid format templateUuid appState =
             appState.apiUrl ++ "/questionnaires/" ++ uuid ++ "/dmp?format=" ++ format
     in
     templateUuid
-        |> Maybe.map ((++) (url ++ "&template="))
+        |> Maybe.map ((++) (url ++ "&templateUuid="))
         |> Maybe.withDefault url
