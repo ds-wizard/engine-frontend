@@ -9,13 +9,14 @@ import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, disabled)
+import Html.Attributes exposing (class, classList, disabled, placeholder)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Entities exposing (Level, Metric, Tag)
 import KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, getCurrentTags)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
-import KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
+import KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.KMEditor.Msgs exposing (..)
+import List.Extra as List
 import Reorderable
 import String exposing (fromInt, toLower)
 
@@ -179,6 +180,15 @@ tagEditorView model editorData =
     )
 
 
+httpMethodOptions : List ( String, String )
+httpMethodOptions =
+    let
+        httpMethods =
+            [ "GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS", "PATCH" ]
+    in
+    List.zip httpMethods httpMethods
+
+
 integrationEditorView : Model -> IntegrationEditorData -> ( String, Html Msg )
 integrationEditorView model editorData =
     let
@@ -191,6 +201,23 @@ integrationEditorView model editorData =
             div []
                 [ FormGroup.input editorData.form "id" "Id"
                 , FormGroup.input editorData.form "name" "Name"
+                , FormGroup.list integrationPropsItemView editorData.form "props" "Props"
+                , div [ class "card card-border-light mb-5" ]
+                    [ div [ class "card-header" ] [ text "Request" ]
+                    , div [ class "card-body" ]
+                        [ FormGroup.select httpMethodOptions editorData.form "requestMethod" "Request Method"
+                        , FormGroup.input editorData.form "requestUrl" "Request URL"
+                        , FormGroup.list integrationHeaderItemView editorData.form "requestHeaders" "Request Headers"
+                        ]
+                    ]
+                , div [ class "card card-border-light mb-5" ]
+                    [ div [ class "card-header" ] [ text "Response" ]
+                    , div [ class "card-body" ]
+                        [ FormGroup.input editorData.form "responseListField" "Response List Field"
+                        , FormGroup.input editorData.form "responseIdField" "Response Id Field"
+                        , FormGroup.input editorData.form "responseNameField" "Response Name Field"
+                        ]
+                    ]
                 ]
     in
     ( editorData.uuid
@@ -199,6 +226,52 @@ integrationEditorView model editorData =
         , form |> Html.map (IntegrationFormMsg >> IntegrationEditorMsg >> EditorMsg)
         ]
     )
+
+
+integrationPropsItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
+integrationPropsItemView form i =
+    let
+        field =
+            Form.getFieldAsString ("props." ++ String.fromInt i) form
+
+        ( error, errorClass ) =
+            FormGroup.getErrors field "Property"
+    in
+    div [ class "input-group mb-2" ]
+        [ Input.textInput field [ class <| "form-control " ++ errorClass ]
+        , div [ class "input-group-append" ]
+            [ button [ class "btn btn-outline-warning", onClick (Form.RemoveItem "props" i) ]
+                [ fa "times" ]
+            ]
+        , error
+        ]
+
+
+integrationHeaderItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
+integrationHeaderItemView form i =
+    let
+        headerField =
+            Form.getFieldAsString ("requestHeaders." ++ String.fromInt i ++ ".header") form
+
+        valueField =
+            Form.getFieldAsString ("requestHeaders." ++ String.fromInt i ++ ".value") form
+
+        ( headerError, headerErrorClass ) =
+            FormGroup.getErrors headerField "Header name"
+
+        ( valueError, valueErrorClass ) =
+            FormGroup.getErrors valueField "Header value"
+    in
+    div [ class "input-group mb-2" ]
+        [ Input.textInput headerField [ class <| "form-control " ++ headerErrorClass, placeholder "HEADER" ]
+        , Input.textInput valueField [ class <| "form-control " ++ valueErrorClass, placeholder "value" ]
+        , div [ class "input-group-append" ]
+            [ button [ class "btn btn-outline-warning", onClick (Form.RemoveItem "requestHeaders" i) ]
+                [ fa "times" ]
+            ]
+        , headerError
+        , valueError
+        ]
 
 
 questionEditorView : Model -> QuestionEditorData -> ( String, Html Msg )

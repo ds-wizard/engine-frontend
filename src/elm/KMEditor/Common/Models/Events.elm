@@ -80,6 +80,7 @@ module KMEditor.Common.Models.Events exposing
     , mapEditReferenceEventData
     )
 
+import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
@@ -185,7 +186,7 @@ type alias AddIntegrationEventData =
     , props : List String
     , requestMethod : String
     , requestUrl : String
-    , requestHeaders : List ( String, String )
+    , requestHeaders : Dict String String
     , responseListField : String
     , responseIdField : String
     , responseNameField : String
@@ -199,7 +200,7 @@ type alias EditIntegrationEventData =
     , props : EventField (List String)
     , requestMethod : EventField String
     , requestUrl : EventField String
-    , requestHeaders : EventField (List ( String, String ))
+    , requestHeaders : EventField (Dict String String)
     , responseListField : EventField String
     , responseIdField : EventField String
     , responseNameField : EventField String
@@ -578,7 +579,7 @@ encodeAddIntegrationEvent data =
     , ( "props", Encode.list Encode.string data.props )
     , ( "requestMethod", Encode.string data.requestMethod )
     , ( "requestUrl", Encode.string data.requestUrl )
-    , ( "requestHeaders", Encode.list (encodePair Encode.string Encode.string) data.requestHeaders )
+    , ( "requestHeaders", Encode.dict identity Encode.string data.requestHeaders )
     , ( "responseListField", Encode.string data.responseListField )
     , ( "responseIdField", Encode.string data.responseIdField )
     , ( "responseNameField", Encode.string data.responseNameField )
@@ -594,7 +595,7 @@ encodeEditIntegrationEvent data =
     , ( "props", encodeEventField (Encode.list Encode.string) data.props )
     , ( "requestMethod", encodeEventField Encode.string data.requestMethod )
     , ( "requestUrl", encodeEventField Encode.string data.requestUrl )
-    , ( "requestHeaders", encodeEventField (Encode.list (encodePair Encode.string Encode.string)) data.requestHeaders )
+    , ( "requestHeaders", encodeEventField (Encode.dict identity Encode.string) data.requestHeaders )
     , ( "responseListField", encodeEventField Encode.string data.responseListField )
     , ( "responseIdField", encodeEventField Encode.string data.responseIdField )
     , ( "responseNameField", encodeEventField Encode.string data.responseNameField )
@@ -1055,7 +1056,7 @@ addIntegrationEventDecoder =
         |> required "props" (Decode.list Decode.string)
         |> required "requestMethod" Decode.string
         |> required "requestUrl" Decode.string
-        |> required "requestHeaders" (Decode.list (decodePair Decode.string Decode.string))
+        |> required "requestHeaders" (Decode.dict Decode.string)
         |> required "responseListField" Decode.string
         |> required "responseIdField" Decode.string
         |> required "responseNameField" Decode.string
@@ -1070,7 +1071,7 @@ editIntegrationEventDecoder =
         |> required "props" (eventFieldDecoder (Decode.list Decode.string))
         |> required "requestMethod" (eventFieldDecoder Decode.string)
         |> required "requestUrl" (eventFieldDecoder Decode.string)
-        |> required "requestHeaders" (eventFieldDecoder (Decode.list (decodePair Decode.string Decode.string)))
+        |> required "requestHeaders" (eventFieldDecoder (Decode.dict Decode.string))
         |> required "responseListField" (eventFieldDecoder Decode.string)
         |> required "responseIdField" (eventFieldDecoder Decode.string)
         |> required "responseNameField" (eventFieldDecoder Decode.string)

@@ -47,6 +47,7 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
 
 import Common.Form exposing (CustomFormError)
 import Common.Form.Validate exposing (validateUuid)
+import Dict
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field
@@ -72,6 +73,13 @@ type alias TagForm =
 type alias IntegrationForm =
     { id : String
     , name : String
+    , props : List String
+    , requestMethod : String
+    , requestUrl : String
+    , requestHeaders : List ( String, String )
+    , responseListField : String
+    , responseIdField : String
+    , responseNameField : String
     }
 
 
@@ -235,15 +243,47 @@ initIntegrationForm =
 
 integrationFormValidation : Validation CustomFormError IntegrationForm
 integrationFormValidation =
-    Validate.map2 IntegrationForm
+    Validate.map8 IntegrationForm
         (Validate.field "id" Validate.string)
         (Validate.field "name" Validate.string)
+        (Validate.field "props" (Validate.list Validate.string))
+        (Validate.field "requestMethod" Validate.string)
+        (Validate.field "requestUrl" Validate.string)
+        (Validate.field "requestHeaders" (Validate.list requestHeaderValidation))
+        (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
+        (Validate.field "responseIdField" Validate.string)
+        |> Validate.andMap (Validate.field "responseNameField" Validate.string)
+
+
+requestHeaderValidation : Validation CustomFormError ( String, String )
+requestHeaderValidation =
+    Validate.map2 Tuple.pair
+        (Validate.field "header" Validate.string)
+        (Validate.field "value" Validate.string)
 
 
 integrationFormInitials : Integration -> List ( String, Field.Field )
 integrationFormInitials integration =
     [ ( "id", Field.string integration.id )
     , ( "name", Field.string integration.name )
+    , ( "props", Field.list (List.map Field.string integration.props) )
+    , ( "requestMethod", Field.string integration.requestMethod )
+    , ( "requestUrl", Field.string integration.requestUrl )
+    , ( "requestHeaders"
+      , Field.list
+            (List.map
+                (\h ->
+                    Field.group
+                        [ ( "header", Field.string <| Tuple.first h )
+                        , ( "value", Field.string <| Tuple.second h )
+                        ]
+                )
+                (Dict.toList integration.requestHeaders)
+            )
+      )
+    , ( "responseListField", Field.string integration.responseListField )
+    , ( "responseIdField", Field.string integration.responseIdField )
+    , ( "responseNameField", Field.string integration.responseNameField )
     ]
 
 
@@ -252,6 +292,13 @@ updateIntegrationWithForm integration integrationForm =
     { integration
         | id = integrationForm.id
         , name = integrationForm.name
+        , props = integrationForm.props
+        , requestMethod = integrationForm.requestMethod
+        , requestUrl = integrationForm.requestUrl
+        , requestHeaders = Dict.fromList integrationForm.requestHeaders
+        , responseListField = integrationForm.responseListField
+        , responseIdField = integrationForm.responseIdField
+        , responseNameField = integrationForm.responseNameField
     }
 
 

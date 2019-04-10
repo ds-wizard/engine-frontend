@@ -107,7 +107,7 @@ type alias Integration =
     , props : List String
     , requestMethod : String
     , requestUrl : String
-    , requestHeaders : List ( String, String )
+    , requestHeaders : Dict String String
     , responseListField : String
     , responseIdField : String
     , responseNameField : String
@@ -280,7 +280,7 @@ integrationDecoder =
         |> required "props" (Decode.list Decode.string)
         |> required "requestMethod" Decode.string
         |> required "requestUrl" Decode.string
-        |> required "requestHeaders" (Decode.list (decodePair Decode.string Decode.string))
+        |> required "requestHeaders" (Decode.dict Decode.string)
         |> required "responseListField" Decode.string
         |> required "responseIdField" Decode.string
         |> required "responseNameField" Decode.string
@@ -514,7 +514,7 @@ newIntegration uuid =
     , props = []
     , requestMethod = "GET"
     , requestUrl = "/"
-    , requestHeaders = []
+    , requestHeaders = Dict.empty
     , responseListField = ""
     , responseIdField = "id"
     , responseNameField = "name"

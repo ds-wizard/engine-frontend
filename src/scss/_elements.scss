@@ -117,6 +117,10 @@ ins, .ins {
 
 .invalid-feedback {
     font-size: 100%;
+
+    & + .invalid-feedback {
+        margin-top: -1rem;
+    }
 }
 
 code {

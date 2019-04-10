@@ -657,7 +657,7 @@ isEditorDirty editor =
             isTagEditorDirty data
 
         IntegrationEditor data ->
-            data.editorState == Deleted
+            isIntegrationEditorDirty data
 
         QuestionEditor data ->
             isQuestionEditorDirty data

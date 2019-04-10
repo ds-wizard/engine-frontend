@@ -24,6 +24,7 @@ module KMEditor.Common.Models.EventsTest exposing
     , eventFieldTest
     )
 
+import Dict
 import Expect exposing (Expectation)
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -418,7 +419,7 @@ addIntegrationEvent =
         , props = [ "kind", "category" ]
         , requestMethod = "GET"
         , requestUrl = "/api/search"
-        , requestHeaders = [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
+        , requestHeaders = Dict.fromList [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
         , responseListField = "items"
         , responseIdField = "uuid"
         , responseNameField = "title"
@@ -468,7 +469,7 @@ editIntegrationEvent =
             }
         , requestHeaders =
             { changed = True
-            , value = Just [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
+            , value = Just <| Dict.fromList [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
             }
         , responseListField =
             { changed = False

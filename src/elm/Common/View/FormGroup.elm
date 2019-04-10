@@ -2,7 +2,9 @@ module Common.View.FormGroup exposing
     ( codeView
     , color
     , formGroup
+    , getErrors
     , input
+    , list
     , password
     , select
     , textView
@@ -16,7 +18,7 @@ import Form exposing (Form, InputType(..), Msg(..))
 import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
-import Html exposing (Html, a, code, div, label, p, span, text)
+import Html exposing (Html, a, button, code, div, label, p, span, text)
 import Html.Attributes exposing (class, classList, for, id, name, style)
 import Html.Events exposing (onClick)
 import String exposing (fromFloat)
@@ -131,6 +133,17 @@ colorButton maybeValue fieldName colorHex =
         , classList [ ( "selected", isSelected ) ]
         ]
         [ check ]
+
+
+list : (Form CustomFormError o -> Int -> Html Form.Msg) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+list itemView form fieldName labelText =
+    div [ class "form-group" ]
+        [ label [] [ text labelText ]
+        , div []
+            (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
+            [ text "Add" ]
+        ]
 
 
 {-| Create Html for a form field using the given input field.

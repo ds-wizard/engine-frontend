@@ -23,6 +23,7 @@ module KMEditor.Editor.KMEditor.Update.Events exposing
     , createEditTagEvent
     )
 
+import Dict
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (Path)
@@ -124,15 +125,13 @@ createAddIntegrationEvent form editorData =
             { integrationUuid = editorData.integration.uuid
             , id = form.id
             , name = form.name
-
-            -- TODO
-            , props = []
-            , requestMethod = "GET"
-            , requestUrl = "/"
-            , requestHeaders = []
-            , responseListField = ""
-            , responseIdField = ""
-            , responseNameField = ""
+            , props = form.props
+            , requestMethod = form.requestMethod
+            , requestUrl = form.requestUrl
+            , requestHeaders = Dict.fromList form.requestHeaders
+            , responseListField = form.responseListField
+            , responseIdField = form.responseIdField
+            , responseNameField = form.responseNameField
             }
     in
     createEvent (AddIntegrationEvent data) editorData.path
@@ -141,19 +140,20 @@ createAddIntegrationEvent form editorData =
 createEditIntegrationEvent : IntegrationForm -> IntegrationEditorData -> Seed -> ( Event, Seed )
 createEditIntegrationEvent form editorData =
     let
+        requestHeaders =
+            Dict.fromList form.requestHeaders
+
         data =
             { integrationUuid = editorData.integration.uuid
             , id = createEventField form.id (editorData.integration.id /= form.id)
             , name = createEventField form.name (editorData.integration.name /= form.name)
-
-            -- TODO
-            , props = createEventField [] (editorData.integration.props /= [])
-            , requestMethod = createEventField "GET" (editorData.integration.requestMethod /= "GET")
-            , requestUrl = createEventField "/" (editorData.integration.requestUrl /= "/")
-            , requestHeaders = createEventField [] (editorData.integration.requestHeaders /= [])
-            , responseListField = createEventField "" (editorData.integration.responseListField /= "")
-            , responseIdField = createEventField "" (editorData.integration.responseIdField /= "")
-            , responseNameField = createEventField "" (editorData.integration.responseNameField /= "")
+            , props = createEventField form.props (editorData.integration.props /= form.props)
+            , requestMethod = createEventField form.requestMethod (editorData.integration.requestMethod /= form.requestMethod)
+            , requestUrl = createEventField form.requestUrl (editorData.integration.requestUrl /= form.requestUrl)
+            , requestHeaders = createEventField requestHeaders (editorData.integration.requestHeaders /= requestHeaders)
+            , responseListField = createEventField form.responseListField (editorData.integration.responseListField /= form.responseListField)
+            , responseIdField = createEventField form.responseIdField (editorData.integration.responseIdField /= form.responseIdField)
+            , responseNameField = createEventField form.responseNameField (editorData.integration.responseNameField /= form.responseNameField)
             }
     in
     createEvent (EditIntegrationEvent data) editorData.path

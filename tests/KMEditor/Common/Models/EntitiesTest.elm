@@ -13,6 +13,7 @@ module KMEditor.Common.Models.EntitiesTest exposing
     , tagDecoderTest
     )
 
+import Dict
 import KMEditor.Common.Models.Entities exposing (..)
 import Test exposing (..)
 import TestUtils exposing (expectDecoder, parametrized)
@@ -129,7 +130,7 @@ knowledgeModelDecoderTest =
                                 "props": ["kind", "category"],
                                 "requestMethod": "GET",
                                 "requestUrl": "/",
-                                "requestHeaders": [["X_USER", "user"]],
+                                "requestHeaders": {"X_USER": "user"},
                                 "responseListField": "items",
                                 "responseIdField": "id",
                                 "responseNameField": "title"
@@ -149,7 +150,7 @@ knowledgeModelDecoderTest =
                               , props = [ "kind", "category" ]
                               , requestMethod = "GET"
                               , requestUrl = "/"
-                              , requestHeaders = [ ( "X_USER", "user" ) ]
+                              , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
                               , responseListField = "items"
                               , responseIdField = "id"
                               , responseNameField = "title"
@@ -203,7 +204,7 @@ integrationDecoderTest =
                             "props": ["kind", "category"],
                             "requestMethod": "GET",
                             "requestUrl": "/",
-                            "requestHeaders": [["X_USER", "user"]],
+                            "requestHeaders": {"X_USER": "user"},
                             "responseListField": "",
                             "responseIdField": "id",
                             "responseNameField": "title"
@@ -217,7 +218,7 @@ integrationDecoderTest =
                         , props = [ "kind", "category" ]
                         , requestMethod = "GET"
                         , requestUrl = "/"
-                        , requestHeaders = [ ( "X_USER", "user" ) ]
+                        , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
                         , responseListField = ""
                         , responseIdField = "id"
                         , responseNameField = "title"
