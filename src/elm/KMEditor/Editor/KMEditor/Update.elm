@@ -9,6 +9,7 @@ import KMEditor.Editor.KMEditor.Update.Abstract exposing (updateEditor)
 import KMEditor.Editor.KMEditor.Update.Answer exposing (..)
 import KMEditor.Editor.KMEditor.Update.Chapter exposing (..)
 import KMEditor.Editor.KMEditor.Update.Expert exposing (..)
+import KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
 import KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing (..)
 import KMEditor.Editor.KMEditor.Update.Question exposing (..)
 import KMEditor.Editor.KMEditor.Update.Reference exposing (..)
@@ -48,6 +49,10 @@ update msg wrapMsg appState model =
                         TagEditor data ->
                             setActiveEditor wrapMsg uuid
                                 |> withGenerateTagEditEvent appState.seed model data
+
+                        IntegrationEditor data ->
+                            setActiveEditor wrapMsg uuid
+                                |> withGenerateIntegrationEditEvent appState.seed model data
 
                         ChapterEditor data ->
                             setActiveEditor wrapMsg uuid
@@ -101,6 +106,16 @@ update msg wrapMsg appState model =
                             addTag (scrollTopCmd wrapMsg)
                                 |> withGenerateKMEditEvent appState.seed model editorData
 
+                        ReorderIntegrations integrationList ->
+                            model
+                                |> insertEditor (KMEditor { editorData | integrations = Children.updateList integrationList editorData.tags })
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        AddIntegration ->
+                            addIntegration (scrollTopCmd wrapMsg)
+                                |> withGenerateKMEditEvent appState.seed model editorData
+
                 ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
                     case chapterEditorMsg of
                         ChapterFormMsg formMsg ->
@@ -131,6 +146,17 @@ update msg wrapMsg appState model =
 
                         DeleteTag uuid ->
                             deleteTag appState.seed model uuid editorData
+                                |> withNoCmd
+
+                ( IntegrationEditorMsg integrationEditorMsg, Just (IntegrationEditor editorData) ) ->
+                    case integrationEditorMsg of
+                        IntegrationFormMsg formMsg ->
+                            updateIntegrationForm model formMsg editorData
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        DeleteIntegration uuid ->
+                            deleteIntegration appState.seed model uuid editorData
                                 |> withNoCmd
 
                 ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
@@ -258,6 +284,9 @@ generateEvents seed model =
 
                 TagEditor data ->
                     withGenerateTagEditEvent seed model data updateModel
+
+                IntegrationEditor data ->
+                    withGenerateIntegrationEditEvent seed model data updateModel
 
                 ChapterEditor data ->
                     withGenerateChapterEditEvent seed model data updateModel

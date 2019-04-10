@@ -2,6 +2,7 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     ( AnswerForm
     , ChapterForm
     , ExpertForm
+    , IntegrationForm
     , KnowledgeModelForm
     , MetricMeasureForm
     , QuestionForm
@@ -18,10 +19,12 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , initChapterForm
     , initExpertForm
     , initForm
+    , initIntegrationForm
     , initKnowledgeModelFrom
     , initQuestionForm
     , initReferenceForm
     , initTagForm
+    , integrationFormValidation
     , isListQuestionForm
     , isOptionsQuestionForm
     , knowledgeModelFormValidation
@@ -35,6 +38,7 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , updateAnswerWithForm
     , updateChapterWithForm
     , updateExpertWithForm
+    , updateIntegrationWithForm
     , updateKnowledgeModelWithForm
     , updateQuestionWithForm
     , updateReferenceWithForm
@@ -62,6 +66,12 @@ type alias TagForm =
     { name : String
     , description : Maybe String
     , color : String
+    }
+
+
+type alias IntegrationForm =
+    { id : String
+    , name : String
     }
 
 
@@ -211,6 +221,37 @@ updateTagWithForm tag tagForm =
         | name = tagForm.name
         , description = tagForm.description
         , color = tagForm.color
+    }
+
+
+
+{- Integration -}
+
+
+initIntegrationForm : Integration -> Form CustomFormError IntegrationForm
+initIntegrationForm =
+    integrationFormInitials >> initForm integrationFormValidation
+
+
+integrationFormValidation : Validation CustomFormError IntegrationForm
+integrationFormValidation =
+    Validate.map2 IntegrationForm
+        (Validate.field "id" Validate.string)
+        (Validate.field "name" Validate.string)
+
+
+integrationFormInitials : Integration -> List ( String, Field.Field )
+integrationFormInitials integration =
+    [ ( "id", Field.string integration.id )
+    , ( "name", Field.string integration.name )
+    ]
+
+
+updateIntegrationWithForm : Integration -> IntegrationForm -> Integration
+updateIntegrationWithForm integration integrationForm =
+    { integration
+        | id = integrationForm.id
+        , name = integrationForm.name
     }
 
 

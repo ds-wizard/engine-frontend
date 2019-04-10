@@ -2,18 +2,21 @@ module KMEditor.Editor.KMEditor.Update.Events exposing
     ( createAddAnswerEvent
     , createAddChapterEvent
     , createAddExpertEvent
+    , createAddIntegrationEvent
     , createAddQuestionEvent
     , createAddReferenceEvent
     , createAddTagEvent
     , createDeleteAnswerEvent
     , createDeleteChapterEvent
     , createDeleteExpertEvent
+    , createDeleteIntegrationEvent
     , createDeleteQuestionEvent
     , createDeleteReferenceEvent
     , createDeleteTagEvent
     , createEditAnswerEvent
     , createEditChapterEvent
     , createEditExpertEvent
+    , createEditIntegrationEvent
     , createEditKnowledgeModelEvent
     , createEditQuestionEvent
     , createEditReferenceEvent
@@ -37,6 +40,7 @@ createEditKnowledgeModelEvent form editorData =
             , name = createEventField form.name (editorData.knowledgeModel.name /= form.name)
             , chapterUuids = createEventField editorData.chapters.list editorData.chapters.dirty
             , tagUuids = createEventField editorData.tags.list editorData.tags.dirty
+            , integrationUuids = createEventField editorData.integrations.list editorData.integrations.dirty
             }
     in
     createEvent (EditKnowledgeModelEvent data) editorData.path
@@ -111,6 +115,58 @@ createDeleteTagEvent tagUuid =
             }
     in
     createEvent (DeleteTagEvent data)
+
+
+createAddIntegrationEvent : IntegrationForm -> IntegrationEditorData -> Seed -> ( Event, Seed )
+createAddIntegrationEvent form editorData =
+    let
+        data =
+            { integrationUuid = editorData.integration.uuid
+            , id = form.id
+            , name = form.name
+
+            -- TODO
+            , props = []
+            , requestMethod = "GET"
+            , requestUrl = "/"
+            , requestHeaders = []
+            , responseListField = ""
+            , responseIdField = ""
+            , responseNameField = ""
+            }
+    in
+    createEvent (AddIntegrationEvent data) editorData.path
+
+
+createEditIntegrationEvent : IntegrationForm -> IntegrationEditorData -> Seed -> ( Event, Seed )
+createEditIntegrationEvent form editorData =
+    let
+        data =
+            { integrationUuid = editorData.integration.uuid
+            , id = createEventField form.id (editorData.integration.id /= form.id)
+            , name = createEventField form.name (editorData.integration.name /= form.name)
+
+            -- TODO
+            , props = createEventField [] (editorData.integration.props /= [])
+            , requestMethod = createEventField "GET" (editorData.integration.requestMethod /= "GET")
+            , requestUrl = createEventField "/" (editorData.integration.requestUrl /= "/")
+            , requestHeaders = createEventField [] (editorData.integration.requestHeaders /= [])
+            , responseListField = createEventField "" (editorData.integration.responseListField /= "")
+            , responseIdField = createEventField "" (editorData.integration.responseIdField /= "")
+            , responseNameField = createEventField "" (editorData.integration.responseNameField /= "")
+            }
+    in
+    createEvent (EditIntegrationEvent data) editorData.path
+
+
+createDeleteIntegrationEvent : String -> Path -> Seed -> ( Event, Seed )
+createDeleteIntegrationEvent integrationUuid =
+    let
+        data =
+            { integrationUuid = integrationUuid
+            }
+    in
+    createEvent (DeleteIntegrationEvent data)
 
 
 createAddQuestionEvent : QuestionForm -> QuestionEditorData -> Seed -> ( Event, Seed )

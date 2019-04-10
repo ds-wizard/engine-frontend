@@ -133,6 +133,7 @@ type alias EditKnowledgeModelEventData =
     , name : EventField String
     , chapterUuids : EventField (List String)
     , tagUuids : EventField (List String)
+    , integrationUuids : EventField (List String)
     }
 
 
@@ -511,6 +512,7 @@ encodeEditKnowledgeModelEvent data =
     , ( "name", encodeEventField Encode.string data.name )
     , ( "chapterUuids", encodeEventField (Encode.list Encode.string) data.chapterUuids )
     , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
+    , ( "integrationUuids", encodeEventField (Encode.list Encode.string) data.integrationUuids )
     ]
 
 
@@ -994,6 +996,7 @@ editKnowledgeModelEventDecoder =
         |> required "name" (eventFieldDecoder Decode.string)
         |> required "chapterUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "integrationUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 addChapterEventDecoder : Decoder AddChapterEventData

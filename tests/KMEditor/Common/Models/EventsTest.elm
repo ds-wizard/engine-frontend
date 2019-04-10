@@ -118,6 +118,10 @@ editKnowledgeModelEvent =
             { changed = False
             , value = Nothing
             }
+        , integrationUuids =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
         , path = []
@@ -148,6 +152,10 @@ editKnowledgeModelEventTest =
                                 , value = Nothing
                                 }
                             , tagUuids =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , integrationUuids =
                                 { changed = False
                                 , value = Nothing
                                 }

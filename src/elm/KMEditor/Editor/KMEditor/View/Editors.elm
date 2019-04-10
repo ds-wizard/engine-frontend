@@ -31,6 +31,9 @@ activeEditor model =
                 TagEditor data ->
                     tagEditorView model data
 
+                IntegrationEditor data ->
+                    integrationEditorView model data
+
                 ChapterEditor data ->
                     chapterEditorView model data
 
@@ -92,6 +95,17 @@ kmEditorView model editorData =
             , viewMsg = SetActiveEditor
             }
 
+        integrationsConfig =
+            { childName = "Integration"
+            , reorderableState = model.reorderableState
+            , children = editorData.integrations.list |> List.filter (editorNotDeleted model.editors)
+            , reorderMsg = ReorderIntegrations >> KMEditorMsg >> EditorMsg
+            , addMsg = AddIntegration |> KMEditorMsg |> EditorMsg
+            , toId = identity
+            , getName = getChildName model.editors
+            , viewMsg = SetActiveEditor
+            }
+
         form =
             div []
                 [ FormGroup.input editorData.form "name" "Name"
@@ -103,6 +117,7 @@ kmEditorView model editorData =
         , form |> Html.map (KMEditorFormMsg >> KMEditorMsg >> EditorMsg)
         , inputChildren chaptersConfig
         , inputChildren tagsConfig
+        , inputChildren integrationsConfig
         ]
     )
 
@@ -160,6 +175,28 @@ tagEditorView model editorData =
     , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
+        ]
+    )
+
+
+integrationEditorView : Model -> IntegrationEditorData -> ( String, Html Msg )
+integrationEditorView model editorData =
+    let
+        editorTitleConfig =
+            { title = "Integration"
+            , deleteAction = DeleteIntegration editorData.uuid |> IntegrationEditorMsg |> EditorMsg |> Just
+            }
+
+        form =
+            div []
+                [ FormGroup.input editorData.form "id" "Id"
+                , FormGroup.input editorData.form "name" "Name"
+                ]
+    in
+    ( editorData.uuid
+    , div [ class editorClass ]
+        [ editorTitle editorTitleConfig
+        , form |> Html.map (IntegrationFormMsg >> IntegrationEditorMsg >> EditorMsg)
         ]
     )
 
