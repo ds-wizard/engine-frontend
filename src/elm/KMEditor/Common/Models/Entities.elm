@@ -80,7 +80,6 @@ import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import List.Extra as List
-import Utils exposing (decodePair)
 
 
 type alias KnowledgeModel =
@@ -509,7 +508,7 @@ newTag uuid =
 newIntegration : String -> Integration
 newIntegration uuid =
     { uuid = uuid
-    , id = "new-integration"
+    , id = ""
     , name = "New Integration"
     , props = []
     , requestMethod = "GET"

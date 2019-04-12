@@ -88,7 +88,6 @@ import Json.Encode.Extra exposing (maybe)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Path exposing (..)
 import List.Extra as List
-import Utils exposing (decodePair, encodePair)
 
 
 type Event

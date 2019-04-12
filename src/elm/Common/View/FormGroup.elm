@@ -236,5 +236,8 @@ toReadable error labelText =
                 ServerValidationError msg ->
                     msg
 
+                NotUnique ->
+                    "This value is already used"
+
         _ ->
             "Invalid value"

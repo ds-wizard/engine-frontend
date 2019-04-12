@@ -1,7 +1,7 @@
 module KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, removeIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
 
 import Form
-import KMEditor.Editor.KMEditor.Models exposing (Model)
+import KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
 import KMEditor.Editor.KMEditor.Models.Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), IntegrationEditorData, KMEditorData, isIntegrationEditorDirty, updateIntegrationEditorData)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (integrationFormValidation)
@@ -12,11 +12,14 @@ import Random exposing (Seed)
 
 
 updateIntegrationForm : Model -> Form.Msg -> IntegrationEditorData -> Model
-updateIntegrationForm =
+updateIntegrationForm model formMsg editorData =
     updateForm
-        { formValidation = integrationFormValidation
+        { formValidation = integrationFormValidation (getCurrentIntegrations model) editorData.uuid
         , createEditor = IntegrationEditor
         }
+        model
+        formMsg
+        editorData
 
 
 withGenerateIntegrationEditEvent :
@@ -25,10 +28,10 @@ withGenerateIntegrationEditEvent :
     -> IntegrationEditorData
     -> (Seed -> Model -> IntegrationEditorData -> ( Seed, Model, Cmd Msgs.Msg ))
     -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateIntegrationEditEvent =
+withGenerateIntegrationEditEvent seed model editorData =
     withGenerateEvent
         { isDirty = isIntegrationEditorDirty
-        , formValidation = integrationFormValidation
+        , formValidation = integrationFormValidation (getCurrentIntegrations model) editorData.uuid
         , createEditor = IntegrationEditor
         , alert = "Please fix the integration errors first"
         , createAddEvent = createAddIntegrationEvent
@@ -36,6 +39,9 @@ withGenerateIntegrationEditEvent =
         , updateEditorData = updateIntegrationEditorData
         , updateEditors = Nothing
         }
+        seed
+        model
+        editorData
 
 
 deleteIntegration : Seed -> Model -> String -> IntegrationEditorData -> ( Seed, Model )

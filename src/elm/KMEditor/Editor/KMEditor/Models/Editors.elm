@@ -272,7 +272,7 @@ createIntegrationEditor editorContext path getEditorState integration editors =
             IntegrationEditor
                 { uuid = integration.uuid
                 , integration = integration
-                , form = initIntegrationForm integration
+                , form = initIntegrationForm [] "" integration
                 , treeOpen = False
                 , editorState = getEditorState integration.uuid
                 , path = path
@@ -780,7 +780,7 @@ updateIntegrationEditorData editorContext newState form editorData =
     { editorData
         | editorState = getNewState editorData.editorState newState
         , integration = newIntegration
-        , form = initIntegrationForm newIntegration
+        , form = initIntegrationForm [] "" newIntegration
     }
 
 

@@ -2,6 +2,7 @@ module KMEditor.Editor.KMEditor.Models exposing
     ( Model
     , containsChanges
     , getActiveEditor
+    , getCurrentIntegrations
     , getCurrentTags
     , getEditorContext
     , getKMEditor
@@ -11,7 +12,7 @@ module KMEditor.Editor.KMEditor.Models exposing
     )
 
 import Dict exposing (Dict)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, Tag)
+import KMEditor.Common.Models.Entities exposing (Integration, KnowledgeModel, Level, Metric, Tag)
 import KMEditor.Common.Models.Events exposing (Event(..), getEventEntityUuid)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
@@ -177,15 +178,32 @@ getKMEditor model =
 getCurrentTags : Model -> List Tag
 getCurrentTags model =
     getKMEditor model
-        |> Maybe.map (getTagEditorsUuids model >> getTags model)
+        |> Maybe.map (getTagEditorsUuids >> getTags model)
         |> Maybe.withDefault []
 
 
-getTagEditorsUuids : Model -> Editor -> List String
-getTagEditorsUuids model editor =
+getCurrentIntegrations : Model -> List Integration
+getCurrentIntegrations model =
+    getKMEditor model
+        |> Maybe.map (getIntegrationEditorsUuids >> getIntegrations model)
+        |> Maybe.withDefault []
+
+
+getTagEditorsUuids : Editor -> List String
+getTagEditorsUuids editor =
     case editor of
         KMEditor kmEditorData ->
             kmEditorData.tags.list
+
+        _ ->
+            []
+
+
+getIntegrationEditorsUuids : Editor -> List String
+getIntegrationEditorsUuids editor =
+    case editor of
+        KMEditor kmEditorData ->
+            kmEditorData.integrations.list
 
         _ ->
             []
@@ -197,6 +215,12 @@ getTags model uuids =
         |> listFilterJust
 
 
+getIntegrations : Model -> List String -> List Integration
+getIntegrations model uuids =
+    List.map (getIntegrationByIntegrationEditorUuid model) uuids
+        |> listFilterJust
+
+
 getTagByTagEditorUuid : Model -> String -> Maybe Tag
 getTagByTagEditorUuid model uuid =
     Dict.get uuid model.editors
@@ -205,6 +229,21 @@ getTagByTagEditorUuid model uuid =
                 case t of
                     TagEditor tagEditorData ->
                         Just tagEditorData.tag
+
+                    _ ->
+                        Nothing
+            )
+        |> Maybe.withDefault Nothing
+
+
+getIntegrationByIntegrationEditorUuid : Model -> String -> Maybe Integration
+getIntegrationByIntegrationEditorUuid model uuid =
+    Dict.get uuid model.editors
+        |> Maybe.map
+            (\t ->
+                case t of
+                    IntegrationEditor integrationEditorData ->
+                        Just integrationEditorData.integration
 
                     _ ->
                         Nothing

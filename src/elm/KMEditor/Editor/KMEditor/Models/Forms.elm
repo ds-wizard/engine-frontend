@@ -45,7 +45,7 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , updateTagWithForm
     )
 
-import Common.Form exposing (CustomFormError)
+import Common.Form exposing (CustomFormError(..))
 import Common.Form.Validate exposing (validateUuid)
 import Dict
 import Form exposing (Form)
@@ -236,15 +236,15 @@ updateTagWithForm tag tagForm =
 {- Integration -}
 
 
-initIntegrationForm : Integration -> Form CustomFormError IntegrationForm
-initIntegrationForm =
-    integrationFormInitials >> initForm integrationFormValidation
+initIntegrationForm : List Integration -> String -> Integration -> Form CustomFormError IntegrationForm
+initIntegrationForm integrations uuid =
+    integrationFormInitials >> initForm (integrationFormValidation integrations uuid)
 
 
-integrationFormValidation : Validation CustomFormError IntegrationForm
-integrationFormValidation =
+integrationFormValidation : List Integration -> String -> Validation CustomFormError IntegrationForm
+integrationFormValidation integrations uuid =
     Validate.map8 IntegrationForm
-        (Validate.field "id" Validate.string)
+        (Validate.field "id" (validateIntegrationId integrations uuid))
         (Validate.field "name" Validate.string)
         (Validate.field "props" (Validate.list Validate.string))
         (Validate.field "requestMethod" Validate.string)
@@ -253,6 +253,24 @@ integrationFormValidation =
         (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
         (Validate.field "responseIdField" Validate.string)
         |> Validate.andMap (Validate.field "responseNameField" Validate.string)
+
+
+validateIntegrationId : List Integration -> String -> Validation CustomFormError String
+validateIntegrationId integrations uuid =
+    let
+        existingUuids =
+            List.filter (.uuid >> (/=) uuid) integrations
+                |> List.map .id
+    in
+    Validate.string
+        |> Validate.andThen
+            (\s v ->
+                if List.member s existingUuids then
+                    Err <| Error.value (CustomError NotUnique)
+
+                else
+                    Ok s
+            )
 
 
 requestHeaderValidation : Validation CustomFormError ( String, String )

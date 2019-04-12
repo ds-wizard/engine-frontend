@@ -12,6 +12,7 @@ type CustomFormError
     = ConfirmationError
     | InvalidUuid
     | ServerValidationError String
+    | NotUnique
 
 
 setFormErrors : ApiError -> Form CustomFormError a -> Form CustomFormError a

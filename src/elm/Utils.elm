@@ -1,8 +1,6 @@
 module Utils exposing
     ( boolToInt
-    , decodePair
     , dispatch
-    , encodePair
     , getContrastColorHex
     , getUuid
     , listFilterJust
@@ -37,16 +35,6 @@ pair a b =
 tuplePrepend : a -> ( b, c ) -> ( a, b, c )
 tuplePrepend a ( b, c ) =
     ( a, b, c )
-
-
-decodePair : Decoder a -> Decoder b -> Decoder ( a, b )
-decodePair decoderA decoderB =
-    Decode.map2 Tuple.pair (Decode.index 0 decoderA) (Decode.index 1 decoderB)
-
-
-encodePair : (a -> Encode.Value) -> (b -> Encode.Value) -> ( a, b ) -> Encode.Value
-encodePair encoderA encoderB ( valueA, valueB ) =
-    Encode.list identity [ encoderA valueA, encoderB valueB ]
 
 
 validateRegex : String -> Validation e String
