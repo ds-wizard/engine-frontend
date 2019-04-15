@@ -137,10 +137,17 @@ colorButton maybeValue fieldName colorHex =
 
 list : (Form CustomFormError o -> Int -> Html Form.Msg) -> Form CustomFormError o -> String -> String -> Html Form.Msg
 list itemView form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, errorClass ) =
+            getErrors field labelText
+    in
     div [ class "form-group" ]
         [ label [] [ text labelText ]
-        , div []
-            (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , div [ class "form-list-error" ] [ error ]
         , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
             [ text "Add" ]
         ]
@@ -236,8 +243,8 @@ toReadable error labelText =
                 ServerValidationError msg ->
                     msg
 
-                NotUnique ->
-                    "This value is already used"
+                Error msg ->
+                    msg
 
         _ ->
             "Invalid value"

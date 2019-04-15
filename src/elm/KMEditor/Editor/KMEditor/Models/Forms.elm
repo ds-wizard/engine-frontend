@@ -254,7 +254,7 @@ integrationFormValidation integrations uuid =
     Validate.map8 IntegrationForm
         (Validate.field "id" (validateIntegrationId integrations uuid))
         (Validate.field "name" Validate.string)
-        (Validate.field "props" (Validate.list Validate.string))
+        (Validate.field "props" validateProps)
         (Validate.field "requestMethod" Validate.string)
         (Validate.field "requestUrl" Validate.string)
         (Validate.field "requestHeaders" (Validate.list requestHeaderValidation))
@@ -274,10 +274,23 @@ validateIntegrationId integrations uuid =
         |> Validate.andThen
             (\s v ->
                 if List.member s existingUuids then
-                    Err <| Error.value (CustomError NotUnique)
+                    Err <| Error.value (CustomError <| Error "This integration ID is already used for different integration")
 
                 else
                     Ok s
+            )
+
+
+validateProps : Validation CustomFormError (List String)
+validateProps =
+    Validate.list Validate.string
+        |> Validate.andThen
+            (\l v ->
+                if List.allDifferent l then
+                    Ok l
+
+                else
+                    Err <| Error.value (CustomError <| Error "Prop names have to be unique")
             )
 
 
