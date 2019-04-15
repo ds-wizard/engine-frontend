@@ -202,6 +202,15 @@ createAddQuestionEvent form editorData =
                         , tagUuids = editorData.tagUuids
                         , valueType = formData.valueType
                         }
+
+                IntegrationQuestionForm formData ->
+                    AddIntegrationQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = formData.title
+                        , text = formData.text
+                        , requiredLevel = formData.requiredLevel
+                        , tagUuids = editorData.tagUuids
+                        }
     in
     createEvent (AddQuestionEvent data) editorData.path
 
@@ -246,6 +255,17 @@ createEditQuestionEvent form editorData =
                         , referenceUuids = createEventField editorData.references.list editorData.references.dirty
                         , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
                         , valueType = createEventField formData.valueType (getQuestionValueType editorData.question /= Just formData.valueType)
+                        }
+
+                IntegrationQuestionForm formData ->
+                    EditIntegrationQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = createEventField formData.title (getQuestionTitle editorData.question /= formData.title)
+                        , text = createEventField formData.text (getQuestionText editorData.question /= formData.text)
+                        , requiredLevel = createEventField formData.requiredLevel (getQuestionRequiredLevel editorData.question /= formData.requiredLevel)
+                        , tagUuids = createEventField editorData.tagUuids (getQuestionTagUuids editorData.question /= editorData.tagUuids)
+                        , referenceUuids = createEventField editorData.references.list editorData.references.dirty
+                        , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
                         }
     in
     createEvent (EditQuestionEvent data) editorData.path

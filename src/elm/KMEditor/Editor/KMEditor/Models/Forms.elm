@@ -97,6 +97,7 @@ type QuestionFormType
     = OptionsQuestionForm OptionsQuestionFormData
     | ListQuestionForm ListQuestionFormData
     | ValueQuestionForm ValueQuestionFormData
+    | IntegrationQuestionForm IntegrationQuestionFormData
 
 
 type alias OptionsQuestionFormData =
@@ -119,6 +120,13 @@ type alias ValueQuestionFormData =
     , text : Maybe String
     , requiredLevel : Maybe Int
     , valueType : ValueQuestionType
+    }
+
+
+type alias IntegrationQuestionFormData =
+    { title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
     }
 
 
@@ -389,6 +397,13 @@ validateQuestion questionType =
                 (Validate.field "valueType" validateValueType)
                 |> Validate.map ValueQuestionForm
 
+        "IntegrationQuestion" ->
+            Validate.map3 IntegrationQuestionFormData
+                (Validate.field "title" Validate.string)
+                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                |> Validate.map IntegrationQuestionForm
+
         _ ->
             Validate.fail <| Error.value InvalidString
 
@@ -429,6 +444,9 @@ questionFormInitials question =
 
                 ValueQuestion _ ->
                     "ValueQuestion"
+
+                IntegrationQuestion _ ->
+                    "IntegrationQuestion"
     in
     [ ( "questionType", Field.string questionType )
     , ( "title", Field.string <| getQuestionTitle question )
@@ -479,12 +497,24 @@ updateQuestionWithForm question questionForm =
                 , valueType = formData.valueType
                 }
 
+        IntegrationQuestionForm formData ->
+            IntegrationQuestion
+                { uuid = getQuestionUuid question
+                , title = formData.title
+                , text = formData.text
+                , requiredLevel = formData.requiredLevel
+                , tagUuids = getQuestionTagUuids question
+                , references = getQuestionReferences question
+                , experts = getQuestionExperts question
+                }
+
 
 questionTypeOptions : List ( String, String )
 questionTypeOptions =
     [ ( "OptionsQuestion", "Options" )
     , ( "ListQuestion", "List of items" )
     , ( "ValueQuestion", "Value" )
+    , ( "IntegrationQuestion", "Integration" )
     ]
 
 

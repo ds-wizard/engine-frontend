@@ -5,6 +5,7 @@ module KMEditor.Common.Models.Entities exposing
     , Expert
     , FollowUps(..)
     , Integration
+    , IntegrationQuestionData
     , KnowledgeModel
     , Level
     , ListQuestionData
@@ -125,6 +126,7 @@ type Question
     = OptionsQuestion OptionsQuestionData
     | ListQuestion ListQuestionData
     | ValueQuestion ValueQuestionData
+    | IntegrationQuestion IntegrationQuestionData
 
 
 type alias OptionsQuestionData =
@@ -161,6 +163,17 @@ type alias ValueQuestionData =
     , references : List Reference
     , experts : List Expert
     , valueType : ValueQuestionType
+    }
+
+
+type alias IntegrationQuestionData =
+    { uuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    , references : List Reference
+    , experts : List Expert
     }
 
 
@@ -291,6 +304,7 @@ questionDecoder =
         [ when questionType ((==) "OptionsQuestion") optionsQuestionDecoder
         , when questionType ((==) "ListQuestion") listQuestionDecoder
         , when questionType ((==) "ValueQuestion") valueQuestionDecoder
+        , when questionType ((==) "IntegrationQuestion") integrationQuestionDecoder
         ]
 
 
@@ -312,6 +326,11 @@ listQuestionDecoder =
 valueQuestionDecoder : Decoder Question
 valueQuestionDecoder =
     Decode.map ValueQuestion valueQuestionDataDecoder
+
+
+integrationQuestionDecoder : Decoder Question
+integrationQuestionDecoder =
+    Decode.map IntegrationQuestion integrationQuestionDataDecoder
 
 
 optionsQuestionDataDecoder : Decoder OptionsQuestionData
@@ -352,6 +371,18 @@ valueQuestionDataDecoder =
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
         |> required "valueType" valueTypeDecoder
+
+
+integrationQuestionDataDecoder : Decoder IntegrationQuestionData
+integrationQuestionDataDecoder =
+    Decode.succeed IntegrationQuestionData
+        |> required "uuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+        |> required "references" (Decode.list referenceDecoder)
+        |> required "experts" (Decode.list expertDecoder)
 
 
 valueTypeDecoder : Decoder ValueQuestionType
@@ -671,6 +702,9 @@ getQuestions km =
                 ValueQuestion _ ->
                     [ question ]
 
+                IntegrationQuestion _ ->
+                    [ question ]
+
         foldChapter chapter =
             List.foldl (\q acc -> acc ++ foldQuestion q) [] chapter.questions
     in
@@ -683,8 +717,14 @@ getQuestion km questionUuid =
         |> List.find (\q -> getQuestionUuid q == questionUuid)
 
 
-mapQuestionData : (OptionsQuestionData -> a) -> (ListQuestionData -> a) -> (ValueQuestionData -> a) -> Question -> a
-mapQuestionData fn1 fn2 fn3 question =
+mapQuestionData :
+    (OptionsQuestionData -> a)
+    -> (ListQuestionData -> a)
+    -> (ValueQuestionData -> a)
+    -> (IntegrationQuestionData -> a)
+    -> Question
+    -> a
+mapQuestionData fn1 fn2 fn3 fn4 question =
     case question of
         OptionsQuestion data ->
             fn1 data
@@ -695,40 +735,43 @@ mapQuestionData fn1 fn2 fn3 question =
         ValueQuestion data ->
             fn3 data
 
+        IntegrationQuestion data ->
+            fn4 data
+
 
 getQuestionUuid : Question -> String
 getQuestionUuid =
-    mapQuestionData .uuid .uuid .uuid
+    mapQuestionData .uuid .uuid .uuid .uuid
 
 
 getQuestionTitle : Question -> String
 getQuestionTitle =
-    mapQuestionData .title .title .title
+    mapQuestionData .title .title .title .title
 
 
 getQuestionText : Question -> Maybe String
 getQuestionText =
-    mapQuestionData .text .text .text
+    mapQuestionData .text .text .text .text
 
 
 getQuestionRequiredLevel : Question -> Maybe Int
 getQuestionRequiredLevel =
-    mapQuestionData .requiredLevel .requiredLevel .requiredLevel
+    mapQuestionData .requiredLevel .requiredLevel .requiredLevel .requiredLevel
 
 
 getQuestionTagUuids : Question -> List String
 getQuestionTagUuids =
-    mapQuestionData .tagUuids .tagUuids .tagUuids
+    mapQuestionData .tagUuids .tagUuids .tagUuids .tagUuids
 
 
 getQuestionExperts : Question -> List Expert
 getQuestionExperts =
-    mapQuestionData .experts .experts .experts
+    mapQuestionData .experts .experts .experts .experts
 
 
 getQuestionReferences : Question -> List Reference
 getQuestionReferences =
-    mapQuestionData .references .references .references
+    mapQuestionData .references .references .references .references
 
 
 getQuestionAnswers : Question -> List Answer
@@ -777,6 +820,7 @@ getQuestionTypeString =
         (\_ -> "Options")
         (\_ -> "List")
         (\_ -> "Value")
+        (\_ -> "Integration")
 
 
 valueQuestionTypeString : ValueQuestionType -> String

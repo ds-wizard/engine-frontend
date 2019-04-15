@@ -329,6 +329,16 @@ questionEditorView model editorData =
                     in
                     ( formData, extraData )
 
+                Just "IntegrationQuestion" ->
+                    let
+                        formData =
+                            div [] formFields
+
+                        extraData =
+                            []
+                    in
+                    ( formData, extraData )
+
                 _ ->
                     ( emptyNode, [] )
     in

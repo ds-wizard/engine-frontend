@@ -548,6 +548,35 @@ questionDecoderTest =
                             }
                 in
                 expectDecoder questionDecoder raw expected
+        , test "should decode integration question type" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "questionType": "IntegrationQuestion",
+                            "title": "Can you answer this question?",
+                            "text": "Please answer the question",
+                            "requiredLevel": null,
+                            "tagUuids": [],
+                            "references": [],
+                            "experts": []
+                        }
+                        """
+
+                    expected =
+                        IntegrationQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Just "Please answer the question"
+                            , requiredLevel = Nothing
+                            , tagUuids = []
+                            , references = []
+                            , experts = []
+                            }
+                in
+                expectDecoder questionDecoder raw expected
         ]
 
 

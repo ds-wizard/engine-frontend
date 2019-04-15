@@ -100,6 +100,9 @@ foldQuestion model indent tags question =
         ValueQuestion _ ->
             questionRow
 
+        IntegrationQuestion _ ->
+            questionRow
+
 
 foldAnswer : Model -> Int -> List Tag -> Answer -> List (Html Msg)
 foldAnswer model indent tags answer =

@@ -338,8 +338,8 @@ viewAddQuestionDiff km event =
             List.map2 (\a b -> ( a, b ))
                 [ "Type", "Title", "Text", "Tags" ]
                 [ getAddQuestionEventQuestionTypeString event
-                , mapAddQuestionEventData .title .title .title event
-                , mapAddQuestionEventData .text .text .text event |> Maybe.withDefault ""
+                , mapAddQuestionEventData .title .title .title .title event
+                , mapAddQuestionEventData .text .text .text .text event |> Maybe.withDefault ""
                 ]
 
         valueField =
@@ -351,7 +351,7 @@ viewAddQuestionDiff km event =
                     []
 
         tagUuids =
-            mapAddQuestionEventData .tagUuids .tagUuids .tagUuids event
+            mapAddQuestionEventData .tagUuids .tagUuids .tagUuids .tagUuids event
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) <| km.tags
@@ -370,10 +370,10 @@ viewEditQuestionDiff : KnowledgeModel -> EditQuestionEventData -> Question -> Ht
 viewEditQuestionDiff km event question =
     let
         title =
-            mapEditQuestionEventData .title .title .title event
+            mapEditQuestionEventData .title .title .title .title event
 
         questionText =
-            mapEditQuestionEventData .text .text .text event
+            mapEditQuestionEventData .text .text .text .text event
 
         originalAnswers =
             List.map .uuid <| getQuestionAnswers question
@@ -385,7 +385,7 @@ viewEditQuestionDiff km event question =
             List.map getReferenceUuid <| getQuestionReferences question
 
         referenceUuids =
-            mapEditQuestionEventData .referenceUuids .referenceUuids .referenceUuids event
+            mapEditQuestionEventData .referenceUuids .referenceUuids .referenceUuids .referenceUuids event
 
         referenceNames =
             Dict.fromList <| List.map (\r -> ( getReferenceUuid r, getReferenceVisibleName r )) <| getQuestionReferences question
@@ -394,7 +394,7 @@ viewEditQuestionDiff km event question =
             List.map .uuid <| getQuestionExperts question
 
         expertUuids =
-            mapEditQuestionEventData .expertUuids .expertUuids .expertUuids event
+            mapEditQuestionEventData .expertUuids .expertUuids .expertUuids .expertUuids event
 
         expertNames =
             Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) <| getQuestionExperts question
@@ -415,7 +415,7 @@ viewEditQuestionDiff km event question =
             getQuestionValueType question
 
         valueType =
-            mapEditQuestionEventData (\_ -> Nothing) (\_ -> Nothing) (\data -> getEventFieldValue data.valueType) event
+            mapEditQuestionEventData (\_ -> Nothing) (\_ -> Nothing) (\data -> getEventFieldValue data.valueType) (\_ -> Nothing) event
 
         valueDiff =
             case ( originalValueType, valueType ) of
@@ -439,7 +439,7 @@ viewEditQuestionDiff km event question =
             getQuestionTagUuids question
 
         tagUuids =
-            getEventFieldValueWithDefault (mapEditQuestionEventData .tagUuids .tagUuids .tagUuids event) originalTags
+            getEventFieldValueWithDefault (mapEditQuestionEventData .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) <| km.tags

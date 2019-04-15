@@ -215,6 +215,7 @@ type AddQuestionEventData
     = AddOptionsQuestionEvent AddOptionsQuestionEventData
     | AddListQuestionEvent AddListQuestionEventData
     | AddValueQuestionEvent AddValueQuestionEventData
+    | AddIntegrationQuestionEvent AddIntegrationQuestionEventData
 
 
 type alias AddOptionsQuestionEventData =
@@ -246,10 +247,20 @@ type alias AddValueQuestionEventData =
     }
 
 
+type alias AddIntegrationQuestionEventData =
+    { questionUuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    }
+
+
 type EditQuestionEventData
     = EditOptionsQuestionEvent EditOptionsQuestionEventData
     | EditListQuestionEvent EditListQuestionEventData
     | EditValueQuestionEvent EditValueQuestionEventData
+    | EditIntegrationQuestionEvent EditIntegrationQuestionEventData
 
 
 type alias EditOptionsQuestionEventData =
@@ -286,6 +297,17 @@ type alias EditValueQuestionEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , valueType : EventField ValueQuestionType
+    }
+
+
+type alias EditIntegrationQuestionEventData =
+    { questionUuid : String
+    , title : EventField String
+    , text : EventField (Maybe String)
+    , requiredLevel : EventField (Maybe Int)
+    , tagUuids : EventField (List String)
+    , referenceUuids : EventField (List String)
+    , expertUuids : EventField (List String)
     }
 
 
@@ -616,6 +638,7 @@ encodeAddQuestionEvent data =
                 encodeAddOptionsQuestionEvent
                 encodeAddListQuestionEvent
                 encodeAddValueQuestionEvent
+                encodeAddIntegrationQuestionEvent
                 data
     in
     [ ( "eventType", Encode.string "AddQuestionEvent" ) ] ++ eventData
@@ -656,6 +679,17 @@ encodeAddValueQuestionEvent data =
     ]
 
 
+encodeAddIntegrationQuestionEvent : AddIntegrationQuestionEventData -> List ( String, Encode.Value )
+encodeAddIntegrationQuestionEvent data =
+    [ ( "questionType", Encode.string "IntegrationQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", Encode.string data.title )
+    , ( "text", maybe Encode.string data.text )
+    , ( "requiredLevel", maybe Encode.int data.requiredLevel )
+    , ( "tagUuids", Encode.list Encode.string data.tagUuids )
+    ]
+
+
 encodeEditQuestionEvent : EditQuestionEventData -> List ( String, Encode.Value )
 encodeEditQuestionEvent data =
     let
@@ -664,6 +698,7 @@ encodeEditQuestionEvent data =
                 encodeEditOptionsQuestionEvent
                 encodeEditListQuestionEvent
                 encodeEditValueQuestionEvent
+                encodeEditIntegrationQuestionEvent
                 data
     in
     [ ( "eventType", Encode.string "EditQuestionEvent" ) ] ++ eventData
@@ -709,6 +744,19 @@ encodeEditValueQuestionEvent data =
     , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
     , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
     , ( "valueType", encodeEventField encodeValueType data.valueType )
+    ]
+
+
+encodeEditIntegrationQuestionEvent : EditIntegrationQuestionEventData -> List ( String, Encode.Value )
+encodeEditIntegrationQuestionEvent data =
+    [ ( "questionType", Encode.string "IntegrationQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", encodeEventField Encode.string data.title )
+    , ( "text", encodeEventField (maybe Encode.string) data.text )
+    , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
+    , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
+    , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
     ]
 
 
@@ -1100,6 +1148,9 @@ addQuestionEventDecoderByType questionType =
         "ValueQuestion" ->
             Decode.map AddValueQuestionEvent addValueQuestionEventDecoder
 
+        "IntegrationQuestion" ->
+            Decode.map AddIntegrationQuestionEvent addIntegrationQuestionEventDecoder
+
         _ ->
             Decode.fail <| "Unknown question type: " ++ questionType
 
@@ -1136,6 +1187,16 @@ addValueQuestionEventDecoder =
         |> required "valueType" valueTypeDecoder
 
 
+addIntegrationQuestionEventDecoder : Decoder AddIntegrationQuestionEventData
+addIntegrationQuestionEventDecoder =
+    Decode.succeed AddIntegrationQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+
+
 editQuestionEventDecoder : Decoder EditQuestionEventData
 editQuestionEventDecoder =
     Decode.field "questionType" Decode.string
@@ -1153,6 +1214,9 @@ editQuestionEventDecoderByType questionType =
 
         "ValueQuestion" ->
             Decode.map EditValueQuestionEvent editValueQuestionEventDecoder
+
+        "IntegrationQuestion" ->
+            Decode.map EditIntegrationQuestionEvent editIntegrationQuestionEventDecoder
 
         _ ->
             Decode.fail <| "Unknown question type: " ++ questionType
@@ -1196,6 +1260,18 @@ editValueQuestionEventDecoder =
         |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "valueType" (eventFieldDecoder valueTypeDecoder)
+
+
+editIntegrationQuestionEventDecoder : Decoder EditIntegrationQuestionEventData
+editIntegrationQuestionEventDecoder =
+    Decode.succeed EditIntegrationQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "text" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 deleteQuestionEventDecoder : Decoder DeleteQuestionEventData
@@ -1597,12 +1673,12 @@ getEventEntityVisibleName event =
 
 getAddQuestionEventEntityVisibleName : AddQuestionEventData -> Maybe String
 getAddQuestionEventEntityVisibleName =
-    Just << mapAddQuestionEventData .title .title .title
+    Just << mapAddQuestionEventData .title .title .title .title
 
 
 getEditQuestionEventEntityVisibleName : EditQuestionEventData -> Maybe String
 getEditQuestionEventEntityVisibleName =
-    getEventFieldValue << mapEditQuestionEventData .title .title .title
+    getEventFieldValue << mapEditQuestionEventData .title .title .title .title
 
 
 getAddReferenceEventEntityVisibleName : AddReferenceEventData -> Maybe String
@@ -1617,12 +1693,12 @@ getEditReferenceEventEntityVisibleName =
 
 getAddQuestionUuid : AddQuestionEventData -> String
 getAddQuestionUuid =
-    mapAddQuestionEventData .questionUuid .questionUuid .questionUuid
+    mapAddQuestionEventData .questionUuid .questionUuid .questionUuid .questionUuid
 
 
 getEditQuestionUuid : EditQuestionEventData -> String
 getEditQuestionUuid =
-    mapEditQuestionEventData .questionUuid .questionUuid .questionUuid
+    mapEditQuestionEventData .questionUuid .questionUuid .questionUuid .questionUuid
 
 
 getAddReferenceUuid : AddReferenceEventData -> String
@@ -1845,8 +1921,14 @@ isAddReference question event =
             False
 
 
-mapAddQuestionEventData : (AddOptionsQuestionEventData -> a) -> (AddListQuestionEventData -> a) -> (AddValueQuestionEventData -> a) -> AddQuestionEventData -> a
-mapAddQuestionEventData optionsQuestion listQuestion valueQuestion question =
+mapAddQuestionEventData :
+    (AddOptionsQuestionEventData -> a)
+    -> (AddListQuestionEventData -> a)
+    -> (AddValueQuestionEventData -> a)
+    -> (AddIntegrationQuestionEventData -> a)
+    -> AddQuestionEventData
+    -> a
+mapAddQuestionEventData optionsQuestion listQuestion valueQuestion integrationQuestion question =
     case question of
         AddOptionsQuestionEvent data ->
             optionsQuestion data
@@ -1857,9 +1939,18 @@ mapAddQuestionEventData optionsQuestion listQuestion valueQuestion question =
         AddValueQuestionEvent data ->
             valueQuestion data
 
+        AddIntegrationQuestionEvent data ->
+            integrationQuestion data
 
-mapEditQuestionEventData : (EditOptionsQuestionEventData -> a) -> (EditListQuestionEventData -> a) -> (EditValueQuestionEventData -> a) -> EditQuestionEventData -> a
-mapEditQuestionEventData optionsQuestion listQuestion valueQuestion question =
+
+mapEditQuestionEventData :
+    (EditOptionsQuestionEventData -> a)
+    -> (EditListQuestionEventData -> a)
+    -> (EditValueQuestionEventData -> a)
+    -> (EditIntegrationQuestionEventData -> a)
+    -> EditQuestionEventData
+    -> a
+mapEditQuestionEventData optionsQuestion listQuestion valueQuestion integrationQuestion question =
     case question of
         EditOptionsQuestionEvent data ->
             optionsQuestion data
@@ -1869,6 +1960,9 @@ mapEditQuestionEventData optionsQuestion listQuestion valueQuestion question =
 
         EditValueQuestionEvent data ->
             valueQuestion data
+
+        EditIntegrationQuestionEvent data ->
+            integrationQuestion data
 
 
 mapAddReferenceEventData : (AddResourcePageReferenceEventData -> a) -> (AddURLReferenceEventData -> a) -> (AddCrossReferenceEventData -> a) -> AddReferenceEventData -> a
@@ -1903,6 +1997,7 @@ getAddQuestionEventQuestionTypeString =
         (\_ -> "Options")
         (\_ -> "List")
         (\_ -> "Value")
+        (\_ -> "Integration")
 
 
 getEditQuestionEventQuestionTypeString : EditQuestionEventData -> String
@@ -1911,3 +2006,4 @@ getEditQuestionEventQuestionTypeString =
         (\_ -> "Options")
         (\_ -> "List")
         (\_ -> "Value")
+        (\_ -> "Integration")
