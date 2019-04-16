@@ -2,6 +2,7 @@ module KMEditor.Editor.KMEditor.View.Editors exposing (activeEditor)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
+import Common.View.Flash as Flash
 import Common.View.FormGroup as FormGroup
 import Common.View.Page as Page
 import Common.View.Tag as Tag
@@ -12,9 +13,9 @@ import Html exposing (..)
 import Html.Attributes exposing (class, classList, disabled, placeholder)
 import Html.Events exposing (onClick)
 import KMEditor.Common.Models.Entities exposing (Level, Metric, Tag)
-import KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, getCurrentTags)
+import KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, getCurrentIntegrations, getCurrentTags)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
-import KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
+import KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, QuestionForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
 import KMEditor.Editor.KMEditor.Msgs exposing (..)
 import List.Extra as List
 import Reorderable
@@ -331,8 +332,50 @@ questionEditorView model editorData =
 
                 Just "IntegrationQuestion" ->
                     let
+                        integrations =
+                            getCurrentIntegrations model
+
+                        integrationOptions =
+                            ( "", "- select integration -" )
+                                :: List.map (\i -> ( i.uuid, i.name )) integrations
+
+                        noIntegrations =
+                            if List.length integrations == 0 then
+                                Flash.info "There are no integrations configured for this Knowledge Model. Create them first."
+
+                            else
+                                emptyNode
+
+                        integrationFields integration =
+                            if List.isEmpty integration.props then
+                                emptyNode
+
+                            else
+                                div [ class "card card-border-light mb-5" ]
+                                    [ div [ class "card-header" ] [ text "Integration Configuration" ]
+                                    , div [ class "card-body" ]
+                                        (List.map
+                                            (\prop ->
+                                                FormGroup.input editorData.form ("props-" ++ prop) prop
+                                            )
+                                            integration.props
+                                        )
+                                    ]
+
+                        integrationFormFields =
+                            (Form.getFieldAsString "integrationUuid" editorData.form).value
+                                |> Maybe.andThen (\integrationUuid -> List.find (.uuid >> (==) integrationUuid) integrations)
+                                |> Maybe.map integrationFields
+                                |> Maybe.withDefault emptyNode
+
                         formData =
-                            div [] formFields
+                            div [ class "integration-question-form" ]
+                                (formFields
+                                    ++ [ FormGroup.select integrationOptions editorData.form "integrationUuid" "Integration"
+                                       , noIntegrations
+                                       , integrationFormFields
+                                       ]
+                                )
 
                         extraData =
                             []

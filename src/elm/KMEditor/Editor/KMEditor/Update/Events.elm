@@ -210,6 +210,8 @@ createAddQuestionEvent form editorData =
                         , text = formData.text
                         , requiredLevel = formData.requiredLevel
                         , tagUuids = editorData.tagUuids
+                        , integrationUuid = formData.integrationUuid
+                        , props = formData.props
                         }
     in
     createEvent (AddQuestionEvent data) editorData.path
@@ -266,6 +268,8 @@ createEditQuestionEvent form editorData =
                         , tagUuids = createEventField editorData.tagUuids (getQuestionTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = createEventField editorData.references.list editorData.references.dirty
                         , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
+                        , integrationUuid = createEventField formData.integrationUuid (getQuestionIntegrationUuid editorData.question /= Just formData.integrationUuid)
+                        , props = createEventField formData.props (getQuestionProps editorData.question /= Just formData.props)
                         }
     in
     createEvent (EditQuestionEvent data) editorData.path

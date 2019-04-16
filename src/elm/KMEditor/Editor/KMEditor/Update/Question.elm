@@ -15,7 +15,7 @@ module KMEditor.Editor.KMEditor.Update.Question exposing
 import Form
 import KMEditor.Common.Models.Entities exposing (newAnswer, newExpert, newQuestion, newReference)
 import KMEditor.Common.Models.Path exposing (PathNode(..))
-import KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentTags, insertEditor)
+import KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations, getCurrentTags, insertEditor)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (questionFormValidation)
@@ -26,11 +26,12 @@ import Random exposing (Seed)
 
 
 updateQuestionForm : Model -> Form.Msg -> QuestionEditorData -> Model
-updateQuestionForm =
+updateQuestionForm model =
     updateForm
-        { formValidation = questionFormValidation
+        { formValidation = questionFormValidation (getCurrentIntegrations model)
         , createEditor = QuestionEditor
         }
+        model
 
 
 addQuestionTag : Model -> String -> QuestionEditorData -> Model
@@ -67,10 +68,10 @@ filterTagUuids model uuids =
 
 
 withGenerateQuestionEditEvent : Seed -> Model -> QuestionEditorData -> (Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateQuestionEditEvent =
+withGenerateQuestionEditEvent seed model =
     withGenerateEvent
         { isDirty = isQuestionEditorDirty
-        , formValidation = questionFormValidation
+        , formValidation = questionFormValidation (getCurrentIntegrations model)
         , createEditor = QuestionEditor
         , alert = "Please fix the question errors first."
         , createAddEvent = createAddQuestionEvent
@@ -78,6 +79,8 @@ withGenerateQuestionEditEvent =
         , updateEditorData = updateQuestionEditorData
         , updateEditors = Just updateEditorsWithQuestion
         }
+        seed
+        model
 
 
 deleteQuestion : Seed -> Model -> String -> QuestionEditorData -> ( Seed, Model )

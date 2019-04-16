@@ -253,6 +253,8 @@ type alias AddIntegrationQuestionEventData =
     , text : Maybe String
     , requiredLevel : Maybe Int
     , tagUuids : List String
+    , integrationUuid : String
+    , props : Dict String String
     }
 
 
@@ -308,6 +310,8 @@ type alias EditIntegrationQuestionEventData =
     , tagUuids : EventField (List String)
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
+    , integrationUuid : EventField String
+    , props : EventField (Dict String String)
     }
 
 
@@ -687,6 +691,8 @@ encodeAddIntegrationQuestionEvent data =
     , ( "text", maybe Encode.string data.text )
     , ( "requiredLevel", maybe Encode.int data.requiredLevel )
     , ( "tagUuids", Encode.list Encode.string data.tagUuids )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
+    , ( "props", Encode.dict identity Encode.string data.props )
     ]
 
 
@@ -757,6 +763,8 @@ encodeEditIntegrationQuestionEvent data =
     , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
     , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
     , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
+    , ( "integrationUuid", encodeEventField Encode.string data.integrationUuid )
+    , ( "props", encodeEventField (Encode.dict identity Encode.string) data.props )
     ]
 
 
@@ -1195,6 +1203,8 @@ addIntegrationQuestionEventDecoder =
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
         |> required "tagUuids" (Decode.list Decode.string)
+        |> required "integrationUuid" Decode.string
+        |> required "props" (Decode.dict Decode.string)
 
 
 editQuestionEventDecoder : Decoder EditQuestionEventData
@@ -1272,6 +1282,8 @@ editIntegrationQuestionEventDecoder =
         |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "integrationUuid" (eventFieldDecoder Decode.string)
+        |> required "props" (eventFieldDecoder (Decode.dict Decode.string))
 
 
 deleteQuestionEventDecoder : Decoder DeleteQuestionEventData

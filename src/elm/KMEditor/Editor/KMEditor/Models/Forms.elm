@@ -47,7 +47,7 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
 
 import Common.Form exposing (CustomFormError(..))
 import Common.Form.Validate exposing (validateUuid)
-import Dict
+import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field
@@ -127,6 +127,8 @@ type alias IntegrationQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
+    , integrationUuid : String
+    , props : Dict String String
     }
 
 
@@ -375,17 +377,17 @@ updateChapterWithForm chapter chapterForm =
 
 initQuestionForm : Question -> Form CustomFormError QuestionForm
 initQuestionForm =
-    questionFormInitials >> initForm questionFormValidation
+    questionFormInitials >> initForm (questionFormValidation [])
 
 
-questionFormValidation : Validation CustomFormError QuestionForm
-questionFormValidation =
+questionFormValidation : List Integration -> Validation CustomFormError QuestionForm
+questionFormValidation integrations =
     Validate.succeed QuestionForm
-        |> Validate.andMap (Validate.field "questionType" Validate.string |> Validate.andThen validateQuestion)
+        |> Validate.andMap (Validate.field "questionType" Validate.string |> Validate.andThen (validateQuestion integrations))
 
 
-validateQuestion : String -> Validation CustomFormError QuestionFormType
-validateQuestion questionType =
+validateQuestion : List Integration -> String -> Validation CustomFormError QuestionFormType
+validateQuestion integrations questionType =
     case questionType of
         "OptionsQuestion" ->
             Validate.map3 OptionsQuestionFormData
@@ -411,14 +413,34 @@ validateQuestion questionType =
                 |> Validate.map ValueQuestionForm
 
         "IntegrationQuestion" ->
-            Validate.map3 IntegrationQuestionFormData
+            Validate.map5 IntegrationQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
                 (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "integrationUuid" Validate.string)
+                (Validate.field "integrationUuid" Validate.string |> Validate.andThen (validateIntegrationProps integrations))
                 |> Validate.map IntegrationQuestionForm
 
         _ ->
             Validate.fail <| Error.value InvalidString
+
+
+validateIntegrationProps : List Integration -> String -> Validation CustomFormError (Dict String String)
+validateIntegrationProps integrations integration =
+    let
+        props =
+            List.find (\i -> i.uuid == integration) integrations
+                |> Maybe.map .props
+                |> Maybe.withDefault []
+
+        fold prop acc =
+            Validate.andThen
+                (\value ->
+                    Validate.map (\dict -> Dict.insert prop value dict) acc
+                )
+                (Validate.field ("props-" ++ prop) Validate.string)
+    in
+    List.foldl fold (Validate.succeed Dict.empty) props
 
 
 validateValueType : Validation CustomFormError ValueQuestionType
@@ -460,6 +482,15 @@ questionFormInitials question =
 
                 IntegrationQuestion _ ->
                     "IntegrationQuestion"
+
+        props =
+            case question of
+                IntegrationQuestion integrationQuestionData ->
+                    Dict.toList integrationQuestionData.props
+                        |> List.map (\( prop, value ) -> ( "props-" ++ prop, Field.string value ))
+
+                _ ->
+                    []
     in
     [ ( "questionType", Field.string questionType )
     , ( "title", Field.string <| getQuestionTitle question )
@@ -467,7 +498,9 @@ questionFormInitials question =
     , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
     , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| getQuestionItemTitle question )
     , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringValueType <| getQuestionValueType question )
+    , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| getQuestionIntegrationUuid question )
     ]
+        ++ props
 
 
 updateQuestionWithForm : Question -> QuestionForm -> Question
@@ -519,6 +552,8 @@ updateQuestionWithForm question questionForm =
                 , tagUuids = getQuestionTagUuids question
                 , references = getQuestionReferences question
                 , experts = getQuestionExperts question
+                , integrationUuid = formData.integrationUuid
+                , props = formData.props
                 }
 
 

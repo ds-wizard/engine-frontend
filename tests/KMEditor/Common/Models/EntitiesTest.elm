@@ -561,7 +561,11 @@ questionDecoderTest =
                             "requiredLevel": null,
                             "tagUuids": [],
                             "references": [],
-                            "experts": []
+                            "experts": [],
+                            "integrationUuid": "b50bf5ce-2fc3-4779-9756-5f176c233374",
+                            "props": {
+                                "prop": "value"
+                            }
                         }
                         """
 
@@ -574,6 +578,8 @@ questionDecoderTest =
                             , tagUuids = []
                             , references = []
                             , experts = []
+                            , integrationUuid = "b50bf5ce-2fc3-4779-9756-5f176c233374"
+                            , props = Dict.fromList [ ( "prop", "value" ) ]
                             }
                 in
                 expectDecoder questionDecoder raw expected

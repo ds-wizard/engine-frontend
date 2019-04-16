@@ -599,6 +599,8 @@ addIntegrationQuestionEvent =
             , text = Nothing
             , requiredLevel = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
+            , integrationUuid = "1d522339-e93b-44e9-bc2a-1df65fb97dc6"
+            , props = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -711,6 +713,8 @@ editIntegrationQuestionEvent =
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }
+            , integrationUuid = { changed = True, value = Just "1d522339-e93b-44e9-bc2a-1df65fb97dc6" }
+            , props = { changed = True, value = Just <| Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ] }
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"

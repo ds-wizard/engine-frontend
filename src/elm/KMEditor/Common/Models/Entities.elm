@@ -34,8 +34,10 @@ module KMEditor.Common.Models.Entities exposing
     , getQuestion
     , getQuestionAnswers
     , getQuestionExperts
+    , getQuestionIntegrationUuid
     , getQuestionItemQuestions
     , getQuestionItemTitle
+    , getQuestionProps
     , getQuestionReferences
     , getQuestionRequiredLevel
     , getQuestionTagUuids
@@ -174,6 +176,8 @@ type alias IntegrationQuestionData =
     , tagUuids : List String
     , references : List Reference
     , experts : List Expert
+    , integrationUuid : String
+    , props : Dict String String
     }
 
 
@@ -383,6 +387,8 @@ integrationQuestionDataDecoder =
         |> required "tagUuids" (Decode.list Decode.string)
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
+        |> required "integrationUuid" Decode.string
+        |> required "props" (Decode.dict Decode.string)
 
 
 valueTypeDecoder : Decoder ValueQuestionType
@@ -809,6 +815,26 @@ getQuestionValueType question =
     case question of
         ValueQuestion valueQuestionData ->
             Just valueQuestionData.valueType
+
+        _ ->
+            Nothing
+
+
+getQuestionIntegrationUuid : Question -> Maybe String
+getQuestionIntegrationUuid question =
+    case question of
+        IntegrationQuestion integrationQuestionData ->
+            Just integrationQuestionData.integrationUuid
+
+        _ ->
+            Nothing
+
+
+getQuestionProps : Question -> Maybe (Dict String String)
+getQuestionProps question =
+    case question of
+        IntegrationQuestion integrationQuestionData ->
+            Just integrationQuestionData.props
 
         _ ->
             Nothing
