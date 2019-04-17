@@ -1,27 +1,57 @@
 module FormEngine.Update exposing (updateForm)
 
+import ActionResult exposing (ActionResult(..))
 import FormEngine.Model exposing (..)
 import FormEngine.Msgs exposing (Msg(..))
 import String exposing (fromInt)
 
 
-updateForm : Msg msg -> Form a -> Form a
-updateForm msg form =
+updateForm : Msg msg -> LoadTypeHints b -> Form a -> ( Form a, Cmd b )
+updateForm msg loadTypeHints form =
     case msg of
         Input path value ->
-            { elements = List.map (updateElement (updateElementValue value) path) form.elements }
+            ( { form | elements = List.map (updateElement (updateElementValue value) path) form.elements }
+            , Cmd.none
+            )
+
+        InputTypehint path questionUuid value ->
+            ( { form | elements = List.map (updateElement (updateElementValue value) path) form.elements }
+            , loadTypeHints questionUuid <| getStringReply value
+            )
 
         Clear path ->
-            { elements = List.map (updateElement clearElementValue path) form.elements }
+            ( { form | elements = List.map (updateElement clearElementValue path) form.elements }
+            , Cmd.none
+            )
 
         GroupItemAdd path ->
-            { elements = List.map (updateElement updateGroupItemAdd path) form.elements }
+            ( { form | elements = List.map (updateElement updateGroupItemAdd path) form.elements }
+            , Cmd.none
+            )
 
         GroupItemRemove path index ->
-            { elements = List.map (updateElement (updateGroupItemRemove index) path) form.elements }
+            ( { form | elements = List.map (updateElement (updateGroupItemRemove index) path) form.elements }
+            , Cmd.none
+            )
+
+        ShowTypeHints path questionUuid ->
+            ( { form
+                | typeHints =
+                    Just
+                        { path = path
+                        , hints = Loading
+                        }
+              }
+            , loadTypeHints questionUuid ""
+            )
+
+        HideTypeHints ->
+            ( { form | typeHints = Nothing }
+            , Cmd.none
+            )
 
         _ ->
-            form
+            ( form, Cmd.none )
 
 
 updateElement : (FormElement a -> FormElement a) -> List String -> FormElement a -> FormElement a
@@ -98,10 +128,13 @@ updateElementValue value element =
         TextFormElement descriptor state ->
             TextFormElement descriptor { state | value = Just value }
 
+        TypeHintFormElement descriptor state ->
+            TypeHintFormElement descriptor { state | value = Just value }
+
         ChoiceFormElement descriptor options state ->
             ChoiceFormElement descriptor options { state | value = Just value }
 
-        _ ->
+        GroupFormElement _ _ _ _ ->
             element
 
 
@@ -117,10 +150,13 @@ clearElementValue element =
         TextFormElement descriptor state ->
             TextFormElement descriptor { state | value = Nothing }
 
+        TypeHintFormElement descriptor state ->
+            TypeHintFormElement descriptor { state | value = Nothing }
+
         ChoiceFormElement descriptor options state ->
             ChoiceFormElement descriptor options { state | value = Nothing }
 
-        _ ->
+        GroupFormElement _ _ _ _ ->
             element
 
 

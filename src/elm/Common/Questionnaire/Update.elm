@@ -4,11 +4,13 @@ import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (encodeChartConfig)
 import Common.Api.Feedbacks as FeedbacksApi
 import Common.Api.Questionnaires as QuestionnairesApi
+import Common.Api.TypeHints as TypeHintsApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Form exposing (Form)
+import FormEngine.Model exposing (LoadTypeHints, setTypeHintsResult)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import KMEditor.Common.Models.Entities exposing (Chapter)
@@ -95,6 +97,25 @@ update msg appState model =
                 _ ->
                     ( model, Cmd.none )
 
+        GetTypeHintsCompleted result ->
+            case model.activePage of
+                PageChapter chapter form ->
+                    let
+                        actionResult =
+                            case result of
+                                Ok typeHints ->
+                                    Success typeHints
+
+                                Err err ->
+                                    getServerError err "Unable to get type hints"
+                    in
+                    ( { model | activePage = PageChapter chapter <| setTypeHintsResult actionResult form }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> AppState -> Model -> ( Model, Cmd Msg )
 handleFormMsg msg appState model =
@@ -115,16 +136,28 @@ handleFormMsg msg appState model =
                             )
 
                 _ ->
+                    let
+                        ( updatedForm, cmd ) =
+                            updateForm msg
+                                (createLoadTypeHints model.questionnaire.package.id appState)
+                                form
+                    in
                     ( updateReplies
                         { model
-                            | activePage = PageChapter chapter (updateForm msg form)
+                            | activePage = PageChapter chapter updatedForm
                             , dirty = True
                         }
-                    , Cmd.none
+                    , cmd
                     )
 
         _ ->
             ( model, Cmd.none )
+
+
+createLoadTypeHints : String -> AppState -> LoadTypeHints Msg
+createLoadTypeHints packageId appState =
+    \questionUuid q ->
+        TypeHintsApi.fetchTypeHints packageId questionUuid q appState GetTypeHintsCompleted
 
 
 handleSetActiveChapter : Chapter -> Model -> Model

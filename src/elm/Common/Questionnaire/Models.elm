@@ -205,7 +205,7 @@ createQuestionFormItem metrics question =
                     StringFormItem descriptor
 
         IntegrationQuestion data ->
-            TextFormItem descriptor
+            TypeHintFormItem descriptor
 
 
 createFormItemDescriptor : Question -> FormItemDescriptor FormExtraData
