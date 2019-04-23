@@ -16,7 +16,7 @@ import Browser.Navigation exposing (Key)
 import Common.AppState exposing (AppState)
 import Common.Menu.Models
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import KMEditor.Models
 import KnowledgeModels.Models
 import Organization.Models
@@ -50,6 +50,10 @@ initialModel route flags session jwt key =
         , apiUrl = flags.apiUrl
         , appTitle = flags.appTitle
         , appTitleShort = flags.appTitleShort
+        , welcome =
+            { warning = flags.welcomeWarning
+            , info = flags.welcomeInfo
+            }
         }
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
@@ -145,6 +149,8 @@ type alias Flags =
     , apiUrl : String
     , appTitle : String
     , appTitleShort : String
+    , welcomeWarning : Maybe String
+    , welcomeInfo : Maybe String
     }
 
 
@@ -156,3 +162,5 @@ flagsDecoder =
         |> required "apiUrl" Decode.string
         |> required "appTitle" Decode.string
         |> required "appTitleShort" Decode.string
+        |> required "welcomeWarning" (maybe Decode.string)
+        |> required "welcomeInfo" (maybe Decode.string)

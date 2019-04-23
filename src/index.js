@@ -26,7 +26,9 @@ var app = program.Elm.Main.init({
         session: JSON.parse(localStorage.session || null),
         apiUrl: getConfigValue('apiUrl', 'http://localhost:3000'),
         appTitle: getConfigValue('appTitle', 'Data Stewardship Wizard'),
-        appTitleShort: getConfigValue('appTitleShort', 'DS Wizard')
+        appTitleShort: getConfigValue('appTitleShort', 'DS Wizard'),
+        welcomeWarning: getConfigValue('welcomeWarning', null),
+        welcomeInfo: getConfigValue('welcomeInfo', null)
     }
 })
 

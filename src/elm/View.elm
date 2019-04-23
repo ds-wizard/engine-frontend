@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Browser exposing (Document)
+import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
 import Common.View.Layout as Layout
 import Common.View.Page as Page
@@ -8,6 +9,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
 import KMEditor.View
 import KnowledgeModels.View
+import Markdown
 import Models exposing (Model)
 import Msgs exposing (Msg(..))
 import Organization.View
@@ -21,7 +23,8 @@ view : Model -> Document Msg
 view model =
     case model.appState.route of
         Welcome ->
-            Layout.app model welcomeView
+            welcomeView model
+                |> Layout.app model
 
         Questionnaires route ->
             model.dsPlannerModel
@@ -60,21 +63,31 @@ view model =
             Layout.app model notFoundView
 
 
-welcomeView : Html Msg
-welcomeView =
+welcomeView : Model -> Html Msg
+welcomeView model =
+    let
+        warning =
+            case model.appState.welcome.warning of
+                Just message ->
+                    div [ class "alert alert-warning" ]
+                        [ Markdown.toHtml [] message ]
+
+                Nothing ->
+                    emptyNode
+
+        info =
+            case model.appState.welcome.info of
+                Just message ->
+                    div [ class "alert alert-info" ]
+                        [ Markdown.toHtml [] message ]
+
+                Nothing ->
+                    emptyNode
+    in
     div [ detailClass "Welcome" ]
-        [ div [ class "alert alert-warning" ]
-            [ h4 [ class "alert-heading" ] [ text "Warning" ]
-            , p [ class "mb-0" ] [ text "DSW is currently under intensive development. As such, we cannot guarantee DS plans compatibility in future versions." ]
-            ]
-        , div [ class "alert alert-info" ]
-            [ p [ class "mb-0" ]
-                [ text "This is a demonstration DSW installment. To deploy your local DSW copy, follow the instructions in "
-                , a [ href "https://docs.ds-wizard.org", target "_blank" ] [ text "docs.ds-wizard.org" ]
-                , text "."
-                ]
-            ]
-        , Page.message "hand-spock-o" "Welcome to the Data Stewardship Wizard!"
+        [ warning
+        , info
+        , Page.message "hand-spock-o" <| "Welcome to the " ++ model.appState.appTitle ++ "!"
         ]
 
 

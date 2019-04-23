@@ -12,6 +12,14 @@ if [[ ! -z "$APP_TITLE_SHORT" ]]; then
     echo -n "appTitleShort:'"$APP_TITLE_SHORT"'," >> ${config}
 fi
 
+if [[ ! -z "$WELCOME_WARNING" ]]; then
+    echo -n "welcomeWarning:'"$WELCOME_WARNING"'," >> ${config}
+fi
+
+if [[ ! -z "$WELCOME_INFO" ]]; then
+    echo -n "welcomeInfo:'"$WELCOME_INFO"'," >> ${config}
+fi
+
 echo -n "};" >> ${config}
 
 
