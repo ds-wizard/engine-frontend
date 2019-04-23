@@ -26,7 +26,7 @@ public model content =
                     [ content ]
                 ]
     in
-    { title = "Data Stewardship Wizard"
+    { title = model.appState.appTitle
     , body = [ html ]
     }
 
@@ -54,7 +54,7 @@ publicHeader model =
             [ div [ class "navbar-header" ]
                 [ linkTo homeRoute
                     [ class "navbar-brand" ]
-                    [ text "Data Stewardship Wizard"
+                    [ text model.appState.appTitle
                     ]
                 ]
             , ul [ class "nav navbar-nav ml-auto" ] links
@@ -74,7 +74,7 @@ app model content =
                 , viewAboutModal model.menuModel.aboutOpen model.menuModel.apiBuildInfo
                 ]
     in
-    { title = "Data Stewardship Wizard"
+    { title = model.appState.appTitle
     , body = [ html ]
     }
 
@@ -94,7 +94,7 @@ logo model =
     let
         logoImg =
             span [ class "logo-full" ]
-                [ span [] [ text "DS Wizard" ] ]
+                [ span [] [ text model.appState.appTitleShort ] ]
     in
     linkTo Welcome [ class "logo" ] [ logoImg ]
 

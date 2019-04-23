@@ -39,15 +39,17 @@ type alias Model =
     }
 
 
-initialModel : Route -> Int -> Session -> Maybe JwtToken -> Key -> String -> Model
-initialModel route seed session jwt key apiUrl =
+initialModel : Route -> Flags -> Session -> Maybe JwtToken -> Key -> Model
+initialModel route flags session jwt key =
     { appState =
         { route = route
-        , seed = initialSeed seed
+        , seed = initialSeed flags.seed
         , session = session
         , jwt = jwt
         , key = key
-        , apiUrl = apiUrl
+        , apiUrl = flags.apiUrl
+        , appTitle = flags.appTitle
+        , appTitleShort = flags.appTitleShort
         }
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
@@ -141,6 +143,8 @@ type alias Flags =
     { session : Maybe Session
     , seed : Int
     , apiUrl : String
+    , appTitle : String
+    , appTitleShort : String
     }
 
 
@@ -150,3 +154,5 @@ flagsDecoder =
         |> required "session" (Decode.nullable sessionDecoder)
         |> required "seed" Decode.int
         |> required "apiUrl" Decode.string
+        |> required "appTitle" Decode.string
+        |> required "appTitleShort" Decode.string

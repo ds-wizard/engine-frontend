@@ -23,6 +23,8 @@ init val location key =
                     { session = Nothing
                     , seed = 0
                     , apiUrl = ""
+                    , appTitle = "Data Stewardship Wizard"
+                    , appTitleShort = "DS Wizard"
                     }
 
         session =
@@ -37,7 +39,7 @@ init val location key =
                 |> routeIfAllowed jwt
 
         model =
-            initialModel route flags.seed session jwt key flags.apiUrl
+            initialModel route flags session jwt key
                 |> initLocalModel
     in
     ( model, decideInitialRoute model route )

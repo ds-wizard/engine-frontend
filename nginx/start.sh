@@ -1,7 +1,18 @@
 #!/bin/sh
 
 # create config
-echo "window.dsw={apiUrl:'"$API_URL"'};" > /usr/share/nginx/html/config.js
+config=/usr/share/nginx/html/config.js
+echo -n "window.dsw={apiUrl:'"$API_URL"'," > ${config}
+
+if [[ ! -z "$APP_TITLE" ]]; then
+    echo -n "appTitle:'"$APP_TITLE"'," >> ${config}
+fi
+
+if [[ ! -z "$APP_TITLE_SHORT" ]]; then
+    echo -n "appTitleShort:'"$APP_TITLE_SHORT"'," >> ${config}
+fi
+
+echo -n "};" >> ${config}
 
 
 # regenerate styles when customizations exist

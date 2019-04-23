@@ -11,11 +11,11 @@ var registerScrollPorts = require('./ports/scroll')
 var registerSessionPorts = require('./ports/session')
 
 
-function getApiUrl() {
-    if (window.dsw && window.dsw.apiUrl) {
-        return window.dsw.apiUrl
+function getConfigValue(key, defaultValue) {
+    if (window.dsw && window.dsw[key]) {
+        return window.dsw[key]
     }
-    return 'http://localhost:3000'
+    return defaultValue
 }
 
 
@@ -24,7 +24,9 @@ var app = program.Elm.Main.init({
     flags: {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
         session: JSON.parse(localStorage.session || null),
-        apiUrl: getApiUrl()
+        apiUrl: getConfigValue('apiUrl', 'http://localhost:3000'),
+        appTitle: getConfigValue('appTitle', 'Data Stewardship Wizard'),
+        appTitleShort: getConfigValue('appTitleShort', 'DS Wizard')
     }
 })
 
