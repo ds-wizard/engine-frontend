@@ -15,4 +15,8 @@ type alias AppState =
     , apiUrl : String
     , appTitle : String
     , appTitleShort : String
+    , welcome :
+        { warning : Maybe String
+        , info : Maybe String
+        }
     }

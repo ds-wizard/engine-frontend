@@ -25,6 +25,8 @@ init val location key =
                     , apiUrl = ""
                     , appTitle = "Data Stewardship Wizard"
                     , appTitleShort = "DS Wizard"
+                    , welcomeWarning = Nothing
+                    , welcomeInfo = Nothing
                     }
 
         session =
