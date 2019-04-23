@@ -74,12 +74,15 @@ type alias IntegrationForm =
     { id : String
     , name : String
     , props : List String
+    , logo : String
     , requestMethod : String
     , requestUrl : String
     , requestHeaders : List ( String, String )
+    , requestBody : String
     , responseListField : String
     , responseIdField : String
     , responseNameField : String
+    , itemUrl : String
     }
 
 
@@ -257,12 +260,15 @@ integrationFormValidation integrations uuid =
         (Validate.field "id" (validateIntegrationId integrations uuid))
         (Validate.field "name" Validate.string)
         (Validate.field "props" validateProps)
+        (Validate.field "logo" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
         (Validate.field "requestMethod" Validate.string)
         (Validate.field "requestUrl" Validate.string)
         (Validate.field "requestHeaders" (Validate.list requestHeaderValidation))
-        (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
-        (Validate.field "responseIdField" Validate.string)
+        (Validate.field "requestBody" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
+        |> Validate.andMap (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
+        |> Validate.andMap (Validate.field "responseIdField" Validate.string)
         |> Validate.andMap (Validate.field "responseNameField" Validate.string)
+        |> Validate.andMap (Validate.field "itemUrl" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
 
 
 validateIntegrationId : List Integration -> String -> Validation CustomFormError String
@@ -308,6 +314,7 @@ integrationFormInitials integration =
     [ ( "id", Field.string integration.id )
     , ( "name", Field.string integration.name )
     , ( "props", Field.list (List.map Field.string integration.props) )
+    , ( "logo", Field.string integration.logo )
     , ( "requestMethod", Field.string integration.requestMethod )
     , ( "requestUrl", Field.string integration.requestUrl )
     , ( "requestHeaders"
@@ -322,9 +329,11 @@ integrationFormInitials integration =
                 (Dict.toList integration.requestHeaders)
             )
       )
+    , ( "requestBody", Field.string integration.requestBody )
     , ( "responseListField", Field.string integration.responseListField )
     , ( "responseIdField", Field.string integration.responseIdField )
     , ( "responseNameField", Field.string integration.responseNameField )
+    , ( "itemUrl", Field.string integration.itemUrl )
     ]
 
 
@@ -334,12 +343,15 @@ updateIntegrationWithForm integration integrationForm =
         | id = integrationForm.id
         , name = integrationForm.name
         , props = integrationForm.props
+        , logo = integrationForm.logo
         , requestMethod = integrationForm.requestMethod
         , requestUrl = integrationForm.requestUrl
         , requestHeaders = Dict.fromList integrationForm.requestHeaders
+        , requestBody = integrationForm.requestBody
         , responseListField = integrationForm.responseListField
         , responseIdField = integrationForm.responseIdField
         , responseNameField = integrationForm.responseNameField
+        , itemUrl = integrationForm.itemUrl
     }
 
 

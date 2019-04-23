@@ -107,12 +107,15 @@ type alias Integration =
     , id : String
     , name : String
     , props : List String
+    , logo : String
     , requestMethod : String
     , requestUrl : String
     , requestHeaders : Dict String String
+    , requestBody : String
     , responseListField : String
     , responseIdField : String
     , responseNameField : String
+    , itemUrl : String
     }
 
 
@@ -294,12 +297,15 @@ integrationDecoder =
         |> required "id" Decode.string
         |> required "name" Decode.string
         |> required "props" (Decode.list Decode.string)
+        |> required "logo" Decode.string
         |> required "requestMethod" Decode.string
         |> required "requestUrl" Decode.string
         |> required "requestHeaders" (Decode.dict Decode.string)
+        |> required "requestBody" Decode.string
         |> required "responseListField" Decode.string
         |> required "responseIdField" Decode.string
         |> required "responseNameField" Decode.string
+        |> required "itemUrl" Decode.string
 
 
 questionDecoder : Decoder Question
@@ -548,12 +554,15 @@ newIntegration uuid =
     , id = ""
     , name = "New Integration"
     , props = []
+    , logo = ""
     , requestMethod = "GET"
     , requestUrl = "/"
     , requestHeaders = Dict.empty
+    , requestBody = ""
     , responseListField = ""
     , responseIdField = "id"
     , responseNameField = "name"
+    , itemUrl = ""
     }
 
 

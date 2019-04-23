@@ -417,12 +417,15 @@ addIntegrationEvent =
         , id = "service"
         , name = "Service"
         , props = [ "kind", "category" ]
+        , logo = "data:image/png;base64,..."
         , requestMethod = "GET"
         , requestUrl = "/api/search"
         , requestHeaders = Dict.fromList [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
+        , requestBody = "{}"
         , responseListField = "items"
         , responseIdField = "uuid"
         , responseNameField = "title"
+        , itemUrl = "http://example.com/${id}"
         }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
         , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
@@ -459,6 +462,10 @@ editIntegrationEvent =
             { changed = True
             , value = Just [ "kind", "category" ]
             }
+        , logo =
+            { changed = False
+            , value = Nothing
+            }
         , requestMethod =
             { changed = True
             , value = Just "GET"
@@ -471,6 +478,10 @@ editIntegrationEvent =
             { changed = True
             , value = Just <| Dict.fromList [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
             }
+        , requestBody =
+            { changed = True
+            , value = Just "{}"
+            }
         , responseListField =
             { changed = False
             , value = Nothing
@@ -482,6 +493,10 @@ editIntegrationEvent =
         , responseNameField =
             { changed = True
             , value = Just "title"
+            }
+        , itemUrl =
+            { changed = True
+            , value = Just "http://example.com/${id}"
             }
         }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"

@@ -14,6 +14,7 @@ module FormEngine.Model exposing
     , OptionElement(..)
     , ReplyValue(..)
     , TypeHint
+    , TypeHintConfig
     , TypeHints
     , createForm
     , createItemElement
@@ -64,11 +65,17 @@ type Option a
     | DetailedOption OptionDescriptor (List (FormItem a))
 
 
+type alias TypeHintConfig =
+    { logo : String
+    , url : String
+    }
+
+
 type FormItem a
     = StringFormItem (FormItemDescriptor a)
     | NumberFormItem (FormItemDescriptor a)
     | TextFormItem (FormItemDescriptor a)
-    | TypeHintFormItem (FormItemDescriptor a)
+    | TypeHintFormItem (FormItemDescriptor a) TypeHintConfig
     | ChoiceFormItem (FormItemDescriptor a) (List (Option a))
     | GroupFormItem (FormItemDescriptor a) (List (FormItem a))
 
@@ -97,7 +104,7 @@ type FormElement a
     = StringFormElement (FormItemDescriptor a) FormElementState
     | NumberFormElement (FormItemDescriptor a) FormElementState
     | TextFormElement (FormItemDescriptor a) FormElementState
-    | TypeHintFormElement (FormItemDescriptor a) FormElementState
+    | TypeHintFormElement (FormItemDescriptor a) TypeHintConfig FormElementState
     | ChoiceFormElement (FormItemDescriptor a) (List (OptionElement a)) FormElementState
     | GroupFormElement (FormItemDescriptor a) (List (FormItem a)) (List (ItemElement a)) FormElementState
 
@@ -330,7 +337,7 @@ getDescriptor element =
         GroupFormElement descriptor _ _ _ ->
             descriptor
 
-        TypeHintFormElement descriptor _ ->
+        TypeHintFormElement descriptor _ _ ->
             descriptor
 
 
@@ -420,8 +427,8 @@ createFormElement item =
         GroupFormItem descriptor items ->
             GroupFormElement descriptor items [ createItemElement items ] emptyFormElementState
 
-        TypeHintFormItem descriptor ->
-            TypeHintFormElement descriptor emptyFormElementState
+        TypeHintFormItem descriptor typeHintConfig ->
+            TypeHintFormElement descriptor typeHintConfig emptyFormElementState
 
 
 emptyFormElementState : FormElementState
@@ -479,8 +486,8 @@ setInitialValue formValues path element =
             in
             GroupFormElement descriptor items newItemElements newState
 
-        TypeHintFormElement descriptor state ->
-            TypeHintFormElement descriptor { state | value = getInitialValue formValues path descriptor.name }
+        TypeHintFormElement descriptor typeHintConfig state ->
+            TypeHintFormElement descriptor typeHintConfig { state | value = getInitialValue formValues path descriptor.name }
 
 
 getInitialValue : FormValues -> List String -> String -> Maybe ReplyValue
@@ -543,7 +550,7 @@ getFieldValue path element values =
             in
             List.indexedFoldl (getItemValues (path ++ [ descriptor.name ])) newValues itemElements
 
-        TypeHintFormElement descriptor state ->
+        TypeHintFormElement descriptor _ state ->
             applyFieldValue values (pathToKey path descriptor.name) state.value
 
 

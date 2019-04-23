@@ -128,8 +128,8 @@ updateElementValue value element =
         TextFormElement descriptor state ->
             TextFormElement descriptor { state | value = Just value }
 
-        TypeHintFormElement descriptor state ->
-            TypeHintFormElement descriptor { state | value = Just value }
+        TypeHintFormElement descriptor typeHintConfig state ->
+            TypeHintFormElement descriptor typeHintConfig { state | value = Just value }
 
         ChoiceFormElement descriptor options state ->
             ChoiceFormElement descriptor options { state | value = Just value }
@@ -150,8 +150,8 @@ clearElementValue element =
         TextFormElement descriptor state ->
             TextFormElement descriptor { state | value = Nothing }
 
-        TypeHintFormElement descriptor state ->
-            TypeHintFormElement descriptor { state | value = Nothing }
+        TypeHintFormElement descriptor typeHintConfig state ->
+            TypeHintFormElement descriptor typeHintConfig { state | value = Nothing }
 
         ChoiceFormElement descriptor options state ->
             ChoiceFormElement descriptor options { state | value = Nothing }

@@ -183,12 +183,15 @@ type alias AddIntegrationEventData =
     , id : String
     , name : String
     , props : List String
+    , logo : String
     , requestMethod : String
     , requestUrl : String
     , requestHeaders : Dict String String
+    , requestBody : String
     , responseListField : String
     , responseIdField : String
     , responseNameField : String
+    , itemUrl : String
     }
 
 
@@ -197,12 +200,15 @@ type alias EditIntegrationEventData =
     , id : EventField String
     , name : EventField String
     , props : EventField (List String)
+    , logo : EventField String
     , requestMethod : EventField String
     , requestUrl : EventField String
     , requestHeaders : EventField (Dict String String)
+    , requestBody : EventField String
     , responseListField : EventField String
     , responseIdField : EventField String
     , responseNameField : EventField String
+    , itemUrl : EventField String
     }
 
 
@@ -602,12 +608,15 @@ encodeAddIntegrationEvent data =
     , ( "id", Encode.string data.id )
     , ( "name", Encode.string data.name )
     , ( "props", Encode.list Encode.string data.props )
+    , ( "logo", Encode.string data.logo )
     , ( "requestMethod", Encode.string data.requestMethod )
     , ( "requestUrl", Encode.string data.requestUrl )
     , ( "requestHeaders", Encode.dict identity Encode.string data.requestHeaders )
+    , ( "requestBody", Encode.string data.requestBody )
     , ( "responseListField", Encode.string data.responseListField )
     , ( "responseIdField", Encode.string data.responseIdField )
     , ( "responseNameField", Encode.string data.responseNameField )
+    , ( "itemUrl", Encode.string data.itemUrl )
     ]
 
 
@@ -618,12 +627,15 @@ encodeEditIntegrationEvent data =
     , ( "id", encodeEventField Encode.string data.id )
     , ( "name", encodeEventField Encode.string data.name )
     , ( "props", encodeEventField (Encode.list Encode.string) data.props )
+    , ( "logo", encodeEventField Encode.string data.logo )
     , ( "requestMethod", encodeEventField Encode.string data.requestMethod )
     , ( "requestUrl", encodeEventField Encode.string data.requestUrl )
     , ( "requestHeaders", encodeEventField (Encode.dict identity Encode.string) data.requestHeaders )
+    , ( "requestBody", encodeEventField Encode.string data.requestBody )
     , ( "responseListField", encodeEventField Encode.string data.responseListField )
     , ( "responseIdField", encodeEventField Encode.string data.responseIdField )
     , ( "responseNameField", encodeEventField Encode.string data.responseNameField )
+    , ( "itemUrl", encodeEventField Encode.string data.itemUrl )
     ]
 
 
@@ -1109,12 +1121,15 @@ addIntegrationEventDecoder =
         |> required "id" Decode.string
         |> required "name" Decode.string
         |> required "props" (Decode.list Decode.string)
+        |> required "logo" Decode.string
         |> required "requestMethod" Decode.string
         |> required "requestUrl" Decode.string
         |> required "requestHeaders" (Decode.dict Decode.string)
+        |> required "requestBody" Decode.string
         |> required "responseListField" Decode.string
         |> required "responseIdField" Decode.string
         |> required "responseNameField" Decode.string
+        |> required "itemUrl" Decode.string
 
 
 editIntegrationEventDecoder : Decoder EditIntegrationEventData
@@ -1124,12 +1139,15 @@ editIntegrationEventDecoder =
         |> required "id" (eventFieldDecoder Decode.string)
         |> required "name" (eventFieldDecoder Decode.string)
         |> required "props" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "logo" (eventFieldDecoder Decode.string)
         |> required "requestMethod" (eventFieldDecoder Decode.string)
         |> required "requestUrl" (eventFieldDecoder Decode.string)
         |> required "requestHeaders" (eventFieldDecoder (Decode.dict Decode.string))
+        |> required "requestBody" (eventFieldDecoder Decode.string)
         |> required "responseListField" (eventFieldDecoder Decode.string)
         |> required "responseIdField" (eventFieldDecoder Decode.string)
         |> required "responseNameField" (eventFieldDecoder Decode.string)
+        |> required "itemUrl" (eventFieldDecoder Decode.string)
 
 
 deleteIntegrationEventDecoder : Decoder DeleteIntegrationEventData

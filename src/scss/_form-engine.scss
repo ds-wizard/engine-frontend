@@ -143,6 +143,17 @@
         padding: .25em 0.8em;
     }
 
+    .integration-extra {
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: flex-end;
+
+        img {
+            height: 1.5rem;
+            margin-right: 0.25rem;
+        }
+    }
+
     .typehints {
         background: #fff;
         position: absolute;

@@ -126,12 +126,15 @@ createAddIntegrationEvent form editorData =
             , id = form.id
             , name = form.name
             , props = form.props
+            , logo = form.logo
             , requestMethod = form.requestMethod
             , requestUrl = form.requestUrl
             , requestHeaders = Dict.fromList form.requestHeaders
+            , requestBody = form.requestBody
             , responseListField = form.responseListField
             , responseIdField = form.responseIdField
             , responseNameField = form.responseNameField
+            , itemUrl = form.itemUrl
             }
     in
     createEvent (AddIntegrationEvent data) editorData.path
@@ -148,12 +151,15 @@ createEditIntegrationEvent form editorData =
             , id = createEventField form.id (editorData.integration.id /= form.id)
             , name = createEventField form.name (editorData.integration.name /= form.name)
             , props = createEventField form.props (editorData.integration.props /= form.props)
+            , logo = createEventField form.logo (editorData.integration.logo /= form.logo)
             , requestMethod = createEventField form.requestMethod (editorData.integration.requestMethod /= form.requestMethod)
             , requestUrl = createEventField form.requestUrl (editorData.integration.requestUrl /= form.requestUrl)
             , requestHeaders = createEventField requestHeaders (editorData.integration.requestHeaders /= requestHeaders)
+            , requestBody = createEventField form.requestBody (editorData.integration.requestBody /= form.requestBody)
             , responseListField = createEventField form.responseListField (editorData.integration.responseListField /= form.responseListField)
             , responseIdField = createEventField form.responseIdField (editorData.integration.responseIdField /= form.responseIdField)
             , responseNameField = createEventField form.responseNameField (editorData.integration.responseNameField /= form.responseNameField)
+            , itemUrl = createEventField form.itemUrl (editorData.integration.itemUrl /= form.itemUrl)
             }
     in
     createEvent (EditIntegrationEvent data) editorData.path

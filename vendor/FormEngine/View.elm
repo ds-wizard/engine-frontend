@@ -98,7 +98,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 , button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
                 ]
 
-        TypeHintFormElement descriptor state ->
+        TypeHintFormElement descriptor typeHintConfig state ->
             div [ class "form-group" ]
                 [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
                 , input
@@ -110,18 +110,32 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                     , onBlur HideTypeHints
                     ]
                     []
-                , viewIntegrationReplyExtra state
                 , viewTypeHints form.typeHints path descriptor
+                , viewIntegrationReplyExtra typeHintConfig state
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 ]
 
 
-viewIntegrationReplyExtra : FormElementState -> Html (Msg msg)
-viewIntegrationReplyExtra state =
+viewIntegrationReplyExtra : TypeHintConfig -> FormElementState -> Html (Msg msg)
+viewIntegrationReplyExtra config state =
     case state.value of
         Just (IntegrationReply (IntegrationValue id name)) ->
-            p [] [ text <| "Integration reply " ++ id ]
+            let
+                url =
+                    String.replace "${id}" id config.url
+
+                logo =
+                    if String.isEmpty config.logo then
+                        text ""
+
+                    else
+                        img [ src config.logo ] []
+            in
+            p [ class "integration-extra" ]
+                [ logo
+                , a [ href url, target "_blank" ] [ text url ]
+                ]
 
         _ ->
             emptyNode

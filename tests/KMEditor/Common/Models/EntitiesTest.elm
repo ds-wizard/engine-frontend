@@ -128,12 +128,15 @@ knowledgeModelDecoderTest =
                                 "id": "service",
                                 "name": "Service",
                                 "props": ["kind", "category"],
+                                "logo": "data:image/png;base64,...",
                                 "requestMethod": "GET",
                                 "requestUrl": "/",
                                 "requestHeaders": {"X_USER": "user"},
+                                "requestBody": "{}",
                                 "responseListField": "items",
                                 "responseIdField": "id",
-                                "responseNameField": "title"
+                                "responseNameField": "title",
+                                "itemUrl": "http://example.com/${id}"
                             }]
                         }
                         """
@@ -148,12 +151,15 @@ knowledgeModelDecoderTest =
                               , id = "service"
                               , name = "Service"
                               , props = [ "kind", "category" ]
+                              , logo = "data:image/png;base64,..."
                               , requestMethod = "GET"
                               , requestUrl = "/"
                               , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
+                              , requestBody = "{}"
                               , responseListField = "items"
                               , responseIdField = "id"
                               , responseNameField = "title"
+                              , itemUrl = "http://example.com/${id}"
                               }
                             ]
                         }
@@ -202,12 +208,15 @@ integrationDecoderTest =
                             "id": "service",
                             "name": "Service",
                             "props": ["kind", "category"],
+                            "logo": "data:image/png;base64,...",
                             "requestMethod": "GET",
                             "requestUrl": "/",
                             "requestHeaders": {"X_USER": "user"},
+                            "requestBody": "{}",
                             "responseListField": "",
                             "responseIdField": "id",
-                            "responseNameField": "title"
+                            "responseNameField": "title",
+                            "itemUrl": "http://example.com/${id}"
                         }
                         """
 
@@ -216,12 +225,15 @@ integrationDecoderTest =
                         , id = "service"
                         , name = "Service"
                         , props = [ "kind", "category" ]
+                        , logo = "data:image/png;base64,..."
                         , requestMethod = "GET"
                         , requestUrl = "/"
                         , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
+                        , requestBody = "{}"
                         , responseListField = ""
                         , responseIdField = "id"
                         , responseNameField = "title"
+                        , itemUrl = "http://example.com/${id}"
                         }
                 in
                 expectDecoder integrationDecoder raw expected

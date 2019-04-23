@@ -202,13 +202,16 @@ integrationEditorView model editorData =
             div []
                 [ FormGroup.input editorData.form "id" "Id"
                 , FormGroup.input editorData.form "name" "Name"
+                , FormGroup.input editorData.form "logo" "Logo"
                 , FormGroup.list integrationPropsItemView editorData.form "props" "Props"
+                , FormGroup.input editorData.form "itemUrl" "Item URL"
                 , div [ class "card card-border-light mb-5" ]
                     [ div [ class "card-header" ] [ text "Request" ]
                     , div [ class "card-body" ]
                         [ FormGroup.select httpMethodOptions editorData.form "requestMethod" "Request Method"
                         , FormGroup.input editorData.form "requestUrl" "Request URL"
                         , FormGroup.list integrationHeaderItemView editorData.form "requestHeaders" "Request Headers"
+                        , FormGroup.textarea editorData.form "requestBody" "Request Body"
                         ]
                     ]
                 , div [ class "card card-border-light mb-5" ]

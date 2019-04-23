@@ -72,7 +72,7 @@ initialModel questionnaire metrics =
         activePage =
             case List.head questionnaire.knowledgeModel.chapters of
                 Just chapter ->
-                    PageChapter chapter (createChapterForm metrics questionnaire chapter)
+                    PageChapter chapter (createChapterForm questionnaire.knowledgeModel metrics questionnaire chapter)
 
                 Nothing ->
                     PageNone
@@ -175,23 +175,23 @@ feedbackListDecoder =
 {- Form creation -}
 
 
-createChapterForm : List Metric -> QuestionnaireDetail -> Chapter -> Form FormExtraData
-createChapterForm metrics questionnaire chapter =
-    createForm { items = List.map (createQuestionFormItem metrics) chapter.questions } questionnaire.replies [ chapter.uuid ]
+createChapterForm : KnowledgeModel -> List Metric -> QuestionnaireDetail -> Chapter -> Form FormExtraData
+createChapterForm km metrics questionnaire chapter =
+    createForm { items = List.map (createQuestionFormItem km metrics) chapter.questions } questionnaire.replies [ chapter.uuid ]
 
 
-createQuestionFormItem : List Metric -> Question -> FormItem FormExtraData
-createQuestionFormItem metrics question =
+createQuestionFormItem : KnowledgeModel -> List Metric -> Question -> FormItem FormExtraData
+createQuestionFormItem km metrics question =
     let
         descriptor =
             createFormItemDescriptor question
     in
     case question of
         OptionsQuestion data ->
-            ChoiceFormItem descriptor (List.map (createAnswerOption metrics) data.answers)
+            ChoiceFormItem descriptor (List.map (createAnswerOption km metrics) data.answers)
 
         ListQuestion data ->
-            GroupFormItem descriptor (createGroupItems metrics data)
+            GroupFormItem descriptor (createGroupItems km metrics data)
 
         ValueQuestion data ->
             case data.valueType of
@@ -205,7 +205,9 @@ createQuestionFormItem metrics question =
                     StringFormItem descriptor
 
         IntegrationQuestion data ->
-            TypeHintFormItem descriptor
+            List.find (.uuid >> (==) data.integrationUuid) km.integrations
+                |> Maybe.map (\i -> TypeHintFormItem descriptor { logo = i.logo, url = i.itemUrl })
+                |> Maybe.withDefault (TextFormItem descriptor)
 
 
 createFormItemDescriptor : Question -> FormItemDescriptor FormExtraData
@@ -241,8 +243,8 @@ createQuestionExtraData question =
     Just <| List.foldl foldReferences newExtraData <| getQuestionReferences question
 
 
-createAnswerOption : List Metric -> Answer -> Option FormExtraData
-createAnswerOption metrics answer =
+createAnswerOption : KnowledgeModel -> List Metric -> Answer -> Option FormExtraData
+createAnswerOption km metrics answer =
     let
         descriptor =
             createOptionFormDescriptor metrics answer
@@ -252,7 +254,7 @@ createAnswerOption metrics answer =
             SimpleOption descriptor
 
         FollowUps followUps ->
-            DetailedOption descriptor (List.map (createQuestionFormItem metrics) followUps)
+            DetailedOption descriptor (List.map (createQuestionFormItem km metrics) followUps)
 
 
 createOptionFormDescriptor : List Metric -> Answer -> OptionDescriptor
@@ -290,8 +292,8 @@ createBadges metrics answer =
             |> Just
 
 
-createGroupItems : List Metric -> ListQuestionData -> List (FormItem FormExtraData)
-createGroupItems metrics questionData =
+createGroupItems : KnowledgeModel -> List Metric -> ListQuestionData -> List (FormItem FormExtraData)
+createGroupItems km metrics questionData =
     let
         itemNameExtraData =
             { resourcePageReferences = []
@@ -309,7 +311,7 @@ createGroupItems metrics questionData =
                 }
 
         questions =
-            List.map (createQuestionFormItem metrics) questionData.itemTemplateQuestions
+            List.map (createQuestionFormItem km metrics) questionData.itemTemplateQuestions
     in
     itemName :: questions
 
@@ -343,7 +345,7 @@ updateQuestionnaireReplies replies questionnaire =
 setActiveChapter : Chapter -> Model -> Model
 setActiveChapter chapter model =
     { model
-        | activePage = PageChapter chapter (createChapterForm model.metrics model.questionnaire chapter)
+        | activePage = PageChapter chapter (createChapterForm model.questionnaire.knowledgeModel model.metrics model.questionnaire chapter)
     }
 
 
