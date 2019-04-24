@@ -31,6 +31,7 @@ module KMEditor.Common.Models.Entities exposing
     , getExpert
     , getExperts
     , getFollowUpQuestions
+    , getIntegration
     , getQuestion
     , getQuestionAnswers
     , getQuestionExperts
@@ -698,6 +699,11 @@ getChapter km chapterUuid =
 getTag : KnowledgeModel -> String -> Maybe Tag
 getTag km tagUuid =
     List.find (\t -> t.uuid == tagUuid) km.tags
+
+
+getIntegration : KnowledgeModel -> String -> Maybe Integration
+getIntegration km integrationUuid =
+    List.find (\i -> i.uuid == integrationUuid) km.integrations
 
 
 getQuestions : KnowledgeModel -> List Question
