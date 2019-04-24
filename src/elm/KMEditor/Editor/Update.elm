@@ -106,6 +106,8 @@ update msg wrapMsg appState model =
                                                 KMEditor.Editor.Preview.Models.initialModel
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
+                                                    ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
+                                                    (ActionResult.withDefault "" <| ActionResult.map (Maybe.withDefault "" << .parentPackageId) model.km)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
                                         , editorModel =
                                             Just <|
@@ -136,11 +138,21 @@ update msg wrapMsg appState model =
 
                 PreviewEditorMsg previewMsg ->
                     let
-                        previewEditorModel =
-                            model.previewEditorModel
-                                |> Maybe.map (KMEditor.Editor.Preview.Update.update previewMsg appState)
+                        ( previewEditorModel, cmd ) =
+                            case model.previewEditorModel of
+                                Just m ->
+                                    let
+                                        ( newPreviewEditorModel, newCmd ) =
+                                            KMEditor.Editor.Preview.Update.update previewMsg appState m
+                                    in
+                                    ( Just newPreviewEditorModel
+                                    , Cmd.map (wrapMsg << PreviewEditorMsg) newCmd
+                                    )
+
+                                Nothing ->
+                                    ( Nothing, Cmd.none )
                     in
-                    ( appState.seed, { model | previewEditorModel = previewEditorModel }, Cmd.none )
+                    ( appState.seed, { model | previewEditorModel = previewEditorModel }, cmd )
 
                 TagEditorMsg tagMsg ->
                     let

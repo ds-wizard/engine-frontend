@@ -14,6 +14,7 @@ import FormEngine.Model exposing (TypeHint, setTypeHintsResult)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import KMEditor.Common.Models.Entities exposing (Chapter)
+import KMEditor.Common.Models.Events exposing (Event)
 import Ports
 import Utils exposing (stringToInt)
 
@@ -138,7 +139,7 @@ handleFormMsg msg appState model =
                 _ ->
                     let
                         ( updatedForm, cmd ) =
-                            updateForm msg form (loadTypeHints appState model.questionnaire.package.id)
+                            updateForm msg form (loadTypeHints appState model.questionnaire.package.id model.events)
                     in
                     ( updateReplies
                         { model
@@ -152,9 +153,17 @@ handleFormMsg msg appState model =
             ( model, Cmd.none )
 
 
-loadTypeHints : AppState -> String -> String -> String -> (Result ApiError (List TypeHint) -> msg) -> Cmd msg
-loadTypeHints appState packageId questionUuid q toMsg =
-    TypeHintsApi.fetchTypeHints packageId questionUuid q appState toMsg
+loadTypeHints : AppState -> String -> List Event -> String -> String -> (Result ApiError (List TypeHint) -> msg) -> Cmd msg
+loadTypeHints appState packageId events questionUuid q toMsg =
+    let
+        mbPackageId =
+            if String.isEmpty packageId then
+                Nothing
+
+            else
+                Just packageId
+    in
+    TypeHintsApi.fetchTypeHints mbPackageId events questionUuid q appState toMsg
 
 
 handleSetActiveChapter : Chapter -> Model -> Model

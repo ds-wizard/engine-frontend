@@ -5,14 +5,16 @@ import Common.AppState exposing (AppState)
 import FormEngine.Model exposing (TypeHint, decodeTypeHint)
 import Json.Decode as Decode
 import Json.Encode as Encode
+import KMEditor.Common.Models.Events exposing (Event, encodeEvent)
 
 
-fetchTypeHints : String -> String -> String -> AppState -> ToMsg (List TypeHint) msg -> Cmd msg
-fetchTypeHints packageId questionUuid q =
+fetchTypeHints : Maybe String -> List Event -> String -> String -> AppState -> ToMsg (List TypeHint) msg -> Cmd msg
+fetchTypeHints mbPackageId events questionUuid q =
     let
         data =
             Encode.object
-                [ ( "packageId", Encode.string packageId )
+                [ ( "packageId", mbPackageId |> Maybe.map Encode.string |> Maybe.withDefault Encode.null )
+                , ( "events", Encode.list encodeEvent events )
                 , ( "questionUuid", Encode.string questionUuid )
                 , ( "q", Encode.string q )
                 ]

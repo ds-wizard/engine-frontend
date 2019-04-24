@@ -32,6 +32,7 @@ import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.Models.Events exposing (Event)
 import KnowledgeModels.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
 import String exposing (fromInt)
@@ -40,6 +41,7 @@ import Utils exposing (boolToInt)
 
 type alias Model =
     { questionnaire : QuestionnaireDetail
+    , events : List Event
     , activePage : ActivePage
     , feedback : ActionResult (List Feedback)
     , feedbackQuestionUuid : Maybe String
@@ -66,8 +68,8 @@ type alias FormExtraData =
     }
 
 
-initialModel : QuestionnaireDetail -> List Metric -> Model
-initialModel questionnaire metrics =
+initialModel : QuestionnaireDetail -> List Metric -> List Event -> Model
+initialModel questionnaire metrics events =
     let
         activePage =
             case List.head questionnaire.knowledgeModel.chapters of
@@ -78,6 +80,7 @@ initialModel questionnaire metrics =
                     PageNone
     in
     { questionnaire = questionnaire
+    , events = events
     , activePage = activePage
     , feedback = Unset
     , feedbackQuestionUuid = Nothing
