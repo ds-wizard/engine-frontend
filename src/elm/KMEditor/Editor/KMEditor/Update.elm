@@ -22,8 +22,8 @@ import SplitPane
 import Utils exposing (pair)
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg appState model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> Cmd Msgs.Msg -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model fetchPreviewCmd =
     case msg of
         PaneMsg paneMsg ->
             ( appState.seed, { model | splitPane = SplitPane.update paneMsg model.splitPane }, Cmd.none )
@@ -155,9 +155,14 @@ update msg wrapMsg appState model =
                                 |> pair appState.seed
                                 |> withNoCmd
 
+                        ToggleDeleteConfirm open ->
+                            insertEditor (IntegrationEditor { editorData | deleteConfirmOpen = open }) model
+                                |> pair appState.seed
+                                |> withNoCmd
+
                         DeleteIntegration uuid ->
                             deleteIntegration appState.seed model uuid editorData
-                                |> withNoCmd
+                                |> withCmd fetchPreviewCmd
 
                 ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
                     case questionEditorMsg of
@@ -308,8 +313,13 @@ generateEvents seed model =
 
 
 withNoCmd : ( a, b ) -> ( a, b, Cmd msg )
-withNoCmd ( a, b ) =
-    ( a, b, Cmd.none )
+withNoCmd =
+    withCmd Cmd.none
+
+
+withCmd : Cmd msg -> ( a, b ) -> ( a, b, Cmd msg )
+withCmd cmd ( a, b ) =
+    ( a, b, cmd )
 
 
 setActiveEditor : (Msg -> Msgs.Msg) -> String -> Seed -> Model -> a -> ( Seed, Model, Cmd Msgs.Msg )

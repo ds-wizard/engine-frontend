@@ -131,6 +131,7 @@ type alias IntegrationEditorData =
     , treeOpen : Bool
     , editorState : EditorState
     , path : Path
+    , deleteConfirmOpen : Bool
     }
 
 
@@ -276,6 +277,7 @@ createIntegrationEditor editorContext path getEditorState integration editors =
                 , treeOpen = False
                 , editorState = getEditorState integration.uuid
                 , path = path
+                , deleteConfirmOpen = False
                 }
     in
     Dict.insert integration.uuid editor editors

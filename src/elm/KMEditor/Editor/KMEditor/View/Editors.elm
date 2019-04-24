@@ -1,9 +1,11 @@
 module KMEditor.Editor.KMEditor.View.Editors exposing (activeEditor)
 
+import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
 import Common.View.Flash as Flash
 import Common.View.FormGroup as FormGroup
+import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Common.View.Tag as Tag
 import Dict exposing (Dict)
@@ -195,7 +197,7 @@ integrationEditorView model editorData =
     let
         editorTitleConfig =
             { title = "Integration"
-            , deleteAction = DeleteIntegration editorData.uuid |> IntegrationEditorMsg |> EditorMsg |> Just
+            , deleteAction = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm True
             }
 
         form =
@@ -228,8 +230,24 @@ integrationEditorView model editorData =
     , div [ class editorClass ]
         [ editorTitle editorTitleConfig
         , form |> Html.map (IntegrationFormMsg >> IntegrationEditorMsg >> EditorMsg)
+        , integrationDeleteConfirm editorData
         ]
     )
+
+
+integrationDeleteConfirm : IntegrationEditorData -> Html Msg
+integrationDeleteConfirm editorData =
+    Modal.confirm
+        { modalTitle = "Delete Integration"
+        , modalContent =
+            [ p [] [ text "All questions using this integration will be converted to Value Question. Are you sure you want to delete the integration?" ]
+            ]
+        , visible = editorData.deleteConfirmOpen
+        , actionResult = Unset
+        , actionName = "Delete"
+        , actionMsg = EditorMsg <| IntegrationEditorMsg <| DeleteIntegration editorData.uuid
+        , cancelMsg = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm False
+        }
 
 
 integrationPropsItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg

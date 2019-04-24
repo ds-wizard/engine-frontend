@@ -60,6 +60,7 @@ type TagEditorMsg
 
 type IntegrationEditorMsg
     = IntegrationFormMsg Form.Msg
+    | ToggleDeleteConfirm Bool
     | DeleteIntegration String
 
 
