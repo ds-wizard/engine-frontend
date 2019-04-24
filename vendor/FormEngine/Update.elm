@@ -1,13 +1,21 @@
 module FormEngine.Update exposing (updateForm)
 
 import ActionResult exposing (ActionResult(..))
+import Debounce
 import FormEngine.Model exposing (..)
 import FormEngine.Msgs exposing (Msg(..))
 import String exposing (fromInt)
 
 
-updateForm : Msg msg -> LoadTypeHints b -> Form a -> ( Form a, Cmd b )
-updateForm msg loadTypeHints form =
+debounceConfig : Debounce.Config (Msg msg err)
+debounceConfig =
+    { strategy = Debounce.later 1000
+    , transform = DebounceMsg
+    }
+
+
+updateForm : Msg msg err -> Form a -> (String -> String -> (Result err (List TypeHint) -> Msg msg err) -> Cmd (Msg msg err)) -> ( Form a, Cmd (Msg msg err) )
+updateForm msg form loadTypeHints =
     case msg of
         Input path value ->
             ( { form | elements = List.map (updateElement (updateElementValue value) path) form.elements }
@@ -15,8 +23,32 @@ updateForm msg loadTypeHints form =
             )
 
         InputTypehint path questionUuid value ->
-            ( { form | elements = List.map (updateElement (updateElementValue value) path) form.elements }
-            , loadTypeHints questionUuid <| getStringReply value
+            let
+                ( debounce, cmd ) =
+                    Debounce.push debounceConfig ( questionUuid, getStringReply value ) form.debounce
+            in
+            ( { form
+                | elements = List.map (updateElement (updateElementValue value) path) form.elements
+                , typeHints =
+                    Just
+                        { path = path
+                        , hints = Loading
+                        }
+                , debounce = debounce
+              }
+            , cmd
+            )
+
+        DebounceMsg debounceMsg ->
+            let
+                load ( questionUuid, value ) =
+                    loadTypeHints questionUuid value TypeHintsLoaded
+
+                ( debounce, cmd ) =
+                    Debounce.update debounceConfig (Debounce.takeLast load) debounceMsg form.debounce
+            in
+            ( { form | debounce = debounce }
+            , cmd
             )
 
         Clear path ->
@@ -34,7 +66,7 @@ updateForm msg loadTypeHints form =
             , Cmd.none
             )
 
-        ShowTypeHints path questionUuid ->
+        ShowTypeHints path questionUuid value ->
             ( { form
                 | typeHints =
                     Just
@@ -42,13 +74,25 @@ updateForm msg loadTypeHints form =
                         , hints = Loading
                         }
               }
-            , loadTypeHints questionUuid ""
+            , loadTypeHints questionUuid value TypeHintsLoaded
             )
 
         HideTypeHints ->
             ( { form | typeHints = Nothing }
             , Cmd.none
             )
+
+        TypeHintsLoaded result ->
+            let
+                actionResult =
+                    case result of
+                        Ok typeHints ->
+                            Success typeHints
+
+                        Err _ ->
+                            Error "Unable to get type hints"
+            in
+            ( setTypeHintsResult actionResult form, Cmd.none )
 
         _ ->
             ( form, Cmd.none )

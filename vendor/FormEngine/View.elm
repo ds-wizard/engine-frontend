@@ -16,14 +16,14 @@ type QuestionState
     | Desirable
 
 
-type alias FormViewConfig msg a =
+type alias FormViewConfig msg a err =
     { customActions : List ( String, msg )
-    , viewExtraData : Maybe (a -> Html (Msg msg))
+    , viewExtraData : Maybe (a -> Html (Msg msg err))
     , isDesirable : Maybe (a -> Bool)
     }
 
 
-viewForm : FormViewConfig msg a -> Form a -> Html (Msg msg)
+viewForm : FormViewConfig msg a err -> Form a -> Html (Msg msg err)
 viewForm config form =
     div [ class "form-engine-form" ]
         (List.indexedMap (viewFormElement form config [] [] False) form.elements)
@@ -39,7 +39,7 @@ identifierToChar =
     (+) 97 >> Char.fromCode >> String.fromChar
 
 
-viewFormElement : Form a -> FormViewConfig msg a -> List String -> List String -> Bool -> Int -> FormElement a -> Html (Msg msg)
+viewFormElement : Form a -> FormViewConfig msg a err -> List String -> List String -> Bool -> Int -> FormElement a -> Html (Msg msg err)
 viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier order formItem =
     let
         newHumanIdentifiers =
@@ -106,7 +106,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                     , type_ "text"
                     , value (stateValueToString state)
                     , onInput (InputTypehint (path ++ [ descriptor.name ]) descriptor.name << IntegrationReply << PlainValue)
-                    , onFocus <| ShowTypeHints (path ++ [ descriptor.name ]) descriptor.name
+                    , onFocus <| ShowTypeHints (path ++ [ descriptor.name ]) descriptor.name (stateValueToString state)
                     , onBlur HideTypeHints
                     ]
                     []
@@ -117,7 +117,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 ]
 
 
-viewIntegrationReplyExtra : TypeHintConfig -> FormElementState -> Html (Msg msg)
+viewIntegrationReplyExtra : TypeHintConfig -> FormElementState -> Html (Msg msg err)
 viewIntegrationReplyExtra config state =
     case state.value of
         Just (IntegrationReply (IntegrationValue id name)) ->
@@ -141,7 +141,7 @@ viewIntegrationReplyExtra config state =
             emptyNode
 
 
-viewTypeHint : List String -> String -> TypeHint -> Html (Msg msg)
+viewTypeHint : List String -> String -> TypeHint -> Html (Msg msg err)
 viewTypeHint path descriptorId typeHint =
     li []
         [ a [ onMouseDown <| InputTypehint path descriptorId <| IntegrationReply <| IntegrationValue typeHint.id typeHint.name ]
@@ -150,7 +150,7 @@ viewTypeHint path descriptorId typeHint =
         ]
 
 
-viewTypeHints : Maybe TypeHints -> List String -> FormItemDescriptor a -> Html (Msg msg)
+viewTypeHints : Maybe TypeHints -> List String -> FormItemDescriptor a -> Html (Msg msg err)
 viewTypeHints typeHints path descriptor =
     let
         currentPath =
@@ -192,7 +192,7 @@ viewTypeHints typeHints path descriptor =
         text ""
 
 
-viewLabel : FormViewConfig msg a -> FormItemDescriptor a -> Bool -> List String -> Html (Msg msg)
+viewLabel : FormViewConfig msg a err -> FormItemDescriptor a -> Bool -> List String -> Html (Msg msg err)
 viewLabel config descriptor answered humanIdentifiers =
     let
         questionState =
@@ -235,26 +235,26 @@ viewLabel config descriptor answered humanIdentifiers =
         ]
 
 
-viewDescription : Maybe String -> Html (Msg msg)
+viewDescription : Maybe String -> Html (Msg msg err)
 viewDescription descriptionText =
     descriptionText
         |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ text t ])
         |> Maybe.withDefault (text "")
 
 
-viewCustomActions : String -> FormViewConfig msg a -> Html (Msg msg)
+viewCustomActions : String -> FormViewConfig msg a err -> Html (Msg msg err)
 viewCustomActions questionId config =
     span [ class "custom-actions" ]
         (List.map (viewCustomAction questionId) config.customActions)
 
 
-viewCustomAction : String -> ( String, msg ) -> Html (Msg msg)
+viewCustomAction : String -> ( String, msg ) -> Html (Msg msg err)
 viewCustomAction questionId ( icon, msg ) =
     a [ onClick <| CustomQuestionMsg questionId msg ]
         [ i [ class <| "fa " ++ icon ] [] ]
 
 
-viewExtraData : FormViewConfig msg a -> Maybe a -> Html (Msg msg)
+viewExtraData : FormViewConfig msg a err -> Maybe a -> Html (Msg msg err)
 viewExtraData config extraData =
     case ( config.viewExtraData, extraData ) of
         ( Just view, Just data ) ->
@@ -264,7 +264,7 @@ viewExtraData config extraData =
             text ""
 
 
-viewClearAnswer : Bool -> List String -> Html (Msg msg)
+viewClearAnswer : Bool -> List String -> Html (Msg msg err)
 viewClearAnswer answered path =
     if answered then
         a [ class "clear-answer", onClick <| Clear path ]
@@ -276,7 +276,7 @@ viewClearAnswer answered path =
         text ""
 
 
-viewGroupItem : Form a -> FormViewConfig msg a -> List String -> List String -> Int -> ItemElement a -> Html (Msg msg)
+viewGroupItem : Form a -> FormViewConfig msg a err -> List String -> List String -> Int -> ItemElement a -> Html (Msg msg err)
 viewGroupItem form config path humanIdentifiers index itemElement =
     let
         newHumanIdentifiers =
@@ -295,7 +295,7 @@ viewGroupItem form config path humanIdentifiers index itemElement =
         ]
 
 
-viewChoice : List String -> FormItemDescriptor a -> FormElementState -> Int -> OptionElement a -> Html (Msg msg)
+viewChoice : List String -> FormItemDescriptor a -> FormElementState -> Int -> OptionElement a -> Html (Msg msg err)
 viewChoice path parentDescriptor parentState order optionElement =
     let
         radioName =
@@ -333,7 +333,7 @@ viewChoice path parentDescriptor parentState order optionElement =
             viewOption label (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] []) badges
 
 
-viewAdvice : Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)
+viewAdvice : Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg err)
 viewAdvice value options =
     let
         getDescriptor option =
@@ -365,7 +365,7 @@ viewAdvice value options =
             text ""
 
 
-adviceElement : Maybe String -> Html (Msg msg)
+adviceElement : Maybe String -> Html (Msg msg err)
 adviceElement maybeAdvice =
     case maybeAdvice of
         Just advice ->
@@ -375,7 +375,7 @@ adviceElement maybeAdvice =
             text ""
 
 
-viewFollowUps : Form a -> FormViewConfig msg a -> List String -> List String -> Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg)
+viewFollowUps : Form a -> FormViewConfig msg a err -> List String -> List String -> Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg err)
 viewFollowUps form config path humanIdentifiers value options =
     let
         isSelected ( _, option ) =

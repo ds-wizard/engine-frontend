@@ -10,7 +10,7 @@ import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Form exposing (Form)
-import FormEngine.Model exposing (LoadTypeHints, setTypeHintsResult)
+import FormEngine.Model exposing (TypeHint, setTypeHintsResult)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import KMEditor.Common.Models.Entities exposing (Chapter)
@@ -117,7 +117,7 @@ update msg appState model =
                     ( model, Cmd.none )
 
 
-handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> AppState -> Model -> ( Model, Cmd Msg )
+handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage ApiError -> AppState -> Model -> ( Model, Cmd Msg )
 handleFormMsg msg appState model =
     case model.activePage of
         PageChapter chapter form ->
@@ -138,26 +138,23 @@ handleFormMsg msg appState model =
                 _ ->
                     let
                         ( updatedForm, cmd ) =
-                            updateForm msg
-                                (createLoadTypeHints model.questionnaire.package.id appState)
-                                form
+                            updateForm msg form (loadTypeHints appState model.questionnaire.package.id)
                     in
                     ( updateReplies
                         { model
                             | activePage = PageChapter chapter updatedForm
                             , dirty = True
                         }
-                    , cmd
+                    , Cmd.map FormMsg cmd
                     )
 
         _ ->
             ( model, Cmd.none )
 
 
-createLoadTypeHints : String -> AppState -> LoadTypeHints Msg
-createLoadTypeHints packageId appState =
-    \questionUuid q ->
-        TypeHintsApi.fetchTypeHints packageId questionUuid q appState GetTypeHintsCompleted
+loadTypeHints : AppState -> String -> String -> String -> (Result ApiError (List TypeHint) -> msg) -> Cmd msg
+loadTypeHints appState packageId questionUuid q toMsg =
+    TypeHintsApi.fetchTypeHints packageId questionUuid q appState toMsg
 
 
 handleSetActiveChapter : Chapter -> Model -> Model

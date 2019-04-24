@@ -8,7 +8,6 @@ module FormEngine.Model exposing
     , FormValues
     , IntegrationReplyValue(..)
     , ItemElement
-    , LoadTypeHints
     , Option(..)
     , OptionDescriptor
     , OptionElement(..)
@@ -32,6 +31,7 @@ module FormEngine.Model exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Debounce exposing (Debounce)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
@@ -124,6 +124,7 @@ type alias TypeHints =
 type alias Form a =
     { elements : List (FormElement a)
     , typeHints : Maybe TypeHints
+    , debounce : Debounce ( String, String )
     }
 
 
@@ -148,10 +149,6 @@ type alias FormValue =
     { path : String
     , value : ReplyValue
     }
-
-
-type alias LoadTypeHints a =
-    String -> String -> Cmd a
 
 
 
@@ -406,6 +403,7 @@ createForm : FormTree a -> FormValues -> List String -> Form a
 createForm formTree formValues defaultPath =
     { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues defaultPath)
     , typeHints = Nothing
+    , debounce = Debounce.init
     }
 
 

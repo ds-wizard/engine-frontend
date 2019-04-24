@@ -11,7 +11,7 @@ import Result exposing (Result)
 
 
 type Msg
-    = FormMsg (FormEngine.Msgs.Msg CustomFormMessage)
+    = FormMsg (FormEngine.Msgs.Msg CustomFormMessage ApiError)
     | SetLevel String
     | SetActiveChapter Chapter
     | ViewSummaryReport
