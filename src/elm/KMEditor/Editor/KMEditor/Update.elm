@@ -20,6 +20,7 @@ import Random exposing (Seed)
 import Reorderable
 import SplitPane
 import Utils exposing (pair)
+import ValueList
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> Cmd Msgs.Msg -> ( Seed, Model, Cmd Msgs.Msg )
@@ -163,6 +164,11 @@ update msg wrapMsg appState model fetchPreviewCmd =
                         DeleteIntegration uuid ->
                             deleteIntegration appState.seed model uuid editorData
                                 |> withCmd fetchPreviewCmd
+
+                        PropsListMsg propsListMsg ->
+                            insertEditor (IntegrationEditor { editorData | props = ValueList.update propsListMsg editorData.props }) model
+                                |> pair appState.seed
+                                |> withNoCmd
 
                 ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
                     case questionEditorMsg of

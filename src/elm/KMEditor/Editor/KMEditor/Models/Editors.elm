@@ -70,6 +70,7 @@ import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (..)
+import ValueList exposing (ValueList)
 
 
 type EditorState
@@ -131,6 +132,7 @@ type alias IntegrationEditorData =
     , treeOpen : Bool
     , editorState : EditorState
     , path : Path
+    , props : ValueList
     , deleteConfirmOpen : Bool
     }
 
@@ -277,6 +279,7 @@ createIntegrationEditor editorContext path getEditorState integration editors =
                 , treeOpen = False
                 , editorState = getEditorState integration.uuid
                 , path = path
+                , props = ValueList.init integration.props
                 , deleteConfirmOpen = False
                 }
     in
@@ -700,6 +703,7 @@ isIntegrationEditorDirty : IntegrationEditorData -> Bool
 isIntegrationEditorDirty editorData =
     (editorData.editorState == Added)
         || formChanged editorData.form
+        || editorData.props.dirty
 
 
 isQuestionEditorDirty : QuestionEditorData -> Bool

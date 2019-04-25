@@ -125,7 +125,7 @@ createAddIntegrationEvent form editorData =
             { integrationUuid = editorData.integration.uuid
             , id = form.id
             , name = form.name
-            , props = form.props
+            , props = editorData.props.list
             , logo = form.logo
             , requestMethod = form.requestMethod
             , requestUrl = form.requestUrl
@@ -150,7 +150,7 @@ createEditIntegrationEvent form editorData =
             { integrationUuid = editorData.integration.uuid
             , id = createEventField form.id (editorData.integration.id /= form.id)
             , name = createEventField form.name (editorData.integration.name /= form.name)
-            , props = createEventField form.props (editorData.integration.props /= form.props)
+            , props = createEventField editorData.props.list editorData.props.dirty
             , logo = createEventField form.logo (editorData.integration.logo /= form.logo)
             , requestMethod = createEventField form.requestMethod (editorData.integration.requestMethod /= form.requestMethod)
             , requestUrl = createEventField form.requestUrl (editorData.integration.requestUrl /= form.requestUrl)

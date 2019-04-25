@@ -14,6 +14,7 @@ module KMEditor.Editor.KMEditor.Msgs exposing
 import Form
 import Reorderable
 import SplitPane
+import ValueList
 
 
 type Msg
@@ -62,6 +63,7 @@ type IntegrationEditorMsg
     = IntegrationFormMsg Form.Msg
     | ToggleDeleteConfirm Bool
     | DeleteIntegration String
+    | PropsListMsg ValueList.Msg
 
 
 type QuestionEditorMsg

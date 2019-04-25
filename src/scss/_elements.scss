@@ -135,6 +135,11 @@ code {
     margin-top: 35px;
 }
 
+.list-group-hover {
+    li:hover {
+        background: $gray-100;
+    }
+}
 
 .badge-value-100 {
     background: $color-value-100;

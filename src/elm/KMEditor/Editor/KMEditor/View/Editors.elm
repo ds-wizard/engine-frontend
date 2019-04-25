@@ -22,6 +22,7 @@ import KMEditor.Editor.KMEditor.Msgs exposing (..)
 import List.Extra as List
 import Reorderable
 import String exposing (fromInt, toLower)
+import ValueList
 
 
 activeEditor : Model -> ( String, Html Msg )
@@ -195,6 +196,12 @@ httpMethodOptions =
 integrationEditorView : Model -> IntegrationEditorData -> ( String, Html Msg )
 integrationEditorView model editorData =
     let
+        formMsg =
+            IntegrationFormMsg >> IntegrationEditorMsg >> EditorMsg
+
+        propsListMsg =
+            PropsListMsg >> IntegrationEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = "Integration"
             , deleteAction = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm True
@@ -202,26 +209,29 @@ integrationEditorView model editorData =
 
         form =
             div []
-                [ FormGroup.input editorData.form "id" "Id"
-                , FormGroup.input editorData.form "name" "Name"
-                , FormGroup.input editorData.form "logo" "Logo"
-                , FormGroup.list integrationPropsItemView editorData.form "props" "Props"
-                , FormGroup.input editorData.form "itemUrl" "Item URL"
+                [ FormGroup.input editorData.form "id" "Id" |> Html.map formMsg
+                , FormGroup.input editorData.form "name" "Name" |> Html.map formMsg
+                , FormGroup.input editorData.form "logo" "Logo" |> Html.map formMsg
+                , div [ class "form-group" ]
+                    [ label [] [ text "Props" ]
+                    , ValueList.view editorData.props |> Html.map propsListMsg
+                    ]
+                , FormGroup.input editorData.form "itemUrl" "Item URL" |> Html.map formMsg
                 , div [ class "card card-border-light mb-5" ]
                     [ div [ class "card-header" ] [ text "Request" ]
                     , div [ class "card-body" ]
-                        [ FormGroup.select httpMethodOptions editorData.form "requestMethod" "Request Method"
-                        , FormGroup.input editorData.form "requestUrl" "Request URL"
-                        , FormGroup.list integrationHeaderItemView editorData.form "requestHeaders" "Request Headers"
-                        , FormGroup.textarea editorData.form "requestBody" "Request Body"
+                        [ FormGroup.select httpMethodOptions editorData.form "requestMethod" "Request Method" |> Html.map formMsg
+                        , FormGroup.input editorData.form "requestUrl" "Request URL" |> Html.map formMsg
+                        , FormGroup.list integrationHeaderItemView editorData.form "requestHeaders" "Request Headers" |> Html.map formMsg
+                        , FormGroup.textarea editorData.form "requestBody" "Request Body" |> Html.map formMsg
                         ]
                     ]
                 , div [ class "card card-border-light mb-5" ]
                     [ div [ class "card-header" ] [ text "Response" ]
                     , div [ class "card-body" ]
-                        [ FormGroup.input editorData.form "responseListField" "Response List Field"
-                        , FormGroup.input editorData.form "responseIdField" "Response Id Field"
-                        , FormGroup.input editorData.form "responseNameField" "Response Name Field"
+                        [ FormGroup.input editorData.form "responseListField" "Response List Field" |> Html.map formMsg
+                        , FormGroup.input editorData.form "responseIdField" "Response Id Field" |> Html.map formMsg
+                        , FormGroup.input editorData.form "responseNameField" "Response Name Field" |> Html.map formMsg
                         ]
                     ]
                 ]
@@ -229,7 +239,7 @@ integrationEditorView model editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle editorTitleConfig
-        , form |> Html.map (IntegrationFormMsg >> IntegrationEditorMsg >> EditorMsg)
+        , form
         , integrationDeleteConfirm editorData
         ]
     )

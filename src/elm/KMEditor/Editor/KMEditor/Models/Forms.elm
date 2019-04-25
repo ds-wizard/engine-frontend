@@ -73,7 +73,6 @@ type alias TagForm =
 type alias IntegrationForm =
     { id : String
     , name : String
-    , props : List String
     , logo : String
     , requestMethod : String
     , requestUrl : String
@@ -259,13 +258,12 @@ integrationFormValidation integrations uuid =
     Validate.map8 IntegrationForm
         (Validate.field "id" (validateIntegrationId integrations uuid))
         (Validate.field "name" Validate.string)
-        (Validate.field "props" validateProps)
         (Validate.field "logo" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
         (Validate.field "requestMethod" Validate.string)
         (Validate.field "requestUrl" Validate.string)
         (Validate.field "requestHeaders" (Validate.list requestHeaderValidation))
         (Validate.field "requestBody" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
-        |> Validate.andMap (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
+        (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
         |> Validate.andMap (Validate.field "responseIdField" Validate.string)
         |> Validate.andMap (Validate.field "responseNameField" Validate.string)
         |> Validate.andMap (Validate.field "itemUrl" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
@@ -289,19 +287,6 @@ validateIntegrationId integrations uuid =
             )
 
 
-validateProps : Validation CustomFormError (List String)
-validateProps =
-    Validate.list Validate.string
-        |> Validate.andThen
-            (\l v ->
-                if List.allDifferent l then
-                    Ok l
-
-                else
-                    Err <| Error.value (CustomError <| Error "Prop names have to be unique")
-            )
-
-
 requestHeaderValidation : Validation CustomFormError ( String, String )
 requestHeaderValidation =
     Validate.map2 Tuple.pair
@@ -313,7 +298,6 @@ integrationFormInitials : Integration -> List ( String, Field.Field )
 integrationFormInitials integration =
     [ ( "id", Field.string integration.id )
     , ( "name", Field.string integration.name )
-    , ( "props", Field.list (List.map Field.string integration.props) )
     , ( "logo", Field.string integration.logo )
     , ( "requestMethod", Field.string integration.requestMethod )
     , ( "requestUrl", Field.string integration.requestUrl )
@@ -342,7 +326,6 @@ updateIntegrationWithForm integration integrationForm =
     { integration
         | id = integrationForm.id
         , name = integrationForm.name
-        , props = integrationForm.props
         , logo = integrationForm.logo
         , requestMethod = integrationForm.requestMethod
         , requestUrl = integrationForm.requestUrl
