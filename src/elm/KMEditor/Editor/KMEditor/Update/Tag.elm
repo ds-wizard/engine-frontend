@@ -24,7 +24,12 @@ updateTagForm =
         }
 
 
-withGenerateTagEditEvent : Seed -> Model -> TagEditorData -> (Seed -> Model -> TagEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateTagEditEvent :
+    Seed
+    -> Model
+    -> TagEditorData
+    -> (Seed -> Model -> TagEditorData -> ( Seed, Model, Cmd Msgs.Msg ))
+    -> ( Seed, Model, Cmd Msgs.Msg )
 withGenerateTagEditEvent =
     withGenerateEvent
         { isDirty = isTagEditorDirty

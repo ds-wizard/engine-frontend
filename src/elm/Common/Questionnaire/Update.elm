@@ -4,14 +4,17 @@ import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (encodeChartConfig)
 import Common.Api.Feedbacks as FeedbacksApi
 import Common.Api.Questionnaires as QuestionnairesApi
+import Common.Api.TypeHints as TypeHintsApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Form exposing (Form)
+import FormEngine.Model exposing (TypeHint, setTypeHintsResult)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
 import KMEditor.Common.Models.Entities exposing (Chapter)
+import KMEditor.Common.Models.Events exposing (Event)
 import Ports
 import Utils exposing (stringToInt)
 
@@ -95,8 +98,27 @@ update msg appState model =
                 _ ->
                     ( model, Cmd.none )
 
+        GetTypeHintsCompleted result ->
+            case model.activePage of
+                PageChapter chapter form ->
+                    let
+                        actionResult =
+                            case result of
+                                Ok typeHints ->
+                                    Success typeHints
 
-handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage -> AppState -> Model -> ( Model, Cmd Msg )
+                                Err err ->
+                                    getServerError err "Unable to get type hints"
+                    in
+                    ( { model | activePage = PageChapter chapter <| setTypeHintsResult actionResult form }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+
+handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage ApiError -> AppState -> Model -> ( Model, Cmd Msg )
 handleFormMsg msg appState model =
     case model.activePage of
         PageChapter chapter form ->
@@ -115,16 +137,33 @@ handleFormMsg msg appState model =
                             )
 
                 _ ->
+                    let
+                        ( updatedForm, cmd ) =
+                            updateForm msg form (loadTypeHints appState model.questionnaire.package.id model.events)
+                    in
                     ( updateReplies
                         { model
-                            | activePage = PageChapter chapter (updateForm msg form)
+                            | activePage = PageChapter chapter updatedForm
                             , dirty = True
                         }
-                    , Cmd.none
+                    , Cmd.map FormMsg cmd
                     )
 
         _ ->
             ( model, Cmd.none )
+
+
+loadTypeHints : AppState -> String -> List Event -> String -> String -> (Result ApiError (List TypeHint) -> msg) -> Cmd msg
+loadTypeHints appState packageId events questionUuid q toMsg =
+    let
+        mbPackageId =
+            if String.isEmpty packageId then
+                Nothing
+
+            else
+                Just packageId
+    in
+    TypeHintsApi.fetchTypeHints mbPackageId events questionUuid q appState toMsg
 
 
 handleSetActiveChapter : Chapter -> Model -> Model

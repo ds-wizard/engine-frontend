@@ -5,6 +5,7 @@ module Common.Questionnaire.View exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.ApiError exposing (ApiError)
 import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions, chapterReportCanvasId)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
@@ -160,7 +161,7 @@ chapterHeader model chapter =
         ]
 
 
-formConfig : ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData
+formConfig : ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData ApiError
 formConfig cfg model =
     { customActions =
         if cfg.showExtraActions then

@@ -4,6 +4,8 @@ module KMEditor.Common.Models.Entities exposing
     , CrossReferenceData
     , Expert
     , FollowUps(..)
+    , Integration
+    , IntegrationQuestionData
     , KnowledgeModel
     , Level
     , ListQuestionData
@@ -29,11 +31,14 @@ module KMEditor.Common.Models.Entities exposing
     , getExpert
     , getExperts
     , getFollowUpQuestions
+    , getIntegration
     , getQuestion
     , getQuestionAnswers
     , getQuestionExperts
+    , getQuestionIntegrationUuid
     , getQuestionItemQuestions
     , getQuestionItemTitle
+    , getQuestionProps
     , getQuestionReferences
     , getQuestionRequiredLevel
     , getQuestionTagUuids
@@ -48,6 +53,7 @@ module KMEditor.Common.Models.Entities exposing
     , getReferenceVisibleName
     , getReferences
     , getTag
+    , integrationDecoder
     , isQuestionList
     , isQuestionOptions
     , knowledgeModelDecoder
@@ -60,6 +66,7 @@ module KMEditor.Common.Models.Entities exposing
     , newAnswer
     , newChapter
     , newExpert
+    , newIntegration
     , newQuestion
     , newReference
     , newTag
@@ -84,6 +91,7 @@ type alias KnowledgeModel =
     , name : String
     , chapters : List Chapter
     , tags : List Tag
+    , integrations : List Integration
     }
 
 
@@ -92,6 +100,23 @@ type alias Tag =
     , name : String
     , description : Maybe String
     , color : String
+    }
+
+
+type alias Integration =
+    { uuid : String
+    , id : String
+    , name : String
+    , props : List String
+    , logo : String
+    , requestMethod : String
+    , requestUrl : String
+    , requestHeaders : Dict String String
+    , requestBody : String
+    , responseListField : String
+    , responseIdField : String
+    , responseNameField : String
+    , itemUrl : String
     }
 
 
@@ -107,6 +132,7 @@ type Question
     = OptionsQuestion OptionsQuestionData
     | ListQuestion ListQuestionData
     | ValueQuestion ValueQuestionData
+    | IntegrationQuestion IntegrationQuestionData
 
 
 type alias OptionsQuestionData =
@@ -143,6 +169,19 @@ type alias ValueQuestionData =
     , references : List Reference
     , experts : List Expert
     , valueType : ValueQuestionType
+    }
+
+
+type alias IntegrationQuestionData =
+    { uuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    , references : List Reference
+    , experts : List Expert
+    , integrationUuid : String
+    , props : Dict String String
     }
 
 
@@ -231,6 +270,7 @@ knowledgeModelDecoder =
         |> required "name" Decode.string
         |> required "chapters" (Decode.list chapterDecoder)
         |> required "tags" (Decode.list tagDecoder)
+        |> required "integrations" (Decode.list integrationDecoder)
 
 
 chapterDecoder : Decoder Chapter
@@ -251,12 +291,31 @@ tagDecoder =
         |> required "color" Decode.string
 
 
+integrationDecoder : Decoder Integration
+integrationDecoder =
+    Decode.succeed Integration
+        |> required "uuid" Decode.string
+        |> required "id" Decode.string
+        |> required "name" Decode.string
+        |> required "props" (Decode.list Decode.string)
+        |> required "logo" Decode.string
+        |> required "requestMethod" Decode.string
+        |> required "requestUrl" Decode.string
+        |> required "requestHeaders" (Decode.dict Decode.string)
+        |> required "requestBody" Decode.string
+        |> required "responseListField" Decode.string
+        |> required "responseIdField" Decode.string
+        |> required "responseNameField" Decode.string
+        |> required "itemUrl" Decode.string
+
+
 questionDecoder : Decoder Question
 questionDecoder =
     Decode.oneOf
         [ when questionType ((==) "OptionsQuestion") optionsQuestionDecoder
         , when questionType ((==) "ListQuestion") listQuestionDecoder
         , when questionType ((==) "ValueQuestion") valueQuestionDecoder
+        , when questionType ((==) "IntegrationQuestion") integrationQuestionDecoder
         ]
 
 
@@ -278,6 +337,11 @@ listQuestionDecoder =
 valueQuestionDecoder : Decoder Question
 valueQuestionDecoder =
     Decode.map ValueQuestion valueQuestionDataDecoder
+
+
+integrationQuestionDecoder : Decoder Question
+integrationQuestionDecoder =
+    Decode.map IntegrationQuestion integrationQuestionDataDecoder
 
 
 optionsQuestionDataDecoder : Decoder OptionsQuestionData
@@ -318,6 +382,20 @@ valueQuestionDataDecoder =
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
         |> required "valueType" valueTypeDecoder
+
+
+integrationQuestionDataDecoder : Decoder IntegrationQuestionData
+integrationQuestionDataDecoder =
+    Decode.succeed IntegrationQuestionData
+        |> required "uuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+        |> required "references" (Decode.list referenceDecoder)
+        |> required "experts" (Decode.list expertDecoder)
+        |> required "integrationUuid" Decode.string
+        |> required "props" (Decode.dict Decode.string)
 
 
 valueTypeDecoder : Decoder ValueQuestionType
@@ -471,6 +549,24 @@ newTag uuid =
     }
 
 
+newIntegration : String -> Integration
+newIntegration uuid =
+    { uuid = uuid
+    , id = ""
+    , name = "New Integration"
+    , props = []
+    , logo = ""
+    , requestMethod = "GET"
+    , requestUrl = "/"
+    , requestHeaders = Dict.empty
+    , requestBody = ""
+    , responseListField = ""
+    , responseIdField = "id"
+    , responseNameField = "name"
+    , itemUrl = ""
+    }
+
+
 newQuestion : String -> Question
 newQuestion uuid =
     OptionsQuestion
@@ -529,8 +625,11 @@ createPathMap knowledgeModel =
 
                 withTags =
                     List.foldl (foldTag nextPath) withChapters km.tags
+
+                withIntegrations =
+                    List.foldl (foldIntegration nextPath) withTags km.integrations
             in
-            Dict.insert km.uuid path withTags
+            Dict.insert km.uuid path withIntegrations
 
         foldChapter path chapter dict =
             let
@@ -544,6 +643,9 @@ createPathMap knowledgeModel =
 
         foldTag path tag dict =
             Dict.insert tag.uuid path dict
+
+        foldIntegration path integration dict =
+            Dict.insert integration.id path dict
 
         foldQuestion path question dict =
             let
@@ -599,6 +701,11 @@ getTag km tagUuid =
     List.find (\t -> t.uuid == tagUuid) km.tags
 
 
+getIntegration : KnowledgeModel -> String -> Maybe Integration
+getIntegration km integrationUuid =
+    List.find (\i -> i.uuid == integrationUuid) km.integrations
+
+
 getQuestions : KnowledgeModel -> List Question
 getQuestions km =
     let
@@ -616,6 +723,9 @@ getQuestions km =
                 ValueQuestion _ ->
                     [ question ]
 
+                IntegrationQuestion _ ->
+                    [ question ]
+
         foldChapter chapter =
             List.foldl (\q acc -> acc ++ foldQuestion q) [] chapter.questions
     in
@@ -628,8 +738,14 @@ getQuestion km questionUuid =
         |> List.find (\q -> getQuestionUuid q == questionUuid)
 
 
-mapQuestionData : (OptionsQuestionData -> a) -> (ListQuestionData -> a) -> (ValueQuestionData -> a) -> Question -> a
-mapQuestionData fn1 fn2 fn3 question =
+mapQuestionData :
+    (OptionsQuestionData -> a)
+    -> (ListQuestionData -> a)
+    -> (ValueQuestionData -> a)
+    -> (IntegrationQuestionData -> a)
+    -> Question
+    -> a
+mapQuestionData fn1 fn2 fn3 fn4 question =
     case question of
         OptionsQuestion data ->
             fn1 data
@@ -640,40 +756,43 @@ mapQuestionData fn1 fn2 fn3 question =
         ValueQuestion data ->
             fn3 data
 
+        IntegrationQuestion data ->
+            fn4 data
+
 
 getQuestionUuid : Question -> String
 getQuestionUuid =
-    mapQuestionData .uuid .uuid .uuid
+    mapQuestionData .uuid .uuid .uuid .uuid
 
 
 getQuestionTitle : Question -> String
 getQuestionTitle =
-    mapQuestionData .title .title .title
+    mapQuestionData .title .title .title .title
 
 
 getQuestionText : Question -> Maybe String
 getQuestionText =
-    mapQuestionData .text .text .text
+    mapQuestionData .text .text .text .text
 
 
 getQuestionRequiredLevel : Question -> Maybe Int
 getQuestionRequiredLevel =
-    mapQuestionData .requiredLevel .requiredLevel .requiredLevel
+    mapQuestionData .requiredLevel .requiredLevel .requiredLevel .requiredLevel
 
 
 getQuestionTagUuids : Question -> List String
 getQuestionTagUuids =
-    mapQuestionData .tagUuids .tagUuids .tagUuids
+    mapQuestionData .tagUuids .tagUuids .tagUuids .tagUuids
 
 
 getQuestionExperts : Question -> List Expert
 getQuestionExperts =
-    mapQuestionData .experts .experts .experts
+    mapQuestionData .experts .experts .experts .experts
 
 
 getQuestionReferences : Question -> List Reference
 getQuestionReferences =
-    mapQuestionData .references .references .references
+    mapQuestionData .references .references .references .references
 
 
 getQuestionAnswers : Question -> List Answer
@@ -716,12 +835,33 @@ getQuestionValueType question =
             Nothing
 
 
+getQuestionIntegrationUuid : Question -> Maybe String
+getQuestionIntegrationUuid question =
+    case question of
+        IntegrationQuestion integrationQuestionData ->
+            Just integrationQuestionData.integrationUuid
+
+        _ ->
+            Nothing
+
+
+getQuestionProps : Question -> Maybe (Dict String String)
+getQuestionProps question =
+    case question of
+        IntegrationQuestion integrationQuestionData ->
+            Just integrationQuestionData.props
+
+        _ ->
+            Nothing
+
+
 getQuestionTypeString : Question -> String
 getQuestionTypeString =
     mapQuestionData
         (\_ -> "Options")
         (\_ -> "List")
         (\_ -> "Value")
+        (\_ -> "Integration")
 
 
 valueQuestionTypeString : ValueQuestionType -> String

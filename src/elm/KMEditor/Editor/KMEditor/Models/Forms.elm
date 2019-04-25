@@ -2,6 +2,7 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     ( AnswerForm
     , ChapterForm
     , ExpertForm
+    , IntegrationForm
     , KnowledgeModelForm
     , MetricMeasureForm
     , QuestionForm
@@ -18,10 +19,12 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , initChapterForm
     , initExpertForm
     , initForm
+    , initIntegrationForm
     , initKnowledgeModelFrom
     , initQuestionForm
     , initReferenceForm
     , initTagForm
+    , integrationFormValidation
     , isListQuestionForm
     , isOptionsQuestionForm
     , knowledgeModelFormValidation
@@ -35,14 +38,16 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , updateAnswerWithForm
     , updateChapterWithForm
     , updateExpertWithForm
+    , updateIntegrationWithForm
     , updateKnowledgeModelWithForm
     , updateQuestionWithForm
     , updateReferenceWithForm
     , updateTagWithForm
     )
 
-import Common.Form exposing (CustomFormError)
+import Common.Form exposing (CustomFormError(..))
 import Common.Form.Validate exposing (validateUuid)
+import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field
@@ -65,6 +70,21 @@ type alias TagForm =
     }
 
 
+type alias IntegrationForm =
+    { id : String
+    , name : String
+    , logo : String
+    , requestMethod : String
+    , requestUrl : String
+    , requestHeaders : List ( String, String )
+    , requestBody : String
+    , responseListField : String
+    , responseIdField : String
+    , responseNameField : String
+    , itemUrl : String
+    }
+
+
 type alias ChapterForm =
     { title : String
     , text : String
@@ -79,6 +99,7 @@ type QuestionFormType
     = OptionsQuestionForm OptionsQuestionFormData
     | ListQuestionForm ListQuestionFormData
     | ValueQuestionForm ValueQuestionFormData
+    | IntegrationQuestionForm IntegrationQuestionFormData
 
 
 type alias OptionsQuestionFormData =
@@ -101,6 +122,15 @@ type alias ValueQuestionFormData =
     , text : Maybe String
     , requiredLevel : Maybe Int
     , valueType : ValueQuestionType
+    }
+
+
+type alias IntegrationQuestionFormData =
+    { title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , integrationUuid : String
+    , props : Dict String String
     }
 
 
@@ -215,6 +245,100 @@ updateTagWithForm tag tagForm =
 
 
 
+{- Integration -}
+
+
+initIntegrationForm : List Integration -> String -> Integration -> Form CustomFormError IntegrationForm
+initIntegrationForm integrations uuid =
+    integrationFormInitials >> initForm (integrationFormValidation integrations uuid)
+
+
+integrationFormValidation : List Integration -> String -> Validation CustomFormError IntegrationForm
+integrationFormValidation integrations uuid =
+    Validate.map8 IntegrationForm
+        (Validate.field "id" (validateIntegrationId integrations uuid))
+        (Validate.field "name" Validate.string)
+        (Validate.field "logo" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
+        (Validate.field "requestMethod" Validate.string)
+        (Validate.field "requestUrl" Validate.string)
+        (Validate.field "requestHeaders" (Validate.list requestHeaderValidation))
+        (Validate.field "requestBody" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
+        (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
+        |> Validate.andMap (Validate.field "responseIdField" Validate.string)
+        |> Validate.andMap (Validate.field "responseNameField" Validate.string)
+        |> Validate.andMap (Validate.field "itemUrl" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
+
+
+validateIntegrationId : List Integration -> String -> Validation CustomFormError String
+validateIntegrationId integrations uuid =
+    let
+        existingUuids =
+            List.filter (.uuid >> (/=) uuid) integrations
+                |> List.map .id
+    in
+    Validate.string
+        |> Validate.andThen
+            (\s v ->
+                if List.member s existingUuids then
+                    Err <| Error.value (CustomError <| Error "This integration ID is already used for different integration")
+
+                else
+                    Ok s
+            )
+
+
+requestHeaderValidation : Validation CustomFormError ( String, String )
+requestHeaderValidation =
+    Validate.map2 Tuple.pair
+        (Validate.field "header" Validate.string)
+        (Validate.field "value" Validate.string)
+
+
+integrationFormInitials : Integration -> List ( String, Field.Field )
+integrationFormInitials integration =
+    [ ( "id", Field.string integration.id )
+    , ( "name", Field.string integration.name )
+    , ( "logo", Field.string integration.logo )
+    , ( "requestMethod", Field.string integration.requestMethod )
+    , ( "requestUrl", Field.string integration.requestUrl )
+    , ( "requestHeaders"
+      , Field.list
+            (List.map
+                (\h ->
+                    Field.group
+                        [ ( "header", Field.string <| Tuple.first h )
+                        , ( "value", Field.string <| Tuple.second h )
+                        ]
+                )
+                (Dict.toList integration.requestHeaders)
+            )
+      )
+    , ( "requestBody", Field.string integration.requestBody )
+    , ( "responseListField", Field.string integration.responseListField )
+    , ( "responseIdField", Field.string integration.responseIdField )
+    , ( "responseNameField", Field.string integration.responseNameField )
+    , ( "itemUrl", Field.string integration.itemUrl )
+    ]
+
+
+updateIntegrationWithForm : Integration -> IntegrationForm -> Integration
+updateIntegrationWithForm integration integrationForm =
+    { integration
+        | id = integrationForm.id
+        , name = integrationForm.name
+        , logo = integrationForm.logo
+        , requestMethod = integrationForm.requestMethod
+        , requestUrl = integrationForm.requestUrl
+        , requestHeaders = Dict.fromList integrationForm.requestHeaders
+        , requestBody = integrationForm.requestBody
+        , responseListField = integrationForm.responseListField
+        , responseIdField = integrationForm.responseIdField
+        , responseNameField = integrationForm.responseNameField
+        , itemUrl = integrationForm.itemUrl
+    }
+
+
+
 {- Chapter -}
 
 
@@ -248,17 +372,17 @@ updateChapterWithForm chapter chapterForm =
 
 initQuestionForm : Question -> Form CustomFormError QuestionForm
 initQuestionForm =
-    questionFormInitials >> initForm questionFormValidation
+    questionFormInitials >> initForm (questionFormValidation [])
 
 
-questionFormValidation : Validation CustomFormError QuestionForm
-questionFormValidation =
+questionFormValidation : List Integration -> Validation CustomFormError QuestionForm
+questionFormValidation integrations =
     Validate.succeed QuestionForm
-        |> Validate.andMap (Validate.field "questionType" Validate.string |> Validate.andThen validateQuestion)
+        |> Validate.andMap (Validate.field "questionType" Validate.string |> Validate.andThen (validateQuestion integrations))
 
 
-validateQuestion : String -> Validation CustomFormError QuestionFormType
-validateQuestion questionType =
+validateQuestion : List Integration -> String -> Validation CustomFormError QuestionFormType
+validateQuestion integrations questionType =
     case questionType of
         "OptionsQuestion" ->
             Validate.map3 OptionsQuestionFormData
@@ -283,8 +407,35 @@ validateQuestion questionType =
                 (Validate.field "valueType" validateValueType)
                 |> Validate.map ValueQuestionForm
 
+        "IntegrationQuestion" ->
+            Validate.map5 IntegrationQuestionFormData
+                (Validate.field "title" Validate.string)
+                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "integrationUuid" Validate.string)
+                (Validate.field "integrationUuid" Validate.string |> Validate.andThen (validateIntegrationProps integrations))
+                |> Validate.map IntegrationQuestionForm
+
         _ ->
             Validate.fail <| Error.value InvalidString
+
+
+validateIntegrationProps : List Integration -> String -> Validation CustomFormError (Dict String String)
+validateIntegrationProps integrations integration =
+    let
+        props =
+            List.find (\i -> i.uuid == integration) integrations
+                |> Maybe.map .props
+                |> Maybe.withDefault []
+
+        fold prop acc =
+            Validate.andThen
+                (\value ->
+                    Validate.map (\dict -> Dict.insert prop value dict) acc
+                )
+                (Validate.field ("props-" ++ prop) Validate.string)
+    in
+    List.foldl fold (Validate.succeed Dict.empty) props
 
 
 validateValueType : Validation CustomFormError ValueQuestionType
@@ -323,6 +474,18 @@ questionFormInitials question =
 
                 ValueQuestion _ ->
                     "ValueQuestion"
+
+                IntegrationQuestion _ ->
+                    "IntegrationQuestion"
+
+        props =
+            case question of
+                IntegrationQuestion integrationQuestionData ->
+                    Dict.toList integrationQuestionData.props
+                        |> List.map (\( prop, value ) -> ( "props-" ++ prop, Field.string value ))
+
+                _ ->
+                    []
     in
     [ ( "questionType", Field.string questionType )
     , ( "title", Field.string <| getQuestionTitle question )
@@ -330,7 +493,9 @@ questionFormInitials question =
     , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
     , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| getQuestionItemTitle question )
     , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringValueType <| getQuestionValueType question )
+    , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| getQuestionIntegrationUuid question )
     ]
+        ++ props
 
 
 updateQuestionWithForm : Question -> QuestionForm -> Question
@@ -373,12 +538,26 @@ updateQuestionWithForm question questionForm =
                 , valueType = formData.valueType
                 }
 
+        IntegrationQuestionForm formData ->
+            IntegrationQuestion
+                { uuid = getQuestionUuid question
+                , title = formData.title
+                , text = formData.text
+                , requiredLevel = formData.requiredLevel
+                , tagUuids = getQuestionTagUuids question
+                , references = getQuestionReferences question
+                , experts = getQuestionExperts question
+                , integrationUuid = formData.integrationUuid
+                , props = formData.props
+                }
+
 
 questionTypeOptions : List ( String, String )
 questionTypeOptions =
     [ ( "OptionsQuestion", "Options" )
     , ( "ListQuestion", "List of items" )
     , ( "ValueQuestion", "Value" )
+    , ( "IntegrationQuestion", "Integration" )
     ]
 
 

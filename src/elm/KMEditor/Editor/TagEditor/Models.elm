@@ -177,6 +177,19 @@ generateQuestionEvent model question path seed =
                             , valueType = createEmptyEventField
                             }
 
+                    IntegrationQuestion _ ->
+                        EditIntegrationQuestionEvent
+                            { questionUuid = questionUuid
+                            , title = createEmptyEventField
+                            , text = createEmptyEventField
+                            , requiredLevel = createEmptyEventField
+                            , tagUuids = createEventField newTags True
+                            , referenceUuids = createEmptyEventField
+                            , expertUuids = createEmptyEventField
+                            , integrationUuid = createEmptyEventField
+                            , props = createEmptyEventField
+                            }
+
             event =
                 EditQuestionEvent
                     eventData

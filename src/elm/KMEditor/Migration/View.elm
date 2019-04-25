@@ -118,6 +118,22 @@ getEventView wrapMsg model migration event =
                 |> Maybe.map (viewEvent wrapMsg model "Delete tag")
                 |> Maybe.withDefault errorMessage
 
+        AddIntegrationEvent eventData _ ->
+            viewAddIntegrationDiff eventData
+                |> viewEvent wrapMsg model "Add integration"
+
+        EditIntegrationEvent eventData _ ->
+            getIntegration migration.currentKnowledgeModel eventData.integrationUuid
+                |> Maybe.map (viewEditIntegrationDiff eventData)
+                |> Maybe.map (viewEvent wrapMsg model "Edit integration")
+                |> Maybe.withDefault errorMessage
+
+        DeleteIntegrationEvent eventData _ ->
+            getIntegration migration.currentKnowledgeModel eventData.integrationUuid
+                |> Maybe.map viewDeleteIntegrationDiff
+                |> Maybe.map (viewEvent wrapMsg model "Delete integration")
+                |> Maybe.withDefault errorMessage
+
         AddChapterEvent eventData _ ->
             viewAddChapterDiff eventData
                 |> viewEvent wrapMsg model "Add chapter"
@@ -276,6 +292,120 @@ viewDeleteTagDiff tag =
         (viewDelete fieldDiff)
 
 
+viewAddIntegrationDiff : AddIntegrationEventData -> Html Msgs.Msg
+viewAddIntegrationDiff event =
+    let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ "Id"
+                , "Name"
+                , "Props"
+                , "Item URL"
+                , "Request Method"
+                , "Request URL"
+                , "Request Headers"
+                , "Request Body"
+                , "Response List Field"
+                , "Response Id Field"
+                , "Response Name Field"
+                ]
+                [ event.id
+                , event.name
+                , String.join ", " event.props
+                , event.itemUrl
+                , event.requestMethod
+                , event.requestUrl
+                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList event.requestHeaders
+                , event.requestBody
+                , event.responseListField
+                , event.responseIdField
+                , event.responseNameField
+                ]
+    in
+    div []
+        (viewAdd fields)
+
+
+viewEditIntegrationDiff : EditIntegrationEventData -> Integration -> Html Msgs.Msg
+viewEditIntegrationDiff event integration =
+    let
+        fieldDiff =
+            List.map3 (\a b c -> ( a, b, c ))
+                [ "Id"
+                , "Name"
+                , "Props"
+                , "Item URL"
+                , "Request Method"
+                , "Request URL"
+                , "Request Headers"
+                , "Request Body"
+                , "Response List Field"
+                , "Response Id Field"
+                , "Response Name Field"
+                ]
+                [ integration.id
+                , integration.name
+                , String.join ", " integration.props
+                , integration.itemUrl
+                , integration.requestMethod
+                , integration.requestUrl
+                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
+                , integration.requestBody
+                , integration.responseListField
+                , integration.responseIdField
+                , integration.responseNameField
+                ]
+                [ getEventFieldValueWithDefault event.id integration.id
+                , getEventFieldValueWithDefault event.name integration.name
+                , String.join ", " <| getEventFieldValueWithDefault event.props integration.props
+                , getEventFieldValueWithDefault event.itemUrl integration.itemUrl
+                , getEventFieldValueWithDefault event.requestMethod integration.requestMethod
+                , getEventFieldValueWithDefault event.requestUrl integration.requestUrl
+                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList <| getEventFieldValueWithDefault event.requestHeaders integration.requestHeaders
+                , getEventFieldValueWithDefault event.requestBody integration.requestBody
+                , getEventFieldValueWithDefault event.responseListField integration.responseListField
+                , getEventFieldValueWithDefault event.responseIdField integration.responseIdField
+                , getEventFieldValueWithDefault event.responseNameField integration.responseNameField
+                ]
+    in
+    div []
+        (viewDiff fieldDiff)
+
+
+viewDeleteIntegrationDiff : Integration -> Html Msgs.Msg
+viewDeleteIntegrationDiff integration =
+    let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ "Id"
+                , "Name"
+                , "Props"
+                , "Item URL"
+                , "Request Method"
+                , "Request URL"
+                , "Request Headers"
+                , "Request Body"
+                , "Response List Field"
+                , "Response Id Field"
+                , "Response Name Field"
+                ]
+                [ integration.id
+                , integration.name
+                , String.join ", " integration.props
+                , integration.itemUrl
+                , integration.requestMethod
+                , integration.requestUrl
+                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
+                , integration.requestBody
+                , integration.responseListField
+                , integration.responseIdField
+                , integration.responseNameField
+                ]
+    in
+    div []
+        (viewDelete fields)
+
+
 viewAddChapterDiff : AddChapterEventData -> Html Msgs.Msg
 viewAddChapterDiff event =
     let
@@ -334,20 +464,28 @@ viewAddQuestionDiff km event =
             List.map2 (\a b -> ( a, b ))
                 [ "Type", "Title", "Text", "Tags" ]
                 [ getAddQuestionEventQuestionTypeString event
-                , mapAddQuestionEventData .title .title .title event
-                , mapAddQuestionEventData .text .text .text event |> Maybe.withDefault ""
+                , mapAddQuestionEventData .title .title .title .title event
+                , mapAddQuestionEventData .text .text .text .text event |> Maybe.withDefault ""
                 ]
 
-        valueField =
+        extraFields =
             case event of
                 AddValueQuestionEvent data ->
                     [ ( "Value Type", valueQuestionTypeString data.valueType ) ]
+
+                AddIntegrationQuestionEvent data ->
+                    [ ( "Integration"
+                      , getIntegration km data.integrationUuid
+                            |> Maybe.map .name
+                            |> Maybe.withDefault ""
+                      )
+                    ]
 
                 _ ->
                     []
 
         tagUuids =
-            mapAddQuestionEventData .tagUuids .tagUuids .tagUuids event
+            mapAddQuestionEventData .tagUuids .tagUuids .tagUuids .tagUuids event
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) <| km.tags
@@ -359,17 +497,17 @@ viewAddQuestionDiff km event =
             viewDiffChildren "Tags" originalTags tagUuids tagNames
     in
     div []
-        (viewAdd (fields ++ valueField) ++ [ tagsDiff ])
+        (viewAdd (fields ++ extraFields) ++ [ tagsDiff ])
 
 
 viewEditQuestionDiff : KnowledgeModel -> EditQuestionEventData -> Question -> Html Msgs.Msg
 viewEditQuestionDiff km event question =
     let
         title =
-            mapEditQuestionEventData .title .title .title event
+            mapEditQuestionEventData .title .title .title .title event
 
         questionText =
-            mapEditQuestionEventData .text .text .text event
+            mapEditQuestionEventData .text .text .text .text event
 
         originalAnswers =
             List.map .uuid <| getQuestionAnswers question
@@ -381,7 +519,7 @@ viewEditQuestionDiff km event question =
             List.map getReferenceUuid <| getQuestionReferences question
 
         referenceUuids =
-            mapEditQuestionEventData .referenceUuids .referenceUuids .referenceUuids event
+            mapEditQuestionEventData .referenceUuids .referenceUuids .referenceUuids .referenceUuids event
 
         referenceNames =
             Dict.fromList <| List.map (\r -> ( getReferenceUuid r, getReferenceVisibleName r )) <| getQuestionReferences question
@@ -390,7 +528,7 @@ viewEditQuestionDiff km event question =
             List.map .uuid <| getQuestionExperts question
 
         expertUuids =
-            mapEditQuestionEventData .expertUuids .expertUuids .expertUuids event
+            mapEditQuestionEventData .expertUuids .expertUuids .expertUuids .expertUuids event
 
         expertNames =
             Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) <| getQuestionExperts question
@@ -411,7 +549,7 @@ viewEditQuestionDiff km event question =
             getQuestionValueType question
 
         valueType =
-            mapEditQuestionEventData (\_ -> Nothing) (\_ -> Nothing) (\data -> getEventFieldValue data.valueType) event
+            mapEditQuestionEventData (\_ -> Nothing) (\_ -> Nothing) (\data -> getEventFieldValue data.valueType) (\_ -> Nothing) event
 
         valueDiff =
             case ( originalValueType, valueType ) of
@@ -435,7 +573,7 @@ viewEditQuestionDiff km event question =
             getQuestionTagUuids question
 
         tagUuids =
-            getEventFieldValueWithDefault (mapEditQuestionEventData .tagUuids .tagUuids .tagUuids event) originalTags
+            getEventFieldValueWithDefault (mapEditQuestionEventData .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) <| km.tags

@@ -5,6 +5,7 @@ module KMEditor.Editor.KMEditor.Models.Editors exposing
     , EditorLike
     , EditorState(..)
     , ExpertEditorData
+    , IntegrationEditorData
     , KMEditorData
     , QuestionEditorData
     , ReferenceEditorData
@@ -12,6 +13,7 @@ module KMEditor.Editor.KMEditor.Models.Editors exposing
     , addAnswerFollowUp
     , addChapterQuestion
     , addKMChapter
+    , addKMIntegration
     , addKMTag
     , addQuestionAnswer
     , addQuestionAnswerItemTemplateQuestion
@@ -20,6 +22,7 @@ module KMEditor.Editor.KMEditor.Models.Editors exposing
     , createAnswerEditor
     , createChapterEditor
     , createExpertEditor
+    , createIntegrationEditor
     , createKnowledgeModelEditor
     , createQuestionEditor
     , createReferenceEditor
@@ -42,6 +45,7 @@ module KMEditor.Editor.KMEditor.Models.Editors exposing
     , isEditorDeleted
     , isEditorDirty
     , isExpertEditorDirty
+    , isIntegrationEditorDirty
     , isKMEditorDirty
     , isQuestionEditorDirty
     , isReferenceEditorDirty
@@ -51,6 +55,7 @@ module KMEditor.Editor.KMEditor.Models.Editors exposing
     , updateChapterEditorData
     , updateEditorsWithQuestion
     , updateExpertEditorData
+    , updateIntegrationEditorData
     , updateKMEditorData
     , updateQuestionEditorData
     , updateReferenceEditorData
@@ -65,6 +70,7 @@ import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (..)
+import ValueList exposing (ValueList)
 
 
 type EditorState
@@ -78,6 +84,7 @@ type EditorState
 type Editor
     = KMEditor KMEditorData
     | TagEditor TagEditorData
+    | IntegrationEditor IntegrationEditorData
     | ChapterEditor ChapterEditorData
     | QuestionEditor QuestionEditorData
     | AnswerEditor AnswerEditorData
@@ -101,6 +108,7 @@ type alias KMEditorData =
     , form : Form CustomFormError KnowledgeModelForm
     , chapters : Children
     , tags : Children
+    , integrations : Children
     , treeOpen : Bool
     , editorState : EditorState
     , path : Path
@@ -114,6 +122,18 @@ type alias TagEditorData =
     , treeOpen : Bool
     , editorState : EditorState
     , path : Path
+    }
+
+
+type alias IntegrationEditorData =
+    { uuid : String
+    , integration : Integration
+    , form : Form CustomFormError IntegrationForm
+    , treeOpen : Bool
+    , editorState : EditorState
+    , path : Path
+    , props : ValueList
+    , deleteConfirmOpen : Bool
     }
 
 
@@ -188,6 +208,7 @@ createKnowledgeModelEditor editorContext getEditorState km editors =
                 , form = initKnowledgeModelFrom km
                 , chapters = Children.init <| List.map .uuid km.chapters
                 , tags = Children.init <| List.map .uuid km.tags
+                , integrations = Children.init <| List.map .uuid km.integrations
                 , treeOpen = True
                 , editorState = getEditorState km.uuid
                 , path = []
@@ -201,8 +222,11 @@ createKnowledgeModelEditor editorContext getEditorState km editors =
 
         withTags =
             List.foldl (createTagEditor editorContext currentPath getEditorState) withChapters km.tags
+
+        withIntegrations =
+            List.foldl (createIntegrationEditor editorContext currentPath getEditorState) withTags km.integrations
     in
-    Dict.insert km.uuid editor withTags
+    Dict.insert km.uuid editor withIntegrations
 
 
 createChapterEditor : EditorContext -> Path -> (String -> EditorState) -> Chapter -> Dict String Editor -> Dict String Editor
@@ -242,6 +266,24 @@ createTagEditor editorContext path getEditorState tag editors =
                 }
     in
     Dict.insert tag.uuid editor editors
+
+
+createIntegrationEditor : EditorContext -> Path -> (String -> EditorState) -> Integration -> Dict String Editor -> Dict String Editor
+createIntegrationEditor editorContext path getEditorState integration editors =
+    let
+        editor =
+            IntegrationEditor
+                { uuid = integration.uuid
+                , integration = integration
+                , form = initIntegrationForm [] "" integration
+                , treeOpen = False
+                , editorState = getEditorState integration.uuid
+                , path = path
+                , props = ValueList.init integration.props
+                , deleteConfirmOpen = False
+                }
+    in
+    Dict.insert integration.uuid editor editors
 
 
 createQuestionEditor : EditorContext -> Path -> (String -> EditorState) -> Question -> Dict String Editor -> Dict String Editor
@@ -374,6 +416,9 @@ deleteEditor uuid editors =
         Just (TagEditor editorData) ->
             deleteTagEditor editorData editors
 
+        Just (IntegrationEditor editorData) ->
+            deleteIntegrationEditor editorData editors
+
         Just (QuestionEditor editorData) ->
             deleteQuestionEditor editorData editors
 
@@ -406,6 +451,11 @@ deleteChapterEditor editorData editors =
 
 deleteTagEditor : TagEditorData -> Dict String Editor -> Dict String Editor
 deleteTagEditor editorData editors =
+    Dict.remove editorData.uuid editors
+
+
+deleteIntegrationEditor : IntegrationEditorData -> Dict String Editor -> Dict String Editor
+deleteIntegrationEditor editorData editors =
     Dict.remove editorData.uuid editors
 
 
@@ -452,6 +502,9 @@ getEditorTitle editor =
         TagEditor data ->
             data.tag.name
 
+        IntegrationEditor data ->
+            data.integration.name
+
         QuestionEditor data ->
             getQuestionTitle data.question
 
@@ -477,6 +530,9 @@ getEditorUuid editor =
         TagEditor data ->
             data.tag.uuid
 
+        IntegrationEditor data ->
+            data.integration.uuid
+
         QuestionEditor data ->
             getQuestionUuid data.question
 
@@ -500,6 +556,9 @@ getEditorPath editor =
             data.path
 
         TagEditor data ->
+            data.path
+
+        IntegrationEditor data ->
             data.path
 
         QuestionEditor data ->
@@ -539,6 +598,9 @@ toggleEditorOpen editor =
         TagEditor data ->
             TagEditor { data | treeOpen = not data.treeOpen }
 
+        IntegrationEditor data ->
+            IntegrationEditor { data | treeOpen = not data.treeOpen }
+
         QuestionEditor data ->
             QuestionEditor { data | treeOpen = not data.treeOpen }
 
@@ -571,6 +633,9 @@ isEditorDeleted editor =
         TagEditor data ->
             data.editorState == Deleted
 
+        IntegrationEditor data ->
+            data.editorState == Deleted
+
         QuestionEditor data ->
             data.editorState == Deleted
 
@@ -596,6 +661,9 @@ isEditorDirty editor =
         TagEditor data ->
             isTagEditorDirty data
 
+        IntegrationEditor data ->
+            isIntegrationEditorDirty data
+
         QuestionEditor data ->
             isQuestionEditorDirty data
 
@@ -615,6 +683,7 @@ isKMEditorDirty editorData =
         || formChanged editorData.form
         || editorData.chapters.dirty
         || editorData.tags.dirty
+        || editorData.integrations.dirty
 
 
 isChapterEditorDirty : ChapterEditorData -> Bool
@@ -628,6 +697,13 @@ isTagEditorDirty : TagEditorData -> Bool
 isTagEditorDirty editorData =
     (editorData.editorState == Added)
         || formChanged editorData.form
+
+
+isIntegrationEditorDirty : IntegrationEditorData -> Bool
+isIntegrationEditorDirty editorData =
+    (editorData.editorState == Added)
+        || formChanged editorData.form
+        || editorData.props.dirty
 
 
 isQuestionEditorDirty : QuestionEditorData -> Bool
@@ -698,6 +774,19 @@ updateTagEditorData editorContext newState form editorData =
         | editorState = getNewState editorData.editorState newState
         , tag = newTag
         , form = initTagForm newTag
+    }
+
+
+updateIntegrationEditorData : EditorContext -> EditorState -> IntegrationForm -> IntegrationEditorData -> IntegrationEditorData
+updateIntegrationEditorData editorContext newState form editorData =
+    let
+        newIntegration =
+            updateIntegrationWithForm editorData.integration form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , integration = newIntegration
+        , form = initIntegrationForm [] "" newIntegration
     }
 
 
@@ -802,6 +891,16 @@ addKMTag tag editorData =
     KMEditor
         { editorData
             | tags = Children.addChild tag.uuid editorData.tags
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
+
+
+addKMIntegration : Integration -> KMEditorData -> Editor
+addKMIntegration integration editorData =
+    KMEditor
+        { editorData
+            | integrations = Children.addChild integration.uuid editorData.integrations
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }

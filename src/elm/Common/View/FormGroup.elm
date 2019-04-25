@@ -2,7 +2,9 @@ module Common.View.FormGroup exposing
     ( codeView
     , color
     , formGroup
+    , getErrors
     , input
+    , list
     , password
     , select
     , textView
@@ -16,7 +18,7 @@ import Form exposing (Form, InputType(..), Msg(..))
 import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
-import Html exposing (Html, a, code, div, label, p, span, text)
+import Html exposing (Html, a, button, code, div, label, p, span, text)
 import Html.Attributes exposing (class, classList, for, id, name, style)
 import Html.Events exposing (onClick)
 import String exposing (fromFloat)
@@ -133,6 +135,24 @@ colorButton maybeValue fieldName colorHex =
         [ check ]
 
 
+list : (Form CustomFormError o -> Int -> Html Form.Msg) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+list itemView form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, errorClass ) =
+            getErrors field labelText
+    in
+    div [ class "form-group" ]
+        [ label [] [ text labelText ]
+        , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , div [ class "form-list-error" ] [ error ]
+        , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
+            [ text "Add" ]
+        ]
+
+
 {-| Create Html for a form field using the given input field.
 -}
 formGroup : Input.Input CustomFormError String -> List (Html.Attribute Form.Msg) -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
@@ -221,6 +241,9 @@ toReadable error labelText =
                     "This is not a valid UUID"
 
                 ServerValidationError msg ->
+                    msg
+
+                Error msg ->
                     msg
 
         _ ->

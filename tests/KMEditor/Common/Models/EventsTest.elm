@@ -2,18 +2,21 @@ module KMEditor.Common.Models.EventsTest exposing
     ( addAnswerEventTest
     , addChapterEventTest
     , addExpertEventTest
+    , addIntegrationEventTest
     , addQuestionEventTest
     , addReferenceEventTest
     , addTagEventTest
     , deleteAnswerEventTest
     , deleteChapterEventTest
     , deleteExpertEventTest
+    , deleteIntegrationEventTest
     , deleteQuestionEventTest
     , deleteReferenceEventTest
     , deleteTagEventTest
     , editAnswerEventTest
     , editChapterEventTest
     , editExpertEventTest
+    , editIntegrationEventTest
     , editKnowledgeModelEventTest
     , editQuestionEventTest
     , editReferenceEventTest
@@ -21,6 +24,7 @@ module KMEditor.Common.Models.EventsTest exposing
     , eventFieldTest
     )
 
+import Dict
 import Expect exposing (Expectation)
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -115,6 +119,10 @@ editKnowledgeModelEvent =
             { changed = False
             , value = Nothing
             }
+        , integrationUuids =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
         , path = []
@@ -145,6 +153,10 @@ editKnowledgeModelEventTest =
                                 , value = Nothing
                                 }
                             , tagUuids =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , integrationUuids =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -298,7 +310,8 @@ addTagEventTest : Test
 addTagEventTest =
     describe "AddTagEvent"
         [ test "should encode and decode" <|
-            \_ -> expectEventEncodeDecode addTagEvent
+            \_ ->
+                expectEventEncodeDecode addTagEvent
         , test "get event uuid" <|
             \_ ->
                 Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid addTagEvent)
@@ -394,6 +407,142 @@ deleteTagEventTest =
 
 
 
+{- integration events -}
+
+
+addIntegrationEvent : Event
+addIntegrationEvent =
+    AddIntegrationEvent
+        { integrationUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
+        , id = "service"
+        , name = "Service"
+        , props = [ "kind", "category" ]
+        , logo = "data:image/png;base64,..."
+        , requestMethod = "GET"
+        , requestUrl = "/api/search"
+        , requestHeaders = Dict.fromList [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
+        , requestBody = "{}"
+        , responseListField = "items"
+        , responseIdField = "uuid"
+        , responseNameField = "title"
+        , itemUrl = "http://example.com/${id}"
+        }
+        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        }
+
+
+addIntegrationEventTest : Test
+addIntegrationEventTest =
+    describe "AddIntegrationEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode addIntegrationEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid addIntegrationEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Service") (getEventEntityVisibleName addIntegrationEvent)
+        ]
+
+
+editIntegrationEvent : Event
+editIntegrationEvent =
+    EditIntegrationEvent
+        { integrationUuid = ""
+        , id =
+            { changed = True
+            , value = Just "service"
+            }
+        , name =
+            { changed = True
+            , value = Just "Service"
+            }
+        , props =
+            { changed = True
+            , value = Just [ "kind", "category" ]
+            }
+        , logo =
+            { changed = False
+            , value = Nothing
+            }
+        , requestMethod =
+            { changed = True
+            , value = Just "GET"
+            }
+        , requestUrl =
+            { changed = False
+            , value = Nothing
+            }
+        , requestHeaders =
+            { changed = True
+            , value = Just <| Dict.fromList [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
+            }
+        , requestBody =
+            { changed = True
+            , value = Just "{}"
+            }
+        , responseListField =
+            { changed = False
+            , value = Nothing
+            }
+        , responseIdField =
+            { changed = False
+            , value = Nothing
+            }
+        , responseNameField =
+            { changed = True
+            , value = Just "title"
+            }
+        , itemUrl =
+            { changed = True
+            , value = Just "http://example.com/${id}"
+            }
+        }
+        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        }
+
+
+editIntegrationEventTest : Test
+editIntegrationEventTest =
+    describe "EditIntegrationEventTest"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editIntegrationEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid editIntegrationEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Service") (getEventEntityVisibleName editIntegrationEvent)
+        ]
+
+
+deleteIntegrationEvent : Event
+deleteIntegrationEvent =
+    DeleteIntegrationEvent
+        { integrationUuid = ""
+        }
+        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        }
+
+
+deleteIntegrationEventTest : Test
+deleteIntegrationEventTest =
+    describe "DeleteIntegrationEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editIntegrationEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid deleteIntegrationEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (getEventEntityVisibleName deleteIntegrationEvent)
+        ]
+
+
+
 {- question events -}
 
 
@@ -456,23 +605,44 @@ addValueQuestionEvent =
         }
 
 
+addIntegrationQuestionEvent : Event
+addIntegrationQuestionEvent =
+    AddQuestionEvent
+        (AddIntegrationQuestionEvent
+            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+            , title = "Can you answer this question?"
+            , text = Nothing
+            , requiredLevel = Nothing
+            , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
+            , integrationUuid = "1d522339-e93b-44e9-bc2a-1df65fb97dc6"
+            , props = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
+            }
+        )
+        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+        , path =
+            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+            ]
+        }
+
+
 addQuestionEventTest : Test
 addQuestionEventTest =
     describe "AddQuestionEvent"
         [ parametrized
-            [ addOptionsQuestionEvent, addListQuestionEvent, addValueQuestionEvent ]
+            [ addOptionsQuestionEvent, addListQuestionEvent, addValueQuestionEvent, addIntegrationQuestionEvent ]
             "should encode decode"
           <|
             \event ->
                 expectEventEncodeDecode event
         , parametrized
-            [ addOptionsQuestionEvent, addListQuestionEvent, addValueQuestionEvent ]
+            [ addOptionsQuestionEvent, addListQuestionEvent, addValueQuestionEvent, addIntegrationQuestionEvent ]
             "get event uuid"
           <|
             \event ->
                 Expect.equal "b09ed98c-3043-11e9-b210-d663bd873d93" (getEventUuid event)
         , parametrized
-            [ addOptionsQuestionEvent, addListQuestionEvent, addValueQuestionEvent ]
+            [ addOptionsQuestionEvent, addListQuestionEvent, addValueQuestionEvent, addIntegrationQuestionEvent ]
             "get event entity visible name"
           <|
             \event ->
@@ -547,17 +717,40 @@ editValueQuestionEvent =
         }
 
 
+editIntegrationQuestionEvent : Event
+editIntegrationQuestionEvent =
+    EditQuestionEvent
+        (EditIntegrationQuestionEvent
+            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+            , title = { changed = True, value = Just "What database will you use?" }
+            , text = { changed = False, value = Nothing }
+            , requiredLevel = { changed = True, value = Just (Just 2) }
+            , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
+            , referenceUuids = { changed = False, value = Nothing }
+            , expertUuids = { changed = False, value = Nothing }
+            , integrationUuid = { changed = True, value = Just "1d522339-e93b-44e9-bc2a-1df65fb97dc6" }
+            , props = { changed = True, value = Just <| Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ] }
+            }
+        )
+        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+        , path =
+            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+            ]
+        }
+
+
 editQuestionEventTest : Test
 editQuestionEventTest =
     describe "EditQuestionEvent"
         [ parametrized
-            [ editOptionsQuestionEvent, editListQuestionEvent, editValueQuestionEvent ]
+            [ editOptionsQuestionEvent, editListQuestionEvent, editValueQuestionEvent, editIntegrationQuestionEvent ]
             "should encode decode"
           <|
             \event ->
                 expectEventEncodeDecode event
         , parametrized
-            [ editOptionsQuestionEvent, editListQuestionEvent, editValueQuestionEvent ]
+            [ editOptionsQuestionEvent, editListQuestionEvent, editValueQuestionEvent, editIntegrationQuestionEvent ]
             "get event uuid"
           <|
             \event ->
@@ -566,6 +759,7 @@ editQuestionEventTest =
             [ ( editOptionsQuestionEvent, Nothing )
             , ( editListQuestionEvent, Just "This is a new title" )
             , ( editValueQuestionEvent, Just "What date is today?" )
+            , ( editIntegrationQuestionEvent, Just "What database will you use?" )
             ]
             "get event entity visible name"
           <|

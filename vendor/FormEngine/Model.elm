@@ -6,14 +6,19 @@ module FormEngine.Model exposing
     , FormItemDescriptor
     , FormTree
     , FormValues
+    , IntegrationReplyValue(..)
     , ItemElement
     , Option(..)
     , OptionDescriptor
     , OptionElement(..)
     , ReplyValue(..)
+    , TypeHint
+    , TypeHintConfig
+    , TypeHints
     , createForm
     , createItemElement
     , decodeFormValues
+    , decodeTypeHint
     , encodeFormValues
     , getAnswerUuid
     , getDescriptor
@@ -22,8 +27,11 @@ module FormEngine.Model exposing
     , getOptionDescriptor
     , getStringReply
     , isEmptyReply
+    , setTypeHintsResult
     )
 
+import ActionResult exposing (ActionResult)
+import Debounce exposing (Debounce)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
@@ -57,10 +65,17 @@ type Option a
     | DetailedOption OptionDescriptor (List (FormItem a))
 
 
+type alias TypeHintConfig =
+    { logo : String
+    , url : String
+    }
+
+
 type FormItem a
     = StringFormItem (FormItemDescriptor a)
     | NumberFormItem (FormItemDescriptor a)
     | TextFormItem (FormItemDescriptor a)
+    | TypeHintFormItem (FormItemDescriptor a) TypeHintConfig
     | ChoiceFormItem (FormItemDescriptor a) (List (Option a))
     | GroupFormItem (FormItemDescriptor a) (List (FormItem a))
 
@@ -89,12 +104,27 @@ type FormElement a
     = StringFormElement (FormItemDescriptor a) FormElementState
     | NumberFormElement (FormItemDescriptor a) FormElementState
     | TextFormElement (FormItemDescriptor a) FormElementState
+    | TypeHintFormElement (FormItemDescriptor a) TypeHintConfig FormElementState
     | ChoiceFormElement (FormItemDescriptor a) (List (OptionElement a)) FormElementState
     | GroupFormElement (FormItemDescriptor a) (List (FormItem a)) (List (ItemElement a)) FormElementState
 
 
+type alias TypeHint =
+    { id : String
+    , name : String
+    }
+
+
+type alias TypeHints =
+    { path : List String
+    , hints : ActionResult (List TypeHint)
+    }
+
+
 type alias Form a =
     { elements : List (FormElement a)
+    , typeHints : Maybe TypeHints
+    , debounce : Debounce ( String, String )
     }
 
 
@@ -103,6 +133,12 @@ type ReplyValue
     | AnswerReply String
     | ItemListReply Int
     | EmptyReply
+    | IntegrationReply IntegrationReplyValue
+
+
+type IntegrationReplyValue
+    = PlainValue String
+    | IntegrationValue String String
 
 
 type alias FormValues =
@@ -137,6 +173,7 @@ decodeReplyValue =
         [ when replyValueType ((==) "StringReply") decodeStringReply
         , when replyValueType ((==) "AnswerReply") decodeAnswerReply
         , when replyValueType ((==) "ItemListReply") decodeItemListReply
+        , when replyValueType ((==) "IntegrationReply") decodeIntegrationReply
         ]
 
 
@@ -161,6 +198,45 @@ decodeItemListReply : Decoder ReplyValue
 decodeItemListReply =
     Decode.succeed ItemListReply
         |> required "value" Decode.int
+
+
+decodeIntegrationReply : Decoder ReplyValue
+decodeIntegrationReply =
+    Decode.succeed IntegrationReply
+        |> required "value" decodeIntegrationReplyValue
+
+
+decodeIntegrationReplyValue : Decoder IntegrationReplyValue
+decodeIntegrationReplyValue =
+    Decode.oneOf
+        [ when integrationValueType ((==) "PlainValue") decodePlainValue
+        , when integrationValueType ((==) "IntegrationValue") decodeIntegrationValue
+        ]
+
+
+decodePlainValue : Decoder IntegrationReplyValue
+decodePlainValue =
+    Decode.succeed PlainValue
+        |> required "value" Decode.string
+
+
+decodeIntegrationValue : Decoder IntegrationReplyValue
+decodeIntegrationValue =
+    Decode.succeed IntegrationValue
+        |> required "id" Decode.string
+        |> required "value" Decode.string
+
+
+integrationValueType : Decoder String
+integrationValueType =
+    Decode.field "type" Decode.string
+
+
+decodeTypeHint : Decoder TypeHint
+decodeTypeHint =
+    Decode.succeed TypeHint
+        |> required "id" Decode.string
+        |> required "name" Decode.string
 
 
 encodeFormValues : FormValues -> Encode.Value
@@ -200,6 +276,31 @@ encodeReplyValue replyValue =
         EmptyReply ->
             Encode.null
 
+        IntegrationReply integrationReplyValue ->
+            case integrationReplyValue of
+                PlainValue value ->
+                    Encode.object
+                        [ ( "type", Encode.string "IntegrationReply" )
+                        , ( "value"
+                          , Encode.object
+                                [ ( "type", Encode.string "PlainValue" )
+                                , ( "value", Encode.string value )
+                                ]
+                          )
+                        ]
+
+                IntegrationValue id value ->
+                    Encode.object
+                        [ ( "type", Encode.string "IntegrationReply" )
+                        , ( "value"
+                          , Encode.object
+                                [ ( "type", Encode.string "IntegrationValue" )
+                                , ( "id", Encode.string id )
+                                , ( "value", Encode.string value )
+                                ]
+                          )
+                        ]
+
 
 
 {- Type helpers -}
@@ -233,6 +334,9 @@ getDescriptor element =
         GroupFormElement descriptor _ _ _ ->
             descriptor
 
+        TypeHintFormElement descriptor _ _ ->
+            descriptor
+
 
 getItemListCount : ReplyValue -> Int
 getItemListCount replyValue =
@@ -260,6 +364,14 @@ getStringReply replyValue =
         StringReply string ->
             string
 
+        IntegrationReply integrationReplyValue ->
+            case integrationReplyValue of
+                PlainValue value ->
+                    value
+
+                IntegrationValue id value ->
+                    value
+
         _ ->
             ""
 
@@ -274,13 +386,25 @@ isEmptyReply replyValue =
             False
 
 
+setTypeHintsResult : ActionResult (List TypeHint) -> Form a -> Form a
+setTypeHintsResult typeHintsResult form =
+    let
+        set result typeHints =
+            { typeHints | hints = result }
+    in
+    { form | typeHints = Maybe.map (set typeHintsResult) form.typeHints }
+
+
 
 {- Form creation -}
 
 
 createForm : FormTree a -> FormValues -> List String -> Form a
 createForm formTree formValues defaultPath =
-    { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues defaultPath) }
+    { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues defaultPath)
+    , typeHints = Nothing
+    , debounce = Debounce.init
+    }
 
 
 createFormElement : FormItem a -> FormElement a
@@ -300,6 +424,9 @@ createFormElement item =
 
         GroupFormItem descriptor items ->
             GroupFormElement descriptor items [ createItemElement items ] emptyFormElementState
+
+        TypeHintFormItem descriptor typeHintConfig ->
+            TypeHintFormElement descriptor typeHintConfig emptyFormElementState
 
 
 emptyFormElementState : FormElementState
@@ -356,6 +483,9 @@ setInitialValue formValues path element =
                     { state | value = Just <| ItemListReply numberOfItems }
             in
             GroupFormElement descriptor items newItemElements newState
+
+        TypeHintFormElement descriptor typeHintConfig state ->
+            TypeHintFormElement descriptor typeHintConfig { state | value = getInitialValue formValues path descriptor.name }
 
 
 getInitialValue : FormValues -> List String -> String -> Maybe ReplyValue
@@ -417,6 +547,9 @@ getFieldValue path element values =
                     applyFieldValue values (pathToKey path descriptor.name) state.value
             in
             List.indexedFoldl (getItemValues (path ++ [ descriptor.name ])) newValues itemElements
+
+        TypeHintFormElement descriptor _ state ->
+            applyFieldValue values (pathToKey path descriptor.name) state.value
 
 
 getOptionValues : List String -> OptionElement a -> FormValues -> FormValues

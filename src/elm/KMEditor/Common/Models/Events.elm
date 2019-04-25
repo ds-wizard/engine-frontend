@@ -3,6 +3,7 @@ module KMEditor.Common.Models.Events exposing
     , AddChapterEventData
     , AddCrossReferenceEventData
     , AddExpertEventData
+    , AddIntegrationEventData
     , AddQuestionEventData(..)
     , AddReferenceEventData(..)
     , AddResourcePageReferenceEventData
@@ -13,6 +14,7 @@ module KMEditor.Common.Models.Events exposing
     , DeleteAnswerEventData
     , DeleteChapterEventData
     , DeleteExpertEventData
+    , DeleteIntegrationEventData
     , DeleteQuestionEventData
     , DeleteReferenceEventData
     , DeleteTagEventData
@@ -20,6 +22,7 @@ module KMEditor.Common.Models.Events exposing
     , EditChapterEventData
     , EditCrossReferenceEventData
     , EditExpertEventData
+    , EditIntegrationEventData
     , EditKnowledgeModelEventData
     , EditListQuestionEventData
     , EditOptionsQuestionEventData
@@ -77,6 +80,7 @@ module KMEditor.Common.Models.Events exposing
     , mapEditReferenceEventData
     )
 
+import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as Encode
@@ -95,6 +99,9 @@ type Event
     | AddTagEvent AddTagEventData CommonEventData
     | EditTagEvent EditTagEventData CommonEventData
     | DeleteTagEvent DeleteTagEventData CommonEventData
+    | AddIntegrationEvent AddIntegrationEventData CommonEventData
+    | EditIntegrationEvent EditIntegrationEventData CommonEventData
+    | DeleteIntegrationEvent DeleteIntegrationEventData CommonEventData
     | AddQuestionEvent AddQuestionEventData CommonEventData
     | EditQuestionEvent EditQuestionEventData CommonEventData
     | DeleteQuestionEvent DeleteQuestionEventData CommonEventData
@@ -126,6 +133,7 @@ type alias EditKnowledgeModelEventData =
     , name : EventField String
     , chapterUuids : EventField (List String)
     , tagUuids : EventField (List String)
+    , integrationUuids : EventField (List String)
     }
 
 
@@ -170,10 +178,50 @@ type alias DeleteTagEventData =
     }
 
 
+type alias AddIntegrationEventData =
+    { integrationUuid : String
+    , id : String
+    , name : String
+    , props : List String
+    , logo : String
+    , requestMethod : String
+    , requestUrl : String
+    , requestHeaders : Dict String String
+    , requestBody : String
+    , responseListField : String
+    , responseIdField : String
+    , responseNameField : String
+    , itemUrl : String
+    }
+
+
+type alias EditIntegrationEventData =
+    { integrationUuid : String
+    , id : EventField String
+    , name : EventField String
+    , props : EventField (List String)
+    , logo : EventField String
+    , requestMethod : EventField String
+    , requestUrl : EventField String
+    , requestHeaders : EventField (Dict String String)
+    , requestBody : EventField String
+    , responseListField : EventField String
+    , responseIdField : EventField String
+    , responseNameField : EventField String
+    , itemUrl : EventField String
+    }
+
+
+type alias DeleteIntegrationEventData =
+    { integrationUuid : String
+    }
+
+
 type AddQuestionEventData
     = AddOptionsQuestionEvent AddOptionsQuestionEventData
     | AddListQuestionEvent AddListQuestionEventData
     | AddValueQuestionEvent AddValueQuestionEventData
+    | AddIntegrationQuestionEvent AddIntegrationQuestionEventData
 
 
 type alias AddOptionsQuestionEventData =
@@ -205,10 +253,22 @@ type alias AddValueQuestionEventData =
     }
 
 
+type alias AddIntegrationQuestionEventData =
+    { questionUuid : String
+    , title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    , tagUuids : List String
+    , integrationUuid : String
+    , props : Dict String String
+    }
+
+
 type EditQuestionEventData
     = EditOptionsQuestionEvent EditOptionsQuestionEventData
     | EditListQuestionEvent EditListQuestionEventData
     | EditValueQuestionEvent EditValueQuestionEventData
+    | EditIntegrationQuestionEvent EditIntegrationQuestionEventData
 
 
 type alias EditOptionsQuestionEventData =
@@ -245,6 +305,19 @@ type alias EditValueQuestionEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , valueType : EventField ValueQuestionType
+    }
+
+
+type alias EditIntegrationQuestionEventData =
+    { questionUuid : String
+    , title : EventField String
+    , text : EventField (Maybe String)
+    , requiredLevel : EventField (Maybe Int)
+    , tagUuids : EventField (List String)
+    , referenceUuids : EventField (List String)
+    , expertUuids : EventField (List String)
+    , integrationUuid : EventField String
+    , props : EventField (Dict String String)
     }
 
 
@@ -401,6 +474,15 @@ encodeEvent event =
                 DeleteTagEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeDeleteTagEvent eventData )
 
+                AddIntegrationEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeAddIntegrationEvent eventData )
+
+                EditIntegrationEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeEditIntegrationEvent eventData )
+
+                DeleteIntegrationEvent eventData commonData ->
+                    ( encodeCommonData commonData, encodeDeleteIntegrationEvent eventData )
+
                 AddQuestionEvent eventData commonData ->
                     ( encodeCommonData commonData, encodeAddQuestionEvent eventData )
 
@@ -462,6 +544,7 @@ encodeEditKnowledgeModelEvent data =
     , ( "name", encodeEventField Encode.string data.name )
     , ( "chapterUuids", encodeEventField (Encode.list Encode.string) data.chapterUuids )
     , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
+    , ( "integrationUuids", encodeEventField (Encode.list Encode.string) data.integrationUuids )
     ]
 
 
@@ -518,6 +601,51 @@ encodeDeleteTagEvent data =
     ]
 
 
+encodeAddIntegrationEvent : AddIntegrationEventData -> List ( String, Encode.Value )
+encodeAddIntegrationEvent data =
+    [ ( "eventType", Encode.string "AddIntegrationEvent" )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
+    , ( "id", Encode.string data.id )
+    , ( "name", Encode.string data.name )
+    , ( "props", Encode.list Encode.string data.props )
+    , ( "logo", Encode.string data.logo )
+    , ( "requestMethod", Encode.string data.requestMethod )
+    , ( "requestUrl", Encode.string data.requestUrl )
+    , ( "requestHeaders", Encode.dict identity Encode.string data.requestHeaders )
+    , ( "requestBody", Encode.string data.requestBody )
+    , ( "responseListField", Encode.string data.responseListField )
+    , ( "responseIdField", Encode.string data.responseIdField )
+    , ( "responseNameField", Encode.string data.responseNameField )
+    , ( "itemUrl", Encode.string data.itemUrl )
+    ]
+
+
+encodeEditIntegrationEvent : EditIntegrationEventData -> List ( String, Encode.Value )
+encodeEditIntegrationEvent data =
+    [ ( "eventType", Encode.string "EditIntegrationEvent" )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
+    , ( "id", encodeEventField Encode.string data.id )
+    , ( "name", encodeEventField Encode.string data.name )
+    , ( "props", encodeEventField (Encode.list Encode.string) data.props )
+    , ( "logo", encodeEventField Encode.string data.logo )
+    , ( "requestMethod", encodeEventField Encode.string data.requestMethod )
+    , ( "requestUrl", encodeEventField Encode.string data.requestUrl )
+    , ( "requestHeaders", encodeEventField (Encode.dict identity Encode.string) data.requestHeaders )
+    , ( "requestBody", encodeEventField Encode.string data.requestBody )
+    , ( "responseListField", encodeEventField Encode.string data.responseListField )
+    , ( "responseIdField", encodeEventField Encode.string data.responseIdField )
+    , ( "responseNameField", encodeEventField Encode.string data.responseNameField )
+    , ( "itemUrl", encodeEventField Encode.string data.itemUrl )
+    ]
+
+
+encodeDeleteIntegrationEvent : DeleteIntegrationEventData -> List ( String, Encode.Value )
+encodeDeleteIntegrationEvent data =
+    [ ( "eventType", Encode.string "DeleteIntegrationEvent" )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
+    ]
+
+
 encodeAddQuestionEvent : AddQuestionEventData -> List ( String, Encode.Value )
 encodeAddQuestionEvent data =
     let
@@ -526,6 +654,7 @@ encodeAddQuestionEvent data =
                 encodeAddOptionsQuestionEvent
                 encodeAddListQuestionEvent
                 encodeAddValueQuestionEvent
+                encodeAddIntegrationQuestionEvent
                 data
     in
     [ ( "eventType", Encode.string "AddQuestionEvent" ) ] ++ eventData
@@ -566,6 +695,19 @@ encodeAddValueQuestionEvent data =
     ]
 
 
+encodeAddIntegrationQuestionEvent : AddIntegrationQuestionEventData -> List ( String, Encode.Value )
+encodeAddIntegrationQuestionEvent data =
+    [ ( "questionType", Encode.string "IntegrationQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", Encode.string data.title )
+    , ( "text", maybe Encode.string data.text )
+    , ( "requiredLevel", maybe Encode.int data.requiredLevel )
+    , ( "tagUuids", Encode.list Encode.string data.tagUuids )
+    , ( "integrationUuid", Encode.string data.integrationUuid )
+    , ( "props", Encode.dict identity Encode.string data.props )
+    ]
+
+
 encodeEditQuestionEvent : EditQuestionEventData -> List ( String, Encode.Value )
 encodeEditQuestionEvent data =
     let
@@ -574,6 +716,7 @@ encodeEditQuestionEvent data =
                 encodeEditOptionsQuestionEvent
                 encodeEditListQuestionEvent
                 encodeEditValueQuestionEvent
+                encodeEditIntegrationQuestionEvent
                 data
     in
     [ ( "eventType", Encode.string "EditQuestionEvent" ) ] ++ eventData
@@ -619,6 +762,21 @@ encodeEditValueQuestionEvent data =
     , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
     , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
     , ( "valueType", encodeEventField encodeValueType data.valueType )
+    ]
+
+
+encodeEditIntegrationQuestionEvent : EditIntegrationQuestionEventData -> List ( String, Encode.Value )
+encodeEditIntegrationQuestionEvent data =
+    [ ( "questionType", Encode.string "IntegrationQuestion" )
+    , ( "questionUuid", Encode.string data.questionUuid )
+    , ( "title", encodeEventField Encode.string data.title )
+    , ( "text", encodeEventField (maybe Encode.string) data.text )
+    , ( "requiredLevel", encodeEventField (maybe Encode.int) data.requiredLevel )
+    , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
+    , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
+    , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
+    , ( "integrationUuid", encodeEventField Encode.string data.integrationUuid )
+    , ( "props", encodeEventField (Encode.dict identity Encode.string) data.props )
     ]
 
 
@@ -836,6 +994,15 @@ eventDecoderByType eventType =
         "DeleteTagEvent" ->
             Decode.map2 DeleteTagEvent deleteTagEventDecoder commonEventDataDecoder
 
+        "AddIntegrationEvent" ->
+            Decode.map2 AddIntegrationEvent addIntegrationEventDecoder commonEventDataDecoder
+
+        "EditIntegrationEvent" ->
+            Decode.map2 EditIntegrationEvent editIntegrationEventDecoder commonEventDataDecoder
+
+        "DeleteIntegrationEvent" ->
+            Decode.map2 DeleteIntegrationEvent deleteIntegrationEventDecoder commonEventDataDecoder
+
         "AddQuestionEvent" ->
             Decode.map2 AddQuestionEvent addQuestionEventDecoder commonEventDataDecoder
 
@@ -897,6 +1064,7 @@ editKnowledgeModelEventDecoder =
         |> required "name" (eventFieldDecoder Decode.string)
         |> required "chapterUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "integrationUuids" (eventFieldDecoder (Decode.list Decode.string))
 
 
 addChapterEventDecoder : Decoder AddChapterEventData
@@ -946,6 +1114,48 @@ deleteTagEventDecoder =
         |> required "tagUuid" Decode.string
 
 
+addIntegrationEventDecoder : Decoder AddIntegrationEventData
+addIntegrationEventDecoder =
+    Decode.succeed AddIntegrationEventData
+        |> required "integrationUuid" Decode.string
+        |> required "id" Decode.string
+        |> required "name" Decode.string
+        |> required "props" (Decode.list Decode.string)
+        |> required "logo" Decode.string
+        |> required "requestMethod" Decode.string
+        |> required "requestUrl" Decode.string
+        |> required "requestHeaders" (Decode.dict Decode.string)
+        |> required "requestBody" Decode.string
+        |> required "responseListField" Decode.string
+        |> required "responseIdField" Decode.string
+        |> required "responseNameField" Decode.string
+        |> required "itemUrl" Decode.string
+
+
+editIntegrationEventDecoder : Decoder EditIntegrationEventData
+editIntegrationEventDecoder =
+    Decode.succeed EditIntegrationEventData
+        |> required "integrationUuid" Decode.string
+        |> required "id" (eventFieldDecoder Decode.string)
+        |> required "name" (eventFieldDecoder Decode.string)
+        |> required "props" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "logo" (eventFieldDecoder Decode.string)
+        |> required "requestMethod" (eventFieldDecoder Decode.string)
+        |> required "requestUrl" (eventFieldDecoder Decode.string)
+        |> required "requestHeaders" (eventFieldDecoder (Decode.dict Decode.string))
+        |> required "requestBody" (eventFieldDecoder Decode.string)
+        |> required "responseListField" (eventFieldDecoder Decode.string)
+        |> required "responseIdField" (eventFieldDecoder Decode.string)
+        |> required "responseNameField" (eventFieldDecoder Decode.string)
+        |> required "itemUrl" (eventFieldDecoder Decode.string)
+
+
+deleteIntegrationEventDecoder : Decoder DeleteIntegrationEventData
+deleteIntegrationEventDecoder =
+    Decode.succeed DeleteIntegrationEventData
+        |> required "integrationUuid" Decode.string
+
+
 addQuestionEventDecoder : Decoder AddQuestionEventData
 addQuestionEventDecoder =
     Decode.field "questionType" Decode.string
@@ -963,6 +1173,9 @@ addQuestionEventDecoderByType questionType =
 
         "ValueQuestion" ->
             Decode.map AddValueQuestionEvent addValueQuestionEventDecoder
+
+        "IntegrationQuestion" ->
+            Decode.map AddIntegrationQuestionEvent addIntegrationQuestionEventDecoder
 
         _ ->
             Decode.fail <| "Unknown question type: " ++ questionType
@@ -1000,6 +1213,18 @@ addValueQuestionEventDecoder =
         |> required "valueType" valueTypeDecoder
 
 
+addIntegrationQuestionEventDecoder : Decoder AddIntegrationQuestionEventData
+addIntegrationQuestionEventDecoder =
+    Decode.succeed AddIntegrationQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" Decode.string
+        |> required "text" (Decode.nullable Decode.string)
+        |> required "requiredLevel" (Decode.nullable Decode.int)
+        |> required "tagUuids" (Decode.list Decode.string)
+        |> required "integrationUuid" Decode.string
+        |> required "props" (Decode.dict Decode.string)
+
+
 editQuestionEventDecoder : Decoder EditQuestionEventData
 editQuestionEventDecoder =
     Decode.field "questionType" Decode.string
@@ -1017,6 +1242,9 @@ editQuestionEventDecoderByType questionType =
 
         "ValueQuestion" ->
             Decode.map EditValueQuestionEvent editValueQuestionEventDecoder
+
+        "IntegrationQuestion" ->
+            Decode.map EditIntegrationQuestionEvent editIntegrationQuestionEventDecoder
 
         _ ->
             Decode.fail <| "Unknown question type: " ++ questionType
@@ -1060,6 +1288,20 @@ editValueQuestionEventDecoder =
         |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "valueType" (eventFieldDecoder valueTypeDecoder)
+
+
+editIntegrationQuestionEventDecoder : Decoder EditIntegrationQuestionEventData
+editIntegrationQuestionEventDecoder =
+    Decode.succeed EditIntegrationQuestionEventData
+        |> required "questionUuid" Decode.string
+        |> required "title" (eventFieldDecoder Decode.string)
+        |> required "text" (eventFieldDecoder (Decode.nullable Decode.string))
+        |> required "requiredLevel" (eventFieldDecoder (Decode.nullable Decode.int))
+        |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
+        |> required "integrationUuid" (eventFieldDecoder Decode.string)
+        |> required "props" (eventFieldDecoder (Decode.dict Decode.string))
 
 
 deleteQuestionEventDecoder : Decoder DeleteQuestionEventData
@@ -1240,6 +1482,15 @@ getEventUuid event =
         DeleteTagEvent _ commonData ->
             commonData.uuid
 
+        AddIntegrationEvent _ commonData ->
+            commonData.uuid
+
+        EditIntegrationEvent _ commonData ->
+            commonData.uuid
+
+        DeleteIntegrationEvent _ commonData ->
+            commonData.uuid
+
         AddChapterEvent _ commonData ->
             commonData.uuid
 
@@ -1303,6 +1554,15 @@ getEventEntityUuid event =
 
         DeleteTagEvent eventData _ ->
             eventData.tagUuid
+
+        AddIntegrationEvent eventData _ ->
+            eventData.integrationUuid
+
+        EditIntegrationEvent eventData _ ->
+            eventData.integrationUuid
+
+        DeleteIntegrationEvent eventData _ ->
+            eventData.integrationUuid
 
         AddChapterEvent eventData _ ->
             eventData.chapterUuid
@@ -1401,6 +1661,12 @@ getEventEntityVisibleName event =
         EditTagEvent eventData _ ->
             getEventFieldValue eventData.name
 
+        AddIntegrationEvent eventData _ ->
+            Just eventData.name
+
+        EditIntegrationEvent eventData _ ->
+            getEventFieldValue eventData.name
+
         AddChapterEvent eventData _ ->
             Just eventData.title
 
@@ -1437,12 +1703,12 @@ getEventEntityVisibleName event =
 
 getAddQuestionEventEntityVisibleName : AddQuestionEventData -> Maybe String
 getAddQuestionEventEntityVisibleName =
-    Just << mapAddQuestionEventData .title .title .title
+    Just << mapAddQuestionEventData .title .title .title .title
 
 
 getEditQuestionEventEntityVisibleName : EditQuestionEventData -> Maybe String
 getEditQuestionEventEntityVisibleName =
-    getEventFieldValue << mapEditQuestionEventData .title .title .title
+    getEventFieldValue << mapEditQuestionEventData .title .title .title .title
 
 
 getAddReferenceEventEntityVisibleName : AddReferenceEventData -> Maybe String
@@ -1457,12 +1723,12 @@ getEditReferenceEventEntityVisibleName =
 
 getAddQuestionUuid : AddQuestionEventData -> String
 getAddQuestionUuid =
-    mapAddQuestionEventData .questionUuid .questionUuid .questionUuid
+    mapAddQuestionEventData .questionUuid .questionUuid .questionUuid .questionUuid
 
 
 getEditQuestionUuid : EditQuestionEventData -> String
 getEditQuestionUuid =
-    mapEditQuestionEventData .questionUuid .questionUuid .questionUuid
+    mapEditQuestionEventData .questionUuid .questionUuid .questionUuid .questionUuid
 
 
 getAddReferenceUuid : AddReferenceEventData -> String
@@ -1685,8 +1951,14 @@ isAddReference question event =
             False
 
 
-mapAddQuestionEventData : (AddOptionsQuestionEventData -> a) -> (AddListQuestionEventData -> a) -> (AddValueQuestionEventData -> a) -> AddQuestionEventData -> a
-mapAddQuestionEventData optionsQuestion listQuestion valueQuestion question =
+mapAddQuestionEventData :
+    (AddOptionsQuestionEventData -> a)
+    -> (AddListQuestionEventData -> a)
+    -> (AddValueQuestionEventData -> a)
+    -> (AddIntegrationQuestionEventData -> a)
+    -> AddQuestionEventData
+    -> a
+mapAddQuestionEventData optionsQuestion listQuestion valueQuestion integrationQuestion question =
     case question of
         AddOptionsQuestionEvent data ->
             optionsQuestion data
@@ -1697,9 +1969,18 @@ mapAddQuestionEventData optionsQuestion listQuestion valueQuestion question =
         AddValueQuestionEvent data ->
             valueQuestion data
 
+        AddIntegrationQuestionEvent data ->
+            integrationQuestion data
 
-mapEditQuestionEventData : (EditOptionsQuestionEventData -> a) -> (EditListQuestionEventData -> a) -> (EditValueQuestionEventData -> a) -> EditQuestionEventData -> a
-mapEditQuestionEventData optionsQuestion listQuestion valueQuestion question =
+
+mapEditQuestionEventData :
+    (EditOptionsQuestionEventData -> a)
+    -> (EditListQuestionEventData -> a)
+    -> (EditValueQuestionEventData -> a)
+    -> (EditIntegrationQuestionEventData -> a)
+    -> EditQuestionEventData
+    -> a
+mapEditQuestionEventData optionsQuestion listQuestion valueQuestion integrationQuestion question =
     case question of
         EditOptionsQuestionEvent data ->
             optionsQuestion data
@@ -1709,6 +1990,9 @@ mapEditQuestionEventData optionsQuestion listQuestion valueQuestion question =
 
         EditValueQuestionEvent data ->
             valueQuestion data
+
+        EditIntegrationQuestionEvent data ->
+            integrationQuestion data
 
 
 mapAddReferenceEventData : (AddResourcePageReferenceEventData -> a) -> (AddURLReferenceEventData -> a) -> (AddCrossReferenceEventData -> a) -> AddReferenceEventData -> a
@@ -1743,6 +2027,7 @@ getAddQuestionEventQuestionTypeString =
         (\_ -> "Options")
         (\_ -> "List")
         (\_ -> "Value")
+        (\_ -> "Integration")
 
 
 getEditQuestionEventQuestionTypeString : EditQuestionEventData -> String
@@ -1751,3 +2036,4 @@ getEditQuestionEventQuestionTypeString =
         (\_ -> "Options")
         (\_ -> "List")
         (\_ -> "Value")
+        (\_ -> "Integration")
