@@ -433,7 +433,7 @@ validateIntegrationProps integrations integration =
                 (\value ->
                     Validate.map (\dict -> Dict.insert prop value dict) acc
                 )
-                (Validate.field ("props-" ++ prop) Validate.string)
+                (Validate.field ("props-" ++ prop) (Validate.oneOf [ Validate.string, Validate.emptyString ]))
     in
     List.foldl fold (Validate.succeed Dict.empty) props
 
