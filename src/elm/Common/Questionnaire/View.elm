@@ -294,13 +294,20 @@ viewChapters model metrics summaryReport =
 
 viewChapterReport : Model -> List Metric -> ChapterReport -> Html Msg
 viewChapterReport model metrics chapterReport =
+    let
+        content =
+            if List.length chapterReport.metrics > 2 then
+                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
+                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
+                ]
+
+            else
+                [ div [ class "col-12" ] [ viewMetricsTable metrics chapterReport ] ]
+    in
     div []
         [ h3 [] [ text <| getTitleByUuid model.questionnaire.knowledgeModel.chapters chapterReport.chapterUuid ]
         , viewIndications chapterReport.indications
-        , div [ class "row" ]
-            [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
-            , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
-            ]
+        , div [ class "row" ] content
         ]
 
 
