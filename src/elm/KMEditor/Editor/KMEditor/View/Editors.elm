@@ -1,6 +1,7 @@
 module KMEditor.Editor.KMEditor.View.Editors exposing (activeEditor)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
 import Common.View.Flash as Flash
@@ -25,8 +26,8 @@ import String exposing (fromInt, toLower)
 import ValueList
 
 
-activeEditor : Model -> ( String, Html Msg )
-activeEditor model =
+activeEditor : AppState -> Model -> ( String, Html Msg )
+activeEditor appState model =
     case getActiveEditor model of
         Just editor ->
             case editor of
@@ -43,7 +44,7 @@ activeEditor model =
                     chapterEditorView model data
 
                 QuestionEditor data ->
-                    questionEditorView model data
+                    questionEditorView appState model data
 
                 AnswerEditor data ->
                     answerEditorView model data
@@ -306,13 +307,20 @@ integrationHeaderItemView form i =
         ]
 
 
-questionEditorView : Model -> QuestionEditorData -> ( String, Html Msg )
-questionEditorView model editorData =
+questionEditorView : AppState -> Model -> QuestionEditorData -> ( String, Html Msg )
+questionEditorView appState model editorData =
     let
         editorTitleConfig =
             { title = "Question"
             , deleteAction = DeleteQuestion editorData.uuid |> QuestionEditorMsg |> EditorMsg |> Just
             }
+
+        levelSelection =
+            if appState.features.levels then
+                questionRequiredLevelSelectGroup editorData model.levels
+
+            else
+                emptyNode
 
         formFields =
             [ FormGroup.select questionTypeOptions editorData.form "questionType" "Question Type"
@@ -322,7 +330,7 @@ questionEditorView model editorData =
                 ]
             , FormGroup.input editorData.form "title" "Title"
             , FormGroup.textarea editorData.form "text" "Text"
-            , questionRequiredLevelSelectGroup editorData model.levels
+            , levelSelection
             ]
 
         ( form, extra ) =

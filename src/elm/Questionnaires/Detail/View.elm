@@ -27,14 +27,19 @@ content wrapMsg appState model ( questionnaireModel, levels ) =
         questionnaireCfg =
             { showExtraActions = appState.features.feedback
             , showExtraNavigation = True
-            , levels = Just levels
+            , levels =
+                if appState.features.levels then
+                    Just levels
+
+                else
+                    Nothing
             }
     in
     div [ class "Questionnaires__Detail" ]
         [ questionnaireHeader wrapMsg model.savingQuestionnaire questionnaireModel
         , FormResult.view model.savingQuestionnaire
         , div [ class "questionnaire-wrapper" ]
-            [ viewQuestionnaire questionnaireCfg questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg) ]
+            [ viewQuestionnaire questionnaireCfg appState questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg) ]
         ]
 
 

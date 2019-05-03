@@ -33,7 +33,7 @@ view model =
 
         KMEditor route ->
             model.kmEditorModel
-                |> KMEditor.View.view route KMEditorMsg model.appState.jwt
+                |> KMEditor.View.view route KMEditorMsg model.appState
                 |> Layout.app model
 
         KnowledgeModels route ->
