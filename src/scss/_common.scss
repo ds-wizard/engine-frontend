@@ -36,6 +36,11 @@
         font-size: 50px;
         margin: 20px;
     }
+
+    &-empty {
+        height: 100vh;
+        padding-top: 40vh;
+    }
 }
 
 .alert-inline-loader {

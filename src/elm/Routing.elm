@@ -16,6 +16,7 @@ module Routing exposing
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser.Navigation exposing (Key, pushUrl)
+import Common.Features exposing (Features)
 import KMEditor.Routing
 import KnowledgeModels.Routing
 import Public.Routing
@@ -37,15 +38,15 @@ type Route
     | NotFound
 
 
-matchers : Parser (Route -> a) a
-matchers =
+matchers : Features -> Parser (Route -> a) a
+matchers features =
     let
         parsers =
             []
                 ++ Questionnaires.Routing.parses Questionnaires
                 ++ KMEditor.Routing.parsers KMEditor
                 ++ KnowledgeModels.Routing.parsers KnowledgeModels
-                ++ Public.Routing.parsers Public
+                ++ Public.Routing.parsers features Public
                 ++ Users.Routing.parses Users
                 ++ [ map Welcome (s "welcome")
                    , map Organization (s "organization")
@@ -129,9 +130,9 @@ toUrl route =
         |> String.join "?"
 
 
-parseLocation : Url -> Route
-parseLocation url =
-    case Url.Parser.parse matchers url of
+parseLocation : Features -> Url -> Route
+parseLocation features url =
+    case Url.Parser.parse (matchers features) url of
         Just route ->
             route
 

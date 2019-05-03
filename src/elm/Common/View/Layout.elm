@@ -2,7 +2,7 @@ module Common.View.Layout exposing (app, public)
 
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser exposing (Document)
-import Common.Html exposing (fa, linkTo)
+import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
 import Html exposing (..)
@@ -35,7 +35,18 @@ publicHeader : Model -> Html Msg
 publicHeader model =
     let
         questionnaireDemoLink =
-            li [ class "nav-item" ] [ linkTo questionnaireDemoRoute [ class "nav-link" ] [ text "Questionnaire Demo" ] ]
+            if model.appState.features.publicQuestionnaire then
+                li [ class "nav-item" ] [ linkTo questionnaireDemoRoute [ class "nav-link" ] [ text "Questionnaire Demo" ] ]
+
+            else
+                emptyNode
+
+        signUpLink =
+            if model.appState.features.registration then
+                li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
+
+            else
+                emptyNode
 
         links =
             if userLoggedIn model then
@@ -46,7 +57,7 @@ publicHeader model =
             else
                 [ questionnaireDemoLink
                 , li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
-                , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
+                , signUpLink
                 ]
     in
     nav [ class "navbar navbar-expand-sm fixed-top" ]
