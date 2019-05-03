@@ -1,6 +1,7 @@
 module Questionnaires.Detail.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
@@ -15,16 +16,16 @@ import Questionnaires.Detail.Models exposing (Model)
 import Questionnaires.Detail.Msgs exposing (Msg(..))
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
-    Page.actionResultView (content wrapMsg model) <| ActionResult.combine model.questionnaireModel model.levels
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
+    Page.actionResultView (content wrapMsg appState model) <| ActionResult.combine model.questionnaireModel model.levels
 
 
-content : (Msg -> Msgs.Msg) -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msgs.Msg
-content wrapMsg model ( questionnaireModel, levels ) =
+content : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msgs.Msg
+content wrapMsg appState model ( questionnaireModel, levels ) =
     let
         questionnaireCfg =
-            { showExtraActions = True
+            { showExtraActions = appState.features.feedback
             , showExtraNavigation = True
             , levels = Just levels
             }

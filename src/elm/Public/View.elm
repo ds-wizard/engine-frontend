@@ -1,5 +1,6 @@
 module Public.View exposing (view)
 
+import Common.AppState exposing (AppState)
 import Html exposing (Html)
 import Msgs
 import Public.BookReference.View
@@ -14,8 +15,8 @@ import Public.Signup.View
 import Public.SignupConfirmation.View
 
 
-view : Route -> (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view route wrapMsg model =
+view : Route -> (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view route wrapMsg appState model =
     case route of
         BookReference uuid ->
             Public.BookReference.View.view model.bookReferenceModel
@@ -30,7 +31,7 @@ view route wrapMsg model =
             Public.Login.View.view (wrapMsg << LoginMsg) model.loginModel
 
         Questionnaire ->
-            Public.Questionnaire.View.view (wrapMsg << QuestionnaireMsg) model.questionnaireModel
+            Public.Questionnaire.View.view (wrapMsg << QuestionnaireMsg) appState model.questionnaireModel
 
         Signup ->
             Public.Signup.View.view (wrapMsg << SignupMsg) model.signupModel

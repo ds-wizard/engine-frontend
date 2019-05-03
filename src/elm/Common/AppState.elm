@@ -2,6 +2,7 @@ module Common.AppState exposing (AppState)
 
 import Auth.Models exposing (JwtToken, Session)
 import Browser.Navigation exposing (Key)
+import Common.Features exposing (Features)
 import Random exposing (Seed)
 import Routing exposing (Route(..))
 
@@ -19,4 +20,5 @@ type alias AppState =
         { warning : Maybe String
         , info : Maybe String
         }
+    , features : Features
     }

@@ -19,7 +19,7 @@ view route wrapMsg appState model =
             Questionnaires.Create.View.view (wrapMsg << CreateMsg) model.createModel
 
         Detail uuid ->
-            Questionnaires.Detail.View.view (wrapMsg << DetailMsg) model.detailModel
+            Questionnaires.Detail.View.view (wrapMsg << DetailMsg) appState model.detailModel
 
         Edit uuid ->
             Questionnaires.Edit.View.view (wrapMsg << EditMsg) model.editModel

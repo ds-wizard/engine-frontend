@@ -3,6 +3,7 @@ module Main exposing (main)
 import Auth.Models exposing (Session, initialSession, parseJwt)
 import Browser
 import Browser.Navigation exposing (Key)
+import Common.Features exposing (initFeatures)
 import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
@@ -27,6 +28,7 @@ init val location key =
                     , appTitleShort = "DS Wizard"
                     , welcomeWarning = Nothing
                     , welcomeInfo = Nothing
+                    , features = initFeatures
                     }
 
         session =
@@ -37,7 +39,7 @@ init val location key =
 
         route =
             location
-                |> Routing.parseLocation
+                |> Routing.parseLocation flags.features
                 |> routeIfAllowed jwt
 
         model =

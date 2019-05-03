@@ -1,5 +1,6 @@
 module Public.Routing exposing (Route(..), forgottenPasswordConfirmation, parsers, signupConfirmation, toUrl)
 
+import Common.Features exposing (Features)
 import Url.Parser exposing (..)
 
 
@@ -13,16 +14,32 @@ type Route
     | SignupConfirmation String String
 
 
-parsers : (Route -> a) -> List (Parser (a -> c) c)
-parsers wrapRoute =
+parsers : Features -> (Route -> a) -> List (Parser (a -> c) c)
+parsers features wrapRoute =
+    let
+        publicQuestionnaireRoutes =
+            if features.publicQuestionnaire then
+                [ map (wrapRoute <| Questionnaire) (s "questionnaire") ]
+
+            else
+                []
+
+        signUpRoutes =
+            if features.registration then
+                [ map (wrapRoute <| Signup) (s "signup")
+                , map (signupConfirmation wrapRoute) (s "signup-confirmation" </> string </> string)
+                ]
+
+            else
+                []
+    in
     [ map (wrapRoute << BookReference) (s "book-references" </> string)
     , map (wrapRoute <| ForgottenPassword) (s "forgotten-password")
     , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
     , map (wrapRoute <| Login) top
-    , map (wrapRoute <| Questionnaire) (s "questionnaire")
-    , map (wrapRoute <| Signup) (s "signup")
-    , map (signupConfirmation wrapRoute) (s "signup-confirmation" </> string </> string)
     ]
+        ++ publicQuestionnaireRoutes
+        ++ signUpRoutes
 
 
 signupConfirmation : (Route -> a) -> String -> String -> a

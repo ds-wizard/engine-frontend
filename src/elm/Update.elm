@@ -59,7 +59,7 @@ update msg model =
         Msgs.OnUrlChange location ->
             let
                 newModel =
-                    setRoute (parseLocation location) model
+                    setRoute (parseLocation model.appState.features location) model
                         |> initLocalModel
             in
             ( newModel, fetchData newModel )

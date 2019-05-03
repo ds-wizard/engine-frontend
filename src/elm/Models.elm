@@ -14,9 +14,10 @@ module Models exposing
 import Auth.Models exposing (JwtToken, Session, sessionDecoder, sessionExists)
 import Browser.Navigation exposing (Key)
 import Common.AppState exposing (AppState)
+import Common.Features exposing (Features, featuresDecoder)
 import Common.Menu.Models
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (optional, required)
+import Json.Decode.Pipeline exposing (required)
 import KMEditor.Models
 import KnowledgeModels.Models
 import Organization.Models
@@ -54,6 +55,7 @@ initialModel route flags session jwt key =
             { warning = flags.welcomeWarning
             , info = flags.welcomeInfo
             }
+        , features = flags.features
         }
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
@@ -151,6 +153,7 @@ type alias Flags =
     , appTitleShort : String
     , welcomeWarning : Maybe String
     , welcomeInfo : Maybe String
+    , features : Features
     }
 
 
@@ -164,3 +167,4 @@ flagsDecoder =
         |> required "appTitleShort" Decode.string
         |> required "welcomeWarning" (maybe Decode.string)
         |> required "welcomeInfo" (maybe Decode.string)
+        |> required "features" featuresDecoder
