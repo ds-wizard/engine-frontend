@@ -16,7 +16,16 @@ view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
 view wrapMsg appState model =
     div [ class "Public__Questionnaire" ]
         [ info
-        , Page.actionResultView (viewQuestionnaire { showExtraActions = appState.features.feedback, showExtraNavigation = False, levels = Nothing } >> Html.map (QuestionnaireMsg >> wrapMsg)) model.questionnaireModel
+        , Page.actionResultView
+            (viewQuestionnaire
+                { showExtraActions = appState.features.feedback
+                , showExtraNavigation = False
+                , levels = Nothing
+                }
+                appState
+                >> Html.map (QuestionnaireMsg >> wrapMsg)
+            )
+            model.questionnaireModel
         ]
 
 

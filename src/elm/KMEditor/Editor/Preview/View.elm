@@ -1,5 +1,6 @@
 module KMEditor.Editor.Preview.View exposing (view)
 
+import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Tag as Tag
@@ -12,15 +13,21 @@ import KMEditor.Editor.Preview.Msgs exposing (Msg(..))
 import Msgs
 
 
-view : (Msg -> Msgs.Msg) -> List Level -> Model -> Html Msgs.Msg
-view wrapMsg levels model =
+view : (Msg -> Msgs.Msg) -> AppState -> List Level -> Model -> Html Msgs.Msg
+view wrapMsg appState levels model =
     let
         questionnaire =
             viewQuestionnaire
                 { showExtraActions = False
                 , showExtraNavigation = False
-                , levels = Just levels
+                , levels =
+                    if appState.features.levels then
+                        Just levels
+
+                    else
+                        Nothing
                 }
+                appState
                 model.questionnaireModel
                 |> Html.map (QuestionnaireMsg >> wrapMsg)
     in

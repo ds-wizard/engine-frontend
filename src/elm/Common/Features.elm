@@ -8,6 +8,7 @@ type alias Features =
     { feedback : Bool
     , registration : Bool
     , publicQuestionnaire : Bool
+    , levels : Bool
     }
 
 
@@ -16,6 +17,7 @@ initFeatures =
     { feedback = True
     , registration = True
     , publicQuestionnaire = True
+    , levels = True
     }
 
 
@@ -25,3 +27,4 @@ featuresDecoder =
         |> required "feedback" Decode.bool
         |> required "registration" Decode.bool
         |> required "publicQuestionnaire" Decode.bool
+        |> required "levels" Decode.bool

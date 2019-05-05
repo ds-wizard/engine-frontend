@@ -40,7 +40,8 @@ function loadApp(config) {
             features: {
                 feedback: getConfigValue(config, ['feedbackEnabled'], true),
                 registration: getConfigValue(config, ['registrationEnabled'], true),
-                publicQuestionnaire: getConfigValue(config, ['publicQuestionnaireEnabled'], true)
+                publicQuestionnaire: getConfigValue(config, ['publicQuestionnaireEnabled'], true),
+                levels: getConfigValue(config, ['levelsEnabled'], true)
             }
         }
     })
