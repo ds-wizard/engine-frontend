@@ -105,6 +105,7 @@ update msg wrapMsg appState model =
                                         , previewEditorModel =
                                             Just <|
                                                 KMEditor.Editor.Preview.Models.initialModel
+                                                    appState
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
                                                     ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
