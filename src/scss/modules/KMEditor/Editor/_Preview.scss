@@ -2,9 +2,13 @@
 
 
 .KMEditor__Editor__Preview {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 50px);
+
     .tag-selection {
         margin: 0 -15px 20px;
-        padding: 20px;
+        padding: 0.5rem 1rem;
         background: $gray-200;
         border-bottom: 1px solid $gray-400;
 
@@ -15,5 +19,9 @@
                 margin-left: 1rem;
             }
         }
+    }
+
+    .Questionnaire {
+        flex-grow: 1;
     }
 }
