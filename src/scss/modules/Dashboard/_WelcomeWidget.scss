@@ -1,0 +1,14 @@
+.WelcomeWidget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    img {
+        width: 25rem;
+        margin: 1.5rem 0;
+    }
+
+    &__Message {
+        font-size: 1.5rem;
+    }
+}

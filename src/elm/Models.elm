@@ -1,6 +1,7 @@
 module Models exposing
     ( Flags
     , Model
+    , defaultFlags
     , flagsDecoder
     , initLocalModel
     , initialModel
@@ -14,16 +15,17 @@ module Models exposing
 import Auth.Models exposing (JwtToken, Session, sessionDecoder, sessionExists)
 import Browser.Navigation exposing (Key)
 import Common.AppState exposing (AppState)
-import Common.Features exposing (Features, featuresDecoder)
+import Common.Config as Config exposing (Config)
 import Common.Menu.Models
+import Dashboard.Models
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (hardcoded, required)
 import KMEditor.Models
 import KnowledgeModels.Models
 import Organization.Models
 import Public.Models
 import Questionnaires.Models
-import Random exposing (Seed, initialSeed)
+import Random exposing (Seed)
 import Routing exposing (Route(..))
 import Users.Models
 
@@ -31,6 +33,7 @@ import Users.Models
 type alias Model =
     { appState : AppState
     , menuModel : Common.Menu.Models.Model
+    , dashboardModel : Dashboard.Models.Model
     , organizationModel : Organization.Models.Model
     , kmEditorModel : KMEditor.Models.Model
     , kmPackagesModel : KnowledgeModels.Models.Model
@@ -40,24 +43,11 @@ type alias Model =
     }
 
 
-initialModel : Route -> Flags -> Session -> Maybe JwtToken -> Key -> Model
-initialModel route flags session jwt key =
-    { appState =
-        { route = route
-        , seed = initialSeed flags.seed
-        , session = session
-        , jwt = jwt
-        , key = key
-        , apiUrl = flags.apiUrl
-        , appTitle = flags.appTitle
-        , appTitleShort = flags.appTitleShort
-        , welcome =
-            { warning = flags.welcomeWarning
-            , info = flags.welcomeInfo
-            }
-        , features = flags.features
-        }
+initialModel : AppState -> Session -> Maybe JwtToken -> Key -> Model
+initialModel appState session jwt key =
+    { appState = appState
     , menuModel = Common.Menu.Models.initialModel
+    , dashboardModel = Dashboard.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , kmEditorModel = KMEditor.Models.initialModel
     , kmPackagesModel = KnowledgeModels.Models.initialModel
@@ -149,11 +139,8 @@ type alias Flags =
     { session : Maybe Session
     , seed : Int
     , apiUrl : String
-    , appTitle : String
-    , appTitleShort : String
-    , welcomeWarning : Maybe String
-    , welcomeInfo : Maybe String
-    , features : Features
+    , config : Config
+    , success : Bool
     }
 
 
@@ -163,8 +150,15 @@ flagsDecoder =
         |> required "session" (Decode.nullable sessionDecoder)
         |> required "seed" Decode.int
         |> required "apiUrl" Decode.string
-        |> required "appTitle" Decode.string
-        |> required "appTitleShort" Decode.string
-        |> required "welcomeWarning" (maybe Decode.string)
-        |> required "welcomeInfo" (maybe Decode.string)
-        |> required "features" featuresDecoder
+        |> required "config" Config.decoder
+        |> hardcoded True
+
+
+defaultFlags : Flags
+defaultFlags =
+    { session = Nothing
+    , seed = 0
+    , apiUrl = ""
+    , config = Config.defaultConfig
+    , success = False
+    }

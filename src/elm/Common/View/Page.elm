@@ -2,6 +2,7 @@ module Common.View.Page exposing
     ( actionResultView
     , error
     , header
+    , illustratedMessage
     , loader
     , message
     , success
@@ -9,8 +10,8 @@ module Common.View.Page exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode, fa)
-import Html exposing (Html, div, h1, h2, p, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, br, div, h1, h2, img, p, text)
+import Html.Attributes exposing (class, src)
 
 
 header : String -> List (Html msg) -> Html msg
@@ -50,6 +51,28 @@ message icon msg =
     div [ class "jumbotron full-page-message" ]
         [ h1 [ class "display-3" ] [ fa icon ]
         , p [ class "lead" ] [ text msg ]
+        ]
+
+
+illustratedMessage :
+    { image : String
+    , heading : String
+    , lines : List String
+    }
+    -> Html msg
+illustratedMessage { image, heading, lines } =
+    let
+        content =
+            lines
+                |> List.map text
+                |> List.intersperse (br [] [])
+    in
+    div [ class "full-page-illustrated-message" ]
+        [ img [ src <| "/img/illustrations/undraw_" ++ image ++ ".svg" ] []
+        , div []
+            [ h1 [] [ text heading ]
+            , p [] content
+            ]
         ]
 
 

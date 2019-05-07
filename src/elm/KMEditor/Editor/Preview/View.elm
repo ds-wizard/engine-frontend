@@ -21,7 +21,7 @@ view wrapMsg appState levels model =
                 { showExtraActions = False
                 , showExtraNavigation = False
                 , levels =
-                    if appState.features.levels then
+                    if appState.config.levelsEnabled then
                         Just levels
 
                     else

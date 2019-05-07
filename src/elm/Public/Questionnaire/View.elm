@@ -18,7 +18,7 @@ view wrapMsg appState model =
         [ info
         , Page.actionResultView
             (viewQuestionnaire
-                { showExtraActions = appState.features.feedback
+                { showExtraActions = appState.config.feedbackEnabled
                 , showExtraNavigation = False
                 , levels = Nothing
                 }

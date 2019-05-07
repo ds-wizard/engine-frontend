@@ -17,15 +17,6 @@ function getApiUrl() {
 }
 
 
-function getConfigValue(config, keys, defaultValue) {
-    var result = keys.reduce(function (current, key) {
-        if (current === null || current[key] === undefined) return null
-        return current[key]
-    }, config)
-    return result !== null ? result : defaultValue
-}
-
-
 function loadApp(config) {
     var app = program.Elm.Main.init({
         node: document.body,
@@ -33,16 +24,7 @@ function loadApp(config) {
             seed: Math.floor(Math.random() * 0xFFFFFFFF),
             session: JSON.parse(localStorage.session || null),
             apiUrl: getApiUrl(),
-            appTitle: getConfigValue(config, ['client', 'appTitle'], 'Data Stewardship Wizard'),
-            appTitleShort: getConfigValue(config, ['client', 'appTitleShort'], 'DS Wizard'),
-            welcomeWarning: getConfigValue(config, ['client', 'welcomeWarning'], null),
-            welcomeInfo: getConfigValue(config, ['client', 'welcomeInfo'], null),
-            features: {
-                feedback: getConfigValue(config, ['feedbackEnabled'], true),
-                registration: getConfigValue(config, ['registrationEnabled'], true),
-                publicQuestionnaire: getConfigValue(config, ['publicQuestionnaireEnabled'], true),
-                levels: getConfigValue(config, ['levelsEnabled'], true)
-            }
+            config: config
         }
     })
 

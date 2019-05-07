@@ -25,10 +25,10 @@ content : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Common.Questionnaire.Model
 content wrapMsg appState model ( questionnaireModel, levels ) =
     let
         questionnaireCfg =
-            { showExtraActions = appState.features.feedback
+            { showExtraActions = appState.config.feedbackEnabled
             , showExtraNavigation = True
             , levels =
-                if appState.features.levels then
+                if appState.config.levelsEnabled then
                     Just levels
 
                 else

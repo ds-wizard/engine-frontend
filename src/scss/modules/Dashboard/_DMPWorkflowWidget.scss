@@ -1,0 +1,55 @@
+@import "../../variables";
+
+.DMPWorkflowWidget {
+    max-width: 80rem;
+    margin: auto;
+
+    &__Message {
+        font-size: 1.5rem;
+    }
+
+    &__Workflow {
+        display: flex;
+
+        &--Images {
+            align-items: flex-end;
+
+            .step {
+                margin: 2rem 2rem 0;
+            }
+        }
+
+        &--Texts {
+            align-items: flex-start;
+
+            .step {
+                margin: 0 2rem 2rem;
+            }
+        }
+
+        .step {
+            flex-grow: 1;
+
+            img {
+                width: 100%;
+                padding: 2rem;
+            }
+
+            p {
+                text-align: center;
+                font-size: 1.25rem;
+            }
+        }
+    }
+    
+    &__Start {
+        text-align: center;
+        border-top: 1px solid $gray-400;
+        padding-top: 2rem;
+
+        .btn {
+            font-size: 1.25rem;
+            padding: 0.5rem 1.5rem;
+        }
+    }
+}
