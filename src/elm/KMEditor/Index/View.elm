@@ -42,7 +42,7 @@ indexActions =
 
 tableConfig : Maybe JwtToken -> TableConfig KnowledgeModel Msg
 tableConfig jwt =
-    { emptyMessage = "There are no knowledge models."
+    { emptyMessage = "There are no knowledge model editors."
     , fields =
         [ { label = "Name"
           , getValue = HtmlValue tableFieldName

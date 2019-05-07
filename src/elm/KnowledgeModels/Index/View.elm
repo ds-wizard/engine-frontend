@@ -43,7 +43,7 @@ indexActions appState =
 
 tableConfig : AppState -> TableConfig Package Msg
 tableConfig appState =
-    { emptyMessage = "There are no packages."
+    { emptyMessage = "There are no knowledge models."
     , fields =
         [ { label = "Name"
           , getValue = TextValue .name
