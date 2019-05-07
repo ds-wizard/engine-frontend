@@ -332,7 +332,7 @@ questionEditorView appState model editorData =
                             div [] formFields
 
                         extraData =
-                            [ questionEditorItemView model editorData ]
+                            [ questionEditorItemView appState model editorData ]
                     in
                     ( formData, extraData )
 
@@ -467,8 +467,8 @@ questionEditorAnswersView model editorData =
         }
 
 
-questionEditorItemView : Model -> QuestionEditorData -> Html Msg
-questionEditorItemView model editorData =
+questionEditorItemView : AppState -> Model -> QuestionEditorData -> Html Msg
+questionEditorItemView appState model editorData =
     let
         config =
             { childName = "Question"
@@ -480,14 +480,23 @@ questionEditorItemView model editorData =
             , getName = getChildName model.editors
             , viewMsg = SetActiveEditor
             }
+
+        itemTitle =
+            if appState.config.itemTitleEnabled then
+                div [ class "form-group" ]
+                    [ FormGroup.input editorData.form "itemTemplateTitle" "Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+                    , div [ class "form-text" ]
+                        [ Flash.warning "Item Title is obsolete and will be removed in future versions. Create a Value Question instead if you need it." ]
+                    ]
+
+            else
+                emptyNode
     in
     div [ class "card card-border-light card-item-template mb-3" ]
         [ div [ class "card-header" ]
             [ text "Item Template" ]
         , div [ class "card-body" ]
-            [ div [ class "form-group" ]
-                [ FormGroup.input editorData.form "itemTemplateTitle" "Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
-                ]
+            [ itemTitle
             , inputChildren config
             ]
         ]

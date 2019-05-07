@@ -3,6 +3,7 @@ module Common.View.Flash exposing
     , info
     , loader
     , success
+    , warning
     )
 
 import Common.Html exposing (emptyNode, fa)
@@ -13,6 +14,11 @@ import Html.Attributes exposing (class)
 error : String -> Html msg
 error =
     flashView "alert-danger" "exclamation-triangle"
+
+
+warning : String -> Html msg
+warning =
+    flashView "alert-warning" "exclamation-triangle"
 
 
 success : String -> Html msg

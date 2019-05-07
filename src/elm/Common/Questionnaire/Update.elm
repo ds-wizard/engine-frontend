@@ -34,7 +34,7 @@ update msg appState model =
             )
 
         SetActiveChapter chapter ->
-            ( handleSetActiveChapter chapter model, Cmd.none )
+            ( handleSetActiveChapter appState chapter model, Cmd.none )
 
         ViewSummaryReport ->
             let
@@ -166,11 +166,11 @@ loadTypeHints appState packageId events questionUuid q toMsg =
     TypeHintsApi.fetchTypeHints mbPackageId events questionUuid q appState toMsg
 
 
-handleSetActiveChapter : Chapter -> Model -> Model
-handleSetActiveChapter chapter model =
+handleSetActiveChapter : AppState -> Chapter -> Model -> Model
+handleSetActiveChapter appState chapter model =
     model
         |> updateReplies
-        |> setActiveChapter chapter
+        |> setActiveChapter appState chapter
 
 
 handleSendFeedbackForm : AppState -> Model -> ( Model, Cmd Msg )

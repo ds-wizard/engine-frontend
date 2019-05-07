@@ -118,7 +118,7 @@ viewChapterAnsweredIndication appState model chapter =
                 100
 
         unanswered =
-            calculateUnansweredQuestions effectiveLevel model.questionnaire.replies chapter
+            calculateUnansweredQuestions appState effectiveLevel model.questionnaire.replies chapter
     in
     if unanswered > 0 then
         span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]

@@ -16,6 +16,7 @@ type alias Config =
     , registrationEnabled : Bool
     , publicQuestionnaireEnabled : Bool
     , levelsEnabled : Bool
+    , itemTitleEnabled : Bool
     }
 
 
@@ -47,6 +48,7 @@ defaultConfig =
     , registrationEnabled = True
     , publicQuestionnaireEnabled = True
     , levelsEnabled = True
+    , itemTitleEnabled = True
     }
 
 
@@ -58,6 +60,7 @@ decoder =
         |> optional "registrationEnabled" Decode.bool True
         |> optional "publicQuestionnaireEnabled" Decode.bool True
         |> optional "levelsEnabled" Decode.bool True
+        |> optional "itemTitleEnabled" Decode.bool True
 
 
 clientConfigDecoder : Decoder ClientConfig
