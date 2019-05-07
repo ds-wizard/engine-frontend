@@ -2,6 +2,7 @@ module KMEditor.Common.Models.EntitiesTest exposing
     ( answerDecoderTest
     , chapterDecoderTest
     , expertDecoderTest
+    , integrationDecoderTest
     , knowledgeModelDecoderTest
     , metricDecoderTest
     ,  metricMeasureDecoderTest
@@ -12,6 +13,7 @@ module KMEditor.Common.Models.EntitiesTest exposing
     , tagDecoderTest
     )
 
+import Dict
 import KMEditor.Common.Models.Entities exposing (..)
 import Test exposing (..)
 import TestUtils exposing (expectDecoder, parametrized)
@@ -29,7 +31,8 @@ knowledgeModelDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "name": "My knowledge model",
                             "chapters": [],
-                            "tags": []
+                            "tags": [],
+                            "integrations": []
                         }
                         """
 
@@ -38,6 +41,7 @@ knowledgeModelDecoderTest =
                         , name = "My knowledge model"
                         , chapters = []
                         , tags = []
+                        , integrations = []
                         }
                 in
                 expectDecoder knowledgeModelDecoder raw expected
@@ -55,7 +59,8 @@ knowledgeModelDecoderTest =
                                 "text": "This chapter is empty",
                                 "questions": []
                             }],
-                            "tags": []
+                            "tags": [],
+                            "integrations": []
                         }
                         """
 
@@ -70,6 +75,7 @@ knowledgeModelDecoderTest =
                               }
                             ]
                         , tags = []
+                        , integrations = []
                         }
                 in
                 expectDecoder knowledgeModelDecoder raw expected
@@ -87,7 +93,8 @@ knowledgeModelDecoderTest =
                                 "name": "Science",
                                 "description": null,
                                 "color": "#F5A623"
-                            }]
+                            }],
+                            "integrations": []
                         }
                         """
 
@@ -100,6 +107,59 @@ knowledgeModelDecoderTest =
                               , name = "Science"
                               , description = Nothing
                               , color = "#F5A623"
+                              }
+                            ]
+                        , integrations = []
+                        }
+                in
+                expectDecoder knowledgeModelDecoder raw expected
+        , test "should decode knowledge model with integrations" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "name": "My knowledge model",
+                            "chapters": [],
+                            "tags": [],
+                            "integrations": [{
+                                "uuid": "",
+                                "id": "service",
+                                "name": "Service",
+                                "props": ["kind", "category"],
+                                "logo": "data:image/png;base64,...",
+                                "requestMethod": "GET",
+                                "requestUrl": "/",
+                                "requestHeaders": {"X_USER": "user"},
+                                "requestBody": "{}",
+                                "responseListField": "items",
+                                "responseIdField": "id",
+                                "responseNameField": "title",
+                                "itemUrl": "http://example.com/${id}"
+                            }]
+                        }
+                        """
+
+                    expected =
+                        { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                        , name = "My knowledge model"
+                        , chapters = []
+                        , tags = []
+                        , integrations =
+                            [ { uuid = ""
+                              , id = "service"
+                              , name = "Service"
+                              , props = [ "kind", "category" ]
+                              , logo = "data:image/png;base64,..."
+                              , requestMethod = "GET"
+                              , requestUrl = "/"
+                              , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
+                              , requestBody = "{}"
+                              , responseListField = "items"
+                              , responseIdField = "id"
+                              , responseNameField = "title"
+                              , itemUrl = "http://example.com/${id}"
                               }
                             ]
                         }
@@ -132,6 +192,51 @@ tagDecoderTest =
                         }
                 in
                 expectDecoder tagDecoder raw expected
+        ]
+
+
+integrationDecoderTest : Test
+integrationDecoderTest =
+    describe "integrationDecoder"
+        [ test "should decode integration" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "",
+                            "id": "service",
+                            "name": "Service",
+                            "props": ["kind", "category"],
+                            "logo": "data:image/png;base64,...",
+                            "requestMethod": "GET",
+                            "requestUrl": "/",
+                            "requestHeaders": {"X_USER": "user"},
+                            "requestBody": "{}",
+                            "responseListField": "",
+                            "responseIdField": "id",
+                            "responseNameField": "title",
+                            "itemUrl": "http://example.com/${id}"
+                        }
+                        """
+
+                    expected =
+                        { uuid = ""
+                        , id = "service"
+                        , name = "Service"
+                        , props = [ "kind", "category" ]
+                        , logo = "data:image/png;base64,..."
+                        , requestMethod = "GET"
+                        , requestUrl = "/"
+                        , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
+                        , requestBody = "{}"
+                        , responseListField = ""
+                        , responseIdField = "id"
+                        , responseNameField = "title"
+                        , itemUrl = "http://example.com/${id}"
+                        }
+                in
+                expectDecoder integrationDecoder raw expected
         ]
 
 
@@ -452,6 +557,41 @@ questionDecoderTest =
                                 ]
                             , references = []
                             , experts = []
+                            }
+                in
+                expectDecoder questionDecoder raw expected
+        , test "should decode integration question type" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "questionType": "IntegrationQuestion",
+                            "title": "Can you answer this question?",
+                            "text": "Please answer the question",
+                            "requiredLevel": null,
+                            "tagUuids": [],
+                            "references": [],
+                            "experts": [],
+                            "integrationUuid": "b50bf5ce-2fc3-4779-9756-5f176c233374",
+                            "props": {
+                                "prop": "value"
+                            }
+                        }
+                        """
+
+                    expected =
+                        IntegrationQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Just "Please answer the question"
+                            , requiredLevel = Nothing
+                            , tagUuids = []
+                            , references = []
+                            , experts = []
+                            , integrationUuid = "b50bf5ce-2fc3-4779-9756-5f176c233374"
+                            , props = Dict.fromList [ ( "prop", "value" ) ]
                             }
                 in
                 expectDecoder questionDecoder raw expected

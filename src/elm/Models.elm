@@ -16,7 +16,7 @@ import Browser.Navigation exposing (Key)
 import Common.AppState exposing (AppState)
 import Common.Menu.Models
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (optional, required)
 import KMEditor.Models
 import KnowledgeModels.Models
 import Organization.Models
@@ -39,15 +39,21 @@ type alias Model =
     }
 
 
-initialModel : Route -> Int -> Session -> Maybe JwtToken -> Key -> String -> Model
-initialModel route seed session jwt key apiUrl =
+initialModel : Route -> Flags -> Session -> Maybe JwtToken -> Key -> Model
+initialModel route flags session jwt key =
     { appState =
         { route = route
-        , seed = initialSeed seed
+        , seed = initialSeed flags.seed
         , session = session
         , jwt = jwt
         , key = key
-        , apiUrl = apiUrl
+        , apiUrl = flags.apiUrl
+        , appTitle = flags.appTitle
+        , appTitleShort = flags.appTitleShort
+        , welcome =
+            { warning = flags.welcomeWarning
+            , info = flags.welcomeInfo
+            }
         }
     , menuModel = Common.Menu.Models.initialModel
     , organizationModel = Organization.Models.initialModel
@@ -141,6 +147,10 @@ type alias Flags =
     { session : Maybe Session
     , seed : Int
     , apiUrl : String
+    , appTitle : String
+    , appTitleShort : String
+    , welcomeWarning : Maybe String
+    , welcomeInfo : Maybe String
     }
 
 
@@ -150,3 +160,7 @@ flagsDecoder =
         |> required "session" (Decode.nullable sessionDecoder)
         |> required "seed" Decode.int
         |> required "apiUrl" Decode.string
+        |> required "appTitle" Decode.string
+        |> required "appTitleShort" Decode.string
+        |> required "welcomeWarning" (maybe Decode.string)
+        |> required "welcomeInfo" (maybe Decode.string)

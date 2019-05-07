@@ -9,20 +9,23 @@ module KMEditor.Editor.Preview.Models exposing
 
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, filterKnowledgModelWithTags)
+import KMEditor.Common.Models.Events exposing (Event)
 
 
 type alias Model =
     { questionnaireModel : Common.Questionnaire.Models.Model
     , knowledgeModel : KnowledgeModel
     , tags : List String
+    , packageId : String
     }
 
 
-initialModel : KnowledgeModel -> List Metric -> Model
-initialModel km metrics =
-    { questionnaireModel = createQuestionnaireModel km metrics
+initialModel : KnowledgeModel -> List Metric -> List Event -> String -> Model
+initialModel km metrics events packageId =
+    { questionnaireModel = createQuestionnaireModel packageId km metrics events
     , knowledgeModel = km
     , tags = []
+    , packageId = packageId
     }
 
 
@@ -63,8 +66,10 @@ createFilteredQuestionnaireModel tags model =
     let
         questionnaireModel =
             createQuestionnaireModel
+                model.packageId
                 (filterKnowledgModelWithTags tags model.knowledgeModel)
                 model.questionnaireModel.metrics
+                model.questionnaireModel.events
     in
     { model
         | questionnaireModel = questionnaireModel
@@ -72,15 +77,15 @@ createFilteredQuestionnaireModel tags model =
     }
 
 
-createQuestionnaireModel : KnowledgeModel -> List Metric -> Common.Questionnaire.Models.Model
-createQuestionnaireModel km metrics =
+createQuestionnaireModel : String -> KnowledgeModel -> List Metric -> List Event -> Common.Questionnaire.Models.Model
+createQuestionnaireModel packageId km =
     Common.Questionnaire.Models.initialModel
         { uuid = ""
         , name = ""
         , private = True
         , package =
             { name = ""
-            , id = ""
+            , id = packageId
             , organizationId = ""
             , kmId = ""
             , version = ""
@@ -91,4 +96,3 @@ createQuestionnaireModel km metrics =
         , replies = []
         , level = 0
         }
-        metrics

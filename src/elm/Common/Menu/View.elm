@@ -87,14 +87,14 @@ viewReportIssueModal isOpen =
         modalContent =
             [ p [] [ text "If you find any problem with the Wizard, the best way to report it is to open an issue in our GitHub repository" ]
             , p []
-                [ a [ class "link-with-icon", href "https://github.com/ds-wizard/dsw-common/issues", target "_blank" ]
+                [ a [ class "link-with-icon", href "https://github.com/ds-wizard/ds-wizard/issues", target "_blank" ]
                     [ fa "github"
-                    , text "ds-wizard/dsw-common"
+                    , text "ds-wizard/ds-wizard"
                     ]
                 ]
             , p []
                 [ text "You can also write us an email to "
-                , a [ href "mailto:bugs@ds-wizard.org" ] [ text "bugs@ds-wizard.org" ]
+                , a [ href "mailto:support@ds-wizard.org" ] [ text "support@ds-wizard.org" ]
                 , text "."
                 ]
             ]

@@ -2,24 +2,28 @@ module KMEditor.Editor.KMEditor.Update.Events exposing
     ( createAddAnswerEvent
     , createAddChapterEvent
     , createAddExpertEvent
+    , createAddIntegrationEvent
     , createAddQuestionEvent
     , createAddReferenceEvent
     , createAddTagEvent
     , createDeleteAnswerEvent
     , createDeleteChapterEvent
     , createDeleteExpertEvent
+    , createDeleteIntegrationEvent
     , createDeleteQuestionEvent
     , createDeleteReferenceEvent
     , createDeleteTagEvent
     , createEditAnswerEvent
     , createEditChapterEvent
     , createEditExpertEvent
+    , createEditIntegrationEvent
     , createEditKnowledgeModelEvent
     , createEditQuestionEvent
     , createEditReferenceEvent
     , createEditTagEvent
     )
 
+import Dict
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (Path)
@@ -37,6 +41,7 @@ createEditKnowledgeModelEvent form editorData =
             , name = createEventField form.name (editorData.knowledgeModel.name /= form.name)
             , chapterUuids = createEventField editorData.chapters.list editorData.chapters.dirty
             , tagUuids = createEventField editorData.tags.list editorData.tags.dirty
+            , integrationUuids = createEventField editorData.integrations.list editorData.integrations.dirty
             }
     in
     createEvent (EditKnowledgeModelEvent data) editorData.path
@@ -113,6 +118,63 @@ createDeleteTagEvent tagUuid =
     createEvent (DeleteTagEvent data)
 
 
+createAddIntegrationEvent : IntegrationForm -> IntegrationEditorData -> Seed -> ( Event, Seed )
+createAddIntegrationEvent form editorData =
+    let
+        data =
+            { integrationUuid = editorData.integration.uuid
+            , id = form.id
+            , name = form.name
+            , props = editorData.props.list
+            , logo = form.logo
+            , requestMethod = form.requestMethod
+            , requestUrl = form.requestUrl
+            , requestHeaders = Dict.fromList form.requestHeaders
+            , requestBody = form.requestBody
+            , responseListField = form.responseListField
+            , responseIdField = form.responseIdField
+            , responseNameField = form.responseNameField
+            , itemUrl = form.itemUrl
+            }
+    in
+    createEvent (AddIntegrationEvent data) editorData.path
+
+
+createEditIntegrationEvent : IntegrationForm -> IntegrationEditorData -> Seed -> ( Event, Seed )
+createEditIntegrationEvent form editorData =
+    let
+        requestHeaders =
+            Dict.fromList form.requestHeaders
+
+        data =
+            { integrationUuid = editorData.integration.uuid
+            , id = createEventField form.id (editorData.integration.id /= form.id)
+            , name = createEventField form.name (editorData.integration.name /= form.name)
+            , props = createEventField editorData.props.list editorData.props.dirty
+            , logo = createEventField form.logo (editorData.integration.logo /= form.logo)
+            , requestMethod = createEventField form.requestMethod (editorData.integration.requestMethod /= form.requestMethod)
+            , requestUrl = createEventField form.requestUrl (editorData.integration.requestUrl /= form.requestUrl)
+            , requestHeaders = createEventField requestHeaders (editorData.integration.requestHeaders /= requestHeaders)
+            , requestBody = createEventField form.requestBody (editorData.integration.requestBody /= form.requestBody)
+            , responseListField = createEventField form.responseListField (editorData.integration.responseListField /= form.responseListField)
+            , responseIdField = createEventField form.responseIdField (editorData.integration.responseIdField /= form.responseIdField)
+            , responseNameField = createEventField form.responseNameField (editorData.integration.responseNameField /= form.responseNameField)
+            , itemUrl = createEventField form.itemUrl (editorData.integration.itemUrl /= form.itemUrl)
+            }
+    in
+    createEvent (EditIntegrationEvent data) editorData.path
+
+
+createDeleteIntegrationEvent : String -> Path -> Seed -> ( Event, Seed )
+createDeleteIntegrationEvent integrationUuid =
+    let
+        data =
+            { integrationUuid = integrationUuid
+            }
+    in
+    createEvent (DeleteIntegrationEvent data)
+
+
 createAddQuestionEvent : QuestionForm -> QuestionEditorData -> Seed -> ( Event, Seed )
 createAddQuestionEvent form editorData =
     let
@@ -145,6 +207,17 @@ createAddQuestionEvent form editorData =
                         , requiredLevel = formData.requiredLevel
                         , tagUuids = editorData.tagUuids
                         , valueType = formData.valueType
+                        }
+
+                IntegrationQuestionForm formData ->
+                    AddIntegrationQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = formData.title
+                        , text = formData.text
+                        , requiredLevel = formData.requiredLevel
+                        , tagUuids = editorData.tagUuids
+                        , integrationUuid = formData.integrationUuid
+                        , props = formData.props
                         }
     in
     createEvent (AddQuestionEvent data) editorData.path
@@ -190,6 +263,19 @@ createEditQuestionEvent form editorData =
                         , referenceUuids = createEventField editorData.references.list editorData.references.dirty
                         , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
                         , valueType = createEventField formData.valueType (getQuestionValueType editorData.question /= Just formData.valueType)
+                        }
+
+                IntegrationQuestionForm formData ->
+                    EditIntegrationQuestionEvent
+                        { questionUuid = getQuestionUuid editorData.question
+                        , title = createEventField formData.title (getQuestionTitle editorData.question /= formData.title)
+                        , text = createEventField formData.text (getQuestionText editorData.question /= formData.text)
+                        , requiredLevel = createEventField formData.requiredLevel (getQuestionRequiredLevel editorData.question /= formData.requiredLevel)
+                        , tagUuids = createEventField editorData.tagUuids (getQuestionTagUuids editorData.question /= editorData.tagUuids)
+                        , referenceUuids = createEventField editorData.references.list editorData.references.dirty
+                        , expertUuids = createEventField editorData.experts.list editorData.experts.dirty
+                        , integrationUuid = createEventField formData.integrationUuid (getQuestionIntegrationUuid editorData.question /= Just formData.integrationUuid)
+                        , props = createEventField formData.props (getQuestionProps editorData.question /= Just formData.props)
                         }
     in
     createEvent (EditQuestionEvent data) editorData.path

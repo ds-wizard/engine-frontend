@@ -26,6 +26,7 @@ import Msgs
 import Ports
 import Random exposing (Seed)
 import Routing exposing (cmdNavigate)
+import Task
 
 
 fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
@@ -106,6 +107,8 @@ update msg wrapMsg appState model =
                                                 KMEditor.Editor.Preview.Models.initialModel
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
+                                                    ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
+                                                    (ActionResult.withDefault "" <| ActionResult.map (Maybe.withDefault "" << .parentPackageId) model.km)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
                                         , editorModel =
                                             Just <|
@@ -136,11 +139,21 @@ update msg wrapMsg appState model =
 
                 PreviewEditorMsg previewMsg ->
                     let
-                        previewEditorModel =
-                            model.previewEditorModel
-                                |> Maybe.map (KMEditor.Editor.Preview.Update.update previewMsg appState)
+                        ( previewEditorModel, cmd ) =
+                            case model.previewEditorModel of
+                                Just m ->
+                                    let
+                                        ( newPreviewEditorModel, newCmd ) =
+                                            KMEditor.Editor.Preview.Update.update previewMsg appState m
+                                    in
+                                    ( Just newPreviewEditorModel
+                                    , Cmd.map (wrapMsg << PreviewEditorMsg) newCmd
+                                    )
+
+                                Nothing ->
+                                    ( Nothing, Cmd.none )
                     in
-                    ( appState.seed, { model | previewEditorModel = previewEditorModel }, Cmd.none )
+                    ( appState.seed, { model | previewEditorModel = previewEditorModel }, cmd )
 
                 TagEditorMsg tagMsg ->
                     let
@@ -157,7 +170,7 @@ update msg wrapMsg appState model =
                                 Just editorModel ->
                                     let
                                         ( updatedSeed, updatedEditorModel, updateCmd ) =
-                                            KMEditor.Editor.KMEditor.Update.update editorMsg (wrapMsg << KMEditorMsg) appState editorModel
+                                            KMEditor.Editor.KMEditor.Update.update editorMsg (wrapMsg << KMEditorMsg) appState editorModel (openEditorTask wrapMsg)
                                     in
                                     ( updatedSeed, Just updatedEditorModel, updateCmd )
 
@@ -208,6 +221,11 @@ update msg wrapMsg appState model =
                             )
     in
     withSetUnloadMsgCmd updateResult
+
+
+openEditorTask : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
+openEditorTask wrapMsg =
+    Task.perform (wrapMsg << OpenEditor) (Task.succeed KMEditor)
 
 
 fetchPreview : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )

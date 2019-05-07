@@ -92,7 +92,7 @@ initQuestionnaireModel : Model -> Model
 initQuestionnaireModel model =
     case ( model.questionnaireDetail, model.metrics ) of
         ( Success questionnaireDetail, Success metrics ) ->
-            { model | questionnaireModel = Success <| initialModel questionnaireDetail metrics }
+            { model | questionnaireModel = Success <| initialModel questionnaireDetail metrics [] }
 
         ( Error err, _ ) ->
             { model | questionnaireModel = Error err }

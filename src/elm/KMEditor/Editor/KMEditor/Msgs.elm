@@ -3,6 +3,7 @@ module KMEditor.Editor.KMEditor.Msgs exposing
     , ChapterEditorMsg(..)
     , EditorMsg(..)
     , ExpertEditorMsg(..)
+    , IntegrationEditorMsg(..)
     , KMEditorMsg(..)
     , Msg(..)
     , QuestionEditorMsg(..)
@@ -13,6 +14,7 @@ module KMEditor.Editor.KMEditor.Msgs exposing
 import Form
 import Reorderable
 import SplitPane
+import ValueList
 
 
 type Msg
@@ -27,6 +29,7 @@ type Msg
 type EditorMsg
     = KMEditorMsg KMEditorMsg
     | TagEditorMsg TagEditorMsg
+    | IntegrationEditorMsg IntegrationEditorMsg
     | ChapterEditorMsg ChapterEditorMsg
     | QuestionEditorMsg QuestionEditorMsg
     | AnswerEditorMsg AnswerEditorMsg
@@ -39,7 +42,9 @@ type KMEditorMsg
     | ReorderChapters (List String)
     | AddChapter
     | ReorderTags (List String)
+    | ReorderIntegrations (List String)
     | AddTag
+    | AddIntegration
 
 
 type ChapterEditorMsg
@@ -52,6 +57,13 @@ type ChapterEditorMsg
 type TagEditorMsg
     = TagFormMsg Form.Msg
     | DeleteTag String
+
+
+type IntegrationEditorMsg
+    = IntegrationFormMsg Form.Msg
+    | ToggleDeleteConfirm Bool
+    | DeleteIntegration String
+    | PropsListMsg ValueList.Msg
 
 
 type QuestionEditorMsg

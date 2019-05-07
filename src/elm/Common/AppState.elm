@@ -13,4 +13,10 @@ type alias AppState =
     , jwt : Maybe JwtToken
     , key : Key
     , apiUrl : String
+    , appTitle : String
+    , appTitleShort : String
+    , welcome :
+        { warning : Maybe String
+        , info : Maybe String
+        }
     }

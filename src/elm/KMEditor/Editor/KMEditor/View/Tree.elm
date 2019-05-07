@@ -26,6 +26,9 @@ treeNodeEditor activeUuid editors editorUuid =
         Just (TagEditor data) ->
             treeNodeTag activeUuid editors data
 
+        Just (IntegrationEditor data) ->
+            treeNodeIntegration activeUuid editors data
+
         Just (ChapterEditor data) ->
             treeNodeChapter activeUuid editors data
 
@@ -54,11 +57,14 @@ treeNodeKM activeUuid editors editorData =
         tags =
             editorData.tags.list ++ editorData.tags.deleted
 
+        integrations =
+            editorData.integrations.list ++ editorData.integrations.deleted
+
         config =
             { editorData = editorData
             , icon = "database"
             , label = editorData.knowledgeModel.name
-            , children = chapters ++ tags
+            , children = chapters ++ tags ++ integrations
             }
     in
     treeNode config activeUuid editors
@@ -71,6 +77,19 @@ treeNodeTag activeUuid editors editorData =
             { editorData = editorData
             , icon = "tag"
             , label = editorData.tag.name
+            , children = []
+            }
+    in
+    treeNode config activeUuid editors
+
+
+treeNodeIntegration : String -> Dict String Editor -> IntegrationEditorData -> Html Msg
+treeNodeIntegration activeUuid editors editorData =
+    let
+        config =
+            { editorData = editorData
+            , icon = "exchange"
+            , label = editorData.integration.name
             , children = []
             }
     in

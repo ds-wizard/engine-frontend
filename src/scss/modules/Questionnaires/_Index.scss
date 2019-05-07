@@ -1,6 +1,14 @@
 @import "../../variables";
 
 .Questionnaires__Index {
+
+    .export-formats {
+        display: grid;
+        grid-template-columns: 49.5% 49.5%;
+        grid-row-gap: 1%;
+        grid-column-gap: 1%;
+    }
+
     .export-link {
         display: block;
         width: 100%;
@@ -10,12 +18,18 @@
         margin-bottom: 0.25rem;
         color: $body-color;
         text-decoration: none;
+        cursor: pointer;
+        font-weight: normal;
 
-        .fa {
+        input {
             margin-right: 15px;
         }
 
-        &:hover {
+        .fa {
+            margin-right: 5px;
+        }
+
+        &:hover, &-selected {
             color: $primary;
             border-color: $primary;
         }

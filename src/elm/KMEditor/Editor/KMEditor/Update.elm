@@ -9,6 +9,7 @@ import KMEditor.Editor.KMEditor.Update.Abstract exposing (updateEditor)
 import KMEditor.Editor.KMEditor.Update.Answer exposing (..)
 import KMEditor.Editor.KMEditor.Update.Chapter exposing (..)
 import KMEditor.Editor.KMEditor.Update.Expert exposing (..)
+import KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
 import KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing (..)
 import KMEditor.Editor.KMEditor.Update.Question exposing (..)
 import KMEditor.Editor.KMEditor.Update.Reference exposing (..)
@@ -19,10 +20,11 @@ import Random exposing (Seed)
 import Reorderable
 import SplitPane
 import Utils exposing (pair)
+import ValueList
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg appState model =
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> Cmd Msgs.Msg -> ( Seed, Model, Cmd Msgs.Msg )
+update msg wrapMsg appState model fetchPreviewCmd =
     case msg of
         PaneMsg paneMsg ->
             ( appState.seed, { model | splitPane = SplitPane.update paneMsg model.splitPane }, Cmd.none )
@@ -48,6 +50,10 @@ update msg wrapMsg appState model =
                         TagEditor data ->
                             setActiveEditor wrapMsg uuid
                                 |> withGenerateTagEditEvent appState.seed model data
+
+                        IntegrationEditor data ->
+                            setActiveEditor wrapMsg uuid
+                                |> withGenerateIntegrationEditEvent appState.seed model data
 
                         ChapterEditor data ->
                             setActiveEditor wrapMsg uuid
@@ -101,6 +107,16 @@ update msg wrapMsg appState model =
                             addTag (scrollTopCmd wrapMsg)
                                 |> withGenerateKMEditEvent appState.seed model editorData
 
+                        ReorderIntegrations integrationList ->
+                            model
+                                |> insertEditor (KMEditor { editorData | integrations = Children.updateList integrationList editorData.tags })
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        AddIntegration ->
+                            addIntegration (scrollTopCmd wrapMsg)
+                                |> withGenerateKMEditEvent appState.seed model editorData
+
                 ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
                     case chapterEditorMsg of
                         ChapterFormMsg formMsg ->
@@ -131,6 +147,27 @@ update msg wrapMsg appState model =
 
                         DeleteTag uuid ->
                             deleteTag appState.seed model uuid editorData
+                                |> withNoCmd
+
+                ( IntegrationEditorMsg integrationEditorMsg, Just (IntegrationEditor editorData) ) ->
+                    case integrationEditorMsg of
+                        IntegrationFormMsg formMsg ->
+                            updateIntegrationForm model formMsg editorData
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        ToggleDeleteConfirm open ->
+                            insertEditor (IntegrationEditor { editorData | deleteConfirmOpen = open }) model
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        DeleteIntegration uuid ->
+                            deleteIntegration appState.seed model uuid editorData
+                                |> withCmd fetchPreviewCmd
+
+                        PropsListMsg propsListMsg ->
+                            insertEditor (IntegrationEditor { editorData | props = ValueList.update propsListMsg editorData.props }) model
+                                |> pair appState.seed
                                 |> withNoCmd
 
                 ( QuestionEditorMsg questionEditorMsg, Just (QuestionEditor editorData) ) ->
@@ -259,6 +296,9 @@ generateEvents seed model =
                 TagEditor data ->
                     withGenerateTagEditEvent seed model data updateModel
 
+                IntegrationEditor data ->
+                    withGenerateIntegrationEditEvent seed model data updateModel
+
                 ChapterEditor data ->
                     withGenerateChapterEditEvent seed model data updateModel
 
@@ -279,8 +319,13 @@ generateEvents seed model =
 
 
 withNoCmd : ( a, b ) -> ( a, b, Cmd msg )
-withNoCmd ( a, b ) =
-    ( a, b, Cmd.none )
+withNoCmd =
+    withCmd Cmd.none
+
+
+withCmd : Cmd msg -> ( a, b ) -> ( a, b, Cmd msg )
+withCmd cmd ( a, b ) =
+    ( a, b, cmd )
 
 
 setActiveEditor : (Msg -> Msgs.Msg) -> String -> Seed -> Model -> a -> ( Seed, Model, Cmd Msgs.Msg )
