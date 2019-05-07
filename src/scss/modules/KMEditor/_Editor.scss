@@ -15,8 +15,7 @@
         left: $side-navigation-width;
         top: 0;
         right: 0;
-        background: $white;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        background: $gray-100;
         z-index: 10;
 
         &.with-error {
@@ -28,7 +27,7 @@
             display: flex;
             justify-content: space-between;
             padding: 0 0.5rem;
-            border-bottom: 1px solid $gray-300;
+            border-bottom: 1px solid $gray-400;
 
             & > div {
                 display: flex;

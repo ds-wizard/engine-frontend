@@ -1,6 +1,7 @@
 module KMEditor.Editor.Preview.View exposing (view)
 
 import Common.AppState exposing (AppState)
+import Common.Html exposing (emptyNode)
 import Common.Questionnaire.Models
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Tag as Tag
@@ -39,18 +40,22 @@ view wrapMsg appState levels model =
 
 tagSelection : List String -> Common.Questionnaire.Models.Model -> Html Msg
 tagSelection selected questionnaireModel =
-    let
-        tagListConfig =
-            { selected = selected
-            , addMsg = AddTag
-            , removeMsg = RemoveTag
-            }
-    in
-    div [ class "tag-selection" ]
-        [ div [ class "tag-selection-header" ]
-            [ strong [] [ text "Tags" ]
-            , a [ onClick SelectAllTags ] [ text "Select All" ]
-            , a [ onClick SelectNoneTags ] [ text "Select None" ]
+    if List.length questionnaireModel.questionnaire.knowledgeModel.tags > 0 then
+        let
+            tagListConfig =
+                { selected = selected
+                , addMsg = AddTag
+                , removeMsg = RemoveTag
+                }
+        in
+        div [ class "tag-selection" ]
+            [ div [ class "tag-selection-header" ]
+                [ strong [] [ text "Tags" ]
+                , a [ onClick SelectAllTags ] [ text "Select All" ]
+                , a [ onClick SelectNoneTags ] [ text "Select None" ]
+                ]
+            , Tag.list tagListConfig questionnaireModel.questionnaire.knowledgeModel.tags
             ]
-        , Tag.list tagListConfig questionnaireModel.questionnaire.knowledgeModel.tags
-        ]
+
+    else
+        emptyNode

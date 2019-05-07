@@ -14,8 +14,8 @@ $header-height: 50px;
         z-index: 1000;
 
         .questionnaire-header-content {
-            background: $white;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            background: $gray-100;
+            border-bottom: 1px solid $gray-400;
             width: 100%;
             height: $header-height;
             display: flex;
