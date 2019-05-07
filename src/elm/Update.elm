@@ -5,15 +5,16 @@ import Auth.Update
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
 import Common.Menu.Update
+import Dashboard.Update
 import KMEditor.Update
 import KnowledgeModels.Update
 import Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
-import Msgs exposing (Msg)
+import Msgs exposing (Msg(..))
 import Organization.Update
 import Ports
 import Public.Update
 import Questionnaires.Update
-import Routing exposing (Route(..), isAllowed, parseLocation)
+import Routing exposing (Route(..), parseLocation)
 import Url exposing (Url)
 import Users.Update
 
@@ -21,6 +22,9 @@ import Users.Update
 fetchData : Model -> Cmd Msg
 fetchData model =
     case model.appState.route of
+        Dashboard ->
+            Cmd.map DashboardMsg <| Dashboard.Update.fetchData model.appState
+
         Questionnaires route ->
             Questionnaires.Update.fetchData route Msgs.QuestionnairesMsg model.appState model.dsPlannerModel
 
@@ -59,7 +63,7 @@ update msg model =
         Msgs.OnUrlChange location ->
             let
                 newModel =
-                    setRoute (parseLocation model.appState.features location) model
+                    setRoute (parseLocation model.appState.config location) model
                         |> initLocalModel
             in
             ( newModel, fetchData newModel )
@@ -100,6 +104,13 @@ update msg model =
                     Common.Menu.Update.update Msgs.MenuMsg menuMsg model.appState model.menuModel
             in
             ( { model | menuModel = menuModel }, cmd )
+
+        Msgs.DashboardMsg dashboardMsg ->
+            let
+                ( dashboardModel, cmd ) =
+                    Dashboard.Update.update dashboardMsg model.dashboardModel
+            in
+            ( { model | dashboardModel = dashboardModel }, cmd )
 
         Msgs.QuestionnairesMsg dsPlannerMsg ->
             let

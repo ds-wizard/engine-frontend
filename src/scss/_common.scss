@@ -63,6 +63,30 @@
 }
 
 
+.full-page-illustrated-message {
+    display: flex;
+    max-width: 80rem;
+    width: 100%;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+
+    img {
+        width: 30%;
+    }
+
+    div {
+        margin-left: 2rem;
+    }
+
+
+    p {
+        font-size: 1.25rem;
+    }
+}
+
+
 .modal-cover {
     position: fixed;
     padding: 0;

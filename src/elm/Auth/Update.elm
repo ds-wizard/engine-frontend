@@ -46,7 +46,7 @@ getCurrentUserCompleted model result =
             ( setSession session model
             , Cmd.batch
                 [ Ports.storeSession <| Just session
-                , cmdNavigate model.appState.key Welcome
+                , cmdNavigate model.appState.key Dashboard
                 ]
             )
 

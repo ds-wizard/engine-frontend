@@ -3,6 +3,7 @@ module Msgs exposing (Msg(..))
 import Auth.Msgs
 import Browser exposing (UrlRequest)
 import Common.Menu.Msgs
+import Dashboard.Msgs
 import KMEditor.Msgs
 import KnowledgeModels.Msgs
 import Organization.Msgs
@@ -18,6 +19,7 @@ type Msg
     | AuthMsg Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
     | MenuMsg Common.Menu.Msgs.Msg
+    | DashboardMsg Dashboard.Msgs.Msg
     | KMEditorMsg KMEditor.Msgs.Msg
     | KnowledgeModelsMsg KnowledgeModels.Msgs.Msg
     | OrganizationMsg Organization.Msgs.Msg

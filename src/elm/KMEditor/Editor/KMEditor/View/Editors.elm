@@ -261,25 +261,6 @@ integrationDeleteConfirm editorData =
         }
 
 
-integrationPropsItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
-integrationPropsItemView form i =
-    let
-        field =
-            Form.getFieldAsString ("props." ++ String.fromInt i) form
-
-        ( error, errorClass ) =
-            FormGroup.getErrors field "Property"
-    in
-    div [ class "input-group mb-2" ]
-        [ Input.textInput field [ class <| "form-control " ++ errorClass ]
-        , div [ class "input-group-append" ]
-            [ button [ class "btn btn-outline-warning", onClick (Form.RemoveItem "props" i) ]
-                [ fa "times" ]
-            ]
-        , error
-        ]
-
-
 integrationHeaderItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
 integrationHeaderItemView form i =
     let
@@ -316,7 +297,7 @@ questionEditorView appState model editorData =
             }
 
         levelSelection =
-            if appState.features.levels then
+            if appState.config.levelsEnabled then
                 questionRequiredLevelSelectGroup editorData model.levels
 
             else

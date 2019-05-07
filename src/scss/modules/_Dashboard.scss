@@ -1,0 +1,11 @@
+@import "Dashboard/DMPWorkflowWidget";
+@import "Dashboard/PhaseQuestionnaireWidget";
+@import "Dashboard/WelcomeWidget";
+
+.Dashboard {
+    .alert {
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
