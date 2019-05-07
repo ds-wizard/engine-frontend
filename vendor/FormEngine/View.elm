@@ -244,8 +244,13 @@ viewDescription descriptionText =
 
 viewCustomActions : String -> FormViewConfig msg a err -> Html (Msg msg err)
 viewCustomActions questionId config =
-    span [ class "custom-actions" ]
-        (List.map (viewCustomAction questionId) config.customActions)
+    -- temporary fix since item name will be removed in the future versions
+    if questionId /= "itemName" then
+        span [ class "custom-actions" ]
+            (List.map (viewCustomAction questionId) config.customActions)
+
+    else
+        text ""
 
 
 viewCustomAction : String -> ( String, msg ) -> Html (Msg msg err)
