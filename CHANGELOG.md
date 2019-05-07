@@ -1,3 +1,13 @@
+# 1.6.0
+
+## Features
+
+- Typehint integrations in Knowledge Model and Questionnaire
+- Multiple DMP templates
+- More client configuration (app tilte, welcome page messages)
+
+
+
 # 1.5.0
 
 ## Features
