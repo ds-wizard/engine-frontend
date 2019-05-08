@@ -19,6 +19,11 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
 view wrapMsg appState model =
+    Page.actionResultView (viewQuestionnaires wrapMsg appState model) model.questionnaires
+
+
+viewQuestionnaires : (Msg -> Msgs.Msg) -> AppState -> Model -> List Questionnaire -> Html Msgs.Msg
+viewQuestionnaires wrapMsg appState model questionnaires =
     div [ class "col Questionnaires__Index" ]
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire

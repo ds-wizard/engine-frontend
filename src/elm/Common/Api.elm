@@ -1,5 +1,6 @@
 module Common.Api exposing
     ( ToMsg
+    , applyResult
     , getResultCmd
     , httpFetch
     , httpGet
@@ -13,8 +14,9 @@ module Common.Api exposing
     , jwtPut
     )
 
+import ActionResult exposing (ActionResult(..))
 import Auth.Msgs
-import Common.ApiError exposing (ApiError(..))
+import Common.ApiError exposing (ApiError(..), getServerError)
 import Common.AppState exposing (AppState)
 import Http
 import Json.Decode as Decode exposing (..)
@@ -131,6 +133,26 @@ getResultCmd result =
 
                 _ ->
                     Cmd.none
+
+
+applyResult :
+    { setResult : ActionResult data -> model -> model
+    , defaultError : String
+    , model : model
+    , result : Result ApiError data
+    }
+    -> ( model, Cmd Msgs.Msg )
+applyResult { setResult, defaultError, model, result } =
+    case result of
+        Ok data ->
+            ( setResult (Success data) model
+            , Cmd.none
+            )
+
+        Err error ->
+            ( setResult (getServerError error defaultError) model
+            , getResultCmd result
+            )
 
 
 expectJson : ToMsg a msg -> Decoder a -> Http.Expect msg

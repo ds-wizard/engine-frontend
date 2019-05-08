@@ -67,16 +67,16 @@
     display: flex;
     max-width: 80rem;
     width: 100%;
-    margin: auto;
     align-items: center;
     justify-content: center;
-    height: 80vh;
+    margin: 5rem auto auto;
 
     img {
         width: 30%;
     }
 
     div {
+        max-width: 50%;
         margin-left: 2rem;
     }
 

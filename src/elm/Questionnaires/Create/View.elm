@@ -24,19 +24,19 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailClass "Questionnaires__Create" ]
-        [ Page.header "Create Questionnaire" []
-        , Page.actionResultView (content wrapMsg model) model.packages
-        ]
+    Page.actionResultView (content wrapMsg model) model.packages
 
 
 content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
 content wrapMsg model packages =
-    div []
-        [ FormResult.view model.savingQuestionnaire
-        , formView model.form packages |> Html.map (wrapMsg << FormMsg)
-        , tagsView wrapMsg model
-        , FormActions.view (Routing.Questionnaires Questionnaires.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+    div [ detailClass "Questionnaires__Create" ]
+        [ Page.header "Create Questionnaire" []
+        , div []
+            [ FormResult.view model.savingQuestionnaire
+            , formView model.form packages |> Html.map (wrapMsg << FormMsg)
+            , tagsView wrapMsg model
+            , FormActions.view (Routing.Questionnaires Questionnaires.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+            ]
         ]
 
 

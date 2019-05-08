@@ -13,11 +13,11 @@ import Routing exposing (Route(..))
 
 view : ActionResult (List Level) -> ActionResult (List Questionnaire) -> Html msg
 view levels questionnaires =
-    Page.actionResultView viewQuestionnaires <| ActionResult.combine levels questionnaires
+    Page.actionResultView viewQuestionnaires <| ActionResult.combine questionnaires levels
 
 
-viewQuestionnaires : ( List Level, List Questionnaire ) -> Html msg
-viewQuestionnaires ( levels, questionnaires ) =
+viewQuestionnaires : ( List Questionnaire, List Level ) -> Html msg
+viewQuestionnaires ( questionnaires, levels ) =
     if List.length questionnaires > 0 then
         div [ class "PhaseQuestionnaireWidget" ]
             [ h3 [] [ text "Your questionnaires" ]

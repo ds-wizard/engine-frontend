@@ -5,7 +5,6 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Common.Api.Packages exposing (exportPackageUrl)
 import Common.AppState exposing (AppState)
-import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass, linkToAttributes)
 import Common.View.FormGroup as FormGroup
 import Common.View.Modal as Modal
@@ -23,27 +22,27 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
 view wrapMsg appState model =
-    div [ detailClass "KnowledgeModels__Detail" ]
-        [ Page.actionResultView (packageDetail wrapMsg appState) model.packages
-        , deleteVersionModal wrapMsg model
-        ]
+    Page.actionResultView (packageDetail wrapMsg appState model) model.packages
 
 
-packageDetail : (Msg -> Msgs.Msg) -> AppState -> List PackageDetailRow -> Html Msgs.Msg
-packageDetail wrapMsg appState packages =
+packageDetail : (Msg -> Msgs.Msg) -> AppState -> Model -> List PackageDetailRow -> Html Msgs.Msg
+packageDetail wrapMsg appState model packages =
     case List.head packages of
         Just package ->
-            div []
-                [ Page.header package.packageDetail.name []
-                , FormGroup.codeView package.packageDetail.organizationId "Organization ID"
-                , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
-                , FormGroup.codeView (String.fromInt package.packageDetail.metamodelVersion) "Metamodel Version"
-                , h3 [] [ text "Versions" ]
-                , div [] (List.map (versionView wrapMsg appState) <| sortPackageDetailRowsByVersion packages)
+            div [ detailClass "KnowledgeModels__Detail" ]
+                [ div []
+                    [ Page.header package.packageDetail.name []
+                    , FormGroup.codeView package.packageDetail.organizationId "Organization ID"
+                    , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
+                    , FormGroup.codeView (String.fromInt package.packageDetail.metamodelVersion) "Metamodel Version"
+                    , h3 [] [ text "Versions" ]
+                    , div [] (List.map (versionView wrapMsg appState) <| sortPackageDetailRowsByVersion packages)
+                    ]
+                , deleteVersionModal wrapMsg model
                 ]
 
         Nothing ->
-            emptyNode
+            Page.error "Empty knowledge model list returned."
 
 
 versionView : (Msg -> Msgs.Msg) -> AppState -> PackageDetailRow -> Html Msgs.Msg

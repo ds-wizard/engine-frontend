@@ -1,12 +1,12 @@
 module KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
-import Common.Api exposing (getResultCmd)
+import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.KnowledgeModels as KnowledgeModelsApi
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Setters exposing (setKnowledgeModels)
 import Form
 import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
@@ -29,7 +29,12 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetKnowledgeModelsCompleted result ->
-            getKnowledgeModelsCompleted model result
+            applyResult
+                { setResult = setKnowledgeModels
+                , defaultError = "Unable to get knowledge model editors."
+                , model = model
+                , result = result
+                }
 
         ShowHideDeleteKnowledgeModal km ->
             ( { model | kmToBeDeleted = km, deletingKnowledgeModel = Unset }, Cmd.none )
@@ -57,23 +62,6 @@ update msg wrapMsg appState model =
 
         DeleteMigrationCompleted result ->
             deleteMigrationCompleted wrapMsg appState model result
-
-
-getKnowledgeModelsCompleted : Model -> Result ApiError (List KnowledgeModel) -> ( Model, Cmd Msgs.Msg )
-getKnowledgeModelsCompleted model result =
-    let
-        newModel =
-            case result of
-                Ok knowledgeModels ->
-                    { model | knowledgeModels = Success knowledgeModels }
-
-                Err error ->
-                    { model | knowledgeModels = getServerError error "Unable to fetch knowledge models" }
-
-        cmd =
-            getResultCmd result
-    in
-    ( newModel, cmd )
 
 
 handleDeleteKM : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )

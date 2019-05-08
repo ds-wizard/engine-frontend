@@ -37,8 +37,12 @@ loader =
 
 
 error : String -> Html msg
-error =
-    message "frown-o"
+error msg =
+    illustratedMessage
+        { image = "cancel"
+        , heading = "Error"
+        , lines = [ msg ]
+        }
 
 
 success : String -> Html msg

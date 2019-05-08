@@ -1,12 +1,12 @@
 module Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api exposing (getResultCmd)
+import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Setters exposing (setUsers)
 import Msgs
-import Users.Common.Models exposing (User)
 import Users.Index.Models exposing (Model)
 import Users.Index.Msgs exposing (Msg(..))
 
@@ -21,7 +21,12 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetUsersCompleted result ->
-            getUsersCompleted model result
+            applyResult
+                { setResult = setUsers
+                , defaultError = "Unable to get users."
+                , model = model
+                , result = result
+                }
 
         ShowHideDeleteUser user ->
             ( { model | userToBeDeleted = user, deletingUser = Unset }, Cmd.none )
@@ -31,23 +36,6 @@ update msg wrapMsg appState model =
 
         DeleteUserCompleted result ->
             deleteUserCompleted wrapMsg appState model result
-
-
-getUsersCompleted : Model -> Result ApiError (List User) -> ( Model, Cmd Msgs.Msg )
-getUsersCompleted model result =
-    let
-        newModel =
-            case result of
-                Ok users ->
-                    { model | users = Success users }
-
-                Err error ->
-                    { model | users = getServerError error "Unable to fetch user list" }
-
-        cmd =
-            getResultCmd result
-    in
-    ( newModel, cmd )
 
 
 handleDeleteUser : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )

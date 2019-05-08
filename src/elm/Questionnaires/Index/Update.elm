@@ -59,7 +59,7 @@ getQuestionnairesCompleted model result =
             )
 
         Err error ->
-            ( { model | questionnaires = getServerError error "Unable to fetch questionnaire list" }
+            ( { model | questionnaires = getServerError error "Unable to get questionnaires." }
             , getResultCmd result
             )
 

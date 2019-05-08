@@ -61,7 +61,11 @@ view model =
                 Layout.app model notAllowedView
 
             NotFound ->
-                Layout.app model notFoundView
+                if model.appState.session.user == Nothing then
+                    Layout.public model notFoundView
+
+                else
+                    Layout.app model notFoundView
 
 
 notFoundView : Html msg

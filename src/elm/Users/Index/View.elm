@@ -17,6 +17,11 @@ import Users.Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
+    Page.actionResultView (viewUserList wrapMsg model) model.users
+
+
+viewUserList : (Msg -> Msgs.Msg) -> Model -> List User -> Html Msgs.Msg
+viewUserList wrapMsg model users =
     div [ class "col Users__Index" ]
         [ Page.header "Users" indexActions
         , FormResult.successOnlyView model.deletingUser

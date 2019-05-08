@@ -19,18 +19,18 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailClass "KMEditor__Create" ]
-        [ Page.header "Create Knowledge Model" []
-        , Page.actionResultView (content wrapMsg model) model.packages
-        ]
+    Page.actionResultView (content wrapMsg model) model.packages
 
 
 content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
 content wrapMsg model packages =
-    div []
-        [ FormResult.view model.savingKnowledgeModel
-        , formView wrapMsg model.form packages
-        , FormActions.view (KMEditor IndexRoute) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+    div [ detailClass "KMEditor__Create" ]
+        [ Page.header "Create Knowledge Model" []
+        , div []
+            [ FormResult.view model.savingKnowledgeModel
+            , formView wrapMsg model.form packages
+            , FormActions.view (KMEditor IndexRoute) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+            ]
         ]
 
 

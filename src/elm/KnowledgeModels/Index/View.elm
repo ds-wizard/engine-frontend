@@ -19,10 +19,15 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
 view wrapMsg appState model =
+    Page.actionResultView (viewKnowledgeModels wrapMsg appState model) model.packages
+
+
+viewKnowledgeModels : (Msg -> Msgs.Msg) -> AppState -> Model -> List Package -> Html Msgs.Msg
+viewKnowledgeModels wrapMsg appState model packages =
     div [ class "col KnowledgeModels__Index" ]
         [ Page.header "Knowledge Models" (indexActions appState)
         , FormResult.successOnlyView model.deletingPackage
-        , Page.actionResultView (Table.view (tableConfig appState) wrapMsg) model.packages
+        , Table.view (tableConfig appState) wrapMsg packages
         , deleteModal wrapMsg model
         ]
 
