@@ -67,7 +67,7 @@ getPackagesCompleted model result =
                     setSelectedPackage { model | packages = Success packages } packages
 
                 Err error ->
-                    { model | packages = getServerError error "Unable to get package list" }
+                    { model | packages = getServerError error "Unable to get knowledge model list." }
 
         cmd =
             getResultCmd result
@@ -84,7 +84,7 @@ getKnowledgeModelPreviewCompleted model result =
                     { model | knowledgeModelPreview = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelPreview = getServerError error "Unable to get package tags" }
+                    { model | knowledgeModelPreview = getServerError error "Unable to get knowledge model tags." }
 
         cmd =
             getResultCmd result

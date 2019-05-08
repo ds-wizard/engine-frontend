@@ -71,7 +71,7 @@ update msg appState model =
                     )
 
                 Err error ->
-                    ( { model | summaryReport = getServerError error "Unable to get summary report" }, Cmd.none )
+                    ( { model | summaryReport = getServerError error "Unable to get summary report." }, Cmd.none )
 
         CloseFeedback ->
             ( { model | feedback = Unset, feedbackQuestionUuid = Nothing }, Cmd.none )
@@ -93,7 +93,7 @@ update msg appState model =
                             ( { model | feedback = Success feedback }, Cmd.none )
 
                         Err error ->
-                            ( { model | feedback = getServerError error "Unable to get feedback" }, Cmd.none )
+                            ( { model | feedback = getServerError error "Unable to get feedback." }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -108,7 +108,7 @@ update msg appState model =
                                     Success typeHints
 
                                 Err err ->
-                                    getServerError err "Unable to get type hints"
+                                    getServerError err "Unable to get type hints."
                     in
                     ( { model | activePage = PageChapter chapter <| setTypeHintsResult actionResult form }
                     , Cmd.none

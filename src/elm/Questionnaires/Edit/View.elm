@@ -19,20 +19,20 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailClass "Questionnaire__Edit" ]
-        [ Page.header "Edit questionnaire" []
-        , Page.actionResultView (questionnaireView wrapMsg model) model.questionnaire
-        ]
+    Page.actionResultView (questionnaireView wrapMsg model) model.questionnaire
 
 
 questionnaireView : (Msg -> Msgs.Msg) -> Model -> QuestionnaireDetail -> Html Msgs.Msg
 questionnaireView wrapMsg model _ =
-    div []
-        [ FormResult.errorOnlyView model.savingQuestionnaire
-        , formView model.editForm |> Html.map (wrapMsg << FormMsg)
-        , FormActions.view
-            (Questionnaires Questionnaires.Routing.Index)
-            ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+    div [ detailClass "Questionnaire__Edit" ]
+        [ Page.header "Edit questionnaire" []
+        , div []
+            [ FormResult.errorOnlyView model.savingQuestionnaire
+            , formView model.editForm |> Html.map (wrapMsg << FormMsg)
+            , FormActions.view
+                (Questionnaires Questionnaires.Routing.Index)
+                ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+            ]
         ]
 
 

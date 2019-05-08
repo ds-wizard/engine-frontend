@@ -22,18 +22,18 @@ import Users.Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailClass "Users__Edit" ]
-        [ Page.header "Edit user profile" []
-        , Page.actionResultView (profileView wrapMsg model) model.user
-        ]
+    Page.actionResultView (profileView wrapMsg model) model.user
 
 
 profileView : (Msg -> Msgs.Msg) -> Model -> User -> Html Msgs.Msg
 profileView wrapMsg model _ =
-    div []
-        [ navbar wrapMsg model
-        , userView wrapMsg model
-        , passwordView wrapMsg model
+    div [ detailClass "Users__Edit" ]
+        [ Page.header "Edit user profile" []
+        , div []
+            [ navbar wrapMsg model
+            , userView wrapMsg model
+            , passwordView wrapMsg model
+            ]
         ]
 
 

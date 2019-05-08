@@ -1,12 +1,13 @@
 module KMEditor.Migration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api exposing (getResultCmd)
+import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.KnowledgeModels as KnowledgeModelsApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Setters exposing (setMigration)
 import KMEditor.Common.Models.Events exposing (getEventUuid)
-import KMEditor.Common.Models.Migration exposing (Migration, MigrationResolution, encodeMigrationResolution, newApplyMigrationResolution, newRejectMigrationResolution)
+import KMEditor.Common.Models.Migration exposing (..)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
 import Msgs
@@ -22,7 +23,12 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetMigrationCompleted result ->
-            handleGetMigrationCompleted model result
+            applyResult
+                { setResult = setMigration
+                , defaultError = "Unable to get migration."
+                , model = model
+                , result = result
+                }
 
         ApplyEvent ->
             handleAcceptChange wrapMsg appState model
@@ -32,18 +38,6 @@ update msg wrapMsg appState model =
 
         PostMigrationConflictCompleted result ->
             handlePostMigrationConflictCompleted wrapMsg appState model result
-
-
-handleGetMigrationCompleted : Model -> Result ApiError Migration -> ( Model, Cmd Msgs.Msg )
-handleGetMigrationCompleted model result =
-    case result of
-        Ok migration ->
-            ( { model | migration = Success migration }, Cmd.none )
-
-        Err error ->
-            ( { model | migration = getServerError error "Unable to get migration" }
-            , getResultCmd result
-            )
 
 
 handleAcceptChange : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )

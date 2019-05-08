@@ -1,12 +1,12 @@
 module KMEditor.Publish.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api exposing (getResultCmd)
+import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.KnowledgeModels as KnowledgeModelsApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Setters exposing (setKnowledgeModel)
 import Form
-import KMEditor.Common.Models exposing (KnowledgeModelDetail)
 import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model, encodeKnowledgeModelPublishForm, knowledgeModelPublishFormValidation)
 import KMEditor.Publish.Msgs exposing (Msg(..))
 import KnowledgeModels.Routing
@@ -24,30 +24,18 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetKnowledgeModelCompleted result ->
-            getKnowledgeModelCompleted model result
+            applyResult
+                { setResult = setKnowledgeModel
+                , defaultError = "Unable to get the knowledge model."
+                , model = model
+                , result = result
+                }
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model
 
         PutKnowledgeModelVersionCompleted result ->
             putKnowledgeModelVersionCompleted appState model result
-
-
-getKnowledgeModelCompleted : Model -> Result ApiError KnowledgeModelDetail -> ( Model, Cmd Msgs.Msg )
-getKnowledgeModelCompleted model result =
-    let
-        newModel =
-            case result of
-                Ok knowledgeModel ->
-                    { model | knowledgeModel = Success knowledgeModel }
-
-                Err error ->
-                    { model | knowledgeModel = getServerError error "Unable to get the knowledge model." }
-
-        cmd =
-            getResultCmd result
-    in
-    ( newModel, Cmd.none )
 
 
 handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )

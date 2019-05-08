@@ -23,10 +23,15 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
 view wrapMsg jwt model =
+    Page.actionResultView (viewKMEditors wrapMsg jwt model) model.knowledgeModels
+
+
+viewKMEditors : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> List KnowledgeModel -> Html Msgs.Msg
+viewKMEditors wrapMsg jwt model knowledgeModels =
     div [ class "col KMEditor__Index" ]
         [ Page.header "Knowledge Model Editor" indexActions
         , FormResult.view model.deletingMigration
-        , Page.actionResultView (Table.view (tableConfig jwt) wrapMsg) model.knowledgeModels
+        , Table.view (tableConfig jwt) wrapMsg knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]

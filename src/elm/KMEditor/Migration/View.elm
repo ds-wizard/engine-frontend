@@ -21,11 +21,7 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ class "col KMEditor__Migration" ]
-        [ div [] [ Page.header "Migration" [] ]
-        , FormResult.view model.conflict
-        , Page.actionResultView (migrationView wrapMsg model) model.migration
-        ]
+    Page.actionResultView (migrationView wrapMsg model) model.migration
 
 
 migrationView : (Msg -> Msgs.Msg) -> Model -> Migration -> Html Msgs.Msg
@@ -67,7 +63,11 @@ migrationView wrapMsg model migration =
                 _ ->
                     errorMessage
     in
-    currentView
+    div [ class "col KMEditor__Migration" ]
+        [ div [] [ Page.header "Migration" [] ]
+        , FormResult.view model.conflict
+        , currentView
+        ]
 
 
 migrationSummary : Migration -> Html Msgs.Msg
