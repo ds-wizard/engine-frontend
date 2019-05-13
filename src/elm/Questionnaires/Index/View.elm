@@ -2,12 +2,14 @@ module Questionnaires.Index.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Common.Html exposing (linkTo)
+import Common.Html.Attribute exposing (listClass)
 import Common.View.FormResult as FormResult
+import Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import KnowledgeModels.Routing
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire)
 import Questionnaires.Index.ExportModal.View as ExportModal
@@ -24,10 +26,10 @@ view wrapMsg appState model =
 
 viewQuestionnaires : (Msg -> Msgs.Msg) -> AppState -> Model -> List Questionnaire -> Html Msgs.Msg
 viewQuestionnaires wrapMsg appState model questionnaires =
-    div [ class "col Questionnaires__Index" ]
+    div [ listClass "Questionnaires__Index" ]
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
-        , Page.actionResultView (Table.view (tableConfig model) wrapMsg) model.questionnaires
+        , Listing.view (listingConfig wrapMsg) <| List.sortBy .name questionnaires
         , ExportModal.view (wrapMsg << ExportModalMsg) appState model.exportModalModel
         , deleteModal wrapMsg model
         ]
@@ -38,44 +40,26 @@ indexActions =
     [ linkTo (Routing.Questionnaires <| Create Nothing) [ class "btn btn-primary" ] [ text "Create" ] ]
 
 
-tableConfig : Model -> TableConfig Questionnaire Msg
-tableConfig model =
-    { emptyMessage = "There are no questionnaires"
-    , fields =
-        [ { label = "Name"
-          , getValue = TextValue .name
-          }
-        , { label = "Visibility"
-          , getValue = HtmlValue tableFieldVisibility
-          }
-        , { label = "Knowledge Model"
-          , getValue = HtmlValue tableFieldKnowledgeModel
-          }
-        ]
-    , actions =
-        [ { label = TableActionPrimary "Fill questionnaire"
-          , action = TableActionLink (Routing.Questionnaires << Detail << .uuid)
-          , visible = always True
-          }
-        , { label = TableActionDefault "download" "Export"
-          , action = TableActionMsg tableActionExport
-          , visible = always True
-          }
-        , { label = TableActionDefault "edit" "Edit"
-          , action = TableActionLink (Routing.Questionnaires << Edit << .uuid)
-          , visible = always True
-          }
-        , { label = TableActionDestructive "trash-o" "Delete"
-          , action = TableActionMsg tableActionDelete
-          , visible = always True
-          }
-        ]
-    , sortBy = .name
+listingConfig : (Msg -> Msgs.Msg) -> ListingConfig Questionnaire Msgs.Msg
+listingConfig wrapMsg =
+    { title = listingTitle
+    , description = listingDescription
+    , actions = listingActions wrapMsg
+    , textTitle = .name
+    , emptyText = "Click \"Create\" button to add a new Questionnaire."
     }
 
 
-tableFieldVisibility : Questionnaire -> Html msg
-tableFieldVisibility questionnaire =
+listingTitle : Questionnaire -> Html Msgs.Msg
+listingTitle questionnaire =
+    span []
+        [ linkTo (detailRoute questionnaire) [] [ text questionnaire.name ]
+        , listingTitleBadge questionnaire
+        ]
+
+
+listingTitleBadge : Questionnaire -> Html msg
+listingTitleBadge questionnaire =
     if questionnaire.private then
         span [ class "badge badge-danger" ]
             [ text "private" ]
@@ -85,9 +69,17 @@ tableFieldVisibility questionnaire =
             [ text "public" ]
 
 
-tableFieldKnowledgeModel : Questionnaire -> Html msg
-tableFieldKnowledgeModel questionnaire =
-    span []
+listingDescription : Questionnaire -> Html Msgs.Msg
+listingDescription questionnaire =
+    let
+        kmRoute =
+            Routing.KnowledgeModels <|
+                KnowledgeModels.Routing.Detail
+                    questionnaire.package.organizationId
+                    questionnaire.package.kmId
+    in
+    linkTo kmRoute
+        [ title "Knowledge Model" ]
         [ text questionnaire.package.name
         , text ", "
         , text questionnaire.package.version
@@ -97,14 +89,34 @@ tableFieldKnowledgeModel questionnaire =
         ]
 
 
-tableActionExport : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
-tableActionExport wrapMsg =
-    wrapMsg << ShowExportQuestionnaire
+listingActions : (Msg -> Msgs.Msg) -> Questionnaire -> List (ListingActionConfig Msgs.Msg)
+listingActions wrapMsg questionnaire =
+    [ { extraClass = Just "font-weight-bold"
+      , icon = Nothing
+      , label = "Fill questionnaire"
+      , msg = ListingActionLink (detailRoute questionnaire)
+      }
+    , { extraClass = Nothing
+      , icon = Just "download"
+      , label = "Export"
+      , msg = ListingActionMsg (wrapMsg <| ShowExportQuestionnaire questionnaire)
+      }
+    , { extraClass = Nothing
+      , icon = Just "edit"
+      , label = "Edit"
+      , msg = ListingActionLink (Routing.Questionnaires <| Edit <| questionnaire.uuid)
+      }
+    , { extraClass = Just "text-danger"
+      , icon = Just "trash-o"
+      , label = "Delete"
+      , msg = ListingActionMsg (wrapMsg <| ShowHideDeleteQuestionnaire <| Just questionnaire)
+      }
+    ]
 
 
-tableActionDelete : (Msg -> Msgs.Msg) -> Questionnaire -> Msgs.Msg
-tableActionDelete wrapMsg =
-    wrapMsg << ShowHideDeleteQuestionnaire << Just
+detailRoute : Questionnaire -> Routing.Route
+detailRoute =
+    Routing.Questionnaires << Detail << .uuid
 
 
 deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg

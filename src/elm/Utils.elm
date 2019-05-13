@@ -4,6 +4,7 @@ module Utils exposing
     , getContrastColorHex
     , getUuid
     , listFilterJust
+    , packageIdToComponents
     , pair
     , replace
     , splitVersion
@@ -18,8 +19,6 @@ import Color.Accessibility exposing (contrastRatio)
 import Color.Convert exposing (hexToColor)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
-import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
 import List.Extra as List
 import Random exposing (Seed, step)
 import Regex exposing (Regex)
@@ -140,3 +139,13 @@ getContrastColorHex colorHex =
 
         _ ->
             "#000000"
+
+
+packageIdToComponents : String -> Maybe ( String, String, String )
+packageIdToComponents packageId =
+    case String.split ":" packageId of
+        orgId :: kmId :: version :: [] ->
+            Just ( orgId, kmId, version )
+
+        _ ->
+            Nothing
