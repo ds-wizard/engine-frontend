@@ -148,7 +148,7 @@ menuItems : List MenuItem
 menuItems =
     [ MenuItem "Organization" "building" Organization Perm.organization
     , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
-    , MenuItem "Knowledge Models" "cubes" (KnowledgeModels KnowledgeModels.Routing.Index) Perm.packageManagementRead
+    , MenuItem "Knowledge Models" "sitemap" (KnowledgeModels KnowledgeModels.Routing.Index) Perm.packageManagementRead
     , MenuItem "Questionnaires" "list-alt" (Questionnaires Questionnaires.Routing.Index) Perm.questionnaire
     , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.IndexRoute) Perm.knowledgeModel
     ]

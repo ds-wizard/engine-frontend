@@ -1,10 +1,11 @@
 module Users.Index.View exposing (view)
 
 import Common.Html exposing (..)
+import Common.Html.Attribute exposing (listClass)
 import Common.View.FormResult as FormResult
+import Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Msgs
@@ -22,56 +23,93 @@ view wrapMsg model =
 
 viewUserList : (Msg -> Msgs.Msg) -> Model -> List User -> Html Msgs.Msg
 viewUserList wrapMsg model users =
-    div [ class "col Users__Index" ]
+    let
+        sortUsers u1 u2 =
+            case compare u1.surname u2.surname of
+                LT ->
+                    LT
+
+                GT ->
+                    GT
+
+                EQ ->
+                    compare u1.name u2.name
+    in
+    div [ listClass "Users__Index" ]
         [ Page.header "Users" indexActions
         , FormResult.successOnlyView model.deletingUser
-        , Page.actionResultView (Table.view tableConfig wrapMsg) model.users
+        , Listing.view (listingConfig wrapMsg) <| List.sortWith sortUsers users
         , deleteModal wrapMsg model
         ]
 
 
 indexActions : List (Html Msgs.Msg)
 indexActions =
-    [ linkTo (Routing.Users Create) [ class "btn btn-primary" ] [ text "Create User" ] ]
+    [ linkTo (Routing.Users Create) [ class "btn btn-primary" ] [ text "Create" ] ]
 
 
-tableConfig : TableConfig User Msg
-tableConfig =
-    { emptyMessage = "There are no users."
-    , fields =
-        [ { label = "Name"
-          , getValue = TextValue .name
-          }
-        , { label = "Surname"
-          , getValue = TextValue .surname
-          }
-        , { label = "Email"
-          , getValue = TextValue .email
-          }
-        , { label = "Role"
-          , getValue = TextValue .role
-          }
-        , { label = "Active"
-          , getValue = BoolValue .active
-          }
-        ]
-    , actions =
-        [ { label = TableActionDefault "edit" "Edit"
-          , action = TableActionLink (Routing.Users << Edit << .uuid)
-          , visible = always True
-          }
-        , { label = TableActionDestructive "trash-o" "Delete"
-          , action = TableActionMsg tableActionDelete
-          , visible = always True
-          }
-        ]
-    , sortBy = .surname
+listingConfig : (Msg -> Msgs.Msg) -> ListingConfig User Msgs.Msg
+listingConfig wrapMsg =
+    { title = listingTitle
+    , description = listingDescription
+    , actions = listingActions wrapMsg
+    , textTitle = \u -> u.surname ++ u.name
+    , emptyText = "Click \"Create\" button to add a new User."
     }
 
 
-tableActionDelete : (Msg -> Msgs.Msg) -> User -> Msgs.Msg
-tableActionDelete wrapMsg =
-    wrapMsg << ShowHideDeleteUser << Just
+listingTitle : User -> Html Msgs.Msg
+listingTitle user =
+    span []
+        [ linkTo (detailRoute user) [] [ text <| user.name ++ " " ++ user.surname ]
+        , listingTitleBadge user
+        ]
+
+
+listingTitleBadge : User -> Html msg
+listingTitleBadge user =
+    let
+        activeBadge =
+            if user.active then
+                emptyNode
+
+            else
+                span [ class "badge badge-danger" ]
+                    [ text "inactive" ]
+    in
+    span []
+        [ span [ class "badge badge-light" ]
+            [ text user.role ]
+        , activeBadge
+        ]
+
+
+listingDescription : User -> Html Msgs.Msg
+listingDescription user =
+    span []
+        [ a [ class "fragment", href <| "mailto:" ++ user.email ]
+            [ text user.email ]
+        ]
+
+
+listingActions : (Msg -> Msgs.Msg) -> User -> List (ListingActionConfig Msgs.Msg)
+listingActions wrapMsg user =
+    [ { extraClass = Nothing
+      , icon = Just "edit"
+      , label = "Edit"
+      , msg = ListingActionLink (detailRoute user)
+      }
+    , { extraClass = Just "text-danger"
+      , icon = Just "trash-o"
+      , label = "Delete"
+      , msg = ListingActionMsg (wrapMsg <| ShowHideDeleteUser <| Just user)
+      }
+    ]
+
+
+detailRoute : User -> Routing.Route
+detailRoute =
+    Routing.Users << Edit << .uuid
 
 
 deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg

@@ -18,6 +18,14 @@ body {
     margin: 20px 0;
 }
 
+.col-list {
+    max-width: 80rem;
+}
+
+.col-detail {
+    max-width: 33rem;
+}
+
 .side-navigation {
     background-color: $side-navigation-bg;
     width: $side-navigation-width;

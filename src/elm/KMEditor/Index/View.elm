@@ -4,11 +4,12 @@ import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Html exposing (..)
+import Common.Html.Attribute exposing (listClass)
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
+import Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import Common.View.Table as Table exposing (TableAction(..), TableActionLabel(..), TableConfig, TableFieldValue(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -17,8 +18,10 @@ import KMEditor.Index.Models exposing (..)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
 import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Routing
 import Msgs
 import Routing exposing (Route(..))
+import Utils exposing (packageIdToComponents)
 
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
@@ -27,11 +30,11 @@ view wrapMsg jwt model =
 
 
 viewKMEditors : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> List KnowledgeModel -> Html Msgs.Msg
-viewKMEditors wrapMsg jwt model knowledgeModels =
-    div [ class "col KMEditor__Index" ]
+viewKMEditors wrapMsg mbJwt model knowledgeModels =
+    div [ listClass "KMEditor__Index" ]
         [ Page.header "Knowledge Model Editor" indexActions
         , FormResult.view model.deletingMigration
-        , Table.view (tableConfig jwt) wrapMsg knowledgeModels
+        , Listing.view (listingConfig wrapMsg mbJwt) <| List.sortBy .name knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]
@@ -45,107 +48,183 @@ indexActions =
     ]
 
 
-tableConfig : Maybe JwtToken -> TableConfig KnowledgeModel Msg
-tableConfig jwt =
-    { emptyMessage = "There are no knowledge model editors."
-    , fields =
-        [ { label = "Name"
-          , getValue = HtmlValue tableFieldName
-          }
-        , { label = "Knowledge Model ID"
-          , getValue = TextValue .kmId
-          }
-        , { label = "Parent Knowledge Model"
-          , getValue = TextValue (Maybe.withDefault "-" << .parentPackageId)
-          }
-        ]
-    , actions =
-        [ { label = TableActionPrimary "Open Editor"
-          , action = TableActionLink (Routing.KMEditor << EditorRoute << .uuid)
-          , visible = kmMatchState [ Default, Edited, Outdated ]
-          }
-        , { label = TableActionDefault "cloud-upload" "Publish"
-          , action = TableActionLink (Routing.KMEditor << PublishRoute << .uuid)
-          , visible = tableActionPublishVisible jwt
-          }
-        , { label = TableActionDefault "angle-double-up" "Upgrade"
-          , action = TableActionMsg tableActionUpgrade
-          , visible = tableActionUpgradeVisible jwt
-          }
-        , { label = TableActionDefault "long-arrow-right" "Continue Migration"
-          , action = TableActionLink (Routing.KMEditor << MigrationRoute << .uuid)
-          , visible = tableActionContinueMigrationVisible jwt
-          }
-        , { label = TableActionDefault "ban" "Cancel Migration"
-          , action = TableActionMsg tableActionCancelMigration
-          , visible = tableActionCancelMigrationVisible jwt
-          }
-        , { label = TableActionDestructive "trash-o" "Delete"
-          , action = TableActionMsg tableActionDelete
-          , visible = always True
-          }
-        ]
-    , sortBy = .name
+listingConfig : (Msg -> Msgs.Msg) -> Maybe JwtToken -> ListingConfig KnowledgeModel Msgs.Msg
+listingConfig wrapMsg mbJwt =
+    { title = listingTitle mbJwt
+    , description = listingDescription
+    , actions = listingActions wrapMsg mbJwt
+    , textTitle = .name
+    , emptyText = "Click \"Create\" button to add a new Knowledge Model Editor."
     }
 
 
-tableFieldName : KnowledgeModel -> Html Msgs.Msg
-tableFieldName km =
-    let
-        extra =
-            case km.stateType of
-                Outdated ->
-                    span [ class "badge badge-warning" ]
-                        [ text "outdated" ]
-
-                Migrating ->
-                    span [ class "badge badge-info" ]
-                        [ text "migrating" ]
-
-                Migrated ->
-                    span [ class "badge badge-success" ]
-                        [ text "migrated" ]
-
-                Edited ->
-                    i [ class "fa fa-pencil" ] []
-
-                _ ->
-                    emptyNode
-    in
+listingTitle : Maybe JwtToken -> KnowledgeModel -> Html Msgs.Msg
+listingTitle mbJwt km =
     span []
-        [ span [] [ text km.name ]
-        , extra
+        [ linkToKM mbJwt km [] [ text km.name ]
+        , listingTitleBadge km
         ]
 
 
-tableActionDelete : (Msg -> Msgs.Msg) -> KnowledgeModel -> Msgs.Msg
-tableActionDelete wrapMsg =
-    wrapMsg << ShowHideDeleteKnowledgeModal << Just
+linkToKM : Maybe JwtToken -> KnowledgeModel -> List (Attribute Msgs.Msg) -> List (Html Msgs.Msg) -> Html Msgs.Msg
+linkToKM mbJwt km =
+    case km.stateType of
+        Migrating ->
+            if continueMigrationActionVisible mbJwt km then
+                linkTo (Routing.KMEditor <| MigrationRoute <| km.uuid)
+
+            else
+                span
+
+        Migrated ->
+            if publishActionVisible mbJwt km then
+                linkTo (Routing.KMEditor <| PublishRoute <| km.uuid)
+
+            else
+                span
+
+        _ ->
+            linkTo (Routing.KMEditor <| EditorRoute <| km.uuid)
 
 
-tableActionPublishVisible : Maybe JwtToken -> KnowledgeModel -> Bool
-tableActionPublishVisible jwt km =
+listingTitleBadge : KnowledgeModel -> Html msg
+listingTitleBadge km =
+    case km.stateType of
+        Outdated ->
+            span
+                [ title "There is a new version of parent knowledge model"
+                , class "badge badge-warning"
+                ]
+                [ text "outdated" ]
+
+        Migrating ->
+            span
+                [ title "This editor is in the process of migration to a new parent knowledge model"
+                , class "badge badge-info"
+                ]
+                [ text "migrating" ]
+
+        Migrated ->
+            span
+                [ title "This editor has been migrated to a new parent knowledge model, you can publish it now."
+                , class "badge badge-success"
+                ]
+                [ text "migrated" ]
+
+        Edited ->
+            i
+                [ title "This editor contains unpublished changes"
+                , class <| "fa fa-pencil"
+                ]
+                []
+
+        _ ->
+            emptyNode
+
+
+listingDescription : KnowledgeModel -> Html Msgs.Msg
+listingDescription km =
+    let
+        parent =
+            case km.parentPackageId of
+                Just parentPackageId ->
+                    let
+                        elem =
+                            case packageIdToComponents parentPackageId of
+                                Just ( orgId, kmId, _ ) ->
+                                    linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Detail orgId kmId)
+
+                                _ ->
+                                    span
+                    in
+                    elem [ class "fragment", title "Parent Knowledge Model" ]
+                        [ fa "code-fork"
+                        , text parentPackageId
+                        ]
+
+                Nothing ->
+                    emptyNode
+    in
+    span []
+        [ span [ class "fragment" ] [ code [] [ text km.kmId ] ]
+        , parent
+        ]
+
+
+listingActions : (Msg -> Msgs.Msg) -> Maybe JwtToken -> KnowledgeModel -> List (ListingActionConfig Msgs.Msg)
+listingActions wrapMsg mbJwt km =
+    let
+        openEditor =
+            { extraClass = Just "font-weight-bold"
+            , icon = Nothing
+            , label = "Open Editor"
+            , msg = ListingActionLink (Routing.KMEditor <| EditorRoute <| km.uuid)
+            }
+
+        publish =
+            { extraClass = Nothing
+            , icon = Just "cloud-upload"
+            , label = "Publish"
+            , msg = ListingActionLink <| Routing.KMEditor <| PublishRoute <| km.uuid
+            }
+
+        upgrade =
+            { extraClass = Nothing
+            , icon = Just "angle-double-up"
+            , label = "Upgrade"
+            , msg = ListingActionMsg <| wrapMsg <| ShowHideUpgradeModal <| Just km
+            }
+
+        continueMigration =
+            { extraClass = Nothing
+            , icon = Just "long-arrow-right"
+            , label = "Continue Migration"
+            , msg = ListingActionLink <| Routing.KMEditor <| MigrationRoute <| km.uuid
+            }
+
+        cancelMigration =
+            { extraClass = Nothing
+            , icon = Just "ban"
+            , label = "Cancel Migration"
+            , msg = ListingActionMsg <| wrapMsg <| DeleteMigration <| km.uuid
+            }
+
+        delete =
+            { extraClass = Just "text-danger"
+            , icon = Just "trash-o"
+            , label = "Delete"
+            , msg = ListingActionMsg <| wrapMsg <| ShowHideDeleteKnowledgeModal <| Just km
+            }
+
+        insertIf item shouldBeInserted list =
+            if shouldBeInserted km then
+                list ++ [ item ]
+
+            else
+                list
+    in
+    []
+        |> insertIf openEditor (kmMatchState [ Default, Edited, Outdated ])
+        |> insertIf publish (publishActionVisible mbJwt)
+        |> insertIf upgrade (upgradeActionVisible mbJwt)
+        |> insertIf continueMigration (continueMigrationActionVisible mbJwt)
+        |> insertIf cancelMigration (tableActionCancelMigrationVisible mbJwt)
+        |> insertIf delete (always True)
+
+
+publishActionVisible : Maybe JwtToken -> KnowledgeModel -> Bool
+publishActionVisible jwt km =
     hasPerm jwt Perm.knowledgeModelPublish && kmMatchState [ Edited, Migrated ] km
 
 
-tableActionUpgrade : (Msg -> Msgs.Msg) -> KnowledgeModel -> Msgs.Msg
-tableActionUpgrade wrapMsg =
-    wrapMsg << ShowHideUpgradeModal << Just
-
-
-tableActionUpgradeVisible : Maybe JwtToken -> KnowledgeModel -> Bool
-tableActionUpgradeVisible jwt km =
+upgradeActionVisible : Maybe JwtToken -> KnowledgeModel -> Bool
+upgradeActionVisible jwt km =
     hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Outdated ] km
 
 
-tableActionContinueMigrationVisible : Maybe JwtToken -> KnowledgeModel -> Bool
-tableActionContinueMigrationVisible jwt km =
+continueMigrationActionVisible : Maybe JwtToken -> KnowledgeModel -> Bool
+continueMigrationActionVisible jwt km =
     hasPerm jwt Perm.knowledgeModelUpgrade && kmMatchState [ Migrating ] km
-
-
-tableActionCancelMigration : (Msg -> Msgs.Msg) -> KnowledgeModel -> Msgs.Msg
-tableActionCancelMigration wrapMsg =
-    wrapMsg << DeleteMigration << .uuid
 
 
 tableActionCancelMigrationVisible : Maybe JwtToken -> KnowledgeModel -> Bool
