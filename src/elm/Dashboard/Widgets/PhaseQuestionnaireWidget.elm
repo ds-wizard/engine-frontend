@@ -7,6 +7,7 @@ import Html exposing (Html, a, code, div, h3, span, strong, text)
 import Html.Attributes exposing (class, href)
 import KMEditor.Common.Models.Entities exposing (Level)
 import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.View exposing (accessibilityBadge)
 import Questionnaires.Routing exposing (Route(..))
 import Routing exposing (Route(..))
 
@@ -69,16 +70,5 @@ viewQuestionnaire questionnaire =
                 , text ")"
                 ]
             ]
-        , badge questionnaire
+        , accessibilityBadge questionnaire.accessibility
         ]
-
-
-badge : Questionnaire -> Html msg
-badge questionnaire =
-    if questionnaire.private then
-        span [ class "badge badge-danger" ]
-            [ text "private" ]
-
-    else
-        span [ class "badge badge-info" ]
-            [ text "public" ]

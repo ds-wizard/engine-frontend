@@ -20,6 +20,7 @@ type alias FormViewConfig msg a err =
     { customActions : List ( String, msg )
     , viewExtraData : Maybe (a -> Html (Msg msg err))
     , isDesirable : Maybe (a -> Bool)
+    , disabled : Bool
     }
 
 
@@ -57,7 +58,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
         StringFormElement descriptor state ->
             div [ class "form-group" ]
                 [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
-                , input [ class "form-control", type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
+                , input [ class "form-control", disabled config.disabled, type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 ]
@@ -65,7 +66,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
         TextFormElement descriptor state ->
             div [ class "form-group" ]
                 [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
-                , textarea [ class "form-control", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
+                , textarea [ class "form-control", disabled config.disabled, value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 ]
@@ -73,7 +74,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
         NumberFormElement descriptor state ->
             div [ class "form-group" ]
                 [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
-                , input [ class "form-control", type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
+                , input [ class "form-control", disabled config.disabled, type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 ]
@@ -83,8 +84,8 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 [ viewLabel config descriptor (state.value /= Nothing) newHumanIdentifiers
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
-                , div [] (List.indexedMap (viewChoice (path ++ [ descriptor.name ]) descriptor state) options)
-                , viewClearAnswer (state.value /= Nothing) (path ++ [ descriptor.name ])
+                , div [] (List.indexedMap (viewChoice config (path ++ [ descriptor.name ]) descriptor state) options)
+                , viewClearAnswer (state.value /= Nothing && not config.disabled) (path ++ [ descriptor.name ])
                 , viewAdvice state.value options
                 , viewFollowUps form config (path ++ [ descriptor.name ]) newHumanIdentifiers state.value options
                 ]
@@ -95,7 +96,11 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 , viewDescription descriptor.text
                 , viewExtraData config descriptor.extraData
                 , div [] (List.indexedMap (viewGroupItem form config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
-                , button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
+                , if not config.disabled then
+                    button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
+
+                  else
+                    text ""
                 ]
 
         TypeHintFormElement descriptor typeHintConfig state ->
@@ -104,6 +109,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 , input
                     [ class "form-control"
                     , type_ "text"
+                    , disabled config.disabled
                     , value (stateValueToString state)
                     , onInput (InputTypehint (path ++ [ descriptor.name ]) descriptor.name << IntegrationReply << PlainValue)
                     , onFocus <| ShowTypeHints (path ++ [ descriptor.name ]) descriptor.name (stateValueToString state)
@@ -288,8 +294,12 @@ viewGroupItem form config path humanIdentifiers index itemElement =
             humanIdentifiers ++ [ identifierToChar index ]
 
         deleteButton =
-            button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
-                [ i [ class "fa fa-trash-o" ] [] ]
+            if not config.disabled then
+                button [ class "btn btn-outline-danger btn-item-delete", onClick (GroupItemRemove path index) ]
+                    [ i [ class "fa fa-trash-o" ] [] ]
+
+            else
+                text ""
     in
     div [ class "item" ]
         [ div [ class "card bg-light  mb-5" ]
@@ -300,8 +310,8 @@ viewGroupItem form config path humanIdentifiers index itemElement =
         ]
 
 
-viewChoice : List String -> FormItemDescriptor a -> FormElementState -> Int -> OptionElement a -> Html (Msg msg err)
-viewChoice path parentDescriptor parentState order optionElement =
+viewChoice : FormViewConfig msg a err -> List String -> FormItemDescriptor a -> FormElementState -> Int -> OptionElement a -> Html (Msg msg err)
+viewChoice config path parentDescriptor parentState order optionElement =
     let
         radioName =
             String.join "." (path ++ [ parentDescriptor.name ])
@@ -323,7 +333,7 @@ viewChoice path parentDescriptor parentState order optionElement =
         viewOption title value extra badges =
             div [ class "radio", classList [ ( "radio-selected", Just value == parentState.value ) ] ]
                 [ label []
-                    [ input [ type_ "radio", name radioName, onClick (Input path value), checked (Just value == parentState.value) ] []
+                    [ input [ type_ "radio", disabled config.disabled, name radioName, onClick (Input path value), checked (Just value == parentState.value) ] []
                     , text <| humanIndentifier ++ ". " ++ title
                     , extra
                     , viewBadges badges

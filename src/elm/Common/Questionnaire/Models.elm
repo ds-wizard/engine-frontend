@@ -36,6 +36,7 @@ import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (Event)
 import KnowledgeModels.Common.Models exposing (PackageDetail, packageDetailDecoder)
 import List.Extra as List
+import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
 import String exposing (fromInt)
 import Utils exposing (boolToInt)
 
@@ -101,7 +102,8 @@ type alias QuestionnaireDetail =
     , knowledgeModel : KnowledgeModel
     , replies : FormValues
     , level : Int
-    , private : Bool
+    , accessibility : QuestionnaireAccessibility
+    , ownerUuid : Maybe String
     }
 
 
@@ -114,14 +116,15 @@ questionnaireDetailDecoder =
         |> required "knowledgeModel" knowledgeModelDecoder
         |> required "replies" decodeFormValues
         |> required "level" Decode.int
-        |> required "private" Decode.bool
+        |> required "accessibility" QuestionnaireAccessibility.decoder
+        |> required "ownerUuid" (Decode.maybe Decode.string)
 
 
 encodeQuestionnaireDetail : QuestionnaireDetail -> Encode.Value
 encodeQuestionnaireDetail questionnaire =
     Encode.object
         [ ( "name", Encode.string questionnaire.name )
-        , ( "private", Encode.bool questionnaire.private )
+        , ( "accessibility", QuestionnaireAccessibility.encode questionnaire.accessibility )
         , ( "replies", encodeFormValues questionnaire.replies )
         , ( "level", Encode.int questionnaire.level )
         ]

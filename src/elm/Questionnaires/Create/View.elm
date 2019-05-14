@@ -16,6 +16,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import KnowledgeModels.Common.Models exposing (PackageDetail)
 import Msgs
+import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility
 import Questionnaires.Create.Models exposing (Model, QuestionnaireCreateForm)
 import Questionnaires.Create.Msgs exposing (Msg(..))
 import Questionnaires.Routing
@@ -44,14 +45,13 @@ formView : Form CustomFormError QuestionnaireCreateForm -> List PackageDetail ->
 formView form packages =
     let
         packageOptions =
-            ( "", "--" ) :: List.map createOption packages
+            ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
 
         formHtml =
             div []
                 [ FormGroup.input form "name" "Name"
                 , FormGroup.select packageOptions form "packageId" "Knowledge Model"
-                , FormGroup.toggle form "private" "Private"
-                , FormExtra.text "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
+                , FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
                 ]
     in
     formHtml

@@ -21,7 +21,7 @@ import KnowledgeModels.Common.Models exposing (PackageDetail)
 import KnowledgeModels.Routing
 import Msgs
 import Routing exposing (Route(..))
-import Utils exposing (packageIdToComponents)
+import Utils exposing (listInsertIf, packageIdToComponents)
 
 
 view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
@@ -195,21 +195,14 @@ listingActions wrapMsg mbJwt km =
             , label = "Delete"
             , msg = ListingActionMsg <| wrapMsg <| ShowHideDeleteKnowledgeModal <| Just km
             }
-
-        insertIf item shouldBeInserted list =
-            if shouldBeInserted km then
-                list ++ [ item ]
-
-            else
-                list
     in
     []
-        |> insertIf openEditor (kmMatchState [ Default, Edited, Outdated ])
-        |> insertIf publish (publishActionVisible mbJwt)
-        |> insertIf upgrade (upgradeActionVisible mbJwt)
-        |> insertIf continueMigration (continueMigrationActionVisible mbJwt)
-        |> insertIf cancelMigration (tableActionCancelMigrationVisible mbJwt)
-        |> insertIf delete (always True)
+        |> listInsertIf openEditor (kmMatchState [ Default, Edited, Outdated ] km)
+        |> listInsertIf publish (publishActionVisible mbJwt km)
+        |> listInsertIf upgrade (upgradeActionVisible mbJwt km)
+        |> listInsertIf continueMigration (continueMigrationActionVisible mbJwt km)
+        |> listInsertIf cancelMigration (tableActionCancelMigrationVisible mbJwt km)
+        |> listInsertIf delete True
 
 
 publishActionVisible : Maybe JwtToken -> KnowledgeModel -> Bool

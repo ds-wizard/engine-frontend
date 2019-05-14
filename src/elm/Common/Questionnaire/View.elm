@@ -21,6 +21,7 @@ import Html.Events exposing (onClick, onInput)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Questionnaires.Common.Models exposing (isEditable)
 import Roman exposing (toRomanNumber)
 import Round
 import String exposing (fromFloat, fromInt)
@@ -58,7 +59,7 @@ viewQuestionnaire cfg appState model =
             , extraActions
             ]
         , div [ class "col col-sm-11 col-md-8 col-lg-8 col-xl-9" ]
-            (pageView cfg model)
+            (pageView appState cfg model)
         , feedbackModal model
         ]
 
@@ -138,15 +139,15 @@ extraNavigation activePage =
         ]
 
 
-pageView : ViewQuestionnaireConfig -> Model -> List (Html Msg)
-pageView cfg model =
+pageView : AppState -> ViewQuestionnaireConfig -> Model -> List (Html Msg)
+pageView appState cfg model =
     case model.activePage of
         PageNone ->
             [ emptyNode ]
 
         PageChapter chapter form ->
             [ chapterHeader model chapter
-            , viewForm (formConfig cfg model) form |> Html.map FormMsg
+            , viewForm (formConfig appState cfg model) form |> Html.map FormMsg
             ]
 
         PageSummaryReport ->
@@ -170,8 +171,8 @@ chapterHeader model chapter =
         ]
 
 
-formConfig : ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData ApiError
-formConfig cfg model =
+formConfig : AppState -> ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData ApiError
+formConfig appState cfg model =
     { customActions =
         if cfg.showExtraActions then
             [ ( "fa-exclamation-circle", FeedbackMsg ) ]
@@ -185,6 +186,7 @@ formConfig cfg model =
 
         else
             Just (.requiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
+    , disabled = not <| isEditable appState model.questionnaire
     }
 
 
