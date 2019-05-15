@@ -6,6 +6,7 @@ module Common.View.FormGroup exposing
     , input
     , list
     , password
+    , richRadioGroup
     , select
     , textView
     , textarea
@@ -19,8 +20,8 @@ import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
 import Html exposing (Html, a, button, code, div, label, p, span, text)
-import Html.Attributes exposing (class, classList, for, id, name, style)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (checked, class, classList, for, id, name, style, type_, value)
+import Html.Events exposing (onClick, onInput)
 import String exposing (fromFloat)
 import Utils exposing (getContrastColorHex)
 
@@ -44,6 +45,33 @@ password =
 select : List ( String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
 select options =
     formGroup (Input.selectInput options) []
+
+
+richRadioGroup : List ( String, String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+richRadioGroup options =
+    let
+        radioInput state attrs =
+            let
+                buildOption ( k, v, d ) =
+                    div [ class "form-check", classList [ ( "form-check-selected", state.value == Just k ) ] ]
+                        [ Html.input
+                            [ value k
+                            , checked (state.value == Just k)
+                            , class "form-check-input"
+                            , type_ "radio"
+                            , id k
+                            , onInput (Field.String >> Input state.path Form.Text)
+                            ]
+                            []
+                        , label [ class "form-check-label", for k ]
+                            [ text v
+                            , p [ class "form-text text-muted" ] [ text d ]
+                            ]
+                        ]
+            in
+            div [ class "form-radio-group" ] (List.map buildOption options)
+    in
+    formGroup radioInput []
 
 
 {-| Helper for creating form group with textarea.

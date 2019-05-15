@@ -11,6 +11,7 @@ import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, filterKnowledgModelWithTags)
 import KMEditor.Common.Models.Events exposing (Event)
+import Questionnaires.Common.Models.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 
 
 type alias Model =
@@ -85,7 +86,8 @@ createQuestionnaireModel appState packageId km =
         appState
         { uuid = ""
         , name = ""
-        , private = True
+        , accessibility = PrivateQuestionnaire
+        , ownerUuid = Nothing
         , package =
             { name = ""
             , id = packageId

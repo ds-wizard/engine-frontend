@@ -4,6 +4,7 @@ module Utils exposing
     , getContrastColorHex
     , getUuid
     , listFilterJust
+    , listInsertIf
     , packageIdToComponents
     , pair
     , replace
@@ -118,6 +119,15 @@ listFilterJust =
                     currentList
     in
     List.foldl fold []
+
+
+listInsertIf : a -> Bool -> List a -> List a
+listInsertIf item shouldBeInserted list =
+    if shouldBeInserted then
+        list ++ [ item ]
+
+    else
+        list
 
 
 getContrastColorHex : String -> String

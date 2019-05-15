@@ -171,6 +171,34 @@ textarea {
 }
 
 
+.form-radio-group {
+    .form-check {
+        padding: .5rem .5rem .5rem 2rem;
+        border: 1px solid $gray-300;
+        border-radius: 0.5rem;
+
+        &:hover {
+            border-color: $gray-500;
+        }
+
+        &.form-check-selected {
+            border-color: $gray-500;
+            background: $gray-100;
+        }
+
+        label {
+            display: block;
+            cursor: pointer;
+
+
+            p {
+                margin-bottom: 0;
+                font-weight: normal;
+            }
+        }
+    }
+}
+
 input[type=color] {
     min-height: 30px;
 }

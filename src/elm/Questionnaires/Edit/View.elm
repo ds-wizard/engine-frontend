@@ -11,6 +11,7 @@ import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (Html, div)
 import Msgs
+import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
 import Questionnaires.Edit.Models exposing (Model, QuestionnaireEditForm)
 import Questionnaires.Edit.Msgs exposing (Msg(..))
 import Questionnaires.Routing
@@ -40,6 +41,5 @@ formView : Form CustomFormError QuestionnaireEditForm -> Html Form.Msg
 formView form =
     div []
         [ FormGroup.input form "name" "Name"
-        , FormGroup.toggle form "private" "Private"
-        , FormExtra.text "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
+        , FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
         ]
