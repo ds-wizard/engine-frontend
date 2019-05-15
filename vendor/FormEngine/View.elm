@@ -300,11 +300,25 @@ viewGroupItem form config path humanIdentifiers index itemElement =
 
             else
                 text ""
+
+        ignoreFirstIdentifier =
+            itemElement
+                |> List.head
+                |> Maybe.map
+                    (\f ->
+                        case f of
+                            StringFormElement descriptor _ ->
+                                descriptor.name == "itemName"
+
+                            _ ->
+                                False
+                    )
+                |> Maybe.withDefault False
     in
     div [ class "item" ]
         [ div [ class "card bg-light  mb-5" ]
             [ div [ class "card-body" ] <|
-                List.indexedMap (viewFormElement form config (path ++ [ fromInt index ]) newHumanIdentifiers True) itemElement
+                List.indexedMap (viewFormElement form config (path ++ [ fromInt index ]) newHumanIdentifiers ignoreFirstIdentifier) itemElement
             ]
         , deleteButton
         ]

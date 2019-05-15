@@ -1,3 +1,27 @@
+# 1.7.0
+
+## Features
+- Dynamic configuration for enabling and disabling various features
+    - feedback
+    - registration
+    - phases
+    - public questionnaire
+    - item title
+    - client specific configuration contains
+        - app title
+        - welcome page info and warning
+- Item title becomes obsolete and will be removed in future version, a value question should be used instead
+- Option to set questionnaire public but read-only
+
+## UI improvements
+
+- Improve list views
+- Improve error pages to be more consistent 
+- Spider chart at summary report is hidden when less than 3 metrics
+- Fix preview in editor minor UI bugs
+
+
+
 # 1.6.0
 
 ## Features
