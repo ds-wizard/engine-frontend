@@ -1,6 +1,7 @@
 module KMEditor.Editor.KMEditor.View.Editors exposing (activeEditor)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
 import Common.View.Flash as Flash
@@ -25,8 +26,8 @@ import String exposing (fromInt, toLower)
 import ValueList
 
 
-activeEditor : Model -> ( String, Html Msg )
-activeEditor model =
+activeEditor : AppState -> Model -> ( String, Html Msg )
+activeEditor appState model =
     case getActiveEditor model of
         Just editor ->
             case editor of
@@ -43,7 +44,7 @@ activeEditor model =
                     chapterEditorView model data
 
                 QuestionEditor data ->
-                    questionEditorView model data
+                    questionEditorView appState model data
 
                 AnswerEditor data ->
                     answerEditorView model data
@@ -260,25 +261,6 @@ integrationDeleteConfirm editorData =
         }
 
 
-integrationPropsItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
-integrationPropsItemView form i =
-    let
-        field =
-            Form.getFieldAsString ("props." ++ String.fromInt i) form
-
-        ( error, errorClass ) =
-            FormGroup.getErrors field "Property"
-    in
-    div [ class "input-group mb-2" ]
-        [ Input.textInput field [ class <| "form-control " ++ errorClass ]
-        , div [ class "input-group-append" ]
-            [ button [ class "btn btn-outline-warning", onClick (Form.RemoveItem "props" i) ]
-                [ fa "times" ]
-            ]
-        , error
-        ]
-
-
 integrationHeaderItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
 integrationHeaderItemView form i =
     let
@@ -306,13 +288,20 @@ integrationHeaderItemView form i =
         ]
 
 
-questionEditorView : Model -> QuestionEditorData -> ( String, Html Msg )
-questionEditorView model editorData =
+questionEditorView : AppState -> Model -> QuestionEditorData -> ( String, Html Msg )
+questionEditorView appState model editorData =
     let
         editorTitleConfig =
             { title = "Question"
             , deleteAction = DeleteQuestion editorData.uuid |> QuestionEditorMsg |> EditorMsg |> Just
             }
+
+        levelSelection =
+            if appState.config.levelsEnabled then
+                questionRequiredLevelSelectGroup editorData model.levels
+
+            else
+                emptyNode
 
         formFields =
             [ FormGroup.select questionTypeOptions editorData.form "questionType" "Question Type"
@@ -322,7 +311,7 @@ questionEditorView model editorData =
                 ]
             , FormGroup.input editorData.form "title" "Title"
             , FormGroup.textarea editorData.form "text" "Text"
-            , questionRequiredLevelSelectGroup editorData model.levels
+            , levelSelection
             ]
 
         ( form, extra ) =
@@ -343,7 +332,7 @@ questionEditorView model editorData =
                             div [] formFields
 
                         extraData =
-                            [ questionEditorItemView model editorData ]
+                            [ questionEditorItemView appState model editorData ]
                     in
                     ( formData, extraData )
 
@@ -478,8 +467,8 @@ questionEditorAnswersView model editorData =
         }
 
 
-questionEditorItemView : Model -> QuestionEditorData -> Html Msg
-questionEditorItemView model editorData =
+questionEditorItemView : AppState -> Model -> QuestionEditorData -> Html Msg
+questionEditorItemView appState model editorData =
     let
         config =
             { childName = "Question"
@@ -491,14 +480,23 @@ questionEditorItemView model editorData =
             , getName = getChildName model.editors
             , viewMsg = SetActiveEditor
             }
+
+        itemTitle =
+            if appState.config.itemTitleEnabled then
+                div [ class "form-group" ]
+                    [ FormGroup.input editorData.form "itemTemplateTitle" "Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+                    , div [ class "form-text" ]
+                        [ Flash.warning "Item Title is obsolete and will be removed in future versions. Create a Value Question instead if you need it." ]
+                    ]
+
+            else
+                emptyNode
     in
     div [ class "card card-border-light card-item-template mb-3" ]
         [ div [ class "card-header" ]
             [ text "Item Template" ]
         , div [ class "card-body" ]
-            [ div [ class "form-group" ]
-                [ FormGroup.input editorData.form "itemTemplateTitle" "Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
-                ]
+            [ itemTitle
             , inputChildren config
             ]
         ]

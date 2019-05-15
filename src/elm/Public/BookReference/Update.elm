@@ -1,9 +1,12 @@
-module Public.BookReference.Update exposing (fetchData, handleGetBookReferenceCompleted, update)
+module Public.BookReference.Update exposing
+    ( fetchData
+    , update
+    )
 
-import ActionResult exposing (ActionResult(..))
+import Common.Api exposing (applyResult)
 import Common.Api.BookReferences as BookReferencesApi
-import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Setters exposing (setBookReference)
 import Msgs
 import Public.BookReference.Models exposing (BookReference, Model)
 import Public.BookReference.Msgs exposing (Msg(..))
@@ -19,18 +22,9 @@ update : Msg -> (Msg -> Msgs.Msg) -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg model =
     case msg of
         GetBookReferenceCompleted result ->
-            handleGetBookReferenceCompleted model result
-
-
-handleGetBookReferenceCompleted : Model -> Result ApiError BookReference -> ( Model, Cmd Msgs.Msg )
-handleGetBookReferenceCompleted model result =
-    let
-        newModel =
-            case result of
-                Ok bookReference ->
-                    { model | bookReference = Success bookReference }
-
-                Err error ->
-                    { model | bookReference = getServerError error "Unable to get book reference" }
-    in
-    ( newModel, Cmd.none )
+            applyResult
+                { setResult = setBookReference
+                , defaultError = "Unable to get book reference."
+                , model = model
+                , result = result
+                }

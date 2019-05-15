@@ -16,6 +16,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import KnowledgeModels.Common.Models exposing (PackageDetail)
 import Msgs
+import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility
 import Questionnaires.Create.Models exposing (Model, QuestionnaireCreateForm)
 import Questionnaires.Create.Msgs exposing (Msg(..))
 import Questionnaires.Routing
@@ -24,19 +25,19 @@ import Routing
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailClass "Questionnaires__Create" ]
-        [ Page.header "Create Questionnaire" []
-        , Page.actionResultView (content wrapMsg model) model.packages
-        ]
+    Page.actionResultView (content wrapMsg model) model.packages
 
 
 content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
 content wrapMsg model packages =
-    div []
-        [ FormResult.view model.savingQuestionnaire
-        , formView model.form packages |> Html.map (wrapMsg << FormMsg)
-        , tagsView wrapMsg model
-        , FormActions.view (Routing.Questionnaires Questionnaires.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+    div [ detailClass "Questionnaires__Create" ]
+        [ Page.header "Create Questionnaire" []
+        , div []
+            [ FormResult.view model.savingQuestionnaire
+            , formView model.form packages |> Html.map (wrapMsg << FormMsg)
+            , tagsView wrapMsg model
+            , FormActions.view (Routing.Questionnaires Questionnaires.Routing.Index) ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+            ]
         ]
 
 
@@ -44,14 +45,13 @@ formView : Form CustomFormError QuestionnaireCreateForm -> List PackageDetail ->
 formView form packages =
     let
         packageOptions =
-            ( "", "--" ) :: List.map createOption packages
+            ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
 
         formHtml =
             div []
                 [ FormGroup.input form "name" "Name"
                 , FormGroup.select packageOptions form "packageId" "Knowledge Model"
-                , FormGroup.toggle form "private" "Private"
-                , FormExtra.text "If the questionnaire is private, it is visible only to you. Otherwise, it is visible to all users."
+                , FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
                 ]
     in
     formHtml

@@ -15,6 +15,7 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import FormEngine.Model exposing (encodeFormValues)
 import Json.Encode as Encode
+import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
 
 
 type alias Model =
@@ -36,7 +37,7 @@ initialModel uuid =
 
 type alias QuestionnaireEditForm =
     { name : String
-    , private : Bool
+    , accessibility : QuestionnaireAccessibility
     }
 
 
@@ -48,7 +49,7 @@ initQuestionnaireEditForm questionnaire =
 questionnaireToFormInitials : QuestionnaireDetail -> List ( String, Field.Field )
 questionnaireToFormInitials questionnaire =
     [ ( "name", Field.string questionnaire.name )
-    , ( "private", Field.bool questionnaire.private )
+    , ( "accessibility", Field.string <| QuestionnaireAccesibility.toString questionnaire.accessibility )
     ]
 
 
@@ -56,14 +57,14 @@ questionnaireEditFormValidation : Validation CustomFormError QuestionnaireEditFo
 questionnaireEditFormValidation =
     Validate.map2 QuestionnaireEditForm
         (Validate.field "name" Validate.string)
-        (Validate.field "private" Validate.bool)
+        (Validate.field "accessibility" QuestionnaireAccesibility.validation)
 
 
 encodeEditForm : QuestionnaireDetail -> QuestionnaireEditForm -> Encode.Value
 encodeEditForm questionnaire form =
     Encode.object
         [ ( "name", Encode.string form.name )
-        , ( "private", Encode.bool form.private )
+        , ( "accessibility", QuestionnaireAccesibility.encode form.accessibility )
         , ( "replies", encodeFormValues questionnaire.replies )
         , ( "level", Encode.int questionnaire.level )
         ]

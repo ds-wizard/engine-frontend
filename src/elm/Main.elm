@@ -7,6 +7,7 @@ import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
 import Public.Routing
+import Random
 import Routing exposing (Route(..), cmdNavigate, homeRoute, routeIfAllowed)
 import Subscriptions exposing (subscriptions)
 import Update exposing (fetchData, update)
@@ -19,15 +20,6 @@ init val location key =
     let
         flags =
             decodeFlagsFromJson val
-                |> Maybe.withDefault
-                    { session = Nothing
-                    , seed = 0
-                    , apiUrl = ""
-                    , appTitle = "Data Stewardship Wizard"
-                    , appTitleShort = "DS Wizard"
-                    , welcomeWarning = Nothing
-                    , welcomeInfo = Nothing
-                    }
 
         session =
             Maybe.withDefault initialSession flags.session
@@ -37,19 +29,30 @@ init val location key =
 
         route =
             location
-                |> Routing.parseLocation
+                |> Routing.parseLocation flags.config
                 |> routeIfAllowed jwt
 
+        appState =
+            { route = route
+            , seed = Random.initialSeed flags.seed
+            , session = session
+            , jwt = jwt
+            , key = key
+            , apiUrl = flags.apiUrl
+            , config = flags.config
+            , valid = flags.success
+            }
+
         model =
-            initialModel route flags session jwt key
+            initialModel appState session jwt key
                 |> initLocalModel
     in
     ( model, decideInitialRoute model route )
 
 
-decodeFlagsFromJson : Value -> Maybe Flags
+decodeFlagsFromJson : Value -> Flags
 decodeFlagsFromJson =
-    Decode.decodeValue flagsDecoder >> Result.toMaybe
+    Decode.decodeValue flagsDecoder >> Result.withDefault defaultFlags
 
 
 decideInitialRoute : Model -> Route -> Cmd Msg
@@ -64,7 +67,7 @@ decideInitialRoute model route =
                     fetchData model
 
                 ( True, _ ) ->
-                    cmdNavigate model.appState.key Welcome
+                    cmdNavigate model.appState.key Dashboard
 
                 _ ->
                     fetchData model

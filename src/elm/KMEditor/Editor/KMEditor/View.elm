@@ -1,5 +1,6 @@
 module KMEditor.Editor.KMEditor.View exposing (view)
 
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Common.View.Modal as Modal exposing (AlertConfig)
 import Html exposing (..)
@@ -15,8 +16,8 @@ import Msgs
 import SplitPane exposing (ViewConfig, createViewConfig)
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
     let
         breadcrumbsView =
             case model.activeEditorUuid of
@@ -29,7 +30,7 @@ view wrapMsg model =
     div [ class "KMEditor__Editor__KMEditor" ]
         [ div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
-        , SplitPane.view viewConfig (viewTree model) (viewEditor model) model.splitPane |> Html.map wrapMsg
+        , SplitPane.view viewConfig (viewTree model) (viewEditor appState model) model.splitPane |> Html.map wrapMsg
         , Modal.alert (alertConfig model) |> Html.map wrapMsg
         ]
 
@@ -49,11 +50,11 @@ viewTree model =
         ]
 
 
-viewEditor : Model -> Html Msg
-viewEditor model =
+viewEditor : AppState -> Model -> Html Msg
+viewEditor appState model =
     Html.Keyed.node "div"
         [ class "editor-form-view", id "editor-view" ]
-        [ activeEditor model
+        [ activeEditor appState model
         ]
 
 

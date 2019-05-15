@@ -7,11 +7,10 @@ module Common.Html exposing
 import Common.Html.Attribute exposing (linkToAttributes)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Msgs exposing (Msg)
 import Routing exposing (Route)
 
 
-linkTo : Route -> List (Attribute Msg) -> List (Html Msg) -> Html Msg
+linkTo : Route -> List (Attribute msg) -> List (Html msg) -> Html msg
 linkTo route attributes children =
     a (attributes ++ linkToAttributes route) children
 

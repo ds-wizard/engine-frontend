@@ -7,9 +7,11 @@ module KMEditor.Editor.Preview.Models exposing
     , selectNoneTags
     )
 
+import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, filterKnowledgModelWithTags)
 import KMEditor.Common.Models.Events exposing (Event)
+import Questionnaires.Common.Models.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 
 
 type alias Model =
@@ -20,52 +22,53 @@ type alias Model =
     }
 
 
-initialModel : KnowledgeModel -> List Metric -> List Event -> String -> Model
-initialModel km metrics events packageId =
-    { questionnaireModel = createQuestionnaireModel packageId km metrics events
+initialModel : AppState -> KnowledgeModel -> List Metric -> List Event -> String -> Model
+initialModel appState km metrics events packageId =
+    { questionnaireModel = createQuestionnaireModel appState packageId km metrics events
     , knowledgeModel = km
     , tags = []
     , packageId = packageId
     }
 
 
-addTag : String -> Model -> Model
-addTag uuid model =
+addTag : AppState -> String -> Model -> Model
+addTag appState uuid model =
     let
         tags =
             uuid :: model.tags
     in
-    createFilteredQuestionnaireModel tags model
+    createFilteredQuestionnaireModel appState tags model
 
 
-removeTag : String -> Model -> Model
-removeTag uuid model =
+removeTag : AppState -> String -> Model -> Model
+removeTag appState uuid model =
     let
         tags =
             List.filter (\t -> t /= uuid) model.tags
     in
-    createFilteredQuestionnaireModel tags model
+    createFilteredQuestionnaireModel appState tags model
 
 
-selectAllTags : Model -> Model
-selectAllTags model =
+selectAllTags : AppState -> Model -> Model
+selectAllTags appState model =
     let
         tags =
             List.map .uuid model.knowledgeModel.tags
     in
-    createFilteredQuestionnaireModel tags model
+    createFilteredQuestionnaireModel appState tags model
 
 
-selectNoneTags : Model -> Model
-selectNoneTags model =
-    createFilteredQuestionnaireModel [] model
+selectNoneTags : AppState -> Model -> Model
+selectNoneTags appState model =
+    createFilteredQuestionnaireModel appState [] model
 
 
-createFilteredQuestionnaireModel : List String -> Model -> Model
-createFilteredQuestionnaireModel tags model =
+createFilteredQuestionnaireModel : AppState -> List String -> Model -> Model
+createFilteredQuestionnaireModel appState tags model =
     let
         questionnaireModel =
             createQuestionnaireModel
+                appState
                 model.packageId
                 (filterKnowledgModelWithTags tags model.knowledgeModel)
                 model.questionnaireModel.metrics
@@ -77,12 +80,14 @@ createFilteredQuestionnaireModel tags model =
     }
 
 
-createQuestionnaireModel : String -> KnowledgeModel -> List Metric -> List Event -> Common.Questionnaire.Models.Model
-createQuestionnaireModel packageId km =
+createQuestionnaireModel : AppState -> String -> KnowledgeModel -> List Metric -> List Event -> Common.Questionnaire.Models.Model
+createQuestionnaireModel appState packageId km =
     Common.Questionnaire.Models.initialModel
+        appState
         { uuid = ""
         , name = ""
-        , private = True
+        , accessibility = PrivateQuestionnaire
+        , ownerUuid = Nothing
         , package =
             { name = ""
             , id = packageId

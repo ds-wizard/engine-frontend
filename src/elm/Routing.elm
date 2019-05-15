@@ -16,6 +16,7 @@ module Routing exposing
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser.Navigation exposing (Key, pushUrl)
+import Common.Config exposing (Config)
 import KMEditor.Routing
 import KnowledgeModels.Routing
 import Public.Routing
@@ -26,7 +27,7 @@ import Users.Routing
 
 
 type Route
-    = Welcome
+    = Dashboard
     | KMEditor KMEditor.Routing.Route
     | KnowledgeModels KnowledgeModels.Routing.Route
     | Organization
@@ -37,17 +38,17 @@ type Route
     | NotFound
 
 
-matchers : Parser (Route -> a) a
-matchers =
+matchers : Config -> Parser (Route -> a) a
+matchers config =
     let
         parsers =
             []
                 ++ Questionnaires.Routing.parses Questionnaires
                 ++ KMEditor.Routing.parsers KMEditor
                 ++ KnowledgeModels.Routing.parsers KnowledgeModels
-                ++ Public.Routing.parsers Public
+                ++ Public.Routing.parsers config Public
                 ++ Users.Routing.parses Users
-                ++ [ map Welcome (s "welcome")
+                ++ [ map Dashboard (s "dashboard")
                    , map Organization (s "organization")
                    ]
     in
@@ -66,7 +67,7 @@ routeIfAllowed maybeJwt route =
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
-        Welcome ->
+        Dashboard ->
             True
 
         Questionnaires dsPlannerRoute ->
@@ -99,8 +100,8 @@ toUrl route =
     let
         parts =
             case route of
-                Welcome ->
-                    [ "welcome" ]
+                Dashboard ->
+                    [ "dashboard" ]
 
                 Questionnaires dsPlannerRoute ->
                     Questionnaires.Routing.toUrl dsPlannerRoute
@@ -129,9 +130,9 @@ toUrl route =
         |> String.join "?"
 
 
-parseLocation : Url -> Route
-parseLocation url =
-    case Url.Parser.parse matchers url of
+parseLocation : Config -> Url -> Route
+parseLocation config url =
+    case Url.Parser.parse (matchers config) url of
         Just route ->
             route
 
@@ -166,4 +167,4 @@ questionnaireDemoRoute =
 
 appRoute : Route
 appRoute =
-    Welcome
+    Dashboard

@@ -48,7 +48,7 @@ getPackageCompleted model result =
                     { model | packages = Success <| List.map initPackageDetailRow packages }
 
                 Err error ->
-                    { model | packages = getServerError error "Unable to get package detail" }
+                    { model | packages = getServerError error "Unable to get knowledge model detail" }
 
         cmd =
             getResultCmd result

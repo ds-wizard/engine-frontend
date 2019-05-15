@@ -16,18 +16,18 @@ import Organization.Msgs exposing (Msg(..))
 
 view : Model -> Html Msgs.Msg
 view model =
-    div [ detailClass "Organization" ]
-        [ Page.header "Organization" []
-        , Page.actionResultView (viewOrganization model) model.organization
-        ]
+    Page.actionResultView (viewOrganization model) model.organization
 
 
 viewOrganization : Model -> Organization -> Html Msgs.Msg
 viewOrganization model _ =
-    div []
-        [ FormResult.view model.savingOrganization
-        , formView model.form
-        , FormActions.viewActionOnly ( "Save", model.savingOrganization, Msgs.OrganizationMsg <| FormMsg Form.Submit )
+    div [ detailClass "Organization" ]
+        [ Page.header "Organization" []
+        , div []
+            [ FormResult.view model.savingOrganization
+            , formView model.form
+            , FormActions.viewActionOnly ( "Save", model.savingOrganization, Msgs.OrganizationMsg <| FormMsg Form.Submit )
+            ]
         ]
 
 

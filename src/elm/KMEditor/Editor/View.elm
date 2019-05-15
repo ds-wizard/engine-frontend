@@ -1,6 +1,7 @@
 module KMEditor.Editor.View exposing (view)
 
 import ActionResult
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, fa)
 import Common.View.ActionButton as ActionButton
 import Common.View.Flash as Flash
@@ -18,25 +19,25 @@ import KMEditor.Editor.TagEditor.View
 import Msgs
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
-    Page.actionResultView (editorView wrapMsg model) <|
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
+    Page.actionResultView (editorView wrapMsg appState model) <|
         ActionResult.combine3 model.km model.metrics model.levels
 
 
-editorView : (Msg -> Msgs.Msg) -> Model -> ( KnowledgeModelDetail, List Metric, List Level ) -> Html Msgs.Msg
-editorView wrapMsg model ( km, metric, levels ) =
+editorView : (Msg -> Msgs.Msg) -> AppState -> Model -> ( KnowledgeModelDetail, List Metric, List Level ) -> Html Msgs.Msg
+editorView wrapMsg appState model ( km, metric, levels ) =
     let
         content _ =
             case model.currentEditor of
                 KMEditor ->
-                    kmEditorView wrapMsg model
+                    kmEditorView wrapMsg appState model
 
                 TagsEditor ->
                     tagsEditorView wrapMsg model
 
                 PreviewEditor ->
-                    previewView wrapMsg model levels
+                    previewView wrapMsg appState model levels
 
                 HistoryEditor ->
                     historyView
@@ -109,10 +110,10 @@ editorHeader wrapMsg model =
         ]
 
 
-kmEditorView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-kmEditorView wrapMsg model =
+kmEditorView : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+kmEditorView wrapMsg appState model =
     model.editorModel
-        |> Maybe.map (KMEditor.Editor.KMEditor.View.view (wrapMsg << KMEditorMsg))
+        |> Maybe.map (KMEditor.Editor.KMEditor.View.view (wrapMsg << KMEditorMsg) appState)
         |> Maybe.withDefault (Page.error "Error opening knowledge model editor")
 
 
@@ -123,10 +124,10 @@ tagsEditorView wrapMsg model =
         |> Maybe.withDefault (Page.error "Error opening tag editor")
 
 
-previewView : (Msg -> Msgs.Msg) -> Model -> List Level -> Html Msgs.Msg
-previewView wrapMsg model levels =
+previewView : (Msg -> Msgs.Msg) -> AppState -> Model -> List Level -> Html Msgs.Msg
+previewView wrapMsg appState model levels =
     model.previewEditorModel
-        |> Maybe.map (KMEditor.Editor.Preview.View.view (wrapMsg << PreviewEditorMsg) levels)
+        |> Maybe.map (KMEditor.Editor.Preview.View.view (wrapMsg << PreviewEditorMsg) appState levels)
         |> Maybe.withDefault (Page.error "Error opening preview")
 
 

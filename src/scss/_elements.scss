@@ -196,6 +196,11 @@ code {
     color: color-yiq($color-value-100);
 }
 
+@each $color, $value in $colors {
+    .badge-#{$color} {
+        @include badge-variant($value);
+    }
+}
 
 .bg-value-100 {
     background: $color-value-100;

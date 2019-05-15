@@ -1,10 +1,11 @@
 module KnowledgeModels.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api exposing (getResultCmd)
+import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Setters exposing (setPackages)
 import KnowledgeModels.Common.Models exposing (Package)
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
@@ -21,7 +22,12 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetPackagesCompleted result ->
-            getPackagesCompleted model result
+            applyResult
+                { setResult = setPackages
+                , defaultError = "Unable to get knowledge models."
+                , model = model
+                , result = result
+                }
 
         ShowHideDeletePackage package ->
             ( { model | packageToBeDeleted = package, deletingPackage = Unset }, Cmd.none )
@@ -31,23 +37,6 @@ update msg wrapMsg appState model =
 
         DeletePackageCompleted result ->
             deletePackageCompleted wrapMsg appState model result
-
-
-getPackagesCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
-getPackagesCompleted model result =
-    let
-        newModel =
-            case result of
-                Ok packages ->
-                    { model | packages = Success packages }
-
-                Err error ->
-                    { model | packages = getServerError error "Unable to fetch package list" }
-
-        cmd =
-            getResultCmd result
-    in
-    ( newModel, cmd )
 
 
 handleDeletePackage : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -68,7 +57,7 @@ deletePackageCompleted wrapMsg appState model result =
     case result of
         Ok package ->
             ( { model
-                | deletingPackage = Success "Package and all its versions were sucessfully deleted"
+                | deletingPackage = Success "Package and all its versions were successfully deleted"
                 , packages = Loading
                 , packageToBeDeleted = Nothing
               }

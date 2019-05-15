@@ -18,6 +18,14 @@ body {
     margin: 20px 0;
 }
 
+.col-list {
+    max-width: 80rem;
+}
+
+.col-detail {
+    max-width: 33rem;
+}
+
 .side-navigation {
     background-color: $side-navigation-bg;
     width: $side-navigation-width;
@@ -130,7 +138,7 @@ body {
                     text-align: center
                 }
 
-                &>span {
+                & > span {
                     flex: 1;
                     display: flex;
                     align-items: baseline;
@@ -166,12 +174,16 @@ body {
             border-top: 1px solid $side-navigation-border-color;
             display: block;
             text-align: center;
-            color: $side-navigation-link-color;
+            color: rgba($side-navigation-link-color, 0.8);
 
             &:hover {
                 text-decoration: none;
                 background: $side-navigation-collapse-hover;
                 color: $side-navigation-link-color;
+            }
+
+            .fa {
+                margin-right: 1rem;
             }
         }
     }
@@ -207,6 +219,12 @@ body {
                 padding: 10px 0;
                 text-align: center;
                 display: inline-block;
+            }
+        }
+
+        .collapse {
+            .fa {
+                margin: 0;
             }
         }
     }

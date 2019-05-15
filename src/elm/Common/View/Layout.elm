@@ -1,10 +1,15 @@
-module Common.View.Layout exposing (app, public)
+module Common.View.Layout exposing
+    ( app
+    , misconfigured
+    , public
+    )
 
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser exposing (Document)
-import Common.Html exposing (fa, linkTo)
+import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
+import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMEditor.Routing
@@ -14,6 +19,24 @@ import Msgs exposing (Msg)
 import Questionnaires.Routing
 import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, questionnaireDemoRoute, signupRoute)
 import Users.Routing
+
+
+misconfigured : Document Msg
+misconfigured =
+    let
+        html =
+            Page.illustratedMessage
+                { image = "bug_fixing"
+                , heading = "Configuration Error"
+                , lines =
+                    [ "Application is not configured correctly and cannot run."
+                    , "Please, contact the administrator."
+                    ]
+                }
+    in
+    { title = "Configuration Error"
+    , body = [ html ]
+    }
 
 
 public : Model -> Html Msg -> Document Msg
@@ -26,7 +49,7 @@ public model content =
                     [ content ]
                 ]
     in
-    { title = model.appState.appTitle
+    { title = model.appState.config.client.appTitle
     , body = [ html ]
     }
 
@@ -35,7 +58,18 @@ publicHeader : Model -> Html Msg
 publicHeader model =
     let
         questionnaireDemoLink =
-            li [ class "nav-item" ] [ linkTo questionnaireDemoRoute [ class "nav-link" ] [ text "Questionnaire Demo" ] ]
+            if model.appState.config.publicQuestionnaireEnabled then
+                li [ class "nav-item" ] [ linkTo questionnaireDemoRoute [ class "nav-link" ] [ text "Questionnaire Demo" ] ]
+
+            else
+                emptyNode
+
+        signUpLink =
+            if model.appState.config.registrationEnabled then
+                li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
+
+            else
+                emptyNode
 
         links =
             if userLoggedIn model then
@@ -46,7 +80,7 @@ publicHeader model =
             else
                 [ questionnaireDemoLink
                 , li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
-                , li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
+                , signUpLink
                 ]
     in
     nav [ class "navbar navbar-expand-sm fixed-top" ]
@@ -54,7 +88,7 @@ publicHeader model =
             [ div [ class "navbar-header" ]
                 [ linkTo homeRoute
                     [ class "navbar-brand" ]
-                    [ text model.appState.appTitle
+                    [ text model.appState.config.client.appTitle
                     ]
                 ]
             , ul [ class "nav navbar-nav ml-auto" ] links
@@ -74,7 +108,7 @@ app model content =
                 , viewAboutModal model.menuModel.aboutOpen model.menuModel.apiBuildInfo
                 ]
     in
-    { title = model.appState.appTitle
+    { title = model.appState.config.client.appTitle
     , body = [ html ]
     }
 
@@ -94,9 +128,9 @@ logo model =
     let
         logoImg =
             span [ class "logo-full" ]
-                [ span [] [ text model.appState.appTitleShort ] ]
+                [ span [] [ text model.appState.config.client.appTitleShort ] ]
     in
-    linkTo Welcome [ class "logo" ] [ logoImg ]
+    linkTo Dashboard [ class "logo" ] [ logoImg ]
 
 
 type MenuItem
@@ -114,14 +148,14 @@ menuItems : List MenuItem
 menuItems =
     [ MenuItem "Organization" "building" Organization Perm.organization
     , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
-    , MenuItem "Knowledge Models" "cubes" (KnowledgeModels KnowledgeModels.Routing.Index) Perm.packageManagementRead
+    , MenuItem "Knowledge Models" "sitemap" (KnowledgeModels KnowledgeModels.Routing.Index) Perm.packageManagementRead
     , MenuItem "Questionnaires" "list-alt" (Questionnaires Questionnaires.Routing.Index) Perm.questionnaire
     , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.IndexRoute) Perm.knowledgeModel
     ]
 
 
 menuItem : Model -> MenuItem -> Html Msg
-menuItem model (MenuItem label icon route perm) =
+menuItem model (MenuItem label icon route _) =
     let
         activeClass =
             if model.appState.route == route then
@@ -157,7 +191,9 @@ profileInfo model =
 
             else
                 a [ onLinkClick (Msgs.SetSidebarCollapsed True), class "collapse" ]
-                    [ fa "angle-double-left" ]
+                    [ fa "angle-double-left"
+                    , text "Collapse sidebar"
+                    ]
     in
     div [ class "profile-info" ]
         [ viewHelpMenu model.menuModel.helpMenuDropdownState

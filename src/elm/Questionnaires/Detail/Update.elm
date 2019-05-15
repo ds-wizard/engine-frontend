@@ -4,7 +4,6 @@ module Questionnaires.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Auth.Models exposing (Session)
 import Common.Api exposing (getResultCmd)
 import Common.Api.Levels as LevelsApi
 import Common.Api.Metrics as MetricsApi
@@ -36,13 +35,13 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetQuestionnaireCompleted result ->
-            handleGetQuestionnaireCompleted model result
+            handleGetQuestionnaireCompleted appState model result
 
         GetLevelsCompleted result ->
             handleGetLevelsCompleted model result
 
         GetMetricsCompleted result ->
-            handleGetMetricsCompleted model result
+            handleGetMetricsCompleted appState model result
 
         QuestionnaireMsg qMsg ->
             handleQuestionnaireMsg wrapMsg qMsg appState model
@@ -54,8 +53,8 @@ update msg wrapMsg appState model =
             handlePutRepliesCompleted appState model result
 
 
-handleGetQuestionnaireCompleted : Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
-handleGetQuestionnaireCompleted model result =
+handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnaireCompleted appState model result =
     let
         newModel =
             case result of
@@ -68,7 +67,7 @@ handleGetQuestionnaireCompleted model result =
         cmd =
             getResultCmd result
     in
-    ( initQuestionnaireModel newModel, cmd )
+    ( initQuestionnaireModel appState newModel, cmd )
 
 
 handleGetLevelsCompleted : Model -> Result ApiError (List Level) -> ( Model, Cmd Msgs.Msg )
@@ -88,11 +87,11 @@ handleGetLevelsCompleted model result =
     ( newModel, cmd )
 
 
-initQuestionnaireModel : Model -> Model
-initQuestionnaireModel model =
+initQuestionnaireModel : AppState -> Model -> Model
+initQuestionnaireModel appState model =
     case ( model.questionnaireDetail, model.metrics ) of
         ( Success questionnaireDetail, Success metrics ) ->
-            { model | questionnaireModel = Success <| initialModel questionnaireDetail metrics [] }
+            { model | questionnaireModel = Success <| initialModel appState questionnaireDetail metrics [] }
 
         ( Error err, _ ) ->
             { model | questionnaireModel = Error err }
@@ -104,8 +103,8 @@ initQuestionnaireModel model =
             model
 
 
-handleGetMetricsCompleted : Model -> Result ApiError (List Metric) -> ( Model, Cmd Msgs.Msg )
-handleGetMetricsCompleted model result =
+handleGetMetricsCompleted : AppState -> Model -> Result ApiError (List Metric) -> ( Model, Cmd Msgs.Msg )
+handleGetMetricsCompleted appState model result =
     let
         newModel =
             case result of
@@ -118,7 +117,7 @@ handleGetMetricsCompleted model result =
         cmd =
             getResultCmd result
     in
-    ( initQuestionnaireModel newModel, cmd )
+    ( initQuestionnaireModel appState newModel, cmd )
 
 
 handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> Common.Questionnaire.Msgs.Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )

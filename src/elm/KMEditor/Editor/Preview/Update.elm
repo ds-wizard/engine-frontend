@@ -14,16 +14,16 @@ update msg appState model =
             handleQuestionnaireMsg questionnaireMsg appState model
 
         AddTag uuid ->
-            ( addTag uuid model, Cmd.none )
+            ( addTag appState uuid model, Cmd.none )
 
         RemoveTag uuid ->
-            ( removeTag uuid model, Cmd.none )
+            ( removeTag appState uuid model, Cmd.none )
 
         SelectAllTags ->
-            ( selectAllTags model, Cmd.none )
+            ( selectAllTags appState model, Cmd.none )
 
         SelectNoneTags ->
-            ( selectNoneTags model, Cmd.none )
+            ( selectNoneTags appState model, Cmd.none )
 
 
 handleQuestionnaireMsg : Common.Questionnaire.Msgs.Msg -> AppState -> Model -> ( Model, Cmd Msg )

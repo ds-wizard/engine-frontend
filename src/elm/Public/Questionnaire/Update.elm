@@ -22,19 +22,19 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetQuestionnaireCompleted result ->
-            handleGetQuestionnaireCompleted model result
+            handleGetQuestionnaireCompleted appState model result
 
         QuestionnaireMsg questionnaireMsg ->
             handleQuestionnaireMsg wrapMsg questionnaireMsg appState model
 
 
-handleGetQuestionnaireCompleted : Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
-handleGetQuestionnaireCompleted model result =
+handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnaireCompleted appState model result =
     let
         newModel =
             case result of
                 Ok questionnaireDetail ->
-                    { model | questionnaireModel = Success <| initialModel questionnaireDetail [] [] }
+                    { model | questionnaireModel = Success <| initialModel appState questionnaireDetail [] [] }
 
                 Err error ->
                     { model | questionnaireModel = getServerError error "Unable to get questionnaire." }

@@ -61,7 +61,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | km = Success km }
 
                                 Err error ->
-                                    ( { model | km = getServerError error "Unable to get Knowledge Model metadata" }
+                                    ( { model | km = getServerError error "Unable to get knowledge model metadata." }
                                     , getResultCmd result
                                     )
                     in
@@ -75,7 +75,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | metrics = Success metrics }
 
                                 Err error ->
-                                    ( { model | metrics = getServerError error "Unable to get metrics" }
+                                    ( { model | metrics = getServerError error "Unable to get metrics." }
                                     , getResultCmd result
                                     )
                     in
@@ -89,7 +89,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | levels = Success levels }
 
                                 Err error ->
-                                    ( { model | levels = getServerError error "Unable to get levels" }
+                                    ( { model | levels = getServerError error "Unable to get levels." }
                                     , getResultCmd result
                                     )
                     in
@@ -105,6 +105,7 @@ update msg wrapMsg appState model =
                                         , previewEditorModel =
                                             Just <|
                                                 KMEditor.Editor.Preview.Models.initialModel
+                                                    appState
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
                                                     ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)

@@ -22,18 +22,18 @@ import Routing exposing (Route(..))
 
 view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
-    div [ detailClass "KMEditor__Publish" ]
-        [ Page.header "Publish new version" []
-        , Page.actionResultView (contentView wrapMsg model) model.knowledgeModel
-        ]
+    Page.actionResultView (contentView wrapMsg model) model.knowledgeModel
 
 
 contentView : (Msg -> Msgs.Msg) -> Model -> KnowledgeModelDetail -> Html Msgs.Msg
 contentView wrapMsg model knowledgeModel =
-    div []
-        [ FormResult.view model.publishingKnowledgeModel
-        , formView wrapMsg model.form knowledgeModel
-        , FormActions.view (KMEditor IndexRoute) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+    div [ detailClass "KMEditor__Publish" ]
+        [ Page.header "Publish new version" []
+        , div []
+            [ FormResult.view model.publishingKnowledgeModel
+            , formView wrapMsg model.form knowledgeModel
+            , FormActions.view (KMEditor IndexRoute) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+            ]
         ]
 
 

@@ -1,5 +1,6 @@
 module Public.Questionnaire.View exposing (view)
 
+import Common.AppState exposing (AppState)
 import Common.Html exposing (linkTo)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Page as Page
@@ -11,11 +12,20 @@ import Public.Questionnaire.Msgs exposing (Msg(..))
 import Routing exposing (signupRoute)
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
     div [ class "Public__Questionnaire" ]
         [ info
-        , Page.actionResultView (viewQuestionnaire { showExtraActions = True, showExtraNavigation = False, levels = Nothing } >> Html.map (QuestionnaireMsg >> wrapMsg)) model.questionnaireModel
+        , Page.actionResultView
+            (viewQuestionnaire
+                { showExtraActions = appState.config.feedbackEnabled
+                , showExtraNavigation = False
+                , levels = Nothing
+                }
+                appState
+                >> Html.map (QuestionnaireMsg >> wrapMsg)
+            )
+            model.questionnaireModel
         ]
 
 

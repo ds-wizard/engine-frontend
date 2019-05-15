@@ -8,6 +8,7 @@ import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
 import KnowledgeModels.Common.Models exposing (PackageDetail)
+import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
 
 
 type alias Model =
@@ -36,7 +37,7 @@ initialModel selectedPackage =
 type alias QuestionnaireCreateForm =
     { name : String
     , packageId : String
-    , private : Bool
+    , accessibility : QuestionnaireAccessibility
     }
 
 
@@ -52,7 +53,7 @@ initQuestionnaireCreateForm selectedPackage =
                     []
 
         initialsWithPrivate =
-            initials ++ [ ( "private", Field.bool True ) ]
+            initials ++ [ ( "accessibility", Field.string <| QuestionnaireAccesibility.toString QuestionnaireAccesibility.PublicReadOnlyQuestionnaire ) ]
     in
     Form.initial initialsWithPrivate questionnaireCreateFormValidation
 
@@ -62,7 +63,7 @@ questionnaireCreateFormValidation =
     Validate.map3 QuestionnaireCreateForm
         (Validate.field "name" Validate.string)
         (Validate.field "packageId" Validate.string)
-        (Validate.field "private" Validate.bool)
+        (Validate.field "accessibility" QuestionnaireAccesibility.validation)
 
 
 encodeQuestionnaireCreateForm : List String -> QuestionnaireCreateForm -> Encode.Value
@@ -70,6 +71,6 @@ encodeQuestionnaireCreateForm tagUuids form =
     Encode.object
         [ ( "name", Encode.string form.name )
         , ( "packageId", Encode.string form.packageId )
-        , ( "private", Encode.bool form.private )
+        , ( "accessibility", QuestionnaireAccesibility.encode form.accessibility )
         , ( "tagUuids", Encode.list Encode.string tagUuids )
         ]

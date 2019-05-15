@@ -6,6 +6,7 @@ module Common.Questionnaire.View exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.ApiError exposing (ApiError)
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions, chapterReportCanvasId)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
@@ -19,6 +20,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
+import Maybe.Extra as Maybe
+import Questionnaires.Common.Models exposing (isEditable)
 import Roman exposing (toRomanNumber)
 import Round
 import String exposing (fromFloat, fromInt)
@@ -31,8 +34,8 @@ type alias ViewQuestionnaireConfig =
     }
 
 
-viewQuestionnaire : ViewQuestionnaireConfig -> Model -> Html Msg
-viewQuestionnaire cfg model =
+viewQuestionnaire : ViewQuestionnaireConfig -> AppState -> Model -> Html Msg
+viewQuestionnaire cfg appState model =
     let
         level =
             case cfg.levels of
@@ -52,11 +55,11 @@ viewQuestionnaire cfg model =
     div [ class "Questionnaire row" ]
         [ div [ class "col col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
             [ level
-            , chapterList model
+            , chapterList appState model
             , extraActions
             ]
         , div [ class "col col-sm-11 col-md-8 col-lg-8 col-xl-9" ]
-            (pageView cfg model)
+            (pageView appState cfg model)
         , feedbackModal model
         ]
 
@@ -78,8 +81,8 @@ levelSelectionOption selectedLevel level =
         [ text level.title ]
 
 
-chapterList : Model -> Html Msg
-chapterList model =
+chapterList : AppState -> Model -> Html Msg
+chapterList appState model =
     let
         activeChapter =
             case model.activePage of
@@ -90,26 +93,33 @@ chapterList model =
                     Nothing
     in
     div [ class "nav nav-pills flex-column" ]
-        (List.indexedMap (chapterListChapter model activeChapter) model.questionnaire.knowledgeModel.chapters)
+        (List.indexedMap (chapterListChapter appState model activeChapter) model.questionnaire.knowledgeModel.chapters)
 
 
-chapterListChapter : Model -> Maybe Chapter -> Int -> Chapter -> Html Msg
-chapterListChapter model activeChapter order chapter =
+chapterListChapter : AppState -> Model -> Maybe Chapter -> Int -> Chapter -> Html Msg
+chapterListChapter appState model activeChapter order chapter =
     a
         [ classList [ ( "nav-link", True ), ( "active", activeChapter == Just chapter ) ]
         , onClick <| SetActiveChapter chapter
         ]
         [ span [ class "chapter-number" ] [ text <| (toRomanNumber <| order + 1) ++ ". " ]
         , span [ class "chapter-name" ] [ text chapter.title ]
-        , viewChapterAnsweredIndication model chapter
+        , viewChapterAnsweredIndication appState model chapter
         ]
 
 
-viewChapterAnsweredIndication : Model -> Chapter -> Html Msg
-viewChapterAnsweredIndication model chapter =
+viewChapterAnsweredIndication : AppState -> Model -> Chapter -> Html Msg
+viewChapterAnsweredIndication appState model chapter =
     let
+        effectiveLevel =
+            if appState.config.levelsEnabled then
+                model.questionnaire.level
+
+            else
+                100
+
         unanswered =
-            calculateUnansweredQuestions model.questionnaire.level model.questionnaire.replies chapter
+            calculateUnansweredQuestions appState effectiveLevel model.questionnaire.replies chapter
     in
     if unanswered > 0 then
         span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]
@@ -129,15 +139,15 @@ extraNavigation activePage =
         ]
 
 
-pageView : ViewQuestionnaireConfig -> Model -> List (Html Msg)
-pageView cfg model =
+pageView : AppState -> ViewQuestionnaireConfig -> Model -> List (Html Msg)
+pageView appState cfg model =
     case model.activePage of
         PageNone ->
             [ emptyNode ]
 
         PageChapter chapter form ->
             [ chapterHeader model chapter
-            , viewForm (formConfig cfg model) form |> Html.map FormMsg
+            , viewForm (formConfig appState cfg model) form |> Html.map FormMsg
             ]
 
         PageSummaryReport ->
@@ -161,8 +171,8 @@ chapterHeader model chapter =
         ]
 
 
-formConfig : ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData ApiError
-formConfig cfg model =
+formConfig : AppState -> ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData ApiError
+formConfig appState cfg model =
     { customActions =
         if cfg.showExtraActions then
             [ ( "fa-exclamation-circle", FeedbackMsg ) ]
@@ -170,7 +180,13 @@ formConfig cfg model =
         else
             []
     , viewExtraData = Just <| viewExtraData <| Maybe.withDefault [] cfg.levels
-    , isDesirable = Just (.requiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
+    , isDesirable =
+        if Maybe.isNothing cfg.levels then
+            Just <| always False
+
+        else
+            Just (.requiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
+    , disabled = not <| isEditable appState model.questionnaire
     }
 
 
@@ -294,13 +310,20 @@ viewChapters model metrics summaryReport =
 
 viewChapterReport : Model -> List Metric -> ChapterReport -> Html Msg
 viewChapterReport model metrics chapterReport =
+    let
+        content =
+            if List.length chapterReport.metrics > 2 then
+                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
+                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
+                ]
+
+            else
+                [ div [ class "col-12" ] [ viewMetricsTable metrics chapterReport ] ]
+    in
     div []
         [ h3 [] [ text <| getTitleByUuid model.questionnaire.knowledgeModel.chapters chapterReport.chapterUuid ]
         , viewIndications chapterReport.indications
-        , div [ class "row" ]
-            [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
-            , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
-            ]
+        , div [ class "row" ] content
         ]
 
 
