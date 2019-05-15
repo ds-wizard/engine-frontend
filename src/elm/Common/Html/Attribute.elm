@@ -2,11 +2,10 @@ module Common.Html.Attribute exposing (detailClass, linkToAttributes, listClass)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
-import Msgs exposing (Msg)
 import Routing exposing (Route)
 
 
-linkToAttributes : Route -> List (Attribute Msg)
+linkToAttributes : Route -> List (Attribute msg)
 linkToAttributes route =
     [ href <| Routing.toUrl route
     ]

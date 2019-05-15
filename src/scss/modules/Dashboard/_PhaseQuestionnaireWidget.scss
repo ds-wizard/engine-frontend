@@ -25,41 +25,4 @@
         padding: .75rem;
         color: $gray-500;
     }
-
-    .list-group-item {
-        display: flex;
-        text-decoration: none;
-        padding: .75rem;
-        border: 0;
-        justify-content: space-between;
-        align-items: flex-start;
-
-        &:hover {
-            background: $gray-200;
-            color: $primary;
-        }
-
-        span {
-
-            &.name {
-                flex: 1;
-                min-width: 0;
-
-                span {
-                    display: block;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                }
-            }
-
-            &.km {
-                color: $body-color;
-            }
-
-            &.badge {
-                margin-left: 3rem;
-            }
-        }
-    }
 }

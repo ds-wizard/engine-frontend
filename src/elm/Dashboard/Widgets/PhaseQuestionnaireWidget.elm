@@ -1,11 +1,13 @@
 module Dashboard.Widgets.PhaseQuestionnaireWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
-import Common.Html exposing (emptyNode)
+import Common.Html exposing (emptyNode, linkTo)
+import Common.View.Listing as Listing exposing (ListingConfig)
 import Common.View.Page as Page
 import Html exposing (Html, a, code, div, h3, span, strong, text)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class, href, title)
 import KMEditor.Common.Models.Entities exposing (Level)
+import KnowledgeModels.Routing
 import Questionnaires.Common.Models exposing (Questionnaire)
 import Questionnaires.Common.View exposing (accessibilityBadge)
 import Questionnaires.Routing exposing (Route(..))
@@ -43,8 +45,7 @@ viewLevelGroupWithData questionnaires level =
     let
         content =
             if List.length questionnaires > 0 then
-                div [ class "list-group list-group-flush" ]
-                    (List.map viewQuestionnaire questionnaires)
+                Listing.view listingConfig questionnaires
 
             else
                 div [ class "empty" ]
@@ -56,19 +57,39 @@ viewLevelGroupWithData questionnaires level =
         ]
 
 
-viewQuestionnaire : Questionnaire -> Html msg
-viewQuestionnaire questionnaire =
-    a [ class "list-group-item", href <| Routing.toUrl <| Questionnaires <| Detail questionnaire.uuid ]
-        [ span [ class "name" ]
-            [ span [] [ text questionnaire.name ]
-            , span [ class "km" ]
-                [ text questionnaire.package.name
-                , text ", "
-                , text questionnaire.package.version
-                , text " ("
-                , code [] [ text questionnaire.package.id ]
-                , text ")"
-                ]
-            ]
+listingConfig : ListingConfig Questionnaire msg
+listingConfig =
+    { title = listingTitle
+    , description = listingDescription
+    , actions = always []
+    , textTitle = .name
+    , emptyText = "Click \"Create\" button to add a new Questionnaire."
+    }
+
+
+listingTitle : Questionnaire -> Html msg
+listingTitle questionnaire =
+    span []
+        [ linkTo (Routing.Questionnaires <| Detail <| questionnaire.uuid) [] [ text questionnaire.name ]
         , accessibilityBadge questionnaire.accessibility
+        ]
+
+
+listingDescription : Questionnaire -> Html msg
+listingDescription questionnaire =
+    let
+        kmRoute =
+            Routing.KnowledgeModels <|
+                KnowledgeModels.Routing.Detail
+                    questionnaire.package.organizationId
+                    questionnaire.package.kmId
+    in
+    linkTo kmRoute
+        [ title "Knowledge Model" ]
+        [ text questionnaire.package.name
+        , text ", "
+        , text questionnaire.package.version
+        , text " ("
+        , code [] [ text questionnaire.package.id ]
+        , text ")"
         ]
