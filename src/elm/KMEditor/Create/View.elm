@@ -2,6 +2,7 @@ module KMEditor.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html.Attribute exposing (detailClass)
+import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
@@ -12,7 +13,8 @@ import Html exposing (..)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Package exposing (Package)
+import KnowledgeModels.Common.Version as Version
 import Msgs
 import Routing exposing (Route(..))
 
@@ -22,23 +24,25 @@ view wrapMsg model =
     Page.actionResultView (content wrapMsg model) model.packages
 
 
-content : (Msg -> Msgs.Msg) -> Model -> List PackageDetail -> Html Msgs.Msg
+content : (Msg -> Msgs.Msg) -> Model -> List Package -> Html Msgs.Msg
 content wrapMsg model packages =
     div [ detailClass "KMEditor__Create" ]
         [ Page.header "Create Knowledge Model" []
         , div []
             [ FormResult.view model.savingKnowledgeModel
             , formView wrapMsg model.form packages
-            , FormActions.view (KMEditor IndexRoute) ( "Save", model.savingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+            , FormActions.view
+                (KMEditor IndexRoute)
+                (ActionButton.ButtonConfig "Save" model.savingKnowledgeModel (wrapMsg <| FormMsg Form.Submit) False)
             ]
         ]
 
 
-formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelCreateForm -> List PackageDetail -> Html Msgs.Msg
+formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelCreateForm -> List Package -> Html Msgs.Msg
 formView wrapMsg form packages =
     let
         parentOptions =
-            ( "", "--" ) :: List.map createOption packages
+            ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
 
         formHtml =
             div []
@@ -51,10 +55,10 @@ formView wrapMsg form packages =
     formHtml |> Html.map (wrapMsg << FormMsg)
 
 
-createOption : PackageDetail -> ( String, String )
+createOption : Package -> ( String, String )
 createOption package =
     let
         optionText =
-            package.name ++ " " ++ package.version ++ " (" ++ package.id ++ ")"
+            package.name ++ " " ++ Version.toString package.version ++ " (" ++ package.id ++ ")"
     in
     ( package.id, optionText )

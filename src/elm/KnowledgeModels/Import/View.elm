@@ -11,19 +11,18 @@ import Html.Events exposing (..)
 import Json.Decode as Decode
 import KnowledgeModels.Import.Models exposing (..)
 import KnowledgeModels.Import.Msgs exposing (Msg(..))
-import Msgs
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+view : Model -> Html Msg
+view model =
     let
         content =
             case model.file of
                 Just file ->
-                    fileView wrapMsg model file.filename
+                    fileView model file.filename
 
                 Nothing ->
-                    dropzone model |> Html.map wrapMsg
+                    dropzone model
     in
     div [ detailClass "KnowledgeModels__Import", id dropzoneId ]
         [ Page.header "Import Knowledge Model" []
@@ -32,8 +31,8 @@ view wrapMsg model =
         ]
 
 
-fileView : (Msg -> Msgs.Msg) -> Model -> String -> Html Msgs.Msg
-fileView wrapMsg model fileName =
+fileView : Model -> String -> Html Msg
+fileView model fileName =
     let
         cancelDisabled =
             case model.importing of
@@ -50,9 +49,9 @@ fileView wrapMsg model fileName =
                 [ text fileName ]
             ]
         , div [ class "actions" ]
-            [ button [ disabled cancelDisabled, onClick (wrapMsg Cancel), class "btn btn-secondary" ]
+            [ button [ disabled cancelDisabled, onClick Cancel, class "btn btn-secondary" ]
                 [ text "Cancel" ]
-            , ActionButton.button ( "Upload", model.importing, wrapMsg Submit )
+            , ActionButton.button <| ActionButton.ButtonConfig "Upload" model.importing Submit False
             ]
         ]
 

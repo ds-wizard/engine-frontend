@@ -57,7 +57,7 @@ editorHeader wrapMsg model =
             if containsChanges model then
                 [ text "(unsaved changes)"
                 , button [ onClick <| wrapMsg Discard, class "btn btn-outline-danger btn-with-loader" ] [ text "Discard" ]
-                , ActionButton.button ( "Save", model.saving, wrapMsg Save )
+                , ActionButton.button <| ActionButton.ButtonConfig "Save" model.saving (wrapMsg Save) False
                 ]
 
             else

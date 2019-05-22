@@ -1,13 +1,10 @@
 module Common.View.FormActions exposing (view, viewActionOnly)
 
-import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (..)
 import Common.View.ActionButton as ActionButton
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Msgs exposing (Msg)
 import Routing exposing (Route)
-import String
 
 
 {-| Helper to show action buttons below the form.
@@ -16,17 +13,17 @@ import String
   - Action button invokes specified message when clicked
 
 -}
-view : Route -> ( String, ActionResult a, Msg ) -> Html Msg
-view cancelRoute actionButtonSettings =
+view : Route -> ActionButton.ButtonConfig a msg -> Html msg
+view cancelRoute actionButtonConfig =
     div [ class "form-actions" ]
         [ linkTo cancelRoute [ class "btn btn-secondary" ] [ text "Cancel" ]
-        , ActionButton.button actionButtonSettings
+        , ActionButton.button actionButtonConfig
         ]
 
 
 {-| Similar to previous, but it contains only the action button.
 -}
-viewActionOnly : ( String, ActionResult a, msg ) -> Html msg
-viewActionOnly actionButtonSettings =
+viewActionOnly : ActionButton.ButtonConfig a msg -> Html msg
+viewActionOnly actionButtonConfig =
     div [ class "text-right" ]
-        [ ActionButton.button actionButtonSettings ]
+        [ ActionButton.button actionButtonConfig ]

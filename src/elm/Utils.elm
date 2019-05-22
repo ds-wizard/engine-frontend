@@ -113,7 +113,7 @@ listFilterJust =
         fold item currentList =
             case item of
                 Just value ->
-                    value :: currentList
+                    currentList ++ [ value ]
 
                 Nothing ->
                     currentList

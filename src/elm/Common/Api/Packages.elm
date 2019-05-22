@@ -1,24 +1,28 @@
-module Common.Api.Packages exposing (deletePackage, deletePackageVersion, exportPackageUrl, getPackages, getPackagesFiltered, getPackagesUnique, importPackage)
+module Common.Api.Packages exposing
+    ( deletePackage
+    , deletePackageVersion
+    , exportPackageUrl
+    , getPackage
+    , getPackages
+    , importPackage
+    )
 
 import Common.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostString)
 import Common.AppState exposing (AppState)
-import KnowledgeModels.Common.Models exposing (Package, PackageDetail, packageDetailListDecoder, packageListDecoder)
+import Json.Decode as D
+import KnowledgeModels.Common.Package as Package exposing (Package)
+import KnowledgeModels.Common.PackageDetail as PackageDetail exposing (PackageDetail)
 import Ports exposing (FilePortData)
 
 
-getPackages : AppState -> ToMsg (List PackageDetail) msg -> Cmd msg
+getPackages : AppState -> ToMsg (List Package) msg -> Cmd msg
 getPackages =
-    jwtGet "/packages" packageDetailListDecoder
+    jwtGet "/packages" (D.list Package.decoder)
 
 
-getPackagesUnique : AppState -> ToMsg (List Package) msg -> Cmd msg
-getPackagesUnique =
-    jwtGet "/packages/unique" packageListDecoder
-
-
-getPackagesFiltered : String -> String -> AppState -> ToMsg (List PackageDetail) msg -> Cmd msg
-getPackagesFiltered organizationId kmId =
-    jwtGet ("/packages/?organizationId=" ++ organizationId ++ "&kmId=" ++ kmId) packageDetailListDecoder
+getPackage : String -> AppState -> ToMsg PackageDetail msg -> Cmd msg
+getPackage packageId =
+    jwtGet ("/packages/" ++ packageId) PackageDetail.decoder
 
 
 deletePackage : String -> String -> AppState -> ToMsg () msg -> Cmd msg

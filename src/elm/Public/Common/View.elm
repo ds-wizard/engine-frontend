@@ -40,7 +40,7 @@ publicForm formConfig =
                 , formConfig.formContent
                 , div [ class "form-group d-flex align-items-baseline justify-content-between" ]
                     [ link
-                    , ActionButton.submit ( formConfig.submitLabel, formConfig.actionResult )
+                    , ActionButton.submit <| ActionButton.SubmitConfig formConfig.submitLabel formConfig.actionResult
                     ]
                 ]
             ]

@@ -9,12 +9,13 @@ import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Form
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire)
 import Questionnaires.Create.Models exposing (Model, QuestionnaireCreateForm, encodeQuestionnaireCreateForm, initQuestionnaireCreateForm, questionnaireCreateFormValidation)
 import Questionnaires.Create.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
+import Result exposing (Result)
 import Routing exposing (cmdNavigate)
 
 
@@ -58,7 +59,7 @@ update msg wrapMsg appState model =
             postQuestionnaireCompleted appState model result
 
 
-getPackagesCompleted : Model -> Result ApiError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
+getPackagesCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
 getPackagesCompleted model result =
     let
         newModel =
@@ -92,7 +93,7 @@ getKnowledgeModelPreviewCompleted model result =
     ( newModel, cmd )
 
 
-setSelectedPackage : Model -> List PackageDetail -> Model
+setSelectedPackage : Model -> List Package -> Model
 setSelectedPackage model packages =
     case model.selectedPackage of
         Just id ->

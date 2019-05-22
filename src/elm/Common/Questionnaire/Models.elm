@@ -34,7 +34,7 @@ import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (Event)
-import KnowledgeModels.Common.Models exposing (PackageDetail, packageDetailDecoder)
+import KnowledgeModels.Common.PackageDetail as PackageDetail exposing (PackageDetail)
 import List.Extra as List
 import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
 import String exposing (fromInt)
@@ -112,7 +112,7 @@ questionnaireDetailDecoder =
     Decode.succeed QuestionnaireDetail
         |> required "uuid" Decode.string
         |> required "name" Decode.string
-        |> required "package" packageDetailDecoder
+        |> required "package" PackageDetail.decoder
         |> required "knowledgeModel" knowledgeModelDecoder
         |> required "replies" decodeFormValues
         |> required "level" Decode.int

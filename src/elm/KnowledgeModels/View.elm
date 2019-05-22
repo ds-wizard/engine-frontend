@@ -8,17 +8,16 @@ import KnowledgeModels.Index.View
 import KnowledgeModels.Models exposing (Model)
 import KnowledgeModels.Msgs exposing (Msg(..))
 import KnowledgeModels.Routing exposing (Route(..))
-import Msgs
 
 
-view : Route -> (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view route wrapMsg appState model =
+view : Route -> AppState -> Model -> Html Msg
+view route appState model =
     case route of
-        Detail _ _ ->
-            KnowledgeModels.Detail.View.view (wrapMsg << DetailMsg) appState model.detailModel
+        Detail _ ->
+            Html.map DetailMsg <| KnowledgeModels.Detail.View.view appState model.detailModel
 
         Import ->
-            KnowledgeModels.Import.View.view (wrapMsg << ImportMsg) model.importModel
+            Html.map ImportMsg <| KnowledgeModels.Import.View.view model.importModel
 
         Index ->
-            KnowledgeModels.Index.View.view (wrapMsg << IndexMsg) appState model.indexModel
+            Html.map IndexMsg <| KnowledgeModels.Index.View.view appState model.indexModel

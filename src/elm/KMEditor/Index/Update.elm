@@ -6,17 +6,15 @@ import Common.Api.KnowledgeModels as KnowledgeModelsApi
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
-import Common.Setters exposing (setKnowledgeModels)
+import Common.Setters exposing (setKnowledgeModels, setPackage)
 import Form
 import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KnowledgeModels.Common.Models exposing (PackageDetail)
-import List.Extra as List
+import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..), cmdNavigate)
-import Utils exposing (versionIsGreater)
 
 
 fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
@@ -54,7 +52,7 @@ update msg wrapMsg appState model =
         UpgradeFormMsg formMsg ->
             handleUpgradeForm formMsg wrapMsg appState model
 
-        GetPackagesCompleted result ->
+        GetPackageCompleted result ->
             handleGetPackagesCompleted model result
 
         DeleteMigration uuid ->
@@ -112,29 +110,15 @@ handleShowHideUpgradeModal wrapMsg maybeKm model appState =
         getPackages lastAppliedParentPackageId =
             let
                 cmd =
-                    getPackagesFilteredCmd wrapMsg lastAppliedParentPackageId appState
+                    Cmd.map wrapMsg <|
+                        PackagesApi.getPackage lastAppliedParentPackageId appState GetPackageCompleted
             in
-            Just ( { model | kmToBeUpgraded = maybeKm, packages = Loading }, cmd )
+            Just ( { model | kmToBeUpgraded = maybeKm, package = Loading }, cmd )
     in
     maybeKm
         |> Maybe.andThen .lastAppliedParentPackageId
         |> Maybe.andThen getPackages
-        |> Maybe.withDefault ( { model | kmToBeUpgraded = Nothing, packages = Unset }, Cmd.none )
-
-
-getPackagesFilteredCmd : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
-getPackagesFilteredCmd wrapMsg lastAppliedParentPackageId appState =
-    let
-        parts =
-            String.split ":" lastAppliedParentPackageId
-    in
-    case ( List.head parts, List.getAt 1 parts ) of
-        ( Just organizationId, Just kmId ) ->
-            Cmd.map wrapMsg <|
-                PackagesApi.getPackagesFiltered organizationId kmId appState GetPackagesCompleted
-
-        _ ->
-            Cmd.none
+        |> Maybe.withDefault ( { model | kmToBeUpgraded = Nothing, package = Unset }, Cmd.none )
 
 
 handleUpgradeForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -159,33 +143,14 @@ handleUpgradeForm formMsg wrapMsg appState model =
             )
 
 
-handleGetPackagesCompleted : Model -> Result ApiError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
+handleGetPackagesCompleted : Model -> Result ApiError PackageDetail -> ( Model, Cmd Msgs.Msg )
 handleGetPackagesCompleted model result =
-    case result of
-        Ok packages ->
-            let
-                packageList =
-                    model.kmToBeUpgraded
-                        |> Maybe.andThen (filterPackages packages)
-                        |> Maybe.withDefault []
-            in
-            ( { model | packages = Success packageList }, Cmd.none )
-
-        Err error ->
-            ( { model | packages = getServerError error "Unable to get package list" }
-            , getResultCmd result
-            )
-
-
-filterPackages : List PackageDetail -> KnowledgeModel -> Maybe (List PackageDetail)
-filterPackages packageList knowledgeModel =
-    let
-        getFilteredList packages version =
-            Just <| List.filter (.version >> versionIsGreater version) packages
-    in
-    knowledgeModel.lastAppliedParentPackageId
-        |> Maybe.andThen (String.split ":" >> List.getAt 2)
-        |> Maybe.andThen (getFilteredList packageList)
+    applyResult
+        { setResult = setPackage
+        , defaultError = "Unable to get package list."
+        , model = model
+        , result = result
+        }
 
 
 handleDeleteMigration : (Msg -> Msgs.Msg) -> String -> AppState -> Model -> ( Model, Cmd Msgs.Msg )

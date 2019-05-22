@@ -2,6 +2,7 @@ module KMEditor.Publish.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html.Attribute exposing (detailClass)
+import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
@@ -32,7 +33,9 @@ contentView wrapMsg model knowledgeModel =
         , div []
             [ FormResult.view model.publishingKnowledgeModel
             , formView wrapMsg model.form knowledgeModel
-            , FormActions.view (KMEditor IndexRoute) ( "Publish", model.publishingKnowledgeModel, wrapMsg <| FormMsg Form.Submit )
+            , FormActions.view
+                (KMEditor IndexRoute)
+                (ActionButton.ButtonConfig "Publish" model.publishingKnowledgeModel (wrapMsg <| FormMsg Form.Submit) False)
             ]
         ]
 

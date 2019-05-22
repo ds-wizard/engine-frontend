@@ -6,7 +6,7 @@ import Url.Parser exposing (..)
 
 
 type Route
-    = Detail String String
+    = Detail String
     | Import
     | Index
 
@@ -18,22 +18,22 @@ moduleRoot =
 
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
-    [ map (detail wrapRoute) (s moduleRoot </> s "package" </> string </> string)
-    , map (wrapRoute <| Import) (s moduleRoot </> s "import")
+    [ map (wrapRoute <| Import) (s moduleRoot </> s "import")
+    , map (detail wrapRoute) (s moduleRoot </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
     ]
 
 
-detail : (Route -> a) -> String -> String -> a
-detail wrapRoute organizationId kmId =
-    Detail organizationId kmId |> wrapRoute
+detail : (Route -> a) -> String -> a
+detail wrapRoute packageId =
+    Detail packageId |> wrapRoute
 
 
 toUrl : Route -> List String
 toUrl route =
     case route of
-        Detail organizationId kmId ->
-            [ moduleRoot, "package", organizationId, kmId ]
+        Detail packageId ->
+            [ moduleRoot, packageId ]
 
         Import ->
             [ moduleRoot, "import" ]
