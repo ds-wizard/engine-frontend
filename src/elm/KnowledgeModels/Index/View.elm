@@ -67,8 +67,30 @@ listingTitle package =
 
 listingDescription : Package -> Html Msg
 listingDescription package =
+    let
+        organizationFragment =
+            case package.organization of
+                Just organization ->
+                    let
+                        logo =
+                            case organization.logo of
+                                Just organizationLogo ->
+                                    img [ class "organization-image", src organizationLogo ] []
+
+                                Nothing ->
+                                    emptyNode
+                    in
+                    span [ class "fragment", title "Published by" ]
+                        [ logo
+                        , text organization.name
+                        ]
+
+                Nothing ->
+                    emptyNode
+    in
     span []
         [ code [ class "fragment" ] [ text package.id ]
+        , organizationFragment
         , span [ class "fragment" ] [ text package.description ]
         ]
 
