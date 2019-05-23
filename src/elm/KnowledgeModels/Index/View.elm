@@ -38,7 +38,7 @@ indexActions appState =
     if hasPerm appState.jwt packageManagementWrite then
         [ linkTo (Routing.KnowledgeModels Import)
             [ class "btn btn-primary link-with-icon" ]
-            [ i [ class "fa fa-cloud-upload" ] []
+            [ i [ class "fa fa-upload" ] []
             , text "Import"
             ]
         ]

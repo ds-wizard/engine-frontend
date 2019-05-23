@@ -34,7 +34,7 @@ successOnlyView result =
             emptyNode
 
 
-errorOnlyView : ActionResult String -> Html msg
+errorOnlyView : ActionResult a -> Html msg
 errorOnlyView result =
     case result of
         Error msg ->

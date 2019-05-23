@@ -1,10 +1,16 @@
 module KnowledgeModels.Import.Subscriptions exposing (subscriptions)
 
-import KnowledgeModels.Import.Models exposing (Model)
+import KnowledgeModels.Import.FileImport.Subscriptions as FileImport
+import KnowledgeModels.Import.Models exposing (ImportModel(..), Model)
 import KnowledgeModels.Import.Msgs exposing (Msg(..))
-import Ports exposing (fileContentRead)
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    fileContentRead FileRead
+    case model.importModel of
+        FileImportModel fileImportModel ->
+            Sub.map FileImportMsg <|
+                FileImport.subscriptions fileImportModel
+
+        _ ->
+            Sub.none
