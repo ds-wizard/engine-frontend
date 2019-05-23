@@ -87,7 +87,7 @@ ins, .ins {
     background: $text-edited-bg;
 }
 
-.nav-tabs {
+.nav-tabs:not(.card-header-tabs) {
     margin-bottom: 30px;
 
     .nav-link {

@@ -5,6 +5,7 @@ module Common.View.FormGroup exposing
     , getErrors
     , input
     , list
+    , markdownEditor
     , password
     , richRadioGroup
     , select
@@ -19,9 +20,10 @@ import Form exposing (Form, InputType(..), Msg(..))
 import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
-import Html exposing (Html, a, button, code, div, label, p, span, text)
-import Html.Attributes exposing (checked, class, classList, for, id, name, style, type_, value)
+import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
+import Html.Attributes exposing (checked, class, classList, for, id, name, rows, style, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Markdown
 import String exposing (fromFloat)
 import Utils exposing (getContrastColorHex)
 
@@ -178,6 +180,73 @@ list itemView form fieldName labelText =
         , div [ class "form-list-error" ] [ error ]
         , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
             [ text "Add" ]
+        ]
+
+
+markdownEditor : Form CustomFormError o -> String -> String -> Html Form.Msg
+markdownEditor form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        previewActiveFieldName =
+            fieldName ++ "-preview-active"
+
+        ( error, errorClass ) =
+            getErrors field labelText
+
+        editorStateField =
+            Form.getFieldAsBool previewActiveFieldName form
+
+        previewActive =
+            Maybe.withDefault False editorStateField.value
+
+        valueString =
+            Maybe.withDefault "" field.value
+
+        content =
+            if previewActive then
+                Markdown.toHtml [] valueString
+
+            else
+                Input.textArea field
+                    [ class <| "form-control " ++ errorClass
+                    , id fieldName
+                    , name fieldName
+                    , rows <| List.length <| String.lines valueString
+                    ]
+
+        previewActiveMsg =
+            Form.Input previewActiveFieldName Form.Checkbox << Field.Bool
+    in
+    div [ class "form-group form-group-markdown" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , div [ class "card" ]
+            [ div [ class "card-header" ]
+                [ ul [ class "nav nav-tabs card-header-tabs" ]
+                    [ li [ class "nav-item" ]
+                        [ a
+                            [ onClick <| previewActiveMsg False
+                            , class "nav-link"
+                            , classList [ ( "active", not previewActive ) ]
+                            ]
+                            [ text "Editor" ]
+                        ]
+                    , li [ class "nav-item" ]
+                        [ a
+                            [ onClick <| previewActiveMsg True
+                            , class "nav-link"
+                            , classList [ ( "active", previewActive ) ]
+                            ]
+                            [ text "Preview" ]
+                        ]
+                    ]
+                ]
+            , div [ class "card-body" ]
+                [ content
+                ]
+            ]
+        , error
         ]
 
 

@@ -3,6 +3,13 @@ module KnowledgeModels.Common.Version exposing
     , compare
     , create
     , decoder
+    , fromString
+    , getMajor
+    , getMinor
+    , getPatch
+    , nextMajor
+    , nextMinor
+    , nextPatch
     , toString
     )
 
@@ -18,6 +25,36 @@ create =
     Version
 
 
+getMajor : Version -> Int
+getMajor (Version value _ _) =
+    value
+
+
+getMinor : Version -> Int
+getMinor (Version _ value _) =
+    value
+
+
+getPatch : Version -> Int
+getPatch (Version _ _ value) =
+    value
+
+
+nextMajor : Version -> Version
+nextMajor (Version major minor patch) =
+    Version (major + 1) minor patch
+
+
+nextMinor : Version -> Version
+nextMinor (Version major minor patch) =
+    Version major (minor + 1) patch
+
+
+nextPatch : Version -> Version
+nextPatch (Version major minor patch) =
+    Version major minor (patch + 1)
+
+
 decoder : Decoder Version
 decoder =
     D.string
@@ -30,7 +67,7 @@ decoder =
                 in
                 case parts of
                     (Just major) :: (Just minor) :: (Just patch) :: [] ->
-                        D.succeed <| Version major minor patch
+                        D.succeed <| create major minor patch
 
                     _ ->
                         D.fail <| "Invalid version " ++ str
@@ -40,6 +77,16 @@ decoder =
 toString : Version -> String
 toString (Version major minor patch) =
     String.fromInt major ++ "." ++ String.fromInt minor ++ "." ++ String.fromInt patch
+
+
+fromString : String -> Maybe Version
+fromString versionString =
+    case List.map String.toInt <| String.split "." versionString of
+        (Just major) :: (Just minor) :: (Just patch) :: [] ->
+            Just <| create major minor patch
+
+        _ ->
+            Nothing
 
 
 compare : Version -> Version -> Order

@@ -1,6 +1,7 @@
 module Utils exposing
     ( boolToInt
     , dispatch
+    , flip
     , getContrastColorHex
     , getUuid
     , listFilterJust
@@ -25,6 +26,11 @@ import Random exposing (Seed, step)
 import Regex exposing (Regex)
 import Task
 import Uuid
+
+
+flip : (a -> b -> c) -> b -> a -> c
+flip f a b =
+    f b a
 
 
 pair : a -> b -> ( a, b )
