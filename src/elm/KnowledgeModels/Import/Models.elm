@@ -1,34 +1,18 @@
-module KnowledgeModels.Import.Models exposing
-    ( Model
-    , dropzoneId
-    , fileInputId
-    , initialModel
-    )
+module KnowledgeModels.Import.Models exposing (ImportModel(..), Model, initialModel)
 
-import ActionResult exposing (ActionResult(..))
-import Ports exposing (FilePortData)
+import KnowledgeModels.Import.FileImport.Models as FileImportModels
+import KnowledgeModels.Import.RegistryImport.Models as RegistryImportModels
+
+
+type ImportModel
+    = FileImportModel FileImportModels.Model
+    | RegistryImportModel RegistryImportModels.Model
 
 
 type alias Model =
-    { dnd : Int
-    , file : Maybe FilePortData
-    , importing : ActionResult String
-    }
+    { importModel : ImportModel }
 
 
-initialModel : Model
-initialModel =
-    { dnd = 0
-    , file = Nothing
-    , importing = Unset
-    }
-
-
-dropzoneId : String
-dropzoneId =
-    "km-import-dropzone"
-
-
-fileInputId : String
-fileInputId =
-    "km-import-input"
+initialModel : Maybe String -> Model
+initialModel packageId =
+    { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" packageId }

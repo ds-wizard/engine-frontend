@@ -1,15 +1,11 @@
 module KnowledgeModels.Import.Msgs exposing (Msg(..))
 
-import Common.ApiError exposing (ApiError)
-import Ports exposing (FilePortData)
+import KnowledgeModels.Import.FileImport.Msgs as FileImportMsgs
+import KnowledgeModels.Import.RegistryImport.Msgs as RegistryImportMsgs
 
 
 type Msg
-    = DragEnter
-    | DragOver
-    | DragLeave
-    | FileSelected
-    | FileRead FilePortData
-    | Submit
-    | Cancel
-    | ImportPackageCompleted (Result ApiError ())
+    = FileImportMsg FileImportMsgs.Msg
+    | RegistryImportMsg RegistryImportMsgs.Msg
+    | ShowRegistryImport
+    | ShowFileImport

@@ -22,6 +22,7 @@ type alias PackageDetail =
     , versions : List Version
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
+    , remoteLatestVersion : Maybe Version
     }
 
 
@@ -40,3 +41,4 @@ decoder =
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
+        |> D.required "remoteLatestVersion" (D.maybe Version.decoder)

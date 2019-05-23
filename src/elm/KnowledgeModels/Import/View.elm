@@ -1,96 +1,62 @@
 module KnowledgeModels.Import.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
+import Common.Html exposing (fa)
 import Common.Html.Attribute exposing (detailClass)
-import Common.View.ActionButton as ActionButton
-import Common.View.FormResult as FormResult
 import Common.View.Page as Page
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Json.Decode as Decode
-import KnowledgeModels.Import.Models exposing (..)
+import Html exposing (Html, a, div, li, text, ul)
+import Html.Attributes exposing (class, classList)
+import Html.Events exposing (onClick)
+import KnowledgeModels.Import.FileImport.View as FileImportView
+import KnowledgeModels.Import.Models exposing (ImportModel(..), Model)
 import KnowledgeModels.Import.Msgs exposing (Msg(..))
+import KnowledgeModels.Import.RegistryImport.View as RegistryImportView
 
 
 view : Model -> Html Msg
 view model =
     let
-        content =
-            case model.file of
-                Just file ->
-                    fileView model file.filename
+        ( registryActive, content ) =
+            case model.importModel of
+                FileImportModel fileImportModel ->
+                    ( False
+                    , Html.map FileImportMsg <|
+                        FileImportView.view fileImportModel
+                    )
 
-                Nothing ->
-                    dropzone model
+                RegistryImportModel registryImportModel ->
+                    ( True
+                    , Html.map RegistryImportMsg <|
+                        RegistryImportView.view registryImportModel
+                    )
     in
-    div [ detailClass "KnowledgeModels__Import", id dropzoneId ]
+    div [ detailClass "KnowledgeModels__Import" ]
         [ Page.header "Import Knowledge Model" []
-        , FormResult.view model.importing
+        , navbar registryActive
         , content
         ]
 
 
-fileView : Model -> String -> Html Msg
-fileView model fileName =
-    let
-        cancelDisabled =
-            case model.importing of
-                Loading ->
-                    True
-
-                _ ->
-                    False
-    in
-    div [ class "file-view" ]
-        [ div [ class "file" ]
-            [ i [ class "fa fa-file-o" ] []
-            , div [ class "filename" ]
-                [ text fileName ]
+navbar : Bool -> Html Msg
+navbar registryActive =
+    ul [ class "nav nav-tabs" ]
+        [ li [ class "nav-item" ]
+            [ a
+                [ onClick ShowRegistryImport
+                , class "nav-link link-with-icon"
+                , classList [ ( "active", registryActive ) ]
+                ]
+                [ fa "cloud-download"
+                , text "From Registry"
+                ]
             ]
-        , div [ class "actions" ]
-            [ button [ disabled cancelDisabled, onClick Cancel, class "btn btn-secondary" ]
-                [ text "Cancel" ]
-            , ActionButton.button <| ActionButton.ButtonConfig "Upload" model.importing Submit False
+        , li [ class "nav-item" ]
+            [ a
+                [ onClick ShowFileImport
+                , class "nav-link link-with-icon"
+                , classList [ ( "active", not registryActive ) ]
+                ]
+                [ fa "upload"
+                , text "From File"
+                ]
             ]
         ]
-
-
-dropzone : Model -> Html Msg
-dropzone model =
-    div (dropzoneAttributes model)
-        [ label [ class "btn btn-secondary btn-file" ]
-            [ text "Choose file"
-            , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected) ] []
-            ]
-        , p [] [ text "or just drop it here" ]
-        ]
-
-
-dropzoneAttributes : Model -> List (Attribute Msg)
-dropzoneAttributes model =
-    let
-        cssClass =
-            case model.dnd of
-                0 ->
-                    ""
-
-                _ ->
-                    "active"
-    in
-    [ class ("dropzone " ++ cssClass)
-    , id dropzoneId
-    , onDragEvent "dragenter" DragEnter
-    , onDragEvent "dragover" DragOver
-    , onDragEvent "dragleave" DragLeave
-    ]
-
-
-onDragEvent : String -> Msg -> Attribute Msg
-onDragEvent event msg =
-    custom event <|
-        Decode.succeed
-            { stopPropagation = True
-            , preventDefault = True
-            , message = msg
-            }

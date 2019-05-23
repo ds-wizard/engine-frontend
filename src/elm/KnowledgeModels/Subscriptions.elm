@@ -9,7 +9,7 @@ import KnowledgeModels.Routing exposing (Route(..))
 subscriptions : Route -> Model -> Sub Msg
 subscriptions route model =
     case route of
-        Import ->
+        Import _ ->
             Sub.map ImportMsg <| KnowledgeModels.Import.Subscriptions.subscriptions model.importModel
 
         _ ->

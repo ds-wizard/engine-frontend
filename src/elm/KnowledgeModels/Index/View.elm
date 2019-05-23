@@ -36,9 +36,9 @@ viewKnowledgeModels appState model packages =
 indexActions : AppState -> List (Html Msg)
 indexActions appState =
     if hasPerm appState.jwt packageManagementWrite then
-        [ linkTo (Routing.KnowledgeModels Import)
+        [ linkTo (Routing.KnowledgeModels <| Import Nothing)
             [ class "btn btn-primary link-with-icon" ]
-            [ i [ class "fa fa-cloud-upload" ] []
+            [ i [ class "fa fa-upload" ] []
             , text "Import"
             ]
         ]

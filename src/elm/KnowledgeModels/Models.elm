@@ -16,7 +16,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { detailModel = KnowledgeModels.Detail.Models.initialModel
-    , importModel = KnowledgeModels.Import.Models.initialModel
+    , importModel = KnowledgeModels.Import.Models.initialModel Nothing
     , indexModel = KnowledgeModels.Index.Models.initialModel
     }
 
@@ -27,8 +27,8 @@ initLocalModel route model =
         Detail _ ->
             { model | detailModel = KnowledgeModels.Detail.Models.initialModel }
 
-        Import ->
-            { model | importModel = KnowledgeModels.Import.Models.initialModel }
+        Import packageId ->
+            { model | importModel = KnowledgeModels.Import.Models.initialModel packageId }
 
         Index ->
             { model | indexModel = KnowledgeModels.Index.Models.initialModel }
