@@ -1,7 +1,6 @@
 module KnowledgeModels.Common.PackageDetail exposing
     ( PackageDetail
     , decoder
-    , dummy
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -41,20 +40,3 @@ decoder =
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
-
-
-dummy : PackageDetail
-dummy =
-    { id = ""
-    , name = ""
-    , organizationId = ""
-    , kmId = ""
-    , version = Version.create 0 0 0
-    , description = ""
-    , readme = ""
-    , metamodelVersion = 0
-    , parentPackageId = Nothing
-    , versions = []
-    , organization = Nothing
-    , registryLink = Nothing
-    }

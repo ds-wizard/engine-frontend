@@ -1,6 +1,7 @@
 module KnowledgeModels.Common.Package exposing
     ( Package
     , decoder
+    , dummy
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -30,3 +31,15 @@ decoder =
         |> D.required "version" Version.decoder
         |> D.required "description" D.string
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
+
+
+dummy : Package
+dummy =
+    { id = ""
+    , name = ""
+    , organizationId = ""
+    , kmId = ""
+    , version = Version.create 0 0 0
+    , description = ""
+    , organization = Nothing
+    }

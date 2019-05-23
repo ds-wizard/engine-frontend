@@ -11,7 +11,7 @@ import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, filterKnowledgModelWithTags)
 import KMEditor.Common.Models.Events exposing (Event)
-import KnowledgeModels.Common.PackageDetail as PackageDetail
+import KnowledgeModels.Common.Package as Package
 import Questionnaires.Common.Models.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 
 
@@ -89,7 +89,7 @@ createQuestionnaireModel appState packageId km =
         , name = ""
         , accessibility = PrivateQuestionnaire
         , ownerUuid = Nothing
-        , package = PackageDetail.dummy
+        , package = Package.dummy
         , knowledgeModel = km
         , replies = []
         , level = 0
