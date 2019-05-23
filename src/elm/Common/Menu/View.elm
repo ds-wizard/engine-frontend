@@ -107,6 +107,7 @@ viewReportIssueModal isOpen =
             , actionName = "Ok"
             , actionMsg = Msgs.MenuMsg <| SetReportIssueOpen False
             , cancelMsg = Nothing
+            , dangerous = False
             }
     in
     Modal.confirm modalConfig
@@ -126,6 +127,7 @@ viewAboutModal isOpen serverBuildInfoActionResult =
             , actionName = "Ok"
             , actionMsg = Msgs.MenuMsg <| SetAboutOpen False
             , cancelMsg = Nothing
+            , dangerous = False
             }
     in
     Modal.confirm modalConfig

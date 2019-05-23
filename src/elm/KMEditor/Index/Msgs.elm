@@ -3,7 +3,7 @@ module KMEditor.Index.Msgs exposing (Msg(..))
 import Common.ApiError exposing (ApiError)
 import Form
 import KMEditor.Common.Models exposing (KnowledgeModel)
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type Msg
@@ -13,7 +13,7 @@ type Msg
     | DeleteKnowledgeModelCompleted (Result ApiError ())
     | PostMigrationCompleted (Result ApiError ())
     | ShowHideUpgradeModal (Maybe KnowledgeModel)
-    | GetPackagesCompleted (Result ApiError (List PackageDetail))
+    | GetPackageCompleted (Result ApiError PackageDetail)
     | UpgradeFormMsg Form.Msg
     | DeleteMigration String
     | DeleteMigrationCompleted (Result ApiError ())

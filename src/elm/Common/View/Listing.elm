@@ -7,9 +7,10 @@ module Common.View.Listing exposing
     )
 
 import Common.Html exposing (emptyNode, fa)
+import Common.View.ItemIcon as ItemIcon
 import Common.View.Page as Page
 import Html exposing (Html, a, div, text)
-import Html.Attributes exposing (class, href, style)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Routing
 
@@ -39,7 +40,7 @@ type ListingActionType msg
 view : ListingConfig a msg -> List a -> Html msg
 view config data =
     if List.length data > 0 then
-        div [ class "list-group list-group-flush list-group-listing" ]
+        div [ class "Listing list-group list-group-flush" ]
             (List.map (viewItem config) data)
 
     else
@@ -58,7 +59,7 @@ viewEmpty config =
 viewItem : ListingConfig a msg -> a -> Html msg
 viewItem config item =
     div [ class "list-group-item" ]
-        [ viewIcon config item
+        [ ItemIcon.view { text = config.textTitle item, image = Nothing }
         , div [ class "content" ]
             [ div [ class "title" ]
                 [ config.title item
@@ -70,38 +71,6 @@ viewItem config item =
                     (List.map viewAction <| config.actions item)
                 ]
             ]
-        ]
-
-
-viewIcon : ListingConfig a msg -> a -> Html msg
-viewIcon config item =
-    let
-        letter =
-            config.textTitle item
-                |> String.uncons
-                |> Maybe.map (\( a, _ ) -> a)
-                |> Maybe.withDefault 'A'
-
-        hash =
-            config.textTitle item
-                |> String.toList
-                |> List.map Char.toCode
-                |> List.sum
-
-        h =
-            String.fromInt <| remainderBy 360 hash
-
-        s =
-            String.fromInt <| 25 + remainderBy 71 hash
-
-        l =
-            String.fromInt <| 85 + remainderBy 11 hash
-
-        hsl =
-            "hsl(" ++ h ++ "," ++ s ++ "%," ++ l ++ "%)"
-    in
-    div [ class "icon", style "background-color" hsl ]
-        [ text <| String.fromChar letter
         ]
 
 

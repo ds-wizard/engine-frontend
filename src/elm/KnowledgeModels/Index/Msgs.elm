@@ -1,7 +1,7 @@
 module KnowledgeModels.Index.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import KnowledgeModels.Common.Models exposing (Package)
+import KnowledgeModels.Common.Package exposing (Package)
 
 
 type Msg

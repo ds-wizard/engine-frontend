@@ -1,9 +1,9 @@
 module Users.Edit.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
+import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
@@ -61,10 +61,10 @@ navbar wrapMsg model =
 
 userView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 userView wrapMsg model =
-    div [ class <| getClass (model.currentView /= Profile) "hidden" ]
+    div [ classList [ ( "hidden", model.currentView /= Profile ) ] ]
         [ FormResult.view model.savingUser
         , userFormView model.userForm (model.uuid == "current") |> Html.map (wrapMsg << EditFormMsg)
-        , formActionsView model ( "Save", model.savingUser, wrapMsg <| EditFormMsg Form.Submit )
+        , formActionsView model (ActionButton.ButtonConfig "Save" model.savingUser (wrapMsg <| EditFormMsg Form.Submit) False)
         ]
 
 
@@ -102,10 +102,10 @@ userFormView form current =
 
 passwordView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 passwordView wrapMsg model =
-    div [ class <| getClass (model.currentView /= Password) "hidden" ]
+    div [ classList [ ( "hidden", model.currentView /= Password ) ] ]
         [ FormResult.view model.savingPassword
         , passwordFormView model.passwordForm |> Html.map (wrapMsg << PasswordFormMsg)
-        , formActionsView model ( "Save", model.savingPassword, wrapMsg <| PasswordFormMsg Form.Submit )
+        , formActionsView model (ActionButton.ButtonConfig "Save" model.savingPassword (wrapMsg <| PasswordFormMsg Form.Submit) False)
         ]
 
 
@@ -117,20 +117,11 @@ passwordFormView form =
         ]
 
 
-formActionsView : Model -> ( String, ActionResult a, Msgs.Msg ) -> Html Msgs.Msg
-formActionsView { uuid } actionButtonSettings =
+formActionsView : Model -> ActionButton.ButtonConfig a Msgs.Msg -> Html Msgs.Msg
+formActionsView { uuid } actionButtonConfig =
     case uuid of
         "current" ->
-            FormActions.viewActionOnly actionButtonSettings
+            FormActions.viewActionOnly actionButtonConfig
 
         _ ->
-            FormActions.view (Users Users.Routing.Index) actionButtonSettings
-
-
-getClass : Bool -> String -> String
-getClass condition class =
-    if condition then
-        class
-
-    else
-        ""
+            FormActions.view (Users Users.Routing.Index) actionButtonConfig

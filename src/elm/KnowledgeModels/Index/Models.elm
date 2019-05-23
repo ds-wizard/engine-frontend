@@ -1,7 +1,7 @@
 module KnowledgeModels.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import KnowledgeModels.Common.Models exposing (Package)
+import KnowledgeModels.Common.Package exposing (Package)
 
 
 type alias Model =

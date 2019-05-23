@@ -1,139 +1,205 @@
 module KnowledgeModels.Detail.View exposing (view)
 
 import Auth.Permission as Perm exposing (hasPerm)
-import Bootstrap.Button as Button
-import Bootstrap.Dropdown as Dropdown
-import Common.Api.Packages exposing (exportPackageUrl)
+import Common.Api.Packages as PackagesApi
 import Common.AppState exposing (AppState)
-import Common.Html.Attribute exposing (detailClass, linkToAttributes)
-import Common.View.FormGroup as FormGroup
+import Common.Html exposing (fa, linkTo)
+import Common.View.ItemIcon as ItemIcon
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html.Events exposing (onClick)
 import KMEditor.Routing
+import KnowledgeModels.Common.OrganizationInfo exposing (OrganizationInfo)
+import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
+import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Detail.Models exposing (..)
 import KnowledgeModels.Detail.Msgs exposing (..)
-import Msgs
+import KnowledgeModels.Routing exposing (Route(..))
+import Markdown
 import Questionnaires.Routing
 import Routing
+import Utils exposing (listFilterJust, listInsertIf)
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
-    Page.actionResultView (packageDetail wrapMsg appState model) model.packages
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView (viewPackage appState model) model.package
 
 
-packageDetail : (Msg -> Msgs.Msg) -> AppState -> Model -> List PackageDetailRow -> Html Msgs.Msg
-packageDetail wrapMsg appState model packages =
-    case List.head packages of
-        Just package ->
-            div [ detailClass "KnowledgeModels__Detail" ]
-                [ div []
-                    [ Page.header package.packageDetail.name []
-                    , FormGroup.codeView package.packageDetail.organizationId "Organization ID"
-                    , FormGroup.codeView package.packageDetail.kmId "Knowledge Model ID"
-                    , FormGroup.codeView (String.fromInt package.packageDetail.metamodelVersion) "Metamodel Version"
-                    , h3 [] [ text "Versions" ]
-                    , div [] (List.map (versionView wrapMsg appState) <| sortPackageDetailRowsByVersion packages)
-                    ]
-                , deleteVersionModal wrapMsg model
+viewPackage : AppState -> Model -> PackageDetail -> Html Msg
+viewPackage appState model package =
+    div [ class "KnowledgeModels__Detail" ]
+        [ header appState package
+        , div [ class "KnowledgeModels__Detail__Readme" ] [ Markdown.toHtml [] package.readme ]
+        , sidePanel package
+        , deleteVersionModal model package
+        ]
+
+
+header : AppState -> PackageDetail -> Html Msg
+header appState package =
+    let
+        exportAction =
+            a [ class "link-with-icon", href <| PackagesApi.exportPackageUrl package.id appState, target "_blank" ]
+                [ fa "download", text "Export" ]
+
+        forkAction =
+            linkTo (Routing.KMEditor <| KMEditor.Routing.CreateRoute <| Just package.id)
+                [ class "link-with-icon" ]
+                [ fa "code-fork"
+                , text "Fork knowledge model"
                 ]
 
-        Nothing ->
-            Page.error "Empty knowledge model list returned."
-
-
-versionView : (Msg -> Msgs.Msg) -> AppState -> PackageDetailRow -> Html Msgs.Msg
-versionView wrapMsg appState row =
-    div [ class "card bg-light mb-3" ]
-        [ div [ class "card-body" ]
-            [ div [ class "row align-items-center" ]
-                [ div [ class "col-4 labels" ]
-                    [ strong [] [ text row.packageDetail.version ] ]
-                , div [ class "col-8 text-right actions" ]
-                    [ versionViewActions wrapMsg appState row ]
+        questionnaireAction =
+            linkTo (Routing.Questionnaires <| Questionnaires.Routing.Create <| Just package.id)
+                [ class "link-with-icon" ]
+                [ fa "list-alt"
+                , text "Create Questionnaire"
                 ]
-            , div [ class "row mt-3" ]
-                [ div [ class "col-12" ] [ text row.packageDetail.description ]
+
+        deleteAction =
+            a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
+                [ fa "trash-o"
+                , text "Delete"
                 ]
+
+        actions =
+            []
+                |> listInsertIf exportAction (hasPerm appState.jwt Perm.packageManagementWrite)
+                |> listInsertIf forkAction (hasPerm appState.jwt Perm.knowledgeModel)
+                |> listInsertIf questionnaireAction (hasPerm appState.jwt Perm.questionnaire)
+                |> listInsertIf deleteAction (hasPerm appState.jwt Perm.packageManagementWrite)
+    in
+    div [ class "KnowledgeModels__Detail__Header" ]
+        [ div [ class "header-content" ]
+            [ div [ class "name" ] [ text package.name ]
+            , div [ class "actions" ] actions
             ]
         ]
 
 
-versionViewActions : (Msg -> Msgs.Msg) -> AppState -> PackageDetailRow -> Html Msgs.Msg
-versionViewActions wrapMsg appState row =
+sidePanel : PackageDetail -> Html msg
+sidePanel package =
     let
-        id =
-            row.packageDetail.id
-
-        exportAndDeleteButtons =
-            if hasPerm appState.jwt Perm.packageManagementWrite then
-                [ a [ class "btn btn-outline-primary link-with-icon", href <| exportPackageUrl id appState, target "_blank" ]
-                    [ i [ class "fa fa-download" ] [], text "Export" ]
-                , a [ class "btn btn-outline-primary", onClick (wrapMsg <| ShowHideDeleteVersion <| Just id) ]
-                    [ i [ class "fa fa-trash-o" ] [] ]
-                ]
-
-            else
-                []
-
-        forkKMItem =
-            if hasPerm appState.jwt Perm.knowledgeModel then
-                [ Dropdown.anchorItem
-                    (linkToAttributes (Routing.KMEditor <| KMEditor.Routing.CreateRoute <| Just id))
-                    [ text "Fork Knowledge Model" ]
-                ]
-
-            else
-                []
-
-        createQuestionnaireItem =
-            if hasPerm appState.jwt Perm.questionnaire then
-                [ Dropdown.anchorItem
-                    (linkToAttributes (Routing.Questionnaires <| Questionnaires.Routing.Create <| Just id))
-                    [ text "Create Questionnaire" ]
-                ]
-
-            else
-                []
-
-        items =
-            forkKMItem ++ createQuestionnaireItem
-
-        dropdown =
-            if List.length items > 0 then
-                [ Dropdown.dropdown row.dropdownState
-                    { options = [ Dropdown.alignMenuRight ]
-                    , toggleMsg = wrapMsg << DropdownMsg row.packageDetail
-                    , toggleButton = Dropdown.toggle [ Button.outlinePrimary ] []
-                    , items = items
-                    }
-                ]
-
-            else
-                []
+        sections =
+            [ sidePanelKmInfo package
+            , sidePanelOtherVersions package
+            , sidePanelOrganizationInfo package
+            , sidePanelRegistryLink package
+            ]
     in
-    div [ class "btn-group" ]
-        (exportAndDeleteButtons ++ dropdown)
+    div [ class "KnowledgeModels__Detail__SidePanel" ]
+        [ list 12 12 <| listFilterJust sections ]
 
 
-deleteVersionModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-deleteVersionModal wrapMsg model =
+sidePanelKmInfo : PackageDetail -> Maybe ( String, Html msg )
+sidePanelKmInfo package =
     let
-        ( version, visible ) =
-            case model.versionToBeDeleted of
-                Just value ->
-                    ( value, True )
+        kmInfoList =
+            [ ( "ID:", text package.id )
+            , ( "Version:", text <| Version.toString package.version )
+            , ( "Metadmodel:", text <| String.fromInt package.metamodelVersion )
+            ]
+
+        parentInfo =
+            case package.parentPackageId of
+                Just parentPackageId ->
+                    [ ( "Parent KM:"
+                      , linkTo (Routing.KnowledgeModels <| Detail parentPackageId)
+                            []
+                            [ text parentPackageId ]
+                      )
+                    ]
 
                 Nothing ->
-                    ( "", False )
+                    []
+    in
+    Just ( "Knowledge Model", list 4 8 <| kmInfoList ++ parentInfo )
 
+
+sidePanelOtherVersions : PackageDetail -> Maybe ( String, Html msg )
+sidePanelOtherVersions package =
+    let
+        versionLink version =
+            li []
+                [ linkTo (Routing.KnowledgeModels <| Detail <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
+                    []
+                    [ text <| Version.toString version ]
+                ]
+
+        versionLinks =
+            package.versions
+                |> List.filter ((/=) package.version)
+                |> List.sortWith Version.compare
+                |> List.map versionLink
+    in
+    if List.length versionLinks > 0 then
+        Just ( "Other Versions", ul [] versionLinks )
+
+    else
+        Nothing
+
+
+sidePanelOrganizationInfo : PackageDetail -> Maybe ( String, Html msg )
+sidePanelOrganizationInfo package =
+    case package.organization of
+        Just organization ->
+            Just ( "Published by", viewOrganization organization )
+
+        Nothing ->
+            Nothing
+
+
+sidePanelRegistryLink : PackageDetail -> Maybe ( String, Html msg )
+sidePanelRegistryLink package =
+    case package.registryLink of
+        Just registryLink ->
+            Just
+                ( "Registry Link"
+                , a [ href registryLink, class "link-with-icon", target "_blank" ]
+                    [ fa "external-link"
+                    , text package.id
+                    ]
+                )
+
+        Nothing ->
+            Nothing
+
+
+list : Int -> Int -> List ( String, Html msg ) -> Html msg
+list colLabel colValue rows =
+    let
+        viewRow ( label, value ) =
+            [ dt [ class <| "col-" ++ String.fromInt colLabel ]
+                [ text label ]
+            , dd [ class <| "col-" ++ String.fromInt colValue ]
+                [ value ]
+            ]
+    in
+    dl [ class "row" ] (List.concatMap viewRow rows)
+
+
+viewOrganization : OrganizationInfo -> Html msg
+viewOrganization organization =
+    div [ class "organization" ]
+        [ ItemIcon.view { text = organization.name, image = organization.logo }
+        , div [ class "content" ]
+            [ strong [] [ text organization.name ]
+            , br [] []
+            , text organization.organizationId
+            ]
+        ]
+
+
+deleteVersionModal : Model -> PackageDetail -> Html Msg
+deleteVersionModal model package =
+    let
         modalContent =
             [ p []
-                [ text "Are you sure you want to permanently delete version "
-                , strong [] [ text version ]
+                [ text "Are you sure you want to permanently delete "
+                , strong [] [ text package.id ]
                 , text "?"
                 ]
             ]
@@ -141,11 +207,12 @@ deleteVersionModal wrapMsg model =
         modalConfig =
             { modalTitle = "Delete version"
             , modalContent = modalContent
-            , visible = visible
+            , visible = model.showDeleteDialog
             , actionResult = model.deletingVersion
             , actionName = "Delete"
-            , actionMsg = wrapMsg DeleteVersion
-            , cancelMsg = Just <| wrapMsg <| ShowHideDeleteVersion Nothing
+            , actionMsg = DeleteVersion
+            , cancelMsg = Just <| ShowDeleteDialog False
+            , dangerous = True
             }
     in
     Modal.confirm modalConfig

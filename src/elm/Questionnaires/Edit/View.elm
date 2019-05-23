@@ -3,6 +3,7 @@ module Questionnaires.Edit.View exposing (formView, questionnaireView, view)
 import Common.Form exposing (CustomFormError)
 import Common.Html.Attribute exposing (detailClass)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
@@ -32,7 +33,7 @@ questionnaireView wrapMsg model _ =
             , formView model.editForm |> Html.map (wrapMsg << FormMsg)
             , FormActions.view
                 (Questionnaires Questionnaires.Routing.Index)
-                ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+                (ActionButton.ButtonConfig "Save" model.savingQuestionnaire (wrapMsg <| FormMsg Form.Submit) False)
             ]
         ]
 

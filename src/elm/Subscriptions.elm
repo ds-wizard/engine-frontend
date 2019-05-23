@@ -17,7 +17,7 @@ subscriptions model =
                     KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel
 
                 KnowledgeModels route ->
-                    KnowledgeModels.Subscriptions.subscriptions KnowledgeModelsMsg route model.kmPackagesModel
+                    Sub.map KnowledgeModelsMsg <| KnowledgeModels.Subscriptions.subscriptions route model.kmPackagesModel
 
                 _ ->
                     Sub.none

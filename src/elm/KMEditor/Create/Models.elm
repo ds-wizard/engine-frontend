@@ -6,12 +6,12 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Package exposing (Package)
 import Utils exposing (validateRegex)
 
 
 type alias Model =
-    { packages : ActionResult (List PackageDetail)
+    { packages : ActionResult (List Package)
     , savingKnowledgeModel : ActionResult String
     , form : Form CustomFormError KnowledgeModelCreateForm
     , selectedPackage : Maybe String

@@ -468,6 +468,7 @@ feedbackModal model =
             , actionName = actionName
             , actionMsg = actionMsg
             , cancelMsg = cancelMsg
+            , dangerous = False
             }
     in
     Modal.confirm modalConfig

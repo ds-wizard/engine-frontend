@@ -2,6 +2,7 @@ module Users.Create.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html.Attribute exposing (detailClass)
+import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
@@ -22,7 +23,9 @@ view wrapMsg model =
         [ Page.header "Create user" []
         , FormResult.view model.savingUser
         , formView model.form |> Html.map (wrapMsg << FormMsg)
-        , FormActions.view (Routing.Users Index) ( "Save", model.savingUser, wrapMsg <| FormMsg Form.Submit )
+        , FormActions.view
+            (Routing.Users Index)
+            (ActionButton.ButtonConfig "Save" model.savingUser (wrapMsg <| FormMsg Form.Submit) False)
         ]
 
 

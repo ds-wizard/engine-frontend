@@ -34,7 +34,8 @@ fetchData route wrapMsg model appState =
             KMEditor.Migration.Update.fetchData (wrapMsg << MigrationMsg) uuid appState
 
         PublishRoute uuid ->
-            KMEditor.Publish.Update.fetchData (wrapMsg << PublishMsg) uuid appState
+            Cmd.map (wrapMsg << PublishMsg) <|
+                KMEditor.Publish.Update.fetchData uuid appState
 
 
 isGuarded : Route -> Model -> Maybe String

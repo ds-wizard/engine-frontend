@@ -4,9 +4,10 @@ import ActionResult exposing (ActionResult)
 import Common.Html exposing (emptyNode, linkTo)
 import Common.View.Listing as Listing exposing (ListingConfig)
 import Common.View.Page as Page
-import Html exposing (Html, a, code, div, h3, span, strong, text)
-import Html.Attributes exposing (class, href, title)
+import Html exposing (Html, code, div, h3, span, strong, text)
+import Html.Attributes exposing (class, title)
 import KMEditor.Common.Models.Entities exposing (Level)
+import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Routing
 import Questionnaires.Common.Models exposing (Questionnaire)
 import Questionnaires.Common.View exposing (accessibilityBadge)
@@ -80,15 +81,13 @@ listingDescription questionnaire =
     let
         kmRoute =
             Routing.KnowledgeModels <|
-                KnowledgeModels.Routing.Detail
-                    questionnaire.package.organizationId
-                    questionnaire.package.kmId
+                KnowledgeModels.Routing.Detail questionnaire.package.id
     in
     linkTo kmRoute
         [ title "Knowledge Model" ]
         [ text questionnaire.package.name
         , text ", "
-        , text questionnaire.package.version
+        , text <| Version.toString questionnaire.package.version
         , text " ("
         , code [] [ text questionnaire.package.id ]
         , text ")"

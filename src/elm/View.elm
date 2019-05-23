@@ -39,7 +39,8 @@ view model =
 
             KnowledgeModels route ->
                 model.kmPackagesModel
-                    |> KnowledgeModels.View.view route KnowledgeModelsMsg model.appState
+                    |> KnowledgeModels.View.view route model.appState
+                    |> Html.map KnowledgeModelsMsg
                     |> Layout.app model
 
             Organization ->

@@ -9,14 +9,14 @@ import Auth.Role as Role
 import Common.AppState exposing (AppState)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (optional, required)
-import KnowledgeModels.Common.Models exposing (PackageDetail, packageDetailDecoder)
+import KnowledgeModels.Common.Package as Package exposing (Package)
 import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 
 
 type alias Questionnaire =
     { uuid : String
     , name : String
-    , package : PackageDetail
+    , package : Package
     , level : Int
     , accessibility : QuestionnaireAccessibility
     , ownerUuid : Maybe String
@@ -50,7 +50,7 @@ questionnaireDecoder =
     Decode.succeed Questionnaire
         |> required "uuid" Decode.string
         |> required "name" Decode.string
-        |> required "package" packageDetailDecoder
+        |> required "package" Package.decoder
         |> optional "level" Decode.int 0
         |> required "accessibility" QuestionnaireAccessibility.decoder
         |> required "ownerUuid" (Decode.maybe Decode.string)

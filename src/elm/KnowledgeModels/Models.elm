@@ -24,7 +24,7 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        Detail _ _ ->
+        Detail _ ->
             { model | detailModel = KnowledgeModels.Detail.Models.initialModel }
 
         Import ->

@@ -258,6 +258,7 @@ integrationDeleteConfirm editorData =
         , actionName = "Delete"
         , actionMsg = EditorMsg <| IntegrationEditorMsg <| DeleteIntegration editorData.uuid
         , cancelMsg = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm False
+        , dangerous = True
         }
 
 

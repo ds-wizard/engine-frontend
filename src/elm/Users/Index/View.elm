@@ -137,6 +137,7 @@ deleteModal wrapMsg model =
             , actionName = "Delete"
             , actionMsg = wrapMsg DeleteUser
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteUser Nothing
+            , dangerous = True
             }
     in
     Modal.confirm modalConfig

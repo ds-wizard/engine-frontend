@@ -1,4 +1,4 @@
-module Common.Html.Attribute exposing (detailClass, linkToAttributes, listClass)
+module Common.Html.Attribute exposing (detailClass, linkToAttributes, listClass, wideDetailClass)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
@@ -14,6 +14,11 @@ linkToAttributes route =
 detailClass : String -> Html.Attribute msg
 detailClass otherClass =
     class <| "col col-detail " ++ otherClass
+
+
+wideDetailClass : String -> Html.Attribute msg
+wideDetailClass otherClass =
+    class <| "col col-wide-detail " ++ otherClass
 
 
 listClass : String -> Html.Attribute msg

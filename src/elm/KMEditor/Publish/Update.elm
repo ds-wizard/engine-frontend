@@ -1,41 +1,78 @@
 module KMEditor.Publish.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api exposing (applyResult, getResultCmd)
+import Common.Api exposing (getResultCmd)
 import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
-import Common.Setters exposing (setKnowledgeModel)
 import Form
-import KMEditor.Publish.Models exposing (KnowledgeModelPublishForm, Model, encodeKnowledgeModelPublishForm, knowledgeModelPublishFormValidation)
+import Form.Field as Field
+import KMEditor.Publish.Models exposing (Model, PublishForm, encodePublishForm, publishFormValidation)
 import KMEditor.Publish.Msgs exposing (Msg(..))
+import KnowledgeModels.Common.Version as Version exposing (Version)
 import KnowledgeModels.Routing
 import Msgs
 import Routing exposing (Route(..), cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg uuid appState =
-    Cmd.map wrapMsg <|
-        KnowledgeModelsApi.getKnowledgeModel uuid appState GetKnowledgeModelCompleted
+fetchData : String -> AppState -> Cmd Msg
+fetchData uuid appState =
+    KnowledgeModelsApi.getKnowledgeModel uuid appState GetKnowledgeModelCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetKnowledgeModelCompleted result ->
-            applyResult
-                { setResult = setKnowledgeModel
-                , defaultError = "Unable to get the knowledge model."
-                , model = model
-                , result = result
-                }
+            case result of
+                Ok knowledgeModel ->
+                    let
+                        cmd =
+                            case knowledgeModel.parentPackageId of
+                                Just parentPackageId ->
+                                    Cmd.map wrapMsg <|
+                                        PackagesApi.getPackage parentPackageId appState GetParentPackageCompleted
+
+                                Nothing ->
+                                    Cmd.none
+                    in
+                    ( { model | knowledgeModel = Success knowledgeModel }
+                    , cmd
+                    )
+
+                Err error ->
+                    ( { model | knowledgeModel = getServerError error "Unable to get the knowledge model." }
+                    , getResultCmd result
+                    )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model
 
+        FormSetVersion version ->
+            handleFormSetVersion version model
+
         PutKnowledgeModelVersionCompleted result ->
             putKnowledgeModelVersionCompleted appState model result
+
+        GetParentPackageCompleted result ->
+            case result of
+                Ok package ->
+                    let
+                        formMsg field value =
+                            Form.Input field Form.Text <| Field.String value
+
+                        form =
+                            model.form
+                                |> Form.update publishFormValidation (formMsg "description" package.description)
+                                |> Form.update publishFormValidation (formMsg "readme" package.readme)
+                    in
+                    ( { model | form = form }
+                    , Cmd.none
+                    )
+
+                Err error ->
+                    ( model, getResultCmd result )
 
 
 handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -44,7 +81,7 @@ handleForm formMsg wrapMsg appState model =
         ( Form.Submit, Just form, Success km ) ->
             let
                 ( version, body ) =
-                    encodeKnowledgeModelPublishForm form
+                    encodePublishForm form
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -55,9 +92,24 @@ handleForm formMsg wrapMsg appState model =
         _ ->
             let
                 form =
-                    Form.update knowledgeModelPublishFormValidation formMsg model.form
+                    Form.update publishFormValidation formMsg model.form
             in
             ( { model | form = form }, Cmd.none )
+
+
+handleFormSetVersion : Version -> Model -> ( Model, Cmd Msgs.Msg )
+handleFormSetVersion version model =
+    let
+        formMsg field value =
+            Form.Input field Form.Text <| Field.String (String.fromInt value)
+
+        form =
+            model.form
+                |> Form.update publishFormValidation (formMsg "major" <| Version.getMajor version)
+                |> Form.update publishFormValidation (formMsg "minor" <| Version.getMinor version)
+                |> Form.update publishFormValidation (formMsg "patch" <| Version.getPatch version)
+    in
+    ( { model | form = form }, Cmd.none )
 
 
 putKnowledgeModelVersionCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )

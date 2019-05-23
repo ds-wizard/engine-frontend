@@ -13,6 +13,7 @@ module KMEditor.Common.Models exposing
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (optional, required)
 import KMEditor.Common.Models.Events exposing (Event, eventDecoder)
+import KnowledgeModels.Common.Version as Version exposing (Version)
 import List.Extra as List
 
 
@@ -104,7 +105,7 @@ kmMatchState states knowledgeModel =
     List.any ((==) knowledgeModel.stateType) states
 
 
-kmLastVersion : KnowledgeModelDetail -> Maybe String
+kmLastVersion : KnowledgeModelDetail -> Maybe Version
 kmLastVersion km =
     let
         getVersion parent =
@@ -124,6 +125,7 @@ kmLastVersion km =
             in
             if sameOrganization && samePackage then
                 List.getAt 2 parts
+                    |> Maybe.andThen Version.fromString
 
             else
                 Nothing
