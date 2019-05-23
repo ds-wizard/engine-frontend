@@ -3,7 +3,7 @@ module KnowledgeModels.Detail.View exposing (view)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Api.Packages as PackagesApi
 import Common.AppState exposing (AppState)
-import Common.Html exposing (fa, linkTo)
+import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.View.ItemIcon as ItemIcon
 import Common.View.Modal as Modal
 import Common.View.Page as Page
@@ -32,7 +32,7 @@ viewPackage : AppState -> Model -> PackageDetail -> Html Msg
 viewPackage appState model package =
     div [ class "KnowledgeModels__Detail" ]
         [ header appState package
-        , div [ class "KnowledgeModels__Detail__Readme" ] [ Markdown.toHtml [] package.readme ]
+        , readme package
         , sidePanel package
         , deleteVersionModal model package
         ]
@@ -77,6 +77,34 @@ header appState package =
             [ div [ class "name" ] [ text package.name ]
             , div [ class "actions" ] actions
             ]
+        ]
+
+
+readme : PackageDetail -> Html msg
+readme package =
+    let
+        outdated =
+            case package.remoteLatestVersion of
+                Just remoteLatestVersion ->
+                    let
+                        latestPackageId =
+                            package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
+                    in
+                    div [ class "alert alert-warning" ]
+                        [ fa "exclamation-triangle"
+                        , text <| "There is a newer version (" ++ Version.toString remoteLatestVersion ++ ") available in the registry, you can "
+                        , linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Import <| Just <| latestPackageId)
+                            []
+                            [ text "import" ]
+                        , text " it."
+                        ]
+
+                Nothing ->
+                    emptyNode
+    in
+    div [ class "KnowledgeModels__Detail__Readme" ]
+        [ outdated
+        , Markdown.toHtml [ class "readme" ] package.readme
         ]
 
 

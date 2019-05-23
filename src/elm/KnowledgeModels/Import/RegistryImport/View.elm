@@ -5,7 +5,7 @@ import Common.Html exposing (fa, linkTo)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormResult as FormResult
 import Html exposing (Html, br, code, div, h1, input, p, strong, text)
-import Html.Attributes exposing (class, placeholder, type_)
+import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onInput)
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Import.RegistryImport.Models exposing (Model)
@@ -35,7 +35,7 @@ viewForm model =
         [ FormResult.errorOnlyView model.package
         , div [ class "jumbotron" ]
             [ div [ class "input-group" ]
-                [ input [ onInput ChangePackageId, type_ "text", class "form-control", placeholder "Knowledge Model ID" ] []
+                [ input [ onInput ChangePackageId, type_ "text", value model.packageId, class "form-control", placeholder "Knowledge Model ID" ] []
                 , div [ class "input-group-append" ]
                     [ ActionButton.button
                         { label = "Import"

@@ -13,6 +13,6 @@ type alias Model =
     { importModel : ImportModel }
 
 
-initialModel : Model
-initialModel =
-    { importModel = RegistryImportModel RegistryImportModels.initialModel }
+initialModel : Maybe String -> Model
+initialModel packageId =
+    { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" packageId }

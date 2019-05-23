@@ -48,7 +48,7 @@ $header-height: 50px;
         margin-top: $header-height;
         overflow-x: auto;
 
-        & > div {
+        .readme {
             max-width: 50rem;
             margin: 20px auto;
             padding: 0 1.25rem;

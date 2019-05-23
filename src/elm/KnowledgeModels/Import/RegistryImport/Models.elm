@@ -10,8 +10,8 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { packageId = ""
+initialModel : String -> Model
+initialModel packageId =
+    { packageId = packageId
     , package = Unset
     }

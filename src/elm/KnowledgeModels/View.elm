@@ -16,7 +16,7 @@ view route appState model =
         Detail _ ->
             Html.map DetailMsg <| KnowledgeModels.Detail.View.view appState model.detailModel
 
-        Import ->
+        Import _ ->
             Html.map ImportMsg <| KnowledgeModels.Import.View.view model.importModel
 
         Index ->

@@ -32,7 +32,7 @@ update msg wrapMsg appState model =
             )
 
         ( ShowRegistryImport, _ ) ->
-            ( { model | importModel = RegistryImportModel RegistryImportModels.initialModel }
+            ( { model | importModel = RegistryImportModel <| RegistryImportModels.initialModel "" }
             , Cmd.none
             )
 
