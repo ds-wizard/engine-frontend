@@ -63,6 +63,7 @@ listingTitle : Maybe JwtToken -> KnowledgeModel -> Html Msgs.Msg
 listingTitle mbJwt km =
     span []
         [ linkToKM mbJwt km [] [ text km.name ]
+        , listingTitleLastPublishedVersionBadge km
         , listingTitleBadge km
         ]
 
@@ -86,6 +87,28 @@ linkToKM mbJwt km =
 
         _ ->
             linkTo (Routing.KMEditor <| EditorRoute <| km.uuid)
+
+
+listingTitleLastPublishedVersionBadge : KnowledgeModel -> Html msg
+listingTitleLastPublishedVersionBadge km =
+    let
+        getVersion packageId =
+            case String.split ":" packageId of
+                _ :: _ :: version :: [] ->
+                    Just version
+
+                _ ->
+                    Nothing
+
+        badge version =
+            span [ title "Last published version", class "badge badge-light" ]
+                [ text <| Version.toString version ]
+    in
+    km.parentPackageId
+        |> Maybe.andThen getVersion
+        |> Maybe.andThen Version.fromString
+        |> Maybe.map badge
+        |> Maybe.withDefault emptyNode
 
 
 listingTitleBadge : KnowledgeModel -> Html msg
