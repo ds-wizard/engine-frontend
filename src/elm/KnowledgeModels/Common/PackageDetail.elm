@@ -6,6 +6,7 @@ module KnowledgeModels.Common.PackageDetail exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import KnowledgeModels.Common.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import KnowledgeModels.Common.PackageState as PackageState exposing (PackageState)
 import KnowledgeModels.Common.Version as Version exposing (Version)
 
 
@@ -23,6 +24,7 @@ type alias PackageDetail =
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
     , remoteLatestVersion : Maybe Version
+    , state : PackageState
     }
 
 
@@ -42,3 +44,4 @@ decoder =
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
+        |> D.required "state" PackageState.decoder

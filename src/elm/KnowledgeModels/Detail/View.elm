@@ -13,6 +13,7 @@ import Html.Events exposing (onClick)
 import KMEditor.Routing
 import KnowledgeModels.Common.OrganizationInfo exposing (OrganizationInfo)
 import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
+import KnowledgeModels.Common.PackageState as PackageState
 import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Detail.Models exposing (..)
 import KnowledgeModels.Detail.Msgs exposing (..)
@@ -84,8 +85,8 @@ readme : PackageDetail -> Html msg
 readme package =
     let
         outdated =
-            case package.remoteLatestVersion of
-                Just remoteLatestVersion ->
+            case ( package.remoteLatestVersion, PackageState.isOutdated package.state ) of
+                ( Just remoteLatestVersion, True ) ->
                     let
                         latestPackageId =
                             package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
@@ -99,7 +100,7 @@ readme package =
                         , text " it."
                         ]
 
-                Nothing ->
+                _ ->
                     emptyNode
     in
     div [ class "KnowledgeModels__Detail__Readme" ]
