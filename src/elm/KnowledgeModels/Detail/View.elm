@@ -3,6 +3,7 @@ module KnowledgeModels.Detail.View exposing (view)
 import Auth.Permission as Perm exposing (hasPerm)
 import Common.Api.Packages as PackagesApi
 import Common.AppState exposing (AppState)
+import Common.Config exposing (Registry(..))
 import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.View.ItemIcon as ItemIcon
 import Common.View.Modal as Modal
@@ -33,7 +34,7 @@ viewPackage : AppState -> Model -> PackageDetail -> Html Msg
 viewPackage appState model package =
     div [ class "KnowledgeModels__Detail" ]
         [ header appState package
-        , readme package
+        , readme appState package
         , sidePanel package
         , deleteVersionModal model package
         ]
@@ -81,12 +82,12 @@ header appState package =
         ]
 
 
-readme : PackageDetail -> Html msg
-readme package =
+readme : AppState -> PackageDetail -> Html msg
+readme appState package =
     let
         outdated =
-            case ( package.remoteLatestVersion, PackageState.isOutdated package.state ) of
-                ( Just remoteLatestVersion, True ) ->
+            case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
+                ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
                     let
                         latestPackageId =
                             package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion

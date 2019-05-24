@@ -1,21 +1,22 @@
 module KnowledgeModels.Import.RegistryImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Html exposing (fa, linkTo)
+import Common.AppState exposing (AppState)
+import Common.Config exposing (Registry(..))
+import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormResult as FormResult
-import Html exposing (Html, br, code, div, h1, input, p, strong, text)
-import Html.Attributes exposing (class, placeholder, type_, value)
+import Html exposing (Html, a, code, div, h1, hr, input, p, text)
+import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Events exposing (onInput)
-import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Import.RegistryImport.Models exposing (Model)
 import KnowledgeModels.Import.RegistryImport.Msgs exposing (Msg(..))
 import KnowledgeModels.Routing
 import Routing
 
 
-view : Model -> Html Msg
-view model =
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         content =
             case model.pulling of
@@ -23,14 +24,14 @@ view model =
                     viewImported model.packageId
 
                 _ ->
-                    viewForm model
+                    viewForm appState model
     in
-    div []
+    div [ class "KnowledgeModels__Import__RegistryImport" ]
         [ content ]
 
 
-viewForm : Model -> Html Msg
-viewForm model =
+viewForm : AppState -> Model -> Html Msg
+viewForm appState model =
     div []
         [ FormResult.errorOnlyView model.pulling
         , div [ class "jumbotron" ]
@@ -45,8 +46,24 @@ viewForm model =
                         }
                     ]
                 ]
+            , hr [] []
+            , viewRegistryText appState
             ]
         ]
+
+
+viewRegistryText : AppState -> Html msg
+viewRegistryText appState =
+    case appState.config.registry of
+        RegistryEnabled url ->
+            p []
+                [ text "You can find knowledge models in the "
+                , a [ href url, target "_blank" ] [ text "registry" ]
+                , text "."
+                ]
+
+        _ ->
+            emptyNode
 
 
 viewImported : String -> Html Msg

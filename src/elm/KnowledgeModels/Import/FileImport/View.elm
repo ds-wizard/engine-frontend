@@ -22,7 +22,7 @@ view model =
                 Nothing ->
                     dropzone model
     in
-    div [ id dropzoneId ]
+    div [ class "KnowledgeModels__Import__FileImport", id dropzoneId ]
         [ FormResult.view model.importing
         , content
         ]

@@ -50,7 +50,7 @@ initialModel appState session jwt key =
     , dashboardModel = Dashboard.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , kmEditorModel = KMEditor.Models.initialModel
-    , kmPackagesModel = KnowledgeModels.Models.initialModel
+    , kmPackagesModel = KnowledgeModels.Models.initialModel appState
     , dsPlannerModel = Questionnaires.Models.initialModel
     , publicModel = Public.Models.initialModel
     , users = Users.Models.initialModel
@@ -115,7 +115,7 @@ initLocalModel model =
             { model | kmEditorModel = KMEditor.Models.initLocalModel route model.kmEditorModel }
 
         KnowledgeModels route ->
-            { model | kmPackagesModel = KnowledgeModels.Models.initLocalModel route model.kmPackagesModel }
+            { model | kmPackagesModel = KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
 
         Public route ->
             { model | publicModel = Public.Models.initLocalModel route model.publicModel }

@@ -1,6 +1,8 @@
 module KnowledgeModels.Import.View exposing (view)
 
-import Common.Html exposing (fa)
+import Common.AppState exposing (AppState)
+import Common.Config exposing (Registry(..))
+import Common.Html exposing (emptyNode, fa)
 import Common.Html.Attribute exposing (detailClass)
 import Common.View.Page as Page
 import Html exposing (Html, a, div, li, text, ul)
@@ -12,8 +14,8 @@ import KnowledgeModels.Import.Msgs exposing (Msg(..))
 import KnowledgeModels.Import.RegistryImport.View as RegistryImportView
 
 
-view : Model -> Html Msg
-view model =
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         ( registryActive, content ) =
             case model.importModel of
@@ -26,18 +28,26 @@ view model =
                 RegistryImportModel registryImportModel ->
                     ( True
                     , Html.map RegistryImportMsg <|
-                        RegistryImportView.view registryImportModel
+                        RegistryImportView.view appState registryImportModel
                     )
+
+        navbar =
+            case appState.config.registry of
+                RegistryEnabled _ ->
+                    viewNavbar registryActive
+
+                _ ->
+                    emptyNode
     in
     div [ detailClass "KnowledgeModels__Import" ]
         [ Page.header "Import Knowledge Model" []
-        , navbar registryActive
+        , navbar
         , content
         ]
 
 
-navbar : Bool -> Html Msg
-navbar registryActive =
+viewNavbar : Bool -> Html Msg
+viewNavbar registryActive =
     ul [ class "nav nav-tabs" ]
         [ li [ class "nav-item" ]
             [ a
