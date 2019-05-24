@@ -85,29 +85,42 @@ header appState package =
 readme : AppState -> PackageDetail -> Html msg
 readme appState package =
     let
-        outdated =
-            case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
-                ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
-                    let
-                        latestPackageId =
-                            package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
-                    in
-                    div [ class "alert alert-warning" ]
-                        [ fa "exclamation-triangle"
-                        , text <| "There is a newer version (" ++ Version.toString remoteLatestVersion ++ ") available in the registry, you can "
-                        , linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Import <| Just <| latestPackageId)
-                            []
-                            [ text "import" ]
-                        , text " it."
-                        ]
+        containsNewerVersions =
+            (List.length <| List.filter (Version.greaterThan package.version) package.versions) > 0
 
-                _ ->
-                    emptyNode
+        warning =
+            if containsNewerVersions then
+                div [ class "alert alert-warning" ]
+                    [ text "This is not the latest available version of this knowledge model." ]
+
+            else
+                newVersionInRegistryWarning appState package
     in
     div [ class "KnowledgeModels__Detail__Readme" ]
-        [ outdated
+        [ warning
         , Markdown.toHtml [ class "readme" ] package.readme
         ]
+
+
+newVersionInRegistryWarning : AppState -> PackageDetail -> Html msg
+newVersionInRegistryWarning appState package =
+    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
+        ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
+            let
+                latestPackageId =
+                    package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
+            in
+            div [ class "alert alert-warning" ]
+                [ fa "exclamation-triangle"
+                , text <| "There is a newer version (" ++ Version.toString remoteLatestVersion ++ ") available in the registry, you can "
+                , linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Import <| Just <| latestPackageId)
+                    []
+                    [ text "import" ]
+                , text " it."
+                ]
+
+        _ ->
+            emptyNode
 
 
 sidePanel : PackageDetail -> Html msg
@@ -163,6 +176,7 @@ sidePanelOtherVersions package =
             package.versions
                 |> List.filter ((/=) package.version)
                 |> List.sortWith Version.compare
+                |> List.reverse
                 |> List.map versionLink
     in
     if List.length versionLinks > 0 then

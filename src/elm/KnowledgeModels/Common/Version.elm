@@ -7,6 +7,7 @@ module KnowledgeModels.Common.Version exposing
     , getMajor
     , getMinor
     , getPatch
+    , greaterThan
     , nextMajor
     , nextMinor
     , nextPatch
@@ -87,6 +88,11 @@ fromString versionString =
 
         _ ->
             Nothing
+
+
+greaterThan : Version -> Version -> Bool
+greaterThan version1 version2 =
+    compare version1 version2 == LT
 
 
 compare : Version -> Version -> Order
