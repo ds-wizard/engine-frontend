@@ -8,7 +8,7 @@ module Common.Api.Packages exposing
     , pullPackage
     )
 
-import Common.Api exposing (ToMsg, jwtDelete, jwtFetchEmpty, jwtGet, jwtPostString)
+import Common.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostString)
 import Common.AppState exposing (AppState)
 import Json.Decode as D
 import KnowledgeModels.Common.Package as Package exposing (Package)
@@ -36,9 +36,9 @@ deletePackageVersion packageId =
     jwtDelete ("/packages/" ++ packageId)
 
 
-pullPackage : String -> AppState -> ToMsg Package msg -> Cmd msg
+pullPackage : String -> AppState -> ToMsg () msg -> Cmd msg
 pullPackage packageId =
-    jwtFetchEmpty ("/packages/" ++ packageId ++ "/pull") Package.decoder
+    jwtPostEmpty ("/packages/" ++ packageId ++ "/pull")
 
 
 importPackage : FilePortData -> AppState -> ToMsg () msg -> Cmd msg

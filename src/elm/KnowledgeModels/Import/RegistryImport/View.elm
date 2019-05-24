@@ -18,9 +18,9 @@ view : Model -> Html Msg
 view model =
     let
         content =
-            case model.package of
-                Success package ->
-                    viewImported package
+            case model.pulling of
+                Success _ ->
+                    viewImported model.packageId
 
                 _ ->
                     viewForm model
@@ -32,14 +32,14 @@ view model =
 viewForm : Model -> Html Msg
 viewForm model =
     div []
-        [ FormResult.errorOnlyView model.package
+        [ FormResult.errorOnlyView model.pulling
         , div [ class "jumbotron" ]
             [ div [ class "input-group" ]
                 [ input [ onInput ChangePackageId, type_ "text", value model.packageId, class "form-control", placeholder "Knowledge Model ID" ] []
                 , div [ class "input-group-append" ]
                     [ ActionButton.button
                         { label = "Import"
-                        , result = model.package
+                        , result = model.pulling
                         , msg = Submit
                         , dangerous = False
                         }
@@ -49,18 +49,17 @@ viewForm model =
         ]
 
 
-viewImported : Package -> Html Msg
-viewImported package =
+viewImported : String -> Html Msg
+viewImported packageId =
     div [ class "jumbotron" ]
         [ h1 [] [ fa "check" ]
         , p [ class "lead" ]
-            [ strong [] [ text package.name ]
-            , text " "
-            , code [] [ text package.id ]
+            [ text "Knowledge model "
+            , code [] [ text packageId ]
             , text " has been imported!"
             ]
         , p [ class "lead" ]
-            [ linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Detail package.id)
+            [ linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Detail packageId)
                 [ class "btn btn-primary" ]
                 [ text "View detail" ]
             ]

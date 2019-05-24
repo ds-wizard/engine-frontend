@@ -4,7 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api exposing (applyResult)
 import Common.Api.Packages as PackagesApi
 import Common.AppState exposing (AppState)
-import Common.Setters exposing (setPackage)
+import Common.Setters exposing (setPulling)
 import KnowledgeModels.Import.RegistryImport.Models exposing (Model)
 import KnowledgeModels.Import.RegistryImport.Msgs exposing (Msg(..))
 import Msgs
@@ -18,7 +18,7 @@ update msg wrapMsg appState model =
 
         Submit ->
             if String.length model.packageId > 0 then
-                ( { model | package = Loading }
+                ( { model | pulling = Loading }
                 , PackagesApi.pullPackage model.packageId appState (wrapMsg << PullPackageCompleted)
                 )
 
@@ -27,7 +27,7 @@ update msg wrapMsg appState model =
 
         PullPackageCompleted result ->
             applyResult
-                { setResult = setPackage
+                { setResult = setPulling
                 , defaultError = "Unable to import package."
                 , model = model
                 , result = result

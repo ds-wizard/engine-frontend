@@ -6,6 +6,7 @@ module Common.Setters exposing
     , setMigration
     , setPackage
     , setPackages
+    , setPulling
     , setQuestionnaires
     , setUsers
     )
@@ -44,6 +45,11 @@ setPackage value record =
 setPackages : a -> { b | packages : a } -> { b | packages : a }
 setPackages value record =
     { record | packages = value }
+
+
+setPulling : a -> { b | pulling : a } -> { b | pulling : a }
+setPulling value record =
+    { record | pulling = value }
 
 
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }

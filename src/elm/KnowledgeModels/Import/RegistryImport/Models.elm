@@ -6,12 +6,12 @@ import KnowledgeModels.Common.Package exposing (Package)
 
 type alias Model =
     { packageId : String
-    , package : ActionResult Package
+    , pulling : ActionResult ()
     }
 
 
 initialModel : String -> Model
 initialModel packageId =
     { packageId = packageId
-    , package = Unset
+    , pulling = Unset
     }
