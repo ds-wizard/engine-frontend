@@ -11,6 +11,7 @@ import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KnowledgeModels.Common.Package exposing (Package)
+import KnowledgeModels.Common.PackageState as PackageState
 import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Index.Models exposing (..)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
@@ -61,8 +62,18 @@ listingTitle : Package -> Html Msg
 listingTitle package =
     span []
         [ linkTo (detailRoute package) [] [ text package.name ]
-        , span [ class "badge badge-light" ] [ text <| Version.toString package.version ]
+        , span [ class "badge badge-light", title "Latest version" ] [ text <| Version.toString package.version ]
+        , listingTitleOutdatedBadge package
         ]
+
+
+listingTitleOutdatedBadge : Package -> Html Msg
+listingTitleOutdatedBadge package =
+    if PackageState.isOutdated package.state then
+        span [ class "badge badge-warning" ] [ text "outdated" ]
+
+    else
+        emptyNode
 
 
 listingDescription : Package -> Html Msg

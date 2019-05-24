@@ -2,6 +2,7 @@ module KnowledgeModels.Common.PackageState exposing
     ( PackageState
     , decoder
     , isOutdated
+    , unknown
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -12,6 +13,11 @@ type PackageState
     | OutdatedPackageState
     | UpToDatePackageState
     | UnpublishedPackageState
+
+
+unknown : PackageState
+unknown =
+    UnknownPackageState
 
 
 decoder : Decoder PackageState

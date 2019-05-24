@@ -7,6 +7,7 @@ module KnowledgeModels.Common.Package exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import KnowledgeModels.Common.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import KnowledgeModels.Common.PackageState as PackageState exposing (PackageState)
 import KnowledgeModels.Common.Version as Version exposing (Version)
 
 
@@ -18,6 +19,7 @@ type alias Package =
     , version : Version
     , description : String
     , organization : Maybe OrganizationInfo
+    , state : PackageState
     }
 
 
@@ -31,6 +33,7 @@ decoder =
         |> D.required "version" Version.decoder
         |> D.required "description" D.string
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
+        |> D.required "state" PackageState.decoder
 
 
 dummy : Package
@@ -42,4 +45,5 @@ dummy =
     , version = Version.create 0 0 0
     , description = ""
     , organization = Nothing
+    , state = PackageState.unknown
     }
