@@ -121,7 +121,7 @@ type alias ValueQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
-    , valueType : ValueQuestionType
+    , valueType : QuestionValueType
     }
 
 
@@ -438,23 +438,23 @@ validateIntegrationProps integrations integration =
     List.foldl fold (Validate.succeed Dict.empty) props
 
 
-validateValueType : Validation CustomFormError ValueQuestionType
+validateValueType : Validation CustomFormError QuestionValueType
 validateValueType =
     Validate.string
         |> Validate.andThen
             (\valueType ->
                 case valueType of
                     "StringValue" ->
-                        Validate.succeed StringValueType
+                        Validate.succeed StringQuestionValueType
 
                     "DateValue" ->
-                        Validate.succeed DateValueType
+                        Validate.succeed DateQuestionValueType
 
                     "NumberValue" ->
-                        Validate.succeed NumberValueType
+                        Validate.succeed NumberQuestionValueType
 
                     "TextValue" ->
-                        Validate.succeed TextValueType
+                        Validate.succeed TextQuestionValueType
 
                     _ ->
                         Validate.fail <| Error.value InvalidString
@@ -492,7 +492,7 @@ questionFormInitials question =
     , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
     , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
     , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| getQuestionItemTitle question )
-    , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringValueType <| getQuestionValueType question )
+    , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| getQuestionValueType question )
     , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| getQuestionIntegrationUuid question )
     ]
         ++ props
@@ -561,19 +561,19 @@ questionTypeOptions =
     ]
 
 
-valueTypeToString : ValueQuestionType -> String
+valueTypeToString : QuestionValueType -> String
 valueTypeToString valueType =
     case valueType of
-        StringValueType ->
+        StringQuestionValueType ->
             "StringValue"
 
-        DateValueType ->
+        DateQuestionValueType ->
             "DateValue"
 
-        NumberValueType ->
+        NumberQuestionValueType ->
             "NumberValue"
 
-        TextValueType ->
+        TextQuestionValueType ->
             "TextValue"
 
 

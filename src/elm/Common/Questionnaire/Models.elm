@@ -202,10 +202,10 @@ createQuestionFormItem appState km metrics question =
 
         ValueQuestion data ->
             case data.valueType of
-                NumberValueType ->
+                NumberQuestionValueType ->
                     NumberFormItem descriptor
 
-                TextValueType ->
+                TextQuestionValueType ->
                     TextFormItem descriptor
 
                 _ ->
