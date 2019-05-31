@@ -281,7 +281,7 @@ textView value =
 codeView : String -> String -> Html.Html msg
 codeView value =
     plainGroup <|
-        code [] [ text value ]
+        code [ class "form-value" ] [ text value ]
 
 
 {-| Plain group is same Html as formGroup but without any input fields. It only

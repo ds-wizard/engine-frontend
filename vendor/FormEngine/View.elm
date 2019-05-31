@@ -7,6 +7,7 @@ import FormEngine.Msgs exposing (Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
+import Markdown
 import String exposing (fromInt)
 
 
@@ -244,7 +245,7 @@ viewLabel config descriptor answered humanIdentifiers =
 viewDescription : Maybe String -> Html (Msg msg err)
 viewDescription descriptionText =
     descriptionText
-        |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ text t ])
+        |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ Markdown.toHtml [] t ])
         |> Maybe.withDefault (text "")
 
 
@@ -398,7 +399,7 @@ adviceElement : Maybe String -> Html (Msg msg err)
 adviceElement maybeAdvice =
     case maybeAdvice of
         Just advice ->
-            div [ class "alert alert-info" ] [ text advice ]
+            div [ class "alert alert-info" ] [ Markdown.toHtml [] advice ]
 
         _ ->
             text ""

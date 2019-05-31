@@ -150,7 +150,7 @@ chapterEditorView model editorData =
         form =
             div []
                 [ FormGroup.input editorData.form "title" "Title"
-                , FormGroup.textarea editorData.form "text" "Text"
+                , FormGroup.markdownEditor editorData.form "text" "Text"
                 ]
     in
     ( editorData.uuid
@@ -311,7 +311,7 @@ questionEditorView appState model editorData =
                 , text "By changing the type answers or items might be removed."
                 ]
             , FormGroup.input editorData.form "title" "Title"
-            , FormGroup.textarea editorData.form "text" "Text"
+            , FormGroup.markdownEditor editorData.form "text" "Text"
             , levelSelection
             ]
 
@@ -556,7 +556,7 @@ answerEditorView model editorData =
         form =
             div []
                 [ FormGroup.input editorData.form "label" "Label"
-                , FormGroup.textarea editorData.form "advice" "Advice"
+                , FormGroup.markdownEditor editorData.form "advice" "Advice"
                 ]
     in
     ( editorData.uuid
