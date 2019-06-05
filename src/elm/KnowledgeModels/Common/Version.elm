@@ -42,13 +42,13 @@ getPatch (Version _ _ value) =
 
 
 nextMajor : Version -> Version
-nextMajor (Version major minor patch) =
-    Version (major + 1) minor patch
+nextMajor (Version major _ _) =
+    Version (major + 1) 0 0
 
 
 nextMinor : Version -> Version
-nextMinor (Version major minor patch) =
-    Version major (minor + 1) patch
+nextMinor (Version major minor _) =
+    Version major (minor + 1) 0
 
 
 nextPatch : Version -> Version
