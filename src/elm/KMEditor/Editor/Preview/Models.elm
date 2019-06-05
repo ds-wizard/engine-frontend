@@ -83,13 +83,17 @@ createFilteredQuestionnaireModel appState tags model =
 
 createQuestionnaireModel : AppState -> String -> KnowledgeModel -> List Metric -> List Event -> Common.Questionnaire.Models.Model
 createQuestionnaireModel appState packageId km =
+    let
+        package =
+            Package.dummy
+    in
     Common.Questionnaire.Models.initialModel
         appState
         { uuid = ""
         , name = ""
         , accessibility = PrivateQuestionnaire
         , ownerUuid = Nothing
-        , package = Package.dummy
+        , package = { package | id = packageId }
         , knowledgeModel = km
         , replies = []
         , level = 0
