@@ -79,7 +79,7 @@ validation =
 
 formOptions : List ( String, String, String )
 formOptions =
-    [ ( toString PublicQuestionnaire, "Public", "Questionnaire can be accessed by all users." )
+    [ ( toString PrivateQuestionnaire, "Private", "Questionnaire is visible only to you." )
     , ( toString PublicReadOnlyQuestionnaire, "Public Read-Only", "Questionnaire can be viewed by other users, but they cannot change it." )
-    , ( toString PrivateQuestionnaire, "Private", "Questionnaire is visible only to you." )
+    , ( toString PublicQuestionnaire, "Public", "Questionnaire can be accessed by all users." )
     ]

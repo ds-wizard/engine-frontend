@@ -52,10 +52,10 @@ initQuestionnaireCreateForm selectedPackage =
                 _ ->
                     []
 
-        initialsWithPrivate =
-            initials ++ [ ( "accessibility", Field.string <| QuestionnaireAccesibility.toString QuestionnaireAccesibility.PublicReadOnlyQuestionnaire ) ]
+        initialsWithAccessibility =
+            initials ++ [ ( "accessibility", Field.string <| QuestionnaireAccesibility.toString QuestionnaireAccesibility.PrivateQuestionnaire ) ]
     in
-    Form.initial initialsWithPrivate questionnaireCreateFormValidation
+    Form.initial initialsWithAccessibility questionnaireCreateFormValidation
 
 
 questionnaireCreateFormValidation : Validation CustomFormError QuestionnaireCreateForm

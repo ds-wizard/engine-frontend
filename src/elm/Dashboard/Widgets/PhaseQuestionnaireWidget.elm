@@ -1,6 +1,7 @@
 module Dashboard.Widgets.PhaseQuestionnaireWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, linkTo)
 import Common.View.Listing as Listing exposing (ListingConfig)
 import Common.View.Page as Page
@@ -15,38 +16,38 @@ import Questionnaires.Routing exposing (Route(..))
 import Routing exposing (Route(..))
 
 
-view : ActionResult (List Level) -> ActionResult (List Questionnaire) -> Html msg
-view levels questionnaires =
-    Page.actionResultView viewQuestionnaires <| ActionResult.combine questionnaires levels
+view : AppState -> ActionResult (List Level) -> ActionResult (List Questionnaire) -> Html msg
+view appState levels questionnaires =
+    Page.actionResultView (viewQuestionnaires appState) (ActionResult.combine questionnaires levels)
 
 
-viewQuestionnaires : ( List Questionnaire, List Level ) -> Html msg
-viewQuestionnaires ( questionnaires, levels ) =
+viewQuestionnaires : AppState -> ( List Questionnaire, List Level ) -> Html msg
+viewQuestionnaires appState ( questionnaires, levels ) =
     if List.length questionnaires > 0 then
         div [ class "PhaseQuestionnaireWidget" ]
             [ h3 [] [ text "Your questionnaires" ]
-            , div [] (List.map (viewLevelGroup questionnaires) levels)
+            , div [] (List.map (viewLevelGroup appState questionnaires) levels)
             ]
 
     else
         emptyNode
 
 
-viewLevelGroup : List Questionnaire -> Level -> Html msg
-viewLevelGroup questionnaires level =
+viewLevelGroup : AppState -> List Questionnaire -> Level -> Html msg
+viewLevelGroup appState questionnaires level =
     let
         levelQuestionnaires =
             List.sortBy .name <| List.filter (.level >> (==) level.level) questionnaires
     in
-    viewLevelGroupWithData levelQuestionnaires level
+    viewLevelGroupWithData appState levelQuestionnaires level
 
 
-viewLevelGroupWithData : List Questionnaire -> Level -> Html msg
-viewLevelGroupWithData questionnaires level =
+viewLevelGroupWithData : AppState -> List Questionnaire -> Level -> Html msg
+viewLevelGroupWithData appState questionnaires level =
     let
         content =
             if List.length questionnaires > 0 then
-                Listing.view listingConfig questionnaires
+                Listing.view (listingConfig appState) questionnaires
 
             else
                 div [ class "empty" ]
@@ -58,9 +59,9 @@ viewLevelGroupWithData questionnaires level =
         ]
 
 
-listingConfig : ListingConfig Questionnaire msg
-listingConfig =
-    { title = listingTitle
+listingConfig : AppState -> ListingConfig Questionnaire msg
+listingConfig appState =
+    { title = listingTitle appState
     , description = listingDescription
     , actions = always []
     , textTitle = .name
@@ -68,11 +69,11 @@ listingConfig =
     }
 
 
-listingTitle : Questionnaire -> Html msg
-listingTitle questionnaire =
+listingTitle : AppState -> Questionnaire -> Html msg
+listingTitle appState questionnaire =
     span []
         [ linkTo (Routing.Questionnaires <| Detail <| questionnaire.uuid) [] [ text questionnaire.name ]
-        , accessibilityBadge questionnaire.accessibility
+        , accessibilityBadge appState questionnaire.accessibility
         ]
 
 
