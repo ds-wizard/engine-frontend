@@ -34,7 +34,7 @@ view route wrapMsg appState model =
             Public.Questionnaire.View.view (wrapMsg << QuestionnaireMsg) appState model.questionnaireModel
 
         Signup ->
-            Public.Signup.View.view (wrapMsg << SignupMsg) model.signupModel
+            Public.Signup.View.view (wrapMsg << SignupMsg) appState model.signupModel
 
         SignupConfirmation userId hash ->
             Public.SignupConfirmation.View.view model.signupConfirmationModel
