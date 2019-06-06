@@ -54,10 +54,10 @@ questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
             else
                 emptyNode
     in
-    div [ class "questionnaire-header" ]
-        [ div [ class "questionnaire-header-content" ]
-            [ text <| questionnaireTitle questionnaireModel.questionnaire
-            , div []
+    div [ class "top-header" ]
+        [ div [ class "top-header-content" ]
+            [ div [ class "top-header-title" ] [ text <| questionnaireTitle questionnaireModel.questionnaire ]
+            , div [ class "top-header-actions" ]
                 [ unsavedChanges
                 , ActionButton.button <| ActionButton.ButtonConfig "Save" savingQuestionnaire (wrapMsg <| Save) False
                 ]

@@ -19,6 +19,11 @@ $side-navigation-link-hover-bg: darken($side-navigation-bg, 15%) !default;
 $side-navigation-border-color: darken($side-navigation-bg, 10%) !default;
 $side-navigation-collapse-hover: darken($side-navigation-bg, 5%) !default;
 
+
+// top-header
+$top-header-height: 50px !default;
+
+
 // special text colors
 
 @function color-level($color, $level: 0) {

@@ -74,10 +74,10 @@ header appState package =
                 |> listInsertIf questionnaireAction (hasPerm appState.jwt Perm.questionnaire)
                 |> listInsertIf deleteAction (hasPerm appState.jwt Perm.packageManagementWrite)
     in
-    div [ class "KnowledgeModels__Detail__Header" ]
-        [ div [ class "header-content" ]
-            [ div [ class "name" ] [ text package.name ]
-            , div [ class "actions" ] actions
+    div [ class "top-header" ]
+        [ div [ class "top-header-content" ]
+            [ div [ class "top-header-title" ] [ text package.name ]
+            , div [ class "top-header-actions" ] actions
             ]
         ]
 

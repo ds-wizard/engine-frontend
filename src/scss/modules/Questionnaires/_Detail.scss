@@ -1,47 +1,26 @@
 @import "../../variables";
 
-$header-height: 50px;
 
 .Questionnaires__Detail {
     width: 100%;
     margin-top: 30px;
 
-    .questionnaire-header {
-        position: fixed;
-        top: 0;
-        left: $side-navigation-width;
-        right: 0;
-        z-index: 1000;
+    .top-header {
+        .top-header-content {
+            .top-header-actions {
+                margin-left: 1rem;
 
-        .questionnaire-header-content {
-            background: $gray-100;
-            border-bottom: 1px solid $gray-400;
-            width: 100%;
-            height: $header-height;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 15px;
-
-            .btn {
-                margin-left: 20px;
+                .btn {
+                    margin-left: 1rem;
+                }
             }
         }
     }
 
     .questionnaire-wrapper {
-        height: calc(100vh - #{$header-height});
+        height: calc(100vh - #{$top-header-height});
         padding-left: 15px;
         padding-right: 15px;
         margin-bottom: -20px;
-    }
-}
-
-
-.side-navigation-collapsed {
-    .Questionnaires__Detail {
-        .questionnaire-header {
-            left: $side-navigation-width-collapsed;
-        }
     }
 }
