@@ -40,7 +40,13 @@ type alias ClientConfig =
     , welcomeInfo : Maybe String
     , welcomeWarning : Maybe String
     , dashboard : Dict String (List Widget)
+    , privacyUrl : String
     }
+
+
+defaultPrivacyUrl : String
+defaultPrivacyUrl =
+    "https://ds-wizard.org/privacy.html"
 
 
 defaultConfig : Config
@@ -51,6 +57,7 @@ defaultConfig =
         , welcomeInfo = Nothing
         , welcomeWarning = Nothing
         , dashboard = Dict.empty
+        , privacyUrl = defaultPrivacyUrl
         }
     , feedbackEnabled = True
     , registrationEnabled = True
@@ -99,6 +106,7 @@ clientConfigDecoder =
         |> D.optional "welcomeInfo" (D.maybe D.string) Nothing
         |> D.optional "welcomeWarning" (D.maybe D.string) Nothing
         |> D.optional "dashboard" widgetDictDecoder Dict.empty
+        |> D.optional "privacyUrl" D.string defaultPrivacyUrl
 
 
 widgetDictDecoder : Decoder (Dict String (List Widget))
