@@ -45,7 +45,7 @@ viewWidget appState model widget =
             DMPWorkflowWidget.view appState model.questionnaires
 
         LevelsQuestionnaire ->
-            PhaseQuestionnaireWidget.view model.levels model.questionnaires
+            PhaseQuestionnaireWidget.view appState model.levels model.questionnaires
 
         Welcome ->
             WelcomeWidget.view appState

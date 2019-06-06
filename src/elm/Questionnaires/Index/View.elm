@@ -58,13 +58,13 @@ listingTitle appState questionnaire =
     span []
         [ linkTo (detailRoute questionnaire) [] [ text questionnaire.name ]
         , ownerIcon appState questionnaire
-        , accessibilityBadge questionnaire.accessibility
+        , accessibilityBadge appState questionnaire.accessibility
         ]
 
 
 ownerIcon : AppState -> Questionnaire -> Html Msgs.Msg
 ownerIcon appState questionnaire =
-    if questionnaire.ownerUuid == Maybe.map .uuid appState.session.user then
+    if appState.config.questionnaireAccessibilityEnabled && questionnaire.ownerUuid == Maybe.map .uuid appState.session.user then
         i [ class "fa fa-user", title "Questionnaire created by you" ] []
 
     else

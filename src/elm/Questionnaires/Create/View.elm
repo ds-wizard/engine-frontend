@@ -1,6 +1,7 @@
 module Questionnaires.Create.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
@@ -25,18 +26,18 @@ import Questionnaires.Routing
 import Routing
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
-    Page.actionResultView (content wrapMsg model) model.packages
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
+    Page.actionResultView (content wrapMsg appState model) model.packages
 
 
-content : (Msg -> Msgs.Msg) -> Model -> List Package -> Html Msgs.Msg
-content wrapMsg model packages =
+content : (Msg -> Msgs.Msg) -> AppState -> Model -> List Package -> Html Msgs.Msg
+content wrapMsg appState model packages =
     div [ detailClass "Questionnaires__Create" ]
         [ Page.header "Create Questionnaire" []
         , div []
             [ FormResult.view model.savingQuestionnaire
-            , formView model.form packages |> Html.map (wrapMsg << FormMsg)
+            , formView appState model.form packages |> Html.map (wrapMsg << FormMsg)
             , tagsView wrapMsg model
             , FormActions.view
                 (Routing.Questionnaires Questionnaires.Routing.Index)
@@ -45,17 +46,24 @@ content wrapMsg model packages =
         ]
 
 
-formView : Form CustomFormError QuestionnaireCreateForm -> List Package -> Html Form.Msg
-formView form packages =
+formView : AppState -> Form CustomFormError QuestionnaireCreateForm -> List Package -> Html Form.Msg
+formView appState form packages =
     let
         packageOptions =
             ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
+
+        accessibilitySelect =
+            if appState.config.questionnaireAccessibilityEnabled then
+                FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
+
+            else
+                emptyNode
 
         formHtml =
             div []
                 [ FormGroup.input form "name" "Name"
                 , FormGroup.select packageOptions form "packageId" "Knowledge Model"
-                , FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
+                , accessibilitySelect
                 ]
     in
     formHtml

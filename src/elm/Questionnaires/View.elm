@@ -16,13 +16,13 @@ view : Route -> (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
 view route wrapMsg appState model =
     case route of
         Create _ ->
-            Questionnaires.Create.View.view (wrapMsg << CreateMsg) model.createModel
+            Questionnaires.Create.View.view (wrapMsg << CreateMsg) appState model.createModel
 
         Detail uuid ->
             Questionnaires.Detail.View.view (wrapMsg << DetailMsg) appState model.detailModel
 
         Edit uuid ->
-            Questionnaires.Edit.View.view (wrapMsg << EditMsg) model.editModel
+            Questionnaires.Edit.View.view (wrapMsg << EditMsg) appState model.editModel
 
         Index ->
             Questionnaires.Index.View.view (wrapMsg << IndexMsg) appState model.indexModel
