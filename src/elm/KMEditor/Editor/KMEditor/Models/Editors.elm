@@ -782,12 +782,18 @@ updateIntegrationEditorData editorContext newState form editorData =
     let
         newIntegration =
             updateIntegrationWithForm editorData.integration form
+                |> updateIntegrationWithProps editorData.props
     in
     { editorData
         | editorState = getNewState editorData.editorState newState
         , integration = newIntegration
         , form = initIntegrationForm [] "" newIntegration
     }
+
+
+updateIntegrationWithProps : ValueList -> Integration -> Integration
+updateIntegrationWithProps props integration =
+    { integration | props = props.list }
 
 
 updateQuestionEditorData : EditorContext -> EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
