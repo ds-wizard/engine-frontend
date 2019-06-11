@@ -30,7 +30,7 @@ content wrapMsg model packages =
         [ Page.header "Create Knowledge Model" []
         , div []
             [ FormResult.view model.savingKnowledgeModel
-            , formView wrapMsg model.form packages
+            , formView wrapMsg model packages
             , FormActions.view
                 (KMEditor IndexRoute)
                 (ActionButton.ButtonConfig "Save" model.savingKnowledgeModel (wrapMsg <| FormMsg Form.Submit) False)
@@ -38,18 +38,26 @@ content wrapMsg model packages =
         ]
 
 
-formView : (Msg -> Msgs.Msg) -> Form CustomFormError KnowledgeModelCreateForm -> List Package -> Html Msgs.Msg
-formView wrapMsg form packages =
+formView : (Msg -> Msgs.Msg) -> Model -> List Package -> Html Msgs.Msg
+formView wrapMsg model packages =
     let
         parentOptions =
             ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
 
+        parentInput =
+            case model.selectedPackage of
+                Just package ->
+                    FormGroup.codeView package
+
+                Nothing ->
+                    FormGroup.select parentOptions model.form "parentPackageId"
+
         formHtml =
             div []
-                [ FormGroup.input form "name" "Name"
-                , FormGroup.input form "kmId" "Knowledge Model ID"
+                [ FormGroup.input model.form "name" "Name"
+                , FormGroup.input model.form "kmId" "Knowledge Model ID"
                 , FormExtra.textAfter "Knowledge Model ID can contain alphanumeric characters and dash but cannot start or end with dash."
-                , FormGroup.select parentOptions form "parentPackageId" "Parent Knowledge Model"
+                , parentInput "Parent Knowledge Model"
                 ]
     in
     formHtml |> Html.map (wrapMsg << FormMsg)

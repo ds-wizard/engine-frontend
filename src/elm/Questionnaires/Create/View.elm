@@ -37,7 +37,7 @@ content wrapMsg appState model packages =
         [ Page.header "Create Questionnaire" []
         , div []
             [ FormResult.view model.savingQuestionnaire
-            , formView appState model.form packages |> Html.map (wrapMsg << FormMsg)
+            , formView appState model packages |> Html.map (wrapMsg << FormMsg)
             , tagsView wrapMsg model
             , FormActions.view
                 (Routing.Questionnaires Questionnaires.Routing.Index)
@@ -46,23 +46,31 @@ content wrapMsg appState model packages =
         ]
 
 
-formView : AppState -> Form CustomFormError QuestionnaireCreateForm -> List Package -> Html Form.Msg
-formView appState form packages =
+formView : AppState -> Model -> List Package -> Html Form.Msg
+formView appState model packages =
     let
         packageOptions =
             ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
 
+        parentInput =
+            case model.selectedPackage of
+                Just package ->
+                    FormGroup.codeView package
+
+                Nothing ->
+                    FormGroup.select packageOptions model.form "packageId"
+
         accessibilitySelect =
             if appState.config.questionnaireAccessibilityEnabled then
-                FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
+                FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions model.form "accessibility" "Accessibility"
 
             else
                 emptyNode
 
         formHtml =
             div []
-                [ FormGroup.input form "name" "Name"
-                , FormGroup.select packageOptions form "packageId" "Knowledge Model"
+                [ FormGroup.input model.form "name" "Name"
+                , parentInput "Knowledge Model"
                 , accessibilitySelect
                 ]
     in
