@@ -1,7 +1,7 @@
 module Questionnaires.Index.View exposing (view)
 
 import Common.AppState exposing (AppState)
-import Common.Html exposing (emptyNode, fa, linkTo)
+import Common.Html exposing (emptyNode, linkTo)
 import Common.Html.Attribute exposing (listClass)
 import Common.View.FormResult as FormResult
 import Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
@@ -9,6 +9,7 @@ import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Routing
 import Msgs
 import Questionnaires.Common.Models exposing (Questionnaire, isEditable)
@@ -57,13 +58,13 @@ listingTitle appState questionnaire =
     span []
         [ linkTo (detailRoute questionnaire) [] [ text questionnaire.name ]
         , ownerIcon appState questionnaire
-        , accessibilityBadge questionnaire.accessibility
+        , accessibilityBadge appState questionnaire.accessibility
         ]
 
 
 ownerIcon : AppState -> Questionnaire -> Html Msgs.Msg
 ownerIcon appState questionnaire =
-    if questionnaire.ownerUuid == Maybe.map .uuid appState.session.user then
+    if appState.config.questionnaireAccessibilityEnabled && questionnaire.ownerUuid == Maybe.map .uuid appState.session.user then
         i [ class "fa fa-user", title "Questionnaire created by you" ] []
 
     else
@@ -75,15 +76,13 @@ listingDescription questionnaire =
     let
         kmRoute =
             Routing.KnowledgeModels <|
-                KnowledgeModels.Routing.Detail
-                    questionnaire.package.organizationId
-                    questionnaire.package.kmId
+                KnowledgeModels.Routing.Detail questionnaire.package.id
     in
     linkTo kmRoute
         [ title "Knowledge Model" ]
         [ text questionnaire.package.name
         , text ", "
-        , text questionnaire.package.version
+        , text <| Version.toString questionnaire.package.version
         , text " ("
         , code [] [ text questionnaire.package.id ]
         , text ")"
@@ -171,6 +170,7 @@ deleteModal wrapMsg model =
             , actionName = "Delete"
             , actionMsg = wrapMsg DeleteQuestionnaire
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteQuestionnaire Nothing
+            , dangerous = True
             }
     in
     Modal.confirm modalConfig

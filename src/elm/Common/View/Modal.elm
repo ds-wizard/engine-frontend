@@ -40,6 +40,7 @@ type alias ConfirmConfig msg =
     , actionName : String
     , actionMsg : msg
     , cancelMsg : Maybe msg
+    , dangerous : Bool
     }
 
 
@@ -75,7 +76,7 @@ confirm cfg =
                 , div [ class "modal-body" ]
                     content
                 , div [ class "modal-footer" ]
-                    [ ActionButton.button ( cfg.actionName, cfg.actionResult, cfg.actionMsg )
+                    [ ActionButton.button <| ActionButton.ButtonConfig cfg.actionName cfg.actionResult cfg.actionMsg cfg.dangerous
                     , cancelButton
                     ]
                 ]

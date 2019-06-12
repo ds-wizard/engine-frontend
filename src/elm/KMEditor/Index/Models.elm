@@ -1,4 +1,11 @@
-module KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeKnowledgeModelUpgradeForm, initKnowledgeModelUpgradeForm, initialModel, knowledgeModelUpgradeFormValidation)
+module KMEditor.Index.Models exposing
+    ( KnowledgeModelUpgradeForm
+    , Model
+    , encodeKnowledgeModelUpgradeForm
+    , initKnowledgeModelUpgradeForm
+    , initialModel
+    , knowledgeModelUpgradeFormValidation
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
@@ -6,7 +13,7 @@ import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models exposing (KnowledgeModel)
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type alias Model =
@@ -15,7 +22,7 @@ type alias Model =
     , deletingKnowledgeModel : ActionResult String
     , creatingMigration : ActionResult String
     , kmToBeUpgraded : Maybe KnowledgeModel
-    , packages : ActionResult (List PackageDetail)
+    , package : ActionResult PackageDetail
     , kmUpgradeForm : Form CustomFormError KnowledgeModelUpgradeForm
     , deletingMigration : ActionResult String
     }
@@ -28,7 +35,7 @@ initialModel =
     , deletingKnowledgeModel = Unset
     , creatingMigration = Unset
     , kmToBeUpgraded = Nothing
-    , packages = Unset
+    , package = Unset
     , kmUpgradeForm = initKnowledgeModelUpgradeForm
     , deletingMigration = Unset
     }

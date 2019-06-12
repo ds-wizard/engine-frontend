@@ -10,6 +10,7 @@ module Common.Api exposing
     , jwtFetch
     , jwtGet
     , jwtPost
+    , jwtPostEmpty
     , jwtPostString
     , jwtPut
     )
@@ -51,6 +52,15 @@ jwtPostString url mime contents appState toMsg =
     Jwt.Http.post appState.session.token
         { url = appState.apiUrl ++ url
         , body = Http.stringBody mime contents
+        , expect = expectWhatever toMsg
+        }
+
+
+jwtPostEmpty : String -> AppState -> ToMsg () msg -> Cmd msg
+jwtPostEmpty url appState toMsg =
+    Jwt.Http.post appState.session.token
+        { url = appState.apiUrl ++ url
+        , body = Http.emptyBody
         , expect = expectWhatever toMsg
         }
 

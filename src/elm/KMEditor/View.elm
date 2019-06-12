@@ -29,4 +29,5 @@ view route wrapMsg appState model =
             KMEditor.Migration.View.view (wrapMsg << MigrationMsg) model.migrationModel
 
         PublishRoute _ ->
-            KMEditor.Publish.View.view (wrapMsg << PublishMsg) model.publishModel
+            Html.map (wrapMsg << PublishMsg) <|
+                KMEditor.Publish.View.view model.publishModel

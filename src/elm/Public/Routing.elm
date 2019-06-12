@@ -33,7 +33,7 @@ parsers config wrapRoute =
         signUpRoutes =
             if config.registrationEnabled then
                 [ map (wrapRoute <| Signup) (s "signup")
-                , map (signupConfirmation wrapRoute) (s "signup-confirmation" </> string </> string)
+                , map (signupConfirmation wrapRoute) (s "signup" </> string </> string)
                 ]
 
             else
@@ -80,4 +80,4 @@ toUrl route =
             [ "signup" ]
 
         SignupConfirmation userId hash ->
-            [ "signup-confirmation", userId, hash ]
+            [ "signup", userId, hash ]

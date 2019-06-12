@@ -17,7 +17,8 @@ import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelState(..),
 import KMEditor.Index.Models exposing (..)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
+import KnowledgeModels.Common.Version as Version exposing (Version)
 import KnowledgeModels.Routing
 import Msgs
 import Routing exposing (Route(..))
@@ -62,6 +63,7 @@ listingTitle : Maybe JwtToken -> KnowledgeModel -> Html Msgs.Msg
 listingTitle mbJwt km =
     span []
         [ linkToKM mbJwt km [] [ text km.name ]
+        , listingTitleLastPublishedVersionBadge km
         , listingTitleBadge km
         ]
 
@@ -85,6 +87,28 @@ linkToKM mbJwt km =
 
         _ ->
             linkTo (Routing.KMEditor <| EditorRoute <| km.uuid)
+
+
+listingTitleLastPublishedVersionBadge : KnowledgeModel -> Html msg
+listingTitleLastPublishedVersionBadge km =
+    let
+        getVersion packageId =
+            case String.split ":" packageId of
+                _ :: _ :: version :: [] ->
+                    Just version
+
+                _ ->
+                    Nothing
+
+        badge version =
+            span [ title "Last published version", class "badge badge-light" ]
+                [ text <| Version.toString version ]
+    in
+    km.parentPackageId
+        |> Maybe.andThen getVersion
+        |> Maybe.andThen Version.fromString
+        |> Maybe.map badge
+        |> Maybe.withDefault emptyNode
 
 
 listingTitleBadge : KnowledgeModel -> Html msg
@@ -126,20 +150,20 @@ listingDescription : KnowledgeModel -> Html Msgs.Msg
 listingDescription km =
     let
         parent =
-            case km.parentPackageId of
-                Just parentPackageId ->
+            case km.lastAppliedParentPackageId of
+                Just lastAppliedParentPackageId ->
                     let
                         elem =
-                            case packageIdToComponents parentPackageId of
-                                Just ( orgId, kmId, _ ) ->
-                                    linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Detail orgId kmId)
+                            case packageIdToComponents lastAppliedParentPackageId of
+                                Just ( orgId, kmId, version ) ->
+                                    linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Detail <| orgId ++ ":" ++ kmId ++ ":" ++ version)
 
                                 _ ->
                                     span
                     in
                     elem [ class "fragment", title "Parent Knowledge Model" ]
                         [ fa "code-fork"
-                        , text parentPackageId
+                        , text lastAppliedParentPackageId
                         ]
 
                 Nothing ->
@@ -252,6 +276,7 @@ deleteModal wrapMsg model =
             , actionName = "Delete"
             , actionMsg = wrapMsg DeleteKnowledgeModel
             , cancelMsg = Just <| wrapMsg <| ShowHideDeleteKnowledgeModal Nothing
+            , dangerous = True
             }
     in
     Modal.confirm modalConfig
@@ -269,15 +294,15 @@ upgradeModal wrapMsg model =
                     ( False, "" )
 
         options =
-            case model.packages of
-                Success packages ->
-                    ( "", "- select parent package -" ) :: List.map createOption packages
+            case model.package of
+                Success package ->
+                    ( "", "- select parent package -" ) :: createOptions package
 
                 _ ->
                     []
 
         modalContent =
-            case model.packages of
+            case model.package of
                 Unset ->
                     [ emptyNode ]
 
@@ -305,15 +330,28 @@ upgradeModal wrapMsg model =
             , actionName = "Create"
             , actionMsg = wrapMsg <| UpgradeFormMsg Form.Submit
             , cancelMsg = Just <| wrapMsg <| ShowHideUpgradeModal Nothing
+            , dangerous = False
             }
     in
     Modal.confirm modalConfig
 
 
-createOption : PackageDetail -> ( String, String )
-createOption package =
+createOptions : PackageDetail -> List ( String, String )
+createOptions package =
     let
-        optionText =
-            package.name ++ " " ++ package.version ++ " (" ++ package.id ++ ")"
+        compare version =
+            Version.compare version package.version == GT
     in
-    ( package.id, optionText )
+    List.map (createOption package) <| List.filter compare package.versions
+
+
+createOption : PackageDetail -> Version -> ( String, String )
+createOption package version =
+    let
+        id =
+            package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version
+
+        optionText =
+            package.name ++ " " ++ Version.toString version ++ " (" ++ id ++ ")"
+    in
+    ( id, optionText )

@@ -4,7 +4,9 @@ module Common.Setters exposing
     , setKnowledgeModels
     , setLevels
     , setMigration
+    , setPackage
     , setPackages
+    , setPulling
     , setQuestionnaires
     , setUsers
     )
@@ -35,9 +37,19 @@ setMigration value record =
     { record | migration = value }
 
 
+setPackage : a -> { b | package : a } -> { b | package : a }
+setPackage value record =
+    { record | package = value }
+
+
 setPackages : a -> { b | packages : a } -> { b | packages : a }
 setPackages value record =
     { record | packages = value }
+
+
+setPulling : a -> { b | pulling : a } -> { b | pulling : a }
+setPulling value record =
+    { record | pulling = value }
 
 
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }

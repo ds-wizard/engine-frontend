@@ -10,35 +10,36 @@ import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KnowledgeModels.Common.Models exposing (..)
+import KnowledgeModels.Common.Package exposing (Package)
+import KnowledgeModels.Common.PackageState as PackageState
+import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Index.Models exposing (..)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
 import KnowledgeModels.Routing exposing (Route(..))
-import Msgs
 import Routing exposing (Route(..))
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
-    Page.actionResultView (viewKnowledgeModels wrapMsg appState model) model.packages
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView (viewKnowledgeModels appState model) model.packages
 
 
-viewKnowledgeModels : (Msg -> Msgs.Msg) -> AppState -> Model -> List Package -> Html Msgs.Msg
-viewKnowledgeModels wrapMsg appState model packages =
+viewKnowledgeModels : AppState -> Model -> List Package -> Html Msg
+viewKnowledgeModels appState model packages =
     div [ listClass "KnowledgeModels__Index" ]
         [ Page.header "Knowledge Models" (indexActions appState)
         , FormResult.successOnlyView model.deletingPackage
-        , Listing.view (listingConfig wrapMsg appState) <| List.sortBy .name packages
-        , deleteModal wrapMsg model
+        , Listing.view (listingConfig appState) <| List.sortBy .name packages
+        , deleteModal model
         ]
 
 
-indexActions : AppState -> List (Html Msgs.Msg)
+indexActions : AppState -> List (Html Msg)
 indexActions appState =
     if hasPerm appState.jwt packageManagementWrite then
-        [ linkTo (Routing.KnowledgeModels Import)
+        [ linkTo (Routing.KnowledgeModels <| Import Nothing)
             [ class "btn btn-primary link-with-icon" ]
-            [ i [ class "fa fa-cloud-upload" ] []
+            [ i [ class "fa fa-upload" ] []
             , text "Import"
             ]
         ]
@@ -47,34 +48,66 @@ indexActions appState =
         []
 
 
-listingConfig : (Msg -> Msgs.Msg) -> AppState -> ListingConfig Package Msgs.Msg
-listingConfig wrapMsg appState =
+listingConfig : AppState -> ListingConfig Package Msg
+listingConfig appState =
     { title = listingTitle
     , description = listingDescription
-    , actions = listingActions wrapMsg appState
+    , actions = listingActions appState
     , textTitle = .name
     , emptyText = "Click \"Import\" button to import a new Knowledge Model."
     }
 
 
-listingTitle : Package -> Html Msgs.Msg
+listingTitle : Package -> Html Msg
 listingTitle package =
     span []
         [ linkTo (detailRoute package) [] [ text package.name ]
+        , span [ class "badge badge-light", title "Latest version" ] [ text <| Version.toString package.version ]
+        , listingTitleOutdatedBadge package
         ]
 
 
-listingDescription : Package -> Html Msgs.Msg
+listingTitleOutdatedBadge : Package -> Html Msg
+listingTitleOutdatedBadge package =
+    if PackageState.isOutdated package.state then
+        span [ class "badge badge-warning" ] [ text "outdated" ]
+
+    else
+        emptyNode
+
+
+listingDescription : Package -> Html Msg
 listingDescription package =
+    let
+        organizationFragment =
+            case package.organization of
+                Just organization ->
+                    let
+                        logo =
+                            case organization.logo of
+                                Just organizationLogo ->
+                                    img [ class "organization-image", src organizationLogo ] []
+
+                                Nothing ->
+                                    emptyNode
+                    in
+                    span [ class "fragment", title "Published by" ]
+                        [ logo
+                        , text organization.name
+                        ]
+
+                Nothing ->
+                    emptyNode
+    in
     span []
-        [ span [ class "fragment", title "Organization ID" ] [ text package.organizationId ]
-        , span [ class "fragment", title "Knowledge Model ID" ] [ text package.kmId ]
-        , span [ class "fragment", title "Latest Version" ] [ text package.latestVersion ]
+        [ code [ class "fragment" ] [ text package.id ]
+        , organizationFragment
+        , span [ class "fragment" ] [ text package.description ]
         ]
 
 
-listingActions : (Msg -> Msgs.Msg) -> AppState -> Package -> List (ListingActionConfig Msgs.Msg)
-listingActions wrapMsg appState package =
+listingActions : AppState -> Package -> List (ListingActionConfig Msg)
+listingActions appState package =
     let
         actions =
             [ { extraClass = Nothing
@@ -89,7 +122,7 @@ listingActions wrapMsg appState package =
             ++ [ { extraClass = Just "text-danger"
                  , icon = Just "trash-o"
                  , label = "Delete"
-                 , msg = ListingActionMsg (wrapMsg <| ShowHideDeletePackage <| Just package)
+                 , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
                  }
                ]
 
@@ -99,11 +132,11 @@ listingActions wrapMsg appState package =
 
 detailRoute : Package -> Routing.Route
 detailRoute package =
-    Routing.KnowledgeModels <| Detail package.organizationId package.kmId
+    Routing.KnowledgeModels <| Detail package.id
 
 
-deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-deleteModal wrapMsg model =
+deleteModal : Model -> Html Msg
+deleteModal model =
     let
         ( visible, version ) =
             case model.packageToBeDeleted of
@@ -127,8 +160,9 @@ deleteModal wrapMsg model =
             , visible = visible
             , actionResult = model.deletingPackage
             , actionName = "Delete"
-            , actionMsg = wrapMsg DeletePackage
-            , cancelMsg = Just <| wrapMsg <| ShowHideDeletePackage Nothing
+            , actionMsg = DeletePackage
+            , cancelMsg = Just <| ShowHideDeletePackage Nothing
+            , dangerous = True
             }
     in
     Modal.confirm modalConfig

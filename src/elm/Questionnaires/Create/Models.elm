@@ -7,12 +7,12 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Package exposing (Package)
 import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
 
 
 type alias Model =
-    { packages : ActionResult (List PackageDetail)
+    { packages : ActionResult (List Package)
     , savingQuestionnaire : ActionResult String
     , form : Form CustomFormError QuestionnaireCreateForm
     , selectedPackage : Maybe String
@@ -52,10 +52,10 @@ initQuestionnaireCreateForm selectedPackage =
                 _ ->
                     []
 
-        initialsWithPrivate =
-            initials ++ [ ( "accessibility", Field.string <| QuestionnaireAccesibility.toString QuestionnaireAccesibility.PublicReadOnlyQuestionnaire ) ]
+        initialsWithAccessibility =
+            initials ++ [ ( "accessibility", Field.string <| QuestionnaireAccesibility.toString QuestionnaireAccesibility.PrivateQuestionnaire ) ]
     in
-    Form.initial initialsWithPrivate questionnaireCreateFormValidation
+    Form.initial initialsWithAccessibility questionnaireCreateFormValidation
 
 
 questionnaireCreateFormValidation : Validation CustomFormError QuestionnaireCreateForm

@@ -249,7 +249,7 @@ type alias AddValueQuestionEventData =
     , text : Maybe String
     , requiredLevel : Maybe Int
     , tagUuids : List String
-    , valueType : ValueQuestionType
+    , valueType : QuestionValueType
     }
 
 
@@ -304,7 +304,7 @@ type alias EditValueQuestionEventData =
     , tagUuids : EventField (List String)
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
-    , valueType : EventField ValueQuestionType
+    , valueType : EventField QuestionValueType
     }
 
 
@@ -691,7 +691,7 @@ encodeAddValueQuestionEvent data =
     , ( "text", maybe Encode.string data.text )
     , ( "requiredLevel", maybe Encode.int data.requiredLevel )
     , ( "tagUuids", Encode.list Encode.string data.tagUuids )
-    , ( "valueType", encodeValueType data.valueType )
+    , ( "valueType", encodeQuestionValueType data.valueType )
     ]
 
 
@@ -761,7 +761,7 @@ encodeEditValueQuestionEvent data =
     , ( "tagUuids", encodeEventField (Encode.list Encode.string) data.tagUuids )
     , ( "referenceUuids", encodeEventField (Encode.list Encode.string) data.referenceUuids )
     , ( "expertUuids", encodeEventField (Encode.list Encode.string) data.expertUuids )
-    , ( "valueType", encodeEventField encodeValueType data.valueType )
+    , ( "valueType", encodeEventField encodeQuestionValueType data.valueType )
     ]
 
 
@@ -787,21 +787,21 @@ encodeDeleteQuestionEvent data =
     ]
 
 
-encodeValueType : ValueQuestionType -> Encode.Value
-encodeValueType valueType =
+encodeQuestionValueType : QuestionValueType -> Encode.Value
+encodeQuestionValueType valueType =
     Encode.string <|
         case valueType of
-            StringValueType ->
-                "StringValue"
+            StringQuestionValueType ->
+                "StringQuestionValueType"
 
-            DateValueType ->
-                "DateValue"
+            DateQuestionValueType ->
+                "DateQuestionValueType"
 
-            NumberValueType ->
-                "NumberValue"
+            NumberQuestionValueType ->
+                "NumberQuestionValueType"
 
-            TextValueType ->
-                "TextValue"
+            TextQuestionValueType ->
+                "TextQuestionValueType"
 
 
 encodeAddAnswerEvent : AddAnswerEventData -> List ( String, Encode.Value )
@@ -1210,7 +1210,7 @@ addValueQuestionEventDecoder =
         |> required "text" (Decode.nullable Decode.string)
         |> required "requiredLevel" (Decode.nullable Decode.int)
         |> required "tagUuids" (Decode.list Decode.string)
-        |> required "valueType" valueTypeDecoder
+        |> required "valueType" questionValueTypeDecoder
 
 
 addIntegrationQuestionEventDecoder : Decoder AddIntegrationQuestionEventData
@@ -1287,7 +1287,7 @@ editValueQuestionEventDecoder =
         |> required "tagUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "referenceUuids" (eventFieldDecoder (Decode.list Decode.string))
         |> required "expertUuids" (eventFieldDecoder (Decode.list Decode.string))
-        |> required "valueType" (eventFieldDecoder valueTypeDecoder)
+        |> required "valueType" (eventFieldDecoder questionValueTypeDecoder)
 
 
 editIntegrationQuestionEventDecoder : Decoder EditIntegrationQuestionEventData

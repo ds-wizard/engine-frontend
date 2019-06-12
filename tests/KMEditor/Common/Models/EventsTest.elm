@@ -28,7 +28,7 @@ import Dict
 import Expect exposing (Expectation)
 import Json.Decode as Decode
 import Json.Encode as Encode
-import KMEditor.Common.Models.Entities exposing (ValueQuestionType(..))
+import KMEditor.Common.Models.Entities exposing (QuestionValueType(..))
 import KMEditor.Common.Models.Events exposing (..)
 import KMEditor.Common.Models.Path exposing (PathNode(..))
 import Test exposing (..)
@@ -594,7 +594,7 @@ addValueQuestionEvent =
             , text = Nothing
             , requiredLevel = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
-            , valueType = NumberValueType
+            , valueType = NumberQuestionValueType
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -706,7 +706,7 @@ editValueQuestionEvent =
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }
-            , valueType = { changed = True, value = Just DateValueType }
+            , valueType = { changed = True, value = Just DateQuestionValueType }
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"

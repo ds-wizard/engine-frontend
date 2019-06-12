@@ -12,8 +12,9 @@ import KMEditor.Common.Models exposing (KnowledgeModel)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KnowledgeModels.Common.Models exposing (PackageDetail)
+import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
+import Result exposing (Result)
 import Routing exposing (Route(..), cmdNavigate)
 
 
@@ -36,7 +37,7 @@ update msg wrapMsg appState model =
             postKmCompleted appState model result
 
 
-getPackageCompleted : Model -> Result ApiError (List PackageDetail) -> ( Model, Cmd Msgs.Msg )
+getPackageCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
 getPackageCompleted model result =
     let
         newModel =
@@ -53,7 +54,7 @@ getPackageCompleted model result =
     ( newModel, cmd )
 
 
-setSelectedPackage : Model -> List PackageDetail -> Model
+setSelectedPackage : Model -> List Package -> Model
 setSelectedPackage model packages =
     case model.selectedPackage of
         Just id ->

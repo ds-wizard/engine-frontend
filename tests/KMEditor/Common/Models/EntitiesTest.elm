@@ -276,7 +276,7 @@ chapterDecoderTest =
                             "questions": [{
                                 "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
                                 "questionType": "ValueQuestion",
-                                "valueType": "StringValue",
+                                "valueType": "StringQuestionValueType",
                                 "title": "What's your name?",
                                 "text": "Fill in your name",
                                 "requiredLevel": null,
@@ -300,7 +300,7 @@ chapterDecoderTest =
                                 , tagUuids = []
                                 , references = []
                                 , experts = []
-                                , valueType = StringValueType
+                                , valueType = StringQuestionValueType
                                 }
                             ]
                         }
@@ -313,7 +313,11 @@ questionDecoderTest : Test
 questionDecoderTest =
     describe "questionDecoder"
         [ parametrized
-            [ ( "StringValue", StringValueType ), ( "NumberValue", NumberValueType ), ( "DateValue", DateValueType ), ( "TextValue", TextValueType ) ]
+            [ ( "StringQuestionValueType", StringQuestionValueType )
+            , ( "NumberQuestionValueType", NumberQuestionValueType )
+            , ( "DateQuestionValueType", DateQuestionValueType )
+            , ( "TextQuestionValueType", TextQuestionValueType )
+            ]
             "should decode value types question"
           <|
             \( jsonType, parsedType ) ->
@@ -355,7 +359,7 @@ questionDecoderTest =
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "questionType": "ValueQuestion",
-                            "valueType": "StringValue",
+                            "valueType": "StringQuestionValueType",
                             "title": "Can you answer this question?",
                             "text": null,
                             "requiredLevel": 1,
@@ -376,7 +380,7 @@ questionDecoderTest =
                             , tagUuids = [ "563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93" ]
                             , references = []
                             , experts = []
-                            , valueType = StringValueType
+                            , valueType = StringQuestionValueType
                             }
                 in
                 expectDecoder questionDecoder raw expected
@@ -388,7 +392,7 @@ questionDecoderTest =
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "questionType": "ValueQuestion",
-                            "valueType": "StringValue",
+                            "valueType": "StringQuestionValueType",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": null,
@@ -418,7 +422,7 @@ questionDecoderTest =
                                     }
                                 ]
                             , experts = []
-                            , valueType = StringValueType
+                            , valueType = StringQuestionValueType
                             }
                 in
                 expectDecoder questionDecoder raw expected
@@ -430,7 +434,7 @@ questionDecoderTest =
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "questionType": "ValueQuestion",
-                            "valueType": "StringValue",
+                            "valueType": "StringQuestionValueType",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredLevel": 2,
@@ -458,7 +462,7 @@ questionDecoderTest =
                                   , email = "expert@example.com"
                                   }
                                 ]
-                            , valueType = StringValueType
+                            , valueType = StringQuestionValueType
                             }
                 in
                 expectDecoder questionDecoder raw expected
@@ -522,7 +526,7 @@ questionDecoderTest =
                             "itemTemplateQuestions": [{
                                 "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
                                 "questionType": "ValueQuestion",
-                                "valueType": "StringValue",
+                                "valueType": "StringQuestionValueType",
                                 "title": "What's your name?",
                                 "text": "Fill in your name",
                                 "requiredLevel": null,
@@ -552,7 +556,7 @@ questionDecoderTest =
                                     , tagUuids = []
                                     , references = []
                                     , experts = []
-                                    , valueType = StringValueType
+                                    , valueType = StringQuestionValueType
                                     }
                                 ]
                             , references = []
@@ -692,7 +696,7 @@ answerDecoderTest =
                             "followUps": [{
                                 "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
                                 "questionType": "ValueQuestion",
-                                "valueType": "StringValue",
+                                "valueType": "StringQuestionValueType",
                                 "title": "What's your name?",
                                 "text": "Fill in your name",
                                 "requiredLevel": null,
@@ -718,7 +722,7 @@ answerDecoderTest =
                                     , tagUuids = []
                                     , references = []
                                     , experts = []
-                                    , valueType = StringValueType
+                                    , valueType = StringQuestionValueType
                                     }
                                 ]
                         }

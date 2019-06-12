@@ -13,12 +13,12 @@ module KMEditor.Common.Models.Entities exposing
     , MetricMeasure
     , OptionsQuestionData
     , Question(..)
+    , QuestionValueType(..)
     , Reference(..)
     , ResourcePageReferenceData
     , Tag
     , URLReferenceData
     , ValueQuestionData
-    , ValueQuestionType(..)
     , answerDecoder
     , chapterDecoder
     , createPathMap
@@ -71,10 +71,10 @@ module KMEditor.Common.Models.Entities exposing
     , newReference
     , newTag
     , questionDecoder
+    , questionValueTypeDecoder
     , referenceDecoder
     , tagDecoder
     , valueQuestionTypeString
-    , valueTypeDecoder
     )
 
 import Dict exposing (Dict)
@@ -168,7 +168,7 @@ type alias ValueQuestionData =
     , tagUuids : List String
     , references : List Reference
     , experts : List Expert
-    , valueType : ValueQuestionType
+    , valueType : QuestionValueType
     }
 
 
@@ -185,11 +185,11 @@ type alias IntegrationQuestionData =
     }
 
 
-type ValueQuestionType
-    = StringValueType
-    | DateValueType
-    | NumberValueType
-    | TextValueType
+type QuestionValueType
+    = StringQuestionValueType
+    | DateQuestionValueType
+    | NumberQuestionValueType
+    | TextQuestionValueType
 
 
 type alias Answer =
@@ -381,7 +381,7 @@ valueQuestionDataDecoder =
         |> required "tagUuids" (Decode.list Decode.string)
         |> required "references" (Decode.list referenceDecoder)
         |> required "experts" (Decode.list expertDecoder)
-        |> required "valueType" valueTypeDecoder
+        |> required "valueType" questionValueTypeDecoder
 
 
 integrationQuestionDataDecoder : Decoder IntegrationQuestionData
@@ -398,23 +398,23 @@ integrationQuestionDataDecoder =
         |> required "props" (Decode.dict Decode.string)
 
 
-valueTypeDecoder : Decoder ValueQuestionType
-valueTypeDecoder =
+questionValueTypeDecoder : Decoder QuestionValueType
+questionValueTypeDecoder =
     Decode.string
         |> Decode.andThen
             (\str ->
                 case str of
-                    "StringValue" ->
-                        Decode.succeed StringValueType
+                    "StringQuestionValueType" ->
+                        Decode.succeed StringQuestionValueType
 
-                    "DateValue" ->
-                        Decode.succeed DateValueType
+                    "DateQuestionValueType" ->
+                        Decode.succeed DateQuestionValueType
 
-                    "NumberValue" ->
-                        Decode.succeed NumberValueType
+                    "NumberQuestionValueType" ->
+                        Decode.succeed NumberQuestionValueType
 
-                    "TextValue" ->
-                        Decode.succeed TextValueType
+                    "TextQuestionValueType" ->
+                        Decode.succeed TextQuestionValueType
 
                     valueType ->
                         Decode.fail <| "Unknown value type: " ++ valueType
@@ -825,7 +825,7 @@ getQuestionItemQuestions question =
             []
 
 
-getQuestionValueType : Question -> Maybe ValueQuestionType
+getQuestionValueType : Question -> Maybe QuestionValueType
 getQuestionValueType question =
     case question of
         ValueQuestion valueQuestionData ->
@@ -864,19 +864,19 @@ getQuestionTypeString =
         (\_ -> "Integration")
 
 
-valueQuestionTypeString : ValueQuestionType -> String
+valueQuestionTypeString : QuestionValueType -> String
 valueQuestionTypeString valueType =
     case valueType of
-        StringValueType ->
+        StringQuestionValueType ->
             "String"
 
-        DateValueType ->
+        DateQuestionValueType ->
             "Date"
 
-        NumberValueType ->
+        NumberQuestionValueType ->
             "Number"
 
-        TextValueType ->
+        TextQuestionValueType ->
             "Text"
 
 

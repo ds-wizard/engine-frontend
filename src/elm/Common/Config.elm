@@ -1,13 +1,14 @@
 module Common.Config exposing
     ( Config
+    , Registry(..)
     , Widget(..)
     , decoder
     , defaultConfig
     )
 
 import Dict exposing (Dict)
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (optional, required)
+import Json.Decode as D exposing (Decoder)
+import Json.Decode.Pipeline as D
 
 
 type alias Config =
@@ -15,8 +16,10 @@ type alias Config =
     , feedbackEnabled : Bool
     , registrationEnabled : Bool
     , publicQuestionnaireEnabled : Bool
+    , questionnaireAccessibilityEnabled : Bool
     , levelsEnabled : Bool
     , itemTitleEnabled : Bool
+    , registry : Registry
     }
 
 
@@ -26,13 +29,24 @@ type Widget
     | Welcome
 
 
+type Registry
+    = RegistryEnabled String
+    | RegistryDisabled
+
+
 type alias ClientConfig =
     { appTitle : String
     , appTitleShort : String
     , welcomeInfo : Maybe String
     , welcomeWarning : Maybe String
     , dashboard : Dict String (List Widget)
+    , privacyUrl : String
     }
+
+
+defaultPrivacyUrl : String
+defaultPrivacyUrl =
+    "https://ds-wizard.org/privacy.html"
 
 
 defaultConfig : Config
@@ -43,56 +57,78 @@ defaultConfig =
         , welcomeInfo = Nothing
         , welcomeWarning = Nothing
         , dashboard = Dict.empty
+        , privacyUrl = defaultPrivacyUrl
         }
     , feedbackEnabled = True
     , registrationEnabled = True
     , publicQuestionnaireEnabled = True
+    , questionnaireAccessibilityEnabled = True
     , levelsEnabled = True
     , itemTitleEnabled = True
+    , registry = RegistryDisabled
     }
 
 
 decoder : Decoder Config
 decoder =
-    Decode.succeed Config
-        |> required "client" clientConfigDecoder
-        |> optional "feedbackEnabled" Decode.bool True
-        |> optional "registrationEnabled" Decode.bool True
-        |> optional "publicQuestionnaireEnabled" Decode.bool True
-        |> optional "levelsEnabled" Decode.bool True
-        |> optional "itemTitleEnabled" Decode.bool True
+    D.succeed Config
+        |> D.required "client" clientConfigDecoder
+        |> D.optional "feedbackEnabled" D.bool True
+        |> D.optional "registrationEnabled" D.bool True
+        |> D.optional "publicQuestionnaireEnabled" D.bool True
+        |> D.optional "questionnaireAccessibilityEnabled" D.bool True
+        |> D.optional "levelsEnabled" D.bool True
+        |> D.optional "itemTitleEnabled" D.bool True
+        |> D.optional "registry" registryDecoder RegistryDisabled
+
+
+registryDecoder : Decoder Registry
+registryDecoder =
+    D.succeed Tuple.pair
+        |> D.required "enabled" D.bool
+        |> D.required "url" (D.maybe D.string)
+        |> D.andThen
+            (\( enabled, mbUrl ) ->
+                case ( enabled, mbUrl ) of
+                    ( True, Just url ) ->
+                        D.succeed <| RegistryEnabled url
+
+                    _ ->
+                        D.succeed RegistryDisabled
+            )
 
 
 clientConfigDecoder : Decoder ClientConfig
 clientConfigDecoder =
-    Decode.succeed ClientConfig
-        |> optional "appTitle" Decode.string "Data Stewardship Wizard"
-        |> optional "appTitleShort" Decode.string "DS Wizard"
-        |> optional "welcomeInfo" (Decode.maybe Decode.string) Nothing
-        |> optional "welcomeWarning" (Decode.maybe Decode.string) Nothing
-        |> optional "dashboard" widgetDictDecoder Dict.empty
+    D.succeed ClientConfig
+        |> D.optional "appTitle" D.string "Data Stewardship Wizard"
+        |> D.optional "appTitleShort" D.string "DS Wizard"
+        |> D.optional "welcomeInfo" (D.maybe D.string) Nothing
+        |> D.optional "welcomeWarning" (D.maybe D.string) Nothing
+        |> D.optional "dashboard" widgetDictDecoder Dict.empty
+        |> D.optional "privacyUrl" D.string defaultPrivacyUrl
 
 
 widgetDictDecoder : Decoder (Dict String (List Widget))
 widgetDictDecoder =
-    Decode.dict (Decode.list widgetDecoder)
+    D.dict (D.list widgetDecoder)
 
 
 widgetDecoder : Decoder Widget
 widgetDecoder =
-    Decode.string
-        |> Decode.andThen
+    D.string
+        |> D.andThen
             (\str ->
                 case str of
                     "DMPWorkflow" ->
-                        Decode.succeed DMPWorkflow
+                        D.succeed DMPWorkflow
 
                     "LevelsQuestionnaire" ->
-                        Decode.succeed LevelsQuestionnaire
+                        D.succeed LevelsQuestionnaire
 
                     "Welcome" ->
-                        Decode.succeed Welcome
+                        D.succeed Welcome
 
                     widgetType ->
-                        Decode.fail <| "Unknown widget: " ++ widgetType
+                        D.fail <| "Unknown widget: " ++ widgetType
             )

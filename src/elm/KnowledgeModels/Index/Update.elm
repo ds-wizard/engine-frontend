@@ -6,16 +6,14 @@ import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Setters exposing (setPackages)
-import KnowledgeModels.Common.Models exposing (Package)
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Msgs
 
 
-fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg appState =
-    Cmd.map wrapMsg <|
-        PackagesApi.getPackagesUnique appState GetPackagesCompleted
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    PackagesApi.getPackages appState GetPackagesCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -61,7 +59,7 @@ deletePackageCompleted wrapMsg appState model result =
                 , packages = Loading
                 , packageToBeDeleted = Nothing
               }
-            , fetchData wrapMsg appState
+            , Cmd.map wrapMsg <| fetchData appState
             )
 
         Err error ->

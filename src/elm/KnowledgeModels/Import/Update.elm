@@ -1,65 +1,45 @@
 module KnowledgeModels.Import.Update exposing (update)
 
-import ActionResult exposing (ActionResult(..))
-import Common.Api exposing (getResultCmd)
-import Common.Api.Packages as PackagesApi
-import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
-import KnowledgeModels.Import.Models exposing (Model, dropzoneId, fileInputId)
+import KnowledgeModels.Import.FileImport.Models as FileImportModels
+import KnowledgeModels.Import.FileImport.Update as FileImportUpdate
+import KnowledgeModels.Import.Models exposing (ImportModel(..), Model)
 import KnowledgeModels.Import.Msgs exposing (Msg(..))
-import KnowledgeModels.Routing
+import KnowledgeModels.Import.RegistryImport.Models as RegistryImportModels
+import KnowledgeModels.Import.RegistryImport.Update as RegistryImportUpdate
 import Msgs
-import Ports exposing (FilePortData, createDropzone, fileSelected)
-import Routing exposing (Route(..), cmdNavigate)
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
-    case msg of
-        DragEnter ->
-            ( { model | dnd = model.dnd + 1 }, createDropzone dropzoneId )
+    case ( msg, model.importModel ) of
+        ( FileImportMsg fileImportMsg, FileImportModel fileImportModel ) ->
+            let
+                ( newFileImportModel, fileImportCmd ) =
+                    FileImportUpdate.update fileImportMsg (wrapMsg << FileImportMsg) appState fileImportModel
+            in
+            ( { model | importModel = FileImportModel newFileImportModel }
+            , fileImportCmd
+            )
 
-        DragLeave ->
-            ( { model | dnd = model.dnd - 1 }, Cmd.none )
+        ( RegistryImportMsg registryImportMsg, RegistryImportModel registryImoprtModel ) ->
+            let
+                ( newRegistryImportModel, registryImportCmd ) =
+                    RegistryImportUpdate.update registryImportMsg (wrapMsg << RegistryImportMsg) appState registryImoprtModel
+            in
+            ( { model | importModel = RegistryImportModel newRegistryImportModel }
+            , registryImportCmd
+            )
 
-        FileSelected ->
-            ( model, fileSelected fileInputId )
+        ( ShowRegistryImport, _ ) ->
+            ( { model | importModel = RegistryImportModel <| RegistryImportModels.initialModel "" }
+            , Cmd.none
+            )
 
-        FileRead data ->
-            ( { model | file = Just data }, Cmd.none )
-
-        Submit ->
-            handleSubmit wrapMsg appState model
-
-        Cancel ->
-            ( { model | file = Nothing, importing = Unset, dnd = 0 }, Cmd.none )
-
-        ImportPackageCompleted result ->
-            importPackageCompleted appState model result
+        ( ShowFileImport, _ ) ->
+            ( { model | importModel = FileImportModel FileImportModels.initialModel }
+            , Cmd.none
+            )
 
         _ ->
             ( model, Cmd.none )
-
-
-handleSubmit : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleSubmit wrapMsg appState model =
-    case model.file of
-        Just file ->
-            ( { model | importing = Loading }
-            , Cmd.map wrapMsg <| PackagesApi.importPackage file appState ImportPackageCompleted
-            )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-importPackageCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-importPackageCompleted appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState.key (KnowledgeModels KnowledgeModels.Routing.Index) )
-
-        Err error ->
-            ( { model | importing = getServerError error "Importing package failed." }
-            , getResultCmd result
-            )

@@ -2,6 +2,7 @@ module Organization.View exposing (view)
 
 import Common.Form exposing (CustomFormError)
 import Common.Html.Attribute exposing (detailClass)
+import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
@@ -26,7 +27,7 @@ viewOrganization model _ =
         , div []
             [ FormResult.view model.savingOrganization
             , formView model.form
-            , FormActions.viewActionOnly ( "Save", model.savingOrganization, Msgs.OrganizationMsg <| FormMsg Form.Submit )
+            , FormActions.viewActionOnly (ActionButton.ButtonConfig "Save" model.savingOrganization (Msgs.OrganizationMsg <| FormMsg Form.Submit) False)
             ]
         ]
 

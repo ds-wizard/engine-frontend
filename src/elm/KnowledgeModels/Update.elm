@@ -13,11 +13,11 @@ import Msgs
 fetchData : Route -> (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
 fetchData route wrapMsg appState =
     case route of
-        Detail organizationId kmId ->
-            KnowledgeModels.Detail.Update.fetchData (wrapMsg << DetailMsg) organizationId kmId appState
+        Detail packageId ->
+            Cmd.map (wrapMsg << DetailMsg) <| KnowledgeModels.Detail.Update.fetchData packageId appState
 
         Index ->
-            KnowledgeModels.Index.Update.fetchData (wrapMsg << IndexMsg) appState
+            Cmd.map (wrapMsg << IndexMsg) <| KnowledgeModels.Index.Update.fetchData appState
 
         _ ->
             Cmd.none

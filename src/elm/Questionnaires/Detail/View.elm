@@ -11,6 +11,7 @@ import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMEditor.Common.Models.Entities exposing (Level)
+import KnowledgeModels.Common.Version as Version
 import Msgs
 import Questionnaires.Detail.Models exposing (Model)
 import Questionnaires.Detail.Msgs exposing (Msg(..))
@@ -53,12 +54,12 @@ questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
             else
                 emptyNode
     in
-    div [ class "questionnaire-header" ]
-        [ div [ class "questionnaire-header-content" ]
-            [ text <| questionnaireTitle questionnaireModel.questionnaire
-            , div []
+    div [ class "top-header" ]
+        [ div [ class "top-header-content" ]
+            [ div [ class "top-header-title" ] [ text <| questionnaireTitle questionnaireModel.questionnaire ]
+            , div [ class "top-header-actions" ]
                 [ unsavedChanges
-                , ActionButton.button ( "Save", savingQuestionnaire, wrapMsg <| Save )
+                , ActionButton.button <| ActionButton.ButtonConfig "Save" savingQuestionnaire (wrapMsg <| Save) False
                 ]
             ]
         ]
@@ -66,4 +67,4 @@ questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
 
 questionnaireTitle : QuestionnaireDetail -> String
 questionnaireTitle questionnaire =
-    questionnaire.name ++ " (" ++ questionnaire.package.name ++ ", " ++ questionnaire.package.version ++ ")"
+    questionnaire.name ++ " (" ++ questionnaire.package.name ++ ", " ++ Version.toString questionnaire.package.version ++ ")"

@@ -1,8 +1,11 @@
 module Questionnaires.Edit.View exposing (formView, questionnaireView, view)
 
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
+import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
@@ -18,28 +21,36 @@ import Questionnaires.Routing
 import Routing exposing (Route(..))
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
-    Page.actionResultView (questionnaireView wrapMsg model) model.questionnaire
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
+    Page.actionResultView (questionnaireView wrapMsg appState model) model.questionnaire
 
 
-questionnaireView : (Msg -> Msgs.Msg) -> Model -> QuestionnaireDetail -> Html Msgs.Msg
-questionnaireView wrapMsg model _ =
+questionnaireView : (Msg -> Msgs.Msg) -> AppState -> Model -> QuestionnaireDetail -> Html Msgs.Msg
+questionnaireView wrapMsg appState model _ =
     div [ detailClass "Questionnaire__Edit" ]
         [ Page.header "Edit questionnaire" []
         , div []
             [ FormResult.errorOnlyView model.savingQuestionnaire
-            , formView model.editForm |> Html.map (wrapMsg << FormMsg)
+            , formView appState model.editForm |> Html.map (wrapMsg << FormMsg)
             , FormActions.view
                 (Questionnaires Questionnaires.Routing.Index)
-                ( "Save", model.savingQuestionnaire, wrapMsg <| FormMsg Form.Submit )
+                (ActionButton.ButtonConfig "Save" model.savingQuestionnaire (wrapMsg <| FormMsg Form.Submit) False)
             ]
         ]
 
 
-formView : Form CustomFormError QuestionnaireEditForm -> Html Form.Msg
-formView form =
+formView : AppState -> Form CustomFormError QuestionnaireEditForm -> Html Form.Msg
+formView appState form =
+    let
+        accessibilitySelect =
+            if appState.config.questionnaireAccessibilityEnabled then
+                FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
+
+            else
+                emptyNode
+    in
     div []
         [ FormGroup.input form "name" "Name"
-        , FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions form "accessibility" "Accessibility"
+        , accessibilitySelect
         ]

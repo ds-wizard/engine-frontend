@@ -20,6 +20,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
 import List.Extra as List
+import Markdown
 import Maybe.Extra as Maybe
 import Questionnaires.Common.Models exposing (isEditable)
 import Roman exposing (toRomanNumber)
@@ -167,7 +168,7 @@ chapterHeader model chapter =
     in
     div []
         [ h2 [] [ text <| chapterNumber ++ ". " ++ chapter.title ]
-        , p [ class "chapter-description" ] [ text chapter.text ]
+        , Markdown.toHtml [ class "chapter-description" ] chapter.text
         ]
 
 
@@ -468,6 +469,7 @@ feedbackModal model =
             , actionName = actionName
             , actionMsg = actionMsg
             , cancelMsg = cancelMsg
+            , dangerous = False
             }
     in
     Modal.confirm modalConfig
