@@ -22,7 +22,7 @@ import Form.Field as Field
 import Form.Input as Input
 import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (checked, class, classList, for, id, name, rows, style, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onCheck, onClick, onInput)
 import Markdown
 import String exposing (fromFloat)
 import Utils exposing (getContrastColorHex)
@@ -62,7 +62,7 @@ richRadioGroup options =
                             , class "form-check-input"
                             , type_ "radio"
                             , id k
-                            , onInput (Field.String >> Input state.path Form.Text)
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String k)
                             ]
                             []
                         , label [ class "form-check-label", for k ]
