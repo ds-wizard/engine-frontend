@@ -1,4 +1,4 @@
-module Common.View.FormExtra exposing (text, textAfter)
+module Common.View.FormExtra exposing (blockAfter, text, textAfter)
 
 import Html exposing (Html, p)
 import Html.Attributes exposing (..)
@@ -13,3 +13,8 @@ text str =
 textAfter : String -> Html msg
 textAfter str =
     p [ class "form-text form-text-after text-muted" ] [ Html.text str ]
+
+
+blockAfter : List (Html msg) -> Html msg
+blockAfter =
+    p [ class "form-text form-text-after text-muted" ]
