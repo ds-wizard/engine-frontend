@@ -144,6 +144,7 @@ sidePanelKmInfo package =
             [ ( "ID:", text package.id )
             , ( "Version:", text <| Version.toString package.version )
             , ( "Metamodel:", text <| String.fromInt package.metamodelVersion )
+            , ( "License:", text package.license )
             ]
 
         parentInfo =

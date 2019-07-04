@@ -66,6 +66,7 @@ update msg wrapMsg appState model =
                             model.form
                                 |> Form.update publishFormValidation (formMsg "description" package.description)
                                 |> Form.update publishFormValidation (formMsg "readme" package.readme)
+                                |> Form.update publishFormValidation (formMsg "license" package.license)
                     in
                     ( { model | form = form }
                     , Cmd.none

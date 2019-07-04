@@ -53,6 +53,8 @@ formView form knowledgeModel =
         , Html.map FormMsg <| FormGroup.codeView knowledgeModel.kmId "Knowledge Model ID"
         , lastVersion mbVersion
         , versionInputGroup form mbVersion
+        , Html.map FormMsg <| FormGroup.input form "license" "License"
+        , FormExtra.blockAfter [ text "Choose a ", a [ href "https://spdx.org/licenses/", target "_blank" ] [ text "license" ], text " so others can use your Knowledge Model." ]
         , Html.map FormMsg <| FormGroup.input form "description" "Description"
         , FormExtra.textAfter "Short description of the Knowledge Model."
         , Html.map FormMsg <| FormGroup.markdownEditor form "readme" "Readme"

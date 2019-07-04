@@ -37,6 +37,7 @@ type alias PublishForm =
     , patch : Int
     , description : String
     , readme : String
+    , license : String
     }
 
 
@@ -47,12 +48,13 @@ initEmptyPublishForm =
 
 publishFormValidation : Validation CustomFormError PublishForm
 publishFormValidation =
-    Validate.map5 PublishForm
+    Validate.map6 PublishForm
         (Validate.field "major" (Validate.int |> Validate.andThen (Validate.minInt 0)))
         (Validate.field "minor" (Validate.int |> Validate.andThen (Validate.minInt 0)))
         (Validate.field "patch" (Validate.int |> Validate.andThen (Validate.minInt 0)))
         (Validate.field "description" Validate.string)
         (Validate.field "readme" Validate.string)
+        (Validate.field "license" Validate.string)
 
 
 encodePublishForm : PublishForm -> ( String, Encode.Value )
@@ -65,6 +67,7 @@ encodePublishForm form =
             Encode.object
                 [ ( "description", Encode.string form.description )
                 , ( "readme", Encode.string form.readme )
+                , ( "license", Encode.string form.license )
                 ]
     in
     ( version, object )
