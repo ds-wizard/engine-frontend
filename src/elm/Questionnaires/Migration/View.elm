@@ -40,6 +40,34 @@ contentView appState model ( migration, levels ) =
 
             else
                 emptyNode
+
+        content =
+            if List.length model.changes.questions == 0 then
+                div [ class "content" ]
+                    [ Page.illustratedMessage
+                        { image = "happy_feeling"
+                        , heading = "No changes to review"
+                        , lines =
+                            [ "There are no changes affecting your answers."
+                            , "You can safely finalize the migration."
+                            ]
+                        }
+                    ]
+
+            else
+                div [ class "content" ]
+                    [ div [ class "changes-view" ]
+                        [ viewChanges model migration
+                        ]
+                    , div [ class "right-view" ]
+                        [ changeView model migration
+                        , div [ class "questionnaire-view" ]
+                            [ model.questionnaireModel
+                                |> Maybe.map (questionnaireView appState model migration levels)
+                                |> Maybe.withDefault emptyNode
+                            ]
+                        ]
+                    ]
     in
     div [ class "Questionnaire__Migration" ]
         [ div [ class "top-header" ]
@@ -50,19 +78,7 @@ contentView appState model ( migration, levels ) =
                     [ finalizeAction ]
                 ]
             ]
-        , div [ class "content" ]
-            [ div [ class "changes-view" ]
-                [ viewChanges model migration
-                ]
-            , div [ class "right-view" ]
-                [ changeView model migration
-                , div [ class "questionnaire-view" ]
-                    [ model.questionnaireModel
-                        |> Maybe.map (questionnaireView appState model migration levels)
-                        |> Maybe.withDefault emptyNode
-                    ]
-                ]
-            ]
+        , content
         ]
 
 
