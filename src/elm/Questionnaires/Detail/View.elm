@@ -3,6 +3,7 @@ module Questionnaires.Detail.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
+import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.ActionButton as ActionButton
@@ -34,6 +35,9 @@ content wrapMsg appState model ( questionnaireModel, levels ) =
 
                 else
                     Nothing
+            , getExtraQuestionClass = always Nothing
+            , forceDisabled = False
+            , createRenderer = defaultQuestionnaireRenderer
             }
     in
     div [ class "Questionnaires__Detail" ]

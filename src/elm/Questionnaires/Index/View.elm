@@ -9,10 +9,11 @@ import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KnowledgeModels.Common.Version as Version
+import KnowledgeModels.Common.Version as Version exposing (Version)
 import KnowledgeModels.Routing
 import Msgs
-import Questionnaires.Common.Models exposing (Questionnaire, isEditable)
+import Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
+import Questionnaires.Common.QuestionnaireState exposing (QuestionnaireState(..))
 import Questionnaires.Common.View exposing (accessibilityBadge)
 import Questionnaires.Index.ExportModal.View as ExportModal
 import Questionnaires.Index.Models exposing (Model)
@@ -32,6 +33,7 @@ viewQuestionnaires wrapMsg appState model questionnaires =
     div [ listClass "Questionnaires__Index" ]
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
+        , FormResult.view model.deletingMigration
         , Listing.view (listingConfig wrapMsg appState) <| List.sortBy (String.toLower << .name) questionnaires
         , ExportModal.view (wrapMsg << ExportModalMsg) appState model.exportModalModel
         , deleteModal wrapMsg model
@@ -55,10 +57,19 @@ listingConfig wrapMsg appState =
 
 listingTitle : AppState -> Questionnaire -> Html Msgs.Msg
 listingTitle appState questionnaire =
+    let
+        linkRoute =
+            if questionnaire.state == Migrating then
+                migrationRoute
+
+            else
+                detailRoute
+    in
     span []
-        [ linkTo (detailRoute questionnaire) [] [ text questionnaire.name ]
+        [ linkTo (linkRoute questionnaire) [] [ text questionnaire.name ]
         , ownerIcon appState questionnaire
         , accessibilityBadge appState questionnaire.accessibility
+        , migrationBadge questionnaire.state
         ]
 
 
@@ -113,6 +124,27 @@ listingActions wrapMsg appState questionnaire =
             , msg = ListingActionMsg (wrapMsg <| ShowExportQuestionnaire questionnaire)
             }
 
+        createMigration =
+            { extraClass = Nothing
+            , icon = Just "random"
+            , label = "Create Migration"
+            , msg = ListingActionLink (Routing.Questionnaires <| CreateMigration <| questionnaire.uuid)
+            }
+
+        continueMigration =
+            { extraClass = Just "font-weight-bold"
+            , icon = Nothing
+            , label = "Continue Migration"
+            , msg = ListingActionLink (Routing.Questionnaires <| Migration <| questionnaire.uuid)
+            }
+
+        cancelMigration =
+            { extraClass = Nothing
+            , icon = Just "ban"
+            , label = "Cancel Migration"
+            , msg = ListingActionMsg (wrapMsg <| DeleteQuestionnaireMigration questionnaire.uuid)
+            }
+
         edit =
             { extraClass = Nothing
             , icon = Just "edit"
@@ -128,19 +160,30 @@ listingActions wrapMsg appState questionnaire =
             }
 
         editable =
-            isEditable appState questionnaire
+            Questionnaire.isEditable appState questionnaire
+
+        migrating =
+            questionnaire.state == Migrating
     in
     []
-        |> listInsertIf fillQuestionnaire editable
-        |> listInsertIf viewQuestionnaire (not editable)
-        |> listInsertIf export_ True
-        |> listInsertIf edit editable
-        |> listInsertIf delete editable
+        |> listInsertIf fillQuestionnaire (editable && not migrating)
+        |> listInsertIf viewQuestionnaire (not editable && not migrating)
+        |> listInsertIf continueMigration migrating
+        |> listInsertIf cancelMigration migrating
+        |> listInsertIf export_ (not migrating)
+        |> listInsertIf createMigration (not migrating)
+        |> listInsertIf edit (editable && not migrating)
+        |> listInsertIf delete (editable && not migrating)
 
 
 detailRoute : Questionnaire -> Routing.Route
 detailRoute =
     Routing.Questionnaires << Detail << .uuid
+
+
+migrationRoute : Questionnaire -> Routing.Route
+migrationRoute =
+    Routing.Questionnaires << Migration << .uuid
 
 
 deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
@@ -174,3 +217,18 @@ deleteModal wrapMsg model =
             }
     in
     Modal.confirm modalConfig
+
+
+migrationBadge : QuestionnaireState -> Html msg
+migrationBadge state =
+    case state of
+        Migrating ->
+            span [ class "badge badge-info" ]
+                [ text "migrating" ]
+
+        Outdated ->
+            span [ class "badge badge-warning" ]
+                [ text "outdated" ]
+
+        Default ->
+            emptyNode

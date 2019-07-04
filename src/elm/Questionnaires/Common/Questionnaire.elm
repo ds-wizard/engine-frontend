@@ -1,8 +1,7 @@
-module Questionnaires.Common.Models exposing
+module Questionnaires.Common.Questionnaire exposing
     ( Questionnaire
+    , decoder
     , isEditable
-    , questionnaireDecoder
-    , questionnaireListDecoder
     )
 
 import Auth.Role as Role
@@ -10,7 +9,8 @@ import Common.AppState exposing (AppState)
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (optional, required)
 import KnowledgeModels.Common.Package as Package exposing (Package)
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
+import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
+import Questionnaires.Common.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 
 
 type alias Questionnaire =
@@ -20,6 +20,7 @@ type alias Questionnaire =
     , level : Int
     , accessibility : QuestionnaireAccessibility
     , ownerUuid : Maybe String
+    , state : QuestionnaireState
     }
 
 
@@ -45,8 +46,8 @@ isEditable appState questionnaire =
     isAdmin || isNotReadonly || isOwner
 
 
-questionnaireDecoder : Decoder Questionnaire
-questionnaireDecoder =
+decoder : Decoder Questionnaire
+decoder =
     Decode.succeed Questionnaire
         |> required "uuid" Decode.string
         |> required "name" Decode.string
@@ -54,8 +55,4 @@ questionnaireDecoder =
         |> optional "level" Decode.int 0
         |> required "accessibility" QuestionnaireAccessibility.decoder
         |> required "ownerUuid" (Decode.maybe Decode.string)
-
-
-questionnaireListDecoder : Decoder (List Questionnaire)
-questionnaireListDecoder =
-    Decode.list questionnaireDecoder
+        |> required "state" QuestionnaireState.decoder

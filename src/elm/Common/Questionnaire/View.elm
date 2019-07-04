@@ -1,6 +1,5 @@
 module Common.Questionnaire.View exposing
-    ( ViewExtraItemsConfig
-    , ViewQuestionnaireConfig
+    ( ViewQuestionnaireConfig
     , viewQuestionnaire
     )
 
@@ -14,15 +13,15 @@ import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Common.View.FormGroup as FormGroup
 import Common.View.Modal as Modal
 import Common.View.Page as Page
-import FormEngine.View exposing (FormViewConfig, viewForm)
+import FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import KMEditor.Common.Models.Entities exposing (Chapter, Expert, Level, Metric, ResourcePageReferenceData, URLReferenceData)
+import KMEditor.Common.Models.Entities exposing (Answer, Chapter, Expert, Level, Metric, Question, ResourcePageReferenceData, URLReferenceData, getQuestionRequiredLevel)
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
-import Questionnaires.Common.Models exposing (isEditable)
+import Questionnaires.Common.Questionnaire as Questionnaire
 import Roman exposing (toRomanNumber)
 import Round
 import String exposing (fromFloat, fromInt)
@@ -32,6 +31,9 @@ type alias ViewQuestionnaireConfig =
     { showExtraActions : Bool
     , showExtraNavigation : Bool
     , levels : Maybe (List Level)
+    , getExtraQuestionClass : String -> Maybe String
+    , forceDisabled : Bool
+    , createRenderer : List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
     }
 
 
@@ -41,7 +43,7 @@ viewQuestionnaire cfg appState model =
         level =
             case cfg.levels of
                 Just levels ->
-                    levelSelection levels model.questionnaire.level
+                    levelSelection cfg appState model levels model.questionnaire.level
 
                 Nothing ->
                     emptyNode
@@ -53,24 +55,28 @@ viewQuestionnaire cfg appState model =
             else
                 emptyNode
     in
-    div [ class "Questionnaire row" ]
-        [ div [ class "col col-sm-12 col-md-4 col-lg-4 col-xl-3" ]
+    div [ class "Questionnaire" ]
+        [ div [ class "chapter-list" ]
             [ level
             , chapterList appState model
             , extraActions
             ]
-        , div [ class "col col-sm-11 col-md-8 col-lg-8 col-xl-9" ]
+        , div [ id "questionnaire-body", class "questionnaire-body" ]
             (pageView appState cfg model)
         , feedbackModal model
         ]
 
 
-levelSelection : List Level -> Int -> Html Msg
-levelSelection levels selectedLevel =
+levelSelection : ViewQuestionnaireConfig -> AppState -> Model -> List Level -> Int -> Html Msg
+levelSelection cfg appState model levels selectedLevel =
+    let
+        isDisabled =
+            cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
+    in
     div [ class "level-selection card bg-light" ]
         [ div [ class "card-body" ]
             [ label [] [ text "Current Phase" ]
-            , select [ class "form-control", onInput SetLevel ]
+            , select [ class "form-control", onInput SetLevel, disabled isDisabled ]
                 (List.map (levelSelectionOption selectedLevel) levels)
             ]
         ]
@@ -172,7 +178,7 @@ chapterHeader model chapter =
         ]
 
 
-formConfig : AppState -> ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage FormExtraData ApiError
+formConfig : AppState -> ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage Question Answer ApiError
 formConfig appState cfg model =
     { customActions =
         if cfg.showExtraActions then
@@ -180,112 +186,16 @@ formConfig appState cfg model =
 
         else
             []
-    , viewExtraData = Just <| viewExtraData <| Maybe.withDefault [] cfg.levels
     , isDesirable =
         if Maybe.isNothing cfg.levels then
             Just <| always False
 
         else
-            Just (.requiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
-    , disabled = not <| isEditable appState model.questionnaire
+            Just (getQuestionRequiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
+    , disabled = cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
+    , getExtraQuestionClass = cfg.getExtraQuestionClass
+    , renderer = cfg.createRenderer (Maybe.withDefault [] cfg.levels) model.metrics
     }
-
-
-viewExtraData : List Level -> FormExtraData -> Html msg
-viewExtraData levels data =
-    p [ class "extra-data" ]
-        [ viewRequiredLevel levels data.requiredLevel
-        , viewResourcePageReferences data.resourcePageReferences
-        , viewUrlReferences data.urlReferences
-        , viewExperts data.experts
-        ]
-
-
-viewRequiredLevel : List Level -> Maybe Int -> Html msg
-viewRequiredLevel levels questionLevel =
-    case List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels of
-        Just level ->
-            span []
-                [ span [ class "caption" ]
-                    [ fa "check-square-o"
-                    , text "Desirable: "
-                    , span [] [ text level.title ]
-                    ]
-                ]
-
-        Nothing ->
-            emptyNode
-
-
-type alias ViewExtraItemsConfig a msg =
-    { icon : String
-    , label : String
-    , viewItem : a -> Html msg
-    }
-
-
-viewExtraItems : ViewExtraItemsConfig a msg -> List a -> Html msg
-viewExtraItems cfg list =
-    if List.length list == 0 then
-        emptyNode
-
-    else
-        let
-            items =
-                List.map cfg.viewItem list
-                    |> List.intersperse (span [ class "separator" ] [ text ", " ])
-        in
-        span []
-            (span [ class "caption" ] [ fa cfg.icon, text (cfg.label ++ ": ") ] :: items)
-
-
-viewResourcePageReferences : List ResourcePageReferenceData -> Html msg
-viewResourcePageReferences =
-    viewExtraItems
-        { icon = "book"
-        , label = "Data Stewardship for Open Science"
-        , viewItem = viewResourcePageReference
-        }
-
-
-viewResourcePageReference : ResourcePageReferenceData -> Html msg
-viewResourcePageReference data =
-    a [ href <| "/book-references/" ++ data.shortUuid, target "_blank" ]
-        [ text data.shortUuid ]
-
-
-viewUrlReferences : List URLReferenceData -> Html msg
-viewUrlReferences =
-    viewExtraItems
-        { icon = "external-link"
-        , label = "External Links"
-        , viewItem = viewUrlReference
-        }
-
-
-viewUrlReference : URLReferenceData -> Html msg
-viewUrlReference data =
-    a [ href data.url, target "_blank" ]
-        [ text data.label ]
-
-
-viewExperts : List Expert -> Html msg
-viewExperts =
-    viewExtraItems
-        { icon = "address-book-o"
-        , label = "Experts"
-        , viewItem = viewExpert
-        }
-
-
-viewExpert : Expert -> Html msg
-viewExpert expert =
-    span []
-        [ text expert.name
-        , text " ("
-        , a [ href <| "mailto:" ++ expert.email ] [ text expert.email ]
-        , text ")"
-        ]
 
 
 viewSummary : Model -> SummaryReport -> Html Msg

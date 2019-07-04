@@ -2,6 +2,7 @@ module KMEditor.Editor.Preview.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
+import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Common.Questionnaire.Models
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Tag as Tag
@@ -27,6 +28,9 @@ view wrapMsg appState levels model =
 
                     else
                         Nothing
+                , getExtraQuestionClass = always Nothing
+                , forceDisabled = False
+                , createRenderer = defaultQuestionnaireRenderer
                 }
                 appState
                 model.questionnaireModel

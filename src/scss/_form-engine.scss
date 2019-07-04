@@ -16,6 +16,16 @@
             justify-content: space-between;
             font-size: 120%;
         }
+
+        &.highlighted {
+            background: theme-color-level("warning", $highlighted-bg-level);
+            padding: 1rem;
+            @include border-radius($alert-border-radius);
+
+            &-resolved {
+                background: theme-color-level("success", $highlighted-bg-level);
+            }
+        }
     }
 
     .followups-group {
@@ -91,10 +101,6 @@
         background: $gray-100;
         border-radius: 0.25rem;
         margin-bottom: 5px;
-
-        &:hover {
-            border-color: $primary;
-        }
 
         &.radio-selected, &:hover {
             background: $gray-200;
@@ -202,6 +208,18 @@
                     }
                 }
             }
+        }
+    }
+
+    &-disabled {
+        .radio {
+            label {
+                cursor: default;
+            }
+        }
+
+        .radio:not(.radio-selected):hover {
+            background: $gray-100;
         }
     }
 }

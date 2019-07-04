@@ -338,11 +338,7 @@ upgradeModal wrapMsg model =
 
 createOptions : PackageDetail -> List ( String, String )
 createOptions package =
-    let
-        compare version =
-            Version.compare version package.version == GT
-    in
-    List.map (createOption package) <| List.filter compare package.versions
+    List.map (createOption package) <| List.filter (Version.greaterThan package.version) package.versions
 
 
 createOption : PackageDetail -> Version -> ( String, String )

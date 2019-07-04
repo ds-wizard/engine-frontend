@@ -1,7 +1,10 @@
-module Questionnaires.Index.Models exposing (Model, initialModel)
+module Questionnaires.Index.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Index.ExportModal.Models as ExportModal
 
 
@@ -10,6 +13,7 @@ type alias Model =
     , questionnaireToBeDeleted : Maybe Questionnaire
     , deletingQuestionnaire : ActionResult String
     , exportModalModel : ExportModal.Model
+    , deletingMigration : ActionResult String
     }
 
 
@@ -19,4 +23,5 @@ initialModel =
     , questionnaireToBeDeleted = Nothing
     , deletingQuestionnaire = Unset
     , exportModalModel = ExportModal.initialModel
+    , deletingMigration = Unset
     }

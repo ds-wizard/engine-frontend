@@ -10,7 +10,7 @@ module Questionnaires.Index.ExportModal.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (required)
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type alias Model =

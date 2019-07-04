@@ -10,7 +10,7 @@ import Html.Attributes exposing (class, title)
 import KMEditor.Common.Models.Entities exposing (Level)
 import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Routing
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Common.View exposing (accessibilityBadge)
 import Questionnaires.Routing exposing (Route(..))
 import Routing exposing (Route(..))

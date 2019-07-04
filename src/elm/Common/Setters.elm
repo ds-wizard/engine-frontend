@@ -1,12 +1,12 @@
 module Common.Setters exposing
     ( setBookReference
-    , setKnowledgeModel
     , setKnowledgeModels
     , setLevels
     , setMigration
     , setPackage
     , setPackages
     , setPulling
+    , setQuestionnaire
     , setQuestionnaires
     , setUsers
     )
@@ -15,11 +15,6 @@ module Common.Setters exposing
 setBookReference : a -> { b | bookReference : a } -> { b | bookReference : a }
 setBookReference value record =
     { record | bookReference = value }
-
-
-setKnowledgeModel : a -> { b | knowledgeModel : a } -> { b | knowledgeModel : a }
-setKnowledgeModel value record =
-    { record | knowledgeModel = value }
 
 
 setKnowledgeModels : a -> { b | knowledgeModels : a } -> { b | knowledgeModels : a }
@@ -50,6 +45,11 @@ setPackages value record =
 setPulling : a -> { b | pulling : a } -> { b | pulling : a }
 setPulling value record =
     { record | pulling = value }
+
+
+setQuestionnaire : a -> { b | questionnaire : a } -> { b | questionnaire : a }
+setQuestionnaire value record =
+    { record | questionnaire = value }
 
 
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }

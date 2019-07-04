@@ -2,6 +2,7 @@ module Public.Questionnaire.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Common.Html exposing (linkTo)
+import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Page as Page
 import Html exposing (..)
@@ -21,6 +22,9 @@ view wrapMsg appState model =
                 { showExtraActions = appState.config.feedbackEnabled
                 , showExtraNavigation = False
                 , levels = Nothing
+                , getExtraQuestionClass = always Nothing
+                , forceDisabled = False
+                , createRenderer = defaultQuestionnaireRenderer
                 }
                 appState
                 >> Html.map (QuestionnaireMsg >> wrapMsg)

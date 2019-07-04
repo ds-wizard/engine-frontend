@@ -8,7 +8,7 @@ import Form.Validate as Validate exposing (..)
 import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
+import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
 
 
 type alias Model =
@@ -26,7 +26,7 @@ initialModel : Maybe String -> Model
 initialModel selectedPackage =
     { packages = Loading
     , savingQuestionnaire = Unset
-    , form = initQuestionnaireCreateForm Nothing
+    , form = initQuestionnaireCreateForm selectedPackage
     , selectedPackage = selectedPackage
     , selectedTags = []
     , lastFetchedPreview = Nothing

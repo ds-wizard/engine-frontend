@@ -18,6 +18,7 @@ type alias Package =
     , kmId : String
     , version : Version
     , description : String
+    , versions : List Version
     , organization : Maybe OrganizationInfo
     , state : PackageState
     }
@@ -32,6 +33,7 @@ decoder =
         |> D.required "kmId" D.string
         |> D.required "version" Version.decoder
         |> D.required "description" D.string
+        |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "state" PackageState.decoder
 
@@ -44,6 +46,7 @@ dummy =
     , kmId = ""
     , version = Version.create 0 0 0
     , description = ""
+    , versions = []
     , organization = Nothing
     , state = PackageState.unknown
     }

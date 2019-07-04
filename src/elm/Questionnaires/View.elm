@@ -4,9 +4,11 @@ import Common.AppState exposing (AppState)
 import Html exposing (Html)
 import Msgs
 import Questionnaires.Create.View
+import Questionnaires.CreateMigration.View
 import Questionnaires.Detail.View
 import Questionnaires.Edit.View
 import Questionnaires.Index.View
+import Questionnaires.Migration.View
 import Questionnaires.Models exposing (Model)
 import Questionnaires.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
@@ -18,6 +20,10 @@ view route wrapMsg appState model =
         Create _ ->
             Questionnaires.Create.View.view (wrapMsg << CreateMsg) appState model.createModel
 
+        CreateMigration _ ->
+            Html.map (wrapMsg << CreateMigrationMsg) <|
+                Questionnaires.CreateMigration.View.view model.createMigrationModel
+
         Detail uuid ->
             Questionnaires.Detail.View.view (wrapMsg << DetailMsg) appState model.detailModel
 
@@ -26,3 +32,7 @@ view route wrapMsg appState model =
 
         Index ->
             Questionnaires.Index.View.view (wrapMsg << IndexMsg) appState model.indexModel
+
+        Migration uuid ->
+            Html.map (wrapMsg << MigrationMsg) <|
+                Questionnaires.Migration.View.view appState model.migrationModel

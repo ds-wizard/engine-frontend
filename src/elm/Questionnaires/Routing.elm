@@ -8,9 +8,11 @@ import Url.Parser.Query as Query
 
 type Route
     = Create (Maybe String)
+    | CreateMigration String
     | Detail String
     | Edit String
     | Index
+    | Migration String
 
 
 moduleRoot : String
@@ -21,9 +23,11 @@ moduleRoot =
 parses : (Route -> a) -> List (Parser (a -> c) c)
 parses wrapRoute =
     [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> Query.string "selected")
+    , map (wrapRoute << CreateMigration) (s moduleRoot </> s "create-migration" </> string)
     , map (wrapRoute << Detail) (s moduleRoot </> s "detail" </> string)
     , map (wrapRoute << Edit) (s moduleRoot </> s "edit" </> string)
     , map (wrapRoute <| Index) (s moduleRoot)
+    , map (wrapRoute << Migration) (s moduleRoot </> s "migration" </> string)
     ]
 
 
@@ -38,6 +42,9 @@ toUrl route =
                 Nothing ->
                     [ moduleRoot, "create" ]
 
+        CreateMigration uuid ->
+            [ moduleRoot, "create-migration", uuid ]
+
         Detail uuid ->
             [ moduleRoot, "detail", uuid ]
 
@@ -46,6 +53,9 @@ toUrl route =
 
         Index ->
             [ moduleRoot ]
+
+        Migration uuid ->
+            [ moduleRoot, "migration", uuid ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool
