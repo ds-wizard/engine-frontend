@@ -37,7 +37,7 @@ viewLevelGroup : AppState -> List Questionnaire -> Level -> Html msg
 viewLevelGroup appState questionnaires level =
     let
         levelQuestionnaires =
-            List.sortBy .name <| List.filter (.level >> (==) level.level) questionnaires
+            List.sortBy (String.toLower << .name) <| List.filter (.level >> (==) level.level) questionnaires
     in
     viewLevelGroupWithData appState levelQuestionnaires level
 

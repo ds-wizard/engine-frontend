@@ -25,7 +25,7 @@ viewUserList : (Msg -> Msgs.Msg) -> Model -> List User -> Html Msgs.Msg
 viewUserList wrapMsg model users =
     let
         sortUsers u1 u2 =
-            case compare u1.surname u2.surname of
+            case compare (String.toLower u1.surname) (String.toLower u2.surname) of
                 LT ->
                     LT
 
@@ -33,7 +33,7 @@ viewUserList wrapMsg model users =
                     GT
 
                 EQ ->
-                    compare u1.name u2.name
+                    compare (String.toLower u1.name) (String.toLower u2.name)
     in
     div [ listClass "Users__Index" ]
         [ Page.header "Users" indexActions

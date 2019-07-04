@@ -29,7 +29,7 @@ viewKnowledgeModels appState model packages =
     div [ listClass "KnowledgeModels__Index" ]
         [ Page.header "Knowledge Models" (indexActions appState)
         , FormResult.successOnlyView model.deletingPackage
-        , Listing.view (listingConfig appState) <| List.sortBy .name packages
+        , Listing.view (listingConfig appState) <| List.sortBy (String.toLower << .name) packages
         , deleteModal model
         ]
 
