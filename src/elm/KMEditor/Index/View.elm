@@ -35,7 +35,7 @@ viewKMEditors wrapMsg mbJwt model knowledgeModels =
     div [ listClass "KMEditor__Index" ]
         [ Page.header "Knowledge Model Editor" indexActions
         , FormResult.view model.deletingMigration
-        , Listing.view (listingConfig wrapMsg mbJwt) <| List.sortBy .name knowledgeModels
+        , Listing.view (listingConfig wrapMsg mbJwt) <| List.sortBy (String.toLower << .name) knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]

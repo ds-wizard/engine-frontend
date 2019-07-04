@@ -32,7 +32,7 @@ viewQuestionnaires wrapMsg appState model questionnaires =
     div [ listClass "Questionnaires__Index" ]
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
-        , Listing.view (listingConfig wrapMsg appState) <| List.sortBy .name questionnaires
+        , Listing.view (listingConfig wrapMsg appState) <| List.sortBy (String.toLower << .name) questionnaires
         , ExportModal.view (wrapMsg << ExportModalMsg) appState model.exportModalModel
         , deleteModal wrapMsg model
         ]
