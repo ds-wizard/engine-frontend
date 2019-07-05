@@ -223,7 +223,10 @@ viewChapterReport : Model -> List Metric -> ChapterReport -> Html Msg
 viewChapterReport model metrics chapterReport =
     let
         content =
-            if List.length chapterReport.metrics > 2 then
+            if List.length chapterReport.metrics == 0 then
+                []
+
+            else if List.length chapterReport.metrics > 2 then
                 [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
                 , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
                 ]
