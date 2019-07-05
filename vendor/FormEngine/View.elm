@@ -107,6 +107,9 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 , if not config.disabled then
                     button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
 
+                  else if List.length items == 0 then
+                    i [] [ text "There are no answers yet" ]
+
                   else
                     text ""
                 ]
