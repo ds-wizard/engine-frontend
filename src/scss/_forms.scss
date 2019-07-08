@@ -83,10 +83,16 @@ textarea {
     }
 
     &-markdown {
+        &.is-invalid {
+            .invalid-feedback {
+                display: block;
+            }
+        }
+
         .card-body {
             padding: 0;
 
-            &>div {
+            & > div {
                 padding: 1rem;
                 min-height: 10rem;
             }

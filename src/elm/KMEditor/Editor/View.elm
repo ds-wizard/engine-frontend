@@ -2,7 +2,7 @@ module KMEditor.Editor.View exposing (view)
 
 import ActionResult
 import Common.AppState exposing (AppState)
-import Common.Html exposing (emptyNode, fa)
+import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.View.ActionButton as ActionButton
 import Common.View.Flash as Flash
 import Common.View.Page as Page
@@ -16,7 +16,9 @@ import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, 
 import KMEditor.Editor.Msgs exposing (Msg(..))
 import KMEditor.Editor.Preview.View
 import KMEditor.Editor.TagEditor.View
+import KnowledgeModels.Routing exposing (Route(..))
 import Msgs
+import Routing
 
 
 view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
@@ -61,7 +63,7 @@ editorHeader wrapMsg model =
                 ]
 
             else
-                []
+                [ linkTo (Routing.KnowledgeModels Index) [ class "btn btn-outline-primary btn-with-loader" ] [ text "Close" ] ]
 
         errorMsg =
             if hasSavingError model then
