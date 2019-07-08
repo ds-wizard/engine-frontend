@@ -195,6 +195,13 @@ markdownEditor form fieldName labelText =
         ( error, errorClass ) =
             getErrors field labelText
 
+        cardErrorClass =
+            if String.isEmpty errorClass then
+                ""
+
+            else
+                "border-danger"
+
         editorStateField =
             Form.getFieldAsBool previewActiveFieldName form
 
@@ -219,9 +226,9 @@ markdownEditor form fieldName labelText =
         previewActiveMsg =
             Form.Input previewActiveFieldName Form.Checkbox << Field.Bool
     in
-    div [ class "form-group form-group-markdown" ]
+    div [ class <| "form-group form-group-markdown " ++ errorClass ]
         [ label [ for fieldName ] [ text labelText ]
-        , div [ class "card" ]
+        , div [ class <| "card " ++ cardErrorClass ]
             [ div [ class "card-header" ]
                 [ ul [ class "nav nav-tabs card-header-tabs" ]
                     [ li [ class "nav-item" ]

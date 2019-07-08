@@ -181,9 +181,13 @@ update msg wrapMsg appState model =
                     ( newSeed, { model | editorModel = newEditorModel }, cmd )
 
                 Discard ->
+                    let
+                        ( newModel, cmd ) =
+                            fetchPreview wrapMsg appState { model | sessionEvents = [] }
+                    in
                     ( appState.seed
-                    , initialModel ""
-                    , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate appState.key <| Routing.KMEditor IndexRoute ]
+                    , newModel
+                    , Cmd.batch [ Ports.clearUnloadMessage (), cmd ]
                     )
 
                 Save ->
@@ -207,11 +211,15 @@ update msg wrapMsg appState model =
                 SaveCompleted result ->
                     case result of
                         Ok _ ->
+                            let
+                                newModel =
+                                    initialModel model.kmUuid
+                            in
                             ( appState.seed
-                            , initialModel ""
+                            , { newModel | currentEditor = model.currentEditor }
                             , Cmd.batch
                                 [ Ports.clearUnloadMessage ()
-                                , cmdNavigate appState.key <| Routing.KMEditor IndexRoute
+                                , fetchData wrapMsg model.kmUuid appState
                                 ]
                             )
 
