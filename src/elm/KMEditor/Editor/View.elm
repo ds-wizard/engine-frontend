@@ -16,7 +16,7 @@ import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, 
 import KMEditor.Editor.Msgs exposing (Msg(..))
 import KMEditor.Editor.Preview.View
 import KMEditor.Editor.TagEditor.View
-import KnowledgeModels.Routing exposing (Route(..))
+import KMEditor.Routing exposing (Route(..))
 import Msgs
 import Routing
 
@@ -63,7 +63,7 @@ editorHeader wrapMsg model =
                 ]
 
             else
-                [ linkTo (Routing.KnowledgeModels Index) [ class "btn btn-outline-primary btn-with-loader" ] [ text "Close" ] ]
+                [ linkTo (Routing.KMEditor IndexRoute) [ class "btn btn-outline-primary btn-with-loader" ] [ text "Close" ] ]
 
         errorMsg =
             if hasSavingError model then
