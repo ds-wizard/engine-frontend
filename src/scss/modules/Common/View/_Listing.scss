@@ -40,9 +40,10 @@
             display: none;
         }
 
-        .title {
-            font-weight: bold;
+        .title-row {
             margin-bottom: 0.25rem;
+            display: flex;
+            justify-content: space-between;
 
             & > span {
                 display: flex;
@@ -61,6 +62,15 @@
             }
 
             .fa {
+                color: $gray-500;
+            }
+
+            .title {
+                font-weight: bold;
+            }
+
+            .updated {
+                font-style: italic;
                 color: $gray-500;
             }
         }

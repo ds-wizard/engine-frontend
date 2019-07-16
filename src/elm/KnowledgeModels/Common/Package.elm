@@ -5,10 +5,12 @@ module KnowledgeModels.Common.Package exposing
     )
 
 import Json.Decode as D exposing (Decoder)
+import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import KnowledgeModels.Common.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import KnowledgeModels.Common.PackageState as PackageState exposing (PackageState)
 import KnowledgeModels.Common.Version as Version exposing (Version)
+import Time
 
 
 type alias Package =
@@ -21,6 +23,7 @@ type alias Package =
     , versions : List Version
     , organization : Maybe OrganizationInfo
     , state : PackageState
+    , createdAt : Time.Posix
     }
 
 
@@ -36,6 +39,7 @@ decoder =
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "state" PackageState.decoder
+        |> D.required "createdAt" D.datetime
 
 
 dummy : Package
@@ -49,4 +53,5 @@ dummy =
     , versions = []
     , organization = Nothing
     , state = PackageState.unknown
+    , createdAt = Time.millisToPosix 0
     }

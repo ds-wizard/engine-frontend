@@ -55,6 +55,11 @@ listingConfig appState =
     , actions = listingActions appState
     , textTitle = .name
     , emptyText = "Click \"Import\" button to import a new Knowledge Model."
+    , updated =
+        Just
+            { getTime = .createdAt
+            , currentTime = appState.currentTime
+            }
     }
 
 

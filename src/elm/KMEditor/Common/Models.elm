@@ -10,11 +10,13 @@ module KMEditor.Common.Models exposing
     , knowledgeModelStateDecoder
     )
 
-import Json.Decode as Decode exposing (..)
+import Json.Decode as D exposing (..)
+import Json.Decode.Extra as D
 import Json.Decode.Pipeline exposing (optional, required)
 import KMEditor.Common.Models.Events exposing (Event, eventDecoder)
 import KnowledgeModels.Common.Version as Version exposing (Version)
 import List.Extra as List
+import Time
 
 
 type alias KnowledgeModel =
@@ -25,6 +27,7 @@ type alias KnowledgeModel =
     , parentPackageId : Maybe String
     , lastAppliedParentPackageId : Maybe String
     , stateType : KnowledgeModelState
+    , updatedAt : Time.Posix
     }
 
 
@@ -48,56 +51,57 @@ type KnowledgeModelState
 
 knowledgeModelDecoder : Decoder KnowledgeModel
 knowledgeModelDecoder =
-    Decode.succeed KnowledgeModel
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-        |> required "organizationId" Decode.string
-        |> required "kmId" Decode.string
-        |> required "parentPackageId" (Decode.nullable Decode.string)
-        |> required "lastAppliedParentPackageId" (Decode.nullable Decode.string)
+    D.succeed KnowledgeModel
+        |> required "uuid" D.string
+        |> required "name" D.string
+        |> required "organizationId" D.string
+        |> required "kmId" D.string
+        |> required "parentPackageId" (D.nullable D.string)
+        |> required "lastAppliedParentPackageId" (D.nullable D.string)
         |> optional "stateType" knowledgeModelStateDecoder Default
+        |> required "updatedAt" D.datetime
 
 
 knowledgeModelStateDecoder : Decoder KnowledgeModelState
 knowledgeModelStateDecoder =
-    Decode.string
-        |> Decode.andThen
+    D.string
+        |> D.andThen
             (\str ->
                 case str of
                     "Default" ->
-                        Decode.succeed Default
+                        D.succeed Default
 
                     "Edited" ->
-                        Decode.succeed Edited
+                        D.succeed Edited
 
                     "Outdated" ->
-                        Decode.succeed Outdated
+                        D.succeed Outdated
 
                     "Migrating" ->
-                        Decode.succeed Migrating
+                        D.succeed Migrating
 
                     "Migrated" ->
-                        Decode.succeed Migrated
+                        D.succeed Migrated
 
                     unknownState ->
-                        Decode.fail <| "Unknown knowledge model appState " ++ unknownState
+                        D.fail <| "Unknown knowledge model appState " ++ unknownState
             )
 
 
 knowledgeModelListDecoder : Decoder (List KnowledgeModel)
 knowledgeModelListDecoder =
-    Decode.list knowledgeModelDecoder
+    D.list knowledgeModelDecoder
 
 
 knowledgeModelDetailDecoder : Decoder KnowledgeModelDetail
 knowledgeModelDetailDecoder =
-    Decode.succeed KnowledgeModelDetail
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-        |> required "kmId" Decode.string
-        |> required "organizationId" Decode.string
-        |> required "parentPackageId" (Decode.nullable Decode.string)
-        |> required "events" (Decode.list eventDecoder)
+    D.succeed KnowledgeModelDetail
+        |> required "uuid" D.string
+        |> required "name" D.string
+        |> required "kmId" D.string
+        |> required "organizationId" D.string
+        |> required "parentPackageId" (D.nullable D.string)
+        |> required "events" (D.list eventDecoder)
 
 
 kmMatchState : List KnowledgeModelState -> KnowledgeModel -> Bool

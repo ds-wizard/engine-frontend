@@ -14,6 +14,7 @@ import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Common.View exposing (accessibilityBadge)
 import Questionnaires.Routing exposing (Route(..))
 import Routing exposing (Route(..))
+import Time
 
 
 view : AppState -> ActionResult (List Level) -> ActionResult (List Questionnaire) -> Html msg
@@ -25,7 +26,7 @@ viewQuestionnaires : AppState -> ( List Questionnaire, List Level ) -> Html msg
 viewQuestionnaires appState ( questionnaires, levels ) =
     if List.length questionnaires > 0 then
         div [ class "PhaseQuestionnaireWidget" ]
-            [ h3 [] [ text "Your questionnaires" ]
+            [ h3 [] [ text "Recent questionnaires" ]
             , div [] (List.map (viewLevelGroup appState questionnaires) levels)
             ]
 
@@ -37,7 +38,10 @@ viewLevelGroup : AppState -> List Questionnaire -> Level -> Html msg
 viewLevelGroup appState questionnaires level =
     let
         levelQuestionnaires =
-            List.sortBy (String.toLower << .name) <| List.filter (.level >> (==) level.level) questionnaires
+            questionnaires
+                |> List.filter (.level >> (==) level.level)
+                |> List.sortBy (.updatedAt >> Time.posixToMillis >> negate)
+                |> List.take 7
     in
     viewLevelGroupWithData appState levelQuestionnaires level
 
@@ -66,6 +70,11 @@ listingConfig appState =
     , actions = always []
     , textTitle = .name
     , emptyText = "Click \"Create\" button to add a new Questionnaire."
+    , updated =
+        Just
+            { getTime = .updatedAt
+            , currentTime = appState.currentTime
+            }
     }
 
 
