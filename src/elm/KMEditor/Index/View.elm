@@ -3,6 +3,7 @@ module KMEditor.Index.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
+import Common.AppState exposing (AppState)
 import Common.Html exposing (..)
 import Common.Html.Attribute exposing (listClass)
 import Common.View.FormGroup as FormGroup
@@ -25,17 +26,17 @@ import Routing exposing (Route(..))
 import Utils exposing (listInsertIf, packageIdToComponents)
 
 
-view : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> Html Msgs.Msg
-view wrapMsg jwt model =
-    Page.actionResultView (viewKMEditors wrapMsg jwt model) model.knowledgeModels
+view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
+view wrapMsg appState model =
+    Page.actionResultView (viewKMEditors wrapMsg appState model) model.knowledgeModels
 
 
-viewKMEditors : (Msg -> Msgs.Msg) -> Maybe JwtToken -> Model -> List KnowledgeModel -> Html Msgs.Msg
-viewKMEditors wrapMsg mbJwt model knowledgeModels =
+viewKMEditors : (Msg -> Msgs.Msg) -> AppState -> Model -> List KnowledgeModel -> Html Msgs.Msg
+viewKMEditors wrapMsg appState model knowledgeModels =
     div [ listClass "KMEditor__Index" ]
         [ Page.header "Knowledge Model Editor" indexActions
         , FormResult.view model.deletingMigration
-        , Listing.view (listingConfig wrapMsg mbJwt) <| List.sortBy (String.toLower << .name) knowledgeModels
+        , Listing.view (listingConfig wrapMsg appState) <| List.sortBy (String.toLower << .name) knowledgeModels
         , deleteModal wrapMsg model
         , upgradeModal wrapMsg model
         ]
@@ -49,13 +50,18 @@ indexActions =
     ]
 
 
-listingConfig : (Msg -> Msgs.Msg) -> Maybe JwtToken -> ListingConfig KnowledgeModel Msgs.Msg
-listingConfig wrapMsg mbJwt =
-    { title = listingTitle mbJwt
+listingConfig : (Msg -> Msgs.Msg) -> AppState -> ListingConfig KnowledgeModel Msgs.Msg
+listingConfig wrapMsg appState =
+    { title = listingTitle appState.jwt
     , description = listingDescription
-    , actions = listingActions wrapMsg mbJwt
+    , actions = listingActions wrapMsg appState.jwt
     , textTitle = .name
     , emptyText = "Click \"Create\" button to add a new Knowledge Model Editor."
+    , updated =
+        Just
+            { getTime = .updatedAt
+            , currentTime = appState.currentTime
+            }
     }
 
 

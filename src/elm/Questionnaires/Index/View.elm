@@ -52,6 +52,11 @@ listingConfig wrapMsg appState =
     , actions = listingActions wrapMsg appState
     , textTitle = .name
     , emptyText = "Click \"Create\" button to add a new Questionnaire."
+    , updated =
+        Just
+            { getTime = .updatedAt
+            , currentTime = appState.currentTime
+            }
     }
 
 

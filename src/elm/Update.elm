@@ -4,7 +4,9 @@ import Auth.Models exposing (setSidebarCollapsed)
 import Auth.Update
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
+import Common.AppState as AppState
 import Common.Menu.Update
+import Common.Time as Time
 import Dashboard.Update
 import KMEditor.Update
 import KnowledgeModels.Update
@@ -21,30 +23,34 @@ import Users.Update
 
 fetchData : Model -> Cmd Msg
 fetchData model =
-    case model.appState.route of
-        Dashboard ->
-            Cmd.map DashboardMsg <| Dashboard.Update.fetchData model.appState
+    let
+        fetchCmd =
+            case model.appState.route of
+                Dashboard ->
+                    Cmd.map DashboardMsg <| Dashboard.Update.fetchData model.appState
 
-        Questionnaires route ->
-            Questionnaires.Update.fetchData route Msgs.QuestionnairesMsg model.appState model.dsPlannerModel
+                Questionnaires route ->
+                    Questionnaires.Update.fetchData route Msgs.QuestionnairesMsg model.appState model.dsPlannerModel
 
-        KMEditor route ->
-            KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.appState
+                KMEditor route ->
+                    KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.appState
 
-        KnowledgeModels route ->
-            KnowledgeModels.Update.fetchData route Msgs.KnowledgeModelsMsg model.appState
+                KnowledgeModels route ->
+                    KnowledgeModels.Update.fetchData route Msgs.KnowledgeModelsMsg model.appState
 
-        Organization ->
-            Cmd.map Msgs.OrganizationMsg <| Organization.Update.fetchData model.appState
+                Organization ->
+                    Cmd.map Msgs.OrganizationMsg <| Organization.Update.fetchData model.appState
 
-        Public route ->
-            Public.Update.fetchData route Msgs.PublicMsg model.appState
+                Public route ->
+                    Public.Update.fetchData route Msgs.PublicMsg model.appState
 
-        Users route ->
-            Users.Update.fetchData route Msgs.UsersMsg model.appState
+                Users route ->
+                    Users.Update.fetchData route Msgs.UsersMsg model.appState
 
-        _ ->
-            Cmd.none
+                _ ->
+                    Cmd.none
+    in
+    Cmd.batch [ fetchCmd, Time.getTime ]
 
 
 isGuarded : Model -> Maybe String
@@ -84,6 +90,9 @@ update msg model =
 
                     else
                         ( model, load url )
+
+        Msgs.OnTime time ->
+            ( { model | appState = AppState.setCurrentTime model.appState time }, Cmd.none )
 
         Msgs.AuthMsg authMsg ->
             Auth.Update.update authMsg model

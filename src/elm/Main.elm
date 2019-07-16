@@ -3,6 +3,7 @@ module Main exposing (main)
 import Auth.Models exposing (Session, initialSession, parseJwt)
 import Browser
 import Browser.Navigation exposing (Key)
+import Common.Time as Time
 import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
@@ -10,6 +11,7 @@ import Public.Routing
 import Random
 import Routing exposing (Route(..), cmdNavigate, homeRoute, routeIfAllowed)
 import Subscriptions exposing (subscriptions)
+import Time
 import Update exposing (fetchData, update)
 import Url exposing (Url)
 import View exposing (view)
@@ -41,13 +43,19 @@ init val location key =
             , apiUrl = flags.apiUrl
             , config = flags.config
             , valid = flags.success
+            , currentTime = Time.millisToPosix 0
             }
 
         model =
             initialModel appState session jwt key
                 |> initLocalModel
     in
-    ( model, decideInitialRoute model route )
+    ( model
+    , Cmd.batch
+        [ decideInitialRoute model route
+        , Time.getTime
+        ]
+    )
 
 
 decodeFlagsFromJson : Value -> Flags

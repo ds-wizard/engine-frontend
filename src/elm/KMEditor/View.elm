@@ -23,7 +23,7 @@ view route wrapMsg appState model =
             KMEditor.Editor.View.view (wrapMsg << EditorMsg) appState model.editorModel
 
         IndexRoute ->
-            KMEditor.Index.View.view (wrapMsg << IndexMsg) appState.jwt model.indexModel
+            KMEditor.Index.View.view (wrapMsg << IndexMsg) appState model.indexModel
 
         MigrationRoute _ ->
             KMEditor.Migration.View.view (wrapMsg << MigrationMsg) model.migrationModel

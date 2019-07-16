@@ -55,6 +55,7 @@ listingConfig wrapMsg =
     , actions = listingActions wrapMsg
     , textTitle = \u -> u.surname ++ u.name
     , emptyText = "Click \"Create\" button to add a new User."
+    , updated = Nothing
     }
 
 

@@ -6,11 +6,13 @@ module Questionnaires.Common.Questionnaire exposing
 
 import Auth.Role as Role
 import Common.AppState exposing (AppState)
-import Json.Decode as Decode exposing (..)
+import Json.Decode as D exposing (..)
+import Json.Decode.Extra as D
 import Json.Decode.Pipeline exposing (optional, required)
 import KnowledgeModels.Common.Package as Package exposing (Package)
 import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 import Questionnaires.Common.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
+import Time
 
 
 type alias Questionnaire =
@@ -21,6 +23,7 @@ type alias Questionnaire =
     , accessibility : QuestionnaireAccessibility
     , ownerUuid : Maybe String
     , state : QuestionnaireState
+    , updatedAt : Time.Posix
     }
 
 
@@ -48,11 +51,12 @@ isEditable appState questionnaire =
 
 decoder : Decoder Questionnaire
 decoder =
-    Decode.succeed Questionnaire
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
+    D.succeed Questionnaire
+        |> required "uuid" D.string
+        |> required "name" D.string
         |> required "package" Package.decoder
-        |> optional "level" Decode.int 0
+        |> optional "level" D.int 0
         |> required "accessibility" QuestionnaireAccessibility.decoder
-        |> required "ownerUuid" (Decode.maybe Decode.string)
+        |> required "ownerUuid" (D.maybe D.string)
         |> required "state" QuestionnaireState.decoder
+        |> required "updatedAt" D.datetime

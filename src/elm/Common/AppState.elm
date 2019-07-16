@@ -1,6 +1,7 @@
 module Common.AppState exposing
     ( AppState
     , getDashboardWidgets
+    , setCurrentTime
     )
 
 import Auth.Models exposing (JwtToken, Session)
@@ -9,6 +10,7 @@ import Common.Config exposing (Config, Widget(..))
 import Dict
 import Random exposing (Seed)
 import Routing exposing (Route(..))
+import Time
 
 
 type alias AppState =
@@ -20,7 +22,13 @@ type alias AppState =
     , apiUrl : String
     , config : Config
     , valid : Bool
+    , currentTime : Time.Posix
     }
+
+
+setCurrentTime : AppState -> Time.Posix -> AppState
+setCurrentTime appState time =
+    { appState | currentTime = time }
 
 
 getDashboardWidgets : AppState -> List Widget

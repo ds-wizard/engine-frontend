@@ -1,6 +1,7 @@
 module Users.Common.Models exposing (User, roles, userDecoder, userListDecoder)
 
 import Json.Decode as Decode exposing (..)
+import Json.Decode.Extra as Decode
 import Json.Decode.Pipeline exposing (required)
 
 
