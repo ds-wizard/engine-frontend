@@ -8,7 +8,7 @@ module KMEditor.Editor.Preview.Models exposing
     )
 
 import Common.AppState exposing (AppState)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.Questionnaire.Models
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, filterKnowledgModelWithTags)
 import KMEditor.Common.Models.Events exposing (Event)
 import KnowledgeModels.Common.Package as Package
@@ -98,4 +98,5 @@ createQuestionnaireModel appState packageId km =
         , replies = []
         , level = 0
         , selectedTagUuids = []
+        , labels = []
         }

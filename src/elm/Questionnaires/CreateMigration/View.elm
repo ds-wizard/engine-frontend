@@ -3,7 +3,6 @@ module Questionnaires.CreateMigration.View exposing (view)
 import ActionResult
 import Common.Html exposing (fa)
 import Common.Html.Attribute exposing (listClass)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.View.ActionButton as ActionResult
 import Common.View.Flash as Flash
 import Common.View.FormActions as FormActions
@@ -17,6 +16,7 @@ import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onInput)
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Common.Version as Version
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.CreateMigration.Models exposing (Model)
 import Questionnaires.CreateMigration.Msgs exposing (Msg(..))
 import Questionnaires.Routing

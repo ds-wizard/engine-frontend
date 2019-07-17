@@ -14,6 +14,7 @@ type Msg
     | SelectChange QuestionChange
     | ResolveCurrentChange
     | UndoResolveCurrentChange
+    | PutQuestionnaireCompleted (Result ApiError ())
     | PutQuestionnaireMigrationCompleted (Result ApiError ())
     | FinalizeMigration
     | FinalizeMigrationCompleted (Result ApiError ())

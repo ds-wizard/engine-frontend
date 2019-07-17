@@ -1,7 +1,7 @@
 module Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import Common.Questionnaire.Models exposing (Feedback)
+import Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Form
 import FormEngine.Model exposing (TypeHint)
@@ -26,3 +26,5 @@ type Msg
 
 type CustomFormMessage
     = FeedbackMsg
+    | AddTodo String
+    | RemoveTodo String

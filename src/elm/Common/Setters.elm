@@ -2,11 +2,13 @@ module Common.Setters exposing
     ( setBookReference
     , setKnowledgeModels
     , setLevels
+    , setMetrics
     , setMigration
     , setPackage
     , setPackages
     , setPulling
     , setQuestionnaire
+    , setQuestionnaireDetail
     , setQuestionnaires
     , setUsers
     )
@@ -32,6 +34,11 @@ setMigration value record =
     { record | migration = value }
 
 
+setMetrics : a -> { b | metrics : a } -> { b | metrics : a }
+setMetrics value record =
+    { record | metrics = value }
+
+
 setPackage : a -> { b | package : a } -> { b | package : a }
 setPackage value record =
     { record | package = value }
@@ -50,6 +57,11 @@ setPulling value record =
 setQuestionnaire : a -> { b | questionnaire : a } -> { b | questionnaire : a }
 setQuestionnaire value record =
     { record | questionnaire = value }
+
+
+setQuestionnaireDetail : a -> { b | questionnaireDetail : a } -> { b | questionnaireDetail : a }
+setQuestionnaireDetail value record =
+    { record | questionnaireDetail = value }
 
 
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }

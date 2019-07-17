@@ -18,6 +18,7 @@ import Maybe.Extra as Maybe
 import Msgs
 import Ports
 import Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange)
+import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
 import Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Questionnaires.Migration.Models exposing (Model, initializeChangeList)
 import Questionnaires.Migration.Msgs exposing (Msg(..))
@@ -33,8 +34,8 @@ fetchData appState uuid =
         ]
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg appState model =
+update : (Msg -> Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update wrapMsg msg appState model =
     case msg of
         GetQuestionnaireMigrationCompleted result ->
             handleGetQuestionnaireMigrationCompleted appState model result
@@ -49,7 +50,7 @@ update msg wrapMsg appState model =
             handleSelectChange appState model (Just change)
 
         QuestionnaireMsg questionnaireMsg ->
-            handleQuestionnaireMsg appState model questionnaireMsg
+            handleQuestionnaireMsg wrapMsg appState model questionnaireMsg
 
         ResolveCurrentChange ->
             handleResolveCurrentChange wrapMsg appState model
@@ -58,14 +59,17 @@ update msg wrapMsg appState model =
             handleUndoResolveCurrentChange wrapMsg appState model
 
         FinalizeMigration ->
-            ( model, Cmd.map wrapMsg <| QuestionnairesApi.deleteQuestionnaireMigration model.questionnaireUuid appState FinalizeMigrationCompleted )
+            handleFinalizeMigration wrapMsg appState model
 
         FinalizeMigrationCompleted result ->
             handleFinalizeMigrationCompleted appState model result
 
+        PutQuestionnaireCompleted _ ->
+            ( model, Cmd.none )
 
 
--- Message Handlers
+
+-- Handlers
 
 
 handleGetQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError QuestionnaireMigration -> ( Model, Cmd Msgs.Msg )
@@ -114,8 +118,11 @@ handleSelectChange appState model mbChange =
                     case model.questionnaireModel of
                         Just questionnaireModel ->
                             let
-                                ( newQuestionnaireModel, cmd ) =
-                                    Common.Questionnaire.Update.update (QuestionnaireMsgs.SetActiveChapter <| QuestionChange.getChapter change) appState questionnaireModel
+                                ( newQuestionnaireModel, _ ) =
+                                    Common.Questionnaire.Update.update
+                                        (QuestionnaireMsgs.SetActiveChapter <| QuestionChange.getChapter change)
+                                        appState
+                                        questionnaireModel
                             in
                             { model | questionnaireModel = Just newQuestionnaireModel }
 
@@ -131,22 +138,31 @@ handleSelectChange appState model mbChange =
             ( model, Cmd.none )
 
 
-handleQuestionnaireMsg : AppState -> Model -> QuestionnaireMsgs.Msg -> ( Model, Cmd Msgs.Msg )
-handleQuestionnaireMsg appState model questionnaireMsg =
-    let
-        newModel =
-            case model.questionnaireModel of
-                Just questionnaireModel ->
-                    let
-                        ( newQuestionnaireModel, _ ) =
-                            Common.Questionnaire.Update.update questionnaireMsg appState questionnaireModel
-                    in
-                    { model | questionnaireModel = Just newQuestionnaireModel }
+handleQuestionnaireMsg : (Msg -> Msgs.Msg) -> AppState -> Model -> QuestionnaireMsgs.Msg -> ( Model, Cmd Msgs.Msg )
+handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
+    case model.questionnaireModel of
+        Just questionnaireModel ->
+            let
+                ( updatedQuestionnaireModel, _ ) =
+                    Common.Questionnaire.Update.update questionnaireMsg appState questionnaireModel
 
-                Nothing ->
-                    model
-    in
-    ( newModel, Cmd.none )
+                body =
+                    QuestionnaireDetail.encode updatedQuestionnaireModel.questionnaire
+
+                ( newQuestionnaireModel, cmd ) =
+                    if updatedQuestionnaireModel.dirty then
+                        ( { updatedQuestionnaireModel | dirty = False }
+                        , Cmd.map wrapMsg <|
+                            QuestionnairesApi.putQuestionnaire model.questionnaireUuid body appState PutQuestionnaireCompleted
+                        )
+
+                    else
+                        ( updatedQuestionnaireModel, Cmd.none )
+            in
+            ( { model | questionnaireModel = Just newQuestionnaireModel }, cmd )
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 handleResolveCurrentChange : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -197,6 +213,14 @@ handleUndoResolveCurrentChange wrapMsg appState model =
             { model | questionnaireMigration = newQuestionnaireMigration }
     in
     ( newModel, putCurrentResolvedIds wrapMsg appState newModel )
+
+
+handleFinalizeMigration : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleFinalizeMigration wrapMsg appState model =
+    ( model
+    , Cmd.map wrapMsg <|
+        QuestionnairesApi.deleteQuestionnaireMigration model.questionnaireUuid appState FinalizeMigrationCompleted
+    )
 
 
 handleFinalizeMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )

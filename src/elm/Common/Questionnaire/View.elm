@@ -7,7 +7,8 @@ import ActionResult exposing (ActionResult(..))
 import Common.ApiError exposing (ApiError)
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, fa)
-import Common.Questionnaire.Models exposing (ActivePage(..), Feedback, FeedbackForm, FormExtraData, Model, QuestionnaireDetail, calculateUnansweredQuestions, chapterReportCanvasId)
+import Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, calculateUnansweredQuestions, chapterReportCanvasId)
+import Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Common.View.FormGroup as FormGroup
@@ -22,6 +23,7 @@ import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
 import Questionnaires.Common.Questionnaire as Questionnaire
+import Questionnaires.Common.QuestionnaireLabel exposing (QuestionnaireLabel)
 import Roman exposing (toRomanNumber)
 import Round
 import String exposing (fromFloat, fromInt)
@@ -182,7 +184,9 @@ formConfig : AppState -> ViewQuestionnaireConfig -> Model -> FormViewConfig Cust
 formConfig appState cfg model =
     { customActions =
         if cfg.showExtraActions then
-            [ ( "fa-exclamation-circle", FeedbackMsg ) ]
+            [ viewTodoAction model.questionnaire.labels
+            , viewFeedbackAction
+            ]
 
         else
             []
@@ -196,6 +200,40 @@ formConfig appState cfg model =
     , getExtraQuestionClass = cfg.getExtraQuestionClass
     , renderer = cfg.createRenderer (Maybe.withDefault [] cfg.levels) model.metrics
     }
+
+
+viewTodoAction : List QuestionnaireLabel -> String -> List String -> Html CustomFormMessage
+viewTodoAction labels questionId path =
+    let
+        currentPath =
+            String.join "." <| path ++ [ questionId ]
+
+        hasTodo =
+            labels
+                |> List.filter (.path >> (==) currentPath)
+                |> (not << List.isEmpty)
+    in
+    if hasTodo then
+        span [ class "action action-todo" ]
+            [ span [] [ text "TODO" ]
+            , a
+                [ title "Remove TODO"
+                , onClick <| RemoveTodo currentPath
+                ]
+                [ fa "times" ]
+            ]
+
+    else
+        a [ class "action action-add-todo", onClick <| AddTodo currentPath ]
+            [ fa "plus"
+            , span [] [ span [] [ text "Add Todo" ] ]
+            ]
+
+
+viewFeedbackAction : String -> List String -> Html CustomFormMessage
+viewFeedbackAction _ _ =
+    a [ class "action", onClick <| FeedbackMsg ]
+        [ fa "exclamation" ]
 
 
 viewSummary : Model -> SummaryReport -> Html Msg
@@ -308,7 +346,7 @@ viewProgressBar colorClass value =
 
 
 viewMetricsChart : List Metric -> ChapterReport -> Html Msg
-viewMetricsChart metrics chapterReport =
+viewMetricsChart _ chapterReport =
     div [ class "metrics-chart" ]
         [ canvas [ id <| chapterReportCanvasId chapterReport ] [] ]
 

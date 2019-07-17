@@ -30,7 +30,8 @@ fetchData model =
                     Cmd.map DashboardMsg <| Dashboard.Update.fetchData model.appState
 
                 Questionnaires route ->
-                    Questionnaires.Update.fetchData route Msgs.QuestionnairesMsg model.appState model.dsPlannerModel
+                    Cmd.map Msgs.QuestionnairesMsg <|
+                        Questionnaires.Update.fetchData route model.appState model.questionnairesModel
 
                 KMEditor route ->
                     KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.appState
@@ -39,7 +40,8 @@ fetchData model =
                     KnowledgeModels.Update.fetchData route Msgs.KnowledgeModelsMsg model.appState
 
                 Organization ->
-                    Cmd.map Msgs.OrganizationMsg <| Organization.Update.fetchData model.appState
+                    Cmd.map Msgs.OrganizationMsg <|
+                        Organization.Update.fetchData model.appState
 
                 Public route ->
                     Public.Update.fetchData route Msgs.PublicMsg model.appState
@@ -123,10 +125,10 @@ update msg model =
 
         Msgs.QuestionnairesMsg dsPlannerMsg ->
             let
-                ( dsPlannerModel, cmd ) =
-                    Questionnaires.Update.update dsPlannerMsg Msgs.QuestionnairesMsg model.appState model.dsPlannerModel
+                ( questionnairesModel, cmd ) =
+                    Questionnaires.Update.update Msgs.QuestionnairesMsg dsPlannerMsg model.appState model.questionnairesModel
             in
-            ( { model | dsPlannerModel = dsPlannerModel }, cmd )
+            ( { model | questionnairesModel = questionnairesModel }, cmd )
 
         Msgs.KMEditorMsg kmEditorMsg ->
             let

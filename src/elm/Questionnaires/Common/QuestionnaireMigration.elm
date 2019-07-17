@@ -7,11 +7,11 @@ module Questionnaires.Common.QuestionnaireMigration exposing
     , removeResolvedQuestion
     )
 
-import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
+import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
 type alias QuestionnaireMigration =
@@ -24,8 +24,8 @@ type alias QuestionnaireMigration =
 decoder : Decoder QuestionnaireMigration
 decoder =
     D.succeed QuestionnaireMigration
-        |> D.required "oldQuestionnaire" questionnaireDetailDecoder
-        |> D.required "newQuestionnaire" questionnaireDetailDecoder
+        |> D.required "oldQuestionnaire" QuestionnaireDetail.decoder
+        |> D.required "newQuestionnaire" QuestionnaireDetail.decoder
         |> D.required "resolvedQuestionUuids" (D.list D.string)
 
 

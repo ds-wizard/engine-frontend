@@ -4,12 +4,13 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail, initialModel)
+import Common.Questionnaire.Models exposing (initialModel)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
 import Msgs
 import Public.Questionnaire.Models exposing (Model)
 import Public.Questionnaire.Msgs exposing (Msg(..))
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
 fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg

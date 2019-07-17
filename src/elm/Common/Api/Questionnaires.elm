@@ -13,13 +13,13 @@ module Common.Api.Questionnaires exposing
     , putQuestionnaireMigration
     )
 
-import Common.Api exposing (ToMsg, httpGet, jwtDelete, jwtFetch, jwtGet, jwtPost, jwtPut)
+import Common.Api exposing (ToMsg, httpGet, jwtDelete, jwtFetch, jwtGet, jwtPut)
 import Common.AppState exposing (AppState)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail, questionnaireDetailDecoder)
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport, summaryReportDecoder)
 import Json.Decode as D
 import Json.Encode exposing (Value)
 import Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
+import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 
 
@@ -30,7 +30,7 @@ getQuestionnaires =
 
 getQuestionnaire : String -> AppState -> ToMsg QuestionnaireDetail msg -> Cmd msg
 getQuestionnaire uuid =
-    jwtGet ("/questionnaires/" ++ uuid) questionnaireDetailDecoder
+    jwtGet ("/questionnaires/" ++ uuid) QuestionnaireDetail.decoder
 
 
 getQuestionnaireMigration : String -> AppState -> ToMsg QuestionnaireMigration msg -> Cmd msg
@@ -40,7 +40,7 @@ getQuestionnaireMigration uuid =
 
 getQuestionnairePublic : AppState -> ToMsg QuestionnaireDetail msg -> Cmd msg
 getQuestionnairePublic =
-    httpGet "/questionnaires/public" questionnaireDetailDecoder
+    httpGet "/questionnaires/public" QuestionnaireDetail.decoder
 
 
 postQuestionnaire : Value -> AppState -> ToMsg Questionnaire msg -> Cmd msg

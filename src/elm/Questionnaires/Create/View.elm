@@ -13,30 +13,29 @@ import Form exposing (Form)
 import Html exposing (..)
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Common.Version as Version
-import Msgs
 import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility
-import Questionnaires.Create.Models exposing (Model, QuestionnaireCreateForm)
+import Questionnaires.Create.Models exposing (Model)
 import Questionnaires.Create.Msgs exposing (Msg(..))
 import Questionnaires.Routing
 import Routing
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
-    Page.actionResultView (content wrapMsg appState model) model.packages
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView (content appState model) model.packages
 
 
-content : (Msg -> Msgs.Msg) -> AppState -> Model -> List Package -> Html Msgs.Msg
-content wrapMsg appState model packages =
+content : AppState -> Model -> List Package -> Html Msg
+content appState model packages =
     div [ detailClass "Questionnaires__Create" ]
         [ Page.header "Create Questionnaire" []
         , div []
             [ FormResult.view model.savingQuestionnaire
-            , formView appState model packages |> Html.map (wrapMsg << FormMsg)
-            , tagsView wrapMsg model
+            , formView appState model packages |> Html.map FormMsg
+            , tagsView model
             , FormActions.view
                 (Routing.Questionnaires Questionnaires.Routing.Index)
-                (ActionResult.ButtonConfig "Save" model.savingQuestionnaire (wrapMsg <| FormMsg Form.Submit) False)
+                (ActionResult.ButtonConfig "Save" model.savingQuestionnaire (FormMsg Form.Submit) False)
             ]
         ]
 
@@ -72,13 +71,13 @@ formView appState model packages =
     formHtml
 
 
-tagsView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-tagsView wrapMsg model =
+tagsView : Model -> Html Msg
+tagsView model =
     let
         tagListConfig =
             { selected = model.selectedTags
-            , addMsg = AddTag >> wrapMsg
-            , removeMsg = RemoveTag >> wrapMsg
+            , addMsg = AddTag
+            , removeMsg = RemoveTag
             }
     in
     Tag.selection tagListConfig model.knowledgeModelPreview

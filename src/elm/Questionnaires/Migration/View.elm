@@ -160,7 +160,7 @@ questionnaireView appState model migration levels questionnaireModel =
                 Nothing
     in
     viewQuestionnaire
-        { showExtraActions = False
+        { showExtraActions = True
         , showExtraNavigation = False
         , levels = mbLevels
         , getExtraQuestionClass = getExtraQuestionClass
