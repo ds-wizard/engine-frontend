@@ -1,10 +1,10 @@
 module Questionnaires.CreateMigration.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Form
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Common.QuestionnaireMigration exposing (QuestionnaireMigration)
 
 

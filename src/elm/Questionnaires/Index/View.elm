@@ -11,7 +11,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import KnowledgeModels.Common.Version as Version exposing (Version)
 import KnowledgeModels.Routing
-import Msgs
 import Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Questionnaires.Common.QuestionnaireState exposing (QuestionnaireState(..))
 import Questionnaires.Common.View exposing (accessibilityBadge)
@@ -23,33 +22,33 @@ import Routing
 import Utils exposing (listInsertIf)
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
-    Page.actionResultView (viewQuestionnaires wrapMsg appState model) model.questionnaires
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView (viewQuestionnaires appState model) model.questionnaires
 
 
-viewQuestionnaires : (Msg -> Msgs.Msg) -> AppState -> Model -> List Questionnaire -> Html Msgs.Msg
-viewQuestionnaires wrapMsg appState model questionnaires =
+viewQuestionnaires : AppState -> Model -> List Questionnaire -> Html Msg
+viewQuestionnaires appState model questionnaires =
     div [ listClass "Questionnaires__Index" ]
         [ Page.header "Questionnaires" indexActions
         , FormResult.successOnlyView model.deletingQuestionnaire
         , FormResult.view model.deletingMigration
-        , Listing.view (listingConfig wrapMsg appState) <| List.sortBy (String.toLower << .name) questionnaires
-        , ExportModal.view (wrapMsg << ExportModalMsg) appState model.exportModalModel
-        , deleteModal wrapMsg model
+        , Listing.view (listingConfig appState) <| List.sortBy (String.toLower << .name) questionnaires
+        , ExportModal.view appState model.exportModalModel |> Html.map ExportModalMsg
+        , deleteModal model
         ]
 
 
-indexActions : List (Html Msgs.Msg)
+indexActions : List (Html Msg)
 indexActions =
     [ linkTo (Routing.Questionnaires <| Create Nothing) [ class "btn btn-primary" ] [ text "Create" ] ]
 
 
-listingConfig : (Msg -> Msgs.Msg) -> AppState -> ListingConfig Questionnaire Msgs.Msg
-listingConfig wrapMsg appState =
+listingConfig : AppState -> ListingConfig Questionnaire Msg
+listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription
-    , actions = listingActions wrapMsg appState
+    , actions = listingActions appState
     , textTitle = .name
     , emptyText = "Click \"Create\" button to add a new Questionnaire."
     , updated =
@@ -60,7 +59,7 @@ listingConfig wrapMsg appState =
     }
 
 
-listingTitle : AppState -> Questionnaire -> Html Msgs.Msg
+listingTitle : AppState -> Questionnaire -> Html Msg
 listingTitle appState questionnaire =
     let
         linkRoute =
@@ -78,7 +77,7 @@ listingTitle appState questionnaire =
         ]
 
 
-ownerIcon : AppState -> Questionnaire -> Html Msgs.Msg
+ownerIcon : AppState -> Questionnaire -> Html Msg
 ownerIcon appState questionnaire =
     if appState.config.questionnaireAccessibilityEnabled && questionnaire.ownerUuid == Maybe.map .uuid appState.session.user then
         i [ class "fa fa-user", title "Questionnaire created by you" ] []
@@ -87,7 +86,7 @@ ownerIcon appState questionnaire =
         emptyNode
 
 
-listingDescription : Questionnaire -> Html Msgs.Msg
+listingDescription : Questionnaire -> Html Msg
 listingDescription questionnaire =
     let
         kmRoute =
@@ -105,8 +104,8 @@ listingDescription questionnaire =
         ]
 
 
-listingActions : (Msg -> Msgs.Msg) -> AppState -> Questionnaire -> List (ListingActionConfig Msgs.Msg)
-listingActions wrapMsg appState questionnaire =
+listingActions : AppState -> Questionnaire -> List (ListingActionConfig Msg)
+listingActions appState questionnaire =
     let
         fillQuestionnaire =
             { extraClass = Just "font-weight-bold"
@@ -126,7 +125,7 @@ listingActions wrapMsg appState questionnaire =
             { extraClass = Nothing
             , icon = Just "download"
             , label = "Export"
-            , msg = ListingActionMsg (wrapMsg <| ShowExportQuestionnaire questionnaire)
+            , msg = ListingActionMsg (ShowExportQuestionnaire questionnaire)
             }
 
         createMigration =
@@ -147,7 +146,7 @@ listingActions wrapMsg appState questionnaire =
             { extraClass = Nothing
             , icon = Just "ban"
             , label = "Cancel Migration"
-            , msg = ListingActionMsg (wrapMsg <| DeleteQuestionnaireMigration questionnaire.uuid)
+            , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
             }
 
         edit =
@@ -161,7 +160,7 @@ listingActions wrapMsg appState questionnaire =
             { extraClass = Just "text-danger"
             , icon = Just "trash-o"
             , label = "Delete"
-            , msg = ListingActionMsg (wrapMsg <| ShowHideDeleteQuestionnaire <| Just questionnaire)
+            , msg = ListingActionMsg (ShowHideDeleteQuestionnaire <| Just questionnaire)
             }
 
         editable =
@@ -191,8 +190,8 @@ migrationRoute =
     Routing.Questionnaires << Migration << .uuid
 
 
-deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-deleteModal wrapMsg model =
+deleteModal : Model -> Html Msg
+deleteModal model =
     let
         ( visible, name ) =
             case model.questionnaireToBeDeleted of
@@ -216,8 +215,8 @@ deleteModal wrapMsg model =
             , visible = visible
             , actionResult = model.deletingQuestionnaire
             , actionName = "Delete"
-            , actionMsg = wrapMsg DeleteQuestionnaire
-            , cancelMsg = Just <| wrapMsg <| ShowHideDeleteQuestionnaire Nothing
+            , actionMsg = DeleteQuestionnaire
+            , cancelMsg = Just <| ShowHideDeleteQuestionnaire Nothing
             , dangerous = True
             }
     in

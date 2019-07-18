@@ -58,7 +58,7 @@ knowledgeModelDecoder =
         |> required "kmId" D.string
         |> required "parentPackageId" (D.nullable D.string)
         |> required "lastAppliedParentPackageId" (D.nullable D.string)
-        |> optional "stateType" knowledgeModelStateDecoder Default
+        |> required "state" knowledgeModelStateDecoder
         |> required "updatedAt" D.datetime
 
 

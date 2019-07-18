@@ -38,20 +38,20 @@ type alias Model =
     , kmEditorModel : KMEditor.Models.Model
     , kmPackagesModel : KnowledgeModels.Models.Model
     , publicModel : Public.Models.Model
-    , dsPlannerModel : Questionnaires.Models.Model
+    , questionnairesModel : Questionnaires.Models.Model
     , users : Users.Models.Model
     }
 
 
-initialModel : AppState -> Session -> Maybe JwtToken -> Key -> Model
-initialModel appState session jwt key =
+initialModel : AppState -> Model
+initialModel appState =
     { appState = appState
     , menuModel = Common.Menu.Models.initialModel
     , dashboardModel = Dashboard.Models.initialModel
     , organizationModel = Organization.Models.initialModel
     , kmEditorModel = KMEditor.Models.initialModel
     , kmPackagesModel = KnowledgeModels.Models.initialModel appState
-    , dsPlannerModel = Questionnaires.Models.initialModel
+    , questionnairesModel = Questionnaires.Models.initialModel
     , publicModel = Public.Models.initialModel
     , users = Users.Models.initialModel
     }
@@ -121,7 +121,7 @@ initLocalModel model =
             { model | publicModel = Public.Models.initLocalModel route model.publicModel }
 
         Questionnaires route ->
-            { model | dsPlannerModel = Questionnaires.Models.initLocalModel route model.dsPlannerModel }
+            { model | questionnairesModel = Questionnaires.Models.initLocalModel route model.questionnairesModel }
 
         Users route ->
             { model | users = Users.Models.initLocalModel route model.users }

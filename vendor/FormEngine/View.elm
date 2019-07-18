@@ -17,7 +17,7 @@ type QuestionState
 
 
 type alias FormViewConfig msg question option err =
-    { customActions : List ( String, msg )
+    { customActions : List (String -> List String -> Html msg)
     , isDesirable : Maybe (question -> Bool)
     , disabled : Bool
     , getExtraQuestionClass : String -> Maybe String
@@ -70,28 +70,28 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
     case formItem of
         StringFormElement descriptor state ->
             div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", disabled config.disabled, type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         TextFormElement descriptor state ->
             div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , textarea [ class "form-control", disabled config.disabled, value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         NumberFormElement descriptor state ->
             div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", disabled config.disabled, type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         ChoiceFormElement descriptor options state ->
             div [ class <| "form-group form-group-choices " ++ extraClass descriptor.name, id descriptor.name ]
-                [ viewLabel config descriptor (state.value /= Nothing) newHumanIdentifiers
+                [ viewLabel config descriptor path (state.value /= Nothing) newHumanIdentifiers
                 , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewChoice config (path ++ [ descriptor.name ]) descriptor state) options)
                 , viewClearAnswer (state.value /= Nothing && not config.disabled) (path ++ [ descriptor.name ])
@@ -101,7 +101,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
 
         GroupFormElement descriptor _ items state ->
             div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
-                [ viewLabel config descriptor (List.length items > 0) newHumanIdentifiers
+                [ viewLabel config descriptor path (List.length items > 0) newHumanIdentifiers
                 , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewGroupItem form config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
                 , if not config.disabled then
@@ -116,7 +116,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
 
         TypeHintFormElement descriptor typeHintConfig state ->
             div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input
                     [ class "form-control"
                     , type_ "text"
@@ -208,8 +208,8 @@ viewTypeHints typeHints path descriptor =
         text ""
 
 
-viewLabel : FormViewConfig msg question option err -> FormItemDescriptor question -> Bool -> List String -> Html (Msg msg err)
-viewLabel config descriptor answered humanIdentifiers =
+viewLabel : FormViewConfig msg question option err -> FormItemDescriptor question -> List String -> Bool -> List String -> Html (Msg msg err)
+viewLabel config descriptor path answered humanIdentifiers =
     let
         questionState =
             let
@@ -247,25 +247,19 @@ viewLabel config descriptor answered humanIdentifiers =
                 ]
                 [ config.renderer.renderQuestionLabel descriptor.question ]
             ]
-        , viewCustomActions descriptor.name config
+        , viewCustomActions descriptor.name path config
         ]
 
 
-viewCustomActions : String -> FormViewConfig msg question option err -> Html (Msg msg err)
-viewCustomActions questionId config =
+viewCustomActions : String -> List String -> FormViewConfig msg question option err -> Html (Msg msg err)
+viewCustomActions questionId path config =
     -- temporary fix since item name will be removed in the future versions
     if questionId /= "itemName" then
         span [ class "custom-actions" ]
-            (List.map (viewCustomAction questionId) config.customActions)
+            (List.map (\f -> Html.map (CustomQuestionMsg questionId) <| f questionId path) config.customActions)
 
     else
         text ""
-
-
-viewCustomAction : String -> ( String, msg ) -> Html (Msg msg err)
-viewCustomAction questionId ( icon, msg ) =
-    a [ onClick <| CustomQuestionMsg questionId msg ]
-        [ i [ class <| "fa " ++ icon ] [] ]
 
 
 viewClearAnswer : Bool -> List String -> Html (Msg msg err)

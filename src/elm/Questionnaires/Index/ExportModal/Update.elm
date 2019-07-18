@@ -9,8 +9,10 @@ import Common.Api.Templates as TemplatesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Msgs
-import Questionnaires.Index.ExportModal.Models exposing (Model, Template, initialModel)
+import Questionnaires.Common.Template exposing (Template)
+import Questionnaires.Index.ExportModal.Models exposing (Model, initialModel)
 import Questionnaires.Index.ExportModal.Msgs exposing (Msg(..))
+import Utils exposing (withNoCmd)
 
 
 fetchData : AppState -> Cmd Msg
@@ -18,20 +20,24 @@ fetchData appState =
     TemplatesApi.getTemplates appState GetTemplatesCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg appState model =
+update : Msg -> Model -> ( Model, Cmd Msgs.Msg )
+update msg model =
     case msg of
         GetTemplatesCompleted result ->
             handleGetTemplatesCompleted model result
 
         Close ->
-            ( initialModel, Cmd.none )
+            handleClose
 
         SelectFormat format ->
-            ( { model | selectedFormat = format }, Cmd.none )
+            handleSelectFormat model format
 
         SelectTemplate template ->
-            ( { model | selectedTemplate = Just template }, Cmd.none )
+            handleSelectTemplate model template
+
+
+
+-- Handlers
 
 
 handleGetTemplatesCompleted : Model -> Result ApiError (List Template) -> ( Model, Cmd Msgs.Msg )
@@ -49,3 +55,20 @@ handleGetTemplatesCompleted model result =
             ( { model | templates = getServerError error "DMP Templates could not be loaded" }
             , getResultCmd result
             )
+
+
+handleClose : ( Model, Cmd Msgs.Msg )
+handleClose =
+    withNoCmd initialModel
+
+
+handleSelectFormat : Model -> String -> ( Model, Cmd Msgs.Msg )
+handleSelectFormat model format =
+    withNoCmd <|
+        { model | selectedFormat = format }
+
+
+handleSelectTemplate : Model -> String -> ( Model, Cmd Msgs.Msg )
+handleSelectTemplate model template =
+    withNoCmd <|
+        { model | selectedTemplate = Just template }

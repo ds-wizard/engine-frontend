@@ -9,7 +9,7 @@ module Questionnaires.Migration.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.Questionnaire.Models
 import FormEngine.Model exposing (FormValue, getAnswerUuid)
 import KMEditor.Common.Models.Entities exposing (Answer, Chapter, Level, Question(..), getChapters, getFollowUpQuestions, getQuestionAnswers, getQuestionExperts, getQuestionReferences, getQuestionRequiredLevel, getQuestionText, getQuestionTitle, getQuestionUuid, getQuestions)
 import List.Extra as List
@@ -17,6 +17,7 @@ import Maybe.Extra as Maybe
 import Questionnaires.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData)
 import Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionAddData, QuestionChange(..), QuestionChangeData)
 import Questionnaires.Common.QuestionnaireChanges as QuestionnaireChanges exposing (QuestionnaireChanges)
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Utils exposing (flip, listFilterJust)
 

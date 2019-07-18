@@ -1,8 +1,9 @@
 module Questionnaires.Detail.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.Questionnaire.Models
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
 type alias Model =

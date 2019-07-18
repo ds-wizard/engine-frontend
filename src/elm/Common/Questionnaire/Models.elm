@@ -1,23 +1,15 @@
 module Common.Questionnaire.Models exposing
     ( ActivePage(..)
-    , Feedback
-    , FeedbackForm
     , FormExtraData
     , Model
-    , QuestionnaireDetail
+    , addLabel
     , calculateUnansweredQuestions
     , chapterReportCanvasId
     , createChapterForm
     , createChartConfig
-    , encodeFeedbackFrom
-    , encodeQuestionnaireDetail
-    , feedbackDecoder
-    , feedbackFormValidation
-    , feedbackListDecoder
     , getReply
-    , initEmptyFeedbackFrom
     , initialModel
-    , questionnaireDetailDecoder
+    , removeLabel
     , setActiveChapter
     , setLevel
     , updateReplies
@@ -27,18 +19,15 @@ import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (ChartConfig)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
+import Common.Questionnaire.Models.Feedback exposing (Feedback)
+import Common.Questionnaire.Models.FeedbackForm as FeedbackForm exposing (FeedbackForm)
 import Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport)
 import Form
-import Form.Validate as Validate exposing (..)
 import FormEngine.Model exposing (..)
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
-import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (Event)
-import KnowledgeModels.Common.Package as Package exposing (Package)
 import List.Extra as List
-import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
+import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import String exposing (fromInt)
 import Utils exposing (boolToInt)
 
@@ -88,98 +77,13 @@ initialModel appState questionnaire metrics events =
     , activePage = activePage
     , feedback = Unset
     , feedbackQuestionUuid = Nothing
-    , feedbackForm = initEmptyFeedbackFrom
+    , feedbackForm = FeedbackForm.initEmpty
     , sendingFeedback = Unset
     , feedbackResult = Nothing
     , metrics = metrics
     , summaryReport = Unset
     , dirty = False
     }
-
-
-type alias QuestionnaireDetail =
-    { uuid : String
-    , name : String
-    , package : Package
-    , knowledgeModel : KnowledgeModel
-    , replies : FormValues
-    , level : Int
-    , accessibility : QuestionnaireAccessibility
-    , ownerUuid : Maybe String
-    , selectedTagUuids : List String
-    }
-
-
-questionnaireDetailDecoder : Decoder QuestionnaireDetail
-questionnaireDetailDecoder =
-    Decode.succeed QuestionnaireDetail
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-        |> required "package" Package.decoder
-        |> required "knowledgeModel" knowledgeModelDecoder
-        |> required "replies" decodeFormValues
-        |> required "level" Decode.int
-        |> required "accessibility" QuestionnaireAccessibility.decoder
-        |> required "ownerUuid" (Decode.maybe Decode.string)
-        |> required "selectedTagUuids" (Decode.list Decode.string)
-
-
-encodeQuestionnaireDetail : QuestionnaireDetail -> Encode.Value
-encodeQuestionnaireDetail questionnaire =
-    Encode.object
-        [ ( "name", Encode.string questionnaire.name )
-        , ( "accessibility", QuestionnaireAccessibility.encode questionnaire.accessibility )
-        , ( "replies", encodeFormValues questionnaire.replies )
-        , ( "level", Encode.int questionnaire.level )
-        ]
-
-
-type alias FeedbackForm =
-    { title : String
-    , content : String
-    }
-
-
-initEmptyFeedbackFrom : Form.Form CustomFormError FeedbackForm
-initEmptyFeedbackFrom =
-    Form.initial [] feedbackFormValidation
-
-
-feedbackFormValidation : Validation CustomFormError FeedbackForm
-feedbackFormValidation =
-    Validate.map2 FeedbackForm
-        (Validate.field "title" Validate.string)
-        (Validate.field "content" Validate.string)
-
-
-encodeFeedbackFrom : String -> String -> FeedbackForm -> Encode.Value
-encodeFeedbackFrom questionUuid packageId form =
-    Encode.object
-        [ ( "questionUuid", Encode.string questionUuid )
-        , ( "packageId", Encode.string packageId )
-        , ( "title", Encode.string form.title )
-        , ( "content", Encode.string form.content )
-        ]
-
-
-type alias Feedback =
-    { title : String
-    , issueId : Int
-    , issueUrl : String
-    }
-
-
-feedbackDecoder : Decoder Feedback
-feedbackDecoder =
-    Decode.succeed Feedback
-        |> required "title" Decode.string
-        |> required "issueId" Decode.int
-        |> required "issueUrl" Decode.string
-
-
-feedbackListDecoder : Decoder (List Feedback)
-feedbackListDecoder =
-    Decode.list feedbackDecoder
 
 
 
@@ -296,12 +200,7 @@ updateReplies model =
                 _ ->
                     model.questionnaire.replies
     in
-    { model | questionnaire = updateQuestionnaireReplies replies model.questionnaire }
-
-
-updateQuestionnaireReplies : FormValues -> QuestionnaireDetail -> QuestionnaireDetail
-updateQuestionnaireReplies replies questionnaire =
-    { questionnaire | replies = replies }
+    { model | questionnaire = QuestionnaireDetail.updateReplies replies model.questionnaire }
 
 
 setActiveChapter : AppState -> Chapter -> Model -> Model
@@ -314,6 +213,37 @@ setActiveChapter appState chapter model =
 setLevel : QuestionnaireDetail -> Int -> QuestionnaireDetail
 setLevel questionnaire level =
     { questionnaire | level = level }
+
+
+addLabel : Model -> String -> Model
+addLabel model path =
+    let
+        labels =
+            [ { path = path, value = [ todoUuid ] } ]
+                ++ model.questionnaire.labels
+                |> List.uniqueBy .path
+    in
+    { model
+        | questionnaire = QuestionnaireDetail.updateLabels labels model.questionnaire
+        , dirty = True
+    }
+
+
+removeLabel : Model -> String -> Model
+removeLabel model path =
+    let
+        labels =
+            List.filter (not << (==) path << .path) model.questionnaire.labels
+    in
+    { model
+        | questionnaire = QuestionnaireDetail.updateLabels labels model.questionnaire
+        , dirty = True
+    }
+
+
+todoUuid : String
+todoUuid =
+    "615b9028-5e3f-414f-b245-12d2ae2eeb20"
 
 
 

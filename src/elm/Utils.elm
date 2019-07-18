@@ -14,6 +14,7 @@ module Utils exposing
     , tuplePrepend
     , validateRegex
     , versionIsGreater
+    , withNoCmd
     )
 
 import Color
@@ -165,3 +166,8 @@ packageIdToComponents packageId =
 
         _ ->
             Nothing
+
+
+withNoCmd : model -> ( model, Cmd msg )
+withNoCmd model =
+    ( model, Cmd.none )

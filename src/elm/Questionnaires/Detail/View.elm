@@ -4,7 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
+import Common.Questionnaire.Models
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormResult as FormResult
@@ -13,18 +13,18 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import KMEditor.Common.Models.Entities exposing (Level)
 import KnowledgeModels.Common.Version as Version
-import Msgs
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Detail.Models exposing (Model)
 import Questionnaires.Detail.Msgs exposing (Msg(..))
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
-    Page.actionResultView (content wrapMsg appState model) <| ActionResult.combine model.questionnaireModel model.levels
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView (content appState model) <| ActionResult.combine model.questionnaireModel model.levels
 
 
-content : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msgs.Msg
-content wrapMsg appState model ( questionnaireModel, levels ) =
+content : AppState -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msg
+content appState model ( questionnaireModel, levels ) =
     let
         questionnaireCfg =
             { showExtraActions = appState.config.feedbackEnabled
@@ -41,15 +41,15 @@ content wrapMsg appState model ( questionnaireModel, levels ) =
             }
     in
     div [ class "Questionnaires__Detail" ]
-        [ questionnaireHeader wrapMsg model.savingQuestionnaire questionnaireModel
+        [ questionnaireHeader model.savingQuestionnaire questionnaireModel
         , FormResult.view model.savingQuestionnaire
         , div [ class "questionnaire-wrapper" ]
-            [ viewQuestionnaire questionnaireCfg appState questionnaireModel |> Html.map (QuestionnaireMsg >> wrapMsg) ]
+            [ viewQuestionnaire questionnaireCfg appState questionnaireModel |> Html.map QuestionnaireMsg ]
         ]
 
 
-questionnaireHeader : (Msg -> Msgs.Msg) -> ActionResult String -> Common.Questionnaire.Models.Model -> Html Msgs.Msg
-questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
+questionnaireHeader : ActionResult String -> Common.Questionnaire.Models.Model -> Html Msg
+questionnaireHeader savingQuestionnaire questionnaireModel =
     let
         unsavedChanges =
             if questionnaireModel.dirty then
@@ -63,7 +63,7 @@ questionnaireHeader wrapMsg savingQuestionnaire questionnaireModel =
             [ div [ class "top-header-title" ] [ text <| questionnaireTitle questionnaireModel.questionnaire ]
             , div [ class "top-header-actions" ]
                 [ unsavedChanges
-                , ActionButton.button <| ActionButton.ButtonConfig "Save" savingQuestionnaire (wrapMsg <| Save) False
+                , ActionButton.button <| ActionButton.ButtonConfig "Save" savingQuestionnaire Save False
                 ]
             ]
         ]

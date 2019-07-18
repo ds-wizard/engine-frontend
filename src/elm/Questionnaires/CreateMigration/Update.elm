@@ -7,17 +7,19 @@ import Common.Api.Packages as PackagesApi
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Setters exposing (setPackages, setQuestionnaire)
 import Form
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Common.QuestionnaireMigration exposing (QuestionnaireMigration)
-import Questionnaires.CreateMigration.Models exposing (Model, encodeQuestionnaireMigrationCreateForm, questionnaireMigrationCreateFormValidation)
+import Questionnaires.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
+import Questionnaires.CreateMigration.Models exposing (Model)
 import Questionnaires.CreateMigration.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
 import Routing exposing (cmdNavigate)
+import Utils exposing (withNoCmd)
 
 
 fetchData : AppState -> String -> Cmd Msg
@@ -32,14 +34,14 @@ fetchData appState uuid =
     Cmd.batch [ getPackagesCmd, getQuestionnaireCmd ]
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg appState model =
+update : (Msg -> Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update wrapMsg msg appState model =
     case msg of
         AddTag tagUuid ->
-            ( { model | selectedTags = tagUuid :: model.selectedTags }, Cmd.none )
+            handleAddTag model tagUuid
 
         RemoveTag tagUuid ->
-            ( { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }, Cmd.none )
+            handleRemoveTag model tagUuid
 
         GetPackagesCompleted result ->
             handleGetPackagesCompleted model result
@@ -48,7 +50,7 @@ update msg wrapMsg appState model =
             handleGetQuestionnaireCompleted model result
 
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg appState model
+            handleForm wrapMsg formMsg appState model
 
         SelectPackage packageId ->
             handleSelectPackage model packageId
@@ -64,35 +66,47 @@ update msg wrapMsg appState model =
 -- Handlers
 
 
+handleAddTag : Model -> String -> ( Model, Cmd Msgs.Msg )
+handleAddTag model tagUuid =
+    withNoCmd <|
+        { model | selectedTags = tagUuid :: model.selectedTags }
+
+
+handleRemoveTag : Model -> String -> ( Model, Cmd Msgs.Msg )
+handleRemoveTag model tagUuid =
+    withNoCmd <|
+        { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }
+
+
 handleGetPackagesCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
 handleGetPackagesCompleted model result =
-    applyResult
-        { setResult = setPackages
-        , defaultError = "Unable to get packages"
-        , model = model
-        , result = result
-        }
-        |> preselectKnowledgeModel
+    preselectKnowledgeModel <|
+        applyResult
+            { setResult = setPackages
+            , defaultError = "Unable to get packages"
+            , model = model
+            , result = result
+            }
 
 
 handleGetQuestionnaireCompleted : Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
 handleGetQuestionnaireCompleted model result =
-    applyResult
-        { setResult = setQuestionnaire
-        , defaultError = "Unable to get packages"
-        , model = model
-        , result = result
-        }
-        |> preselectKnowledgeModel
+    preselectKnowledgeModel <|
+        applyResult
+            { setResult = setQuestionnaire
+            , defaultError = "Unable to get packages"
+            , model = model
+            , result = result
+            }
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg appState model =
+handleForm : (Msg -> Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleForm wrapMsg formMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just form ) ->
             let
                 body =
-                    encodeQuestionnaireMigrationCreateForm model.selectedTags form
+                    QuestionnaireMigrationCreateForm.encode model.selectedTags form
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -103,7 +117,7 @@ handleForm formMsg wrapMsg appState model =
         _ ->
             let
                 newModel =
-                    { model | form = Form.update questionnaireMigrationCreateFormValidation formMsg model.form }
+                    { model | form = Form.update QuestionnaireMigrationCreateForm.validation formMsg model.form }
             in
             case getSelectedPackageId newModel of
                 Just packageId ->

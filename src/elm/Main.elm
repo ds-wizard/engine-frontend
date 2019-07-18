@@ -47,7 +47,7 @@ init val location key =
             }
 
         model =
-            initialModel appState session jwt key
+            initialModel appState
                 |> initLocalModel
     in
     ( model
