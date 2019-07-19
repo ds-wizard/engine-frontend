@@ -4,6 +4,7 @@ import ActionResult
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, fa)
 import Common.Questionnaire.Models
+import Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Page as Page
 import Html exposing (..)
@@ -160,8 +161,7 @@ questionnaireView appState model migration levels questionnaireModel =
                 Nothing
     in
     viewQuestionnaire
-        { showExtraActions = True
-        , showExtraNavigation = False
+        { features = [ QuestionnaireFeature.todos ]
         , levels = mbLevels
         , getExtraQuestionClass = getExtraQuestionClass
         , forceDisabled = True

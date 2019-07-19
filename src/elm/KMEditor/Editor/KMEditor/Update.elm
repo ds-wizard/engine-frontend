@@ -23,8 +23,8 @@ import Utils exposing (pair)
 import ValueList
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> Cmd Msgs.Msg -> ( Seed, Model, Cmd Msgs.Msg )
-update msg wrapMsg appState model fetchPreviewCmd =
+update : Msg -> AppState -> Model -> Cmd Msgs.Msg -> ( Seed, Model, Cmd Msgs.Msg )
+update msg appState model fetchPreviewCmd =
     case msg of
         PaneMsg paneMsg ->
             ( appState.seed, { model | splitPane = SplitPane.update paneMsg model.splitPane }, Cmd.none )
@@ -44,39 +44,39 @@ update msg wrapMsg appState model fetchPreviewCmd =
                 Just editor ->
                     case editor of
                         KMEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateKMEditEvent appState.seed model data
 
                         TagEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateTagEditEvent appState.seed model data
 
                         IntegrationEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateIntegrationEditEvent appState.seed model data
 
                         ChapterEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateChapterEditEvent appState.seed model data
 
                         QuestionEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateQuestionEditEvent appState.seed model data
 
                         AnswerEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateAnswerEditEvent appState.seed model data
 
                         ReferenceEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateReferenceEditEvent appState.seed model data
 
                         ExpertEditor data ->
-                            setActiveEditor wrapMsg uuid
+                            setActiveEditor uuid
                                 |> withGenerateExpertEditEvent appState.seed model data
 
                 _ ->
-                    setActiveEditor wrapMsg uuid appState.seed model ()
+                    setActiveEditor uuid appState.seed model ()
 
         EditorMsg editorMsg ->
             case ( editorMsg, getActiveEditor model ) of
@@ -94,7 +94,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddChapter ->
-                            addChapter (scrollTopCmd wrapMsg)
+                            addChapter scrollTopCmd
                                 |> withGenerateKMEditEvent appState.seed model editorData
 
                         ReorderTags tagList ->
@@ -104,7 +104,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddTag ->
-                            addTag (scrollTopCmd wrapMsg)
+                            addTag scrollTopCmd
                                 |> withGenerateKMEditEvent appState.seed model editorData
 
                         ReorderIntegrations integrationList ->
@@ -114,7 +114,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddIntegration ->
-                            addIntegration (scrollTopCmd wrapMsg)
+                            addIntegration scrollTopCmd
                                 |> withGenerateKMEditEvent appState.seed model editorData
 
                 ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
@@ -135,7 +135,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddQuestion ->
-                            addQuestion (scrollTopCmd wrapMsg)
+                            addQuestion scrollTopCmd
                                 |> withGenerateChapterEditEvent appState.seed model editorData
 
                 ( TagEditorMsg tagEditorMsg, Just (TagEditor editorData) ) ->
@@ -198,7 +198,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddAnswer ->
-                            addAnswer (scrollTopCmd wrapMsg)
+                            addAnswer scrollTopCmd
                                 |> withGenerateQuestionEditEvent appState.seed model editorData
 
                         ReorderItemQuestions itemQuestionList ->
@@ -208,7 +208,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddAnswerItemTemplateQuestion ->
-                            addAnswerItemTemplateQuestion (scrollTopCmd wrapMsg)
+                            addAnswerItemTemplateQuestion scrollTopCmd
                                 |> withGenerateQuestionEditEvent appState.seed model editorData
 
                         ReorderReferences referenceList ->
@@ -218,7 +218,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddReference ->
-                            addReference (scrollTopCmd wrapMsg)
+                            addReference scrollTopCmd
                                 |> withGenerateQuestionEditEvent appState.seed model editorData
 
                         ReorderExperts expertList ->
@@ -228,7 +228,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddExpert ->
-                            addExpert (scrollTopCmd wrapMsg)
+                            addExpert scrollTopCmd
                                 |> withGenerateQuestionEditEvent appState.seed model editorData
 
                 ( AnswerEditorMsg answerEditorMsg, Just (AnswerEditor editorData) ) ->
@@ -249,7 +249,7 @@ update msg wrapMsg appState model fetchPreviewCmd =
                                 |> withNoCmd
 
                         AddFollowUp ->
-                            addFollowUp (scrollTopCmd wrapMsg)
+                            addFollowUp scrollTopCmd
                                 |> withGenerateAnswerEditEvent appState.seed model editorData
 
                 ( ReferenceEditorMsg referenceEditorMsg, Just (ReferenceEditor editorData) ) ->
@@ -328,11 +328,11 @@ withCmd cmd ( a, b ) =
     ( a, b, cmd )
 
 
-setActiveEditor : (Msg -> Msgs.Msg) -> String -> Seed -> Model -> a -> ( Seed, Model, Cmd Msgs.Msg )
-setActiveEditor wrapMsg uuid seed model _ =
-    ( seed, { model | activeEditorUuid = Just uuid }, scrollTopCmd wrapMsg )
+setActiveEditor : String -> Seed -> Model -> a -> ( Seed, Model, Cmd Msgs.Msg )
+setActiveEditor uuid seed model _ =
+    ( seed, { model | activeEditorUuid = Just uuid }, scrollTopCmd )
 
 
-scrollTopCmd : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
-scrollTopCmd wrapMsg =
-    Ports.scrollToTop "editor-view"
+scrollTopCmd : Cmd Msgs.Msg
+scrollTopCmd =
+    Ports.scrollToTop "#editor-view"

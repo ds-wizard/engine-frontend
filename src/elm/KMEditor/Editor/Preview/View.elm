@@ -20,8 +20,7 @@ view wrapMsg appState levels model =
     let
         questionnaire =
             viewQuestionnaire
-                { showExtraActions = False
-                , showExtraNavigation = False
+                { features = []
                 , levels =
                     if appState.config.levelsEnabled then
                         Just levels

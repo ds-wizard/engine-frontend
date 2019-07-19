@@ -2,19 +2,23 @@ module Questionnaires.Common.QuestionnaireDetail exposing
     ( QuestionnaireDetail
     , decoder
     , encode
+    , getTodos
     , setLevel
+    , todosLength
     , updateLabels
     , updateReplies
     )
 
-import FormEngine.Model exposing (FormValues, decodeFormValues, encodeFormValues)
+import FormEngine.Model exposing (FormValue, FormValues, decodeFormValues, encodeFormValues, getAnswerUuid, getItemListCount)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
+import KMEditor.Common.Models.Entities exposing (Chapter, KnowledgeModel, Question(..), getFollowUpQuestions, getQuestionTitle, getQuestionUuid, knowledgeModelDecoder)
 import KnowledgeModels.Common.Package as Package exposing (Package)
+import List.Extra as List
 import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
 import Questionnaires.Common.QuestionnaireLabel as QuestionnaireLabel exposing (QuestionnaireLabel)
+import Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 
 
 type alias QuestionnaireDetail =
@@ -70,3 +74,81 @@ updateLabels labels questionnaire =
 setLevel : QuestionnaireDetail -> Int -> QuestionnaireDetail
 setLevel questionnaire level =
     { questionnaire | level = level }
+
+
+todosLength : QuestionnaireDetail -> Int
+todosLength =
+    List.length << getTodos
+
+
+getTodos : QuestionnaireDetail -> List QuestionnaireTodo
+getTodos questionnaire =
+    List.concatMap (getChapterTodos questionnaire) questionnaire.knowledgeModel.chapters
+
+
+getChapterTodos : QuestionnaireDetail -> Chapter -> List QuestionnaireTodo
+getChapterTodos questionnaire chapter =
+    List.concatMap (getQuestionTodos questionnaire chapter [ chapter.uuid ]) chapter.questions
+
+
+getQuestionTodos : QuestionnaireDetail -> Chapter -> List String -> Question -> List QuestionnaireTodo
+getQuestionTodos questionnaire chapter path question =
+    let
+        currentPath =
+            path ++ [ getQuestionUuid question ]
+
+        questionTodo =
+            if hasTodo questionnaire (pathToString currentPath) then
+                [ { chapter = chapter
+                  , question = question
+                  , path = pathToString currentPath
+                  }
+                ]
+
+            else
+                []
+
+        childTodos =
+            case getReply questionnaire (pathToString currentPath) of
+                Just formValue ->
+                    case question of
+                        OptionsQuestion questionData ->
+                            case List.find (.uuid >> (==) (getAnswerUuid formValue.value)) questionData.answers of
+                                Just answer ->
+                                    List.concatMap (getQuestionTodos questionnaire chapter (currentPath ++ [ answer.uuid ])) (getFollowUpQuestions answer)
+
+                                Nothing ->
+                                    []
+
+                        ListQuestion questionData ->
+                            let
+                                getItemQuestionTodos index =
+                                    List.concatMap
+                                        (getQuestionTodos questionnaire chapter (currentPath ++ [ String.fromInt index ]))
+                                        questionData.itemTemplateQuestions
+                            in
+                            List.range 0 (getItemListCount formValue.value)
+                                |> List.concatMap getItemQuestionTodos
+
+                        _ ->
+                            []
+
+                Nothing ->
+                    []
+    in
+    questionTodo ++ childTodos
+
+
+getReply : QuestionnaireDetail -> String -> Maybe FormValue
+getReply questionnaire path =
+    List.find (.path >> (==) path) questionnaire.replies
+
+
+hasTodo : QuestionnaireDetail -> String -> Bool
+hasTodo questionnaire path =
+    List.any (.path >> (==) path) questionnaire.labels
+
+
+pathToString : List String -> String
+pathToString =
+    String.join "."

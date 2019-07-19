@@ -20,6 +20,7 @@ import KMEditor.Common.Models.Entities exposing (Chapter)
 import KMEditor.Common.Models.Events exposing (Event)
 import Ports
 import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
+import Questionnaires.Common.QuestionnaireTodo as QuestionnaireTodo exposing (QuestionnaireTodo)
 import Utils exposing (stringToInt, withNoCmd)
 
 
@@ -35,6 +36,9 @@ update msg appState model =
         SetActiveChapter chapter ->
             handleSetActiveChapter appState model chapter
 
+        ViewTodos ->
+            handleViewTodos model
+
         ViewSummaryReport ->
             handleViewSummaryReport appState model
 
@@ -42,10 +46,10 @@ update msg appState model =
             handlePostForSummaryReportCompleted model result
 
         CloseFeedback ->
-            ( { model | feedback = Unset, feedbackQuestionUuid = Nothing }, Cmd.none )
+            handleCloseFeedback model
 
         FeedbackFormMsg formMsg ->
-            ( { model | feedbackForm = Form.update FeedbackForm.validation formMsg model.feedbackForm }, Cmd.none )
+            handleFeedbackFormMsg formMsg model
 
         SendFeedbackForm ->
             handleSendFeedbackForm appState model
@@ -58,6 +62,9 @@ update msg appState model =
 
         GetTypeHintsCompleted result ->
             handleGetTypeHintsCompleted model result
+
+        ScrollToTodo todo ->
+            handleScrollToTodo appState model todo
 
 
 
@@ -123,6 +130,12 @@ handleSetActiveChapter appState model chapter =
         |> withNoCmd
 
 
+handleViewTodos : Model -> ( Model, Cmd Msg )
+handleViewTodos model =
+    withNoCmd <|
+        { model | activePage = PageTodos }
+
+
 handleViewSummaryReport : AppState -> Model -> ( Model, Cmd Msg )
 handleViewSummaryReport appState model =
     let
@@ -162,6 +175,18 @@ handlePostForSummaryReportCompleted model result =
 
         Err error ->
             ( { model | summaryReport = getServerError error "Unable to get summary report." }, Cmd.none )
+
+
+handleCloseFeedback : Model -> ( Model, Cmd Msg )
+handleCloseFeedback model =
+    withNoCmd <|
+        { model | feedback = Unset, feedbackQuestionUuid = Nothing }
+
+
+handleFeedbackFormMsg : Form.Msg -> Model -> ( Model, Cmd Msg )
+handleFeedbackFormMsg formMsg model =
+    withNoCmd <|
+        { model | feedbackForm = Form.update FeedbackForm.validation formMsg model.feedbackForm }
 
 
 handleSendFeedbackForm : AppState -> Model -> ( Model, Cmd Msg )
@@ -233,6 +258,17 @@ handleGetTypeHintsCompleted model result =
 
         _ ->
             ( model, Cmd.none )
+
+
+handleScrollToTodo : AppState -> Model -> QuestionnaireTodo -> ( Model, Cmd Msg )
+handleScrollToTodo appState model todo =
+    let
+        selector =
+            "[data-path=\"" ++ QuestionnaireTodo.getSelectorPath todo ++ "\"]"
+    in
+    ( setActiveChapter appState todo.chapter model
+    , Ports.scrollIntoView selector
+    )
 
 
 

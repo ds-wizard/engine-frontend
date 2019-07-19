@@ -3,8 +3,8 @@ module.exports = function (app) {
     app.ports.scrollToTop.subscribe(scrollToTop)
 
 
-    function scrollIntoView(elementId) {
-        waitForElement(elementId, function ($element) {
+    function scrollIntoView(elementSelector) {
+        waitForElement(elementSelector, function ($element) {
             $element.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
@@ -12,18 +12,18 @@ module.exports = function (app) {
         })
     }
 
-    function scrollToTop(elementId) {
-        waitForElement(elementId, function ($element) {
+    function scrollToTop(elementSelector) {
+        waitForElement(elementSelector, function ($element) {
             $element.scrollTop = 0
         })
     }
 
-    function waitForElement(elementId, callback, timeout) {
+    function waitForElement(elementSelector, callback, timeout) {
         timeout = timeout || 5000
         var step = 100
         var currentTime = 0
         var interval = setInterval(function () {
-            var $element = document.getElementById(elementId)
+            var $element = document.querySelector(elementSelector)
             if ($element instanceof HTMLElement) {
                 clearInterval(interval)
                 callback($element)

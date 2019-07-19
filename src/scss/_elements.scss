@@ -136,7 +136,7 @@ code {
 }
 
 .list-group-hover {
-    li:hover {
+    li:hover, a:hover {
         background: $gray-100;
     }
 }

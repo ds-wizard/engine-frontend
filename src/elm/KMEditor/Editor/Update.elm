@@ -171,7 +171,7 @@ update msg wrapMsg appState model =
                                 Just editorModel ->
                                     let
                                         ( updatedSeed, updatedEditorModel, updateCmd ) =
-                                            KMEditor.Editor.KMEditor.Update.update editorMsg (wrapMsg << KMEditorMsg) appState editorModel (openEditorTask wrapMsg)
+                                            KMEditor.Editor.KMEditor.Update.update editorMsg appState editorModel (openEditorTask wrapMsg)
                                     in
                                     ( updatedSeed, Just updatedEditorModel, updateCmd )
 

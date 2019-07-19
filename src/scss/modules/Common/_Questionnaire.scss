@@ -38,6 +38,10 @@
     .nav {
         margin-bottom: 35px;
 
+        strong {
+            margin-bottom: 0.5rem;
+        }
+
         a {
             word-wrap: break-word;
             display: flex;
@@ -139,6 +143,28 @@
 
             .progress {
                 height: 10px;
+            }
+        }
+    }
+
+    .todos {
+        .list-group {
+            a {
+                color: $body-color;
+
+                &:hover {
+                    text-decoration: none;
+                    color: $primary;
+                }
+
+                p {
+                    margin-bottom: 0;
+
+                    &.nested {
+                        border-left: 5px $gray-300 solid;
+                        padding-left: 10px;
+                    }
+                }
             }
         }
     }

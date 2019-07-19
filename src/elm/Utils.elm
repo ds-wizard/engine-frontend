@@ -11,6 +11,7 @@ module Utils exposing
     , replace
     , splitVersion
     , stringToInt
+    , toHtmlId
     , tuplePrepend
     , validateRegex
     , versionIsGreater
@@ -171,3 +172,8 @@ packageIdToComponents packageId =
 withNoCmd : model -> ( model, Cmd msg )
 withNoCmd model =
     ( model, Cmd.none )
+
+
+toHtmlId : String -> String
+toHtmlId str =
+    "#" ++ str
