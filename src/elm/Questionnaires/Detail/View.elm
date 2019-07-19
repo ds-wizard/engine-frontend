@@ -5,6 +5,7 @@ import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Common.Questionnaire.Models
+import Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormResult as FormResult
@@ -27,8 +28,12 @@ content : AppState -> Model -> ( Common.Questionnaire.Models.Model, List Level )
 content appState model ( questionnaireModel, levels ) =
     let
         questionnaireCfg =
-            { showExtraActions = appState.config.feedbackEnabled
-            , showExtraNavigation = True
+            { features =
+                [ QuestionnaireFeature.feedback
+                , QuestionnaireFeature.summaryReport
+                , QuestionnaireFeature.todos
+                , QuestionnaireFeature.todoList
+                ]
             , levels =
                 if appState.config.levelsEnabled then
                     Just levels

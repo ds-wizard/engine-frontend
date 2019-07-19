@@ -3,16 +3,15 @@ module Common.Questionnaire.View exposing
     , viewQuestionnaire
     )
 
-import ActionResult exposing (ActionResult(..))
 import Common.ApiError exposing (ApiError)
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, fa)
-import Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, calculateUnansweredQuestions, chapterReportCanvasId)
-import Common.Questionnaire.Models.Feedback exposing (Feedback)
-import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
+import Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, calculateUnansweredQuestions, getActiveChapter)
+import Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature exposing (QuestionnaireFeature)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Common.View.FormGroup as FormGroup
-import Common.View.Modal as Modal
+import Common.Questionnaire.Views.FeedbackModal as FeedbackModal
+import Common.Questionnaire.Views.SummaryReport as SummaryReport
+import Common.Questionnaire.Views.Todos as Todos
 import Common.View.Page as Page
 import FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 import Html exposing (..)
@@ -23,15 +22,14 @@ import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
 import Questionnaires.Common.Questionnaire as Questionnaire
-import Questionnaires.Common.QuestionnaireLabel exposing (QuestionnaireLabel)
+import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
 import Roman exposing (toRomanNumber)
-import Round
-import String exposing (fromFloat, fromInt)
+import String exposing (fromInt)
+import Utils exposing (listInsertIf)
 
 
 type alias ViewQuestionnaireConfig =
-    { showExtraActions : Bool
-    , showExtraNavigation : Bool
+    { features : List QuestionnaireFeature
     , levels : Maybe (List Level)
     , getExtraQuestionClass : String -> Maybe String
     , forceDisabled : Bool
@@ -51,11 +49,7 @@ viewQuestionnaire cfg appState model =
                     emptyNode
 
         extraActions =
-            if cfg.showExtraNavigation then
-                extraNavigation model.activePage
-
-            else
-                emptyNode
+            viewExtraNavigation cfg model
     in
     div [ class "Questionnaire" ]
         [ div [ class "chapter-list" ]
@@ -65,8 +59,12 @@ viewQuestionnaire cfg appState model =
             ]
         , div [ id "questionnaire-body", class "questionnaire-body" ]
             (pageView appState cfg model)
-        , feedbackModal model
+        , FeedbackModal.view model
         ]
+
+
+
+-- Levels selection
 
 
 levelSelection : ViewQuestionnaireConfig -> AppState -> Model -> List Level -> Int -> Html Msg
@@ -90,6 +88,10 @@ levelSelectionOption selectedLevel level =
         [ text level.title ]
 
 
+
+-- Chapter list
+
+
 chapterList : AppState -> Model -> Html Msg
 chapterList appState model =
     let
@@ -102,7 +104,9 @@ chapterList appState model =
                     Nothing
     in
     div [ class "nav nav-pills flex-column" ]
-        (List.indexedMap (chapterListChapter appState model activeChapter) model.questionnaire.knowledgeModel.chapters)
+        ([ strong [] [ text "Chapters" ] ]
+            ++ List.indexedMap (chapterListChapter appState model activeChapter) model.questionnaire.knowledgeModel.chapters
+        )
 
 
 chapterListChapter : AppState -> Model -> Maybe Chapter -> Int -> Chapter -> Html Msg
@@ -137,15 +141,68 @@ viewChapterAnsweredIndication appState model chapter =
         fa "check"
 
 
-extraNavigation : ActivePage -> Html Msg
-extraNavigation activePage =
-    div [ class "nav nav-pills flex-column" ]
-        [ a
-            [ classList [ ( "nav-link", True ), ( "active", activePage == PageSummaryReport ) ]
-            , onClick ViewSummaryReport
-            ]
-            [ text "Summary Report" ]
+
+-- Extra navigation
+
+
+viewExtraNavigation : ViewQuestionnaireConfig -> Model -> Html Msg
+viewExtraNavigation cfg model =
+    let
+        todosLength =
+            QuestionnaireDetail.todosLength model.questionnaire
+
+        todosLinkVisible =
+            QuestionnaireFeature.todoListEnabled cfg.features && todosLength > 0
+
+        extraNavigation =
+            []
+                |> listInsertIf (viewTodosLink todosLength model.activePage) todosLinkVisible
+                |> listInsertIf (viewSummaryReportLink model.activePage) (QuestionnaireFeature.summaryReportEnabled cfg.features)
+    in
+    if List.length extraNavigation > 0 then
+        div [ class "nav nav-pills flex-column" ]
+            ([ strong [] [ text "More" ] ]
+                ++ extraNavigation
+            )
+
+    else
+        emptyNode
+
+
+viewSummaryReportLink : ActivePage -> Html Msg
+viewSummaryReportLink =
+    viewLink "Summary Report" PageSummaryReport ViewSummaryReport Nothing
+
+
+viewTodosLink : Int -> ActivePage -> Html Msg
+viewTodosLink todosCount =
+    viewLink "TODOs" PageTodos ViewTodos (Just todosCount)
+
+
+viewLink : String -> ActivePage -> Msg -> Maybe Int -> ActivePage -> Html Msg
+viewLink linkText targetPage msg mbCount activePage =
+    let
+        indication =
+            case mbCount of
+                Just count ->
+                    span [ class "badge badge-light badge-pill" ]
+                        [ text <| fromInt count ]
+
+                Nothing ->
+                    span [] []
+    in
+    a
+        [ class "nav-link"
+        , classList [ ( "active", activePage == targetPage ) ]
+        , onClick msg
         ]
+        [ text linkText
+        , indication
+        ]
+
+
+
+-- Chapter page
 
 
 pageView : AppState -> ViewQuestionnaireConfig -> Model -> List (Html Msg)
@@ -160,7 +217,10 @@ pageView appState cfg model =
             ]
 
         PageSummaryReport ->
-            [ Page.actionResultView (viewSummary model) model.summaryReport ]
+            [ Page.actionResultView (SummaryReport.view model) model.summaryReport ]
+
+        PageTodos ->
+            [ Todos.view model ]
 
 
 chapterHeader : Model -> Chapter -> Html Msg
@@ -182,280 +242,67 @@ chapterHeader model chapter =
 
 formConfig : AppState -> ViewQuestionnaireConfig -> Model -> FormViewConfig CustomFormMessage Question Answer ApiError
 formConfig appState cfg model =
-    { customActions =
-        if cfg.showExtraActions then
-            [ viewTodoAction model.questionnaire.labels
-            , viewFeedbackAction
-            ]
-
-        else
+    let
+        customActions =
             []
-    , isDesirable =
-        if Maybe.isNothing cfg.levels then
-            Just <| always False
+                |> listInsertIf (viewTodoAction model) (QuestionnaireFeature.todosEnabled cfg.features)
+                |> listInsertIf viewFeedbackAction (QuestionnaireFeature.feedbackEnabled appState cfg.features)
 
-        else
-            Just (getQuestionRequiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
+        isDesirable =
+            if Maybe.isNothing cfg.levels then
+                Just <| always False
+
+            else
+                Just (getQuestionRequiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
+    in
+    { customActions = customActions
+    , isDesirable = isDesirable
     , disabled = cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
     , getExtraQuestionClass = cfg.getExtraQuestionClass
     , renderer = cfg.createRenderer (Maybe.withDefault [] cfg.levels) model.metrics
     }
 
 
-viewTodoAction : List QuestionnaireLabel -> String -> List String -> Html CustomFormMessage
-viewTodoAction labels questionId path =
+
+-- Custom form actions
+
+
+viewTodoAction : Model -> String -> List String -> Html CustomFormMessage
+viewTodoAction model questionId path =
     let
+        activeChapterUuid =
+            Maybe.map .uuid <| getActiveChapter model
+
         currentPath =
-            String.join "." <| path ++ [ questionId ]
+            String.join "." <| [ Maybe.withDefault "" activeChapterUuid ] ++ path ++ [ questionId ]
 
         hasTodo =
-            labels
+            model.questionnaire.labels
                 |> List.filter (.path >> (==) currentPath)
                 |> (not << List.isEmpty)
     in
-    if hasTodo then
-        span [ class "action action-todo" ]
-            [ span [] [ text "TODO" ]
-            , a
-                [ title "Remove TODO"
-                , onClick <| RemoveTodo currentPath
+    if Maybe.isJust activeChapterUuid then
+        if hasTodo then
+            span [ class "action action-todo" ]
+                [ span [] [ text "TODO" ]
+                , a
+                    [ title "Remove TODO"
+                    , onClick <| RemoveTodo currentPath
+                    ]
+                    [ fa "times" ]
                 ]
-                [ fa "times" ]
-            ]
+
+        else
+            a [ class "action action-add-todo", onClick <| AddTodo currentPath ]
+                [ fa "plus"
+                , span [] [ span [] [ text "Add Todo" ] ]
+                ]
 
     else
-        a [ class "action action-add-todo", onClick <| AddTodo currentPath ]
-            [ fa "plus"
-            , span [] [ span [] [ text "Add Todo" ] ]
-            ]
+        emptyNode
 
 
 viewFeedbackAction : String -> List String -> Html CustomFormMessage
 viewFeedbackAction _ _ =
     a [ class "action", onClick <| FeedbackMsg ]
         [ fa "exclamation" ]
-
-
-viewSummary : Model -> SummaryReport -> Html Msg
-viewSummary model summaryReport =
-    let
-        title =
-            [ h2 [] [ text "Summary report" ] ]
-
-        chapters =
-            viewChapters model model.metrics summaryReport
-
-        metricDescriptions =
-            [ viewMetricsDescriptions model.metrics ]
-    in
-    div [ class "summary-report" ]
-        (List.concat [ title, chapters, metricDescriptions ])
-
-
-viewChapters : Model -> List Metric -> SummaryReport -> List (Html Msg)
-viewChapters model metrics summaryReport =
-    List.map (viewChapterReport model metrics) summaryReport.chapterReports
-
-
-viewChapterReport : Model -> List Metric -> ChapterReport -> Html Msg
-viewChapterReport model metrics chapterReport =
-    let
-        content =
-            if List.length chapterReport.metrics == 0 then
-                []
-
-            else if List.length chapterReport.metrics > 2 then
-                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
-                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
-                ]
-
-            else
-                [ div [ class "col-12" ] [ viewMetricsTable metrics chapterReport ] ]
-    in
-    div []
-        [ h3 [] [ text <| getTitleByUuid model.questionnaire.knowledgeModel.chapters chapterReport.chapterUuid ]
-        , viewIndications chapterReport.indications
-        , div [ class "row" ] content
-        ]
-
-
-viewIndications : List IndicationReport -> Html Msg
-viewIndications indications =
-    div [] (List.map viewIndication indications)
-
-
-viewIndication : IndicationReport -> Html Msg
-viewIndication indicationReport =
-    case indicationReport of
-        AnsweredIndication data ->
-            viewAnsweredIndication data
-
-
-viewAnsweredIndication : AnsweredIndicationData -> Html Msg
-viewAnsweredIndication data =
-    let
-        progress =
-            toFloat data.answeredQuestions / (toFloat <| data.answeredQuestions + data.unansweredQuestions)
-    in
-    div [ class "indication" ]
-        [ p [] [ text <| "Answered: " ++ fromInt data.answeredQuestions ++ "/" ++ (fromInt <| data.answeredQuestions + data.unansweredQuestions) ]
-        , viewProgressBar "bg-info" progress
-        ]
-
-
-viewMetricsTable : List Metric -> ChapterReport -> Html Msg
-viewMetricsTable metrics chapterReport =
-    table [ class "table table-metrics-report" ]
-        [ thead []
-            [ tr []
-                [ th [] [ text "Metric" ]
-                , th [ colspan 2 ] [ text "Measure" ]
-                ]
-            ]
-        , tbody []
-            (List.map (viewMetricReportRow metrics) chapterReport.metrics)
-        ]
-
-
-viewMetricReportRow : List Metric -> MetricReport -> Html Msg
-viewMetricReportRow metrics metricReport =
-    tr []
-        [ td [] [ text <| getTitleByUuid metrics metricReport.metricUuid ]
-        , td [] [ text <| Round.round 2 metricReport.measure ]
-        , td [] [ viewProgressBarWithColors metricReport.measure ]
-        ]
-
-
-viewProgressBarWithColors : Float -> Html msg
-viewProgressBarWithColors value =
-    let
-        colorClass =
-            (++) "bg-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
-    in
-    viewProgressBar colorClass value
-
-
-viewProgressBar : String -> Float -> Html msg
-viewProgressBar colorClass value =
-    let
-        width =
-            (fromFloat <| value * 100) ++ "%"
-    in
-    div [ class "progress" ]
-        [ div [ class <| "progress-bar " ++ colorClass, style "width" width ] [] ]
-
-
-viewMetricsChart : List Metric -> ChapterReport -> Html Msg
-viewMetricsChart _ chapterReport =
-    div [ class "metrics-chart" ]
-        [ canvas [ id <| chapterReportCanvasId chapterReport ] [] ]
-
-
-getTitleByUuid : List { a | uuid : String, title : String } -> String -> String
-getTitleByUuid items uuid =
-    List.find (.uuid >> (==) uuid) items
-        |> Maybe.map .title
-        |> Maybe.withDefault "Unknown"
-
-
-viewMetricsDescriptions : List Metric -> Html msg
-viewMetricsDescriptions metrics =
-    div []
-        ([ h3 [] [ text "Metrics Explanation" ] ]
-            ++ List.map viewMetricDescription metrics
-        )
-
-
-viewMetricDescription : Metric -> Html msg
-viewMetricDescription metric =
-    div []
-        [ h4 [] [ text <| metric.abbreviation ++ " - " ++ metric.title ]
-        , p [ class "text-justify" ] [ text metric.description ]
-        ]
-
-
-feedbackModal : Model -> Html Msg
-feedbackModal model =
-    let
-        visible =
-            case model.feedback of
-                Unset ->
-                    False
-
-                _ ->
-                    True
-
-        modalContent =
-            case model.sendingFeedback of
-                Success _ ->
-                    case model.feedbackResult of
-                        Just feedback ->
-                            [ p []
-                                [ text "You can follow the GitHub "
-                                , a [ href feedback.issueUrl, target "_blank" ]
-                                    [ text <| "issue " ++ fromInt feedback.issueId ]
-                                , text "."
-                                ]
-                            ]
-
-                        Nothing ->
-                            [ emptyNode ]
-
-                _ ->
-                    feedbackModalContent model
-
-        ( actionName, actionMsg, cancelMsg ) =
-            case model.sendingFeedback of
-                Success _ ->
-                    ( "Done", CloseFeedback, Nothing )
-
-                _ ->
-                    ( "Send", SendFeedbackForm, Just <| CloseFeedback )
-
-        modalConfig =
-            { modalTitle = "Feedback"
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.sendingFeedback
-            , actionName = actionName
-            , actionMsg = actionMsg
-            , cancelMsg = cancelMsg
-            , dangerous = False
-            }
-    in
-    Modal.confirm modalConfig
-
-
-feedbackModalContent : Model -> List (Html Msg)
-feedbackModalContent model =
-    let
-        feedbackList =
-            case model.feedback of
-                Success feedbacks ->
-                    if List.length feedbacks > 0 then
-                        div []
-                            [ div []
-                                [ text "There are already some issues reported with this question" ]
-                            , ul [] (List.map feedbackIssue feedbacks)
-                            ]
-
-                    else
-                        emptyNode
-
-                _ ->
-                    emptyNode
-    in
-    [ div [ class "alert alert-info" ]
-        [ text "If you found something wrong with the question, you can send us your feedback how to improve it." ]
-    , feedbackList
-    , FormGroup.input model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
-    , FormGroup.textarea model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
-    ]
-
-
-feedbackIssue : Feedback -> Html Msg
-feedbackIssue feedback =
-    li []
-        [ a [ href feedback.issueUrl, target "_blank" ]
-            [ text feedback.title ]
-        ]

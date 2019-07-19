@@ -7,6 +7,7 @@ module Common.Questionnaire.Models exposing
     , chapterReportCanvasId
     , createChapterForm
     , createChartConfig
+    , getActiveChapter
     , getReply
     , initialModel
     , removeLabel
@@ -51,6 +52,7 @@ type ActivePage
     = PageNone
     | PageChapter Chapter (Form Question Answer)
     | PageSummaryReport
+    | PageTodos
 
 
 type alias FormExtraData =
@@ -208,6 +210,16 @@ setActiveChapter appState chapter model =
     { model
         | activePage = PageChapter chapter (createChapterForm appState model.questionnaire.knowledgeModel model.metrics model.questionnaire chapter)
     }
+
+
+getActiveChapter : Model -> Maybe Chapter
+getActiveChapter model =
+    case model.activePage of
+        PageChapter chapter _ ->
+            Just chapter
+
+        _ ->
+            Nothing
 
 
 setLevel : QuestionnaireDetail -> Int -> QuestionnaireDetail

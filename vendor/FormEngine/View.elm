@@ -66,31 +66,34 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
 
         extraClass uuid =
             Maybe.withDefault "" <| config.getExtraQuestionClass uuid
+
+        dataPath pathAttribute =
+            attribute "data-path" <| String.join "." pathAttribute
     in
     case formItem of
         StringFormElement descriptor state ->
-            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
+            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
                 [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", disabled config.disabled, type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         TextFormElement descriptor state ->
-            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
+            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
                 [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , textarea [ class "form-control", disabled config.disabled, value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         NumberFormElement descriptor state ->
-            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
+            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
                 [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", disabled config.disabled, type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
                 , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         ChoiceFormElement descriptor options state ->
-            div [ class <| "form-group form-group-choices " ++ extraClass descriptor.name, id descriptor.name ]
+            div [ class <| "form-group form-group-choices " ++ extraClass descriptor.name, id descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
                 [ viewLabel config descriptor path (state.value /= Nothing) newHumanIdentifiers
                 , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewChoice config (path ++ [ descriptor.name ]) descriptor state) options)
@@ -100,7 +103,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 ]
 
         GroupFormElement descriptor _ items state ->
-            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
+            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
                 [ viewLabel config descriptor path (List.length items > 0) newHumanIdentifiers
                 , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewGroupItem form config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
@@ -115,7 +118,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 ]
 
         TypeHintFormElement descriptor typeHintConfig state ->
-            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name ]
+            div [ class <| "form-group " ++ extraClass descriptor.name, id descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
                 [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input
                     [ class "form-control"
