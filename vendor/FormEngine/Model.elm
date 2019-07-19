@@ -416,7 +416,7 @@ createFormElement item =
             ChoiceFormElement descriptor (List.map createOptionElement options) emptyFormElementState
 
         GroupFormItem descriptor items ->
-            GroupFormElement descriptor items [ createItemElement items ] emptyFormElementState
+            GroupFormElement descriptor items [] emptyFormElementState
 
         TypeHintFormItem descriptor typeHintConfig ->
             TypeHintFormElement descriptor typeHintConfig emptyFormElementState
