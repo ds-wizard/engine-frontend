@@ -11,6 +11,7 @@ module Common.Questionnaire.Models exposing
     , getReply
     , initialModel
     , removeLabel
+    , removeLabelsFromItem
     , setActiveChapter
     , setLevel
     , updateReplies
@@ -246,6 +247,61 @@ removeLabel model path =
     let
         labels =
             List.filter (not << (==) path << .path) model.questionnaire.labels
+    in
+    { model
+        | questionnaire = QuestionnaireDetail.updateLabels labels model.questionnaire
+        , dirty = True
+    }
+
+
+removeLabelsFromItem : Model -> List String -> Int -> Model
+removeLabelsFromItem model path index =
+    let
+        activeChapterUuid =
+            Maybe.withDefault "" <| Maybe.map .uuid <| getActiveChapter model
+
+        fullPath =
+            activeChapterUuid :: path
+
+        pathString =
+            String.join "." fullPath
+
+        pathLength =
+            List.length fullPath
+
+        getIndex p =
+            String.split "." p
+                |> List.drop pathLength
+                |> List.head
+                |> Maybe.andThen String.toInt
+                |> Maybe.withDefault -1
+
+        decrementIndex p =
+            let
+                parts =
+                    String.split "." p
+            in
+            String.join "." <|
+                List.take pathLength parts
+                    ++ [ String.fromInt <| getIndex p - 1 ]
+                    ++ List.drop (pathLength + 1) parts
+
+        filter label =
+            if String.startsWith pathString label.path then
+                if getIndex label.path < index then
+                    Just label
+
+                else if getIndex label.path == index then
+                    Nothing
+
+                else
+                    Just { label | path = decrementIndex label.path }
+
+            else
+                Just label
+
+        labels =
+            List.filterMap filter model.questionnaire.labels
     in
     { model
         | questionnaire = QuestionnaireDetail.updateLabels labels model.questionnaire

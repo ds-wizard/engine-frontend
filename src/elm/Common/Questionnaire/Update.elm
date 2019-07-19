@@ -99,12 +99,21 @@ handleFormMsg msg appState model =
                     let
                         ( updatedForm, cmd ) =
                             updateForm msg form (loadTypeHints appState model.questionnaire.package.id model.events)
+
+                        removeLabels newModel =
+                            case msg of
+                                FormEngine.Msgs.GroupItemRemove path index ->
+                                    removeLabelsFromItem newModel path index
+
+                                _ ->
+                                    newModel
                     in
-                    ( updateReplies
-                        { model
-                            | activePage = PageChapter chapter updatedForm
-                            , dirty = True
-                        }
+                    ( removeLabels <|
+                        updateReplies
+                            { model
+                                | activePage = PageChapter chapter updatedForm
+                                , dirty = True
+                            }
                     , Cmd.map FormMsg cmd
                     )
 
