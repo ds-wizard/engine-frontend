@@ -1,5 +1,6 @@
 module KnowledgeModels.Common.Package exposing
     ( Package
+    , createFormOption
     , decoder
     , dummy
     )
@@ -55,3 +56,12 @@ dummy =
     , state = PackageState.unknown
     , createdAt = Time.millisToPosix 0
     }
+
+
+createFormOption : Package -> ( String, String )
+createFormOption package =
+    let
+        optionText =
+            package.name ++ " " ++ Version.toString package.version ++ " (" ++ package.id ++ ")"
+    in
+    ( package.id, optionText )

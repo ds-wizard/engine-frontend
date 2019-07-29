@@ -1,6 +1,6 @@
 module Common.Setters exposing
     ( setBookReference
-    , setKnowledgeModels
+    , setBranches
     , setLevels
     , setMetrics
     , setMigration
@@ -19,9 +19,9 @@ setBookReference value record =
     { record | bookReference = value }
 
 
-setKnowledgeModels : a -> { b | knowledgeModels : a } -> { b | knowledgeModels : a }
-setKnowledgeModels value record =
-    { record | knowledgeModels = value }
+setBranches : a -> { b | branches : a } -> { b | branches : a }
+setBranches value record =
+    { record | branches = value }
 
 
 setLevels : a -> { b | levels : a } -> { b | levels : a }

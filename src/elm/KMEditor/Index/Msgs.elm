@@ -2,17 +2,17 @@ module KMEditor.Index.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
 import Form
-import KMEditor.Common.Models exposing (KnowledgeModel)
+import KMEditor.Common.Branch exposing (Branch)
 import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type Msg
-    = GetKnowledgeModelsCompleted (Result ApiError (List KnowledgeModel))
-    | ShowHideDeleteKnowledgeModal (Maybe KnowledgeModel)
-    | DeleteKnowledgeModel
-    | DeleteKnowledgeModelCompleted (Result ApiError ())
+    = GetBranchesCompleted (Result ApiError (List Branch))
+    | ShowHideDeleteBranchModal (Maybe Branch)
+    | DeleteBranch
+    | DeleteBranchCompleted (Result ApiError ())
     | PostMigrationCompleted (Result ApiError ())
-    | ShowHideUpgradeModal (Maybe KnowledgeModel)
+    | ShowHideUpgradeModal (Maybe Branch)
     | GetPackageCompleted (Result ApiError PackageDetail)
     | UpgradeFormMsg Form.Msg
     | DeleteMigration String

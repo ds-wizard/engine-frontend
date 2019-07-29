@@ -148,9 +148,9 @@ sidePanelKmInfo package =
             ]
 
         parentInfo =
-            case package.parentPackageId of
+            case package.forkOfPackageId of
                 Just parentPackageId ->
-                    [ ( "Parent KM:"
+                    [ ( "Fork of:"
                       , linkTo (Routing.KnowledgeModels <| Detail parentPackageId)
                             []
                             [ text parentPackageId ]

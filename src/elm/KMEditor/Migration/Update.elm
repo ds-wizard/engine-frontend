@@ -2,7 +2,7 @@ module KMEditor.Migration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api exposing (applyResult, getResultCmd)
-import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.Api.Branches as BranchesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Setters exposing (setMigration)
@@ -16,42 +16,71 @@ import Msgs
 fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
 fetchData wrapMsg uuid appState =
     Cmd.map wrapMsg <|
-        KnowledgeModelsApi.getMigration uuid appState GetMigrationCompleted
+        BranchesApi.getMigration uuid appState GetMigrationCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetMigrationCompleted result ->
-            applyResult
-                { setResult = setMigration
-                , defaultError = "Unable to get migration."
-                , model = model
-                , result = result
-                }
+            handleGetMigrationCompleted model result
 
         ApplyEvent ->
-            handleAcceptChange wrapMsg appState model
+            handleApplyEvent wrapMsg appState model
 
         RejectEvent ->
-            handleRejectChange wrapMsg appState model
+            handleRejectEvent wrapMsg appState model
 
         PostMigrationConflictCompleted result ->
             handlePostMigrationConflictCompleted wrapMsg appState model result
 
 
-handleAcceptChange : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleAcceptChange =
-    handleResolveChange newApplyMigrationResolution
+
+-- Handlers
 
 
-handleRejectChange : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleRejectChange =
-    handleResolveChange newRejectMigrationResolution
+handleGetMigrationCompleted : Model -> Result ApiError Migration -> ( Model, Cmd Msgs.Msg )
+handleGetMigrationCompleted model result =
+    applyResult
+        { setResult = setMigration
+        , defaultError = "Unable to get migration."
+        , model = model
+        , result = result
+        }
 
 
-handleResolveChange : (String -> MigrationResolution) -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleResolveChange createMigrationResolution wrapMsg appState model =
+handleApplyEvent : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleApplyEvent =
+    resolveChange newApplyMigrationResolution
+
+
+handleRejectEvent : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleRejectEvent =
+    resolveChange newRejectMigrationResolution
+
+
+handlePostMigrationConflictCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handlePostMigrationConflictCompleted wrapMsg appState model result =
+    case result of
+        Ok _ ->
+            let
+                cmd =
+                    fetchData wrapMsg model.branchUuid appState
+            in
+            ( { model | migration = Loading, conflict = Unset }, cmd )
+
+        Err error ->
+            ( { model | conflict = getServerError error "Unable to resolve conflict" }
+            , getResultCmd result
+            )
+
+
+
+-- Helpers
+
+
+resolveChange : (String -> MigrationResolution) -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+resolveChange createMigrationResolution wrapMsg appState model =
     let
         cmd =
             case model.migration of
@@ -75,20 +104,4 @@ postMigrationConflictCmd wrapMsg uuid appState resolution =
             encodeMigrationResolution resolution
     in
     Cmd.map wrapMsg <|
-        KnowledgeModelsApi.postMigrationConflict uuid body appState PostMigrationConflictCompleted
-
-
-handlePostMigrationConflictCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-handlePostMigrationConflictCompleted wrapMsg appState model result =
-    case result of
-        Ok migration ->
-            let
-                cmd =
-                    fetchData wrapMsg model.branchUuid appState
-            in
-            ( { model | migration = Loading, conflict = Unset }, cmd )
-
-        Err error ->
-            ( { model | conflict = getServerError error "Unable to resolve conflict" }
-            , getResultCmd result
-            )
+        BranchesApi.postMigrationConflict uuid body appState PostMigrationConflictCompleted
