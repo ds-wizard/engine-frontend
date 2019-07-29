@@ -1,63 +1,36 @@
 module KMEditor.Index.Models exposing
-    ( KnowledgeModelUpgradeForm
-    , Model
-    , encodeKnowledgeModelUpgradeForm
-    , initKnowledgeModelUpgradeForm
+    ( Model
     , initialModel
-    , knowledgeModelUpgradeFormValidation
     )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
-import Form.Validate as Validate exposing (..)
-import Json.Encode as Encode exposing (..)
-import KMEditor.Common.Models exposing (KnowledgeModel)
+import KMEditor.Common.Branch exposing (Branch)
+import KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm exposing (BranchUpgradeForm)
 import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type alias Model =
-    { knowledgeModels : ActionResult (List KnowledgeModel)
-    , kmToBeDeleted : Maybe KnowledgeModel
+    { branches : ActionResult (List Branch)
+    , branchToBeDeleted : Maybe Branch
     , deletingKnowledgeModel : ActionResult String
     , creatingMigration : ActionResult String
-    , kmToBeUpgraded : Maybe KnowledgeModel
+    , branchToBeUpgraded : Maybe Branch
     , package : ActionResult PackageDetail
-    , kmUpgradeForm : Form CustomFormError KnowledgeModelUpgradeForm
+    , branchUpgradeForm : Form CustomFormError BranchUpgradeForm
     , deletingMigration : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { knowledgeModels = Loading
-    , kmToBeDeleted = Nothing
+    { branches = Loading
+    , branchToBeDeleted = Nothing
     , deletingKnowledgeModel = Unset
     , creatingMigration = Unset
-    , kmToBeUpgraded = Nothing
+    , branchToBeUpgraded = Nothing
     , package = Unset
-    , kmUpgradeForm = initKnowledgeModelUpgradeForm
+    , branchUpgradeForm = BranchUpgradeForm.init
     , deletingMigration = Unset
     }
-
-
-type alias KnowledgeModelUpgradeForm =
-    { targetPackageId : String
-    }
-
-
-initKnowledgeModelUpgradeForm : Form CustomFormError KnowledgeModelUpgradeForm
-initKnowledgeModelUpgradeForm =
-    Form.initial [] knowledgeModelUpgradeFormValidation
-
-
-knowledgeModelUpgradeFormValidation : Validation CustomFormError KnowledgeModelUpgradeForm
-knowledgeModelUpgradeFormValidation =
-    Validate.map KnowledgeModelUpgradeForm
-        (Validate.field "targetPackageId" Validate.string)
-
-
-encodeKnowledgeModelUpgradeForm : KnowledgeModelUpgradeForm -> Encode.Value
-encodeKnowledgeModelUpgradeForm form =
-    Encode.object
-        [ ( "targetPackageId", Encode.string form.targetPackageId ) ]

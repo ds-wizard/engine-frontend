@@ -9,7 +9,7 @@ import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models exposing (KnowledgeModelDetail)
+import KMEditor.Common.BranchDetail exposing (BranchDetail)
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
 import KMEditor.Editor.KMEditor.View
 import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
@@ -27,8 +27,8 @@ view wrapMsg appState model =
         ActionResult.combine3 model.km model.metrics model.levels
 
 
-editorView : (Msg -> Msgs.Msg) -> AppState -> Model -> ( KnowledgeModelDetail, List Metric, List Level ) -> Html Msgs.Msg
-editorView wrapMsg appState model ( km, metric, levels ) =
+editorView : (Msg -> Msgs.Msg) -> AppState -> Model -> ( BranchDetail, List Metric, List Level ) -> Html Msgs.Msg
+editorView wrapMsg appState model ( _, _, levels ) =
     let
         content _ =
             case model.currentEditor of

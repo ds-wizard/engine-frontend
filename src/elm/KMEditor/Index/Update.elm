@@ -2,80 +2,100 @@ module KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api exposing (applyResult, getResultCmd)
-import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.Api.Branches as BranchesApi
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
-import Common.Setters exposing (setKnowledgeModels, setPackage)
+import Common.Setters exposing (setBranches, setPackage)
 import Form
-import KMEditor.Common.Models exposing (KnowledgeModel)
-import KMEditor.Index.Models exposing (KnowledgeModelUpgradeForm, Model, encodeKnowledgeModelUpgradeForm, knowledgeModelUpgradeFormValidation)
+import KMEditor.Common.Branch exposing (Branch)
+import KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm
+import KMEditor.Index.Models exposing (Model)
 import KMEditor.Index.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
 import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 import Msgs
 import Routing exposing (Route(..), cmdNavigate)
+import Utils exposing (withNoCmd)
 
 
 fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
 fetchData wrapMsg appState =
     Cmd.map wrapMsg <|
-        KnowledgeModelsApi.getKnowledgeModels appState GetKnowledgeModelsCompleted
+        BranchesApi.getBranches appState GetBranchesCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetKnowledgeModelsCompleted result ->
-            applyResult
-                { setResult = setKnowledgeModels
-                , defaultError = "Unable to get knowledge model editors."
-                , model = model
-                , result = result
-                }
+        GetBranchesCompleted result ->
+            handleGetBranchesCompleted model result
 
-        ShowHideDeleteKnowledgeModal km ->
-            ( { model | kmToBeDeleted = km, deletingKnowledgeModel = Unset }, Cmd.none )
+        ShowHideDeleteBranchModal branch ->
+            handleShowHideDeleteBranchModal model branch
 
-        DeleteKnowledgeModel ->
-            handleDeleteKM wrapMsg appState model
+        DeleteBranch ->
+            handleDeleteBranch wrapMsg appState model
 
-        DeleteKnowledgeModelCompleted result ->
-            deleteKnowledgeModelCompleted appState model result
+        DeleteBranchCompleted result ->
+            handleDeleteBranchCompleted appState model result
 
         PostMigrationCompleted result ->
-            postMigrationCompleted appState model result
+            handlePostMigrationCompleted appState model result
 
-        ShowHideUpgradeModal km ->
-            handleShowHideUpgradeModal wrapMsg km model appState
+        ShowHideUpgradeModal mbBranch ->
+            handleShowHideUpgradeModal wrapMsg appState model mbBranch
 
         UpgradeFormMsg formMsg ->
-            handleUpgradeForm formMsg wrapMsg appState model
+            handleUpgradeFormMsg formMsg wrapMsg appState model
 
         GetPackageCompleted result ->
             handleGetPackagesCompleted model result
 
         DeleteMigration uuid ->
-            handleDeleteMigration wrapMsg uuid appState model
+            handleDeleteMigration wrapMsg appState model uuid
 
         DeleteMigrationCompleted result ->
-            deleteMigrationCompleted wrapMsg appState model result
+            handleDeleteMigrationCompleted wrapMsg appState model result
 
 
-handleDeleteKM : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeleteKM wrapMsg appState model =
-    case model.kmToBeDeleted of
-        Just km ->
+
+-- Handlers
+
+
+handleGetBranchesCompleted : Model -> Result ApiError (List Branch) -> ( Model, Cmd Msgs.Msg )
+handleGetBranchesCompleted model result =
+    applyResult
+        { setResult = setBranches
+        , defaultError = "Unable to get knowledge model editors."
+        , model = model
+        , result = result
+        }
+
+
+handleShowHideDeleteBranchModal : Model -> Maybe Branch -> ( Model, Cmd Msgs.Msg )
+handleShowHideDeleteBranchModal model mbBranch =
+    withNoCmd <|
+        { model
+            | branchToBeDeleted = mbBranch
+            , deletingKnowledgeModel = Unset
+        }
+
+
+handleDeleteBranch : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleDeleteBranch wrapMsg appState model =
+    case model.branchToBeDeleted of
+        Just branch ->
             ( { model | deletingKnowledgeModel = Loading }
-            , Cmd.map wrapMsg <| KnowledgeModelsApi.deleteKnowledgeModel km.uuid appState DeleteKnowledgeModelCompleted
+            , Cmd.map wrapMsg <| BranchesApi.deleteBranch branch.uuid appState DeleteBranchCompleted
             )
 
         _ ->
-            ( model, Cmd.none )
+            withNoCmd model
 
 
-deleteKnowledgeModelCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-deleteKnowledgeModelCompleted appState model result =
+handleDeleteBranchCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handleDeleteBranchCompleted appState model result =
     case result of
         Ok _ ->
             ( model, cmdNavigate appState.key <| KMEditor IndexRoute )
@@ -86,14 +106,14 @@ deleteKnowledgeModelCompleted appState model result =
             )
 
 
-postMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-postMigrationCompleted appState model result =
+handlePostMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handlePostMigrationCompleted appState model result =
     case result of
-        Ok migration ->
+        Ok _ ->
             let
                 kmUuid =
-                    model.kmToBeUpgraded
-                        |> Maybe.andThen (\km -> Just km.uuid)
+                    model.branchToBeUpgraded
+                        |> Maybe.andThen (\branch -> Just branch.uuid)
                         |> Maybe.withDefault ""
             in
             ( model, cmdNavigate appState.key <| KMEditor <| MigrationRoute kmUuid )
@@ -104,8 +124,8 @@ postMigrationCompleted appState model result =
             )
 
 
-handleShowHideUpgradeModal : (Msg -> Msgs.Msg) -> Maybe KnowledgeModel -> Model -> AppState -> ( Model, Cmd Msgs.Msg )
-handleShowHideUpgradeModal wrapMsg maybeKm model appState =
+handleShowHideUpgradeModal : (Msg -> Msgs.Msg) -> AppState -> Model -> Maybe Branch -> ( Model, Cmd Msgs.Msg )
+handleShowHideUpgradeModal wrapMsg appState model mbBranch =
     let
         getPackages lastAppliedParentPackageId =
             let
@@ -113,34 +133,33 @@ handleShowHideUpgradeModal wrapMsg maybeKm model appState =
                     Cmd.map wrapMsg <|
                         PackagesApi.getPackage lastAppliedParentPackageId appState GetPackageCompleted
             in
-            Just ( { model | kmToBeUpgraded = maybeKm, package = Loading }, cmd )
+            Just ( { model | branchToBeUpgraded = mbBranch, package = Loading }, cmd )
     in
-    maybeKm
-        |> Maybe.andThen .lastAppliedParentPackageId
+    mbBranch
+        |> Maybe.andThen .forkOfPackageId
         |> Maybe.andThen getPackages
-        |> Maybe.withDefault ( { model | kmToBeUpgraded = Nothing, package = Unset }, Cmd.none )
+        |> Maybe.withDefault ( { model | branchToBeUpgraded = Nothing, package = Unset }, Cmd.none )
 
 
-handleUpgradeForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleUpgradeForm formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.kmUpgradeForm, model.kmToBeUpgraded ) of
-        ( Form.Submit, Just kmUpgradeForm, Just km ) ->
+handleUpgradeFormMsg : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleUpgradeFormMsg formMsg wrapMsg appState model =
+    case ( formMsg, Form.getOutput model.branchUpgradeForm, model.branchToBeUpgraded ) of
+        ( Form.Submit, Just branchUpgradeForm, Just branch ) ->
             let
                 body =
-                    encodeKnowledgeModelUpgradeForm kmUpgradeForm
+                    BranchUpgradeForm.encode branchUpgradeForm
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        KnowledgeModelsApi.postMigration km.uuid body appState PostMigrationCompleted
+                        BranchesApi.postMigration branch.uuid body appState PostMigrationCompleted
             in
             ( { model | creatingMigration = Loading }
             , cmd
             )
 
         _ ->
-            ( { model | kmUpgradeForm = Form.update knowledgeModelUpgradeFormValidation formMsg model.kmUpgradeForm }
-            , Cmd.none
-            )
+            withNoCmd <|
+                { model | branchUpgradeForm = Form.update BranchUpgradeForm.validation formMsg model.branchUpgradeForm }
 
 
 handleGetPackagesCompleted : Model -> Result ApiError PackageDetail -> ( Model, Cmd Msgs.Msg )
@@ -153,18 +172,18 @@ handleGetPackagesCompleted model result =
         }
 
 
-handleDeleteMigration : (Msg -> Msgs.Msg) -> String -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleDeleteMigration wrapMsg uuid appState model =
+handleDeleteMigration : (Msg -> Msgs.Msg) -> AppState -> Model -> String -> ( Model, Cmd Msgs.Msg )
+handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
-    , Cmd.map wrapMsg <| KnowledgeModelsApi.deleteMigration uuid appState DeleteKnowledgeModelCompleted
+    , Cmd.map wrapMsg <| BranchesApi.deleteMigration uuid appState DeleteBranchCompleted
     )
 
 
-deleteMigrationCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-deleteMigrationCompleted wrapMsg appState model result =
+handleDeleteMigrationCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handleDeleteMigrationCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( { model | deletingMigration = Success "Migration was successfully canceled", knowledgeModels = Loading }
+            ( { model | deletingMigration = Success "Migration was successfully canceled", branches = Loading }
             , fetchData wrapMsg appState
             )
 

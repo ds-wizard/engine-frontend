@@ -1,73 +1,26 @@
 module KMEditor.Publish.Models exposing
     ( Model
-    , PublishForm
-    , encodePublishForm
-    , initEmptyPublishForm
     , initialModel
-    , publishFormValidation
     )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
-import Form.Validate as Validate exposing (..)
-import Json.Encode as Encode exposing (..)
-import KMEditor.Common.Models exposing (..)
-import String exposing (fromInt)
+import KMEditor.Common.BranchDetail exposing (BranchDetail)
+import KMEditor.Common.BranchPublishForm as BranchPublishForm exposing (BranchPublishForm)
+import String
 
 
 type alias Model =
-    { knowledgeModel : ActionResult KnowledgeModelDetail
-    , publishingKnowledgeModel : ActionResult String
-    , form : Form CustomFormError PublishForm
+    { branch : ActionResult BranchDetail
+    , publishingBranch : ActionResult String
+    , form : Form CustomFormError BranchPublishForm
     }
 
 
 initialModel : Model
 initialModel =
-    { knowledgeModel = Loading
-    , publishingKnowledgeModel = Unset
-    , form = initEmptyPublishForm
+    { branch = Loading
+    , publishingBranch = Unset
+    , form = BranchPublishForm.init
     }
-
-
-type alias PublishForm =
-    { major : Int
-    , minor : Int
-    , patch : Int
-    , description : String
-    , readme : String
-    , license : String
-    }
-
-
-initEmptyPublishForm : Form CustomFormError PublishForm
-initEmptyPublishForm =
-    Form.initial [] publishFormValidation
-
-
-publishFormValidation : Validation CustomFormError PublishForm
-publishFormValidation =
-    Validate.map6 PublishForm
-        (Validate.field "major" (Validate.int |> Validate.andThen (Validate.minInt 0)))
-        (Validate.field "minor" (Validate.int |> Validate.andThen (Validate.minInt 0)))
-        (Validate.field "patch" (Validate.int |> Validate.andThen (Validate.minInt 0)))
-        (Validate.field "description" Validate.string)
-        (Validate.field "readme" Validate.string)
-        (Validate.field "license" Validate.string)
-
-
-encodePublishForm : PublishForm -> ( String, Encode.Value )
-encodePublishForm form =
-    let
-        version =
-            String.join "." <| List.map fromInt [ form.major, form.minor, form.patch ]
-
-        object =
-            Encode.object
-                [ ( "description", Encode.string form.description )
-                , ( "readme", Encode.string form.readme )
-                , ( "license", Encode.string form.license )
-                ]
-    in
-    ( version, object )
