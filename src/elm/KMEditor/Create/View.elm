@@ -48,7 +48,7 @@ formView wrapMsg model packages =
                     FormGroup.codeView package
 
                 Nothing ->
-                    FormGroup.select parentOptions model.form "parentPackageId"
+                    FormGroup.select parentOptions model.form "previousPackageId"
 
         formHtml =
             div []
