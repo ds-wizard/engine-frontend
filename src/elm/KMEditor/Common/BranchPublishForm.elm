@@ -8,7 +8,7 @@ module KMEditor.Common.BranchPublishForm exposing
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
-import Json.Encode as Encode exposing (..)
+import Json.Encode as E exposing (..)
 import String exposing (fromInt)
 
 
@@ -38,17 +38,17 @@ validation =
         (Validate.field "license" Validate.string)
 
 
-encode : BranchPublishForm -> ( String, Encode.Value )
+encode : BranchPublishForm -> ( String, E.Value )
 encode form =
     let
         version =
             String.join "." <| List.map fromInt [ form.major, form.minor, form.patch ]
 
         object =
-            Encode.object
-                [ ( "description", Encode.string form.description )
-                , ( "readme", Encode.string form.readme )
-                , ( "license", Encode.string form.license )
+            E.object
+                [ ( "description", E.string form.description )
+                , ( "readme", E.string form.readme )
+                , ( "license", E.string form.license )
                 ]
     in
     ( version, object )

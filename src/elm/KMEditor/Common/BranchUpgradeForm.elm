@@ -8,7 +8,7 @@ module KMEditor.Common.BranchUpgradeForm exposing
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
-import Json.Encode as Encode exposing (..)
+import Json.Encode as E exposing (..)
 
 
 type alias BranchUpgradeForm =
@@ -26,7 +26,7 @@ validation =
         (Validate.field "targetPackageId" Validate.string)
 
 
-encode : BranchUpgradeForm -> Encode.Value
+encode : BranchUpgradeForm -> E.Value
 encode form =
-    Encode.object
-        [ ( "targetPackageId", Encode.string form.targetPackageId ) ]
+    E.object
+        [ ( "targetPackageId", E.string form.targetPackageId ) ]
