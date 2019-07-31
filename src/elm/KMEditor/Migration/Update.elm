@@ -6,8 +6,9 @@ import Common.Api.Branches as BranchesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Setters exposing (setMigration)
+import KMEditor.Common.Migration exposing (Migration)
+import KMEditor.Common.MigrationResolution as MigrationResolution exposing (MigrationResolution)
 import KMEditor.Common.Models.Events exposing (getEventUuid)
-import KMEditor.Common.Models.Migration exposing (..)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
 import Msgs
@@ -51,12 +52,12 @@ handleGetMigrationCompleted model result =
 
 handleApplyEvent : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 handleApplyEvent =
-    resolveChange newApplyMigrationResolution
+    resolveChange MigrationResolution.apply
 
 
 handleRejectEvent : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 handleRejectEvent =
-    resolveChange newRejectMigrationResolution
+    resolveChange MigrationResolution.reject
 
 
 handlePostMigrationConflictCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
@@ -101,7 +102,7 @@ postMigrationConflictCmd : (Msg -> Msgs.Msg) -> String -> AppState -> MigrationR
 postMigrationConflictCmd wrapMsg uuid appState resolution =
     let
         body =
-            encodeMigrationResolution resolution
+            MigrationResolution.encode resolution
     in
     Cmd.map wrapMsg <|
         BranchesApi.postMigrationConflict uuid body appState PostMigrationConflictCompleted

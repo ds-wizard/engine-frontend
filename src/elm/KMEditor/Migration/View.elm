@@ -8,9 +8,10 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import KMEditor.Common.Migration exposing (Migration)
+import KMEditor.Common.MigrationStateType exposing (MigrationStateType(..))
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (..)
-import KMEditor.Common.Models.Migration exposing (Migration, MigrationStateType(..))
 import KMEditor.Common.View exposing (diffTreeView)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
@@ -77,7 +78,7 @@ migrationSummary migration =
             [ text "Migration of "
             , strong [] [ text migration.currentKnowledgeModel.name ]
             , text " from "
-            , code [] [ text migration.branchParentId ]
+            , code [] [ text migration.branchPreviousPackageId ]
             , text " to "
             , code [] [ text migration.targetPackageId ]
             , text "."

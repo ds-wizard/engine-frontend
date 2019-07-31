@@ -1,7 +1,7 @@
 module KMEditor.Migration.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import KMEditor.Common.Models.Migration exposing (Migration)
+import KMEditor.Common.Migration exposing (Migration)
 
 
 type Msg
