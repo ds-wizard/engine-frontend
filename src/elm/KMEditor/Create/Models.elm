@@ -23,7 +23,7 @@ initialModel : Maybe String -> Model
 initialModel selectedPackage =
     { packages = Loading
     , savingBranch = Unset
-    , form = BranchCreateForm.init Nothing
+    , form = BranchCreateForm.init selectedPackage
     , selectedPackage = selectedPackage
     }
 

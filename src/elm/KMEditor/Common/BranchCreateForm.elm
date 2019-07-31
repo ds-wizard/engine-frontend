@@ -57,5 +57,4 @@ encode form =
         [ ( "name", E.string form.name )
         , ( "kmId", E.string form.kmId )
         , ( "previousPackageId", parentPackage )
-        , ( "organizationId", E.string "" )
         ]
