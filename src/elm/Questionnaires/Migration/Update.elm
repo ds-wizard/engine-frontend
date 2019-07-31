@@ -24,7 +24,6 @@ import Questionnaires.Migration.Models exposing (Model, initializeChangeList)
 import Questionnaires.Migration.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
 import Routing exposing (Route(..), cmdNavigate)
-import Utils exposing (toHtmlId)
 
 
 fetchData : AppState -> String -> Cmd Msg
@@ -274,6 +273,10 @@ setResult appState migration model =
 
 scrollToQuestion : Model -> Cmd msg
 scrollToQuestion model =
+    let
+        prefix uuid =
+            "#question-" ++ uuid
+    in
     model.selectedChange
-        |> Maybe.map (QuestionChange.getQuestionUuid >> toHtmlId >> Ports.scrollIntoView)
+        |> Maybe.map (QuestionChange.getQuestionUuid >> prefix >> Ports.scrollIntoView)
         |> Maybe.withDefault Cmd.none
