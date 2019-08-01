@@ -16,8 +16,8 @@ import Common.AppState exposing (AppState)
 import Json.Encode as Encode exposing (Value)
 import KMEditor.Common.Branch as Branch exposing (Branch)
 import KMEditor.Common.BranchDetail as BranchDetail exposing (BranchDetail)
+import KMEditor.Common.Migration as Migration exposing (Migration)
 import KMEditor.Common.Models.Events exposing (Event, encodeEvent)
-import KMEditor.Common.Models.Migration exposing (Migration, migrationDecoder)
 
 
 getBranches : AppState -> ToMsg (List Branch) msg -> Cmd msg
@@ -60,7 +60,7 @@ putVersion kmUuid version =
 
 getMigration : String -> AppState -> ToMsg Migration msg -> Cmd msg
 getMigration uuid =
-    jwtGet ("/branches/" ++ uuid ++ "/migrations/current") migrationDecoder
+    jwtGet ("/branches/" ++ uuid ++ "/migrations/current") Migration.decoder
 
 
 postMigration : String -> Value -> AppState -> ToMsg () msg -> Cmd msg

@@ -50,8 +50,8 @@ header appState package =
         forkAction =
             linkTo (Routing.KMEditor <| KMEditor.Routing.CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
-                [ fa "code-fork"
-                , text "Fork knowledge model"
+                [ fa "edit"
+                , text "Create KM Editor"
                 ]
 
         questionnaireAction =
