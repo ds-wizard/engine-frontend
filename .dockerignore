@@ -1,0 +1,10 @@
+node_modules
+!node_modules/bootstrap
+!node_modules/bootswatch
+!node_modules/font-awesome
+elm-stuff
+scripts
+src
+!src/scss
+tests
+vendor

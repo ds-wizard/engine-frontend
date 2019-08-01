@@ -5,6 +5,7 @@ import Common.Api exposing (getResultCmd)
 import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Form exposing (setFormErrors)
 import Form exposing (Form)
 import Msgs
 import Result exposing (Result)
@@ -108,19 +109,17 @@ handlePasswordForm formMsg wrapMsg appState model =
 
 putUserCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
 putUserCompleted model result =
-    let
-        editResult =
-            case result of
-                Ok _ ->
-                    Success "Profile was successfully updated"
+    case result of
+        Ok _ ->
+            ( { model | savingUser = Success "Profile was successfully updated" }, Cmd.none )
 
-                Err error ->
-                    Error "Profile could not be saved."
-
-        cmd =
-            getResultCmd result
-    in
-    ( { model | savingUser = editResult }, cmd )
+        Err err ->
+            ( { model
+                | savingUser = getServerError err "Profile could not be saved."
+                , userForm = setFormErrors err model.userForm
+              }
+            , getResultCmd result
+            )
 
 
 putUserPasswordCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )

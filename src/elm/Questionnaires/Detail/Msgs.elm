@@ -1,9 +1,9 @@
 module Questionnaires.Detail.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import Common.Questionnaire.Models exposing (QuestionnaireDetail)
 import Common.Questionnaire.Msgs
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
 type Msg

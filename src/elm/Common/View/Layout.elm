@@ -6,6 +6,7 @@ module Common.View.Layout exposing
 
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser exposing (Document)
+import Common.Config exposing (CustomMenuLink)
 import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.Html.Events exposing (onLinkClick)
 import Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
@@ -139,9 +140,16 @@ type MenuItem
 
 createMenu : Model -> List (Html Msg)
 createMenu model =
-    menuItems
-        |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.appState.jwt perm)
-        |> List.map (menuItem model)
+    let
+        defaultMenuItems =
+            menuItems
+                |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.appState.jwt perm)
+                |> List.map (menuItem model)
+
+        customMenuItems =
+            List.map customMenuItem model.appState.config.client.customMenuLinks
+    in
+    defaultMenuItems ++ customMenuItems
 
 
 menuItems : List MenuItem
@@ -169,6 +177,24 @@ menuItem model (MenuItem label icon route _) =
             [ class activeClass ]
             [ fa icon
             , span [ class "sidebar-link" ] [ text label ]
+            ]
+        ]
+
+
+customMenuItem : CustomMenuLink -> Html msg
+customMenuItem link =
+    let
+        targetArg =
+            if link.newWindow then
+                [ target "_blank" ]
+
+            else
+                []
+    in
+    li []
+        [ a ([ href link.url ] ++ targetArg)
+            [ fa link.icon
+            , span [ class "sidebar-link" ] [ text link.title ]
             ]
         ]
 

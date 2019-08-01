@@ -6,12 +6,13 @@ module KMEditor.Editor.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api exposing (getResultCmd)
+import Common.Api.Branches as BranchesApi
 import Common.Api.KnowledgeModels as KnowledgeModelsApi
 import Common.Api.Levels as LevelsApi
 import Common.Api.Metrics as MetricsApi
 import Common.ApiError exposing (getServerError)
 import Common.AppState exposing (AppState)
-import KMEditor.Common.Models exposing (KnowledgeModel, KnowledgeModelDetail)
+import KMEditor.Common.BranchDetail exposing (BranchDetail)
 import KMEditor.Editor.KMEditor.Models
 import KMEditor.Editor.KMEditor.Update exposing (generateEvents)
 import KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, initialModel)
@@ -20,12 +21,10 @@ import KMEditor.Editor.Preview.Models
 import KMEditor.Editor.Preview.Update
 import KMEditor.Editor.TagEditor.Models as TagEditorModel
 import KMEditor.Editor.TagEditor.Update
-import KMEditor.Routing exposing (Route(..))
 import Maybe.Extra exposing (isJust)
 import Msgs
 import Ports
 import Random exposing (Seed)
-import Routing exposing (cmdNavigate)
 import Task
 
 
@@ -33,7 +32,7 @@ fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
 fetchData wrapMsg uuid appState =
     Cmd.map wrapMsg <|
         Cmd.batch
-            [ KnowledgeModelsApi.getKnowledgeModel uuid appState GetKnowledgeModelCompleted
+            [ BranchesApi.getBranch uuid appState GetKnowledgeModelCompleted
             , MetricsApi.getMetrics appState GetMetricsCompleted
             , LevelsApi.getLevels appState GetLevelsCompleted
             ]
@@ -109,7 +108,7 @@ update msg wrapMsg appState model =
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
                                                     ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
-                                                    (ActionResult.withDefault "" <| ActionResult.map (Maybe.withDefault "" << .parentPackageId) model.km)
+                                                    (ActionResult.withDefault "" <| ActionResult.map (Maybe.withDefault "" << .previousPackageId) model.km)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
                                         , editorModel =
                                             Just <|
@@ -171,7 +170,7 @@ update msg wrapMsg appState model =
                                 Just editorModel ->
                                     let
                                         ( updatedSeed, updatedEditorModel, updateCmd ) =
-                                            KMEditor.Editor.KMEditor.Update.update editorMsg (wrapMsg << KMEditorMsg) appState editorModel (openEditorTask wrapMsg)
+                                            KMEditor.Editor.KMEditor.Update.update editorMsg appState editorModel (openEditorTask wrapMsg)
                                     in
                                     ( updatedSeed, Just updatedEditorModel, updateCmd )
 
@@ -181,9 +180,13 @@ update msg wrapMsg appState model =
                     ( newSeed, { model | editorModel = newEditorModel }, cmd )
 
                 Discard ->
+                    let
+                        ( newModel, cmd ) =
+                            fetchPreview wrapMsg appState { model | sessionEvents = [] }
+                    in
                     ( appState.seed
-                    , initialModel ""
-                    , Cmd.batch [ Ports.clearUnloadMessage (), cmdNavigate appState.key <| Routing.KMEditor IndexRoute ]
+                    , newModel
+                    , Cmd.batch [ Ports.clearUnloadMessage (), cmd ]
                     )
 
                 Save ->
@@ -207,11 +210,15 @@ update msg wrapMsg appState model =
                 SaveCompleted result ->
                     case result of
                         Ok _ ->
+                            let
+                                newModel =
+                                    initialModel model.kmUuid
+                            in
                             ( appState.seed
-                            , initialModel ""
+                            , { newModel | currentEditor = model.currentEditor }
                             , Cmd.batch
                                 [ Ports.clearUnloadMessage ()
-                                , cmdNavigate appState.key <| Routing.KMEditor IndexRoute
+                                , fetchData wrapMsg model.kmUuid appState
                                 ]
                             )
 
@@ -235,17 +242,17 @@ fetchPreview wrapMsg appState model =
         Success ( km, _, _ ) ->
             ( { model | preview = Loading }
             , Cmd.map wrapMsg <|
-                KnowledgeModelsApi.fetchPreview km.parentPackageId (km.events ++ model.sessionEvents) [] appState GetPreviewCompleted
+                KnowledgeModelsApi.fetchPreview km.previousPackageId (km.events ++ model.sessionEvents) [] appState GetPreviewCompleted
             )
 
         _ ->
             ( model, Cmd.none )
 
 
-putBranchCmd : (Msg -> Msgs.Msg) -> AppState -> Model -> KnowledgeModelDetail -> Cmd Msgs.Msg
+putBranchCmd : (Msg -> Msgs.Msg) -> AppState -> Model -> BranchDetail -> Cmd Msgs.Msg
 putBranchCmd wrapMsg appState model km =
     Cmd.map wrapMsg <|
-        KnowledgeModelsApi.putKnowledgeModel model.kmUuid km.name km.kmId (km.events ++ model.sessionEvents) appState SaveCompleted
+        BranchesApi.putBranch model.kmUuid km.name km.kmId (km.events ++ model.sessionEvents) appState SaveCompleted
 
 
 applyCurrentEditorChanges : Seed -> Model -> ( Seed, Model )

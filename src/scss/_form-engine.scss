@@ -16,6 +16,16 @@
             justify-content: space-between;
             font-size: 120%;
         }
+
+        &.highlighted {
+            background: theme-color-level("warning", $highlighted-bg-level);
+            padding: 1rem;
+            @include border-radius($alert-border-radius);
+
+            &-resolved {
+                background: theme-color-level("success", $highlighted-bg-level);
+            }
+        }
     }
 
     .followups-group {
@@ -92,10 +102,6 @@
         border-radius: 0.25rem;
         margin-bottom: 5px;
 
-        &:hover {
-            border-color: $primary;
-        }
-
         &.radio-selected, &:hover {
             background: $gray-200;
 
@@ -106,12 +112,68 @@
     }
 
     .custom-actions {
-        a {
-            color: $gray-400;
-            margin-left: 10px;
+        display: flex;
+
+
+        .action {
+            color: $gray-500;
+            margin-left: 0.5rem;
+            max-width: 1.25rem;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            padding: 0.5rem;
+            text-align: center;
+            border-radius: 10rem;
+            background: $gray-200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 75%;
 
             &:hover {
                 color: $gray-700;
+                text-decoration: none;
+            }
+
+
+            &-add-todo {
+                transition: all 0.25s ease-in-out;
+
+                &>span {
+                    color: $gray-700;
+                    overflow: hidden;
+                    max-width: 0;
+                    transition: all 0.25s ease-in-out;
+
+                    span {
+                        padding-left: 0.25rem;
+                        white-space: nowrap;
+                    }
+                }
+
+                &:hover {
+                    border-color: $gray-700;
+                    max-width: 10rem;
+
+                    &>span {
+                        max-width: 200px;
+                    }
+                }
+            }
+
+            &-todo {
+                max-width: 10rem;
+                background: $warning;
+                color: $white;
+
+                a {
+                    margin-left: 0.25rem;
+                    color: $white;
+                }
+
+                &:hover {
+                    color: $white;
+                }
             }
         }
     }
@@ -202,6 +264,18 @@
                     }
                 }
             }
+        }
+    }
+
+    &-disabled {
+        .radio {
+            label {
+                cursor: default;
+            }
+        }
+
+        .radio:not(.radio-selected):hover {
+            background: $gray-100;
         }
     }
 }

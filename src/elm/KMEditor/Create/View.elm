@@ -1,6 +1,5 @@
 module KMEditor.Create.View exposing (view)
 
-import Common.Form exposing (CustomFormError)
 import Common.Html.Attribute exposing (detailClass)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
@@ -13,8 +12,7 @@ import Html exposing (..)
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
-import KnowledgeModels.Common.Package exposing (Package)
-import KnowledgeModels.Common.Version as Version
+import KnowledgeModels.Common.Package as Package exposing (Package)
 import Msgs
 import Routing exposing (Route(..))
 
@@ -29,11 +27,11 @@ content wrapMsg model packages =
     div [ detailClass "KMEditor__Create" ]
         [ Page.header "Create Knowledge Model" []
         , div []
-            [ FormResult.view model.savingKnowledgeModel
+            [ FormResult.errorOnlyView model.savingBranch
             , formView wrapMsg model packages
             , FormActions.view
                 (KMEditor IndexRoute)
-                (ActionButton.ButtonConfig "Save" model.savingKnowledgeModel (wrapMsg <| FormMsg Form.Submit) False)
+                (ActionButton.ButtonConfig "Save" model.savingBranch (wrapMsg <| FormMsg Form.Submit) False)
             ]
         ]
 
@@ -42,7 +40,7 @@ formView : (Msg -> Msgs.Msg) -> Model -> List Package -> Html Msgs.Msg
 formView wrapMsg model packages =
     let
         parentOptions =
-            ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
+            ( "", "--" ) :: (List.map Package.createFormOption <| List.sortBy .name packages)
 
         parentInput =
             case model.selectedPackage of
@@ -50,23 +48,15 @@ formView wrapMsg model packages =
                     FormGroup.codeView package
 
                 Nothing ->
-                    FormGroup.select parentOptions model.form "parentPackageId"
+                    FormGroup.select parentOptions model.form "previousPackageId"
 
         formHtml =
             div []
                 [ FormGroup.input model.form "name" "Name"
                 , FormGroup.input model.form "kmId" "Knowledge Model ID"
                 , FormExtra.textAfter "Knowledge Model ID can contain alphanumeric characters and dash but cannot start or end with dash."
-                , parentInput "Parent Knowledge Model"
+                , parentInput "Based on"
+                , FormExtra.textAfter "You can create a new Knowledge Model based on existing one or start from scratch."
                 ]
     in
     formHtml |> Html.map (wrapMsg << FormMsg)
-
-
-createOption : Package -> ( String, String )
-createOption package =
-    let
-        optionText =
-            package.name ++ " " ++ Version.toString package.version ++ " (" ++ package.id ++ ")"
-    in
-    ( package.id, optionText )

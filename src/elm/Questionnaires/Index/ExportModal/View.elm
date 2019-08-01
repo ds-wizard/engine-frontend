@@ -9,13 +9,13 @@ import Common.View.Page as Page
 import Html exposing (Html, a, button, div, h5, input, label, option, select, text)
 import Html.Attributes exposing (checked, class, classList, href, name, target, type_, value)
 import Html.Events exposing (onClick, onInput)
-import Msgs
-import Questionnaires.Index.ExportModal.Models exposing (Model, Template)
+import Questionnaires.Common.Template exposing (Template)
+import Questionnaires.Index.ExportModal.Models exposing (Model)
 import Questionnaires.Index.ExportModal.Msgs exposing (Msg(..))
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         ( visible, questionnaireName, questionnaireUuid ) =
             case model.questionnaire of
@@ -40,8 +40,7 @@ view wrapMsg appState model =
             , visible = visible
             }
     in
-    Html.map wrapMsg <|
-        Modal.simple modalConfig
+    Modal.simple modalConfig
 
 
 viewModalContent : String -> List Template -> Html Msg

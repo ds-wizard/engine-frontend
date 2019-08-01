@@ -8,12 +8,10 @@ module Utils exposing
     , listInsertIf
     , packageIdToComponents
     , pair
-    , replace
-    , splitVersion
     , stringToInt
     , tuplePrepend
     , validateRegex
-    , versionIsGreater
+    , withNoCmd
     )
 
 import Color
@@ -21,7 +19,6 @@ import Color.Accessibility exposing (contrastRatio)
 import Color.Convert exposing (hexToColor)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as Validate exposing (..)
-import List.Extra as List
 import Random exposing (Seed, step)
 import Regex exposing (Regex)
 import Task
@@ -59,39 +56,9 @@ getUuid seed =
     ( Uuid.toString uuid, newSeed )
 
 
-versionIsGreater : String -> String -> Bool
-versionIsGreater than version =
-    case ( splitVersion version, splitVersion than ) of
-        ( Just ( versionMajor, versionMinor, versionPatch ), Just ( thanMajor, thanMinor, thanPatch ) ) ->
-            versionMajor > thanMajor || (versionMajor == thanMajor && (versionMinor > thanMinor || (versionMinor == thanMinor && versionPatch > thanPatch)))
-
-        _ ->
-            False
-
-
-splitVersion : String -> Maybe ( Int, Int, Int )
-splitVersion version =
-    let
-        parts =
-            String.split "." version |> List.map (String.toInt >> Maybe.withDefault 0)
-    in
-    case ( List.getAt 0 parts, List.getAt 1 parts, List.getAt 2 parts ) of
-        ( Just major, Just minor, Just patch ) ->
-            Just ( major, minor, patch )
-
-        _ ->
-            Nothing
-
-
 dispatch : a -> Cmd a
 dispatch msg =
     Task.perform (always msg) (Task.succeed ())
-
-
-replace : String -> String -> String -> String
-replace from to str =
-    String.split from str
-        |> String.join to
 
 
 stringToInt : String -> Int
@@ -165,3 +132,8 @@ packageIdToComponents packageId =
 
         _ ->
             Nothing
+
+
+withNoCmd : model -> ( model, Cmd msg )
+withNoCmd model =
+    ( model, Cmd.none )

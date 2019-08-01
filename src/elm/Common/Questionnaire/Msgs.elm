@@ -1,12 +1,13 @@
 module Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import Common.Questionnaire.Models exposing (Feedback)
+import Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Form
 import FormEngine.Model exposing (TypeHint)
 import FormEngine.Msgs
 import KMEditor.Common.Models.Entities exposing (Chapter, Metric)
+import Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Result exposing (Result)
 
 
@@ -15,6 +16,7 @@ type Msg
     | SetLevel String
     | SetActiveChapter Chapter
     | ViewSummaryReport
+    | ViewTodos
     | PostForSummaryReportCompleted (Result ApiError SummaryReport)
     | CloseFeedback
     | FeedbackFormMsg Form.Msg
@@ -22,7 +24,10 @@ type Msg
     | SendFeedbackForm
     | GetFeedbacksCompleted (Result ApiError (List Feedback))
     | GetTypeHintsCompleted (Result ApiError (List TypeHint))
+    | ScrollToTodo QuestionnaireTodo
 
 
 type CustomFormMessage
     = FeedbackMsg
+    | AddTodo String
+    | RemoveTodo String

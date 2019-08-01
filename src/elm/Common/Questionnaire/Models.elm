@@ -1,21 +1,17 @@
 module Common.Questionnaire.Models exposing
     ( ActivePage(..)
-    , Feedback
-    , FeedbackForm
     , FormExtraData
     , Model
-    , QuestionnaireDetail
+    , addLabel
     , calculateUnansweredQuestions
     , chapterReportCanvasId
+    , createChapterForm
     , createChartConfig
-    , encodeFeedbackFrom
-    , encodeQuestionnaireDetail
-    , feedbackDecoder
-    , feedbackFormValidation
-    , feedbackListDecoder
-    , initEmptyFeedbackFrom
+    , getActiveChapter
+    , getReply
     , initialModel
-    , questionnaireDetailDecoder
+    , removeLabel
+    , removeLabelsFromItem
     , setActiveChapter
     , setLevel
     , updateReplies
@@ -25,18 +21,15 @@ import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (ChartConfig)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
+import Common.Questionnaire.Models.Feedback exposing (Feedback)
+import Common.Questionnaire.Models.FeedbackForm as FeedbackForm exposing (FeedbackForm)
 import Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport)
 import Form
-import Form.Validate as Validate exposing (..)
 import FormEngine.Model exposing (..)
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
-import Json.Encode as Encode exposing (..)
 import KMEditor.Common.Models.Entities exposing (..)
 import KMEditor.Common.Models.Events exposing (Event)
-import KnowledgeModels.Common.Package as Package exposing (Package)
 import List.Extra as List
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
+import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import String exposing (fromInt)
 import Utils exposing (boolToInt)
 
@@ -58,8 +51,9 @@ type alias Model =
 
 type ActivePage
     = PageNone
-    | PageChapter Chapter (Form FormExtraData)
+    | PageChapter Chapter (Form Question Answer)
     | PageSummaryReport
+    | PageTodos
 
 
 type alias FormExtraData =
@@ -86,7 +80,7 @@ initialModel appState questionnaire metrics events =
     , activePage = activePage
     , feedback = Unset
     , feedbackQuestionUuid = Nothing
-    , feedbackForm = initEmptyFeedbackFrom
+    , feedbackForm = FeedbackForm.initEmpty
     , sendingFeedback = Unset
     , feedbackResult = Nothing
     , metrics = metrics
@@ -95,99 +89,16 @@ initialModel appState questionnaire metrics events =
     }
 
 
-type alias QuestionnaireDetail =
-    { uuid : String
-    , name : String
-    , package : Package
-    , knowledgeModel : KnowledgeModel
-    , replies : FormValues
-    , level : Int
-    , accessibility : QuestionnaireAccessibility
-    , ownerUuid : Maybe String
-    }
-
-
-questionnaireDetailDecoder : Decoder QuestionnaireDetail
-questionnaireDetailDecoder =
-    Decode.succeed QuestionnaireDetail
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-        |> required "package" Package.decoder
-        |> required "knowledgeModel" knowledgeModelDecoder
-        |> required "replies" decodeFormValues
-        |> required "level" Decode.int
-        |> required "accessibility" QuestionnaireAccessibility.decoder
-        |> required "ownerUuid" (Decode.maybe Decode.string)
-
-
-encodeQuestionnaireDetail : QuestionnaireDetail -> Encode.Value
-encodeQuestionnaireDetail questionnaire =
-    Encode.object
-        [ ( "name", Encode.string questionnaire.name )
-        , ( "accessibility", QuestionnaireAccessibility.encode questionnaire.accessibility )
-        , ( "replies", encodeFormValues questionnaire.replies )
-        , ( "level", Encode.int questionnaire.level )
-        ]
-
-
-type alias FeedbackForm =
-    { title : String
-    , content : String
-    }
-
-
-initEmptyFeedbackFrom : Form.Form CustomFormError FeedbackForm
-initEmptyFeedbackFrom =
-    Form.initial [] feedbackFormValidation
-
-
-feedbackFormValidation : Validation CustomFormError FeedbackForm
-feedbackFormValidation =
-    Validate.map2 FeedbackForm
-        (Validate.field "title" Validate.string)
-        (Validate.field "content" Validate.string)
-
-
-encodeFeedbackFrom : String -> String -> FeedbackForm -> Encode.Value
-encodeFeedbackFrom questionUuid packageId form =
-    Encode.object
-        [ ( "questionUuid", Encode.string questionUuid )
-        , ( "packageId", Encode.string packageId )
-        , ( "title", Encode.string form.title )
-        , ( "content", Encode.string form.content )
-        ]
-
-
-type alias Feedback =
-    { title : String
-    , issueId : Int
-    , issueUrl : String
-    }
-
-
-feedbackDecoder : Decoder Feedback
-feedbackDecoder =
-    Decode.succeed Feedback
-        |> required "title" Decode.string
-        |> required "issueId" Decode.int
-        |> required "issueUrl" Decode.string
-
-
-feedbackListDecoder : Decoder (List Feedback)
-feedbackListDecoder =
-    Decode.list feedbackDecoder
-
-
 
 {- Form creation -}
 
 
-createChapterForm : AppState -> KnowledgeModel -> List Metric -> QuestionnaireDetail -> Chapter -> Form FormExtraData
+createChapterForm : AppState -> KnowledgeModel -> List Metric -> QuestionnaireDetail -> Chapter -> Form Question Answer
 createChapterForm appState km metrics questionnaire chapter =
     createForm { items = List.map (createQuestionFormItem appState km metrics) chapter.questions } questionnaire.replies [ chapter.uuid ]
 
 
-createQuestionFormItem : AppState -> KnowledgeModel -> List Metric -> Question -> FormItem FormExtraData
+createQuestionFormItem : AppState -> KnowledgeModel -> List Metric -> Question -> FormItem Question Answer
 createQuestionFormItem appState km metrics question =
     let
         descriptor =
@@ -217,44 +128,18 @@ createQuestionFormItem appState km metrics question =
                 |> Maybe.withDefault (TextFormItem descriptor)
 
 
-createFormItemDescriptor : Question -> FormItemDescriptor FormExtraData
+createFormItemDescriptor : Question -> FormItemDescriptor Question
 createFormItemDescriptor question =
     { name = getQuestionUuid question
-    , label = getQuestionTitle question
-    , text = getQuestionText question
-    , extraData = createQuestionExtraData question
+    , question = question
     }
 
 
-createQuestionExtraData : Question -> Maybe FormExtraData
-createQuestionExtraData question =
-    let
-        foldReferences reference extraData =
-            case reference of
-                ResourcePageReference data ->
-                    { extraData | resourcePageReferences = extraData.resourcePageReferences ++ [ data ] }
-
-                URLReference data ->
-                    { extraData | urlReferences = extraData.urlReferences ++ [ data ] }
-
-                _ ->
-                    extraData
-
-        newExtraData =
-            { resourcePageReferences = []
-            , urlReferences = []
-            , experts = getQuestionExperts question
-            , requiredLevel = getQuestionRequiredLevel question
-            }
-    in
-    Just <| List.foldl foldReferences newExtraData <| getQuestionReferences question
-
-
-createAnswerOption : AppState -> KnowledgeModel -> List Metric -> Answer -> Option FormExtraData
+createAnswerOption : AppState -> KnowledgeModel -> List Metric -> Answer -> Option Question Answer
 createAnswerOption appState km metrics answer =
     let
         descriptor =
-            createOptionFormDescriptor metrics answer
+            createOptionFormDescriptor answer
     in
     case answer.followUps of
         FollowUps [] ->
@@ -264,57 +149,30 @@ createAnswerOption appState km metrics answer =
             DetailedOption descriptor (List.map (createQuestionFormItem appState km metrics) followUps)
 
 
-createOptionFormDescriptor : List Metric -> Answer -> OptionDescriptor
-createOptionFormDescriptor metrics answer =
+createOptionFormDescriptor : Answer -> OptionDescriptor Answer
+createOptionFormDescriptor answer =
     { name = answer.uuid
-    , label = answer.label
-    , text = answer.advice
-    , badges = createBadges metrics answer
+    , option = answer
     }
 
 
-createBadges : List Metric -> Answer -> Maybe (List ( String, String ))
-createBadges metrics answer =
-    let
-        getMetricName uuid =
-            List.find ((==) uuid << .uuid) metrics
-                |> Maybe.map .title
-                |> Maybe.withDefault "Unknown"
-
-        getBadgeClass value =
-            (++) "badge-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
-
-        createBadge metricMeasure =
-            ( getBadgeClass metricMeasure.measure, getMetricName metricMeasure.metricUuid )
-
-        metricExists measure =
-            List.find ((==) measure.metricUuid << .uuid) metrics /= Nothing
-    in
-    if List.isEmpty answer.metricMeasures then
-        Nothing
-
-    else
-        List.filter metricExists answer.metricMeasures
-            |> List.map createBadge
-            |> Just
-
-
-createGroupItems : AppState -> KnowledgeModel -> List Metric -> ListQuestionData -> List (FormItem FormExtraData)
+createGroupItems : AppState -> KnowledgeModel -> List Metric -> ListQuestionData -> List (FormItem Question Answer)
 createGroupItems appState km metrics questionData =
     let
-        itemNameExtraData =
-            { resourcePageReferences = []
-            , urlReferences = []
-            , experts = []
-            , requiredLevel = questionData.requiredLevel
-            }
-
         itemName =
             StringFormItem
                 { name = "itemName"
-                , label = questionData.itemTemplateTitle
-                , text = Nothing
-                , extraData = Just itemNameExtraData
+                , question =
+                    ValueQuestion
+                        { uuid = "itemName"
+                        , title = questionData.itemTemplateTitle
+                        , text = Nothing
+                        , requiredLevel = Nothing
+                        , tagUuids = []
+                        , references = []
+                        , experts = []
+                        , valueType = StringQuestionValueType
+                        }
                 }
 
         questions =
@@ -345,12 +203,7 @@ updateReplies model =
                 _ ->
                     model.questionnaire.replies
     in
-    { model | questionnaire = updateQuestionnaireReplies replies model.questionnaire }
-
-
-updateQuestionnaireReplies : FormValues -> QuestionnaireDetail -> QuestionnaireDetail
-updateQuestionnaireReplies replies questionnaire =
-    { questionnaire | replies = replies }
+    { model | questionnaire = QuestionnaireDetail.updateReplies replies model.questionnaire }
 
 
 setActiveChapter : AppState -> Chapter -> Model -> Model
@@ -360,9 +213,105 @@ setActiveChapter appState chapter model =
     }
 
 
+getActiveChapter : Model -> Maybe Chapter
+getActiveChapter model =
+    case model.activePage of
+        PageChapter chapter _ ->
+            Just chapter
+
+        _ ->
+            Nothing
+
+
 setLevel : QuestionnaireDetail -> Int -> QuestionnaireDetail
 setLevel questionnaire level =
     { questionnaire | level = level }
+
+
+addLabel : Model -> String -> Model
+addLabel model path =
+    let
+        labels =
+            [ { path = path, value = [ todoUuid ] } ]
+                ++ model.questionnaire.labels
+                |> List.uniqueBy .path
+    in
+    { model
+        | questionnaire = QuestionnaireDetail.updateLabels labels model.questionnaire
+        , dirty = True
+    }
+
+
+removeLabel : Model -> String -> Model
+removeLabel model path =
+    let
+        labels =
+            List.filter (not << (==) path << .path) model.questionnaire.labels
+    in
+    { model
+        | questionnaire = QuestionnaireDetail.updateLabels labels model.questionnaire
+        , dirty = True
+    }
+
+
+removeLabelsFromItem : Model -> List String -> Int -> Model
+removeLabelsFromItem model path index =
+    let
+        activeChapterUuid =
+            Maybe.withDefault "" <| Maybe.map .uuid <| getActiveChapter model
+
+        fullPath =
+            activeChapterUuid :: path
+
+        pathString =
+            String.join "." fullPath
+
+        pathLength =
+            List.length fullPath
+
+        getIndex p =
+            String.split "." p
+                |> List.drop pathLength
+                |> List.head
+                |> Maybe.andThen String.toInt
+                |> Maybe.withDefault -1
+
+        decrementIndex p =
+            let
+                parts =
+                    String.split "." p
+            in
+            String.join "." <|
+                List.take pathLength parts
+                    ++ [ String.fromInt <| getIndex p - 1 ]
+                    ++ List.drop (pathLength + 1) parts
+
+        filter label =
+            if String.startsWith pathString label.path then
+                if getIndex label.path < index then
+                    Just label
+
+                else if getIndex label.path == index then
+                    Nothing
+
+                else
+                    Just { label | path = decrementIndex label.path }
+
+            else
+                Just label
+
+        labels =
+            List.filterMap filter model.questionnaire.labels
+    in
+    { model
+        | questionnaire = QuestionnaireDetail.updateLabels labels model.questionnaire
+        , dirty = True
+    }
+
+
+todoUuid : String
+todoUuid =
+    "615b9028-5e3f-414f-b245-12d2ae2eeb20"
 
 
 

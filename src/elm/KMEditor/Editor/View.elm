@@ -2,21 +2,23 @@ module KMEditor.Editor.View exposing (view)
 
 import ActionResult
 import Common.AppState exposing (AppState)
-import Common.Html exposing (emptyNode, fa)
+import Common.Html exposing (emptyNode, fa, linkTo)
 import Common.View.ActionButton as ActionButton
 import Common.View.Flash as Flash
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models exposing (KnowledgeModelDetail)
+import KMEditor.Common.BranchDetail exposing (BranchDetail)
 import KMEditor.Common.Models.Entities exposing (Level, Metric)
 import KMEditor.Editor.KMEditor.View
 import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
 import KMEditor.Editor.Msgs exposing (Msg(..))
 import KMEditor.Editor.Preview.View
 import KMEditor.Editor.TagEditor.View
+import KMEditor.Routing exposing (Route(..))
 import Msgs
+import Routing
 
 
 view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
@@ -25,8 +27,8 @@ view wrapMsg appState model =
         ActionResult.combine3 model.km model.metrics model.levels
 
 
-editorView : (Msg -> Msgs.Msg) -> AppState -> Model -> ( KnowledgeModelDetail, List Metric, List Level ) -> Html Msgs.Msg
-editorView wrapMsg appState model ( km, metric, levels ) =
+editorView : (Msg -> Msgs.Msg) -> AppState -> Model -> ( BranchDetail, List Metric, List Level ) -> Html Msgs.Msg
+editorView wrapMsg appState model ( _, _, levels ) =
     let
         content _ =
             case model.currentEditor of
@@ -61,7 +63,7 @@ editorHeader wrapMsg model =
                 ]
 
             else
-                []
+                [ linkTo (Routing.KMEditor IndexRoute) [ class "btn btn-outline-primary btn-with-loader" ] [ text "Close" ] ]
 
         errorMsg =
             if hasSavingError model then

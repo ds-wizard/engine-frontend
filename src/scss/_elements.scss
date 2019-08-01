@@ -136,7 +136,7 @@ code {
 }
 
 .list-group-hover {
-    li:hover {
+    li:hover, a:hover {
         background: $gray-100;
     }
 }
@@ -265,7 +265,7 @@ code {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0 15px;
+        padding: 0 1rem;
 
         .top-header-title {
             margin: 0;
@@ -284,5 +284,19 @@ code {
 .side-navigation-collapsed {
     .top-header {
         left: $side-navigation-width-collapsed;
+    }
+}
+
+
+.diff {
+    .diff {
+        &-added {
+            background: theme-color-level("success", $alert-bg-level);
+        }
+
+        &-removed {
+            text-decoration: line-through;
+            background: theme-color-level("danger", $alert-bg-level);
+        }
     }
 }

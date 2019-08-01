@@ -29,7 +29,7 @@ viewKnowledgeModels appState model packages =
     div [ listClass "KnowledgeModels__Index" ]
         [ Page.header "Knowledge Models" (indexActions appState)
         , FormResult.successOnlyView model.deletingPackage
-        , Listing.view (listingConfig appState) <| List.sortBy .name packages
+        , Listing.view (listingConfig appState) <| List.sortBy (String.toLower << .name) packages
         , deleteModal model
         ]
 
@@ -55,6 +55,11 @@ listingConfig appState =
     , actions = listingActions appState
     , textTitle = .name
     , emptyText = "Click \"Import\" button to import a new Knowledge Model."
+    , updated =
+        Just
+            { getTime = .createdAt
+            , currentTime = appState.currentTime
+            }
     }
 
 

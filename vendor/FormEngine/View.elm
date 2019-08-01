@@ -1,4 +1,4 @@
-module FormEngine.View exposing (FormViewConfig, viewForm)
+module FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Html exposing (emptyNode)
@@ -7,7 +7,6 @@ import FormEngine.Msgs exposing (Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
-import Markdown
 import String exposing (fromInt)
 
 
@@ -17,17 +16,27 @@ type QuestionState
     | Desirable
 
 
-type alias FormViewConfig msg a err =
-    { customActions : List ( String, msg )
-    , viewExtraData : Maybe (a -> Html (Msg msg err))
-    , isDesirable : Maybe (a -> Bool)
+type alias FormViewConfig msg question option err =
+    { customActions : List (String -> List String -> Html msg)
+    , isDesirable : Maybe (question -> Bool)
     , disabled : Bool
+    , getExtraQuestionClass : String -> Maybe String
+    , renderer : FormRenderer msg question option err
     }
 
 
-viewForm : FormViewConfig msg a err -> Form a -> Html (Msg msg err)
+type alias FormRenderer msg question option err =
+    { renderQuestionLabel : question -> Html (Msg msg err)
+    , renderQuestionDescription : question -> Html (Msg msg err)
+    , renderOptionLabel : option -> Html (Msg msg err)
+    , renderOptionBadges : option -> Html (Msg msg err)
+    , renderOptionAdvice : option -> Html (Msg msg err)
+    }
+
+
+viewForm : FormViewConfig msg question option err -> Form question option -> Html (Msg msg err)
 viewForm config form =
-    div [ class "form-engine-form" ]
+    div [ class "form-engine-form", classList [ ( "form-engine-form-disabled", config.disabled ) ] ]
         (List.indexedMap (viewFormElement form config [] [] False) form.elements)
 
 
@@ -41,7 +50,7 @@ identifierToChar =
     (+) 97 >> Char.fromCode >> String.fromChar
 
 
-viewFormElement : Form a -> FormViewConfig msg a err -> List String -> List String -> Bool -> Int -> FormElement a -> Html (Msg msg err)
+viewFormElement : Form question option -> FormViewConfig msg question option err -> List String -> List String -> Bool -> Int -> FormElement question option -> Html (Msg msg err)
 viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier order formItem =
     let
         newHumanIdentifiers =
@@ -54,59 +63,66 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
 
                 ( False, _ ) ->
                     humanIdentifiers ++ [ String.fromInt <| order + 1 ]
+
+        extraClass uuid =
+            Maybe.withDefault "" <| config.getExtraQuestionClass uuid
+
+        dataPath pathAttribute =
+            attribute "data-path" <| String.join "." pathAttribute
+
+        prefix formItemName =
+            "question-" ++ formItemName
     in
     case formItem of
         StringFormElement descriptor state ->
-            div [ class "form-group" ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+            div [ class <| "form-group " ++ extraClass descriptor.name, id <| prefix descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", disabled config.disabled, type_ "text", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
-                , viewDescription descriptor.text
-                , viewExtraData config descriptor.extraData
+                , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         TextFormElement descriptor state ->
-            div [ class "form-group" ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+            div [ class <| "form-group " ++ extraClass descriptor.name, id <| prefix descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , textarea [ class "form-control", disabled config.disabled, value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
-                , viewDescription descriptor.text
-                , viewExtraData config descriptor.extraData
+                , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         NumberFormElement descriptor state ->
-            div [ class "form-group" ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+            div [ class <| "form-group " ++ extraClass descriptor.name, id <| prefix descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input [ class "form-control", disabled config.disabled, type_ "number", value (stateValueToString state), onInput (Input (path ++ [ descriptor.name ]) << StringReply) ] []
-                , viewDescription descriptor.text
-                , viewExtraData config descriptor.extraData
+                , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
         ChoiceFormElement descriptor options state ->
-            div [ class "form-group form-group-choices" ]
-                [ viewLabel config descriptor (state.value /= Nothing) newHumanIdentifiers
-                , viewDescription descriptor.text
-                , viewExtraData config descriptor.extraData
+            div [ class <| "form-group form-group-choices " ++ extraClass descriptor.name, id <| prefix descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
+                [ viewLabel config descriptor path (state.value /= Nothing) newHumanIdentifiers
+                , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewChoice config (path ++ [ descriptor.name ]) descriptor state) options)
                 , viewClearAnswer (state.value /= Nothing && not config.disabled) (path ++ [ descriptor.name ])
-                , viewAdvice state.value options
+                , viewAdvice config state.value options
                 , viewFollowUps form config (path ++ [ descriptor.name ]) newHumanIdentifiers state.value options
                 ]
 
         GroupFormElement descriptor _ items state ->
-            div [ class "form-group" ]
-                [ viewLabel config descriptor (List.length items > 0) newHumanIdentifiers
-                , viewDescription descriptor.text
-                , viewExtraData config descriptor.extraData
+            div [ class <| "form-group " ++ extraClass descriptor.name, id <| prefix descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
+                [ viewLabel config descriptor path (List.length items > 0) newHumanIdentifiers
+                , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewGroupItem form config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
                 , if not config.disabled then
                     button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
+
+                  else if List.length items == 0 then
+                    i [] [ text "There are no answers yet" ]
 
                   else
                     text ""
                 ]
 
         TypeHintFormElement descriptor typeHintConfig state ->
-            div [ class "form-group" ]
-                [ viewLabel config descriptor (stateValueToString state /= "") newHumanIdentifiers
+            div [ class <| "form-group " ++ extraClass descriptor.name, id <| prefix descriptor.name, dataPath (path ++ [ descriptor.name ]) ]
+                [ viewLabel config descriptor path (stateValueToString state /= "") newHumanIdentifiers
                 , input
                     [ class "form-control"
                     , type_ "text"
@@ -119,8 +135,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                     []
                 , viewTypeHints form.typeHints path descriptor
                 , viewIntegrationReplyExtra typeHintConfig state
-                , viewDescription descriptor.text
-                , viewExtraData config descriptor.extraData
+                , config.renderer.renderQuestionDescription descriptor.question
                 ]
 
 
@@ -199,14 +214,14 @@ viewTypeHints typeHints path descriptor =
         text ""
 
 
-viewLabel : FormViewConfig msg a err -> FormItemDescriptor a -> Bool -> List String -> Html (Msg msg err)
-viewLabel config descriptor answered humanIdentifiers =
+viewLabel : FormViewConfig msg question option err -> FormItemDescriptor question -> List String -> Bool -> List String -> Html (Msg msg err)
+viewLabel config descriptor path answered humanIdentifiers =
     let
         questionState =
             let
                 desirable =
                     config.isDesirable
-                        |> Maybe.andThen (\isDesirable -> Maybe.map isDesirable descriptor.extraData)
+                        |> Maybe.map (\isDesirable -> isDesirable descriptor.question)
                         |> Maybe.withDefault False
             in
             case ( answered, desirable ) of
@@ -236,44 +251,21 @@ viewLabel config descriptor answered humanIdentifiers =
                     , ( "text-danger", questionState == Desirable )
                     ]
                 ]
-                [ text descriptor.label ]
+                [ config.renderer.renderQuestionLabel descriptor.question ]
             ]
-        , viewCustomActions descriptor.name config
+        , viewCustomActions descriptor.name path config
         ]
 
 
-viewDescription : Maybe String -> Html (Msg msg err)
-viewDescription descriptionText =
-    descriptionText
-        |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ Markdown.toHtml [] t ])
-        |> Maybe.withDefault (text "")
-
-
-viewCustomActions : String -> FormViewConfig msg a err -> Html (Msg msg err)
-viewCustomActions questionId config =
+viewCustomActions : String -> List String -> FormViewConfig msg question option err -> Html (Msg msg err)
+viewCustomActions questionId path config =
     -- temporary fix since item name will be removed in the future versions
     if questionId /= "itemName" then
         span [ class "custom-actions" ]
-            (List.map (viewCustomAction questionId) config.customActions)
+            (List.map (\f -> Html.map (CustomQuestionMsg questionId) <| f questionId path) config.customActions)
 
     else
         text ""
-
-
-viewCustomAction : String -> ( String, msg ) -> Html (Msg msg err)
-viewCustomAction questionId ( icon, msg ) =
-    a [ onClick <| CustomQuestionMsg questionId msg ]
-        [ i [ class <| "fa " ++ icon ] [] ]
-
-
-viewExtraData : FormViewConfig msg a err -> Maybe a -> Html (Msg msg err)
-viewExtraData config extraData =
-    case ( config.viewExtraData, extraData ) of
-        ( Just view, Just data ) ->
-            view data
-
-        _ ->
-            text ""
 
 
 viewClearAnswer : Bool -> List String -> Html (Msg msg err)
@@ -288,7 +280,7 @@ viewClearAnswer answered path =
         text ""
 
 
-viewGroupItem : Form a -> FormViewConfig msg a err -> List String -> List String -> Int -> ItemElement a -> Html (Msg msg err)
+viewGroupItem : Form question option -> FormViewConfig msg question option err -> List String -> List String -> Int -> ItemElement question option -> Html (Msg msg err)
 viewGroupItem form config path humanIdentifiers index itemElement =
     let
         newHumanIdentifiers =
@@ -325,46 +317,36 @@ viewGroupItem form config path humanIdentifiers index itemElement =
         ]
 
 
-viewChoice : FormViewConfig msg a err -> List String -> FormItemDescriptor a -> FormElementState -> Int -> OptionElement a -> Html (Msg msg err)
+viewChoice : FormViewConfig msg question option err -> List String -> FormItemDescriptor question -> FormElementState -> Int -> OptionElement question option -> Html (Msg msg err)
 viewChoice config path parentDescriptor parentState order optionElement =
     let
         radioName =
             String.join "." (path ++ [ parentDescriptor.name ])
 
         humanIndentifier =
-            identifierToChar order
+            identifierToChar order ++ ". "
 
-        viewBadge ( cssClass, title ) =
-            span [ class <| "badge " ++ cssClass ] [ text title ]
-
-        viewBadges mbBadges =
-            case mbBadges of
-                Just badges ->
-                    div [ class "badges" ] (List.map viewBadge badges)
-
-                Nothing ->
-                    text ""
-
-        viewOption title value extra badges =
+        viewOption option value extra =
             div [ class "radio", classList [ ( "radio-selected", Just value == parentState.value ) ] ]
                 [ label []
                     [ input [ type_ "radio", disabled config.disabled, name radioName, onClick (Input path value), checked (Just value == parentState.value) ] []
-                    , text <| humanIndentifier ++ ". " ++ title
+                    , text humanIndentifier
+                    , config.renderer.renderOptionLabel option
                     , extra
-                    , viewBadges badges
+                    , config.renderer.renderOptionBadges option
                     ]
                 ]
     in
     case optionElement of
-        SimpleOptionElement { name, label, badges } ->
-            viewOption label (AnswerReply name) (text "") badges
+        SimpleOptionElement { option, name } ->
+            viewOption option (AnswerReply name) (text "")
 
-        DetailedOptionElement { name, label, badges } _ ->
-            viewOption label (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] []) badges
+        DetailedOptionElement { option, name } _ ->
+            viewOption option (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] [])
 
 
-viewAdvice : Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg err)
-viewAdvice value options =
+viewAdvice : FormViewConfig msg question option err -> Maybe ReplyValue -> List (OptionElement question option) -> Html (Msg msg err)
+viewAdvice config value options =
     let
         getDescriptor option =
             case option of
@@ -389,23 +371,13 @@ viewAdvice value options =
     in
     case selectedDetailedOption of
         Just descriptor ->
-            adviceElement descriptor.text
+            config.renderer.renderOptionAdvice descriptor.option
 
         _ ->
             text ""
 
 
-adviceElement : Maybe String -> Html (Msg msg err)
-adviceElement maybeAdvice =
-    case maybeAdvice of
-        Just advice ->
-            div [ class "alert alert-info" ] [ Markdown.toHtml [] advice ]
-
-        _ ->
-            text ""
-
-
-viewFollowUps : Form a -> FormViewConfig msg a err -> List String -> List String -> Maybe ReplyValue -> List (OptionElement a) -> Html (Msg msg err)
+viewFollowUps : Form question option -> FormViewConfig msg question option err -> List String -> List String -> Maybe ReplyValue -> List (OptionElement question option) -> Html (Msg msg err)
 viewFollowUps form config path humanIdentifiers value options =
     let
         isSelected ( _, option ) =

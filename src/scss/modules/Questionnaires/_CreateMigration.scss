@@ -1,0 +1,21 @@
+@import "../../variables";
+
+.Questionnaires__CreateMigration {
+    .form {
+        display: flex;
+        justify-content: space-between;
+
+        &>div {
+            width: 45%;
+            padding: 1rem;
+            border: 1px solid $gray-300;
+            border-radius: $border-radius;
+        }
+
+        &>.fa {
+            font-size: 200%;
+            margin-top: 3rem;
+            color: $gray-400;
+        }
+    }
+}

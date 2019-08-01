@@ -1,16 +1,12 @@
 module Questionnaires.Index.ExportModal.Models exposing
     ( Model
-    , Template
     , initialModel
     , setQuestionnaire
-    , templateDecoder
-    , templateListDecoder
     )
 
 import ActionResult exposing (ActionResult(..))
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (required)
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
+import Questionnaires.Common.Template exposing (Template)
 
 
 type alias Model =
@@ -36,21 +32,3 @@ setQuestionnaire questionnaire model =
         | questionnaire = Just questionnaire
         , templates = Loading
     }
-
-
-type alias Template =
-    { uuid : String
-    , name : String
-    }
-
-
-templateDecoder : Decoder Template
-templateDecoder =
-    Decode.succeed Template
-        |> required "uuid" Decode.string
-        |> required "name" Decode.string
-
-
-templateListDecoder : Decoder (List Template)
-templateListDecoder =
-    Decode.list templateDecoder

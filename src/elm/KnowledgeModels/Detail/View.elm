@@ -50,8 +50,8 @@ header appState package =
         forkAction =
             linkTo (Routing.KMEditor <| KMEditor.Routing.CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
-                [ fa "code-fork"
-                , text "Fork knowledge model"
+                [ fa "edit"
+                , text "Create KM Editor"
                 ]
 
         questionnaireAction =
@@ -144,12 +144,13 @@ sidePanelKmInfo package =
             [ ( "ID:", text package.id )
             , ( "Version:", text <| Version.toString package.version )
             , ( "Metamodel:", text <| String.fromInt package.metamodelVersion )
+            , ( "License:", text package.license )
             ]
 
         parentInfo =
-            case package.parentPackageId of
+            case package.forkOfPackageId of
                 Just parentPackageId ->
-                    [ ( "Parent KM:"
+                    [ ( "Fork of:"
                       , linkTo (Routing.KnowledgeModels <| Detail parentPackageId)
                             []
                             [ text parentPackageId ]

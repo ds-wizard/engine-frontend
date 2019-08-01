@@ -1,47 +1,41 @@
 module Questionnaires.Create.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
-import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
 import Common.View.ActionButton as ActionResult
-import Common.View.Flash as Flash
 import Common.View.FormActions as FormActions
-import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Common.View.Tag as Tag
 import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (class)
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Common.Version as Version
-import Msgs
-import Questionnaires.Common.Models.QuestionnaireAccessibility as QuestionnaireAccessibility
-import Questionnaires.Create.Models exposing (Model, QuestionnaireCreateForm)
+import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility
+import Questionnaires.Create.Models exposing (Model)
 import Questionnaires.Create.Msgs exposing (Msg(..))
 import Questionnaires.Routing
 import Routing
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
-    Page.actionResultView (content wrapMsg appState model) model.packages
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView (content appState model) model.packages
 
 
-content : (Msg -> Msgs.Msg) -> AppState -> Model -> List Package -> Html Msgs.Msg
-content wrapMsg appState model packages =
+content : AppState -> Model -> List Package -> Html Msg
+content appState model packages =
     div [ detailClass "Questionnaires__Create" ]
         [ Page.header "Create Questionnaire" []
         , div []
             [ FormResult.view model.savingQuestionnaire
-            , formView appState model packages |> Html.map (wrapMsg << FormMsg)
-            , tagsView wrapMsg model
+            , formView appState model packages |> Html.map FormMsg
+            , tagsView model
             , FormActions.view
                 (Routing.Questionnaires Questionnaires.Routing.Index)
-                (ActionResult.ButtonConfig "Save" model.savingQuestionnaire (wrapMsg <| FormMsg Form.Submit) False)
+                (ActionResult.ButtonConfig "Save" model.savingQuestionnaire (FormMsg Form.Submit) False)
             ]
         ]
 
@@ -77,45 +71,16 @@ formView appState model packages =
     formHtml
 
 
-tagsView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-tagsView wrapMsg model =
+tagsView : Model -> Html Msg
+tagsView model =
     let
-        tagsContent =
-            case model.knowledgeModelPreview of
-                Unset ->
-                    div [ class "alert alert-light" ]
-                        [ i [] [ text "Select the knowledge model first" ] ]
-
-                Loading ->
-                    Flash.loader
-
-                Error err ->
-                    Flash.error err
-
-                Success knowledgeModel ->
-                    let
-                        tagListConfig =
-                            { selected = model.selectedTags
-                            , addMsg = AddTag >> wrapMsg
-                            , removeMsg = RemoveTag >> wrapMsg
-                            }
-
-                        extraText =
-                            if List.length knowledgeModel.tags > 0 then
-                                FormExtra.text "You can filter questions in the questionnaire by tags. If no tags are selected, all questions will be used."
-
-                            else
-                                emptyNode
-                    in
-                    div []
-                        [ Tag.list tagListConfig knowledgeModel.tags
-                        , extraText
-                        ]
+        tagListConfig =
+            { selected = model.selectedTags
+            , addMsg = AddTag
+            , removeMsg = RemoveTag
+            }
     in
-    div [ class "form-group form-group-tags" ]
-        [ label [] [ text "Tags" ]
-        , div [] [ tagsContent ]
-        ]
+    Tag.selection tagListConfig model.knowledgeModelPreview
 
 
 createOption : Package -> ( String, String )

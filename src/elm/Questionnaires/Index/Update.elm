@@ -4,64 +4,72 @@ module Questionnaires.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api exposing (getResultCmd)
+import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Setters exposing (setQuestionnaires)
 import Msgs
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Index.ExportModal.Models exposing (setQuestionnaire)
+import Questionnaires.Index.ExportModal.Msgs as ExportModal
 import Questionnaires.Index.ExportModal.Update as ExportModal
 import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
 
 
-fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg appState =
-    Cmd.map wrapMsg <|
-        QuestionnairesApi.getQuestionnaires appState GetQuestionnairesCompleted
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    QuestionnairesApi.getQuestionnaires appState GetQuestionnairesCompleted
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-update msg wrapMsg appState model =
+update : (Msg -> Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update wrapMsg msg appState model =
     case msg of
         GetQuestionnairesCompleted result ->
-            getQuestionnairesCompleted model result
+            handleGetQuestionnairesCompleted model result
 
-        ShowHideDeleteQuestionnaire questionnaire ->
-            ( { model | questionnaireToBeDeleted = questionnaire, deletingQuestionnaire = Unset }, Cmd.none )
+        ShowHideDeleteQuestionnaire mbQuestionnaire ->
+            handleShowHideDeleteQuestionnaire model mbQuestionnaire
 
         DeleteQuestionnaire ->
             handleDeleteQuestionnaire wrapMsg appState model
 
         DeleteQuestionnaireCompleted result ->
-            deleteQuestionnaireCompleted wrapMsg appState model result
+            handleDeleteQuestionnaireCompleted wrapMsg appState model result
 
         ShowExportQuestionnaire questionnaire ->
-            ( { model | exportModalModel = setQuestionnaire questionnaire model.exportModalModel }
-            , Cmd.map (wrapMsg << ExportModalMsg) <| ExportModal.fetchData appState
-            )
+            handleShowExportQuestionnaire wrapMsg appState model questionnaire
 
         ExportModalMsg exportModalMsg ->
-            let
-                ( exportModalModel, cmd ) =
-                    ExportModal.update exportModalMsg (wrapMsg << ExportModalMsg) appState model.exportModalModel
-            in
-            ( { model | exportModalModel = exportModalModel }, cmd )
+            handleExportModal exportModalMsg model
+
+        DeleteQuestionnaireMigration uuid ->
+            handleDeleteMigration wrapMsg appState model uuid
+
+        DeleteQuestionnaireMigrationCompleted result ->
+            handleDeleteMigrationCompleted wrapMsg appState model result
 
 
-getQuestionnairesCompleted : Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
-getQuestionnairesCompleted model result =
-    case result of
-        Ok questionnaires ->
-            ( { model | questionnaires = Success questionnaires }
-            , Cmd.none
-            )
 
-        Err error ->
-            ( { model | questionnaires = getServerError error "Unable to get questionnaires." }
-            , getResultCmd result
-            )
+-- Handlers
+
+
+handleGetQuestionnairesCompleted : Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnairesCompleted model result =
+    applyResult
+        { setResult = setQuestionnaires
+        , defaultError = "Unable to get questionnaires."
+        , model = model
+        , result = result
+        }
+
+
+handleShowHideDeleteQuestionnaire : Model -> Maybe Questionnaire -> ( Model, Cmd Msgs.Msg )
+handleShowHideDeleteQuestionnaire model mbQuestionnaire =
+    ( { model | questionnaireToBeDeleted = mbQuestionnaire, deletingQuestionnaire = Unset }
+    , Cmd.none
+    )
 
 
 handleDeleteQuestionnaire : (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -82,15 +90,52 @@ handleDeleteQuestionnaire wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deleteQuestionnaireCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-deleteQuestionnaireCompleted wrapMsg appState model result =
+handleDeleteQuestionnaireCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handleDeleteQuestionnaireCompleted wrapMsg appState model result =
     case result of
-        Ok user ->
+        Ok _ ->
             ( { model | deletingQuestionnaire = Success "Questionnaire was sucessfully deleted", questionnaires = Loading, questionnaireToBeDeleted = Nothing }
-            , fetchData wrapMsg appState
+            , Cmd.map wrapMsg <| fetchData appState
             )
 
         Err error ->
             ( { model | deletingQuestionnaire = getServerError error "Questionnaire could not be deleted" }
+            , getResultCmd result
+            )
+
+
+handleShowExportQuestionnaire : (Msg -> Msgs.Msg) -> AppState -> Model -> Questionnaire -> ( Model, Cmd Msgs.Msg )
+handleShowExportQuestionnaire wrapMsg appState model questionnaire =
+    ( { model | exportModalModel = setQuestionnaire questionnaire model.exportModalModel }
+    , Cmd.map (wrapMsg << ExportModalMsg) <| ExportModal.fetchData appState
+    )
+
+
+handleExportModal : ExportModal.Msg -> Model -> ( Model, Cmd Msgs.Msg )
+handleExportModal exportModalMsg model =
+    let
+        ( exportModalModel, cmd ) =
+            ExportModal.update exportModalMsg model.exportModalModel
+    in
+    ( { model | exportModalModel = exportModalModel }, cmd )
+
+
+handleDeleteMigration : (Msg -> Msgs.Msg) -> AppState -> Model -> String -> ( Model, Cmd Msgs.Msg )
+handleDeleteMigration wrapMsg appState model uuid =
+    ( { model | deletingMigration = Loading }
+    , QuestionnairesApi.deleteQuestionnaireMigration uuid appState (wrapMsg << DeleteQuestionnaireMigrationCompleted)
+    )
+
+
+handleDeleteMigrationCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handleDeleteMigrationCompleted wrapMsg appState model result =
+    case result of
+        Ok _ ->
+            ( { model | deletingMigration = Success "Questionnaire migration was canceled.", questionnaires = Loading }
+            , Cmd.map wrapMsg <| fetchData appState
+            )
+
+        Err error ->
+            ( { model | deletingMigration = getServerError error "Questionnaire migration could not be canceled." }
             , getResultCmd result
             )

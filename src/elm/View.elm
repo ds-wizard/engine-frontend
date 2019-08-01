@@ -28,8 +28,9 @@ view model =
                     |> Layout.app model
 
             Questionnaires route ->
-                model.dsPlannerModel
-                    |> Questionnaires.View.view route QuestionnairesMsg model.appState
+                model.questionnairesModel
+                    |> Questionnaires.View.view route model.appState
+                    |> Html.map QuestionnairesMsg
                     |> Layout.app model
 
             KMEditor route ->

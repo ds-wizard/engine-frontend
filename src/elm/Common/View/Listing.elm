@@ -2,6 +2,7 @@ module Common.View.Listing exposing
     ( ListingActionConfig
     , ListingActionType(..)
     , ListingConfig
+    , UpdatedConfig
     , view
     , viewItem
     )
@@ -9,10 +10,12 @@ module Common.View.Listing exposing
 import Common.Html exposing (emptyNode, fa)
 import Common.View.ItemIcon as ItemIcon
 import Common.View.Page as Page
-import Html exposing (Html, a, div, text)
+import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Routing
+import Time
+import Time.Distance exposing (inWords)
 
 
 type alias ListingConfig a msg =
@@ -21,6 +24,13 @@ type alias ListingConfig a msg =
     , actions : a -> List (ListingActionConfig msg)
     , textTitle : a -> String
     , emptyText : String
+    , updated : Maybe (UpdatedConfig a)
+    }
+
+
+type alias UpdatedConfig a =
+    { getTime : a -> Time.Posix
+    , currentTime : Time.Posix
     }
 
 
@@ -61,8 +71,9 @@ viewItem config item =
     div [ class "list-group-item" ]
         [ ItemIcon.view { text = config.textTitle item, image = Nothing }
         , div [ class "content" ]
-            [ div [ class "title" ]
-                [ config.title item
+            [ div [ class "title-row" ]
+                [ span [ class "title" ] [ config.title item ]
+                , viewUpdated config item
                 ]
             , div [ class "extra" ]
                 [ div [ class "description" ]
@@ -72,6 +83,17 @@ viewItem config item =
                 ]
             ]
         ]
+
+
+viewUpdated : ListingConfig a msg -> a -> Html msg
+viewUpdated config item =
+    case config.updated of
+        Just updated ->
+            span [ class "updated" ]
+                [ text <| "Updated " ++ inWords (updated.getTime item) updated.currentTime ]
+
+        Nothing ->
+            emptyNode
 
 
 viewAction : ListingActionConfig msg -> Html msg

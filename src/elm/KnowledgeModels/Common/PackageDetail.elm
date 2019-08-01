@@ -1,5 +1,6 @@
 module KnowledgeModels.Common.PackageDetail exposing
     ( PackageDetail
+    , createFormOptions
     , decoder
     )
 
@@ -18,8 +19,10 @@ type alias PackageDetail =
     , version : Version
     , description : String
     , readme : String
+    , license : String
     , metamodelVersion : Int
-    , parentPackageId : Maybe String
+    , forkOfPackageId : Maybe String
+    , previousPackageId : Maybe String
     , versions : List Version
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
@@ -38,10 +41,29 @@ decoder =
         |> D.required "version" Version.decoder
         |> D.required "description" D.string
         |> D.required "readme" D.string
+        |> D.required "license" D.string
         |> D.required "metamodelVersion" D.int
-        |> D.required "parentPackageId" (D.maybe D.string)
+        |> D.required "forkOfPackageId" (D.maybe D.string)
+        |> D.required "previousPackageId" (D.maybe D.string)
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "state" PackageState.decoder
+
+
+createFormOptions : PackageDetail -> List ( String, String )
+createFormOptions package =
+    List.map (createFormOption package) <| List.filter (Version.greaterThan package.version) package.versions
+
+
+createFormOption : PackageDetail -> Version -> ( String, String )
+createFormOption package version =
+    let
+        id =
+            package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version
+
+        optionText =
+            package.name ++ " " ++ Version.toString version ++ " (" ++ id ++ ")"
+    in
+    ( id, optionText )

@@ -2,27 +2,40 @@ module Questionnaires.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Html exposing (Html)
-import Msgs
 import Questionnaires.Create.View
+import Questionnaires.CreateMigration.View
 import Questionnaires.Detail.View
 import Questionnaires.Edit.View
 import Questionnaires.Index.View
+import Questionnaires.Migration.View
 import Questionnaires.Models exposing (Model)
 import Questionnaires.Msgs exposing (Msg(..))
 import Questionnaires.Routing exposing (Route(..))
 
 
-view : Route -> (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view route wrapMsg appState model =
+view : Route -> AppState -> Model -> Html Msg
+view route appState model =
     case route of
         Create _ ->
-            Questionnaires.Create.View.view (wrapMsg << CreateMsg) appState model.createModel
+            Html.map CreateMsg <|
+                Questionnaires.Create.View.view appState model.createModel
 
-        Detail uuid ->
-            Questionnaires.Detail.View.view (wrapMsg << DetailMsg) appState model.detailModel
+        CreateMigration _ ->
+            Html.map CreateMigrationMsg <|
+                Questionnaires.CreateMigration.View.view model.createMigrationModel
 
-        Edit uuid ->
-            Questionnaires.Edit.View.view (wrapMsg << EditMsg) appState model.editModel
+        Detail _ ->
+            Html.map DetailMsg <|
+                Questionnaires.Detail.View.view appState model.detailModel
+
+        Edit _ ->
+            Html.map EditMsg <|
+                Questionnaires.Edit.View.view appState model.editModel
 
         Index ->
-            Questionnaires.Index.View.view (wrapMsg << IndexMsg) appState model.indexModel
+            Html.map IndexMsg <|
+                Questionnaires.Index.View.view appState model.indexModel
+
+        Migration _ ->
+            Html.map MigrationMsg <|
+                Questionnaires.Migration.View.view appState model.migrationModel

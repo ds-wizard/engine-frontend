@@ -1,12 +1,14 @@
 module Common.Setters exposing
     ( setBookReference
-    , setKnowledgeModel
-    , setKnowledgeModels
+    , setBranches
     , setLevels
+    , setMetrics
     , setMigration
     , setPackage
     , setPackages
     , setPulling
+    , setQuestionnaire
+    , setQuestionnaireDetail
     , setQuestionnaires
     , setUsers
     )
@@ -17,14 +19,9 @@ setBookReference value record =
     { record | bookReference = value }
 
 
-setKnowledgeModel : a -> { b | knowledgeModel : a } -> { b | knowledgeModel : a }
-setKnowledgeModel value record =
-    { record | knowledgeModel = value }
-
-
-setKnowledgeModels : a -> { b | knowledgeModels : a } -> { b | knowledgeModels : a }
-setKnowledgeModels value record =
-    { record | knowledgeModels = value }
+setBranches : a -> { b | branches : a } -> { b | branches : a }
+setBranches value record =
+    { record | branches = value }
 
 
 setLevels : a -> { b | levels : a } -> { b | levels : a }
@@ -35,6 +32,11 @@ setLevels value record =
 setMigration : a -> { b | migration : a } -> { b | migration : a }
 setMigration value record =
     { record | migration = value }
+
+
+setMetrics : a -> { b | metrics : a } -> { b | metrics : a }
+setMetrics value record =
+    { record | metrics = value }
 
 
 setPackage : a -> { b | package : a } -> { b | package : a }
@@ -50,6 +52,16 @@ setPackages value record =
 setPulling : a -> { b | pulling : a } -> { b | pulling : a }
 setPulling value record =
     { record | pulling = value }
+
+
+setQuestionnaire : a -> { b | questionnaire : a } -> { b | questionnaire : a }
+setQuestionnaire value record =
+    { record | questionnaire = value }
+
+
+setQuestionnaireDetail : a -> { b | questionnaireDetail : a } -> { b | questionnaireDetail : a }
+setQuestionnaireDetail value record =
+    { record | questionnaireDetail = value }
 
 
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }

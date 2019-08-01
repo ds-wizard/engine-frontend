@@ -2,13 +2,14 @@ module KMEditor.Create.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api exposing (getResultCmd)
-import Common.Api.KnowledgeModels as KnowledgeModelsApi
+import Common.Api.Branches as BranchesApi
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
 import Form exposing (Form)
-import KMEditor.Common.Models exposing (KnowledgeModel)
+import KMEditor.Common.Branch exposing (Branch)
+import KMEditor.Common.BranchCreateForm as BranchCreateForm
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
@@ -28,17 +29,21 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetPackagesCompleted result ->
-            getPackageCompleted model result
+            handleGetPackageCompleted model result
 
         FormMsg formMsg ->
-            handleForm formMsg wrapMsg appState model
+            handleFormMsg wrapMsg formMsg appState model
 
-        PostKnowledgeModelCompleted result ->
-            postKmCompleted appState model result
+        PostBranchCompleted result ->
+            handlePostBranchCompleted appState model result
 
 
-getPackageCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
-getPackageCompleted model result =
+
+-- Handlers
+
+
+handleGetPackageCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
+handleGetPackageCompleted model result =
     let
         newModel =
             case result of
@@ -54,44 +59,30 @@ getPackageCompleted model result =
     ( newModel, cmd )
 
 
-setSelectedPackage : Model -> List Package -> Model
-setSelectedPackage model packages =
-    case model.selectedPackage of
-        Just id ->
-            if List.any (.id >> (==) id) packages then
-                { model | form = initKnowledgeModelCreateForm model.selectedPackage }
-
-            else
-                model
-
-        _ ->
-            model
-
-
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
-handleForm formMsg wrapMsg appState model =
+handleFormMsg : (Msg -> Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleFormMsg wrapMsg formMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just kmCreateForm ) ->
             let
                 body =
-                    encodeKnowledgeCreateModelForm kmCreateForm
+                    BranchCreateForm.encode kmCreateForm
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        KnowledgeModelsApi.postKnowledgeModel body appState PostKnowledgeModelCompleted
+                        BranchesApi.postBranch body appState PostBranchCompleted
             in
-            ( { model | savingKnowledgeModel = Loading }, cmd )
+            ( { model | savingBranch = Loading }, cmd )
 
         _ ->
             let
                 newModel =
-                    { model | form = Form.update knowledgeModelCreateFormValidation formMsg model.form }
+                    { model | form = Form.update BranchCreateForm.validation formMsg model.form }
             in
             ( newModel, Cmd.none )
 
 
-postKmCompleted : AppState -> Model -> Result ApiError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
-postKmCompleted appState model result =
+handlePostBranchCompleted : AppState -> Model -> Result ApiError Branch -> ( Model, Cmd Msgs.Msg )
+handlePostBranchCompleted appState model result =
     case result of
         Ok km ->
             ( model
@@ -101,7 +92,7 @@ postKmCompleted appState model result =
         Err error ->
             ( { model
                 | form = setFormErrors error model.form
-                , savingKnowledgeModel = getServerError error "Knowledge model could not be created."
+                , savingBranch = getServerError error "Knowledge model could not be created."
               }
             , getResultCmd result
             )

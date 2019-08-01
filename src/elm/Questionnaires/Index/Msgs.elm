@@ -1,7 +1,7 @@
 module Questionnaires.Index.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Index.ExportModal.Msgs as ExportModal
 
 
@@ -12,3 +12,5 @@ type Msg
     | DeleteQuestionnaireCompleted (Result ApiError ())
     | ShowExportQuestionnaire Questionnaire
     | ExportModalMsg ExportModal.Msg
+    | DeleteQuestionnaireMigration String
+    | DeleteQuestionnaireMigrationCompleted (Result ApiError ())

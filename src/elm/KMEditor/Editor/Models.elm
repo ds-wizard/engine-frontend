@@ -9,7 +9,7 @@ module KMEditor.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import KMEditor.Common.Models exposing (KnowledgeModelDetail)
+import KMEditor.Common.BranchDetail exposing (BranchDetail)
 import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
 import KMEditor.Common.Models.Events exposing (Event)
 import KMEditor.Editor.KMEditor.Models as KMEditorModel
@@ -26,7 +26,7 @@ type EditorType
 
 type alias Model =
     { kmUuid : String
-    , km : ActionResult KnowledgeModelDetail
+    , km : ActionResult BranchDetail
     , metrics : ActionResult (List Metric)
     , levels : ActionResult (List Level)
     , preview : ActionResult KnowledgeModel

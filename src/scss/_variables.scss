@@ -57,3 +57,7 @@ $color-value-30: mix($yellow, $red, 60%) !default;
 $color-value-20: mix($yellow, $red, 40%) !default;
 $color-value-10: mix($yellow, $red, 20%) !default;
 $color-value-0: $red !default;
+
+
+// form engine
+$highlighted-bg-level: -11;

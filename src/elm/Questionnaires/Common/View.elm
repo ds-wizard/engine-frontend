@@ -4,7 +4,7 @@ import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
-import Questionnaires.Common.Models.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
+import Questionnaires.Common.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 
 
 accessibilityBadge : AppState -> QuestionnaireAccessibility -> Html msg

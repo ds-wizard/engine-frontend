@@ -1,5 +1,6 @@
 module Common.Config exposing
     ( Config
+    , CustomMenuLink
     , Registry(..)
     , Widget(..)
     , decoder
@@ -41,6 +42,15 @@ type alias ClientConfig =
     , welcomeWarning : Maybe String
     , dashboard : Dict String (List Widget)
     , privacyUrl : String
+    , customMenuLinks : List CustomMenuLink
+    }
+
+
+type alias CustomMenuLink =
+    { icon : String
+    , title : String
+    , url : String
+    , newWindow : Bool
     }
 
 
@@ -58,6 +68,7 @@ defaultConfig =
         , welcomeWarning = Nothing
         , dashboard = Dict.empty
         , privacyUrl = defaultPrivacyUrl
+        , customMenuLinks = []
         }
     , feedbackEnabled = True
     , registrationEnabled = True
@@ -107,6 +118,16 @@ clientConfigDecoder =
         |> D.optional "welcomeWarning" (D.maybe D.string) Nothing
         |> D.optional "dashboard" widgetDictDecoder Dict.empty
         |> D.optional "privacyUrl" D.string defaultPrivacyUrl
+        |> D.optional "customMenuLinks" (D.list customMenuLinkDecoder) []
+
+
+customMenuLinkDecoder : Decoder CustomMenuLink
+customMenuLinkDecoder =
+    D.succeed CustomMenuLink
+        |> D.required "icon" D.string
+        |> D.required "title" D.string
+        |> D.required "url" D.string
+        |> D.required "newWindow" D.bool
 
 
 widgetDictDecoder : Decoder (Dict String (List Widget))

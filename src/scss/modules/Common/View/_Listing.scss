@@ -40,14 +40,27 @@
             display: none;
         }
 
-        .title {
-            font-weight: bold;
+        .title-row {
             margin-bottom: 0.25rem;
+            display: flex;
+            justify-content: space-between;
 
-            & > span {
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
+            .title {
+                font-weight: bold;
+                min-width: 0;
+
+                & > span {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                }
+            }
+
+            .updated {
+                font-style: italic;
+                color: $gray-500;
+                white-space: nowrap;
+                padding-left: 0.5rem;
             }
 
             a {

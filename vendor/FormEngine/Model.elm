@@ -5,6 +5,7 @@ module FormEngine.Model exposing
     , FormItem(..)
     , FormItemDescriptor
     , FormTree
+    , FormValue
     , FormValues
     , IntegrationReplyValue(..)
     , ItemElement
@@ -40,29 +41,21 @@ import List.Extra as List
 import String exposing (fromInt)
 
 
-
-{- Types definitions -}
-
-
-type alias FormItemDescriptor a =
+type alias FormItemDescriptor question =
     { name : String
-    , label : String
-    , text : Maybe String
-    , extraData : Maybe a
+    , question : question
     }
 
 
-type alias OptionDescriptor =
+type alias OptionDescriptor option =
     { name : String
-    , label : String
-    , text : Maybe String
-    , badges : Maybe (List ( String, String ))
+    , option : option
     }
 
 
-type Option a
-    = SimpleOption OptionDescriptor
-    | DetailedOption OptionDescriptor (List (FormItem a))
+type Option question option
+    = SimpleOption (OptionDescriptor option)
+    | DetailedOption (OptionDescriptor option) (List (FormItem question option))
 
 
 type alias TypeHintConfig =
@@ -71,17 +64,17 @@ type alias TypeHintConfig =
     }
 
 
-type FormItem a
-    = StringFormItem (FormItemDescriptor a)
-    | NumberFormItem (FormItemDescriptor a)
-    | TextFormItem (FormItemDescriptor a)
-    | TypeHintFormItem (FormItemDescriptor a) TypeHintConfig
-    | ChoiceFormItem (FormItemDescriptor a) (List (Option a))
-    | GroupFormItem (FormItemDescriptor a) (List (FormItem a))
+type FormItem question option
+    = StringFormItem (FormItemDescriptor question)
+    | NumberFormItem (FormItemDescriptor question)
+    | TextFormItem (FormItemDescriptor question)
+    | TypeHintFormItem (FormItemDescriptor question) TypeHintConfig
+    | ChoiceFormItem (FormItemDescriptor question) (List (Option question option))
+    | GroupFormItem (FormItemDescriptor question) (List (FormItem question option))
 
 
-type alias FormTree a =
-    { items : List (FormItem a)
+type alias FormTree question option =
+    { items : List (FormItem question option)
     }
 
 
@@ -91,22 +84,22 @@ type alias FormElementState =
     }
 
 
-type OptionElement a
-    = SimpleOptionElement OptionDescriptor
-    | DetailedOptionElement OptionDescriptor (List (FormElement a))
+type OptionElement question option
+    = SimpleOptionElement (OptionDescriptor option)
+    | DetailedOptionElement (OptionDescriptor option) (List (FormElement question option))
 
 
-type alias ItemElement a =
-    List (FormElement a)
+type alias ItemElement question option =
+    List (FormElement question option)
 
 
-type FormElement a
-    = StringFormElement (FormItemDescriptor a) FormElementState
-    | NumberFormElement (FormItemDescriptor a) FormElementState
-    | TextFormElement (FormItemDescriptor a) FormElementState
-    | TypeHintFormElement (FormItemDescriptor a) TypeHintConfig FormElementState
-    | ChoiceFormElement (FormItemDescriptor a) (List (OptionElement a)) FormElementState
-    | GroupFormElement (FormItemDescriptor a) (List (FormItem a)) (List (ItemElement a)) FormElementState
+type FormElement question option
+    = StringFormElement (FormItemDescriptor question) FormElementState
+    | NumberFormElement (FormItemDescriptor question) FormElementState
+    | TextFormElement (FormItemDescriptor question) FormElementState
+    | TypeHintFormElement (FormItemDescriptor question) TypeHintConfig FormElementState
+    | ChoiceFormElement (FormItemDescriptor question) (List (OptionElement question option)) FormElementState
+    | GroupFormElement (FormItemDescriptor question) (List (FormItem question option)) (List (ItemElement question option)) FormElementState
 
 
 type alias TypeHint =
@@ -121,8 +114,8 @@ type alias TypeHints =
     }
 
 
-type alias Form a =
-    { elements : List (FormElement a)
+type alias Form question option =
+    { elements : List (FormElement question option)
     , typeHints : Maybe TypeHints
     , debounce : Debounce ( String, String )
     }
@@ -306,7 +299,7 @@ encodeReplyValue replyValue =
 {- Type helpers -}
 
 
-getOptionDescriptor : OptionElement a -> OptionDescriptor
+getOptionDescriptor : OptionElement question option -> OptionDescriptor option
 getOptionDescriptor option =
     case option of
         SimpleOptionElement descriptor ->
@@ -316,7 +309,7 @@ getOptionDescriptor option =
             descriptor
 
 
-getDescriptor : FormElement a -> FormItemDescriptor a
+getDescriptor : FormElement question option -> FormItemDescriptor question
 getDescriptor element =
     case element of
         StringFormElement descriptor _ ->
@@ -386,7 +379,7 @@ isEmptyReply replyValue =
             False
 
 
-setTypeHintsResult : ActionResult (List TypeHint) -> Form a -> Form a
+setTypeHintsResult : ActionResult (List TypeHint) -> Form question option -> Form question option
 setTypeHintsResult typeHintsResult form =
     let
         set result typeHints =
@@ -399,7 +392,7 @@ setTypeHintsResult typeHintsResult form =
 {- Form creation -}
 
 
-createForm : FormTree a -> FormValues -> List String -> Form a
+createForm : FormTree question option -> FormValues -> List String -> Form question option
 createForm formTree formValues defaultPath =
     { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues defaultPath)
     , typeHints = Nothing
@@ -407,7 +400,7 @@ createForm formTree formValues defaultPath =
     }
 
 
-createFormElement : FormItem a -> FormElement a
+createFormElement : FormItem question option -> FormElement question option
 createFormElement item =
     case item of
         StringFormItem descriptor ->
@@ -423,7 +416,7 @@ createFormElement item =
             ChoiceFormElement descriptor (List.map createOptionElement options) emptyFormElementState
 
         GroupFormItem descriptor items ->
-            GroupFormElement descriptor items [ createItemElement items ] emptyFormElementState
+            GroupFormElement descriptor items [] emptyFormElementState
 
         TypeHintFormItem descriptor typeHintConfig ->
             TypeHintFormElement descriptor typeHintConfig emptyFormElementState
@@ -434,7 +427,7 @@ emptyFormElementState =
     { value = Nothing, valid = True }
 
 
-createOptionElement : Option a -> OptionElement a
+createOptionElement : Option question option -> OptionElement question option
 createOptionElement option =
     case option of
         SimpleOption descriptor ->
@@ -444,12 +437,12 @@ createOptionElement option =
             DetailedOptionElement descriptor (List.map createFormElement items)
 
 
-createItemElement : List (FormItem a) -> ItemElement a
+createItemElement : List (FormItem question option) -> ItemElement question option
 createItemElement formItems =
     List.map createFormElement formItems
 
 
-setInitialValue : FormValues -> List String -> FormElement a -> FormElement a
+setInitialValue : FormValues -> List String -> FormElement question option -> FormElement question option
 setInitialValue formValues path element =
     case element of
         StringFormElement descriptor state ->
@@ -498,7 +491,7 @@ getInitialValue formValues path current =
         |> Maybe.map .value
 
 
-setInitialValuesOption : FormValues -> List String -> OptionElement a -> OptionElement a
+setInitialValuesOption : FormValues -> List String -> OptionElement question option -> OptionElement question option
 setInitialValuesOption formValues path option =
     case option of
         DetailedOptionElement descriptor items ->
@@ -508,7 +501,7 @@ setInitialValuesOption formValues path option =
             option
 
 
-setInitialValuesItems : FormValues -> List String -> Int -> ItemElement a -> ItemElement a
+setInitialValuesItems : FormValues -> List String -> Int -> ItemElement question option -> ItemElement question option
 setInitialValuesItems formValues path index itemElement =
     List.map (setInitialValue formValues (path ++ [ fromInt index ])) itemElement
 
@@ -517,12 +510,12 @@ setInitialValuesItems formValues path index itemElement =
 {- getting form values -}
 
 
-getFormValues : List String -> Form a -> FormValues
+getFormValues : List String -> Form question option -> FormValues
 getFormValues defaultPath form =
     List.foldl (getFieldValue defaultPath) [] form.elements
 
 
-getFieldValue : List String -> FormElement a -> FormValues -> FormValues
+getFieldValue : List String -> FormElement question option -> FormValues -> FormValues
 getFieldValue path element values =
     case element of
         StringFormElement descriptor state ->
@@ -552,7 +545,7 @@ getFieldValue path element values =
             applyFieldValue values (pathToKey path descriptor.name) state.value
 
 
-getOptionValues : List String -> OptionElement a -> FormValues -> FormValues
+getOptionValues : List String -> OptionElement question option -> FormValues -> FormValues
 getOptionValues path option values =
     case option of
         DetailedOptionElement descriptor items ->
@@ -562,7 +555,7 @@ getOptionValues path option values =
             values
 
 
-getItemValues : List String -> Int -> ItemElement a -> FormValues -> FormValues
+getItemValues : List String -> Int -> ItemElement question option -> FormValues -> FormValues
 getItemValues path index item values =
     List.foldl (getFieldValue (path ++ [ fromInt index ])) values item
 

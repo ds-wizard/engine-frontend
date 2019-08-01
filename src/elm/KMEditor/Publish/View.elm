@@ -14,8 +14,10 @@ import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models exposing (KnowledgeModelDetail, kmLastVersion)
-import KMEditor.Publish.Models exposing (Model, PublishForm)
+import KMEditor.Common.BranchDetail as BranchDetail exposing (BranchDetail)
+import KMEditor.Common.BranchPublishForm exposing (BranchPublishForm)
+import KMEditor.Common.BranchUtils as BranchUtils
+import KMEditor.Publish.Models exposing (Model)
 import KMEditor.Publish.Msgs exposing (Msg(..))
 import KMEditor.Routing exposing (Route(..))
 import KnowledgeModels.Common.Version as Version exposing (Version)
@@ -25,34 +27,36 @@ import Utils exposing (flip)
 
 view : Model -> Html Msg
 view model =
-    Page.actionResultView (contentView model) model.knowledgeModel
+    Page.actionResultView (contentView model) model.branch
 
 
-contentView : Model -> KnowledgeModelDetail -> Html Msg
-contentView model knowledgeModel =
+contentView : Model -> BranchDetail -> Html Msg
+contentView model branch =
     div [ wideDetailClass "KMEditor__Publish" ]
         [ Page.header "Publish new version" []
         , div []
-            [ FormResult.view model.publishingKnowledgeModel
-            , formView model.form knowledgeModel
+            [ FormResult.view model.publishingBranch
+            , formView model.form branch
             , FormActions.view
                 (KMEditor IndexRoute)
-                (ActionButton.ButtonConfig "Publish" model.publishingKnowledgeModel (FormMsg Form.Submit) False)
+                (ActionButton.ButtonConfig "Publish" model.publishingBranch (FormMsg Form.Submit) False)
             ]
         ]
 
 
-formView : Form CustomFormError PublishForm -> KnowledgeModelDetail -> Html Msg
-formView form knowledgeModel =
+formView : Form CustomFormError BranchPublishForm -> BranchDetail -> Html Msg
+formView form branch =
     let
         mbVersion =
-            kmLastVersion knowledgeModel
+            BranchUtils.lastVersion branch
     in
     div []
-        [ Html.map FormMsg <| FormGroup.textView knowledgeModel.name "Knowledge Model"
-        , Html.map FormMsg <| FormGroup.codeView knowledgeModel.kmId "Knowledge Model ID"
+        [ Html.map FormMsg <| FormGroup.textView branch.name "Knowledge Model"
+        , Html.map FormMsg <| FormGroup.codeView branch.kmId "Knowledge Model ID"
         , lastVersion mbVersion
         , versionInputGroup form mbVersion
+        , Html.map FormMsg <| FormGroup.input form "license" "License"
+        , FormExtra.blockAfter [ text "Choose a ", a [ href "https://spdx.org/licenses/", target "_blank" ] [ text "license" ], text " so others can use your Knowledge Model." ]
         , Html.map FormMsg <| FormGroup.input form "description" "Description"
         , FormExtra.textAfter "Short description of the Knowledge Model."
         , Html.map FormMsg <| FormGroup.markdownEditor form "readme" "Readme"
@@ -68,7 +72,7 @@ lastVersion mbVersion =
         |> flip FormGroup.textView "Last version"
 
 
-versionInputGroup : Form CustomFormError PublishForm -> Maybe Version -> Html Msg
+versionInputGroup : Form CustomFormError BranchPublishForm -> Maybe Version -> Html Msg
 versionInputGroup form mbVersion =
     let
         majorField =

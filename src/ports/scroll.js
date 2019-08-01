@@ -1,11 +1,38 @@
 module.exports = function (app) {
-    app.ports.scrollToTop.subscribe(scrollToTop);
+    app.ports.scrollIntoView.subscribe(scrollIntoView)
+    app.ports.scrollToTop.subscribe(scrollToTop)
 
 
-    function scrollToTop(elementId) {
-        var element = document.getElementById(elementId);
-        if (element) {
-            element.scrollTop = 0;
-        }
+    function scrollIntoView(elementSelector) {
+        waitForElement(elementSelector, function ($element) {
+            $element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            })
+        })
     }
-};
+
+    function scrollToTop(elementSelector) {
+        waitForElement(elementSelector, function ($element) {
+            $element.scrollTop = 0
+        })
+    }
+
+    function waitForElement(elementSelector, callback, timeout) {
+        timeout = timeout || 5000
+        var step = 100
+        var currentTime = 0
+        var interval = setInterval(function () {
+            var $element = document.querySelector(elementSelector)
+            if ($element instanceof HTMLElement) {
+                clearInterval(interval)
+                callback($element)
+            }
+
+            currentTime += step
+            if (currentTime >= timeout) {
+                clearInterval(interval)
+            }
+        }, step)
+    }
+}

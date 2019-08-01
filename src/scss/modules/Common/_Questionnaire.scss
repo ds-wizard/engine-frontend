@@ -2,12 +2,27 @@
 
 .Questionnaire {
     height: 100%;
+    display: flex;
 
     .col {
         height: 100%;
         overflow: auto;
         padding-top: 20px;
         padding-bottom: 20px;
+    }
+
+    .chapter-list {
+        flex: 0 0 20rem;
+        height: 100%;
+        overflow: auto;
+        padding: 1rem;
+    }
+
+    .questionnaire-body {
+        flex-grow: 1;
+        height: 100%;
+        overflow: auto;
+        padding: 1rem;
     }
 
     h3 {
@@ -22,6 +37,10 @@
 
     .nav {
         margin-bottom: 35px;
+
+        strong {
+            margin-bottom: 0.5rem;
+        }
 
         a {
             word-wrap: break-word;
@@ -124,6 +143,28 @@
 
             .progress {
                 height: 10px;
+            }
+        }
+    }
+
+    .todos {
+        .list-group {
+            a {
+                color: $body-color;
+
+                &:hover {
+                    text-decoration: none;
+                    color: $primary;
+                }
+
+                p {
+                    margin-bottom: 0;
+
+                    &.nested {
+                        border-left: 5px $gray-300 solid;
+                        padding-left: 10px;
+                    }
+                }
             }
         }
     }

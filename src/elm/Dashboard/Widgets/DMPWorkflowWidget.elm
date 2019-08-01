@@ -5,7 +5,7 @@ import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Html exposing (Html, a, div, img, p, text)
 import Html.Attributes exposing (class, href, src)
-import Questionnaires.Common.Models exposing (Questionnaire)
+import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Routing exposing (Route(..))
 import Routing exposing (Route(..))
 
