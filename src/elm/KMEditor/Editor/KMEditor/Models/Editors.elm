@@ -36,7 +36,7 @@ module KMEditor.Editor.KMEditor.Models.Editors exposing
     , deleteQuestionEditor
     , deleteReferenceEditor
     , editorNotDeleted
-    , getEditorPath
+    , getEditorParentUuid
     , getEditorTitle
     , getEditorUuid
     , getNewState
@@ -65,11 +65,18 @@ module KMEditor.Editor.KMEditor.Models.Editors exposing
 import Common.Form exposing (CustomFormError)
 import Dict exposing (Dict)
 import Form exposing (Form)
-import KMEditor.Common.Models.Entities exposing (..)
-import KMEditor.Common.Models.Path exposing (Path, PathNode(..))
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
+import KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
+import KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference)
+import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (..)
+import Utils exposing (nilUuid)
 import ValueList exposing (ValueList)
 
 
@@ -98,7 +105,7 @@ type alias EditorLike editorData e form =
         , editorState : EditorState
         , uuid : String
         , treeOpen : Bool
-        , path : Path
+        , parentUuid : String
     }
 
 
@@ -111,7 +118,7 @@ type alias KMEditorData =
     , integrations : Children
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     }
 
 
@@ -121,7 +128,7 @@ type alias TagEditorData =
     , form : Form CustomFormError TagForm
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     }
 
 
@@ -131,7 +138,7 @@ type alias IntegrationEditorData =
     , form : Form CustomFormError IntegrationForm
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     , props : ValueList
     , deleteConfirmOpen : Bool
     }
@@ -144,7 +151,7 @@ type alias ChapterEditorData =
     , questions : Children
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     }
 
 
@@ -159,7 +166,7 @@ type alias QuestionEditorData =
     , experts : Children
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     }
 
 
@@ -170,7 +177,7 @@ type alias AnswerEditorData =
     , followUps : Children
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     }
 
 
@@ -180,7 +187,7 @@ type alias ReferenceEditorData =
     , form : Form CustomFormError ReferenceForm
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     }
 
 
@@ -190,7 +197,7 @@ type alias ExpertEditorData =
     , form : Form CustomFormError ExpertForm
     , treeOpen : Bool
     , editorState : EditorState
-    , path : Path
+    , parentUuid : String
     }
 
 
@@ -201,59 +208,65 @@ type alias ExpertEditorData =
 createKnowledgeModelEditor : EditorContext -> (String -> EditorState) -> KnowledgeModel -> Dict String Editor -> Dict String Editor
 createKnowledgeModelEditor editorContext getEditorState km editors =
     let
+        chapters =
+            KnowledgeModel.getChapters km
+
+        tags =
+            KnowledgeModel.getTags km
+
+        integrations =
+            KnowledgeModel.getIntegrations km
+
         editor =
             KMEditor
                 { uuid = km.uuid
                 , knowledgeModel = km
                 , form = initKnowledgeModelFrom km
-                , chapters = Children.init <| List.map .uuid km.chapters
-                , tags = Children.init <| List.map .uuid km.tags
-                , integrations = Children.init <| List.map .uuid km.integrations
+                , chapters = Children.init <| List.map .uuid chapters
+                , tags = Children.init <| List.map .uuid tags
+                , integrations = Children.init <| List.map .uuid integrations
                 , treeOpen = True
                 , editorState = getEditorState km.uuid
-                , path = []
+                , parentUuid = nilUuid
                 }
 
-        currentPath =
-            [ KMPathNode km.uuid ]
-
         withChapters =
-            List.foldl (createChapterEditor editorContext currentPath getEditorState) editors km.chapters
+            List.foldl (createChapterEditor editorContext km.uuid getEditorState km) editors chapters
 
         withTags =
-            List.foldl (createTagEditor editorContext currentPath getEditorState) withChapters km.tags
+            List.foldl (createTagEditor editorContext km.uuid getEditorState km) withChapters tags
 
         withIntegrations =
-            List.foldl (createIntegrationEditor editorContext currentPath getEditorState) withTags km.integrations
+            List.foldl (createIntegrationEditor editorContext km.uuid getEditorState km) withTags integrations
     in
     Dict.insert km.uuid editor withIntegrations
 
 
-createChapterEditor : EditorContext -> Path -> (String -> EditorState) -> Chapter -> Dict String Editor -> Dict String Editor
-createChapterEditor editorContext path getEditorState chapter editors =
+createChapterEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Chapter -> Dict String Editor -> Dict String Editor
+createChapterEditor editorContext parentUuid getEditorState km chapter editors =
     let
+        questions =
+            KnowledgeModel.getChapterQuestions chapter.uuid km
+
         editor =
             ChapterEditor
                 { uuid = chapter.uuid
                 , chapter = chapter
                 , form = initChapterForm chapter
-                , questions = Children.init <| List.map getQuestionUuid chapter.questions
+                , questions = Children.init <| List.map Question.getUuid questions
                 , treeOpen = False
                 , editorState = getEditorState chapter.uuid
-                , path = path
+                , parentUuid = parentUuid
                 }
 
-        currentPath =
-            path ++ [ ChapterPathNode chapter.uuid ]
-
         withQuestions =
-            List.foldl (createQuestionEditor editorContext currentPath getEditorState) editors chapter.questions
+            List.foldl (createQuestionEditor editorContext chapter.uuid getEditorState km) editors questions
     in
     Dict.insert chapter.uuid editor withQuestions
 
 
-createTagEditor : EditorContext -> Path -> (String -> EditorState) -> Tag -> Dict String Editor -> Dict String Editor
-createTagEditor editorContext path getEditorState tag editors =
+createTagEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Tag -> Dict String Editor -> Dict String Editor
+createTagEditor editorContext parentUuid getEditorState km tag editors =
     let
         editor =
             TagEditor
@@ -262,14 +275,14 @@ createTagEditor editorContext path getEditorState tag editors =
                 , form = initTagForm tag
                 , treeOpen = False
                 , editorState = getEditorState tag.uuid
-                , path = path
+                , parentUuid = parentUuid
                 }
     in
     Dict.insert tag.uuid editor editors
 
 
-createIntegrationEditor : EditorContext -> Path -> (String -> EditorState) -> Integration -> Dict String Editor -> Dict String Editor
-createIntegrationEditor editorContext path getEditorState integration editors =
+createIntegrationEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Integration -> Dict String Editor -> Dict String Editor
+createIntegrationEditor editorContext parentUuid getEditorState km integration editors =
     let
         editor =
             IntegrationEditor
@@ -278,7 +291,7 @@ createIntegrationEditor editorContext path getEditorState integration editors =
                 , form = initIntegrationForm [] "" integration
                 , treeOpen = False
                 , editorState = getEditorState integration.uuid
-                , path = path
+                , parentUuid = parentUuid
                 , props = ValueList.init integration.props
                 , deleteConfirmOpen = False
                 }
@@ -286,85 +299,82 @@ createIntegrationEditor editorContext path getEditorState integration editors =
     Dict.insert integration.uuid editor editors
 
 
-createQuestionEditor : EditorContext -> Path -> (String -> EditorState) -> Question -> Dict String Editor -> Dict String Editor
-createQuestionEditor editorContext path getEditorState question editors =
+createQuestionEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Question -> Dict String Editor -> Dict String Editor
+createQuestionEditor editorContext parentUuid getEditorState km question editors =
     let
         questionUuid =
-            getQuestionUuid question
+            Question.getUuid question
 
         answers =
-            getQuestionAnswers question
-                |> List.map .uuid
+            KnowledgeModel.getQuestionAnswers questionUuid km
 
         itemTemplateQuestions =
-            getQuestionItemQuestions question
-                |> List.map getQuestionUuid
+            KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
+
+        references =
+            KnowledgeModel.getQuestionReferences questionUuid km
+
+        experts =
+            KnowledgeModel.getQuestionExperts questionUuid km
 
         editor =
             QuestionEditor
                 { uuid = questionUuid
                 , question = question
                 , form = initQuestionForm question
-                , tagUuids = getQuestionTagUuids question
-                , answers = Children.init answers
-                , itemTemplateQuestions = Children.init itemTemplateQuestions
-                , references = Children.init <| List.map getReferenceUuid <| getQuestionReferences question
-                , experts = Children.init <| List.map .uuid <| getQuestionExperts question
+                , tagUuids = Question.getTagUuids question
+                , answers = Children.init <| List.map .uuid answers
+                , itemTemplateQuestions = Children.init <| List.map Question.getUuid itemTemplateQuestions
+                , references = Children.init <| List.map Reference.getUuid references
+                , experts = Children.init <| List.map .uuid experts
                 , treeOpen = False
                 , editorState = getEditorState questionUuid
-                , path = path
+                , parentUuid = parentUuid
                 }
 
-        currentPath =
-            path ++ [ QuestionPathNode questionUuid ]
-
         withAnswers =
-            List.foldl (createAnswerEditor editorContext currentPath getEditorState) editors <| getQuestionAnswers question
+            List.foldl (createAnswerEditor editorContext questionUuid getEditorState km) editors answers
 
         withAnswerItemTemplateQuestions =
-            List.foldl (createQuestionEditor editorContext currentPath getEditorState) withAnswers <| getQuestionItemQuestions question
+            List.foldl (createQuestionEditor editorContext questionUuid getEditorState km) withAnswers itemTemplateQuestions
 
         withReferences =
-            List.foldl (createReferenceEditor editorContext currentPath getEditorState) withAnswerItemTemplateQuestions <| getQuestionReferences question
+            List.foldl (createReferenceEditor editorContext questionUuid getEditorState km) withAnswerItemTemplateQuestions references
 
         withExperts =
-            List.foldl (createExpertEditor editorContext currentPath getEditorState) withReferences <| getQuestionExperts question
+            List.foldl (createExpertEditor editorContext questionUuid getEditorState km) withReferences experts
     in
     Dict.insert questionUuid editor withExperts
 
 
-createAnswerEditor : EditorContext -> Path -> (String -> EditorState) -> Answer -> Dict String Editor -> Dict String Editor
-createAnswerEditor editorContext path getEditorState answer editors =
+createAnswerEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Answer -> Dict String Editor -> Dict String Editor
+createAnswerEditor editorContext parentUuid getEditorState km answer editors =
     let
         followUps =
-            getFollowUpQuestions answer
-                |> List.map getQuestionUuid
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
 
         editor =
             AnswerEditor
                 { uuid = answer.uuid
                 , answer = answer
                 , form = initAnswerForm editorContext answer
-                , followUps = Children.init followUps
+                , followUps = Children.init <| List.map Question.getUuid followUps
                 , treeOpen = False
                 , editorState = getEditorState answer.uuid
-                , path = path
+                , parentUuid = parentUuid
                 }
 
-        currentPath =
-            path ++ [ AnswerPathNode answer.uuid ]
-
         withFollowUps =
-            List.foldl (createQuestionEditor editorContext currentPath getEditorState) editors <| getFollowUpQuestions answer
+            List.foldl (createQuestionEditor editorContext answer.uuid getEditorState km) editors followUps
     in
     Dict.insert answer.uuid editor withFollowUps
 
 
-createReferenceEditor : EditorContext -> Path -> (String -> EditorState) -> Reference -> Dict String Editor -> Dict String Editor
-createReferenceEditor editorContext path getEditorState reference editors =
+createReferenceEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Reference -> Dict String Editor -> Dict String Editor
+createReferenceEditor editorContext parentUuid getEditorState km reference editors =
     let
         referenceUuid =
-            getReferenceUuid reference
+            Reference.getUuid reference
 
         editor =
             ReferenceEditor
@@ -373,14 +383,14 @@ createReferenceEditor editorContext path getEditorState reference editors =
                 , form = initReferenceForm reference
                 , treeOpen = False
                 , editorState = getEditorState referenceUuid
-                , path = path
+                , parentUuid = parentUuid
                 }
     in
     Dict.insert referenceUuid editor editors
 
 
-createExpertEditor : EditorContext -> Path -> (String -> EditorState) -> Expert -> Dict String Editor -> Dict String Editor
-createExpertEditor editorContext path getEditorState expert editors =
+createExpertEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Expert -> Dict String Editor -> Dict String Editor
+createExpertEditor editorContext parentUuid getEditorState km expert editors =
     let
         editor =
             ExpertEditor
@@ -389,7 +399,7 @@ createExpertEditor editorContext path getEditorState expert editors =
                 , form = initExpertForm expert
                 , treeOpen = False
                 , editorState = getEditorState expert.uuid
-                , path = path
+                , parentUuid = parentUuid
                 }
     in
     Dict.insert expert.uuid editor editors
@@ -506,13 +516,13 @@ getEditorTitle editor =
             data.integration.name
 
         QuestionEditor data ->
-            getQuestionTitle data.question
+            Question.getTitle data.question
 
         AnswerEditor data ->
             data.answer.label
 
         ReferenceEditor data ->
-            getReferenceVisibleName data.reference
+            Reference.getVisibleName data.reference
 
         ExpertEditor data ->
             data.expert.name
@@ -534,44 +544,44 @@ getEditorUuid editor =
             data.integration.uuid
 
         QuestionEditor data ->
-            getQuestionUuid data.question
+            Question.getUuid data.question
 
         AnswerEditor data ->
             data.answer.uuid
 
         ReferenceEditor data ->
-            getReferenceUuid data.reference
+            Reference.getUuid data.reference
 
         ExpertEditor data ->
             data.expert.uuid
 
 
-getEditorPath : Editor -> Path
-getEditorPath editor =
+getEditorParentUuid : Editor -> String
+getEditorParentUuid editor =
     case editor of
         KMEditor data ->
-            data.path
+            data.parentUuid
 
         ChapterEditor data ->
-            data.path
+            data.parentUuid
 
         TagEditor data ->
-            data.path
+            data.parentUuid
 
         IntegrationEditor data ->
-            data.path
+            data.parentUuid
 
         QuestionEditor data ->
-            data.path
+            data.parentUuid
 
         AnswerEditor data ->
-            data.path
+            data.parentUuid
 
         ReferenceEditor data ->
-            data.path
+            data.parentUuid
 
         ExpertEditor data ->
-            data.path
+            data.parentUuid
 
 
 getNewState : EditorState -> EditorState -> EditorState
@@ -710,7 +720,7 @@ isQuestionEditorDirty : QuestionEditorData -> Bool
 isQuestionEditorDirty editorData =
     (editorData.editorState == Added)
         || formChanged editorData.form
-        || (getQuestionTagUuids editorData.question /= editorData.tagUuids)
+        || (Question.getTagUuids editorData.question /= editorData.tagUuids)
         || editorData.answers.dirty
         || editorData.itemTemplateQuestions.dirty
         || editorData.references.dirty
@@ -803,14 +813,14 @@ updateQuestionEditorData editorContext newState form editorData =
             updateQuestionWithForm editorData.question form
 
         newAnswers =
-            if isQuestionOptions newQuestion then
+            if Question.isOptions newQuestion then
                 Children.cleanDirty editorData.answers
 
             else
                 Children.init []
 
         newAnswerItemTemplateQuestions =
-            if isQuestionList newQuestion then
+            if Question.isList newQuestion then
                 Children.cleanDirty editorData.itemTemplateQuestions
 
             else
@@ -830,10 +840,10 @@ updateQuestionEditorData editorContext newState form editorData =
 updateEditorsWithQuestion : QuestionEditorData -> QuestionEditorData -> Dict String Editor -> Dict String Editor
 updateEditorsWithQuestion newEditorData oldEditorData editors =
     case newEditorData.question of
-        OptionsQuestion _ ->
+        OptionsQuestion _ _ ->
             deleteEditors oldEditorData.itemTemplateQuestions editors
 
-        ListQuestion _ ->
+        ListQuestion _ _ ->
             deleteEditors oldEditorData.answers editors
 
         _ ->
@@ -916,7 +926,7 @@ addChapterQuestion : Question -> ChapterEditorData -> Editor
 addChapterQuestion question editorData =
     ChapterEditor
         { editorData
-            | questions = Children.addChild (getQuestionUuid question) editorData.questions
+            | questions = Children.addChild (Question.getUuid question) editorData.questions
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }
@@ -936,7 +946,7 @@ addQuestionAnswerItemTemplateQuestion : Question -> QuestionEditorData -> Editor
 addQuestionAnswerItemTemplateQuestion question editorData =
     QuestionEditor
         { editorData
-            | itemTemplateQuestions = Children.addChild (getQuestionUuid question) editorData.itemTemplateQuestions
+            | itemTemplateQuestions = Children.addChild (Question.getUuid question) editorData.itemTemplateQuestions
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }
@@ -946,7 +956,7 @@ addQuestionReference : Reference -> QuestionEditorData -> Editor
 addQuestionReference reference editorData =
     QuestionEditor
         { editorData
-            | references = Children.addChild (getReferenceUuid reference) editorData.references
+            | references = Children.addChild (Reference.getUuid reference) editorData.references
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }
@@ -966,7 +976,7 @@ addAnswerFollowUp : Question -> AnswerEditorData -> Editor
 addAnswerFollowUp followUp editorData =
     AnswerEditor
         { editorData
-            | followUps = Children.addChild (getQuestionUuid followUp) editorData.followUps
+            | followUps = Children.addChild (Question.getUuid followUp) editorData.followUps
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }

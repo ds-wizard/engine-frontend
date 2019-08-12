@@ -8,8 +8,7 @@ module KMEditor.Editor.KMEditor.Update.Answer exposing
     )
 
 import Form
-import KMEditor.Common.Models.Entities exposing (newQuestion)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Question as Question
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, Editor(..), QuestionEditorData, addAnswerFollowUp, createQuestionEditor, isAnswerEditorDirty, updateAnswerEditorData)
@@ -69,8 +68,7 @@ updateIfQuestion update editor =
 addFollowUp : Cmd Msgs.Msg -> Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addFollowUp =
     addEntity
-        { newEntity = newQuestion
+        { newEntity = Question.new
         , createEntityEditor = createQuestionEditor
-        , createPathNode = AnswerPathNode
         , addEntity = addAnswerFollowUp
         }

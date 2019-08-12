@@ -13,16 +13,24 @@ import Common.Questionnaire.Msgs exposing (CustomFormMessage)
 import FormEngine.View exposing (FormRenderer)
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
-import KMEditor.Common.Models.Entities exposing (Answer, Expert, Level, Metric, Question, Reference(..), ResourcePageReferenceData, URLReferenceData, getQuestionExperts, getQuestionReferences, getQuestionRequiredLevel, getQuestionText, getQuestionTitle)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
+import KMEditor.Common.KnowledgeModel.Reference exposing (Reference(..))
+import KMEditor.Common.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
+import KMEditor.Common.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
 
 
-defaultQuestionnaireRenderer : List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
-defaultQuestionnaireRenderer levels metrics =
+defaultQuestionnaireRenderer : KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
+defaultQuestionnaireRenderer km levels metrics =
     { renderQuestionLabel = renderQuestionLabel
-    , renderQuestionDescription = renderQuestionDescription levels
+    , renderQuestionDescription = renderQuestionDescription levels km
     , renderOptionLabel = renderOptionLabel
     , renderOptionBadges = renderOptionBadges metrics
     , renderOptionAdvice = renderOptionAdvice
@@ -31,19 +39,19 @@ defaultQuestionnaireRenderer levels metrics =
 
 renderQuestionLabel : Question -> Html msg
 renderQuestionLabel question =
-    text <| getQuestionTitle question
+    text <| Question.getTitle question
 
 
-renderQuestionDescription : List Level -> Question -> Html msg
-renderQuestionDescription levels question =
+renderQuestionDescription : List Level -> KnowledgeModel -> Question -> Html msg
+renderQuestionDescription levels km question =
     let
         description =
-            getQuestionText question
+            Question.getText question
                 |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ Markdown.toHtml [] t ])
                 |> Maybe.withDefault (text "")
 
         extraData =
-            viewExtraData levels <| createQuestionExtraData question
+            viewExtraData levels <| createQuestionExtraData km question
     in
     div []
         [ description
@@ -106,8 +114,8 @@ type alias FormExtraData =
     }
 
 
-createQuestionExtraData : Question -> FormExtraData
-createQuestionExtraData question =
+createQuestionExtraData : KnowledgeModel -> Question -> FormExtraData
+createQuestionExtraData km question =
     let
         foldReferences reference extraData =
             case reference of
@@ -123,11 +131,12 @@ createQuestionExtraData question =
         newExtraData =
             { resourcePageReferences = []
             , urlReferences = []
-            , experts = getQuestionExperts question
-            , requiredLevel = getQuestionRequiredLevel question
+            , experts = KnowledgeModel.getQuestionExperts (Question.getUuid question) km
+            , requiredLevel = Question.getRequiredLevel question
             }
     in
-    List.foldl foldReferences newExtraData <| getQuestionReferences question
+    KnowledgeModel.getQuestionReferences (Question.getUuid question) km
+        |> List.foldl foldReferences newExtraData
 
 
 viewExtraData : List Level -> FormExtraData -> Html msg

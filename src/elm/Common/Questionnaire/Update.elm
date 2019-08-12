@@ -16,8 +16,9 @@ import Form exposing (Form)
 import FormEngine.Model exposing (TypeHint, setTypeHintsResult)
 import FormEngine.Msgs
 import FormEngine.Update exposing (updateForm)
-import KMEditor.Common.Models.Entities exposing (Chapter)
-import KMEditor.Common.Models.Events exposing (Event)
+import KMEditor.Common.Events.Event exposing (Event)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
 import Ports
 import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
 import Questionnaires.Common.QuestionnaireTodo as QuestionnaireTodo exposing (QuestionnaireTodo)
@@ -170,11 +171,14 @@ handlePostForSummaryReportCompleted model result =
     case result of
         Ok summaryReport ->
             let
+                chapters =
+                    KnowledgeModel.getChapters model.questionnaire.knowledgeModel
+
                 cmds =
                     List.map
                         (Ports.drawMetricsChart
                             << encodeChartConfig
-                            << createChartConfig model.metrics model.questionnaire.knowledgeModel.chapters
+                            << createChartConfig model.metrics chapters
                         )
                         summaryReport.chapterReports
             in

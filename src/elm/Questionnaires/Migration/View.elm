@@ -10,7 +10,8 @@ import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Level, getQuestionTitle)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Question as Question
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Common.Version as Version
 import Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
@@ -208,5 +209,5 @@ viewChange model migration change =
             [ h5 [] [ text eventLabel ]
             , resolvedLabel
             ]
-        , p [ class "mb-0" ] [ text <| getQuestionTitle question ]
+        , p [ class "mb-0" ] [ text <| Question.getTitle question ]
         ]

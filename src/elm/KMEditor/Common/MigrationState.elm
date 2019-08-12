@@ -5,8 +5,8 @@ module KMEditor.Common.MigrationState exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import KMEditor.Common.Events.Event as Event exposing (Event)
 import KMEditor.Common.MigrationStateType as MigrationStateType exposing (MigrationStateType)
-import KMEditor.Common.Models.Events exposing (Event, eventDecoder)
 
 
 type alias MigrationState =
@@ -19,4 +19,4 @@ decoder : Decoder MigrationState
 decoder =
     D.succeed MigrationState
         |> D.required "stateType" MigrationStateType.decoder
-        |> D.optional "targetEvent" (D.maybe eventDecoder) Nothing
+        |> D.optional "targetEvent" (D.maybe Event.decoder) Nothing

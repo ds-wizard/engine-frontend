@@ -2,7 +2,7 @@ module Questionnaires.Migration.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
 import Common.Questionnaire.Msgs
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Questionnaires.Common.QuestionChange exposing (QuestionChange)
 import Questionnaires.Common.QuestionnaireMigration exposing (QuestionnaireMigration)
 

@@ -13,7 +13,7 @@ import Common.Questionnaire.Models exposing (initialModel)
 import Common.Questionnaire.Msgs as QuestionnaireMsgs
 import Common.Questionnaire.Update
 import Common.Setters exposing (setLevels)
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Maybe.Extra as Maybe
 import Msgs
 import Ports

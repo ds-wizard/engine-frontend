@@ -17,7 +17,12 @@ import FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import KMEditor.Common.Models.Entities exposing (Answer, Chapter, Expert, Level, Metric, Question, ResourcePageReferenceData, URLReferenceData, getQuestionRequiredLevel)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
@@ -33,7 +38,7 @@ type alias ViewQuestionnaireConfig =
     , levels : Maybe (List Level)
     , getExtraQuestionClass : String -> Maybe String
     , forceDisabled : Bool
-    , createRenderer : List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
+    , createRenderer : KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
     }
 
 
@@ -102,10 +107,13 @@ chapterList appState model =
 
                 _ ->
                     Nothing
+
+        chapters =
+            KnowledgeModel.getChapters model.questionnaire.knowledgeModel
     in
     div [ class "nav nav-pills flex-column" ]
         ([ strong [] [ text "Chapters" ] ]
-            ++ List.indexedMap (chapterListChapter appState model activeChapter) model.questionnaire.knowledgeModel.chapters
+            ++ List.indexedMap (chapterListChapter appState model activeChapter) chapters
         )
 
 
@@ -132,7 +140,7 @@ viewChapterAnsweredIndication appState model chapter =
                 100
 
         unanswered =
-            calculateUnansweredQuestions appState effectiveLevel model.questionnaire.replies chapter
+            calculateUnansweredQuestions appState model.questionnaire.knowledgeModel effectiveLevel model.questionnaire.replies chapter
     in
     if unanswered > 0 then
         span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]
@@ -227,10 +235,10 @@ chapterHeader : Model -> Chapter -> Html Msg
 chapterHeader model chapter =
     let
         chapterNumber =
-            model.questionnaire.knowledgeModel.chapters
+            KnowledgeModel.getChapters model.questionnaire.knowledgeModel
                 |> List.indexedMap (\i c -> ( i, c ))
-                |> List.find (\( i, c ) -> c.uuid == chapter.uuid)
-                |> Maybe.map (\( i, c ) -> i + 1)
+                |> List.find (\( _, c ) -> c.uuid == chapter.uuid)
+                |> Maybe.map (\( i, _ ) -> i + 1)
                 |> Maybe.withDefault 1
                 |> toRomanNumber
     in
@@ -253,13 +261,13 @@ formConfig appState cfg model =
                 Just <| always False
 
             else
-                Just (getQuestionRequiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
+                Just (Question.getRequiredLevel >> Maybe.map ((>=) model.questionnaire.level) >> Maybe.withDefault False)
     in
     { customActions = customActions
     , isDesirable = isDesirable
     , disabled = cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
     , getExtraQuestionClass = cfg.getExtraQuestionClass
-    , renderer = cfg.createRenderer (Maybe.withDefault [] cfg.levels) model.metrics
+    , renderer = cfg.createRenderer model.questionnaire.knowledgeModel (Maybe.withDefault [] cfg.levels) model.metrics
     }
 
 

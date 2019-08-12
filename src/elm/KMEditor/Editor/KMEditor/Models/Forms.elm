@@ -52,7 +52,17 @@ import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
-import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
+import KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
+import KMEditor.Common.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import List.Extra as List
 import Set
@@ -466,21 +476,21 @@ questionFormInitials question =
     let
         questionType =
             case question of
-                OptionsQuestion _ ->
+                OptionsQuestion _ _ ->
                     "OptionsQuestion"
 
-                ListQuestion _ ->
+                ListQuestion _ _ ->
                     "ListQuestion"
 
-                ValueQuestion _ ->
+                ValueQuestion _ _ ->
                     "ValueQuestion"
 
-                IntegrationQuestion _ ->
+                IntegrationQuestion _ _ ->
                     "IntegrationQuestion"
 
         props =
             case question of
-                IntegrationQuestion integrationQuestionData ->
+                IntegrationQuestion _ integrationQuestionData ->
                     Dict.toList integrationQuestionData.props
                         |> List.map (\( prop, value ) -> ( "props-" ++ prop, Field.string value ))
 
@@ -488,12 +498,12 @@ questionFormInitials question =
                     []
     in
     [ ( "questionType", Field.string questionType )
-    , ( "title", Field.string <| getQuestionTitle question )
-    , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
-    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
-    , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| getQuestionItemTitle question )
-    , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| getQuestionValueType question )
-    , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| getQuestionIntegrationUuid question )
+    , ( "title", Field.string <| Question.getTitle question )
+    , ( "text", Field.string <| Maybe.withDefault "" <| Question.getText question )
+    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| Question.getRequiredLevel question )
+    , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| Question.getItemTitle question )
+    , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| Question.getValueType question )
+    , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| Question.getIntegrationUuid question )
     ]
         ++ props
 
@@ -503,51 +513,55 @@ updateQuestionWithForm question questionForm =
     case questionForm.question of
         OptionsQuestionForm formData ->
             OptionsQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , answers = getQuestionAnswers question
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { answerUuids = Question.getAnswerUuids question
                 }
 
         ListQuestionForm formData ->
             ListQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , itemTemplateTitle = formData.itemTemplateTitle
-                , itemTemplateQuestions = getQuestionItemQuestions question
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { itemTemplateTitle = formData.itemTemplateTitle
+                , itemTemplateQuestionUuids = Question.getItemQuestionUuids question
                 }
 
         ValueQuestionForm formData ->
             ValueQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , valueType = formData.valueType
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { valueType = formData.valueType
                 }
 
         IntegrationQuestionForm formData ->
             IntegrationQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , integrationUuid = formData.integrationUuid
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { integrationUuid = formData.integrationUuid
                 , props = formData.props
                 }
 
@@ -779,20 +793,20 @@ updateReferenceWithForm reference referenceForm =
     case referenceForm.reference of
         ResourcePageReferenceFormType shortUuid ->
             ResourcePageReference
-                { uuid = getReferenceUuid reference
+                { uuid = Reference.getUuid reference
                 , shortUuid = shortUuid
                 }
 
         URLReferenceFormType url label ->
             URLReference
-                { uuid = getReferenceUuid reference
+                { uuid = Reference.getUuid reference
                 , url = url
                 , label = label
                 }
 
         CrossReferenceFormType targetUuid description ->
             CrossReference
-                { uuid = getReferenceUuid reference
+                { uuid = Reference.getUuid reference
                 , targetUuid = targetUuid
                 , description = description
                 }

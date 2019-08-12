@@ -5,7 +5,8 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (getQuestionTitle, getReferenceVisibleName)
+import KMEditor.Common.KnowledgeModel.Question as Question
+import KMEditor.Common.KnowledgeModel.Reference as Reference
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isOptionsQuestionForm)
 import KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
@@ -135,7 +136,7 @@ treeNodeQuestion activeUuid editors editorData =
         config =
             { editorData = editorData
             , icon = "comment-o"
-            , label = getQuestionTitle editorData.question
+            , label = Question.getTitle editorData.question
             , children = itemTemplateQuestions ++ answers ++ references ++ experts
             }
     in
@@ -161,7 +162,7 @@ treeNodeReference activeUuid editors editorData =
         config =
             { editorData = editorData
             , icon = "bookmark-o"
-            , label = getReferenceVisibleName editorData.reference
+            , label = Reference.getVisibleName editorData.reference
             , children = []
             }
     in

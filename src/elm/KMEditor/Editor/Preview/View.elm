@@ -9,7 +9,8 @@ import Common.View.Tag as Tag
 import Html exposing (Html, a, div, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModels
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import KMEditor.Editor.Preview.Models exposing (Model)
 import KMEditor.Editor.Preview.Msgs exposing (Msg(..))
 import Msgs
@@ -43,8 +44,11 @@ view wrapMsg appState levels model =
 
 tagSelection : List String -> Common.Questionnaire.Models.Model -> Html Msg
 tagSelection selected questionnaireModel =
-    if List.length questionnaireModel.questionnaire.knowledgeModel.tags > 0 then
+    if List.length questionnaireModel.questionnaire.knowledgeModel.tagUuids > 0 then
         let
+            tags =
+                KnowledgeModels.getTags questionnaireModel.questionnaire.knowledgeModel
+
             tagListConfig =
                 { selected = selected
                 , addMsg = AddTag
@@ -57,7 +61,7 @@ tagSelection selected questionnaireModel =
                 , a [ onClick SelectAllTags ] [ text "Select All" ]
                 , a [ onClick SelectNoneTags ] [ text "Select None" ]
                 ]
-            , Tag.list tagListConfig questionnaireModel.questionnaire.knowledgeModel.tags
+            , Tag.list tagListConfig tags
             ]
 
     else

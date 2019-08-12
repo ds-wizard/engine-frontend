@@ -5,8 +5,8 @@ module KMEditor.Common.Migration exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import KMEditor.Common.MigrationState as MigrationState exposing (MigrationState)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, knowledgeModelDecoder)
 
 
 type alias Migration =
@@ -25,4 +25,4 @@ decoder =
         |> D.required "migrationState" MigrationState.decoder
         |> D.required "branchPreviousPackageId" D.string
         |> D.required "targetPackageId" D.string
-        |> D.required "currentKnowledgeModel" knowledgeModelDecoder
+        |> D.required "currentKnowledgeModel" KnowledgeModel.decoder

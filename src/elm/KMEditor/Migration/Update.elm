@@ -6,9 +6,9 @@ import Common.Api.Branches as BranchesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Setters exposing (setMigration)
+import KMEditor.Common.Events.Event as Event
 import KMEditor.Common.Migration exposing (Migration)
 import KMEditor.Common.MigrationResolution as MigrationResolution exposing (MigrationResolution)
-import KMEditor.Common.Models.Events exposing (getEventUuid)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
 import Msgs
@@ -87,7 +87,7 @@ resolveChange createMigrationResolution wrapMsg appState model =
             case model.migration of
                 Success migration ->
                     migration.migrationState.targetEvent
-                        |> Maybe.map getEventUuid
+                        |> Maybe.map Event.getUuid
                         |> Maybe.map createMigrationResolution
                         |> Maybe.map (postMigrationConflictCmd wrapMsg model.branchUuid appState)
                         |> Maybe.withDefault Cmd.none

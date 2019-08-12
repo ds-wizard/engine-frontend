@@ -5,7 +5,7 @@ import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (getQuestionTitle)
+import KMEditor.Common.KnowledgeModel.Question as Question
 import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
 import Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 
@@ -26,5 +26,5 @@ viewTodo todo =
     in
     a [ class "list-group-item flex-column", onClick <| ScrollToTodo todo ]
         [ div [] [ small [] [ text todo.chapter.title ] ]
-        , p [ classList [ ( "nested", isNested ) ] ] [ text <| getQuestionTitle todo.question ]
+        , p [ classList [ ( "nested", isNested ) ] ] [ text <| Question.getTitle todo.question ]
         ]

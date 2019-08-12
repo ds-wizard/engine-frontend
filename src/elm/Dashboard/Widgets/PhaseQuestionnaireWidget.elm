@@ -7,7 +7,7 @@ import Common.View.Listing as Listing exposing (ListingConfig)
 import Common.View.Page as Page
 import Html exposing (Html, code, div, h3, span, strong, text)
 import Html.Attributes exposing (class, title)
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Routing
 import Questionnaires.Common.Questionnaire exposing (Questionnaire)

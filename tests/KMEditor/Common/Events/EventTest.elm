@@ -1,4 +1,4 @@
-module KMEditor.Common.Models.EventsTest exposing
+module KMEditor.Common.Events.EventTest exposing
     ( addAnswerEventTest
     , addChapterEventTest
     , addExpertEventTest
@@ -21,82 +21,19 @@ module KMEditor.Common.Models.EventsTest exposing
     , editQuestionEventTest
     , editReferenceEventTest
     , editTagEventTest
-    , eventFieldTest
     )
 
 import Dict
 import Expect exposing (Expectation)
-import Json.Decode as Decode
-import Json.Encode as Encode
-import KMEditor.Common.Models.Entities exposing (QuestionValueType(..))
-import KMEditor.Common.Models.Events exposing (..)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.Events.AddQuestionEventData exposing (AddQuestionEventData(..))
+import KMEditor.Common.Events.AddReferenceEventData exposing (AddReferenceEventData(..))
+import KMEditor.Common.Events.EditQuestionEventData exposing (EditQuestionEventData(..))
+import KMEditor.Common.Events.EditReferenceEventData exposing (EditReferenceEventData(..))
+import KMEditor.Common.Events.Event as Event exposing (Event(..))
+import KMEditor.Common.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Test exposing (..)
 import TestUtils exposing (expectEncodeDecode, parametrized)
-
-
-
-{- eventField -}
-
-
-eventFieldTest : Test
-eventFieldTest =
-    describe "EventField"
-        [ test "should encode and decode when not changed" <|
-            \_ ->
-                let
-                    eventField =
-                        { changed = False
-                        , value = Nothing
-                        }
-                in
-                expectEncodeDecode (encodeEventField Encode.string) (eventFieldDecoder Decode.string) eventField
-        , test "should encode and decode when changed" <|
-            \_ ->
-                let
-                    eventField =
-                        { changed = True
-                        , value = Just "My new value"
-                        }
-                in
-                expectEncodeDecode (encodeEventField Encode.string) (eventFieldDecoder Decode.string) eventField
-        , test "get value when not changed" <|
-            \_ ->
-                let
-                    eventField =
-                        { changed = False
-                        , value = Nothing
-                        }
-                in
-                Expect.equal Nothing (getEventFieldValue eventField)
-        , test "get value when changed" <|
-            \_ ->
-                let
-                    eventField =
-                        { changed = True
-                        , value = Just 12
-                        }
-                in
-                Expect.equal (Just 12) (getEventFieldValue eventField)
-        , test "get value with default when not changed" <|
-            \_ ->
-                let
-                    eventField =
-                        { changed = False
-                        , value = Nothing
-                        }
-                in
-                Expect.equal "Default" (getEventFieldValueWithDefault eventField "Default")
-        , test "get value with default when changed" <|
-            \_ ->
-                let
-                    eventField =
-                        { changed = True
-                        , value = Just [ 1, 2, 3 ]
-                        }
-                in
-                Expect.equal [ 1, 2, 3 ] (getEventFieldValueWithDefault eventField [])
-        ]
+import Utils exposing (nilUuid)
 
 
 
@@ -106,8 +43,7 @@ eventFieldTest =
 editKnowledgeModelEvent : Event
 editKnowledgeModelEvent =
     EditKnowledgeModelEvent
-        { kmUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , name =
+        { name =
             { changed = True
             , value = Just "My Knowledge Model"
             }
@@ -125,7 +61,8 @@ editKnowledgeModelEvent =
             }
         }
         { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
-        , path = []
+        , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+        , parentUuid = nilUuid
         }
 
 
@@ -137,14 +74,13 @@ editKnowledgeModelEventTest =
                 expectEventEncodeDecode editKnowledgeModelEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac" (getEventUuid editKnowledgeModelEvent)
+                Expect.equal "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac" (Event.getUuid editKnowledgeModelEvent)
         , test "get event entity visible name when not changed" <|
             \_ ->
                 let
                     event =
                         EditKnowledgeModelEvent
-                            { kmUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-                            , name =
+                            { name =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -162,13 +98,14 @@ editKnowledgeModelEventTest =
                                 }
                             }
                             { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
-                            , path = []
+                            , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+                            , parentUuid = nilUuid
                             }
                 in
-                Expect.equal Nothing (getEventEntityVisibleName event)
+                Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
             \_ ->
-                Expect.equal (Just "My Knowledge Model") (getEventEntityVisibleName editKnowledgeModelEvent)
+                Expect.equal (Just "My Knowledge Model") (Event.getEntityVisibleName editKnowledgeModelEvent)
         ]
 
 
@@ -179,12 +116,12 @@ editKnowledgeModelEventTest =
 addChapterEvent : Event
 addChapterEvent =
     AddChapterEvent
-        { chapterUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , title = "Design of Experiment"
+        { title = "Design of Experiment"
         , text = "This is a chapter about the designing of the experiment"
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -196,18 +133,17 @@ addChapterEventTest =
                 expectEventEncodeDecode addChapterEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid addChapterEvent)
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid addChapterEvent)
         , test "get event entity visible name" <|
             \_ ->
-                Expect.equal (Just "Design of Experiment") (getEventEntityVisibleName addChapterEvent)
+                Expect.equal (Just "Design of Experiment") (Event.getEntityVisibleName addChapterEvent)
         ]
 
 
 editChapterEvent : Event
 editChapterEvent =
     EditChapterEvent
-        { chapterUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , title =
+        { title =
             { changed = True
             , value = Just "Design of Experiment"
             }
@@ -221,7 +157,8 @@ editChapterEvent =
             }
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -233,14 +170,13 @@ editChapterEventTest =
                 expectEventEncodeDecode editChapterEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid editChapterEvent)
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid editChapterEvent)
         , test "get entity visible name when not changed" <|
             \_ ->
                 let
                     event =
                         EditChapterEvent
-                            { chapterUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-                            , title =
+                            { title =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -254,23 +190,23 @@ editChapterEventTest =
                                 }
                             }
                             { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-                            , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+                            , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
                             }
                 in
-                Expect.equal Nothing (getEventEntityVisibleName event)
+                Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get entity visible name when changed" <|
             \_ ->
-                Expect.equal (Just "Design of Experiment") (getEventEntityVisibleName editChapterEvent)
+                Expect.equal (Just "Design of Experiment") (Event.getEntityVisibleName editChapterEvent)
         ]
 
 
 deleteChapterEvent : Event
 deleteChapterEvent =
     DeleteChapterEvent
-        { chapterUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -282,10 +218,10 @@ deleteChapterEventTest =
                 expectEventEncodeDecode deleteChapterEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid deleteChapterEvent)
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid deleteChapterEvent)
         , test "get entity visible name" <|
             \_ ->
-                Expect.equal Nothing (getEventEntityVisibleName deleteChapterEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName deleteChapterEvent)
         ]
 
 
@@ -296,13 +232,13 @@ deleteChapterEventTest =
 addTagEvent : Event
 addTagEvent =
     AddTagEvent
-        { tagUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , name = "Astronomy"
+        { name = "Astronomy"
         , description = Just "Questions connected to astronomy"
         , color = "#F5A623"
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -314,18 +250,17 @@ addTagEventTest =
                 expectEventEncodeDecode addTagEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid addTagEvent)
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid addTagEvent)
         , test "get event entity visible name" <|
             \_ ->
-                Expect.equal (Just "Astronomy") (getEventEntityVisibleName addTagEvent)
+                Expect.equal (Just "Astronomy") (Event.getEntityVisibleName addTagEvent)
         ]
 
 
 editTagEvent : Event
 editTagEvent =
     EditTagEvent
-        { tagUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , name =
+        { name =
             { changed = True
             , value = Just "Astronomy"
             }
@@ -339,7 +274,8 @@ editTagEvent =
             }
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -350,14 +286,13 @@ editTagEventTest =
             \_ -> expectEventEncodeDecode editTagEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid editTagEvent)
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid editTagEvent)
         , test "get event entity visible name when not changed" <|
             \_ ->
                 let
                     event =
                         EditTagEvent
-                            { tagUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-                            , name =
+                            { name =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -371,23 +306,23 @@ editTagEventTest =
                                 }
                             }
                             { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-                            , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+                            , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
                             }
                 in
-                Expect.equal Nothing (getEventEntityVisibleName event)
+                Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
             \_ ->
-                Expect.equal (Just "Astronomy") (getEventEntityVisibleName editTagEvent)
+                Expect.equal (Just "Astronomy") (Event.getEntityVisibleName editTagEvent)
         ]
 
 
 deleteTagEvent : Event
 deleteTagEvent =
     DeleteTagEvent
-        { tagUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -399,10 +334,10 @@ deleteTagEventTest =
                 expectEventEncodeDecode deleteTagEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (getEventUuid deleteTagEvent)
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid deleteTagEvent)
         , test "get entity visible name" <|
             \_ ->
-                Expect.equal Nothing (getEventEntityVisibleName deleteTagEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName deleteTagEvent)
         ]
 
 
@@ -413,8 +348,7 @@ deleteTagEventTest =
 addIntegrationEvent : Event
 addIntegrationEvent =
     AddIntegrationEvent
-        { integrationUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
-        , id = "service"
+        { id = "service"
         , name = "Service"
         , props = [ "kind", "category" ]
         , logo = "data:image/png;base64,..."
@@ -428,7 +362,8 @@ addIntegrationEvent =
         , itemUrl = "http://example.com/${id}"
         }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -439,18 +374,17 @@ addIntegrationEventTest =
             \_ -> expectEventEncodeDecode addIntegrationEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid addIntegrationEvent)
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (Event.getUuid addIntegrationEvent)
         , test "get event entity visible name" <|
             \_ ->
-                Expect.equal (Just "Service") (getEventEntityVisibleName addIntegrationEvent)
+                Expect.equal (Just "Service") (Event.getEntityVisibleName addIntegrationEvent)
         ]
 
 
 editIntegrationEvent : Event
 editIntegrationEvent =
     EditIntegrationEvent
-        { integrationUuid = ""
-        , id =
+        { id =
             { changed = True
             , value = Just "service"
             }
@@ -500,7 +434,8 @@ editIntegrationEvent =
             }
         }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -511,20 +446,19 @@ editIntegrationEventTest =
             \_ -> expectEventEncodeDecode editIntegrationEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid editIntegrationEvent)
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (Event.getUuid editIntegrationEvent)
         , test "get event entity visible name" <|
             \_ ->
-                Expect.equal (Just "Service") (getEventEntityVisibleName editIntegrationEvent)
+                Expect.equal (Just "Service") (Event.getEntityVisibleName editIntegrationEvent)
         ]
 
 
 deleteIntegrationEvent : Event
 deleteIntegrationEvent =
     DeleteIntegrationEvent
-        { integrationUuid = ""
-        }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+        , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
         }
 
 
@@ -535,10 +469,10 @@ deleteIntegrationEventTest =
             \_ -> expectEventEncodeDecode editIntegrationEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (getEventUuid deleteIntegrationEvent)
+                Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (Event.getUuid deleteIntegrationEvent)
         , test "get event entity visible name" <|
             \_ ->
-                Expect.equal Nothing (getEventEntityVisibleName deleteIntegrationEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName deleteIntegrationEvent)
         ]
 
 
@@ -549,28 +483,24 @@ deleteIntegrationEventTest =
 addOptionsQuestionEvent : Event
 addOptionsQuestionEvent =
     AddQuestionEvent
-        (AddOptionsQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = "Can you answer this question?"
+        (AddQuestionOptionsEvent
+            { title = "Can you answer this question?"
             , text = Nothing
             , requiredLevel = Just 2
             , tagUuids = []
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
 addListQuestionEvent : Event
 addListQuestionEvent =
     AddQuestionEvent
-        (AddListQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = "Can you answer this question?"
+        (AddQuestionListEvent
+            { title = "Can you answer this question?"
             , text = Just "Just answer the question!"
             , requiredLevel = Just 2
             , tagUuids = []
@@ -578,19 +508,16 @@ addListQuestionEvent =
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
 addValueQuestionEvent : Event
 addValueQuestionEvent =
     AddQuestionEvent
-        (AddValueQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = "Can you answer this question?"
+        (AddQuestionValueEvent
+            { title = "Can you answer this question?"
             , text = Nothing
             , requiredLevel = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
@@ -598,19 +525,16 @@ addValueQuestionEvent =
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
 addIntegrationQuestionEvent : Event
 addIntegrationQuestionEvent =
     AddQuestionEvent
-        (AddIntegrationQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = "Can you answer this question?"
+        (AddQuestionIntegrationEvent
+            { title = "Can you answer this question?"
             , text = Nothing
             , requiredLevel = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
@@ -619,10 +543,8 @@ addIntegrationQuestionEvent =
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
@@ -640,22 +562,21 @@ addQuestionEventTest =
             "get event uuid"
           <|
             \event ->
-                Expect.equal "b09ed98c-3043-11e9-b210-d663bd873d93" (getEventUuid event)
+                Expect.equal "b09ed98c-3043-11e9-b210-d663bd873d93" (Event.getUuid event)
         , parametrized
             [ addOptionsQuestionEvent, addListQuestionEvent, addValueQuestionEvent, addIntegrationQuestionEvent ]
             "get event entity visible name"
           <|
             \event ->
-                Expect.equal (Just "Can you answer this question?") (getEventEntityVisibleName event)
+                Expect.equal (Just "Can you answer this question?") (Event.getEntityVisibleName event)
         ]
 
 
 editOptionsQuestionEvent : Event
 editOptionsQuestionEvent =
     EditQuestionEvent
-        (EditOptionsQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = { changed = False, value = Nothing }
+        (EditQuestionOptionsEvent
+            { title = { changed = False, value = Nothing }
             , text = { changed = True, value = Just (Just "Answer this immediately") }
             , requiredLevel = { changed = True, value = Just (Just 2) }
             , tagUuids = { changed = False, value = Nothing }
@@ -665,19 +586,16 @@ editOptionsQuestionEvent =
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
 editListQuestionEvent : Event
 editListQuestionEvent =
     EditQuestionEvent
-        (EditListQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = { changed = True, value = Just "This is a new title" }
+        (EditQuestionListEvent
+            { title = { changed = True, value = Just "This is a new title" }
             , text = { changed = False, value = Nothing }
             , requiredLevel = { changed = False, value = Nothing }
             , tagUuids = { changed = False, value = Nothing }
@@ -688,19 +606,16 @@ editListQuestionEvent =
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
 editValueQuestionEvent : Event
 editValueQuestionEvent =
     EditQuestionEvent
-        (EditValueQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = { changed = True, value = Just "What date is today?" }
+        (EditQuestionValueEvent
+            { title = { changed = True, value = Just "What date is today?" }
             , text = { changed = False, value = Nothing }
             , requiredLevel = { changed = True, value = Just (Just 2) }
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
@@ -710,19 +625,16 @@ editValueQuestionEvent =
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
 editIntegrationQuestionEvent : Event
 editIntegrationQuestionEvent =
     EditQuestionEvent
-        (EditIntegrationQuestionEvent
-            { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-            , title = { changed = True, value = Just "What database will you use?" }
+        (EditQuestionIntegrationEvent
+            { title = { changed = True, value = Just "What database will you use?" }
             , text = { changed = False, value = Nothing }
             , requiredLevel = { changed = True, value = Just (Just 2) }
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
@@ -733,10 +645,8 @@ editIntegrationQuestionEvent =
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
@@ -754,7 +664,7 @@ editQuestionEventTest =
             "get event uuid"
           <|
             \event ->
-                Expect.equal "b09ed98c-3043-11e9-b210-d663bd873d93" (getEventUuid event)
+                Expect.equal "b09ed98c-3043-11e9-b210-d663bd873d93" (Event.getUuid event)
         , parametrized
             [ ( editOptionsQuestionEvent, Nothing )
             , ( editListQuestionEvent, Just "This is a new title" )
@@ -764,20 +674,16 @@ editQuestionEventTest =
             "get event entity visible name"
           <|
             \( event, name ) ->
-                Expect.equal name (getEventEntityVisibleName event)
+                Expect.equal name (Event.getEntityVisibleName event)
         ]
 
 
 deleteQuestionEvent : Event
 deleteQuestionEvent =
     DeleteQuestionEvent
-        { questionUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        }
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
         }
 
 
@@ -789,10 +695,10 @@ deleteQuestionEventTest =
                 expectEventEncodeDecode deleteQuestionEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "b09ed98c-3043-11e9-b210-d663bd873d93" (getEventUuid deleteQuestionEvent)
+                Expect.equal "b09ed98c-3043-11e9-b210-d663bd873d93" (Event.getUuid deleteQuestionEvent)
         , test "get entity visible name" <|
             \_ ->
-                Expect.equal Nothing (getEventEntityVisibleName deleteQuestionEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName deleteQuestionEvent)
         ]
 
 
@@ -803,8 +709,7 @@ deleteQuestionEventTest =
 addAnswerEvent : Event
 addAnswerEvent =
     AddAnswerEvent
-        { answerUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-        , label = "Yes"
+        { label = "Yes"
         , advice = Just "Good choice"
         , metricMeasures =
             [ { metricUuid = "1ca4da0a-2e00-11e9-b210-d663bd873d93"
@@ -814,11 +719,8 @@ addAnswerEvent =
             ]
         }
         { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -830,18 +732,17 @@ addAnswerEventTest =
                 expectEventEncodeDecode addAnswerEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "efac9f6e-2e00-11e9-b210-d663bd873d93" (getEventUuid addAnswerEvent)
+                Expect.equal "efac9f6e-2e00-11e9-b210-d663bd873d93" (Event.getUuid addAnswerEvent)
         , test "get event entity visible name" <|
             \_ ->
-                Expect.equal (Just "Yes") (getEventEntityVisibleName addAnswerEvent)
+                Expect.equal (Just "Yes") (Event.getEntityVisibleName addAnswerEvent)
         ]
 
 
 editAnswerEvent : Event
 editAnswerEvent =
     EditAnswerEvent
-        { answerUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-        , label =
+        { label =
             { changed = True
             , value = Just "No"
             }
@@ -864,11 +765,8 @@ editAnswerEvent =
             }
         }
         { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -880,14 +778,13 @@ editAnswerEventTest =
                 expectEventEncodeDecode editAnswerEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "efac9f6e-2e00-11e9-b210-d663bd873d93" (getEventUuid editAnswerEvent)
+                Expect.equal "efac9f6e-2e00-11e9-b210-d663bd873d93" (Event.getUuid editAnswerEvent)
         , test "get entity visible name when not changed" <|
             \_ ->
                 let
                     event =
                         EditAnswerEvent
-                            { answerUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-                            , label =
+                            { label =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -910,31 +807,23 @@ editAnswerEventTest =
                                 }
                             }
                             { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-                            , path =
-                                [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-                                , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-                                , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-                                ]
+                            , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
                             }
                 in
-                Expect.equal Nothing (getEventEntityVisibleName event)
+                Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get entity visible name when changed" <|
             \_ ->
-                Expect.equal (Just "No") (getEventEntityVisibleName editAnswerEvent)
+                Expect.equal (Just "No") (Event.getEntityVisibleName editAnswerEvent)
         ]
 
 
 deleteAnswerEvent : Event
 deleteAnswerEvent =
     DeleteAnswerEvent
-        { answerUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-        }
         { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -946,10 +835,10 @@ deleteAnswerEventTest =
                 expectEventEncodeDecode deleteAnswerEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "efac9f6e-2e00-11e9-b210-d663bd873d93" (getEventUuid deleteAnswerEvent)
+                Expect.equal "efac9f6e-2e00-11e9-b210-d663bd873d93" (Event.getUuid deleteAnswerEvent)
         , test "get entity visible name" <|
             \_ ->
-                Expect.equal Nothing (getEventEntityVisibleName deleteAnswerEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName deleteAnswerEvent)
         ]
 
 
@@ -960,53 +849,41 @@ deleteAnswerEventTest =
 addResourcePageReferenceEvent : Event
 addResourcePageReferenceEvent =
     AddReferenceEvent
-        (AddResourcePageReferenceEvent
-            { referenceUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
-            , shortUuid = "atq"
+        (AddReferenceResourcePageEvent
+            { shortUuid = "atq"
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
 addURLReferenceEvent : Event
 addURLReferenceEvent =
     AddReferenceEvent
-        (AddURLReferenceEvent
-            { referenceUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
-            , url = "http://example.com"
+        (AddReferenceURLEvent
+            { url = "http://example.com"
             , label = "Example"
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
 addCrossReferenceEvent : Event
 addCrossReferenceEvent =
     AddReferenceEvent
-        (AddCrossReferenceEvent
-            { referenceUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
-            , targetUuid = "072af95a-2dfd-11e9-b210-d663bd873d93"
+        (AddReferenceCrossEvent
+            { targetUuid = "072af95a-2dfd-11e9-b210-d663bd873d93"
             , description = "Related"
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -1024,7 +901,7 @@ addReferenceEventTest =
             "get event uuid"
           <|
             \event ->
-                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (getEventUuid event)
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid event)
         , parametrized
             [ ( addResourcePageReferenceEvent, "atq" )
             , ( addURLReferenceEvent, "Example" )
@@ -1033,36 +910,31 @@ addReferenceEventTest =
             "get event entity visible name"
           <|
             \( event, name ) ->
-                Expect.equal (Just name) (getEventEntityVisibleName event)
+                Expect.equal (Just name) (Event.getEntityVisibleName event)
         ]
 
 
 editResourcePageReferenceEvent : Event
 editResourcePageReferenceEvent =
     EditReferenceEvent
-        (EditResourcePageReferenceEvent
-            { referenceUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
-            , shortUuid =
+        (EditReferenceResourcePageEvent
+            { shortUuid =
                 { changed = True
                 , value = Just "atq"
                 }
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
 editURLReferenceEvent : Event
 editURLReferenceEvent =
     EditReferenceEvent
-        (EditURLReferenceEvent
-            { referenceUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
-            , url =
+        (EditReferenceURLEvent
+            { url =
                 { changed = False
                 , value = Nothing
                 }
@@ -1073,20 +945,16 @@ editURLReferenceEvent =
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
 editCrossReferenceEvent : Event
 editCrossReferenceEvent =
     EditReferenceEvent
-        (EditCrossReferenceEvent
-            { referenceUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
-            , targetUuid =
+        (EditReferenceCrossEvent
+            { targetUuid =
                 { changed = False
                 , value = Nothing
                 }
@@ -1097,11 +965,8 @@ editCrossReferenceEvent =
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -1119,7 +984,7 @@ editReferenceEventTest =
             "get event uuid"
           <|
             \event ->
-                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (getEventUuid event)
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid event)
         , parametrized
             [ ( editResourcePageReferenceEvent, Just "atq" )
             , ( editURLReferenceEvent, Just "Example" )
@@ -1128,21 +993,16 @@ editReferenceEventTest =
             "get event entity visible name"
           <|
             \( event, name ) ->
-                Expect.equal name (getEventEntityVisibleName event)
+                Expect.equal name (Event.getEntityVisibleName event)
         ]
 
 
 deleteReferenceEvent : Event
 deleteReferenceEvent =
     DeleteReferenceEvent
-        { referenceUuid = "6606ebf8-2dff-11e9-b210-d663bd873d93"
-        }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "6606ebf8-2dff-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -1154,10 +1014,10 @@ deleteReferenceEventTest =
                 expectEventEncodeDecode deleteReferenceEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (getEventUuid deleteReferenceEvent)
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid deleteReferenceEvent)
         , test "get entity visible name" <|
             \_ ->
-                Expect.equal Nothing (getEventEntityVisibleName deleteReferenceEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName deleteReferenceEvent)
         ]
 
 
@@ -1168,16 +1028,12 @@ deleteReferenceEventTest =
 addExpertEvent : Event
 addExpertEvent =
     AddExpertEvent
-        { expertUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , name = "Albert Einstein"
+        { name = "Albert Einstein"
         , email = "albert.einstein@example.com"
         }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -1188,18 +1044,17 @@ addExpertEventTest =
             \_ -> expectEventEncodeDecode addExpertEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (getEventUuid addExpertEvent)
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid addExpertEvent)
         , test "get event entity visible name" <|
             \_ ->
-                Expect.equal (Just "Albert Einstein") (getEventEntityVisibleName addExpertEvent)
+                Expect.equal (Just "Albert Einstein") (Event.getEntityVisibleName addExpertEvent)
         ]
 
 
 editExpertEvent : Event
 editExpertEvent =
     EditExpertEvent
-        { expertUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , name =
+        { name =
             { changed = True
             , value = Just "Nikola Tesla"
             }
@@ -1209,11 +1064,8 @@ editExpertEvent =
             }
         }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -1224,14 +1076,13 @@ editExpertEventTest =
             \_ -> expectEventEncodeDecode editExpertEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (getEventUuid editExpertEvent)
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid editExpertEvent)
         , test "get event entity visible name when not changed" <|
             \_ ->
                 let
                     event =
                         EditExpertEvent
-                            { expertUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-                            , name =
+                            { name =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -1240,28 +1091,24 @@ editExpertEventTest =
                                 , value = Just "nikola.tesla@example.com"
                                 }
                             }
-                            { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-                            , path = [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f" ]
+                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
                             }
                 in
-                Expect.equal Nothing (getEventEntityVisibleName event)
+                Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
             \_ ->
-                Expect.equal (Just "Nikola Tesla") (getEventEntityVisibleName editExpertEvent)
+                Expect.equal (Just "Nikola Tesla") (Event.getEntityVisibleName editExpertEvent)
         ]
 
 
 deleteExpertEvent : Event
 deleteExpertEvent =
     DeleteExpertEvent
-        { expertUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , path =
-            [ KMPathNode "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-            , ChapterPathNode "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-            , QuestionPathNode "2f73c924-2dfc-11e9-b210-d663bd873d93"
-            ]
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
         }
 
 
@@ -1273,10 +1120,10 @@ deleteExpertEventTest =
                 expectEventEncodeDecode deleteExpertEvent
         , test "get event uuid" <|
             \_ ->
-                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (getEventUuid deleteExpertEvent)
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid deleteExpertEvent)
         , test "get entity visible name" <|
             \_ ->
-                Expect.equal Nothing (getEventEntityVisibleName deleteExpertEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName deleteExpertEvent)
         ]
 
 
@@ -1286,4 +1133,4 @@ deleteExpertEventTest =
 
 expectEventEncodeDecode : Event -> Expectation
 expectEventEncodeDecode =
-    expectEncodeDecode encodeEvent eventDecoder
+    expectEncodeDecode Event.encode Event.decoder

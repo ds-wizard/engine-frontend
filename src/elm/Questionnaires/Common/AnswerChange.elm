@@ -1,6 +1,6 @@
 module Questionnaires.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData, getAnswerUuid)
 
-import KMEditor.Common.Models.Entities exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
 
 
 type AnswerChange

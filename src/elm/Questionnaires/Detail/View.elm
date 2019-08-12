@@ -12,7 +12,7 @@ import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import KnowledgeModels.Common.Version as Version
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Detail.Models exposing (Model)

@@ -16,8 +16,8 @@ import Common.AppState exposing (AppState)
 import Json.Encode as Encode exposing (Value)
 import KMEditor.Common.Branch as Branch exposing (Branch)
 import KMEditor.Common.BranchDetail as BranchDetail exposing (BranchDetail)
+import KMEditor.Common.Events.Event as Event exposing (Event)
 import KMEditor.Common.Migration as Migration exposing (Migration)
-import KMEditor.Common.Models.Events exposing (Event, encodeEvent)
 
 
 getBranches : AppState -> ToMsg (List Branch) msg -> Cmd msg
@@ -42,7 +42,7 @@ putBranch uuid name kmId events =
             Encode.object
                 [ ( "name", Encode.string name )
                 , ( "kmId", Encode.string kmId )
-                , ( "events", Encode.list encodeEvent events )
+                , ( "events", Encode.list Event.encode events )
                 ]
     in
     jwtPut ("/branches/" ++ uuid) body

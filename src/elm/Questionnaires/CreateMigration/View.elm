@@ -14,6 +14,7 @@ import Form
 import Html exposing (Html, div, label, option, select, text)
 import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onInput)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Common.Version as Version
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -44,10 +45,13 @@ createMigrationView model ( questionnaire, packages ) =
         createOptions package =
             ( "", "--" ) :: List.map (createVersionOption package) package.versions
 
+        tags =
+            KnowledgeModel.getTags questionnaire.knowledgeModel
+
         originalTagList =
             div [ class "form-group form-group-tags" ]
                 [ label [] [ text "Original tags" ]
-                , div [] [ Tag.readOnlyList questionnaire.selectedTagUuids questionnaire.knowledgeModel.tags ]
+                , div [] [ Tag.readOnlyList questionnaire.selectedTagUuids tags ]
                 ]
 
         versionSelect =

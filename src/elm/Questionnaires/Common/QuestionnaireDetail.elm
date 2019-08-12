@@ -13,7 +13,9 @@ import FormEngine.Model exposing (FormValue, FormValues, decodeFormValues, encod
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import KMEditor.Common.Models.Entities exposing (Chapter, KnowledgeModel, Question(..), getFollowUpQuestions, getQuestionTitle, getQuestionUuid, knowledgeModelDecoder)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import KnowledgeModels.Common.Package as Package exposing (Package)
 import List.Extra as List
 import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
@@ -41,7 +43,7 @@ decoder =
         |> D.required "uuid" D.string
         |> D.required "name" D.string
         |> D.required "package" Package.decoder
-        |> D.required "knowledgeModel" knowledgeModelDecoder
+        |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" decodeFormValues
         |> D.required "level" D.int
         |> D.required "accessibility" QuestionnaireAccessibility.decoder
@@ -83,19 +85,26 @@ todosLength =
 
 getTodos : QuestionnaireDetail -> List QuestionnaireTodo
 getTodos questionnaire =
-    List.concatMap (getChapterTodos questionnaire) questionnaire.knowledgeModel.chapters
+    List.concatMap
+        (getChapterTodos questionnaire)
+        (KnowledgeModel.getChapters questionnaire.knowledgeModel)
 
 
 getChapterTodos : QuestionnaireDetail -> Chapter -> List QuestionnaireTodo
 getChapterTodos questionnaire chapter =
-    List.concatMap (getQuestionTodos questionnaire chapter [ chapter.uuid ]) chapter.questions
+    List.concatMap
+        (getQuestionTodos questionnaire chapter [ chapter.uuid ])
+        (KnowledgeModel.getChapterQuestions chapter.uuid questionnaire.knowledgeModel)
 
 
 getQuestionTodos : QuestionnaireDetail -> Chapter -> List String -> Question -> List QuestionnaireTodo
 getQuestionTodos questionnaire chapter path question =
     let
+        km =
+            questionnaire.knowledgeModel
+
         currentPath =
-            path ++ [ getQuestionUuid question ]
+            path ++ [ Question.getUuid question ]
 
         questionTodo =
             if hasTodo questionnaire (pathToString currentPath) then
@@ -112,20 +121,22 @@ getQuestionTodos questionnaire chapter path question =
             case getReply questionnaire (pathToString currentPath) of
                 Just formValue ->
                     case question of
-                        OptionsQuestion questionData ->
-                            case List.find (.uuid >> (==) (getAnswerUuid formValue.value)) questionData.answers of
+                        OptionsQuestion commonData _ ->
+                            case List.find (.uuid >> (==) (getAnswerUuid formValue.value)) (KnowledgeModel.getQuestionAnswers commonData.uuid km) of
                                 Just answer ->
-                                    List.concatMap (getQuestionTodos questionnaire chapter (currentPath ++ [ answer.uuid ])) (getFollowUpQuestions answer)
+                                    List.concatMap
+                                        (getQuestionTodos questionnaire chapter (currentPath ++ [ answer.uuid ]))
+                                        (KnowledgeModel.getAnswerFollowupQuestions answer.uuid km)
 
                                 Nothing ->
                                     []
 
-                        ListQuestion questionData ->
+                        ListQuestion commonData _ ->
                             let
                                 getItemQuestionTodos index =
                                     List.concatMap
                                         (getQuestionTodos questionnaire chapter (currentPath ++ [ String.fromInt index ]))
-                                        questionData.itemTemplateQuestions
+                                        (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid km)
                             in
                             List.range 0 (getItemListCount formValue.value)
                                 |> List.concatMap getItemQuestionTodos

@@ -12,8 +12,12 @@ module KMEditor.Editor.KMEditor.Models exposing
     )
 
 import Dict exposing (Dict)
-import KMEditor.Common.Models.Entities exposing (Integration, KnowledgeModel, Level, Metric, Tag)
-import KMEditor.Common.Models.Events exposing (Event(..), getEventEntityUuid)
+import KMEditor.Common.Events.Event as Event exposing (Event(..))
+import KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
 import Reorderable
@@ -68,7 +72,7 @@ createEditorStateDict events =
         (\event dict ->
             let
                 entityUuid =
-                    getEventEntityUuid event
+                    Event.getEntityUuid event
 
                 eventState =
                     eventToEditorState event
@@ -98,7 +102,7 @@ eventToEditorState event =
         EditChapterEvent _ _ ->
             Edited
 
-        DeleteChapterEvent _ _ ->
+        DeleteChapterEvent _ ->
             Deleted
 
         AddTagEvent _ _ ->
@@ -107,7 +111,7 @@ eventToEditorState event =
         EditTagEvent _ _ ->
             Edited
 
-        DeleteTagEvent _ _ ->
+        DeleteTagEvent _ ->
             Deleted
 
         AddIntegrationEvent _ _ ->
@@ -116,7 +120,7 @@ eventToEditorState event =
         EditIntegrationEvent _ _ ->
             Edited
 
-        DeleteIntegrationEvent _ _ ->
+        DeleteIntegrationEvent _ ->
             Deleted
 
         AddQuestionEvent _ _ ->
@@ -125,7 +129,7 @@ eventToEditorState event =
         EditQuestionEvent _ _ ->
             Edited
 
-        DeleteQuestionEvent _ _ ->
+        DeleteQuestionEvent _ ->
             Deleted
 
         AddAnswerEvent _ _ ->
@@ -134,7 +138,7 @@ eventToEditorState event =
         EditAnswerEvent _ _ ->
             Edited
 
-        DeleteAnswerEvent _ _ ->
+        DeleteAnswerEvent _ ->
             Deleted
 
         AddReferenceEvent _ _ ->
@@ -143,7 +147,7 @@ eventToEditorState event =
         EditReferenceEvent _ _ ->
             Edited
 
-        DeleteReferenceEvent _ _ ->
+        DeleteReferenceEvent _ ->
             Deleted
 
         AddExpertEvent _ _ ->
@@ -152,7 +156,7 @@ eventToEditorState event =
         EditExpertEvent _ _ ->
             Edited
 
-        DeleteExpertEvent _ _ ->
+        DeleteExpertEvent _ ->
             Deleted
 
 

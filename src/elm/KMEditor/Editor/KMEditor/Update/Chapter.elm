@@ -8,8 +8,7 @@ module KMEditor.Editor.KMEditor.Update.Chapter exposing
     )
 
 import Form
-import KMEditor.Common.Models.Entities exposing (newQuestion)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Question as Question
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
@@ -69,8 +68,7 @@ updateIfKMEditor update editor =
 addQuestion : Cmd Msgs.Msg -> Seed -> Model -> ChapterEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addQuestion =
     addEntity
-        { newEntity = newQuestion
+        { newEntity = Question.new
         , createEntityEditor = createQuestionEditor
-        , createPathNode = ChapterPathNode
         , addEntity = addChapterQuestion
         }

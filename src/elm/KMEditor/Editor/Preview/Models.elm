@@ -9,8 +9,9 @@ module KMEditor.Editor.Preview.Models exposing
 
 import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric, filterKnowledgModelWithTags)
-import KMEditor.Common.Models.Events exposing (Event)
+import KMEditor.Common.Events.Event exposing (Event)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import KnowledgeModels.Common.Package as Package
 import Questionnaires.Common.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 
@@ -54,7 +55,7 @@ selectAllTags : AppState -> Model -> Model
 selectAllTags appState model =
     let
         tags =
-            List.map .uuid model.knowledgeModel.tags
+            List.map .uuid (KnowledgeModel.getTags model.knowledgeModel)
     in
     createFilteredQuestionnaireModel appState tags model
 
@@ -71,7 +72,7 @@ createFilteredQuestionnaireModel appState tags model =
             createQuestionnaireModel
                 appState
                 model.packageId
-                (filterKnowledgModelWithTags tags model.knowledgeModel)
+                (KnowledgeModel.filterWithTags tags model.knowledgeModel)
                 model.questionnaireModel.metrics
                 model.questionnaireModel.events
     in

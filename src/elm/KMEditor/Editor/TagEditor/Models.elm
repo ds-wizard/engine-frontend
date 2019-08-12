@@ -10,9 +10,11 @@ module KMEditor.Editor.TagEditor.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Question(..), createPathMap, getQuestionTagUuids, getQuestionUuid, getQuestions)
-import KMEditor.Common.Models.Events exposing (EditQuestionEventData(..), Event(..), EventField, createEmptyEventField, createEventField)
-import KMEditor.Common.Models.Path exposing (Path)
+import KMEditor.Common.Events.EditQuestionEventData exposing (EditQuestionEventData(..))
+import KMEditor.Common.Events.Event exposing (Event(..))
+import KMEditor.Common.Events.EventField as EventField
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import Random exposing (Seed)
 import Utils exposing (getUuid)
 
@@ -87,48 +89,38 @@ containsChanges =
 
 initQuestionTagsDict : KnowledgeModel -> Dict String (List String)
 initQuestionTagsDict km =
-    List.foldl (\q dict -> Dict.insert (getQuestionUuid q) (getQuestionTagUuids q) dict) Dict.empty (getQuestions km)
+    List.foldl (\q dict -> Dict.insert (Question.getUuid q) (Question.getTagUuids q) dict) Dict.empty (KnowledgeModel.getAllQuestions km)
 
 
 generateEvents : Seed -> KnowledgeModel -> Model -> ( Seed, List Event )
 generateEvents seed knowledgeModel model =
     let
-        pathMap =
-            createPathMap knowledgeModel
+        parentMap =
+            KnowledgeModel.createParentMap knowledgeModel
     in
-    getQuestions knowledgeModel
+    KnowledgeModel.getAllQuestions knowledgeModel
         |> List.foldl
             (\q ( s, events ) ->
                 let
-                    path =
-                        getPath pathMap (getQuestionUuid q)
+                    parentUuid =
+                        KnowledgeModel.getParent parentMap (Question.getUuid q)
 
                     ( newSeed, newEvents ) =
-                        generateQuestionEvent model q path s
+                        generateQuestionEvent model q parentUuid s
                 in
                 ( newSeed, events ++ newEvents )
             )
             ( seed, [] )
 
 
-getPath : Dict String Path -> String -> Path
-getPath pathMap uuid =
-    case Dict.get uuid pathMap of
-        Just path ->
-            path
-
-        Nothing ->
-            []
-
-
-generateQuestionEvent : Model -> Question -> Path -> Seed -> ( Seed, List Event )
-generateQuestionEvent model question path seed =
+generateQuestionEvent : Model -> Question -> String -> Seed -> ( Seed, List Event )
+generateQuestionEvent model question parentUuid seed =
     let
         questionUuid =
-            getQuestionUuid question
+            Question.getUuid question
 
         originalTags =
-            List.sort <| getQuestionTagUuids question
+            List.sort <| Question.getTagUuids question
 
         newTags =
             List.sort <| getQuestionTags model questionUuid
@@ -138,64 +130,64 @@ generateQuestionEvent model question path seed =
             ( uuid, newSeed ) =
                 getUuid seed
 
+            commonData =
+                { uuid = uuid
+                , parentUuid = parentUuid
+                , entityUuid = questionUuid
+                }
+
             eventData =
                 case question of
-                    OptionsQuestion _ ->
-                        EditOptionsQuestionEvent
-                            { questionUuid = questionUuid
-                            , title = createEmptyEventField
-                            , text = createEmptyEventField
-                            , requiredLevel = createEmptyEventField
-                            , tagUuids = createEventField newTags True
-                            , referenceUuids = createEmptyEventField
-                            , expertUuids = createEmptyEventField
-                            , answerUuids = createEmptyEventField
+                    OptionsQuestion _ _ ->
+                        EditQuestionOptionsEvent
+                            { title = EventField.empty
+                            , text = EventField.empty
+                            , requiredLevel = EventField.empty
+                            , tagUuids = EventField.create newTags True
+                            , referenceUuids = EventField.empty
+                            , expertUuids = EventField.empty
+                            , answerUuids = EventField.empty
                             }
 
-                    ListQuestion _ ->
-                        EditListQuestionEvent
-                            { questionUuid = questionUuid
-                            , title = createEmptyEventField
-                            , text = createEmptyEventField
-                            , requiredLevel = createEmptyEventField
-                            , tagUuids = createEventField newTags True
-                            , referenceUuids = createEmptyEventField
-                            , expertUuids = createEmptyEventField
-                            , itemTemplateTitle = createEmptyEventField
-                            , itemTemplateQuestionUuids = createEmptyEventField
+                    ListQuestion _ _ ->
+                        EditQuestionListEvent
+                            { title = EventField.empty
+                            , text = EventField.empty
+                            , requiredLevel = EventField.empty
+                            , tagUuids = EventField.create newTags True
+                            , referenceUuids = EventField.empty
+                            , expertUuids = EventField.empty
+                            , itemTemplateTitle = EventField.empty
+                            , itemTemplateQuestionUuids = EventField.empty
                             }
 
-                    ValueQuestion _ ->
-                        EditValueQuestionEvent
-                            { questionUuid = questionUuid
-                            , title = createEmptyEventField
-                            , text = createEmptyEventField
-                            , requiredLevel = createEmptyEventField
-                            , tagUuids = createEventField newTags True
-                            , referenceUuids = createEmptyEventField
-                            , expertUuids = createEmptyEventField
-                            , valueType = createEmptyEventField
+                    ValueQuestion _ _ ->
+                        EditQuestionValueEvent
+                            { title = EventField.empty
+                            , text = EventField.empty
+                            , requiredLevel = EventField.empty
+                            , tagUuids = EventField.create newTags True
+                            , referenceUuids = EventField.empty
+                            , expertUuids = EventField.empty
+                            , valueType = EventField.empty
                             }
 
-                    IntegrationQuestion _ ->
-                        EditIntegrationQuestionEvent
-                            { questionUuid = questionUuid
-                            , title = createEmptyEventField
-                            , text = createEmptyEventField
-                            , requiredLevel = createEmptyEventField
-                            , tagUuids = createEventField newTags True
-                            , referenceUuids = createEmptyEventField
-                            , expertUuids = createEmptyEventField
-                            , integrationUuid = createEmptyEventField
-                            , props = createEmptyEventField
+                    IntegrationQuestion _ _ ->
+                        EditQuestionIntegrationEvent
+                            { title = EventField.empty
+                            , text = EventField.empty
+                            , requiredLevel = EventField.empty
+                            , tagUuids = EventField.create newTags True
+                            , referenceUuids = EventField.empty
+                            , expertUuids = EventField.empty
+                            , integrationUuid = EventField.empty
+                            , props = EventField.empty
                             }
 
             event =
-                EditQuestionEvent
-                    eventData
-                    { uuid = uuid, path = path }
+                EditQuestionEvent eventData commonData
         in
-        ( seed, [ event ] )
+        ( newSeed, [ event ] )
 
     else
         ( seed, [] )

@@ -7,8 +7,9 @@ module KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing
     )
 
 import Form
-import KMEditor.Common.Models.Entities exposing (newChapter, newIntegration, newTag)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Chapter as Chapter
+import KMEditor.Common.KnowledgeModel.Integration as Integration
+import KMEditor.Common.KnowledgeModel.Tag as Tag
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (knowledgeModelFormValidation)
@@ -43,9 +44,8 @@ withGenerateKMEditEvent =
 addChapter : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addChapter =
     addEntity
-        { newEntity = newChapter
+        { newEntity = Chapter.new
         , createEntityEditor = createChapterEditor
-        , createPathNode = KMPathNode
         , addEntity = addKMChapter
         }
 
@@ -53,9 +53,8 @@ addChapter =
 addTag : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addTag =
     addEntity
-        { newEntity = newTag
+        { newEntity = Tag.new
         , createEntityEditor = createTagEditor
-        , createPathNode = KMPathNode
         , addEntity = addKMTag
         }
 
@@ -63,8 +62,7 @@ addTag =
 addIntegration : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addIntegration =
     addEntity
-        { newEntity = newIntegration
+        { newEntity = Integration.new
         , createEntityEditor = createIntegrationEditor
-        , createPathNode = KMPathNode
         , addEntity = addKMIntegration
         }

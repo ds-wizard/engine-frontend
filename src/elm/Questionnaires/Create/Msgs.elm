@@ -2,7 +2,7 @@ module Questionnaires.Create.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
 import Form
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
 import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
