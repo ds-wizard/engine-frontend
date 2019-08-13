@@ -2,7 +2,8 @@ module Questionnaires.Detail.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Questionnaire.Models
-import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 

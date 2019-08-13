@@ -7,7 +7,8 @@ import Common.View.FormExtra as FormExtra
 import Html exposing (Html, div, i, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, style, type_)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Tag)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import Utils exposing (getContrastColorHex)
 
 
@@ -78,15 +79,18 @@ selection tagListConfig knowledgeModelResult =
 
                 Success knowledgeModel ->
                     let
+                        tags =
+                            KnowledgeModel.getTags knowledgeModel
+
                         extraText =
-                            if List.length knowledgeModel.tags > 0 then
+                            if List.length tags > 0 then
                                 FormExtra.text "You can filter questions in the questionnaire by tags. If no tags are selected, all questions will be used."
 
                             else
                                 emptyNode
                     in
                     div []
-                        [ list tagListConfig knowledgeModel.tags
+                        [ list tagListConfig tags
                         , extraText
                         ]
     in

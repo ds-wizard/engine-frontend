@@ -6,7 +6,7 @@ module Questionnaires.Create.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
 import Questionnaires.Common.QuestionnaireCreateForm as QuestionnaireCreateForm exposing (QuestionnaireCreateForm)
 

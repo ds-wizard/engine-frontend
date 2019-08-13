@@ -3,8 +3,14 @@ module KMEditor.Common.View exposing (diffTreeView)
 import Common.Html exposing (emptyNode)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import KMEditor.Common.Models.Entities exposing (..)
-import KMEditor.Common.Models.Events exposing (..)
+import KMEditor.Common.Events.Event as Event exposing (Event(..))
+import KMEditor.Common.KnowledgeModel.Answer as Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter as Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.Expert as Expert exposing (Expert)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
+import KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference)
+import KMEditor.Common.KnowledgeModel.Tag as Tag exposing (Tag)
 import List.Extra as List
 
 
@@ -17,27 +23,36 @@ diffTreeNodeKnowledgeModel : List Event -> KnowledgeModel -> Html msg
 diffTreeNodeKnowledgeModel events km =
     let
         newChapters =
-            newChildren isAddChapter diffTreeNodeNewChapter events km
+            newChildren Event.isAddChapter diffTreeNodeNewChapter events km
 
         newTags =
-            newChildren isAddTag diffTreeNodeNewTag events km
+            newChildren Event.isAddTag diffTreeNodeNewTag events km
+
+        chapters =
+            KnowledgeModel.getChapters km
+
+        tags =
+            KnowledgeModel.getTags km
     in
     div [ class "diff-tree" ]
         [ ul []
-            (List.map (diffTreeNodeChapter events) km.chapters ++ newChapters)
+            (List.map (diffTreeNodeChapter events km) chapters ++ newChapters)
         , ul []
-            (List.map (diffTreeNodeTag events) km.tags ++ newTags)
+            (List.map (diffTreeNodeTag events) tags ++ newTags)
         ]
 
 
-diffTreeNodeChapter : List Event -> Chapter -> Html msg
-diffTreeNodeChapter events chapter =
+diffTreeNodeChapter : List Event -> KnowledgeModel -> Chapter -> Html msg
+diffTreeNodeChapter events km chapter =
     let
         divClass =
-            getClass isDeleteChapter isEditChapter events chapter
+            getClass Event.isDeleteChapter Event.isEditChapter events chapter
 
         newQuestions =
-            newChildren isAddQuestion diffTreeNodeNewQuestion events chapter.uuid
+            newChildren Event.isAddQuestion diffTreeNodeNewQuestion events chapter.uuid
+
+        questions =
+            KnowledgeModel.getChapterQuestions chapter.uuid km
     in
     li [ class (divClass ++ " chapter") ]
         [ span []
@@ -45,24 +60,24 @@ diffTreeNodeChapter events chapter =
             , strong [] [ text chapter.title ]
             ]
         , ul []
-            (List.map (diffTreeNodeQuestion events) chapter.questions ++ newQuestions)
+            (List.map (diffTreeNodeQuestion events km) questions ++ newQuestions)
         ]
 
 
 diffTreeNodeNewChapter : List Event -> Event -> Html msg
 diffTreeNodeNewChapter events event =
     case event of
-        AddChapterEvent eventData _ ->
+        AddChapterEvent eventData commonData ->
             let
                 dummyChapter =
-                    newChapter eventData.chapterUuid
+                    Chapter.new commonData.entityUuid
             in
-            if List.any (isDeleteChapter dummyChapter) events then
+            if List.any (Event.isDeleteChapter dummyChapter) events then
                 emptyNode
 
             else
-                List.find (isEditChapter dummyChapter) events
-                    |> Maybe.andThen getEventEntityVisibleName
+                List.find (Event.isEditChapter dummyChapter) events
+                    |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.title
                     |> chapterNewNode
 
@@ -84,7 +99,7 @@ diffTreeNodeTag : List Event -> Tag -> Html msg
 diffTreeNodeTag events tag =
     let
         divClass =
-            getClass isDeleteTag isEditTag events tag
+            getClass Event.isDeleteTag Event.isEditTag events tag
     in
     li [ class (divClass ++ " tag") ]
         [ span []
@@ -97,17 +112,17 @@ diffTreeNodeTag events tag =
 diffTreeNodeNewTag : List Event -> Event -> Html msg
 diffTreeNodeNewTag events event =
     case event of
-        AddTagEvent eventData _ ->
+        AddTagEvent eventData commonData ->
             let
                 dummyTag =
-                    newTag eventData.tagUuid
+                    Tag.new commonData.entityUuid
             in
-            if List.any (isDeleteTag dummyTag) events then
+            if List.any (Event.isDeleteTag dummyTag) events then
                 emptyNode
 
             else
-                List.find (isEditTag (newTag eventData.tagUuid)) events
-                    |> Maybe.andThen getEventEntityVisibleName
+                List.find (Event.isEditTag dummyTag) events
+                    |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.name
                     |> diffTreeNewNode "tag" "fa-tag"
 
@@ -115,37 +130,52 @@ diffTreeNodeNewTag events event =
             emptyNode
 
 
-diffTreeNodeQuestion : List Event -> Question -> Html msg
-diffTreeNodeQuestion events question =
+diffTreeNodeQuestion : List Event -> KnowledgeModel -> Question -> Html msg
+diffTreeNodeQuestion events km question =
     let
+        questionUuid =
+            Question.getUuid question
+
         divClass =
-            getClass isDeleteQuestion isEditQuestion events question
+            getClass Event.isDeleteQuestion Event.isEditQuestion events question
 
         newAnswers =
-            newChildren isAddAnswer diffTreeNodeNewAnswer events question
+            newChildren Event.isAddAnswer diffTreeNodeNewAnswer events question
 
         newItemQuestions =
-            newChildren isAddQuestion diffTreeNodeNewQuestion events (getQuestionUuid question)
+            newChildren Event.isAddQuestion diffTreeNodeNewQuestion events questionUuid
 
         newReferences =
-            newChildren isAddReference diffTreeNodeNewReference events question
+            newChildren Event.isAddReference diffTreeNodeNewReference events question
 
         newExperts =
-            newChildren isAddExpert diffTreeNodeNewExpert events question
+            newChildren Event.isAddExpert diffTreeNodeNewExpert events question
+
+        answers =
+            KnowledgeModel.getQuestionAnswers questionUuid km
+
+        itemTemplateQuestions =
+            KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
+
+        references =
+            KnowledgeModel.getQuestionReferences questionUuid km
+
+        experts =
+            KnowledgeModel.getQuestionExperts questionUuid km
     in
     li [ class (divClass ++ " question") ]
         [ span []
             [ i [ class "fa fa-comment-o" ] []
-            , text (getQuestionTitle question)
+            , text (Question.getTitle question)
             ]
         , ul []
-            (List.map (diffTreeNodeAnswer events) (getQuestionAnswers question) ++ newAnswers)
+            (List.map (diffTreeNodeAnswer events km) answers ++ newAnswers)
         , ul []
-            (List.map (diffTreeNodeQuestion events) (getQuestionItemQuestions question) ++ newItemQuestions)
+            (List.map (diffTreeNodeQuestion events km) itemTemplateQuestions ++ newItemQuestions)
         , ul []
-            (List.map (diffTreeNodeReference events) (getQuestionReferences question) ++ newReferences)
+            (List.map (diffTreeNodeReference events) references ++ newReferences)
         , ul []
-            (List.map (diffTreeNodeExpert events) (getQuestionExperts question) ++ newExperts)
+            (List.map (diffTreeNodeExpert events) experts ++ newExperts)
         ]
 
 
@@ -155,33 +185,36 @@ diffTreeNodeNewQuestion events event =
         getNode questionUuid title =
             let
                 dummyQuestion =
-                    newQuestion questionUuid
+                    Question.new questionUuid
             in
-            if List.any (isDeleteQuestion dummyQuestion) events then
+            if List.any (Event.isDeleteQuestion dummyQuestion) events then
                 emptyNode
 
             else
-                List.find (isEditQuestion dummyQuestion) events
-                    |> Maybe.andThen getEventEntityVisibleName
+                List.find (Event.isEditQuestion dummyQuestion) events
+                    |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault title
                     |> diffTreeNewNode "question" "fa-comment-o"
     in
     case event of
-        AddQuestionEvent eventData _ ->
-            getNode (getAddQuestionUuid eventData) (getAddQuestionEventEntityVisibleName eventData |> Maybe.withDefault "")
+        AddQuestionEvent _ commonData ->
+            getNode commonData.entityUuid (Event.getEntityVisibleName event |> Maybe.withDefault "")
 
         _ ->
             emptyNode
 
 
-diffTreeNodeAnswer : List Event -> Answer -> Html msg
-diffTreeNodeAnswer events answer =
+diffTreeNodeAnswer : List Event -> KnowledgeModel -> Answer -> Html msg
+diffTreeNodeAnswer events km answer =
     let
         divClass =
-            getClass isDeleteAnswer isEditAnswer events answer
+            getClass Event.isDeleteAnswer Event.isEditAnswer events answer
 
         newQuestions =
-            newChildren isAddQuestion diffTreeNodeNewQuestion events answer.uuid
+            newChildren Event.isAddQuestion diffTreeNodeNewQuestion events answer.uuid
+
+        followUpQuestions =
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
     in
     li [ class (divClass ++ " answer") ]
         [ span []
@@ -189,24 +222,24 @@ diffTreeNodeAnswer events answer =
             , text answer.label
             ]
         , ul []
-            (List.map (diffTreeNodeQuestion events) (getFollowUpQuestions answer) ++ newQuestions)
+            (List.map (diffTreeNodeQuestion events km) followUpQuestions ++ newQuestions)
         ]
 
 
 diffTreeNodeNewAnswer : List Event -> Event -> Html msg
 diffTreeNodeNewAnswer events event =
     case event of
-        AddAnswerEvent eventData _ ->
+        AddAnswerEvent eventData commonData ->
             let
                 dummyAnswer =
-                    newAnswer eventData.answerUuid
+                    Answer.new commonData.entityUuid
             in
-            if List.any (isDeleteAnswer dummyAnswer) events then
+            if List.any (Event.isDeleteAnswer dummyAnswer) events then
                 emptyNode
 
             else
-                List.find (isEditAnswer dummyAnswer) events
-                    |> Maybe.andThen getEventEntityVisibleName
+                List.find (Event.isEditAnswer dummyAnswer) events
+                    |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.label
                     |> diffTreeNewNode "answer" "fa-check-square-o"
 
@@ -218,12 +251,12 @@ diffTreeNodeReference : List Event -> Reference -> Html msg
 diffTreeNodeReference events reference =
     let
         divClass =
-            getClass isDeleteReference isEditReference events reference
+            getClass Event.isDeleteReference Event.isEditReference events reference
     in
     li [ class (divClass ++ " reference") ]
         [ span []
             [ i [ class "fa fa-bookmark-o" ] []
-            , text <| getReferenceVisibleName reference
+            , text <| Reference.getVisibleName reference
             ]
         ]
 
@@ -231,17 +264,17 @@ diffTreeNodeReference events reference =
 diffTreeNodeNewReference : List Event -> Event -> Html msg
 diffTreeNodeNewReference events event =
     case event of
-        AddReferenceEvent eventData _ ->
+        AddReferenceEvent _ commonData ->
             let
                 dummyReference =
-                    newReference <| getAddReferenceUuid eventData
+                    Reference.new commonData.entityUuid
             in
-            if List.any (isDeleteReference dummyReference) events then
+            if List.any (Event.isDeleteReference dummyReference) events then
                 emptyNode
 
             else
-                List.find (isEditReference (newReference (getAddReferenceUuid eventData))) events
-                    |> Maybe.andThen getEventEntityVisibleName
+                List.find (Event.isEditReference dummyReference) events
+                    |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault "Reference"
                     |> diffTreeNewNode "reference" "fa-bookmark-o"
 
@@ -253,7 +286,7 @@ diffTreeNodeExpert : List Event -> Expert -> Html msg
 diffTreeNodeExpert events expert =
     let
         divClass =
-            getClass isDeleteExpert isEditExpert events expert
+            getClass Event.isDeleteExpert Event.isEditExpert events expert
     in
     li [ class (divClass ++ " expert") ]
         [ span []
@@ -266,17 +299,17 @@ diffTreeNodeExpert events expert =
 diffTreeNodeNewExpert : List Event -> Event -> Html msg
 diffTreeNodeNewExpert events event =
     case event of
-        AddExpertEvent eventData _ ->
+        AddExpertEvent eventData commonData ->
             let
                 dummyExpert =
-                    newExpert eventData.expertUuid
+                    Expert.new commonData.entityUuid
             in
-            if List.any (isDeleteExpert dummyExpert) events then
+            if List.any (Event.isDeleteExpert dummyExpert) events then
                 emptyNode
 
             else
-                List.find (isEditExpert (newExpert eventData.expertUuid)) events
-                    |> Maybe.andThen getEventEntityVisibleName
+                List.find (Event.isEditExpert dummyExpert) events
+                    |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.name
                     |> diffTreeNewNode "expert" "fa-user-o"
 

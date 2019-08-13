@@ -11,7 +11,10 @@ import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
 import Common.Questionnaire.Models
 import FormEngine.Model exposing (FormValue, getAnswerUuid)
-import KMEditor.Common.Models.Entities exposing (Answer, Chapter, Level, Question(..), getChapters, getFollowUpQuestions, getQuestionAnswers, getQuestionExperts, getQuestionReferences, getQuestionRequiredLevel, getQuestionText, getQuestionTitle, getQuestionUuid, getQuestions)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Questionnaires.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData)
@@ -78,24 +81,33 @@ initializeChangeList appState model =
 
 getChangeList : AppState -> QuestionnaireMigration -> QuestionnaireChanges
 getChangeList appState migration =
-    getChapters migration.newQuestionnaire.knowledgeModel
+    KnowledgeModel.getChapters migration.newQuestionnaire.knowledgeModel
         |> QuestionnaireChanges.foldMap (getChapterChanges appState migration)
 
 
 getChapterChanges : AppState -> QuestionnaireMigration -> Chapter -> QuestionnaireChanges
 getChapterChanges appState migration chapter =
-    QuestionnaireChanges.foldMap (getQuestionChanges appState migration chapter) chapter.questions
+    QuestionnaireChanges.foldMap
+        (getQuestionChanges appState migration chapter)
+        (KnowledgeModel.getChapterQuestions chapter.uuid migration.newQuestionnaire.knowledgeModel)
 
 
 getQuestionChanges : AppState -> QuestionnaireMigration -> Chapter -> Question -> QuestionnaireChanges
 getQuestionChanges appState migration chapter question =
     let
+        oldKm =
+            migration.oldQuestionnaire.knowledgeModel
+
+        newKm =
+            migration.newQuestionnaire.knowledgeModel
+
         questionChange =
-            case List.find (getQuestionUuid >> (==) (getQuestionUuid question)) (getQuestions migration.oldQuestionnaire.knowledgeModel) of
+            --            case List.find (Question.getUuid >> (==) (Question.getUuid question)) (KnowledgeModel.getQuestions migration.oldQuestionnaire.knowledgeModel) of
+            case KnowledgeModel.getQuestion (Question.getUuid question) oldKm of
                 Just oldQuestion ->
                     let
                         answerChanges =
-                            getAnswerChanges oldQuestion question
+                            getAnswerChanges migration question
                     in
                     if not (List.isEmpty answerChanges) || isChanged appState.config.levelsEnabled oldQuestion question then
                         QuestionnaireChanges [ QuestionChange <| QuestionChangeData question oldQuestion chapter ] answerChanges
@@ -114,16 +126,20 @@ getQuestionChanges appState migration chapter question =
             case getReply migration.newQuestionnaire question of
                 Just formValue ->
                     case question of
-                        OptionsQuestion questionData ->
-                            case List.find (.uuid >> (==) (getAnswerUuid formValue.value)) questionData.answers of
+                        OptionsQuestion _ _ ->
+                            case KnowledgeModel.getAnswer (getAnswerUuid formValue.value) newKm of
                                 Just answer ->
-                                    QuestionnaireChanges.foldMap (getQuestionChanges appState migration chapter) (getFollowUpQuestions answer)
+                                    QuestionnaireChanges.foldMap
+                                        (getQuestionChanges appState migration chapter)
+                                        (KnowledgeModel.getAnswerFollowupQuestions answer.uuid migration.newQuestionnaire.knowledgeModel)
 
                                 Nothing ->
                                     QuestionnaireChanges.empty
 
-                        ListQuestion questionData ->
-                            QuestionnaireChanges.foldMap (getQuestionChanges appState migration chapter) questionData.itemTemplateQuestions
+                        ListQuestion commonData _ ->
+                            QuestionnaireChanges.foldMap
+                                (getQuestionChanges appState migration chapter)
+                                (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid migration.newQuestionnaire.knowledgeModel)
 
                         _ ->
                             QuestionnaireChanges.empty
@@ -136,33 +152,39 @@ getQuestionChanges appState migration chapter question =
 
 getReply : QuestionnaireDetail -> Question -> Maybe FormValue
 getReply questionnaire question =
-    List.find (.path >> getUuidFromPath >> (==) (getQuestionUuid question)) questionnaire.replies
+    List.find (.path >> getUuidFromPath >> (==) (Question.getUuid question)) questionnaire.replies
 
 
 isNew : QuestionnaireDetail -> Question -> Bool
 isNew questionnaire question =
-    not <| List.any (getQuestionUuid >> (==) (getQuestionUuid question)) (getQuestions questionnaire.knowledgeModel)
+    Maybe.isNothing <| KnowledgeModel.getQuestion (Question.getUuid question) questionnaire.knowledgeModel
 
 
 isChanged : Bool -> Question -> Question -> Bool
 isChanged levelsEnabled oldQuestion newQuestion =
-    (getQuestionTitle oldQuestion /= getQuestionTitle newQuestion)
+    (Question.getTitle oldQuestion /= Question.getTitle newQuestion)
         || areQuestionDetailsChanged levelsEnabled oldQuestion newQuestion
 
 
 areQuestionDetailsChanged : Bool -> Question -> Question -> Bool
 areQuestionDetailsChanged levelsEnabled oldQuestion newQuestion =
-    (getQuestionText oldQuestion /= getQuestionText newQuestion)
-        || (levelsEnabled && (getQuestionRequiredLevel oldQuestion /= getQuestionRequiredLevel newQuestion))
-        || (getQuestionReferences oldQuestion /= getQuestionReferences newQuestion)
-        || (getQuestionExperts oldQuestion /= getQuestionExperts newQuestion)
+    (Question.getText oldQuestion /= Question.getText newQuestion)
+        || (levelsEnabled && (Question.getRequiredLevel oldQuestion /= Question.getRequiredLevel newQuestion))
+        || (Question.getReferenceUuids oldQuestion /= Question.getReferenceUuids newQuestion)
+        || (Question.getExpertUuids oldQuestion /= Question.getExpertUuids newQuestion)
 
 
-getAnswerChanges : Question -> Question -> List AnswerChange
-getAnswerChanges oldQuestion newQuestion =
+getAnswerChanges : QuestionnaireMigration -> Question -> List AnswerChange
+getAnswerChanges migration newQuestion =
     let
+        oldKm =
+            migration.oldQuestionnaire.knowledgeModel
+
+        newKm =
+            migration.newQuestionnaire.knowledgeModel
+
         createAnswerChange answer =
-            case List.find (.uuid >> (==) answer.uuid) (getQuestionAnswers oldQuestion) of
+            case KnowledgeModel.getAnswer answer.uuid oldKm of
                 Just oldAnswer ->
                     if oldAnswer.label /= answer.label then
                         Just <| AnswerChange <| AnswerChangeData answer oldAnswer
@@ -173,7 +195,9 @@ getAnswerChanges oldQuestion newQuestion =
                 Nothing ->
                     Just <| AnswerAdd <| AnswerAddData answer
     in
-    listFilterJust <| List.map createAnswerChange <| getQuestionAnswers newQuestion
+    KnowledgeModel.getQuestionAnswers (Question.getUuid newQuestion) newKm
+        |> List.map createAnswerChange
+        |> listFilterJust
 
 
 getUuidFromPath : String -> String

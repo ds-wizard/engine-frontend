@@ -13,8 +13,10 @@ module KMEditor.Editor.KMEditor.Update.Question exposing
     )
 
 import Form
-import KMEditor.Common.Models.Entities exposing (newAnswer, newExpert, newQuestion, newReference)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Answer as Answer
+import KMEditor.Common.KnowledgeModel.Expert as Expert
+import KMEditor.Common.KnowledgeModel.Question as Question
+import KMEditor.Common.KnowledgeModel.Reference as Reference
 import KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations, getCurrentTags, insertEditor)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
@@ -110,9 +112,8 @@ updateIfChapterEditor update editor =
 addAnswer : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addAnswer =
     addEntity
-        { newEntity = newAnswer
+        { newEntity = Answer.new
         , createEntityEditor = createAnswerEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionAnswer
         }
 
@@ -120,9 +121,8 @@ addAnswer =
 addAnswerItemTemplateQuestion : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addAnswerItemTemplateQuestion =
     addEntity
-        { newEntity = newQuestion
+        { newEntity = Question.new
         , createEntityEditor = createQuestionEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionAnswerItemTemplateQuestion
         }
 
@@ -130,9 +130,8 @@ addAnswerItemTemplateQuestion =
 addReference : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addReference =
     addEntity
-        { newEntity = newReference
+        { newEntity = Reference.new
         , createEntityEditor = createReferenceEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionReference
         }
 
@@ -140,8 +139,7 @@ addReference =
 addExpert : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addExpert =
     addEntity
-        { newEntity = newExpert
+        { newEntity = Expert.new
         , createEntityEditor = createExpertEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionExpert
         }

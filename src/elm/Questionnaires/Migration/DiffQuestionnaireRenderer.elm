@@ -5,9 +5,13 @@ import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage)
 import Diff
 import FormEngine.View exposing (FormRenderer)
-import Html exposing (Html, div, p, span, text)
+import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
-import KMEditor.Common.Models.Entities exposing (Answer, Level, Metric, Question, getQuestionExperts, getQuestionReferences, getQuestionRequiredLevel, getQuestionText, getQuestionTitle, getQuestionUuid)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
 import List.Extra as List
 import Questionnaires.Common.AnswerChange as AnswerChange exposing (AnswerChange(..))
 import Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
@@ -15,10 +19,10 @@ import Questionnaires.Common.QuestionnaireChanges exposing (QuestionnaireChanges
 import Questionnaires.Migration.Models exposing (areQuestionDetailsChanged)
 
 
-diffQuestionnaireRenderer : QuestionnaireChanges -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
-diffQuestionnaireRenderer changes levels metrics =
+diffQuestionnaireRenderer : QuestionnaireChanges -> KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
+diffQuestionnaireRenderer changes km levels metrics =
     { renderQuestionLabel = renderQuestionLabelDiff changes.questions
-    , renderQuestionDescription = renderQuestionDescriptionDiff changes.questions levels
+    , renderQuestionDescription = renderQuestionDescriptionDiff changes.questions levels km
     , renderOptionLabel = renderOptionLabelDiff changes.answers
     , renderOptionBadges = renderOptionBadges metrics
     , renderOptionAdvice = renderOptionAdvice
@@ -29,7 +33,7 @@ renderQuestionLabelDiff : List QuestionChange -> Question -> Html msg
 renderQuestionLabelDiff changes question =
     let
         mbChange =
-            List.find (QuestionChange.getQuestionUuid >> (==) (getQuestionUuid question)) changes
+            List.find (QuestionChange.getQuestionUuid >> (==) (Question.getUuid question)) changes
     in
     case mbChange of
         Just change ->
@@ -41,35 +45,35 @@ renderQuestionLabelDiff changes question =
                     renderQuestionChange data.originalQuestion data.question
 
         Nothing ->
-            text <| getQuestionTitle question
+            text <| Question.getTitle question
 
 
-renderQuestionDescriptionDiff : List QuestionChange -> List Level -> Question -> Html msg
-renderQuestionDescriptionDiff changes levels question =
+renderQuestionDescriptionDiff : List QuestionChange -> List Level -> KnowledgeModel -> Question -> Html msg
+renderQuestionDescriptionDiff changes levels km question =
     let
         mbChange =
-            List.find (QuestionChange.getQuestionUuid >> (==) (getQuestionUuid question)) changes
+            List.find (QuestionChange.getQuestionUuid >> (==) (Question.getUuid question)) changes
     in
     case mbChange of
         Just change ->
             case change of
                 QuestionAdd data ->
                     div [ class "diff" ]
-                        [ div [ class "diff-added" ] [ renderQuestionDescription levels question ]
+                        [ div [ class "diff-added" ] [ renderQuestionDescription levels km question ]
                         ]
 
                 QuestionChange data ->
                     if areQuestionDetailsChanged True data.originalQuestion data.question then
                         div [ class "diff" ]
-                            [ div [ class "diff-removed" ] [ renderQuestionDescription levels data.originalQuestion ]
-                            , div [ class "diff-added" ] [ renderQuestionDescription levels question ]
+                            [ div [ class "diff-removed" ] [ renderQuestionDescription levels km data.originalQuestion ]
+                            , div [ class "diff-added" ] [ renderQuestionDescription levels km question ]
                             ]
 
                     else
-                        renderQuestionDescription levels question
+                        renderQuestionDescription levels km question
 
         Nothing ->
-            renderQuestionDescription levels question
+            renderQuestionDescription levels km question
 
 
 renderOptionLabelDiff : List AnswerChange -> Answer -> Html msg
@@ -111,7 +115,7 @@ renderQuestionChange original new =
 
 getQuestionDiffableTitle : Question -> List String
 getQuestionDiffableTitle =
-    String.split "" << getQuestionTitle
+    String.split "" << Question.getTitle
 
 
 renderAnswerAdd : Answer -> Html msg

@@ -14,7 +14,8 @@ import Common.Questionnaire.Models exposing (initialModel, updateReplies)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
 import Common.Setters exposing (setLevels, setMetrics, setQuestionnaireDetail)
-import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Msgs
 import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Detail.Models exposing (Model)

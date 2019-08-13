@@ -6,7 +6,7 @@ import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Form
 import FormEngine.Model exposing (TypeHint)
 import FormEngine.Msgs
-import KMEditor.Common.Models.Entities exposing (Chapter, Metric)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Result exposing (Result)
 

@@ -5,7 +5,11 @@ import Common.View.Flash as Flash
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
-import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
+import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Editor.TagEditor.Models exposing (Model, hasQuestionTag)
 import KMEditor.Editor.TagEditor.Msgs exposing (Msg(..))
 import Msgs
@@ -16,8 +20,8 @@ view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
 view wrapMsg model =
     let
         content =
-            if List.length model.knowledgeModel.tags > 0 then
-                if (List.length <| getQuestions model.knowledgeModel) > 0 then
+            if List.length model.knowledgeModel.tagUuids > 0 then
+                if (List.length <| KnowledgeModel.getAllQuestions model.knowledgeModel) > 0 then
                     tagEditorTable model
 
                 else
@@ -33,6 +37,10 @@ view wrapMsg model =
 
 tagEditorTable : Model -> Html Msg
 tagEditorTable model =
+    let
+        tags =
+            KnowledgeModel.getTags model.knowledgeModel
+    in
     div [ class "editor-table-container" ]
         [ table []
             [ thead []
@@ -40,7 +48,7 @@ tagEditorTable model =
                     ([ th [ class "top-left" ]
                         [ div [] [] ]
                      ]
-                        ++ (List.map (thTag model) <| List.sortBy .name model.knowledgeModel.tags)
+                        ++ (List.map (thTag model) <| List.sortBy .name tags)
                     )
                 ]
             , tbody [] (foldKMRows model)
@@ -66,13 +74,24 @@ thTag model tag =
 
 foldKMRows : Model -> List (Html Msg)
 foldKMRows model =
-    List.foldl (\c rows -> rows ++ foldChapter model model.knowledgeModel.tags c) [] model.knowledgeModel.chapters
+    let
+        tags =
+            KnowledgeModel.getTags model.knowledgeModel
+
+        chapters =
+            KnowledgeModel.getChapters model.knowledgeModel
+    in
+    List.foldl (\c rows -> rows ++ foldChapter model tags c) [] chapters
 
 
 foldChapter : Model -> List Tag -> Chapter -> List (Html Msg)
 foldChapter model tags chapter =
-    if List.length chapter.questions > 0 then
-        List.foldl (\q rows -> rows ++ foldQuestion model 1 tags q) [ trChapter chapter tags ] chapter.questions
+    if List.length chapter.questionUuids > 0 then
+        let
+            questions =
+                KnowledgeModel.getChapterQuestions chapter.uuid model.knowledgeModel
+        in
+        List.foldl (\q rows -> rows ++ foldQuestion model 1 tags q) [ trChapter chapter tags ] questions
 
     else
         []
@@ -85,22 +104,22 @@ foldQuestion model indent tags question =
             [ trQuestion model indent tags question ]
     in
     case question of
-        OptionsQuestion questionData ->
+        OptionsQuestion commonData _ ->
             List.foldl
                 (\a rows -> rows ++ foldAnswer model (indent + 1) tags a)
                 questionRow
-                questionData.answers
+                (KnowledgeModel.getQuestionAnswers commonData.uuid model.knowledgeModel)
 
-        ListQuestion questionData ->
+        ListQuestion commonData _ ->
             List.foldl
                 (\q rows -> rows ++ foldQuestion model (indent + 2) tags q)
                 (questionRow ++ [ trItemTemplate (indent + 1) tags ])
-                questionData.itemTemplateQuestions
+                (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid model.knowledgeModel)
 
-        ValueQuestion _ ->
+        ValueQuestion _ _ ->
             questionRow
 
-        IntegrationQuestion _ ->
+        IntegrationQuestion _ _ ->
             questionRow
 
 
@@ -108,7 +127,7 @@ foldAnswer : Model -> Int -> List Tag -> Answer -> List (Html Msg)
 foldAnswer model indent tags answer =
     let
         followUps =
-            getFollowUpQuestions answer
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid model.knowledgeModel
     in
     if List.length followUps > 0 then
         List.foldl (\q rows -> rows ++ foldQuestion model (indent + 1) tags q) [ trAnswer answer indent tags ] followUps
@@ -123,7 +142,7 @@ trQuestion model indent tags question =
         ([ th []
             [ div [ indentClass indent ]
                 [ fa "comment-o"
-                , text (getQuestionTitle question)
+                , text (Question.getTitle question)
                 ]
             ]
          ]
@@ -135,14 +154,14 @@ tdQuestionTagCheckbox : Model -> Question -> Tag -> Html Msg
 tdQuestionTagCheckbox model question tag =
     let
         hasTag =
-            hasQuestionTag model (getQuestionUuid question) tag.uuid
+            hasQuestionTag model (Question.getUuid question) tag.uuid
 
         msg =
             if hasTag then
-                RemoveTag (getQuestionUuid question) tag.uuid
+                RemoveTag (Question.getUuid question) tag.uuid
 
             else
-                AddTag (getQuestionUuid question) tag.uuid
+                AddTag (Question.getUuid question) tag.uuid
     in
     td
         [ class "td-checkbox"

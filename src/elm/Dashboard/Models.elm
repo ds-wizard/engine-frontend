@@ -1,7 +1,7 @@
 module Dashboard.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 

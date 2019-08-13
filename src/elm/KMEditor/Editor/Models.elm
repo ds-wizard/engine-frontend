@@ -10,8 +10,10 @@ module KMEditor.Editor.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import KMEditor.Common.BranchDetail exposing (BranchDetail)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
-import KMEditor.Common.Models.Events exposing (Event)
+import KMEditor.Common.Events.Event exposing (Event)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import KMEditor.Editor.KMEditor.Models as KMEditorModel
 import KMEditor.Editor.Preview.Models
 import KMEditor.Editor.TagEditor.Models as TagEditorModel

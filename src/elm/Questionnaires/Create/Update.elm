@@ -8,7 +8,7 @@ import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Form
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
 import Questionnaires.Common.Questionnaire exposing (Questionnaire)

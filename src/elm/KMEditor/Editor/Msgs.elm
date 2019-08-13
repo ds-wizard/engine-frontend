@@ -2,7 +2,9 @@ module KMEditor.Editor.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
 import KMEditor.Common.BranchDetail exposing (BranchDetail)
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel, Level, Metric)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import KMEditor.Editor.KMEditor.Msgs
 import KMEditor.Editor.Models exposing (EditorType)
 import KMEditor.Editor.Preview.Msgs

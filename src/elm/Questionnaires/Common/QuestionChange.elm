@@ -6,7 +6,8 @@ module Questionnaires.Common.QuestionChange exposing
     , getQuestionUuid
     )
 
-import KMEditor.Common.Models.Entities as Entities exposing (Chapter, Question)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
 
 
 type QuestionChange
@@ -31,10 +32,10 @@ getQuestionUuid : QuestionChange -> String
 getQuestionUuid change =
     case change of
         QuestionAdd data ->
-            Entities.getQuestionUuid data.question
+            Question.getUuid data.question
 
         QuestionChange data ->
-            Entities.getQuestionUuid data.question
+            Question.getUuid data.question
 
 
 getChapter : QuestionChange -> Chapter

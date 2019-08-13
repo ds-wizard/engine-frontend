@@ -5,7 +5,8 @@ import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationDat
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KMEditor.Common.Models.Entities exposing (Answer, Chapter, Expert, Level, Metric, Question, ResourcePageReferenceData, URLReferenceData)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModels
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import List.Extra as List
 import Round
 import String exposing (fromFloat, fromInt)
@@ -46,9 +47,15 @@ viewChapterReport model metrics chapterReport =
 
             else
                 [ div [ class "col-12" ] [ viewMetricsTable metrics chapterReport ] ]
+
+        chapterTitle =
+            model.questionnaire.knowledgeModel
+                |> KnowledgeModels.getChapter chapterReport.chapterUuid
+                |> Maybe.map .title
+                |> Maybe.withDefault "Unknown"
     in
     div []
-        [ h3 [] [ text <| getTitleByUuid model.questionnaire.knowledgeModel.chapters chapterReport.chapterUuid ]
+        [ h3 [] [ text chapterTitle ]
         , viewIndications chapterReport.indications
         , div [ class "row" ] content
         ]

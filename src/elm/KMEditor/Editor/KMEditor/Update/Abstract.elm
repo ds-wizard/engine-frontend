@@ -13,8 +13,8 @@ module KMEditor.Editor.KMEditor.Update.Abstract exposing
 import Dict exposing (Dict)
 import Form
 import Form.Validate exposing (Validation)
-import KMEditor.Common.Models.Events exposing (Event)
-import KMEditor.Common.Models.Path exposing (Path, PathNode, getParentUuid)
+import KMEditor.Common.Events.Event exposing (Event)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
 import KMEditor.Editor.KMEditor.Models exposing (Model, getEditorContext, insertEditor, setAlert)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
@@ -30,8 +30,7 @@ import Utils exposing (getUuid)
 
 type alias AddEntityConfig entity editorData =
     { newEntity : String -> entity
-    , createEntityEditor : EditorContext -> Path -> (String -> EditorState) -> entity -> Dict String Editor -> Dict String Editor
-    , createPathNode : String -> PathNode
+    , createEntityEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> entity -> Dict String Editor -> Dict String Editor
     , addEntity : entity -> editorData -> Editor
     }
 
@@ -46,7 +45,7 @@ addEntity cfg cmd seed model editorData =
             cfg.newEntity newUuid
 
         editorsWithEntity =
-            cfg.createEntityEditor (getEditorContext model) (editorData.path ++ [ cfg.createPathNode editorData.uuid ]) (\_ -> Added) entity model.editors
+            cfg.createEntityEditor (getEditorContext model) editorData.parentUuid (\_ -> Added) model.knowledgeModel entity model.editors
 
         newParentEditor =
             cfg.addEntity entity editorData
@@ -141,7 +140,7 @@ withGenerateEvent cfg seed model editorData callback =
 type alias DeleteEntityConfig editorData =
     { removeEntity : (String -> Children -> Children) -> String -> Editor -> Editor
     , createEditor : editorData -> Editor
-    , createDeleteEvent : String -> Path -> Seed -> ( Event, Seed )
+    , createDeleteEvent : String -> String -> Seed -> ( Event, Seed )
     }
 
 
@@ -153,7 +152,7 @@ deleteEntity cfg seed model uuid editorData =
                 Dict.remove uuid model.editors
 
             parentUuid =
-                getParentUuid editorData.path
+                Just editorData.parentUuid
 
             editorsWithKm =
                 Maybe.map (updateEditor newEditors (cfg.removeEntity Children.removeChild uuid)) parentUuid
@@ -170,13 +169,13 @@ deleteEntity cfg seed model uuid editorData =
                 Dict.insert editorData.uuid newEditor model.editors
 
             ( event, newSeed ) =
-                cfg.createDeleteEvent editorData.uuid editorData.path seed
+                cfg.createDeleteEvent editorData.uuid editorData.parentUuid seed
 
             events =
                 model.events ++ [ event ]
 
             parentUuid =
-                getParentUuid editorData.path
+                Just editorData.parentUuid
 
             editorsWithKm =
                 Maybe.map (updateEditor newEditors (cfg.removeEntity Children.deleteChild uuid)) parentUuid

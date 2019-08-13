@@ -6,6 +6,7 @@ module Utils exposing
     , getUuid
     , listFilterJust
     , listInsertIf
+    , nilUuid
     , packageIdToComponents
     , pair
     , stringToInt
@@ -54,6 +55,11 @@ getUuid seed =
             step Uuid.uuidGenerator seed
     in
     ( Uuid.toString uuid, newSeed )
+
+
+nilUuid : String
+nilUuid =
+    "00000000-0000-0000-0000-000000000000"
 
 
 dispatch : a -> Cmd a
