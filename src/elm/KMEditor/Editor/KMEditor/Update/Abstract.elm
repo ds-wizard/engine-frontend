@@ -45,7 +45,7 @@ addEntity cfg cmd seed model editorData =
             cfg.newEntity newUuid
 
         editorsWithEntity =
-            cfg.createEntityEditor (getEditorContext model) editorData.parentUuid (\_ -> Added) model.knowledgeModel entity model.editors
+            cfg.createEntityEditor (getEditorContext model) editorData.uuid (\_ -> Added) model.knowledgeModel entity model.editors
 
         newParentEditor =
             cfg.addEntity entity editorData
