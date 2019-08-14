@@ -34,7 +34,7 @@ import KMEditor.Common.KnowledgeModel.KnowledgeModelEntities as KnowledgeModelEn
 import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
 import KMEditor.Common.KnowledgeModel.Reference exposing (Reference)
 import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
-import Utils exposing (nilUuid)
+import Utils exposing (listFilterJust, nilUuid)
 
 
 type alias KnowledgeModel =
@@ -127,70 +127,51 @@ getTags km =
 
 getChapterQuestions : String -> KnowledgeModel -> List Question
 getChapterQuestions =
-    getEntities .chapters .questionUuids resolveQuestions
+    getEntities .chapters .questionUuids .questions
 
 
 getQuestionAnswers : String -> KnowledgeModel -> List Answer
 getQuestionAnswers =
-    getEntities .questions Question.getAnswerUuids resolveAnswers
+    getEntities .questions Question.getAnswerUuids .answers
 
 
 getQuestionReferences : String -> KnowledgeModel -> List Reference
 getQuestionReferences =
-    getEntities .questions Question.getReferenceUuids resolveReferences
+    getEntities .questions Question.getReferenceUuids .references
 
 
 getQuestionExperts : String -> KnowledgeModel -> List Expert
 getQuestionExperts =
-    getEntities .questions Question.getExpertUuids resolveExperts
+    getEntities .questions Question.getExpertUuids .experts
 
 
 getQuestionItemTemplateQuestions : String -> KnowledgeModel -> List Question
 getQuestionItemTemplateQuestions =
-    getEntities .questions Question.getItemQuestionUuids resolveQuestions
+    getEntities .questions Question.getItemQuestionUuids .questions
 
 
 getAnswerFollowupQuestions : String -> KnowledgeModel -> List Question
 getAnswerFollowupQuestions =
-    getEntities .answers .followUpUuids resolveQuestions
+    getEntities .answers .followUpUuids .questions
 
 
 getEntities :
     (KnowledgeModelEntities -> Dict String parent)
     -> (parent -> List String)
-    -> (KnowledgeModel -> List String -> List entity)
+    -> (KnowledgeModelEntities -> Dict String entity)
     -> String
     -> KnowledgeModel
     -> List entity
-getEntities getParents getChildUuids resolveFn uuid km =
+getEntities getParents getChildUuids getChildren uuid km =
     Dict.get uuid (getParents km.entities)
-        |> Maybe.map (\parent -> resolveFn km (getChildUuids parent))
+        |> Maybe.map getChildUuids
         |> Maybe.withDefault []
-
-
-resolveAnswers : KnowledgeModel -> List String -> List Answer
-resolveAnswers km =
-    resolveEntities km.entities.answers
-
-
-resolveQuestions : KnowledgeModel -> List String -> List Question
-resolveQuestions km =
-    resolveEntities km.entities.questions
-
-
-resolveExperts : KnowledgeModel -> List String -> List Expert
-resolveExperts km =
-    resolveEntities km.entities.experts
-
-
-resolveReferences : KnowledgeModel -> List String -> List Reference
-resolveReferences km =
-    resolveEntities km.entities.references
+        |> resolveEntities (getChildren km.entities)
 
 
 resolveEntities : Dict String a -> List String -> List a
-resolveEntities entities uuids =
-    Dict.values <| Dict.filter (\uuid _ -> List.member uuid uuids) entities
+resolveEntities entities =
+    listFilterJust << List.map (\uuid -> Dict.get uuid entities)
 
 
 
