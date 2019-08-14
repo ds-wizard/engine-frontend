@@ -8,6 +8,7 @@ import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Common.Setters exposing (setQuestionnaires)
 import Msgs
 import Questionnaires.Common.Questionnaire exposing (Questionnaire)
@@ -27,7 +28,7 @@ update : (Msg -> Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update wrapMsg msg appState model =
     case msg of
         GetQuestionnairesCompleted result ->
-            handleGetQuestionnairesCompleted model result
+            handleGetQuestionnairesCompleted appState model result
 
         ShowHideDeleteQuestionnaire mbQuestionnaire ->
             handleShowHideDeleteQuestionnaire model mbQuestionnaire
@@ -42,7 +43,7 @@ update wrapMsg msg appState model =
             handleShowExportQuestionnaire wrapMsg appState model questionnaire
 
         ExportModalMsg exportModalMsg ->
-            handleExportModal exportModalMsg model
+            handleExportModal exportModalMsg appState model
 
         DeleteQuestionnaireMigration uuid ->
             handleDeleteMigration wrapMsg appState model uuid
@@ -55,11 +56,11 @@ update wrapMsg msg appState model =
 -- Handlers
 
 
-handleGetQuestionnairesCompleted : Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
-handleGetQuestionnairesCompleted model result =
+handleGetQuestionnairesCompleted : AppState -> Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnairesCompleted appState model result =
     applyResult
         { setResult = setQuestionnaires
-        , defaultError = "Unable to get questionnaires."
+        , defaultError = lg "apiError.questionnaires.getListError" appState
         , model = model
         , result = result
         }
@@ -94,12 +95,12 @@ handleDeleteQuestionnaireCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> R
 handleDeleteQuestionnaireCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( { model | deletingQuestionnaire = Success "Questionnaire was sucessfully deleted", questionnaires = Loading, questionnaireToBeDeleted = Nothing }
+            ( { model | deletingQuestionnaire = Success <| lg "apiSuccess.questionnaires.delete" appState, questionnaires = Loading, questionnaireToBeDeleted = Nothing }
             , Cmd.map wrapMsg <| fetchData appState
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = getServerError error "Questionnaire could not be deleted" }
+            ( { model | deletingQuestionnaire = getServerError error <| lg "apiError.questionnaires.deleteError" appState }
             , getResultCmd result
             )
 
@@ -111,11 +112,11 @@ handleShowExportQuestionnaire wrapMsg appState model questionnaire =
     )
 
 
-handleExportModal : ExportModal.Msg -> Model -> ( Model, Cmd Msgs.Msg )
-handleExportModal exportModalMsg model =
+handleExportModal : ExportModal.Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+handleExportModal exportModalMsg appState model =
     let
         ( exportModalModel, cmd ) =
-            ExportModal.update exportModalMsg model.exportModalModel
+            ExportModal.update exportModalMsg appState model.exportModalModel
     in
     ( { model | exportModalModel = exportModalModel }, cmd )
 
@@ -131,11 +132,11 @@ handleDeleteMigrationCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Resul
 handleDeleteMigrationCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( { model | deletingMigration = Success "Questionnaire migration was canceled.", questionnaires = Loading }
+            ( { model | deletingMigration = Success <| lg "apiSuccess.questionnaires.migration.delete" appState, questionnaires = Loading }
             , Cmd.map wrapMsg <| fetchData appState
             )
 
         Err error ->
-            ( { model | deletingMigration = getServerError error "Questionnaire migration could not be canceled." }
+            ( { model | deletingMigration = getServerError error <| lg "apiError.questionnaires.migrations.deleteError" appState }
             , getResultCmd result
             )

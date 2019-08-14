@@ -5,7 +5,9 @@ module Common.Questionnaire.View exposing
 
 import Common.ApiError exposing (ApiError)
 import Common.AppState exposing (AppState)
+import Common.FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 import Common.Html exposing (emptyNode, fa)
+import Common.Locale exposing (l, lg, lgx, lx)
 import Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, calculateUnansweredQuestions, getActiveChapter)
 import Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature exposing (QuestionnaireFeature)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
@@ -13,7 +15,6 @@ import Common.Questionnaire.Views.FeedbackModal as FeedbackModal
 import Common.Questionnaire.Views.SummaryReport as SummaryReport
 import Common.Questionnaire.Views.Todos as Todos
 import Common.View.Page as Page
-import FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -31,6 +32,16 @@ import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
 import Roman exposing (toRomanNumber)
 import String exposing (fromInt)
 import Utils exposing (listInsertIf)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Common.Questionnaire.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.Questionnaire.View"
 
 
 type alias ViewQuestionnaireConfig =
@@ -54,7 +65,7 @@ viewQuestionnaire cfg appState model =
                     emptyNode
 
         extraActions =
-            viewExtraNavigation cfg model
+            viewExtraNavigation appState cfg model
     in
     div [ class "Questionnaire" ]
         [ div [ class "chapter-list" ]
@@ -64,7 +75,7 @@ viewQuestionnaire cfg appState model =
             ]
         , div [ id "questionnaire-body", class "questionnaire-body" ]
             (pageView appState cfg model)
-        , FeedbackModal.view model
+        , FeedbackModal.view appState model
         ]
 
 
@@ -80,7 +91,7 @@ levelSelection cfg appState model levels selectedLevel =
     in
     div [ class "level-selection card bg-light" ]
         [ div [ class "card-body" ]
-            [ label [] [ text "Current Phase" ]
+            [ label [] [ lgx "questionnaire.currentPhase" appState ]
             , select [ class "form-control", onInput SetLevel, disabled isDisabled ]
                 (List.map (levelSelectionOption selectedLevel) levels)
             ]
@@ -112,7 +123,7 @@ chapterList appState model =
             KnowledgeModel.getChapters model.questionnaire.knowledgeModel
     in
     div [ class "nav nav-pills flex-column" ]
-        ([ strong [] [ text "Chapters" ] ]
+        ([ strong [] [ lgx "chapters" appState ] ]
             ++ List.indexedMap (chapterListChapter appState model activeChapter) chapters
         )
 
@@ -153,8 +164,8 @@ viewChapterAnsweredIndication appState model chapter =
 -- Extra navigation
 
 
-viewExtraNavigation : ViewQuestionnaireConfig -> Model -> Html Msg
-viewExtraNavigation cfg model =
+viewExtraNavigation : AppState -> ViewQuestionnaireConfig -> Model -> Html Msg
+viewExtraNavigation appState cfg model =
     let
         todosLength =
             QuestionnaireDetail.todosLength model.questionnaire
@@ -164,12 +175,12 @@ viewExtraNavigation cfg model =
 
         extraNavigation =
             []
-                |> listInsertIf (viewTodosLink todosLength model.activePage) todosLinkVisible
-                |> listInsertIf (viewSummaryReportLink model.activePage) (QuestionnaireFeature.summaryReportEnabled cfg.features)
+                |> listInsertIf (viewTodosLink appState todosLength model.activePage) todosLinkVisible
+                |> listInsertIf (viewSummaryReportLink appState model.activePage) (QuestionnaireFeature.summaryReportEnabled cfg.features)
     in
     if List.length extraNavigation > 0 then
         div [ class "nav nav-pills flex-column" ]
-            ([ strong [] [ text "More" ] ]
+            ([ strong [] [ lx_ "extraNavigation.more" appState ] ]
                 ++ extraNavigation
             )
 
@@ -177,14 +188,14 @@ viewExtraNavigation cfg model =
         emptyNode
 
 
-viewSummaryReportLink : ActivePage -> Html Msg
-viewSummaryReportLink =
-    viewLink "Summary Report" PageSummaryReport ViewSummaryReport Nothing
+viewSummaryReportLink : AppState -> ActivePage -> Html Msg
+viewSummaryReportLink appState =
+    viewLink (lg "questionnaire.summaryReport" appState) PageSummaryReport ViewSummaryReport Nothing
 
 
-viewTodosLink : Int -> ActivePage -> Html Msg
-viewTodosLink todosCount =
-    viewLink "TODOs" PageTodos ViewTodos (Just todosCount)
+viewTodosLink : AppState -> Int -> ActivePage -> Html Msg
+viewTodosLink appState todosCount =
+    viewLink (lg "questionnaire.todos" appState) PageTodos ViewTodos (Just todosCount)
 
 
 viewLink : String -> ActivePage -> Msg -> Maybe Int -> ActivePage -> Html Msg
@@ -225,10 +236,10 @@ pageView appState cfg model =
             ]
 
         PageSummaryReport ->
-            [ Page.actionResultView (SummaryReport.view model) model.summaryReport ]
+            [ Page.actionResultView appState (SummaryReport.view appState model) model.summaryReport ]
 
         PageTodos ->
-            [ Todos.view model ]
+            [ Todos.view appState model ]
 
 
 chapterHeader : Model -> Chapter -> Html Msg
@@ -253,7 +264,7 @@ formConfig appState cfg model =
     let
         customActions =
             []
-                |> listInsertIf (viewTodoAction model) (QuestionnaireFeature.todosEnabled cfg.features)
+                |> listInsertIf (viewTodoAction appState model) (QuestionnaireFeature.todosEnabled cfg.features)
                 |> listInsertIf viewFeedbackAction (QuestionnaireFeature.feedbackEnabled appState cfg.features)
 
         isDesirable =
@@ -268,6 +279,7 @@ formConfig appState cfg model =
     , disabled = cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
     , getExtraQuestionClass = cfg.getExtraQuestionClass
     , renderer = cfg.createRenderer model.questionnaire.knowledgeModel (Maybe.withDefault [] cfg.levels) model.metrics
+    , appState = appState
     }
 
 
@@ -275,8 +287,8 @@ formConfig appState cfg model =
 -- Custom form actions
 
 
-viewTodoAction : Model -> String -> List String -> Html CustomFormMessage
-viewTodoAction model questionId path =
+viewTodoAction : AppState -> Model -> String -> List String -> Html CustomFormMessage
+viewTodoAction appState model questionId path =
     let
         activeChapterUuid =
             Maybe.map .uuid <| getActiveChapter model
@@ -292,9 +304,9 @@ viewTodoAction model questionId path =
     if Maybe.isJust activeChapterUuid then
         if hasTodo then
             span [ class "action action-todo" ]
-                [ span [] [ text "TODO" ]
+                [ span [] [ lx_ "todoAction.todo" appState ]
                 , a
-                    [ title "Remove TODO"
+                    [ title <| l_ "todoAction.removeTodo" appState
                     , onClick <| RemoveTodo currentPath
                     ]
                     [ fa "times" ]
@@ -303,7 +315,7 @@ viewTodoAction model questionId path =
         else
             a [ class "action action-add-todo", onClick <| AddTodo currentPath ]
                 [ fa "plus"
-                , span [] [ span [] [ text "Add Todo" ] ]
+                , span [] [ span [] [ lx_ "todoAction.addTodo" appState ] ]
                 ]
 
     else

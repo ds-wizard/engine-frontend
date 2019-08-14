@@ -1,13 +1,15 @@
-module Users.Edit.Models exposing (Model, UserEditForm, UserPasswordForm, View(..), encodeUserEditForm, encodeUserPasswordForm, initEmptyUserEditForm, initUserEditForm, initUserPasswordForm, initialModel, userEditFormValidation, userPasswordFormValidation, userToUserEditFormInitials)
+module Users.Edit.Models exposing
+    ( Model
+    , View(..)
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Form.Validate exposing (validateConfirmation)
 import Form exposing (Form)
-import Form.Field as Field
-import Form.Validate as Validate exposing (..)
-import Json.Encode as Encode exposing (..)
-import Users.Common.Models exposing (User)
+import Users.Common.User exposing (User)
+import Users.Common.UserEditForm as UserEditForm exposing (UserEditForm)
+import Users.Common.UserPasswordForm as UserPasswordForm exposing (UserPasswordForm)
 
 
 type View
@@ -33,82 +35,6 @@ initialModel uuid =
     , user = Loading
     , savingUser = Unset
     , savingPassword = Unset
-    , userForm = initEmptyUserEditForm
-    , passwordForm = initUserPasswordForm
+    , userForm = UserEditForm.initEmpty
+    , passwordForm = UserPasswordForm.init
     }
-
-
-type alias UserEditForm =
-    { email : String
-    , name : String
-    , surname : String
-    , role : String
-    , active : Bool
-    }
-
-
-initEmptyUserEditForm : Form CustomFormError UserEditForm
-initEmptyUserEditForm =
-    Form.initial [] userEditFormValidation
-
-
-initUserEditForm : User -> Form CustomFormError UserEditForm
-initUserEditForm user =
-    Form.initial (userToUserEditFormInitials user) userEditFormValidation
-
-
-userEditFormValidation : Validation CustomFormError UserEditForm
-userEditFormValidation =
-    Validate.map5 UserEditForm
-        (Validate.field "email" Validate.email)
-        (Validate.field "name" Validate.string)
-        (Validate.field "surname" Validate.string)
-        (Validate.field "role" Validate.string)
-        (Validate.field "active" Validate.bool)
-
-
-encodeUserEditForm : String -> UserEditForm -> Encode.Value
-encodeUserEditForm uuid form =
-    Encode.object
-        [ ( "uuid", Encode.string uuid )
-        , ( "email", Encode.string form.email )
-        , ( "name", Encode.string form.name )
-        , ( "surname", Encode.string form.surname )
-        , ( "role", Encode.string form.role )
-        , ( "active", Encode.bool form.active )
-        ]
-
-
-userToUserEditFormInitials : User -> List ( String, Field.Field )
-userToUserEditFormInitials user =
-    [ ( "email", Field.string user.email )
-    , ( "name", Field.string user.name )
-    , ( "surname", Field.string user.surname )
-    , ( "role", Field.string user.role )
-    , ( "active", Field.bool user.active )
-    ]
-
-
-type alias UserPasswordForm =
-    { password : String
-    , passwordConfirmation : String
-    }
-
-
-initUserPasswordForm : Form CustomFormError UserPasswordForm
-initUserPasswordForm =
-    Form.initial [] userPasswordFormValidation
-
-
-userPasswordFormValidation : Validation CustomFormError UserPasswordForm
-userPasswordFormValidation =
-    Validate.map2 UserPasswordForm
-        (Validate.field "password" Validate.string)
-        (Validate.field "password" Validate.string |> validateConfirmation "passwordConfirmation")
-
-
-encodeUserPasswordForm : UserPasswordForm -> Encode.Value
-encodeUserPasswordForm form =
-    Encode.object
-        [ ( "password", Encode.string form.password )
-        ]

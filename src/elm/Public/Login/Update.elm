@@ -6,6 +6,7 @@ import Auth.Msgs
 import Common.Api.Tokens as TokensApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import Msgs
 import Public.Login.Models exposing (Model)
 import Public.Login.Msgs exposing (Msg(..))
@@ -27,14 +28,14 @@ update msg wrapMsg appState model =
             )
 
         LoginCompleted result ->
-            loginCompleted model result
+            loginCompleted appState model result
 
         GetProfileInfoFailed error ->
             ( { model | loggingIn = error }, Cmd.none )
 
 
-loginCompleted : Model -> Result ApiError String -> ( Model, Cmd Msgs.Msg )
-loginCompleted model result =
+loginCompleted : AppState -> Model -> Result ApiError String -> ( Model, Cmd Msgs.Msg )
+loginCompleted appState model result =
     case result of
         Ok token ->
             case parseJwt token of
@@ -42,7 +43,7 @@ loginCompleted model result =
                     ( model, dispatch (Msgs.AuthMsg <| Auth.Msgs.Token token jwt) )
 
                 Nothing ->
-                    ( { model | loggingIn = Error "Invalid response from the server" }, Cmd.none )
+                    ( { model | loggingIn = Error <| lg "apiError.tokens.fetchTokenError" appState }, Cmd.none )
 
         Err error ->
-            ( { model | loggingIn = getServerError error "Login failed" }, Cmd.none )
+            ( { model | loggingIn = getServerError error <| lg "apiError.tokens.fetchTokenError" appState }, Cmd.none )

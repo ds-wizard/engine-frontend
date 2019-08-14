@@ -5,52 +5,48 @@ import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
+import Common.Locale exposing (lg)
 import Form
 import Msgs
+import Public.Common.SignupForm as SignupForm
 import Public.Signup.Models exposing (..)
 import Public.Signup.Msgs exposing (Msg(..))
-import Random exposing (Seed, step)
-import Utils exposing (tuplePrepend)
-import Uuid
 
 
-update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model
 
         PostSignupCompleted result ->
-            handlePostSignupCompleted result model |> tuplePrepend appState.seed
+            handlePostSignupCompleted appState result model
 
 
-handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 handleForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just signupForm ) ->
             let
-                ( newUuid, newSeed ) =
-                    step Uuid.uuidGenerator appState.seed
-
                 body =
-                    encodeSignupForm (Uuid.toString newUuid) signupForm
+                    SignupForm.encode signupForm
 
                 cmd =
                     Cmd.map wrapMsg <|
                         UsersApi.postUserPublic body appState PostSignupCompleted
             in
-            ( newSeed, { model | signingUp = Loading }, cmd )
+            ( { model | signingUp = Loading }, cmd )
 
         _ ->
             let
                 newModel =
-                    { model | form = Form.update signupFormValidation formMsg model.form }
+                    { model | form = Form.update SignupForm.validation formMsg model.form }
             in
-            ( appState.seed, newModel, Cmd.none )
+            ( newModel, Cmd.none )
 
 
-handlePostSignupCompleted : Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
-handlePostSignupCompleted result model =
+handlePostSignupCompleted : AppState -> Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
+handlePostSignupCompleted appState result model =
     case result of
         Ok _ ->
             ( { model | signingUp = Success "" }, Cmd.none )
@@ -61,6 +57,6 @@ handlePostSignupCompleted result model =
                     setFormErrors error model.form
 
                 errorMessage =
-                    getServerError error "Sign up process failed."
+                    getServerError error <| lg "apiError.users.public.postError" appState
             in
             ( { model | signingUp = errorMessage, form = form }, Cmd.none )

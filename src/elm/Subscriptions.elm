@@ -5,7 +5,7 @@ import KMEditor.Subscriptions
 import KnowledgeModels.Subscriptions
 import Models exposing (Model)
 import Msgs exposing (Msg(..))
-import Routing exposing (Route(..))
+import Routes
 
 
 subscriptions : Model -> Sub Msg
@@ -13,10 +13,10 @@ subscriptions model =
     let
         currentViewSubscriptions =
             case model.appState.route of
-                KMEditor route ->
+                Routes.KMEditorRoute route ->
                     KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel
 
-                KnowledgeModels route ->
+                Routes.KnowledgeModelsRoute route ->
                     Sub.map KnowledgeModelsMsg <| KnowledgeModels.Subscriptions.subscriptions route model.kmPackagesModel
 
                 _ ->

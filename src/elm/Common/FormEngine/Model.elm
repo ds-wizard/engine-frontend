@@ -1,4 +1,4 @@
-module FormEngine.Model exposing
+module Common.FormEngine.Model exposing
     ( Form
     , FormElement(..)
     , FormElementState

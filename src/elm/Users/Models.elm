@@ -3,7 +3,7 @@ module Users.Models exposing (Model, initLocalModel, initialModel)
 import Users.Create.Models
 import Users.Edit.Models
 import Users.Index.Models
-import Users.Routing exposing (Route(..))
+import Users.Routes exposing (Route(..))
 
 
 type alias Model =
@@ -24,11 +24,11 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        Create ->
+        CreateRoute ->
             { model | createModel = Users.Create.Models.initialModel }
 
-        Edit uuid ->
+        EditRoute uuid ->
             { model | editModel = Users.Edit.Models.initialModel uuid }
 
-        Index ->
+        IndexRoute ->
             { model | indexModel = Users.Index.Models.initialModel }

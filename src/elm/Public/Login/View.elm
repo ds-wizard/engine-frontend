@@ -1,44 +1,50 @@
 module Public.Login.View exposing (view)
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg, lgx)
 import Html exposing (..)
 import Html.Attributes exposing (class, for, id, placeholder, type_)
 import Html.Events exposing (..)
-import Msgs
 import Public.Common.View exposing (publicForm)
 import Public.Login.Models exposing (Model)
 import Public.Login.Msgs exposing (Msg(..))
-import Public.Routing exposing (Route(..))
-import Routing exposing (Route(..))
+import Public.Routes exposing (Route(..))
+import Routes
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+l_ : String -> AppState -> String
+l_ =
+    l "Public.Login.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     div [ class "row justify-content-center Public__Login" ]
-        [ loginForm wrapMsg model ]
+        [ loginForm appState model ]
 
 
-loginForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-loginForm wrapMsg model =
+loginForm : AppState -> Model -> Html Msg
+loginForm appState model =
     let
         formContent =
             div []
                 [ div [ class "form-group" ]
-                    [ label [ for "email" ] [ text "Email" ]
-                    , input [ onInput (wrapMsg << Email), id "email", type_ "text", class "form-control", placeholder "Email" ] []
+                    [ label [ for "email" ] [ lgx "user.email" appState ]
+                    , input [ onInput Email, id "email", type_ "text", class "form-control", placeholder <| lg "user.email" appState ] []
                     ]
                 , div [ class "form-group" ]
-                    [ label [ for "password" ] [ text "Password" ]
-                    , input [ onInput (wrapMsg << Password), id "password", type_ "password", class "form-control", placeholder "Password" ] []
+                    [ label [ for "password" ] [ lgx "user.password" appState ]
+                    , input [ onInput Password, id "password", type_ "password", class "form-control", placeholder <| lg "user.password" appState ] []
                     ]
                 ]
 
         formConfig =
-            { title = "Log in"
-            , submitMsg = wrapMsg DoLogin
+            { title = l_ "form.title" appState
+            , submitMsg = DoLogin
             , actionResult = model.loggingIn
-            , submitLabel = "Log in"
+            , submitLabel = l_ "form.submit" appState
             , formContent = formContent
-            , link = Just ( Public ForgottenPassword, "Forgot your password?" )
+            , link = Just ( Routes.PublicRoute ForgottenPasswordRoute, l_ "form.link" appState )
             }
     in
-    publicForm formConfig
+    publicForm appState formConfig

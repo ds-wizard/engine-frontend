@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
 import Common.Config exposing (Registry(..))
 import Common.Html exposing (emptyNode, fa, linkTo)
+import Common.Locale exposing (l, lg, lh, lx)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormResult as FormResult
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
@@ -11,8 +12,23 @@ import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Events exposing (onInput)
 import KnowledgeModels.Import.RegistryImport.Models exposing (Model)
 import KnowledgeModels.Import.RegistryImport.Msgs exposing (Msg(..))
-import KnowledgeModels.Routing
-import Routing
+import KnowledgeModels.Routes
+import Routes
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "KnowledgeModels.Import.RegistryImport.View"
+
+
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "KnowledgeModels.Import.RegistryImport.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "KnowledgeModels.Import.RegistryImport.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -21,7 +37,7 @@ view appState model =
         content =
             case model.pulling of
                 Success _ ->
-                    viewImported model.packageId
+                    viewImported appState model.packageId
 
                 _ ->
                     viewForm appState model
@@ -36,10 +52,17 @@ viewForm appState model =
         [ FormResult.errorOnlyView model.pulling
         , div [ class "jumbotron" ]
             [ div [ class "input-group" ]
-                [ input [ onInput ChangePackageId, type_ "text", value model.packageId, class "form-control", placeholder "Knowledge Model ID" ] []
+                [ input
+                    [ onInput ChangePackageId
+                    , type_ "text"
+                    , value model.packageId
+                    , class "form-control"
+                    , placeholder <| lg "package.knowledgeModelId" appState
+                    ]
+                    []
                 , div [ class "input-group-append" ]
                     [ ActionButton.button
-                        { label = "Import"
+                        { label = l_ "form.import" appState
                         , result = model.pulling
                         , msg = Submit
                         , dangerous = False
@@ -57,27 +80,26 @@ viewRegistryText appState =
     case appState.config.registry of
         RegistryEnabled url ->
             p []
-                [ text "You can find knowledge models in the "
-                , a [ href url, target "_blank" ] [ text "registry" ]
-                , text "."
-                ]
+                (lh_ "registryLink"
+                    [ a [ href url, target "_blank" ] [ lx_ "registry" appState ]
+                    ]
+                    appState
+                )
 
         _ ->
             emptyNode
 
 
-viewImported : String -> Html Msg
-viewImported packageId =
+viewImported : AppState -> String -> Html Msg
+viewImported appState packageId =
     div [ class "jumbotron" ]
         [ h1 [] [ fa "check" ]
         , p [ class "lead" ]
-            [ text "Knowledge model "
-            , code [] [ text packageId ]
-            , text " has been imported!"
-            ]
+            (lh_ "imported.message" [ code [] [ text packageId ] ] appState)
         , p [ class "lead" ]
-            [ linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Detail packageId)
+            [ linkTo appState
+                (Routes.KnowledgeModelsRoute <| KnowledgeModels.Routes.DetailRoute packageId)
                 [ class "btn btn-primary" ]
-                [ text "View detail" ]
+                [ lx_ "imported.action" appState ]
             ]
         ]

@@ -7,15 +7,16 @@ import Common.Api.Questionnaires as QuestionnairesApi
 import Common.Api.TypeHints as TypeHintsApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.FormEngine.Model exposing (TypeHint, setTypeHintsResult)
+import Common.FormEngine.Msgs
+import Common.FormEngine.Update exposing (updateForm)
+import Common.Locale exposing (lg)
 import Common.Questionnaire.Models exposing (..)
 import Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Common.Questionnaire.Models.FeedbackForm as FeedbackForm
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Form exposing (Form)
-import FormEngine.Model exposing (TypeHint, setTypeHintsResult)
-import FormEngine.Msgs
-import FormEngine.Update exposing (updateForm)
 import KMEditor.Common.Events.Event exposing (Event)
 import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
@@ -44,7 +45,7 @@ update msg appState model =
             handleViewSummaryReport appState model
 
         PostForSummaryReportCompleted result ->
-            handlePostForSummaryReportCompleted model result
+            handlePostForSummaryReportCompleted appState model result
 
         CloseFeedback ->
             handleCloseFeedback model
@@ -56,13 +57,13 @@ update msg appState model =
             handleSendFeedbackForm appState model
 
         PostFeedbackCompleted result ->
-            handlePostFeedbackCompleted model result
+            handlePostFeedbackCompleted appState model result
 
         GetFeedbacksCompleted result ->
-            handleGetFeedbacksCompleted model result
+            handleGetFeedbacksCompleted appState model result
 
         GetTypeHintsCompleted result ->
-            handleGetTypeHintsCompleted model result
+            handleGetTypeHintsCompleted appState model result
 
         ScrollToTodo todo ->
             handleScrollToTodo appState model todo
@@ -72,12 +73,12 @@ update msg appState model =
 -- Handlers
 
 
-handleFormMsg : FormEngine.Msgs.Msg CustomFormMessage ApiError -> AppState -> Model -> ( Model, Cmd Msg )
+handleFormMsg : Common.FormEngine.Msgs.Msg CustomFormMessage ApiError -> AppState -> Model -> ( Model, Cmd Msg )
 handleFormMsg msg appState model =
     case model.activePage of
         PageChapter chapter form ->
             case msg of
-                FormEngine.Msgs.CustomQuestionMsg questionUuid customMsg ->
+                Common.FormEngine.Msgs.CustomQuestionMsg questionUuid customMsg ->
                     case customMsg of
                         FeedbackMsg ->
                             ( { model
@@ -99,11 +100,11 @@ handleFormMsg msg appState model =
                 _ ->
                     let
                         ( updatedForm, cmd ) =
-                            updateForm msg form (loadTypeHints appState model.questionnaire.package.id model.events)
+                            updateForm msg appState form (loadTypeHints appState model.questionnaire.package.id model.events)
 
                         removeLabels newModel =
                             case msg of
-                                FormEngine.Msgs.GroupItemRemove path index ->
+                                Common.FormEngine.Msgs.GroupItemRemove path index ->
                                     removeLabelsFromItem newModel path index
 
                                 _ ->
@@ -166,8 +167,8 @@ handleViewSummaryReport appState model =
     )
 
 
-handlePostForSummaryReportCompleted : Model -> Result ApiError SummaryReport -> ( Model, Cmd Msg )
-handlePostForSummaryReportCompleted model result =
+handlePostForSummaryReportCompleted : AppState -> Model -> Result ApiError SummaryReport -> ( Model, Cmd Msg )
+handlePostForSummaryReportCompleted appState model result =
     case result of
         Ok summaryReport ->
             let
@@ -187,7 +188,7 @@ handlePostForSummaryReportCompleted model result =
             )
 
         Err error ->
-            ( { model | summaryReport = getServerError error "Unable to get summary report." }, Cmd.none )
+            ( { model | summaryReport = getServerError error <| lg "apiError.questionnaires.summaryReport.fetchError" appState }, Cmd.none )
 
 
 handleCloseFeedback : Model -> ( Model, Cmd Msg )
@@ -223,22 +224,22 @@ handleSendFeedbackForm appState model =
             ( { model | feedbackForm = newFeedbackForm }, Cmd.none )
 
 
-handlePostFeedbackCompleted : Model -> Result ApiError Feedback -> ( Model, Cmd Msg )
-handlePostFeedbackCompleted model result =
+handlePostFeedbackCompleted : AppState -> Model -> Result ApiError Feedback -> ( Model, Cmd Msg )
+handlePostFeedbackCompleted appState model result =
     withNoCmd <|
         case result of
             Ok feedback ->
                 { model
-                    | sendingFeedback = Success "Your feedback has been sent."
+                    | sendingFeedback = Success <| lg "apiSuccess.feedbacks.post" appState
                     , feedbackResult = Just feedback
                 }
 
             Err error ->
-                { model | sendingFeedback = getServerError error "Feedback could not be sent." }
+                { model | sendingFeedback = getServerError error <| lg "apiError.feedbacks.postError" appState }
 
 
-handleGetFeedbacksCompleted : Model -> Result ApiError (List Feedback) -> ( Model, Cmd Msg )
-handleGetFeedbacksCompleted model result =
+handleGetFeedbacksCompleted : AppState -> Model -> Result ApiError (List Feedback) -> ( Model, Cmd Msg )
+handleGetFeedbacksCompleted appState model result =
     case model.feedback of
         Loading ->
             case result of
@@ -246,14 +247,14 @@ handleGetFeedbacksCompleted model result =
                     ( { model | feedback = Success feedback }, Cmd.none )
 
                 Err error ->
-                    ( { model | feedback = getServerError error "Unable to get feedback." }, Cmd.none )
+                    ( { model | feedback = getServerError error <| lg "apiError.feedbacks.getError" appState }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-handleGetTypeHintsCompleted : Model -> Result ApiError (List TypeHint) -> ( Model, Cmd Msg )
-handleGetTypeHintsCompleted model result =
+handleGetTypeHintsCompleted : AppState -> Model -> Result ApiError (List TypeHint) -> ( Model, Cmd Msg )
+handleGetTypeHintsCompleted appState model result =
     case model.activePage of
         PageChapter chapter form ->
             let
@@ -263,7 +264,7 @@ handleGetTypeHintsCompleted model result =
                             Success typeHints
 
                         Err err ->
-                            getServerError err "Unable to get type hints."
+                            getServerError err <| lg "apiError.typeHints.getListError" appState
             in
             ( { model | activePage = PageChapter chapter <| setTypeHintsResult actionResult form }
             , Cmd.none

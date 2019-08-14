@@ -2,23 +2,24 @@ module Common.Api.Users exposing (deleteUser, getCurrentUser, getUser, getUsers,
 
 import Common.Api exposing (ToMsg, httpPost, httpPut, jwtDelete, jwtGet, jwtPost, jwtPut)
 import Common.AppState exposing (AppState)
+import Json.Decode as D
 import Json.Encode as Encode exposing (Value)
-import Users.Common.Models exposing (User, userDecoder, userListDecoder)
+import Users.Common.User as User exposing (User)
 
 
 getUsers : AppState -> ToMsg (List User) msg -> Cmd msg
 getUsers =
-    jwtGet "/users" userListDecoder
+    jwtGet "/users" (D.list User.decoder)
 
 
 getUser : String -> AppState -> ToMsg User msg -> Cmd msg
 getUser uuid =
-    jwtGet ("/users/" ++ uuid) userDecoder
+    jwtGet ("/users/" ++ uuid) User.decoder
 
 
 getCurrentUser : AppState -> ToMsg User msg -> Cmd msg
 getCurrentUser =
-    jwtGet "/users/current" userDecoder
+    jwtGet "/users/current" User.decoder
 
 
 postUser : Value -> AppState -> ToMsg () msg -> Cmd msg

@@ -2,7 +2,7 @@ module Common.Api.TypeHints exposing (fetchTypeHints)
 
 import Common.Api exposing (ToMsg, jwtFetch)
 import Common.AppState exposing (AppState)
-import FormEngine.Model exposing (TypeHint, decodeTypeHint)
+import Common.FormEngine.Model exposing (TypeHint, decodeTypeHint)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import KMEditor.Common.Events.Event as Event exposing (Event)

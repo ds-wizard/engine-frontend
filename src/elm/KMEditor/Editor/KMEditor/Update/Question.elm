@@ -12,6 +12,8 @@ module KMEditor.Editor.KMEditor.Update.Question exposing
     , withGenerateQuestionEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
 import KMEditor.Common.KnowledgeModel.Answer as Answer
 import KMEditor.Common.KnowledgeModel.Expert as Expert
@@ -25,6 +27,11 @@ import KMEditor.Editor.KMEditor.Update.Abstract exposing (addEntity, deleteEntit
 import KMEditor.Editor.KMEditor.Update.Events exposing (createAddQuestionEvent, createDeleteQuestionEvent, createEditQuestionEvent)
 import Msgs
 import Random exposing (Seed)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.Question"
 
 
 updateQuestionForm : Model -> Form.Msg -> QuestionEditorData -> Model
@@ -69,13 +76,13 @@ filterTagUuids model uuids =
     List.filter (\uuid -> List.member uuid currentTagUuids) uuids
 
 
-withGenerateQuestionEditEvent : Seed -> Model -> QuestionEditorData -> (Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateQuestionEditEvent seed model =
+withGenerateQuestionEditEvent : AppState -> Seed -> Model -> QuestionEditorData -> (Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateQuestionEditEvent appState seed model =
     withGenerateEvent
         { isDirty = isQuestionEditorDirty
         , formValidation = questionFormValidation (getCurrentIntegrations model)
         , createEditor = QuestionEditor
-        , alert = "Please fix the question errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createAddQuestionEvent
         , createEditEvent = createEditQuestionEvent
         , updateEditorData = updateQuestionEditorData

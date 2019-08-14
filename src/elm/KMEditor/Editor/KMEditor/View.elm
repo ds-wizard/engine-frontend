@@ -2,6 +2,7 @@ module KMEditor.Editor.KMEditor.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
+import Common.Locale exposing (l)
 import Common.View.Modal as Modal exposing (AlertConfig)
 import Html exposing (..)
 import Html.Attributes exposing (class, id)
@@ -12,17 +13,21 @@ import KMEditor.Editor.KMEditor.View.Breadcrumbs exposing (breadcrumbs)
 import KMEditor.Editor.KMEditor.View.Editors exposing (activeEditor)
 import KMEditor.Editor.KMEditor.View.Tree exposing (treeView)
 import Maybe.Extra as Maybe
-import Msgs
 import SplitPane exposing (ViewConfig, createViewConfig)
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         breadcrumbsView =
             case model.activeEditorUuid of
                 Just activeUuid ->
-                    breadcrumbs activeUuid model.editors |> Html.map wrapMsg
+                    breadcrumbs activeUuid model.editors
 
                 _ ->
                     emptyNode
@@ -30,8 +35,8 @@ view wrapMsg appState model =
     div [ class "KMEditor__Editor__KMEditor" ]
         [ div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
-        , SplitPane.view viewConfig (viewTree model) (viewEditor appState model) model.splitPane |> Html.map wrapMsg
-        , Modal.alert (alertConfig model) |> Html.map wrapMsg
+        , SplitPane.view viewConfig (viewTree appState model) (viewEditor appState model) model.splitPane
+        , Modal.alert (alertConfig appState model)
         ]
 
 
@@ -43,10 +48,10 @@ viewConfig =
         }
 
 
-viewTree : Model -> Html Msg
-viewTree model =
+viewTree : AppState -> Model -> Html Msg
+viewTree appState model =
     div [ class "tree-col" ]
-        [ treeView (Maybe.withDefault "" model.activeEditorUuid) model.editors model.knowledgeModel.uuid
+        [ treeView appState (Maybe.withDefault "" model.activeEditorUuid) model.editors model.knowledgeModel.uuid
         ]
 
 
@@ -58,10 +63,10 @@ viewEditor appState model =
         ]
 
 
-alertConfig : Model -> AlertConfig Msg
-alertConfig model =
+alertConfig : AppState -> Model -> AlertConfig Msg
+alertConfig appState model =
     { message = Maybe.withDefault "" model.alert
     , visible = Maybe.isJust model.alert
     , actionMsg = CloseAlert
-    , actionName = "Ok"
+    , actionName = l_ "alert.close" appState
     }

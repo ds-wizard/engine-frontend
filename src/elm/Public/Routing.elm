@@ -1,48 +1,39 @@
 module Public.Routing exposing
-    ( Route(..)
-    , forgottenPasswordConfirmation
+    ( forgottenPasswordConfirmation
     , parsers
     , signupConfirmation
     , toUrl
     )
 
-import Common.Config exposing (Config)
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (lr)
+import Public.Routes exposing (Route(..))
 import Url.Parser exposing (..)
 
 
-type Route
-    = BookReference String
-    | ForgottenPassword
-    | ForgottenPasswordConfirmation String String
-    | Login
-    | Questionnaire
-    | Signup
-    | SignupConfirmation String String
-
-
-parsers : Config -> (Route -> a) -> List (Parser (a -> c) c)
-parsers config wrapRoute =
+parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
+parsers appState wrapRoute =
     let
         publicQuestionnaireRoutes =
-            if config.publicQuestionnaireEnabled then
-                [ map (wrapRoute <| Questionnaire) (s "questionnaire") ]
+            if appState.config.publicQuestionnaireEnabled then
+                [ map (wrapRoute <| QuestionnaireRoute) (s (lr "public.questionnaire" appState)) ]
 
             else
                 []
 
         signUpRoutes =
-            if config.registrationEnabled then
-                [ map (wrapRoute <| Signup) (s "signup")
-                , map (signupConfirmation wrapRoute) (s "signup" </> string </> string)
+            if appState.config.registrationEnabled then
+                [ map (wrapRoute <| SignupRoute) (s (lr "public.signup" appState))
+                , map (signupConfirmation wrapRoute) (s (lr "public.signup" appState) </> string </> string)
                 ]
 
             else
                 []
     in
-    [ map (wrapRoute << BookReference) (s "book-references" </> string)
-    , map (wrapRoute <| ForgottenPassword) (s "forgotten-password")
-    , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
-    , map (wrapRoute <| Login) top
+    [ map (wrapRoute << BookReferenceRoute) (s (lr "public.bookReferences" appState) </> string)
+    , map (wrapRoute <| ForgottenPasswordRoute) (s (lr "public.forgottenPassword" appState))
+    , map (forgottenPasswordConfirmation wrapRoute) (s (lr "public.forgottenPassword" appState) </> string </> string)
+    , map (wrapRoute <| LoginRoute) top
     ]
         ++ publicQuestionnaireRoutes
         ++ signUpRoutes
@@ -50,34 +41,34 @@ parsers config wrapRoute =
 
 signupConfirmation : (Route -> a) -> String -> String -> a
 signupConfirmation wrapRoute userId hash =
-    SignupConfirmation userId hash |> wrapRoute
+    SignupConfirmationRoute userId hash |> wrapRoute
 
 
 forgottenPasswordConfirmation : (Route -> a) -> String -> String -> a
 forgottenPasswordConfirmation wrapRoute userId hash =
-    ForgottenPasswordConfirmation userId hash |> wrapRoute
+    ForgottenPasswordConfirmationRoute userId hash |> wrapRoute
 
 
-toUrl : Route -> List String
-toUrl route =
+toUrl : AppState -> Route -> List String
+toUrl appState route =
     case route of
-        BookReference uuid ->
-            [ "book-references", uuid ]
+        BookReferenceRoute uuid ->
+            [ lr "public.bookReferences" appState, uuid ]
 
-        ForgottenPassword ->
-            [ "forgotten-password" ]
+        ForgottenPasswordRoute ->
+            [ lr "public.forgottenPassword" appState ]
 
-        ForgottenPasswordConfirmation userId hash ->
-            [ "forgotten-password", userId, hash ]
+        ForgottenPasswordConfirmationRoute userId hash ->
+            [ lr "public.forgottenPassword" appState, userId, hash ]
 
-        Login ->
+        LoginRoute ->
             []
 
-        Questionnaire ->
-            [ "questionnaire" ]
+        QuestionnaireRoute ->
+            [ lr "public.questionnaire" appState ]
 
-        Signup ->
-            [ "signup" ]
+        SignupRoute ->
+            [ lr "public.signup" appState ]
 
-        SignupConfirmation userId hash ->
-            [ "signup", userId, hash ]
+        SignupConfirmationRoute userId hash ->
+            [ lr "public.signup" appState, userId, hash ]

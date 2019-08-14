@@ -1,13 +1,25 @@
-module FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
+module Common.FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
+import Common.FormEngine.Model exposing (..)
+import Common.FormEngine.Msgs exposing (Msg(..))
 import Common.Html exposing (emptyNode)
-import FormEngine.Model exposing (..)
-import FormEngine.Msgs exposing (Msg(..))
+import Common.Locale exposing (l, lx)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
 import String exposing (fromInt)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Common.FormEngine.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.FormEngine.View"
 
 
 type QuestionState
@@ -22,6 +34,7 @@ type alias FormViewConfig msg question option err =
     , disabled : Bool
     , getExtraQuestionClass : String -> Maybe String
     , renderer : FormRenderer msg question option err
+    , appState : AppState
     }
 
 
@@ -100,7 +113,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 [ viewLabel config descriptor path (state.value /= Nothing) newHumanIdentifiers
                 , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewChoice config (path ++ [ descriptor.name ]) descriptor state) options)
-                , viewClearAnswer (state.value /= Nothing && not config.disabled) (path ++ [ descriptor.name ])
+                , viewClearAnswer config.appState (state.value /= Nothing && not config.disabled) (path ++ [ descriptor.name ])
                 , viewAdvice config state.value options
                 , viewFollowUps form config (path ++ [ descriptor.name ]) newHumanIdentifiers state.value options
                 ]
@@ -111,13 +124,16 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                 , config.renderer.renderQuestionDescription descriptor.question
                 , div [] (List.indexedMap (viewGroupItem form config (path ++ [ descriptor.name ]) newHumanIdentifiers) items)
                 , if not config.disabled then
-                    button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ] [ i [ class "fa fa-plus" ] [], text "Add" ]
+                    button [ class "btn btn-outline-secondary link-with-icon", onClick (GroupItemAdd (path ++ [ descriptor.name ])) ]
+                        [ i [ class "fa fa-plus" ] []
+                        , lx_ "groupElement.add" config.appState
+                        ]
 
                   else if List.length items == 0 then
-                    i [] [ text "There are no answers yet" ]
+                    i [] [ lx_ "groupElement.noAnswers" config.appState ]
 
                   else
-                    text ""
+                    emptyNode
                 ]
 
         TypeHintFormElement descriptor typeHintConfig state ->
@@ -133,7 +149,7 @@ viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier ord
                     , onBlur HideTypeHints
                     ]
                     []
-                , viewTypeHints form.typeHints path descriptor
+                , viewTypeHints config.appState form.typeHints path descriptor
                 , viewIntegrationReplyExtra typeHintConfig state
                 , config.renderer.renderQuestionDescription descriptor.question
                 ]
@@ -149,7 +165,7 @@ viewIntegrationReplyExtra config state =
 
                 logo =
                     if String.isEmpty config.logo then
-                        text ""
+                        emptyNode
 
                     else
                         img [ src config.logo ] []
@@ -172,8 +188,8 @@ viewTypeHint path descriptorId typeHint =
         ]
 
 
-viewTypeHints : Maybe TypeHints -> List String -> FormItemDescriptor a -> Html (Msg msg err)
-viewTypeHints typeHints path descriptor =
+viewTypeHints : AppState -> Maybe TypeHints -> List String -> FormItemDescriptor a -> Html (Msg msg err)
+viewTypeHints appState typeHints path descriptor =
     let
         currentPath =
             path ++ [ descriptor.name ]
@@ -196,7 +212,7 @@ viewTypeHints typeHints path descriptor =
                     Loading ->
                         div [ class "loading" ]
                             [ i [ class "fa fa-spinner fa-spin" ] []
-                            , text "Loading"
+                            , lx_ "typeHints.loading" appState
                             ]
 
                     Error err ->
@@ -206,12 +222,12 @@ viewTypeHints typeHints path descriptor =
                             ]
 
                     Unset ->
-                        text ""
+                        emptyNode
         in
         div [ class "typehints" ] [ content ]
 
     else
-        text ""
+        emptyNode
 
 
 viewLabel : FormViewConfig msg question option err -> FormItemDescriptor question -> List String -> Bool -> List String -> Html (Msg msg err)
@@ -265,19 +281,19 @@ viewCustomActions questionId path config =
             (List.map (\f -> Html.map (CustomQuestionMsg questionId) <| f questionId path) config.customActions)
 
     else
-        text ""
+        emptyNode
 
 
-viewClearAnswer : Bool -> List String -> Html (Msg msg err)
-viewClearAnswer answered path =
+viewClearAnswer : AppState -> Bool -> List String -> Html (Msg msg err)
+viewClearAnswer appState answered path =
     if answered then
         a [ class "clear-answer", onClick <| Clear path ]
             [ i [ class "fa fa-undo" ] []
-            , text "Clear answer"
+            , lx_ "optionsElement.clearAnswer" appState
             ]
 
     else
-        text ""
+        emptyNode
 
 
 viewGroupItem : Form question option -> FormViewConfig msg question option err -> List String -> List String -> Int -> ItemElement question option -> Html (Msg msg err)
@@ -292,7 +308,7 @@ viewGroupItem form config path humanIdentifiers index itemElement =
                     [ i [ class "fa fa-trash-o" ] [] ]
 
             else
-                text ""
+                emptyNode
 
         ignoreFirstIdentifier =
             itemElement
@@ -339,10 +355,17 @@ viewChoice config path parentDescriptor parentState order optionElement =
     in
     case optionElement of
         SimpleOptionElement { option, name } ->
-            viewOption option (AnswerReply name) (text "")
+            viewOption option (AnswerReply name) emptyNode
 
         DetailedOptionElement { option, name } _ ->
-            viewOption option (AnswerReply name) (i [ class "expand-icon fa fa-list-ul", title "This option leads to some follow up questions" ] [])
+            viewOption option
+                (AnswerReply name)
+                (i
+                    [ class "expand-icon fa fa-list-ul"
+                    , title <| l_ "optionsElement.followUpTitle" config.appState
+                    ]
+                    []
+                )
 
 
 viewAdvice : FormViewConfig msg question option err -> Maybe ReplyValue -> List (OptionElement question option) -> Html (Msg msg err)
@@ -374,7 +397,7 @@ viewAdvice config value options =
             config.renderer.renderOptionAdvice descriptor.option
 
         _ ->
-            text ""
+            emptyNode
 
 
 viewFollowUps : Form question option -> FormViewConfig msg question option err -> List String -> List String -> Maybe ReplyValue -> List (OptionElement question option) -> Html (Msg msg err)
@@ -409,4 +432,4 @@ viewFollowUps form config path humanIdentifiers value options =
                 )
 
         _ ->
-            text ""
+            emptyNode

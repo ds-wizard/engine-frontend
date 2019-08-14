@@ -7,20 +7,22 @@ module Common.AppState exposing
 import Auth.Models exposing (JwtToken, Session)
 import Browser.Navigation exposing (Key)
 import Common.Config exposing (Config, Widget(..))
+import Common.Provisioning exposing (Provisioning)
 import Dict
 import Random exposing (Seed)
-import Routing exposing (Route(..))
+import Routes
 import Time
 
 
 type alias AppState =
-    { route : Route
+    { route : Routes.Route
     , seed : Seed
     , session : Session
     , jwt : Maybe JwtToken
     , key : Key
     , apiUrl : String
     , config : Config
+    , provisioning : Provisioning
     , valid : Bool
     , currentTime : Time.Posix
     }

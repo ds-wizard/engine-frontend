@@ -1,8 +1,10 @@
-module Public.BookReference.Models exposing (BookReference, Model, bookReferenceDecoder, initialModel)
+module Public.BookReference.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
+import Public.Common.BookReference exposing (BookReference)
 
 
 type alias Model =
@@ -14,18 +16,3 @@ initialModel : Model
 initialModel =
     { bookReference = Loading
     }
-
-
-type alias BookReference =
-    { shortUuid : String
-    , content : String
-    , bookChapter : String
-    }
-
-
-bookReferenceDecoder : Decoder BookReference
-bookReferenceDecoder =
-    Decode.succeed BookReference
-        |> required "shortUuid" Decode.string
-        |> required "content" Decode.string
-        |> required "bookChapter" Decode.string

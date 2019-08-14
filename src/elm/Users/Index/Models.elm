@@ -1,7 +1,7 @@
 module Users.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import Users.Common.Models exposing (User)
+import Users.Common.User exposing (User)
 
 
 type alias Model =

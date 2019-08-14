@@ -2,7 +2,7 @@ module Users.Edit.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
 import Form
-import Users.Common.Models exposing (User)
+import Users.Common.User exposing (User)
 import Users.Edit.Models exposing (View)
 
 

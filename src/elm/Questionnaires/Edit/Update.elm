@@ -5,13 +5,15 @@ import Common.Api exposing (getResultCmd)
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Form
 import Msgs
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Common.QuestionnaireEditForm as QuestionnaireEditForm
 import Questionnaires.Edit.Models exposing (Model)
 import Questionnaires.Edit.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
+import Questionnaires.Routes exposing (Route(..))
+import Routes
 import Routing exposing (cmdNavigate)
 
 
@@ -27,7 +29,7 @@ update wrapMsg msg appState model =
             handleForm wrapMsg formMsg appState model
 
         GetQuestionnaireCompleted result ->
-            handleGetQuestionnaireCompleted model result
+            handleGetQuestionnaireCompleted appState model result
 
         PutQuestionnaireCompleted result ->
             handlePutQuestionnaireCompleted appState model result
@@ -61,8 +63,8 @@ handleForm wrapMsg formMsg appState model =
             ( { model | editForm = editForm }, Cmd.none )
 
 
-handleGetQuestionnaireCompleted : Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
-handleGetQuestionnaireCompleted model result =
+handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnaireCompleted appState model result =
     case result of
         Ok questionnaire ->
             ( { model
@@ -73,7 +75,7 @@ handleGetQuestionnaireCompleted model result =
             )
 
         Err error ->
-            ( { model | questionnaire = getServerError error "Unable to get questionnaire detail." }
+            ( { model | questionnaire = getServerError error <| lg "apiError.questionnaires.getError" appState }
             , getResultCmd result
             )
 
@@ -82,9 +84,9 @@ handlePutQuestionnaireCompleted : AppState -> Model -> Result ApiError () -> ( M
 handlePutQuestionnaireCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key <| Routing.Questionnaires Index )
+            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute IndexRoute )
 
         Err error ->
-            ( { model | savingQuestionnaire = getServerError error "Questionnaire could not be saved." }
+            ( { model | savingQuestionnaire = getServerError error <| lg "apiError.questionnaires.putError" appState }
             , getResultCmd result
             )

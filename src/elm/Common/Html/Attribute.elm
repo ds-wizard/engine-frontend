@@ -1,13 +1,20 @@
-module Common.Html.Attribute exposing (detailClass, linkToAttributes, listClass, wideDetailClass)
+module Common.Html.Attribute exposing
+    ( detailClass
+    , linkToAttributes
+    , listClass
+    , wideDetailClass
+    )
 
+import Common.AppState exposing (AppState)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
-import Routing exposing (Route)
+import Routes
+import Routing
 
 
-linkToAttributes : Route -> List (Attribute msg)
-linkToAttributes route =
-    [ href <| Routing.toUrl route
+linkToAttributes : AppState -> Routes.Route -> List (Attribute msg)
+linkToAttributes appState route =
+    [ href <| Routing.toUrl appState route
     ]
 
 

@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Common.Questionnaire.Models exposing (initialModel)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
@@ -13,10 +14,9 @@ import Public.Questionnaire.Msgs exposing (Msg(..))
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
-fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg appState =
-    Cmd.map wrapMsg <|
-        QuestionnairesApi.getQuestionnairePublic appState GetQuestionnaireCompleted
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    QuestionnairesApi.getQuestionnairePublic appState GetQuestionnaireCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -38,7 +38,7 @@ handleGetQuestionnaireCompleted appState model result =
                     { model | questionnaireModel = Success <| initialModel appState questionnaireDetail [] [] }
 
                 Err error ->
-                    { model | questionnaireModel = getServerError error "Unable to get questionnaire." }
+                    { model | questionnaireModel = getServerError error <| lg "apiError.questionnaires.pubic.getError" appState }
     in
     ( newModel, Cmd.none )
 

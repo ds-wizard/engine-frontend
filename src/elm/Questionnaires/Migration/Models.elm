@@ -9,8 +9,8 @@ module Questionnaires.Migration.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
+import Common.FormEngine.Model exposing (FormValue, getAnswerUuid)
 import Common.Questionnaire.Models
-import FormEngine.Model exposing (FormValue, getAnswerUuid)
 import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
 import KMEditor.Common.KnowledgeModel.Level exposing (Level)

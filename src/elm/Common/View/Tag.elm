@@ -1,7 +1,9 @@
 module Common.View.Tag exposing (TagListConfig, list, readOnlyList, selection)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
+import Common.Locale exposing (l, lx)
 import Common.View.Flash as Flash
 import Common.View.FormExtra as FormExtra
 import Html exposing (Html, div, i, input, label, text)
@@ -19,15 +21,25 @@ type alias TagListConfig msg =
     }
 
 
-list : TagListConfig msg -> List Tag -> Html msg
-list config tags =
+l_ : String -> AppState -> String
+l_ =
+    l "Common.View.Tag"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.View.Tag"
+
+
+list : AppState -> TagListConfig msg -> List Tag -> Html msg
+list appState config tags =
     let
         content =
             if List.length tags > 0 then
                 List.map (tagView config) (List.sortBy .name tags)
 
             else
-                [ Flash.info "There are no tags configured for the Knowledge Model" ]
+                [ Flash.info <| l_ "list.empty" appState ]
     in
     div [ class "tag-list" ] content
 
@@ -62,17 +74,19 @@ tagView config tag =
         ]
 
 
-selection : TagListConfig msg -> ActionResult KnowledgeModel -> Html msg
-selection tagListConfig knowledgeModelResult =
+selection : AppState -> TagListConfig msg -> ActionResult KnowledgeModel -> Html msg
+selection appState tagListConfig knowledgeModelResult =
     let
         tagsContent =
             case knowledgeModelResult of
                 Unset ->
                     div [ class "alert alert-light" ]
-                        [ i [] [ text "Select the knowledge model first" ] ]
+                        [ i []
+                            [ lx_ "selection.notSelected" appState ]
+                        ]
 
                 Loading ->
-                    Flash.loader
+                    Flash.loader appState
 
                 Error err ->
                     Flash.error err
@@ -84,13 +98,13 @@ selection tagListConfig knowledgeModelResult =
 
                         extraText =
                             if List.length tags > 0 then
-                                FormExtra.text "You can filter questions in the questionnaire by tags. If no tags are selected, all questions will be used."
+                                FormExtra.text <| l_ "selection.info" appState
 
                             else
                                 emptyNode
                     in
                     div []
-                        [ list tagListConfig tags
+                        [ list appState tagListConfig tags
                         , extraText
                         ]
     in
@@ -100,8 +114,8 @@ selection tagListConfig knowledgeModelResult =
         ]
 
 
-readOnlyList : List String -> List Tag -> Html msg
-readOnlyList selected tags =
+readOnlyList : AppState -> List String -> List Tag -> Html msg
+readOnlyList appState selected tags =
     let
         content =
             if List.length tags > 0 then
@@ -109,7 +123,7 @@ readOnlyList selected tags =
 
             else
                 [ div [ class "alert alert-light" ]
-                    [ i [] [ text "No tags" ] ]
+                    [ i [] [ lx_ "readOnlyList.noTags" appState ] ]
                 ]
     in
     div [ class "tag-list" ] content

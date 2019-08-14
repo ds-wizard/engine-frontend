@@ -5,8 +5,11 @@ import Common.Api exposing (getResultCmd)
 import Common.Api.Organizations as OrganizationsApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Form exposing (Form)
 import Msgs
+import Organization.Common.Organization exposing (Organization)
+import Organization.Common.OrganizationForm as OrganizationForm
 import Organization.Models exposing (..)
 import Organization.Msgs exposing (Msg(..))
 
@@ -20,25 +23,25 @@ update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg 
 update msg wrapMsg appState model =
     case msg of
         GetCurrentOrganizationCompleted result ->
-            getCurrentOrganizationCompleted model result
+            getCurrentOrganizationCompleted appState model result
 
         PutCurrentOrganizationCompleted result ->
-            putCurrentOrganizationCompleted model result
+            putCurrentOrganizationCompleted appState model result
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model
 
 
-getCurrentOrganizationCompleted : Model -> Result ApiError Organization -> ( Model, Cmd Msgs.Msg )
-getCurrentOrganizationCompleted model result =
+getCurrentOrganizationCompleted : AppState -> Model -> Result ApiError Organization -> ( Model, Cmd Msgs.Msg )
+getCurrentOrganizationCompleted appState model result =
     let
         newModel =
             case result of
                 Ok organization ->
-                    { model | form = initOrganizationForm organization, organization = Success organization }
+                    { model | form = OrganizationForm.init organization, organization = Success organization }
 
                 Err error ->
-                    { model | organization = getServerError error "Unable to get organization information." }
+                    { model | organization = getServerError error <| lg "apiError.organizations.getError" appState }
 
         cmd =
             getResultCmd result
@@ -46,16 +49,16 @@ getCurrentOrganizationCompleted model result =
     ( newModel, cmd )
 
 
-putCurrentOrganizationCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-putCurrentOrganizationCompleted model result =
+putCurrentOrganizationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+putCurrentOrganizationCompleted appState model result =
     let
         newResult =
             case result of
                 Ok _ ->
-                    Success "Organization was successfuly saved"
+                    Success <| lg "apiSuccess.organizations.put" appState
 
                 Err error ->
-                    getServerError error "Organization could not be saved"
+                    getServerError error <| lg "apiError.organizations.putError" appState
 
         cmd =
             getResultCmd result
@@ -69,7 +72,7 @@ handleForm formMsg wrapMsg appState model =
         ( Form.Submit, Just form, Success organization ) ->
             let
                 body =
-                    encodeOrganizationForm organization.uuid form
+                    OrganizationForm.encode organization.uuid form
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -80,6 +83,6 @@ handleForm formMsg wrapMsg appState model =
         _ ->
             let
                 form =
-                    Form.update organizationFormValidation formMsg model.form
+                    Form.update OrganizationForm.validation formMsg model.form
             in
             ( { model | form = form }, Cmd.none )

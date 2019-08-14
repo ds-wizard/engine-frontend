@@ -1,7 +1,9 @@
 module KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Html exposing (..)
+import Common.Locale exposing (l, lg, lh, lx)
 import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Dict exposing (Dict)
@@ -48,26 +50,40 @@ import KMEditor.Common.MigrationStateType exposing (MigrationStateType(..))
 import KMEditor.Common.View exposing (diffTreeView)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(..))
-import Msgs
-import Routing exposing (Route(..))
+import KMEditor.Routes exposing (Route(..))
+import Routes
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
-    Page.actionResultView (migrationView wrapMsg model) model.migration
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Migration.View"
 
 
-migrationView : (Msg -> Msgs.Msg) -> Model -> Migration -> Html Msgs.Msg
-migrationView wrapMsg model migration =
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "KMEditor.Migration.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "KMEditor.Migration.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView appState (migrationView appState model) model.migration
+
+
+migrationView : AppState -> Model -> Migration -> Html Msg
+migrationView appState model migration =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
-                [ text "Migration appState is corrupted." ]
+                [ lx_ "stateError" appState ]
 
         runningStateMessage =
             div [ class "alert alert-warning" ]
-                [ text "Migration is still running, try again later." ]
+                [ lx_ "running" appState ]
 
         currentView =
             case migration.migrationState.stateType of
@@ -75,21 +91,21 @@ migrationView wrapMsg model migration =
                     let
                         conflictView =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (getEventView wrapMsg model migration)
+                                |> Maybe.map (getEventView appState model migration)
                                 |> Maybe.map (List.singleton >> div [ class "col-8" ])
                                 |> Maybe.withDefault (div [ class "col-12" ] [ errorMessage ])
 
                         diffTree =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (List.singleton >> diffTreeView migration.currentKnowledgeModel)
+                                |> Maybe.map (List.singleton >> diffTreeView appState migration.currentKnowledgeModel)
                                 |> Maybe.map (List.singleton >> div [ class "col-4" ])
                                 |> Maybe.withDefault emptyNode
                     in
                     div [ class "row" ]
-                        [ migrationSummary migration, conflictView, diffTree ]
+                        [ migrationSummary appState migration, conflictView, diffTree ]
 
                 CompletedState ->
-                    viewCompletedMigration model
+                    viewCompletedMigration appState model
 
                 RunningState ->
                     runningStateMessage
@@ -98,33 +114,32 @@ migrationView wrapMsg model migration =
                     errorMessage
     in
     div [ class "col KMEditor__Migration" ]
-        [ div [] [ Page.header "Migration" [] ]
+        [ div [] [ Page.header (lg "kmMigration" appState) [] ]
         , FormResult.view model.conflict
         , currentView
         ]
 
 
-migrationSummary : Migration -> Html Msgs.Msg
-migrationSummary migration =
+migrationSummary : AppState -> Migration -> Html Msg
+migrationSummary appState migration =
     div [ class "col-12" ]
         [ p []
-            [ text "Migration of "
-            , strong [] [ text migration.currentKnowledgeModel.name ]
-            , text " from "
-            , code [] [ text migration.branchPreviousPackageId ]
-            , text " to "
-            , code [] [ text migration.targetPackageId ]
-            , text "."
-            ]
+            (lh_ "summary"
+                [ strong [] [ text migration.currentKnowledgeModel.name ]
+                , code [] [ text migration.branchPreviousPackageId ]
+                , code [] [ text migration.targetPackageId ]
+                ]
+                appState
+            )
         ]
 
 
-getEventView : (Msg -> Msgs.Msg) -> Model -> Migration -> Event -> Html Msgs.Msg
-getEventView wrapMsg model migration event =
+getEventView : AppState -> Model -> Migration -> Event -> Html Msg
+getEventView appState model migration event =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
-                [ text "The event is not connected to any entity in the knowledge model." ]
+                [ lx_ "eventError" appState ]
     in
     case event of
         AddKnowledgeModelEvent _ _ ->
@@ -133,137 +148,137 @@ getEventView wrapMsg model migration event =
 
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
-                |> viewEditKnowledgeModelDiff eventData
-                |> viewEvent wrapMsg model "Edit knowledge model"
+                |> viewEditKnowledgeModelDiff appState eventData
+                |> viewEvent appState model (lg "event.editKM" appState)
 
         AddTagEvent eventData _ ->
-            viewAddTagDiff eventData
-                |> viewEvent wrapMsg model "Add tag"
+            viewAddTagDiff appState eventData
+                |> viewEvent appState model (lg "event.addTag" appState)
 
         EditTagEvent eventData commonData ->
             KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditTagDiff eventData)
-                |> Maybe.map (viewEvent wrapMsg model "Edit tag")
+                |> Maybe.map (viewEditTagDiff appState eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editTag" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteTagEvent commonData ->
             KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map viewDeleteTagDiff
-                |> Maybe.map (viewEvent wrapMsg model "Delete tag")
+                |> Maybe.map (viewDeleteTagDiff appState)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteTag" appState))
                 |> Maybe.withDefault errorMessage
 
         AddIntegrationEvent eventData _ ->
-            viewAddIntegrationDiff eventData
-                |> viewEvent wrapMsg model "Add integration"
+            viewAddIntegrationDiff appState eventData
+                |> viewEvent appState model (lg "event.addIntegration" appState)
 
         EditIntegrationEvent eventData commonData ->
             KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditIntegrationDiff eventData)
-                |> Maybe.map (viewEvent wrapMsg model "Edit integration")
+                |> Maybe.map (viewEditIntegrationDiff appState eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editIntegration" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteIntegrationEvent commonData ->
             KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map viewDeleteIntegrationDiff
-                |> Maybe.map (viewEvent wrapMsg model "Delete integration")
+                |> Maybe.map (viewDeleteIntegrationDiff appState)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteIntegration" appState))
                 |> Maybe.withDefault errorMessage
 
         AddChapterEvent eventData _ ->
-            viewAddChapterDiff eventData
-                |> viewEvent wrapMsg model "Add chapter"
+            viewAddChapterDiff appState eventData
+                |> viewEvent appState model (lg "event.addChapter" appState)
 
         EditChapterEvent eventData commonData ->
             KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditChapterDiff migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent wrapMsg model "Edit chapter")
+                |> Maybe.map (viewEditChapterDiff appState migration.currentKnowledgeModel eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editChapter" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteChapterEvent commonData ->
             KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewDeleteChapterDiff migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent wrapMsg model "Delete chapter")
+                |> Maybe.map (viewDeleteChapterDiff appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteChapter" appState))
                 |> Maybe.withDefault errorMessage
 
         AddQuestionEvent eventData _ ->
-            viewAddQuestionDiff migration.currentKnowledgeModel eventData
-                |> viewEvent wrapMsg model "Add question"
+            viewAddQuestionDiff appState migration.currentKnowledgeModel eventData
+                |> viewEvent appState model (lg "event.addQuestion" appState)
 
         EditQuestionEvent eventData commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditQuestionDiff migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent wrapMsg model "Edit question")
+                |> Maybe.map (viewEditQuestionDiff appState migration.currentKnowledgeModel eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editQuestion" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteQuestionEvent commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewDeleteQuestionDiff migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent wrapMsg model "Delete question")
+                |> Maybe.map (viewDeleteQuestionDiff appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteQuestion" appState))
                 |> Maybe.withDefault errorMessage
 
         AddAnswerEvent eventData _ ->
-            viewAddAnswerDiff eventData
-                |> viewEvent wrapMsg model "Add answer"
+            viewAddAnswerDiff appState eventData
+                |> viewEvent appState model (lg "event.addAnswer" appState)
 
         EditAnswerEvent eventData commonData ->
             KnowledgeModel.getAnswer commonData.uuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditAnswerDiff migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent wrapMsg model "Edit answer")
+                |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteAnswerEvent commonData ->
             KnowledgeModel.getAnswer commonData.uuid migration.currentKnowledgeModel
-                |> Maybe.map (viewDeleteAnswerDiff migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent wrapMsg model "Delete answer")
+                |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
         AddReferenceEvent eventData _ ->
-            viewAddReferenceDiff eventData
-                |> viewEvent wrapMsg model "Add reference"
+            viewAddReferenceDiff appState eventData
+                |> viewEvent appState model (lg "event.addReference" appState)
 
         EditReferenceEvent eventData commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditReferenceDiff eventData)
-                |> Maybe.map (viewEvent wrapMsg model "Edit reference")
+                |> Maybe.map (viewEditReferenceDiff appState eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editReference" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteReferenceEvent commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map viewDeleteReferenceDiff
-                |> Maybe.map (viewEvent wrapMsg model "Delete reference")
+                |> Maybe.map (viewDeleteReferenceDiff appState)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteReference" appState))
                 |> Maybe.withDefault errorMessage
 
         AddExpertEvent eventData _ ->
-            viewAddExpertDiff eventData
-                |> viewEvent wrapMsg model "Add expert"
+            viewAddExpertDiff appState eventData
+                |> viewEvent appState model (lg "event.addExpert" appState)
 
         EditExpertEvent eventData commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditExpertDiff eventData)
-                |> Maybe.map (viewEvent wrapMsg model "Edit expert")
+                |> Maybe.map (viewEditExpertDiff appState eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editExpert" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteExpertEvent commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map viewDeleteExpertDiff
-                |> Maybe.map (viewEvent wrapMsg model "Delete expert")
+                |> Maybe.map (viewDeleteExpertDiff appState)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteExpert" appState))
                 |> Maybe.withDefault errorMessage
 
 
-viewEvent : (Msg -> Msgs.Msg) -> Model -> String -> Html Msgs.Msg -> Html Msgs.Msg
-viewEvent wrapMsg model name diffView =
+viewEvent : AppState -> Model -> String -> Html Msg -> Html Msg
+viewEvent appState model name diffView =
     div []
         [ h3 [] [ text name ]
         , div [ class "card bg-light" ]
             [ div [ class "card-body" ]
                 [ diffView
-                , formActions wrapMsg model
+                , formActions appState model
                 ]
             ]
         ]
 
 
-viewEditKnowledgeModelDiff : EditKnowledgeModelEventData -> KnowledgeModel -> Html Msgs.Msg
-viewEditKnowledgeModelDiff event km =
+viewEditKnowledgeModelDiff : AppState -> EditKnowledgeModelEventData -> KnowledgeModel -> Html Msg
+viewEditKnowledgeModelDiff appState event km =
     let
         chapters =
             KnowledgeModel.getChapters km
@@ -278,10 +293,10 @@ viewEditKnowledgeModelDiff event km =
             Dict.fromList <| List.map (\c -> ( c.uuid, c.title )) chapters
 
         fieldDiff =
-            viewDiff <| List.map3 (\a b c -> ( a, b, c )) [ "Name" ] [ km.name ] [ EventField.getValueWithDefault event.name km.name ]
+            viewDiff <| List.map3 (\a b c -> ( a, b, c )) [ lg "knowledgeModel.name" appState ] [ km.name ] [ EventField.getValueWithDefault event.name km.name ]
 
         chaptersDiff =
-            viewDiffChildren "Chapters" originalChapters (EventField.getValueWithDefault event.chapterUuids originalChapters) chapterNames
+            viewDiffChildren (lg "chapters" appState) originalChapters (EventField.getValueWithDefault event.chapterUuids originalChapters) chapterNames
 
         originalTags =
             List.map .uuid tags
@@ -290,29 +305,43 @@ viewEditKnowledgeModelDiff event km =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
 
         tagsDiff =
-            viewDiffChildren "Tags" originalTags (EventField.getValueWithDefault event.tagUuids originalTags) tagNames
+            viewDiffChildren (lg "tags" appState) originalTags (EventField.getValueWithDefault event.tagUuids originalTags) tagNames
     in
     div []
         (fieldDiff ++ [ chaptersDiff, tagsDiff ])
 
 
-viewAddTagDiff : AddTagEventData -> Html Msgs.Msg
-viewAddTagDiff event =
+viewAddTagDiff : AppState -> AddTagEventData -> Html Msg
+viewAddTagDiff appState event =
     let
         fields =
-            List.map2 (\a b -> ( a, b )) [ "Name", "Description", "Color" ] [ event.name, event.description |> Maybe.withDefault "", event.color ]
+            List.map2 (\a b -> ( a, b ))
+                [ lg "tag.name" appState
+                , lg "tag.description" appState
+                , lg "tag.color" appState
+                ]
+                [ event.name
+                , event.description |> Maybe.withDefault ""
+                , event.color
+                ]
     in
     div []
         (viewAdd fields)
 
 
-viewEditTagDiff : EditTagEventData -> Tag -> Html Msgs.Msg
-viewEditTagDiff event tag =
+viewEditTagDiff : AppState -> EditTagEventData -> Tag -> Html Msg
+viewEditTagDiff appState event tag =
     let
         fieldDiff =
             List.map3 (\a b c -> ( a, b, c ))
-                [ "Name", "Description", "Color" ]
-                [ tag.name, Maybe.withDefault "" tag.description, tag.color ]
+                [ lg "tag.name" appState
+                , lg "tag.description" appState
+                , lg "tag.color" appState
+                ]
+                [ tag.name
+                , Maybe.withDefault "" tag.description
+                , tag.color
+                ]
                 [ EventField.getValueWithDefault event.name tag.name
                 , EventField.getValueWithDefault event.description tag.description |> Maybe.withDefault ""
                 , EventField.getValueWithDefault event.color tag.color
@@ -322,32 +351,40 @@ viewEditTagDiff event tag =
         (viewDiff fieldDiff)
 
 
-viewDeleteTagDiff : Tag -> Html Msgs.Msg
-viewDeleteTagDiff tag =
+viewDeleteTagDiff : AppState -> Tag -> Html Msg
+viewDeleteTagDiff appState tag =
     let
         fieldDiff =
-            List.map2 (\a b -> ( a, b )) [ "Name", "Description", "Color" ] [ tag.name, tag.description |> Maybe.withDefault "", tag.color ]
+            List.map2 (\a b -> ( a, b ))
+                [ lg "tag.name" appState
+                , lg "tag.description" appState
+                , lg "tag.color" appState
+                ]
+                [ tag.name
+                , tag.description |> Maybe.withDefault ""
+                , tag.color
+                ]
     in
     div []
         (viewDelete fieldDiff)
 
 
-viewAddIntegrationDiff : AddIntegrationEventData -> Html Msgs.Msg
-viewAddIntegrationDiff event =
+viewAddIntegrationDiff : AppState -> AddIntegrationEventData -> Html Msg
+viewAddIntegrationDiff appState event =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ "Id"
-                , "Name"
-                , "Props"
-                , "Item URL"
-                , "Request Method"
-                , "Request URL"
-                , "Request Headers"
-                , "Request Body"
-                , "Response List Field"
-                , "Response Id Field"
-                , "Response Name Field"
+                [ lg "integration.id" appState
+                , lg "integration.name" appState
+                , lg "integration.props" appState
+                , lg "integration.itemUrl" appState
+                , lg "integration.request.method" appState
+                , lg "integration.request.url" appState
+                , lg "integration.request.headers" appState
+                , lg "integration.request.body" appState
+                , lg "integration.response.listField" appState
+                , lg "integration.response.idField" appState
+                , lg "integration.response.nameField" appState
                 ]
                 [ event.id
                 , event.name
@@ -366,22 +403,22 @@ viewAddIntegrationDiff event =
         (viewAdd fields)
 
 
-viewEditIntegrationDiff : EditIntegrationEventData -> Integration -> Html Msgs.Msg
-viewEditIntegrationDiff event integration =
+viewEditIntegrationDiff : AppState -> EditIntegrationEventData -> Integration -> Html Msg
+viewEditIntegrationDiff appState event integration =
     let
         fieldDiff =
             List.map3 (\a b c -> ( a, b, c ))
-                [ "Id"
-                , "Name"
-                , "Props"
-                , "Item URL"
-                , "Request Method"
-                , "Request URL"
-                , "Request Headers"
-                , "Request Body"
-                , "Response List Field"
-                , "Response Id Field"
-                , "Response Name Field"
+                [ lg "integration.id" appState
+                , lg "integration.name" appState
+                , lg "integration.props" appState
+                , lg "integration.itemUrl" appState
+                , lg "integration.request.method" appState
+                , lg "integration.request.url" appState
+                , lg "integration.request.headers" appState
+                , lg "integration.request.body" appState
+                , lg "integration.response.listField" appState
+                , lg "integration.response.idField" appState
+                , lg "integration.response.nameField" appState
                 ]
                 [ integration.id
                 , integration.name
@@ -412,22 +449,22 @@ viewEditIntegrationDiff event integration =
         (viewDiff fieldDiff)
 
 
-viewDeleteIntegrationDiff : Integration -> Html Msgs.Msg
-viewDeleteIntegrationDiff integration =
+viewDeleteIntegrationDiff : AppState -> Integration -> Html Msg
+viewDeleteIntegrationDiff appState integration =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ "Id"
-                , "Name"
-                , "Props"
-                , "Item URL"
-                , "Request Method"
-                , "Request URL"
-                , "Request Headers"
-                , "Request Body"
-                , "Response List Field"
-                , "Response Id Field"
-                , "Response Name Field"
+                [ lg "integration.id" appState
+                , lg "integration.name" appState
+                , lg "integration.props" appState
+                , lg "integration.itemUrl" appState
+                , lg "integration.request.method" appState
+                , lg "integration.request.url" appState
+                , lg "integration.request.headers" appState
+                , lg "integration.request.body" appState
+                , lg "integration.response.listField" appState
+                , lg "integration.response.idField" appState
+                , lg "integration.response.nameField" appState
                 ]
                 [ integration.id
                 , integration.name
@@ -446,18 +483,24 @@ viewDeleteIntegrationDiff integration =
         (viewDelete fields)
 
 
-viewAddChapterDiff : AddChapterEventData -> Html Msgs.Msg
-viewAddChapterDiff event =
+viewAddChapterDiff : AppState -> AddChapterEventData -> Html Msg
+viewAddChapterDiff appState event =
     let
         fields =
-            List.map2 (\a b -> ( a, b )) [ "Title", "Text" ] [ event.title, event.text ]
+            List.map2 (\a b -> ( a, b ))
+                [ lg "chapter.title" appState
+                , lg "chapter.text" appState
+                ]
+                [ event.title
+                , event.text
+                ]
     in
     div []
         (viewAdd fields)
 
 
-viewEditChapterDiff : KnowledgeModel -> EditChapterEventData -> Chapter -> Html Msgs.Msg
-viewEditChapterDiff km event chapter =
+viewEditChapterDiff : AppState -> KnowledgeModel -> EditChapterEventData -> Chapter -> Html Msg
+viewEditChapterDiff appState km event chapter =
     let
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid km
@@ -471,21 +514,25 @@ viewEditChapterDiff km event chapter =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ "Title", "Text" ]
-                    [ chapter.title, chapter.text ]
+                    [ lg "chapter.title" appState
+                    , lg "chapter.text" appState
+                    ]
+                    [ chapter.title
+                    , chapter.text
+                    ]
                     [ EventField.getValueWithDefault event.title chapter.title
                     , EventField.getValueWithDefault event.text chapter.text
                     ]
 
         questionsDiff =
-            viewDiffChildren "Questions" originalQuestions (EventField.getValueWithDefault event.questionUuids originalQuestions) questionNames
+            viewDiffChildren (lg "questions" appState) originalQuestions (EventField.getValueWithDefault event.questionUuids originalQuestions) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewDeleteChapterDiff : KnowledgeModel -> Chapter -> Html Msgs.Msg
-viewDeleteChapterDiff km chapter =
+viewDeleteChapterDiff : AppState -> KnowledgeModel -> Chapter -> Html Msg
+viewDeleteChapterDiff appState km chapter =
     let
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid km
@@ -494,21 +541,32 @@ viewDeleteChapterDiff km chapter =
             List.map Question.getTitle questions
 
         fieldDiff =
-            viewDelete <| List.map2 (\a b -> ( a, b )) [ "Title", "Text" ] [ chapter.title, chapter.text ]
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "chapter.title" appState
+                    , lg "chapter.text" appState
+                    ]
+                    [ chapter.title
+                    , chapter.text
+                    ]
 
         questionsDiff =
-            viewDeletedChildren "Questions" questionNames
+            viewDeletedChildren (lg "questions" appState) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewAddQuestionDiff : KnowledgeModel -> AddQuestionEventData -> Html Msgs.Msg
-viewAddQuestionDiff km event =
+viewAddQuestionDiff : AppState -> KnowledgeModel -> AddQuestionEventData -> Html Msg
+viewAddQuestionDiff appState km event =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ "Type", "Title", "Text", "Tags" ]
+                [ lg "questionType" appState
+                , lg "question.title" appState
+                , lg "question.text" appState
+                , lg "tags" appState
+                ]
                 [ AddQuestionEventQuestion.getTypeString event
                 , AddQuestionEventQuestion.map .title .title .title .title event
                 , AddQuestionEventQuestion.map .text .text .text .text event |> Maybe.withDefault ""
@@ -517,10 +575,10 @@ viewAddQuestionDiff km event =
         extraFields =
             case event of
                 AddQuestionValueEvent data ->
-                    [ ( "Value Type", QuestionValueType.toString data.valueType ) ]
+                    [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
 
                 AddQuestionIntegrationEvent data ->
-                    [ ( "Integration"
+                    [ ( lg "integration" appState
                       , KnowledgeModel.getIntegration data.integrationUuid km
                             |> Maybe.map .name
                             |> Maybe.withDefault ""
@@ -543,14 +601,14 @@ viewAddQuestionDiff km event =
             List.map (\_ -> "") tagUuids
 
         tagsDiff =
-            viewDiffChildren "Tags" originalTags tagUuids tagNames
+            viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
     in
     div []
         (viewAdd (fields ++ extraFields) ++ [ tagsDiff ])
 
 
-viewEditQuestionDiff : KnowledgeModel -> EditQuestionEventData -> Question -> Html Msgs.Msg
-viewEditQuestionDiff km event question =
+viewEditQuestionDiff : AppState -> KnowledgeModel -> EditQuestionEventData -> Question -> Html Msg
+viewEditQuestionDiff appState km event question =
     let
         title =
             EditQuestionEventData.map .title .title .title .title event
@@ -596,7 +654,10 @@ viewEditQuestionDiff km event question =
 
         fields =
             List.map3 (\a b c -> ( a, b, c ))
-                [ "Type", "Title", "Text" ]
+                [ lg "questionType" appState
+                , lg "question.title" appState
+                , lg "question.text" appState
+                ]
                 [ Question.getTypeString question
                 , Question.getTitle question
                 , Question.getText question |> Maybe.withDefault ""
@@ -630,7 +691,7 @@ viewEditQuestionDiff km event question =
                         newStr =
                             Maybe.withDefault originalStr <| Maybe.map QuestionValueType.toString new
                     in
-                    [ ( "Value Type", originalStr, newStr ) ]
+                    [ ( lg "questionValueType" appState, originalStr, newStr ) ]
 
         fieldDiff =
             viewDiff (fields ++ valueDiff)
@@ -648,7 +709,7 @@ viewEditQuestionDiff km event question =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
 
         tagsDiff =
-            viewDiffChildren "Tags" originalTags tagUuids tagNames
+            viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
 
         answersDiff =
             case event of
@@ -657,33 +718,37 @@ viewEditQuestionDiff km event question =
                         answerUuids =
                             EventField.getValueWithDefault eventData.answerUuids originalAnswers
                     in
-                    viewDiffChildren "Answers" originalAnswers answerUuids answerNames
+                    viewDiffChildren (lg "answers" appState) originalAnswers answerUuids answerNames
 
                 _ ->
                     emptyNode
 
         referencesDiff =
-            viewDiffChildren "References" originalReferences (EventField.getValueWithDefault referenceUuids originalReferences) referenceNames
+            viewDiffChildren (lg "references" appState) originalReferences (EventField.getValueWithDefault referenceUuids originalReferences) referenceNames
 
         expertsDiff =
-            viewDiffChildren "Experts" originalExperts (EventField.getValueWithDefault expertUuids originalExperts) expertNames
+            viewDiffChildren (lg "experts" appState) originalExperts (EventField.getValueWithDefault expertUuids originalExperts) expertNames
     in
     div []
         (fieldDiff ++ [ tagsDiff, answersDiff, referencesDiff, expertsDiff ])
 
 
-viewDeleteQuestionDiff : KnowledgeModel -> Question -> Html Msgs.Msg
-viewDeleteQuestionDiff km question =
+viewDeleteQuestionDiff : AppState -> KnowledgeModel -> Question -> Html Msg
+viewDeleteQuestionDiff appState km question =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ "Title", "Text" ]
-                [ Question.getTitle question, Question.getText question |> Maybe.withDefault "" ]
+                [ lg "question.title" appState
+                , lg "question.text" appState
+                ]
+                [ Question.getTitle question
+                , Question.getText question |> Maybe.withDefault ""
+                ]
 
         valueField =
             case question of
                 ValueQuestion _ data ->
-                    [ ( "Value Type", QuestionValueType.toString data.valueType ) ]
+                    [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
 
                 _ ->
                     []
@@ -698,36 +763,42 @@ viewDeleteQuestionDiff km question =
             KnowledgeModel.getQuestionAnswers questionUuid km
 
         answersDiff =
-            viewDeletedChildren "Answers" <| List.map .label answers
+            viewDeletedChildren (lg "answers" appState) <| List.map .label answers
 
         references =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
-            viewDeletedChildren "References" <| List.map Reference.getVisibleName references
+            viewDeletedChildren (lg "references" appState) <| List.map Reference.getVisibleName references
 
         experts =
             KnowledgeModel.getQuestionExperts questionUuid km
 
         expertsDiff =
-            viewDeletedChildren "Experts" <| List.map .name experts
+            viewDeletedChildren (lg "experts" appState) <| List.map .name experts
     in
     div []
         (fieldDiff ++ [ answersDiff, referencesDiff, expertsDiff ])
 
 
-viewAddAnswerDiff : AddAnswerEventData -> Html Msgs.Msg
-viewAddAnswerDiff event =
+viewAddAnswerDiff : AppState -> AddAnswerEventData -> Html Msg
+viewAddAnswerDiff appState event =
     let
         fields =
-            List.map2 (\a b -> ( a, b )) [ "Label", "Advice" ] [ event.label, event.advice |> Maybe.withDefault "" ]
+            List.map2 (\a b -> ( a, b ))
+                [ lg "answer.label" appState
+                , lg "answer.advice" appState
+                ]
+                [ event.label
+                , event.advice |> Maybe.withDefault ""
+                ]
     in
     div []
         (viewAdd fields)
 
 
-viewEditAnswerDiff : KnowledgeModel -> EditAnswerEventData -> Answer -> Html Msgs.Msg
-viewEditAnswerDiff km event answer =
+viewEditAnswerDiff : AppState -> KnowledgeModel -> EditAnswerEventData -> Answer -> Html Msg
+viewEditAnswerDiff appState km event answer =
     let
         questions =
             KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
@@ -741,21 +812,25 @@ viewEditAnswerDiff km event answer =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ "Label", "Advice" ]
-                    [ answer.label, answer.advice |> Maybe.withDefault "" ]
+                    [ lg "answer.label" appState
+                    , lg "answer.advice" appState
+                    ]
+                    [ answer.label
+                    , answer.advice |> Maybe.withDefault ""
+                    ]
                     [ EventField.getValueWithDefault event.label answer.label
                     , EventField.getValueWithDefault event.advice answer.advice |> Maybe.withDefault ""
                     ]
 
         questionsDiff =
-            viewDiffChildren "Questions" originalQuestions (EventField.getValueWithDefault event.followUpUuids originalQuestions) questionNames
+            viewDiffChildren (lg "questions" appState) originalQuestions (EventField.getValueWithDefault event.followUpUuids originalQuestions) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewDeleteAnswerDiff : KnowledgeModel -> Answer -> Html Msgs.Msg
-viewDeleteAnswerDiff km answer =
+viewDeleteAnswerDiff : AppState -> KnowledgeModel -> Answer -> Html Msg
+viewDeleteAnswerDiff appState km answer =
     let
         questions =
             KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
@@ -764,60 +839,107 @@ viewDeleteAnswerDiff km answer =
             List.map Question.getTitle questions
 
         fieldDiff =
-            viewDelete <| List.map2 (\a b -> ( a, b )) [ "Label", "Advice" ] [ answer.label, answer.advice |> Maybe.withDefault "" ]
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "answer.label" appState
+                    , lg "answer.advice" appState
+                    ]
+                    [ answer.label
+                    , answer.advice |> Maybe.withDefault ""
+                    ]
 
         questionsDiff =
-            viewDeletedChildren "Questions" questionNames
+            viewDeletedChildren (lg "questions" appState) questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
 
 
-viewAddReferenceDiff : AddReferenceEventData -> Html Msgs.Msg
-viewAddReferenceDiff =
+viewAddReferenceDiff : AppState -> AddReferenceEventData -> Html Msg
+viewAddReferenceDiff appState =
     AddReferenceEventData.map
-        viewAddResourcePageReferenceDiff
-        viewAddURLReferenceDiff
-        viewAddCrossReferenceDiff
+        (viewAddResourcePageReferenceDiff appState)
+        (viewAddURLReferenceDiff appState)
+        (viewAddCrossReferenceDiff appState)
 
 
-viewAddResourcePageReferenceDiff : AddReferenceResourcePageEventData -> Html Msgs.Msg
-viewAddResourcePageReferenceDiff data =
+viewAddResourcePageReferenceDiff : AppState -> AddReferenceResourcePageEventData -> Html Msg
+viewAddResourcePageReferenceDiff appState data =
     div []
-        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "Type", "Short UUID" ] [ "Resource Page", data.shortUuid ])
+        (viewAdd <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.shortUuid" appState
+                ]
+                [ lg "referenceType.resourcePage" appState
+                , data.shortUuid
+                ]
+        )
 
 
-viewAddURLReferenceDiff : AddReferenceURLEventData -> Html Msgs.Msg
-viewAddURLReferenceDiff data =
+viewAddURLReferenceDiff : AppState -> AddReferenceURLEventData -> Html Msg
+viewAddURLReferenceDiff appState data =
     div []
-        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "Type", "URL", "Label" ] [ "URL", data.url, data.label ])
+        (viewAdd <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.url" appState
+                , lg "reference.label" appState
+                ]
+                [ lg "referenceType.url" appState
+                , data.url
+                , data.label
+                ]
+        )
 
 
-viewAddCrossReferenceDiff : AddReferenceCrossEventData -> Html Msgs.Msg
-viewAddCrossReferenceDiff data =
+viewAddCrossReferenceDiff : AppState -> AddReferenceCrossEventData -> Html Msg
+viewAddCrossReferenceDiff appState data =
     div []
-        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "Type", "Target UUID", "Description" ] [ "Cross Reference", data.targetUuid, data.description ])
+        (viewAdd <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.targetUuid" appState
+                , lg "reference.description" appState
+                ]
+                [ lg "referenceType.cross" appState
+                , data.targetUuid
+                , data.description
+                ]
+        )
 
 
-viewEditReferenceDiff : EditReferenceEventData -> Reference -> Html Msgs.Msg
-viewEditReferenceDiff event reference =
+viewEditReferenceDiff : AppState -> EditReferenceEventData -> Reference -> Html Msg
+viewEditReferenceDiff appState event reference =
     case ( event, reference ) of
         ( EditReferenceResourcePageEvent eventData, ResourcePageReference referenceData ) ->
             div []
                 (viewDiff <|
                     List.map3 (\a b c -> ( a, b, c ))
-                        [ "Type", "Short UUID" ]
-                        [ "Resource Page", referenceData.shortUuid ]
-                        [ "Resource Page", EventField.getValueWithDefault eventData.shortUuid referenceData.shortUuid ]
+                        [ lg "referenceType" appState
+                        , lg "reference.shortUuid" appState
+                        ]
+                        [ lg "referenceType.resourcePage" appState
+                        , referenceData.shortUuid
+                        ]
+                        [ lg "referenceType.resourcePage" appState
+                        , EventField.getValueWithDefault eventData.shortUuid referenceData.shortUuid
+                        ]
                 )
 
         ( EditReferenceURLEvent eventData, URLReference referenceData ) ->
             div []
                 (viewDiff <|
                     List.map3 (\a b c -> ( a, b, c ))
-                        [ "Type", "URL", "Label" ]
-                        [ "URL", referenceData.url, referenceData.label ]
-                        [ "URL"
+                        [ lg "referenceType" appState
+                        , lg "reference.url" appState
+                        , lg "reference.label" appState
+                        ]
+                        [ lg "referenceType.url" appState
+                        , referenceData.url
+                        , referenceData.label
+                        ]
+                        [ lg "referenceType.url" appState
                         , EventField.getValueWithDefault eventData.url referenceData.url
                         , EventField.getValueWithDefault eventData.label referenceData.label
                         ]
@@ -827,9 +949,15 @@ viewEditReferenceDiff event reference =
             div []
                 (viewDiff <|
                     List.map3 (\a b c -> ( a, b, c ))
-                        [ "Type", "Target UUID", "Description" ]
-                        [ "Cross Reference", referenceData.targetUuid, referenceData.description ]
-                        [ "Cross Reference"
+                        [ lg "referenceType" appState
+                        , lg "reference.targetUuid" appState
+                        , lg "reference.description" appState
+                        ]
+                        [ lg "referenceType.cross" appState
+                        , referenceData.targetUuid
+                        , referenceData.description
+                        ]
+                        [ lg "referenceType.cross" appState
                         , EventField.getValueWithDefault eventData.targetUuid referenceData.targetUuid
                         , EventField.getValueWithDefault eventData.description referenceData.description
                         ]
@@ -838,106 +966,164 @@ viewEditReferenceDiff event reference =
         ( otherEvent, otherReference ) ->
             let
                 deleteReference =
-                    viewDeleteReferenceDiff otherReference
+                    viewDeleteReferenceDiff appState otherReference
 
                 addReference =
                     EditReferenceEventData.map
-                        viewEditResourcePageReferenceDiff
-                        viewEditURLReferenceDiff
-                        viewEditCrossReferenceDiff
+                        (viewEditResourcePageReferenceDiff appState)
+                        (viewEditURLReferenceDiff appState)
+                        (viewEditCrossReferenceDiff appState)
                         otherEvent
             in
             div [] [ deleteReference, addReference ]
 
 
-viewEditResourcePageReferenceDiff : EditReferenceResourcePageEventData -> Html Msgs.Msg
-viewEditResourcePageReferenceDiff data =
+viewEditResourcePageReferenceDiff : AppState -> EditReferenceResourcePageEventData -> Html Msg
+viewEditResourcePageReferenceDiff appState data =
     div []
         (viewAdd <|
             List.map2 (\a b -> ( a, b ))
-                [ "Type", "Short UUID" ]
-                [ "Resource Page", EventField.getValueWithDefault data.shortUuid "" ]
+                [ lg "referenceType" appState
+                , lg "reference.shortUuid" appState
+                ]
+                [ lg "referenceType.resourcePage" appState
+                , EventField.getValueWithDefault data.shortUuid ""
+                ]
         )
 
 
-viewEditURLReferenceDiff : EditReferenceURLEventData -> Html Msgs.Msg
-viewEditURLReferenceDiff data =
+viewEditURLReferenceDiff : AppState -> EditReferenceURLEventData -> Html Msg
+viewEditURLReferenceDiff appState data =
     div []
         (viewAdd <|
             List.map2 (\a b -> ( a, b ))
-                [ "Type", "URL", "Label" ]
-                [ "URL"
+                [ lg "referenceType" appState
+                , lg "reference.url" appState
+                , lg "reference.label" appState
+                ]
+                [ lg "referenceType.url" appState
                 , EventField.getValueWithDefault data.url ""
                 , EventField.getValueWithDefault data.label ""
                 ]
         )
 
 
-viewEditCrossReferenceDiff : EditReferenceCrossEventData -> Html Msgs.Msg
-viewEditCrossReferenceDiff data =
+viewEditCrossReferenceDiff : AppState -> EditReferenceCrossEventData -> Html Msg
+viewEditCrossReferenceDiff appState data =
     div []
         (viewAdd <|
             List.map2 (\a b -> ( a, b ))
-                [ "Type", "Target UUID", "Description" ]
-                [ "Cross Reference"
+                [ lg "referenceType" appState
+                , lg "reference.targetUuid" appState
+                , lg "reference.description" appState
+                ]
+                [ lg "referenceType.cross" appState
                 , EventField.getValueWithDefault data.targetUuid ""
                 , EventField.getValueWithDefault data.description ""
                 ]
         )
 
 
-viewDeleteReferenceDiff : Reference -> Html Msgs.Msg
-viewDeleteReferenceDiff =
+viewDeleteReferenceDiff : AppState -> Reference -> Html Msg
+viewDeleteReferenceDiff appState =
     Reference.map
-        viewDeleteResourcePageReferenceDiff
-        viewDeleteURLReferenceDiff
-        viewDeleteCrossReferenceDiff
+        (viewDeleteResourcePageReferenceDiff appState)
+        (viewDeleteURLReferenceDiff appState)
+        (viewDeleteCrossReferenceDiff appState)
 
 
-viewDeleteResourcePageReferenceDiff : ResourcePageReferenceData -> Html Msgs.Msg
-viewDeleteResourcePageReferenceDiff data =
+viewDeleteResourcePageReferenceDiff : AppState -> ResourcePageReferenceData -> Html Msg
+viewDeleteResourcePageReferenceDiff appState data =
     div []
-        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "Type", "Short UUID" ] [ "Resource Page", data.shortUuid ])
+        (viewDelete <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.shortUuid" appState
+                ]
+                [ lg "referenceType.resourcePage" appState
+                , data.shortUuid
+                ]
+        )
 
 
-viewDeleteURLReferenceDiff : URLReferenceData -> Html Msgs.Msg
-viewDeleteURLReferenceDiff data =
+viewDeleteURLReferenceDiff : AppState -> URLReferenceData -> Html Msg
+viewDeleteURLReferenceDiff appState data =
     div []
-        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "Type", "URL", "Label" ] [ "URL", data.url, data.label ])
+        (viewDelete <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.url" appState
+                , lg "reference.label" appState
+                ]
+                [ lg "referenceType.url" appState
+                , data.url
+                , data.label
+                ]
+        )
 
 
-viewDeleteCrossReferenceDiff : CrossReferenceData -> Html Msgs.Msg
-viewDeleteCrossReferenceDiff data =
+viewDeleteCrossReferenceDiff : AppState -> CrossReferenceData -> Html Msg
+viewDeleteCrossReferenceDiff appState data =
     div []
-        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "Type", "Target UUID", "Description" ] [ "Cross Reference", data.targetUuid, data.description ])
+        (viewDelete <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.targetUuid" appState
+                , lg "reference.description" appState
+                ]
+                [ lg "referenceType.cross" appState
+                , data.targetUuid
+                , data.description
+                ]
+        )
 
 
-viewAddExpertDiff : AddExpertEventData -> Html Msgs.Msg
-viewAddExpertDiff event =
+viewAddExpertDiff : AppState -> AddExpertEventData -> Html Msg
+viewAddExpertDiff appState event =
     div []
-        (viewAdd <| List.map2 (\a b -> ( a, b )) [ "Name", "Email" ] [ event.name, event.email ])
+        (viewAdd <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "expert.name" appState
+                , lg "expert.email" appState
+                ]
+                [ event.name
+                , event.email
+                ]
+        )
 
 
-viewEditExpertDiff : EditExpertEventData -> Expert -> Html Msgs.Msg
-viewEditExpertDiff event expert =
+viewEditExpertDiff : AppState -> EditExpertEventData -> Expert -> Html Msg
+viewEditExpertDiff appState event expert =
     div []
         (viewDiff <|
             List.map3 (\a b c -> ( a, b, c ))
-                [ "Name", "Email" ]
-                [ expert.name, expert.email ]
+                [ lg "expert.name" appState
+                , lg "expert.email" appState
+                ]
+                [ expert.name
+                , expert.email
+                ]
                 [ EventField.getValueWithDefault event.name expert.name
                 , EventField.getValueWithDefault event.email expert.email
                 ]
         )
 
 
-viewDeleteExpertDiff : Expert -> Html Msgs.Msg
-viewDeleteExpertDiff expert =
+viewDeleteExpertDiff : AppState -> Expert -> Html Msg
+viewDeleteExpertDiff appState expert =
     div []
-        (viewDelete <| List.map2 (\a b -> ( a, b )) [ "Name", "Email" ] [ expert.name, expert.email ])
+        (viewDelete <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "expert.name" appState
+                , lg "expert.email" appState
+                ]
+                [ expert.name
+                , expert.email
+                ]
+        )
 
 
-viewDiff : List ( String, String, String ) -> List (Html Msgs.Msg)
+viewDiff : List ( String, String, String ) -> List (Html Msg)
 viewDiff changes =
     List.map
         (\( fieldName, originalValue, newValue ) ->
@@ -959,7 +1145,7 @@ viewDiff changes =
         changes
 
 
-viewAdd : List ( String, String ) -> List (Html Msgs.Msg)
+viewAdd : List ( String, String ) -> List (Html Msg)
 viewAdd changes =
     List.map
         (\( fieldName, newValue ) ->
@@ -976,7 +1162,7 @@ viewAdd changes =
         changes
 
 
-viewDelete : List ( String, String ) -> List (Html Msgs.Msg)
+viewDelete : List ( String, String ) -> List (Html Msg)
 viewDelete changes =
     List.map
         (\( fieldName, newValue ) ->
@@ -993,7 +1179,7 @@ viewDelete changes =
         changes
 
 
-viewDiffChildren : String -> List String -> List String -> Dict String String -> Html Msgs.Msg
+viewDiffChildren : String -> List String -> List String -> Dict String String -> Html Msg
 viewDiffChildren fieldName originalOrder newOrder childrenNames =
     let
         viewChildren ulClass uuids =
@@ -1025,14 +1211,14 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
     childrenView fieldName diff
 
 
-viewDeletedChildren : String -> List String -> Html Msgs.Msg
+viewDeletedChildren : String -> List String -> Html Msg
 viewDeletedChildren fieldName children =
     childrenView fieldName <|
         ul [ class "del" ]
             (List.map (\child -> li [] [ text child ]) children)
 
 
-childrenView : String -> Html Msgs.Msg -> Html Msgs.Msg
+childrenView : String -> Html Msg -> Html Msg
 childrenView fieldName diffView =
     div [ class "form-group" ]
         [ label [ class "control-label" ]
@@ -1042,8 +1228,8 @@ childrenView fieldName diffView =
         ]
 
 
-formActions : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-formActions wrapMsg model =
+formActions : AppState -> Model -> Html Msg
+formActions appState model =
     let
         actionsDisabled =
             case model.conflict of
@@ -1054,27 +1240,28 @@ formActions wrapMsg model =
                     False
     in
     div [ class "form-actions" ]
-        [ button [ class "btn btn-warning", onClick (wrapMsg RejectEvent), disabled actionsDisabled ]
-            [ text "Reject" ]
-        , button [ class "btn btn-success", onClick (wrapMsg ApplyEvent), disabled actionsDisabled ]
-            [ text "Apply" ]
+        [ button [ class "btn btn-warning", onClick RejectEvent, disabled actionsDisabled ]
+            [ lx_ "action.reject" appState ]
+        , button [ class "btn btn-success", onClick ApplyEvent, disabled actionsDisabled ]
+            [ lx_ "action.apply" appState ]
         ]
 
 
-viewCompletedMigration : Model -> Html Msgs.Msg
-viewCompletedMigration model =
+viewCompletedMigration : AppState -> Model -> Html Msg
+viewCompletedMigration appState model =
     div [ class "col-xs-12" ]
         [ div [ class "jumbotron full-page-error" ]
             [ h1 [ class "display-3" ] [ i [ class "fa fa-check-square-o" ] [] ]
             , p []
-                [ text "Migration successfully completed."
+                [ lx_ "completed.msg1" appState
                 , br [] []
-                , text "You can publish the new version now."
+                , lx_ "completed.msg2" appState
                 ]
             , div [ class "text-right" ]
-                [ linkTo (KMEditor <| PublishRoute model.branchUuid)
+                [ linkTo appState
+                    (Routes.KMEditorRoute <| PublishRoute model.branchUuid)
                     [ class "btn btn-primary" ]
-                    [ text "Publish"
+                    [ lx_ "completed.publish" appState
                     , i [ class "fa fa-long-arrow-right", style "margin-left" "10px" ] []
                     ]
                 ]

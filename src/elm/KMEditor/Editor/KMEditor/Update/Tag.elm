@@ -5,6 +5,8 @@ module KMEditor.Editor.KMEditor.Update.Tag exposing
     , withGenerateTagEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
@@ -16,6 +18,11 @@ import Msgs
 import Random exposing (Seed)
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.Tag"
+
+
 updateTagForm : Model -> Form.Msg -> TagEditorData -> Model
 updateTagForm =
     updateForm
@@ -25,17 +32,18 @@ updateTagForm =
 
 
 withGenerateTagEditEvent :
-    Seed
+    AppState
+    -> Seed
     -> Model
     -> TagEditorData
     -> (Seed -> Model -> TagEditorData -> ( Seed, Model, Cmd Msgs.Msg ))
     -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateTagEditEvent =
+withGenerateTagEditEvent appState =
     withGenerateEvent
         { isDirty = isTagEditorDirty
         , formValidation = tagFormValidation
         , createEditor = TagEditor
-        , alert = "Please fix the tag errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createAddTagEvent
         , createEditEvent = createEditTagEvent
         , updateEditorData = updateTagEditorData

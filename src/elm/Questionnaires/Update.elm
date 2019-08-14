@@ -10,33 +10,33 @@ import Questionnaires.Index.Update
 import Questionnaires.Migration.Update
 import Questionnaires.Models exposing (Model)
 import Questionnaires.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
+import Questionnaires.Routes exposing (Route(..))
 
 
 fetchData : Route -> AppState -> Model -> Cmd Msg
 fetchData route appState model =
     case route of
-        Create _ ->
+        CreateRoute _ ->
             Cmd.map CreateMsg <|
                 Questionnaires.Create.Update.fetchData appState model.createModel
 
-        CreateMigration uuid ->
+        CreateMigrationRoute uuid ->
             Cmd.map CreateMigrationMsg <|
                 Questionnaires.CreateMigration.Update.fetchData appState uuid
 
-        Detail uuid ->
+        DetailRoute uuid ->
             Cmd.map DetailMsg <|
                 Questionnaires.Detail.Update.fetchData appState uuid
 
-        Edit uuid ->
+        EditRoute uuid ->
             Cmd.map EditMsg <|
                 Questionnaires.Edit.Update.fetchData appState uuid
 
-        Index ->
+        IndexRoute ->
             Cmd.map IndexMsg <|
                 Questionnaires.Index.Update.fetchData appState
 
-        Migration uuid ->
+        MigrationRoute uuid ->
             Cmd.map MigrationMsg <|
                 Questionnaires.Migration.Update.fetchData appState uuid
 

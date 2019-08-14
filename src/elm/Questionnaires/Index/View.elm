@@ -3,6 +3,7 @@ module Questionnaires.Index.View exposing (view)
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, linkTo)
 import Common.Html.Attribute exposing (listClass)
+import Common.Locale exposing (l, lg, lh, lx)
 import Common.View.FormResult as FormResult
 import Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Common.View.Modal as Modal
@@ -10,47 +11,66 @@ import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import KnowledgeModels.Common.Version as Version exposing (Version)
-import KnowledgeModels.Routing
+import KnowledgeModels.Routes
 import Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Questionnaires.Common.QuestionnaireState exposing (QuestionnaireState(..))
 import Questionnaires.Common.View exposing (accessibilityBadge)
 import Questionnaires.Index.ExportModal.View as ExportModal
 import Questionnaires.Index.Models exposing (Model)
 import Questionnaires.Index.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
-import Routing
+import Questionnaires.Routes exposing (Route(..))
+import Routes
 import Utils exposing (listInsertIf)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Questionnaires.Index.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Questionnaires.Index.View"
+
+
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "Questionnaires.Index.View"
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (viewQuestionnaires appState model) model.questionnaires
+    Page.actionResultView appState (viewQuestionnaires appState model) model.questionnaires
 
 
 viewQuestionnaires : AppState -> Model -> List Questionnaire -> Html Msg
 viewQuestionnaires appState model questionnaires =
     div [ listClass "Questionnaires__Index" ]
-        [ Page.header "Questionnaires" indexActions
+        [ Page.header (l_ "header.title" appState) (indexActions appState)
         , FormResult.successOnlyView model.deletingQuestionnaire
         , FormResult.view model.deletingMigration
-        , Listing.view (listingConfig appState) <| List.sortBy (String.toLower << .name) questionnaires
+        , Listing.view appState (listingConfig appState) <| List.sortBy (String.toLower << .name) questionnaires
         , ExportModal.view appState model.exportModalModel |> Html.map ExportModalMsg
-        , deleteModal model
+        , deleteModal appState model
         ]
 
 
-indexActions : List (Html Msg)
-indexActions =
-    [ linkTo (Routing.Questionnaires <| Create Nothing) [ class "btn btn-primary" ] [ text "Create" ] ]
+indexActions : AppState -> List (Html Msg)
+indexActions appState =
+    [ linkTo appState
+        (Routes.QuestionnairesRoute <| CreateRoute Nothing)
+        [ class "btn btn-primary" ]
+        [ lx_ "header.create" appState ]
+    ]
 
 
 listingConfig : AppState -> ListingConfig Questionnaire Msg
 listingConfig appState =
     { title = listingTitle appState
-    , description = listingDescription
+    , description = listingDescription appState
     , actions = listingActions appState
     , textTitle = .name
-    , emptyText = "Click \"Create\" button to add a new Questionnaire."
+    , emptyText = l_ "listing.empty" appState
     , updated =
         Just
             { getTime = .updatedAt
@@ -70,31 +90,32 @@ listingTitle appState questionnaire =
                 detailRoute
     in
     span []
-        [ linkTo (linkRoute questionnaire) [] [ text questionnaire.name ]
+        [ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ]
         , ownerIcon appState questionnaire
         , accessibilityBadge appState questionnaire.accessibility
-        , migrationBadge questionnaire.state
+        , migrationBadge appState questionnaire.state
         ]
 
 
 ownerIcon : AppState -> Questionnaire -> Html Msg
 ownerIcon appState questionnaire =
     if appState.config.questionnaireAccessibilityEnabled && questionnaire.ownerUuid == Maybe.map .uuid appState.session.user then
-        i [ class "fa fa-user", title "Questionnaire created by you" ] []
+        i [ class "fa fa-user", title <| l_ "badge.owner" appState ] []
 
     else
         emptyNode
 
 
-listingDescription : Questionnaire -> Html Msg
-listingDescription questionnaire =
+listingDescription : AppState -> Questionnaire -> Html Msg
+listingDescription appState questionnaire =
     let
         kmRoute =
-            Routing.KnowledgeModels <|
-                KnowledgeModels.Routing.Detail questionnaire.package.id
+            Routes.KnowledgeModelsRoute <|
+                KnowledgeModels.Routes.DetailRoute questionnaire.package.id
     in
-    linkTo kmRoute
-        [ title "Knowledge Model" ]
+    linkTo appState
+        kmRoute
+        [ title <| lg "knowledgeModel" appState ]
         [ text questionnaire.package.name
         , text ", "
         , text <| Version.toString questionnaire.package.version
@@ -110,56 +131,56 @@ listingActions appState questionnaire =
         fillQuestionnaire =
             { extraClass = Just "font-weight-bold"
             , icon = Nothing
-            , label = "Fill questionnaire"
+            , label = l_ "action.fillQuestionnaire" appState
             , msg = ListingActionLink (detailRoute questionnaire)
             }
 
         viewQuestionnaire =
             { extraClass = Just "font-weight-bold"
             , icon = Nothing
-            , label = "View questionnaire"
+            , label = l_ "action.viewQuestionnaire" appState
             , msg = ListingActionLink (detailRoute questionnaire)
             }
 
         export_ =
             { extraClass = Nothing
             , icon = Just "download"
-            , label = "Export"
+            , label = l_ "action.export" appState
             , msg = ListingActionMsg (ShowExportQuestionnaire questionnaire)
             }
 
         createMigration =
             { extraClass = Nothing
             , icon = Just "random"
-            , label = "Create Migration"
-            , msg = ListingActionLink (Routing.Questionnaires <| CreateMigration <| questionnaire.uuid)
+            , label = l_ "action.createMigration" appState
+            , msg = ListingActionLink (Routes.QuestionnairesRoute <| CreateMigrationRoute <| questionnaire.uuid)
             }
 
         continueMigration =
             { extraClass = Just "font-weight-bold"
             , icon = Nothing
-            , label = "Continue Migration"
-            , msg = ListingActionLink (Routing.Questionnaires <| Migration <| questionnaire.uuid)
+            , label = l_ "action.continueMigration" appState
+            , msg = ListingActionLink (Routes.QuestionnairesRoute <| MigrationRoute <| questionnaire.uuid)
             }
 
         cancelMigration =
             { extraClass = Nothing
             , icon = Just "ban"
-            , label = "Cancel Migration"
+            , label = l_ "action.cancelMigration" appState
             , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
             }
 
         edit =
             { extraClass = Nothing
             , icon = Just "edit"
-            , label = "Edit"
-            , msg = ListingActionLink (Routing.Questionnaires <| Edit <| questionnaire.uuid)
+            , label = l_ "action.edit" appState
+            , msg = ListingActionLink (Routes.QuestionnairesRoute <| EditRoute <| questionnaire.uuid)
             }
 
         delete =
             { extraClass = Just "text-danger"
             , icon = Just "trash-o"
-            , label = "Delete"
+            , label = l_ "action.delete" appState
             , msg = ListingActionMsg (ShowHideDeleteQuestionnaire <| Just questionnaire)
             }
 
@@ -180,18 +201,18 @@ listingActions appState questionnaire =
         |> listInsertIf delete (editable && not migrating)
 
 
-detailRoute : Questionnaire -> Routing.Route
+detailRoute : Questionnaire -> Routes.Route
 detailRoute =
-    Routing.Questionnaires << Detail << .uuid
+    Routes.QuestionnairesRoute << DetailRoute << .uuid
 
 
-migrationRoute : Questionnaire -> Routing.Route
+migrationRoute : Questionnaire -> Routes.Route
 migrationRoute =
-    Routing.Questionnaires << Migration << .uuid
+    Routes.QuestionnairesRoute << MigrationRoute << .uuid
 
 
-deleteModal : Model -> Html Msg
-deleteModal model =
+deleteModal : AppState -> Model -> Html Msg
+deleteModal appState model =
     let
         ( visible, name ) =
             case model.questionnaireToBeDeleted of
@@ -203,18 +224,15 @@ deleteModal model =
 
         modalContent =
             [ p []
-                [ text "Are you sure you want to permanently delete "
-                , strong [] [ text name ]
-                , text "?"
-                ]
+                (lh_ "deleteModal.message" [ strong [] [ text name ] ] appState)
             ]
 
         modalConfig =
-            { modalTitle = "Delete questionnaire"
+            { modalTitle = l_ "deleteModal.title" appState
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.deletingQuestionnaire
-            , actionName = "Delete"
+            , actionName = l_ "deleteModal.action" appState
             , actionMsg = DeleteQuestionnaire
             , cancelMsg = Just <| ShowHideDeleteQuestionnaire Nothing
             , dangerous = True
@@ -223,16 +241,16 @@ deleteModal model =
     Modal.confirm modalConfig
 
 
-migrationBadge : QuestionnaireState -> Html msg
-migrationBadge state =
+migrationBadge : AppState -> QuestionnaireState -> Html msg
+migrationBadge appState state =
     case state of
         Migrating ->
             span [ class "badge badge-info" ]
-                [ text "migrating" ]
+                [ lx_ "badge.migrating" appState ]
 
         Outdated ->
             span [ class "badge badge-warning" ]
-                [ text "outdated" ]
+                [ lx_ "badge.outdated" appState ]
 
         Default ->
             emptyNode

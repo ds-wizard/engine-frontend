@@ -1,9 +1,11 @@
-module FormEngine.Update exposing (updateForm)
+module Common.FormEngine.Update exposing (updateForm)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
+import Common.FormEngine.Model exposing (..)
+import Common.FormEngine.Msgs exposing (Msg(..))
+import Common.Locale exposing (lg)
 import Debounce
-import FormEngine.Model exposing (..)
-import FormEngine.Msgs exposing (Msg(..))
 import String exposing (fromInt)
 
 
@@ -14,8 +16,8 @@ debounceConfig =
     }
 
 
-updateForm : Msg msg err -> Form question option -> (String -> String -> (Result err (List TypeHint) -> Msg msg err) -> Cmd (Msg msg err)) -> ( Form question option, Cmd (Msg msg err) )
-updateForm msg form loadTypeHints =
+updateForm : Msg msg err -> AppState -> Form question option -> (String -> String -> (Result err (List TypeHint) -> Msg msg err) -> Cmd (Msg msg err)) -> ( Form question option, Cmd (Msg msg err) )
+updateForm msg appState form loadTypeHints =
     case msg of
         Input path value ->
             ( { form | elements = List.map (updateElement (updateElementValue value) path) form.elements }
@@ -90,7 +92,7 @@ updateForm msg form loadTypeHints =
                             Success typeHints
 
                         Err _ ->
-                            Error "Unable to get type hints"
+                            Error <| lg "apiError.typeHints.getListError" appState
             in
             ( setTypeHintsResult actionResult form, Cmd.none )
 

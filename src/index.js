@@ -16,15 +16,21 @@ function getApiUrl() {
     return 'http://localhost:3000'
 }
 
+function getProvisioningUrl() {
+    if (window.dsw && window.dsw['provisioningUrl']) return window.dsw['provisioningUrl']
+    return false
+}
 
-function loadApp(config) {
+
+function loadApp(config, provisioning) {
     var app = program.Elm.Main.init({
         node: document.body,
         flags: {
             seed: Math.floor(Math.random() * 0xFFFFFFFF),
             session: JSON.parse(localStorage.session || null),
             apiUrl: getApiUrl(),
-            config: config
+            config: config,
+            provisioning: provisioning
         }
     })
 
@@ -36,15 +42,36 @@ function loadApp(config) {
 }
 
 
-window.onload = function () {
-    var callbackMethod = 'callback'
+function jsonp(src) {
     var script = document.createElement('script')
-    script.src = getApiUrl() + '/configuration?callback=callback'
+    script.src = src
     document.body.appendChild(script)
+    return script
+}
 
-    window[callbackMethod] = function (config) {
-        delete window[callbackMethod]
-        document.body.removeChild(script)
-        loadApp(config)
+
+window.onload = function () {
+    var configCallbackMethod = 'configCallback'
+    var configScript = jsonp(getApiUrl() + '/configuration?callback=' + configCallbackMethod)
+
+
+    window[configCallbackMethod] = function (config) {
+        var provisioningUrl = getProvisioningUrl()
+        if (provisioningUrl !== false) {
+            var provisioningCallbackMethod = 'provisioningCallback'
+            var provisioningScript = jsonp(provisioningUrl + '?callback=' + provisioningCallbackMethod)
+
+            window[provisioningCallbackMethod] = function (provisioning) {
+                delete window[provisioningCallbackMethod]
+                document.body.removeChild(provisioningScript)
+                loadApp(config, provisioning)
+            }
+
+        } else {
+            loadApp(config, null)
+        }
+
+        delete window[configCallbackMethod]
+        document.body.removeChild(configScript)
     }
 }

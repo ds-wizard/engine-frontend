@@ -3,7 +3,7 @@ module KMEditor.Subscriptions exposing (subscriptions)
 import KMEditor.Editor.Subscriptions
 import KMEditor.Models exposing (Model)
 import KMEditor.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(..))
+import KMEditor.Routes exposing (Route(..))
 import Msgs
 
 

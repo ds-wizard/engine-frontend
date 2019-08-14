@@ -6,18 +6,20 @@ import KnowledgeModels.Import.Update
 import KnowledgeModels.Index.Update
 import KnowledgeModels.Models exposing (Model)
 import KnowledgeModels.Msgs exposing (Msg(..))
-import KnowledgeModels.Routing exposing (Route(..))
+import KnowledgeModels.Routes exposing (Route(..))
 import Msgs
 
 
-fetchData : Route -> (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData route wrapMsg appState =
+fetchData : Route -> AppState -> Cmd Msg
+fetchData route appState =
     case route of
-        Detail packageId ->
-            Cmd.map (wrapMsg << DetailMsg) <| KnowledgeModels.Detail.Update.fetchData packageId appState
+        DetailRoute packageId ->
+            Cmd.map DetailMsg <|
+                KnowledgeModels.Detail.Update.fetchData packageId appState
 
-        Index ->
-            Cmd.map (wrapMsg << IndexMsg) <| KnowledgeModels.Index.Update.fetchData appState
+        IndexRoute ->
+            Cmd.map IndexMsg <|
+                KnowledgeModels.Index.Update.fetchData appState
 
         _ ->
             Cmd.none

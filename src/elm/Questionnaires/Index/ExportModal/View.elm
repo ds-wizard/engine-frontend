@@ -3,7 +3,8 @@ module Questionnaires.Index.ExportModal.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.AppState exposing (AppState)
-import Common.Html exposing (fa)
+import Common.Html exposing (fa, faSet)
+import Common.Locale exposing (l, lg, lgx, lx)
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Html exposing (Html, a, button, div, h5, input, label, option, select, text)
@@ -12,6 +13,16 @@ import Html.Events exposing (onClick, onInput)
 import Questionnaires.Common.Template exposing (Template)
 import Questionnaires.Index.ExportModal.Models exposing (Model)
 import Questionnaires.Index.ExportModal.Msgs exposing (Msg(..))
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Questionnaires.Index.ExportModal.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Questionnaires.Index.ExportModal.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -27,10 +38,10 @@ view appState model =
 
         modalContent =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text <| "Export " ++ questionnaireName ]
+                [ h5 [ class "modal-title" ] [ text <| l_ "title" appState ++ " " ++ questionnaireName ]
                 ]
             , div [ class "modal-body" ]
-                [ Page.actionResultView (viewModalContent model.selectedFormat) model.templates ]
+                [ Page.actionResultView appState (viewModalContent appState model.selectedFormat) model.templates ]
             , div [ class "modal-footer" ]
                 (modalActions appState model questionnaireUuid)
             ]
@@ -43,18 +54,18 @@ view appState model =
     Modal.simple modalConfig
 
 
-viewModalContent : String -> List Template -> Html Msg
-viewModalContent selectedFormat templates =
+viewModalContent : AppState -> String -> List Template -> Html Msg
+viewModalContent appState selectedFormat templates =
     div []
-        [ templateFormGroup templates
-        , formatFormGroup selectedFormat
+        [ templateFormGroup appState templates
+        , formatFormGroup appState selectedFormat
         ]
 
 
-templateFormGroup : List Template -> Html Msg
-templateFormGroup templates =
+templateFormGroup : AppState -> List Template -> Html Msg
+templateFormGroup appState templates =
     div [ class "form-group" ]
-        [ label [] [ text "Template" ]
+        [ label [] [ lgx "template" appState ]
         , select [ class "form-control", onInput SelectTemplate ]
             (List.map templateOption templates)
         ]
@@ -65,16 +76,16 @@ templateOption template =
     option [ value template.uuid ] [ text template.name ]
 
 
-formatFormGroup : String -> Html Msg
-formatFormGroup selectedFormat =
+formatFormGroup : AppState -> String -> Html Msg
+formatFormGroup appState selectedFormat =
     div [ class "form-group" ]
-        [ label [] [ text "Format" ]
+        [ label [] [ lgx "template.format" appState ]
         , div [ class "export-formats" ]
-            (List.map (exportItem selectedFormat) exportFormats)
+            (List.map (exportItem selectedFormat) (exportFormats appState))
         ]
 
 
-exportItem : String -> ( String, String, String ) -> Html Msg
+exportItem : String -> ( Html Msg, String, String ) -> Html Msg
 exportItem selected ( icon, format, formatLabel ) =
     label [ class "export-link", classList [ ( "export-link-selected", selected == format ) ] ]
         [ input
@@ -84,23 +95,24 @@ exportItem selected ( icon, format, formatLabel ) =
             , onClick (SelectFormat format)
             ]
             []
-        , fa icon
+        , icon
         , text <| formatLabel
         ]
 
 
-exportFormats : List ( String, String, String )
-exportFormats =
-    [ ( "file-pdf-o", "pdf", "PDF Document" )
-    , ( "file-text-o", "latex", "LaTeX Document" )
-    , ( "file-word-o", "docx", "MS Word Document" )
-    , ( "file-code-o", "html", "HTML Document" )
-    , ( "file-code-o", "json", "JSON Data" )
-    , ( "file-text-o", "odt", "OpenDocument Text" )
-    , ( "file-text-o", "markdown", "Markdown Document" )
+exportFormats : AppState -> List ( Html Msg, String, String )
+exportFormats appState =
+    [ ( faSet "format.pdf" appState, "pdf", lg "template.format.pdf" appState )
+    , ( faSet "format.text" appState, "latex", lg "template.format.latex" appState )
+    , ( faSet "format.word" appState, "docx", lg "template.format.docx" appState )
+    , ( faSet "format.code" appState, "html", lg "template.format.html" appState )
+    , ( faSet "format.code" appState, "json", lg "template.format.json" appState )
+    , ( faSet "format.text" appState, "odt", lg "template.format.odt" appState )
+    , ( faSet "format.text" appState, "markdown", lg "template.format.markdown" appState )
     ]
 
 
+modalActions : AppState -> Model -> String -> List (Html Msg)
 modalActions appState model questionnaireUuid =
     let
         downloadLink =
@@ -108,12 +120,12 @@ modalActions appState model questionnaireUuid =
     in
     if ActionResult.isSuccess model.templates then
         [ a [ onClick Close, class "btn btn-primary", href downloadLink, target "_blank" ]
-            [ text "Download" ]
+            [ lx_ "action.download" appState ]
         , button [ onClick Close, class "btn btn-secondary" ]
-            [ text "Cancel" ]
+            [ lx_ "action.cancel" appState ]
         ]
 
     else
         [ button [ onClick Close, class "btn btn-primary" ]
-            [ text "Close" ]
+            [ lx_ "action.close" appState ]
         ]

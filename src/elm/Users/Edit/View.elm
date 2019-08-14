@@ -1,8 +1,10 @@
 module Users.Edit.View exposing (view)
 
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
+import Common.Locale exposing (l, lg, lx)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormActions as FormActions
 import Common.View.FormGroup as FormGroup
@@ -12,87 +14,98 @@ import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Msgs
-import Routing exposing (Route(..))
-import Users.Common.Models exposing (User, roles)
+import Routes
+import Users.Common.User as User exposing (User)
+import Users.Common.UserEditForm exposing (UserEditForm)
+import Users.Common.UserPasswordForm exposing (UserPasswordForm)
 import Users.Edit.Models exposing (..)
 import Users.Edit.Msgs exposing (Msg(..))
-import Users.Routing
+import Users.Routes
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
-    Page.actionResultView (profileView wrapMsg model) model.user
+l_ : String -> AppState -> String
+l_ =
+    l "Users.Edit.View"
 
 
-profileView : (Msg -> Msgs.Msg) -> Model -> User -> Html Msgs.Msg
-profileView wrapMsg model _ =
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Users.Edit.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView appState (profileView appState model) model.user
+
+
+profileView : AppState -> Model -> User -> Html Msg
+profileView appState model _ =
     div [ detailClass "Users__Edit" ]
-        [ Page.header "Edit user profile" []
+        [ Page.header (l_ "header.title" appState) []
         , div []
-            [ navbar wrapMsg model
-            , userView wrapMsg model
-            , passwordView wrapMsg model
+            [ navbar appState model
+            , userView appState model
+            , passwordView appState model
             ]
         ]
 
 
-navbar : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-navbar wrapMsg model =
+navbar : AppState -> Model -> Html Msg
+navbar appState model =
     ul [ class "nav nav-tabs" ]
         [ li [ class "nav-item" ]
             [ a
                 [ class "nav-link"
                 , classList [ ( "active", model.currentView == Profile ) ]
-                , onClick <| wrapMsg <| ChangeView Profile
+                , onClick <| ChangeView Profile
                 ]
-                [ text "Profile" ]
+                [ lx_ "navbar.profile" appState ]
             ]
         , li [ class "nav-item" ]
             [ a
                 [ class "nav-link"
                 , classList [ ( "active", model.currentView == Password ) ]
-                , onClick <| wrapMsg <| ChangeView Password
+                , onClick <| ChangeView Password
                 ]
-                [ text "Password" ]
+                [ lx_ "navbar.password" appState ]
             ]
         ]
 
 
-userView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-userView wrapMsg model =
+userView : AppState -> Model -> Html Msg
+userView appState model =
     div [ classList [ ( "hidden", model.currentView /= Profile ) ] ]
         [ FormResult.view model.savingUser
-        , userFormView model.userForm (model.uuid == "current") |> Html.map (wrapMsg << EditFormMsg)
-        , formActionsView model (ActionButton.ButtonConfig "Save" model.savingUser (wrapMsg <| EditFormMsg Form.Submit) False)
+        , userFormView appState model.userForm (model.uuid == "current") |> Html.map EditFormMsg
+        , formActionsView appState model (ActionButton.ButtonConfig (l_ "userView.save" appState) model.savingUser (EditFormMsg Form.Submit) False)
         ]
 
 
-userFormView : Form CustomFormError UserEditForm -> Bool -> Html Form.Msg
-userFormView form current =
+userFormView : AppState -> Form CustomFormError UserEditForm -> Bool -> Html Form.Msg
+userFormView appState form current =
     let
         roleOptions =
-            ( "", "--" ) :: List.map (\o -> ( o, o )) roles
+            ( "", "--" ) :: List.map (\o -> ( o, o )) User.roles
 
         roleSelect =
             if current then
                 emptyNode
 
             else
-                FormGroup.select roleOptions form "role" "Role"
+                FormGroup.select appState roleOptions form "role" <| lg "user.role" appState
 
         activeToggle =
             if current then
                 emptyNode
 
             else
-                FormGroup.toggle form "active" "Active"
+                FormGroup.toggle form "active" <| lg "user.active" appState
 
         formHtml =
             div []
-                [ FormGroup.input form "email" "Email"
-                , FormGroup.input form "name" "Name"
-                , FormGroup.input form "surname" "Surname"
+                [ FormGroup.input appState form "email" <| lg "user.email" appState
+                , FormGroup.input appState form "name" <| lg "user.name" appState
+                , FormGroup.input appState form "surname" <| lg "user.surname" appState
                 , roleSelect
                 , activeToggle
                 ]
@@ -100,28 +113,30 @@ userFormView form current =
     formHtml
 
 
-passwordView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-passwordView wrapMsg model =
+passwordView : AppState -> Model -> Html Msg
+passwordView appState model =
     div [ classList [ ( "hidden", model.currentView /= Password ) ] ]
         [ FormResult.view model.savingPassword
-        , passwordFormView model.passwordForm |> Html.map (wrapMsg << PasswordFormMsg)
-        , formActionsView model (ActionButton.ButtonConfig "Save" model.savingPassword (wrapMsg <| PasswordFormMsg Form.Submit) False)
+        , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
+        , formActionsView appState
+            model
+            (ActionButton.ButtonConfig (l_ "passwordView.save" appState) model.savingPassword (PasswordFormMsg Form.Submit) False)
         ]
 
 
-passwordFormView : Form CustomFormError UserPasswordForm -> Html Form.Msg
-passwordFormView form =
+passwordFormView : AppState -> Form CustomFormError UserPasswordForm -> Html Form.Msg
+passwordFormView appState form =
     div []
-        [ FormGroup.password form "password" "New password"
-        , FormGroup.password form "passwordConfirmation" "New password again"
+        [ FormGroup.password appState form "password" <| l_ "passwordForm.password" appState
+        , FormGroup.password appState form "passwordConfirmation" <| l_ "passwordForm.passwordConfirmation" appState
         ]
 
 
-formActionsView : Model -> ActionButton.ButtonConfig a Msgs.Msg -> Html Msgs.Msg
-formActionsView { uuid } actionButtonConfig =
+formActionsView : AppState -> Model -> ActionButton.ButtonConfig a Msg -> Html Msg
+formActionsView appState { uuid } actionButtonConfig =
     case uuid of
         "current" ->
             FormActions.viewActionOnly actionButtonConfig
 
         _ ->
-            FormActions.view (Users Users.Routing.Index) actionButtonConfig
+            FormActions.view appState (Routes.UsersRoute Users.Routes.IndexRoute) actionButtonConfig

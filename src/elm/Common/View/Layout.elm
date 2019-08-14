@@ -6,36 +6,49 @@ module Common.View.Layout exposing
 
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser exposing (Document)
+import Common.AppState exposing (AppState)
 import Common.Config exposing (CustomMenuLink)
-import Common.Html exposing (emptyNode, fa, linkTo)
+import Common.Html exposing (emptyNode, fa, faSet, linkTo)
 import Common.Html.Events exposing (onLinkClick)
+import Common.Locale exposing (l, lx)
 import Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KMEditor.Routing
-import KnowledgeModels.Routing
+import KMEditor.Routes
+import KnowledgeModels.Routes
 import Models exposing (Model, userLoggedIn)
 import Msgs exposing (Msg)
-import Questionnaires.Routing
-import Routing exposing (Route(..), appRoute, homeRoute, loginRoute, questionnaireDemoRoute, signupRoute)
-import Users.Routing
+import Questionnaires.Routes
+import Routes
+import Routing exposing (appRoute, homeRoute, loginRoute, questionnaireDemoRoute, signupRoute)
+import Users.Routes
 
 
-misconfigured : Document Msg
-misconfigured =
+l_ : String -> AppState -> String
+l_ =
+    l "Common.View.Layout"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.View.Layout"
+
+
+misconfigured : AppState -> Document Msg
+misconfigured appState =
     let
         html =
             Page.illustratedMessage
                 { image = "bug_fixing"
-                , heading = "Configuration Error"
+                , heading = l_ "misconfigured.configurationError" appState
                 , lines =
-                    [ "Application is not configured correctly and cannot run."
-                    , "Please, contact the administrator."
+                    [ l_ "misconfigured.appNotConfigured" appState
+                    , l_ "misconfigured.contactAdmin" appState
                     ]
                 }
     in
-    { title = "Configuration Error"
+    { title = l_ "misconfigured.configurationError" appState
     , body = [ html ]
     }
 
@@ -60,14 +73,24 @@ publicHeader model =
     let
         questionnaireDemoLink =
             if model.appState.config.publicQuestionnaireEnabled then
-                li [ class "nav-item" ] [ linkTo questionnaireDemoRoute [ class "nav-link" ] [ text "Questionnaire Demo" ] ]
+                li [ class "nav-item" ]
+                    [ linkTo model.appState
+                        questionnaireDemoRoute
+                        [ class "nav-link" ]
+                        [ lx_ "header.questionnaireDemo" model.appState ]
+                    ]
 
             else
                 emptyNode
 
         signUpLink =
             if model.appState.config.registrationEnabled then
-                li [ class "nav-item" ] [ linkTo signupRoute [ class "nav-link" ] [ text "Sign Up" ] ]
+                li [ class "nav-item" ]
+                    [ linkTo model.appState
+                        signupRoute
+                        [ class "nav-link" ]
+                        [ lx_ "header.signUp" model.appState ]
+                    ]
 
             else
                 emptyNode
@@ -75,19 +98,30 @@ publicHeader model =
         links =
             if userLoggedIn model then
                 [ questionnaireDemoLink
-                , li [ class "nav-item" ] [ linkTo appRoute [ class "nav-link" ] [ text "Go to App" ] ]
+                , li [ class "nav-item" ]
+                    [ linkTo model.appState
+                        appRoute
+                        [ class "nav-link" ]
+                        [ lx_ "header.goToApp" model.appState ]
+                    ]
                 ]
 
             else
                 [ questionnaireDemoLink
-                , li [ class "nav-item" ] [ linkTo loginRoute [ class "nav-link" ] [ text "Log In" ] ]
+                , li [ class "nav-item" ]
+                    [ linkTo model.appState
+                        loginRoute
+                        [ class "nav-link" ]
+                        [ lx_ "header.logIn" model.appState ]
+                    ]
                 , signUpLink
                 ]
     in
     nav [ class "navbar navbar-expand-sm fixed-top" ]
         [ div [ class "container" ]
             [ div [ class "navbar-header" ]
-                [ linkTo homeRoute
+                [ linkTo model.appState
+                    homeRoute
                     [ class "navbar-brand" ]
                     [ text model.appState.config.client.appTitle
                     ]
@@ -105,8 +139,8 @@ app model content =
                 [ menu model
                 , div [ class "page row justify-content-center" ]
                     [ content ]
-                , viewReportIssueModal model.menuModel.reportIssueOpen
-                , viewAboutModal model.menuModel.aboutOpen model.menuModel.apiBuildInfo
+                , viewReportIssueModal model.appState model.menuModel.reportIssueOpen
+                , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.apiBuildInfo
                 ]
     in
     { title = model.appState.config.client.appTitle
@@ -131,18 +165,18 @@ logo model =
             span [ class "logo-full" ]
                 [ span [] [ text model.appState.config.client.appTitleShort ] ]
     in
-    linkTo Dashboard [ class "logo" ] [ logoImg ]
+    linkTo model.appState Routes.DashboardRoute [ class "logo" ] [ logoImg ]
 
 
-type MenuItem
-    = MenuItem String String Route String
+type MenuItem msg
+    = MenuItem String (Html msg) Routes.Route String
 
 
 createMenu : Model -> List (Html Msg)
 createMenu model =
     let
         defaultMenuItems =
-            menuItems
+            menuItems model.appState
                 |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.appState.jwt perm)
                 |> List.map (menuItem model)
 
@@ -152,17 +186,37 @@ createMenu model =
     defaultMenuItems ++ customMenuItems
 
 
-menuItems : List MenuItem
-menuItems =
-    [ MenuItem "Organization" "building" Organization Perm.organization
-    , MenuItem "Users" "users" (Users Users.Routing.Index) Perm.userManagement
-    , MenuItem "Knowledge Models" "sitemap" (KnowledgeModels KnowledgeModels.Routing.Index) Perm.packageManagementRead
-    , MenuItem "Questionnaires" "list-alt" (Questionnaires Questionnaires.Routing.Index) Perm.questionnaire
-    , MenuItem "KM Editor" "edit" (KMEditor KMEditor.Routing.IndexRoute) Perm.knowledgeModel
+menuItems : AppState -> List (MenuItem msg)
+menuItems appState =
+    [ MenuItem
+        (l_ "menu.organization" appState)
+        (faSet "menu.organization" appState)
+        Routes.OrganizationRoute
+        Perm.organization
+    , MenuItem
+        (l_ "menu.users" appState)
+        (faSet "menu.users" appState)
+        (Routes.UsersRoute Users.Routes.IndexRoute)
+        Perm.userManagement
+    , MenuItem
+        (l_ "menu.knowledgeModels" appState)
+        (faSet "menu.knowledgeModels" appState)
+        (Routes.KnowledgeModelsRoute KnowledgeModels.Routes.IndexRoute)
+        Perm.packageManagementRead
+    , MenuItem
+        (l_ "menu.questionnaires" appState)
+        (faSet "menu.questionnaires" appState)
+        (Routes.QuestionnairesRoute Questionnaires.Routes.IndexRoute)
+        Perm.questionnaire
+    , MenuItem
+        (l_ "menu.kmEditor" appState)
+        (faSet "menu.kmEditor" appState)
+        (Routes.KMEditorRoute KMEditor.Routes.IndexRoute)
+        Perm.knowledgeModel
     ]
 
 
-menuItem : Model -> MenuItem -> Html Msg
+menuItem : Model -> MenuItem msg -> Html msg
 menuItem model (MenuItem label icon route _) =
     let
         activeClass =
@@ -173,9 +227,10 @@ menuItem model (MenuItem label icon route _) =
                 ""
     in
     li []
-        [ linkTo route
+        [ linkTo model.appState
+            route
             [ class activeClass ]
-            [ fa icon
+            [ icon
             , span [ class "sidebar-link" ] [ text label ]
             ]
         ]
@@ -218,11 +273,11 @@ profileInfo model =
             else
                 a [ onLinkClick (Msgs.SetSidebarCollapsed True), class "collapse" ]
                     [ fa "angle-double-left"
-                    , text "Collapse sidebar"
+                    , lx_ "sidebar.collapse" model.appState
                     ]
     in
     div [ class "profile-info" ]
-        [ viewHelpMenu model.menuModel.helpMenuDropdownState
-        , viewProfileMenu model.appState.session.user model.menuModel.profileMenuDropdownState
+        [ viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
+        , viewProfileMenu model.appState model.menuModel.profileMenuDropdownState
         , collapseLink
         ]
