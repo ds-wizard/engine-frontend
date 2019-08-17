@@ -38,7 +38,7 @@ createBreadCrumbs editors depth editorUuid =
             [ ( Nothing, "..." ) ]
 
         ( Just editor, _ ) ->
-            ( Just editorUuid, getEditorTitle editor ) :: (createBreadCrumbs editors (depth - 1) <| getEditorParentUuid editor)
+            (createBreadCrumbs editors (depth - 1) <| getEditorParentUuid editor) ++ [ ( Just editorUuid, getEditorTitle editor ) ]
 
         ( Nothing, _ ) ->
             []
