@@ -244,8 +244,16 @@ getParent parentMap uuid =
 
 filterWithTags : List String -> KnowledgeModel -> KnowledgeModel
 filterWithTags tags km =
-    let
-        questions =
-            Dict.filter (\k _ -> List.member k tags) km.entities.questions
-    in
-    { km | entities = KnowledgeModelEntities.updateQuestions questions km.entities }
+    if List.isEmpty tags then
+        km
+
+    else
+        let
+            filter _ question =
+                Question.getTagUuids question
+                    |> List.any (\t -> List.member t tags)
+
+            questions =
+                Dict.filter filter km.entities.questions
+        in
+        { km | entities = KnowledgeModelEntities.updateQuestions questions km.entities }
