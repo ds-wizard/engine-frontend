@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api exposing (applyResult)
 import Common.Api.Packages as PackagesApi
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import Common.Setters exposing (setPulling)
 import KnowledgeModels.Import.RegistryImport.Models exposing (Model)
 import KnowledgeModels.Import.RegistryImport.Msgs exposing (Msg(..))
@@ -28,7 +29,7 @@ update msg wrapMsg appState model =
         PullPackageCompleted result ->
             applyResult
                 { setResult = setPulling
-                , defaultError = "Unable to import package."
+                , defaultError = lg "apiError.packages.pullError" appState
                 , model = model
                 , result = result
                 }

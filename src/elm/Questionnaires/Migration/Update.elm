@@ -9,6 +9,7 @@ import Common.Api.Levels as LevelsApi
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Common.Questionnaire.Models exposing (initialModel)
 import Common.Questionnaire.Msgs as QuestionnaireMsgs
 import Common.Questionnaire.Update
@@ -22,8 +23,9 @@ import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
 import Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Questionnaires.Migration.Models exposing (Model, initializeChangeList)
 import Questionnaires.Migration.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
-import Routing exposing (Route(..), cmdNavigate)
+import Questionnaires.Routes exposing (Route(..))
+import Routes
+import Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> String -> Cmd Msg
@@ -41,10 +43,10 @@ update wrapMsg msg appState model =
             handleGetQuestionnaireMigrationCompleted appState model result
 
         PutQuestionnaireMigrationCompleted result ->
-            handlePutQuestionnaireMigrationCompleted model result
+            handlePutQuestionnaireMigrationCompleted appState model result
 
         GetLevelsCompleted result ->
-            handleGetLevelsCompleted model result
+            handleGetLevelsCompleted appState model result
 
         SelectChange change ->
             handleSelectChange appState model (Just change)
@@ -78,7 +80,7 @@ handleGetQuestionnaireMigrationCompleted appState model result =
         ( modelWithMigration, cmd ) =
             applyResult
                 { setResult = setResult appState
-                , defaultError = "Unable to get questionnaire migration."
+                , defaultError = lg "apiError.questionnaires.migrations.getError" appState
                 , result = result
                 , model = model
                 }
@@ -89,21 +91,21 @@ handleGetQuestionnaireMigrationCompleted appState model result =
     ( newModel, Cmd.batch [ cmd, scrollCmd ] )
 
 
-handlePutQuestionnaireMigrationCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-handlePutQuestionnaireMigrationCompleted model result =
+handlePutQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+handlePutQuestionnaireMigrationCompleted appState model result =
     applyResult
         { setResult = \_ _ -> model
-        , defaultError = "Unable to save migration."
+        , defaultError = lg "apiError.questionnaires.migrations.putError" appState
         , result = result
         , model = model
         }
 
 
-handleGetLevelsCompleted : Model -> Result ApiError (List Level) -> ( Model, Cmd Msgs.Msg )
-handleGetLevelsCompleted model result =
+handleGetLevelsCompleted : AppState -> Model -> Result ApiError (List Level) -> ( Model, Cmd Msgs.Msg )
+handleGetLevelsCompleted appState model result =
     applyResult
         { setResult = setLevels
-        , defaultError = "Unable to get levels."
+        , defaultError = lg "apiError.levels.getListError" appState
         , result = result
         , model = model
         }
@@ -227,7 +229,7 @@ handleFinalizeMigrationCompleted : AppState -> Model -> Result ApiError () -> ( 
 handleFinalizeMigrationCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key <| Questionnaires <| Detail model.questionnaireUuid )
+            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute <| DetailRoute model.questionnaireUuid )
 
         _ ->
             ( model, Cmd.none )

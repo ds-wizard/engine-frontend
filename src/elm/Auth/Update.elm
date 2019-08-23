@@ -4,13 +4,15 @@ import Auth.Models exposing (initialSession, setToken, setUser)
 import Auth.Msgs as AuthMsgs
 import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
+import Common.Locale exposing (lg)
 import Models exposing (Model, setJwt, setSession)
 import Msgs exposing (Msg)
 import Ports
 import Public.Login.Msgs
 import Public.Msgs
-import Routing exposing (Route(..), cmdNavigate, homeRoute)
-import Users.Common.Models exposing (User)
+import Routes
+import Routing exposing (cmdNavigate, homeRoute)
+import Users.Common.User exposing (User)
 import Utils exposing (dispatch)
 
 
@@ -46,14 +48,14 @@ getCurrentUserCompleted model result =
             ( setSession session model
             , Cmd.batch
                 [ Ports.storeSession <| Just session
-                , cmdNavigate model.appState.key Dashboard
+                , cmdNavigate model.appState Routes.DashboardRoute
                 ]
             )
 
         Err error ->
             let
                 msg =
-                    getServerError error "Loading profile info failed"
+                    getServerError error (lg "apiError.users.current.getError" model.appState)
                         |> Public.Login.Msgs.GetProfileInfoFailed
                         |> Public.Msgs.LoginMsg
                         |> Msgs.PublicMsg
@@ -65,6 +67,6 @@ logout : Model -> ( Model, Cmd Msg )
 logout model =
     let
         cmd =
-            Cmd.batch [ Ports.clearSession (), cmdNavigate model.appState.key homeRoute ]
+            Cmd.batch [ Ports.clearSession (), cmdNavigate model.appState homeRoute ]
     in
     ( setSession initialSession model, cmd )

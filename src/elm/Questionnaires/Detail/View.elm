@@ -21,7 +21,7 @@ import Questionnaires.Detail.Msgs exposing (Msg(..))
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (content appState model) <| ActionResult.combine model.questionnaireModel model.levels
+    Page.actionResultView appState (content appState model) <| ActionResult.combine model.questionnaireModel model.levels
 
 
 content : AppState -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msg
@@ -42,7 +42,7 @@ content appState model ( questionnaireModel, levels ) =
                     Nothing
             , getExtraQuestionClass = always Nothing
             , forceDisabled = False
-            , createRenderer = defaultQuestionnaireRenderer
+            , createRenderer = defaultQuestionnaireRenderer appState
             }
     in
     div [ class "Questionnaires__Detail" ]

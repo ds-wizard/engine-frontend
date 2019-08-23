@@ -1,10 +1,11 @@
 module Questionnaires.Migration.DiffQuestionnaireRenderer exposing (diffQuestionnaireRenderer)
 
 import Common.ApiError exposing (ApiError)
+import Common.AppState exposing (AppState)
+import Common.FormEngine.View exposing (FormRenderer)
 import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (..)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage)
 import Diff
-import FormEngine.View exposing (FormRenderer)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
@@ -19,10 +20,10 @@ import Questionnaires.Common.QuestionnaireChanges exposing (QuestionnaireChanges
 import Questionnaires.Migration.Models exposing (areQuestionDetailsChanged)
 
 
-diffQuestionnaireRenderer : QuestionnaireChanges -> KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
-diffQuestionnaireRenderer changes km levels metrics =
+diffQuestionnaireRenderer : AppState -> QuestionnaireChanges -> KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
+diffQuestionnaireRenderer appState changes km levels metrics =
     { renderQuestionLabel = renderQuestionLabelDiff changes.questions
-    , renderQuestionDescription = renderQuestionDescriptionDiff changes.questions levels km
+    , renderQuestionDescription = renderQuestionDescriptionDiff appState changes.questions levels km
     , renderOptionLabel = renderOptionLabelDiff changes.answers
     , renderOptionBadges = renderOptionBadges metrics
     , renderOptionAdvice = renderOptionAdvice
@@ -48,8 +49,8 @@ renderQuestionLabelDiff changes question =
             text <| Question.getTitle question
 
 
-renderQuestionDescriptionDiff : List QuestionChange -> List Level -> KnowledgeModel -> Question -> Html msg
-renderQuestionDescriptionDiff changes levels km question =
+renderQuestionDescriptionDiff : AppState -> List QuestionChange -> List Level -> KnowledgeModel -> Question -> Html msg
+renderQuestionDescriptionDiff appState changes levels km question =
     let
         mbChange =
             List.find (QuestionChange.getQuestionUuid >> (==) (Question.getUuid question)) changes
@@ -57,23 +58,23 @@ renderQuestionDescriptionDiff changes levels km question =
     case mbChange of
         Just change ->
             case change of
-                QuestionAdd data ->
+                QuestionAdd _ ->
                     div [ class "diff" ]
-                        [ div [ class "diff-added" ] [ renderQuestionDescription levels km question ]
+                        [ div [ class "diff-added" ] [ renderQuestionDescription appState levels km question ]
                         ]
 
                 QuestionChange data ->
                     if areQuestionDetailsChanged True data.originalQuestion data.question then
                         div [ class "diff" ]
-                            [ div [ class "diff-removed" ] [ renderQuestionDescription levels km data.originalQuestion ]
-                            , div [ class "diff-added" ] [ renderQuestionDescription levels km question ]
+                            [ div [ class "diff-removed" ] [ renderQuestionDescription appState levels km data.originalQuestion ]
+                            , div [ class "diff-added" ] [ renderQuestionDescription appState levels km question ]
                             ]
 
                     else
-                        renderQuestionDescription levels km question
+                        renderQuestionDescription appState levels km question
 
         Nothing ->
-            renderQuestionDescription levels km question
+            renderQuestionDescription appState levels km question
 
 
 renderOptionLabelDiff : List AnswerChange -> Answer -> Html msg

@@ -6,18 +6,20 @@ import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
+import Common.Locale exposing (lg)
 import Form exposing (Form)
 import Msgs
 import Result exposing (Result)
-import Users.Common.Models exposing (..)
+import Users.Common.User exposing (User)
+import Users.Common.UserEditForm as UserEditForm
+import Users.Common.UserPasswordForm as UserPasswordForm
 import Users.Edit.Models exposing (..)
 import Users.Edit.Msgs exposing (Msg(..))
 
 
-fetchData : (Msg -> Msgs.Msg) -> AppState -> String -> Cmd Msgs.Msg
-fetchData wrapMsg appState uuid =
-    Cmd.map wrapMsg <|
-        UsersApi.getUser uuid appState GetUserCompleted
+fetchData : AppState -> String -> Cmd Msg
+fetchData appState uuid =
+    UsersApi.getUser uuid appState GetUserCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -30,16 +32,16 @@ update msg wrapMsg appState model =
             handleUserForm formMsg wrapMsg appState model
 
         GetUserCompleted result ->
-            getUserCompleted model result
+            getUserCompleted appState model result
 
         PasswordFormMsg formMsg ->
             handlePasswordForm formMsg wrapMsg appState model
 
         PutUserCompleted result ->
-            putUserCompleted model result
+            putUserCompleted appState model result
 
         PutUserPasswordCompleted result ->
-            putUserPasswordCompleted model result
+            putUserPasswordCompleted appState model result
 
 
 handleUserForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -48,7 +50,7 @@ handleUserForm formMsg wrapMsg appState model =
         ( Form.Submit, Just userForm ) ->
             let
                 body =
-                    encodeUserEditForm model.uuid userForm
+                    UserEditForm.encode model.uuid userForm
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -59,25 +61,25 @@ handleUserForm formMsg wrapMsg appState model =
         _ ->
             let
                 userForm =
-                    Form.update userEditFormValidation formMsg model.userForm
+                    Form.update UserEditForm.validation formMsg model.userForm
             in
             ( { model | userForm = userForm }, Cmd.none )
 
 
-getUserCompleted : Model -> Result ApiError User -> ( Model, Cmd Msgs.Msg )
-getUserCompleted model result =
+getUserCompleted : AppState -> Model -> Result ApiError User -> ( Model, Cmd Msgs.Msg )
+getUserCompleted appState model result =
     let
         newModel =
             case result of
                 Ok user ->
                     let
                         userForm =
-                            initUserEditForm user
+                            UserEditForm.init user
                     in
                     { model | userForm = userForm, user = Success user }
 
-                Err error ->
-                    { model | user = Error "Unable to get user profile." }
+                Err _ ->
+                    { model | user = Error <| lg "apiError.users.getError" appState }
 
         cmd =
             getResultCmd result
@@ -91,7 +93,7 @@ handlePasswordForm formMsg wrapMsg appState model =
         ( Form.Submit, Just passwordForm ) ->
             let
                 body =
-                    encodeUserPasswordForm passwordForm
+                    UserPasswordForm.encode passwordForm
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -102,36 +104,36 @@ handlePasswordForm formMsg wrapMsg appState model =
         _ ->
             let
                 passwordForm =
-                    Form.update userPasswordFormValidation formMsg model.passwordForm
+                    Form.update UserPasswordForm.validation formMsg model.passwordForm
             in
             ( { model | passwordForm = passwordForm }, Cmd.none )
 
 
-putUserCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-putUserCompleted model result =
+putUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+putUserCompleted appState model result =
     case result of
         Ok _ ->
-            ( { model | savingUser = Success "Profile was successfully updated" }, Cmd.none )
+            ( { model | savingUser = Success <| lg "apiSuccess.users.put" appState }, Cmd.none )
 
         Err err ->
             ( { model
-                | savingUser = getServerError err "Profile could not be saved."
+                | savingUser = getServerError err <| lg "apiError.users.putError" appState
                 , userForm = setFormErrors err model.userForm
               }
             , getResultCmd result
             )
 
 
-putUserPasswordCompleted : Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
-putUserPasswordCompleted model result =
+putUserPasswordCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
+putUserPasswordCompleted appState model result =
     let
         passwordResult =
             case result of
                 Ok _ ->
-                    Success "Password was successfully changed"
+                    Success <| lg "apiSuccess.users.password.put" appState
 
                 Err error ->
-                    getServerError error "Password could not be changed."
+                    getServerError error <| lg "apiError.users.password.putError" appState
 
         cmd =
             getResultCmd result

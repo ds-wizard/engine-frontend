@@ -5,6 +5,7 @@ import Common.Api.Levels as LevelsApi
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.AppState as AppState exposing (AppState)
 import Common.Config exposing (Widget(..))
+import Common.Locale exposing (lg)
 import Common.Setters exposing (setLevels, setQuestionnaires)
 import Dashboard.Models as Model exposing (Model)
 import Dashboard.Msgs exposing (Msg(..))
@@ -27,13 +28,13 @@ fetchData appState =
         Cmd.none
 
 
-update : Msg -> Model -> ( Model, Cmd Msgs.Msg )
-update msg model =
+update : Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg appState model =
     case msg of
         GetLevelsCompleted result ->
             applyResult
                 { setResult = setLevels
-                , defaultError = "Unable to get levels."
+                , defaultError = lg "apiError.levels.getListError" appState
                 , model = model
                 , result = result
                 }
@@ -41,7 +42,7 @@ update msg model =
         GetQuestionnairesCompleted result ->
             applyResult
                 { setResult = setQuestionnaires
-                , defaultError = "Unable to get questionnaires."
+                , defaultError = lg "apiError.questionnaires.getListError" appState
                 , model = model
                 , result = result
                 }

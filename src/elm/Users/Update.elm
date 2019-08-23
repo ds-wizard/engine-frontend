@@ -1,6 +1,5 @@
 module Users.Update exposing (fetchData, update)
 
-import Auth.Models exposing (Session)
 import Common.AppState exposing (AppState)
 import Msgs
 import Random exposing (Seed)
@@ -9,17 +8,19 @@ import Users.Edit.Update
 import Users.Index.Update
 import Users.Models exposing (Model)
 import Users.Msgs exposing (Msg(..))
-import Users.Routing exposing (Route(..))
+import Users.Routes exposing (Route(..))
 
 
-fetchData : Route -> (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData route wrapMsg appState =
+fetchData : Route -> AppState -> Cmd Msg
+fetchData route appState =
     case route of
-        Edit uuid ->
-            Users.Edit.Update.fetchData (wrapMsg << EditMsg) appState uuid
+        EditRoute uuid ->
+            Cmd.map EditMsg <|
+                Users.Edit.Update.fetchData appState uuid
 
-        Index ->
-            Users.Index.Update.fetchData (wrapMsg << IndexMsg) appState
+        IndexRoute ->
+            Cmd.map IndexMsg <|
+                Users.Index.Update.fetchData appState
 
         _ ->
             Cmd.none

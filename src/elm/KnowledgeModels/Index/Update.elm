@@ -5,10 +5,16 @@ import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import Common.Setters exposing (setPackages)
 import KnowledgeModels.Index.Models exposing (Model)
 import KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Msgs
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "KnowledgeModels.Index.Update"
 
 
 fetchData : AppState -> Cmd Msg
@@ -22,7 +28,7 @@ update msg wrapMsg appState model =
         GetPackagesCompleted result ->
             applyResult
                 { setResult = setPackages
-                , defaultError = "Unable to get knowledge models."
+                , defaultError = lg "apiError.packages.getListError" appState
                 , model = model
                 , result = result
                 }
@@ -53,9 +59,9 @@ handleDeletePackage wrapMsg appState model =
 deletePackageCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
 deletePackageCompleted wrapMsg appState model result =
     case result of
-        Ok package ->
+        Ok _ ->
             ( { model
-                | deletingPackage = Success "Package and all its versions were successfully deleted"
+                | deletingPackage = Success <| lg "apiSuccess.packages.delete" appState
                 , packages = Loading
                 , packageToBeDeleted = Nothing
               }
@@ -63,6 +69,6 @@ deletePackageCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | deletingPackage = getServerError error "Package could not be deleted" }
+            ( { model | deletingPackage = getServerError error <| lg "apiError.packages.deleteError" appState }
             , getResultCmd result
             )

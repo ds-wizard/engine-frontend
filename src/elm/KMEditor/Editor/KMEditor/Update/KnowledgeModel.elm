@@ -6,6 +6,8 @@ module KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing
     , withGenerateKMEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
 import KMEditor.Common.KnowledgeModel.Chapter as Chapter
 import KMEditor.Common.KnowledgeModel.Integration as Integration
@@ -19,6 +21,11 @@ import Msgs
 import Random exposing (Seed)
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.KnowledgeModel"
+
+
 updateKMForm : Model -> Form.Msg -> KMEditorData -> Model
 updateKMForm =
     updateForm
@@ -27,13 +34,13 @@ updateKMForm =
         }
 
 
-withGenerateKMEditEvent : Seed -> Model -> KMEditorData -> (Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateKMEditEvent =
+withGenerateKMEditEvent : AppState -> Seed -> Model -> KMEditorData -> (Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateKMEditEvent appState =
     withGenerateEvent
         { isDirty = isKMEditorDirty
         , formValidation = knowledgeModelFormValidation
         , createEditor = KMEditor
-        , alert = "Please fix the knowledge model errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createEditKnowledgeModelEvent
         , createEditEvent = createEditKnowledgeModelEvent
         , updateEditorData = updateKMEditorData

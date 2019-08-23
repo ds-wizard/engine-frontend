@@ -45,35 +45,35 @@ update msg appState model fetchPreviewCmd =
                     case editor of
                         KMEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateKMEditEvent appState.seed model data
+                                |> withGenerateKMEditEvent appState appState.seed model data
 
                         TagEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateTagEditEvent appState.seed model data
+                                |> withGenerateTagEditEvent appState appState.seed model data
 
                         IntegrationEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateIntegrationEditEvent appState.seed model data
+                                |> withGenerateIntegrationEditEvent appState appState.seed model data
 
                         ChapterEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateChapterEditEvent appState.seed model data
+                                |> withGenerateChapterEditEvent appState appState.seed model data
 
                         QuestionEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateQuestionEditEvent appState.seed model data
+                                |> withGenerateQuestionEditEvent appState appState.seed model data
 
                         AnswerEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateAnswerEditEvent appState.seed model data
+                                |> withGenerateAnswerEditEvent appState appState.seed model data
 
                         ReferenceEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateReferenceEditEvent appState.seed model data
+                                |> withGenerateReferenceEditEvent appState appState.seed model data
 
                         ExpertEditor data ->
                             setActiveEditor uuid
-                                |> withGenerateExpertEditEvent appState.seed model data
+                                |> withGenerateExpertEditEvent appState appState.seed model data
 
                 _ ->
                     setActiveEditor uuid appState.seed model ()
@@ -95,7 +95,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddChapter ->
                             addChapter scrollTopCmd
-                                |> withGenerateKMEditEvent appState.seed model editorData
+                                |> withGenerateKMEditEvent appState appState.seed model editorData
 
                         ReorderTags tagList ->
                             model
@@ -105,7 +105,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddTag ->
                             addTag scrollTopCmd
-                                |> withGenerateKMEditEvent appState.seed model editorData
+                                |> withGenerateKMEditEvent appState appState.seed model editorData
 
                         ReorderIntegrations integrationList ->
                             model
@@ -115,7 +115,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddIntegration ->
                             addIntegration scrollTopCmd
-                                |> withGenerateKMEditEvent appState.seed model editorData
+                                |> withGenerateKMEditEvent appState appState.seed model editorData
 
                 ( ChapterEditorMsg chapterEditorMsg, Just (ChapterEditor editorData) ) ->
                     case chapterEditorMsg of
@@ -136,7 +136,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddQuestion ->
                             addQuestion scrollTopCmd
-                                |> withGenerateChapterEditEvent appState.seed model editorData
+                                |> withGenerateChapterEditEvent appState appState.seed model editorData
 
                 ( TagEditorMsg tagEditorMsg, Just (TagEditor editorData) ) ->
                     case tagEditorMsg of
@@ -199,7 +199,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddAnswer ->
                             addAnswer scrollTopCmd
-                                |> withGenerateQuestionEditEvent appState.seed model editorData
+                                |> withGenerateQuestionEditEvent appState appState.seed model editorData
 
                         ReorderItemQuestions itemQuestionList ->
                             model
@@ -209,7 +209,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddAnswerItemTemplateQuestion ->
                             addAnswerItemTemplateQuestion scrollTopCmd
-                                |> withGenerateQuestionEditEvent appState.seed model editorData
+                                |> withGenerateQuestionEditEvent appState appState.seed model editorData
 
                         ReorderReferences referenceList ->
                             model
@@ -219,7 +219,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddReference ->
                             addReference scrollTopCmd
-                                |> withGenerateQuestionEditEvent appState.seed model editorData
+                                |> withGenerateQuestionEditEvent appState appState.seed model editorData
 
                         ReorderExperts expertList ->
                             model
@@ -229,7 +229,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddExpert ->
                             addExpert scrollTopCmd
-                                |> withGenerateQuestionEditEvent appState.seed model editorData
+                                |> withGenerateQuestionEditEvent appState appState.seed model editorData
 
                 ( AnswerEditorMsg answerEditorMsg, Just (AnswerEditor editorData) ) ->
                     case answerEditorMsg of
@@ -250,7 +250,7 @@ update msg appState model fetchPreviewCmd =
 
                         AddFollowUp ->
                             addFollowUp scrollTopCmd
-                                |> withGenerateAnswerEditEvent appState.seed model editorData
+                                |> withGenerateAnswerEditEvent appState appState.seed model editorData
 
                 ( ReferenceEditorMsg referenceEditorMsg, Just (ReferenceEditor editorData) ) ->
                     case referenceEditorMsg of
@@ -281,8 +281,8 @@ update msg appState model fetchPreviewCmd =
             ( appState.seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
 
 
-generateEvents : Seed -> Model -> ( Seed, Model, Cmd Msgs.Msg )
-generateEvents seed model =
+generateEvents : AppState -> Seed -> Model -> ( Seed, Model, Cmd Msgs.Msg )
+generateEvents appState seed model =
     let
         updateModel newSeed newModel a =
             ( newSeed, newModel, Cmd.none )
@@ -291,28 +291,28 @@ generateEvents seed model =
         Just editor ->
             case editor of
                 KMEditor data ->
-                    withGenerateKMEditEvent seed model data updateModel
+                    withGenerateKMEditEvent appState seed model data updateModel
 
                 TagEditor data ->
-                    withGenerateTagEditEvent seed model data updateModel
+                    withGenerateTagEditEvent appState seed model data updateModel
 
                 IntegrationEditor data ->
-                    withGenerateIntegrationEditEvent seed model data updateModel
+                    withGenerateIntegrationEditEvent appState seed model data updateModel
 
                 ChapterEditor data ->
-                    withGenerateChapterEditEvent seed model data updateModel
+                    withGenerateChapterEditEvent appState seed model data updateModel
 
                 QuestionEditor data ->
-                    withGenerateQuestionEditEvent seed model data updateModel
+                    withGenerateQuestionEditEvent appState seed model data updateModel
 
                 AnswerEditor data ->
-                    withGenerateAnswerEditEvent seed model data updateModel
+                    withGenerateAnswerEditEvent appState seed model data updateModel
 
                 ReferenceEditor data ->
-                    withGenerateReferenceEditEvent seed model data updateModel
+                    withGenerateReferenceEditEvent appState seed model data updateModel
 
                 ExpertEditor data ->
-                    withGenerateExpertEditEvent seed model data updateModel
+                    withGenerateExpertEditEvent appState seed model data updateModel
 
         _ ->
             ( seed, model, Cmd.none )

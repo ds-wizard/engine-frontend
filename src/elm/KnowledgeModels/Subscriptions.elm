@@ -3,13 +3,13 @@ module KnowledgeModels.Subscriptions exposing (subscriptions)
 import KnowledgeModels.Import.Subscriptions
 import KnowledgeModels.Models exposing (Model)
 import KnowledgeModels.Msgs exposing (Msg(..))
-import KnowledgeModels.Routing exposing (Route(..))
+import KnowledgeModels.Routes exposing (Route(..))
 
 
 subscriptions : Route -> Model -> Sub Msg
 subscriptions route model =
     case route of
-        Import _ ->
+        ImportRoute _ ->
             Sub.map ImportMsg <| KnowledgeModels.Import.Subscriptions.subscriptions model.importModel
 
         _ ->

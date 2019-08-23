@@ -13,20 +13,20 @@ module Models exposing
     )
 
 import Auth.Models exposing (JwtToken, Session, sessionDecoder, sessionExists)
-import Browser.Navigation exposing (Key)
 import Common.AppState exposing (AppState)
 import Common.Config as Config exposing (Config)
 import Common.Menu.Models
+import Common.Provisioning as Provisioning exposing (Provisioning)
 import Dashboard.Models
 import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (hardcoded, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import KMEditor.Models
 import KnowledgeModels.Models
 import Organization.Models
 import Public.Models
 import Questionnaires.Models
 import Random exposing (Seed)
-import Routing exposing (Route(..))
+import Routes
 import Users.Models
 
 
@@ -81,7 +81,7 @@ setJwt jwt model =
     { model | appState = newState }
 
 
-setRoute : Route -> Model -> Model
+setRoute : Routes.Route -> Model -> Model
 setRoute route model =
     let
         appState =
@@ -108,22 +108,22 @@ setSeed seed model =
 initLocalModel : Model -> Model
 initLocalModel model =
     case model.appState.route of
-        Organization ->
+        Routes.OrganizationRoute ->
             { model | organizationModel = Organization.Models.initialModel }
 
-        KMEditor route ->
+        Routes.KMEditorRoute route ->
             { model | kmEditorModel = KMEditor.Models.initLocalModel route model.kmEditorModel }
 
-        KnowledgeModels route ->
+        Routes.KnowledgeModelsRoute route ->
             { model | kmPackagesModel = KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
 
-        Public route ->
+        Routes.PublicRoute route ->
             { model | publicModel = Public.Models.initLocalModel route model.publicModel }
 
-        Questionnaires route ->
+        Routes.QuestionnairesRoute route ->
             { model | questionnairesModel = Questionnaires.Models.initLocalModel route model.questionnairesModel }
 
-        Users route ->
+        Routes.UsersRoute route ->
             { model | users = Users.Models.initLocalModel route model.users }
 
         _ ->
@@ -140,6 +140,7 @@ type alias Flags =
     , seed : Int
     , apiUrl : String
     , config : Config
+    , provisioning : Provisioning
     , success : Bool
     }
 
@@ -151,6 +152,7 @@ flagsDecoder =
         |> required "seed" Decode.int
         |> required "apiUrl" Decode.string
         |> required "config" Config.decoder
+        |> optional "provisioning" Provisioning.decoder Provisioning.default
         |> hardcoded True
 
 
@@ -160,5 +162,6 @@ defaultFlags =
     , seed = 0
     , apiUrl = ""
     , config = Config.defaultConfig
+    , provisioning = Provisioning.default
     , success = False
     }

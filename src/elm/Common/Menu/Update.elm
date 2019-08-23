@@ -4,9 +4,15 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api.BuildInfo as BuildInfoApi
 import Common.ApiError exposing (getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Common.Menu.Models exposing (Model)
 import Common.Menu.Msgs exposing (Msg(..))
 import Msgs
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Common.Menu.Update"
 
 
 fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
@@ -38,7 +44,7 @@ update wrapMsg msg appState model =
                     ( { model | apiBuildInfo = Success buildInfo }, Cmd.none )
 
                 Err error ->
-                    ( { model | apiBuildInfo = getServerError error "Cannot get build info" }, Cmd.none )
+                    ( { model | apiBuildInfo = getServerError error (l_ "error.buildInfo" appState) }, Cmd.none )
 
         HelpMenuDropdownMsg dropdownState ->
             ( { model | helpMenuDropdownState = dropdownState }, Cmd.none )

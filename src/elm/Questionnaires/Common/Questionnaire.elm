@@ -4,7 +4,6 @@ module Questionnaires.Common.Questionnaire exposing
     , isEditable
     )
 
-import Auth.Role as Role
 import Common.AppState exposing (AppState)
 import Json.Decode as D exposing (..)
 import Json.Decode.Extra as D
@@ -13,6 +12,7 @@ import KnowledgeModels.Common.Package as Package exposing (Package)
 import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 import Questionnaires.Common.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 import Time
+import Users.Common.User as User
 
 
 type alias Questionnaire =
@@ -38,7 +38,7 @@ isEditable :
 isEditable appState questionnaire =
     let
         isAdmin =
-            Role.isAdmin appState.session.user
+            User.isAdmin appState.session.user
 
         isNotReadonly =
             questionnaire.accessibility /= PublicReadOnlyQuestionnaire

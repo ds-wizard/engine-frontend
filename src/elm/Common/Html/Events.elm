@@ -1,14 +1,5 @@
 module Common.Html.Events exposing (onLinkClick)
 
-{-| Common helpers for Html events.
-
-
-# Helpers
-
-@docs onLinkClick
-
--}
-
 import Html exposing (Attribute)
 import Html.Events exposing (custom)
 import Json.Decode as Decode

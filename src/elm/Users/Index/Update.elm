@@ -5,16 +5,16 @@ import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Common.Setters exposing (setUsers)
 import Msgs
 import Users.Index.Models exposing (Model)
 import Users.Index.Msgs exposing (Msg(..))
 
 
-fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg appState =
-    Cmd.map wrapMsg <|
-        UsersApi.getUsers appState GetUsersCompleted
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    UsersApi.getUsers appState GetUsersCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -23,7 +23,7 @@ update msg wrapMsg appState model =
         GetUsersCompleted result ->
             applyResult
                 { setResult = setUsers
-                , defaultError = "Unable to get users."
+                , defaultError = lg "apiError.users.getListError" appState
                 , model = model
                 , result = result
                 }
@@ -54,12 +54,12 @@ handleDeleteUser wrapMsg appState model =
 deleteUserCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs.Msg )
 deleteUserCompleted wrapMsg appState model result =
     case result of
-        Ok user ->
-            ( { model | deletingUser = Success "User was sucessfully deleted", users = Loading, userToBeDeleted = Nothing }
+        Ok _ ->
+            ( { model | deletingUser = Success <| lg "apiSuccess.users.delete" appState, users = Loading, userToBeDeleted = Nothing }
             , Cmd.map wrapMsg <| UsersApi.getUsers appState GetUsersCompleted
             )
 
         Err error ->
-            ( { model | deletingUser = getServerError error "User could not be deleted" }
+            ( { model | deletingUser = getServerError error <| lg "apiError.users.deleteError" appState }
             , getResultCmd result
             )

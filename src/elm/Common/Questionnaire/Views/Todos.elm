@@ -1,5 +1,7 @@
 module Common.Questionnaire.Views.Todos exposing (view)
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lgx)
 import Common.Questionnaire.Models exposing (Model)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Html exposing (..)
@@ -10,10 +12,15 @@ import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
 import Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 
 
-view : Model -> Html Msg
-view model =
+l_ : String -> AppState -> String
+l_ =
+    l "Common.Questionnaire.Views.Todos"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     div [ class "todos" ]
-        [ h2 [] [ text "TODOs" ]
+        [ h2 [] [ lgx "questionnaire.todos" appState ]
         , div [ class "list-group list-group-hover" ] (List.map viewTodo <| QuestionnaireDetail.getTodos model.questionnaire)
         ]
 

@@ -8,6 +8,7 @@ import Common.Api exposing (getResultCmd)
 import Common.Api.Templates as TemplatesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Msgs
 import Questionnaires.Common.Template exposing (Template)
 import Questionnaires.Index.ExportModal.Models exposing (Model, initialModel)
@@ -20,11 +21,11 @@ fetchData appState =
     TemplatesApi.getTemplates appState GetTemplatesCompleted
 
 
-update : Msg -> Model -> ( Model, Cmd Msgs.Msg )
-update msg model =
+update : Msg -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
+update msg appState model =
     case msg of
         GetTemplatesCompleted result ->
-            handleGetTemplatesCompleted model result
+            handleGetTemplatesCompleted appState model result
 
         Close ->
             handleClose
@@ -40,8 +41,8 @@ update msg model =
 -- Handlers
 
 
-handleGetTemplatesCompleted : Model -> Result ApiError (List Template) -> ( Model, Cmd Msgs.Msg )
-handleGetTemplatesCompleted model result =
+handleGetTemplatesCompleted : AppState -> Model -> Result ApiError (List Template) -> ( Model, Cmd Msgs.Msg )
+handleGetTemplatesCompleted appState model result =
     case result of
         Ok templates ->
             ( { model
@@ -52,7 +53,7 @@ handleGetTemplatesCompleted model result =
             )
 
         Err error ->
-            ( { model | templates = getServerError error "DMP Templates could not be loaded" }
+            ( { model | templates = getServerError error <| lg "apiError.templates.getListError" appState }
             , getResultCmd result
             )
 

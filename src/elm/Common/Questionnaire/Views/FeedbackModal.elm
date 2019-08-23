@@ -1,7 +1,9 @@
 module Common.Questionnaire.Views.FeedbackModal exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
+import Common.Locale exposing (l, lf, lh, lx)
 import Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model)
 import Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
@@ -12,8 +14,28 @@ import Html.Attributes exposing (..)
 import String exposing (fromInt)
 
 
-view : Model -> Html Msg
-view model =
+l_ : String -> AppState -> String
+l_ =
+    l "Common.Questionnaire.Views.FeedbackModal"
+
+
+lf_ : String -> List String -> AppState -> String
+lf_ =
+    lf "Common.Questionnaire.Views.FeedbackModal"
+
+
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "Common.Questionnaire.Views.FeedbackModal"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.Questionnaire.Views.FeedbackModal"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         visible =
             case model.feedback of
@@ -28,30 +50,31 @@ view model =
                 Success _ ->
                     case model.feedbackResult of
                         Just feedback ->
+                            let
+                                issueLink =
+                                    a [ href feedback.issueUrl, target "_blank" ]
+                                        [ text <| lf_ "issue" [ fromInt feedback.issueId ] appState ]
+                            in
                             [ p []
-                                [ text "You can follow the GitHub "
-                                , a [ href feedback.issueUrl, target "_blank" ]
-                                    [ text <| "issue " ++ fromInt feedback.issueId ]
-                                , text "."
-                                ]
+                                (lh_ "follow" [ issueLink ] appState)
                             ]
 
                         Nothing ->
                             [ emptyNode ]
 
                 _ ->
-                    feedbackModalContent model
+                    feedbackModalContent appState model
 
         ( actionName, actionMsg, cancelMsg ) =
             case model.sendingFeedback of
                 Success _ ->
-                    ( "Done", CloseFeedback, Nothing )
+                    ( l_ "done" appState, CloseFeedback, Nothing )
 
                 _ ->
-                    ( "Send", SendFeedbackForm, Just <| CloseFeedback )
+                    ( l_ "send" appState, SendFeedbackForm, Just <| CloseFeedback )
 
         modalConfig =
-            { modalTitle = "Feedback"
+            { modalTitle = l_ "title" appState
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.sendingFeedback
@@ -64,8 +87,8 @@ view model =
     Modal.confirm modalConfig
 
 
-feedbackModalContent : Model -> List (Html Msg)
-feedbackModalContent model =
+feedbackModalContent : AppState -> Model -> List (Html Msg)
+feedbackModalContent appState model =
     let
         feedbackList =
             case model.feedback of
@@ -73,7 +96,7 @@ feedbackModalContent model =
                     if List.length feedbacks > 0 then
                         div []
                             [ div []
-                                [ text "There are already some issues reported with this question" ]
+                                [ lx_ "reportedIssues" appState ]
                             , ul [] (List.map feedbackIssue feedbacks)
                             ]
 
@@ -84,10 +107,10 @@ feedbackModalContent model =
                     emptyNode
     in
     [ div [ class "alert alert-info" ]
-        [ text "If you found something wrong with the question, you can send us your feedback how to improve it." ]
+        [ lx_ "info" appState ]
     , feedbackList
-    , FormGroup.input model.feedbackForm "title" "Title" |> Html.map FeedbackFormMsg
-    , FormGroup.textarea model.feedbackForm "content" "Description" |> Html.map FeedbackFormMsg
+    , FormGroup.input appState model.feedbackForm "title" (l_ "form.title" appState) |> Html.map FeedbackFormMsg
+    , FormGroup.textarea appState model.feedbackForm "content" (l_ "form.description" appState) |> Html.map FeedbackFormMsg
     ]
 
 

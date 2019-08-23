@@ -1,52 +1,59 @@
 module Public.ForgottenPassword.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
+import Common.Locale exposing (l, lg)
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Common.View.Page as Page
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Msgs
+import Public.Common.ForgottenPasswordForm exposing (ForgottenPasswordForm)
 import Public.Common.View exposing (publicForm)
-import Public.ForgottenPassword.Models exposing (ForgottenPasswordForm, Model)
+import Public.ForgottenPassword.Models exposing (Model)
 import Public.ForgottenPassword.Msgs exposing (Msg(..))
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+l_ : String -> AppState -> String
+l_ =
+    l "Public.ForgottenPassword.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         content =
             case model.submitting of
                 Success _ ->
-                    Page.success "We've sent you a recover link. Follow the instructions in your email."
+                    Page.success <| l_ "recoveryLinkSent" appState
 
                 _ ->
-                    forgottenPasswordForm wrapMsg model
+                    forgottenPasswordForm appState model
     in
     div [ class "row justify-content-center Public__ForgottenPassword" ]
         [ content ]
 
 
-forgottenPasswordForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-forgottenPasswordForm wrapMsg model =
+forgottenPasswordForm : AppState -> Model -> Html Msg
+forgottenPasswordForm appState model =
     let
         formConfig =
-            { title = "Forgotten Password"
-            , submitMsg = wrapMsg <| FormMsg Form.Submit
+            { title = l_ "form.title" appState
+            , submitMsg = FormMsg Form.Submit
             , actionResult = model.submitting
-            , submitLabel = "Recover"
-            , formContent = formView model.form |> Html.map (wrapMsg << FormMsg)
+            , submitLabel = l_ "form.submit" appState
+            , formContent = formView appState model.form |> Html.map FormMsg
             , link = Nothing
             }
     in
-    publicForm formConfig
+    publicForm appState formConfig
 
 
-formView : Form CustomFormError ForgottenPasswordForm -> Html Form.Msg
-formView form =
+formView : AppState -> Form CustomFormError ForgottenPasswordForm -> Html Form.Msg
+formView appState form =
     div []
-        [ FormGroup.input form "email" "Email"
-        , FormExtra.textAfter "Enter the email you use to log in and we will send you a recover link."
+        [ FormGroup.input appState form "email" <| lg "user.email" appState
+        , FormExtra.textAfter <| l_ "form.email.description" appState
         ]

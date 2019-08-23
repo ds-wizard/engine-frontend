@@ -45,8 +45,10 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , updateTagWithForm
     )
 
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError(..))
 import Common.Form.Validate exposing (validateUuid)
+import Common.Locale exposing (l, lg)
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
@@ -290,7 +292,7 @@ validateIntegrationId integrations uuid =
         |> Validate.andThen
             (\s v ->
                 if List.member s existingUuids then
-                    Err <| Error.value (CustomError <| Error "This integration ID is already used for different integration")
+                    Err <| Error.value (CustomError IntegrationIdAlreadyUsed)
 
                 else
                     Ok s
@@ -566,12 +568,12 @@ updateQuestionWithForm question questionForm =
                 }
 
 
-questionTypeOptions : List ( String, String )
-questionTypeOptions =
-    [ ( "OptionsQuestion", "Options" )
-    , ( "ListQuestion", "List of items" )
-    , ( "ValueQuestion", "Value" )
-    , ( "IntegrationQuestion", "Integration" )
+questionTypeOptions : AppState -> List ( String, String )
+questionTypeOptions appState =
+    [ ( "OptionsQuestion", lg "questionType.options" appState )
+    , ( "ListQuestion", lg "questionType.list" appState )
+    , ( "ValueQuestion", lg "questionType.value" appState )
+    , ( "IntegrationQuestion", lg "questionType.integration" appState )
     ]
 
 
@@ -591,12 +593,12 @@ valueTypeToString valueType =
             "TextValue"
 
 
-questionValueTypeOptions : List ( String, String )
-questionValueTypeOptions =
-    [ ( "StringValue", "String" )
-    , ( "DateValue", "Date" )
-    , ( "NumberValue", "Number" )
-    , ( "TextValue", "Text" )
+questionValueTypeOptions : AppState -> List ( String, String )
+questionValueTypeOptions appState =
+    [ ( "StringValue", lg "questionValueType.string" appState )
+    , ( "DateValue", lg "questionValueType.date" appState )
+    , ( "NumberValue", lg "questionValueType.number" appState )
+    , ( "TextValue", lg "questionValueType.text" appState )
     ]
 
 
@@ -812,11 +814,11 @@ updateReferenceWithForm reference referenceForm =
                 }
 
 
-referenceTypeOptions : List ( String, String )
-referenceTypeOptions =
-    [ ( "ResourcePageReference", "Resource Page" )
-    , ( "URLReference", "URL" )
-    , ( "CrossReference", "Cross Reference" )
+referenceTypeOptions : AppState -> List ( String, String )
+referenceTypeOptions appState =
+    [ ( "ResourcePageReference", lg "referenceType.resourcePage" appState )
+    , ( "URLReference", lg "referenceType.url" appState )
+    , ( "CrossReference", lg "referenceType.cross" appState )
     ]
 
 

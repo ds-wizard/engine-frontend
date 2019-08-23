@@ -8,9 +8,11 @@ module Common.Questionnaire.DefaultQuestionnaireRenderer exposing
     )
 
 import Common.ApiError exposing (ApiError)
+import Common.AppState exposing (AppState)
+import Common.FormEngine.View exposing (FormRenderer)
 import Common.Html exposing (emptyNode, fa)
+import Common.Locale exposing (l, lg, lx)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage)
-import FormEngine.View exposing (FormRenderer)
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
 import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
@@ -27,10 +29,20 @@ import Markdown
 import Maybe.Extra as Maybe
 
 
-defaultQuestionnaireRenderer : KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
-defaultQuestionnaireRenderer km levels metrics =
+l_ : String -> AppState -> String
+l_ =
+    l "Common.Questionnaire.DefaultQuestionnaireRenderer"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.Questionnaire.DefaultQuestionnaireRenderer"
+
+
+defaultQuestionnaireRenderer : AppState -> KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
+defaultQuestionnaireRenderer appState km levels metrics =
     { renderQuestionLabel = renderQuestionLabel
-    , renderQuestionDescription = renderQuestionDescription levels km
+    , renderQuestionDescription = renderQuestionDescription appState levels km
     , renderOptionLabel = renderOptionLabel
     , renderOptionBadges = renderOptionBadges metrics
     , renderOptionAdvice = renderOptionAdvice
@@ -42,8 +54,8 @@ renderQuestionLabel question =
     text <| Question.getTitle question
 
 
-renderQuestionDescription : List Level -> KnowledgeModel -> Question -> Html msg
-renderQuestionDescription levels km question =
+renderQuestionDescription : AppState -> List Level -> KnowledgeModel -> Question -> Html msg
+renderQuestionDescription appState levels km question =
     let
         description =
             Question.getText question
@@ -51,7 +63,7 @@ renderQuestionDescription levels km question =
                 |> Maybe.withDefault (text "")
 
         extraData =
-            viewExtraData levels <| createQuestionExtraData km question
+            viewExtraData appState levels <| createQuestionExtraData km question
     in
     div []
         [ description
@@ -139,8 +151,8 @@ createQuestionExtraData km question =
         |> List.foldl foldReferences newExtraData
 
 
-viewExtraData : List Level -> FormExtraData -> Html msg
-viewExtraData levels data =
+viewExtraData : AppState -> List Level -> FormExtraData -> Html msg
+viewExtraData appState levels data =
     let
         isEmpty =
             List.isEmpty data.resourcePageReferences
@@ -153,21 +165,21 @@ viewExtraData levels data =
 
     else
         p [ class "extra-data" ]
-            [ viewRequiredLevel levels data.requiredLevel
+            [ viewRequiredLevel appState levels data.requiredLevel
             , viewResourcePageReferences data.resourcePageReferences
-            , viewUrlReferences data.urlReferences
-            , viewExperts data.experts
+            , viewUrlReferences appState data.urlReferences
+            , viewExperts appState data.experts
             ]
 
 
-viewRequiredLevel : List Level -> Maybe Int -> Html msg
-viewRequiredLevel levels questionLevel =
+viewRequiredLevel : AppState -> List Level -> Maybe Int -> Html msg
+viewRequiredLevel appState levels questionLevel =
     case List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels of
         Just level ->
             span []
                 [ span [ class "caption" ]
                     [ fa "check-square-o"
-                    , text "Desirable: "
+                    , lx_ "desirable" appState
                     , span [] [ text level.title ]
                     ]
                 ]
@@ -213,11 +225,11 @@ viewResourcePageReference data =
         [ text data.shortUuid ]
 
 
-viewUrlReferences : List URLReferenceData -> Html msg
-viewUrlReferences =
+viewUrlReferences : AppState -> List URLReferenceData -> Html msg
+viewUrlReferences appState =
     viewExtraItems
         { icon = "external-link"
-        , label = "External Links"
+        , label = l_ "externalLinks" appState
         , viewItem = viewUrlReference
         }
 
@@ -228,11 +240,11 @@ viewUrlReference data =
         [ text data.label ]
 
 
-viewExperts : List Expert -> Html msg
-viewExperts =
+viewExperts : AppState -> List Expert -> Html msg
+viewExperts appState =
     viewExtraItems
         { icon = "address-book-o"
-        , label = "Experts"
+        , label = lg "experts" appState
         , viewItem = viewExpert
         }
 

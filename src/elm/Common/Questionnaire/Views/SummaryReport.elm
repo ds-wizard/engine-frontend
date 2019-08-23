@@ -1,5 +1,7 @@
 module Common.Questionnaire.Views.SummaryReport exposing (view)
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lf, lgx, lx)
 import Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, chapterReportCanvasId)
 import Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
@@ -12,41 +14,56 @@ import Round
 import String exposing (fromFloat, fromInt)
 
 
-view : Model -> SummaryReport -> Html Msg
-view model summaryReport =
+l_ : String -> AppState -> String
+l_ =
+    l "Common.Questionnaire.Views.SummaryReport"
+
+
+lf_ : String -> List String -> AppState -> String
+lf_ =
+    lf "Common.Questionnaire.Views.SummaryReport"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.Questionnaire.Views.SummaryReport"
+
+
+view : AppState -> Model -> SummaryReport -> Html Msg
+view appState model summaryReport =
     let
         title =
-            [ h2 [] [ text "Summary report" ] ]
+            [ h2 [] [ lgx "questionnaire.summaryReport" appState ] ]
 
         chapters =
-            viewChapters model model.metrics summaryReport
+            viewChapters appState model model.metrics summaryReport
 
         metricDescriptions =
-            [ viewMetricsDescriptions model.metrics ]
+            [ viewMetricsDescriptions appState model.metrics ]
     in
     div [ class "summary-report" ]
         (List.concat [ title, chapters, metricDescriptions ])
 
 
-viewChapters : Model -> List Metric -> SummaryReport -> List (Html Msg)
-viewChapters model metrics summaryReport =
-    List.map (viewChapterReport model metrics) summaryReport.chapterReports
+viewChapters : AppState -> Model -> List Metric -> SummaryReport -> List (Html Msg)
+viewChapters appState model metrics summaryReport =
+    List.map (viewChapterReport appState model metrics) summaryReport.chapterReports
 
 
-viewChapterReport : Model -> List Metric -> ChapterReport -> Html Msg
-viewChapterReport model metrics chapterReport =
+viewChapterReport : AppState -> Model -> List Metric -> ChapterReport -> Html Msg
+viewChapterReport appState model metrics chapterReport =
     let
         content =
             if List.length chapterReport.metrics == 0 then
                 []
 
             else if List.length chapterReport.metrics > 2 then
-                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable metrics chapterReport ]
+                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState metrics chapterReport ]
                 , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
                 ]
 
             else
-                [ div [ class "col-12" ] [ viewMetricsTable metrics chapterReport ] ]
+                [ div [ class "col-12" ] [ viewMetricsTable appState metrics chapterReport ] ]
 
         chapterTitle =
             model.questionnaire.knowledgeModel
@@ -56,42 +73,48 @@ viewChapterReport model metrics chapterReport =
     in
     div []
         [ h3 [] [ text chapterTitle ]
-        , viewIndications chapterReport.indications
+        , viewIndications appState chapterReport.indications
         , div [ class "row" ] content
         ]
 
 
-viewIndications : List IndicationReport -> Html Msg
-viewIndications indications =
-    div [] (List.map viewIndication indications)
+viewIndications : AppState -> List IndicationReport -> Html Msg
+viewIndications appState indications =
+    div [] (List.map (viewIndication appState) indications)
 
 
-viewIndication : IndicationReport -> Html Msg
-viewIndication indicationReport =
+viewIndication : AppState -> IndicationReport -> Html Msg
+viewIndication appState indicationReport =
     case indicationReport of
         AnsweredIndication data ->
-            viewAnsweredIndication data
+            viewAnsweredIndication appState data
 
 
-viewAnsweredIndication : AnsweredIndicationData -> Html Msg
-viewAnsweredIndication data =
+viewAnsweredIndication : AppState -> AnsweredIndicationData -> Html Msg
+viewAnsweredIndication appState data =
     let
         progress =
             toFloat data.answeredQuestions / (toFloat <| data.answeredQuestions + data.unansweredQuestions)
+
+        answered =
+            fromInt data.answeredQuestions
+
+        all =
+            fromInt <| data.answeredQuestions + data.unansweredQuestions
     in
     div [ class "indication" ]
-        [ p [] [ text <| "Answered: " ++ fromInt data.answeredQuestions ++ "/" ++ (fromInt <| data.answeredQuestions + data.unansweredQuestions) ]
+        [ p [] [ text <| lf_ "answeredIndication.label" [ answered, all ] appState ]
         , viewProgressBar "bg-info" progress
         ]
 
 
-viewMetricsTable : List Metric -> ChapterReport -> Html Msg
-viewMetricsTable metrics chapterReport =
+viewMetricsTable : AppState -> List Metric -> ChapterReport -> Html Msg
+viewMetricsTable appState metrics chapterReport =
     table [ class "table table-metrics-report" ]
         [ thead []
             [ tr []
-                [ th [] [ text "Metric" ]
-                , th [ colspan 2 ] [ text "Measure" ]
+                [ th [] [ lgx "metric" appState ]
+                , th [ colspan 2 ] [ lgx "metric.measure" appState ]
                 ]
             ]
         , tbody []
@@ -140,10 +163,10 @@ getTitleByUuid items uuid =
         |> Maybe.withDefault "Unknown"
 
 
-viewMetricsDescriptions : List Metric -> Html msg
-viewMetricsDescriptions metrics =
+viewMetricsDescriptions : AppState -> List Metric -> Html msg
+viewMetricsDescriptions appState metrics =
     div []
-        ([ h3 [] [ text "Metrics Explanation" ] ]
+        ([ h3 [] [ lx_ "metricsDescriptions.metricsExplanation" appState ] ]
             ++ List.map viewMetricDescription metrics
         )
 

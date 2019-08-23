@@ -9,7 +9,7 @@ module Questionnaires.Common.QuestionnaireDetail exposing
     , updateReplies
     )
 
-import FormEngine.Model exposing (FormValue, FormValues, decodeFormValues, encodeFormValues, getAnswerUuid, getItemListCount)
+import Common.FormEngine.Model exposing (FormValue, FormValues, decodeFormValues, encodeFormValues, getAnswerUuid, getItemListCount)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E

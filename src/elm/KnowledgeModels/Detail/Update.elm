@@ -5,12 +5,14 @@ import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import Common.Setters exposing (setPackage)
 import KnowledgeModels.Detail.Models exposing (..)
 import KnowledgeModels.Detail.Msgs exposing (Msg(..))
-import KnowledgeModels.Routing exposing (Route(..))
+import KnowledgeModels.Routes exposing (Route(..))
 import Msgs
-import Routing exposing (Route(..), cmdNavigate)
+import Routes
+import Routing exposing (cmdNavigate)
 
 
 fetchData : String -> AppState -> Cmd Msg
@@ -24,7 +26,7 @@ update msg wrapMsg appState model =
         GetPackageCompleted result ->
             applyResult
                 { setResult = setPackage
-                , defaultError = "Unable to get knowledge model."
+                , defaultError = lg "apiError.packages.getError" appState
                 , model = model
                 , result = result
                 }
@@ -55,9 +57,9 @@ deleteVersionCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd
 deleteVersionCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key <| KnowledgeModels Index )
+            ( model, cmdNavigate appState <| Routes.KnowledgeModelsRoute IndexRoute )
 
         Err error ->
-            ( { model | deletingVersion = getServerError error "Knowledge model could not be deleted." }
+            ( { model | deletingVersion = getServerError error <| lg "apiError.packages.deleteError" appState }
             , getResultCmd result
             )

@@ -2,7 +2,6 @@ module Public.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Html exposing (Html)
-import Msgs
 import Public.BookReference.View
 import Public.ForgottenPassword.View
 import Public.ForgottenPasswordConfirmation.View
@@ -10,31 +9,38 @@ import Public.Login.View
 import Public.Models exposing (Model)
 import Public.Msgs exposing (Msg(..))
 import Public.Questionnaire.View
-import Public.Routing exposing (Route(..))
+import Public.Routes exposing (Route(..))
 import Public.Signup.View
 import Public.SignupConfirmation.View
 
 
-view : Route -> (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view route wrapMsg appState model =
+view : Route -> AppState -> Model -> Html Msg
+view route appState model =
     case route of
-        BookReference uuid ->
-            Public.BookReference.View.view model.bookReferenceModel
+        BookReferenceRoute _ ->
+            Html.map BookReferenceMsg <|
+                Public.BookReference.View.view appState model.bookReferenceModel
 
-        ForgottenPassword ->
-            Public.ForgottenPassword.View.view (wrapMsg << ForgottenPasswordMsg) model.forgottenPasswordModel
+        ForgottenPasswordRoute ->
+            Html.map ForgottenPasswordMsg <|
+                Public.ForgottenPassword.View.view appState model.forgottenPasswordModel
 
-        ForgottenPasswordConfirmation userId hash ->
-            Public.ForgottenPasswordConfirmation.View.view (wrapMsg << ForgottenPasswordConfirmationMsg) model.forgottenPasswordConfirmationModel
+        ForgottenPasswordConfirmationRoute _ _ ->
+            Html.map ForgottenPasswordConfirmationMsg <|
+                Public.ForgottenPasswordConfirmation.View.view appState model.forgottenPasswordConfirmationModel
 
-        Login ->
-            Public.Login.View.view (wrapMsg << LoginMsg) model.loginModel
+        LoginRoute ->
+            Html.map LoginMsg <|
+                Public.Login.View.view appState model.loginModel
 
-        Questionnaire ->
-            Public.Questionnaire.View.view (wrapMsg << QuestionnaireMsg) appState model.questionnaireModel
+        QuestionnaireRoute ->
+            Html.map QuestionnaireMsg <|
+                Public.Questionnaire.View.view appState model.questionnaireModel
 
-        Signup ->
-            Public.Signup.View.view (wrapMsg << SignupMsg) appState model.signupModel
+        SignupRoute ->
+            Html.map SignupMsg <|
+                Public.Signup.View.view appState model.signupModel
 
-        SignupConfirmation userId hash ->
-            Public.SignupConfirmation.View.view model.signupConfirmationModel
+        SignupConfirmationRoute _ _ ->
+            Html.map SignupConfirmationMsg <|
+                Public.SignupConfirmation.View.view appState model.signupConfirmationModel

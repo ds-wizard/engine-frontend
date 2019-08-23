@@ -1,63 +1,64 @@
-module Questionnaires.Routing exposing (Route(..), isAllowed, moduleRoot, parses, toUrl)
+module Questionnaires.Routing exposing
+    ( isAllowed
+    , parses
+    , toUrl
+    )
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (lr)
+import Questionnaires.Routes exposing (Route(..))
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
 
 
-type Route
-    = Create (Maybe String)
-    | CreateMigration String
-    | Detail String
-    | Edit String
-    | Index
-    | Migration String
-
-
-moduleRoot : String
-moduleRoot =
-    "questionnaires"
-
-
-parses : (Route -> a) -> List (Parser (a -> c) c)
-parses wrapRoute =
-    [ map (wrapRoute << Create) (s moduleRoot </> s "create" <?> Query.string "selected")
-    , map (wrapRoute << CreateMigration) (s moduleRoot </> s "create-migration" </> string)
-    , map (wrapRoute << Detail) (s moduleRoot </> s "detail" </> string)
-    , map (wrapRoute << Edit) (s moduleRoot </> s "edit" </> string)
-    , map (wrapRoute <| Index) (s moduleRoot)
-    , map (wrapRoute << Migration) (s moduleRoot </> s "migration" </> string)
+parses : AppState -> (Route -> a) -> List (Parser (a -> c) c)
+parses appState wrapRoute =
+    let
+        moduleRoot =
+            lr "questionnaires" appState
+    in
+    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "questionnaires.create" appState) <?> Query.string (lr "questionnaires.create.selected" appState))
+    , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s (lr "questionnaires.createMigration" appState) </> string)
+    , map (wrapRoute << DetailRoute) (s moduleRoot </> s (lr "questionnaires.detail" appState) </> string)
+    , map (wrapRoute << EditRoute) (s moduleRoot </> s (lr "questionnaires.edit" appState) </> string)
+    , map (wrapRoute <| IndexRoute) (s moduleRoot)
+    , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "questionnaires.migration" appState) </> string)
     ]
 
 
-toUrl : Route -> List String
-toUrl route =
+toUrl : AppState -> Route -> List String
+toUrl appState route =
+    let
+        moduleRoot =
+            lr "questionnaires" appState
+    in
     case route of
-        Create selected ->
+        CreateRoute selected ->
             case selected of
                 Just id ->
-                    [ moduleRoot, "create", "?selected=" ++ id ]
+                    [ moduleRoot, lr "questionnaires.create" appState, "?" ++ lr "questionnaires.create.selected" appState ++ "=" ++ id ]
 
                 Nothing ->
-                    [ moduleRoot, "create" ]
+                    [ moduleRoot, lr "questionnaires.create" appState ]
 
-        CreateMigration uuid ->
-            [ moduleRoot, "create-migration", uuid ]
+        CreateMigrationRoute uuid ->
+            [ moduleRoot, lr "questionnaires.createMigration" appState, uuid ]
 
-        Detail uuid ->
-            [ moduleRoot, "detail", uuid ]
+        DetailRoute uuid ->
+            [ moduleRoot, lr "questionnaires.detail" appState, uuid ]
 
-        Edit uuid ->
-            [ moduleRoot, "edit", uuid ]
+        EditRoute uuid ->
+            [ moduleRoot, lr "questionnaires.edit" appState, uuid ]
 
-        Index ->
+        IndexRoute ->
             [ moduleRoot ]
 
-        Migration uuid ->
-            [ moduleRoot, "migration", uuid ]
+        MigrationRoute uuid ->
+            [ moduleRoot, lr "questionnaires.migration" appState, uuid ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool
-isAllowed route maybeJwt =
+isAllowed _ maybeJwt =
     hasPerm maybeJwt Perm.questionnaire

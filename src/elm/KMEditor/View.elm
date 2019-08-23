@@ -9,25 +9,28 @@ import KMEditor.Migration.View
 import KMEditor.Models exposing (Model)
 import KMEditor.Msgs exposing (Msg(..))
 import KMEditor.Publish.View
-import KMEditor.Routing exposing (Route(..))
-import Msgs
+import KMEditor.Routes exposing (Route(..))
 
 
-view : Route -> (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view route wrapMsg appState model =
+view : Route -> AppState -> Model -> Html Msg
+view route appState model =
     case route of
         CreateRoute _ ->
-            KMEditor.Create.View.view (wrapMsg << CreateMsg) model.createModel
+            Html.map CreateMsg <|
+                KMEditor.Create.View.view appState model.createModel
 
         EditorRoute _ ->
-            KMEditor.Editor.View.view (wrapMsg << EditorMsg) appState model.editorModel
+            Html.map EditorMsg <|
+                KMEditor.Editor.View.view appState model.editorModel
 
         IndexRoute ->
-            KMEditor.Index.View.view (wrapMsg << IndexMsg) appState model.indexModel
+            Html.map IndexMsg <|
+                KMEditor.Index.View.view appState model.indexModel
 
         MigrationRoute _ ->
-            KMEditor.Migration.View.view (wrapMsg << MigrationMsg) model.migrationModel
+            Html.map MigrationMsg <|
+                KMEditor.Migration.View.view appState model.migrationModel
 
         PublishRoute _ ->
-            Html.map (wrapMsg << PublishMsg) <|
-                KMEditor.Publish.View.view model.publishModel
+            Html.map PublishMsg <|
+                KMEditor.Publish.View.view appState model.publishModel

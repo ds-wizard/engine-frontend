@@ -10,32 +10,32 @@ import Questionnaires.Index.View
 import Questionnaires.Migration.View
 import Questionnaires.Models exposing (Model)
 import Questionnaires.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
+import Questionnaires.Routes exposing (Route(..))
 
 
 view : Route -> AppState -> Model -> Html Msg
 view route appState model =
     case route of
-        Create _ ->
+        CreateRoute _ ->
             Html.map CreateMsg <|
                 Questionnaires.Create.View.view appState model.createModel
 
-        CreateMigration _ ->
+        CreateMigrationRoute _ ->
             Html.map CreateMigrationMsg <|
-                Questionnaires.CreateMigration.View.view model.createMigrationModel
+                Questionnaires.CreateMigration.View.view appState model.createMigrationModel
 
-        Detail _ ->
+        DetailRoute _ ->
             Html.map DetailMsg <|
                 Questionnaires.Detail.View.view appState model.detailModel
 
-        Edit _ ->
+        EditRoute _ ->
             Html.map EditMsg <|
                 Questionnaires.Edit.View.view appState model.editModel
 
-        Index ->
+        IndexRoute ->
             Html.map IndexMsg <|
                 Questionnaires.Index.View.view appState model.indexModel
 
-        Migration _ ->
+        MigrationRoute _ ->
             Html.map MigrationMsg <|
                 Questionnaires.Migration.View.view appState model.migrationModel

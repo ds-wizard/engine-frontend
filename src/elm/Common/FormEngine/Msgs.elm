@@ -1,7 +1,7 @@
-module FormEngine.Msgs exposing (Msg(..))
+module Common.FormEngine.Msgs exposing (Msg(..))
 
+import Common.FormEngine.Model exposing (ReplyValue, TypeHint)
 import Debounce
-import FormEngine.Model exposing (ReplyValue, TypeHint)
 
 
 type Msg a err

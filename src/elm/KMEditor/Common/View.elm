@@ -1,6 +1,7 @@
 module KMEditor.Common.View exposing (diffTreeView)
 
-import Common.Html exposing (emptyNode)
+import Common.AppState exposing (AppState)
+import Common.Html exposing (emptyNode, faSet)
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import KMEditor.Common.Events.Event as Event exposing (Event(..))
@@ -14,19 +15,19 @@ import KMEditor.Common.KnowledgeModel.Tag as Tag exposing (Tag)
 import List.Extra as List
 
 
-diffTreeView : KnowledgeModel -> List Event -> Html msg
-diffTreeView km events =
-    diffTreeNodeKnowledgeModel (List.reverse events) km
+diffTreeView : AppState -> KnowledgeModel -> List Event -> Html msg
+diffTreeView appState km events =
+    diffTreeNodeKnowledgeModel appState (List.reverse events) km
 
 
-diffTreeNodeKnowledgeModel : List Event -> KnowledgeModel -> Html msg
-diffTreeNodeKnowledgeModel events km =
+diffTreeNodeKnowledgeModel : AppState -> List Event -> KnowledgeModel -> Html msg
+diffTreeNodeKnowledgeModel appState events km =
     let
         newChapters =
-            newChildren Event.isAddChapter diffTreeNodeNewChapter events km
+            newChildren Event.isAddChapter (diffTreeNodeNewChapter appState) events km
 
         newTags =
-            newChildren Event.isAddTag diffTreeNodeNewTag events km
+            newChildren Event.isAddTag (diffTreeNodeNewTag appState) events km
 
         chapters =
             KnowledgeModel.getChapters km
@@ -36,36 +37,36 @@ diffTreeNodeKnowledgeModel events km =
     in
     div [ class "diff-tree" ]
         [ ul []
-            (List.map (diffTreeNodeChapter events km) chapters ++ newChapters)
+            (List.map (diffTreeNodeChapter appState events km) chapters ++ newChapters)
         , ul []
-            (List.map (diffTreeNodeTag events) tags ++ newTags)
+            (List.map (diffTreeNodeTag appState events) tags ++ newTags)
         ]
 
 
-diffTreeNodeChapter : List Event -> KnowledgeModel -> Chapter -> Html msg
-diffTreeNodeChapter events km chapter =
+diffTreeNodeChapter : AppState -> List Event -> KnowledgeModel -> Chapter -> Html msg
+diffTreeNodeChapter appState events km chapter =
     let
         divClass =
             getClass Event.isDeleteChapter Event.isEditChapter events chapter
 
         newQuestions =
-            newChildren Event.isAddQuestion diffTreeNodeNewQuestion events chapter.uuid
+            newChildren Event.isAddQuestion (diffTreeNodeNewQuestion appState) events chapter.uuid
 
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid km
     in
     li [ class (divClass ++ " chapter") ]
         [ span []
-            [ i [ class "fa fa-book" ] []
+            [ faSet "km.chapter" appState
             , strong [] [ text chapter.title ]
             ]
         , ul []
-            (List.map (diffTreeNodeQuestion events km) questions ++ newQuestions)
+            (List.map (diffTreeNodeQuestion appState events km) questions ++ newQuestions)
         ]
 
 
-diffTreeNodeNewChapter : List Event -> Event -> Html msg
-diffTreeNodeNewChapter events event =
+diffTreeNodeNewChapter : AppState -> List Event -> Event -> Html msg
+diffTreeNodeNewChapter appState events event =
     case event of
         AddChapterEvent eventData commonData ->
             let
@@ -79,38 +80,38 @@ diffTreeNodeNewChapter events event =
                 List.find (Event.isEditChapter dummyChapter) events
                     |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.title
-                    |> chapterNewNode
+                    |> chapterNewNode appState
 
         _ ->
             emptyNode
 
 
-chapterNewNode : String -> Html msg
-chapterNewNode title =
+chapterNewNode : AppState -> String -> Html msg
+chapterNewNode appState title =
     li [ class "ins chapter" ]
         [ span []
-            [ i [ class "fa fa-book" ] []
+            [ faSet "km.chapter" appState
             , strong [] [ text title ]
             ]
         ]
 
 
-diffTreeNodeTag : List Event -> Tag -> Html msg
-diffTreeNodeTag events tag =
+diffTreeNodeTag : AppState -> List Event -> Tag -> Html msg
+diffTreeNodeTag appState events tag =
     let
         divClass =
             getClass Event.isDeleteTag Event.isEditTag events tag
     in
     li [ class (divClass ++ " tag") ]
         [ span []
-            [ i [ class "fa fa-tag" ] []
+            [ faSet "km.tag" appState
             , text tag.name
             ]
         ]
 
 
-diffTreeNodeNewTag : List Event -> Event -> Html msg
-diffTreeNodeNewTag events event =
+diffTreeNodeNewTag : AppState -> List Event -> Event -> Html msg
+diffTreeNodeNewTag appState events event =
     case event of
         AddTagEvent eventData commonData ->
             let
@@ -124,14 +125,14 @@ diffTreeNodeNewTag events event =
                 List.find (Event.isEditTag dummyTag) events
                     |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.name
-                    |> diffTreeNewNode "tag" "fa-tag"
+                    |> diffTreeNewNode "tag" (faSet "km.tag" appState)
 
         _ ->
             emptyNode
 
 
-diffTreeNodeQuestion : List Event -> KnowledgeModel -> Question -> Html msg
-diffTreeNodeQuestion events km question =
+diffTreeNodeQuestion : AppState -> List Event -> KnowledgeModel -> Question -> Html msg
+diffTreeNodeQuestion appState events km question =
     let
         questionUuid =
             Question.getUuid question
@@ -140,16 +141,16 @@ diffTreeNodeQuestion events km question =
             getClass Event.isDeleteQuestion Event.isEditQuestion events question
 
         newAnswers =
-            newChildren Event.isAddAnswer diffTreeNodeNewAnswer events question
+            newChildren Event.isAddAnswer (diffTreeNodeNewAnswer appState) events question
 
         newItemQuestions =
-            newChildren Event.isAddQuestion diffTreeNodeNewQuestion events questionUuid
+            newChildren Event.isAddQuestion (diffTreeNodeNewQuestion appState) events questionUuid
 
         newReferences =
-            newChildren Event.isAddReference diffTreeNodeNewReference events question
+            newChildren Event.isAddReference (diffTreeNodeNewReference appState) events question
 
         newExperts =
-            newChildren Event.isAddExpert diffTreeNodeNewExpert events question
+            newChildren Event.isAddExpert (diffTreeNodeNewExpert appState) events question
 
         answers =
             KnowledgeModel.getQuestionAnswers questionUuid km
@@ -165,22 +166,22 @@ diffTreeNodeQuestion events km question =
     in
     li [ class (divClass ++ " question") ]
         [ span []
-            [ i [ class "fa fa-comment-o" ] []
+            [ faSet "km.question" appState
             , text (Question.getTitle question)
             ]
         , ul []
-            (List.map (diffTreeNodeAnswer events km) answers ++ newAnswers)
+            (List.map (diffTreeNodeAnswer appState events km) answers ++ newAnswers)
         , ul []
-            (List.map (diffTreeNodeQuestion events km) itemTemplateQuestions ++ newItemQuestions)
+            (List.map (diffTreeNodeQuestion appState events km) itemTemplateQuestions ++ newItemQuestions)
         , ul []
-            (List.map (diffTreeNodeReference events) references ++ newReferences)
+            (List.map (diffTreeNodeReference appState events) references ++ newReferences)
         , ul []
-            (List.map (diffTreeNodeExpert events) experts ++ newExperts)
+            (List.map (diffTreeNodeExpert appState events) experts ++ newExperts)
         ]
 
 
-diffTreeNodeNewQuestion : List Event -> Event -> Html msg
-diffTreeNodeNewQuestion events event =
+diffTreeNodeNewQuestion : AppState -> List Event -> Event -> Html msg
+diffTreeNodeNewQuestion appState events event =
     let
         getNode questionUuid title =
             let
@@ -194,7 +195,7 @@ diffTreeNodeNewQuestion events event =
                 List.find (Event.isEditQuestion dummyQuestion) events
                     |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault title
-                    |> diffTreeNewNode "question" "fa-comment-o"
+                    |> diffTreeNewNode "question" (faSet "km.question" appState)
     in
     case event of
         AddQuestionEvent _ commonData ->
@@ -204,30 +205,30 @@ diffTreeNodeNewQuestion events event =
             emptyNode
 
 
-diffTreeNodeAnswer : List Event -> KnowledgeModel -> Answer -> Html msg
-diffTreeNodeAnswer events km answer =
+diffTreeNodeAnswer : AppState -> List Event -> KnowledgeModel -> Answer -> Html msg
+diffTreeNodeAnswer appState events km answer =
     let
         divClass =
             getClass Event.isDeleteAnswer Event.isEditAnswer events answer
 
         newQuestions =
-            newChildren Event.isAddQuestion diffTreeNodeNewQuestion events answer.uuid
+            newChildren Event.isAddQuestion (diffTreeNodeNewQuestion appState) events answer.uuid
 
         followUpQuestions =
             KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
     in
     li [ class (divClass ++ " answer") ]
         [ span []
-            [ i [ class "fa fa-check-square-o" ] []
+            [ faSet "km.answer" appState
             , text answer.label
             ]
         , ul []
-            (List.map (diffTreeNodeQuestion events km) followUpQuestions ++ newQuestions)
+            (List.map (diffTreeNodeQuestion appState events km) followUpQuestions ++ newQuestions)
         ]
 
 
-diffTreeNodeNewAnswer : List Event -> Event -> Html msg
-diffTreeNodeNewAnswer events event =
+diffTreeNodeNewAnswer : AppState -> List Event -> Event -> Html msg
+diffTreeNodeNewAnswer appState events event =
     case event of
         AddAnswerEvent eventData commonData ->
             let
@@ -241,28 +242,28 @@ diffTreeNodeNewAnswer events event =
                 List.find (Event.isEditAnswer dummyAnswer) events
                     |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.label
-                    |> diffTreeNewNode "answer" "fa-check-square-o"
+                    |> diffTreeNewNode "answer" (faSet "km.answer" appState)
 
         _ ->
             emptyNode
 
 
-diffTreeNodeReference : List Event -> Reference -> Html msg
-diffTreeNodeReference events reference =
+diffTreeNodeReference : AppState -> List Event -> Reference -> Html msg
+diffTreeNodeReference appState events reference =
     let
         divClass =
             getClass Event.isDeleteReference Event.isEditReference events reference
     in
     li [ class (divClass ++ " reference") ]
         [ span []
-            [ i [ class "fa fa-bookmark-o" ] []
+            [ faSet "km.reference" appState
             , text <| Reference.getVisibleName reference
             ]
         ]
 
 
-diffTreeNodeNewReference : List Event -> Event -> Html msg
-diffTreeNodeNewReference events event =
+diffTreeNodeNewReference : AppState -> List Event -> Event -> Html msg
+diffTreeNodeNewReference appState events event =
     case event of
         AddReferenceEvent _ commonData ->
             let
@@ -276,28 +277,28 @@ diffTreeNodeNewReference events event =
                 List.find (Event.isEditReference dummyReference) events
                     |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault "Reference"
-                    |> diffTreeNewNode "reference" "fa-bookmark-o"
+                    |> diffTreeNewNode "reference" (faSet "km.reference" appState)
 
         _ ->
             emptyNode
 
 
-diffTreeNodeExpert : List Event -> Expert -> Html msg
-diffTreeNodeExpert events expert =
+diffTreeNodeExpert : AppState -> List Event -> Expert -> Html msg
+diffTreeNodeExpert appState events expert =
     let
         divClass =
             getClass Event.isDeleteExpert Event.isEditExpert events expert
     in
     li [ class (divClass ++ " expert") ]
         [ span []
-            [ i [ class "fa fa-user-o" ] []
+            [ faSet "km.expert" appState
             , text expert.name
             ]
         ]
 
 
-diffTreeNodeNewExpert : List Event -> Event -> Html msg
-diffTreeNodeNewExpert events event =
+diffTreeNodeNewExpert : AppState -> List Event -> Event -> Html msg
+diffTreeNodeNewExpert appState events event =
     case event of
         AddExpertEvent eventData commonData ->
             let
@@ -311,17 +312,17 @@ diffTreeNodeNewExpert events event =
                 List.find (Event.isEditExpert dummyExpert) events
                     |> Maybe.andThen Event.getEntityVisibleName
                     |> Maybe.withDefault eventData.name
-                    |> diffTreeNewNode "expert" "fa-user-o"
+                    |> diffTreeNewNode "expert" (faSet "km.expert" appState)
 
         _ ->
             emptyNode
 
 
-diffTreeNewNode : String -> String -> String -> Html msg
+diffTreeNewNode : String -> Html msg -> String -> Html msg
 diffTreeNewNode cssClass icon title =
     li [ class <| "ins " ++ cssClass ]
         [ span []
-            [ i [ class <| "fa " ++ icon ] []
+            [ icon
             , text title
             ]
         ]

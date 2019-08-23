@@ -6,6 +6,7 @@ import Common.Api.Branches as BranchesApi
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import Form
 import Form.Field as Field
 import KMEditor.Common.BranchDetail exposing (BranchDetail)
@@ -14,9 +15,10 @@ import KMEditor.Publish.Models exposing (Model)
 import KMEditor.Publish.Msgs exposing (Msg(..))
 import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 import KnowledgeModels.Common.Version as Version exposing (Version)
-import KnowledgeModels.Routing
+import KnowledgeModels.Routes
 import Msgs
-import Routing exposing (Route(..), cmdNavigate)
+import Routes
+import Routing exposing (cmdNavigate)
 
 
 fetchData : String -> AppState -> Cmd Msg
@@ -66,7 +68,7 @@ handleGetBranchCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | branch = getServerError error "Unable to get the knowledge model." }
+            ( { model | branch = getServerError error <| lg "apiError.branches.getError" appState }
             , getResultCmd result
             )
 
@@ -134,9 +136,9 @@ handlePutBranchCompleted : AppState -> Model -> Result ApiError () -> ( Model, C
 handlePutBranchCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key (KnowledgeModels KnowledgeModels.Routing.Index) )
+            ( model, cmdNavigate appState (Routes.KnowledgeModelsRoute KnowledgeModels.Routes.IndexRoute) )
 
         Err error ->
-            ( { model | publishingBranch = getServerError error "Publishing new version failed" }
+            ( { model | publishingBranch = getServerError error <| lg "apiError.packages.version.postError" appState }
             , getResultCmd result
             )

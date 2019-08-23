@@ -1,28 +1,39 @@
 module Users.Index.View exposing (view)
 
+import Common.AppState exposing (AppState)
 import Common.Html exposing (..)
 import Common.Html.Attribute exposing (listClass)
+import Common.Locale exposing (l, lg, lx)
 import Common.View.FormResult as FormResult
 import Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Msgs
-import Routing
-import Users.Common.Models exposing (User)
+import Routes
+import Users.Common.User exposing (User)
 import Users.Index.Models exposing (..)
 import Users.Index.Msgs exposing (Msg(..))
-import Users.Routing exposing (Route(..))
+import Users.Routes exposing (Route(..))
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
-    Page.actionResultView (viewUserList wrapMsg model) model.users
+l_ : String -> AppState -> String
+l_ =
+    l "Users.Index.View"
 
 
-viewUserList : (Msg -> Msgs.Msg) -> Model -> List User -> Html Msgs.Msg
-viewUserList wrapMsg model users =
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Users.Index.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView appState (viewUserList appState model) model.users
+
+
+viewUserList : AppState -> Model -> List User -> Html Msg
+viewUserList appState model users =
     let
         sortUsers u1 u2 =
             case compare (String.toLower u1.surname) (String.toLower u2.surname) of
@@ -36,39 +47,43 @@ viewUserList wrapMsg model users =
                     compare (String.toLower u1.name) (String.toLower u2.name)
     in
     div [ listClass "Users__Index" ]
-        [ Page.header "Users" indexActions
+        [ Page.header (lg "users" appState) (indexActions appState)
         , FormResult.successOnlyView model.deletingUser
-        , Listing.view (listingConfig wrapMsg) <| List.sortWith sortUsers users
-        , deleteModal wrapMsg model
+        , Listing.view appState (listingConfig appState) <| List.sortWith sortUsers users
+        , deleteModal appState model
         ]
 
 
-indexActions : List (Html Msgs.Msg)
-indexActions =
-    [ linkTo (Routing.Users Create) [ class "btn btn-primary" ] [ text "Create" ] ]
+indexActions : AppState -> List (Html Msg)
+indexActions appState =
+    [ linkTo appState
+        (Routes.UsersRoute CreateRoute)
+        [ class "btn btn-primary" ]
+        [ lx_ "header.create" appState ]
+    ]
 
 
-listingConfig : (Msg -> Msgs.Msg) -> ListingConfig User Msgs.Msg
-listingConfig wrapMsg =
-    { title = listingTitle
+listingConfig : AppState -> ListingConfig User Msg
+listingConfig appState =
+    { title = listingTitle appState
     , description = listingDescription
-    , actions = listingActions wrapMsg
+    , actions = listingActions appState
     , textTitle = \u -> u.surname ++ u.name
-    , emptyText = "Click \"Create\" button to add a new User."
+    , emptyText = l_ "listing.empty" appState
     , updated = Nothing
     }
 
 
-listingTitle : User -> Html Msgs.Msg
-listingTitle user =
+listingTitle : AppState -> User -> Html Msg
+listingTitle appState user =
     span []
-        [ linkTo (detailRoute user) [] [ text <| user.name ++ " " ++ user.surname ]
-        , listingTitleBadge user
+        [ linkTo appState (detailRoute user) [] [ text <| user.name ++ " " ++ user.surname ]
+        , listingTitleBadge appState user
         ]
 
 
-listingTitleBadge : User -> Html msg
-listingTitleBadge user =
+listingTitleBadge : AppState -> User -> Html msg
+listingTitleBadge appState user =
     let
         activeBadge =
             if user.active then
@@ -76,7 +91,7 @@ listingTitleBadge user =
 
             else
                 span [ class "badge badge-danger" ]
-                    [ text "inactive" ]
+                    [ lx_ "badge.inactive" appState ]
     in
     span []
         [ span [ class "badge badge-light" ]
@@ -85,7 +100,7 @@ listingTitleBadge user =
         ]
 
 
-listingDescription : User -> Html Msgs.Msg
+listingDescription : User -> Html Msg
 listingDescription user =
     span []
         [ a [ class "fragment", href <| "mailto:" ++ user.email ]
@@ -93,59 +108,59 @@ listingDescription user =
         ]
 
 
-listingActions : (Msg -> Msgs.Msg) -> User -> List (ListingActionConfig Msgs.Msg)
-listingActions wrapMsg user =
+listingActions : AppState -> User -> List (ListingActionConfig Msg)
+listingActions appState user =
     [ { extraClass = Nothing
       , icon = Just "edit"
-      , label = "Edit"
+      , label = l_ "action.edit" appState
       , msg = ListingActionLink (detailRoute user)
       }
     , { extraClass = Just "text-danger"
       , icon = Just "trash-o"
-      , label = "Delete"
-      , msg = ListingActionMsg (wrapMsg <| ShowHideDeleteUser <| Just user)
+      , label = l_ "action.delete" appState
+      , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
       }
     ]
 
 
-detailRoute : User -> Routing.Route
+detailRoute : User -> Routes.Route
 detailRoute =
-    Routing.Users << Edit << .uuid
+    Routes.UsersRoute << EditRoute << .uuid
 
 
-deleteModal : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-deleteModal wrapMsg model =
+deleteModal : AppState -> Model -> Html Msg
+deleteModal appState model =
     let
         ( visible, userHtml ) =
             case model.userToBeDeleted of
                 Just user ->
-                    ( True, userCard user )
+                    ( True, userCard appState user )
 
                 Nothing ->
                     ( False, emptyNode )
 
         modalContent =
             [ p []
-                [ text "Are you sure you want to permanently delete the following user?" ]
+                [ lx_ "deleteModal.message" appState ]
             , userHtml
             ]
 
         modalConfig =
-            { modalTitle = "Delete user"
+            { modalTitle = l_ "deleteModal.title" appState
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.deletingUser
-            , actionName = "Delete"
-            , actionMsg = wrapMsg DeleteUser
-            , cancelMsg = Just <| wrapMsg <| ShowHideDeleteUser Nothing
+            , actionName = l_ "deleteModal.action" appState
+            , actionMsg = DeleteUser
+            , cancelMsg = Just <| ShowHideDeleteUser Nothing
             , dangerous = True
             }
     in
     Modal.confirm modalConfig
 
 
-userCard : User -> Html Msgs.Msg
-userCard user =
+userCard : AppState -> User -> Html Msg
+userCard appState user =
     div [ class "user-card" ]
         [ div [ class "icon" ] [ i [ class "fa fa-user-circle-o" ] [] ]
         , div [ class "name" ] [ text (user.name ++ " " ++ user.surname) ]
@@ -153,6 +168,6 @@ userCard user =
             [ a [ href ("mailto:" ++ user.email) ] [ text user.email ]
             ]
         , div [ class "role" ]
-            [ text ("Role: " ++ user.role)
+            [ text (lg "user.role" appState ++ ": " ++ user.role)
             ]
         ]

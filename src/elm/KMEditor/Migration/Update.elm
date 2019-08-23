@@ -5,6 +5,7 @@ import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Branches as BranchesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import Common.Setters exposing (setMigration)
 import KMEditor.Common.Events.Event as Event
 import KMEditor.Common.Migration exposing (Migration)
@@ -14,17 +15,16 @@ import KMEditor.Migration.Msgs exposing (Msg(..))
 import Msgs
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg uuid appState =
-    Cmd.map wrapMsg <|
-        BranchesApi.getMigration uuid appState GetMigrationCompleted
+fetchData : String -> AppState -> Cmd Msg
+fetchData uuid appState =
+    BranchesApi.getMigration uuid appState GetMigrationCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetMigrationCompleted result ->
-            handleGetMigrationCompleted model result
+            handleGetMigrationCompleted appState model result
 
         ApplyEvent ->
             handleApplyEvent wrapMsg appState model
@@ -40,11 +40,11 @@ update msg wrapMsg appState model =
 -- Handlers
 
 
-handleGetMigrationCompleted : Model -> Result ApiError Migration -> ( Model, Cmd Msgs.Msg )
-handleGetMigrationCompleted model result =
+handleGetMigrationCompleted : AppState -> Model -> Result ApiError Migration -> ( Model, Cmd Msgs.Msg )
+handleGetMigrationCompleted appState model result =
     applyResult
         { setResult = setMigration
-        , defaultError = "Unable to get migration."
+        , defaultError = lg "apiError.branches.migrations.getError" appState
         , model = model
         , result = result
         }
@@ -66,12 +66,12 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
         Ok _ ->
             let
                 cmd =
-                    fetchData wrapMsg model.branchUuid appState
+                    Cmd.map wrapMsg <| fetchData model.branchUuid appState
             in
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
         Err error ->
-            ( { model | conflict = getServerError error "Unable to resolve conflict" }
+            ( { model | conflict = getServerError error <| lg "apiError.branches.migrations.conflict.postError" appState }
             , getResultCmd result
             )
 

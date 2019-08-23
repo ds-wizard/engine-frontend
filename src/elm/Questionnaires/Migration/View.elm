@@ -3,6 +3,7 @@ module Questionnaires.Migration.View exposing (view)
 import ActionResult
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, fa)
+import Common.Locale exposing (l, lf, lgx, lx)
 import Common.Questionnaire.Models
 import Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Common.Questionnaire.View exposing (viewQuestionnaire)
@@ -22,9 +23,24 @@ import Questionnaires.Migration.Msgs exposing (Msg(..))
 import Utils exposing (boolToInt, flip)
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "Questionnaires.Migration.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Questionnaires.Migration.View"
+
+
+lf_ : String -> List String -> AppState -> String
+lf_ =
+    lf "Questionnaires.Migration.View"
+
+
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (contentView appState model) (ActionResult.combine model.questionnaireMigration model.levels)
+    Page.actionResultView appState (contentView appState model) (ActionResult.combine model.questionnaireMigration model.levels)
 
 
 contentView : AppState -> Model -> ( QuestionnaireMigration, List Level ) -> Html Msg
@@ -38,7 +54,7 @@ contentView appState model ( migration, levels ) =
         finalizeAction =
             if allResolved then
                 button [ class "btn btn-primary link-with-icon", onClick FinalizeMigration ]
-                    [ text "Finalize Migration" ]
+                    [ lx_ "navbar.finalize" appState ]
 
             else
                 emptyNode
@@ -48,10 +64,10 @@ contentView appState model ( migration, levels ) =
                 div [ class "content" ]
                     [ Page.illustratedMessage
                         { image = "happy_feeling"
-                        , heading = "No changes to review"
+                        , heading = l_ "noChanges.heading" appState
                         , lines =
-                            [ "There are no changes affecting your answers."
-                            , "You can safely finalize the migration."
+                            [ l_ "noChanges.line1" appState
+                            , l_ "noChanges.line2" appState
                             ]
                         }
                     ]
@@ -59,10 +75,10 @@ contentView appState model ( migration, levels ) =
             else
                 div [ class "content" ]
                     [ div [ class "changes-view" ]
-                        [ viewChanges model migration
+                        [ viewChanges appState model migration
                         ]
                     , div [ class "right-view" ]
-                        [ changeView model migration
+                        [ changeView appState model migration
                         , div [ class "questionnaire-view" ]
                             [ model.questionnaireModel
                                 |> Maybe.map (questionnaireView appState model migration levels)
@@ -75,7 +91,7 @@ contentView appState model ( migration, levels ) =
         [ div [ class "top-header" ]
             [ div [ class "top-header-content" ]
                 [ div [ class "top-header-title" ]
-                    [ migrationInfo migration ]
+                    [ migrationInfo appState migration ]
                 , div [ class "top-header-actions" ]
                     [ finalizeAction ]
                 ]
@@ -84,12 +100,13 @@ contentView appState model ( migration, levels ) =
         ]
 
 
-migrationInfo : QuestionnaireMigration -> Html Msg
-migrationInfo migration =
+migrationInfo : AppState -> QuestionnaireMigration -> Html Msg
+migrationInfo appState migration =
     div [ class "migration-info" ]
         [ strong [] [ text migration.newQuestionnaire.name ]
         , div []
-            [ text "Migration: "
+            [ lgx "questionnaireMigration" appState
+            , text ":"
             , packageInfo migration.oldQuestionnaire.package
             , fa "long-arrow-right"
             , packageInfo migration.newQuestionnaire.package
@@ -105,8 +122,8 @@ packageInfo package =
         ]
 
 
-changeView : Model -> QuestionnaireMigration -> Html Msg
-changeView model migration =
+changeView : AppState -> Model -> QuestionnaireMigration -> Html Msg
+changeView appState model migration =
     let
         resolvedCount =
             List.length migration.resolvedQuestionUuids
@@ -120,18 +137,18 @@ changeView model migration =
         resolveAction =
             if isSelectedChangeResolved model then
                 div []
-                    [ text "Change already resolved"
+                    [ lx_ "changeView.resolved" appState
                     , button [ class "btn btn-outline-secondary link-with-icon", onClick UndoResolveCurrentChange ]
-                        [ fa "undo", text "Undo" ]
+                        [ fa "undo", lx_ "changeView.undo" appState ]
                     ]
 
             else
                 button [ class "btn btn-outline-primary link-with-icon", onClick ResolveCurrentChange ]
-                    [ fa "check", text "Resolve" ]
+                    [ fa "check", lx_ "changeView.resolve" appState ]
     in
     div [ class "change-view" ]
         [ div [ class "progress-view" ]
-            [ text <| "Resolved changes " ++ String.fromInt resolvedCount ++ "/" ++ String.fromInt changesCount
+            [ text <| lf_ "changeView.resolvedChanges" [ String.fromInt resolvedCount, String.fromInt changesCount ] appState
             , div [ class "progress" ]
                 [ div [ class "progress-bar", classList [ ( "bg-success", resolvedCount == changesCount ) ], style "width" (progress ++ "%") ] [] ]
             ]
@@ -166,33 +183,33 @@ questionnaireView appState model migration levels questionnaireModel =
         , levels = mbLevels
         , getExtraQuestionClass = getExtraQuestionClass
         , forceDisabled = True
-        , createRenderer = diffQuestionnaireRenderer model.changes
+        , createRenderer = diffQuestionnaireRenderer appState model.changes
         }
         appState
         questionnaireModel
         |> Html.map QuestionnaireMsg
 
 
-viewChanges : Model -> QuestionnaireMigration -> Html Msg
-viewChanges model migration =
+viewChanges : AppState -> Model -> QuestionnaireMigration -> Html Msg
+viewChanges appState model migration =
     div [ class "list-group" ]
-        (List.map (viewChange model migration) <| List.sortBy (boolToInt << isQuestionChangeResolved migration) model.changes.questions)
+        (List.map (viewChange appState model migration) <| List.sortBy (boolToInt << isQuestionChangeResolved migration) model.changes.questions)
 
 
-viewChange : Model -> QuestionnaireMigration -> QuestionChange -> Html Msg
-viewChange model migration change =
+viewChange : AppState -> Model -> QuestionnaireMigration -> QuestionChange -> Html Msg
+viewChange appState model migration change =
     let
         ( eventLabel, question ) =
             case change of
                 QuestionAdd data ->
-                    ( "New Question", data.question )
+                    ( l_ "change.questionAdd" appState, data.question )
 
                 QuestionChange data ->
-                    ( "Question Changed", data.question )
+                    ( l_ "change.questionChange" appState, data.question )
 
         resolvedLabel =
             if isQuestionChangeResolved migration change then
-                small [] [ text "Resolved" ]
+                small [] [ lx_ "change.resolved" appState ]
 
             else
                 emptyNode

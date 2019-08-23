@@ -6,6 +6,8 @@ module KMEditor.Editor.KMEditor.Update.Reference exposing
     , withGenerateReferenceEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
@@ -17,6 +19,11 @@ import Msgs
 import Random exposing (Seed)
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.Reference"
+
+
 updateReferenceForm : Model -> Form.Msg -> ReferenceEditorData -> Model
 updateReferenceForm =
     updateForm
@@ -25,13 +32,13 @@ updateReferenceForm =
         }
 
 
-withGenerateReferenceEditEvent : Seed -> Model -> ReferenceEditorData -> (Seed -> Model -> ReferenceEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateReferenceEditEvent =
+withGenerateReferenceEditEvent : AppState -> Seed -> Model -> ReferenceEditorData -> (Seed -> Model -> ReferenceEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateReferenceEditEvent appState =
     withGenerateEvent
         { isDirty = isReferenceEditorDirty
         , formValidation = referenceFormValidation
         , createEditor = ReferenceEditor
-        , alert = "Please fix the reference errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createAddReferenceEvent
         , createEditEvent = createEditReferenceEvent
         , updateEditorData = updateReferenceEditorData

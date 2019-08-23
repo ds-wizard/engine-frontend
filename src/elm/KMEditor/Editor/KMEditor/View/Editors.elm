@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (emptyNode, fa)
+import Common.Locale exposing (l, lf, lg, lgx, lx)
 import Common.View.Flash as Flash
 import Common.View.FormGroup as FormGroup
 import Common.View.Modal as Modal
@@ -27,37 +28,52 @@ import String exposing (fromInt, toLower)
 import ValueList
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.View.Editors"
+
+
+lf_ : String -> List String -> AppState -> String
+lf_ =
+    lf "KMEditor.Editor.KMEditor.View.Editors"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "KMEditor.Editor.KMEditor.View.Editors"
+
+
 activeEditor : AppState -> Model -> ( String, Html Msg )
 activeEditor appState model =
     case getActiveEditor model of
         Just editor ->
             case editor of
                 KMEditor data ->
-                    kmEditorView model data
+                    kmEditorView appState model data
 
                 TagEditor data ->
-                    tagEditorView model data
+                    tagEditorView appState model data
 
                 IntegrationEditor data ->
-                    integrationEditorView model data
+                    integrationEditorView appState model data
 
                 ChapterEditor data ->
-                    chapterEditorView model data
+                    chapterEditorView appState model data
 
                 QuestionEditor data ->
                     questionEditorView appState model data
 
                 AnswerEditor data ->
-                    answerEditorView model data
+                    answerEditorView appState model data
 
                 ReferenceEditor data ->
-                    referenceEditorView data
+                    referenceEditorView appState data
 
                 ExpertEditor data ->
-                    expertEditorView data
+                    expertEditorView appState data
 
         Nothing ->
-            ( "nothing", Page.message "long-arrow-left" "Select what you want to edit" )
+            ( "nothing", Page.message "long-arrow-left" <| l_ "activeEditor.nothing" appState )
 
 
 getChildName : Dict String Editor -> String -> String
@@ -72,16 +88,17 @@ editorClass =
     "col-xl-10 col-lg-12"
 
 
-kmEditorView : Model -> KMEditorData -> ( String, Html Msg )
-kmEditorView model editorData =
+kmEditorView : AppState -> Model -> KMEditorData -> ( String, Html Msg )
+kmEditorView appState model editorData =
     let
         editorTitleConfig =
-            { title = "Knowledge Model"
+            { title = lg "knowledgeModel" appState
             , deleteAction = Nothing
             }
 
         chaptersConfig =
-            { childName = "Chapter"
+            { childName = lg "chapter" appState
+            , childNamePlural = lg "chapters" appState
             , reorderableState = model.reorderableState
             , children = editorData.chapters.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderChapters >> KMEditorMsg >> EditorMsg
@@ -92,7 +109,8 @@ kmEditorView model editorData =
             }
 
         tagsConfig =
-            { childName = "Tag"
+            { childName = lg "tag" appState
+            , childNamePlural = lg "tags" appState
             , reorderableState = model.reorderableState
             , children = editorData.tags.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderTags >> KMEditorMsg >> EditorMsg
@@ -103,7 +121,8 @@ kmEditorView model editorData =
             }
 
         integrationsConfig =
-            { childName = "Integration"
+            { childName = lg "integration" appState
+            , childNamePlural = lg "integrations" appState
             , reorderableState = model.reorderableState
             , children = editorData.integrations.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderIntegrations >> KMEditorMsg >> EditorMsg
@@ -115,30 +134,31 @@ kmEditorView model editorData =
 
         form =
             div []
-                [ FormGroup.input editorData.form "name" "Name"
+                [ FormGroup.input appState editorData.form "name" <| lg "knowledgeModel.name" appState
                 ]
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
+        [ editorTitle appState editorTitleConfig
         , form |> Html.map (KMEditorFormMsg >> KMEditorMsg >> EditorMsg)
-        , inputChildren chaptersConfig
-        , inputChildren tagsConfig
-        , inputChildren integrationsConfig
+        , inputChildren appState chaptersConfig
+        , inputChildren appState tagsConfig
+        , inputChildren appState integrationsConfig
         ]
     )
 
 
-chapterEditorView : Model -> ChapterEditorData -> ( String, Html Msg )
-chapterEditorView model editorData =
+chapterEditorView : AppState -> Model -> ChapterEditorData -> ( String, Html Msg )
+chapterEditorView appState model editorData =
     let
         editorTitleConfig =
-            { title = "Chapter"
+            { title = lg "chapter" appState
             , deleteAction = DeleteChapter editorData.uuid |> ChapterEditorMsg |> EditorMsg |> Just
             }
 
         questionsConfig =
-            { childName = "Question"
+            { childName = lg "question" appState
+            , childNamePlural = lg "questions" appState
             , reorderableState = model.reorderableState
             , children = editorData.questions.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderQuestions >> ChapterEditorMsg >> EditorMsg
@@ -150,37 +170,37 @@ chapterEditorView model editorData =
 
         form =
             div []
-                [ FormGroup.input editorData.form "title" "Title"
-                , FormGroup.markdownEditor editorData.form "text" "Text"
+                [ FormGroup.input appState editorData.form "title" <| lg "chapter.title" appState
+                , FormGroup.markdownEditor appState editorData.form "text" <| lg "chapter.text" appState
                 ]
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
+        [ editorTitle appState editorTitleConfig
         , form |> Html.map (ChapterFormMsg >> ChapterEditorMsg >> EditorMsg)
-        , inputChildren questionsConfig
+        , inputChildren appState questionsConfig
         ]
     )
 
 
-tagEditorView : Model -> TagEditorData -> ( String, Html Msg )
-tagEditorView model editorData =
+tagEditorView : AppState -> Model -> TagEditorData -> ( String, Html Msg )
+tagEditorView appState model editorData =
     let
         editorTitleConfig =
-            { title = "Tag"
+            { title = lg "tag" appState
             , deleteAction = DeleteTag editorData.uuid |> TagEditorMsg |> EditorMsg |> Just
             }
 
         form =
             div []
-                [ FormGroup.input editorData.form "name" "Name"
-                , FormGroup.textarea editorData.form "description" "Description"
-                , FormGroup.color editorData.form "color" "Color"
+                [ FormGroup.input appState editorData.form "name" <| lg "tag.name" appState
+                , FormGroup.textarea appState editorData.form "description" <| lg "tag.description" appState
+                , FormGroup.color editorData.form "color" <| lg "tag.color" appState
                 ]
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
+        [ editorTitle appState editorTitleConfig
         , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
         ]
     )
@@ -195,8 +215,8 @@ httpMethodOptions =
     List.zip httpMethods httpMethods
 
 
-integrationEditorView : Model -> IntegrationEditorData -> ( String, Html Msg )
-integrationEditorView model editorData =
+integrationEditorView : AppState -> Model -> IntegrationEditorData -> ( String, Html Msg )
+integrationEditorView appState model editorData =
     let
         formMsg =
             IntegrationFormMsg >> IntegrationEditorMsg >> EditorMsg
@@ -205,66 +225,50 @@ integrationEditorView model editorData =
             PropsListMsg >> IntegrationEditorMsg >> EditorMsg
 
         editorTitleConfig =
-            { title = "Integration"
+            { title = lg "integration" appState
             , deleteAction = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm True
             }
 
         form =
             div []
-                [ FormGroup.input editorData.form "id" "Id" |> Html.map formMsg
-                , FormGroup.input editorData.form "name" "Name" |> Html.map formMsg
-                , FormGroup.input editorData.form "logo" "Logo" |> Html.map formMsg
+                [ FormGroup.input appState editorData.form "id" (lg "integration.id" appState) |> Html.map formMsg
+                , FormGroup.input appState editorData.form "name" (lg "integration.name" appState) |> Html.map formMsg
+                , FormGroup.input appState editorData.form "logo" (lg "integration.logo" appState) |> Html.map formMsg
                 , div [ class "form-group" ]
-                    [ label [] [ text "Props" ]
+                    [ label [] [ lgx "integration.props" appState ]
                     , ValueList.view editorData.props |> Html.map propsListMsg
                     ]
-                , FormGroup.input editorData.form "itemUrl" "Item URL" |> Html.map formMsg
+                , FormGroup.input appState editorData.form "itemUrl" (lg "integration.itemUrl" appState) |> Html.map formMsg
                 , div [ class "card card-border-light mb-5" ]
-                    [ div [ class "card-header" ] [ text "Request" ]
+                    [ div [ class "card-header" ] [ lgx "integration.request" appState ]
                     , div [ class "card-body" ]
-                        [ FormGroup.select httpMethodOptions editorData.form "requestMethod" "Request Method" |> Html.map formMsg
-                        , FormGroup.input editorData.form "requestUrl" "Request URL" |> Html.map formMsg
-                        , FormGroup.list integrationHeaderItemView editorData.form "requestHeaders" "Request Headers" |> Html.map formMsg
-                        , FormGroup.textarea editorData.form "requestBody" "Request Body" |> Html.map formMsg
+                        [ FormGroup.select appState httpMethodOptions editorData.form "requestMethod" (lg "integration.request.method" appState) |> Html.map formMsg
+                        , FormGroup.input appState editorData.form "requestUrl" (lg "integration.request.url" appState) |> Html.map formMsg
+                        , FormGroup.list appState (integrationHeaderItemView appState) editorData.form "requestHeaders" (lg "integration.request.headers" appState) |> Html.map formMsg
+                        , FormGroup.textarea appState editorData.form "requestBody" (lg "integration.request.body" appState) |> Html.map formMsg
                         ]
                     ]
                 , div [ class "card card-border-light mb-5" ]
-                    [ div [ class "card-header" ] [ text "Response" ]
+                    [ div [ class "card-header" ] [ lgx "integration.response" appState ]
                     , div [ class "card-body" ]
-                        [ FormGroup.input editorData.form "responseListField" "Response List Field" |> Html.map formMsg
-                        , FormGroup.input editorData.form "responseIdField" "Response Id Field" |> Html.map formMsg
-                        , FormGroup.input editorData.form "responseNameField" "Response Name Field" |> Html.map formMsg
+                        [ FormGroup.input appState editorData.form "responseListField" (lg "integration.response.listField" appState) |> Html.map formMsg
+                        , FormGroup.input appState editorData.form "responseIdField" (lg "integration.response.idField" appState) |> Html.map formMsg
+                        , FormGroup.input appState editorData.form "responseNameField" (lg "integration.response.nameField" appState) |> Html.map formMsg
                         ]
                     ]
                 ]
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
+        [ editorTitle appState editorTitleConfig
         , form
-        , integrationDeleteConfirm editorData
+        , integrationDeleteConfirm appState editorData
         ]
     )
 
 
-integrationDeleteConfirm : IntegrationEditorData -> Html Msg
-integrationDeleteConfirm editorData =
-    Modal.confirm
-        { modalTitle = "Delete Integration"
-        , modalContent =
-            [ p [] [ text "All questions using this integration will be converted to Value Question. Are you sure you want to delete the integration?" ]
-            ]
-        , visible = editorData.deleteConfirmOpen
-        , actionResult = Unset
-        , actionName = "Delete"
-        , actionMsg = EditorMsg <| IntegrationEditorMsg <| DeleteIntegration editorData.uuid
-        , cancelMsg = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm False
-        , dangerous = True
-        }
-
-
-integrationHeaderItemView : Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
-integrationHeaderItemView form i =
+integrationHeaderItemView : AppState -> Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
+integrationHeaderItemView appState form i =
     let
         headerField =
             Form.getFieldAsString ("requestHeaders." ++ String.fromInt i ++ ".header") form
@@ -273,14 +277,14 @@ integrationHeaderItemView form i =
             Form.getFieldAsString ("requestHeaders." ++ String.fromInt i ++ ".value") form
 
         ( headerError, headerErrorClass ) =
-            FormGroup.getErrors headerField "Header name"
+            FormGroup.getErrors appState headerField <| lg "integration.header.name" appState
 
         ( valueError, valueErrorClass ) =
-            FormGroup.getErrors valueField "Header value"
+            FormGroup.getErrors appState valueField <| lg "integration.header.value" appState
     in
     div [ class "input-group mb-2" ]
-        [ Input.textInput headerField [ class <| "form-control " ++ headerErrorClass, placeholder "HEADER" ]
-        , Input.textInput valueField [ class <| "form-control " ++ valueErrorClass, placeholder "value" ]
+        [ Input.textInput headerField [ class <| "form-control " ++ headerErrorClass, placeholder <| l_ "integrationEditor.form.header.namePlaceholder" appState ]
+        , Input.textInput valueField [ class <| "form-control " ++ valueErrorClass, placeholder <| l_ "integrationEditor.form.header.valuePlaceholder" appState ]
         , div [ class "input-group-append" ]
             [ button [ class "btn btn-outline-warning", onClick (Form.RemoveItem "requestHeaders" i) ]
                 [ fa "times" ]
@@ -290,29 +294,45 @@ integrationHeaderItemView form i =
         ]
 
 
+integrationDeleteConfirm : AppState -> IntegrationEditorData -> Html Msg
+integrationDeleteConfirm appState editorData =
+    Modal.confirm
+        { modalTitle = l_ "integrationEditor.deleteConfirm.title" appState
+        , modalContent =
+            [ p [] [ lx_ "integrationEditor.deleteConfirm.text" appState ]
+            ]
+        , visible = editorData.deleteConfirmOpen
+        , actionResult = Unset
+        , actionName = l_ "integrationEditor.deleteConfirm.action" appState
+        , actionMsg = EditorMsg <| IntegrationEditorMsg <| DeleteIntegration editorData.uuid
+        , cancelMsg = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm False
+        , dangerous = True
+        }
+
+
 questionEditorView : AppState -> Model -> QuestionEditorData -> ( String, Html Msg )
 questionEditorView appState model editorData =
     let
         editorTitleConfig =
-            { title = "Question"
+            { title = lg "question" appState
             , deleteAction = DeleteQuestion editorData.uuid |> QuestionEditorMsg |> EditorMsg |> Just
             }
 
         levelSelection =
             if appState.config.levelsEnabled then
-                questionRequiredLevelSelectGroup editorData model.levels
+                questionRequiredLevelSelectGroup appState editorData model.levels
 
             else
                 emptyNode
 
         formFields =
-            [ FormGroup.select questionTypeOptions editorData.form "questionType" "Question Type"
+            [ FormGroup.select appState (questionTypeOptions appState) editorData.form "questionType" <| lg "questionType" appState
             , p [ class "form-text text-muted" ]
                 [ fa "warning"
-                , text "By changing the type answers or items might be removed."
+                , lx_ "questionEditor.form.questionTypeWarning" appState
                 ]
-            , FormGroup.input editorData.form "title" "Title"
-            , FormGroup.markdownEditor editorData.form "text" "Text"
+            , FormGroup.input appState editorData.form "title" <| lg "question.title" appState
+            , FormGroup.markdownEditor appState editorData.form "text" <| lg "question.text" appState
             , levelSelection
             ]
 
@@ -324,7 +344,7 @@ questionEditorView appState model editorData =
                             div [] formFields
 
                         extraData =
-                            [ questionEditorAnswersView model editorData ]
+                            [ questionEditorAnswersView appState model editorData ]
                     in
                     ( formData, extraData )
 
@@ -343,7 +363,7 @@ questionEditorView appState model editorData =
                         formData =
                             div []
                                 (formFields
-                                    ++ [ FormGroup.select questionValueTypeOptions editorData.form "valueType" "Value Type"
+                                    ++ [ FormGroup.select appState (questionValueTypeOptions appState) editorData.form "valueType" <| lg "questionValueType" appState
                                        ]
                                 )
 
@@ -358,12 +378,12 @@ questionEditorView appState model editorData =
                             getCurrentIntegrations model
 
                         integrationOptions =
-                            ( "", "- select integration -" )
+                            ( "", l_ "questionEditor.form.integration.defaultValue" appState )
                                 :: List.map (\i -> ( i.uuid, i.name )) integrations
 
                         noIntegrations =
                             if List.length integrations == 0 then
-                                Flash.info "There are no integrations configured for this Knowledge Model. Create them first."
+                                Flash.info <| l_ "questionEditor.form.integration.noIntegrations" appState
 
                             else
                                 emptyNode
@@ -374,11 +394,11 @@ questionEditorView appState model editorData =
 
                             else
                                 div [ class "card card-border-light mb-5" ]
-                                    [ div [ class "card-header" ] [ text "Integration Configuration" ]
+                                    [ div [ class "card-header" ] [ lx_ "questionEditor.form.integration.configuration" appState ]
                                     , div [ class "card-body" ]
                                         (List.map
                                             (\prop ->
-                                                FormGroup.input editorData.form ("props-" ++ prop) prop
+                                                FormGroup.input appState editorData.form ("props-" ++ prop) prop
                                             )
                                             integration.props
                                         )
@@ -393,7 +413,7 @@ questionEditorView appState model editorData =
                         formData =
                             div [ class "integration-question-form" ]
                                 (formFields
-                                    ++ [ FormGroup.select integrationOptions editorData.form "integrationUuid" "Integration"
+                                    ++ [ FormGroup.select appState integrationOptions editorData.form "integrationUuid" <| lg "integration" appState
                                        , noIntegrations
                                        , integrationFormFields
                                        ]
@@ -409,20 +429,20 @@ questionEditorView appState model editorData =
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        ([ editorTitle editorTitleConfig
+        ([ editorTitle appState editorTitleConfig
          , form |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
-         , questionTagList model editorData
+         , questionTagList appState model editorData
          ]
             ++ extra
-            ++ [ questionEditorReferencesView model editorData
-               , questionEditorExpertsView model editorData
+            ++ [ questionEditorReferencesView appState model editorData
+               , questionEditorExpertsView appState model editorData
                ]
         )
     )
 
 
-questionTagList : Model -> QuestionEditorData -> Html Msg
-questionTagList model editorData =
+questionTagList : AppState -> Model -> QuestionEditorData -> Html Msg
+questionTagList appState model editorData =
     let
         tags =
             getCurrentTags model
@@ -434,20 +454,20 @@ questionTagList model editorData =
             }
     in
     div [ class "form-group" ]
-        [ label [] [ text "Tags" ]
-        , Tag.list tagListConfig tags
+        [ label [] [ lgx "tags" appState ]
+        , Tag.list appState tagListConfig tags
         ]
 
 
-questionRequiredLevelSelectGroup : QuestionEditorData -> List Level -> Html Form.Msg
-questionRequiredLevelSelectGroup editorData levels =
+questionRequiredLevelSelectGroup : AppState -> QuestionEditorData -> List Level -> Html Form.Msg
+questionRequiredLevelSelectGroup appState editorData levels =
     let
         options =
             levels
                 |> List.map createLevelOption
-                |> (::) ( "", "Never" )
+                |> (::) ( "", l_ "questionEditor.form.requiredLevel.defaultValue" appState )
     in
-    FormGroup.select options editorData.form "requiredLevel" "When does this question become desirable?"
+    FormGroup.select appState options editorData.form "requiredLevel" <| lg "question.requiredLevel" appState
 
 
 createLevelOption : Level -> ( String, String )
@@ -455,10 +475,11 @@ createLevelOption level =
     ( fromInt level.level, level.title )
 
 
-questionEditorAnswersView : Model -> QuestionEditorData -> Html Msg
-questionEditorAnswersView model editorData =
-    inputChildren
-        { childName = "Answer"
+questionEditorAnswersView : AppState -> Model -> QuestionEditorData -> Html Msg
+questionEditorAnswersView appState model editorData =
+    inputChildren appState
+        { childName = lg "answer" appState
+        , childNamePlural = lg "answers" appState
         , reorderableState = model.reorderableState
         , children = editorData.answers.list |> List.filter (editorNotDeleted model.editors)
         , reorderMsg = ReorderAnswers >> QuestionEditorMsg >> EditorMsg
@@ -473,7 +494,8 @@ questionEditorItemView : AppState -> Model -> QuestionEditorData -> Html Msg
 questionEditorItemView appState model editorData =
     let
         config =
-            { childName = "Question"
+            { childName = lg "question" appState
+            , childNamePlural = lg "questions" appState
             , reorderableState = model.reorderableState
             , children = editorData.itemTemplateQuestions.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderItemQuestions >> QuestionEditorMsg >> EditorMsg
@@ -486,9 +508,9 @@ questionEditorItemView appState model editorData =
         itemTitle =
             if appState.config.itemTitleEnabled then
                 div [ class "form-group" ]
-                    [ FormGroup.input editorData.form "itemTemplateTitle" "Title" |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+                    [ FormGroup.input appState editorData.form "itemTemplateTitle" (lg "question.itemTitle" appState) |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
                     , div [ class "form-text" ]
-                        [ Flash.warning "Item Title is obsolete and will be removed in future versions. Create a Value Question instead if you need it." ]
+                        [ Flash.warning <| l_ "questionEditor.form.itemTitleObsolete" appState ]
                     ]
 
             else
@@ -496,18 +518,19 @@ questionEditorItemView appState model editorData =
     in
     div [ class "card card-border-light card-item-template mb-3" ]
         [ div [ class "card-header" ]
-            [ text "Item Template" ]
+            [ lx_ "questionEditor.form.itemTemplate" appState ]
         , div [ class "card-body" ]
             [ itemTitle
-            , inputChildren config
+            , inputChildren appState config
             ]
         ]
 
 
-questionEditorReferencesView : Model -> QuestionEditorData -> Html Msg
-questionEditorReferencesView model editorData =
-    inputChildren
-        { childName = "Reference"
+questionEditorReferencesView : AppState -> Model -> QuestionEditorData -> Html Msg
+questionEditorReferencesView appState model editorData =
+    inputChildren appState
+        { childName = lg "reference" appState
+        , childNamePlural = lg "references" appState
         , reorderableState = model.reorderableState
         , children = editorData.references.list |> List.filter (editorNotDeleted model.editors)
         , reorderMsg = ReorderReferences >> QuestionEditorMsg >> EditorMsg
@@ -518,10 +541,11 @@ questionEditorReferencesView model editorData =
         }
 
 
-questionEditorExpertsView : Model -> QuestionEditorData -> Html Msg
-questionEditorExpertsView model editorData =
-    inputChildren
-        { childName = "Expert"
+questionEditorExpertsView : AppState -> Model -> QuestionEditorData -> Html Msg
+questionEditorExpertsView appState model editorData =
+    inputChildren appState
+        { childName = lg "expert" appState
+        , childNamePlural = lg "experts" appState
         , reorderableState = model.reorderableState
         , children = editorData.experts.list |> List.filter (editorNotDeleted model.editors)
         , reorderMsg = ReorderExperts >> QuestionEditorMsg >> EditorMsg
@@ -532,19 +556,20 @@ questionEditorExpertsView model editorData =
         }
 
 
-answerEditorView : Model -> AnswerEditorData -> ( String, Html Msg )
-answerEditorView model editorData =
+answerEditorView : AppState -> Model -> AnswerEditorData -> ( String, Html Msg )
+answerEditorView appState model editorData =
     let
         editorTitleConfig =
-            { title = "Answer"
+            { title = lg "answer" appState
             , deleteAction = DeleteAnswer editorData.uuid |> AnswerEditorMsg |> EditorMsg |> Just
             }
 
         metrics =
-            metricsView editorData model.metrics
+            metricsView appState editorData model.metrics
 
         followUpsConfig =
-            { childName = "Follow-up Question"
+            { childName = lg "followupQuestion" appState
+            , childNamePlural = lg "followupQuestions" appState
             , reorderableState = model.reorderableState
             , children = editorData.followUps.list |> List.filter (editorNotDeleted model.editors)
             , reorderMsg = ReorderFollowUps >> AnswerEditorMsg >> EditorMsg
@@ -556,40 +581,40 @@ answerEditorView model editorData =
 
         form =
             div []
-                [ FormGroup.input editorData.form "label" "Label"
-                , FormGroup.markdownEditor editorData.form "advice" "Advice"
+                [ FormGroup.input appState editorData.form "label" <| lg "answer.label" appState
+                , FormGroup.markdownEditor appState editorData.form "advice" <| lg "answer.advice" appState
                 ]
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
+        [ editorTitle appState editorTitleConfig
         , form |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
         , metrics
-        , inputChildren followUpsConfig
+        , inputChildren appState followUpsConfig
         ]
     )
 
 
-metricsView : AnswerEditorData -> List Metric -> Html Msg
-metricsView editorData metrics =
+metricsView : AppState -> AnswerEditorData -> List Metric -> Html Msg
+metricsView appState editorData metrics =
     div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text "Metrics" ]
+        [ label [ class "control-label" ] [ lgx "metrics" appState ]
         , table [ class "table table-hover table-metrics" ]
             [ thead []
                 [ tr []
                     [ th [] []
-                    , th [] [ text "Weight" ]
-                    , th [] [ text "Measure" ]
+                    , th [] [ lgx "metric.weight" appState ]
+                    , th [] [ lgx "metric.measure" appState ]
                     ]
                 ]
-            , tbody [] (List.indexedMap (metricView editorData.form) metrics)
+            , tbody [] (List.indexedMap (metricView appState editorData.form) metrics)
             ]
         ]
         |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
 
 
-metricView : Form CustomFormError AnswerForm -> Int -> Metric -> Html Form.Msg
-metricView form i metric =
+metricView : AppState -> Form CustomFormError AnswerForm -> Int -> Metric -> Html Form.Msg
+metricView appState form i metric =
     let
         enabled =
             Form.getFieldAsBool ("metricMeasures." ++ fromInt i ++ ".enabled") form
@@ -598,38 +623,38 @@ metricView form i metric =
     in
     tr [ classList [ ( "disabled", not enabled ) ] ]
         [ td [] [ FormGroup.toggle form ("metricMeasures." ++ fromInt i ++ ".enabled") metric.title ]
-        , td [] [ metricInput form ("metricMeasures." ++ fromInt i ++ ".weight") enabled ]
-        , td [] [ metricInput form ("metricMeasures." ++ fromInt i ++ ".measure") enabled ]
+        , td [] [ metricInput appState form ("metricMeasures." ++ fromInt i ++ ".weight") enabled ]
+        , td [] [ metricInput appState form ("metricMeasures." ++ fromInt i ++ ".measure") enabled ]
         ]
 
 
-metricInput : Form CustomFormError o -> String -> Bool -> Html Form.Msg
-metricInput form fieldName enabled =
-    FormGroup.formGroup Input.textInput [ disabled (not enabled) ] form fieldName ""
+metricInput : AppState -> Form CustomFormError o -> String -> Bool -> Html Form.Msg
+metricInput appState form fieldName enabled =
+    FormGroup.formGroup Input.textInput [ disabled (not enabled) ] appState form fieldName ""
 
 
-referenceEditorView : ReferenceEditorData -> ( String, Html Msg )
-referenceEditorView editorData =
+referenceEditorView : AppState -> ReferenceEditorData -> ( String, Html Msg )
+referenceEditorView appState editorData =
     let
         editorTitleConfig =
-            { title = "Reference"
+            { title = lg "reference" appState
             , deleteAction = DeleteReference editorData.uuid |> ReferenceEditorMsg |> EditorMsg |> Just
             }
 
         formFields =
             case (Form.getFieldAsString "referenceType" editorData.form).value of
                 Just "ResourcePageReference" ->
-                    [ FormGroup.input editorData.form "shortUuid" "Short UUID"
+                    [ FormGroup.input appState editorData.form "shortUuid" <| lg "reference.shortUuid" appState
                     ]
 
                 Just "URLReference" ->
-                    [ FormGroup.input editorData.form "url" "URL"
-                    , FormGroup.input editorData.form "label" "Label"
+                    [ FormGroup.input appState editorData.form "url" <| lg "reference.url" appState
+                    , FormGroup.input appState editorData.form "label" <| lg "reference.label" appState
                     ]
 
                 Just "CrossReference" ->
-                    [ FormGroup.input editorData.form "targetUuid" "Target UUID"
-                    , FormGroup.input editorData.form "description" "Description"
+                    [ FormGroup.input appState editorData.form "targetUuid" <| lg "reference.targetUuid" appState
+                    , FormGroup.input appState editorData.form "description" <| lg "reference.description" appState
                     ]
 
                 _ ->
@@ -637,35 +662,35 @@ referenceEditorView editorData =
 
         form =
             div []
-                ([ FormGroup.select referenceTypeOptions editorData.form "referenceType" "Type" ]
+                ([ FormGroup.select appState (referenceTypeOptions appState) editorData.form "referenceType" <| lg "referenceType" appState ]
                     ++ formFields
                 )
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
+        [ editorTitle appState editorTitleConfig
         , form |> Html.map (ReferenceFormMsg >> ReferenceEditorMsg >> EditorMsg)
         ]
     )
 
 
-expertEditorView : ExpertEditorData -> ( String, Html Msg )
-expertEditorView editorData =
+expertEditorView : AppState -> ExpertEditorData -> ( String, Html Msg )
+expertEditorView appState editorData =
     let
         editorTitleConfig =
-            { title = "Expert"
+            { title = lg "expert" appState
             , deleteAction = DeleteExpert editorData.uuid |> ExpertEditorMsg |> EditorMsg |> Just
             }
 
         form =
             div []
-                [ FormGroup.input editorData.form "name" "Name"
-                , FormGroup.input editorData.form "email" "Email"
+                [ FormGroup.input appState editorData.form "name" <| lg "expert.name" appState
+                , FormGroup.input appState editorData.form "email" <| lg "expert.email" appState
                 ]
     in
     ( editorData.uuid
     , div [ class editorClass ]
-        [ editorTitle editorTitleConfig
+        [ editorTitle appState editorTitleConfig
         , form |> Html.map (ExpertFormMsg >> ExpertEditorMsg >> EditorMsg)
         ]
     )
@@ -677,15 +702,15 @@ type alias EditorTitleConfig =
     }
 
 
-editorTitle : EditorTitleConfig -> Html Msg
-editorTitle config =
+editorTitle : AppState -> EditorTitleConfig -> Html Msg
+editorTitle appState config =
     let
         deleteActionButton =
             case config.deleteAction of
                 Just msg ->
                     button [ class "btn btn-outline-danger link-with-icon", onClick msg ]
                         [ fa "trash-o"
-                        , text "Delete"
+                        , lx_ "editorTitle.delete" appState
                         ]
 
                 Nothing ->
@@ -699,6 +724,7 @@ editorTitle config =
 
 type alias InputChildrenConfig a =
     { childName : String
+    , childNamePlural : String
     , reorderableState : Reorderable.State
     , children : List a
     , reorderMsg : List a -> Msg
@@ -709,10 +735,10 @@ type alias InputChildrenConfig a =
     }
 
 
-inputChildren : InputChildrenConfig a -> Html Msg
-inputChildren config =
+inputChildren : AppState -> InputChildrenConfig a -> Html Msg
+inputChildren appState config =
     div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text (config.childName ++ "s") ]
+        [ label [ class "control-label" ] [ text config.childNamePlural ]
         , Reorderable.view
             { toId = config.toId
             , toMsg = ReorderableMsg
@@ -727,7 +753,7 @@ inputChildren config =
             config.children
         , a [ onClick config.addMsg, class "link-with-icon link-add-child" ]
             [ i [ class "fa fa-plus" ] []
-            , text ("Add " ++ toLower config.childName)
+            , text <| lf_ "inputChildren.add" [ toLower config.childName ] appState
             ]
         ]
 

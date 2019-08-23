@@ -4,7 +4,7 @@ import Common.AppState exposing (AppState)
 import KnowledgeModels.Detail.Models
 import KnowledgeModels.Import.Models
 import KnowledgeModels.Index.Models
-import KnowledgeModels.Routing exposing (Route(..))
+import KnowledgeModels.Routes exposing (Route(..))
 
 
 type alias Model =
@@ -25,11 +25,11 @@ initialModel appState =
 initLocalModel : Route -> AppState -> Model -> Model
 initLocalModel route appState model =
     case route of
-        Detail _ ->
+        DetailRoute _ ->
             { model | detailModel = KnowledgeModels.Detail.Models.initialModel }
 
-        Import packageId ->
+        ImportRoute packageId ->
             { model | importModel = KnowledgeModels.Import.Models.initialModel appState packageId }
 
-        Index ->
+        IndexRoute ->
             { model | indexModel = KnowledgeModels.Index.Models.initialModel }

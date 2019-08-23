@@ -4,30 +4,46 @@ import Auth.Permission as Perm exposing (hasPerm)
 import Common.Api.Packages as PackagesApi
 import Common.AppState exposing (AppState)
 import Common.Config exposing (Registry(..))
-import Common.Html exposing (emptyNode, fa, linkTo)
+import Common.Html exposing (emptyNode, fa, faSet, linkTo)
+import Common.Locale exposing (l, lg, lh, lx)
 import Common.View.ItemIcon as ItemIcon
 import Common.View.Modal as Modal
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import KMEditor.Routing
+import KMEditor.Routes exposing (Route(..))
 import KnowledgeModels.Common.OrganizationInfo exposing (OrganizationInfo)
 import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 import KnowledgeModels.Common.PackageState as PackageState
 import KnowledgeModels.Common.Version as Version
 import KnowledgeModels.Detail.Models exposing (..)
 import KnowledgeModels.Detail.Msgs exposing (..)
-import KnowledgeModels.Routing exposing (Route(..))
+import KnowledgeModels.Routes exposing (Route(..))
 import Markdown
-import Questionnaires.Routing
-import Routing
+import Questionnaires.Routes
+import Routes
 import Utils exposing (listFilterJust, listInsertIf)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "KnowledgeModels.Detail.View"
+
+
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "KnowledgeModels.Detail.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "KnowledgeModels.Detail.View"
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (viewPackage appState model) model.package
+    Page.actionResultView appState (viewPackage appState model) model.package
 
 
 viewPackage : AppState -> Model -> PackageDetail -> Html Msg
@@ -35,8 +51,8 @@ viewPackage appState model package =
     div [ class "KnowledgeModels__Detail" ]
         [ header appState package
         , readme appState package
-        , sidePanel package
-        , deleteVersionModal model package
+        , sidePanel appState package
+        , deleteVersionModal appState model package
         ]
 
 
@@ -45,26 +61,30 @@ header appState package =
     let
         exportAction =
             a [ class "link-with-icon", href <| PackagesApi.exportPackageUrl package.id appState, target "_blank" ]
-                [ fa "download", text "Export" ]
+                [ faSet "kmDetail.export" appState
+                , lx_ "header.export" appState
+                ]
 
         forkAction =
-            linkTo (Routing.KMEditor <| KMEditor.Routing.CreateRoute <| Just package.id)
+            linkTo appState
+                (Routes.KMEditorRoute <| CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
-                [ fa "edit"
-                , text "Create KM Editor"
+                [ faSet "kmDetail.createKMEditor" appState
+                , lx_ "header.createKMEditor" appState
                 ]
 
         questionnaireAction =
-            linkTo (Routing.Questionnaires <| Questionnaires.Routing.Create <| Just package.id)
+            linkTo appState
+                (Routes.QuestionnairesRoute <| Questionnaires.Routes.CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
-                [ fa "list-alt"
-                , text "Create Questionnaire"
+                [ faSet "kmDetail.createQuestionnaire" appState
+                , lx_ "header.createQuestionnaire" appState
                 ]
 
         deleteAction =
             a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
                 [ fa "trash-o"
-                , text "Delete"
+                , lx_ "header.delete" appState
                 ]
 
         actions =
@@ -91,7 +111,7 @@ readme appState package =
         warning =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
-                    [ text "This is not the latest available version of this knowledge model." ]
+                    [ lx_ "readme.versionWarning" appState ]
 
             else
                 newVersionInRegistryWarning appState package
@@ -111,47 +131,51 @@ newVersionInRegistryWarning appState package =
                     package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
             in
             div [ class "alert alert-warning" ]
-                [ fa "exclamation-triangle"
-                , text <| "There is a newer version (" ++ Version.toString remoteLatestVersion ++ ") available in the registry, you can "
-                , linkTo (Routing.KnowledgeModels <| KnowledgeModels.Routing.Import <| Just <| latestPackageId)
-                    []
-                    [ text "import" ]
-                , text " it."
-                ]
+                ([ fa "exclamation-triangle" ]
+                    ++ lh_ "registryVersion.warning"
+                        [ text (Version.toString remoteLatestVersion)
+                        , linkTo appState
+                            (Routes.KnowledgeModelsRoute <| ImportRoute <| Just <| latestPackageId)
+                            []
+                            [ lx_ "registryVersion.warning.import" appState ]
+                        ]
+                        appState
+                )
 
         _ ->
             emptyNode
 
 
-sidePanel : PackageDetail -> Html msg
-sidePanel package =
+sidePanel : AppState -> PackageDetail -> Html msg
+sidePanel appState package =
     let
         sections =
-            [ sidePanelKmInfo package
-            , sidePanelOtherVersions package
-            , sidePanelOrganizationInfo package
-            , sidePanelRegistryLink package
+            [ sidePanelKmInfo appState package
+            , sidePanelOtherVersions appState package
+            , sidePanelOrganizationInfo appState package
+            , sidePanelRegistryLink appState package
             ]
     in
     div [ class "KnowledgeModels__Detail__SidePanel" ]
         [ list 12 12 <| listFilterJust sections ]
 
 
-sidePanelKmInfo : PackageDetail -> Maybe ( String, Html msg )
-sidePanelKmInfo package =
+sidePanelKmInfo : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelKmInfo appState package =
     let
         kmInfoList =
-            [ ( "ID:", text package.id )
-            , ( "Version:", text <| Version.toString package.version )
-            , ( "Metamodel:", text <| String.fromInt package.metamodelVersion )
-            , ( "License:", text package.license )
+            [ ( lg "package.id" appState, text package.id )
+            , ( lg "package.version" appState, text <| Version.toString package.version )
+            , ( lg "package.metamodel" appState, text <| String.fromInt package.metamodelVersion )
+            , ( lg "package.license" appState, text package.license )
             ]
 
         parentInfo =
             case package.forkOfPackageId of
                 Just parentPackageId ->
-                    [ ( "Fork of:"
-                      , linkTo (Routing.KnowledgeModels <| Detail parentPackageId)
+                    [ ( lg "package.forkOf" appState
+                      , linkTo appState
+                            (Routes.KnowledgeModelsRoute <| DetailRoute parentPackageId)
                             []
                             [ text parentPackageId ]
                       )
@@ -160,15 +184,16 @@ sidePanelKmInfo package =
                 Nothing ->
                     []
     in
-    Just ( "Knowledge Model", list 4 8 <| kmInfoList ++ parentInfo )
+    Just ( lg "package" appState, list 4 8 <| kmInfoList ++ parentInfo )
 
 
-sidePanelOtherVersions : PackageDetail -> Maybe ( String, Html msg )
-sidePanelOtherVersions package =
+sidePanelOtherVersions : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelOtherVersions appState package =
     let
         versionLink version =
             li []
-                [ linkTo (Routing.KnowledgeModels <| Detail <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
+                [ linkTo appState
+                    (Routes.KnowledgeModelsRoute <| DetailRoute <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -181,28 +206,28 @@ sidePanelOtherVersions package =
                 |> List.map versionLink
     in
     if List.length versionLinks > 0 then
-        Just ( "Other Versions", ul [] versionLinks )
+        Just ( lg "package.otherVersions" appState, ul [] versionLinks )
 
     else
         Nothing
 
 
-sidePanelOrganizationInfo : PackageDetail -> Maybe ( String, Html msg )
-sidePanelOrganizationInfo package =
+sidePanelOrganizationInfo : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelOrganizationInfo appState package =
     case package.organization of
         Just organization ->
-            Just ( "Published by", viewOrganization organization )
+            Just ( lg "package.publishedBy" appState, viewOrganization organization )
 
         Nothing ->
             Nothing
 
 
-sidePanelRegistryLink : PackageDetail -> Maybe ( String, Html msg )
-sidePanelRegistryLink package =
+sidePanelRegistryLink : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelRegistryLink appState package =
     case package.registryLink of
         Just registryLink ->
             Just
-                ( "Registry Link"
+                ( lg "package.registryLink" appState
                 , a [ href registryLink, class "link-with-icon", target "_blank" ]
                     [ fa "external-link"
                     , text package.id
@@ -238,23 +263,20 @@ viewOrganization organization =
         ]
 
 
-deleteVersionModal : Model -> PackageDetail -> Html Msg
-deleteVersionModal model package =
+deleteVersionModal : AppState -> Model -> PackageDetail -> Html Msg
+deleteVersionModal appState model package =
     let
         modalContent =
             [ p []
-                [ text "Are you sure you want to permanently delete "
-                , strong [] [ text package.id ]
-                , text "?"
-                ]
+                (lh_ "deleteModal.message" [ strong [] [ text package.id ] ] appState)
             ]
 
         modalConfig =
-            { modalTitle = "Delete version"
+            { modalTitle = l_ "deleteModal.title" appState
             , modalContent = modalContent
             , visible = model.showDeleteDialog
             , actionResult = model.deletingVersion
-            , actionName = "Delete"
+            , actionName = l_ "deleteModal.action" appState
             , actionMsg = DeleteVersion
             , cancelMsg = Just <| ShowDeleteDialog False
             , dangerous = True

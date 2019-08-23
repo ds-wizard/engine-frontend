@@ -2,44 +2,60 @@ module Public.Questionnaire.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Common.Html exposing (linkTo)
+import Common.Locale exposing (l, lh, lx)
 import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Msgs
 import Public.Questionnaire.Models exposing (Model)
 import Public.Questionnaire.Msgs exposing (Msg(..))
 import Routing exposing (signupRoute)
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
+l_ : String -> AppState -> String
+l_ =
+    l "Public.Questionnaire.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Public.Questionnaire.View"
+
+
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "Public.Questionnaire.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     div [ class "Public__Questionnaire" ]
-        [ info
-        , Page.actionResultView
+        [ info appState
+        , Page.actionResultView appState
             (viewQuestionnaire
                 { features = [ QuestionnaireFeature.feedback ]
                 , levels = Nothing
                 , getExtraQuestionClass = always Nothing
                 , forceDisabled = False
-                , createRenderer = defaultQuestionnaireRenderer
+                , createRenderer = defaultQuestionnaireRenderer appState
                 }
                 appState
-                >> Html.map (QuestionnaireMsg >> wrapMsg)
+                >> Html.map QuestionnaireMsg
             )
             model.questionnaireModel
         ]
 
 
-info : Html Msgs.Msg
-info =
+info : AppState -> Html Msg
+info appState =
     div [ class "alert alert-info" ]
-        [ h4 [ class "alert-heading" ] [ text "Questionnaire demo" ]
+        [ h4 [ class "alert-heading" ] [ lx_ "title" appState ]
         , p []
-            [ text "You can browse questions and answers in this questionnaire demo. If you want to save the results or try more functionality (e.g. generating data management plans), you need to "
-            , linkTo signupRoute [ class "alert-link" ] [ text "sign up" ]
-            , text " first."
-            ]
+            (lh_ "text"
+                [ linkTo appState signupRoute [ class "alert-link" ] [ lx_ "signUp" appState ]
+                ]
+                appState
+            )
         ]

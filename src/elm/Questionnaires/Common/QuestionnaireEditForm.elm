@@ -7,10 +7,10 @@ module Questionnaires.Common.QuestionnaireEditForm exposing
     )
 
 import Common.Form exposing (CustomFormError)
+import Common.FormEngine.Model exposing (encodeFormValues)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
-import FormEngine.Model exposing (encodeFormValues)
 import Json.Encode as E
 import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
