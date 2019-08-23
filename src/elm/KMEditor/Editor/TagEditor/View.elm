@@ -144,7 +144,7 @@ foldAnswer appState model indent tags answer =
 trQuestion : AppState -> Model -> Int -> List Tag -> Question -> Html Msg
 trQuestion appState model indent tags question =
     tr []
-        ([ th []
+        ([ th [ onClick <| CopyUuid <| Question.getUuid question ]
             [ div [ indentClass indent ]
                 [ faSet "km.question" appState
                 , text (Question.getTitle question)
@@ -179,23 +179,32 @@ tdQuestionTagCheckbox model question tag =
 
 trChapter : AppState -> Chapter -> List Tag -> Html Msg
 trChapter appState chapter =
-    trSeparator chapter.title (faSet "km.chapter" appState) "separator-chapter" 0
+    trSeparator (Just chapter.uuid) chapter.title (faSet "km.chapter" appState) "separator-chapter" 0
 
 
 trAnswer : AppState -> Answer -> Int -> List Tag -> Html Msg
 trAnswer appState answer =
-    trSeparator answer.label (faSet "km.answer" appState) ""
+    trSeparator (Just answer.uuid) answer.label (faSet "km.answer" appState) ""
 
 
 trItemTemplate : AppState -> Int -> List Tag -> Html Msg
 trItemTemplate appState =
-    trSeparator "Item Template" (faSet "km.itemTemplate" appState) ""
+    trSeparator Nothing "Item Template" (faSet "km.itemTemplate" appState) ""
 
 
-trSeparator : String -> Html Msg -> String -> Int -> List Tag -> Html Msg
-trSeparator title icon extraClass indent tags =
+trSeparator : Maybe String -> String -> Html Msg -> String -> Int -> List Tag -> Html Msg
+trSeparator mbUuid title icon extraClass indent tags =
+    let
+        thAttributes =
+            case mbUuid of
+                Just uuid ->
+                    [ onClick <| CopyUuid uuid ]
+
+                Nothing ->
+                    []
+    in
     tr [ class <| "separator " ++ extraClass ]
-        ([ th []
+        ([ th thAttributes
             [ div [ indentClass indent ]
                 [ icon
                 , text title

@@ -14,7 +14,7 @@ import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, disabled, placeholder)
+import Html.Attributes exposing (class, classList, disabled, placeholder, title)
 import Html.Events exposing (onClick)
 import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
@@ -93,6 +93,7 @@ kmEditorView appState model editorData =
     let
         editorTitleConfig =
             { title = lg "knowledgeModel" appState
+            , uuid = editorData.uuid
             , deleteAction = Nothing
             }
 
@@ -153,6 +154,7 @@ chapterEditorView appState model editorData =
     let
         editorTitleConfig =
             { title = lg "chapter" appState
+            , uuid = editorData.uuid
             , deleteAction = DeleteChapter editorData.uuid |> ChapterEditorMsg |> EditorMsg |> Just
             }
 
@@ -188,6 +190,7 @@ tagEditorView appState model editorData =
     let
         editorTitleConfig =
             { title = lg "tag" appState
+            , uuid = editorData.uuid
             , deleteAction = DeleteTag editorData.uuid |> TagEditorMsg |> EditorMsg |> Just
             }
 
@@ -226,6 +229,7 @@ integrationEditorView appState model editorData =
 
         editorTitleConfig =
             { title = lg "integration" appState
+            , uuid = editorData.uuid
             , deleteAction = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm True
             }
 
@@ -315,6 +319,7 @@ questionEditorView appState model editorData =
     let
         editorTitleConfig =
             { title = lg "question" appState
+            , uuid = editorData.uuid
             , deleteAction = DeleteQuestion editorData.uuid |> QuestionEditorMsg |> EditorMsg |> Just
             }
 
@@ -549,6 +554,7 @@ answerEditorView appState model editorData =
     let
         editorTitleConfig =
             { title = lg "answer" appState
+            , uuid = editorData.uuid
             , deleteAction = DeleteAnswer editorData.uuid |> AnswerEditorMsg |> EditorMsg |> Just
             }
 
@@ -626,6 +632,7 @@ referenceEditorView appState editorData =
     let
         editorTitleConfig =
             { title = lg "reference" appState
+            , uuid = editorData.uuid
             , deleteAction = DeleteReference editorData.uuid |> ReferenceEditorMsg |> EditorMsg |> Just
             }
 
@@ -667,6 +674,7 @@ expertEditorView appState editorData =
     let
         editorTitleConfig =
             { title = lg "expert" appState
+            , uuid = editorData.uuid
             , deleteAction = DeleteExpert editorData.uuid |> ExpertEditorMsg |> EditorMsg |> Just
             }
 
@@ -686,6 +694,7 @@ expertEditorView appState editorData =
 
 type alias EditorTitleConfig =
     { title : String
+    , uuid : String
     , deleteAction : Maybe Msg
     }
 
@@ -693,20 +702,35 @@ type alias EditorTitleConfig =
 editorTitle : AppState -> EditorTitleConfig -> Html Msg
 editorTitle appState config =
     let
+        copyUuidButton =
+            button
+                [ class "btn btn-outline-secondary link-with-icon"
+                , title <| l_ "editorTitle.copyUuid" appState
+                , onClick <| CopyUuid config.uuid
+                ]
+                [ fa "clipboard"
+                , text config.uuid
+                ]
+
         deleteActionButton =
             case config.deleteAction of
                 Just msg ->
-                    button [ class "btn btn-outline-danger link-with-icon", onClick msg ]
-                        [ fa "trash-o"
-                        , lx_ "editorTitle.delete" appState
+                    button
+                        [ class "btn btn-outline-danger"
+                        , title <| l_ "editorTitle.delete" appState
+                        , onClick msg
                         ]
+                        [ fa "trash-o" ]
 
                 Nothing ->
                     emptyNode
     in
     div [ class "editor-title" ]
         [ h3 [] [ text config.title ]
-        , deleteActionButton
+        , div [ class "btn-group" ]
+            [ copyUuidButton
+            , deleteActionButton
+            ]
         ]
 
 
