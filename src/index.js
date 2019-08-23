@@ -5,6 +5,7 @@
 var program = require('./elm/Main.elm')
 
 var registerChartPorts = require('./ports/chart')
+var registerCopyPorts = require('./ports/copy')
 var registerImportPorts = require('./ports/import')
 var registerPageUnloadPorts = require('./ports/page-unload')
 var registerScrollPorts = require('./ports/scroll')
@@ -35,6 +36,7 @@ function loadApp(config, provisioning) {
     })
 
     registerChartPorts(app)
+    registerCopyPorts(app)
     registerImportPorts(app)
     registerPageUnloadPorts(app)
     registerScrollPorts(app)

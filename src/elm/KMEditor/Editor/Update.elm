@@ -162,11 +162,21 @@ update msg wrapMsg appState model =
 
                 TagEditorMsg tagMsg ->
                     let
-                        tagEditorModel =
-                            model.tagEditorModel
-                                |> Maybe.map (KMEditor.Editor.TagEditor.Update.update tagMsg)
+                        ( newTagEditorModel, cmd ) =
+                            case model.tagEditorModel of
+                                Just tagEditorModel ->
+                                    let
+                                        ( updatedTagEditorModel, updateCmd ) =
+                                            KMEditor.Editor.TagEditor.Update.update tagMsg tagEditorModel
+                                    in
+                                    ( Just updatedTagEditorModel
+                                    , Cmd.map (wrapMsg << TagEditorMsg) updateCmd
+                                    )
+
+                                Nothing ->
+                                    ( Nothing, Cmd.none )
                     in
-                    ( appState.seed, { model | tagEditorModel = tagEditorModel }, Cmd.none )
+                    ( appState.seed, { model | tagEditorModel = newTagEditorModel }, cmd )
 
                 KMEditorMsg editorMsg ->
                     let

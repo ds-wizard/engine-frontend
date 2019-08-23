@@ -24,6 +24,7 @@ type Msg
     | ReorderableMsg Reorderable.Msg
     | CloseAlert
     | PaneMsg SplitPane.Msg
+    | CopyUuid String
 
 
 type EditorMsg

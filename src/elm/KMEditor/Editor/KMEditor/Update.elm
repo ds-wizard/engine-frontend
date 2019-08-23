@@ -280,6 +280,9 @@ update msg appState model fetchPreviewCmd =
         ReorderableMsg reorderableMsg ->
             ( appState.seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
 
+        CopyUuid uuid ->
+            ( appState.seed, model, Ports.copyToClipboard uuid )
+
 
 generateEvents : AppState -> Seed -> Model -> ( Seed, Model, Cmd Msgs.Msg )
 generateEvents appState seed model =

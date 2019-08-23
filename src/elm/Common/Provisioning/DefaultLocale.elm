@@ -363,6 +363,7 @@ locale =
         , ( "KMEditor.Editor.KMEditor.View.Editors.questionEditor.form.integration.configuration", "Integration Configuration" )
         , ( "KMEditor.Editor.KMEditor.View.Editors.questionEditor.form.requiredLevel.defaultValue", "Never" )
         , ( "KMEditor.Editor.KMEditor.View.Editors.questionEditor.form.itemTemplate", "Item Template" )
+        , ( "KMEditor.Editor.KMEditor.View.Editors.editorTitle.copyUuid", "Click to copy UUID" )
         , ( "KMEditor.Editor.KMEditor.View.Editors.editorTitle.delete", "Delete" )
         , ( "KMEditor.Editor.KMEditor.View.Editors.inputChildren.add", "Add %s" )
         , ( "KMEditor.Editor.Preview.View.tagSelection.all", "Select All" )
