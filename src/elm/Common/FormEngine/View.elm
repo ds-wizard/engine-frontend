@@ -50,7 +50,7 @@ type alias FormRenderer msg question option err =
 viewForm : FormViewConfig msg question option err -> Form question option -> Html (Msg msg err)
 viewForm config form =
     div [ class "form-engine-form", classList [ ( "form-engine-form-disabled", config.disabled ) ] ]
-        (List.indexedMap (viewFormElement form config [] [] False) form.elements)
+        (List.indexedMap (viewFormElement form config [] []) form.elements)
 
 
 stateValueToString : FormElementState -> String
@@ -63,19 +63,11 @@ identifierToChar =
     (+) 97 >> Char.fromCode >> String.fromChar
 
 
-viewFormElement : Form question option -> FormViewConfig msg question option err -> List String -> List String -> Bool -> Int -> FormElement question option -> Html (Msg msg err)
-viewFormElement form config path humanIdentifiers ignoreFirstHumanIdentifier order formItem =
+viewFormElement : Form question option -> FormViewConfig msg question option err -> List String -> List String -> Int -> FormElement question option -> Html (Msg msg err)
+viewFormElement form config path humanIdentifiers order formItem =
     let
         newHumanIdentifiers =
-            case ( ignoreFirstHumanIdentifier, order ) of
-                ( True, 0 ) ->
-                    humanIdentifiers
-
-                ( True, _ ) ->
-                    humanIdentifiers ++ [ String.fromInt order ]
-
-                ( False, _ ) ->
-                    humanIdentifiers ++ [ String.fromInt <| order + 1 ]
+            humanIdentifiers ++ [ String.fromInt <| order + 1 ]
 
         extraClass uuid =
             Maybe.withDefault "" <| config.getExtraQuestionClass uuid
@@ -275,13 +267,8 @@ viewLabel config descriptor path answered humanIdentifiers =
 
 viewCustomActions : String -> List String -> FormViewConfig msg question option err -> Html (Msg msg err)
 viewCustomActions questionId path config =
-    -- temporary fix since item name will be removed in the future versions
-    if questionId /= "itemName" then
-        span [ class "custom-actions" ]
-            (List.map (\f -> Html.map (CustomQuestionMsg questionId) <| f questionId path) config.customActions)
-
-    else
-        emptyNode
+    span [ class "custom-actions" ]
+        (List.map (\f -> Html.map (CustomQuestionMsg questionId) <| f questionId path) config.customActions)
 
 
 viewClearAnswer : AppState -> Bool -> List String -> Html (Msg msg err)
@@ -309,25 +296,11 @@ viewGroupItem form config path humanIdentifiers index itemElement =
 
             else
                 emptyNode
-
-        ignoreFirstIdentifier =
-            itemElement
-                |> List.head
-                |> Maybe.map
-                    (\f ->
-                        case f of
-                            StringFormElement descriptor _ ->
-                                descriptor.name == "itemName"
-
-                            _ ->
-                                False
-                    )
-                |> Maybe.withDefault False
     in
     div [ class "item" ]
         [ div [ class "card bg-light  mb-5" ]
             [ div [ class "card-body" ] <|
-                List.indexedMap (viewFormElement form config (path ++ [ fromInt index ]) newHumanIdentifiers ignoreFirstIdentifier) itemElement
+                List.indexedMap (viewFormElement form config (path ++ [ fromInt index ]) newHumanIdentifiers) itemElement
             ]
         , deleteButton
         ]
@@ -426,7 +399,6 @@ viewFollowUps form config path humanIdentifiers value options =
                         config
                         (path ++ [ descriptor.name ])
                         (humanIdentifiers ++ [ identifierToChar index ])
-                        False
                     )
                     items
                 )

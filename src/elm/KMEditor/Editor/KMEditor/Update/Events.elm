@@ -178,7 +178,6 @@ createAddQuestionEvent form editorData =
                         , text = formData.text
                         , requiredLevel = formData.requiredLevel
                         , tagUuids = editorData.tagUuids
-                        , itemTemplateTitle = formData.itemTemplateTitle
                         }
 
                 ValueQuestionForm formData ->
@@ -227,7 +226,6 @@ createEditQuestionEvent form editorData =
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
-                        , itemTemplateTitle = EventField.create formData.itemTemplateTitle (Maybe.withDefault "" (Question.getItemTitle editorData.question) /= formData.itemTemplateTitle)
                         , itemTemplateQuestionUuids = EventField.create editorData.itemTemplateQuestions.list editorData.itemTemplateQuestions.dirty
                         }
 

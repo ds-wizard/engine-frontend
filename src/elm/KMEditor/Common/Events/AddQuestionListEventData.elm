@@ -15,7 +15,6 @@ type alias AddQuestionListEventData =
     , text : Maybe String
     , requiredLevel : Maybe Int
     , tagUuids : List String
-    , itemTemplateTitle : String
     }
 
 
@@ -26,7 +25,6 @@ decoder =
         |> D.required "text" (D.nullable D.string)
         |> D.required "requiredLevel" (D.nullable D.int)
         |> D.required "tagUuids" (D.list D.string)
-        |> D.required "itemTemplateTitle" D.string
 
 
 encode : AddQuestionListEventData -> List ( String, E.Value )
@@ -36,5 +34,4 @@ encode data =
     , ( "text", E.maybe E.string data.text )
     , ( "requiredLevel", E.maybe E.int data.requiredLevel )
     , ( "tagUuids", E.list E.string data.tagUuids )
-    , ( "itemTemplateTitle", E.string data.itemTemplateTitle )
     ]

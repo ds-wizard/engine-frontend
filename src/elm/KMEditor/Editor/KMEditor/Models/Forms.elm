@@ -125,7 +125,6 @@ type alias ListQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
-    , itemTemplateTitle : String
     }
 
 
@@ -404,11 +403,10 @@ validateQuestion integrations questionType =
                 |> Validate.map OptionsQuestionForm
 
         "ListQuestion" ->
-            Validate.map4 ListQuestionFormData
+            Validate.map3 ListQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
                 (Validate.field "requiredLevel" (Validate.maybe Validate.int))
-                (Validate.field "itemTemplateTitle" Validate.string)
                 |> Validate.map ListQuestionForm
 
         "ValueQuestion" ->
@@ -503,7 +501,6 @@ questionFormInitials question =
     , ( "title", Field.string <| Question.getTitle question )
     , ( "text", Field.string <| Maybe.withDefault "" <| Question.getText question )
     , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| Question.getRequiredLevel question )
-    , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| Question.getItemTitle question )
     , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| Question.getValueType question )
     , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| Question.getIntegrationUuid question )
     ]
@@ -536,8 +533,7 @@ updateQuestionWithForm question questionForm =
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
                 }
-                { itemTemplateTitle = formData.itemTemplateTitle
-                , itemTemplateQuestionUuids = Question.getItemQuestionUuids question
+                { itemTemplateQuestionUuids = Question.getItemQuestionUuids question
                 }
 
         ValueQuestionForm formData ->

@@ -157,7 +157,6 @@ generateQuestionEvent model question parentUuid seed =
                             , tagUuids = EventField.create newTags True
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
-                            , itemTemplateTitle = EventField.empty
                             , itemTemplateQuestionUuids = EventField.empty
                             }
 

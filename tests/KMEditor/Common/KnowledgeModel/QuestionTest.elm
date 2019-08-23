@@ -190,7 +190,6 @@ questionDecoderTest =
                             "text": "Please answer the question",
                             "requiredLevel": null,
                             "tagUuids": [],
-                            "itemTemplateTitle": "Item",
                             "itemTemplateQuestionUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
                             "referenceUuids": [],
                             "expertUuids": []
@@ -207,8 +206,7 @@ questionDecoderTest =
                             , referenceUuids = []
                             , expertUuids = []
                             }
-                            { itemTemplateTitle = "Item"
-                            , itemTemplateQuestionUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
+                            { itemTemplateQuestionUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
                             }
                 in
                 expectDecoder Question.decoder raw expected

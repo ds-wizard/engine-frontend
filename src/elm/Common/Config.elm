@@ -19,7 +19,6 @@ type alias Config =
     , publicQuestionnaireEnabled : Bool
     , questionnaireAccessibilityEnabled : Bool
     , levelsEnabled : Bool
-    , itemTitleEnabled : Bool
     , registry : Registry
     }
 
@@ -96,7 +95,6 @@ defaultConfig =
     , publicQuestionnaireEnabled = True
     , questionnaireAccessibilityEnabled = True
     , levelsEnabled = True
-    , itemTitleEnabled = True
     , registry = RegistryDisabled
     }
 
@@ -110,7 +108,6 @@ decoder =
         |> D.optional "publicQuestionnaireEnabled" D.bool True
         |> D.optional "questionnaireAccessibilityEnabled" D.bool True
         |> D.optional "levelsEnabled" D.bool True
-        |> D.optional "itemTitleEnabled" D.bool True
         |> D.optional "registry" registryDecoder RegistryDisabled
 
 

@@ -504,24 +504,12 @@ questionEditorItemView appState model editorData =
             , getName = getChildName model.editors
             , viewMsg = SetActiveEditor
             }
-
-        itemTitle =
-            if appState.config.itemTitleEnabled then
-                div [ class "form-group" ]
-                    [ FormGroup.input appState editorData.form "itemTemplateTitle" (lg "question.itemTitle" appState) |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
-                    , div [ class "form-text" ]
-                        [ Flash.warning <| l_ "questionEditor.form.itemTitleObsolete" appState ]
-                    ]
-
-            else
-                emptyNode
     in
     div [ class "card card-border-light card-item-template mb-3" ]
         [ div [ class "card-header" ]
             [ lx_ "questionEditor.form.itemTemplate" appState ]
         , div [ class "card-body" ]
-            [ itemTitle
-            , inputChildren appState config
+            [ inputChildren appState config
             ]
         ]
 

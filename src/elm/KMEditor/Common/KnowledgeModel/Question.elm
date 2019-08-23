@@ -5,7 +5,6 @@ module KMEditor.Common.KnowledgeModel.Question exposing
     , getExpertUuids
     , getIntegrationUuid
     , getItemQuestionUuids
-    , getItemTitle
     , getProps
     , getReferenceUuids
     , getRequiredLevel
@@ -157,16 +156,6 @@ getAnswerUuids question =
 
         _ ->
             []
-
-
-getItemTitle : Question -> Maybe String
-getItemTitle question =
-    case question of
-        ListQuestion _ data ->
-            Just data.itemTemplateTitle
-
-        _ ->
-            Nothing
 
 
 getItemQuestionUuids : Question -> List String
