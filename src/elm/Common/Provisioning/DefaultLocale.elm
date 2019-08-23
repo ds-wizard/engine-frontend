@@ -23,12 +23,12 @@ locale =
         , ( "__routing.public.questionnaire", "questionnaire" )
         , ( "__routing.public.signup", "signup" )
         , ( "__routing.questionnaires", "questionnaires" )
-        , ( "__routing.questionnaires.create", "forgotten-password" )
-        , ( "__routing.questionnaires.create.selected", "forgotten-password" )
-        , ( "__routing.questionnaires.createMigration", "forgotten-password" )
-        , ( "__routing.questionnaires.detail", "forgotten-password" )
-        , ( "__routing.questionnaires.edit", "forgotten-password" )
-        , ( "__routing.questionnaires.migration", "forgotten-password" )
+        , ( "__routing.questionnaires.create", "create" )
+        , ( "__routing.questionnaires.create.selected", "selected" )
+        , ( "__routing.questionnaires.createMigration", "create-migration" )
+        , ( "__routing.questionnaires.detail", "detail" )
+        , ( "__routing.questionnaires.edit", "edit" )
+        , ( "__routing.questionnaires.migration", "migration" )
 
         -- API messages
         , ( "_global.apiError.actionKey.passwordRecoveryError", "Forgotten password recovery failed." )

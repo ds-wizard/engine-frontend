@@ -45,7 +45,7 @@ function loadApp(config, provisioning) {
 function jsonp(src) {
     var script = document.createElement('script')
     script.src = src
-    document.body.appendChild(script)
+    document.head.appendChild(script)
     return script
 }
 
@@ -63,7 +63,7 @@ window.onload = function () {
 
             window[provisioningCallbackMethod] = function (provisioning) {
                 delete window[provisioningCallbackMethod]
-                document.body.removeChild(provisioningScript)
+                document.head.removeChild(provisioningScript)
                 loadApp(config, provisioning)
             }
 
@@ -72,6 +72,6 @@ window.onload = function () {
         }
 
         delete window[configCallbackMethod]
-        document.body.removeChild(configScript)
+        document.head.removeChild(configScript)
     }
 }
