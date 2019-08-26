@@ -255,7 +255,7 @@ chapterHeader model chapter =
     in
     div []
         [ h2 [] [ text <| chapterNumber ++ ". " ++ chapter.title ]
-        , Markdown.toHtml [ class "chapter-description" ] chapter.text
+        , Markdown.toHtml [ class "chapter-description" ] (Maybe.withDefault "" chapter.text)
         ]
 
 

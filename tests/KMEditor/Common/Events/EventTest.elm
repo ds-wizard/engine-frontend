@@ -117,7 +117,7 @@ addChapterEvent : Event
 addChapterEvent =
     AddChapterEvent
         { title = "Design of Experiment"
-        , text = "This is a chapter about the designing of the experiment"
+        , text = Just "This is a chapter about the designing of the experiment"
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"

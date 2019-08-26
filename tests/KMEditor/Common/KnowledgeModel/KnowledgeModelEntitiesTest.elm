@@ -67,7 +67,7 @@ knowledgeModelEntitiesDecoderTest =
                                 [ ( "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
                                   , { uuid = "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"
                                     , title = "Chapter 1"
-                                    , text = "This chapter is empty"
+                                    , text = Just "This chapter is empty"
                                     , questionUuids = []
                                     }
                                   )
