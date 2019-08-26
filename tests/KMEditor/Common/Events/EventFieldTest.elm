@@ -29,6 +29,15 @@ eventFieldTest =
                         }
                 in
                 expectEncodeDecode (EventField.encode E.string) (EventField.decoder D.string) eventField
+        , test "should encode and decode when changed to null" <|
+            \_ ->
+                let
+                    eventField =
+                        { changed = True
+                        , value = Nothing
+                        }
+                in
+                expectEncodeDecode (EventField.encode E.string) (EventField.decoder D.string) eventField
         , test "get value when not changed" <|
             \_ ->
                 let

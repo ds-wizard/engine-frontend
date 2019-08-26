@@ -35,6 +35,12 @@ encode encodeValue field =
                 , ( "value", encodeValue value )
                 ]
 
+        ( True, Nothing ) ->
+            E.object
+                [ ( "changed", E.bool True )
+                , ( "value", E.null )
+                ]
+
         _ ->
             E.object
                 [ ( "changed", E.bool False )
