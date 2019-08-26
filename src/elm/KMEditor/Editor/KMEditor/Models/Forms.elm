@@ -99,7 +99,7 @@ type alias IntegrationForm =
 
 type alias ChapterForm =
     { title : String
-    , text : String
+    , text : Maybe String
     }
 
 
@@ -362,13 +362,13 @@ chapterFormValidation : Validation CustomFormError ChapterForm
 chapterFormValidation =
     Validate.map2 ChapterForm
         (Validate.field "title" Validate.string)
-        (Validate.field "text" Validate.string)
+        (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
 
 
 chapterFormInitials : Chapter -> List ( String, Field.Field )
 chapterFormInitials chapter =
     [ ( "title", Field.string chapter.title )
-    , ( "text", Field.string chapter.text )
+    , ( "text", Field.string <| Maybe.withDefault "" chapter.text )
     ]
 
 

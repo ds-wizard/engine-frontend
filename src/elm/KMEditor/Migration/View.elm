@@ -492,7 +492,7 @@ viewAddChapterDiff appState event =
                 , lg "chapter.text" appState
                 ]
                 [ event.title
-                , event.text
+                , Maybe.withDefault "" event.text
                 ]
     in
     div []
@@ -518,10 +518,10 @@ viewEditChapterDiff appState km event chapter =
                     , lg "chapter.text" appState
                     ]
                     [ chapter.title
-                    , chapter.text
+                    , Maybe.withDefault "" chapter.text
                     ]
                     [ EventField.getValueWithDefault event.title chapter.title
-                    , EventField.getValueWithDefault event.text chapter.text
+                    , EventField.getValueWithDefault event.text chapter.text |> Maybe.withDefault ""
                     ]
 
         questionsDiff =
@@ -547,7 +547,7 @@ viewDeleteChapterDiff appState km chapter =
                     , lg "chapter.text" appState
                     ]
                     [ chapter.title
-                    , chapter.text
+                    , Maybe.withDefault "" chapter.text
                     ]
 
         questionsDiff =
