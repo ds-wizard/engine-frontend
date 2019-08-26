@@ -583,8 +583,8 @@ answerEditorView appState model editorData =
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
         , form |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
-        , metrics
         , inputChildren appState followUpsConfig
+        , metrics
         ]
     )
 
