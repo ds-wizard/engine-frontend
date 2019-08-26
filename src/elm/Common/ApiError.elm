@@ -41,6 +41,9 @@ fieldErrorDecoder =
 decodeApiError : ApiError -> Maybe ServerError
 decodeApiError error =
     case error of
+        BadStatus 500 _ ->
+            Nothing
+
         BadStatus _ response ->
             case decodeString errorDecoder response of
                 Ok err ->
