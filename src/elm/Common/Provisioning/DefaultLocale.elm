@@ -528,7 +528,7 @@ locale =
         , ( "Questionnaires.Index.View.deleteModal.title", "Delete questionnaire" )
         , ( "Questionnaires.Index.View.deleteModal.action", "Delete" )
         , ( "Questionnaires.Migration.View.navbar.finalize", "Finalize Migration" )
-        , ( "Questionnaires.Migration.View.noChanges.heading", "Finalize Migration" )
+        , ( "Questionnaires.Migration.View.noChanges.heading", "No changes to review" )
         , ( "Questionnaires.Migration.View.noChanges.line1", "There are no changes affecting your answers." )
         , ( "Questionnaires.Migration.View.noChanges.line2", "You can safely finalize the migration." )
         , ( "Questionnaires.Migration.View.changeView.resolved", "Change already resolved" )
