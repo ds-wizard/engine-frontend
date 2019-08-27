@@ -163,7 +163,7 @@ locale =
 
         -- Events
         , ( "_global.event.addAnswer", "Add answer" )
-        , ( "_global.event.addChapter", "Add Chapter" )
+        , ( "_global.event.addChapter", "Add chapter" )
         , ( "_global.event.addExpert", "Add expert" )
         , ( "_global.event.addIntegration", "Add integration" )
         , ( "_global.event.addQuestion", "Add question" )
@@ -172,7 +172,7 @@ locale =
         , ( "_global.event.deleteAnswer", "Delete answer" )
         , ( "_global.event.deleteChapter", "Delete chapter" )
         , ( "_global.event.deleteExpert", "Delete expert" )
-        , ( "_global.event.deleteIntegration", "Delete Integration" )
+        , ( "_global.event.deleteIntegration", "Delete integration" )
         , ( "_global.event.deleteQuestion", "Delete question" )
         , ( "_global.event.deleteReference", "Delete reference" )
         , ( "_global.event.deleteTag", "Delete tag" )

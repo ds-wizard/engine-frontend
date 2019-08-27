@@ -47,9 +47,9 @@ import KMEditor.Common.KnowledgeModel.Reference.URLReferenceData exposing (URLRe
 import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Common.Migration exposing (Migration)
 import KMEditor.Common.MigrationStateType exposing (MigrationStateType(..))
-import KMEditor.Common.View exposing (diffTreeView)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
+import KMEditor.Migration.View.DiffTree as DiffTree
 import KMEditor.Routes exposing (Route(..))
 import Routes
 
@@ -97,7 +97,7 @@ migrationView appState model migration =
 
                         diffTree =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (List.singleton >> diffTreeView appState migration.currentKnowledgeModel)
+                                |> Maybe.map (DiffTree.view appState migration.currentKnowledgeModel)
                                 |> Maybe.map (List.singleton >> div [ class "col-4" ])
                                 |> Maybe.withDefault emptyNode
                     in

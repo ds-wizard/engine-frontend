@@ -1,5 +1,6 @@
 module KMEditor.Common.KnowledgeModel.KnowledgeModel exposing
     ( KnowledgeModel
+    , ParentMap
     , createParentMap
     , decoder
     , filterWithTags
