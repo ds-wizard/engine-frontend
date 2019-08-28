@@ -220,13 +220,13 @@ getEventView appState model migration event =
                 |> viewEvent appState model (lg "event.addAnswer" appState)
 
         EditAnswerEvent eventData commonData ->
-            KnowledgeModel.getAnswer commonData.uuid migration.currentKnowledgeModel
+            KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel eventData)
                 |> Maybe.map (viewEvent appState model (lg "event.editAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteAnswerEvent commonData ->
-            KnowledgeModel.getAnswer commonData.uuid migration.currentKnowledgeModel
+            KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel)
                 |> Maybe.map (viewEvent appState model (lg "event.deleteAnswer" appState))
                 |> Maybe.withDefault errorMessage
@@ -280,11 +280,15 @@ viewEvent appState model name diffView =
 viewEditKnowledgeModelDiff : AppState -> EditKnowledgeModelEventData -> KnowledgeModel -> Html Msg
 viewEditKnowledgeModelDiff appState event km =
     let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "knowledgeModel.name" appState ]
+                    [ km.name ]
+                    [ EventField.getValueWithDefault event.name km.name ]
+
         chapters =
             KnowledgeModel.getChapters km
-
-        tags =
-            KnowledgeModel.getTags km
 
         originalChapters =
             List.map .uuid chapters
@@ -292,11 +296,11 @@ viewEditKnowledgeModelDiff appState event km =
         chapterNames =
             Dict.fromList <| List.map (\c -> ( c.uuid, c.title )) chapters
 
-        fieldDiff =
-            viewDiff <| List.map3 (\a b c -> ( a, b, c )) [ lg "knowledgeModel.name" appState ] [ km.name ] [ EventField.getValueWithDefault event.name km.name ]
-
         chaptersDiff =
             viewDiffChildren (lg "chapters" appState) originalChapters (EventField.getValueWithDefault event.chapterUuids originalChapters) chapterNames
+
+        tags =
+            KnowledgeModel.getTags km
 
         originalTags =
             List.map .uuid tags
@@ -305,10 +309,28 @@ viewEditKnowledgeModelDiff appState event km =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
 
         tagsDiff =
-            viewDiffChildren (lg "tags" appState) originalTags (EventField.getValueWithDefault event.tagUuids originalTags) tagNames
+            viewDiffChildren (lg "tags" appState)
+                originalTags
+                (EventField.getValueWithDefault event.tagUuids originalTags)
+                tagNames
+
+        integrations =
+            KnowledgeModel.getIntegrations km
+
+        originalIntegrations =
+            List.map .uuid integrations
+
+        integrationNames =
+            Dict.fromList <| List.map (\i -> ( i.uuid, i.name )) integrations
+
+        integrationsDiff =
+            viewDiffChildren (lg "integrations" appState)
+                originalIntegrations
+                (EventField.getValueWithDefault event.integrationUuids originalIntegrations)
+                integrationNames
     in
     div []
-        (fieldDiff ++ [ chaptersDiff, tagsDiff ])
+        (fieldDiff ++ [ chaptersDiff, tagsDiff, integrationsDiff ])
 
 
 viewAddTagDiff : AppState -> AddTagEventData -> Html Msg
@@ -333,184 +355,175 @@ viewEditTagDiff : AppState -> EditTagEventData -> Tag -> Html Msg
 viewEditTagDiff appState event tag =
     let
         fieldDiff =
-            List.map3 (\a b c -> ( a, b, c ))
-                [ lg "tag.name" appState
-                , lg "tag.description" appState
-                , lg "tag.color" appState
-                ]
-                [ tag.name
-                , Maybe.withDefault "" tag.description
-                , tag.color
-                ]
-                [ EventField.getValueWithDefault event.name tag.name
-                , EventField.getValueWithDefault event.description tag.description |> Maybe.withDefault ""
-                , EventField.getValueWithDefault event.color tag.color
-                ]
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "tag.name" appState
+                    , lg "tag.description" appState
+                    , lg "tag.color" appState
+                    ]
+                    [ tag.name
+                    , Maybe.withDefault "" tag.description
+                    , tag.color
+                    ]
+                    [ EventField.getValueWithDefault event.name tag.name
+                    , EventField.getValueWithDefault event.description tag.description |> Maybe.withDefault ""
+                    , EventField.getValueWithDefault event.color tag.color
+                    ]
     in
-    div []
-        (viewDiff fieldDiff)
+    div [] fieldDiff
 
 
 viewDeleteTagDiff : AppState -> Tag -> Html Msg
 viewDeleteTagDiff appState tag =
     let
         fieldDiff =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "tag.name" appState
-                , lg "tag.description" appState
-                , lg "tag.color" appState
-                ]
-                [ tag.name
-                , tag.description |> Maybe.withDefault ""
-                , tag.color
-                ]
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "tag.name" appState
+                    , lg "tag.description" appState
+                    , lg "tag.color" appState
+                    ]
+                    [ tag.name
+                    , tag.description |> Maybe.withDefault ""
+                    , tag.color
+                    ]
     in
-    div []
-        (viewDelete fieldDiff)
+    div [] fieldDiff
 
 
 viewAddIntegrationDiff : AppState -> AddIntegrationEventData -> Html Msg
 viewAddIntegrationDiff appState event =
     let
-        fields =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "integration.id" appState
-                , lg "integration.name" appState
-                , lg "integration.props" appState
-                , lg "integration.itemUrl" appState
-                , lg "integration.request.method" appState
-                , lg "integration.request.url" appState
-                , lg "integration.request.headers" appState
-                , lg "integration.request.body" appState
-                , lg "integration.response.listField" appState
-                , lg "integration.response.idField" appState
-                , lg "integration.response.nameField" appState
-                ]
-                [ event.id
-                , event.name
-                , String.join ", " event.props
-                , event.itemUrl
-                , event.requestMethod
-                , event.requestUrl
-                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList event.requestHeaders
-                , event.requestBody
-                , event.responseListField
-                , event.responseIdField
-                , event.responseNameField
-                ]
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "integration.id" appState
+                    , lg "integration.name" appState
+                    , lg "integration.props" appState
+                    , lg "integration.itemUrl" appState
+                    , lg "integration.request.method" appState
+                    , lg "integration.request.url" appState
+                    , lg "integration.request.headers" appState
+                    , lg "integration.request.body" appState
+                    , lg "integration.response.listField" appState
+                    , lg "integration.response.idField" appState
+                    , lg "integration.response.nameField" appState
+                    ]
+                    [ event.id
+                    , event.name
+                    , String.join ", " event.props
+                    , event.itemUrl
+                    , event.requestMethod
+                    , event.requestUrl
+                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList event.requestHeaders
+                    , event.requestBody
+                    , event.responseListField
+                    , event.responseIdField
+                    , event.responseNameField
+                    ]
     in
-    div []
-        (viewAdd fields)
+    div [] fieldDiff
 
 
 viewEditIntegrationDiff : AppState -> EditIntegrationEventData -> Integration -> Html Msg
 viewEditIntegrationDiff appState event integration =
     let
         fieldDiff =
-            List.map3 (\a b c -> ( a, b, c ))
-                [ lg "integration.id" appState
-                , lg "integration.name" appState
-                , lg "integration.props" appState
-                , lg "integration.itemUrl" appState
-                , lg "integration.request.method" appState
-                , lg "integration.request.url" appState
-                , lg "integration.request.headers" appState
-                , lg "integration.request.body" appState
-                , lg "integration.response.listField" appState
-                , lg "integration.response.idField" appState
-                , lg "integration.response.nameField" appState
-                ]
-                [ integration.id
-                , integration.name
-                , String.join ", " integration.props
-                , integration.itemUrl
-                , integration.requestMethod
-                , integration.requestUrl
-                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
-                , integration.requestBody
-                , integration.responseListField
-                , integration.responseIdField
-                , integration.responseNameField
-                ]
-                [ EventField.getValueWithDefault event.id integration.id
-                , EventField.getValueWithDefault event.name integration.name
-                , String.join ", " <| EventField.getValueWithDefault event.props integration.props
-                , EventField.getValueWithDefault event.itemUrl integration.itemUrl
-                , EventField.getValueWithDefault event.requestMethod integration.requestMethod
-                , EventField.getValueWithDefault event.requestUrl integration.requestUrl
-                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList <| EventField.getValueWithDefault event.requestHeaders integration.requestHeaders
-                , EventField.getValueWithDefault event.requestBody integration.requestBody
-                , EventField.getValueWithDefault event.responseListField integration.responseListField
-                , EventField.getValueWithDefault event.responseIdField integration.responseIdField
-                , EventField.getValueWithDefault event.responseNameField integration.responseNameField
-                ]
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "integration.id" appState
+                    , lg "integration.name" appState
+                    , lg "integration.props" appState
+                    , lg "integration.itemUrl" appState
+                    , lg "integration.request.method" appState
+                    , lg "integration.request.url" appState
+                    , lg "integration.request.headers" appState
+                    , lg "integration.request.body" appState
+                    , lg "integration.response.listField" appState
+                    , lg "integration.response.idField" appState
+                    , lg "integration.response.nameField" appState
+                    ]
+                    [ integration.id
+                    , integration.name
+                    , String.join ", " integration.props
+                    , integration.itemUrl
+                    , integration.requestMethod
+                    , integration.requestUrl
+                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
+                    , integration.requestBody
+                    , integration.responseListField
+                    , integration.responseIdField
+                    , integration.responseNameField
+                    ]
+                    [ EventField.getValueWithDefault event.id integration.id
+                    , EventField.getValueWithDefault event.name integration.name
+                    , String.join ", " <| EventField.getValueWithDefault event.props integration.props
+                    , EventField.getValueWithDefault event.itemUrl integration.itemUrl
+                    , EventField.getValueWithDefault event.requestMethod integration.requestMethod
+                    , EventField.getValueWithDefault event.requestUrl integration.requestUrl
+                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList <| EventField.getValueWithDefault event.requestHeaders integration.requestHeaders
+                    , EventField.getValueWithDefault event.requestBody integration.requestBody
+                    , EventField.getValueWithDefault event.responseListField integration.responseListField
+                    , EventField.getValueWithDefault event.responseIdField integration.responseIdField
+                    , EventField.getValueWithDefault event.responseNameField integration.responseNameField
+                    ]
     in
-    div []
-        (viewDiff fieldDiff)
+    div [] fieldDiff
 
 
 viewDeleteIntegrationDiff : AppState -> Integration -> Html Msg
 viewDeleteIntegrationDiff appState integration =
     let
-        fields =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "integration.id" appState
-                , lg "integration.name" appState
-                , lg "integration.props" appState
-                , lg "integration.itemUrl" appState
-                , lg "integration.request.method" appState
-                , lg "integration.request.url" appState
-                , lg "integration.request.headers" appState
-                , lg "integration.request.body" appState
-                , lg "integration.response.listField" appState
-                , lg "integration.response.idField" appState
-                , lg "integration.response.nameField" appState
-                ]
-                [ integration.id
-                , integration.name
-                , String.join ", " integration.props
-                , integration.itemUrl
-                , integration.requestMethod
-                , integration.requestUrl
-                , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
-                , integration.requestBody
-                , integration.responseListField
-                , integration.responseIdField
-                , integration.responseNameField
-                ]
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "integration.id" appState
+                    , lg "integration.name" appState
+                    , lg "integration.props" appState
+                    , lg "integration.itemUrl" appState
+                    , lg "integration.request.method" appState
+                    , lg "integration.request.url" appState
+                    , lg "integration.request.headers" appState
+                    , lg "integration.request.body" appState
+                    , lg "integration.response.listField" appState
+                    , lg "integration.response.idField" appState
+                    , lg "integration.response.nameField" appState
+                    ]
+                    [ integration.id
+                    , integration.name
+                    , String.join ", " integration.props
+                    , integration.itemUrl
+                    , integration.requestMethod
+                    , integration.requestUrl
+                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
+                    , integration.requestBody
+                    , integration.responseListField
+                    , integration.responseIdField
+                    , integration.responseNameField
+                    ]
     in
-    div []
-        (viewDelete fields)
+    div [] fieldDiff
 
 
 viewAddChapterDiff : AppState -> AddChapterEventData -> Html Msg
 viewAddChapterDiff appState event =
     let
-        fields =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "chapter.title" appState
-                , lg "chapter.text" appState
-                ]
-                [ event.title
-                , Maybe.withDefault "" event.text
-                ]
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "chapter.title" appState
+                    , lg "chapter.text" appState
+                    ]
+                    [ event.title
+                    , Maybe.withDefault "" event.text
+                    ]
     in
-    div []
-        (viewAdd fields)
+    div [] fieldDiff
 
 
 viewEditChapterDiff : AppState -> KnowledgeModel -> EditChapterEventData -> Chapter -> Html Msg
 viewEditChapterDiff appState km event chapter =
     let
-        questions =
-            KnowledgeModel.getChapterQuestions chapter.uuid km
-
-        originalQuestions =
-            List.map Question.getUuid questions
-
-        questionNames =
-            Dict.fromList <| List.map (\q -> ( Question.getUuid q, Question.getTitle q )) questions
-
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
@@ -524,8 +537,20 @@ viewEditChapterDiff appState km event chapter =
                     , EventField.getValueWithDefault event.text chapter.text |> Maybe.withDefault ""
                     ]
 
+        questions =
+            KnowledgeModel.getChapterQuestions chapter.uuid km
+
+        originalQuestions =
+            List.map Question.getUuid questions
+
+        questionNames =
+            Dict.fromList <| List.map (\q -> ( Question.getUuid q, Question.getTitle q )) questions
+
         questionsDiff =
-            viewDiffChildren (lg "questions" appState) originalQuestions (EventField.getValueWithDefault event.questionUuids originalQuestions) questionNames
+            viewDiffChildren (lg "questions" appState)
+                originalQuestions
+                (EventField.getValueWithDefault event.questionUuids originalQuestions)
+                questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
@@ -534,12 +559,6 @@ viewEditChapterDiff appState km event chapter =
 viewDeleteChapterDiff : AppState -> KnowledgeModel -> Chapter -> Html Msg
 viewDeleteChapterDiff appState km chapter =
     let
-        questions =
-            KnowledgeModel.getChapterQuestions chapter.uuid km
-
-        questionNames =
-            List.map Question.getTitle questions
-
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
@@ -549,6 +568,12 @@ viewDeleteChapterDiff appState km chapter =
                     [ chapter.title
                     , Maybe.withDefault "" chapter.text
                     ]
+
+        questions =
+            KnowledgeModel.getChapterQuestions chapter.uuid km
+
+        questionNames =
+            List.map Question.getTitle questions
 
         questionsDiff =
             viewDeletedChildren (lg "questions" appState) questionNames
@@ -565,7 +590,6 @@ viewAddQuestionDiff appState km event =
                 [ lg "questionType" appState
                 , lg "question.title" appState
                 , lg "question.text" appState
-                , lg "tags" appState
                 ]
                 [ AddQuestionEventQuestion.getTypeString event
                 , AddQuestionEventQuestion.map .title .title .title .title event
@@ -588,6 +612,9 @@ viewAddQuestionDiff appState km event =
                 _ ->
                     []
 
+        fieldsDiff =
+            viewAdd (fields ++ extraFields)
+
         tags =
             KnowledgeModel.getTags km
 
@@ -604,53 +631,21 @@ viewAddQuestionDiff appState km event =
             viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
     in
     div []
-        (viewAdd (fields ++ extraFields) ++ [ tagsDiff ])
+        (fieldsDiff ++ [ tagsDiff ])
 
 
 viewEditQuestionDiff : AppState -> KnowledgeModel -> EditQuestionEventData -> Question -> Html Msg
 viewEditQuestionDiff appState km event question =
     let
+        -- Fields
+        questionUuid =
+            Question.getUuid question
+
         title =
             EditQuestionEventData.map .title .title .title .title event
 
         questionText =
             EditQuestionEventData.map .text .text .text .text event
-
-        questionUuid =
-            Question.getUuid question
-
-        answers =
-            KnowledgeModel.getQuestionAnswers questionUuid km
-
-        originalAnswers =
-            List.map .uuid answers
-
-        answerNames =
-            Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) answers
-
-        references =
-            KnowledgeModel.getQuestionReferences questionUuid km
-
-        originalReferences =
-            List.map Reference.getUuid references
-
-        referenceUuids =
-            EditQuestionEventData.map .referenceUuids .referenceUuids .referenceUuids .referenceUuids event
-
-        referenceNames =
-            Dict.fromList <| List.map (\r -> ( Reference.getUuid r, Reference.getVisibleName r )) references
-
-        experts =
-            KnowledgeModel.getQuestionExperts questionUuid km
-
-        originalExperts =
-            List.map .uuid experts
-
-        expertUuids =
-            EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids event
-
-        expertNames =
-            Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) experts
 
         fields =
             List.map3 (\a b c -> ( a, b, c ))
@@ -667,110 +662,212 @@ viewEditQuestionDiff appState km event question =
                 , EventField.getValueWithDefault questionText (Question.getText question) |> Maybe.withDefault ""
                 ]
 
-        originalValueType =
-            Question.getValueType question
+        extraFields =
+            case event of
+                EditQuestionValueEvent data ->
+                    case ( Question.getValueType question, EventField.getValue data.valueType ) of
+                        ( Nothing, Nothing ) ->
+                            []
 
-        valueType =
-            EditQuestionEventData.map
-                (\_ -> Nothing)
-                (\_ -> Nothing)
-                (\data -> EventField.getValue data.valueType)
-                (\_ -> Nothing)
-                event
+                        ( original, new ) ->
+                            let
+                                originalStr =
+                                    Maybe.withDefault "" <| Maybe.map QuestionValueType.toString original
 
-        valueDiff =
-            case ( originalValueType, valueType ) of
-                ( Nothing, Nothing ) ->
+                                newStr =
+                                    Maybe.withDefault originalStr <| Maybe.map QuestionValueType.toString new
+                            in
+                            [ ( lg "questionValueType" appState, originalStr, newStr ) ]
+
+                EditQuestionIntegrationEvent data ->
+                    case ( Question.getIntegrationUuid question, EventField.getValue data.integrationUuid ) of
+                        ( Nothing, Nothing ) ->
+                            []
+
+                        ( original, new ) ->
+                            let
+                                originalStr =
+                                    Maybe.withDefault "" original
+
+                                newStr =
+                                    Maybe.withDefault originalStr new
+                            in
+                            [ ( lg "integration" appState, originalStr, newStr ) ]
+
+                _ ->
                     []
 
-                ( original, new ) ->
-                    let
-                        originalStr =
-                            Maybe.withDefault "" <| Maybe.map QuestionValueType.toString original
-
-                        newStr =
-                            Maybe.withDefault originalStr <| Maybe.map QuestionValueType.toString new
-                    in
-                    [ ( lg "questionValueType" appState, originalStr, newStr ) ]
-
         fieldDiff =
-            viewDiff (fields ++ valueDiff)
+            viewDiff (fields ++ extraFields)
+
+        -- Tags
+        tags =
+            KnowledgeModel.getTags km
 
         originalTags =
             Question.getTagUuids question
-
-        tagUuids =
-            EventField.getValueWithDefault (EditQuestionEventData.map .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags
-
-        tags =
-            KnowledgeModel.getTags km
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
 
         tagsDiff =
-            viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
+            viewDiffChildren (lg "tags" appState)
+                originalTags
+                (EventField.getValueWithDefault (EditQuestionEventData.map .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags)
+                tagNames
 
+        -- Answers
         answersDiff =
             case event of
-                EditQuestionOptionsEvent eventData ->
+                EditQuestionOptionsEvent data ->
                     let
-                        answerUuids =
-                            EventField.getValueWithDefault eventData.answerUuids originalAnswers
+                        answers =
+                            KnowledgeModel.getQuestionAnswers questionUuid km
+
+                        originalAnswers =
+                            List.map .uuid answers
+
+                        answerNames =
+                            Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) answers
                     in
-                    viewDiffChildren (lg "answers" appState) originalAnswers answerUuids answerNames
+                    viewDiffChildren (lg "answers" appState)
+                        originalAnswers
+                        (EventField.getValueWithDefault data.answerUuids originalAnswers)
+                        answerNames
 
                 _ ->
                     emptyNode
 
+        -- Item Template Questions
+        itemTemplateQuestionsDiff =
+            case event of
+                EditQuestionListEvent data ->
+                    let
+                        itemTemplateQuestions =
+                            KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
+
+                        originalItemTemplateQuestions =
+                            List.map Question.getUuid itemTemplateQuestions
+
+                        itemTemplateQuestionNames =
+                            Dict.fromList <| List.map (\q -> ( Question.getUuid q, Question.getTitle q )) itemTemplateQuestions
+                    in
+                    viewDiffChildren (lg "questions" appState)
+                        originalItemTemplateQuestions
+                        (EventField.getValueWithDefault data.itemTemplateQuestionUuids originalItemTemplateQuestions)
+                        itemTemplateQuestionNames
+
+                _ ->
+                    emptyNode
+
+        -- References
+        references =
+            KnowledgeModel.getQuestionReferences questionUuid km
+
+        originalReferences =
+            List.map Reference.getUuid references
+
+        referenceNames =
+            Dict.fromList <| List.map (\r -> ( Reference.getUuid r, Reference.getVisibleName r )) references
+
         referencesDiff =
-            viewDiffChildren (lg "references" appState) originalReferences (EventField.getValueWithDefault referenceUuids originalReferences) referenceNames
+            viewDiffChildren (lg "references" appState)
+                originalReferences
+                (EventField.getValueWithDefault (EditQuestionEventData.map .referenceUuids .referenceUuids .referenceUuids .referenceUuids event) originalReferences)
+                referenceNames
+
+        -- Experts
+        experts =
+            KnowledgeModel.getQuestionExperts questionUuid km
+
+        originalExperts =
+            List.map .uuid experts
+
+        expertNames =
+            Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) experts
 
         expertsDiff =
-            viewDiffChildren (lg "experts" appState) originalExperts (EventField.getValueWithDefault expertUuids originalExperts) expertNames
+            viewDiffChildren (lg "experts" appState)
+                originalExperts
+                (EventField.getValueWithDefault (EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids event) originalExperts)
+                expertNames
     in
     div []
-        (fieldDiff ++ [ tagsDiff, answersDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
 viewDeleteQuestionDiff : AppState -> KnowledgeModel -> Question -> Html Msg
 viewDeleteQuestionDiff appState km question =
     let
+        -- Fields
+        questionUuid =
+            Question.getUuid question
+
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "question.title" appState
+                [ lg "questionType" appState
+                , lg "question.title" appState
                 , lg "question.text" appState
                 ]
-                [ Question.getTitle question
+                [ Question.getTypeString question
+                , Question.getTitle question
                 , Question.getText question |> Maybe.withDefault ""
                 ]
 
-        valueField =
+        extraFields =
             case question of
                 ValueQuestion _ data ->
                     [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
+
+                IntegrationQuestion _ data ->
+                    [ ( lg "integration" appState, data.integrationUuid ) ]
 
                 _ ->
                     []
 
         fieldDiff =
-            viewDelete (fields ++ valueField)
+            viewDelete (fields ++ extraFields)
 
-        questionUuid =
-            Question.getUuid question
+        -- Tags
+        tags =
+            KnowledgeModel.getTags km
 
-        answers =
-            KnowledgeModel.getQuestionAnswers questionUuid km
+        tagNames =
+            List.map .name <| List.filter (\t -> List.member t.uuid (Question.getTagUuids question)) tags
 
+        tagsDiff =
+            viewDeletedChildren (lg "tags" appState) tagNames
+
+        -- Answers
         answersDiff =
-            viewDeletedChildren (lg "answers" appState) <| List.map .label answers
+            case question of
+                OptionsQuestion _ _ ->
+                    viewDeletedChildren (lg "answers" appState) <|
+                        List.map .label <|
+                            KnowledgeModel.getQuestionAnswers questionUuid km
 
+                _ ->
+                    emptyNode
+
+        -- Item Template Questions
+        itemTemplateQuestionsDiff =
+            case question of
+                ListQuestion _ _ ->
+                    viewDeletedChildren (lg "questions" appState) <|
+                        List.map Question.getTitle <|
+                            KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
+
+                _ ->
+                    emptyNode
+
+        -- References
         references =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
             viewDeletedChildren (lg "references" appState) <| List.map Reference.getVisibleName references
 
+        -- Experts
         experts =
             KnowledgeModel.getQuestionExperts questionUuid km
 
@@ -778,28 +875,41 @@ viewDeleteQuestionDiff appState km question =
             viewDeletedChildren (lg "experts" appState) <| List.map .name experts
     in
     div []
-        (fieldDiff ++ [ answersDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
 viewAddAnswerDiff : AppState -> AddAnswerEventData -> Html Msg
 viewAddAnswerDiff appState event =
     let
-        fields =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "answer.label" appState
-                , lg "answer.advice" appState
-                ]
-                [ event.label
-                , event.advice |> Maybe.withDefault ""
-                ]
+        fieldsDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "answer.label" appState
+                    , lg "answer.advice" appState
+                    ]
+                    [ event.label
+                    , event.advice |> Maybe.withDefault ""
+                    ]
     in
-    div []
-        (viewAdd fields)
+    div [] fieldsDiff
 
 
 viewEditAnswerDiff : AppState -> KnowledgeModel -> EditAnswerEventData -> Answer -> Html Msg
 viewEditAnswerDiff appState km event answer =
     let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "answer.label" appState
+                    , lg "answer.advice" appState
+                    ]
+                    [ answer.label
+                    , Maybe.withDefault "" answer.advice
+                    ]
+                    [ EventField.getValueWithDefault event.label answer.label
+                    , EventField.getValueWithDefault event.advice answer.advice |> Maybe.withDefault ""
+                    ]
+
         questions =
             KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
 
@@ -809,21 +919,11 @@ viewEditAnswerDiff appState km event answer =
         questionNames =
             Dict.fromList <| List.map (\q -> ( Question.getUuid q, Question.getTitle q )) questions
 
-        fieldDiff =
-            viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "answer.label" appState
-                    , lg "answer.advice" appState
-                    ]
-                    [ answer.label
-                    , answer.advice |> Maybe.withDefault ""
-                    ]
-                    [ EventField.getValueWithDefault event.label answer.label
-                    , EventField.getValueWithDefault event.advice answer.advice |> Maybe.withDefault ""
-                    ]
-
         questionsDiff =
-            viewDiffChildren (lg "questions" appState) originalQuestions (EventField.getValueWithDefault event.followUpUuids originalQuestions) questionNames
+            viewDiffChildren (lg "questions" appState)
+                originalQuestions
+                (EventField.getValueWithDefault event.followUpUuids originalQuestions)
+                questionNames
     in
     div []
         (fieldDiff ++ [ questionsDiff ])
@@ -832,12 +932,6 @@ viewEditAnswerDiff appState km event answer =
 viewDeleteAnswerDiff : AppState -> KnowledgeModel -> Answer -> Html Msg
 viewDeleteAnswerDiff appState km answer =
     let
-        questions =
-            KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
-
-        questionNames =
-            List.map Question.getTitle questions
-
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
@@ -847,6 +941,12 @@ viewDeleteAnswerDiff appState km answer =
                     [ answer.label
                     , answer.advice |> Maybe.withDefault ""
                     ]
+
+        questions =
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
+
+        questionNames =
+            List.map Question.getTitle questions
 
         questionsDiff =
             viewDeletedChildren (lg "questions" appState) questionNames
@@ -865,8 +965,8 @@ viewAddReferenceDiff appState =
 
 viewAddResourcePageReferenceDiff : AppState -> AddReferenceResourcePageEventData -> Html Msg
 viewAddResourcePageReferenceDiff appState data =
-    div []
-        (viewAdd <|
+    div [] <|
+        viewAdd <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.shortUuid" appState
@@ -874,13 +974,12 @@ viewAddResourcePageReferenceDiff appState data =
                 [ lg "referenceType.resourcePage" appState
                 , data.shortUuid
                 ]
-        )
 
 
 viewAddURLReferenceDiff : AppState -> AddReferenceURLEventData -> Html Msg
 viewAddURLReferenceDiff appState data =
-    div []
-        (viewAdd <|
+    div [] <|
+        viewAdd <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.url" appState
@@ -890,13 +989,12 @@ viewAddURLReferenceDiff appState data =
                 , data.url
                 , data.label
                 ]
-        )
 
 
 viewAddCrossReferenceDiff : AppState -> AddReferenceCrossEventData -> Html Msg
 viewAddCrossReferenceDiff appState data =
-    div []
-        (viewAdd <|
+    div [] <|
+        viewAdd <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.targetUuid" appState
@@ -906,7 +1004,6 @@ viewAddCrossReferenceDiff appState data =
                 , data.targetUuid
                 , data.description
                 ]
-        )
 
 
 viewEditReferenceDiff : AppState -> EditReferenceEventData -> Reference -> Html Msg
@@ -980,8 +1077,8 @@ viewEditReferenceDiff appState event reference =
 
 viewEditResourcePageReferenceDiff : AppState -> EditReferenceResourcePageEventData -> Html Msg
 viewEditResourcePageReferenceDiff appState data =
-    div []
-        (viewAdd <|
+    div [] <|
+        viewAdd <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.shortUuid" appState
@@ -989,13 +1086,12 @@ viewEditResourcePageReferenceDiff appState data =
                 [ lg "referenceType.resourcePage" appState
                 , EventField.getValueWithDefault data.shortUuid ""
                 ]
-        )
 
 
 viewEditURLReferenceDiff : AppState -> EditReferenceURLEventData -> Html Msg
 viewEditURLReferenceDiff appState data =
-    div []
-        (viewAdd <|
+    div [] <|
+        viewAdd <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.url" appState
@@ -1005,13 +1101,12 @@ viewEditURLReferenceDiff appState data =
                 , EventField.getValueWithDefault data.url ""
                 , EventField.getValueWithDefault data.label ""
                 ]
-        )
 
 
 viewEditCrossReferenceDiff : AppState -> EditReferenceCrossEventData -> Html Msg
 viewEditCrossReferenceDiff appState data =
-    div []
-        (viewAdd <|
+    div [] <|
+        viewAdd <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.targetUuid" appState
@@ -1021,7 +1116,6 @@ viewEditCrossReferenceDiff appState data =
                 , EventField.getValueWithDefault data.targetUuid ""
                 , EventField.getValueWithDefault data.description ""
                 ]
-        )
 
 
 viewDeleteReferenceDiff : AppState -> Reference -> Html Msg
@@ -1034,8 +1128,8 @@ viewDeleteReferenceDiff appState =
 
 viewDeleteResourcePageReferenceDiff : AppState -> ResourcePageReferenceData -> Html Msg
 viewDeleteResourcePageReferenceDiff appState data =
-    div []
-        (viewDelete <|
+    div [] <|
+        viewDelete <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.shortUuid" appState
@@ -1043,13 +1137,12 @@ viewDeleteResourcePageReferenceDiff appState data =
                 [ lg "referenceType.resourcePage" appState
                 , data.shortUuid
                 ]
-        )
 
 
 viewDeleteURLReferenceDiff : AppState -> URLReferenceData -> Html Msg
 viewDeleteURLReferenceDiff appState data =
-    div []
-        (viewDelete <|
+    div [] <|
+        viewDelete <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.url" appState
@@ -1059,13 +1152,12 @@ viewDeleteURLReferenceDiff appState data =
                 , data.url
                 , data.label
                 ]
-        )
 
 
 viewDeleteCrossReferenceDiff : AppState -> CrossReferenceData -> Html Msg
 viewDeleteCrossReferenceDiff appState data =
-    div []
-        (viewDelete <|
+    div [] <|
+        viewDelete <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "referenceType" appState
                 , lg "reference.targetUuid" appState
@@ -1075,13 +1167,12 @@ viewDeleteCrossReferenceDiff appState data =
                 , data.targetUuid
                 , data.description
                 ]
-        )
 
 
 viewAddExpertDiff : AppState -> AddExpertEventData -> Html Msg
 viewAddExpertDiff appState event =
-    div []
-        (viewAdd <|
+    div [] <|
+        viewAdd <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "expert.name" appState
                 , lg "expert.email" appState
@@ -1089,13 +1180,12 @@ viewAddExpertDiff appState event =
                 [ event.name
                 , event.email
                 ]
-        )
 
 
 viewEditExpertDiff : AppState -> EditExpertEventData -> Expert -> Html Msg
 viewEditExpertDiff appState event expert =
-    div []
-        (viewDiff <|
+    div [] <|
+        viewDiff <|
             List.map3 (\a b c -> ( a, b, c ))
                 [ lg "expert.name" appState
                 , lg "expert.email" appState
@@ -1106,13 +1196,12 @@ viewEditExpertDiff appState event expert =
                 [ EventField.getValueWithDefault event.name expert.name
                 , EventField.getValueWithDefault event.email expert.email
                 ]
-        )
 
 
 viewDeleteExpertDiff : AppState -> Expert -> Html Msg
 viewDeleteExpertDiff appState expert =
-    div []
-        (viewDelete <|
+    div [] <|
+        viewDelete <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "expert.name" appState
                 , lg "expert.email" appState
@@ -1120,7 +1209,6 @@ viewDeleteExpertDiff appState expert =
                 [ expert.name
                 , expert.email
                 ]
-        )
 
 
 viewDiff : List ( String, String, String ) -> List (Html Msg)
@@ -1194,7 +1282,7 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
                 )
 
         diff =
-            if List.length originalOrder == 0 then
+            if List.length originalOrder == 0 && List.length newOrder == 0 then
                 div [ class "form-value" ] [ text "-" ]
 
             else if originalOrder == newOrder then
