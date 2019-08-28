@@ -605,12 +605,7 @@ viewAddQuestionDiff appState km event =
                     [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
 
                 AddQuestionIntegrationEvent data ->
-                    [ ( lg "integration" appState
-                      , KnowledgeModel.getIntegration data.integrationUuid km
-                            |> Maybe.map .name
-                            |> Maybe.withDefault ""
-                      )
-                    ]
+                    [ ( lg "integration" appState, getIntegrationName km data.integrationUuid ) ]
 
                 _ ->
                     []
@@ -699,13 +694,17 @@ viewEditQuestionDiff appState km event question =
                         ( Nothing, Nothing ) ->
                             []
 
-                        ( original, new ) ->
+                        ( originalIntegrationUuid, newIntegrationUuid ) ->
                             let
                                 originalStr =
-                                    Maybe.withDefault "" original
+                                    originalIntegrationUuid
+                                        |> Maybe.map (getIntegrationName km)
+                                        |> Maybe.withDefault ""
 
                                 newStr =
-                                    Maybe.withDefault originalStr new
+                                    newIntegrationUuid
+                                        |> Maybe.map (getIntegrationName km)
+                                        |> Maybe.withDefault originalStr
                             in
                             [ ( lg "integration" appState, originalStr, newStr ) ]
 
@@ -855,7 +854,7 @@ viewDeleteQuestionDiff appState km question =
                     [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
 
                 IntegrationQuestion _ data ->
-                    [ ( lg "integration" appState, data.integrationUuid ) ]
+                    [ ( lg "integration" appState, getIntegrationName km data.integrationUuid ) ]
 
                 _ ->
                     []
@@ -911,6 +910,13 @@ viewDeleteQuestionDiff appState km question =
     in
     div []
         (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+
+
+getIntegrationName : KnowledgeModel -> String -> String
+getIntegrationName km integrationUuid =
+    KnowledgeModel.getIntegration integrationUuid km
+        |> Maybe.map .name
+        |> Maybe.withDefault ""
 
 
 viewAddAnswerDiff : AppState -> List Metric -> AddAnswerEventData -> Html Msg
