@@ -615,6 +615,18 @@ viewAddQuestionDiff appState km event =
         fieldsDiff =
             viewAdd (fields ++ extraFields)
 
+        integrationPropsDiff =
+            case event of
+                AddQuestionIntegrationEvent data ->
+                    let
+                        props =
+                            List.map (\( p, v ) -> p ++ " = " ++ v) <| Dict.toList data.props
+                    in
+                    viewAddedChildren (lg "integration.props" appState) props
+
+                _ ->
+                    emptyNode
+
         tags =
             KnowledgeModel.getTags km
 
@@ -631,7 +643,7 @@ viewAddQuestionDiff appState km event =
             viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
     in
     div []
-        (fieldsDiff ++ [ tagsDiff ])
+        (fieldsDiff ++ [ integrationPropsDiff, tagsDiff ])
 
 
 viewEditQuestionDiff : AppState -> KnowledgeModel -> EditQuestionEventData -> Question -> Html Msg
@@ -699,6 +711,26 @@ viewEditQuestionDiff appState km event question =
 
         fieldDiff =
             viewDiff (fields ++ extraFields)
+
+        -- Integration props
+        integrationPropsDiff =
+            case event of
+                EditQuestionIntegrationEvent data ->
+                    let
+                        originalProps =
+                            Question.getProps question
+                                |> Maybe.map (List.map (\( p, v ) -> p ++ " = " ++ v) << Dict.toList)
+                                |> Maybe.withDefault []
+
+                        newProps =
+                            EventField.getValue data.props
+                                |> Maybe.map (List.map (\( p, v ) -> p ++ " = " ++ v) << Dict.toList)
+                                |> Maybe.withDefault originalProps
+                    in
+                    viewAddedAndDeletedChildren (lg "integration.props" appState) originalProps newProps
+
+                _ ->
+                    emptyNode
 
         -- Tags
         tags =
@@ -793,7 +825,7 @@ viewEditQuestionDiff appState km event question =
                 expertNames
     in
     div []
-        (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ integrationPropsDiff, tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
 viewDeleteQuestionDiff : AppState -> KnowledgeModel -> Question -> Html Msg
@@ -1282,7 +1314,7 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
                 )
 
         diff =
-            if List.length originalOrder == 0 && List.length newOrder == 0 then
+            if List.isEmpty originalOrder && List.isEmpty newOrder then
                 div [ class "form-value" ] [ text "-" ]
 
             else if originalOrder == newOrder then
@@ -1299,11 +1331,57 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
     childrenView fieldName diff
 
 
+viewAddedChildren : String -> List String -> Html Msg
+viewAddedChildren fieldName children =
+    childrenView fieldName <|
+        if List.isEmpty children then
+            div [ class "form-value" ] [ text "-" ]
+
+        else
+            ul [ class "ins" ]
+                (List.map (\child -> li [] [ text child ]) children)
+
+
 viewDeletedChildren : String -> List String -> Html Msg
 viewDeletedChildren fieldName children =
     childrenView fieldName <|
-        ul [ class "del" ]
-            (List.map (\child -> li [] [ text child ]) children)
+        if List.isEmpty children then
+            div [ class "form-value" ] [ text "-" ]
+
+        else
+            ul [ class "del" ]
+                (List.map (\child -> li [] [ text child ]) children)
+
+
+viewAddedAndDeletedChildren : String -> List String -> List String -> Html Msg
+viewAddedAndDeletedChildren fieldName originalChildren newChildren =
+    childrenView fieldName <|
+        if List.isEmpty originalChildren && List.isEmpty newChildren then
+            div [ class "form-value" ] [ text "-" ]
+
+        else if originalChildren == newChildren then
+            ul []
+                (List.map (\child -> li [] [ text child ]) originalChildren)
+
+        else
+            let
+                original =
+                    if List.length originalChildren > 0 then
+                        ul [ class "del" ]
+                            (List.map (\child -> li [] [ text child ]) originalChildren)
+
+                    else
+                        emptyNode
+
+                new =
+                    if List.length newChildren > 0 then
+                        ul [ class "ins" ]
+                            (List.map (\child -> li [] [ text child ]) newChildren)
+
+                    else
+                        emptyNode
+            in
+            div [] [ original, new ]
 
 
 childrenView : String -> Html Msg -> Html Msg
