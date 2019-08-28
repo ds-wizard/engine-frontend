@@ -38,6 +38,8 @@ import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
 import KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
 import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
 import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import KMEditor.Common.KnowledgeModel.Question.QuestionValueType as QuestionValueType
 import KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference(..))
@@ -52,6 +54,7 @@ import KMEditor.Migration.Msgs exposing (Msg(..))
 import KMEditor.Migration.View.DiffTree as DiffTree
 import KMEditor.Routes exposing (Route(..))
 import Routes
+import String.Format exposing (format)
 
 
 l_ : String -> AppState -> String
@@ -71,11 +74,11 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (migrationView appState model) model.migration
+    Page.actionResultView appState (migrationView appState model) (ActionResult.combine model.migration model.metrics)
 
 
-migrationView : AppState -> Model -> Migration -> Html Msg
-migrationView appState model migration =
+migrationView : AppState -> Model -> ( Migration, List Metric ) -> Html Msg
+migrationView appState model ( migration, metrics ) =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
@@ -91,7 +94,7 @@ migrationView appState model migration =
                     let
                         conflictView =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (getEventView appState model migration)
+                                |> Maybe.map (getEventView appState model migration metrics)
                                 |> Maybe.map (List.singleton >> div [ class "col-8" ])
                                 |> Maybe.withDefault (div [ class "col-12" ] [ errorMessage ])
 
@@ -134,8 +137,8 @@ migrationSummary appState migration =
         ]
 
 
-getEventView : AppState -> Model -> Migration -> Event -> Html Msg
-getEventView appState model migration event =
+getEventView : AppState -> Model -> Migration -> List Metric -> Event -> Html Msg
+getEventView appState model migration metrics event =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
@@ -216,18 +219,18 @@ getEventView appState model migration event =
                 |> Maybe.withDefault errorMessage
 
         AddAnswerEvent eventData _ ->
-            viewAddAnswerDiff appState eventData
+            viewAddAnswerDiff appState metrics eventData
                 |> viewEvent appState model (lg "event.addAnswer" appState)
 
         EditAnswerEvent eventData commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel eventData)
+                |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel metrics eventData)
                 |> Maybe.map (viewEvent appState model (lg "event.editAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteAnswerEvent commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel metrics)
                 |> Maybe.map (viewEvent appState model (lg "event.deleteAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
@@ -910,8 +913,8 @@ viewDeleteQuestionDiff appState km question =
         (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
-viewAddAnswerDiff : AppState -> AddAnswerEventData -> Html Msg
-viewAddAnswerDiff appState event =
+viewAddAnswerDiff : AppState -> List Metric -> AddAnswerEventData -> Html Msg
+viewAddAnswerDiff appState metrics event =
     let
         fieldsDiff =
             viewAdd <|
@@ -922,12 +925,16 @@ viewAddAnswerDiff appState event =
                     [ event.label
                     , event.advice |> Maybe.withDefault ""
                     ]
+
+        metricsDiff =
+            viewAddedChildren (lg "metrics" appState) <|
+                List.map (metricMeasureToString metrics) event.metricMeasures
     in
-    div [] fieldsDiff
+    div [] (fieldsDiff ++ [ metricsDiff ])
 
 
-viewEditAnswerDiff : AppState -> KnowledgeModel -> EditAnswerEventData -> Answer -> Html Msg
-viewEditAnswerDiff appState km event answer =
+viewEditAnswerDiff : AppState -> KnowledgeModel -> List Metric -> EditAnswerEventData -> Answer -> Html Msg
+viewEditAnswerDiff appState km metrics event answer =
     let
         fieldDiff =
             viewDiff <|
@@ -956,13 +963,23 @@ viewEditAnswerDiff appState km event answer =
                 originalQuestions
                 (EventField.getValueWithDefault event.followUpUuids originalQuestions)
                 questionNames
+
+        originalMetrics =
+            List.map (metricMeasureToString metrics) answer.metricMeasures
+
+        newMetrics =
+            EventField.getValueWithDefault event.metricMeasures answer.metricMeasures
+                |> List.map (metricMeasureToString metrics)
+
+        metricsPropsDiff =
+            viewAddedAndDeletedChildren (lg "metrics" appState) originalMetrics newMetrics
     in
     div []
-        (fieldDiff ++ [ questionsDiff ])
+        (fieldDiff ++ [ questionsDiff, metricsPropsDiff ])
 
 
-viewDeleteAnswerDiff : AppState -> KnowledgeModel -> Answer -> Html Msg
-viewDeleteAnswerDiff appState km answer =
+viewDeleteAnswerDiff : AppState -> KnowledgeModel -> List Metric -> Answer -> Html Msg
+viewDeleteAnswerDiff appState km metrics answer =
     let
         fieldDiff =
             viewDelete <|
@@ -982,9 +999,31 @@ viewDeleteAnswerDiff appState km answer =
 
         questionsDiff =
             viewDeletedChildren (lg "questions" appState) questionNames
+
+        originalMetrics =
+            List.map (metricMeasureToString metrics) answer.metricMeasures
+
+        metricsDiff =
+            viewDeletedChildren (lg "metrics" appState) originalMetrics
     in
     div []
-        (fieldDiff ++ [ questionsDiff ])
+        (fieldDiff ++ [ questionsDiff, metricsDiff ])
+
+
+metricMeasureToString : List Metric -> MetricMeasure -> String
+metricMeasureToString metrics metricMeasure =
+    let
+        metricName m =
+            List.filter (.uuid >> (==) m.metricUuid) metrics
+                |> List.head
+                |> Maybe.map .title
+                |> Maybe.withDefault ""
+    in
+    format "%s (weight = %s, measure = %s)"
+        [ metricName metricMeasure
+        , String.fromFloat metricMeasure.weight
+        , String.fromFloat metricMeasure.measure
+        ]
 
 
 viewAddReferenceDiff : AppState -> AddReferenceEventData -> Html Msg
