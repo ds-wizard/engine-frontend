@@ -76,6 +76,7 @@ import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (..)
+import String.Format exposing (format)
 import Utils exposing (nilUuid)
 import ValueList exposing (ValueList)
 
@@ -711,8 +712,30 @@ isTagEditorDirty editorData =
 
 isIntegrationEditorDirty : IntegrationEditorData -> Bool
 isIntegrationEditorDirty editorData =
+    let
+        buildHeader i =
+            let
+                index =
+                    String.fromInt i
+
+                header =
+                    Form.getFieldAsString (format "requestHeaders.%s.header" [ index ]) editorData.form
+
+                value =
+                    Form.getFieldAsString (format "requestHeaders.%s.value" [ index ]) editorData.form
+            in
+            ( Maybe.withDefault "" header.value
+            , Maybe.withDefault "" value.value
+            )
+
+        currentHeaders =
+            Dict.fromList <|
+                List.map buildHeader <|
+                    Form.getListIndexes "requestHeaders" editorData.form
+    in
     (editorData.editorState == Added)
         || formChanged editorData.form
+        || (currentHeaders /= editorData.integration.requestHeaders)
         || editorData.props.dirty
 
 
