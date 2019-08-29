@@ -80,18 +80,21 @@ viewChapterReport appState model metrics chapterReport =
 
 viewIndications : AppState -> List IndicationReport -> Html Msg
 viewIndications appState indications =
-    div [] (List.map (viewIndication appState) indications)
+    table [ class "indication-table" ] (List.map (viewIndication appState) indications)
 
 
 viewIndication : AppState -> IndicationReport -> Html Msg
 viewIndication appState indicationReport =
     case indicationReport of
         AnsweredIndication data ->
-            viewAnsweredIndication appState data
+            viewAnsweredIndication appState (lf_ "answeredIndication.label") data
+
+        LevelsAnsweredIndication data ->
+            viewAnsweredIndication appState (lf_ "levelsAnsweredIndication.label") data
 
 
-viewAnsweredIndication : AppState -> AnsweredIndicationData -> Html Msg
-viewAnsweredIndication appState data =
+viewAnsweredIndication : AppState -> (List String -> AppState -> String) -> AnsweredIndicationData -> Html Msg
+viewAnsweredIndication appState title data =
     let
         progress =
             toFloat data.answeredQuestions / (toFloat <| data.answeredQuestions + data.unansweredQuestions)
@@ -102,9 +105,9 @@ viewAnsweredIndication appState data =
         all =
             fromInt <| data.answeredQuestions + data.unansweredQuestions
     in
-    div [ class "indication" ]
-        [ p [] [ text <| lf_ "answeredIndication.label" [ answered, all ] appState ]
-        , viewProgressBar "bg-info" progress
+    tr [ class "indication" ]
+        [ td [] [ text <| title [ answered, all ] appState ]
+        , td [] [ viewProgressBar "bg-info" progress ]
         ]
 
 
