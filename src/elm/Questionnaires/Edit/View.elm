@@ -50,7 +50,7 @@ formView appState form =
     let
         accessibilitySelect =
             if appState.config.questionnaireAccessibilityEnabled then
-                FormGroup.richRadioGroup appState QuestionnaireAccessibility.formOptions form "accessibility" <| lg "questionnaire.accessibility" appState
+                FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) form "accessibility" <| lg "questionnaire.accessibility" appState
 
             else
                 emptyNode
