@@ -239,7 +239,7 @@ locale =
         -- Modules texts
         , ( "Common.FormEngine.View.groupElement.add", "Add" )
         , ( "Common.FormEngine.View.groupElement.noAnswers", "There are no answers yet" )
-        , ( "Common.FormEngine.View.typeHints.loading", "There are no answers yet" )
+        , ( "Common.FormEngine.View.typeHints.loading", "Loading..." )
         , ( "Common.FormEngine.View.optionsElement.clearAnswer", "Clear answer" )
         , ( "Common.FormEngine.View.optionsElement.followUpTitle", "This option leads to some follow up questions" )
         , ( "Common.Menu.Update.error.buildInfo", "Cannot get build info" )
