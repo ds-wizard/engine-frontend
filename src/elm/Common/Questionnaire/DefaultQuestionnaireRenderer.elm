@@ -8,21 +8,41 @@ module Common.Questionnaire.DefaultQuestionnaireRenderer exposing
     )
 
 import Common.ApiError exposing (ApiError)
+import Common.AppState exposing (AppState)
+import Common.FormEngine.View exposing (FormRenderer)
 import Common.Html exposing (emptyNode, fa)
+import Common.Locale exposing (l, lg, lx)
 import Common.Questionnaire.Msgs exposing (CustomFormMessage)
-import FormEngine.View exposing (FormRenderer)
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target)
-import KMEditor.Common.Models.Entities exposing (Answer, Expert, Level, Metric, Question, Reference(..), ResourcePageReferenceData, URLReferenceData, getQuestionExperts, getQuestionReferences, getQuestionRequiredLevel, getQuestionText, getQuestionTitle)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
+import KMEditor.Common.KnowledgeModel.Reference exposing (Reference(..))
+import KMEditor.Common.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
+import KMEditor.Common.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
 
 
-defaultQuestionnaireRenderer : List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
-defaultQuestionnaireRenderer levels metrics =
+l_ : String -> AppState -> String
+l_ =
+    l "Common.Questionnaire.DefaultQuestionnaireRenderer"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.Questionnaire.DefaultQuestionnaireRenderer"
+
+
+defaultQuestionnaireRenderer : AppState -> KnowledgeModel -> List Level -> List Metric -> FormRenderer CustomFormMessage Question Answer ApiError
+defaultQuestionnaireRenderer appState km levels metrics =
     { renderQuestionLabel = renderQuestionLabel
-    , renderQuestionDescription = renderQuestionDescription levels
+    , renderQuestionDescription = renderQuestionDescription appState levels km
     , renderOptionLabel = renderOptionLabel
     , renderOptionBadges = renderOptionBadges metrics
     , renderOptionAdvice = renderOptionAdvice
@@ -31,19 +51,19 @@ defaultQuestionnaireRenderer levels metrics =
 
 renderQuestionLabel : Question -> Html msg
 renderQuestionLabel question =
-    text <| getQuestionTitle question
+    text <| Question.getTitle question
 
 
-renderQuestionDescription : List Level -> Question -> Html msg
-renderQuestionDescription levels question =
+renderQuestionDescription : AppState -> List Level -> KnowledgeModel -> Question -> Html msg
+renderQuestionDescription appState levels km question =
     let
         description =
-            getQuestionText question
+            Question.getText question
                 |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ Markdown.toHtml [] t ])
                 |> Maybe.withDefault (text "")
 
         extraData =
-            viewExtraData levels <| createQuestionExtraData question
+            viewExtraData appState levels <| createQuestionExtraData km question
     in
     div []
         [ description
@@ -106,8 +126,8 @@ type alias FormExtraData =
     }
 
 
-createQuestionExtraData : Question -> FormExtraData
-createQuestionExtraData question =
+createQuestionExtraData : KnowledgeModel -> Question -> FormExtraData
+createQuestionExtraData km question =
     let
         foldReferences reference extraData =
             case reference of
@@ -123,15 +143,16 @@ createQuestionExtraData question =
         newExtraData =
             { resourcePageReferences = []
             , urlReferences = []
-            , experts = getQuestionExperts question
-            , requiredLevel = getQuestionRequiredLevel question
+            , experts = KnowledgeModel.getQuestionExperts (Question.getUuid question) km
+            , requiredLevel = Question.getRequiredLevel question
             }
     in
-    List.foldl foldReferences newExtraData <| getQuestionReferences question
+    KnowledgeModel.getQuestionReferences (Question.getUuid question) km
+        |> List.foldl foldReferences newExtraData
 
 
-viewExtraData : List Level -> FormExtraData -> Html msg
-viewExtraData levels data =
+viewExtraData : AppState -> List Level -> FormExtraData -> Html msg
+viewExtraData appState levels data =
     let
         isEmpty =
             List.isEmpty data.resourcePageReferences
@@ -144,21 +165,21 @@ viewExtraData levels data =
 
     else
         p [ class "extra-data" ]
-            [ viewRequiredLevel levels data.requiredLevel
+            [ viewRequiredLevel appState levels data.requiredLevel
             , viewResourcePageReferences data.resourcePageReferences
-            , viewUrlReferences data.urlReferences
-            , viewExperts data.experts
+            , viewUrlReferences appState data.urlReferences
+            , viewExperts appState data.experts
             ]
 
 
-viewRequiredLevel : List Level -> Maybe Int -> Html msg
-viewRequiredLevel levels questionLevel =
+viewRequiredLevel : AppState -> List Level -> Maybe Int -> Html msg
+viewRequiredLevel appState levels questionLevel =
     case List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels of
         Just level ->
             span []
                 [ span [ class "caption" ]
                     [ fa "check-square-o"
-                    , text "Desirable: "
+                    , lx_ "desirable" appState
                     , span [] [ text level.title ]
                     ]
                 ]
@@ -204,11 +225,11 @@ viewResourcePageReference data =
         [ text data.shortUuid ]
 
 
-viewUrlReferences : List URLReferenceData -> Html msg
-viewUrlReferences =
+viewUrlReferences : AppState -> List URLReferenceData -> Html msg
+viewUrlReferences appState =
     viewExtraItems
         { icon = "external-link"
-        , label = "External Links"
+        , label = l_ "externalLinks" appState
         , viewItem = viewUrlReference
         }
 
@@ -219,11 +240,11 @@ viewUrlReference data =
         [ text data.label ]
 
 
-viewExperts : List Expert -> Html msg
-viewExperts =
+viewExperts : AppState -> List Expert -> Html msg
+viewExperts appState =
     viewExtraItems
         { icon = "address-book-o"
-        , label = "Experts"
+        , label = lg "experts" appState
         , viewItem = viewExpert
         }
 

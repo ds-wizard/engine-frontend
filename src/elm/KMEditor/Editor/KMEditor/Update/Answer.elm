@@ -7,9 +7,10 @@ module KMEditor.Editor.KMEditor.Update.Answer exposing
     , withGenerateAnswerEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
-import KMEditor.Common.Models.Entities exposing (newQuestion)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Question as Question
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, Editor(..), QuestionEditorData, addAnswerFollowUp, createQuestionEditor, isAnswerEditorDirty, updateAnswerEditorData)
@@ -20,6 +21,11 @@ import Msgs
 import Random exposing (Seed)
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.Answer"
+
+
 updateAnswerForm : Model -> Form.Msg -> AnswerEditorData -> Model
 updateAnswerForm =
     updateForm
@@ -28,13 +34,13 @@ updateAnswerForm =
         }
 
 
-withGenerateAnswerEditEvent : Seed -> Model -> AnswerEditorData -> (Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateAnswerEditEvent =
+withGenerateAnswerEditEvent : AppState -> Seed -> Model -> AnswerEditorData -> (Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateAnswerEditEvent appState =
     withGenerateEvent
         { isDirty = isAnswerEditorDirty
         , formValidation = answerFormValidation
         , createEditor = AnswerEditor
-        , alert = "Please fix the answer errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createAddAnswerEvent
         , createEditEvent = createEditAnswerEvent
         , updateEditorData = updateAnswerEditorData
@@ -69,8 +75,7 @@ updateIfQuestion update editor =
 addFollowUp : Cmd Msgs.Msg -> Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addFollowUp =
     addEntity
-        { newEntity = newQuestion
+        { newEntity = Question.new
         , createEntityEditor = createQuestionEditor
-        , createPathNode = AnswerPathNode
         , addEntity = addAnswerFollowUp
         }

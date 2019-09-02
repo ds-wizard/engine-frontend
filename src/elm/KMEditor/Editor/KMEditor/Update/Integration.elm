@@ -1,5 +1,7 @@
 module KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, removeIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
 import KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
 import KMEditor.Editor.KMEditor.Models.Children exposing (Children)
@@ -9,6 +11,11 @@ import KMEditor.Editor.KMEditor.Update.Abstract exposing (deleteEntity, updateFo
 import KMEditor.Editor.KMEditor.Update.Events exposing (createAddIntegrationEvent, createDeleteIntegrationEvent, createEditIntegrationEvent)
 import Msgs
 import Random exposing (Seed)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.Integration"
 
 
 updateIntegrationForm : Model -> Form.Msg -> IntegrationEditorData -> Model
@@ -23,17 +30,18 @@ updateIntegrationForm model formMsg editorData =
 
 
 withGenerateIntegrationEditEvent :
-    Seed
+    AppState
+    -> Seed
     -> Model
     -> IntegrationEditorData
     -> (Seed -> Model -> IntegrationEditorData -> ( Seed, Model, Cmd Msgs.Msg ))
     -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateIntegrationEditEvent seed model editorData =
+withGenerateIntegrationEditEvent appState seed model editorData =
     withGenerateEvent
         { isDirty = isIntegrationEditorDirty
         , formValidation = integrationFormValidation (getCurrentIntegrations model) editorData.uuid
         , createEditor = IntegrationEditor
-        , alert = "Please fix the integration errors first"
+        , alert = l_ "alert" appState
         , createAddEvent = createAddIntegrationEvent
         , createEditEvent = createEditIntegrationEvent
         , updateEditorData = updateIntegrationEditorData

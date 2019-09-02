@@ -9,40 +9,44 @@ import KMEditor.Migration.Update
 import KMEditor.Models exposing (Model)
 import KMEditor.Msgs exposing (Msg(..))
 import KMEditor.Publish.Update
-import KMEditor.Routing exposing (Route(..))
+import KMEditor.Routes exposing (Route(..))
 import Msgs
 import Random exposing (Seed)
 
 
-fetchData : Route -> (Msg -> Msgs.Msg) -> Model -> AppState -> Cmd Msgs.Msg
-fetchData route wrapMsg model appState =
+fetchData : Route -> Model -> AppState -> Cmd Msg
+fetchData route model appState =
     case route of
         CreateRoute _ ->
-            KMEditor.Create.Update.fetchData (wrapMsg << CreateMsg) appState
+            Cmd.map CreateMsg <|
+                KMEditor.Create.Update.fetchData appState
 
         EditorRoute uuid ->
             if model.editorModel.kmUuid == uuid && KMEditor.Editor.Models.containsChanges model.editorModel then
                 Cmd.none
 
             else
-                KMEditor.Editor.Update.fetchData (wrapMsg << EditorMsg) uuid appState
+                Cmd.map EditorMsg <|
+                    KMEditor.Editor.Update.fetchData uuid appState
 
         IndexRoute ->
-            KMEditor.Index.Update.fetchData (wrapMsg << IndexMsg) appState
+            Cmd.map IndexMsg <|
+                KMEditor.Index.Update.fetchData appState
 
         MigrationRoute uuid ->
-            KMEditor.Migration.Update.fetchData (wrapMsg << MigrationMsg) uuid appState
+            Cmd.map MigrationMsg <|
+                KMEditor.Migration.Update.fetchData uuid appState
 
         PublishRoute uuid ->
-            Cmd.map (wrapMsg << PublishMsg) <|
+            Cmd.map PublishMsg <|
                 KMEditor.Publish.Update.fetchData uuid appState
 
 
-isGuarded : Route -> Model -> Maybe String
-isGuarded route model =
+isGuarded : Route -> AppState -> Model -> Maybe String
+isGuarded route appState model =
     case route of
         EditorRoute _ ->
-            KMEditor.Editor.Update.isGuarded model.editorModel
+            KMEditor.Editor.Update.isGuarded appState model.editorModel
 
         _ ->
             Nothing

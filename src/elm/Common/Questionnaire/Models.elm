@@ -21,13 +21,23 @@ import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (ChartConfig)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
+import Common.FormEngine.Model exposing (..)
 import Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Common.Questionnaire.Models.FeedbackForm as FeedbackForm exposing (FeedbackForm)
 import Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport)
 import Form
-import FormEngine.Model exposing (..)
-import KMEditor.Common.Models.Entities exposing (..)
-import KMEditor.Common.Models.Events exposing (Event)
+import KMEditor.Common.Events.Event exposing (Event)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
+import KMEditor.Common.KnowledgeModel.Question.CommonQuestionData exposing (CommonQuestionData)
+import KMEditor.Common.KnowledgeModel.Question.ListQuestionData exposing (ListQuestionData)
+import KMEditor.Common.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import KMEditor.Common.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
+import KMEditor.Common.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import List.Extra as List
 import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import String exposing (fromInt)
@@ -68,7 +78,7 @@ initialModel : AppState -> QuestionnaireDetail -> List Metric -> List Event -> M
 initialModel appState questionnaire metrics events =
     let
         activePage =
-            case List.head questionnaire.knowledgeModel.chapters of
+            case List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel) of
                 Just chapter ->
                     PageChapter chapter (createChapterForm appState questionnaire.knowledgeModel metrics questionnaire chapter)
 
@@ -95,7 +105,10 @@ initialModel appState questionnaire metrics events =
 
 createChapterForm : AppState -> KnowledgeModel -> List Metric -> QuestionnaireDetail -> Chapter -> Form Question Answer
 createChapterForm appState km metrics questionnaire chapter =
-    createForm { items = List.map (createQuestionFormItem appState km metrics) chapter.questions } questionnaire.replies [ chapter.uuid ]
+    createForm
+        { items = List.map (createQuestionFormItem appState km metrics) (KnowledgeModel.getChapterQuestions chapter.uuid km) }
+        questionnaire.replies
+        [ chapter.uuid ]
 
 
 createQuestionFormItem : AppState -> KnowledgeModel -> List Metric -> Question -> FormItem Question Answer
@@ -105,14 +118,14 @@ createQuestionFormItem appState km metrics question =
             createFormItemDescriptor question
     in
     case question of
-        OptionsQuestion data ->
-            ChoiceFormItem descriptor (List.map (createAnswerOption appState km metrics) data.answers)
+        OptionsQuestion commonData _ ->
+            ChoiceFormItem descriptor <| List.map (createAnswerOption appState km metrics) (KnowledgeModel.getQuestionAnswers commonData.uuid km)
 
-        ListQuestion data ->
-            GroupFormItem descriptor (createGroupItems appState km metrics data)
+        ListQuestion commonData _ ->
+            GroupFormItem descriptor (createGroupItems appState km metrics commonData)
 
-        ValueQuestion data ->
-            case data.valueType of
+        ValueQuestion _ questionData ->
+            case questionData.valueType of
                 NumberQuestionValueType ->
                     NumberFormItem descriptor
 
@@ -122,15 +135,15 @@ createQuestionFormItem appState km metrics question =
                 _ ->
                     StringFormItem descriptor
 
-        IntegrationQuestion data ->
-            List.find (.uuid >> (==) data.integrationUuid) km.integrations
+        IntegrationQuestion _ questionData ->
+            List.find (.uuid >> (==) questionData.integrationUuid) (KnowledgeModel.getIntegrations km)
                 |> Maybe.map (\i -> TypeHintFormItem descriptor { logo = i.logo, url = i.itemUrl })
                 |> Maybe.withDefault (TextFormItem descriptor)
 
 
 createFormItemDescriptor : Question -> FormItemDescriptor Question
 createFormItemDescriptor question =
-    { name = getQuestionUuid question
+    { name = Question.getUuid question
     , question = question
     }
 
@@ -141,11 +154,11 @@ createAnswerOption appState km metrics answer =
         descriptor =
             createOptionFormDescriptor answer
     in
-    case answer.followUps of
-        FollowUps [] ->
+    case KnowledgeModel.getAnswerFollowupQuestions answer.uuid km of
+        [] ->
             SimpleOption descriptor
 
-        FollowUps followUps ->
+        followUps ->
             DetailedOption descriptor (List.map (createQuestionFormItem appState km metrics) followUps)
 
 
@@ -156,33 +169,9 @@ createOptionFormDescriptor answer =
     }
 
 
-createGroupItems : AppState -> KnowledgeModel -> List Metric -> ListQuestionData -> List (FormItem Question Answer)
-createGroupItems appState km metrics questionData =
-    let
-        itemName =
-            StringFormItem
-                { name = "itemName"
-                , question =
-                    ValueQuestion
-                        { uuid = "itemName"
-                        , title = questionData.itemTemplateTitle
-                        , text = Nothing
-                        , requiredLevel = Nothing
-                        , tagUuids = []
-                        , references = []
-                        , experts = []
-                        , valueType = StringQuestionValueType
-                        }
-                }
-
-        questions =
-            List.map (createQuestionFormItem appState km metrics) questionData.itemTemplateQuestions
-    in
-    if appState.config.itemTitleEnabled then
-        itemName :: questions
-
-    else
-        questions
+createGroupItems : AppState -> KnowledgeModel -> List Metric -> CommonQuestionData -> List (FormItem Question Answer)
+createGroupItems appState km metrics commonData =
+    List.map (createQuestionFormItem appState km metrics) (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid km)
 
 
 
@@ -318,10 +307,10 @@ todoUuid =
 {- Indications calculations -}
 
 
-calculateUnansweredQuestions : AppState -> Int -> FormValues -> Chapter -> Int
-calculateUnansweredQuestions appState currentLevel replies chapter =
-    chapter.questions
-        |> List.map (evaluateQuestion appState currentLevel replies [ chapter.uuid ])
+calculateUnansweredQuestions : AppState -> KnowledgeModel -> Int -> FormValues -> Chapter -> Int
+calculateUnansweredQuestions appState km currentLevel replies chapter =
+    KnowledgeModel.getChapterQuestions chapter.uuid km
+        |> List.map (evaluateQuestion appState km currentLevel replies [ chapter.uuid ])
         |> List.foldl (+) 0
 
 
@@ -331,20 +320,20 @@ getReply replies path =
         |> Maybe.map .value
 
 
-evaluateQuestion : AppState -> Int -> FormValues -> List String -> Question -> Int
-evaluateQuestion appState currentLevel replies path question =
+evaluateQuestion : AppState -> KnowledgeModel -> Int -> FormValues -> List String -> Question -> Int
+evaluateQuestion appState km currentLevel replies path question =
     let
         currentPath =
-            path ++ [ getQuestionUuid question ]
+            path ++ [ Question.getUuid question ]
 
         requiredNow =
-            (getQuestionRequiredLevel question |> Maybe.withDefault 100) <= currentLevel
+            (Question.getRequiredLevel question |> Maybe.withDefault 100) <= currentLevel
 
         rawValue =
             getReply replies (String.join "." currentPath)
 
         adjustedValue =
-            if isQuestionList question then
+            if Question.isList question then
                 case rawValue of
                     Nothing ->
                         Just <| ItemListReply 0
@@ -358,20 +347,20 @@ evaluateQuestion appState currentLevel replies path question =
     case adjustedValue of
         Just value ->
             case question of
-                OptionsQuestion data ->
-                    data.answers
-                        |> List.find (.uuid >> (==) (getAnswerUuid value))
-                        |> Maybe.map (evaluateFollowups appState currentLevel replies currentPath)
+                OptionsQuestion _ questionData ->
+                    questionData.answerUuids
+                        |> List.find ((==) (getAnswerUuid value))
+                        |> Maybe.map (evaluateFollowups appState km currentLevel replies currentPath)
                         |> Maybe.withDefault 1
 
-                ListQuestion data ->
+                ListQuestion commonData _ ->
                     let
                         itemCount =
                             getItemListCount value
                     in
                     if itemCount > 0 then
                         List.range 0 (itemCount - 1)
-                            |> List.map (evaluateAnswerItem appState currentLevel replies currentPath requiredNow data.itemTemplateQuestions)
+                            |> List.map (evaluateAnswerItem appState km currentLevel replies currentPath (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid km))
                             |> List.foldl (+) 0
 
                     else
@@ -388,37 +377,26 @@ evaluateQuestion appState currentLevel replies path question =
                 0
 
 
-evaluateFollowups : AppState -> Int -> FormValues -> List String -> Answer -> Int
-evaluateFollowups appState currentLevel replies path answer =
+evaluateFollowups : AppState -> KnowledgeModel -> Int -> FormValues -> List String -> String -> Int
+evaluateFollowups appState km currentLevel replies path answerUuid =
     let
         currentPath =
-            path ++ [ answer.uuid ]
+            path ++ [ answerUuid ]
     in
-    getFollowUpQuestions answer
-        |> List.map (evaluateQuestion appState currentLevel replies currentPath)
+    KnowledgeModel.getAnswerFollowupQuestions answerUuid km
+        |> List.map (evaluateQuestion appState km currentLevel replies currentPath)
         |> List.foldl (+) 0
 
 
-evaluateAnswerItem : AppState -> Int -> FormValues -> List String -> Bool -> List Question -> Int -> Int
-evaluateAnswerItem appState currentLevel replies path requiredNow questions index =
+evaluateAnswerItem : AppState -> KnowledgeModel -> Int -> FormValues -> List String -> List Question -> Int -> Int
+evaluateAnswerItem appState km currentLevel replies path questions index =
     let
         currentPath =
             path ++ [ fromInt index ]
-
-        answerItem =
-            if requiredNow && appState.config.itemTitleEnabled then
-                getReply replies (String.join "." <| currentPath ++ [ "itemName" ])
-                    |> Maybe.map isEmptyReply
-                    |> Maybe.withDefault True
-                    |> boolToInt
-
-            else
-                0
     in
     questions
-        |> List.map (evaluateQuestion appState currentLevel replies currentPath)
+        |> List.map (evaluateQuestion appState km currentLevel replies currentPath)
         |> List.foldl (+) 0
-        |> (+) answerItem
 
 
 createChartConfig : List Metric -> List Chapter -> ChapterReport -> ChartConfig

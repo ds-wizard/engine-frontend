@@ -134,15 +134,15 @@
             }
         }
 
-        .indication {
+        .indication-table {
             margin-bottom: 2rem;
 
-            p {
-                margin-bottom: 0;
-            }
-
-            .progress {
-                height: 10px;
+            .indication {
+                .progress {
+                    width: 15rem;
+                    margin-left: 1rem;
+                    height: 10px;
+                }
             }
         }
     }

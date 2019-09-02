@@ -1,6 +1,8 @@
 module KnowledgeModels.Import.FileImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lx)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormResult as FormResult
 import Html exposing (..)
@@ -11,16 +13,26 @@ import KnowledgeModels.Import.FileImport.Models exposing (..)
 import KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
 
 
-view : Model -> Html Msg
-view model =
+l_ : String -> AppState -> String
+l_ =
+    l "KnowledgeModels.Import.FileImport.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "KnowledgeModels.Import.FileImport.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         content =
             case model.file of
                 Just file ->
-                    fileView model file.filename
+                    fileView appState model file.filename
 
                 Nothing ->
-                    dropzone model
+                    dropzone appState model
     in
     div [ class "KnowledgeModels__Import__FileImport", id dropzoneId ]
         [ FormResult.view model.importing
@@ -28,8 +40,8 @@ view model =
         ]
 
 
-fileView : Model -> String -> Html Msg
-fileView model fileName =
+fileView : AppState -> Model -> String -> Html Msg
+fileView appState model fileName =
     let
         cancelDisabled =
             case model.importing of
@@ -47,20 +59,20 @@ fileView model fileName =
             ]
         , div [ class "actions" ]
             [ button [ disabled cancelDisabled, onClick Cancel, class "btn btn-secondary" ]
-                [ text "Cancel" ]
-            , ActionButton.button <| ActionButton.ButtonConfig "Upload" model.importing Submit False
+                [ lx_ "fileView.cancel" appState ]
+            , ActionButton.button <| ActionButton.ButtonConfig (l_ "fileView.upload" appState) model.importing Submit False
             ]
         ]
 
 
-dropzone : Model -> Html Msg
-dropzone model =
+dropzone : AppState -> Model -> Html Msg
+dropzone appState model =
     div (dropzoneAttributes model)
         [ label [ class "btn btn-secondary btn-file" ]
-            [ text "Choose file"
+            [ lx_ "dropzone.choose" appState
             , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected) ] []
             ]
-        , p [] [ text "or just drop it here" ]
+        , p [] [ lx_ "dropzone.drop" appState ]
         ]
 
 

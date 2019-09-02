@@ -45,14 +45,26 @@ module KMEditor.Editor.KMEditor.Models.Forms exposing
     , updateTagWithForm
     )
 
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError(..))
 import Common.Form.Validate exposing (validateUuid)
+import Common.Locale exposing (l, lg)
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
-import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
+import KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import KMEditor.Common.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
+import KMEditor.Common.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import List.Extra as List
 import Set
@@ -87,7 +99,7 @@ type alias IntegrationForm =
 
 type alias ChapterForm =
     { title : String
-    , text : String
+    , text : Maybe String
     }
 
 
@@ -113,7 +125,6 @@ type alias ListQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredLevel : Maybe Int
-    , itemTemplateTitle : String
     }
 
 
@@ -280,7 +291,7 @@ validateIntegrationId integrations uuid =
         |> Validate.andThen
             (\s v ->
                 if List.member s existingUuids then
-                    Err <| Error.value (CustomError <| Error "This integration ID is already used for different integration")
+                    Err <| Error.value (CustomError IntegrationIdAlreadyUsed)
 
                 else
                     Ok s
@@ -351,13 +362,13 @@ chapterFormValidation : Validation CustomFormError ChapterForm
 chapterFormValidation =
     Validate.map2 ChapterForm
         (Validate.field "title" Validate.string)
-        (Validate.field "text" Validate.string)
+        (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
 
 
 chapterFormInitials : Chapter -> List ( String, Field.Field )
 chapterFormInitials chapter =
     [ ( "title", Field.string chapter.title )
-    , ( "text", Field.string chapter.text )
+    , ( "text", Field.string <| Maybe.withDefault "" chapter.text )
     ]
 
 
@@ -392,11 +403,10 @@ validateQuestion integrations questionType =
                 |> Validate.map OptionsQuestionForm
 
         "ListQuestion" ->
-            Validate.map4 ListQuestionFormData
+            Validate.map3 ListQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
                 (Validate.field "requiredLevel" (Validate.maybe Validate.int))
-                (Validate.field "itemTemplateTitle" Validate.string)
                 |> Validate.map ListQuestionForm
 
         "ValueQuestion" ->
@@ -466,21 +476,21 @@ questionFormInitials question =
     let
         questionType =
             case question of
-                OptionsQuestion _ ->
+                OptionsQuestion _ _ ->
                     "OptionsQuestion"
 
-                ListQuestion _ ->
+                ListQuestion _ _ ->
                     "ListQuestion"
 
-                ValueQuestion _ ->
+                ValueQuestion _ _ ->
                     "ValueQuestion"
 
-                IntegrationQuestion _ ->
+                IntegrationQuestion _ _ ->
                     "IntegrationQuestion"
 
         props =
             case question of
-                IntegrationQuestion integrationQuestionData ->
+                IntegrationQuestion _ integrationQuestionData ->
                     Dict.toList integrationQuestionData.props
                         |> List.map (\( prop, value ) -> ( "props-" ++ prop, Field.string value ))
 
@@ -488,12 +498,11 @@ questionFormInitials question =
                     []
     in
     [ ( "questionType", Field.string questionType )
-    , ( "title", Field.string <| getQuestionTitle question )
-    , ( "text", Field.string <| Maybe.withDefault "" <| getQuestionText question )
-    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| getQuestionRequiredLevel question )
-    , ( "itemTemplateTitle", Field.string <| Maybe.withDefault "Item" <| getQuestionItemTitle question )
-    , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| getQuestionValueType question )
-    , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| getQuestionIntegrationUuid question )
+    , ( "title", Field.string <| Question.getTitle question )
+    , ( "text", Field.string <| Maybe.withDefault "" <| Question.getText question )
+    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| Question.getRequiredLevel question )
+    , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| Question.getValueType question )
+    , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| Question.getIntegrationUuid question )
     ]
         ++ props
 
@@ -503,61 +512,64 @@ updateQuestionWithForm question questionForm =
     case questionForm.question of
         OptionsQuestionForm formData ->
             OptionsQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , answers = getQuestionAnswers question
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { answerUuids = Question.getAnswerUuids question
                 }
 
         ListQuestionForm formData ->
             ListQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , itemTemplateTitle = formData.itemTemplateTitle
-                , itemTemplateQuestions = getQuestionItemQuestions question
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { itemTemplateQuestionUuids = Question.getItemQuestionUuids question
                 }
 
         ValueQuestionForm formData ->
             ValueQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , valueType = formData.valueType
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { valueType = formData.valueType
                 }
 
         IntegrationQuestionForm formData ->
             IntegrationQuestion
-                { uuid = getQuestionUuid question
+                { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
                 , requiredLevel = formData.requiredLevel
-                , tagUuids = getQuestionTagUuids question
-                , references = getQuestionReferences question
-                , experts = getQuestionExperts question
-                , integrationUuid = formData.integrationUuid
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { integrationUuid = formData.integrationUuid
                 , props = formData.props
                 }
 
 
-questionTypeOptions : List ( String, String )
-questionTypeOptions =
-    [ ( "OptionsQuestion", "Options" )
-    , ( "ListQuestion", "List of items" )
-    , ( "ValueQuestion", "Value" )
-    , ( "IntegrationQuestion", "Integration" )
+questionTypeOptions : AppState -> List ( String, String )
+questionTypeOptions appState =
+    [ ( "OptionsQuestion", lg "questionType.options" appState )
+    , ( "ListQuestion", lg "questionType.list" appState )
+    , ( "ValueQuestion", lg "questionType.value" appState )
+    , ( "IntegrationQuestion", lg "questionType.integration" appState )
     ]
 
 
@@ -577,12 +589,12 @@ valueTypeToString valueType =
             "TextValue"
 
 
-questionValueTypeOptions : List ( String, String )
-questionValueTypeOptions =
-    [ ( "StringValue", "String" )
-    , ( "DateValue", "Date" )
-    , ( "NumberValue", "Number" )
-    , ( "TextValue", "Text" )
+questionValueTypeOptions : AppState -> List ( String, String )
+questionValueTypeOptions appState =
+    [ ( "StringValue", lg "questionValueType.string" appState )
+    , ( "DateValue", lg "questionValueType.date" appState )
+    , ( "NumberValue", lg "questionValueType.number" appState )
+    , ( "TextValue", lg "questionValueType.text" appState )
     ]
 
 
@@ -779,30 +791,30 @@ updateReferenceWithForm reference referenceForm =
     case referenceForm.reference of
         ResourcePageReferenceFormType shortUuid ->
             ResourcePageReference
-                { uuid = getReferenceUuid reference
+                { uuid = Reference.getUuid reference
                 , shortUuid = shortUuid
                 }
 
         URLReferenceFormType url label ->
             URLReference
-                { uuid = getReferenceUuid reference
+                { uuid = Reference.getUuid reference
                 , url = url
                 , label = label
                 }
 
         CrossReferenceFormType targetUuid description ->
             CrossReference
-                { uuid = getReferenceUuid reference
+                { uuid = Reference.getUuid reference
                 , targetUuid = targetUuid
                 , description = description
                 }
 
 
-referenceTypeOptions : List ( String, String )
-referenceTypeOptions =
-    [ ( "ResourcePageReference", "Resource Page" )
-    , ( "URLReference", "URL" )
-    , ( "CrossReference", "Cross Reference" )
+referenceTypeOptions : AppState -> List ( String, String )
+referenceTypeOptions appState =
+    [ ( "ResourcePageReference", lg "referenceType.resourcePage" appState )
+    , ( "URLReference", lg "referenceType.url" appState )
+    , ( "CrossReference", lg "referenceType.cross" appState )
     ]
 
 

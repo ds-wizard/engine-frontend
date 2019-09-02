@@ -12,6 +12,7 @@ import Common.Api.Levels as LevelsApi
 import Common.Api.Metrics as MetricsApi
 import Common.ApiError exposing (getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import KMEditor.Common.BranchDetail exposing (BranchDetail)
 import KMEditor.Editor.KMEditor.Models
 import KMEditor.Editor.KMEditor.Update exposing (generateEvents)
@@ -28,20 +29,24 @@ import Random exposing (Seed)
 import Task
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg uuid appState =
-    Cmd.map wrapMsg <|
-        Cmd.batch
-            [ BranchesApi.getBranch uuid appState GetKnowledgeModelCompleted
-            , MetricsApi.getMetrics appState GetMetricsCompleted
-            , LevelsApi.getLevels appState GetLevelsCompleted
-            ]
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.Update"
 
 
-isGuarded : Model -> Maybe String
-isGuarded model =
+fetchData : String -> AppState -> Cmd Msg
+fetchData uuid appState =
+    Cmd.batch
+        [ BranchesApi.getBranch uuid appState GetKnowledgeModelCompleted
+        , MetricsApi.getMetrics appState GetMetricsCompleted
+        , LevelsApi.getLevels appState GetLevelsCompleted
+        ]
+
+
+isGuarded : AppState -> Model -> Maybe String
+isGuarded appState model =
     if containsChanges model then
-        Just unsavedChangesMsg
+        Just <| l_ "unsavedChanges" appState
 
     else
         Nothing
@@ -60,7 +65,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | km = Success km }
 
                                 Err error ->
-                                    ( { model | km = getServerError error "Unable to get knowledge model metadata." }
+                                    ( { model | km = getServerError error <| lg "apiError.branches.getError" appState }
                                     , getResultCmd result
                                     )
                     in
@@ -74,7 +79,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | metrics = Success metrics }
 
                                 Err error ->
-                                    ( { model | metrics = getServerError error "Unable to get metrics." }
+                                    ( { model | metrics = getServerError error <| lg "apiError.metrics.getListError" appState }
                                     , getResultCmd result
                                     )
                     in
@@ -88,7 +93,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | levels = Success levels }
 
                                 Err error ->
-                                    ( { model | levels = getServerError error "Unable to get levels." }
+                                    ( { model | levels = getServerError error <| lg "apiError.levels.getListError" appState }
                                     , getResultCmd result
                                     )
                     in
@@ -120,7 +125,7 @@ update msg wrapMsg appState model =
                                     }
 
                                 Err error ->
-                                    { model | preview = getServerError error "Unable to get Knowledge Model" }
+                                    { model | preview = getServerError error <| lg "apiError.knowledgeModels.preview.fetchError" appState }
 
                         cmd =
                             getResultCmd result
@@ -130,7 +135,7 @@ update msg wrapMsg appState model =
                 OpenEditor editor ->
                     let
                         ( newSeed, modelWithEvents ) =
-                            applyCurrentEditorChanges appState.seed model
+                            applyCurrentEditorChanges appState appState.seed model
 
                         ( newModel, cmd ) =
                             fetchPreview wrapMsg appState { modelWithEvents | currentEditor = editor }
@@ -157,11 +162,21 @@ update msg wrapMsg appState model =
 
                 TagEditorMsg tagMsg ->
                     let
-                        tagEditorModel =
-                            model.tagEditorModel
-                                |> Maybe.map (KMEditor.Editor.TagEditor.Update.update tagMsg)
+                        ( newTagEditorModel, cmd ) =
+                            case model.tagEditorModel of
+                                Just tagEditorModel ->
+                                    let
+                                        ( updatedTagEditorModel, updateCmd ) =
+                                            KMEditor.Editor.TagEditor.Update.update tagMsg tagEditorModel
+                                    in
+                                    ( Just updatedTagEditorModel
+                                    , Cmd.map (wrapMsg << TagEditorMsg) updateCmd
+                                    )
+
+                                Nothing ->
+                                    ( Nothing, Cmd.none )
                     in
-                    ( appState.seed, { model | tagEditorModel = tagEditorModel }, Cmd.none )
+                    ( appState.seed, { model | tagEditorModel = newTagEditorModel }, cmd )
 
                 KMEditorMsg editorMsg ->
                     let
@@ -192,7 +207,7 @@ update msg wrapMsg appState model =
                 Save ->
                     let
                         ( newSeed, newModel ) =
-                            applyCurrentEditorChanges appState.seed model
+                            applyCurrentEditorChanges appState appState.seed model
 
                         ( newModel2, cmd ) =
                             if hasKMEditorAlert newModel.editorModel then
@@ -218,17 +233,17 @@ update msg wrapMsg appState model =
                             , { newModel | currentEditor = model.currentEditor }
                             , Cmd.batch
                                 [ Ports.clearUnloadMessage ()
-                                , fetchData wrapMsg model.kmUuid appState
+                                , Cmd.map wrapMsg <| fetchData model.kmUuid appState
                                 ]
                             )
 
                         Err error ->
                             ( appState.seed
-                            , { model | saving = getServerError error "Knowledge model could not be saved" }
+                            , { model | saving = getServerError error <| lg "apiError.branches.putError" appState }
                             , getResultCmd result
                             )
     in
-    withSetUnloadMsgCmd updateResult
+    withSetUnloadMsgCmd appState updateResult
 
 
 openEditorTask : (Msg -> Msgs.Msg) -> Cmd Msgs.Msg
@@ -255,8 +270,8 @@ putBranchCmd wrapMsg appState model km =
         BranchesApi.putBranch model.kmUuid km.name km.kmId (km.events ++ model.sessionEvents) appState SaveCompleted
 
 
-applyCurrentEditorChanges : Seed -> Model -> ( Seed, Model )
-applyCurrentEditorChanges seed model =
+applyCurrentEditorChanges : AppState -> Seed -> Model -> ( Seed, Model )
+applyCurrentEditorChanges appState seed model =
     case ( model.currentEditor, model.preview ) of
         ( TagsEditor, Success km ) ->
             let
@@ -274,7 +289,7 @@ applyCurrentEditorChanges seed model =
 
                 ( newSeed, newEvents, newEditorModel ) =
                     model.editorModel
-                        |> Maybe.map (map << generateEvents seed)
+                        |> Maybe.map (map << generateEvents appState seed)
                         |> Maybe.withDefault ( seed, [], model.editorModel )
             in
             if hasKMEditorAlert newEditorModel then
@@ -292,19 +307,14 @@ hasKMEditorAlert =
     Maybe.map (.alert >> isJust) >> Maybe.withDefault False
 
 
-withSetUnloadMsgCmd : ( a, Model, Cmd msg ) -> ( a, Model, Cmd msg )
-withSetUnloadMsgCmd ( a, model, cmd ) =
+withSetUnloadMsgCmd : AppState -> ( a, Model, Cmd msg ) -> ( a, Model, Cmd msg )
+withSetUnloadMsgCmd appState ( a, model, cmd ) =
     let
         newCmd =
             if containsChanges model then
-                Cmd.batch [ cmd, Ports.setUnloadMessage unsavedChangesMsg ]
+                Cmd.batch [ cmd, Ports.setUnloadMessage <| l_ "unsavedChanges" appState ]
 
             else
                 cmd
     in
     ( a, model, newCmd )
-
-
-unsavedChangesMsg : String
-unsavedChangesMsg =
-    "You have unsaved changes in the Knowledge Model, save or discard them first."

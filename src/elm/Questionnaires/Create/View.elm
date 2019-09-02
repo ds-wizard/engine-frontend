@@ -3,6 +3,7 @@ module Questionnaires.Create.View exposing (view)
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
 import Common.Html.Attribute exposing (detailClass)
+import Common.Locale exposing (l, lg)
 import Common.View.ActionButton as ActionResult
 import Common.View.FormActions as FormActions
 import Common.View.FormGroup as FormGroup
@@ -16,26 +17,31 @@ import KnowledgeModels.Common.Version as Version
 import Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility
 import Questionnaires.Create.Models exposing (Model)
 import Questionnaires.Create.Msgs exposing (Msg(..))
-import Questionnaires.Routing
-import Routing
+import Questionnaires.Routes exposing (Route(..))
+import Routes
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Questionnaires.Create.View"
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (content appState model) model.packages
+    Page.actionResultView appState (content appState model) model.packages
 
 
 content : AppState -> Model -> List Package -> Html Msg
 content appState model packages =
     div [ detailClass "Questionnaires__Create" ]
-        [ Page.header "Create Questionnaire" []
+        [ Page.header (l_ "header.title" appState) []
         , div []
             [ FormResult.view model.savingQuestionnaire
             , formView appState model packages |> Html.map FormMsg
-            , tagsView model
-            , FormActions.view
-                (Routing.Questionnaires Questionnaires.Routing.Index)
-                (ActionResult.ButtonConfig "Save" model.savingQuestionnaire (FormMsg Form.Submit) False)
+            , tagsView appState model
+            , FormActions.view appState
+                (Routes.QuestionnairesRoute IndexRoute)
+                (ActionResult.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
             ]
         ]
 
@@ -52,27 +58,27 @@ formView appState model packages =
                     FormGroup.codeView package
 
                 Nothing ->
-                    FormGroup.select packageOptions model.form "packageId"
+                    FormGroup.select appState packageOptions model.form "packageId"
 
         accessibilitySelect =
             if appState.config.questionnaireAccessibilityEnabled then
-                FormGroup.richRadioGroup QuestionnaireAccessibility.formOptions model.form "accessibility" "Accessibility"
+                FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) model.form "accessibility" <| lg "questionnaire.accessibility" appState
 
             else
                 emptyNode
 
         formHtml =
             div []
-                [ FormGroup.input model.form "name" "Name"
-                , parentInput "Knowledge Model"
+                [ FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
+                , parentInput <| lg "knowledgeModel" appState
                 , accessibilitySelect
                 ]
     in
     formHtml
 
 
-tagsView : Model -> Html Msg
-tagsView model =
+tagsView : AppState -> Model -> Html Msg
+tagsView appState model =
     let
         tagListConfig =
             { selected = model.selectedTags
@@ -80,7 +86,7 @@ tagsView model =
             , removeMsg = RemoveTag
             }
     in
-    Tag.selection tagListConfig model.knowledgeModelPreview
+    Tag.selection appState tagListConfig model.knowledgeModelPreview
 
 
 createOption : Package -> ( String, String )

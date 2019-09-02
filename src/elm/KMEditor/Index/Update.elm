@@ -6,30 +6,36 @@ import Common.Api.Branches as BranchesApi
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import Common.Setters exposing (setBranches, setPackage)
 import Form
 import KMEditor.Common.Branch exposing (Branch)
 import KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm
 import KMEditor.Index.Models exposing (Model)
 import KMEditor.Index.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(..))
+import KMEditor.Routes exposing (Route(..))
 import KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 import Msgs
-import Routing exposing (Route(..), cmdNavigate)
+import Routes
+import Routing exposing (cmdNavigate)
 import Utils exposing (withNoCmd)
 
 
-fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg appState =
-    Cmd.map wrapMsg <|
-        BranchesApi.getBranches appState GetBranchesCompleted
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Index.Update"
+
+
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    BranchesApi.getBranches appState GetBranchesCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetBranchesCompleted result ->
-            handleGetBranchesCompleted model result
+            handleGetBranchesCompleted appState model result
 
         ShowHideDeleteBranchModal branch ->
             handleShowHideDeleteBranchModal model branch
@@ -50,7 +56,7 @@ update msg wrapMsg appState model =
             handleUpgradeFormMsg formMsg wrapMsg appState model
 
         GetPackageCompleted result ->
-            handleGetPackagesCompleted model result
+            handleGetPackageCompleted appState model result
 
         DeleteMigration uuid ->
             handleDeleteMigration wrapMsg appState model uuid
@@ -63,11 +69,11 @@ update msg wrapMsg appState model =
 -- Handlers
 
 
-handleGetBranchesCompleted : Model -> Result ApiError (List Branch) -> ( Model, Cmd Msgs.Msg )
-handleGetBranchesCompleted model result =
+handleGetBranchesCompleted : AppState -> Model -> Result ApiError (List Branch) -> ( Model, Cmd Msgs.Msg )
+handleGetBranchesCompleted appState model result =
     applyResult
         { setResult = setBranches
-        , defaultError = "Unable to get knowledge model editors."
+        , defaultError = lg "apiError.branches.getListError" appState
         , model = model
         , result = result
         }
@@ -98,10 +104,10 @@ handleDeleteBranchCompleted : AppState -> Model -> Result ApiError () -> ( Model
 handleDeleteBranchCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key <| KMEditor IndexRoute )
+            ( model, cmdNavigate appState <| Routes.KMEditorRoute IndexRoute )
 
         Err error ->
-            ( { model | deletingKnowledgeModel = getServerError error "Knowledge model could not be deleted" }
+            ( { model | deletingKnowledgeModel = getServerError error <| lg "apiError.branches.deleteError" appState }
             , getResultCmd result
             )
 
@@ -116,10 +122,10 @@ handlePostMigrationCompleted appState model result =
                         |> Maybe.andThen (\branch -> Just branch.uuid)
                         |> Maybe.withDefault ""
             in
-            ( model, cmdNavigate appState.key <| KMEditor <| MigrationRoute kmUuid )
+            ( model, cmdNavigate appState <| Routes.KMEditorRoute <| MigrationRoute kmUuid )
 
         Err error ->
-            ( { model | creatingMigration = getServerError error "Migration could not be created" }
+            ( { model | creatingMigration = getServerError error <| lg "apiError.branches.migrations.postError" appState }
             , getResultCmd result
             )
 
@@ -162,11 +168,11 @@ handleUpgradeFormMsg formMsg wrapMsg appState model =
                 { model | branchUpgradeForm = Form.update BranchUpgradeForm.validation formMsg model.branchUpgradeForm }
 
 
-handleGetPackagesCompleted : Model -> Result ApiError PackageDetail -> ( Model, Cmd Msgs.Msg )
-handleGetPackagesCompleted model result =
+handleGetPackageCompleted : AppState -> Model -> Result ApiError PackageDetail -> ( Model, Cmd Msgs.Msg )
+handleGetPackageCompleted appState model result =
     applyResult
         { setResult = setPackage
-        , defaultError = "Unable to get knowledge model list."
+        , defaultError = lg "apiError.packages.getError" appState
         , model = model
         , result = result
         }
@@ -183,11 +189,11 @@ handleDeleteMigrationCompleted : (Msg -> Msgs.Msg) -> AppState -> Model -> Resul
 handleDeleteMigrationCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( { model | deletingMigration = Success "Migration was successfully canceled", branches = Loading }
-            , fetchData wrapMsg appState
+            ( { model | deletingMigration = Success <| lg "apiSuccess.migration.delete" appState, branches = Loading }
+            , Cmd.map wrapMsg <| fetchData appState
             )
 
         Err error ->
-            ( { model | deletingMigration = getServerError error "Migration could not be deleted" }
+            ( { model | deletingMigration = getServerError error <| lg "apiError.branches.migrations.deleteError" appState }
             , getResultCmd result
             )

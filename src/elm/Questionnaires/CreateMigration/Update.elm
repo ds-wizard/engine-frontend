@@ -7,9 +7,10 @@ import Common.Api.Packages as PackagesApi
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Common.Setters exposing (setPackages, setQuestionnaire)
 import Form
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -17,7 +18,8 @@ import Questionnaires.Common.QuestionnaireMigration exposing (QuestionnaireMigra
 import Questionnaires.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
 import Questionnaires.CreateMigration.Models exposing (Model)
 import Questionnaires.CreateMigration.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
+import Questionnaires.Routes exposing (Route(..))
+import Routes
 import Routing exposing (cmdNavigate)
 import Utils exposing (withNoCmd)
 
@@ -44,10 +46,10 @@ update wrapMsg msg appState model =
             handleRemoveTag model tagUuid
 
         GetPackagesCompleted result ->
-            handleGetPackagesCompleted model result
+            handleGetPackagesCompleted appState model result
 
         GetQuestionnaireCompleted result ->
-            handleGetQuestionnaireCompleted model result
+            handleGetQuestionnaireCompleted appState model result
 
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model
@@ -59,7 +61,7 @@ update wrapMsg msg appState model =
             handlePostMigrationCompleted appState model result
 
         GetKnowledgeModelPreviewCompleted result ->
-            handleGetKnowledgeModelPreviewCompleted model result
+            handleGetKnowledgeModelPreviewCompleted appState model result
 
 
 
@@ -78,23 +80,23 @@ handleRemoveTag model tagUuid =
         { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }
 
 
-handleGetPackagesCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
-handleGetPackagesCompleted model result =
+handleGetPackagesCompleted : AppState -> Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
+handleGetPackagesCompleted appState model result =
     preselectKnowledgeModel <|
         applyResult
             { setResult = setPackages
-            , defaultError = "Unable to get packages"
+            , defaultError = lg "apiError.packages.getListError" appState
             , model = model
             , result = result
             }
 
 
-handleGetQuestionnaireCompleted : Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
-handleGetQuestionnaireCompleted model result =
+handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Msgs.Msg )
+handleGetQuestionnaireCompleted appState model result =
     preselectKnowledgeModel <|
         applyResult
             { setResult = setQuestionnaire
-            , defaultError = "Unable to get packages"
+            , defaultError = lg "apiError.questionnaires.getError" appState
             , model = model
             , result = result
             }
@@ -156,16 +158,16 @@ handlePostMigrationCompleted : AppState -> Model -> Result ApiError Questionnair
 handlePostMigrationCompleted appState model result =
     case result of
         Ok migration ->
-            ( model, cmdNavigate appState.key <| Routing.Questionnaires << Migration <| migration.newQuestionnaire.uuid )
+            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute << MigrationRoute <| migration.newQuestionnaire.uuid )
 
         Err error ->
-            ( { model | savingMigration = getServerError error "Questionnaire migration could not be created." }
+            ( { model | savingMigration = getServerError error <| lg "apiError.questionnaires.migrations.postError" appState }
             , getResultCmd result
             )
 
 
-handleGetKnowledgeModelPreviewCompleted : Model -> Result ApiError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
-handleGetKnowledgeModelPreviewCompleted model result =
+handleGetKnowledgeModelPreviewCompleted : AppState -> Model -> Result ApiError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
+handleGetKnowledgeModelPreviewCompleted appState model result =
     let
         newModel =
             case result of
@@ -173,7 +175,7 @@ handleGetKnowledgeModelPreviewCompleted model result =
                     { model | knowledgeModelPreview = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelPreview = getServerError error "Unable to get knowledge model tags." }
+                    { model | knowledgeModelPreview = getServerError error <| lg "apiError.knowledgeModels.tags.getError" appState }
 
         cmd =
             getResultCmd result

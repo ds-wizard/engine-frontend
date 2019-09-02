@@ -5,8 +5,10 @@ import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
+import Common.Locale exposing (lg)
 import Form
 import Msgs
+import Public.Common.PasswordForm as PasswordForm
 import Public.ForgottenPasswordConfirmation.Models exposing (..)
 import Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
 
@@ -18,7 +20,7 @@ update msg wrapMsg appState model =
             handleForm formMsg wrapMsg appState model
 
         PutPasswordCompleted result ->
-            handlePutUserPasswordCompleted result model
+            handlePutUserPasswordCompleted appState result model
 
 
 handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -27,7 +29,7 @@ handleForm formMsg wrapMsg appState model =
         ( Form.Submit, Just passwordForm ) ->
             let
                 body =
-                    encodePasswordForm passwordForm
+                    PasswordForm.encode passwordForm
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -38,13 +40,13 @@ handleForm formMsg wrapMsg appState model =
         _ ->
             let
                 newModel =
-                    { model | form = Form.update passwordFormValidation formMsg model.form }
+                    { model | form = Form.update PasswordForm.validation formMsg model.form }
             in
             ( newModel, Cmd.none )
 
 
-handlePutUserPasswordCompleted : Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
-handlePutUserPasswordCompleted result model =
+handlePutUserPasswordCompleted : AppState -> Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
+handlePutUserPasswordCompleted appState result model =
     case result of
         Ok _ ->
             ( { model | submitting = Success "" }, Cmd.none )
@@ -55,6 +57,6 @@ handlePutUserPasswordCompleted result model =
                     setFormErrors error model.form
 
                 errorMessage =
-                    getServerError error "Forgotten password recovery failed."
+                    getServerError error <| lg "apiError.actionKey.passwordRecoveryError" appState
             in
             ( { model | submitting = errorMessage, form = form }, Cmd.none )

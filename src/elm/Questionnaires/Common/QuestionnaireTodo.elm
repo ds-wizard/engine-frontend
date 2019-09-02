@@ -1,6 +1,7 @@
 module Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo, getSelectorPath)
 
-import KMEditor.Common.Models.Entities exposing (Chapter, Question)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.Question exposing (Question)
 
 
 type alias QuestionnaireTodo =

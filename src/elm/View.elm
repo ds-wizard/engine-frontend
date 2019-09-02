@@ -1,6 +1,8 @@
 module View exposing (view)
 
 import Browser exposing (Document)
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Common.View.Layout as Layout
 import Common.View.Page as Page
 import Dashboard.View
@@ -12,77 +14,87 @@ import Msgs exposing (Msg(..))
 import Organization.View
 import Public.View
 import Questionnaires.View
-import Routing exposing (Route(..))
+import Routes
 import Users.View
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "View"
 
 
 view : Model -> Document Msg
 view model =
     if not model.appState.valid then
-        Layout.misconfigured
+        Layout.misconfigured model.appState
 
     else
         case model.appState.route of
-            Dashboard ->
+            Routes.DashboardRoute ->
                 Dashboard.View.view model.appState model.dashboardModel
                     |> Layout.app model
 
-            Questionnaires route ->
+            Routes.QuestionnairesRoute route ->
                 model.questionnairesModel
                     |> Questionnaires.View.view route model.appState
                     |> Html.map QuestionnairesMsg
                     |> Layout.app model
 
-            KMEditor route ->
+            Routes.KMEditorRoute route ->
                 model.kmEditorModel
-                    |> KMEditor.View.view route KMEditorMsg model.appState
+                    |> KMEditor.View.view route model.appState
+                    |> Html.map KMEditorMsg
                     |> Layout.app model
 
-            KnowledgeModels route ->
+            Routes.KnowledgeModelsRoute route ->
                 model.kmPackagesModel
                     |> KnowledgeModels.View.view route model.appState
                     |> Html.map KnowledgeModelsMsg
                     |> Layout.app model
 
-            Organization ->
+            Routes.OrganizationRoute ->
                 model.organizationModel
-                    |> Organization.View.view
+                    |> Organization.View.view model.appState
+                    |> Html.map OrganizationMsg
                     |> Layout.app model
 
-            Public route ->
+            Routes.PublicRoute route ->
                 model.publicModel
-                    |> Public.View.view route PublicMsg model.appState
+                    |> Public.View.view route model.appState
+                    |> Html.map PublicMsg
                     |> Layout.public model
 
-            Users route ->
+            Routes.UsersRoute route ->
                 model.users
-                    |> Users.View.view route UsersMsg
+                    |> Users.View.view route model.appState
+                    |> Html.map UsersMsg
                     |> Layout.app model
 
-            NotAllowed ->
-                Layout.app model notAllowedView
+            Routes.NotAllowedRoute ->
+                notAllowedView model.appState
+                    |> Layout.app model
 
-            NotFound ->
+            Routes.NotFoundRoute ->
                 if model.appState.session.user == Nothing then
-                    Layout.public model notFoundView
+                    Layout.public model <| notFoundView model.appState
 
                 else
-                    Layout.app model notFoundView
+                    Layout.app model <| notFoundView model.appState
 
 
-notFoundView : Html msg
-notFoundView =
+notFoundView : AppState -> Html msg
+notFoundView appState =
     Page.illustratedMessage
         { image = "page_not_found"
-        , heading = "Not Found"
-        , lines = [ "The page you are looking for was not found." ]
+        , heading = l_ "notFound.title" appState
+        , lines = [ l_ "notFound.message" appState ]
         }
 
 
-notAllowedView : Html msg
-notAllowedView =
+notAllowedView : AppState -> Html msg
+notAllowedView appState =
     Page.illustratedMessage
         { image = "security"
-        , heading = "Not Allowed"
-        , lines = [ "You don't have a permission to view this page." ]
+        , heading = l_ "notAllowed.title" appState
+        , lines = [ l_ "notAllowed.message" appState ]
         }

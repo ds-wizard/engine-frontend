@@ -3,6 +3,7 @@ port module Ports exposing
     , alert
     , clearSession
     , clearUnloadMessage
+    , copyToClipboard
     , createDropzone
     , drawMetricsChart
     , fileContentRead
@@ -74,3 +75,10 @@ port alert : String -> Cmd msg
 
 
 port drawMetricsChart : Encode.Value -> Cmd msg
+
+
+
+-- Copy
+
+
+port copyToClipboard : String -> Cmd msg

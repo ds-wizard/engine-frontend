@@ -1,18 +1,18 @@
 module Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 
 import Common.ApiError exposing (ApiError)
+import Common.FormEngine.Model exposing (TypeHint)
+import Common.FormEngine.Msgs
 import Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Form
-import FormEngine.Model exposing (TypeHint)
-import FormEngine.Msgs
-import KMEditor.Common.Models.Entities exposing (Chapter, Metric)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Result exposing (Result)
 
 
 type Msg
-    = FormMsg (FormEngine.Msgs.Msg CustomFormMessage ApiError)
+    = FormMsg (Common.FormEngine.Msgs.Msg CustomFormMessage ApiError)
     | SetLevel String
     | SetActiveChapter Chapter
     | ViewSummaryReport

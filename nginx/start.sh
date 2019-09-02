@@ -2,7 +2,11 @@
 
 # create config
 config=/usr/share/nginx/html/config.js
-echo -n "window.dsw={apiUrl:'"$API_URL"'};" > ${config}
+echo -n "window.dsw={apiUrl:'"$API_URL"'" > ${config}
+if [[ ! -z "$PROVISIONING_URL" ]]; then
+    echo -n ",provisioningUrl:'"$PROVISIONING_URL"'" >> ${config}
+fi
+echo -n "};" >> ${config}
 
 
 # check if customizations exist

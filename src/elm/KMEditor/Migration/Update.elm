@@ -3,28 +3,36 @@ module KMEditor.Migration.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Common.Api exposing (applyResult, getResultCmd)
 import Common.Api.Branches as BranchesApi
+import Common.Api.Metrics as MetricsApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
-import Common.Setters exposing (setMigration)
+import Common.Locale exposing (l, lg)
+import Common.Setters exposing (setMetrics, setMigration)
+import KMEditor.Common.Events.Event as Event
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import KMEditor.Common.Migration exposing (Migration)
 import KMEditor.Common.MigrationResolution as MigrationResolution exposing (MigrationResolution)
-import KMEditor.Common.Models.Events exposing (getEventUuid)
 import KMEditor.Migration.Models exposing (Model)
 import KMEditor.Migration.Msgs exposing (Msg(..))
 import Msgs
 
 
-fetchData : (Msg -> Msgs.Msg) -> String -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg uuid appState =
-    Cmd.map wrapMsg <|
-        BranchesApi.getMigration uuid appState GetMigrationCompleted
+fetchData : String -> AppState -> Cmd Msg
+fetchData uuid appState =
+    Cmd.batch
+        [ BranchesApi.getMigration uuid appState GetMigrationCompleted
+        , MetricsApi.getMetrics appState GetMetricsCompleted
+        ]
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetMigrationCompleted result ->
-            handleGetMigrationCompleted model result
+            handleGetMigrationCompleted appState model result
+
+        GetMetricsCompleted result ->
+            handleGetMetricsCompleted appState model result
 
         ApplyEvent ->
             handleApplyEvent wrapMsg appState model
@@ -40,11 +48,21 @@ update msg wrapMsg appState model =
 -- Handlers
 
 
-handleGetMigrationCompleted : Model -> Result ApiError Migration -> ( Model, Cmd Msgs.Msg )
-handleGetMigrationCompleted model result =
+handleGetMigrationCompleted : AppState -> Model -> Result ApiError Migration -> ( Model, Cmd Msgs.Msg )
+handleGetMigrationCompleted appState model result =
     applyResult
         { setResult = setMigration
-        , defaultError = "Unable to get migration."
+        , defaultError = lg "apiError.branches.migrations.getError" appState
+        , model = model
+        , result = result
+        }
+
+
+handleGetMetricsCompleted : AppState -> Model -> Result ApiError (List Metric) -> ( Model, Cmd Msgs.Msg )
+handleGetMetricsCompleted appState model result =
+    applyResult
+        { setResult = setMetrics
+        , defaultError = lg "apiError.metrics.getListError" appState
         , model = model
         , result = result
         }
@@ -66,12 +84,12 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
         Ok _ ->
             let
                 cmd =
-                    fetchData wrapMsg model.branchUuid appState
+                    Cmd.map wrapMsg <| fetchData model.branchUuid appState
             in
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
         Err error ->
-            ( { model | conflict = getServerError error "Unable to resolve conflict" }
+            ( { model | conflict = getServerError error <| lg "apiError.branches.migrations.conflict.postError" appState }
             , getResultCmd result
             )
 
@@ -87,7 +105,7 @@ resolveChange createMigrationResolution wrapMsg appState model =
             case model.migration of
                 Success migration ->
                     migration.migrationState.targetEvent
-                        |> Maybe.map getEventUuid
+                        |> Maybe.map Event.getUuid
                         |> Maybe.map createMigrationResolution
                         |> Maybe.map (postMigrationConflictCmd wrapMsg model.branchUuid appState)
                         |> Maybe.withDefault Cmd.none

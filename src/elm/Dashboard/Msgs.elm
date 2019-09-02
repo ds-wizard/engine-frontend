@@ -1,7 +1,7 @@
 module Dashboard.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 

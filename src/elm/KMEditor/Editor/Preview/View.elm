@@ -2,21 +2,32 @@ module KMEditor.Editor.Preview.View exposing (view)
 
 import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode)
+import Common.Locale exposing (l, lgx, lx)
 import Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Common.Questionnaire.Models
 import Common.Questionnaire.View exposing (viewQuestionnaire)
 import Common.View.Tag as Tag
-import Html exposing (Html, a, div, strong, text)
+import Html exposing (Html, a, div, strong)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModels
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import KMEditor.Editor.Preview.Models exposing (Model)
 import KMEditor.Editor.Preview.Msgs exposing (Msg(..))
-import Msgs
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> List Level -> Model -> Html Msgs.Msg
-view wrapMsg appState levels model =
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.Preview.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "KMEditor.Editor.Preview.View"
+
+
+view : AppState -> List Level -> Model -> Html Msg
+view appState levels model =
     let
         questionnaire =
             viewQuestionnaire
@@ -29,22 +40,25 @@ view wrapMsg appState levels model =
                         Nothing
                 , getExtraQuestionClass = always Nothing
                 , forceDisabled = False
-                , createRenderer = defaultQuestionnaireRenderer
+                , createRenderer = defaultQuestionnaireRenderer appState
                 }
                 appState
                 model.questionnaireModel
-                |> Html.map (QuestionnaireMsg >> wrapMsg)
+                |> Html.map QuestionnaireMsg
     in
     div [ class "col KMEditor__Editor__Preview" ]
-        [ tagSelection model.tags model.questionnaireModel |> Html.map wrapMsg
+        [ tagSelection appState model.tags model.questionnaireModel
         , questionnaire
         ]
 
 
-tagSelection : List String -> Common.Questionnaire.Models.Model -> Html Msg
-tagSelection selected questionnaireModel =
-    if List.length questionnaireModel.questionnaire.knowledgeModel.tags > 0 then
+tagSelection : AppState -> List String -> Common.Questionnaire.Models.Model -> Html Msg
+tagSelection appState selected questionnaireModel =
+    if List.length questionnaireModel.questionnaire.knowledgeModel.tagUuids > 0 then
         let
+            tags =
+                KnowledgeModels.getTags questionnaireModel.questionnaire.knowledgeModel
+
             tagListConfig =
                 { selected = selected
                 , addMsg = AddTag
@@ -53,11 +67,11 @@ tagSelection selected questionnaireModel =
         in
         div [ class "tag-selection" ]
             [ div [ class "tag-selection-header" ]
-                [ strong [] [ text "Tags" ]
-                , a [ onClick SelectAllTags ] [ text "Select All" ]
-                , a [ onClick SelectNoneTags ] [ text "Select None" ]
+                [ strong [] [ lgx "tags" appState ]
+                , a [ onClick SelectAllTags ] [ lx_ "tagSelection.all" appState ]
+                , a [ onClick SelectNoneTags ] [ lx_ "tagSelection.none" appState ]
                 ]
-            , Tag.list tagListConfig questionnaireModel.questionnaire.knowledgeModel.tags
+            , Tag.list appState tagListConfig tags
             ]
 
     else

@@ -5,7 +5,7 @@ module KMEditor.Common.BranchDetail exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import KMEditor.Common.Models.Events exposing (Event, eventDecoder)
+import KMEditor.Common.Events.Event as Event exposing (Event)
 
 
 type alias BranchDetail =
@@ -28,4 +28,4 @@ decoder =
         |> D.required "organizationId" D.string
         |> D.required "forkOfPackageId" (D.nullable D.string)
         |> D.required "previousPackageId" (D.nullable D.string)
-        |> D.required "events" (D.list eventDecoder)
+        |> D.required "events" (D.list Event.decoder)

@@ -12,7 +12,7 @@ import Common.View.FormResult as FormResult
 import Common.View.Page as Page
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import KMEditor.Common.Models.Entities exposing (Level)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import KnowledgeModels.Common.Version as Version
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Detail.Models exposing (Model)
@@ -21,7 +21,7 @@ import Questionnaires.Detail.Msgs exposing (Msg(..))
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (content appState model) <| ActionResult.combine model.questionnaireModel model.levels
+    Page.actionResultView appState (content appState model) <| ActionResult.combine model.questionnaireModel model.levels
 
 
 content : AppState -> Model -> ( Common.Questionnaire.Models.Model, List Level ) -> Html Msg
@@ -42,7 +42,7 @@ content appState model ( questionnaireModel, levels ) =
                     Nothing
             , getExtraQuestionClass = always Nothing
             , forceDisabled = False
-            , createRenderer = defaultQuestionnaireRenderer
+            , createRenderer = defaultQuestionnaireRenderer appState
             }
     in
     div [ class "Questionnaires__Detail" ]

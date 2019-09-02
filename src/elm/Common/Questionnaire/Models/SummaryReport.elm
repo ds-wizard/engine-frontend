@@ -24,6 +24,7 @@ type alias MetricReport =
 
 type IndicationReport
     = AnsweredIndication AnsweredIndicationData
+    | LevelsAnsweredIndication AnsweredIndicationData
 
 
 type alias AnsweredIndicationData =
@@ -56,7 +57,9 @@ metricReportDecoder =
 indicationReportDecoder : Decoder IndicationReport
 indicationReportDecoder =
     Decode.oneOf
-        [ when indicationType ((==) "AnsweredIndication") answeredIndicationDecoder ]
+        [ when indicationType ((==) "AnsweredIndication") answeredIndicationDecoder
+        , when indicationType ((==) "LevelsAnsweredIndication") levelsAnsweredIndicationDecoder
+        ]
 
 
 indicationType : Decoder String
@@ -66,7 +69,16 @@ indicationType =
 
 answeredIndicationDecoder : Decoder IndicationReport
 answeredIndicationDecoder =
+    Decode.map AnsweredIndication answeredIndicationDataDecoder
+
+
+levelsAnsweredIndicationDecoder : Decoder IndicationReport
+levelsAnsweredIndicationDecoder =
+    Decode.map LevelsAnsweredIndication answeredIndicationDataDecoder
+
+
+answeredIndicationDataDecoder : Decoder AnsweredIndicationData
+answeredIndicationDataDecoder =
     Decode.succeed AnsweredIndicationData
         |> required "answeredQuestions" Decode.int
         |> required "unansweredQuestions" Decode.int
-        |> Decode.map AnsweredIndication

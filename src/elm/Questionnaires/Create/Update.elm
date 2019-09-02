@@ -7,16 +7,18 @@ import Common.Api.Packages as PackagesApi
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Form
-import KMEditor.Common.Models.Entities exposing (KnowledgeModel)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
 import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
 import Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Questionnaires.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
 import Questionnaires.Create.Models exposing (Model)
 import Questionnaires.Create.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
+import Questionnaires.Routes exposing (Route(..))
 import Result exposing (Result)
+import Routes
 import Routing exposing (cmdNavigate)
 import Utils exposing (withNoCmd)
 
@@ -48,10 +50,10 @@ update wrapMsg msg appState model =
             handleRemoveTag model tagUuid
 
         GetPackagesCompleted result ->
-            handleGetPackagesCompleted model result
+            handleGetPackagesCompleted appState model result
 
         GetKnowledgeModelPreviewCompleted result ->
-            handleGetKnowledgeModelPreviewCompleted model result
+            handleGetKnowledgeModelPreviewCompleted appState model result
 
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model
@@ -76,8 +78,8 @@ handleRemoveTag model tagUuid =
         { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }
 
 
-handleGetPackagesCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
-handleGetPackagesCompleted model result =
+handleGetPackagesCompleted : AppState -> Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
+handleGetPackagesCompleted appState model result =
     let
         newModel =
             case result of
@@ -85,7 +87,7 @@ handleGetPackagesCompleted model result =
                     setSelectedPackage { model | packages = Success packages } packages
 
                 Err error ->
-                    { model | packages = getServerError error "Unable to get knowledge model list." }
+                    { model | packages = getServerError error <| lg "apiError.packages.getListError" appState }
 
         cmd =
             getResultCmd result
@@ -93,8 +95,8 @@ handleGetPackagesCompleted model result =
     ( newModel, cmd )
 
 
-handleGetKnowledgeModelPreviewCompleted : Model -> Result ApiError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
-handleGetKnowledgeModelPreviewCompleted model result =
+handleGetKnowledgeModelPreviewCompleted : AppState -> Model -> Result ApiError KnowledgeModel -> ( Model, Cmd Msgs.Msg )
+handleGetKnowledgeModelPreviewCompleted appState model result =
     let
         newModel =
             case result of
@@ -102,7 +104,7 @@ handleGetKnowledgeModelPreviewCompleted model result =
                     { model | knowledgeModelPreview = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelPreview = getServerError error "Unable to get knowledge model tags." }
+                    { model | knowledgeModelPreview = getServerError error <| lg "apiError.knowledgeModels.tags.getError" appState }
 
         cmd =
             getResultCmd result
@@ -153,11 +155,11 @@ handlePostQuestionnaireCompleted appState model result =
     case result of
         Ok questionnaire ->
             ( model
-            , cmdNavigate appState.key <| Routing.Questionnaires <| Questionnaires.Routing.Detail questionnaire.uuid
+            , cmdNavigate appState <| Routes.QuestionnairesRoute <| DetailRoute questionnaire.uuid
             )
 
         Err error ->
-            ( { model | savingQuestionnaire = getServerError error "Questionnaire could not be created." }
+            ( { model | savingQuestionnaire = getServerError error <| lg "apiError.questionnaires.postError" appState }
             , getResultCmd result
             )
 

@@ -38,8 +38,8 @@ $text-delete-bg: color-level($red, $alert-bg-level) !default;
 $text-inserted-color: color-level($green, $alert-color-level) !default;
 $text-inserted-bg: color-level($green, $alert-bg-level) !default;
 
-$text-edited-color: color-level($yellow, $alert-color-level) !default;
-$text-edited-bg: color-level($yellow, $alert-bg-level) !default;
+$text-edited-color: color-level($blue, $alert-color-level) !default;
+$text-edited-bg: color-level($blue, $alert-bg-level) !default;
 
 $code-block-bg-level: -12 !default;
 $code-block-bg: color-level($code-color, $code-block-bg-level);

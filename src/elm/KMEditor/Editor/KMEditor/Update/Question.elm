@@ -12,9 +12,13 @@ module KMEditor.Editor.KMEditor.Update.Question exposing
     , withGenerateQuestionEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
-import KMEditor.Common.Models.Entities exposing (newAnswer, newExpert, newQuestion, newReference)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Answer as Answer
+import KMEditor.Common.KnowledgeModel.Expert as Expert
+import KMEditor.Common.KnowledgeModel.Question as Question
+import KMEditor.Common.KnowledgeModel.Reference as Reference
 import KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations, getCurrentTags, insertEditor)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
@@ -23,6 +27,11 @@ import KMEditor.Editor.KMEditor.Update.Abstract exposing (addEntity, deleteEntit
 import KMEditor.Editor.KMEditor.Update.Events exposing (createAddQuestionEvent, createDeleteQuestionEvent, createEditQuestionEvent)
 import Msgs
 import Random exposing (Seed)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.Question"
 
 
 updateQuestionForm : Model -> Form.Msg -> QuestionEditorData -> Model
@@ -67,13 +76,13 @@ filterTagUuids model uuids =
     List.filter (\uuid -> List.member uuid currentTagUuids) uuids
 
 
-withGenerateQuestionEditEvent : Seed -> Model -> QuestionEditorData -> (Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateQuestionEditEvent seed model =
+withGenerateQuestionEditEvent : AppState -> Seed -> Model -> QuestionEditorData -> (Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateQuestionEditEvent appState seed model =
     withGenerateEvent
         { isDirty = isQuestionEditorDirty
         , formValidation = questionFormValidation (getCurrentIntegrations model)
         , createEditor = QuestionEditor
-        , alert = "Please fix the question errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createAddQuestionEvent
         , createEditEvent = createEditQuestionEvent
         , updateEditorData = updateQuestionEditorData
@@ -110,9 +119,8 @@ updateIfChapterEditor update editor =
 addAnswer : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addAnswer =
     addEntity
-        { newEntity = newAnswer
+        { newEntity = Answer.new
         , createEntityEditor = createAnswerEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionAnswer
         }
 
@@ -120,9 +128,8 @@ addAnswer =
 addAnswerItemTemplateQuestion : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addAnswerItemTemplateQuestion =
     addEntity
-        { newEntity = newQuestion
+        { newEntity = Question.new
         , createEntityEditor = createQuestionEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionAnswerItemTemplateQuestion
         }
 
@@ -130,9 +137,8 @@ addAnswerItemTemplateQuestion =
 addReference : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addReference =
     addEntity
-        { newEntity = newReference
+        { newEntity = Reference.new
         , createEntityEditor = createReferenceEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionReference
         }
 
@@ -140,8 +146,7 @@ addReference =
 addExpert : Cmd Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addExpert =
     addEntity
-        { newEntity = newExpert
+        { newEntity = Expert.new
         , createEntityEditor = createExpertEditor
-        , createPathNode = QuestionPathNode
         , addEntity = addQuestionExpert
         }

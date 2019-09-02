@@ -1,57 +1,62 @@
-module KnowledgeModels.Routing exposing (Route(..), detail, isAllowed, moduleRoot, parsers, toUrl)
+module KnowledgeModels.Routing exposing
+    ( detail
+    , isAllowed
+    , parsers
+    , toUrl
+    )
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (lr)
+import KnowledgeModels.Routes exposing (Route(..))
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
 
 
-type Route
-    = Detail String
-    | Import (Maybe String)
-    | Index
-
-
-moduleRoot : String
-moduleRoot =
-    "knowledge-models"
-
-
-parsers : (Route -> a) -> List (Parser (a -> c) c)
-parsers wrapRoute =
-    [ map (wrapRoute << Import) (s moduleRoot </> s "import" <?> Query.string "packageId")
+parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
+parsers appState wrapRoute =
+    let
+        moduleRoot =
+            lr "knowledgeModels" appState
+    in
+    [ map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "knowledgeModels.import" appState) <?> Query.string (lr "knowledgeModels.import.packageId" appState))
     , map (detail wrapRoute) (s moduleRoot </> string)
-    , map (wrapRoute <| Index) (s moduleRoot)
+    , map (wrapRoute <| IndexRoute) (s moduleRoot)
     ]
 
 
 detail : (Route -> a) -> String -> a
 detail wrapRoute packageId =
-    Detail packageId |> wrapRoute
+    DetailRoute packageId |> wrapRoute
 
 
-toUrl : Route -> List String
-toUrl route =
+toUrl : AppState -> Route -> List String
+toUrl appState route =
+    let
+        moduleRoot =
+            lr "knowledgeModels" appState
+    in
     case route of
-        Detail packageId ->
+        DetailRoute packageId ->
             [ moduleRoot, packageId ]
 
-        Import packageId ->
+        ImportRoute packageId ->
             case packageId of
                 Just id ->
-                    [ moduleRoot, "import", "?packageId=" ++ id ]
+                    [ moduleRoot, lr "knowledgeModels.import" appState, "?" ++ lr "knowledgeModels.import.packageId" appState ++ "=" ++ id ]
 
                 Nothing ->
-                    [ moduleRoot, "import" ]
+                    [ moduleRoot, lr "knowledgeModels.import" appState ]
 
-        Index ->
+        IndexRoute ->
             [ moduleRoot ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
-        Import _ ->
+        ImportRoute _ ->
             hasPerm maybeJwt Perm.packageManagementWrite
 
         _ ->

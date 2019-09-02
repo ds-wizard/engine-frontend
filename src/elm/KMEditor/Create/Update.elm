@@ -7,29 +7,30 @@ import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
+import Common.Locale exposing (l, lg)
 import Form exposing (Form)
 import KMEditor.Common.Branch exposing (Branch)
 import KMEditor.Common.BranchCreateForm as BranchCreateForm
 import KMEditor.Create.Models exposing (..)
 import KMEditor.Create.Msgs exposing (Msg(..))
-import KMEditor.Routing exposing (Route(..))
+import KMEditor.Routes exposing (Route(..))
 import KnowledgeModels.Common.Package exposing (Package)
 import Msgs
 import Result exposing (Result)
-import Routing exposing (Route(..), cmdNavigate)
+import Routes
+import Routing exposing (cmdNavigate)
 
 
-fetchData : (Msg -> Msgs.Msg) -> AppState -> Cmd Msgs.Msg
-fetchData wrapMsg appState =
-    Cmd.map wrapMsg <|
-        PackagesApi.getPackages appState GetPackagesCompleted
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    PackagesApi.getPackages appState GetPackagesCompleted
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetPackagesCompleted result ->
-            handleGetPackageCompleted model result
+            handleGetPackageCompleted appState model result
 
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model
@@ -42,8 +43,8 @@ update msg wrapMsg appState model =
 -- Handlers
 
 
-handleGetPackageCompleted : Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
-handleGetPackageCompleted model result =
+handleGetPackageCompleted : AppState -> Model -> Result ApiError (List Package) -> ( Model, Cmd Msgs.Msg )
+handleGetPackageCompleted appState model result =
     let
         newModel =
             case result of
@@ -51,7 +52,7 @@ handleGetPackageCompleted model result =
                     setSelectedPackage { model | packages = Success packages } packages
 
                 Err error ->
-                    { model | packages = getServerError error "Unable to get knowledge model list." }
+                    { model | packages = getServerError error <| lg "apiError.packages.getListError" appState }
 
         cmd =
             getResultCmd result
@@ -86,13 +87,13 @@ handlePostBranchCompleted appState model result =
     case result of
         Ok km ->
             ( model
-            , cmdNavigate appState.key (Routing.KMEditor <| EditorRoute km.uuid)
+            , cmdNavigate appState (Routes.KMEditorRoute <| EditorRoute km.uuid)
             )
 
         Err error ->
             ( { model
                 | form = setFormErrors error model.form
-                , savingBranch = getServerError error "Knowledge model could not be created."
+                , savingBranch = getServerError error <| lg "apiError.branches.postError" appState
               }
             , getResultCmd result
             )

@@ -1,67 +1,85 @@
 module Public.ForgottenPasswordConfirmation.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Form exposing (CustomFormError)
 import Common.Html exposing (linkTo)
+import Common.Locale exposing (l, lh, lx)
 import Common.View.FormExtra as FormExtra
 import Common.View.FormGroup as FormGroup
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Msgs
+import Public.Common.PasswordForm exposing (PasswordForm)
 import Public.Common.View exposing (publicForm)
 import Public.ForgottenPasswordConfirmation.Models exposing (..)
 import Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
-import Public.Routing exposing (Route(..))
-import Routing
+import Public.Routes exposing (Route(..))
+import Routes
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+l_ : String -> AppState -> String
+l_ =
+    l "Public.ForgottenPasswordConfirmation.View"
+
+
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "Public.ForgottenPasswordConfirmation.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Public.ForgottenPasswordConfirmation.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         content =
             case model.submitting of
                 Success _ ->
-                    successView
+                    successView appState
 
                 _ ->
-                    signupForm wrapMsg model
+                    signupForm appState model
     in
     div [ class "row justify-content-center Public_ForgottenPasswordConfirmation" ]
         [ content ]
 
 
-signupForm : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-signupForm wrapMsg model =
+signupForm : AppState -> Model -> Html Msg
+signupForm appState model =
     let
         formConfig =
-            { title = "Password Recovery"
-            , submitMsg = wrapMsg <| FormMsg Form.Submit
+            { title = l_ "form.title" appState
+            , submitMsg = FormMsg Form.Submit
             , actionResult = model.submitting
-            , submitLabel = "Save"
-            , formContent = formView model.form |> Html.map (wrapMsg << FormMsg)
+            , submitLabel = l_ "form.submit" appState
+            , formContent = formView appState model.form |> Html.map FormMsg
             , link = Nothing
             }
     in
-    publicForm formConfig
+    publicForm appState formConfig
 
 
-formView : Form CustomFormError PasswordForm -> Html Form.Msg
-formView form =
+formView : AppState -> Form CustomFormError PasswordForm -> Html Form.Msg
+formView appState form =
     div []
-        [ FormExtra.text "Enter a new password you want to use to log in."
-        , FormGroup.password form "password" "New password"
-        , FormGroup.password form "passwordConfirmation" "New password again"
+        [ FormExtra.text <| l_ "form.text" appState
+        , FormGroup.password appState form "password" <| l_ "form.password" appState
+        , FormGroup.password appState form "passwordConfirmation" <| l_ "form.passwordConfirmation" appState
         ]
 
 
-successView : Html Msgs.Msg
-successView =
+successView : AppState -> Html Msg
+successView appState =
     div [ class "jumbotron full-page-error" ]
         [ h1 [ class "display-3" ] [ i [ class "fa fa-check" ] [] ]
         , p [ class "lead" ]
-            [ text "Your password was has been changed. You can now "
-            , linkTo (Routing.Public Login) [] [ text "log in" ]
-            , text "."
-            ]
+            (lh_ "success.message"
+                [ linkTo appState (Routes.PublicRoute LoginRoute) [] [ lx_ "success.logIn" appState ]
+                ]
+                appState
+            )
         ]

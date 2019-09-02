@@ -29,7 +29,7 @@ type alias ServerError =
 errorDecoder : Decoder ServerError
 errorDecoder =
     Decode.succeed ServerError
-        |> required "message" Decode.string
+        |> optional "message" Decode.string ""
         |> optional "fieldErrors" (Decode.list <| fieldErrorDecoder) []
 
 
@@ -41,6 +41,9 @@ fieldErrorDecoder =
 decodeApiError : ApiError -> Maybe ServerError
 decodeApiError error =
     case error of
+        BadStatus 500 _ ->
+            Nothing
+
         BadStatus _ response ->
             case decodeString errorDecoder response of
                 Ok err ->

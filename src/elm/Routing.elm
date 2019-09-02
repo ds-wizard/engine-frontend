@@ -1,6 +1,5 @@
 module Routing exposing
-    ( Route(..)
-    , appRoute
+    ( appRoute
     , cmdNavigate
     , homeRoute
     , isAllowed
@@ -16,109 +15,100 @@ module Routing exposing
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Browser.Navigation exposing (Key, pushUrl)
-import Common.Config exposing (Config)
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (lr)
 import KMEditor.Routing
 import KnowledgeModels.Routing
+import Public.Routes
 import Public.Routing
 import Questionnaires.Routing
+import Routes
 import Url exposing (Url)
 import Url.Parser exposing (..)
 import Users.Routing
 
 
-type Route
-    = Dashboard
-    | KMEditor KMEditor.Routing.Route
-    | KnowledgeModels KnowledgeModels.Routing.Route
-    | Organization
-    | Public Public.Routing.Route
-    | Questionnaires Questionnaires.Routing.Route
-    | Users Users.Routing.Route
-    | NotAllowed
-    | NotFound
-
-
-matchers : Config -> Parser (Route -> a) a
-matchers config =
+matchers : AppState -> Parser (Routes.Route -> b) b
+matchers appState =
     let
         parsers =
             []
-                ++ Questionnaires.Routing.parses Questionnaires
-                ++ KMEditor.Routing.parsers KMEditor
-                ++ KnowledgeModels.Routing.parsers KnowledgeModels
-                ++ Public.Routing.parsers config Public
-                ++ Users.Routing.parses Users
-                ++ [ map Dashboard (s "dashboard")
-                   , map Organization (s "organization")
+                ++ Questionnaires.Routing.parses appState Routes.QuestionnairesRoute
+                ++ KMEditor.Routing.parsers appState Routes.KMEditorRoute
+                ++ KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
+                ++ Public.Routing.parsers appState Routes.PublicRoute
+                ++ Users.Routing.parses Routes.UsersRoute
+                ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
+                   , map Routes.OrganizationRoute (s (lr "organization" appState))
                    ]
     in
     oneOf parsers
 
 
-routeIfAllowed : Maybe JwtToken -> Route -> Route
+routeIfAllowed : Maybe JwtToken -> Routes.Route -> Routes.Route
 routeIfAllowed maybeJwt route =
     if isAllowed route maybeJwt then
         route
 
     else
-        NotAllowed
+        Routes.NotAllowedRoute
 
 
-isAllowed : Route -> Maybe JwtToken -> Bool
+isAllowed : Routes.Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
-        Dashboard ->
+        Routes.DashboardRoute ->
             True
 
-        Questionnaires dsPlannerRoute ->
+        Routes.QuestionnairesRoute dsPlannerRoute ->
             Questionnaires.Routing.isAllowed dsPlannerRoute maybeJwt
 
-        KMEditor kmEditorRoute ->
+        Routes.KMEditorRoute kmEditorRoute ->
             KMEditor.Routing.isAllowed kmEditorRoute maybeJwt
 
-        KnowledgeModels kmPackagesRoute ->
+        Routes.KnowledgeModelsRoute kmPackagesRoute ->
             KnowledgeModels.Routing.isAllowed kmPackagesRoute maybeJwt
 
-        Organization ->
+        Routes.OrganizationRoute ->
             hasPerm maybeJwt Perm.organization
 
-        Public _ ->
+        Routes.PublicRoute _ ->
             True
 
-        Users usersRoute ->
+        Routes.UsersRoute usersRoute ->
             Users.Routing.isAllowed usersRoute maybeJwt
 
-        NotFound ->
+        Routes.NotFoundRoute ->
             True
 
         _ ->
             False
 
 
-toUrl : Route -> String
-toUrl route =
+toUrl : AppState -> Routes.Route -> String
+toUrl appState route =
     let
         parts =
             case route of
-                Dashboard ->
-                    [ "dashboard" ]
+                Routes.DashboardRoute ->
+                    [ lr "dashboard" appState ]
 
-                Questionnaires dsPlannerRoute ->
-                    Questionnaires.Routing.toUrl dsPlannerRoute
+                Routes.QuestionnairesRoute questionnairesRoute ->
+                    Questionnaires.Routing.toUrl appState questionnairesRoute
 
-                KMEditor kmEditorRoute ->
-                    KMEditor.Routing.toUrl kmEditorRoute
+                Routes.KMEditorRoute kmEditorRoute ->
+                    KMEditor.Routing.toUrl appState kmEditorRoute
 
-                KnowledgeModels kmPackagesRoute ->
-                    KnowledgeModels.Routing.toUrl kmPackagesRoute
+                Routes.KnowledgeModelsRoute kmPackagesRoute ->
+                    KnowledgeModels.Routing.toUrl appState kmPackagesRoute
 
-                Organization ->
-                    [ "organization" ]
+                Routes.OrganizationRoute ->
+                    [ lr "organization" appState ]
 
-                Public publicRoute ->
-                    Public.Routing.toUrl publicRoute
+                Routes.PublicRoute publicRoute ->
+                    Public.Routing.toUrl appState publicRoute
 
-                Users usersRoute ->
+                Routes.UsersRoute usersRoute ->
                     Users.Routing.toUrl usersRoute
 
                 _ ->
@@ -130,41 +120,41 @@ toUrl route =
         |> String.join "?"
 
 
-parseLocation : Config -> Url -> Route
-parseLocation config url =
-    case Url.Parser.parse (matchers config) url of
+parseLocation : AppState -> Url -> Routes.Route
+parseLocation appState url =
+    case Url.Parser.parse (matchers appState) url of
         Just route ->
             route
 
         Nothing ->
-            NotFound
+            Routes.NotFoundRoute
 
 
-cmdNavigate : Key -> Route -> Cmd msg
-cmdNavigate key =
-    pushUrl key << toUrl
+cmdNavigate : AppState -> Routes.Route -> Cmd msg
+cmdNavigate appState =
+    pushUrl appState.key << toUrl appState
 
 
-homeRoute : Route
+homeRoute : Routes.Route
 homeRoute =
-    Public Public.Routing.Login
+    Routes.PublicRoute Public.Routes.LoginRoute
 
 
-loginRoute : Route
+loginRoute : Routes.Route
 loginRoute =
-    Public Public.Routing.Login
+    Routes.PublicRoute Public.Routes.LoginRoute
 
 
-signupRoute : Route
+signupRoute : Routes.Route
 signupRoute =
-    Public Public.Routing.Signup
+    Routes.PublicRoute Public.Routes.SignupRoute
 
 
-questionnaireDemoRoute : Route
+questionnaireDemoRoute : Routes.Route
 questionnaireDemoRoute =
-    Public Public.Routing.Questionnaire
+    Routes.PublicRoute Public.Routes.QuestionnaireRoute
 
 
-appRoute : Route
+appRoute : Routes.Route
 appRoute =
-    Dashboard
+    Routes.DashboardRoute

@@ -1,10 +1,12 @@
-module Public.ForgottenPassword.Models exposing (ForgottenPasswordForm, Model, encodeForgottenPasswordForm, forgottenPasswordFormValidation, initEmptyForgottenPasswordForm, initialModel)
+module Public.ForgottenPassword.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
 import Form exposing (Form)
-import Form.Validate as Validate exposing (..)
-import Json.Encode as Encode exposing (..)
+import Public.Common.ForgottenPasswordForm as ForgottenPasswordForm exposing (ForgottenPasswordForm)
 
 
 type alias Model =
@@ -15,30 +17,6 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { form = initEmptyForgottenPasswordForm
+    { form = ForgottenPasswordForm.initEmpty
     , submitting = Unset
     }
-
-
-type alias ForgottenPasswordForm =
-    { email : String
-    }
-
-
-initEmptyForgottenPasswordForm : Form CustomFormError ForgottenPasswordForm
-initEmptyForgottenPasswordForm =
-    Form.initial [] forgottenPasswordFormValidation
-
-
-forgottenPasswordFormValidation : Validation CustomFormError ForgottenPasswordForm
-forgottenPasswordFormValidation =
-    Validate.map ForgottenPasswordForm
-        (Validate.field "email" Validate.email)
-
-
-encodeForgottenPasswordForm : ForgottenPasswordForm -> Encode.Value
-encodeForgottenPasswordForm form =
-    Encode.object
-        [ ( "type", Encode.string "password" )
-        , ( "email", Encode.string form.email )
-        ]

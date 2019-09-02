@@ -5,12 +5,14 @@ import Common.Api exposing (getResultCmd)
 import Common.Api.Packages as PackagesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (l, lg)
 import KnowledgeModels.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
-import KnowledgeModels.Routing
+import KnowledgeModels.Routes exposing (Route(..))
 import Msgs
 import Ports exposing (FilePortData, createDropzone, fileSelected)
-import Routing exposing (Route(..), cmdNavigate)
+import Routes
+import Routing exposing (cmdNavigate)
 
 
 update : Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -57,9 +59,9 @@ importPackageCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd
 importPackageCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key (KnowledgeModels KnowledgeModels.Routing.Index) )
+            ( model, cmdNavigate appState (Routes.KnowledgeModelsRoute IndexRoute) )
 
         Err error ->
-            ( { model | importing = getServerError error "Importing package failed." }
+            ( { model | importing = getServerError error <| lg "apiError.packages.importError" appState }
             , getResultCmd result
             )

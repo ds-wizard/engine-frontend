@@ -5,7 +5,7 @@ import KMEditor.Editor.Models
 import KMEditor.Index.Models
 import KMEditor.Migration.Models
 import KMEditor.Publish.Models
-import KMEditor.Routing exposing (Route(..))
+import KMEditor.Routes exposing (Route(..))
 
 
 type alias Model =
@@ -46,5 +46,5 @@ initLocalModel route model =
         MigrationRoute uuid ->
             { model | migrationModel = KMEditor.Migration.Models.initialModel uuid }
 
-        PublishRoute uuid ->
+        PublishRoute _ ->
             { model | publishModel = KMEditor.Publish.Models.initialModel }

@@ -16,7 +16,8 @@ import Organization.Update
 import Ports
 import Public.Update
 import Questionnaires.Update
-import Routing exposing (Route(..), parseLocation)
+import Routes
+import Routing exposing (parseLocation)
 import Url exposing (Url)
 import Users.Update
 
@@ -26,28 +27,33 @@ fetchData model =
     let
         fetchCmd =
             case model.appState.route of
-                Dashboard ->
-                    Cmd.map DashboardMsg <| Dashboard.Update.fetchData model.appState
+                Routes.DashboardRoute ->
+                    Cmd.map DashboardMsg <|
+                        Dashboard.Update.fetchData model.appState
 
-                Questionnaires route ->
+                Routes.QuestionnairesRoute route ->
                     Cmd.map Msgs.QuestionnairesMsg <|
                         Questionnaires.Update.fetchData route model.appState model.questionnairesModel
 
-                KMEditor route ->
-                    KMEditor.Update.fetchData route Msgs.KMEditorMsg model.kmEditorModel model.appState
+                Routes.KMEditorRoute route ->
+                    Cmd.map Msgs.KMEditorMsg <|
+                        KMEditor.Update.fetchData route model.kmEditorModel model.appState
 
-                KnowledgeModels route ->
-                    KnowledgeModels.Update.fetchData route Msgs.KnowledgeModelsMsg model.appState
+                Routes.KnowledgeModelsRoute route ->
+                    Cmd.map Msgs.KnowledgeModelsMsg <|
+                        KnowledgeModels.Update.fetchData route model.appState
 
-                Organization ->
+                Routes.OrganizationRoute ->
                     Cmd.map Msgs.OrganizationMsg <|
                         Organization.Update.fetchData model.appState
 
-                Public route ->
-                    Public.Update.fetchData route Msgs.PublicMsg model.appState
+                Routes.PublicRoute route ->
+                    Cmd.map Msgs.PublicMsg <|
+                        Public.Update.fetchData route model.appState
 
-                Users route ->
-                    Users.Update.fetchData route Msgs.UsersMsg model.appState
+                Routes.UsersRoute route ->
+                    Cmd.map Msgs.UsersMsg <|
+                        Users.Update.fetchData route model.appState
 
                 _ ->
                     Cmd.none
@@ -58,8 +64,8 @@ fetchData model =
 isGuarded : Model -> Maybe String
 isGuarded model =
     case model.appState.route of
-        KMEditor route ->
-            KMEditor.Update.isGuarded route model.kmEditorModel
+        Routes.KMEditorRoute route ->
+            KMEditor.Update.isGuarded route model.appState model.kmEditorModel
 
         _ ->
             Nothing
@@ -71,7 +77,7 @@ update msg model =
         Msgs.OnUrlChange location ->
             let
                 newModel =
-                    setRoute (parseLocation model.appState.config location) model
+                    setRoute (parseLocation model.appState location) model
                         |> initLocalModel
             in
             ( newModel, fetchData newModel )
@@ -119,7 +125,7 @@ update msg model =
         Msgs.DashboardMsg dashboardMsg ->
             let
                 ( dashboardModel, cmd ) =
-                    Dashboard.Update.update dashboardMsg model.dashboardModel
+                    Dashboard.Update.update dashboardMsg model.appState model.dashboardModel
             in
             ( { model | dashboardModel = dashboardModel }, cmd )
 
@@ -153,10 +159,10 @@ update msg model =
 
         Msgs.PublicMsg publicMsg ->
             let
-                ( seed, publicModel, cmd ) =
+                ( publicModel, cmd ) =
                     Public.Update.update publicMsg Msgs.PublicMsg model.appState model.publicModel
             in
-            ( setSeed seed { model | publicModel = publicModel }, cmd )
+            ( { model | publicModel = publicModel }, cmd )
 
         Msgs.UsersMsg usersMsg ->
             let

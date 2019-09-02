@@ -13,6 +13,7 @@ type CustomFormError
     | InvalidUuid
     | ServerValidationError String
     | Error String
+    | IntegrationIdAlreadyUsed
 
 
 setFormErrors : ApiError -> Form CustomFormError a -> Form CustomFormError a

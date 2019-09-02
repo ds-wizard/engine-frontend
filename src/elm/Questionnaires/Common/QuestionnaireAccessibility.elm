@@ -7,6 +7,8 @@ module Questionnaires.Common.QuestionnaireAccessibility exposing
     , validation
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as Validate exposing (Validation)
 import Json.Decode as D exposing (Decoder)
@@ -77,9 +79,18 @@ validation =
             )
 
 
-formOptions : List ( String, String, String )
-formOptions =
-    [ ( toString PrivateQuestionnaire, "Private", "Questionnaire is visible only to you." )
-    , ( toString PublicReadOnlyQuestionnaire, "Public Read-Only", "Questionnaire can be viewed by other users, but they cannot change it." )
-    , ( toString PublicQuestionnaire, "Public", "Questionnaire can be accessed by all users." )
+formOptions : AppState -> List ( String, String, String )
+formOptions appState =
+    [ ( toString PrivateQuestionnaire
+      , lg "questionnaireAccessibility.private" appState
+      , lg "questionnaireAccessibility.private.description" appState
+      )
+    , ( toString PublicReadOnlyQuestionnaire
+      , lg "questionnaireAccessibility.publicReadOnly" appState
+      , lg "questionnaireAccessibility.publicReadOnly.description" appState
+      )
+    , ( toString PublicQuestionnaire
+      , lg "questionnaireAccessibility.public" appState
+      , lg "questionnaireAccessibility.public.description" appState
+      )
     ]

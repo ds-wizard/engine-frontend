@@ -1,56 +1,58 @@
-module KMEditor.Routing exposing (Route(..), isAllowed, moduleRoot, parsers, toUrl)
+module KMEditor.Routing exposing
+    ( isAllowed
+    , parsers
+    , toUrl
+    )
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (lr)
+import KMEditor.Routes exposing (Route(..))
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
 
 
-type Route
-    = CreateRoute (Maybe String)
-    | EditorRoute String
-    | IndexRoute
-    | MigrationRoute String
-    | PublishRoute String
-
-
-moduleRoot : String
-moduleRoot =
-    "km-editor"
-
-
-parsers : (Route -> a) -> List (Parser (a -> c) c)
-parsers wrapRoute =
-    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s "create" <?> Query.string "selected")
-    , map (wrapRoute << EditorRoute) (s moduleRoot </> s "edit" </> string)
+parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
+parsers appState wrapRoute =
+    let
+        moduleRoot =
+            lr "kmEditor" appState
+    in
+    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "kmEditor.create" appState) <?> Query.string (lr "kmEditor.create.selected" appState))
+    , map (wrapRoute << EditorRoute) (s moduleRoot </> s (lr "kmEditor.edit" appState) </> string)
     , map (wrapRoute <| IndexRoute) (s moduleRoot)
-    , map (wrapRoute << MigrationRoute) (s moduleRoot </> s "migration" </> string)
-    , map (wrapRoute << PublishRoute) (s moduleRoot </> s "publish" </> string)
+    , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "kmEditor.migration" appState) </> string)
+    , map (wrapRoute << PublishRoute) (s moduleRoot </> s (lr "kmEditor.publish" appState) </> string)
     ]
 
 
-toUrl : Route -> List String
-toUrl route =
+toUrl : AppState -> Route -> List String
+toUrl appState route =
+    let
+        moduleRoot =
+            lr "kmEditor" appState
+    in
     case route of
         CreateRoute selected ->
             case selected of
                 Just id ->
-                    [ moduleRoot, "create", "?selected=" ++ id ]
+                    [ moduleRoot, lr "kmEditor.create" appState, "?" ++ lr "kmEditor.create.selected" appState ++ "=" ++ id ]
 
                 Nothing ->
-                    [ moduleRoot, "create" ]
+                    [ moduleRoot, lr "kmEditor.create" appState ]
 
         EditorRoute uuid ->
-            [ moduleRoot, "edit", uuid ]
+            [ moduleRoot, lr "kmEditor.edit" appState, uuid ]
 
         IndexRoute ->
             [ moduleRoot ]
 
         MigrationRoute uuid ->
-            [ moduleRoot, "migration", uuid ]
+            [ moduleRoot, lr "kmEditor.migration" appState, uuid ]
 
         PublishRoute uuid ->
-            [ moduleRoot, "publish", uuid ]
+            [ moduleRoot, lr "kmEditor.publish" appState, uuid ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool
@@ -59,14 +61,14 @@ isAllowed route maybeJwt =
         CreateRoute _ ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        EditorRoute uuid ->
+        EditorRoute _ ->
             hasPerm maybeJwt Perm.knowledgeModel
 
         IndexRoute ->
             hasPerm maybeJwt Perm.knowledgeModel
 
-        MigrationRoute uuid ->
+        MigrationRoute _ ->
             hasPerm maybeJwt Perm.knowledgeModelUpgrade
 
-        PublishRoute uuid ->
+        PublishRoute _ ->
             hasPerm maybeJwt Perm.knowledgeModelPublish

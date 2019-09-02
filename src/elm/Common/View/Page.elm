@@ -9,9 +9,21 @@ module Common.View.Page exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.AppState exposing (AppState)
 import Common.Html exposing (emptyNode, fa)
+import Common.Locale exposing (l, lx)
 import Html exposing (Html, br, div, h1, h2, img, p, text)
 import Html.Attributes exposing (class, src)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Common.View.Page"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Common.View.Page"
 
 
 header : String -> List (Html msg) -> Html msg
@@ -28,19 +40,19 @@ headerActions actions =
         actions
 
 
-loader : Html msg
-loader =
+loader : AppState -> Html msg
+loader appState =
     div [ class "full-page-loader" ]
         [ fa "spinner fa-spin"
-        , div [] [ text "Loading..." ]
+        , div [] [ lx_ "loader.loading" appState ]
         ]
 
 
-error : String -> Html msg
-error msg =
+error : AppState -> String -> Html msg
+error appState msg =
     illustratedMessage
         { image = "cancel"
-        , heading = "Error"
+        , heading = l_ "error.heading" appState
         , lines = [ msg ]
         }
 
@@ -80,17 +92,17 @@ illustratedMessage { image, heading, lines } =
         ]
 
 
-actionResultView : (a -> Html msg) -> ActionResult a -> Html msg
-actionResultView viewContent actionResult =
+actionResultView : AppState -> (a -> Html msg) -> ActionResult a -> Html msg
+actionResultView appState viewContent actionResult =
     case actionResult of
         Unset ->
             emptyNode
 
         Loading ->
-            loader
+            loader appState
 
         Error err ->
-            error err
+            error appState err
 
         Success result ->
             viewContent result

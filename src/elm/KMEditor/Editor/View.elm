@@ -2,7 +2,8 @@ module KMEditor.Editor.View exposing (view)
 
 import ActionResult
 import Common.AppState exposing (AppState)
-import Common.Html exposing (emptyNode, fa, linkTo)
+import Common.Html exposing (emptyNode, fa, faSet, linkTo)
+import Common.Locale exposing (l, lx)
 import Common.View.ActionButton as ActionButton
 import Common.View.Flash as Flash
 import Common.View.Page as Page
@@ -10,60 +11,76 @@ import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import KMEditor.Common.BranchDetail exposing (BranchDetail)
-import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import KMEditor.Editor.KMEditor.View
 import KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
 import KMEditor.Editor.Msgs exposing (Msg(..))
 import KMEditor.Editor.Preview.View
 import KMEditor.Editor.TagEditor.View
-import KMEditor.Routing exposing (Route(..))
-import Msgs
-import Routing
+import KMEditor.Routes exposing (Route(..))
+import Routes
 
 
-view : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-view wrapMsg appState model =
-    Page.actionResultView (editorView wrapMsg appState model) <|
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "KMEditor.Editor.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView appState (editorView appState model) <|
         ActionResult.combine3 model.km model.metrics model.levels
 
 
-editorView : (Msg -> Msgs.Msg) -> AppState -> Model -> ( BranchDetail, List Metric, List Level ) -> Html Msgs.Msg
-editorView wrapMsg appState model ( _, _, levels ) =
+editorView : AppState -> Model -> ( BranchDetail, List Metric, List Level ) -> Html Msg
+editorView appState model ( _, _, levels ) =
     let
         content _ =
             case model.currentEditor of
                 KMEditor ->
-                    kmEditorView wrapMsg appState model
+                    kmEditorView appState model
 
                 TagsEditor ->
-                    tagsEditorView wrapMsg model
+                    tagsEditorView appState model
 
                 PreviewEditor ->
-                    previewView wrapMsg appState model levels
+                    previewView appState model levels
 
                 HistoryEditor ->
                     historyView
     in
     div [ class "KMEditor__Editor" ]
-        [ editorHeader wrapMsg model
+        [ editorHeader appState model
         , div [ class "editor-body", classList [ ( "with-error", hasSavingError model ) ] ]
-            [ Page.actionResultView content model.preview
+            [ Page.actionResultView appState content model.preview
             ]
         ]
 
 
-editorHeader : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-editorHeader wrapMsg model =
+editorHeader : AppState -> Model -> Html Msg
+editorHeader appState model =
     let
         actions =
             if containsChanges model then
-                [ text "(unsaved changes)"
-                , button [ onClick <| wrapMsg Discard, class "btn btn-outline-danger btn-with-loader" ] [ text "Discard" ]
-                , ActionButton.button <| ActionButton.ButtonConfig "Save" model.saving (wrapMsg Save) False
+                [ lx_ "header.unsavedChanges" appState
+                , button [ onClick Discard, class "btn btn-outline-danger btn-with-loader" ]
+                    [ lx_ "header.discard" appState ]
+                , ActionButton.button <|
+                    ActionButton.ButtonConfig (l_ "header.save" appState) model.saving Save False
                 ]
 
             else
-                [ linkTo (Routing.KMEditor IndexRoute) [ class "btn btn-outline-primary btn-with-loader" ] [ text "Close" ] ]
+                [ linkTo appState
+                    (Routes.KMEditorRoute IndexRoute)
+                    [ class "btn btn-outline-primary btn-with-loader" ]
+                    [ lx_ "header.close" appState ]
+                ]
 
         errorMsg =
             if hasSavingError model then
@@ -83,21 +100,21 @@ editorHeader wrapMsg model =
                 [ a
                     [ class "nav-link"
                     , classList [ ( "active", model.currentEditor == KMEditor ) ]
-                    , onClick <| wrapMsg <| OpenEditor KMEditor
+                    , onClick <| OpenEditor KMEditor
                     ]
-                    [ fa "sitemap", text "Knowledge Model" ]
+                    [ faSet "kmEditor.knowledgeModel" appState, lx_ "nav.knowledgeModel" appState ]
                 , a
                     [ class "nav-link"
                     , classList [ ( "active", model.currentEditor == TagsEditor ) ]
-                    , onClick <| wrapMsg <| OpenEditor TagsEditor
+                    , onClick <| OpenEditor TagsEditor
                     ]
-                    [ fa "tags", text "Tags" ]
+                    [ faSet "kmEditor.tags" appState, lx_ "nav.tags" appState ]
                 , a
                     [ class "nav-link"
                     , classList [ ( "active", model.currentEditor == PreviewEditor ) ]
-                    , onClick <| wrapMsg <| OpenEditor PreviewEditor
+                    , onClick <| OpenEditor PreviewEditor
                     ]
-                    [ fa "eye", text "Preview" ]
+                    [ faSet "kmEditor.preview" appState, lx_ "nav.preview" appState ]
 
                 --                , a
                 --                    [ class "nav-link"
@@ -112,27 +129,27 @@ editorHeader wrapMsg model =
         ]
 
 
-kmEditorView : (Msg -> Msgs.Msg) -> AppState -> Model -> Html Msgs.Msg
-kmEditorView wrapMsg appState model =
+kmEditorView : AppState -> Model -> Html Msg
+kmEditorView appState model =
     model.editorModel
-        |> Maybe.map (KMEditor.Editor.KMEditor.View.view (wrapMsg << KMEditorMsg) appState)
-        |> Maybe.withDefault (Page.error "Error opening knowledge model editor")
+        |> Maybe.map (Html.map KMEditorMsg << KMEditor.Editor.KMEditor.View.view appState)
+        |> Maybe.withDefault (Page.error appState <| l_ "kmEditor.error" appState)
 
 
-tagsEditorView : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-tagsEditorView wrapMsg model =
+tagsEditorView : AppState -> Model -> Html Msg
+tagsEditorView appState model =
     model.tagEditorModel
-        |> Maybe.map (KMEditor.Editor.TagEditor.View.view (wrapMsg << TagEditorMsg))
-        |> Maybe.withDefault (Page.error "Error opening tag editor")
+        |> Maybe.map (Html.map TagEditorMsg << KMEditor.Editor.TagEditor.View.view appState)
+        |> Maybe.withDefault (Page.error appState <| l_ "tagsEditor.error" appState)
 
 
-previewView : (Msg -> Msgs.Msg) -> AppState -> Model -> List Level -> Html Msgs.Msg
-previewView wrapMsg appState model levels =
+previewView : AppState -> Model -> List Level -> Html Msg
+previewView appState model levels =
     model.previewEditorModel
-        |> Maybe.map (KMEditor.Editor.Preview.View.view (wrapMsg << PreviewEditorMsg) appState levels)
-        |> Maybe.withDefault (Page.error "Error opening preview")
+        |> Maybe.map (Html.map PreviewEditorMsg << KMEditor.Editor.Preview.View.view appState levels)
+        |> Maybe.withDefault (Page.error appState <| l_ "preview.error" appState)
 
 
-historyView : Html Msgs.Msg
+historyView : Html Msg
 historyView =
     div [] [ text "History" ]

@@ -6,9 +6,12 @@ module KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing
     , withGenerateKMEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
-import KMEditor.Common.Models.Entities exposing (newChapter, newIntegration, newTag)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Chapter as Chapter
+import KMEditor.Common.KnowledgeModel.Integration as Integration
+import KMEditor.Common.KnowledgeModel.Tag as Tag
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import KMEditor.Editor.KMEditor.Models.Forms exposing (knowledgeModelFormValidation)
@@ -16,6 +19,11 @@ import KMEditor.Editor.KMEditor.Update.Abstract exposing (addEntity, updateForm,
 import KMEditor.Editor.KMEditor.Update.Events exposing (createEditKnowledgeModelEvent)
 import Msgs
 import Random exposing (Seed)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.KnowledgeModel"
 
 
 updateKMForm : Model -> Form.Msg -> KMEditorData -> Model
@@ -26,13 +34,13 @@ updateKMForm =
         }
 
 
-withGenerateKMEditEvent : Seed -> Model -> KMEditorData -> (Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateKMEditEvent =
+withGenerateKMEditEvent : AppState -> Seed -> Model -> KMEditorData -> (Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateKMEditEvent appState =
     withGenerateEvent
         { isDirty = isKMEditorDirty
         , formValidation = knowledgeModelFormValidation
         , createEditor = KMEditor
-        , alert = "Please fix the knowledge model errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createEditKnowledgeModelEvent
         , createEditEvent = createEditKnowledgeModelEvent
         , updateEditorData = updateKMEditorData
@@ -43,9 +51,8 @@ withGenerateKMEditEvent =
 addChapter : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addChapter =
     addEntity
-        { newEntity = newChapter
+        { newEntity = Chapter.new
         , createEntityEditor = createChapterEditor
-        , createPathNode = KMPathNode
         , addEntity = addKMChapter
         }
 
@@ -53,9 +60,8 @@ addChapter =
 addTag : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addTag =
     addEntity
-        { newEntity = newTag
+        { newEntity = Tag.new
         , createEntityEditor = createTagEditor
-        , createPathNode = KMPathNode
         , addEntity = addKMTag
         }
 
@@ -63,8 +69,7 @@ addTag =
 addIntegration : Cmd Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addIntegration =
     addEntity
-        { newEntity = newIntegration
+        { newEntity = Integration.new
         , createEntityEditor = createIntegrationEditor
-        , createPathNode = KMPathNode
         , addEntity = addKMIntegration
         }

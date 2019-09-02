@@ -1,14 +1,14 @@
-module Users.Routing exposing (Route(..), isAllowed, moduleRoot, parses, toUrl)
+module Users.Routing exposing
+    ( isAllowed
+    , moduleRoot
+    , parses
+    , toUrl
+    )
 
 import Auth.Models exposing (JwtToken)
 import Auth.Permission as Perm exposing (hasPerm)
 import Url.Parser exposing (..)
-
-
-type Route
-    = Create
-    | Edit String
-    | Index
+import Users.Routes exposing (Route(..))
 
 
 moduleRoot : String
@@ -18,29 +18,29 @@ moduleRoot =
 
 parses : (Route -> a) -> List (Parser (a -> c) c)
 parses wrapRoute =
-    [ map (wrapRoute <| Create) (s moduleRoot </> s "create")
-    , map (wrapRoute << Edit) (s moduleRoot </> s "edit" </> string)
-    , map (wrapRoute <| Index) (s moduleRoot)
+    [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
+    , map (wrapRoute << EditRoute) (s moduleRoot </> s "edit" </> string)
+    , map (wrapRoute <| IndexRoute) (s moduleRoot)
     ]
 
 
 toUrl : Route -> List String
 toUrl route =
     case route of
-        Create ->
+        CreateRoute ->
             [ moduleRoot, "create" ]
 
-        Edit uuid ->
+        EditRoute uuid ->
             [ moduleRoot, "edit", uuid ]
 
-        Index ->
+        IndexRoute ->
             [ moduleRoot ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool
 isAllowed route maybeJwt =
     case route of
-        Edit uuid ->
+        EditRoute uuid ->
             if uuid == "current" then
                 True
 

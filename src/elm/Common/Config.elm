@@ -19,7 +19,6 @@ type alias Config =
     , publicQuestionnaireEnabled : Bool
     , questionnaireAccessibilityEnabled : Bool
     , levelsEnabled : Bool
-    , itemTitleEnabled : Bool
     , registry : Registry
     }
 
@@ -43,6 +42,9 @@ type alias ClientConfig =
     , dashboard : Dict String (List Widget)
     , privacyUrl : String
     , customMenuLinks : List CustomMenuLink
+    , supportEmail : String
+    , supportRepositoryName : String
+    , supportRepositoryUrl : String
     }
 
 
@@ -59,6 +61,21 @@ defaultPrivacyUrl =
     "https://ds-wizard.org/privacy.html"
 
 
+defaultSupportEmail : String
+defaultSupportEmail =
+    "support@ds-wizard.org"
+
+
+defaultSupportRepositoryName : String
+defaultSupportRepositoryName =
+    "ds-wizard/ds-wizard"
+
+
+defaultSupportRepositoryUrl : String
+defaultSupportRepositoryUrl =
+    "https://github.com/ds-wizard/ds-wizard/issues"
+
+
 defaultConfig : Config
 defaultConfig =
     { client =
@@ -69,13 +86,15 @@ defaultConfig =
         , dashboard = Dict.empty
         , privacyUrl = defaultPrivacyUrl
         , customMenuLinks = []
+        , supportEmail = defaultSupportEmail
+        , supportRepositoryName = defaultSupportRepositoryName
+        , supportRepositoryUrl = defaultSupportRepositoryUrl
         }
     , feedbackEnabled = True
     , registrationEnabled = True
     , publicQuestionnaireEnabled = True
     , questionnaireAccessibilityEnabled = True
     , levelsEnabled = True
-    , itemTitleEnabled = True
     , registry = RegistryDisabled
     }
 
@@ -89,7 +108,6 @@ decoder =
         |> D.optional "publicQuestionnaireEnabled" D.bool True
         |> D.optional "questionnaireAccessibilityEnabled" D.bool True
         |> D.optional "levelsEnabled" D.bool True
-        |> D.optional "itemTitleEnabled" D.bool True
         |> D.optional "registry" registryDecoder RegistryDisabled
 
 
@@ -119,6 +137,9 @@ clientConfigDecoder =
         |> D.optional "dashboard" widgetDictDecoder Dict.empty
         |> D.optional "privacyUrl" D.string defaultPrivacyUrl
         |> D.optional "customMenuLinks" (D.list customMenuLinkDecoder) []
+        |> D.optional "supportEmail" D.string defaultSupportEmail
+        |> D.optional "supportRepositoryName" D.string defaultSupportRepositoryName
+        |> D.optional "supportRepositoryUrl" D.string defaultSupportRepositoryUrl
 
 
 customMenuLinkDecoder : Decoder CustomMenuLink

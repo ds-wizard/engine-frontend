@@ -1,11 +1,12 @@
-module Public.ForgottenPasswordConfirmation.Models exposing (Model, PasswordForm, encodePasswordForm, initEmptyPasswordForm, initialModel, passwordFormValidation)
+module Public.ForgottenPasswordConfirmation.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Common.Form exposing (CustomFormError)
-import Common.Form.Validate exposing (validateConfirmation)
 import Form exposing (Form)
-import Form.Validate as Validate exposing (Validation)
-import Json.Encode as Encode exposing (..)
+import Public.Common.PasswordForm as PasswordForm exposing (PasswordForm)
 
 
 type alias Model =
@@ -18,33 +19,8 @@ type alias Model =
 
 initialModel : String -> String -> Model
 initialModel userId hash =
-    { form = initEmptyPasswordForm
+    { form = PasswordForm.initEmpty
     , submitting = Unset
     , userId = userId
     , hash = hash
     }
-
-
-type alias PasswordForm =
-    { password : String
-    , passwordConfirmation : String
-    }
-
-
-initEmptyPasswordForm : Form CustomFormError PasswordForm
-initEmptyPasswordForm =
-    Form.initial [] passwordFormValidation
-
-
-passwordFormValidation : Validation CustomFormError PasswordForm
-passwordFormValidation =
-    Validate.map2 PasswordForm
-        (Validate.field "password" Validate.string)
-        (Validate.field "password" Validate.string |> validateConfirmation "passwordConfirmation")
-
-
-encodePasswordForm : PasswordForm -> Encode.Value
-encodePasswordForm form =
-    Encode.object
-        [ ( "password", Encode.string form.password )
-        ]

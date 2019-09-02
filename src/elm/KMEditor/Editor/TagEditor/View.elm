@@ -1,38 +1,51 @@
 module KMEditor.Editor.TagEditor.View exposing (view)
 
-import Common.Html exposing (fa)
+import Common.AppState exposing (AppState)
+import Common.Html exposing (fa, faSet)
+import Common.Locale exposing (l)
 import Common.View.Flash as Flash
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
-import KMEditor.Common.Models.Entities exposing (..)
+import KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
+import KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
+import KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import KMEditor.Editor.TagEditor.Models exposing (Model, hasQuestionTag)
 import KMEditor.Editor.TagEditor.Msgs exposing (Msg(..))
-import Msgs
 import Utils exposing (getContrastColorHex)
 
 
-view : (Msg -> Msgs.Msg) -> Model -> Html Msgs.Msg
-view wrapMsg model =
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.TagEditor.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         content =
-            if List.length model.knowledgeModel.tags > 0 then
-                if (List.length <| getQuestions model.knowledgeModel) > 0 then
-                    tagEditorTable model
+            if List.length model.knowledgeModel.tagUuids > 0 then
+                if (List.length <| KnowledgeModel.getAllQuestions model.knowledgeModel) > 0 then
+                    tagEditorTable appState model
 
                 else
-                    Flash.info "There are no questions, create them first in the Knowledge Model editor."
+                    Flash.info <| l_ "noQuestions" appState
 
             else
-                Flash.info "There are no tags, create them first in the Knowledge Model editor."
+                Flash.info <| l_ "noTags" appState
     in
     div [ class "KMEditor__Editor__TagEditor" ]
         [ content ]
-        |> Html.map wrapMsg
 
 
-tagEditorTable : Model -> Html Msg
-tagEditorTable model =
+tagEditorTable : AppState -> Model -> Html Msg
+tagEditorTable appState model =
+    let
+        tags =
+            KnowledgeModel.getTags model.knowledgeModel
+    in
     div [ class "editor-table-container" ]
         [ table []
             [ thead []
@@ -40,10 +53,10 @@ tagEditorTable model =
                     ([ th [ class "top-left" ]
                         [ div [] [] ]
                      ]
-                        ++ (List.map (thTag model) <| List.sortBy .name model.knowledgeModel.tags)
+                        ++ (List.map (thTag model) <| List.sortBy .name tags)
                     )
                 ]
-            , tbody [] (foldKMRows model)
+            , tbody [] (foldKMRows appState model)
             ]
         ]
 
@@ -64,66 +77,77 @@ thTag model tag =
         ]
 
 
-foldKMRows : Model -> List (Html Msg)
-foldKMRows model =
-    List.foldl (\c rows -> rows ++ foldChapter model model.knowledgeModel.tags c) [] model.knowledgeModel.chapters
+foldKMRows : AppState -> Model -> List (Html Msg)
+foldKMRows appState model =
+    let
+        tags =
+            KnowledgeModel.getTags model.knowledgeModel
+
+        chapters =
+            KnowledgeModel.getChapters model.knowledgeModel
+    in
+    List.foldl (\c rows -> rows ++ foldChapter appState model tags c) [] chapters
 
 
-foldChapter : Model -> List Tag -> Chapter -> List (Html Msg)
-foldChapter model tags chapter =
-    if List.length chapter.questions > 0 then
-        List.foldl (\q rows -> rows ++ foldQuestion model 1 tags q) [ trChapter chapter tags ] chapter.questions
+foldChapter : AppState -> Model -> List Tag -> Chapter -> List (Html Msg)
+foldChapter appState model tags chapter =
+    if List.length chapter.questionUuids > 0 then
+        let
+            questions =
+                KnowledgeModel.getChapterQuestions chapter.uuid model.knowledgeModel
+        in
+        List.foldl (\q rows -> rows ++ foldQuestion appState model 1 tags q) [ trChapter appState chapter tags ] questions
 
     else
         []
 
 
-foldQuestion : Model -> Int -> List Tag -> Question -> List (Html Msg)
-foldQuestion model indent tags question =
+foldQuestion : AppState -> Model -> Int -> List Tag -> Question -> List (Html Msg)
+foldQuestion appState model indent tags question =
     let
         questionRow =
-            [ trQuestion model indent tags question ]
+            [ trQuestion appState model indent tags question ]
     in
     case question of
-        OptionsQuestion questionData ->
+        OptionsQuestion commonData _ ->
             List.foldl
-                (\a rows -> rows ++ foldAnswer model (indent + 1) tags a)
+                (\a rows -> rows ++ foldAnswer appState model (indent + 1) tags a)
                 questionRow
-                questionData.answers
+                (KnowledgeModel.getQuestionAnswers commonData.uuid model.knowledgeModel)
 
-        ListQuestion questionData ->
+        ListQuestion commonData _ ->
             List.foldl
-                (\q rows -> rows ++ foldQuestion model (indent + 2) tags q)
-                (questionRow ++ [ trItemTemplate (indent + 1) tags ])
-                questionData.itemTemplateQuestions
+                (\q rows -> rows ++ foldQuestion appState model (indent + 2) tags q)
+                (questionRow ++ [ trItemTemplate appState (indent + 1) tags ])
+                (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid model.knowledgeModel)
 
-        ValueQuestion _ ->
+        ValueQuestion _ _ ->
             questionRow
 
-        IntegrationQuestion _ ->
+        IntegrationQuestion _ _ ->
             questionRow
 
 
-foldAnswer : Model -> Int -> List Tag -> Answer -> List (Html Msg)
-foldAnswer model indent tags answer =
+foldAnswer : AppState -> Model -> Int -> List Tag -> Answer -> List (Html Msg)
+foldAnswer appState model indent tags answer =
     let
         followUps =
-            getFollowUpQuestions answer
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid model.knowledgeModel
     in
     if List.length followUps > 0 then
-        List.foldl (\q rows -> rows ++ foldQuestion model (indent + 1) tags q) [ trAnswer answer indent tags ] followUps
+        List.foldl (\q rows -> rows ++ foldQuestion appState model (indent + 1) tags q) [ trAnswer appState answer indent tags ] followUps
 
     else
         []
 
 
-trQuestion : Model -> Int -> List Tag -> Question -> Html Msg
-trQuestion model indent tags question =
+trQuestion : AppState -> Model -> Int -> List Tag -> Question -> Html Msg
+trQuestion appState model indent tags question =
     tr []
-        ([ th []
+        ([ th [ onClick <| CopyUuid <| Question.getUuid question ]
             [ div [ indentClass indent ]
-                [ fa "comment-o"
-                , text (getQuestionTitle question)
+                [ faSet "km.question" appState
+                , text (Question.getTitle question)
                 ]
             ]
          ]
@@ -135,14 +159,14 @@ tdQuestionTagCheckbox : Model -> Question -> Tag -> Html Msg
 tdQuestionTagCheckbox model question tag =
     let
         hasTag =
-            hasQuestionTag model (getQuestionUuid question) tag.uuid
+            hasQuestionTag model (Question.getUuid question) tag.uuid
 
         msg =
             if hasTag then
-                RemoveTag (getQuestionUuid question) tag.uuid
+                RemoveTag (Question.getUuid question) tag.uuid
 
             else
-                AddTag (getQuestionUuid question) tag.uuid
+                AddTag (Question.getUuid question) tag.uuid
     in
     td
         [ class "td-checkbox"
@@ -153,27 +177,36 @@ tdQuestionTagCheckbox model question tag =
         [ label [] [ input [ type_ "checkbox", checked hasTag, onClick msg ] [] ] ]
 
 
-trChapter : Chapter -> List Tag -> Html Msg
-trChapter chapter =
-    trSeparator chapter.title "book" "separator-chapter" 0
+trChapter : AppState -> Chapter -> List Tag -> Html Msg
+trChapter appState chapter =
+    trSeparator (Just chapter.uuid) chapter.title (faSet "km.chapter" appState) "separator-chapter" 0
 
 
-trAnswer : Answer -> Int -> List Tag -> Html Msg
-trAnswer answer =
-    trSeparator answer.label "check-square-o" ""
+trAnswer : AppState -> Answer -> Int -> List Tag -> Html Msg
+trAnswer appState answer =
+    trSeparator (Just answer.uuid) answer.label (faSet "km.answer" appState) ""
 
 
-trItemTemplate : Int -> List Tag -> Html Msg
-trItemTemplate =
-    trSeparator "Item Template" "file-text-o" ""
+trItemTemplate : AppState -> Int -> List Tag -> Html Msg
+trItemTemplate appState =
+    trSeparator Nothing "Item Template" (faSet "km.itemTemplate" appState) ""
 
 
-trSeparator : String -> String -> String -> Int -> List Tag -> Html Msg
-trSeparator title icon extraClass indent tags =
+trSeparator : Maybe String -> String -> Html Msg -> String -> Int -> List Tag -> Html Msg
+trSeparator mbUuid title icon extraClass indent tags =
+    let
+        thAttributes =
+            case mbUuid of
+                Just uuid ->
+                    [ onClick <| CopyUuid uuid ]
+
+                Nothing ->
+                    []
+    in
     tr [ class <| "separator " ++ extraClass ]
-        ([ th []
+        ([ th thAttributes
             [ div [ indentClass indent ]
-                [ fa icon
+                [ icon
                 , text title
                 ]
             ]

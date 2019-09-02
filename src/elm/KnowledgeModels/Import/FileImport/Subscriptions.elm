@@ -6,5 +6,5 @@ import Ports exposing (fileContentRead)
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     fileContentRead FileRead

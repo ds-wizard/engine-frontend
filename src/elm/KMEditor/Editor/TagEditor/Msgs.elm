@@ -6,3 +6,4 @@ type Msg
     | CancelHighlight
     | AddTag String String
     | RemoveTag String String
+    | CopyUuid String

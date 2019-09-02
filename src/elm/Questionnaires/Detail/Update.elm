@@ -10,16 +10,19 @@ import Common.Api.Metrics as MetricsApi
 import Common.Api.Questionnaires as QuestionnairesApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Common.Questionnaire.Models exposing (initialModel, updateReplies)
 import Common.Questionnaire.Msgs
 import Common.Questionnaire.Update
 import Common.Setters exposing (setLevels, setMetrics, setQuestionnaireDetail)
-import KMEditor.Common.Models.Entities exposing (Level, Metric)
+import KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Msgs
 import Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.Detail.Models exposing (Model)
 import Questionnaires.Detail.Msgs exposing (Msg(..))
-import Questionnaires.Routing exposing (Route(..))
+import Questionnaires.Routes exposing (Route(..))
+import Routes
 import Routing exposing (cmdNavigate)
 
 
@@ -39,7 +42,7 @@ update wrapMsg msg appState model =
             handleGetQuestionnaireCompleted appState model result
 
         GetLevelsCompleted result ->
-            handleGetLevelsCompleted model result
+            handleGetLevelsCompleted appState model result
 
         GetMetricsCompleted result ->
             handleGetMetricsCompleted appState model result
@@ -63,17 +66,17 @@ handleGetQuestionnaireCompleted appState model result =
     initQuestionnaireModel appState <|
         applyResult
             { setResult = setQuestionnaireDetail
-            , defaultError = "Unable to get questionnaire."
+            , defaultError = lg "apiError.questionnaires.getError" appState
             , model = model
             , result = result
             }
 
 
-handleGetLevelsCompleted : Model -> Result ApiError (List Level) -> ( Model, Cmd Msgs.Msg )
-handleGetLevelsCompleted model result =
+handleGetLevelsCompleted : AppState -> Model -> Result ApiError (List Level) -> ( Model, Cmd Msgs.Msg )
+handleGetLevelsCompleted appState model result =
     applyResult
         { setResult = setLevels
-        , defaultError = "Unable to get levels."
+        , defaultError = lg "apiError.levels.getListError" appState
         , model = model
         , result = result
         }
@@ -84,7 +87,7 @@ handleGetMetricsCompleted appState model result =
     initQuestionnaireModel appState <|
         applyResult
             { setResult = setMetrics
-            , defaultError = "Unable to get metrics."
+            , defaultError = lg "apiError.metrics.getListError" appState
             , model = model
             , result = result
             }
@@ -133,10 +136,10 @@ handlePutRepliesCompleted : AppState -> Model -> Result ApiError () -> ( Model, 
 handlePutRepliesCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key <| Routing.Questionnaires Index )
+            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute IndexRoute )
 
         Err error ->
-            ( { model | savingQuestionnaire = getServerError error "Questionnaire could not be saved." }
+            ( { model | savingQuestionnaire = getServerError error <| lg "apiError.questionnaires.replies.putError" appState }
             , getResultCmd result
             )
 

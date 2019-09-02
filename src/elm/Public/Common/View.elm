@@ -1,33 +1,33 @@
 module Public.Common.View exposing (FormConfig, publicForm)
 
 import ActionResult exposing (ActionResult)
+import Common.AppState exposing (AppState)
 import Common.Html exposing (linkTo)
 import Common.View.ActionButton as ActionButton
 import Common.View.FormResult as FormResult
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Msgs
-import Routing exposing (Route)
+import Routes
 
 
-type alias FormConfig =
+type alias FormConfig msg =
     { title : String
-    , submitMsg : Msgs.Msg
+    , submitMsg : msg
     , actionResult : ActionResult String
     , submitLabel : String
-    , formContent : Html Msgs.Msg
-    , link : Maybe ( Route, String )
+    , formContent : Html msg
+    , link : Maybe ( Routes.Route, String )
     }
 
 
-publicForm : FormConfig -> Html Msgs.Msg
-publicForm formConfig =
+publicForm : AppState -> FormConfig msg -> Html msg
+publicForm appState formConfig =
     let
         link =
             case formConfig.link of
                 Just ( route, linkText ) ->
-                    linkTo route [] [ text linkText ]
+                    linkTo appState route [] [ text linkText ]
 
                 _ ->
                     span [] []

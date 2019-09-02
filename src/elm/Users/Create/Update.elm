@@ -5,13 +5,16 @@ import Common.Api exposing (getResultCmd)
 import Common.Api.Users as UsersApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
+import Common.Locale exposing (lg)
 import Form exposing (Form)
 import Msgs
 import Random exposing (Seed, step)
+import Routes
 import Routing exposing (cmdNavigate)
+import Users.Common.UserCreateForm as UserCreateForm
 import Users.Create.Models exposing (..)
 import Users.Create.Msgs exposing (Msg(..))
-import Users.Routing exposing (Route(..))
+import Users.Routes exposing (Route(..))
 import Utils exposing (tuplePrepend)
 import Uuid
 
@@ -35,7 +38,7 @@ handleForm formMsg wrapMsg seed appState model =
                     step Uuid.uuidGenerator seed
 
                 body =
-                    encodeUserCreateForm (Uuid.toString newUuid) userCreateForm
+                    UserCreateForm.encode (Uuid.toString newUuid) userCreateForm
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -46,7 +49,7 @@ handleForm formMsg wrapMsg seed appState model =
         _ ->
             let
                 newModel =
-                    { model | form = Form.update userCreateFormValidation formMsg model.form }
+                    { model | form = Form.update UserCreateForm.validation formMsg model.form }
             in
             ( seed, newModel, Cmd.none )
 
@@ -55,9 +58,9 @@ postUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Msgs
 postUserCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState.key <| Routing.Users Index )
+            ( model, cmdNavigate appState <| Routes.UsersRoute IndexRoute )
 
         Err error ->
-            ( { model | savingUser = getServerError error "User could not be created." }
+            ( { model | savingUser = getServerError error <| lg "apiError.users.postError" appState }
             , getResultCmd result
             )

@@ -7,9 +7,10 @@ module KMEditor.Editor.KMEditor.Update.Chapter exposing
     , withGenerateChapterEditEvent
     )
 
+import Common.AppState exposing (AppState)
+import Common.Locale exposing (l)
 import Form
-import KMEditor.Common.Models.Entities exposing (newQuestion)
-import KMEditor.Common.Models.Path exposing (PathNode(..))
+import KMEditor.Common.KnowledgeModel.Question as Question
 import KMEditor.Editor.KMEditor.Models exposing (Model)
 import KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import KMEditor.Editor.KMEditor.Models.Editors exposing (..)
@@ -20,6 +21,11 @@ import Msgs
 import Random exposing (Seed)
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "KMEditor.Editor.KMEditor.Update.Chapter"
+
+
 updateChapterForm : Model -> Form.Msg -> ChapterEditorData -> Model
 updateChapterForm =
     updateForm
@@ -28,13 +34,13 @@ updateChapterForm =
         }
 
 
-withGenerateChapterEditEvent : Seed -> Model -> ChapterEditorData -> (Seed -> Model -> ChapterEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
-withGenerateChapterEditEvent =
+withGenerateChapterEditEvent : AppState -> Seed -> Model -> ChapterEditorData -> (Seed -> Model -> ChapterEditorData -> ( Seed, Model, Cmd Msgs.Msg )) -> ( Seed, Model, Cmd Msgs.Msg )
+withGenerateChapterEditEvent appState =
     withGenerateEvent
         { isDirty = isChapterEditorDirty
         , formValidation = chapterFormValidation
         , createEditor = ChapterEditor
-        , alert = "Please fix the chapter errors first."
+        , alert = l_ "alert" appState
         , createAddEvent = createAddChapterEvent
         , createEditEvent = createEditChapterEvent
         , updateEditorData = updateChapterEditorData
@@ -69,8 +75,7 @@ updateIfKMEditor update editor =
 addQuestion : Cmd Msgs.Msg -> Seed -> Model -> ChapterEditorData -> ( Seed, Model, Cmd Msgs.Msg )
 addQuestion =
     addEntity
-        { newEntity = newQuestion
+        { newEntity = Question.new
         , createEntityEditor = createQuestionEditor
-        , createPathNode = ChapterPathNode
         , addEntity = addChapterQuestion
         }

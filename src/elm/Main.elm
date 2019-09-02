@@ -7,9 +7,10 @@ import Common.Time as Time
 import Json.Decode as Decode exposing (Value)
 import Models exposing (..)
 import Msgs exposing (Msg)
-import Public.Routing
+import Public.Routes
 import Random
-import Routing exposing (Route(..), cmdNavigate, homeRoute, routeIfAllowed)
+import Routes
+import Routing exposing (cmdNavigate, homeRoute, routeIfAllowed)
 import Subscriptions exposing (subscriptions)
 import Time
 import Update exposing (fetchData, update)
@@ -31,24 +32,27 @@ init val location key =
 
         route =
             location
-                |> Routing.parseLocation flags.config
+                |> Routing.parseLocation appState
                 |> routeIfAllowed jwt
 
         appState =
-            { route = route
+            { route = Routes.NotFoundRoute
             , seed = Random.initialSeed flags.seed
             , session = session
             , jwt = jwt
             , key = key
             , apiUrl = flags.apiUrl
             , config = flags.config
+            , provisioning = flags.provisioning
             , valid = flags.success
             , currentTime = Time.millisToPosix 0
             }
 
+        appStateWithRoute =
+            { appState | route = route }
+
         model =
-            initialModel appState
-                |> initLocalModel
+            initLocalModel <| initialModel appStateWithRoute
     in
     ( model
     , Cmd.batch
@@ -63,19 +67,19 @@ decodeFlagsFromJson =
     Decode.decodeValue flagsDecoder >> Result.withDefault defaultFlags
 
 
-decideInitialRoute : Model -> Route -> Cmd Msg
+decideInitialRoute : Model -> Routes.Route -> Cmd Msg
 decideInitialRoute model route =
     case route of
-        Public subroute ->
+        Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
-                ( True, Public.Routing.BookReference _ ) ->
+                ( True, Public.Routes.BookReferenceRoute _ ) ->
                     fetchData model
 
-                ( True, Public.Routing.Questionnaire ) ->
+                ( True, Public.Routes.QuestionnaireRoute ) ->
                     fetchData model
 
                 ( True, _ ) ->
-                    cmdNavigate model.appState.key Dashboard
+                    cmdNavigate model.appState Routes.DashboardRoute
 
                 _ ->
                     fetchData model
@@ -85,7 +89,7 @@ decideInitialRoute model route =
                 fetchData model
 
             else
-                cmdNavigate model.appState.key homeRoute
+                cmdNavigate model.appState homeRoute
 
 
 main : Program Value Model Msg

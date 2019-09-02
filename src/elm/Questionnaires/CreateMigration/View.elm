@@ -1,8 +1,10 @@
 module Questionnaires.CreateMigration.View exposing (view)
 
 import ActionResult
+import Common.AppState exposing (AppState)
 import Common.Html exposing (fa)
 import Common.Html.Attribute exposing (listClass)
+import Common.Locale exposing (l, lg, lx)
 import Common.View.ActionButton as ActionResult
 import Common.View.Flash as Flash
 import Common.View.FormActions as FormActions
@@ -14,22 +16,33 @@ import Form
 import Html exposing (Html, div, label, option, select, text)
 import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onInput)
+import KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
 import KnowledgeModels.Common.Package exposing (Package)
 import KnowledgeModels.Common.Version as Version
 import Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Questionnaires.CreateMigration.Models exposing (Model)
 import Questionnaires.CreateMigration.Msgs exposing (Msg(..))
-import Questionnaires.Routing
-import Routing
+import Questionnaires.Routes exposing (Route(..))
+import Routes
 
 
-view : Model -> Html Msg
-view model =
-    Page.actionResultView (createMigrationView model) <| ActionResult.combine model.questionnaire model.packages
+l_ : String -> AppState -> String
+l_ =
+    l "Questionnaires.CreateMigration.View"
 
 
-createMigrationView : Model -> ( QuestionnaireDetail, List Package ) -> Html Msg
-createMigrationView model ( questionnaire, packages ) =
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Questionnaires.CreateMigration.View"
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.actionResultView appState (createMigrationView appState model) <| ActionResult.combine model.questionnaire model.packages
+
+
+createMigrationView : AppState -> Model -> ( QuestionnaireDetail, List Package ) -> Html Msg
+createMigrationView appState model ( questionnaire, packages ) =
     let
         createVersionOption package version =
             let
@@ -44,50 +57,53 @@ createMigrationView model ( questionnaire, packages ) =
         createOptions package =
             ( "", "--" ) :: List.map (createVersionOption package) package.versions
 
+        tags =
+            KnowledgeModel.getTags questionnaire.knowledgeModel
+
         originalTagList =
             div [ class "form-group form-group-tags" ]
-                [ label [] [ text "Original tags" ]
-                , div [] [ Tag.readOnlyList questionnaire.selectedTagUuids questionnaire.knowledgeModel.tags ]
+                [ label [] [ lx_ "form.originalTags" appState ]
+                , div [] [ Tag.readOnlyList appState questionnaire.selectedTagUuids tags ]
                 ]
 
         versionSelect =
             case model.selectedPackage of
                 Just package ->
-                    FormGroup.select (createOptions package) model.form "packageId"
+                    FormGroup.select appState (createOptions package) model.form "packageId"
 
                 Nothing ->
-                    FormGroup.textView "Select Knowledge Model first"
+                    FormGroup.textView <| l_ "form.selectKMFirst" appState
     in
     div [ listClass "Questionnaires__CreateMigration" ]
-        [ Page.header "Create migration" []
-        , Flash.info "New questionnaire is created for the migration. The original will remain unchanged."
+        [ Page.header (l_ "header.title" appState) []
+        , Flash.info <| l_ "header.info" appState
         , FormResult.view model.savingMigration
-        , FormGroup.textView questionnaire.name "Questionnaire"
+        , FormGroup.textView questionnaire.name <| lg "questionnaire" appState
         , div [ class "form" ]
             [ div []
-                [ FormGroup.textView questionnaire.package.name "Original Knowledge Model"
-                , FormGroup.codeView (Version.toString questionnaire.package.version) "Original Version"
+                [ FormGroup.textView questionnaire.package.name <| l_ "form.originalKM" appState
+                , FormGroup.codeView (Version.toString questionnaire.package.version) <| l_ "form.originalVersion" appState
                 , originalTagList
                 ]
             , fa "arrow-right"
             , div []
                 [ div [ class "form-group" ]
-                    [ label [] [ text "New Knowledge Model" ]
+                    [ label [] [ lx_ "form.newKM" appState ]
                     , select [ class "form-control", onInput SelectPackage ]
                         (List.map (packageToOption model.selectedPackage) <| List.sortBy (String.toLower << .name) packages)
                     ]
-                , Html.map FormMsg <| versionSelect "New Version"
-                , tagsView model
+                , Html.map FormMsg <| versionSelect <| l_ "form.newVersion" appState
+                , tagsView appState model
                 ]
             ]
-        , FormActions.view
-            (Routing.Questionnaires Questionnaires.Routing.Index)
-            (ActionResult.ButtonConfig "Create" model.savingMigration (FormMsg Form.Submit) False)
+        , FormActions.view appState
+            (Routes.QuestionnairesRoute IndexRoute)
+            (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingMigration (FormMsg Form.Submit) False)
         ]
 
 
-tagsView : Model -> Html Msg
-tagsView model =
+tagsView : AppState -> Model -> Html Msg
+tagsView appState model =
     let
         tagListConfig =
             { selected = model.selectedTags
@@ -95,7 +111,7 @@ tagsView model =
             , removeMsg = RemoveTag
             }
     in
-    Tag.selection tagListConfig model.knowledgeModelPreview
+    Tag.selection appState tagListConfig model.knowledgeModelPreview
 
 
 packageToOption : Maybe Package -> Package -> Html Msg

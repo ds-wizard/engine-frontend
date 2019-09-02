@@ -1,7 +1,7 @@
 module Public.BookReference.Msgs exposing (Msg(..))
 
 import Common.ApiError exposing (ApiError)
-import Public.BookReference.Models exposing (BookReference)
+import Public.Common.BookReference exposing (BookReference)
 
 
 type Msg

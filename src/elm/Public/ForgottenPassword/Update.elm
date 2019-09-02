@@ -5,8 +5,10 @@ import Common.Api.ActionKeys as ActionKeysApi
 import Common.ApiError exposing (ApiError, getServerError)
 import Common.AppState exposing (AppState)
 import Common.Form exposing (setFormErrors)
+import Common.Locale exposing (lg)
 import Form
 import Msgs
+import Public.Common.ForgottenPasswordForm as ForgottenPasswordForm
 import Public.ForgottenPassword.Models exposing (..)
 import Public.ForgottenPassword.Msgs exposing (Msg(..))
 
@@ -18,7 +20,7 @@ update msg wrapMsg appState model =
             handleForm formMsg wrapMsg appState model
 
         PostForgottenPasswordCompleted result ->
-            handlePostPasswordActionKeyCompleted result model
+            handlePostPasswordActionKeyCompleted appState result model
 
 
 handleForm : Form.Msg -> (Msg -> Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Msgs.Msg )
@@ -27,7 +29,7 @@ handleForm formMsg wrapMsg appState model =
         ( Form.Submit, Just forgottenPasswordForm ) ->
             let
                 body =
-                    encodeForgottenPasswordForm forgottenPasswordForm
+                    ForgottenPasswordForm.encode forgottenPasswordForm
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -38,13 +40,13 @@ handleForm formMsg wrapMsg appState model =
         _ ->
             let
                 newModel =
-                    { model | form = Form.update forgottenPasswordFormValidation formMsg model.form }
+                    { model | form = Form.update ForgottenPasswordForm.validation formMsg model.form }
             in
             ( newModel, Cmd.none )
 
 
-handlePostPasswordActionKeyCompleted : Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
-handlePostPasswordActionKeyCompleted result model =
+handlePostPasswordActionKeyCompleted : AppState -> Result ApiError () -> Model -> ( Model, Cmd Msgs.Msg )
+handlePostPasswordActionKeyCompleted appState result model =
     case result of
         Ok _ ->
             ( { model | submitting = Success "" }, Cmd.none )
@@ -55,6 +57,6 @@ handlePostPasswordActionKeyCompleted result model =
                     setFormErrors error model.form
 
                 errorMessage =
-                    getServerError error "Forgotten password recovery failed."
+                    getServerError error <| lg "apiError.actionKey.passwordRecoveryError" appState
             in
             ( { model | submitting = errorMessage, form = form }, Cmd.none )

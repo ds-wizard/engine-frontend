@@ -3,7 +3,7 @@ module Auth.Models exposing (JwtToken, Session, initialSession, jwtDecoder, pars
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Pipeline exposing (optional, required)
 import Jwt exposing (decodeToken)
-import Users.Common.Models exposing (User, userDecoder)
+import Users.Common.User as User exposing (User)
 
 
 type alias Session =
@@ -48,7 +48,7 @@ sessionDecoder : Decoder Session
 sessionDecoder =
     Decode.succeed Session
         |> required "token" Decode.string
-        |> required "user" (Decode.nullable userDecoder)
+        |> required "user" (Decode.nullable User.decoder)
         |> optional "sidebarCollapsed" Decode.bool False
 
 
@@ -67,7 +67,7 @@ parseJwt token =
         Ok jwt ->
             Just jwt
 
-        Err error ->
+        Err _ ->
             Nothing
 
 

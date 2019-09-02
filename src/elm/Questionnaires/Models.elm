@@ -6,7 +6,7 @@ import Questionnaires.Detail.Models
 import Questionnaires.Edit.Models
 import Questionnaires.Index.Models
 import Questionnaires.Migration.Models
-import Questionnaires.Routing exposing (Route(..))
+import Questionnaires.Routes exposing (Route(..))
 
 
 type alias Model =
@@ -33,20 +33,20 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        Create selectedPackage ->
+        CreateRoute selectedPackage ->
             { model | createModel = Questionnaires.Create.Models.initialModel selectedPackage }
 
-        CreateMigration uuid ->
+        CreateMigrationRoute uuid ->
             { model | createMigrationModel = Questionnaires.CreateMigration.Models.initialModel uuid }
 
-        Detail uuid ->
+        DetailRoute uuid ->
             { model | detailModel = Questionnaires.Detail.Models.initialModel uuid }
 
-        Edit uuid ->
+        EditRoute uuid ->
             { model | editModel = Questionnaires.Edit.Models.initialModel uuid }
 
-        Index ->
+        IndexRoute ->
             { model | indexModel = Questionnaires.Index.Models.initialModel }
 
-        Migration uuid ->
+        MigrationRoute uuid ->
             { model | migrationModel = Questionnaires.Migration.Models.initialModel uuid }

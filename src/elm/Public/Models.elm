@@ -5,7 +5,7 @@ import Public.ForgottenPassword.Models
 import Public.ForgottenPasswordConfirmation.Models
 import Public.Login.Models
 import Public.Questionnaire.Models
-import Public.Routing exposing (Route(..))
+import Public.Routes exposing (Route(..))
 import Public.Signup.Models
 import Public.SignupConfirmation.Models
 
@@ -36,22 +36,22 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        BookReference uuid ->
+        BookReferenceRoute _ ->
             { model | bookReferenceModel = Public.BookReference.Models.initialModel }
 
-        ForgottenPassword ->
+        ForgottenPasswordRoute ->
             { model | forgottenPasswordModel = Public.ForgottenPassword.Models.initialModel }
 
-        ForgottenPasswordConfirmation userId hash ->
+        ForgottenPasswordConfirmationRoute userId hash ->
             { model | forgottenPasswordConfirmationModel = Public.ForgottenPasswordConfirmation.Models.initialModel userId hash }
 
-        Login ->
+        LoginRoute ->
             { model | loginModel = Public.Login.Models.initialModel }
 
-        Questionnaire ->
+        QuestionnaireRoute ->
             { model | questionnaireModel = Public.Questionnaire.Models.initialModel }
 
-        Signup ->
+        SignupRoute ->
             { model | signupModel = Public.Signup.Models.initialModel }
 
         _ ->
