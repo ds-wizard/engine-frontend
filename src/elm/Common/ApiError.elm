@@ -29,7 +29,7 @@ type alias ServerError =
 errorDecoder : Decoder ServerError
 errorDecoder =
     Decode.succeed ServerError
-        |> required "message" Decode.string
+        |> optional "message" Decode.string ""
         |> optional "fieldErrors" (Decode.list <| fieldErrorDecoder) []
 
 
