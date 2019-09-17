@@ -322,7 +322,7 @@ locale =
         , ( "Common.View.Layout.misconfigured.appNotConfigured", "Application is not configured correctly and cannot run." )
         , ( "Common.View.Layout.misconfigured.configurationError", "Configuration Error" )
         , ( "Common.View.Layout.misconfigured.contactAdmin", "Please, contact the administrator." )
-        , ( "Common.View.Layout.menu.kmEditor", "KM Editor" )
+        , ( "Common.View.Layout.menu.kmEditor", "Knowledge Model Editor" )
         , ( "Common.View.Layout.menu.knowledgeModels", "Knowledge Models" )
         , ( "Common.View.Layout.menu.organization", "Organization" )
         , ( "Common.View.Layout.menu.questionnaires", "Questionnaires" )
