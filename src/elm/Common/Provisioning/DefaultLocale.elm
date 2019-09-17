@@ -303,6 +303,7 @@ locale =
         , ( "Common.View.FormActions.cancelButton.cancel", "Cancel" )
         , ( "Common.View.FormGroup.list.add", "Add" )
         , ( "Common.View.FormGroup.markdownEditor.editor", "Editor" )
+        , ( "Common.View.FormGroup.markdownEditor.markdownDescription", "You can use Markdown and see the result in the Preview tab." )
         , ( "Common.View.FormGroup.markdownEditor.preview", "Preview" )
         , ( "Common.View.FormGroup.error.confirmationError", "Passwords don't match" )
         , ( "Common.View.FormGroup.error.default", "Invalid value" )
