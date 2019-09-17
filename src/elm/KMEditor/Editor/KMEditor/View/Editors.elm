@@ -692,30 +692,31 @@ editorTitle appState config =
     let
         copyUuidButton =
             button
-                [ class "btn btn-outline-secondary link-with-icon"
+                [ class "btn btn-link link-with-icon"
                 , title <| l_ "editorTitle.copyUuid" appState
                 , onClick <| CopyUuid config.uuid
                 ]
                 [ fa "clipboard"
-                , text config.uuid
+                , small [] [ text config.uuid ]
                 ]
 
         deleteActionButton =
             case config.deleteAction of
                 Just msg ->
                     button
-                        [ class "btn btn-outline-danger"
-                        , title <| l_ "editorTitle.delete" appState
+                        [ class "btn btn-outline-danger link-with-icon"
                         , onClick msg
                         ]
-                        [ fa "trash-o" ]
+                        [ fa "trash-o"
+                        , lx_ "editorTitle.delete" appState
+                        ]
 
                 Nothing ->
                     emptyNode
     in
     div [ class "editor-title" ]
         [ h3 [] [ text config.title ]
-        , div [ class "btn-group" ]
+        , div [ class "editor-title-buttons" ]
             [ copyUuidButton
             , deleteActionButton
             ]

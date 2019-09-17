@@ -73,6 +73,17 @@ $breadcrumbs-height: 40px;
         h3 {
             margin: 0;
         }
+
+        &-buttons {
+            .btn-link {
+                color: $secondary;
+                text-decoration: none;
+
+                &:hover {
+                    color: $gray-700;
+                }
+            }
+        }
     }
 
     .pane-container {
