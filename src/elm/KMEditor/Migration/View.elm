@@ -590,7 +590,7 @@ viewAddQuestionDiff appState km event =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "questionType" appState
+                [ lg "question.type" appState
                 , lg "question.title" appState
                 , lg "question.text" appState
                 ]
@@ -659,7 +659,7 @@ viewEditQuestionDiff appState km event question =
 
         fields =
             List.map3 (\a b c -> ( a, b, c ))
-                [ lg "questionType" appState
+                [ lg "question.type" appState
                 , lg "question.title" appState
                 , lg "question.text" appState
                 ]
@@ -839,7 +839,7 @@ viewDeleteQuestionDiff appState km question =
 
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "questionType" appState
+                [ lg "question.type" appState
                 , lg "question.title" appState
                 , lg "question.text" appState
                 ]

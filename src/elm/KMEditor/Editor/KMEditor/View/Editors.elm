@@ -331,7 +331,7 @@ questionEditorView appState model editorData =
                 emptyNode
 
         formFields =
-            [ FormGroup.select appState (questionTypeOptions appState) editorData.form "questionType" <| lg "questionType" appState
+            [ FormGroup.select appState (questionTypeOptions appState) editorData.form "questionType" <| lg "question.type" appState
             , p [ class "form-text text-muted" ]
                 [ fa "warning"
                 , lx_ "questionEditor.form.questionTypeWarning" appState
