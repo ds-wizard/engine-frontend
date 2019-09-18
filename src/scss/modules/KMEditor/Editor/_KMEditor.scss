@@ -73,6 +73,17 @@ $breadcrumbs-height: 40px;
         h3 {
             margin: 0;
         }
+
+        &-buttons {
+            .btn-link {
+                color: $secondary;
+                text-decoration: none;
+
+                &:hover {
+                    color: $gray-700;
+                }
+            }
+        }
     }
 
     .pane-container {
@@ -146,41 +157,38 @@ $breadcrumbs-height: 40px;
         }
     }
 
-    .table-metrics {
-        th {
-            border-top: none;
-            width: 33.3333%;
+    .metric-view {
+        margin-bottom: .25rem;
+
+        .form-check {
+            margin-bottom: .5rem;
         }
 
-        tbody {
-            tr.disabled {
-                .form-check {
-                    label {
-                        color: $gray-400;
-                    }
-                }
-            }
+        .metric-view-inputs {
+            height: 0;
+            overflow: hidden;
+            display: flex;
+            padding-left: 60px;
+            align-items: flex-start;
+            transition: height 0.3s ease-in-out;
 
-            td {
-                vertical-align: top;
+            .form-group {
+                display: flex;
+                margin: .25rem 1.5rem 0 0;
+                align-items: center;
 
-                .form-check, .form-group, .invalid-feedback {
-                    margin: 0;
-                }
-
-                .form-check {
-                    margin-top: 5px;
-                }
-
-                .form-group {
-                    label {
-                        display: none;
-                    }
+                label {
+                    margin: 0 0.5rem 0 0;
+                    font-weight: normal;
                 }
 
                 .invalid-feedback {
-                    padding-top: 3px;
+                    display: none;
                 }
+            }
+
+            &-enabled {
+                height: 60px;
             }
         }
     }

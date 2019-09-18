@@ -199,6 +199,11 @@ menuItems appState =
         (Routes.UsersRoute Users.Routes.IndexRoute)
         Perm.userManagement
     , MenuItem
+        (l_ "menu.kmEditor" appState)
+        (faSet "menu.kmEditor" appState)
+        (Routes.KMEditorRoute KMEditor.Routes.IndexRoute)
+        Perm.knowledgeModel
+    , MenuItem
         (l_ "menu.knowledgeModels" appState)
         (faSet "menu.knowledgeModels" appState)
         (Routes.KnowledgeModelsRoute KnowledgeModels.Routes.IndexRoute)
@@ -208,11 +213,6 @@ menuItems appState =
         (faSet "menu.questionnaires" appState)
         (Routes.QuestionnairesRoute Questionnaires.Routes.IndexRoute)
         Perm.questionnaire
-    , MenuItem
-        (l_ "menu.kmEditor" appState)
-        (faSet "menu.kmEditor" appState)
-        (Routes.KMEditorRoute KMEditor.Routes.IndexRoute)
-        Perm.knowledgeModel
     ]
 
 

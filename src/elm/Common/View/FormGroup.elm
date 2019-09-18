@@ -269,6 +269,8 @@ markdownEditor appState form fieldName labelText =
             , div [ class "card-body" ]
                 [ content
                 ]
+            , div [ class "card-footer text-muted" ]
+                [ lx_ "markdownEditor.markdownDescription" appState ]
             ]
         , error
         ]
