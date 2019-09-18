@@ -331,7 +331,7 @@ questionEditorView appState model editorData =
                 emptyNode
 
         formFields =
-            [ FormGroup.select appState (questionTypeOptions appState) editorData.form "questionType" <| lg "questionType" appState
+            [ FormGroup.select appState (questionTypeOptions appState) editorData.form "questionType" <| lg "question.type" appState
             , p [ class "form-text text-muted" ]
                 [ fa "warning"
                 , lx_ "questionEditor.form.questionTypeWarning" appState
@@ -593,16 +593,7 @@ metricsView : AppState -> AnswerEditorData -> List Metric -> Html Msg
 metricsView appState editorData metrics =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ lgx "metrics" appState ]
-        , table [ class "table table-hover table-metrics" ]
-            [ thead []
-                [ tr []
-                    [ th [] []
-                    , th [] [ lgx "metric.weight" appState ]
-                    , th [] [ lgx "metric.measure" appState ]
-                    ]
-                ]
-            , tbody [] (List.indexedMap (metricView appState editorData.form) metrics)
-            ]
+        , div [] (List.indexedMap (metricView appState editorData.form) metrics)
         ]
         |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
 
@@ -615,16 +606,13 @@ metricView appState form i metric =
                 |> .value
                 |> Maybe.withDefault False
     in
-    tr [ classList [ ( "disabled", not enabled ) ] ]
-        [ td [] [ FormGroup.toggle form ("metricMeasures." ++ fromInt i ++ ".enabled") metric.title ]
-        , td [] [ metricInput appState form ("metricMeasures." ++ fromInt i ++ ".weight") enabled ]
-        , td [] [ metricInput appState form ("metricMeasures." ++ fromInt i ++ ".measure") enabled ]
+    div [ class "metric-view" ]
+        [ FormGroup.toggle form ("metricMeasures." ++ fromInt i ++ ".enabled") metric.title
+        , div [ class "metric-view-inputs", classList [ ( "metric-view-inputs-enabled", enabled ) ] ]
+            [ FormGroup.input appState form ("metricMeasures." ++ fromInt i ++ ".weight") (lg "metric.weight" appState)
+            , FormGroup.input appState form ("metricMeasures." ++ fromInt i ++ ".measure") (lg "metric.measure" appState)
+            ]
         ]
-
-
-metricInput : AppState -> Form CustomFormError o -> String -> Bool -> Html Form.Msg
-metricInput appState form fieldName enabled =
-    FormGroup.formGroup Input.textInput [ disabled (not enabled) ] appState form fieldName ""
 
 
 referenceEditorView : AppState -> ReferenceEditorData -> ( String, Html Msg )
@@ -704,30 +692,31 @@ editorTitle appState config =
     let
         copyUuidButton =
             button
-                [ class "btn btn-outline-secondary link-with-icon"
+                [ class "btn btn-link link-with-icon"
                 , title <| l_ "editorTitle.copyUuid" appState
                 , onClick <| CopyUuid config.uuid
                 ]
                 [ fa "clipboard"
-                , text config.uuid
+                , small [] [ text config.uuid ]
                 ]
 
         deleteActionButton =
             case config.deleteAction of
                 Just msg ->
                     button
-                        [ class "btn btn-outline-danger"
-                        , title <| l_ "editorTitle.delete" appState
+                        [ class "btn btn-outline-danger link-with-icon"
                         , onClick msg
                         ]
-                        [ fa "trash-o" ]
+                        [ fa "trash-o"
+                        , lx_ "editorTitle.delete" appState
+                        ]
 
                 Nothing ->
                     emptyNode
     in
     div [ class "editor-title" ]
         [ h3 [] [ text config.title ]
-        , div [ class "btn-group" ]
+        , div [ class "editor-title-buttons" ]
             [ copyUuidButton
             , deleteActionButton
             ]
