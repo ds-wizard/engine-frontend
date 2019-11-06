@@ -2,97 +2,75 @@ sudo: required
 
 language: node_js
 
-node_js:
-  - "8.12.0"
-
 services:
   - docker
 
-stages:
-  - build
-  - tag
-
-env:
-  - PRIVATE_IMAGE="$PRIVATE_DOCKER_REGISTRY/dsw-client" \
-    IMAGE="$PUBLIC_DOCKER_USER/client" \
-    IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT" \
-    IMAGE_TAG_BRANCH="$PRIVATE_IMAGE:"`echo $TRAVIS_BRANCH | sed 's#/#-#g'` \
-    IMAGE_TAG_DEVELOP="$IMAGE:develop" \
-    IMAGE_TAG_LATEST="$IMAGE:latest"
-
-install:
-  - npm install -g npx
-  - npm install
+node_js:
+  - "8.16.2"
 
 cache:
   directories:
     - node_modules
+env:
+  matrix:
+    - COMPONENT=wizard
+    - COMPONENT=registry
+
+install:
+  - npm install
 
 before_script:
   - docker login -u "$PUBLIC_DOCKER_USER" -p "$PUBLIC_DOCKER_PASSWORD"
   - docker login -u "$PRIVATE_DOCKER_USER" -p "$PRIVATE_DOCKER_PASSWORD" "$PRIVATE_DOCKER_REGISTRY"
 
-jobs:
-  include:
-    - stage: build
-      script:
-        - npm run build
-        - npm test
-        - docker build -t $IMAGE_TAG .
-        - docker push $IMAGE_TAG
+  - export PRIVATE_IMAGE="$PRIVATE_DOCKER_REGISTRY/engine/$COMPONENT-client"
+  - export IMAGE="datastewardshipwizard/$COMPONENT-client"
+  - export IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT"
+  - export IMAGE_TAG_BRANCH="$PRIVATE_IMAGE:"`echo $TRAVIS_BRANCH | sed 's#/#-#g'`
+  - export IMAGE_TAG_DEVELOP="$IMAGE:develop"
+  - export IMAGE_TAG_LATEST="$IMAGE:latest"
+  - export IMAGE_TAG_MAJOR="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v(.*)\..*\..*/\1/g"`
+  - export IMAGE_TAG_MINOR="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v(.*)\..*/\1/g"`
+  - export IMAGE_TAG_PATCH="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v//g"`
+  - export IMAGE_TAG_RC="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v//g"`
 
-    - stage: tag
-      if: (branch = develop) AND (NOT (type IN (pull_request)))
-      install: false
-      script:
-        - docker pull $IMAGE_TAG
-        - docker image tag $IMAGE_TAG $IMAGE_TAG_DEVELOP
-        - docker push $IMAGE_TAG_DEVELOP
+script:
+  # tests
+  - npm run test:elm
+  - node scripts/test-icon-set.js
+  - node scripts/test-locale.js
 
-    - stage: tag
-      if: (branch = master) AND (NOT (type IN (pull_request)))
-      install: false
-      script:
-        - docker pull $IMAGE_TAG
-        - docker image tag $IMAGE_TAG $IMAGE_TAG_LATEST
-        - docker push $IMAGE_TAG_LATEST
+  # build
+  - ./scripts/build.sh
+  - docker build -t $IMAGE_TAG -f engine-$COMPONENT/docker/Dockerfile .
 
-    - stage: tag
-      if: (type = push)
-      install: false
-      script:
-        - docker pull $IMAGE_TAG
-        - docker image tag $IMAGE_TAG $IMAGE_TAG_BRANCH
-        - docker push $IMAGE_TAG_BRANCH
+  # push
+  - docker push $IMAGE_TAG
 
-    - stage: tag
-      if: (tag =~ ^v\d+\.\d+\.\d+$)
-      install: false
-      env:
-        - PRIVATE_IMAGE="$PRIVATE_DOCKER_REGISTRY/dsw-client"
-        - IMAGE="$PUBLIC_DOCKER_USER/client"
-        - IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT"
-        - IMAGE_TAG_MAJOR="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v(.*)\..*\..*/\1/g"`
-        - IMAGE_TAG_MINOR="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v(.*)\..*/\1/g"`
-        - IMAGE_TAG_PATCH="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v//g"`
-      script:
-        - docker pull $IMAGE_TAG
-        - docker image tag $IMAGE_TAG $IMAGE_TAG_MAJOR
-        - docker push $IMAGE_TAG_MAJOR
-        - docker image tag $IMAGE_TAG $IMAGE_TAG_MINOR
-        - docker push $IMAGE_TAG_MINOR
-        - docker image tag $IMAGE_TAG $IMAGE_TAG_PATCH
-        - docker push $IMAGE_TAG_PATCH
+after_success:
+  # current branch tag (private registry)
+  - if [[ $TRAVIS_PULL_REQUEST == "false" ]]; then
+    docker image tag $IMAGE_TAG $IMAGE_TAG_BRANCH && docker push $IMAGE_TAG_BRANCH;
+    fi
 
-    - stage: tag
-      if: (tag =~ ^v\d+\.\d+\.\d+-rc\.\d+$)
-      install: false
-      env:
-        - PRIVATE_IMAGE="$PRIVATE_DOCKER_REGISTRY/dsw-client"
-        - IMAGE="$PUBLIC_DOCKER_USER/client"
-        - IMAGE_TAG="$PRIVATE_IMAGE:$TRAVIS_COMMIT"
-        - IMAGE_TAG_RC="$IMAGE:"`echo $TRAVIS_TAG | sed -E "s/v//g"`
-      script:
-        - docker pull $IMAGE_TAG
-        - docker image tag $IMAGE_TAG $IMAGE_TAG_RC
-        - docker push $IMAGE_TAG_RC
+  # develop
+  - if [[ $TRAVIS_BRANCH == "develop" && $TRAVIS_PULL_REQUEST == "false" ]]; then
+    docker image tag $IMAGE_TAG $IMAGE_TAG_DEVELOP && docker push $IMAGE_TAG_DEVELOP;
+    fi
+
+  # latest
+  - if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]]; then
+    docker image tag $IMAGE_TAG $IMAGE_TAG_LATEST && docker push $IMAGE_TAG_LATEST;
+    fi
+
+  # version
+  - if [[ $TRAVIS_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    docker image tag $IMAGE_TAG $IMAGE_TAG_MAJOR && docker push $IMAGE_TAG_MAJOR;
+    docker image tag $IMAGE_TAG $IMAGE_TAG_MINOR && docker push $IMAGE_TAG_MINOR;
+    docker image tag $IMAGE_TAG $IMAGE_TAG_PATCH && docker push $IMAGE_TAG_PATCH;
+    fi
+
+  # rc version
+  - if [[ $TRAVIS_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+    docker image tag $IMAGE_TAG $IMAGE_TAG_RC && docker push $IMAGE_TAG_RC;
+    fi

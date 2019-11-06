@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-const defaultLocalePath = 'src/elm/Common/Provisioning/DefaultLocale.elm'
+const {defaultLocalePath} = utils.getComponentData()
 const fileContent = fs.readFileSync(defaultLocalePath, 'utf8')
 const locale = {}
 const regex = /\( "(.*)", "(.*)" \)/g

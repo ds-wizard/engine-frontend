@@ -1,15 +1,15 @@
-module ActionResult
-    exposing
-        ( ActionResult(..)
-        , combine
-        , combine3
-        , isError
-        , isLoading
-        , isSuccess
-        , isUnset
-        , map
-        , withDefault
-        )
+module ActionResult exposing
+    ( ActionResult(..)
+    , apply
+    , combine
+    , combine3
+    , isError
+    , isLoading
+    , isSuccess
+    , isUnset
+    , map
+    , withDefault
+    )
 
 
 type ActionResult a
@@ -124,3 +124,18 @@ combine3 actionResult1 actionResult2 actionResult3 =
 
         Success ( ( a, b ), c ) ->
             Success ( a, b, c )
+
+
+apply :
+    (ActionResult data -> model -> model)
+    -> (e -> ActionResult data)
+    -> Result e data
+    -> model
+    -> model
+apply setData convertError result =
+    case result of
+        Ok data ->
+            setData (Success data)
+
+        Err err ->
+            setData (convertError err)

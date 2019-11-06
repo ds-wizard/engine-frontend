@@ -1,9 +1,10 @@
 const glob = require('glob')
 const fs = require('fs')
+const utils = require('./utils')
 
 let error = 0
 
-const defaultLocalePath = 'src/elm/Common/Provisioning/DefaultLocale.elm'
+const {moduleName, componentSource, defaultLocalePath} = utils.getComponentData()
 const localeKeys = loadLocaleKeys()
 
 const regexL = /\s+l "([^"]*)"/
@@ -20,10 +21,10 @@ const regexLX_ = /[\s+\(]lx_ "([^"]*)"/g
 
 const ignored = [
     defaultLocalePath,
-    'src/elm/Common/Locale.elm'
+    `${componentSource}/${moduleName}/Common/Locale.elm`
 ]
 
-glob('src/elm/**/*.elm', (err, files) => {
+glob(`${componentSource}/**/*.elm`, (err, files) => {
     files.forEach(testFile)
 
     Object.entries(localeKeys).forEach(([key, value]) => {
@@ -61,7 +62,7 @@ function testFile(file) {
         return
     }
 
-    const moduleName = toModuleName(file)
+    const moduleName = utils.toModuleName(componentSource, file)
     const moduleContent = fs.readFileSync(file, 'utf8')
 
     testLocaleGlobal(moduleName, moduleContent, '_global', regexLG)
@@ -71,11 +72,6 @@ function testFile(file) {
     testLocale(moduleName, moduleContent, regexLF, regexLF_)
     testLocale(moduleName, moduleContent, regexLH, regexLH_)
     testLocale(moduleName, moduleContent, regexLX, regexLX_)
-}
-
-
-function toModuleName(file) {
-    return file.replace('src/elm/', '').replace('.elm', '').replace(/\//g, '.')
 }
 
 
@@ -95,6 +91,7 @@ function testLocale(moduleName, moduleContent, regexDef, regexUse) {
             return
         }
 
+        let result
         while ((result = regexUse.exec(moduleContent)) !== null) {
             testKey(moduleName, `${moduleName}.${result[1]}`)
         }
