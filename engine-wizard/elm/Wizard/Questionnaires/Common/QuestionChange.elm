@@ -2,6 +2,7 @@ module Wizard.Questionnaires.Common.QuestionChange exposing
     ( QuestionAddData
     , QuestionChange(..)
     , QuestionChangeData
+    , QuestionMoveData
     , getChapter
     , getQuestionUuid
     )
@@ -13,6 +14,7 @@ import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Ques
 type QuestionChange
     = QuestionAdd QuestionAddData
     | QuestionChange QuestionChangeData
+    | QuestionMove QuestionMoveData
 
 
 type alias QuestionAddData =
@@ -28,6 +30,12 @@ type alias QuestionChangeData =
     }
 
 
+type alias QuestionMoveData =
+    { question : Question
+    , chapter : Chapter
+    }
+
+
 getQuestionUuid : QuestionChange -> String
 getQuestionUuid change =
     case change of
@@ -35,6 +43,9 @@ getQuestionUuid change =
             Question.getUuid data.question
 
         QuestionChange data ->
+            Question.getUuid data.question
+
+        QuestionMove data ->
             Question.getUuid data.question
 
 
@@ -45,4 +56,7 @@ getChapter change =
             data.chapter
 
         QuestionChange data ->
+            data.chapter
+
+        QuestionMove data ->
             data.chapter

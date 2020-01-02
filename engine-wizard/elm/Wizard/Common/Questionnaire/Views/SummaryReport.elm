@@ -4,9 +4,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import List.Extra as List
 import Round
+import Shared.Locale exposing (l, lf, lgx, lx)
 import String exposing (fromFloat, fromInt)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l, lf, lgx, lx)
 import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, chapterReportCanvasId)
 import Wizard.Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))

@@ -15,6 +15,7 @@ import Form
 import Reorderable
 import SplitPane
 import ValueList
+import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
 
 
 type Msg
@@ -25,6 +26,8 @@ type Msg
     | CloseAlert
     | PaneMsg SplitPane.Msg
     | CopyUuid String
+    | OpenMoveModal
+    | MoveModalMsg MoveModal.Msg
 
 
 type EditorMsg

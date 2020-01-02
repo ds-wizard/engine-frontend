@@ -2,9 +2,9 @@ module Wizard.KMEditor.Create.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (..)
+import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
-import Wizard.Common.Locale exposing (l, lg)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra

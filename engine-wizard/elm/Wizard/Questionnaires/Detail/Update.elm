@@ -6,13 +6,12 @@ module Wizard.Questionnaires.Detail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l)
+import Shared.Locale exposing (l, lg)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.Api.Levels as LevelsApi
 import Wizard.Common.Api.Metrics as MetricsApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Questionnaire.Models exposing (cleanDirty, initialModel, updateReplies)
 import Wizard.Common.Questionnaire.Msgs
 import Wizard.Common.Questionnaire.Update

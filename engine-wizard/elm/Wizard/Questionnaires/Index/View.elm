@@ -2,11 +2,11 @@ module Wizard.Questionnaires.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Locale exposing (l, lg, lh, lx)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (emptyNode, faKeyClass, faSet, linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
-import Wizard.Common.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Wizard.Common.View.Modal as Modal

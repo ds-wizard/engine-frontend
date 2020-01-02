@@ -5,9 +5,9 @@ import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
+import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
 import Wizard.Public.Common.SignupForm exposing (SignupForm)

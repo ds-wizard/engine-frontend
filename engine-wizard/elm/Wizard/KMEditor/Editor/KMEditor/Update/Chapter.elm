@@ -9,8 +9,8 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Chapter exposing
 
 import Form
 import Random exposing (Seed)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)

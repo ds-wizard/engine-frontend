@@ -45,6 +45,9 @@ renderQuestionLabelDiff changes question =
                 QuestionChange data ->
                     renderQuestionChange data.originalQuestion data.question
 
+                QuestionMove data ->
+                    span [] [ text <| Question.getTitle data.question ]
+
         Nothing ->
             text <| Question.getTitle question
 
@@ -72,6 +75,11 @@ renderQuestionDescriptionDiff appState changes levels km question =
 
                     else
                         renderQuestionDescription appState levels km question
+
+                QuestionMove _ ->
+                    div [ class "diff" ]
+                        [ div [] [ renderQuestionDescription appState levels km question ]
+                        ]
 
         Nothing ->
             renderQuestionDescription appState levels km question

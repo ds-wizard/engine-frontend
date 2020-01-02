@@ -45,6 +45,7 @@ import Wizard.KMEditor.Common.Events.EditQuestionEventData as EditQuestionEventD
 import Wizard.KMEditor.Common.Events.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData)
 import Wizard.KMEditor.Common.Events.EditTagEventData as EditTagEventData exposing (EditTagEventData)
 import Wizard.KMEditor.Common.Events.EventField as EventField
+import Wizard.KMEditor.Common.Events.MoveEventData as MoveEventData exposing (MoveEventData)
 import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
@@ -78,6 +79,10 @@ type Event
     | AddExpertEvent AddExpertEventData CommonEventData
     | EditExpertEvent EditExpertEventData CommonEventData
     | DeleteExpertEvent CommonEventData
+    | MoveQuestionEvent MoveEventData CommonEventData
+    | MoveAnswerEvent MoveEventData CommonEventData
+    | MoveReferenceEvent MoveEventData CommonEventData
+    | MoveExpertEvent MoveEventData CommonEventData
 
 
 decoder : Decoder Event
@@ -158,6 +163,18 @@ decoderByType eventType =
         "DeleteExpertEvent" ->
             D.map DeleteExpertEvent CommonEventData.decoder
 
+        "MoveQuestionEvent" ->
+            D.map2 MoveQuestionEvent MoveEventData.decoder CommonEventData.decoder
+
+        "MoveAnswerEvent" ->
+            D.map2 MoveAnswerEvent MoveEventData.decoder CommonEventData.decoder
+
+        "MoveReferenceEvent" ->
+            D.map2 MoveReferenceEvent MoveEventData.decoder CommonEventData.decoder
+
+        "MoveExpertEvent" ->
+            D.map2 MoveExpertEvent MoveEventData.decoder CommonEventData.decoder
+
         _ ->
             D.fail <| "Unknown event type: " ++ eventType
 
@@ -235,6 +252,18 @@ encode event =
 
                 DeleteExpertEvent commonData ->
                     ( [ ( "eventType", E.string "DeleteExpertEvent" ) ], CommonEventData.encode commonData )
+
+                MoveQuestionEvent eventData commonData ->
+                    ( MoveEventData.encode "MoveQuestionEvent" eventData, CommonEventData.encode commonData )
+
+                MoveAnswerEvent eventData commonData ->
+                    ( MoveEventData.encode "MoveAnswerEvent" eventData, CommonEventData.encode commonData )
+
+                MoveReferenceEvent eventData commonData ->
+                    ( MoveEventData.encode "MoveReferenceEvent" eventData, CommonEventData.encode commonData )
+
+                MoveExpertEvent eventData commonData ->
+                    ( MoveEventData.encode "MoveExpertEvent" eventData, CommonEventData.encode commonData )
     in
     E.object <| encodedCommonData ++ encodedEventData
 
@@ -319,6 +348,18 @@ getCommonData event =
             commonData
 
         DeleteExpertEvent commonData ->
+            commonData
+
+        MoveQuestionEvent _ commonData ->
+            commonData
+
+        MoveAnswerEvent _ commonData ->
+            commonData
+
+        MoveReferenceEvent _ commonData ->
+            commonData
+
+        MoveExpertEvent _ commonData ->
             commonData
 
 

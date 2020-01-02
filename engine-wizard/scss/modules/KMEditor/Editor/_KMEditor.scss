@@ -83,6 +83,10 @@ $breadcrumbs-height: 40px;
                     color: $gray-700;
                 }
             }
+
+            .btn:not(.btn-link):not(:last-child) {
+                margin-right: .75rem;
+            }
         }
     }
 

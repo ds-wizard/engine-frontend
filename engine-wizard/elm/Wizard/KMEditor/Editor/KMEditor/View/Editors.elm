@@ -9,12 +9,12 @@ import Html.Attributes exposing (class, classList, placeholder, title)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Reorderable
+import Shared.Locale exposing (l, lf, lg, lgx, lx)
 import String exposing (fromInt, toLower)
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html exposing (emptyNode, faSet)
-import Wizard.Common.Locale exposing (l, lf, lg, lgx, lx)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
@@ -99,6 +99,7 @@ kmEditorView appState model editorData =
             { title = lg "knowledgeModel" appState
             , uuid = editorData.uuid
             , deleteAction = Nothing
+            , movable = False
             }
 
         chaptersConfig =
@@ -160,6 +161,7 @@ chapterEditorView appState model editorData =
             { title = lg "chapter" appState
             , uuid = editorData.uuid
             , deleteAction = DeleteChapter editorData.uuid |> ChapterEditorMsg |> EditorMsg |> Just
+            , movable = False
             }
 
         questionsConfig =
@@ -196,6 +198,7 @@ tagEditorView appState model editorData =
             { title = lg "tag" appState
             , uuid = editorData.uuid
             , deleteAction = DeleteTag editorData.uuid |> TagEditorMsg |> EditorMsg |> Just
+            , movable = False
             }
 
         form =
@@ -235,6 +238,7 @@ integrationEditorView appState model editorData =
             { title = lg "integration" appState
             , uuid = editorData.uuid
             , deleteAction = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm True
+            , movable = False
             }
 
         form =
@@ -325,6 +329,7 @@ questionEditorView appState model editorData =
             { title = lg "question" appState
             , uuid = editorData.uuid
             , deleteAction = DeleteQuestion editorData.uuid |> QuestionEditorMsg |> EditorMsg |> Just
+            , movable = True
             }
 
         levelSelection =
@@ -560,6 +565,7 @@ answerEditorView appState model editorData =
             { title = lg "answer" appState
             , uuid = editorData.uuid
             , deleteAction = DeleteAnswer editorData.uuid |> AnswerEditorMsg |> EditorMsg |> Just
+            , movable = True
             }
 
         metrics =
@@ -626,6 +632,7 @@ referenceEditorView appState editorData =
             { title = lg "reference" appState
             , uuid = editorData.uuid
             , deleteAction = DeleteReference editorData.uuid |> ReferenceEditorMsg |> EditorMsg |> Just
+            , movable = True
             }
 
         formFields =
@@ -668,6 +675,7 @@ expertEditorView appState editorData =
             { title = lg "expert" appState
             , uuid = editorData.uuid
             , deleteAction = DeleteExpert editorData.uuid |> ExpertEditorMsg |> EditorMsg |> Just
+            , movable = True
             }
 
         form =
@@ -688,6 +696,7 @@ type alias EditorTitleConfig =
     { title : String
     , uuid : String
     , deleteAction : Maybe Msg
+    , movable : Bool
     }
 
 
@@ -701,8 +710,21 @@ editorTitle appState config =
                 , onClick <| CopyUuid config.uuid
                 ]
                 [ faSet "kmEditor.copyUuid" appState
-                , small [] [ text config.uuid ]
+                , small [] [ text <| String.slice 0 8 config.uuid ]
                 ]
+
+        moveActionButton =
+            if config.movable then
+                button
+                    [ class "btn btn-outline-secondary link-with-icon"
+                    , onClick OpenMoveModal
+                    ]
+                    [ faSet "kmEditor.move" appState
+                    , lx_ "editorTitle.move" appState
+                    ]
+
+            else
+                emptyNode
 
         deleteActionButton =
             case config.deleteAction of
@@ -722,6 +744,7 @@ editorTitle appState config =
         [ h3 [] [ text config.title ]
         , div [ class "editor-title-buttons" ]
             [ copyUuidButton
+            , moveActionButton
             , deleteActionButton
             ]
         ]

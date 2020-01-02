@@ -4,11 +4,12 @@ import Html exposing (..)
 import Html.Attributes exposing (class, id)
 import Html.Keyed
 import Maybe.Extra as Maybe
+import Shared.Locale exposing (l)
 import SplitPane exposing (ViewConfig, createViewConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (emptyNode)
-import Wizard.Common.Locale exposing (l)
 import Wizard.Common.View.Modal as Modal exposing (AlertConfig)
+import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.View.Breadcrumbs exposing (breadcrumbs)
@@ -31,12 +32,19 @@ view appState model =
 
                 _ ->
                     emptyNode
+
+        moveModalViewProps =
+            { editors = model.editors
+            , kmUuid = model.knowledgeModel.uuid
+            , movingUuid = Maybe.withDefault "" model.activeEditorUuid
+            }
     in
     div [ class "KMEditor__Editor__KMEditor" ]
         [ div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
         , SplitPane.view viewConfig (viewTree appState model) (viewEditor appState model) model.splitPane
         , Modal.alert (alertConfig appState model)
+        , MoveModal.view appState moveModalViewProps model.moveModal |> Html.map MoveModalMsg
         ]
 
 

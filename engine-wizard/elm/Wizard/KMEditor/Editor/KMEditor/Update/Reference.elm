@@ -8,8 +8,8 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Reference exposing
 
 import Form
 import Random exposing (Seed)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), QuestionEditorData, ReferenceEditorData, isReferenceEditorDirty, updateReferenceEditorData)

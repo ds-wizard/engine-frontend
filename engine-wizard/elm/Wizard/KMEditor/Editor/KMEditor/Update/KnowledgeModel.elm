@@ -8,8 +8,8 @@ module Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing
 
 import Form
 import Random exposing (Seed)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l)
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter as Chapter
 import Wizard.KMEditor.Common.KnowledgeModel.Integration as Integration
 import Wizard.KMEditor.Common.KnowledgeModel.Tag as Tag

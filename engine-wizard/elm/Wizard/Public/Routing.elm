@@ -5,9 +5,9 @@ module Wizard.Public.Routing exposing
     , toUrl
     )
 
+import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lr)
 import Wizard.Public.Routes exposing (Route(..))
 
 

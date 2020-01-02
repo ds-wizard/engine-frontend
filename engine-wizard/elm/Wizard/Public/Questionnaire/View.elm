@@ -2,9 +2,9 @@ module Wizard.Public.Questionnaire.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Shared.Locale exposing (l, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Locale exposing (l, lh, lx)
 import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)

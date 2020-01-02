@@ -2,9 +2,9 @@ module Wizard.Public.Questionnaire.Update exposing (fetchData, handleGetQuestion
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Questionnaire.Models exposing (initialModel)
 import Wizard.Common.Questionnaire.Msgs
 import Wizard.Common.Questionnaire.Update

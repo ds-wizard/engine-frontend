@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (encodeChartConfig)
 import Form exposing (Form)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api.Feedbacks as FeedbacksApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.Api.TypeHints as TypeHintsApi
@@ -11,7 +12,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.Model exposing (TypeHint, setTypeHintsResult)
 import Wizard.Common.FormEngine.Msgs
 import Wizard.Common.FormEngine.Update exposing (updateForm)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Questionnaire.Models exposing (..)
 import Wizard.Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Wizard.Common.Questionnaire.Models.FeedbackForm as FeedbackForm

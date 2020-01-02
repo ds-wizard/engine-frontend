@@ -5,10 +5,10 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Locale exposing (l, lg, lh, lx)
 import String.Format exposing (format)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (..)
-import Wizard.Common.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.Events.AddAnswerEventData exposing (AddAnswerEventData)
@@ -264,6 +264,30 @@ getEventView appState model migration metrics event =
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteExpertDiff appState)
                 |> Maybe.map (viewEvent appState model (lg "event.deleteExpert" appState))
+                |> Maybe.withDefault errorMessage
+
+        MoveQuestionEvent _ commonData ->
+            KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewMoveQuestion appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewEvent appState model (lg "event.moveQuestion" appState))
+                |> Maybe.withDefault errorMessage
+
+        MoveAnswerEvent _ commonData ->
+            KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewMoveAnswer appState migration.currentKnowledgeModel metrics)
+                |> Maybe.map (viewEvent appState model (lg "event.moveAnswer" appState))
+                |> Maybe.withDefault errorMessage
+
+        MoveReferenceEvent _ commonData ->
+            KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewMoveReference appState)
+                |> Maybe.map (viewEvent appState model (lg "event.moveReference" appState))
+                |> Maybe.withDefault errorMessage
+
+        MoveExpertEvent _ commonData ->
+            KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewMoveExpert appState)
+                |> Maybe.map (viewEvent appState model (lg "event.moveExpert" appState))
                 |> Maybe.withDefault errorMessage
 
 
@@ -912,6 +936,88 @@ viewDeleteQuestionDiff appState km question =
         (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
+viewMoveQuestion : AppState -> KnowledgeModel -> Question -> Html Msg
+viewMoveQuestion appState km question =
+    let
+        -- Fields
+        questionUuid =
+            Question.getUuid question
+
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ lg "question.type" appState
+                , lg "question.title" appState
+                , lg "question.text" appState
+                ]
+                [ Question.getTypeString question
+                , Question.getTitle question
+                , Question.getText question |> Maybe.withDefault ""
+                ]
+
+        extraFields =
+            case question of
+                ValueQuestion _ data ->
+                    [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
+
+                IntegrationQuestion _ data ->
+                    [ ( lg "integration" appState, getIntegrationName km data.integrationUuid ) ]
+
+                _ ->
+                    []
+
+        fieldDiff =
+            viewPlain (fields ++ extraFields)
+
+        -- Tags
+        tags =
+            KnowledgeModel.getTags km
+
+        tagNames =
+            List.map .name <| List.filter (\t -> List.member t.uuid (Question.getTagUuids question)) tags
+
+        tagsDiff =
+            viewPlainChildren (lg "tags" appState) tagNames
+
+        -- Answers
+        answersDiff =
+            case question of
+                OptionsQuestion _ _ ->
+                    viewDeletedChildren (lg "answers" appState) <|
+                        List.map .label <|
+                            KnowledgeModel.getQuestionAnswers questionUuid km
+
+                _ ->
+                    emptyNode
+
+        -- Item Template Questions
+        itemTemplateQuestionsDiff =
+            case question of
+                ListQuestion _ _ ->
+                    viewDeletedChildren (lg "questions" appState) <|
+                        List.map Question.getTitle <|
+                            KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
+
+                _ ->
+                    emptyNode
+
+        -- References
+        references =
+            KnowledgeModel.getQuestionReferences questionUuid km
+
+        referencesDiff =
+            viewDeletedChildren (lg "references" appState) <| List.map Reference.getVisibleName references
+
+        -- Experts
+        experts =
+            KnowledgeModel.getQuestionExperts questionUuid km
+
+        expertsDiff =
+            viewDeletedChildren (lg "experts" appState) <| List.map .name experts
+    in
+    div []
+        (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+
+
 getIntegrationName : KnowledgeModel -> String -> String
 getIntegrationName km integrationUuid =
     KnowledgeModel.getIntegration integrationUuid km
@@ -1011,6 +1117,38 @@ viewDeleteAnswerDiff appState km metrics answer =
 
         metricsDiff =
             viewDeletedChildren (lg "metrics" appState) originalMetrics
+    in
+    div []
+        (fieldDiff ++ [ questionsDiff, metricsDiff ])
+
+
+viewMoveAnswer : AppState -> KnowledgeModel -> List Metric -> Answer -> Html Msg
+viewMoveAnswer appState km metrics answer =
+    let
+        fieldDiff =
+            viewPlain <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "answer.label" appState
+                    , lg "answer.advice" appState
+                    ]
+                    [ answer.label
+                    , answer.advice |> Maybe.withDefault ""
+                    ]
+
+        questions =
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
+
+        questionNames =
+            List.map Question.getTitle questions
+
+        questionsDiff =
+            viewPlainChildren (lg "questions" appState) questionNames
+
+        originalMetrics =
+            List.map (metricMeasureToString metrics) answer.metricMeasures
+
+        metricsDiff =
+            viewPlainChildren (lg "metrics" appState) originalMetrics
     in
     div []
         (fieldDiff ++ [ questionsDiff, metricsDiff ])
@@ -1246,6 +1384,57 @@ viewDeleteCrossReferenceDiff appState data =
                 ]
 
 
+viewMoveReference : AppState -> Reference -> Html Msg
+viewMoveReference appState =
+    Reference.map
+        (viewMoveResourcePageReference appState)
+        (viewMoveURLReference appState)
+        (viewMoveCrossReference appState)
+
+
+viewMoveResourcePageReference : AppState -> ResourcePageReferenceData -> Html Msg
+viewMoveResourcePageReference appState data =
+    div [] <|
+        viewPlain <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.shortUuid" appState
+                ]
+                [ lg "referenceType.resourcePage" appState
+                , data.shortUuid
+                ]
+
+
+viewMoveURLReference : AppState -> URLReferenceData -> Html Msg
+viewMoveURLReference appState data =
+    div [] <|
+        viewPlain <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.url" appState
+                , lg "reference.label" appState
+                ]
+                [ lg "referenceType.url" appState
+                , data.url
+                , data.label
+                ]
+
+
+viewMoveCrossReference : AppState -> CrossReferenceData -> Html Msg
+viewMoveCrossReference appState data =
+    div [] <|
+        viewPlain <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "referenceType" appState
+                , lg "reference.targetUuid" appState
+                , lg "reference.description" appState
+                ]
+                [ lg "referenceType.cross" appState
+                , data.targetUuid
+                , data.description
+                ]
+
+
 viewAddExpertDiff : AppState -> AddExpertEventData -> Html Msg
 viewAddExpertDiff appState event =
     div [] <|
@@ -1279,6 +1468,19 @@ viewDeleteExpertDiff : AppState -> Expert -> Html Msg
 viewDeleteExpertDiff appState expert =
     div [] <|
         viewDelete <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "expert.name" appState
+                , lg "expert.email" appState
+                ]
+                [ expert.name
+                , expert.email
+                ]
+
+
+viewMoveExpert : AppState -> Expert -> Html Msg
+viewMoveExpert appState expert =
+    div [] <|
+        viewPlain <|
             List.map2 (\a b -> ( a, b ))
                 [ lg "expert.name" appState
                 , lg "expert.email" appState
@@ -1344,6 +1546,23 @@ viewDelete changes =
         changes
 
 
+viewPlain : List ( String, String ) -> List (Html Msg)
+viewPlain fields =
+    List.map
+        (\( fieldName, newValue ) ->
+            let
+                content =
+                    [ div [ class "form-value" ]
+                        [ div [] [ span [] [ text newValue ] ]
+                        ]
+                    ]
+            in
+            div [ class "form-group" ]
+                (label [ class "control-label" ] [ text fieldName ] :: content)
+        )
+        fields
+
+
 viewDiffChildren : String -> List String -> List String -> Dict String String -> Html Msg
 viewDiffChildren fieldName originalOrder newOrder childrenNames =
     let
@@ -1395,6 +1614,17 @@ viewDeletedChildren fieldName children =
 
         else
             ul [ class "del" ]
+                (List.map (\child -> li [] [ text child ]) children)
+
+
+viewPlainChildren : String -> List String -> Html Msg
+viewPlainChildren fieldName children =
+    childrenView fieldName <|
+        if List.isEmpty children then
+            div [ class "form-value" ] [ text "-" ]
+
+        else
+            ul []
                 (List.map (\child -> li [] [ text child ]) children)
 
 

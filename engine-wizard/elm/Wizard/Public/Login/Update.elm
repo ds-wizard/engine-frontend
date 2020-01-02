@@ -2,11 +2,11 @@ module Wizard.Public.Login.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Auth.Msgs
 import Wizard.Common.Api.Tokens as TokensApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.JwtToken as JwtToken
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Msgs
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
