@@ -3,10 +3,10 @@ module Wizard.Public.BookReference.Update exposing
     , update
     )
 
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.Api.BookReferences as BookReferencesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Setters exposing (setBookReference)
 import Wizard.Msgs
 import Wizard.Public.BookReference.Models exposing (Model)

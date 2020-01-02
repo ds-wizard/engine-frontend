@@ -21,6 +21,10 @@ module Wizard.KMEditor.Common.Events.EventTest exposing
     , editQuestionEventTest
     , editReferenceEventTest
     , editTagEventTest
+    , moveAnswerEventTest
+    , moveExpertEventTest
+    , moveQuestionEventTest
+    , moveReferenceEventTest
     )
 
 import Dict
@@ -700,6 +704,30 @@ deleteQuestionEventTest =
         ]
 
 
+moveQuestionEvent : Event
+moveQuestionEvent =
+    MoveQuestionEvent
+        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+moveQuestionEventTest : Test
+moveQuestionEventTest =
+    describe "MoveQuestionEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode moveQuestionEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid moveQuestionEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName moveQuestionEvent)
+        ]
+
+
 
 {- answer events -}
 
@@ -837,6 +865,30 @@ deleteAnswerEventTest =
         , test "get entity visible name" <|
             \_ ->
                 Expect.equal Nothing (Event.getEntityVisibleName deleteAnswerEvent)
+        ]
+
+
+moveAnswerEvent : Event
+moveAnswerEvent =
+    MoveAnswerEvent
+        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+moveAnswerEventTest : Test
+moveAnswerEventTest =
+    describe "MoveAnswerEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode moveAnswerEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid moveAnswerEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName moveAnswerEvent)
         ]
 
 
@@ -1019,6 +1071,30 @@ deleteReferenceEventTest =
         ]
 
 
+moveReferenceEvent : Event
+moveReferenceEvent =
+    MoveReferenceEvent
+        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+moveReferenceEventTest : Test
+moveReferenceEventTest =
+    describe "MoveReferenceEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode moveReferenceEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid moveReferenceEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName moveReferenceEvent)
+        ]
+
+
 
 {- expert events -}
 
@@ -1122,6 +1198,30 @@ deleteExpertEventTest =
         , test "get entity visible name" <|
             \_ ->
                 Expect.equal Nothing (Event.getEntityVisibleName deleteExpertEvent)
+        ]
+
+
+moveExpertEvent : Event
+moveExpertEvent =
+    MoveExpertEvent
+        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+moveExpertEventTest : Test
+moveExpertEventTest =
+    describe "MoveExpertEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode moveExpertEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid moveExpertEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName moveExpertEvent)
         ]
 
 

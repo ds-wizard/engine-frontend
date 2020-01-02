@@ -2,9 +2,9 @@ module Wizard.Common.Menu.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError
+import Shared.Locale exposing (l)
 import Wizard.Common.Api.BuildInfo as BuildInfoApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l)
 import Wizard.Common.Menu.Models exposing (Model)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))
 import Wizard.Msgs

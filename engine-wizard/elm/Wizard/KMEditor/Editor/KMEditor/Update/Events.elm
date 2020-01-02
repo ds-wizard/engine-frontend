@@ -21,6 +21,10 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     , createEditQuestionEvent
     , createEditReferenceEvent
     , createEditTagEvent
+    , createMoveAnswerEvent
+    , createMoveExpertEvent
+    , createMoveQuestionEvent
+    , createMoveReferenceEvent
     )
 
 import Dict
@@ -32,6 +36,7 @@ import Wizard.KMEditor.Common.Events.EditQuestionEventData exposing (EditQuestio
 import Wizard.KMEditor.Common.Events.EditReferenceEventData exposing (EditReferenceEventData(..))
 import Wizard.KMEditor.Common.Events.Event exposing (Event(..))
 import Wizard.KMEditor.Common.Events.EventField as EventField
+import Wizard.KMEditor.Common.Events.MoveEventData exposing (MoveEventData)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
 import Wizard.KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference(..))
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
@@ -409,6 +414,35 @@ createEditExpertEvent form editorData =
 createDeleteExpertEvent : String -> String -> Seed -> ( Event, Seed )
 createDeleteExpertEvent =
     createEvent DeleteExpertEvent
+
+
+createMoveQuestionEvent : String -> String -> String -> Seed -> ( Event, Seed )
+createMoveQuestionEvent =
+    createMoveEvent MoveQuestionEvent
+
+
+createMoveAnswerEvent : String -> String -> String -> Seed -> ( Event, Seed )
+createMoveAnswerEvent =
+    createMoveEvent MoveAnswerEvent
+
+
+createMoveReferenceEvent : String -> String -> String -> Seed -> ( Event, Seed )
+createMoveReferenceEvent =
+    createMoveEvent MoveReferenceEvent
+
+
+createMoveExpertEvent : String -> String -> String -> Seed -> ( Event, Seed )
+createMoveExpertEvent =
+    createMoveEvent MoveExpertEvent
+
+
+createMoveEvent : (MoveEventData -> CommonEventData -> Event) -> String -> String -> String -> Seed -> ( Event, Seed )
+createMoveEvent constructor targetUuid =
+    let
+        data =
+            { targetUuid = targetUuid }
+    in
+    createEvent (constructor data)
 
 
 createEvent : (CommonEventData -> Event) -> String -> String -> Seed -> ( Event, Seed )

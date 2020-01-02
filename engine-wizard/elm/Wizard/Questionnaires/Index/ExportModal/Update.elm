@@ -5,10 +5,10 @@ module Wizard.Questionnaires.Index.ExportModal.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Templates as TemplatesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Msgs
 import Wizard.Questionnaires.Common.Template exposing (Template)
 import Wizard.Questionnaires.Index.ExportModal.Models exposing (Model, initialModel)

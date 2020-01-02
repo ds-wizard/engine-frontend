@@ -13,10 +13,10 @@ import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
 import Shared.Error.ApiError exposing (ApiError)
+import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.View exposing (FormRenderer)
 import Wizard.Common.Html exposing (emptyNode, faSet)
-import Wizard.Common.Locale exposing (l, lg, lx)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage)
 import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
 import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)

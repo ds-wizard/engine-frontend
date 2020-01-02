@@ -12,12 +12,12 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (..)
 import Html.Attributes exposing (class, colspan, href, target)
+import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (faSet)
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
-import Wizard.Common.Locale exposing (l, lh, lx)
 import Wizard.Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))
 import Wizard.Common.View.Modal as Modal

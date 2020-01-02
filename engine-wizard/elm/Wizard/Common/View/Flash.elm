@@ -8,9 +8,9 @@ module Wizard.Common.View.Flash exposing
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (emptyNode, faSet)
-import Wizard.Common.Locale exposing (l)
 
 
 l_ : String -> AppState -> String

@@ -8,6 +8,7 @@ import ActionResult exposing (ActionResult(..))
 import Maybe.Extra exposing (isJust)
 import Random exposing (Seed)
 import Shared.Error.ApiError as ApiError
+import Shared.Locale exposing (l, lg)
 import Task
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Branches as BranchesApi
@@ -15,11 +16,10 @@ import Wizard.Common.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Common.Api.Levels as LevelsApi
 import Wizard.Common.Api.Metrics as MetricsApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l, lg)
 import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
 import Wizard.KMEditor.Editor.KMEditor.Models
 import Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents)
-import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, initialModel)
+import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, getCurrentActiveEditorUuid, initialModel)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Editor.Preview.Models
 import Wizard.KMEditor.Editor.Preview.Update
@@ -119,6 +119,7 @@ update msg wrapMsg appState model =
                                             Just <|
                                                 Wizard.KMEditor.Editor.KMEditor.Models.initialModel
                                                     km
+                                                    model.sessionActiveEditor
                                                     (ActionResult.withDefault [] model.metrics)
                                                     (ActionResult.withDefault [] model.levels)
                                                     ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
@@ -138,7 +139,7 @@ update msg wrapMsg appState model =
                             applyCurrentEditorChanges appState appState.seed model
 
                         ( newModel, cmd ) =
-                            fetchPreview wrapMsg appState { modelWithEvents | currentEditor = editor }
+                            fetchPreview wrapMsg appState { modelWithEvents | currentEditor = editor, sessionActiveEditor = getCurrentActiveEditorUuid model }
                     in
                     ( newSeed, newModel, cmd )
 
@@ -230,7 +231,7 @@ update msg wrapMsg appState model =
                                     initialModel model.kmUuid
                             in
                             ( appState.seed
-                            , { newModel | currentEditor = model.currentEditor }
+                            , { newModel | currentEditor = model.currentEditor, sessionActiveEditor = getCurrentActiveEditorUuid model }
                             , Cmd.batch
                                 [ Ports.clearUnloadMessage ()
                                 , Cmd.map wrapMsg <| fetchData model.kmUuid appState
@@ -257,7 +258,12 @@ fetchPreview wrapMsg appState model =
         Success ( km, _, _ ) ->
             ( { model | preview = Loading }
             , Cmd.map wrapMsg <|
-                KnowledgeModelsApi.fetchPreview km.previousPackageId (km.events ++ model.sessionEvents) [] appState GetPreviewCompleted
+                KnowledgeModelsApi.fetchPreview
+                    km.previousPackageId
+                    (km.events ++ model.sessionEvents)
+                    []
+                    appState
+                    GetPreviewCompleted
             )
 
         _ ->
@@ -267,7 +273,13 @@ fetchPreview wrapMsg appState model =
 putBranchCmd : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> BranchDetail -> Cmd Wizard.Msgs.Msg
 putBranchCmd wrapMsg appState model km =
     Cmd.map wrapMsg <|
-        BranchesApi.putBranch model.kmUuid km.name km.kmId (km.events ++ model.sessionEvents) appState SaveCompleted
+        BranchesApi.putBranch
+            model.kmUuid
+            km.name
+            km.kmId
+            (km.events ++ model.sessionEvents)
+            appState
+            SaveCompleted
 
 
 applyCurrentEditorChanges : AppState -> Seed -> Model -> ( Seed, Model )

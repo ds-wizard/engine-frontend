@@ -3,12 +3,12 @@ module Wizard.Questionnaires.CreateMigration.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Setters exposing (setPackages, setQuestionnaire)
 import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.KnowledgeModels.Common.Package exposing (Package)

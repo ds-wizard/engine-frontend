@@ -52,11 +52,11 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import List.Extra as List
 import Set
+import Shared.Locale exposing (l, lg)
 import String exposing (fromFloat, fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError(..))
 import Wizard.Common.Form.Validate exposing (validateUuid)
-import Wizard.Common.Locale exposing (l, lg)
 import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)

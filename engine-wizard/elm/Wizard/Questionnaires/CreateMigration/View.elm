@@ -5,11 +5,11 @@ import Form
 import Html exposing (Html, div, label, option, select, text)
 import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onInput)
+import Shared.Locale exposing (l, lg, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (faSet)
 import Wizard.Common.Html.Attribute exposing (listClass)
-import Wizard.Common.Locale exposing (l, lg, lx)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormActions as FormActions

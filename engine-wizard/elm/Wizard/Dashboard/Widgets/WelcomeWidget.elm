@@ -2,8 +2,8 @@ module Wizard.Dashboard.Widgets.WelcomeWidget exposing (view)
 
 import Html exposing (Html, div, img, text)
 import Html.Attributes exposing (class, src)
+import Shared.Locale exposing (lf)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lf)
 
 
 lf_ : String -> List String -> AppState -> String

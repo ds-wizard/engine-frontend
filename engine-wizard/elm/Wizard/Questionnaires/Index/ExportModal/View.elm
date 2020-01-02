@@ -4,10 +4,10 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, a, button, div, h5, input, label, option, select, text)
 import Html.Attributes exposing (checked, class, classList, href, name, target, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Shared.Locale exposing (l, lg, lgx, lx)
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (faSet)
-import Wizard.Common.Locale exposing (l, lg, lgx, lx)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Questionnaires.Common.Template exposing (Template)

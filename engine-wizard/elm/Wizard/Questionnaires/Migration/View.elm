@@ -4,10 +4,10 @@ import ActionResult
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Locale exposing (l, lf, lgx, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (emptyNode, faSet)
-import Wizard.Common.Locale exposing (l, lf, lgx, lx)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
@@ -206,6 +206,9 @@ viewChange appState model migration change =
 
                 QuestionChange data ->
                     ( l_ "change.questionChange" appState, data.question )
+
+                QuestionMove data ->
+                    ( l_ "change.questionMove" appState, data.question )
 
         resolvedLabel =
             if isQuestionChangeResolved migration change then

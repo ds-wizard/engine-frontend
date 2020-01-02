@@ -5,6 +5,7 @@ import Reorderable
 import SplitPane
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
@@ -12,6 +13,7 @@ import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (updateEditor)
 import Wizard.KMEditor.Editor.KMEditor.Update.Answer exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Chapter exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createMoveAnswerEvent, createMoveExpertEvent, createMoveQuestionEvent, createMoveReferenceEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Expert exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing (..)
@@ -282,6 +284,46 @@ update msg appState model fetchPreviewCmd =
 
         CopyUuid uuid ->
             ( appState.seed, model, Ports.copyToClipboard uuid )
+
+        OpenMoveModal ->
+            ( appState.seed, { model | moveModal = MoveModal.open model.moveModal }, Cmd.none )
+
+        MoveModalMsg moveModalMsg ->
+            let
+                createMoveEvent constructor entityUuid parentUuid =
+                    let
+                        ( moveEvent, newSeed ) =
+                            constructor
+                                (MoveModal.getSelectedTargetUuid model.moveModal)
+                                entityUuid
+                                parentUuid
+                                appState.seed
+
+                        events =
+                            model.events ++ [ moveEvent ]
+                    in
+                    ( newSeed, { model | events = events }, fetchPreviewCmd )
+            in
+            case moveModalMsg of
+                MoveModal.Submit ->
+                    case getActiveEditor model of
+                        Just (QuestionEditor questionEditor) ->
+                            createMoveEvent createMoveQuestionEvent questionEditor.uuid questionEditor.parentUuid
+
+                        Just (AnswerEditor answerEditor) ->
+                            createMoveEvent createMoveAnswerEvent answerEditor.uuid answerEditor.parentUuid
+
+                        Just (ReferenceEditor referenceEditor) ->
+                            createMoveEvent createMoveReferenceEvent referenceEditor.uuid referenceEditor.parentUuid
+
+                        Just (ExpertEditor expertEditor) ->
+                            createMoveEvent createMoveExpertEvent expertEditor.uuid expertEditor.parentUuid
+
+                        _ ->
+                            ( appState.seed, { model | moveModal = MoveModal.update moveModalMsg model.moveModal }, Cmd.none )
+
+                _ ->
+                    ( appState.seed, { model | moveModal = MoveModal.update moveModalMsg model.moveModal }, Cmd.none )
 
 
 generateEvents : AppState -> Seed -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
