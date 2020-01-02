@@ -11,8 +11,8 @@ import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as Validate exposing (Validation)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
+import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 
 
 type QuestionnaireAccessibility

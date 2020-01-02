@@ -4,11 +4,11 @@ import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.Html.Attribute exposing (detailClass)
-import Wizard.Common.Locale exposing (l, lg, lx)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup

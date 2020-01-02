@@ -4,12 +4,12 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Version exposing (Version)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Branches as BranchesApi
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
 import Wizard.KMEditor.Common.BranchPublishForm as BranchPublishForm
 import Wizard.KMEditor.Publish.Models exposing (Model)

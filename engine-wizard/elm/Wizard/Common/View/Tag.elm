@@ -4,9 +4,9 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, div, i, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, style, type_)
 import Html.Events exposing (onClick)
+import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (emptyNode)
-import Wizard.Common.Locale exposing (l, lx)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)

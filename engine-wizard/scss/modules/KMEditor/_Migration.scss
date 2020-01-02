@@ -31,5 +31,9 @@
             background: $text-delete-bg;
             text-decoration: line-through;
         }
+
+        div > li:first-child {
+            margin-bottom: 3rem;
+        }
     }
 }

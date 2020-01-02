@@ -2,11 +2,11 @@ module Wizard.Common.FormEngine.Update exposing (updateForm)
 
 import ActionResult exposing (ActionResult(..))
 import Debounce
+import Shared.Locale exposing (lg)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.Model exposing (..)
 import Wizard.Common.FormEngine.Msgs exposing (Msg(..))
-import Wizard.Common.Locale exposing (lg)
 
 
 debounceConfig : Debounce.Config (Msg msg err)

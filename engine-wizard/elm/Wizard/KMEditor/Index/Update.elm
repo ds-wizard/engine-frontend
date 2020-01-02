@@ -3,11 +3,11 @@ module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (l, lg)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.Api.Branches as BranchesApi
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l, lg)
 import Wizard.Common.Setters exposing (setBranches, setPackage)
 import Wizard.KMEditor.Common.Branch exposing (Branch)
 import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm

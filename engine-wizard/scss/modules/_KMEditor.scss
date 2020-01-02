@@ -25,6 +25,14 @@ $indent-step: 20px;
     margin: 20px 0;
     width: 100%;
 
+    &-input {
+        border: 1px solid $gray-400;
+        border-radius: .25rem;
+        height: 15rem;
+        overflow: auto;
+        margin: 0;
+    }
+
     ul {
         margin: 0;
         padding: 0;
@@ -42,7 +50,7 @@ $indent-step: 20px;
                 height: 27px;
                 position: absolute;
                 left: 0;
-                top: -3px;
+                top: -2px;
                 background: $gray-400;
                 content: " ";
                 z-index: 0;
@@ -96,6 +104,12 @@ $indent-step: 20px;
             &.state-deleted > a > span {
                 color: $red !important;
                 text-decoration: line-through;
+                cursor: default;
+            }
+
+            &.disabled > a > span {
+                color: $gray-500 !important;
+                text-decoration: none;
                 cursor: default;
             }
         }

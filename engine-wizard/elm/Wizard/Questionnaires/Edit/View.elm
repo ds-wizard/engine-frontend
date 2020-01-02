@@ -2,11 +2,11 @@ module Wizard.Questionnaires.Edit.View exposing (formView, questionnaireView, vi
 
 import Form exposing (Form)
 import Html exposing (Html, div)
+import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.Html.Attribute exposing (detailClass)
-import Wizard.Common.Locale exposing (l, lg)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup

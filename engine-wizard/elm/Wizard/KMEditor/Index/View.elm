@@ -4,13 +4,13 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Locale exposing (l, lg, lh, lx)
 import Version exposing (Version)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (..)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.JwtToken exposing (JwtToken)
-import Wizard.Common.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)

@@ -2,8 +2,8 @@ module Wizard.View exposing (view)
 
 import Browser exposing (Document)
 import Html exposing (..)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l)
 import Wizard.Common.View.Layout as Layout
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.View

@@ -1,9 +1,9 @@
 module Wizard.Auth.Update exposing (update)
 
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Auth.Msgs as AuthMsgs
 import Wizard.Common.Api.Users as UsersApi
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Session as Session
 import Wizard.Models exposing (Model, setJwt, setSession)
 import Wizard.Msgs exposing (Msg)

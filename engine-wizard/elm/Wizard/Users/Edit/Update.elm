@@ -4,11 +4,11 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Result exposing (Result)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (setFormErrors)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Msgs
 import Wizard.Users.Common.User exposing (User)
 import Wizard.Users.Common.UserEditForm as UserEditForm

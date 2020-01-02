@@ -2,10 +2,10 @@ module Wizard.KnowledgeModels.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (l, lg)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l, lg)
 import Wizard.Common.Setters exposing (setPackages)
 import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))

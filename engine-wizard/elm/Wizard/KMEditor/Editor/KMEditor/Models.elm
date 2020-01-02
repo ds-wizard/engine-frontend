@@ -12,6 +12,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models exposing
     )
 
 import Dict exposing (Dict)
+import Maybe.Extra as Maybe
 import Reorderable
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
 import Wizard.KMEditor.Common.Events.Event as Event exposing (Event(..))
@@ -20,6 +21,7 @@ import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeM
 import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
+import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
 import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
 import Wizard.Utils exposing (listFilterJust)
@@ -36,28 +38,42 @@ type alias Model =
     , events : List Event
     , alert : Maybe String
     , splitPane : SplitPane.State
+    , moveModal : MoveModal.Model
     }
 
 
-initialModel : KnowledgeModel -> List Metric -> List Level -> List Event -> Model
-initialModel knowledgeModel metrics levels =
-    createEditors
+initialModel : KnowledgeModel -> Maybe String -> List Metric -> List Level -> List Event -> Model
+initialModel knowledgeModel mbActiveEditorUuid metrics levels =
+    let
+        activeEditorUuid =
+            Maybe.or mbActiveEditorUuid (Just knowledgeModel.uuid)
+    in
+    createEditors mbActiveEditorUuid
         { kmUuid = knowledgeModel.uuid
         , knowledgeModel = knowledgeModel
         , metrics = metrics
         , levels = levels
-        , activeEditorUuid = Just knowledgeModel.uuid
+        , activeEditorUuid = activeEditorUuid
         , editors = Dict.fromList []
         , reorderableState = Reorderable.initialState
         , events = []
         , alert = Nothing
         , splitPane = SplitPane.init Horizontal |> configureSplitter (percentage 0.2 (Just ( 0.05, 0.7 )))
+        , moveModal = MoveModal.initialModel knowledgeModel.uuid
         }
 
 
-createEditors : Model -> List Event -> Model
-createEditors model events =
-    { model | editors = createKnowledgeModelEditor (getEditorContext model) (getEditorState (createEditorStateDict events)) model.knowledgeModel model.editors }
+createEditors : Maybe String -> Model -> List Event -> Model
+createEditors mbActiveEditorUuid model events =
+    { model
+        | editors =
+            createKnowledgeModelEditor
+                (getEditorContext model)
+                mbActiveEditorUuid
+                (getEditorState (createEditorStateDict events))
+                model.knowledgeModel
+                model.editors
+    }
 
 
 getEditorState : Dict String EditorState -> String -> EditorState
@@ -158,6 +174,18 @@ eventToEditorState event =
 
         DeleteExpertEvent _ ->
             Deleted
+
+        MoveQuestionEvent _ _ ->
+            Edited
+
+        MoveAnswerEvent _ _ ->
+            Edited
+
+        MoveReferenceEvent _ _ ->
+            Edited
+
+        MoveExpertEvent _ _ ->
+            Edited
 
 
 

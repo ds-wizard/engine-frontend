@@ -1,8 +1,8 @@
 module Wizard.Common.TimeDistance exposing (locale)
 
+import Shared.Locale exposing (l, lf)
 import Time.Distance.Types exposing (DistanceId(..), Locale, Tense(..))
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l, lf)
 
 
 l_ : String -> AppState -> String

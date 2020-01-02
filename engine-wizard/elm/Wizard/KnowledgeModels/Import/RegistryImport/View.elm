@@ -4,10 +4,10 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Events exposing (onInput)
+import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Config exposing (Registry(..))
 import Wizard.Common.Html exposing (emptyNode, faSet, linkTo)
-import Wizard.Common.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.KnowledgeModels.Import.RegistryImport.Models exposing (Model)

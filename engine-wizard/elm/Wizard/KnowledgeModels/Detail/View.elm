@@ -4,13 +4,13 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Markdown
+import Shared.Locale exposing (l, lg, lh, lx)
 import Version
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Config exposing (Registry(..))
 import Wizard.Common.Html exposing (emptyNode, faSet, linkTo)
-import Wizard.Common.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page

@@ -2,9 +2,9 @@ module Wizard.Public.SignupConfirmation.Update exposing (fetchData, handleSendCo
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Msgs
 import Wizard.Public.SignupConfirmation.Models exposing (Model)
 import Wizard.Public.SignupConfirmation.Msgs exposing (Msg(..))

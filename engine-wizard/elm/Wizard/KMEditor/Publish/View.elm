@@ -6,11 +6,11 @@ import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Locale exposing (l, lh, lx)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
-import Wizard.Common.Locale exposing (l, lh, lx)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra

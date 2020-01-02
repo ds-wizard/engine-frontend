@@ -3,6 +3,7 @@ module Wizard.KMEditor.Editor.Models exposing
     , Model
     , addSessionEvents
     , containsChanges
+    , getCurrentActiveEditorUuid
     , getSavingError
     , hasSavingError
     , initialModel
@@ -34,6 +35,7 @@ type alias Model =
     , preview : ActionResult KnowledgeModel
     , currentEditor : EditorType
     , sessionEvents : List Event
+    , sessionActiveEditor : Maybe String
     , previewEditorModel : Maybe Wizard.KMEditor.Editor.Preview.Models.Model
     , tagEditorModel : Maybe TagEditorModel.Model
     , editorModel : Maybe KMEditorModel.Model
@@ -50,6 +52,7 @@ initialModel kmUuid =
     , preview = Unset
     , currentEditor = KMEditor
     , sessionEvents = []
+    , sessionActiveEditor = Nothing
     , previewEditorModel = Nothing
     , tagEditorModel = Nothing
     , editorModel = Nothing
@@ -91,3 +94,8 @@ getSavingError model =
 
         _ ->
             ""
+
+
+getCurrentActiveEditorUuid : Model -> Maybe String
+getCurrentActiveEditorUuid =
+    .editorModel >> Maybe.andThen .activeEditorUuid

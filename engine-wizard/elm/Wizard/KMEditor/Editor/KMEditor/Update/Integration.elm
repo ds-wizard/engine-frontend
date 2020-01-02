@@ -2,8 +2,8 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegr
 
 import Form
 import Random exposing (Seed)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), IntegrationEditorData, KMEditorData, isIntegrationEditorDirty, updateIntegrationEditorData)
