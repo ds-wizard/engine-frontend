@@ -3,10 +3,10 @@ module Wizard.Questionnaires.Edit.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Msgs
 import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Common.QuestionnaireEditForm as QuestionnaireEditForm

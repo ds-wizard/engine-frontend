@@ -50,6 +50,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , isQuestionEditorDirty
     , isReferenceEditorDirty
     , isTagEditorDirty
+    , setEditorOpen
     , toggleEditorOpen
     , updateAnswerEditorData
     , updateChapterEditorData
@@ -206,8 +207,8 @@ type alias ExpertEditorData =
 {- constructors -}
 
 
-createKnowledgeModelEditor : EditorContext -> (String -> EditorState) -> KnowledgeModel -> Dict String Editor -> Dict String Editor
-createKnowledgeModelEditor editorContext getEditorState km editors =
+createKnowledgeModelEditor : EditorContext -> Maybe String -> (String -> EditorState) -> KnowledgeModel -> Dict String Editor -> Dict String Editor
+createKnowledgeModelEditor editorContext mbActiveEditorUuid getEditorState km editors =
     let
         chapters =
             KnowledgeModel.getChapters km
@@ -240,7 +241,19 @@ createKnowledgeModelEditor editorContext getEditorState km editors =
         withIntegrations =
             List.foldl (createIntegrationEditor editorContext km.uuid getEditorState km) withTags integrations
     in
-    Dict.insert km.uuid editor withIntegrations
+    openActiveEditorPath mbActiveEditorUuid <| Dict.insert km.uuid editor withIntegrations
+
+
+openActiveEditorPath : Maybe String -> Dict String Editor -> Dict String Editor
+openActiveEditorPath activeEditorUuid editors =
+    case Maybe.andThen (\uuid -> Dict.get uuid editors) activeEditorUuid of
+        Just editor ->
+            openActiveEditorPath
+                (Just <| getEditorParentUuid editor)
+                (Dict.insert (getEditorUuid editor) (setEditorOpen editor) editors)
+
+        Nothing ->
+            editors
 
 
 createChapterEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Chapter -> Dict String Editor -> Dict String Editor
@@ -598,31 +611,41 @@ getNewState originalState newState =
 
 
 toggleEditorOpen : Editor -> Editor
-toggleEditorOpen editor =
+toggleEditorOpen =
+    updateEditorOpen not
+
+
+setEditorOpen : Editor -> Editor
+setEditorOpen =
+    updateEditorOpen (always True)
+
+
+updateEditorOpen : (Bool -> Bool) -> Editor -> Editor
+updateEditorOpen updateFn editor =
     case editor of
         KMEditor data ->
-            KMEditor { data | treeOpen = not data.treeOpen }
+            KMEditor { data | treeOpen = updateFn data.treeOpen }
 
         ChapterEditor data ->
-            ChapterEditor { data | treeOpen = not data.treeOpen }
+            ChapterEditor { data | treeOpen = updateFn data.treeOpen }
 
         TagEditor data ->
-            TagEditor { data | treeOpen = not data.treeOpen }
+            TagEditor { data | treeOpen = updateFn data.treeOpen }
 
         IntegrationEditor data ->
-            IntegrationEditor { data | treeOpen = not data.treeOpen }
+            IntegrationEditor { data | treeOpen = updateFn data.treeOpen }
 
         QuestionEditor data ->
-            QuestionEditor { data | treeOpen = not data.treeOpen }
+            QuestionEditor { data | treeOpen = updateFn data.treeOpen }
 
         AnswerEditor data ->
-            AnswerEditor { data | treeOpen = not data.treeOpen }
+            AnswerEditor { data | treeOpen = updateFn data.treeOpen }
 
         ReferenceEditor data ->
-            ReferenceEditor { data | treeOpen = not data.treeOpen }
+            ReferenceEditor { data | treeOpen = updateFn data.treeOpen }
 
         ExpertEditor data ->
-            ExpertEditor { data | treeOpen = not data.treeOpen }
+            ExpertEditor { data | treeOpen = updateFn data.treeOpen }
 
 
 editorNotDeleted : Dict String Editor -> String -> Bool

@@ -11,11 +11,11 @@ import Markdown
 import Maybe.Extra as Maybe
 import Roman exposing (toRomanNumber)
 import Shared.Error.ApiError exposing (ApiError)
+import Shared.Locale exposing (l, lg, lgx, lx)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
 import Wizard.Common.Html exposing (emptyNode, faSet)
-import Wizard.Common.Locale exposing (l, lg, lgx, lx)
 import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, calculateUnansweredQuestions, getActiveChapter)
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature exposing (QuestionnaireFeature)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))

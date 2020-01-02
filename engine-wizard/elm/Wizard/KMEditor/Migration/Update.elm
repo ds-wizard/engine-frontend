@@ -2,11 +2,11 @@ module Wizard.KMEditor.Migration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (l, lg)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.Api.Branches as BranchesApi
 import Wizard.Common.Api.Metrics as MetricsApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (l, lg)
 import Wizard.Common.Setters exposing (setMetrics, setMigration)
 import Wizard.KMEditor.Common.Events.Event as Event
 import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)

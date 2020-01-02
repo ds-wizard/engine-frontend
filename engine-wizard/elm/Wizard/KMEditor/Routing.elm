@@ -4,12 +4,12 @@ module Wizard.KMEditor.Routing exposing
     , toUrl
     )
 
+import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.JwtToken exposing (JwtToken)
-import Wizard.Common.Locale exposing (lr)
 import Wizard.KMEditor.Routes exposing (Route(..))
 
 

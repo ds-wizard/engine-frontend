@@ -148,6 +148,30 @@ viewEvent appState km event =
         DeleteExpertEvent commonData ->
             viewExpertNode_ stateClass.deleted (getExpertName commonData) commonData.parentUuid
 
+        MoveQuestionEvent eventData commonData ->
+            div []
+                [ viewQuestionNode_ stateClass.deleted (getQuestionTitle commonData) commonData.parentUuid
+                , viewQuestionNode_ stateClass.added (getQuestionTitle commonData) eventData.targetUuid
+                ]
+
+        MoveAnswerEvent eventData commonData ->
+            div []
+                [ viewAnswerNode_ stateClass.deleted (getAnswerLabel commonData) commonData.parentUuid
+                , viewAnswerNode_ stateClass.added (getAnswerLabel commonData) eventData.targetUuid
+                ]
+
+        MoveReferenceEvent eventData commonData ->
+            div []
+                [ viewReferenceNode_ stateClass.deleted (getReferenceName commonData) commonData.parentUuid
+                , viewReferenceNode_ stateClass.added (getReferenceName commonData) eventData.targetUuid
+                ]
+
+        MoveExpertEvent eventData commonData ->
+            div []
+                [ viewExpertNode_ stateClass.deleted (getExpertName commonData) commonData.parentUuid
+                , viewExpertNode_ stateClass.added (getExpertName commonData) eventData.targetUuid
+                ]
+
 
 
 -- Node views

@@ -13,12 +13,12 @@ module Wizard.Routing exposing
     )
 
 import Browser.Navigation exposing (Key, pushUrl)
+import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing (..)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.JwtToken exposing (JwtToken)
-import Wizard.Common.Locale exposing (lr)
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
 import Wizard.Public.Routes

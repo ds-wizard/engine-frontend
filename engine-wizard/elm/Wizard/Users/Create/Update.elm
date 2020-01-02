@@ -4,11 +4,11 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Random exposing (Seed, step)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)

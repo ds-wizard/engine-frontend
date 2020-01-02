@@ -1,11 +1,11 @@
 module Wizard.Dashboard.Update exposing (fetchData, update)
 
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.Api.Levels as LevelsApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Config exposing (Widget(..))
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Setters exposing (setLevels, setQuestionnaires)
 import Wizard.Dashboard.Models as Model exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg(..))

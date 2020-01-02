@@ -2,10 +2,10 @@ module Wizard.Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Locale exposing (lg)
 import Wizard.Common.Setters exposing (setUsers)
 import Wizard.Msgs
 import Wizard.Users.Index.Models exposing (Model)
