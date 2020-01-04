@@ -1,4 +1,4 @@
-module Wizard.Questionnaires.Update exposing (fetchData, update)
+module Wizard.Questionnaires.Update exposing (fetchData, isGuarded, update)
 
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -39,6 +39,16 @@ fetchData route appState model =
         MigrationRoute uuid ->
             Cmd.map MigrationMsg <|
                 Wizard.Questionnaires.Migration.Update.fetchData appState uuid
+
+
+isGuarded : Route -> AppState -> Model -> Maybe String
+isGuarded route appState model =
+    case route of
+        DetailRoute _ ->
+            Wizard.Questionnaires.Detail.Update.isGuarded appState model.detailModel
+
+        _ ->
+            Nothing
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
