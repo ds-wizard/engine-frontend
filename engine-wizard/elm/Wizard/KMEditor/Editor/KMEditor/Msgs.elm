@@ -28,6 +28,8 @@ type Msg
     | CopyUuid String
     | OpenMoveModal
     | MoveModalMsg MoveModal.Msg
+    | TreeExpandAll
+    | TreeCollapseAll
 
 
 type EditorMsg

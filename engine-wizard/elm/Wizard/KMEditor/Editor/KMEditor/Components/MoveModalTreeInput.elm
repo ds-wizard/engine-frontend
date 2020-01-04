@@ -11,15 +11,23 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Set exposing (Set)
+import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (emptyNode, faKeyClass, faSet)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), getEditorParentUuid)
 
 
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.KMEditor.Editor.KMEditor.Components.MoveModalTreeInput"
+
+
 type Msg
     = ToggleTreeOpen String
     | ChangeUuid String
+    | ExpandAll
+    | CollapseAll
 
 
 type alias Model =
@@ -43,8 +51,12 @@ initialModel kmUuid =
     }
 
 
-update : Msg -> Model -> Model
-update msg model =
+type alias UpdateProps =
+    { editors : Dict String Editor }
+
+
+update : Msg -> Model -> UpdateProps -> Model
+update msg model props =
     case msg of
         ToggleTreeOpen uuid ->
             if Set.member uuid model.treeOpenUuids then
@@ -55,6 +67,12 @@ update msg model =
 
         ChangeUuid uuid ->
             { model | uuid = uuid }
+
+        ExpandAll ->
+            { model | treeOpenUuids = Set.fromList <| Dict.keys props.editors }
+
+        CollapseAll ->
+            { model | treeOpenUuids = Set.empty }
 
 
 type alias ViewProps =
@@ -74,8 +92,20 @@ view appState model props =
             , movingEntity = getMovingEntity props.editors props.movingUuid
             }
     in
-    div [ class "diff-tree diff-tree-input" ]
-        [ ul [] [ treeNodeKM appState model treeNodeProps props.kmUuid ]
+    div []
+        [ div [ class "diff-tree-input-actions" ]
+            [ a [ onClick ExpandAll ]
+                [ faSet "kmEditor.expandAll" appState
+                , lx_ "expandAll" appState
+                ]
+            , a [ onClick CollapseAll ]
+                [ faSet "kmEditor.collapseAll" appState
+                , lx_ "collapseAll" appState
+                ]
+            ]
+        , div [ class "diff-tree diff-tree-input" ]
+            [ div [ class "inner" ] [ ul [] [ treeNodeKM appState model treeNodeProps props.kmUuid ] ]
+            ]
         ]
 
 

@@ -60,14 +60,18 @@ open model =
     { model | visible = True }
 
 
-update : Msg -> Model -> Model
-update msg model =
+type alias UpdateProps =
+    { editors : Dict String Editor }
+
+
+update : Msg -> Model -> UpdateProps -> Model
+update msg model props =
     case msg of
         Close ->
             close model
 
         MoveModalTreeInputMsg moveModalTreeInputMsg ->
-            { model | treeInputModel = MoveModalTreeInput.update moveModalTreeInputMsg model.treeInputModel }
+            { model | treeInputModel = MoveModalTreeInput.update moveModalTreeInputMsg model.treeInputModel props }
 
         _ ->
             model
