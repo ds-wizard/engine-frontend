@@ -50,6 +50,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , isQuestionEditorDirty
     , isReferenceEditorDirty
     , isTagEditorDirty
+    , setEditorClosed
     , setEditorOpen
     , toggleEditorOpen
     , updateAnswerEditorData
@@ -618,6 +619,11 @@ toggleEditorOpen =
 setEditorOpen : Editor -> Editor
 setEditorOpen =
     updateEditorOpen (always True)
+
+
+setEditorClosed : Editor -> Editor
+setEditorClosed =
+    updateEditorOpen (always False)
 
 
 updateEditorOpen : (Bool -> Bool) -> Editor -> Editor
