@@ -5,6 +5,7 @@ module Wizard.Common.Questionnaire.Models exposing
     , addLabel
     , calculateUnansweredQuestions
     , chapterReportCanvasId
+    , cleanDirty
     , createChapterForm
     , createChartConfig
     , getActiveChapter
@@ -301,6 +302,11 @@ removeLabelsFromItem model path index =
 todoUuid : String
 todoUuid =
     "615b9028-5e3f-414f-b245-12d2ae2eeb20"
+
+
+cleanDirty : Model -> Model
+cleanDirty model =
+    { model | dirty = False }
 
 
 

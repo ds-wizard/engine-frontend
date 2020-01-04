@@ -14,3 +14,4 @@ type Msg
     | QuestionnaireMsg Wizard.Common.Questionnaire.Msgs.Msg
     | Save
     | PutRepliesCompleted (Result ApiError ())
+    | Discard

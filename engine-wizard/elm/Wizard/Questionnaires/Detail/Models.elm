@@ -1,4 +1,4 @@
-module Wizard.Questionnaires.Detail.Models exposing (Model, initialModel)
+module Wizard.Questionnaires.Detail.Models exposing (Model, initialModel, isDirty)
 
 import ActionResult exposing (ActionResult(..))
 import Wizard.Common.Questionnaire.Models
@@ -26,3 +26,8 @@ initialModel uuid =
     , metrics = Loading
     , savingQuestionnaire = Unset
     }
+
+
+isDirty : Model -> Bool
+isDirty =
+    .questionnaireModel >> ActionResult.map .dirty >> ActionResult.withDefault False

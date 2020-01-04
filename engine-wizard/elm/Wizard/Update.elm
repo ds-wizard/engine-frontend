@@ -67,6 +67,9 @@ isGuarded model =
         Routes.KMEditorRoute route ->
             Wizard.KMEditor.Update.isGuarded route model.appState model.kmEditorModel
 
+        Routes.QuestionnairesRoute route ->
+            Wizard.Questionnaires.Update.isGuarded route model.appState model.questionnairesModel
+
         _ ->
             Nothing
 

@@ -1,29 +1,34 @@
 module Wizard.Questionnaires.Detail.Update exposing
     ( fetchData
+    , isGuarded
     , update
     )
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (l)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.Api.Levels as LevelsApi
 import Wizard.Common.Api.Metrics as MetricsApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Locale exposing (lg)
-import Wizard.Common.Questionnaire.Models exposing (initialModel, updateReplies)
+import Wizard.Common.Questionnaire.Models exposing (cleanDirty, initialModel, updateReplies)
 import Wizard.Common.Questionnaire.Msgs
 import Wizard.Common.Questionnaire.Update
 import Wizard.Common.Setters exposing (setLevels, setMetrics, setQuestionnaireDetail)
 import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Wizard.Questionnaires.Detail.Models exposing (Model)
+import Wizard.Questionnaires.Detail.Models exposing (Model, isDirty)
 import Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
-import Wizard.Questionnaires.Routes exposing (Route(..))
-import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.Questionnaires.Detail.Update"
 
 
 fetchData : AppState -> String -> Cmd Msg
@@ -33,6 +38,15 @@ fetchData appState uuid =
         , LevelsApi.getLevels appState GetLevelsCompleted
         , MetricsApi.getMetrics appState GetMetricsCompleted
         ]
+
+
+isGuarded : AppState -> Model -> Maybe String
+isGuarded appState model =
+    if isDirty model then
+        Just <| l_ "unsavedChanges" appState
+
+    else
+        Nothing
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -55,6 +69,9 @@ update wrapMsg msg appState model =
 
         PutRepliesCompleted result ->
             handlePutRepliesCompleted appState model result
+
+        Discard ->
+            handleDiscard wrapMsg appState model
 
 
 
@@ -107,8 +124,23 @@ handleQuestionnaireMsg wrapMsg msg appState model =
 
                 _ ->
                     ( model.questionnaireModel, Cmd.none )
+
+        newModel =
+            { model | questionnaireModel = newQuestionnaireModel }
+
+        setUnloadMsgCmd =
+            if isDirty newModel then
+                Ports.setUnloadMessage <| l_ "unsavedChanges" appState
+
+            else
+                Cmd.none
     in
-    ( { model | questionnaireModel = newQuestionnaireModel }, cmd |> Cmd.map (QuestionnaireMsg >> wrapMsg) )
+    ( newModel
+    , Cmd.batch
+        [ cmd |> Cmd.map (QuestionnaireMsg >> wrapMsg)
+        , setUnloadMsgCmd
+        ]
+    )
 
 
 handleSave : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -126,7 +158,7 @@ handleSave wrapMsg appState model =
                     Cmd.map wrapMsg <|
                         QuestionnairesApi.putQuestionnaire model.uuid body appState PutRepliesCompleted
             in
-            ( { model | questionnaireModel = Success newQuestionnaireModel }, cmd )
+            ( { model | questionnaireModel = Success newQuestionnaireModel, savingQuestionnaire = Loading }, cmd )
 
         _ ->
             ( model, Cmd.none )
@@ -136,12 +168,24 @@ handlePutRepliesCompleted : AppState -> Model -> Result ApiError () -> ( Model, 
 handlePutRepliesCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute IndexRoute )
+            ( { model
+                | questionnaireModel = ActionResult.map cleanDirty model.questionnaireModel
+                , savingQuestionnaire = Success ""
+              }
+            , Ports.clearUnloadMessage ()
+            )
 
         Err error ->
             ( { model | savingQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.replies.putError" appState) error }
             , getResultCmd result
             )
+
+
+handleDiscard : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDiscard wrapMsg appState model =
+    ( { model | questionnaireModel = Loading }
+    , Cmd.map wrapMsg <| fetchData appState model.uuid
+    )
 
 
 
@@ -165,4 +209,4 @@ initQuestionnaireModel appState ( model, cmd ) =
                 _ ->
                     model
     in
-    ( newModel, cmd )
+    ( newModel, Cmd.batch [ cmd, Ports.clearUnloadMessage () ] )

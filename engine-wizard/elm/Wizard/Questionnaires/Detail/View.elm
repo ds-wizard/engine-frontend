@@ -3,9 +3,11 @@ module Wizard.Questionnaires.Detail.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
+import Shared.Locale exposing (l, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode)
+import Wizard.Common.Html exposing (emptyNode, linkTo)
 import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
@@ -17,6 +19,18 @@ import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Detail.Models exposing (Model)
 import Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
+import Wizard.Questionnaires.Routes exposing (Route(..))
+import Wizard.Routes as Routes
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.Questionnaires.Detail.View"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.Questionnaires.Detail.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -56,20 +70,27 @@ content appState model ( questionnaireModel, levels ) =
 questionnaireHeader : AppState -> ActionResult String -> Wizard.Common.Questionnaire.Models.Model -> Html Msg
 questionnaireHeader appState savingQuestionnaire questionnaireModel =
     let
-        unsavedChanges =
+        actions =
             if questionnaireModel.dirty then
-                text "(unsaved changes)"
+                [ lx_ "header.unsavedChanges" appState
+                , button [ onClick Discard, class "btn btn-outline-danger btn-with-loader" ]
+                    [ lx_ "header.discard" appState ]
+                , ActionButton.button appState <|
+                    ActionButton.ButtonConfig (l_ "header.save" appState) savingQuestionnaire Save False
+                ]
 
             else
-                emptyNode
+                [ linkTo appState
+                    (Routes.QuestionnairesRoute IndexRoute)
+                    [ class "btn btn-outline-primary btn-with-loader" ]
+                    [ lx_ "header.close" appState ]
+                ]
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
             [ div [ class "top-header-title" ] [ text <| questionnaireTitle questionnaireModel.questionnaire ]
             , div [ class "top-header-actions" ]
-                [ unsavedChanges
-                , ActionButton.button appState <| ActionButton.ButtonConfig "Save" savingQuestionnaire Save False
-                ]
+                actions
             ]
         ]
 
