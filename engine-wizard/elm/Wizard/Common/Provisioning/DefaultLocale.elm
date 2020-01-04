@@ -383,6 +383,8 @@ locale =
         , ( "Wizard.KMEditor.Editor.KMEditor.View.Editors.editorTitle.delete", "Delete" )
         , ( "Wizard.KMEditor.Editor.KMEditor.View.Editors.editorTitle.move", "Move" )
         , ( "Wizard.KMEditor.Editor.KMEditor.View.Editors.inputChildren.add", "Add %s" )
+        , ( "Wizard.KMEditor.Editor.KMEditor.View.Tree.collapseAll", "Collapse all" )
+        , ( "Wizard.KMEditor.Editor.KMEditor.View.Tree.expandAll", "Expand all" )
         , ( "Wizard.KMEditor.Editor.Preview.View.tagSelection.all", "Select All" )
         , ( "Wizard.KMEditor.Editor.Preview.View.tagSelection.none", "Select None" )
         , ( "Wizard.KMEditor.Editor.TagEditor.View.noQuestions", "There are no questions, create them first in the Knowledge Model editor." )

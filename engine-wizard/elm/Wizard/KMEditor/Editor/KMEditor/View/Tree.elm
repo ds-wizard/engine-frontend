@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (emptyNode, faKeyClass, faSet)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
@@ -13,10 +14,26 @@ import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
 
 
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.KMEditor.Editor.KMEditor.View.Tree"
+
+
 treeView : AppState -> String -> Dict String Editor -> String -> Html Msg
 treeView appState activeUuid editors kmUuid =
     div [ class "diff-tree" ]
-        [ ul [] [ treeNodeEditor appState activeUuid editors kmUuid ] ]
+        [ div [ class "actions" ]
+            [ a [ onClick TreeExpandAll ]
+                [ faSet "kmEditor.expandAll" appState
+                , lx_ "expandAll" appState
+                ]
+            , a [ onClick TreeCollapseAll ]
+                [ faSet "kmEditor.collapseAll" appState
+                , lx_ "collapseAll" appState
+                ]
+            ]
+        , ul [] [ treeNodeEditor appState activeUuid editors kmUuid ]
+        ]
 
 
 treeNodeEditor : AppState -> String -> Dict String Editor -> String -> Html Msg

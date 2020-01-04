@@ -22,7 +22,6 @@ $indent-step: 20px;
     @include indent(0, 20);
 
     display: inline-block;
-    margin: 20px 0;
     width: 100%;
 
     &-input {
@@ -31,6 +30,20 @@ $indent-step: 20px;
         height: 15rem;
         overflow: auto;
         margin: 0;
+    }
+
+    .actions {
+        padding: 0.5rem 0.7rem;
+        border-bottom: 1px solid $gray-400;
+
+        a {
+            font-size: 80%;
+            padding: 0.25rem 0.3rem;
+
+            .fa {
+                margin-right: 0.25rem;
+            }
+        }
     }
 
     ul {

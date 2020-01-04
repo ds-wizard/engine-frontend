@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents, update)
 
+import Dict
 import Random exposing (Seed)
 import Reorderable
 import SplitPane
@@ -324,6 +325,20 @@ update msg appState model fetchPreviewCmd =
 
                 _ ->
                     ( appState.seed, { model | moveModal = MoveModal.update moveModalMsg model.moveModal }, Cmd.none )
+
+        TreeExpandAll ->
+            let
+                newModel =
+                    { model | editors = Dict.map (\_ e -> setEditorOpen e) model.editors }
+            in
+            ( appState.seed, newModel, Cmd.none )
+
+        TreeCollapseAll ->
+            let
+                newModel =
+                    { model | editors = Dict.map (\_ e -> setEditorClosed e) model.editors }
+            in
+            ( appState.seed, newModel, Cmd.none )
 
 
 generateEvents : AppState -> Seed -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
