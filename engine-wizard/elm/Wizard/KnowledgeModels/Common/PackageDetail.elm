@@ -54,7 +54,10 @@ decoder =
 
 createFormOptions : PackageDetail -> List ( String, String )
 createFormOptions package =
-    List.map (createFormOption package) <| List.filter (Version.greaterThan package.version) package.versions
+    package.versions
+        |> List.sortWith Version.compare
+        |> List.filter (Version.greaterThan package.version)
+        |> List.map (createFormOption package)
 
 
 createFormOption : PackageDetail -> Version -> ( String, String )
