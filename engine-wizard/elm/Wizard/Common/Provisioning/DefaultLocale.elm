@@ -529,7 +529,7 @@ locale =
         , ( "Wizard.Questionnaires.Index.View.action.export", "Export" )
         , ( "Wizard.Questionnaires.Index.View.action.createMigration", "Create Migration" )
         , ( "Wizard.Questionnaires.Index.View.action.continueMigration", "Continue Migration" )
-        , ( "Wizard.Questionnaires.Index.View.action.cancelMigration", "Cancel Migratio" )
+        , ( "Wizard.Questionnaires.Index.View.action.cancelMigration", "Cancel Migration" )
         , ( "Wizard.Questionnaires.Index.View.action.edit", "Edit" )
         , ( "Wizard.Questionnaires.Index.View.action.delete", "Delete" )
         , ( "Wizard.Questionnaires.Index.View.deleteModal.message", "Are you sure you want to permanently delete %h?" )
