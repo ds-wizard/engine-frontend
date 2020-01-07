@@ -76,6 +76,7 @@ iconSet =
         , ( "questionnaire.followUpsIndication", "fas fa-list-ul" )
         , ( "questionnaire.resourcePageReferences", "fas fa-book" )
         , ( "questionnaire.urlReferences", "fas fa-external-link-alt" )
+        , ( "questionnaireList.clone", "far fa-copy" )
         , ( "questionnaireList.createMigration", "fas fa-random" )
         , ( "questionnaireList.export", "fas fa-download" )
         , ( "questionnaireList.owner", "fas fa-user" )

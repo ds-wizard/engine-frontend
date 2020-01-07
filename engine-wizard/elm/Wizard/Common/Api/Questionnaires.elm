@@ -1,5 +1,6 @@
 module Wizard.Common.Api.Questionnaires exposing
-    ( deleteQuestionnaire
+    ( cloneQuestionnaire
+    , deleteQuestionnaire
     , deleteQuestionnaireMigration
     , exportQuestionnaireUrl
     , fetchQuestionnaireMigration
@@ -15,7 +16,7 @@ module Wizard.Common.Api.Questionnaires exposing
 
 import Json.Decode as D
 import Json.Encode exposing (Value)
-import Wizard.Common.Api exposing (ToMsg, httpGet, jwtDelete, jwtFetch, jwtGet, jwtPut)
+import Wizard.Common.Api exposing (ToMsg, httpGet, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtPut)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models.SummaryReport exposing (SummaryReport, summaryReportDecoder)
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
@@ -46,6 +47,11 @@ getQuestionnairePublic =
 postQuestionnaire : Value -> AppState -> ToMsg Questionnaire msg -> Cmd msg
 postQuestionnaire =
     jwtFetch "/questionnaires" Questionnaire.decoder
+
+
+cloneQuestionnaire : String -> AppState -> ToMsg Questionnaire msg -> Cmd msg
+cloneQuestionnaire uuid =
+    jwtFetchEmpty ("/questionnaires?cloneUuid=" ++ uuid) Questionnaire.decoder
 
 
 fetchQuestionnaireMigration : String -> Value -> AppState -> ToMsg QuestionnaireMigration msg -> Cmd msg
