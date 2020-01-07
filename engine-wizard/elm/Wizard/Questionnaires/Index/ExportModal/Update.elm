@@ -16,9 +16,9 @@ import Wizard.Questionnaires.Index.ExportModal.Msgs exposing (Msg(..))
 import Wizard.Utils exposing (withNoCmd)
 
 
-fetchData : AppState -> Cmd Msg
-fetchData appState =
-    TemplatesApi.getTemplates appState GetTemplatesCompleted
+fetchData : String -> AppState -> Cmd Msg
+fetchData pkgId appState =
+    TemplatesApi.getTemplatesFor pkgId appState GetTemplatesCompleted
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

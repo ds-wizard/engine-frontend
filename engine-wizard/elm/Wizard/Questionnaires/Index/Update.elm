@@ -114,7 +114,7 @@ handleDeleteQuestionnaireCompleted wrapMsg appState model result =
 handleShowExportQuestionnaire : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
 handleShowExportQuestionnaire wrapMsg appState model questionnaire =
     ( { model | exportModalModel = setQuestionnaire questionnaire model.exportModalModel }
-    , Cmd.map (wrapMsg << ExportModalMsg) <| ExportModal.fetchData appState
+    , Cmd.map (wrapMsg << ExportModalMsg) <| ExportModal.fetchData questionnaire.package.id appState
     )
 
 
