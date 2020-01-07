@@ -51,6 +51,12 @@ update wrapMsg msg appState model =
         DeleteQuestionnaireMigrationCompleted result ->
             handleDeleteMigrationCompleted wrapMsg appState model result
 
+        CloneQuestionnaire questionnaire ->
+            handleCloneQuestionnaire wrapMsg appState model questionnaire
+
+        CloneQuestionnaireCompleted result ->
+            handleCloneQuestionnaireCompleted wrapMsg appState model result
+
 
 
 -- Handlers
@@ -138,5 +144,26 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | deletingMigration = ApiError.toActionResult (lg "apiError.questionnaires.migrations.deleteError" appState) error }
+            , getResultCmd result
+            )
+
+
+handleCloneQuestionnaire : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
+handleCloneQuestionnaire wrapMsg appState model questionnaire =
+    ( { model | cloningQuestionnaire = Loading }
+    , QuestionnairesApi.cloneQuestionnaire questionnaire.uuid appState (wrapMsg << CloneQuestionnaireCompleted)
+    )
+
+
+handleCloneQuestionnaireCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
+handleCloneQuestionnaireCompleted wrapMsg appState model result =
+    case result of
+        Ok questionnaire ->
+            ( { model | cloningQuestionnaire = Success <| questionnaire.name ++ " has been created" }
+            , Cmd.map wrapMsg <| fetchData appState
+            )
+
+        Err error ->
+            ( { model | cloningQuestionnaire = ApiError.toActionResult "Error" error }
             , getResultCmd result
             )

@@ -49,6 +49,7 @@ viewQuestionnaires appState model questionnaires =
         [ Page.header (l_ "header.title" appState) (indexActions appState)
         , FormResult.successOnlyView appState model.deletingQuestionnaire
         , FormResult.view appState model.deletingMigration
+        , FormResult.view appState model.cloningQuestionnaire
         , Listing.view appState (listingConfig appState) <| List.sortBy (String.toLower << .name) questionnaires
         , ExportModal.view appState model.exportModalModel |> Html.map ExportModalMsg
         , deleteModal appState model
@@ -146,11 +147,25 @@ listingActions appState questionnaire =
             , msg = ListingActionLink (detailRoute questionnaire)
             }
 
+        edit =
+            { extraClass = Nothing
+            , icon = Just <| faSet "_global.edit" appState
+            , label = l_ "action.edit" appState
+            , msg = ListingActionLink (Routes.QuestionnairesRoute <| EditRoute <| questionnaire.uuid)
+            }
+
         export_ =
             { extraClass = Nothing
             , icon = Just <| faSet "questionnaireList.export" appState
             , label = l_ "action.export" appState
             , msg = ListingActionMsg (ShowExportQuestionnaire questionnaire)
+            }
+
+        clone =
+            { extraClass = Nothing
+            , icon = Just <| faSet "questionnaireList.clone" appState
+            , label = l_ "action.clone" appState
+            , msg = ListingActionMsg (CloneQuestionnaire questionnaire)
             }
 
         createMigration =
@@ -174,13 +189,6 @@ listingActions appState questionnaire =
             , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
             }
 
-        edit =
-            { extraClass = Nothing
-            , icon = Just <| faSet "_global.edit" appState
-            , label = l_ "action.edit" appState
-            , msg = ListingActionLink (Routes.QuestionnairesRoute <| EditRoute <| questionnaire.uuid)
-            }
-
         delete =
             { extraClass = Just "text-danger"
             , icon = Just <| faSet "_global.delete" appState
@@ -197,11 +205,12 @@ listingActions appState questionnaire =
     []
         |> listInsertIf fillQuestionnaire (editable && not migrating)
         |> listInsertIf viewQuestionnaire (not editable && not migrating)
+        |> listInsertIf edit (editable && not migrating)
+        |> listInsertIf clone (not migrating)
+        |> listInsertIf export_ (not migrating)
         |> listInsertIf continueMigration migrating
         |> listInsertIf cancelMigration migrating
-        |> listInsertIf export_ (not migrating)
         |> listInsertIf createMigration (not migrating)
-        |> listInsertIf edit (editable && not migrating)
         |> listInsertIf delete (editable && not migrating)
 
 

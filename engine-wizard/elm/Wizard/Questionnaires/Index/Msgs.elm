@@ -14,3 +14,5 @@ type Msg
     | ExportModalMsg ExportModal.Msg
     | DeleteQuestionnaireMigration String
     | DeleteQuestionnaireMigrationCompleted (Result ApiError ())
+    | CloneQuestionnaire Questionnaire
+    | CloneQuestionnaireCompleted (Result ApiError Questionnaire)

@@ -14,6 +14,7 @@ type alias Model =
     , deletingQuestionnaire : ActionResult String
     , exportModalModel : ExportModal.Model
     , deletingMigration : ActionResult String
+    , cloningQuestionnaire : ActionResult String
     }
 
 
@@ -24,4 +25,5 @@ initialModel =
     , deletingQuestionnaire = Unset
     , exportModalModel = ExportModal.initialModel
     , deletingMigration = Unset
+    , cloningQuestionnaire = Unset
     }
