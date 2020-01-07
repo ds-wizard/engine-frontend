@@ -544,6 +544,7 @@ locale =
         , ( "Wizard.Questionnaires.Index.View.badge.outdated", "outdated" )
         , ( "Wizard.Questionnaires.Index.View.action.fillQuestionnaire", "Fill questionnaire" )
         , ( "Wizard.Questionnaires.Index.View.action.viewQuestionnaire", "View questionnaire" )
+        , ( "Wizard.Questionnaires.Index.View.action.clone", "Clone" )
         , ( "Wizard.Questionnaires.Index.View.action.export", "Export" )
         , ( "Wizard.Questionnaires.Index.View.action.createMigration", "Create Migration" )
         , ( "Wizard.Questionnaires.Index.View.action.continueMigration", "Continue Migration" )

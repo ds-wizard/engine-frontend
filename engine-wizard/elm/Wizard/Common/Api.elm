@@ -8,6 +8,7 @@ module Wizard.Common.Api exposing
     , httpPut
     , jwtDelete
     , jwtFetch
+    , jwtFetchEmpty
     , jwtGet
     , jwtPost
     , jwtPostEmpty
@@ -70,6 +71,15 @@ jwtFetch url decoder body appState toMsg =
     Jwt.Http.post appState.session.token
         { url = appState.apiUrl ++ url
         , body = Http.jsonBody body
+        , expect = expectJson toMsg decoder
+        }
+
+
+jwtFetchEmpty : String -> Decoder a -> AppState -> ToMsg a msg -> Cmd msg
+jwtFetchEmpty url decoder appState toMsg =
+    Jwt.Http.post appState.session.token
+        { url = appState.apiUrl ++ url
+        , body = Http.emptyBody
         , expect = expectJson toMsg decoder
         }
 
