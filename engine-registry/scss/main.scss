@@ -1,0 +1,97 @@
+@import "~bootstrap/scss/bootstrap";
+@import "mixins";
+@import "animations";
+
+@import "Common";
+@import "Pages";
+
+
+body {
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+
+
+.navbar-nav {
+    flex-direction: row;
+
+    .nav-link {
+        padding-right: .5rem;
+        padding-left: .5rem;
+        cursor: pointer;
+
+    }
+}
+
+
+.navbar-brand {
+    .logo {
+        height: 30px;
+        margin-right: 10px;
+    }
+}
+
+
+h1 + form {
+    margin-top: 2rem;
+}
+
+
+.btn-with-loader {
+    min-width: 100px;
+}
+
+
+.animation-fade-in {
+    opacity: 0;
+    @include animation(fadeIn, ease-in, 1);
+    @include animation-duration(1s);
+    @include animation-delay(.4s);
+    @include animation-fill-mode(forwards);
+}
+
+
+.full-page-illustrated-message {
+    display: flex;
+    max-width: 80rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 5rem auto auto;
+
+    img {
+        width: 30%;
+    }
+
+    div {
+        max-width: 50%;
+        margin-left: 2rem;
+    }
+
+    p {
+        font-size: 1.25rem;
+    }
+}
+
+
+.card-form {
+    max-width: 30rem;
+    margin: auto;
+
+    .card-header {
+        font-weight: bold;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+
+        label {
+            font-weight: bold
+        }
+    }
+
+    .form-group + .text-muted {
+        margin-top: -1.5rem;
+        margin-bottom: 2rem;
+    }
+}

@@ -1,0 +1,118 @@
+@import "../../variables";
+@import "../../mixins";
+@import "Editor/KMEditor";
+@import "Editor/Preview";
+@import "Editor/TagEditor";
+
+.KMEditor__Editor {
+    width: 100%;
+    margin-top: -20px;
+    margin-bottom: -20px;
+
+    .editor-header {
+        height: 50px;
+        position: fixed;
+        left: $side-navigation-width;
+        top: 0;
+        right: 0;
+        background: $gray-100;
+        z-index: 10;
+
+        &.with-error {
+            height: 100px;
+        }
+
+        .navigation {
+            height: 50px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 0.5rem;
+            border-bottom: 1px solid $gray-400;
+
+            & > div {
+                display: flex;
+                align-items: center;
+            }
+
+            .undo {
+                padding: 0 1rem;
+                justify-content: space-around;
+
+                a {
+                    color: $gray-700;
+                    padding: 0.5rem;
+
+                    &:hover {
+                        color: $primary;
+                    }
+
+                    &.disabled {
+                        color: $gray-300;
+                    }
+                }
+            }
+
+            .nav {
+                .nav-link {
+                    display: flex;
+                    align-items: center;
+                    padding: 0.5rem 1rem;
+                    text-transform: uppercase;
+
+                    &:first-child {
+                        margin-left: -0.5rem;
+                    }
+
+                    &:not(.active) {
+                        color: $gray-700;
+                    }
+
+                    &:hover {
+                        text-decoration: none;
+                        color: $primary;
+                    }
+
+                    .fa {
+                        margin-right: 10px;
+                    }
+                }
+            }
+
+            .actions {
+                flex-grow: 1;
+                justify-content: flex-end;
+
+                .btn {
+                    margin-left: 1rem;
+                }
+            }
+        }
+
+        .alert {
+            margin: 0;
+            height: 50px;
+            border-radius: 0;
+            border: 0;
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .editor-body {
+        margin-top: 50px;
+
+        &.with-error {
+            margin-top: 100px;
+        }
+    }
+
+}
+
+
+.side-navigation-collapsed {
+    .KMEditor__Editor {
+        .editor-header {
+            left: $side-navigation-width-collapsed;
+        }
+    }
+}

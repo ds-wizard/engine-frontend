@@ -1,0 +1,18 @@
+.KMDetail {
+    &__Panel {
+        border-left: 1px solid $gray-300;
+
+        p, ul, .organization {
+            margin-bottom: 2rem;
+        }
+
+        .organization {
+            display: flex;
+            align-items: center;
+
+            .ItemIcon {
+                margin-right: 0.5rem;
+            }
+        }
+    }
+}

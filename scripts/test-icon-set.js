@@ -1,19 +1,21 @@
 const glob = require('glob')
 const fs = require('fs')
+const utils = require('./utils')
 
 let error = 0
 
-const defaultIconSetPath = 'src/elm/Common/Provisioning/DefaultIconSet.elm'
+const {componentSource, defaultIconSetPath} = utils.getComponentData()
 const iconSetKeys = loadIconSetKeys()
 
 const regexFaSet = /[\s+\(]faSet "([^"]*)"/g
+const regexFaKeyClass = /[\s+\(]faKeyClass "([^"]*)"/g
 
 const ignored = [
     defaultIconSetPath,
-    'src/elm/Common/Html.elm'
+    `${componentSource}/Common/Html.elm`
 ]
 
-glob('src/elm/**/*.elm', (err, files) => {
+glob(`${componentSource}/**/*.elm`, (err, files) => {
     files.forEach(testFile)
 
     Object.entries(iconSetKeys).forEach(([key, value]) => {
@@ -51,15 +53,11 @@ function testFile(file) {
         return
     }
 
-    const moduleName = toModuleName(file)
+    const moduleName = utils.toModuleName(componentSource, file)
     const moduleContent = fs.readFileSync(file, 'utf8')
 
     testIconSet(moduleName, moduleContent, regexFaSet)
-}
-
-
-function toModuleName(file) {
-    return file.replace('src/elm/', '').replace('.elm', '').replace(/\//g, '.')
+    testIconSet(moduleName, moduleContent, regexFaKeyClass)
 }
 
 

@@ -1,0 +1,30 @@
+@import "variables";
+@import "~bootstrap/scss/bootstrap";
+
+@import "customizations/extra-app";
+@import "customizations/extra";
+
+$fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+
+
+@import "animations";
+@import "common";
+@import "elements";
+@import "form-engine";
+@import "forms";
+@import "layout";
+@import "tables";
+
+@import "modules/Common";
+@import "modules/Dashboard";
+@import "modules/Questionnaires";
+@import "modules/KMEditor";
+@import "modules/KnowledgeModels";
+@import "modules/Public";
+@import "modules/Users";
+
+@import "customizations/overrides-app";
+@import "customizations/overrides";

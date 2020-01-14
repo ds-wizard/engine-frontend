@@ -1,0 +1,69 @@
+@mixin border-radius($radius) {
+    -webkit-border-radius: $radius;
+    -moz-border-radius: $radius;
+    -ms-border-radius: $radius;
+    border-radius: $radius;
+}
+
+@mixin background-image-retina($file, $ext) {
+    background-image: url($file + '.' + $ext);
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 144dpi) {
+        & {
+            background-image: url($file + '@2x.' + $ext);
+        }
+    }
+}
+
+@mixin keyframes($name) {
+    @-webkit-keyframes #{$name} {
+        @content;
+    }
+    @-moz-keyframes #{$name} {
+        @content;
+    }
+    @-ms-keyframes #{$name} {
+        @content;
+    }
+    @keyframes #{$name} {
+        @content;
+    }
+}
+
+@mixin animation($name, $timing, $repeat) {
+    -webkit-animation: $name $timing $repeat;
+    -moz-animation: $name $timing $repeat;
+    animation: $name $timing $repeat;
+}
+
+@mixin animation-duration($value) {
+    -webkit-animation-duration: $value;
+    -moz-animation-duration: $value;
+    animation-duration: $value;
+}
+
+@mixin animation-delay($value) {
+    -webkit-animation-delay: $value;
+    -moz-animation-delay: $value;
+    animation-delay: $value;
+}
+
+@mixin animation-fill-mode($value) {
+    -webkit-animation-fill-mode: $value;
+    -moz-animation-fill-mode: $value;
+    animation-fill-mode: $value;
+}
+
+@mixin transition($value) {
+    -webkit-transition: $value;
+    -moz-transition: $value;
+    transition: $value;
+}
+
+@mixin not-selectable() {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

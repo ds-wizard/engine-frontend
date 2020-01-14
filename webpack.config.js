@@ -1,15 +1,19 @@
-var path = require('path')
-var CopyWebpackPlugin = require('copy-webpack-plugin')
-var HtmlWebpackPlugin = require('html-webpack-plugin')
-var MiniCssExtractPlugin = require('mini-css-extract-plugin')
-var OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
+const component = `engine-${process.env.COMPONENT}`
 
 module.exports = {
-    entry: ['./src/index.js', './src/scss/main.scss'],
+    entry: [
+        `./${component}/index.js`,
+        `./${component}/scss/main.scss`
+    ],
 
     output: {
-        path: path.resolve(__dirname + '/dist'),
+        path: path.resolve(`${__dirname}/dist/${component}/`),
         filename: '[name].[chunkhash].js',
         publicPath: '/'
     },
@@ -18,7 +22,7 @@ module.exports = {
         rules: [
             {
                 test: /\.(scss|css)$/,
-                use: [{ loader: MiniCssExtractPlugin.loader },
+                use: [{loader: MiniCssExtractPlugin.loader},
                     'css-loader',
                     'sass-loader'
                 ]
@@ -48,8 +52,7 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Data Stewardship Wizard',
-            template: 'src/index.ejs'
+            template: `${component}/index.ejs`
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[chunkhash].css',
@@ -57,18 +60,18 @@ module.exports = {
         }),
         new OptimizeCssAssetsPlugin({
             cssProcessorPluginOptions: {
-                preset: ['default', { discardComments: { removeAll: true } }]
+                preset: ['default', {discardComments: {removeAll: true}}]
             }
         }),
         new CopyWebpackPlugin([
-            { from: 'src/img', to: 'img' },
-            { from: 'src/favicon.ico', to: 'favicon.ico' }
+            {from: `${component}/img`, to: 'img'},
+            {from: `${component}/favicon.ico`, to: 'favicon.ico'}
         ])
     ],
 
     devServer: {
         inline: true,
-        stats: { colors: true },
-        historyApiFallback: { disableDotRule: true }
+        stats: {colors: true},
+        historyApiFallback: {disableDotRule: true}
     }
 }
