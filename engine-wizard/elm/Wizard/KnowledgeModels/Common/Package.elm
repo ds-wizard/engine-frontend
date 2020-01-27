@@ -1,5 +1,6 @@
 module Wizard.KnowledgeModels.Common.Package exposing
     ( Package
+    , compare
     , createFormOption
     , decoder
     , dummy
@@ -65,3 +66,8 @@ createFormOption package =
             package.name ++ " " ++ Version.toString package.version ++ " (" ++ package.id ++ ")"
     in
     ( package.id, optionText )
+
+
+compare : Package -> Package -> Order
+compare p1 p2 =
+    Basics.compare (String.toLower p1.name) (String.toLower p2.name)

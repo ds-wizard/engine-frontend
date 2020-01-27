@@ -7,12 +7,13 @@ import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Config exposing (Widget(..))
 import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Dashboard.Models exposing (Model)
+import Wizard.Dashboard.Msgs exposing (Msg)
 import Wizard.Dashboard.Widgets.DMPWorkflowWidget as DMPWorkflowWidget
 import Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget as PhaseQuestionnaireWidget
 import Wizard.Dashboard.Widgets.WelcomeWidget as WelcomeWidget
 
 
-view : AppState -> Model -> Html msg
+view : AppState -> Model -> Html Msg
 view appState model =
     let
         widgets =
@@ -27,7 +28,7 @@ view appState model =
         )
 
 
-viewAlert : String -> Maybe String -> Html msg
+viewAlert : String -> Maybe String -> Html Msg
 viewAlert alertClass mbMessage =
     case mbMessage of
         Just message ->
@@ -38,7 +39,7 @@ viewAlert alertClass mbMessage =
             emptyNode
 
 
-viewWidget : AppState -> Model -> Widget -> Html msg
+viewWidget : AppState -> Model -> Widget -> Html Msg
 viewWidget appState model widget =
     case widget of
         DMPWorkflow ->

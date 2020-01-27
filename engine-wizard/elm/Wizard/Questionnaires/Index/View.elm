@@ -5,10 +5,10 @@ import Html.Attributes exposing (..)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (emptyNode, faKeyClass, faSet, linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Routes
@@ -43,14 +43,14 @@ view appState model =
     Page.actionResultView appState (viewQuestionnaires appState model) model.questionnaires
 
 
-viewQuestionnaires : AppState -> Model -> List Questionnaire -> Html Msg
+viewQuestionnaires : AppState -> Model -> Listing.Model Questionnaire -> Html Msg
 viewQuestionnaires appState model questionnaires =
     div [ listClass "Questionnaires__Index" ]
         [ Page.header (l_ "header.title" appState) (indexActions appState)
         , FormResult.successOnlyView appState model.deletingQuestionnaire
         , FormResult.view appState model.deletingMigration
         , FormResult.view appState model.cloningQuestionnaire
-        , Listing.view appState (listingConfig appState) <| List.sortBy (String.toLower << .name) questionnaires
+        , Listing.view appState (listingConfig appState) questionnaires
         , ExportModal.view appState model.exportModalModel |> Html.map ExportModalMsg
         , deleteModal appState model
         ]
@@ -69,7 +69,7 @@ listingConfig : AppState -> ListingConfig Questionnaire Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
-    , actions = listingActions appState
+    , dropdownItems = listingActions appState
     , textTitle = .name
     , emptyText = l_ "listing.empty" appState
     , updated =
@@ -77,6 +77,7 @@ listingConfig appState =
             { getTime = .updatedAt
             , currentTime = appState.currentTime
             }
+    , wrapMsg = ListingMsg
     }
 
 
@@ -130,71 +131,80 @@ listingDescription appState questionnaire =
         ]
 
 
-listingActions : AppState -> Questionnaire -> List (ListingActionConfig Msg)
+listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)
 listingActions appState questionnaire =
     let
         fillQuestionnaire =
-            { extraClass = Just "font-weight-bold"
-            , icon = Nothing
-            , label = l_ "action.fillQuestionnaire" appState
-            , msg = ListingActionLink (detailRoute questionnaire)
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "questionnaire.fill" appState
+                , label = l_ "action.fillQuestionnaire" appState
+                , msg = ListingActionLink (detailRoute questionnaire)
+                }
 
         viewQuestionnaire =
-            { extraClass = Just "font-weight-bold"
-            , icon = Nothing
-            , label = l_ "action.viewQuestionnaire" appState
-            , msg = ListingActionLink (detailRoute questionnaire)
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "_global.view" appState
+                , label = l_ "action.viewQuestionnaire" appState
+                , msg = ListingActionLink (detailRoute questionnaire)
+                }
 
         edit =
-            { extraClass = Nothing
-            , icon = Just <| faSet "_global.edit" appState
-            , label = l_ "action.edit" appState
-            , msg = ListingActionLink (Routes.QuestionnairesRoute <| EditRoute <| questionnaire.uuid)
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "_global.edit" appState
+                , label = l_ "action.edit" appState
+                , msg = ListingActionLink (Routes.QuestionnairesRoute <| EditRoute <| questionnaire.uuid)
+                }
 
-        export_ =
-            { extraClass = Nothing
-            , icon = Just <| faSet "questionnaireList.export" appState
-            , label = l_ "action.export" appState
-            , msg = ListingActionMsg (ShowExportQuestionnaire questionnaire)
-            }
+        createDocument =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "questionnaireList.createDocument" appState
+                , label = l_ "action.createDocument" appState
+                , msg = ListingActionMsg (ShowExportQuestionnaire questionnaire)
+                }
 
         clone =
-            { extraClass = Nothing
-            , icon = Just <| faSet "questionnaireList.clone" appState
-            , label = l_ "action.clone" appState
-            , msg = ListingActionMsg (CloneQuestionnaire questionnaire)
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "questionnaireList.clone" appState
+                , label = l_ "action.clone" appState
+                , msg = ListingActionMsg (CloneQuestionnaire questionnaire)
+                }
 
         createMigration =
-            { extraClass = Nothing
-            , icon = Just <| faSet "questionnaireList.createMigration" appState
-            , label = l_ "action.createMigration" appState
-            , msg = ListingActionLink (Routes.QuestionnairesRoute <| CreateMigrationRoute <| questionnaire.uuid)
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "questionnaireList.createMigration" appState
+                , label = l_ "action.createMigration" appState
+                , msg = ListingActionLink (Routes.QuestionnairesRoute <| CreateMigrationRoute <| questionnaire.uuid)
+                }
 
         continueMigration =
-            { extraClass = Just "font-weight-bold"
-            , icon = Nothing
-            , label = l_ "action.continueMigration" appState
-            , msg = ListingActionLink (Routes.QuestionnairesRoute <| MigrationRoute <| questionnaire.uuid)
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "questionnaireList.createMigration" appState
+                , label = l_ "action.continueMigration" appState
+                , msg = ListingActionLink (Routes.QuestionnairesRoute <| MigrationRoute <| questionnaire.uuid)
+                }
 
         cancelMigration =
-            { extraClass = Nothing
-            , icon = Just <| faSet "_global.cancel" appState
-            , label = l_ "action.cancelMigration" appState
-            , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
-            }
+            Listing.dropdownAction
+                { extraClass = Just "text-danger"
+                , icon = faSet "_global.cancel" appState
+                , label = l_ "action.cancelMigration" appState
+                , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
+                }
 
         delete =
-            { extraClass = Just "text-danger"
-            , icon = Just <| faSet "_global.delete" appState
-            , label = l_ "action.delete" appState
-            , msg = ListingActionMsg (ShowHideDeleteQuestionnaire <| Just questionnaire)
-            }
+            Listing.dropdownAction
+                { extraClass = Just "text-danger"
+                , icon = faSet "_global.delete" appState
+                , label = l_ "action.delete" appState
+                , msg = ListingActionMsg (ShowHideDeleteQuestionnaire <| Just questionnaire)
+                }
 
         editable =
             Questionnaire.isEditable appState questionnaire
@@ -206,11 +216,14 @@ listingActions appState questionnaire =
         |> listInsertIf fillQuestionnaire (editable && not migrating)
         |> listInsertIf viewQuestionnaire (not editable && not migrating)
         |> listInsertIf edit (editable && not migrating)
+        |> listInsertIf Listing.dropdownSeparator (not migrating)
+        |> listInsertIf createDocument (not migrating)
+        |> listInsertIf Listing.dropdownSeparator (not migrating)
         |> listInsertIf clone (not migrating)
-        |> listInsertIf export_ (not migrating)
         |> listInsertIf continueMigration migrating
         |> listInsertIf cancelMigration migrating
         |> listInsertIf createMigration (not migrating)
+        |> listInsertIf Listing.dropdownSeparator (editable && not migrating)
         |> listInsertIf delete (editable && not migrating)
 
 

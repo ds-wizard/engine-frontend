@@ -4,12 +4,13 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (l, lg)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Branches as BranchesApi
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing
 import Wizard.Common.Setters exposing (setBranches, setPackage)
-import Wizard.KMEditor.Common.Branch exposing (Branch)
+import Wizard.KMEditor.Common.Branch as Branch exposing (Branch)
 import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm
 import Wizard.KMEditor.Index.Models exposing (Model)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
@@ -64,6 +65,9 @@ update msg wrapMsg appState model =
         DeleteMigrationCompleted result ->
             handleDeleteMigrationCompleted wrapMsg appState model result
 
+        ListingMsg listingMsg ->
+            handleListingMsg listingMsg model
+
 
 
 -- Handlers
@@ -71,11 +75,12 @@ update msg wrapMsg appState model =
 
 handleGetBranchesCompleted : AppState -> Model -> Result ApiError (List Branch) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetBranchesCompleted appState model result =
-    applyResult
+    applyResultTransform
         { setResult = setBranches
         , defaultError = lg "apiError.branches.getListError" appState
         , model = model
         , result = result
+        , transform = Listing.modelFromList << List.sortWith Branch.compare
         }
 
 
@@ -197,3 +202,10 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
             ( { model | deletingMigration = ApiError.toActionResult (lg "apiError.branches.migrations.deleteError" appState) error }
             , getResultCmd result
             )
+
+
+handleListingMsg : Listing.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg listingMsg model =
+    ( { model | branches = ActionResult.map (Listing.update listingMsg) model.branches }
+    , Cmd.none
+    )

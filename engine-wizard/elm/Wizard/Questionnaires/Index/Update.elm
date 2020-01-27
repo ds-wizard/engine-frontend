@@ -6,12 +6,13 @@ module Wizard.Questionnaires.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Common.Api exposing (applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing
 import Wizard.Common.Setters exposing (setQuestionnaires)
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
+import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Index.ExportModal.Models exposing (setQuestionnaire)
 import Wizard.Questionnaires.Index.ExportModal.Msgs as ExportModal
 import Wizard.Questionnaires.Index.ExportModal.Update as ExportModal
@@ -57,6 +58,9 @@ update wrapMsg msg appState model =
         CloneQuestionnaireCompleted result ->
             handleCloneQuestionnaireCompleted wrapMsg appState model result
 
+        ListingMsg listingMsg ->
+            handleListingMsg listingMsg model
+
 
 
 -- Handlers
@@ -64,11 +68,12 @@ update wrapMsg msg appState model =
 
 handleGetQuestionnairesCompleted : AppState -> Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnairesCompleted appState model result =
-    applyResult
+    applyResultTransform
         { setResult = setQuestionnaires
         , defaultError = lg "apiError.questionnaires.getListError" appState
         , model = model
         , result = result
+        , transform = Listing.modelFromList << List.sortWith Questionnaire.compare
         }
 
 
@@ -167,3 +172,10 @@ handleCloneQuestionnaireCompleted wrapMsg appState model result =
             ( { model | cloningQuestionnaire = ApiError.toActionResult "Error" error }
             , getResultCmd result
             )
+
+
+handleListingMsg : Listing.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg listingMsg model =
+    ( { model | questionnaires = ActionResult.map (Listing.update listingMsg) model.questionnaires }
+    , Cmd.none
+    )

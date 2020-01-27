@@ -32,6 +32,7 @@ view model =
         case model.appState.route of
             Routes.DashboardRoute ->
                 Wizard.Dashboard.View.view model.appState model.dashboardModel
+                    |> Html.map DashboardMsg
                     |> Layout.app model
 
             Routes.QuestionnairesRoute route ->

@@ -4,10 +4,10 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (..)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
@@ -32,24 +32,12 @@ view appState model =
     Page.actionResultView appState (viewUserList appState model) model.users
 
 
-viewUserList : AppState -> Model -> List User -> Html Msg
+viewUserList : AppState -> Model -> Listing.Model User -> Html Msg
 viewUserList appState model users =
-    let
-        sortUsers u1 u2 =
-            case compare (String.toLower u1.surname) (String.toLower u2.surname) of
-                LT ->
-                    LT
-
-                GT ->
-                    GT
-
-                EQ ->
-                    compare (String.toLower u1.name) (String.toLower u2.name)
-    in
     div [ listClass "Users__Index" ]
         [ Page.header (lg "users" appState) (indexActions appState)
         , FormResult.successOnlyView appState model.deletingUser
-        , Listing.view appState (listingConfig appState) <| List.sortWith sortUsers users
+        , Listing.view appState (listingConfig appState) users
         , deleteModal appState model
         ]
 
@@ -67,10 +55,11 @@ listingConfig : AppState -> ListingConfig User Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription
-    , actions = listingActions appState
+    , dropdownItems = listingActions appState
     , textTitle = \u -> u.surname ++ u.name
     , emptyText = l_ "listing.empty" appState
     , updated = Nothing
+    , wrapMsg = ListingMsg
     }
 
 
@@ -108,18 +97,21 @@ listingDescription user =
         ]
 
 
-listingActions : AppState -> User -> List (ListingActionConfig Msg)
+listingActions : AppState -> User -> List (ListingDropdownItem Msg)
 listingActions appState user =
-    [ { extraClass = Nothing
-      , icon = Just <| faSet "_global.edit" appState
-      , label = l_ "action.edit" appState
-      , msg = ListingActionLink (detailRoute user)
-      }
-    , { extraClass = Just "text-danger"
-      , icon = Just <| faSet "_global.delete" appState
-      , label = l_ "action.delete" appState
-      , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
-      }
+    [ Listing.dropdownAction
+        { extraClass = Nothing
+        , icon = faSet "_global.edit" appState
+        , label = l_ "action.edit" appState
+        , msg = ListingActionLink (detailRoute user)
+        }
+    , Listing.dropdownSeparator
+    , Listing.dropdownAction
+        { extraClass = Just "text-danger"
+        , icon = faSet "_global.delete" appState
+        , label = l_ "action.delete" appState
+        , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
+        }
     ]
 
 
