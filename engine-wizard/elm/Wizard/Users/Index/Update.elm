@@ -3,11 +3,13 @@ module Wizard.Users.Index.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Common.Api exposing (applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing
 import Wizard.Common.Setters exposing (setUsers)
 import Wizard.Msgs
+import Wizard.Users.Common.User as User
 import Wizard.Users.Index.Models exposing (Model)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
 
@@ -21,11 +23,12 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         GetUsersCompleted result ->
-            applyResult
+            applyResultTransform
                 { setResult = setUsers
                 , defaultError = lg "apiError.users.getListError" appState
                 , model = model
                 , result = result
+                , transform = Listing.modelFromList << List.sortWith User.compare
                 }
 
         ShowHideDeleteUser user ->
@@ -36,6 +39,11 @@ update msg wrapMsg appState model =
 
         DeleteUserCompleted result ->
             deleteUserCompleted wrapMsg appState model result
+
+        ListingMsg listingMsg ->
+            ( { model | users = ActionResult.map (Listing.update listingMsg) model.users }
+            , Cmd.none
+            )
 
 
 handleDeleteUser : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

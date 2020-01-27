@@ -5,6 +5,7 @@ module Wizard.KMEditor.Index.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Wizard.Common.Components.Listing as Listing
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.KMEditor.Common.Branch exposing (Branch)
 import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm exposing (BranchUpgradeForm)
@@ -12,7 +13,7 @@ import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type alias Model =
-    { branches : ActionResult (List Branch)
+    { branches : ActionResult (Listing.Model Branch)
     , branchToBeDeleted : Maybe Branch
     , deletingKnowledgeModel : ActionResult String
     , creatingMigration : ActionResult String

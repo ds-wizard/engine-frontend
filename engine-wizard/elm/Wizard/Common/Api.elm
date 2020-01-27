@@ -1,6 +1,7 @@
 module Wizard.Common.Api exposing
     ( ToMsg
     , applyResult
+    , applyResultTransform
     , getResultCmd
     , httpFetch
     , httpGet
@@ -163,9 +164,27 @@ applyResult :
     }
     -> ( model, Cmd Wizard.Msgs.Msg )
 applyResult { setResult, defaultError, model, result } =
+    applyResultTransform
+        { setResult = setResult
+        , defaultError = defaultError
+        , model = model
+        , result = result
+        , transform = identity
+        }
+
+
+applyResultTransform :
+    { setResult : ActionResult data2 -> model -> model
+    , defaultError : String
+    , model : model
+    , result : Result ApiError data1
+    , transform : data1 -> data2
+    }
+    -> ( model, Cmd Wizard.Msgs.Msg )
+applyResultTransform { setResult, defaultError, model, result, transform } =
     case result of
         Ok data ->
-            ( setResult (Success data) model
+            ( setResult (Success <| transform data) model
             , Cmd.none
             )
 

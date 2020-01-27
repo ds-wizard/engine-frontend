@@ -8,12 +8,12 @@ import Shared.Locale exposing (l, lg, lh, lx)
 import Version exposing (Version)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (..)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.Branch as Branch exposing (Branch)
@@ -48,12 +48,12 @@ view appState model =
     Page.actionResultView appState (viewKMEditors appState model) model.branches
 
 
-viewKMEditors : AppState -> Model -> List Branch -> Html Msg
+viewKMEditors : AppState -> Model -> Listing.Model Branch -> Html Msg
 viewKMEditors appState model branches =
     div [ listClass "KMEditor__Index" ]
         [ Page.header (l_ "header.title" appState) (indexActions appState)
         , FormResult.view appState model.deletingMigration
-        , Listing.view appState (listingConfig appState) <| List.sortBy (String.toLower << .name) branches
+        , Listing.view appState (listingConfig appState) branches
         , deleteModal appState model
         , upgradeModal appState model
         ]
@@ -72,7 +72,7 @@ listingConfig : AppState -> ListingConfig Branch Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
-    , actions = listingActions appState
+    , dropdownItems = listingActions appState
     , textTitle = .name
     , emptyText = l_ "content.empty" appState
     , updated =
@@ -80,6 +80,7 @@ listingConfig appState =
             { getTime = .updatedAt
             , currentTime = appState.currentTime
             }
+    , wrapMsg = ListingMsg
     }
 
 
@@ -189,57 +190,81 @@ listingDescription appState branch =
         ]
 
 
-listingActions : AppState -> Branch -> List (ListingActionConfig Msg)
+listingActions : AppState -> Branch -> List (ListingDropdownItem Msg)
 listingActions appState branch =
     let
         openEditor =
-            { extraClass = Just "font-weight-bold"
-            , icon = Nothing
-            , label = l_ "action.openEditor" appState
-            , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute <| branch.uuid)
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "kmEditorList.edit" appState
+                , label = l_ "action.openEditor" appState
+                , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute <| branch.uuid)
+                }
 
         publish =
-            { extraClass = Nothing
-            , icon = Just <| faSet "kmEditorList.publish" appState
-            , label = l_ "action.publish" appState
-            , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute <| branch.uuid
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "kmEditorList.publish" appState
+                , label = l_ "action.publish" appState
+                , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute <| branch.uuid
+                }
 
         upgrade =
-            { extraClass = Nothing
-            , icon = Just <| faSet "kmEditorList.upgrade" appState
-            , label = l_ "action.upgrade" appState
-            , msg = ListingActionMsg <| ShowHideUpgradeModal <| Just branch
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "kmEditorList.upgrade" appState
+                , label = l_ "action.upgrade" appState
+                , msg = ListingActionMsg <| ShowHideUpgradeModal <| Just branch
+                }
 
         continueMigration =
-            { extraClass = Nothing
-            , icon = Just <| faSet "kmEditorList.continueMigration" appState
-            , label = l_ "action.continueMigration" appState
-            , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute <| branch.uuid
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "kmEditorList.continueMigration" appState
+                , label = l_ "action.continueMigration" appState
+                , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute <| branch.uuid
+                }
 
         cancelMigration =
-            { extraClass = Nothing
-            , icon = Just <| faSet "_global.cancel" appState
-            , label = l_ "action.cancelMigration" appState
-            , msg = ListingActionMsg <| DeleteMigration <| branch.uuid
-            }
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "_global.cancel" appState
+                , label = l_ "action.cancelMigration" appState
+                , msg = ListingActionMsg <| DeleteMigration <| branch.uuid
+                }
 
         delete =
-            { extraClass = Just "text-danger"
-            , icon = Just <| faSet "_global.delete" appState
-            , label = l_ "action.delete" appState
-            , msg = ListingActionMsg <| ShowHideDeleteBranchModal <| Just branch
-            }
+            Listing.dropdownAction
+                { extraClass = Just "text-danger"
+                , icon = faSet "_global.delete" appState
+                , label = l_ "action.delete" appState
+                , msg = ListingActionMsg <| ShowHideDeleteBranchModal <| Just branch
+                }
+
+        showOpenEditor =
+            openEditorActionVisible branch
+
+        showPublish =
+            publishActionVisible appState.jwt branch
+
+        showUpgrade =
+            upgradeActionVisible appState.jwt branch
+
+        showContinueMigration =
+            continueMigrationActionVisible appState.jwt branch
+
+        showCancelMigration =
+            tableActionCancelMigrationVisible appState.jwt branch
     in
     []
-        |> listInsertIf openEditor (openEditorActionVisible branch)
-        |> listInsertIf publish (publishActionVisible appState.jwt branch)
-        |> listInsertIf upgrade (upgradeActionVisible appState.jwt branch)
-        |> listInsertIf continueMigration (continueMigrationActionVisible appState.jwt branch)
-        |> listInsertIf cancelMigration (tableActionCancelMigrationVisible appState.jwt branch)
+        |> listInsertIf openEditor showOpenEditor
+        |> listInsertIf Listing.dropdownSeparator showPublish
+        |> listInsertIf publish showPublish
+        |> listInsertIf Listing.dropdownSeparator (showUpgrade || showContinueMigration || showCancelMigration)
+        |> listInsertIf upgrade showUpgrade
+        |> listInsertIf continueMigration showContinueMigration
+        |> listInsertIf cancelMigration showCancelMigration
+        |> listInsertIf Listing.dropdownSeparator True
         |> listInsertIf delete True
 
 

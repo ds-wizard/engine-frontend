@@ -6,10 +6,10 @@ import Shared.Locale exposing (l, lg, lh, lx)
 import Version
 import Wizard.Auth.Permission exposing (hasPerm, packageManagementWrite)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (..)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Common.Package exposing (Package)
@@ -40,12 +40,12 @@ view appState model =
     Page.actionResultView appState (viewKnowledgeModels appState model) model.packages
 
 
-viewKnowledgeModels : AppState -> Model -> List Package -> Html Msg
+viewKnowledgeModels : AppState -> Model -> Listing.Model Package -> Html Msg
 viewKnowledgeModels appState model packages =
     div [ listClass "KnowledgeModels__Index" ]
         [ Page.header (l_ "header.title" appState) (indexActions appState)
         , FormResult.successOnlyView appState model.deletingPackage
-        , Listing.view appState (listingConfig appState) <| List.sortBy (String.toLower << .name) packages
+        , Listing.view appState (listingConfig appState) packages
         , deleteModal appState model
         ]
 
@@ -69,7 +69,7 @@ listingConfig : AppState -> ListingConfig Package Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
-    , actions = listingActions appState
+    , dropdownItems = listingActions appState
     , textTitle = .name
     , emptyText = l_ "listing.empty" appState
     , updated =
@@ -77,6 +77,7 @@ listingConfig appState =
             { getTime = .createdAt
             , currentTime = appState.currentTime
             }
+    , wrapMsg = ListingMsg
     }
 
 
@@ -132,24 +133,27 @@ listingDescription appState package =
         ]
 
 
-listingActions : AppState -> Package -> List (ListingActionConfig Msg)
+listingActions : AppState -> Package -> List (ListingDropdownItem Msg)
 listingActions appState package =
     let
         actions =
-            [ { extraClass = Just "font-weight-bold"
-              , icon = Nothing
-              , label = l_ "action.viewDetail" appState
-              , msg = ListingActionLink (detailRoute package)
-              }
+            [ Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "_global.view" appState
+                , label = l_ "action.viewDetail" appState
+                , msg = ListingActionLink (detailRoute package)
+                }
             ]
     in
     if hasPerm appState.jwt packageManagementWrite then
         actions
-            ++ [ { extraClass = Just "text-danger"
-                 , icon = Just <| faSet "_global.delete" appState
-                 , label = l_ "action.delete" appState
-                 , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
-                 }
+            ++ [ Listing.dropdownSeparator
+               , Listing.dropdownAction
+                    { extraClass = Just "text-danger"
+                    , icon = faSet "_global.delete" appState
+                    , label = l_ "action.delete" appState
+                    , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
+                    }
                ]
 
     else

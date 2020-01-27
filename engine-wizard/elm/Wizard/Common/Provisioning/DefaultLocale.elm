@@ -241,6 +241,8 @@ locale =
         , ( "_global.users", "Users" )
 
         -- Modules texts
+        , ( "Wizard.Common.Components.Listing.empty.heading", "No data" )
+        , ( "Wizard.Common.Components.Listing.item.updated", "Updated " )
         , ( "Wizard.Common.FormEngine.View.groupElement.add", "Add" )
         , ( "Wizard.Common.FormEngine.View.groupElement.noAnswers", "There are no answers yet" )
         , ( "Wizard.Common.FormEngine.View.typeHints.loading", "Loading..." )
@@ -332,8 +334,6 @@ locale =
         , ( "Wizard.Common.View.Layout.menu.questionnaires", "Questionnaires" )
         , ( "Wizard.Common.View.Layout.menu.users", "Users" )
         , ( "Wizard.Common.View.Layout.sidebar.collapse", "Collapse sidebar" )
-        , ( "Wizard.Common.View.Listing.empty.heading", "No data" )
-        , ( "Wizard.Common.View.Listing.item.updated", "Updated " )
         , ( "Wizard.Common.View.Page.error.heading", "Error" )
         , ( "Wizard.Common.View.Page.loader.loading", "Loading..." )
         , ( "Wizard.Common.View.Tag.list.empty", "There are no tags configured for the Knowledge Model" )
@@ -545,7 +545,7 @@ locale =
         , ( "Wizard.Questionnaires.Index.View.action.fillQuestionnaire", "Fill questionnaire" )
         , ( "Wizard.Questionnaires.Index.View.action.viewQuestionnaire", "View questionnaire" )
         , ( "Wizard.Questionnaires.Index.View.action.clone", "Clone" )
-        , ( "Wizard.Questionnaires.Index.View.action.export", "Export" )
+        , ( "Wizard.Questionnaires.Index.View.action.createDocument", "Create Document" )
         , ( "Wizard.Questionnaires.Index.View.action.createMigration", "Create Migration" )
         , ( "Wizard.Questionnaires.Index.View.action.continueMigration", "Continue Migration" )
         , ( "Wizard.Questionnaires.Index.View.action.cancelMigration", "Cancel Migration" )
