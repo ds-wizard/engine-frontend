@@ -86,5 +86,6 @@ iconSet =
         , ( "questionnaireList.owner", "fas fa-user" )
         , ( "questionnaireMigration.resolve", "fas fa-check" )
         , ( "questionnaireMigration.undo", "fas fa-undo-alt" )
+        , ( "report.repository", "fab fa-github" )
         , ( "userCard.icon", "far fa-user-circle" )
         ]

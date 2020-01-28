@@ -109,7 +109,8 @@ viewReportIssueModal appState isOpen =
             [ p [] [ lx_ "reportModal.info" appState ]
             , p []
                 [ a [ class "link-with-icon", href appState.config.client.supportRepositoryUrl, target "_blank" ]
-                    [ text appState.config.client.supportRepositoryName
+                    [ faSet "report.repository" appState
+                    , text appState.config.client.supportRepositoryName
                     ]
                 ]
             , p [] (lh_ "reportModal.writeUs" [ supportMailLink ] appState)
