@@ -83,7 +83,7 @@ viewProfileMenu appState dropdownState =
         , toggleButton =
             Dropdown.toggle [ Button.roleLink ]
                 [ faSet "menu.user" appState
-                , span [ class "sidebar-link" ] [ text name, faSet "menu.dropdownToggle" appState ]
+                , span [ class "sidebar-link" ] [ span [] [ text name ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =
             [ Dropdown.anchorItem (linkToAttributes appState (Routes.UsersRoute <| Wizard.Users.Routes.EditRoute "current"))

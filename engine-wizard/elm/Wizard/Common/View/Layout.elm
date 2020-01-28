@@ -257,14 +257,6 @@ customMenuItem link =
 profileInfo : Model -> Html Msg
 profileInfo model =
     let
-        name =
-            case model.appState.session.user of
-                Just user ->
-                    user.name ++ " " ++ user.surname
-
-                Nothing ->
-                    ""
-
         collapseLink =
             if model.appState.session.sidebarCollapsed then
                 a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed False), class "collapse" ]
