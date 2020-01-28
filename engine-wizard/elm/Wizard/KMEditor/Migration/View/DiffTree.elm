@@ -225,7 +225,7 @@ viewIntegrationNode :
 viewIntegrationNode appState km cssClass mbTitle =
     let
         integrationNode =
-            viewNode (faSet "km.tag" appState) cssClass mbTitle Nothing
+            viewNode (faSet "km.integration" appState) cssClass mbTitle Nothing
     in
     viewKnowledgeModelNode appState (Just integrationNode) stateClass.none (Just km.name)
 
