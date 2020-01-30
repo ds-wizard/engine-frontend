@@ -18,7 +18,7 @@ module Wizard.Common.Components.Listing exposing
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, div, span, text)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Shared.Locale exposing (l)
 import Time
@@ -88,6 +88,7 @@ type alias ListingActionConfig msg =
 type ListingActionType msg
     = ListingActionMsg msg
     | ListingActionLink Routes.Route
+    | ListingActionExternalLink String
 
 
 
@@ -237,18 +238,19 @@ viewAction appState dropdownItem =
     case dropdownItem of
         ListingDropdownAction action ->
             let
-                event =
+                attrs =
                     case action.msg of
                         ListingActionLink route ->
-                            href <| Routing.toUrl appState route
+                            [ href <| Routing.toUrl appState route ]
+
+                        ListingActionExternalLink url ->
+                            [ href url, target "_blank" ]
 
                         ListingActionMsg msg ->
-                            onClick msg
+                            [ onClick msg ]
             in
             Dropdown.anchorItem
-                [ class <| Maybe.withDefault "" action.extraClass
-                , event
-                ]
+                ([ class <| Maybe.withDefault "" action.extraClass ] ++ attrs)
                 [ action.icon, text action.label ]
 
         ListingDropdownSeparator ->

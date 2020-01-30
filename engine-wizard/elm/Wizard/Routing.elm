@@ -19,6 +19,7 @@ import Url.Parser exposing (..)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.JwtToken exposing (JwtToken)
+import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
 import Wizard.Public.Routes
@@ -33,10 +34,11 @@ matchers appState =
     let
         parsers =
             []
-                ++ Wizard.Questionnaires.Routing.parses appState Routes.QuestionnairesRoute
+                ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
+                ++ Wizard.Questionnaires.Routing.parses appState Routes.QuestionnairesRoute
                 ++ Wizard.Users.Routing.parses Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    , map Routes.OrganizationRoute (s (lr "organization" appState))
@@ -60,8 +62,8 @@ isAllowed route maybeJwt =
         Routes.DashboardRoute ->
             True
 
-        Routes.QuestionnairesRoute dsPlannerRoute ->
-            Wizard.Questionnaires.Routing.isAllowed dsPlannerRoute maybeJwt
+        Routes.DocumentsRoute documentsRoute ->
+            Wizard.Documents.Routing.isAllowed documentsRoute maybeJwt
 
         Routes.KMEditorRoute kmEditorRoute ->
             Wizard.KMEditor.Routing.isAllowed kmEditorRoute maybeJwt
@@ -74,6 +76,9 @@ isAllowed route maybeJwt =
 
         Routes.PublicRoute _ ->
             True
+
+        Routes.QuestionnairesRoute questionnaireRoute ->
+            Wizard.Questionnaires.Routing.isAllowed questionnaireRoute maybeJwt
 
         Routes.UsersRoute usersRoute ->
             Wizard.Users.Routing.isAllowed usersRoute maybeJwt
@@ -92,6 +97,9 @@ toUrl appState route =
             case route of
                 Routes.DashboardRoute ->
                     [ lr "dashboard" appState ]
+
+                Routes.DocumentsRoute documentsRoute ->
+                    Wizard.Documents.Routing.toUrl appState documentsRoute
 
                 Routes.QuestionnairesRoute questionnairesRoute ->
                     Wizard.Questionnaires.Routing.toUrl appState questionnairesRoute

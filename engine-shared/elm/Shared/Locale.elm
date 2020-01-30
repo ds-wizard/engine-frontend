@@ -39,6 +39,11 @@ lgx t =
     text << lg t
 
 
+lgf : String -> List String -> { a | provisioning : Provisioning } -> String
+lgf =
+    lf "_global"
+
+
 lf : String -> String -> List String -> { a | provisioning : Provisioning } -> String
 lf moduleKey termKey terms appState =
     String.format (l moduleKey termKey appState) terms

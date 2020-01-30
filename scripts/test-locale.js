@@ -10,6 +10,7 @@ const localeKeys = loadLocaleKeys()
 const regexL = /\s+l "([^"]*)"/
 const regexLG = /[\s+\(]lg "([^"]*)"/g
 const regexLGX = /[\s+\(]lgx "([^"]*)"/g
+const regexLGF = /[\s+\(]lgf "([^"]*)"/g
 const regexLR = /[\s+\(]lr "([^"]*)"/g
 const regexLF = /\s+lf "([^"]*)"/
 const regexLH = /\s+lh "([^"]*)"/
@@ -67,6 +68,7 @@ function testFile(file) {
 
     testLocaleGlobal(moduleName, moduleContent, '_global', regexLG)
     testLocaleGlobal(moduleName, moduleContent, '_global', regexLGX)
+    testLocaleGlobal(moduleName, moduleContent, '_global', regexLGF)
     testLocaleGlobal(moduleName, moduleContent, '__routing', regexLR)
     testLocale(moduleName, moduleContent, regexL, regexL_)
     testLocale(moduleName, moduleContent, regexLF, regexLF_)
