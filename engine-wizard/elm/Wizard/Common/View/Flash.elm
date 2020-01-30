@@ -1,11 +1,13 @@
 module Wizard.Common.View.Flash exposing
-    ( error
+    ( actionResult
+    , error
     , info
     , loader
     , success
     , warning
     )
 
+import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Shared.Locale exposing (l)
@@ -43,6 +45,19 @@ loader appState =
     flashView "alert-inline-loader"
         (faSet "_global.spinner" appState)
         (l_ "loader.loading" appState)
+
+
+actionResult : AppState -> ActionResult a -> Html msg
+actionResult appState result =
+    case result of
+        Loading ->
+            loader appState
+
+        Error err ->
+            error appState err
+
+        _ ->
+            emptyNode
 
 
 flashView : String -> Html msg -> String -> Html msg

@@ -7,6 +7,14 @@
         display: flex;
         align-items: center;
 
+        &:hover {
+            background: $gray-200;
+        }
+
+        &:last-child:first-child {
+            border-bottom: 1px solid rgba(0, 0, 0, .125);
+        }
+
         .ItemIcon {
             margin-right: 1rem;
         }
@@ -17,18 +25,25 @@
             min-width: 0;
         }
 
-        &:hover {
-            background: $gray-200;
-        }
-
         .description, .title {
             a {
-                color: $body-color !important;
                 text-decoration: none;
 
                 &:hover {
                     text-decoration: underline;
                 }
+            }
+        }
+
+        .title {
+            a {
+                color: $body-color !important;
+            }
+        }
+
+        .description {
+            a {
+                color: $gray-700;
             }
         }
 
@@ -45,6 +60,11 @@
                     display: flex;
                     align-items: center;
                     justify-content: flex-start;
+
+                    & > .fa {
+                        margin-left: 0.5rem;
+                        color: $gray-500;
+                    }
                 }
             }
 
@@ -54,12 +74,12 @@
                 overflow: hidden;
             }
 
-            .badge, .fa {
+            .badge {
                 margin-left: 0.5rem;
-            }
 
-            .fa {
-                color: $gray-500;
+                .fa {
+                    margin-right: 0.25rem;
+                }
             }
         }
 
@@ -105,6 +125,11 @@
 
                 &:active {
                     color: $light;
+
+                    &.text-danger {
+                        background-color: $danger;
+                        color: $light !important;
+                    }
                 }
 
                 .fa {
@@ -115,18 +140,24 @@
             }
         }
 
-        .fragment + .fragment {
-            margin-left: 0.5rem;
+        .fragment {
+            &:not(code) {
+                color: $gray-700;
+            }
 
             .fa {
                 margin-right: 0.25rem;
             }
 
-            &:before {
-                content: "·";
-                margin-right: 0.5rem;
-                display: inline-block;
-                text-decoration: none !important;
+            & + .fragment {
+                margin-left: 0.5rem;
+
+                &:before {
+                    content: "·";
+                    margin-right: 0.5rem;
+                    display: inline-block;
+                    text-decoration: none !important;
+                }
             }
         }
     }

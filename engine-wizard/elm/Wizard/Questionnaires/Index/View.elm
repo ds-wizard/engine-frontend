@@ -11,11 +11,11 @@ import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.Documents.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Common.QuestionnaireState exposing (QuestionnaireState(..))
 import Wizard.Questionnaires.Common.View exposing (accessibilityBadge)
-import Wizard.Questionnaires.Index.ExportModal.View as ExportModal
 import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
@@ -51,7 +51,6 @@ viewQuestionnaires appState model questionnaires =
         , FormResult.view appState model.deletingMigration
         , FormResult.view appState model.cloningQuestionnaire
         , Listing.view appState (listingConfig appState) questionnaires
-        , ExportModal.view appState model.exportModalModel |> Html.map ExportModalMsg
         , deleteModal appState model
         ]
 
@@ -163,7 +162,15 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createDocument" appState
                 , label = l_ "action.createDocument" appState
-                , msg = ListingActionMsg (ShowExportQuestionnaire questionnaire)
+                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.CreateRoute <| Just questionnaire.uuid)
+                }
+
+        viewDocuments =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "questionnaireList.viewDocuments" appState
+                , label = l_ "action.viewDocuments" appState
+                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute <| Just questionnaire.uuid)
                 }
 
         clone =
@@ -218,6 +225,7 @@ listingActions appState questionnaire =
         |> listInsertIf edit (editable && not migrating)
         |> listInsertIf Listing.dropdownSeparator (not migrating)
         |> listInsertIf createDocument (not migrating)
+        |> listInsertIf viewDocuments (not migrating)
         |> listInsertIf Listing.dropdownSeparator (not migrating)
         |> listInsertIf clone (not migrating)
         |> listInsertIf continueMigration migrating

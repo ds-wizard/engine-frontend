@@ -9,6 +9,7 @@ import Wizard.Common.Menu.Update
 import Wizard.Common.Session as Session
 import Wizard.Common.Time as Time
 import Wizard.Dashboard.Update
+import Wizard.Documents.Update
 import Wizard.KMEditor.Update
 import Wizard.KnowledgeModels.Update
 import Wizard.Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
@@ -30,6 +31,10 @@ fetchData model =
                 Routes.DashboardRoute ->
                     Cmd.map DashboardMsg <|
                         Wizard.Dashboard.Update.fetchData model.appState
+
+                Routes.DocumentsRoute route ->
+                    Cmd.map DocumentsMsg <|
+                        Wizard.Documents.Update.fetchData route model.appState model.documentsModel
 
                 Routes.QuestionnairesRoute route ->
                     Cmd.map Wizard.Msgs.QuestionnairesMsg <|
@@ -132,12 +137,12 @@ update msg model =
             in
             ( { model | dashboardModel = dashboardModel }, cmd )
 
-        Wizard.Msgs.QuestionnairesMsg dsPlannerMsg ->
+        Wizard.Msgs.DocumentsMsg documentsMsg ->
             let
-                ( questionnairesModel, cmd ) =
-                    Wizard.Questionnaires.Update.update Wizard.Msgs.QuestionnairesMsg dsPlannerMsg model.appState model.questionnairesModel
+                ( documentsModel, cmd ) =
+                    Wizard.Documents.Update.update Wizard.Msgs.DocumentsMsg documentsMsg model.appState model.documentsModel
             in
-            ( { model | questionnairesModel = questionnairesModel }, cmd )
+            ( { model | documentsModel = documentsModel }, cmd )
 
         Wizard.Msgs.KMEditorMsg kmEditorMsg ->
             let
@@ -166,6 +171,13 @@ update msg model =
                     Wizard.Public.Update.update publicMsg Wizard.Msgs.PublicMsg model.appState model.publicModel
             in
             ( { model | publicModel = publicModel }, cmd )
+
+        Wizard.Msgs.QuestionnairesMsg questionnairesMsg ->
+            let
+                ( questionnairesModel, cmd ) =
+                    Wizard.Questionnaires.Update.update Wizard.Msgs.QuestionnairesMsg questionnairesMsg model.appState model.questionnairesModel
+            in
+            ( { model | questionnairesModel = questionnairesModel }, cmd )
 
         Wizard.Msgs.UsersMsg usersMsg ->
             let

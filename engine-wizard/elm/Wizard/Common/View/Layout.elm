@@ -15,6 +15,7 @@ import Wizard.Common.Html exposing (emptyNode, fa, faSet, linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
 import Wizard.Common.View.Page as Page
+import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Models exposing (Model, userLoggedIn)
@@ -212,6 +213,11 @@ menuItems appState =
         (l_ "menu.questionnaires" appState)
         (faSet "menu.questionnaires" appState)
         (Routes.QuestionnairesRoute Wizard.Questionnaires.Routes.IndexRoute)
+        Perm.questionnaire
+    , MenuItem
+        (l_ "menu.documents" appState)
+        (faSet "menu.documents" appState)
+        (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute Nothing)
         Perm.questionnaire
     ]
 

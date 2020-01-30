@@ -51,7 +51,7 @@ viewHelpMenu appState dropdownState =
             Dropdown.toggle [ Button.roleLink ]
                 [ faSet "menu.help" appState
                 , span [ class "sidebar-link" ]
-                    [ lx_ "helpMenu.help" appState, faSet "menu.dropdownToggle" appState ]
+                    [ span [] [ lx_ "helpMenu.help" appState ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =
             [ Dropdown.anchorItem [ onLinkClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetAboutOpen True) ]

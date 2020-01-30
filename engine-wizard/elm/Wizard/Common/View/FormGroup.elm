@@ -2,6 +2,7 @@ module Wizard.Common.View.FormGroup exposing
     ( codeView
     , color
     , formGroup
+    , formatRadioGroup
     , getErrors
     , input
     , list
@@ -89,6 +90,30 @@ richRadioGroup appState options =
                         ]
             in
             div [ class "form-radio-group" ] (List.map buildOption options)
+    in
+    formGroup radioInput [] appState
+
+
+formatRadioGroup : AppState -> List ( Html Form.Msg, String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+formatRadioGroup appState options =
+    let
+        radioInput state attrs =
+            let
+                buildOption ( icon, format, formatLabel ) =
+                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just format ) ] ]
+                        [ Html.input
+                            [ value format
+                            , checked (state.value == Just format)
+                            , type_ "radio"
+                            , name "format"
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String format)
+                            ]
+                            []
+                        , icon
+                        , text formatLabel
+                        ]
+            in
+            div [ class "export-formats" ] (List.map buildOption options)
     in
     formGroup radioInput [] appState
 
