@@ -3,20 +3,34 @@ module Wizard.Documents.Index.Update exposing (..)
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (applyResultTransform, getResultCmd)
+import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Documents as DocumentsApi
+import Wizard.Common.Api.Questionnaires as QuestionnaireApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.Common.Setters exposing (setDocuments)
+import Wizard.Common.Setters exposing (setDocuments, setQuestionnaire)
 import Wizard.Documents.Common.Document as Document exposing (Document)
 import Wizard.Documents.Index.Models exposing (Model, updateStates)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Msgs
+import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
 fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
-    DocumentsApi.getDocuments model.questionnaireUuid appState GetDocumentsCompleted
+    let
+        questionnaireCmd =
+            case model.questionnaireUuid of
+                Just questionnaireUuid ->
+                    QuestionnaireApi.getQuestionnaire questionnaireUuid appState GetQuestionnaireCompleted
+
+                Nothing ->
+                    Cmd.none
+    in
+    Cmd.batch
+        [ DocumentsApi.getDocuments model.questionnaireUuid appState GetDocumentsCompleted
+        , questionnaireCmd
+        ]
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -24,6 +38,9 @@ update wrapMsg msg appState model =
     case msg of
         GetDocumentsCompleted result ->
             handleGetDocumentsCompleted appState model result
+
+        GetQuestionnaireCompleted result ->
+            handleGetQuestionnaireCompleted appState model result
 
         ShowHideDeleteDocument mbDocument ->
             handleShowHideDeleteDocument model mbDocument
@@ -56,6 +73,16 @@ handleGetDocumentsCompleted appState model result =
         , model = model
         , result = result
         , transform = Listing.modelFromList << List.sortWith Document.compare
+        }
+
+
+handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireCompleted appState model result =
+    applyResult
+        { setResult = setQuestionnaire << Just
+        , defaultError = lg "apiError.documents.getListError" appState
+        , model = model
+        , result = result
         }
 
 

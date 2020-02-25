@@ -5,6 +5,7 @@ import List.Extra as List
 import Wizard.Common.Components.Listing as Listing
 import Wizard.Documents.Common.Document exposing (Document)
 import Wizard.Documents.Common.DocumentState exposing (DocumentState(..))
+import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
 type alias Model =
@@ -12,6 +13,7 @@ type alias Model =
     , documentToBeDeleted : Maybe Document
     , deletingDocument : ActionResult String
     , questionnaireUuid : Maybe String
+    , questionnaire : Maybe (ActionResult QuestionnaireDetail)
     }
 
 
@@ -21,6 +23,7 @@ initialModel questionnaireUuid =
     , documentToBeDeleted = Nothing
     , deletingDocument = Unset
     , questionnaireUuid = questionnaireUuid
+    , questionnaire = Maybe.map (\_ -> Loading) questionnaireUuid
     }
 
 
