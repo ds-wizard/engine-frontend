@@ -5,7 +5,7 @@ type Route
     = BookReferenceRoute String
     | ForgottenPasswordRoute
     | ForgottenPasswordConfirmationRoute String String
-    | LoginRoute
+    | LoginRoute (Maybe String)
     | QuestionnaireRoute
     | SignupRoute
     | SignupConfirmationRoute String String

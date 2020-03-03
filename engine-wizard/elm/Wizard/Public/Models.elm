@@ -26,7 +26,7 @@ initialModel =
     { bookReferenceModel = Wizard.Public.BookReference.Models.initialModel
     , forgottenPasswordModel = Wizard.Public.ForgottenPassword.Models.initialModel
     , forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel "" ""
-    , loginModel = Wizard.Public.Login.Models.initialModel
+    , loginModel = Wizard.Public.Login.Models.initialModel Nothing
     , questionnaireModel = Wizard.Public.Questionnaire.Models.initialModel
     , signupModel = Wizard.Public.Signup.Models.initialModel
     , signupConfirmationModel = Wizard.Public.SignupConfirmation.Models.initialModel
@@ -45,8 +45,8 @@ initLocalModel route model =
         ForgottenPasswordConfirmationRoute userId hash ->
             { model | forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel userId hash }
 
-        LoginRoute ->
-            { model | loginModel = Wizard.Public.Login.Models.initialModel }
+        LoginRoute mbOriginalUrl ->
+            { model | loginModel = Wizard.Public.Login.Models.initialModel mbOriginalUrl }
 
         QuestionnaireRoute ->
             { model | questionnaireModel = Wizard.Public.Questionnaire.Models.initialModel }

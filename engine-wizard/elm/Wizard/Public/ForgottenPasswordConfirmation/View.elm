@@ -78,7 +78,7 @@ successView appState =
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "success.message"
-                [ linkTo appState (Routes.PublicRoute LoginRoute) [] [ lx_ "success.logIn" appState ]
+                [ linkTo appState (Routes.PublicRoute (LoginRoute Nothing)) [] [ lx_ "success.logIn" appState ]
                 ]
                 appState
             )

@@ -111,7 +111,7 @@ publicHeader model =
                 [ questionnaireDemoLink
                 , li [ class "nav-item" ]
                     [ linkTo model.appState
-                        loginRoute
+                        (loginRoute Nothing)
                         [ class "nav-link" ]
                         [ lx_ "header.logIn" model.appState ]
                     ]
