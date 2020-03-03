@@ -8,8 +8,8 @@ import Wizard.Common.Form exposing (CustomFormError)
 
 type alias UserCreateForm =
     { email : String
-    , name : String
-    , surname : String
+    , firstName : String
+    , lastName : String
     , role : String
     , password : String
     }
@@ -24,8 +24,8 @@ validation : Validation CustomFormError UserCreateForm
 validation =
     Validate.map5 UserCreateForm
         (Validate.field "email" Validate.email)
-        (Validate.field "name" Validate.string)
-        (Validate.field "surname" Validate.string)
+        (Validate.field "firstName" Validate.string)
+        (Validate.field "lastName" Validate.string)
         (Validate.field "role" Validate.string)
         (Validate.field "password" Validate.string)
 
@@ -35,8 +35,8 @@ encode uuid form =
     E.object
         [ ( "uuid", E.string uuid )
         , ( "email", E.string form.email )
-        , ( "name", E.string form.name )
-        , ( "surname", E.string form.surname )
+        , ( "firstName", E.string form.firstName )
+        , ( "lastName", E.string form.lastName )
         , ( "role", E.string form.role )
         , ( "password", E.string form.password )
         ]

@@ -45,8 +45,8 @@ formView appState form =
         formHtml =
             div []
                 [ FormGroup.input appState form "email" <| lg "user.email" appState
-                , FormGroup.input appState form "name" <| lg "user.name" appState
-                , FormGroup.input appState form "surname" <| lg "user.surname" appState
+                , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
+                , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
                 , FormGroup.select appState roleOptions form "role" <| lg "user.role" appState
                 , FormGroup.password appState form "password" <| lg "user.password" appState
                 ]

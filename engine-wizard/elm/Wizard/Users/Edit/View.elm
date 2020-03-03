@@ -104,8 +104,8 @@ userFormView appState form current =
         formHtml =
             div []
                 [ FormGroup.input appState form "email" <| lg "user.email" appState
-                , FormGroup.input appState form "name" <| lg "user.name" appState
-                , FormGroup.input appState form "surname" <| lg "user.surname" appState
+                , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
+                , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
                 , roleSelect
                 , activeToggle
                 ]

@@ -244,11 +244,11 @@ locale =
         , ( "_global.template.format.odt", "OpenDocument Text" )
         , ( "_global.user.active", "Active" )
         , ( "_global.user.email", "Email" )
-        , ( "_global.user.name", "Name" )
+        , ( "_global.user.firstName", "First name" )
+        , ( "_global.user.lastName", "Last name" )
         , ( "_global.user.password", "Password" )
         , ( "_global.user.passwordConfirmation", "Password again" )
         , ( "_global.user.role", "Role" )
-        , ( "_global.user.surname", "Surname" )
         , ( "_global.users", "Users" )
 
         -- Modules texts
