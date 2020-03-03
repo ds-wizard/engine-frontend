@@ -11,7 +11,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Users.Common.User exposing (User)
+import Wizard.Users.Common.User as User exposing (User)
 import Wizard.Users.Index.Models exposing (..)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
 import Wizard.Users.Routes exposing (Route(..))
@@ -56,7 +56,7 @@ listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription
     , dropdownItems = listingActions appState
-    , textTitle = \u -> u.surname ++ u.name
+    , textTitle = User.fullName
     , emptyText = l_ "listing.empty" appState
     , updated = Nothing
     , wrapMsg = ListingMsg
@@ -66,7 +66,7 @@ listingConfig appState =
 listingTitle : AppState -> User -> Html Msg
 listingTitle appState user =
     span []
-        [ linkTo appState (detailRoute user) [] [ text <| user.name ++ " " ++ user.surname ]
+        [ linkTo appState (detailRoute user) [] [ text <| User.fullName user ]
         , listingTitleBadge appState user
         ]
 
@@ -155,7 +155,7 @@ userCard : AppState -> User -> Html Msg
 userCard appState user =
     div [ class "user-card" ]
         [ div [ class "icon" ] [ faSet "userCard.icon" appState ]
-        , div [ class "name" ] [ text (user.name ++ " " ++ user.surname) ]
+        , div [ class "name" ] [ text <| User.fullName user ]
         , div [ class "email" ]
             [ a [ href ("mailto:" ++ user.email) ] [ text user.email ]
             ]

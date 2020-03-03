@@ -16,8 +16,8 @@ import Wizard.Users.Common.User exposing (User)
 
 type alias UserEditForm =
     { email : String
-    , name : String
-    , surname : String
+    , firstName : String
+    , lastName : String
     , role : String
     , active : Bool
     }
@@ -37,8 +37,8 @@ validation : Validation CustomFormError UserEditForm
 validation =
     Validate.map5 UserEditForm
         (Validate.field "email" Validate.email)
-        (Validate.field "name" Validate.string)
-        (Validate.field "surname" Validate.string)
+        (Validate.field "firstName" Validate.string)
+        (Validate.field "lastName" Validate.string)
         (Validate.field "role" Validate.string)
         (Validate.field "active" Validate.bool)
 
@@ -48,8 +48,8 @@ encode uuid form =
     Encode.object
         [ ( "uuid", Encode.string uuid )
         , ( "email", Encode.string form.email )
-        , ( "name", Encode.string form.name )
-        , ( "surname", Encode.string form.surname )
+        , ( "firstName", Encode.string form.firstName )
+        , ( "lastName", Encode.string form.lastName )
         , ( "role", Encode.string form.role )
         , ( "active", Encode.bool form.active )
         ]
@@ -58,8 +58,8 @@ encode uuid form =
 userToUserEditFormInitials : User -> List ( String, Field.Field )
 userToUserEditFormInitials user =
     [ ( "email", Field.string user.email )
-    , ( "name", Field.string user.name )
-    , ( "surname", Field.string user.surname )
+    , ( "firstName", Field.string user.firstName )
+    , ( "lastName", Field.string user.lastName )
     , ( "role", Field.string user.role )
     , ( "active", Field.bool user.active )
     ]

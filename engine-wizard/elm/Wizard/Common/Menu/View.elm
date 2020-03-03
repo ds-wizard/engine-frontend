@@ -24,6 +24,7 @@ import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Msgs
 import Wizard.Routes as Routes
+import Wizard.Users.Common.User as User
 import Wizard.Users.Routes
 
 
@@ -72,7 +73,7 @@ viewProfileMenu appState dropdownState =
         name =
             case appState.session.user of
                 Just user ->
-                    user.name ++ " " ++ user.surname
+                    User.fullName user
 
                 Nothing ->
                     ""
