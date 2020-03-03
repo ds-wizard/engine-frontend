@@ -40,7 +40,7 @@ loginCompleted appState model result =
         Ok token ->
             case JwtToken.parse token of
                 Just jwt ->
-                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.Token token jwt) )
+                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.Token token jwt model.originalUrl) )
 
                 Nothing ->
                     ( { model | loggingIn = Error <| lg "apiError.tokens.fetchTokenError" appState }, Cmd.none )

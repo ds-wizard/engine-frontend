@@ -29,7 +29,7 @@ view route appState model =
             Html.map ForgottenPasswordConfirmationMsg <|
                 Wizard.Public.ForgottenPasswordConfirmation.View.view appState model.forgottenPasswordConfirmationModel
 
-        LoginRoute ->
+        LoginRoute _ ->
             Html.map LoginMsg <|
                 Wizard.Public.Login.View.view appState model.loginModel
 

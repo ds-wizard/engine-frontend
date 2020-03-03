@@ -57,7 +57,7 @@ signupForm appState model =
             , actionResult = model.signingUp
             , submitLabel = l_ "form.submit" appState
             , formContent = formView appState model.form |> Html.map FormMsg
-            , link = Just ( Routes.PublicRoute LoginRoute, l_ "form.link" appState )
+            , link = Just ( Routes.PublicRoute (LoginRoute Nothing), l_ "form.link" appState )
             }
     in
     publicForm appState formConfig

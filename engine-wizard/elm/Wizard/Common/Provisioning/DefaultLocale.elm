@@ -21,6 +21,7 @@ locale =
         , ( "__routing.knowledgeModels", "knowledge-models" )
         , ( "__routing.knowledgeModels.import", "import" )
         , ( "__routing.knowledgeModels.import.packageId", "packageId" )
+        , ( "__routing.login.originalUrl", "originalUrl" )
         , ( "__routing.organization", "organization" )
         , ( "__routing.public.bookReferences", "book-references" )
         , ( "__routing.public.forgottenPassword", "forgotten-password" )

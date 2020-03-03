@@ -6,6 +6,6 @@ import Wizard.Users.Common.User exposing (User)
 
 
 type Msg
-    = GetCurrentUserCompleted (Result ApiError User)
+    = GetCurrentUserCompleted (Maybe String) (Result ApiError User)
     | Logout
-    | Token String JwtToken
+    | Token String JwtToken (Maybe String)

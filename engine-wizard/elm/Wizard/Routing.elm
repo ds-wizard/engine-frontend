@@ -1,6 +1,7 @@
 module Wizard.Routing exposing
     ( appRoute
     , cmdNavigate
+    , cmdNavigateRaw
     , homeRoute
     , isAllowed
     , loginRoute
@@ -143,14 +144,19 @@ cmdNavigate appState =
     pushUrl appState.key << toUrl appState
 
 
+cmdNavigateRaw : AppState -> String -> Cmd msg
+cmdNavigateRaw appState =
+    pushUrl appState.key
+
+
 homeRoute : Routes.Route
 homeRoute =
-    Routes.PublicRoute Wizard.Public.Routes.LoginRoute
+    Routes.PublicRoute <| Wizard.Public.Routes.LoginRoute Nothing
 
 
-loginRoute : Routes.Route
-loginRoute =
-    Routes.PublicRoute Wizard.Public.Routes.LoginRoute
+loginRoute : Maybe String -> Routes.Route
+loginRoute originalUrl =
+    Routes.PublicRoute <| Wizard.Public.Routes.LoginRoute originalUrl
 
 
 signupRoute : Routes.Route

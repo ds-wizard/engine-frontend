@@ -6,7 +6,9 @@ module Wizard.Public.Routing exposing
     )
 
 import Shared.Locale exposing (lr)
+import Url exposing (percentEncode)
 import Url.Parser exposing (..)
+import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Public.Routes exposing (Route(..))
 
@@ -33,7 +35,7 @@ parsers appState wrapRoute =
     [ map (wrapRoute << BookReferenceRoute) (s (lr "public.bookReferences" appState) </> string)
     , map (wrapRoute <| ForgottenPasswordRoute) (s (lr "public.forgottenPassword" appState))
     , map (forgottenPasswordConfirmation wrapRoute) (s (lr "public.forgottenPassword" appState) </> string </> string)
-    , map (wrapRoute <| LoginRoute) top
+    , map (wrapRoute << LoginRoute) (top <?> Query.string (lr "login.originalUrl" appState))
     ]
         ++ publicQuestionnaireRoutes
         ++ signUpRoutes
@@ -61,8 +63,13 @@ toUrl appState route =
         ForgottenPasswordConfirmationRoute userId hash ->
             [ lr "public.forgottenPassword" appState, userId, hash ]
 
-        LoginRoute ->
-            []
+        LoginRoute mbOriginalUrl ->
+            case mbOriginalUrl of
+                Just originalUrl ->
+                    [ "/?" ++ lr "login.originalUrl" appState ++ "=" ++ percentEncode originalUrl ]
+
+                Nothing ->
+                    []
 
         QuestionnaireRoute ->
             [ lr "public.questionnaire" appState ]
