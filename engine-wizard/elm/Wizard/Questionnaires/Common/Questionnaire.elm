@@ -1,5 +1,6 @@
 module Wizard.Questionnaires.Common.Questionnaire exposing
     ( Questionnaire
+    , compare
     , decoder
     , isEditable
     )
@@ -60,3 +61,8 @@ decoder =
         |> required "ownerUuid" (D.maybe D.string)
         |> required "state" QuestionnaireState.decoder
         |> required "updatedAt" D.datetime
+
+
+compare : Questionnaire -> Questionnaire -> Order
+compare q1 q2 =
+    Basics.compare (String.toLower q1.name) (String.toLower q2.name)

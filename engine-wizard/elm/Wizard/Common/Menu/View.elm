@@ -51,7 +51,7 @@ viewHelpMenu appState dropdownState =
             Dropdown.toggle [ Button.roleLink ]
                 [ faSet "menu.help" appState
                 , span [ class "sidebar-link" ]
-                    [ lx_ "helpMenu.help" appState, faSet "menu.dropdownToggle" appState ]
+                    [ span [] [ lx_ "helpMenu.help" appState ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =
             [ Dropdown.anchorItem [ onLinkClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetAboutOpen True) ]
@@ -83,7 +83,7 @@ viewProfileMenu appState dropdownState =
         , toggleButton =
             Dropdown.toggle [ Button.roleLink ]
                 [ faSet "menu.user" appState
-                , span [ class "sidebar-link" ] [ text name, faSet "menu.dropdownToggle" appState ]
+                , span [ class "sidebar-link" ] [ span [] [ text name ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =
             [ Dropdown.anchorItem (linkToAttributes appState (Routes.UsersRoute <| Wizard.Users.Routes.EditRoute "current"))
@@ -109,7 +109,8 @@ viewReportIssueModal appState isOpen =
             [ p [] [ lx_ "reportModal.info" appState ]
             , p []
                 [ a [ class "link-with-icon", href appState.config.client.supportRepositoryUrl, target "_blank" ]
-                    [ text appState.config.client.supportRepositoryName
+                    [ faSet "report.repository" appState
+                    , text appState.config.client.supportRepositoryName
                     ]
                 ]
             , p [] (lh_ "reportModal.writeUs" [ supportMailLink ] appState)

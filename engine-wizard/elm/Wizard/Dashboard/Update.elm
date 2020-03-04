@@ -7,7 +7,7 @@ import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Config exposing (Widget(..))
 import Wizard.Common.Setters exposing (setLevels, setQuestionnaires)
-import Wizard.Dashboard.Models as Model exposing (Model)
+import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg(..))
 import Wizard.Msgs
 
@@ -46,3 +46,6 @@ update msg appState model =
                 , model = model
                 , result = result
                 }
+
+        _ ->
+            ( model, Cmd.none )

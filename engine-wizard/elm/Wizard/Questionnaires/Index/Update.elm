@@ -5,16 +5,14 @@ module Wizard.Questionnaires.Index.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Shared.Locale exposing (lg, lgf)
+import Wizard.Common.Api exposing (applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing
 import Wizard.Common.Setters exposing (setQuestionnaires)
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Index.ExportModal.Models exposing (setQuestionnaire)
-import Wizard.Questionnaires.Index.ExportModal.Msgs as ExportModal
-import Wizard.Questionnaires.Index.ExportModal.Update as ExportModal
+import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 
@@ -39,12 +37,6 @@ update wrapMsg msg appState model =
         DeleteQuestionnaireCompleted result ->
             handleDeleteQuestionnaireCompleted wrapMsg appState model result
 
-        ShowExportQuestionnaire questionnaire ->
-            handleShowExportQuestionnaire wrapMsg appState model questionnaire
-
-        ExportModalMsg exportModalMsg ->
-            handleExportModal exportModalMsg appState model
-
         DeleteQuestionnaireMigration uuid ->
             handleDeleteMigration wrapMsg appState model uuid
 
@@ -57,6 +49,9 @@ update wrapMsg msg appState model =
         CloneQuestionnaireCompleted result ->
             handleCloneQuestionnaireCompleted wrapMsg appState model result
 
+        ListingMsg listingMsg ->
+            handleListingMsg listingMsg model
+
 
 
 -- Handlers
@@ -64,11 +59,12 @@ update wrapMsg msg appState model =
 
 handleGetQuestionnairesCompleted : AppState -> Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnairesCompleted appState model result =
-    applyResult
+    applyResultTransform
         { setResult = setQuestionnaires
         , defaultError = lg "apiError.questionnaires.getListError" appState
         , model = model
         , result = result
+        , transform = Listing.modelFromList << List.sortWith Questionnaire.compare
         }
 
 
@@ -111,22 +107,6 @@ handleDeleteQuestionnaireCompleted wrapMsg appState model result =
             )
 
 
-handleShowExportQuestionnaire : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
-handleShowExportQuestionnaire wrapMsg appState model questionnaire =
-    ( { model | exportModalModel = setQuestionnaire questionnaire model.exportModalModel }
-    , Cmd.map (wrapMsg << ExportModalMsg) <| ExportModal.fetchData questionnaire.package.id appState
-    )
-
-
-handleExportModal : ExportModal.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleExportModal exportModalMsg appState model =
-    let
-        ( exportModalModel, cmd ) =
-            ExportModal.update exportModalMsg appState model.exportModalModel
-    in
-    ( { model | exportModalModel = exportModalModel }, cmd )
-
-
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> String -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
@@ -159,11 +139,18 @@ handleCloneQuestionnaireCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Mode
 handleCloneQuestionnaireCompleted wrapMsg appState model result =
     case result of
         Ok questionnaire ->
-            ( { model | cloningQuestionnaire = Success <| questionnaire.name ++ " has been created" }
+            ( { model | cloningQuestionnaire = Success <| lgf "apiSuccess.questionnaires.clone" [ questionnaire.name ] appState }
             , Cmd.map wrapMsg <| fetchData appState
             )
 
         Err error ->
-            ( { model | cloningQuestionnaire = ApiError.toActionResult "Error" error }
+            ( { model | cloningQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.cloneError" appState) error }
             , getResultCmd result
             )
+
+
+handleListingMsg : Listing.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg listingMsg model =
+    ( { model | questionnaires = ActionResult.map (Listing.update listingMsg) model.questionnaires }
+    , Cmd.none
+    )

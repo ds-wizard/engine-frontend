@@ -36,7 +36,7 @@ locale =
         , ( "Registry.Pages.KMDetail.view.otherVersions", "Other versions" )
         , ( "Registry.Pages.KMDetail.view.publishedBy", "Published by" )
         , ( "Registry.Pages.KMDetail.view.version", "Version" )
-        , ( "Registry.Pages.Login.update.error", "Version" )
+        , ( "Registry.Pages.Login.update.error", "Login failed" )
         , ( "Registry.Pages.Login.view.header", "Log in" )
         , ( "Registry.Pages.Login.view.organizationId", "Organization ID" )
         , ( "Registry.Pages.Login.view.token", "Token" )

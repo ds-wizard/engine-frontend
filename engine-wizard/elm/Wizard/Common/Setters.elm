@@ -1,6 +1,7 @@
 module Wizard.Common.Setters exposing
     ( setBookReference
     , setBranches
+    , setDocuments
     , setLevels
     , setMetrics
     , setMigration
@@ -10,6 +11,7 @@ module Wizard.Common.Setters exposing
     , setQuestionnaire
     , setQuestionnaireDetail
     , setQuestionnaires
+    , setTemplates
     , setUsers
     )
 
@@ -22,6 +24,11 @@ setBookReference value record =
 setBranches : a -> { b | branches : a } -> { b | branches : a }
 setBranches value record =
     { record | branches = value }
+
+
+setDocuments : a -> { b | documents : a } -> { b | documents : a }
+setDocuments value record =
+    { record | documents = value }
 
 
 setLevels : a -> { b | levels : a } -> { b | levels : a }
@@ -67,6 +74,11 @@ setQuestionnaireDetail value record =
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }
 setQuestionnaires value record =
     { record | questionnaires = value }
+
+
+setTemplates : a -> { b | templates : a } -> { b | templates : a }
+setTemplates value record =
+    { record | templates = value }
 
 
 setUsers : a -> { b | users : a } -> { b | users : a }

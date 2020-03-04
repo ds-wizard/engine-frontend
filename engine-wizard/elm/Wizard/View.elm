@@ -7,6 +7,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Layout as Layout
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.View
+import Wizard.Documents.View
 import Wizard.KMEditor.View
 import Wizard.KnowledgeModels.View
 import Wizard.Models exposing (Model)
@@ -32,6 +33,13 @@ view model =
         case model.appState.route of
             Routes.DashboardRoute ->
                 Wizard.Dashboard.View.view model.appState model.dashboardModel
+                    |> Html.map DashboardMsg
+                    |> Layout.app model
+
+            Routes.DocumentsRoute route ->
+                model.documentsModel
+                    |> Wizard.Documents.View.view route model.appState
+                    |> Html.map DocumentsMsg
                     |> Layout.app model
 
             Routes.QuestionnairesRoute route ->

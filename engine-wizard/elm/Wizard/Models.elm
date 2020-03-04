@@ -15,6 +15,7 @@ import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Common.Menu.Models
 import Wizard.Common.Session as Session exposing (Session)
 import Wizard.Dashboard.Models
+import Wizard.Documents.Models
 import Wizard.KMEditor.Models
 import Wizard.KnowledgeModels.Models
 import Wizard.Organization.Models
@@ -28,6 +29,7 @@ type alias Model =
     { appState : AppState
     , menuModel : Wizard.Common.Menu.Models.Model
     , dashboardModel : Wizard.Dashboard.Models.Model
+    , documentsModel : Wizard.Documents.Models.Model
     , organizationModel : Wizard.Organization.Models.Model
     , kmEditorModel : Wizard.KMEditor.Models.Model
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
@@ -42,6 +44,7 @@ initialModel appState =
     { appState = appState
     , menuModel = Wizard.Common.Menu.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel
+    , documentsModel = Wizard.Documents.Models.initialModel
     , organizationModel = Wizard.Organization.Models.initialModel
     , kmEditorModel = Wizard.KMEditor.Models.initialModel
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
@@ -102,6 +105,9 @@ setSeed seed model =
 initLocalModel : Model -> Model
 initLocalModel model =
     case model.appState.route of
+        Routes.DocumentsRoute route ->
+            { model | documentsModel = Wizard.Documents.Models.initLocalModel route model.documentsModel }
+
         Routes.OrganizationRoute ->
             { model | organizationModel = Wizard.Organization.Models.initialModel }
 

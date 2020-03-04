@@ -3,10 +3,12 @@ module Wizard.KnowledgeModels.Index.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (l, lg)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Common.Api exposing (applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing
 import Wizard.Common.Setters exposing (setPackages)
+import Wizard.KnowledgeModels.Common.Package as Package
 import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.Msgs
@@ -26,11 +28,12 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         GetPackagesCompleted result ->
-            applyResult
+            applyResultTransform
                 { setResult = setPackages
                 , defaultError = lg "apiError.packages.getListError" appState
                 , model = model
                 , result = result
+                , transform = Listing.modelFromList << List.sortWith Package.compare
                 }
 
         ShowHideDeletePackage package ->
@@ -41,6 +44,11 @@ update msg wrapMsg appState model =
 
         DeletePackageCompleted result ->
             deletePackageCompleted wrapMsg appState model result
+
+        ListingMsg listingMsg ->
+            ( { model | packages = ActionResult.map (Listing.update listingMsg) model.packages }
+            , Cmd.none
+            )
 
 
 handleDeletePackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

@@ -1,0 +1,23 @@
+@import "../../variables";
+
+.Documents__Index {
+    .filters {
+        margin-top: -20px;
+        margin-bottom: 30px;
+        display: flex;
+
+        .badge {
+            font-size: $font-size-base;
+            font-weight: normal;
+            margin-left: 0.5rem;
+            display: flex;
+            align-items: center;
+
+            a {
+                margin-left: 0.5rem;
+                color: $white;
+                font-size: 0.75rem;
+            }
+        }
+    }
+}

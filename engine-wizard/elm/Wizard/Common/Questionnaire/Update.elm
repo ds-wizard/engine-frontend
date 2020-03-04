@@ -135,10 +135,11 @@ handleSetLevel model level =
 
 handleSetActiveChapter : AppState -> Model -> Chapter -> ( Model, Cmd Msg )
 handleSetActiveChapter appState model chapter =
-    model
+    ( model
         |> updateReplies
         |> setActiveChapter appState chapter
-        |> withNoCmd
+    , Ports.scrollToTop "#questionnaire-body"
+    )
 
 
 handleViewTodos : Model -> ( Model, Cmd Msg )

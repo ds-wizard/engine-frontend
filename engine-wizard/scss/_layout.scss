@@ -150,6 +150,17 @@ body {
                 }
             }
 
+            .sidebar-link {
+                max-width: calc(100% - 30px);
+
+                & > span {
+                    width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: left;
+                }
+            }
+
             .dropdown-menu {
                 top: auto !important;
                 bottom: 0 !important;

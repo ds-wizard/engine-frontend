@@ -7,9 +7,10 @@ import Shared.Locale exposing (l, lx)
 import Time
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing as Listing exposing (ListingConfig)
 import Wizard.Common.Html exposing (emptyNode, linkTo)
-import Wizard.Common.View.Listing as Listing exposing (ListingConfig)
 import Wizard.Common.View.Page as Page
+import Wizard.Dashboard.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.KnowledgeModels.Routes
 import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
@@ -28,12 +29,12 @@ lx_ =
     lx "Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget"
 
 
-view : AppState -> ActionResult (List Level) -> ActionResult (List Questionnaire) -> Html msg
+view : AppState -> ActionResult (List Level) -> ActionResult (List Questionnaire) -> Html Msg
 view appState levels questionnaires =
     Page.actionResultView appState (viewQuestionnaires appState) (ActionResult.combine questionnaires levels)
 
 
-viewQuestionnaires : AppState -> ( List Questionnaire, List Level ) -> Html msg
+viewQuestionnaires : AppState -> ( List Questionnaire, List Level ) -> Html Msg
 viewQuestionnaires appState ( questionnaires, levels ) =
     if List.length questionnaires > 0 then
         div [ class "PhaseQuestionnaireWidget" ]
@@ -45,7 +46,7 @@ viewQuestionnaires appState ( questionnaires, levels ) =
         emptyNode
 
 
-viewLevelGroup : AppState -> List Questionnaire -> Level -> Html msg
+viewLevelGroup : AppState -> List Questionnaire -> Level -> Html Msg
 viewLevelGroup appState questionnaires level =
     let
         levelQuestionnaires =
@@ -57,12 +58,12 @@ viewLevelGroup appState questionnaires level =
     viewLevelGroupWithData appState levelQuestionnaires level
 
 
-viewLevelGroupWithData : AppState -> List Questionnaire -> Level -> Html msg
+viewLevelGroupWithData : AppState -> List Questionnaire -> Level -> Html Msg
 viewLevelGroupWithData appState questionnaires level =
     let
         content =
             if List.length questionnaires > 0 then
-                Listing.view appState (listingConfig appState) questionnaires
+                Listing.view appState (listingConfig appState) <| Listing.modelFromList questionnaires
 
             else
                 div [ class "empty" ]
@@ -74,11 +75,11 @@ viewLevelGroupWithData appState questionnaires level =
         ]
 
 
-listingConfig : AppState -> ListingConfig Questionnaire msg
+listingConfig : AppState -> ListingConfig Questionnaire Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
-    , actions = always []
+    , dropdownItems = always []
     , textTitle = .name
     , emptyText = l_ "clickCreate" appState
     , updated =
@@ -86,6 +87,7 @@ listingConfig appState =
             { getTime = .updatedAt
             , currentTime = appState.currentTime
             }
+    , wrapMsg = ListingMsg
     }
 
 

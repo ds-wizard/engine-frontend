@@ -1,0 +1,164 @@
+@import "../../../variables";
+
+.Listing {
+    width: 100%;
+
+    .list-group-item {
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            background: $gray-200;
+        }
+
+        &:last-child:first-child {
+            border-bottom: 1px solid rgba(0, 0, 0, .125);
+        }
+
+        .ItemIcon {
+            margin-right: 1rem;
+        }
+
+        .content {
+            flex-basis: 0;
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .description, .title {
+            a {
+                text-decoration: none;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+
+        .title {
+            a {
+                color: $body-color !important;
+            }
+        }
+
+        .description {
+            a {
+                color: $gray-700;
+            }
+        }
+
+        .title-row {
+            margin-bottom: 0.25rem;
+            display: flex;
+            justify-content: space-between;
+
+            .title {
+                font-weight: bold;
+                min-width: 0;
+
+                & > span {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+
+                    & > .fa {
+                        margin-left: 0.5rem;
+                        color: $gray-500;
+                    }
+                }
+            }
+
+            a {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+
+            .badge {
+                margin-left: 0.5rem;
+
+                .fa {
+                    margin-right: 0.25rem;
+                }
+            }
+        }
+
+        .extra {
+            display: flex;
+            justify-content: space-between;
+
+            .description {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+        }
+
+        .updated {
+            span {
+                font-style: italic;
+                color: $gray-500;
+                white-space: nowrap;
+                padding-left: 0.5rem;
+            }
+
+            @media screen and (max-width: map-get($grid-breakpoints, "md")) {
+                display: none;
+            }
+        }
+
+        .actions {
+            margin-left: 1rem;
+            margin-right: -0.5rem;
+
+            .dropdown-toggle {
+                &::after {
+                    display: none;
+                }
+            }
+
+            .dropdown-item {
+                padding: 0.25rem 1rem;
+
+                color: $gray-900;
+                text-decoration: none;
+
+                &:active {
+                    color: $light;
+
+                    &.text-danger {
+                        background-color: $danger;
+                        color: $light !important;
+                    }
+                }
+
+                .fa {
+                    width: 1.5rem;
+                    text-align: center;
+                    margin-right: 0.25rem;
+                }
+            }
+        }
+
+        .fragment {
+            &:not(code) {
+                color: $gray-700;
+            }
+
+            .fa {
+                margin-right: 0.25rem;
+            }
+
+            & + .fragment {
+                margin-left: 0.5rem;
+
+                &:before {
+                    content: "·";
+                    margin-right: 0.5rem;
+                    display: inline-block;
+                    text-decoration: none !important;
+                }
+            }
+        }
+    }
+}
