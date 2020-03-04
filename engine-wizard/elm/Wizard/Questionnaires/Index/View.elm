@@ -20,6 +20,7 @@ import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
+import Wizard.Users.Common.User as User
 import Wizard.Utils exposing (listInsertIf)
 
 
@@ -92,23 +93,9 @@ listingTitle appState questionnaire =
     in
     span []
         [ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ]
-        , ownerIcon appState questionnaire
         , accessibilityBadge appState questionnaire.accessibility
         , migrationBadge appState questionnaire.state
         ]
-
-
-ownerIcon : AppState -> Questionnaire -> Html Msg
-ownerIcon appState questionnaire =
-    if appState.config.questionnaireAccessibilityEnabled && questionnaire.ownerUuid == Maybe.map .uuid appState.session.user then
-        i
-            [ class <| faKeyClass "questionnaireList.owner" appState
-            , title <| l_ "badge.owner" appState
-            ]
-            []
-
-    else
-        emptyNode
 
 
 listingDescription : AppState -> Questionnaire -> Html Msg
@@ -117,16 +104,30 @@ listingDescription appState questionnaire =
         kmRoute =
             Routes.KnowledgeModelsRoute <|
                 Wizard.KnowledgeModels.Routes.DetailRoute questionnaire.package.id
+
+        ownerName =
+            case questionnaire.owner of
+                Just owner ->
+                    span [ class "fragment fragment-icon-light" ]
+                        [ faSet "questionnaireList.owner" appState
+                        , text <| User.fullName owner
+                        ]
+
+                Nothing ->
+                    emptyNode
     in
-    linkTo appState
-        kmRoute
-        [ title <| lg "knowledgeModel" appState ]
-        [ text questionnaire.package.name
-        , text ", "
-        , text <| Version.toString questionnaire.package.version
-        , text " ("
-        , code [] [ text questionnaire.package.id ]
-        , text ")"
+    span []
+        [ ownerName
+        , linkTo appState
+            kmRoute
+            [ title <| lg "knowledgeModel" appState, class "fragment" ]
+            [ text questionnaire.package.name
+            , text ", "
+            , text <| Version.toString questionnaire.package.version
+            , text " ("
+            , code [] [ text questionnaire.package.id ]
+            , text ")"
+            ]
         ]
 
 
