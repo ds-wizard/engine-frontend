@@ -21,10 +21,11 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 
 @import "modules/Common";
 @import "modules/Dashboard";
-@import "modules/Questionnaires";
+@import "modules/Documents";
 @import "modules/KMEditor";
 @import "modules/KnowledgeModels";
 @import "modules/Public";
+@import "modules/Questionnaires";
 @import "modules/Users";
 
 @import "customizations/overrides-app";

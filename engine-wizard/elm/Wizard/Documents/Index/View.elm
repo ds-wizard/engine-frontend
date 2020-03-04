@@ -1,5 +1,6 @@
 module Wizard.Documents.Index.View exposing (..)
 
+import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target, title)
 import Shared.Locale exposing (l, lh, lx)
@@ -16,6 +17,8 @@ import Wizard.Documents.Common.DocumentState exposing (DocumentState(..))
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
+import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
+import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Routes
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Utils exposing (listInsertIf)
@@ -38,13 +41,41 @@ lh_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewDocuments appState model) model.documents
+    let
+        questionnaireActionResult =
+            case model.questionnaire of
+                Just questionnaire ->
+                    ActionResult.map Just questionnaire
+
+                Nothing ->
+                    Success Nothing
+
+        actionResult =
+            ActionResult.combine model.documents questionnaireActionResult
+    in
+    Page.actionResultView appState (viewDocuments appState model) actionResult
 
 
-viewDocuments : AppState -> Model -> Listing.Model Document -> Html Msg
-viewDocuments appState model documents =
+viewDocuments : AppState -> Model -> ( Listing.Model Document, Maybe QuestionnaireDetail ) -> Html Msg
+viewDocuments appState model ( documents, mbQuestionnaire ) =
+    let
+        questionnaireView =
+            case mbQuestionnaire of
+                Just questionnaire ->
+                    div [ class "filters" ]
+                        [ lx_ "listing.filter" appState
+                        , span [ class "badge badge-pill badge-secondary" ]
+                            [ text questionnaire.name
+                            , linkTo appState (Routes.DocumentsRoute (IndexRoute Nothing)) [] [ faSet "_global.remove" appState ]
+                            ]
+                        ]
+
+                Nothing ->
+                    emptyNode
+    in
     div [ listClass "Documents__Index" ]
         [ Page.header (l_ "header.title" appState) (indexActions appState)
+        , questionnaireView
         , FormResult.successOnlyView appState model.deletingDocument
         , Listing.view appState (listingConfig appState) documents
         , deleteModal appState model
