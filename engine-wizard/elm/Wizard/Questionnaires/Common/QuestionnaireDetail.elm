@@ -3,6 +3,7 @@ module Wizard.Questionnaires.Common.QuestionnaireDetail exposing
     , decoder
     , encode
     , getTodos
+    , isEditable
     , setLevel
     , todosLength
     , updateLabels
@@ -13,14 +14,16 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.Model exposing (FormValue, FormValues, decodeFormValues, encodeFormValues, getAnswerUuid, getItemListCount)
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.KnowledgeModels.Common.Package as Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
+import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 import Wizard.Questionnaires.Common.QuestionnaireLabel as QuestionnaireLabel exposing (QuestionnaireLabel)
 import Wizard.Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
+import Wizard.Users.Common.User as User
 
 
 type alias QuestionnaireDetail =
@@ -61,6 +64,21 @@ encode questionnaire =
         , ( "level", E.int questionnaire.level )
         , ( "labels", E.list QuestionnaireLabel.encode questionnaire.labels )
         ]
+
+
+isEditable : AppState -> QuestionnaireDetail -> Bool
+isEditable appState questionnaire =
+    let
+        isAdmin =
+            User.isAdmin appState.session.user
+
+        isNotReadonly =
+            questionnaire.accessibility /= PublicReadOnlyQuestionnaire
+
+        isOwner =
+            questionnaire.ownerUuid == Maybe.map .uuid appState.session.user
+    in
+    isAdmin || isNotReadonly || isOwner
 
 
 updateReplies : FormValues -> QuestionnaireDetail -> QuestionnaireDetail

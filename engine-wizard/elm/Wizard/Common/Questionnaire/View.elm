@@ -87,7 +87,7 @@ levelSelection : ViewQuestionnaireConfig -> AppState -> Model -> List Level -> I
 levelSelection cfg appState model levels selectedLevel =
     let
         isDisabled =
-            cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
+            cfg.forceDisabled || (not <| QuestionnaireDetail.isEditable appState model.questionnaire)
     in
     div [ class "level-selection card bg-light" ]
         [ div [ class "card-body" ]
@@ -276,7 +276,7 @@ formConfig appState cfg model =
     in
     { customActions = customActions
     , isDesirable = isDesirable
-    , disabled = cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
+    , disabled = cfg.forceDisabled || (not <| QuestionnaireDetail.isEditable appState model.questionnaire)
     , getExtraQuestionClass = cfg.getExtraQuestionClass
     , renderer = cfg.createRenderer model.questionnaire.knowledgeModel (Maybe.withDefault [] cfg.levels) model.metrics
     , appState = appState

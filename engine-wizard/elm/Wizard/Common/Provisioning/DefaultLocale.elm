@@ -563,7 +563,6 @@ locale =
         , ( "Wizard.Questionnaires.Index.View.header.title", "Questionnaires" )
         , ( "Wizard.Questionnaires.Index.View.header.create", "Create" )
         , ( "Wizard.Questionnaires.Index.View.listing.empty", "Click \"Create\" button to add a new Questionnaire." )
-        , ( "Wizard.Questionnaires.Index.View.badge.owner", "Questionnaire created by you" )
         , ( "Wizard.Questionnaires.Index.View.badge.migrating", "migrating" )
         , ( "Wizard.Questionnaires.Index.View.badge.outdated", "outdated" )
         , ( "Wizard.Questionnaires.Index.View.action.fillQuestionnaire", "Fill questionnaire" )
