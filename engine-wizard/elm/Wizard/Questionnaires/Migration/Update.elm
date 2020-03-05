@@ -221,7 +221,7 @@ handleFinalizeMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Mod
 handleFinalizeMigration wrapMsg appState model =
     ( model
     , Cmd.map wrapMsg <|
-        QuestionnairesApi.deleteQuestionnaireMigration model.questionnaireUuid appState FinalizeMigrationCompleted
+        QuestionnairesApi.completeQuestionnaireMigration model.questionnaireUuid appState FinalizeMigrationCompleted
     )
 
 
