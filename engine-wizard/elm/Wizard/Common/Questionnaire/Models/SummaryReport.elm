@@ -1,4 +1,12 @@
-module Wizard.Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport, answeredIndicationDecoder, chapterReportDecoder, indicationReportDecoder, indicationType, metricReportDecoder, summaryReportDecoder)
+module Wizard.Common.Questionnaire.Models.SummaryReport exposing
+    ( AnsweredIndicationData
+    , ChapterReport
+    , IndicationReport(..)
+    , MetricReport
+    , SummaryReport
+    , TotalReport
+    , summaryReportDecoder
+    )
 
 import Json.Decode as Decode exposing (..)
 import Json.Decode.Extra exposing (when)
@@ -6,7 +14,15 @@ import Json.Decode.Pipeline exposing (required)
 
 
 type alias SummaryReport =
-    { chapterReports : List ChapterReport }
+    { totalReport : TotalReport
+    , chapterReports : List ChapterReport
+    }
+
+
+type alias TotalReport =
+    { metrics : List MetricReport
+    , indications : List IndicationReport
+    }
 
 
 type alias ChapterReport =
@@ -36,7 +52,15 @@ type alias AnsweredIndicationData =
 summaryReportDecoder : Decoder SummaryReport
 summaryReportDecoder =
     Decode.succeed SummaryReport
+        |> required "totalReport" totalReportDecoder
         |> required "chapterReports" (Decode.list chapterReportDecoder)
+
+
+totalReportDecoder : Decoder TotalReport
+totalReportDecoder =
+    Decode.succeed TotalReport
+        |> required "metrics" (Decode.list metricReportDecoder)
+        |> required "indications" (Decode.list indicationReportDecoder)
 
 
 chapterReportDecoder : Decoder ChapterReport
