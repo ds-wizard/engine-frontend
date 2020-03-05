@@ -39,6 +39,7 @@ type alias ClientConfig =
     , appTitleShort : String
     , welcomeInfo : Maybe String
     , welcomeWarning : Maybe String
+    , loginInfo : Maybe String
     , dashboard : Dict String (List Widget)
     , privacyUrl : String
     , customMenuLinks : List CustomMenuLink
@@ -83,6 +84,7 @@ defaultConfig =
         , appTitleShort = ""
         , welcomeInfo = Nothing
         , welcomeWarning = Nothing
+        , loginInfo = Nothing
         , dashboard = Dict.empty
         , privacyUrl = defaultPrivacyUrl
         , customMenuLinks = []
@@ -134,6 +136,7 @@ clientConfigDecoder =
         |> D.optional "appTitleShort" D.string "{defaultAppTitleShort}"
         |> D.optional "welcomeInfo" (D.maybe D.string) Nothing
         |> D.optional "welcomeWarning" (D.maybe D.string) Nothing
+        |> D.optional "loginInfo" (D.maybe D.string) Nothing
         |> D.optional "dashboard" widgetDictDecoder Dict.empty
         |> D.optional "privacyUrl" D.string defaultPrivacyUrl
         |> D.optional "customMenuLinks" (D.list customMenuLinkDecoder) []

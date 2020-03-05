@@ -1,0 +1,19 @@
+@import "../../variables";
+
+.Public__Login {
+    .side-info {
+        border-right: 1px solid $gray-300;
+
+        @media screen and (max-width: map-get($grid-breakpoints, "md")) {
+            border: none;
+            margin-bottom: 3rem;
+        }
+    }
+
+    .side-login {
+        & > div {
+            flex: 1;
+            max-width: 100%;
+        }
+    }
+}
