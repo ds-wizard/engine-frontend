@@ -176,13 +176,16 @@ handlePostForSummaryReportCompleted appState model result =
                 chapters =
                     KnowledgeModel.getChapters model.questionnaire.knowledgeModel
 
+                chapterChartsConfigs =
+                    List.map (createChapterChartConfig model.metrics chapters) summaryReport.chapterReports
+
+                totalChartConfig =
+                    createTotalChartConfig model.metrics summaryReport.totalReport
+
                 cmds =
                     List.map
-                        (Ports.drawMetricsChart
-                            << encodeChartConfig
-                            << createChartConfig model.metrics chapters
-                        )
-                        summaryReport.chapterReports
+                        (Ports.drawMetricsChart << encodeChartConfig)
+                        ([ totalChartConfig ] ++ chapterChartsConfigs)
             in
             ( { model | summaryReport = Success summaryReport }
             , Cmd.batch cmds
