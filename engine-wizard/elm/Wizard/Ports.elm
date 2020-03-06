@@ -2,6 +2,7 @@ port module Wizard.Ports exposing
     ( FilePortData
     , alert
     , clearSession
+    , clearSessionAndReload
     , clearUnloadMessage
     , copyToClipboard
     , createDropzone
@@ -26,6 +27,9 @@ port storeSession : Maybe Session -> Cmd msg
 
 
 port clearSession : () -> Cmd msg
+
+
+port clearSessionAndReload : () -> Cmd msg
 
 
 

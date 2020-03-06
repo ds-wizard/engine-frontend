@@ -8,6 +8,7 @@ import Wizard.Common.AppState as AppState
 import Wizard.Common.Time as Time
 import Wizard.Models exposing (..)
 import Wizard.Msgs exposing (Msg)
+import Wizard.Ports as Ports
 import Wizard.Public.Routes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, homeRoute, loginRoute, routeIfAllowed, toUrl)
@@ -33,13 +34,18 @@ init flags location key =
 
         model =
             initLocalModel <| initialModel appStateWithRoute
+
+        cmd =
+            if appState.invalidSession then
+                Ports.clearSessionAndReload ()
+
+            else
+                Cmd.batch
+                    [ decideInitialRoute model route originalRoute
+                    , Time.getTime
+                    ]
     in
-    ( model
-    , Cmd.batch
-        [ decideInitialRoute model route originalRoute
-        , Time.getTime
-        ]
-    )
+    ( model, cmd )
 
 
 decideInitialRoute : Model -> Routes.Route -> Routes.Route -> Cmd Msg
