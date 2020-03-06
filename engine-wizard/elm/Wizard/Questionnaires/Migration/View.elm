@@ -4,10 +4,10 @@ import ActionResult
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lgx, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)

@@ -9,9 +9,9 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (faSet)
 import String
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (faSet)
 
 
 type alias ButtonConfig a msg =

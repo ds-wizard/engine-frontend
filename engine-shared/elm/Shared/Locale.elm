@@ -2,10 +2,8 @@ module Shared.Locale exposing (..)
 
 import Dict exposing (Dict)
 import Html exposing (Html, text)
-import Maybe.Extra as Maybe
+import Shared.Provisioning exposing (Provisioning)
 import String.Format as String
-import Wizard.Common.Provisioning exposing (Provisioning)
-import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
 
 
 l : String -> String -> { a | provisioning : Provisioning } -> String
@@ -15,7 +13,6 @@ l moduleKey termKey appState =
             moduleKey ++ "." ++ termKey
     in
     Dict.get key appState.provisioning.locale
-        |> Maybe.orElseLazy (\_ -> Dict.get key DefaultLocale.locale)
         |> Maybe.withDefault ""
 
 

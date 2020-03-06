@@ -7,7 +7,7 @@ module Registry.Common.View.Flash exposing
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Registry.Common.Html exposing (emptyNode)
+import Shared.Html exposing (emptyNode)
 
 
 error : String -> Html msg

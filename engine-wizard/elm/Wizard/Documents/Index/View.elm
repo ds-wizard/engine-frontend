@@ -3,11 +3,12 @@ module Wizard.Documents.Index.View exposing (..)
 import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target, title)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Common.Api.Documents as DocumentsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionType(..), ListingConfig, ListingDropdownItem)
-import Wizard.Common.Html exposing (emptyNode, faSet, linkTo)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal

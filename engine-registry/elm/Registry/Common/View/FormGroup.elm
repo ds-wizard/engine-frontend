@@ -17,7 +17,7 @@ import Html exposing (Html, code, div, label, p, span, text)
 import Html.Attributes exposing (class, for, id, name)
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.FormExtra exposing (CustomFormError(..))
-import Registry.Common.Html exposing (emptyNode)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf)
 
 

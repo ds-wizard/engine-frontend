@@ -3,9 +3,9 @@ module Wizard.Documents.Create.View exposing (..)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Html exposing (..)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash

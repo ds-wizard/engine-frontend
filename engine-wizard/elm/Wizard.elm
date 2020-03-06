@@ -11,7 +11,7 @@ import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
 import Wizard.Public.Routes
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing exposing (cmdNavigate, homeRoute, loginRoute, routeIfAllowed, toUrl)
+import Wizard.Routing as Routing exposing (cmdNavigate, loginRoute, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
 import Wizard.Update exposing (fetchData, update)
 import Wizard.View exposing (view)

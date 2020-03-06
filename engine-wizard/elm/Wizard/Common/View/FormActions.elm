@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (..)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Routes as Routes
 

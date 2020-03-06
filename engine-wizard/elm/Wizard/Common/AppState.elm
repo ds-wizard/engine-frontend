@@ -9,12 +9,11 @@ import Browser.Navigation as Navigation exposing (Key)
 import Dict
 import Json.Decode as D exposing (Decoder, Error(..))
 import Random exposing (Seed)
-import Shared.Provisioning as Provisioning
+import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Time
 import Wizard.Common.Config exposing (Config, Widget(..))
 import Wizard.Common.Flags as Flags
 import Wizard.Common.JwtToken as JwtToken exposing (JwtToken)
-import Wizard.Common.Provisioning exposing (Provisioning)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
 import Wizard.Common.Session as Session exposing (Session)
