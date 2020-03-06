@@ -4,9 +4,9 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, faKeyClass, faSet)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
 import Wizard.KMEditor.Common.KnowledgeModel.Reference as Reference
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)

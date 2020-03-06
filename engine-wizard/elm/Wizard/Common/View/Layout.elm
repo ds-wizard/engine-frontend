@@ -7,11 +7,12 @@ module Wizard.Common.View.Layout exposing
 import Browser exposing (Document)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Config exposing (CustomMenuLink)
-import Wizard.Common.Html exposing (emptyNode, fa, faSet, linkTo)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
 import Wizard.Common.View.Page as Page

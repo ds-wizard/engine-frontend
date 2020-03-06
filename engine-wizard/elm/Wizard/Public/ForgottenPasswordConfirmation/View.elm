@@ -4,10 +4,11 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Html exposing (faSet, linkTo)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Public.Common.PasswordForm exposing (PasswordForm)

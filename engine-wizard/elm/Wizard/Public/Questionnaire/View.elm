@@ -11,7 +11,7 @@ import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
 import Wizard.Common.View.Page as Page
 import Wizard.Public.Questionnaire.Models exposing (Model)
 import Wizard.Public.Questionnaire.Msgs exposing (Msg(..))
-import Wizard.Routing as Routing exposing (signupRoute)
+import Wizard.Routing exposing (signupRoute)
 
 
 l_ : String -> AppState -> String

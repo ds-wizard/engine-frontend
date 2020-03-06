@@ -3,10 +3,10 @@ module Wizard.KnowledgeModels.Import.View exposing (view)
 import Html exposing (Html, a, div, li, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Config exposing (Registry(..))
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Import.FileImport.View as FileImportView

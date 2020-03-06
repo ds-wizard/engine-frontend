@@ -4,9 +4,10 @@ import ActionResult
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, faSet, linkTo)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Page as Page

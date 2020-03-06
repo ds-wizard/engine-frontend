@@ -5,10 +5,11 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import String.Format exposing (format)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (..)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.Events.AddAnswerEventData exposing (AddAnswerEventData)

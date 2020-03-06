@@ -13,8 +13,9 @@ cache:
     - node_modules
 env:
   matrix:
-    - COMPONENT=wizard
     - COMPONENT=registry
+    - COMPONENT=wizard
+    - COMPONENT=wizard-research
 
 install:
   - npm install

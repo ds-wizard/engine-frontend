@@ -2,9 +2,10 @@ module Wizard.Public.SignupConfirmation.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Html exposing (faSet)
 import Shared.Locale exposing (lh, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (faSet, linkTo)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Public.SignupConfirmation.Models exposing (Model)

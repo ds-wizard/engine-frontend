@@ -11,8 +11,8 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 

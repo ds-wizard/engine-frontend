@@ -23,11 +23,11 @@ import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (checked, class, classList, for, id, name, rows, style, type_, value)
 import Html.Events exposing (onCheck, onClick)
 import Markdown
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lx)
 import String exposing (fromFloat)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError(..))
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Utils exposing (getContrastColorHex)
 
 
