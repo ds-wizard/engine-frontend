@@ -7,7 +7,7 @@ module Wizard.Common.AppState exposing
 
 import Browser.Navigation as Navigation exposing (Key)
 import Dict
-import Json.Decode as D exposing (Decoder)
+import Json.Decode as D exposing (Decoder, Error(..))
 import Random exposing (Seed)
 import Shared.Provisioning as Provisioning
 import Time
@@ -25,6 +25,7 @@ type alias AppState =
     { route : Routes.Route
     , seed : Seed
     , session : Session
+    , invalidSession : Bool
     , jwt : Maybe JwtToken
     , key : Key
     , apiUrl : String
@@ -38,9 +39,19 @@ type alias AppState =
 init : D.Value -> Navigation.Key -> AppState
 init flagsValue key =
     let
+        flagsResult =
+            D.decodeValue Flags.decoder flagsValue
+
+        invalidSession =
+            case flagsResult of
+                Err (Field "session" _) ->
+                    True
+
+                _ ->
+                    False
+
         flags =
-            Result.withDefault Flags.default <|
-                D.decodeValue Flags.decoder flagsValue
+            Result.withDefault Flags.default flagsResult
 
         defaultProvisioning =
             { locale = DefaultLocale.locale
@@ -57,6 +68,7 @@ init flagsValue key =
     { route = Routes.NotFoundRoute
     , seed = Random.initialSeed flags.seed
     , session = Maybe.withDefault Session.init flags.session
+    , invalidSession = invalidSession
     , jwt = Maybe.andThen (.token >> JwtToken.parse) flags.session
     , key = key
     , apiUrl = flags.apiUrl
