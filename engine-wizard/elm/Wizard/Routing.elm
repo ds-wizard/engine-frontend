@@ -43,6 +43,7 @@ matchers appState =
                 ++ Wizard.Users.Routing.parses Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    , map Routes.OrganizationRoute (s (lr "organization" appState))
+                   , map Routes.SettingsRoute (s (lr "settings" appState))
                    ]
     in
     oneOf parsers
@@ -81,6 +82,9 @@ isAllowed route maybeJwt =
         Routes.QuestionnairesRoute questionnaireRoute ->
             Wizard.Questionnaires.Routing.isAllowed questionnaireRoute maybeJwt
 
+        Routes.SettingsRoute ->
+            hasPerm maybeJwt Perm.settings
+
         Routes.UsersRoute usersRoute ->
             Wizard.Users.Routing.isAllowed usersRoute maybeJwt
 
@@ -116,6 +120,9 @@ toUrl appState route =
 
                 Routes.PublicRoute publicRoute ->
                     Wizard.Public.Routing.toUrl appState publicRoute
+
+                Routes.SettingsRoute ->
+                    [ lr "settings" appState ]
 
                 Routes.UsersRoute usersRoute ->
                     Wizard.Users.Routing.toUrl usersRoute

@@ -7,7 +7,7 @@ import Html.Events exposing (onInput)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config exposing (Registry(..))
+import Wizard.Common.Config.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
@@ -78,7 +78,7 @@ viewForm appState model =
 
 viewRegistryText : AppState -> Html msg
 viewRegistryText appState =
-    case appState.config.registry of
+    case appState.config.features.registry of
         RegistryEnabled url ->
             p []
                 (lh_ "registryLink"

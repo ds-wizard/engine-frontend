@@ -12,7 +12,7 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Users.Common.User as User
+import Wizard.Users.Common.Role as Role
 import Wizard.Users.Common.UserCreateForm exposing (UserCreateForm)
 import Wizard.Users.Create.Models exposing (..)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
@@ -40,7 +40,7 @@ formView : AppState -> Form CustomFormError UserCreateForm -> Html Form.Msg
 formView appState form =
     let
         roleOptions =
-            ( "", "--" ) :: List.map (\o -> ( o, o )) User.roles
+            ( "", "--" ) :: List.map (\o -> ( o, o )) Role.list
 
         formHtml =
             div []

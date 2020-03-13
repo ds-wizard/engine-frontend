@@ -10,7 +10,7 @@ import Version
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config exposing (Registry(..))
+import Wizard.Common.Config.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
@@ -125,7 +125,7 @@ readme appState package =
 
 newVersionInRegistryWarning : AppState -> PackageDetail -> Html msg
 newVersionInRegistryWarning appState package =
-    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
+    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.features.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 latestPackageId =

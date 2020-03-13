@@ -42,7 +42,7 @@ todoList =
 
 feedbackEnabled : AppState -> List QuestionnaireFeature -> Bool
 feedbackEnabled appState features =
-    if appState.config.feedbackEnabled then
+    if appState.config.features.feedback.enabled then
         enabled Feedback features
 
     else

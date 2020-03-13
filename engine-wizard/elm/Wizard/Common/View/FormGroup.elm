@@ -5,6 +5,7 @@ module Wizard.Common.View.FormGroup exposing
     , formatRadioGroup
     , getErrors
     , input
+    , inputAttrs
     , list
     , markdownEditor
     , password
@@ -51,6 +52,11 @@ lx_ =
 input : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
 input =
     formGroup Input.textInput []
+
+
+inputAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+inputAttrs =
+    formGroup Input.textInput
 
 
 {-| Helper for creating form group with password input field.

@@ -10,5 +10,6 @@ subscriptions : Model -> Sub Wizard.Msgs.Msg
 subscriptions model =
     Sub.batch
         [ Dropdown.subscriptions model.helpMenuDropdownState (Wizard.Msgs.MenuMsg << HelpMenuDropdownMsg)
+        , Dropdown.subscriptions model.settingsMenuDropdownState (Wizard.Msgs.MenuMsg << SettingsMenuDropdownMsg)
         , Dropdown.subscriptions model.profileMenuDropdownState (Wizard.Msgs.MenuMsg << ProfileMenuDropdownMsg)
         ]
