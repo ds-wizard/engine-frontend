@@ -16,6 +16,7 @@ import Wizard.Organization.View
 import Wizard.Public.View
 import Wizard.Questionnaires.View
 import Wizard.Routes as Routes
+import Wizard.Settings.View
 import Wizard.Users.View
 
 
@@ -71,6 +72,12 @@ view model =
                     |> Wizard.Public.View.view route model.appState
                     |> Html.map PublicMsg
                     |> Layout.public model
+
+            Routes.SettingsRoute ->
+                model.settingsModel
+                    |> Wizard.Settings.View.view model.appState
+                    |> Html.map SettingsMsg
+                    |> Layout.app model
 
             Routes.UsersRoute route ->
                 model.users

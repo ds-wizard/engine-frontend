@@ -12,7 +12,6 @@ import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.Msgs
 import Wizard.Organization.Common.Organization exposing (Organization)
 import Wizard.Organization.Common.OrganizationForm exposing (OrganizationForm)
 import Wizard.Organization.Models exposing (..)

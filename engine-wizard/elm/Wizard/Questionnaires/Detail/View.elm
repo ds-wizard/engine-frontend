@@ -49,7 +49,7 @@ content appState model ( questionnaireModel, levels ) =
                 , QuestionnaireFeature.todoList
                 ]
             , levels =
-                if appState.config.levelsEnabled then
+                if appState.config.features.levels.enabled then
                     Just levels
 
                 else

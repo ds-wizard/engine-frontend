@@ -5,7 +5,7 @@ import Html.Attributes exposing (class)
 import Markdown
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.Common.Config exposing (Widget(..))
+import Wizard.Common.Config.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg)
 import Wizard.Dashboard.Widgets.DMPWorkflowWidget as DMPWorkflowWidget
@@ -39,14 +39,14 @@ viewAlert alertClass mbMessage =
             emptyNode
 
 
-viewWidget : AppState -> Model -> Widget -> Html Msg
+viewWidget : AppState -> Model -> DashboardWidget -> Html Msg
 viewWidget appState model widget =
     case widget of
-        DMPWorkflow ->
+        DMPWorkflowDashboardWidget ->
             DMPWorkflowWidget.view appState model.questionnaires
 
-        LevelsQuestionnaire ->
+        LevelsQuestionnaireDashboardWidget ->
             PhaseQuestionnaireWidget.view appState model.levels model.questionnaires
 
-        Welcome ->
+        WelcomeDashboardWidget ->
             WelcomeWidget.view appState

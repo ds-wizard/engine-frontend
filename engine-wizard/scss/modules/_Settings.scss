@@ -1,0 +1,25 @@
+.Configuration {
+    .form-group-markdown {
+        .card-footer {
+            display: none;
+        }
+    }
+
+    .custom-menu-links {
+        .form-group label {
+            display: none;
+        }
+
+        .custom-menu-links-header {
+            margin-bottom: 0.25rem;
+        }
+
+        .btn-secondary {
+            margin-top: 0.5rem;
+        }
+
+        .row {
+            margin-bottom: 0.25rem;
+        }
+    }
+}

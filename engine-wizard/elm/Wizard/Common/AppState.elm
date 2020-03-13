@@ -11,7 +11,8 @@ import Json.Decode as D exposing (Decoder, Error(..))
 import Random exposing (Seed)
 import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Time
-import Wizard.Common.Config exposing (Config, Widget(..))
+import Wizard.Common.Config exposing (Config)
+import Wizard.Common.Config.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Common.Flags as Flags
 import Wizard.Common.JwtToken as JwtToken exposing (JwtToken)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
@@ -83,7 +84,7 @@ setCurrentTime appState time =
     { appState | currentTime = time }
 
 
-getDashboardWidgets : AppState -> List Widget
+getDashboardWidgets : AppState -> List DashboardWidget
 getDashboardWidgets appState =
     let
         role =
@@ -92,4 +93,4 @@ getDashboardWidgets appState =
                 |> Maybe.withDefault ""
     in
     Dict.get role appState.config.client.dashboard
-        |> Maybe.withDefault [ Welcome ]
+        |> Maybe.withDefault [ WelcomeDashboardWidget ]

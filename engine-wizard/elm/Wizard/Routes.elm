@@ -16,6 +16,7 @@ type Route
     | OrganizationRoute
     | PublicRoute Wizard.Public.Routes.Route
     | QuestionnairesRoute Wizard.Questionnaires.Routes.Route
+    | SettingsRoute
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute

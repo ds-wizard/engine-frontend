@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config exposing (Registry(..))
+import Wizard.Common.Config.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Import.FileImport.View as FileImportView
@@ -43,7 +43,7 @@ view appState model =
                     )
 
         navbar =
-            case appState.config.registry of
+            case appState.config.features.registry of
                 RegistryEnabled _ ->
                     viewNavbar appState registryActive
 

@@ -12,6 +12,7 @@ import Wizard.KnowledgeModels.Msgs
 import Wizard.Organization.Msgs
 import Wizard.Public.Msgs
 import Wizard.Questionnaires.Msgs
+import Wizard.Settings.Msgs
 import Wizard.Users.Msgs
 
 
@@ -29,4 +30,5 @@ type Msg
     | OrganizationMsg Wizard.Organization.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg
     | QuestionnairesMsg Wizard.Questionnaires.Msgs.Msg
+    | SettingsMsg Wizard.Settings.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg

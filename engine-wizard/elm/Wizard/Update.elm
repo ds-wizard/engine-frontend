@@ -20,6 +20,7 @@ import Wizard.Public.Update
 import Wizard.Questionnaires.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation)
+import Wizard.Settings.Update
 import Wizard.Users.Update
 
 
@@ -55,6 +56,10 @@ fetchData model =
                 Routes.PublicRoute route ->
                     Cmd.map Wizard.Msgs.PublicMsg <|
                         Wizard.Public.Update.fetchData route model.appState
+
+                Routes.SettingsRoute ->
+                    Cmd.map Wizard.Msgs.SettingsMsg <|
+                        Wizard.Settings.Update.fetchData model.appState
 
                 Routes.UsersRoute route ->
                     Cmd.map Wizard.Msgs.UsersMsg <|
@@ -178,6 +183,13 @@ update msg model =
                     Wizard.Questionnaires.Update.update Wizard.Msgs.QuestionnairesMsg questionnairesMsg model.appState model.questionnairesModel
             in
             ( { model | questionnairesModel = questionnairesModel }, cmd )
+
+        Wizard.Msgs.SettingsMsg settingsMsg ->
+            let
+                ( settingsModel, cmd ) =
+                    Wizard.Settings.Update.update settingsMsg Wizard.Msgs.SettingsMsg model.appState model.settingsModel
+            in
+            ( { model | settingsModel = settingsModel }, cmd )
 
         Wizard.Msgs.UsersMsg usersMsg ->
             let

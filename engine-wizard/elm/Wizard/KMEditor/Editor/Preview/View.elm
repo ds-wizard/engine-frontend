@@ -33,7 +33,7 @@ view appState levels model =
             viewQuestionnaire
                 { features = []
                 , levels =
-                    if appState.config.levelsEnabled then
+                    if appState.config.features.levels.enabled then
                         Just levels
 
                     else

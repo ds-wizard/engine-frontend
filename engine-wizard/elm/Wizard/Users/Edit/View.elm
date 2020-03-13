@@ -15,6 +15,7 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
+import Wizard.Users.Common.Role as Role
 import Wizard.Users.Common.User as User exposing (User)
 import Wizard.Users.Common.UserEditForm exposing (UserEditForm)
 import Wizard.Users.Common.UserPasswordForm exposing (UserPasswordForm)
@@ -85,7 +86,7 @@ userFormView : AppState -> Form CustomFormError UserEditForm -> Bool -> Html For
 userFormView appState form current =
     let
         roleOptions =
-            ( "", "--" ) :: List.map (\o -> ( o, o )) User.roles
+            ( "", "--" ) :: List.map (\o -> ( o, o )) Role.list
 
         roleSelect =
             if current then

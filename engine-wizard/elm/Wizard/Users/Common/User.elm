@@ -4,11 +4,11 @@ module Wizard.Users.Common.User exposing
     , decoder
     , fullName
     , isAdmin
-    , roles
     )
 
 import Json.Decode as D exposing (..)
 import Json.Decode.Pipeline as D
+import Wizard.Users.Common.Role as Role
 
 
 type alias User =
@@ -32,14 +32,9 @@ decoder =
         |> D.required "active" D.bool
 
 
-roles : List String
-roles =
-    [ "ADMIN", "DATASTEWARD", "RESEARCHER" ]
-
-
 isAdmin : Maybe User -> Bool
 isAdmin =
-    Maybe.map (.role >> (==) "ADMIN") >> Maybe.withDefault False
+    Maybe.map (.role >> (==) Role.admin) >> Maybe.withDefault False
 
 
 compare : User -> User -> Order
