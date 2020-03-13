@@ -11,10 +11,10 @@ import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config exposing (CustomMenuLink)
+import Wizard.Common.Config.CustomMenuLink exposing (CustomMenuLink)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
-import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
+import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
@@ -74,7 +74,7 @@ publicHeader : Model -> Html Msg
 publicHeader model =
     let
         questionnaireDemoLink =
-            if model.appState.config.publicQuestionnaireEnabled then
+            if model.appState.config.features.publicQuestionnaire.enabled then
                 li [ class "nav-item" ]
                     [ linkTo model.appState
                         questionnaireDemoRoute
@@ -86,7 +86,7 @@ publicHeader model =
                 emptyNode
 
         signUpLink =
-            if model.appState.config.registrationEnabled then
+            if model.appState.config.features.registration.enabled then
                 li [ class "nav-item" ]
                     [ linkTo model.appState
                         signupRoute
@@ -191,11 +191,6 @@ createMenu model =
 menuItems : AppState -> List (MenuItem msg)
 menuItems appState =
     [ MenuItem
-        (l_ "menu.organization" appState)
-        (faSet "menu.organization" appState)
-        Routes.OrganizationRoute
-        Perm.organization
-    , MenuItem
         (l_ "menu.users" appState)
         (faSet "menu.users" appState)
         (Routes.UsersRoute Wizard.Users.Routes.IndexRoute)
@@ -277,6 +272,7 @@ profileInfo model =
     in
     div [ class "profile-info" ]
         [ viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
+        , viewSettingsMenu model.appState model.menuModel.settingsMenuDropdownState
         , viewProfileMenu model.appState model.menuModel.profileMenuDropdownState
         , collapseLink
         ]

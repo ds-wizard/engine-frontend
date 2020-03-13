@@ -1,4 +1,4 @@
-module Wizard.Auth.Permission exposing (dataManagementPlan, hasPerm, knowledgeModel, knowledgeModelPublish, knowledgeModelUpgrade, organization, packageManagementRead, packageManagementWrite, questionnaire, userManagement)
+module Wizard.Auth.Permission exposing (dataManagementPlan, hasPerm, knowledgeModel, knowledgeModelPublish, knowledgeModelUpgrade, organization, packageManagementRead, packageManagementWrite, questionnaire, settings, userManagement)
 
 import Wizard.Common.JwtToken exposing (JwtToken)
 
@@ -56,3 +56,8 @@ questionnaire =
 dataManagementPlan : String
 dataManagementPlan =
     "DMP_PERM"
+
+
+settings : String
+settings =
+    "CFG_PERM"
