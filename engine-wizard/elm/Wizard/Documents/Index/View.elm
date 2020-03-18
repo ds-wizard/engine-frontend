@@ -3,7 +3,7 @@ module Wizard.Documents.Index.View exposing (..)
 import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (class, href, target, title)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Common.Api.Documents as DocumentsApi
 import Wizard.Common.AppState exposing (AppState)
@@ -148,25 +148,16 @@ listingDescription appState document =
                 Nothing ->
                     emptyNode
 
-        icon =
-            case document.format of
-                "pdf" ->
-                    faSet "format.pdf" appState
+        ( icon, formatName ) =
+            case Document.getFormat document of
+                Just format ->
+                    ( fa format.icon, format.name )
 
-                "docx" ->
-                    faSet "format.word" appState
-
-                "html" ->
-                    faSet "format.code" appState
-
-                "json" ->
-                    faSet "format.code" appState
-
-                _ ->
-                    faSet "format.text" appState
+                Nothing ->
+                    ( emptyNode, "" )
     in
     span []
-        [ span [ class "fragment" ] [ icon, text document.format ]
+        [ span [ class "fragment" ] [ icon, text formatName ]
         , questionnaireLink
         ]
 

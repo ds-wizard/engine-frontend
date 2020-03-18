@@ -15,13 +15,13 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Setters exposing (setQuestionnaires, setTemplates)
 import Wizard.Documents.Common.Document exposing (Document)
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm
+import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Documents.Create.Models exposing (Model)
 import Wizard.Documents.Create.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
 import Wizard.KnowledgeModels.Common.Package exposing (Package)
 import Wizard.Msgs
 import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.Template exposing (Template)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 

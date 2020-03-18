@@ -3,8 +3,8 @@ module Wizard.Documents.Create.Msgs exposing (..)
 import Form
 import Shared.Error.ApiError exposing (ApiError)
 import Wizard.Documents.Common.Document exposing (Document)
+import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.Template exposing (Template)
 
 
 type Msg
