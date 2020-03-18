@@ -3,11 +3,13 @@ module Wizard.Documents.Common.Document exposing (..)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
+import List.Extra as List
 import Time
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Common.DocumentState as DocumentState exposing (DocumentState)
+import Wizard.Documents.Common.Template as Template exposing (Template)
+import Wizard.Documents.Common.TemplateFormat exposing (TemplateFormat)
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.Template as Template exposing (Template)
 import Wizard.Users.Common.User as User
 
 
@@ -17,7 +19,7 @@ type alias Document =
     , createdAt : Time.Posix
     , questionnaire : Maybe Questionnaire
     , template : Template
-    , format : String
+    , formatUuid : String
     , state : DocumentState
     , ownerUuid : String
     }
@@ -45,7 +47,7 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.optional "questionnaire" (D.maybe Questionnaire.decoder) Nothing
         |> D.required "template" Template.decoder
-        |> D.required "format" D.string
+        |> D.required "formatUuid" D.string
         |> D.required "state" DocumentState.decoder
         |> D.required "ownerUuid" D.string
 
@@ -53,3 +55,8 @@ decoder =
 compare : Document -> Document -> Order
 compare d1 d2 =
     Basics.compare (String.toLower d1.name) (String.toLower d2.name)
+
+
+getFormat : Document -> Maybe TemplateFormat
+getFormat document =
+    List.find (.uuid >> (==) document.formatUuid) document.template.formats

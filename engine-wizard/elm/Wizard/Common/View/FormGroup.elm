@@ -24,11 +24,12 @@ import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (checked, class, classList, for, id, name, rows, style, type_, value)
 import Html.Events exposing (onCheck, onClick)
 import Markdown
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lx)
 import String exposing (fromFloat)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError(..))
+import Wizard.Documents.Common.TemplateFormat exposing (TemplateFormat)
 import Wizard.Utils exposing (getContrastColorHex)
 
 
@@ -100,23 +101,24 @@ richRadioGroup appState options =
     formGroup radioInput [] appState
 
 
-formatRadioGroup : AppState -> List ( Html Form.Msg, String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+formatRadioGroup : AppState -> List TemplateFormat -> Form CustomFormError o -> String -> String -> Html Form.Msg
 formatRadioGroup appState options =
     let
         radioInput state attrs =
             let
-                buildOption ( icon, format, formatLabel ) =
-                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just format ) ] ]
+                buildOption : TemplateFormat -> Html Form.Msg
+                buildOption format =
+                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just format.uuid ) ] ]
                         [ Html.input
-                            [ value format
-                            , checked (state.value == Just format)
+                            [ value format.uuid
+                            , checked (state.value == Just format.uuid)
                             , type_ "radio"
                             , name "format"
-                            , onCheck (\_ -> Input state.path Form.Text <| Field.String format)
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String format.uuid)
                             ]
                             []
-                        , icon
-                        , text formatLabel
+                        , fa format.icon
+                        , text format.name
                         ]
             in
             div [ class "export-formats" ] (List.map buildOption options)

@@ -4,8 +4,8 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing (DocumentCreateForm)
+import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.Template exposing (Template)
 
 
 type alias Model =

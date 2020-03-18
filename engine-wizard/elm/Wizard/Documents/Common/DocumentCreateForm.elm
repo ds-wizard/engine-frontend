@@ -16,7 +16,7 @@ type alias DocumentCreateForm =
     { name : String
     , questionnaireUuid : String
     , templateUuid : String
-    , format : String
+    , formatUuid : String
     }
 
 
@@ -40,7 +40,7 @@ validation =
         (Validate.field "name" Validate.string)
         (Validate.field "questionnaireUuid" Validate.string)
         (Validate.field "templateUuid" Validate.string)
-        (Validate.field "format" Validate.string)
+        (Validate.field "formatUuid" Validate.string)
 
 
 encode : DocumentCreateForm -> E.Value
@@ -49,5 +49,5 @@ encode form =
         [ ( "name", E.string form.name )
         , ( "questionnaireUuid", E.string form.questionnaireUuid )
         , ( "templateUuid", E.string form.templateUuid )
-        , ( "format", E.string form.format )
+        , ( "formatUuid", E.string form.formatUuid )
         ]
