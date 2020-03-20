@@ -18,6 +18,7 @@ import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
 import Wizard.Auth.Permission as Permissions
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
@@ -26,6 +27,7 @@ import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Msgs
 import Wizard.Routes as Routes
+import Wizard.Settings.Routes
 import Wizard.Users.Common.User as User
 import Wizard.Users.Routes
 import Wizard.Utils exposing (listInsertIf)
@@ -70,53 +72,20 @@ viewHelpMenu appState dropdownState =
         }
 
 
-viewSettingsMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg
-viewSettingsMenu appState dropdownState =
-    let
-        hasOrganizationPerm =
-            Permissions.hasPerm appState.jwt Permissions.organization
-
-        hasSettingsPerm =
-            Permissions.hasPerm appState.jwt Permissions.settings
-
-        hasAdminSettings =
-            hasOrganizationPerm || hasSettingsPerm
-
-        organizationItem =
-            Dropdown.anchorItem (linkToAttributes appState Routes.OrganizationRoute)
-                [ faSet "menu.organization" appState
-                , lx_ "settingsMenu.organization" appState
+viewSettingsMenu : AppState -> Html Wizard.Msgs.Msg
+viewSettingsMenu appState =
+    if Permissions.hasPerm appState.jwt Permissions.settings then
+        div [ class "btn-group" ]
+            [ linkTo appState
+                (Routes.SettingsRoute Wizard.Settings.Routes.defaultRoute)
+                [ class "btn btn-link" ]
+                [ faSet "menu.settings" appState
+                , span [ class "sidebar-link" ] [ span [] [ lx_ "settingsMenu.settings" appState ] ]
                 ]
-
-        settingsItem =
-            Dropdown.anchorItem (linkToAttributes appState Routes.SettingsRoute)
-                [ faSet "menu.config" appState
-                , lx_ "settingsMenu.config" appState
-                ]
-
-        adminSettings =
-            if hasAdminSettings then
-                []
-                    |> listInsertIf organizationItem hasOrganizationPerm
-                    |> listInsertIf settingsItem hasSettingsPerm
-
-            else
-                []
-    in
-    if not hasAdminSettings then
-        emptyNode
+            ]
 
     else
-        Dropdown.dropdown dropdownState
-            { options = [ Dropdown.dropRight ]
-            , toggleMsg = Wizard.Msgs.MenuMsg << SettingsMenuDropdownMsg
-            , toggleButton =
-                Dropdown.toggle [ Button.roleLink ]
-                    [ faSet "menu.settings" appState
-                    , span [ class "sidebar-link" ] [ span [] [ lx_ "settingsMenu.settings" appState ], faSet "menu.dropdownToggle" appState ]
-                    ]
-            , items = adminSettings
-            }
+        emptyNode
 
 
 viewProfileMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg

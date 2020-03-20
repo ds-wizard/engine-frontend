@@ -6,9 +6,12 @@ module Wizard.Common.View.FormGroup exposing
     , getErrors
     , input
     , inputAttrs
+    , inputWithTypehints
     , list
     , markdownEditor
+    , optionalWrapper
     , password
+    , resizableTextarea
     , richRadioGroup
     , select
     , textView
@@ -21,8 +24,8 @@ import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
 import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
-import Html.Attributes exposing (checked, class, classList, for, id, name, rows, style, type_, value)
-import Html.Events exposing (onCheck, onClick)
+import Html.Attributes exposing (autocomplete, checked, class, classList, for, id, name, rows, style, type_, value)
+import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Markdown
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lx)
@@ -48,6 +51,14 @@ lx_ =
     lx "Wizard.Common.View.FormGroup"
 
 
+optionalWrapper : AppState -> Html Form.Msg -> Html Form.Msg
+optionalWrapper appState content =
+    div [ class "form-group form-group-optional-wrapper" ]
+        [ span [ class "optional-label" ] [ lx_ "optional" appState ]
+        , content
+        ]
+
+
 {-| Helper for creating form group with text input field.
 -}
 input : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
@@ -58,6 +69,50 @@ input =
 inputAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
 inputAttrs =
     formGroup Input.textInput
+
+
+inputWithTypehints : List String -> AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+inputWithTypehints options appState form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, errorClass ) =
+            getErrors appState field labelText
+
+        typehintMessage =
+            Form.Input fieldName Form.Text << Field.String
+
+        contains a b =
+            String.contains (String.toLower a) (String.toLower b)
+
+        filteredOptions =
+            case field.value of
+                Just value ->
+                    List.filter (contains value) options
+
+                Nothing ->
+                    options
+
+        typehints =
+            if field.hasFocus then
+                ul [ class "typehints" ]
+                    (List.map
+                        (\option ->
+                            li [ onMouseDown <| typehintMessage option ] [ text option ]
+                        )
+                        filteredOptions
+                    )
+
+            else
+                emptyNode
+    in
+    div [ class "form-group" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , Input.textInput field [ class <| "form-control " ++ errorClass, id fieldName, name fieldName, autocomplete False ]
+        , typehints
+        , error
+        ]
 
 
 {-| Helper for creating form group with password input field.
@@ -131,6 +186,17 @@ formatRadioGroup appState options =
 textarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
 textarea =
     formGroup Input.textArea []
+
+
+resizableTextarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+resizableTextarea appState form fieldName =
+    let
+        lines =
+            (Form.getFieldAsString fieldName form).value
+                |> Maybe.map (max 3 << List.length << String.split "\n")
+                |> Maybe.withDefault 3
+    in
+    formGroup Input.textArea [ rows lines ] appState form fieldName
 
 
 {-| Helper for creating form group with toggle

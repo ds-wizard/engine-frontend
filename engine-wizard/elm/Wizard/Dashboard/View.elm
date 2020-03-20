@@ -21,8 +21,8 @@ view appState model =
                 |> List.map (viewWidget appState model)
     in
     div [ class "col Dashboard" ]
-        ([ viewAlert "warning" appState.config.client.welcomeWarning
-         , viewAlert "info" appState.config.client.welcomeInfo
+        ([ viewAlert "warning" appState.config.info.welcomeWarning
+         , viewAlert "info" appState.config.info.welcomeInfo
          ]
             ++ widgets
         )

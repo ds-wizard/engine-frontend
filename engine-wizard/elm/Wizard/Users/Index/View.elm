@@ -92,10 +92,21 @@ listingTitleBadge appState user =
 
 listingDescription : User -> Html Msg
 listingDescription user =
+    let
+        affiliationFragment =
+            case user.affiliation of
+                Just affiliation ->
+                    [ span [ class "fragment" ] [ text affiliation ] ]
+
+                Nothing ->
+                    []
+    in
     span []
-        [ a [ class "fragment", href <| "mailto:" ++ user.email ]
+        ([ a [ class "fragment", href <| "mailto:" ++ user.email ]
             [ text user.email ]
-        ]
+         ]
+            ++ affiliationFragment
+        )
 
 
 listingActions : AppState -> User -> List (ListingDropdownItem Msg)

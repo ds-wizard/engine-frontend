@@ -16,6 +16,7 @@ type alias User =
     , email : String
     , firstName : String
     , lastName : String
+    , affiliation : Maybe String
     , role : String
     , active : Bool
     }
@@ -28,6 +29,7 @@ decoder =
         |> D.required "email" D.string
         |> D.required "firstName" D.string
         |> D.required "lastName" D.string
+        |> D.required "affiliation" (D.maybe D.string)
         |> D.required "role" D.string
         |> D.required "active" D.bool
 

@@ -1,89 +1,78 @@
-module Wizard.Settings.Update exposing (..)
+module Wizard.Settings.Update exposing
+    ( fetchData
+    , update
+    )
 
-import ActionResult exposing (ActionResult(..))
-import Form
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Config as ConfigApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Ports as Ports
-import Wizard.Settings.Common.ConfigForm as ConfigForm
-import Wizard.Settings.Common.EditableConfig as EditableConfig exposing (EditableConfig)
+import Wizard.Settings.Affiliation.Update
+import Wizard.Settings.Client.Update
+import Wizard.Settings.Features.Update
+import Wizard.Settings.Info.Update
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
+import Wizard.Settings.Organization.Update
+import Wizard.Settings.Routes exposing (Route(..))
 
 
-fetchData : AppState -> Cmd Msg
-fetchData appState =
-    ConfigApi.getApplicationConfig appState GetApplicationConfigCompleted
+fetchData : Route -> AppState -> Model -> Cmd Msg
+fetchData route appState model =
+    case route of
+        AffiliationRoute ->
+            Cmd.map AffiliationMsg <|
+                Wizard.Settings.Affiliation.Update.fetchData appState
+
+        ClientRoute ->
+            Cmd.map ClientMsg <|
+                Wizard.Settings.Client.Update.fetchData appState
+
+        FeaturesRoute ->
+            Cmd.map FeaturesMsg <|
+                Wizard.Settings.Features.Update.fetchData appState
+
+        InfoRoute ->
+            Cmd.map InfoMsg <|
+                Wizard.Settings.Info.Update.fetchData appState
+
+        OrganizationRoute ->
+            Cmd.map OrganizationMsg <|
+                Wizard.Settings.Organization.Update.fetchData appState
 
 
-update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update msg wrapMsg appState model =
+update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+update wrapMsg msg appState model =
     case msg of
-        GetApplicationConfigCompleted result ->
-            handleGetApplicationConfigCompleted appState model result
-
-        PutApplicationConfigCompleted result ->
-            handlePutApplicationConfigCompleted appState model result
-
-        FormMsg formMsg ->
-            handleForm formMsg wrapMsg appState model
-
-
-handleGetApplicationConfigCompleted : AppState -> Model -> Result ApiError EditableConfig -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetApplicationConfigCompleted appState model result =
-    let
-        newModel =
-            case result of
-                Ok config ->
-                    { model | form = ConfigForm.init config, config = Success config }
-
-                Err error ->
-                    { model | config = ApiError.toActionResult (lg "apiError.config.application.getError" appState) error }
-
-        cmd =
-            getResultCmd result
-    in
-    ( newModel, cmd )
-
-
-handlePutApplicationConfigCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePutApplicationConfigCompleted appState model result =
-    let
-        newResult =
-            case result of
-                Ok _ ->
-                    Success <| lg "apiSuccess.config.application.put" appState
-
-                Err error ->
-                    ApiError.toActionResult (lg "apiError.config.application.putError" appState) error
-
-        cmd =
-            getResultCmd result
-    in
-    ( { model | savingConfig = newResult }, Cmd.batch [ cmd, Ports.scrollIntoView ".Configuration" ] )
-
-
-handleForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleForm formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.form ) of
-        ( Form.Submit, Just form ) ->
+        AffiliationMsg affiliationMsg ->
             let
-                body =
-                    EditableConfig.encode <| ConfigForm.toEditableConfig form
-
-                cmd =
-                    Cmd.map wrapMsg <|
-                        ConfigApi.putApplicationConfig body appState PutApplicationConfigCompleted
+                ( affiliationModel, cmd ) =
+                    Wizard.Settings.Affiliation.Update.update (wrapMsg << AffiliationMsg) affiliationMsg appState model.affiliationModel
             in
-            ( { model | savingConfig = Loading }, cmd )
+            ( { model | affiliationModel = affiliationModel }, cmd )
 
-        _ ->
+        ClientMsg clientMsg ->
             let
-                form =
-                    Form.update ConfigForm.validation formMsg model.form
+                ( clientModel, cmd ) =
+                    Wizard.Settings.Client.Update.update (wrapMsg << ClientMsg) clientMsg appState model.clientModel
             in
-            ( { model | form = form }, Cmd.none )
+            ( { model | clientModel = clientModel }, cmd )
+
+        FeaturesMsg featuresMsg ->
+            let
+                ( featuresModel, cmd ) =
+                    Wizard.Settings.Features.Update.update (wrapMsg << FeaturesMsg) featuresMsg appState model.featuresModel
+            in
+            ( { model | featuresModel = featuresModel }, cmd )
+
+        InfoMsg infoMsg ->
+            let
+                ( infoModel, cmd ) =
+                    Wizard.Settings.Info.Update.update (wrapMsg << InfoMsg) infoMsg appState model.infoModel
+            in
+            ( { model | infoModel = infoModel }, cmd )
+
+        OrganizationMsg organizationMsg ->
+            let
+                ( organizationModel, cmd ) =
+                    Wizard.Settings.Organization.Update.update (wrapMsg << OrganizationMsg) organizationMsg appState model.organizationModel
+            in
+            ( { model | organizationModel = organizationModel }, cmd )

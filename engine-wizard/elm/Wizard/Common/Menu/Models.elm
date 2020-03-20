@@ -9,7 +9,6 @@ import Json.Decode.Pipeline exposing (required)
 type alias Model =
     { reportIssueOpen : Bool
     , helpMenuDropdownState : Dropdown.State
-    , settingsMenuDropdownState : Dropdown.State
     , profileMenuDropdownState : Dropdown.State
     , aboutOpen : Bool
     , apiBuildInfo : ActionResult BuildInfo
@@ -26,7 +25,6 @@ initialModel : Model
 initialModel =
     { reportIssueOpen = False
     , helpMenuDropdownState = Dropdown.initialState
-    , settingsMenuDropdownState = Dropdown.initialState
     , profileMenuDropdownState = Dropdown.initialState
     , aboutOpen = False
     , apiBuildInfo = Unset

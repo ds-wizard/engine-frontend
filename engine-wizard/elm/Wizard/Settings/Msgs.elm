@@ -1,11 +1,15 @@
 module Wizard.Settings.Msgs exposing (Msg(..))
 
-import Form
-import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Settings.Common.EditableConfig exposing (EditableConfig)
+import Wizard.Settings.Affiliation.Msgs
+import Wizard.Settings.Client.Msgs
+import Wizard.Settings.Features.Msgs
+import Wizard.Settings.Info.Msgs
+import Wizard.Settings.Organization.Msgs
 
 
 type Msg
-    = GetApplicationConfigCompleted (Result ApiError EditableConfig)
-    | PutApplicationConfigCompleted (Result ApiError ())
-    | FormMsg Form.Msg
+    = AffiliationMsg Wizard.Settings.Affiliation.Msgs.Msg
+    | ClientMsg Wizard.Settings.Client.Msgs.Msg
+    | FeaturesMsg Wizard.Settings.Features.Msgs.Msg
+    | InfoMsg Wizard.Settings.Info.Msgs.Msg
+    | OrganizationMsg Wizard.Settings.Organization.Msgs.Msg

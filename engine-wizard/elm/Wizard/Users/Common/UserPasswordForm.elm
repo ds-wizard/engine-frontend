@@ -1,10 +1,10 @@
 module Wizard.Users.Common.UserPasswordForm exposing (UserPasswordForm, encode, init, validation)
 
 import Form exposing (Form)
-import Form.Validate as Validate exposing (Validation)
+import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate exposing (validateConfirmation)
+import Wizard.Common.Form.Validate as V
 
 
 type alias UserPasswordForm =
@@ -20,9 +20,9 @@ init =
 
 validation : Validation CustomFormError UserPasswordForm
 validation =
-    Validate.map2 UserPasswordForm
-        (Validate.field "password" Validate.string)
-        (Validate.field "password" Validate.string |> validateConfirmation "passwordConfirmation")
+    V.map2 UserPasswordForm
+        (V.field "password" V.string)
+        (V.field "password" V.string |> V.confirmation "passwordConfirmation")
 
 
 encode : UserPasswordForm -> E.Value

@@ -18,7 +18,6 @@ import Wizard.Dashboard.Models
 import Wizard.Documents.Models
 import Wizard.KMEditor.Models
 import Wizard.KnowledgeModels.Models
-import Wizard.Organization.Models
 import Wizard.Public.Models
 import Wizard.Questionnaires.Models
 import Wizard.Routes as Routes
@@ -31,7 +30,6 @@ type alias Model =
     , menuModel : Wizard.Common.Menu.Models.Model
     , dashboardModel : Wizard.Dashboard.Models.Model
     , documentsModel : Wizard.Documents.Models.Model
-    , organizationModel : Wizard.Organization.Models.Model
     , kmEditorModel : Wizard.KMEditor.Models.Model
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
     , publicModel : Wizard.Public.Models.Model
@@ -47,7 +45,6 @@ initialModel appState =
     , menuModel = Wizard.Common.Menu.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel
     , documentsModel = Wizard.Documents.Models.initialModel
-    , organizationModel = Wizard.Organization.Models.initialModel
     , kmEditorModel = Wizard.KMEditor.Models.initialModel
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
     , questionnairesModel = Wizard.Questionnaires.Models.initialModel
@@ -111,9 +108,6 @@ initLocalModel model =
         Routes.DocumentsRoute route ->
             { model | documentsModel = Wizard.Documents.Models.initLocalModel route model.documentsModel }
 
-        Routes.OrganizationRoute ->
-            { model | organizationModel = Wizard.Organization.Models.initialModel }
-
         Routes.KMEditorRoute route ->
             { model | kmEditorModel = Wizard.KMEditor.Models.initLocalModel route model.kmEditorModel }
 
@@ -126,8 +120,8 @@ initLocalModel model =
         Routes.QuestionnairesRoute route ->
             { model | questionnairesModel = Wizard.Questionnaires.Models.initLocalModel route model.questionnairesModel }
 
-        Routes.SettingsRoute ->
-            { model | settingsModel = Wizard.Settings.Models.initialModel }
+        Routes.SettingsRoute route ->
+            { model | settingsModel = Wizard.Settings.Models.initLocalModel route model.settingsModel }
 
         Routes.UsersRoute route ->
             { model | users = Wizard.Users.Models.initLocalModel route model.users }

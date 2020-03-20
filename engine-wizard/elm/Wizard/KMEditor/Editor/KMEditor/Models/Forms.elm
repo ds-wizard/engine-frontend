@@ -56,7 +56,7 @@ import Shared.Locale exposing (l, lg)
 import String exposing (fromFloat, fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError(..))
-import Wizard.Common.Form.Validate exposing (validateUuid)
+import Wizard.Common.Form.Validate as Validate
 import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
@@ -758,7 +758,7 @@ validateReference referenceType =
 
         "CrossReference" ->
             Validate.succeed CrossReferenceFormType
-                |> Validate.andMap (Validate.field "targetUuid" validateUuid)
+                |> Validate.andMap (Validate.field "targetUuid" Validate.uuid)
                 |> Validate.andMap (Validate.field "description" Validate.string)
 
         _ ->

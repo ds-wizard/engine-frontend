@@ -60,7 +60,7 @@ function jsonp(src) {
 
 window.onload = function () {
     var configCallbackMethod = 'configCallback'
-    var configScript = jsonp(getApiUrl() + '/configs/client?callback=' + configCallbackMethod)
+    var configScript = jsonp(getApiUrl() + '/configs/bootstrap?callback=' + configCallbackMethod)
 
 
     window[configCallbackMethod] = function (config) {

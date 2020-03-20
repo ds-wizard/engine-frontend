@@ -47,6 +47,7 @@ formView appState form =
                 [ FormGroup.input appState form "email" <| lg "user.email" appState
                 , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
                 , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+                , FormGroup.inputWithTypehints appState.config.affiliation.affiliations appState form "affiliation" <| lg "user.affiliation" appState
                 , FormGroup.select appState roleOptions form "role" <| lg "user.role" appState
                 , FormGroup.password appState form "password" <| lg "user.password" appState
                 ]

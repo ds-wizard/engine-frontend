@@ -10,7 +10,7 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Encode as E exposing (..)
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Utils exposing (validateRegex)
+import Wizard.Common.Form.Validate as Validate
 
 
 type alias BranchCreateForm =
@@ -38,7 +38,7 @@ validation : Validation CustomFormError BranchCreateForm
 validation =
     Validate.map3 BranchCreateForm
         (Validate.field "name" Validate.string)
-        (Validate.field "kmId" (validateRegex "^^(?![-])(?!.*[-]$)[a-zA-Z0-9-]+$"))
+        (Validate.field "kmId" (Validate.regex "^^(?![-])(?!.*[-]$)[a-zA-Z0-9-]+$"))
         (Validate.field "previousPackageId" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
 
 

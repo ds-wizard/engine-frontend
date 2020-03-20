@@ -1,6 +1,6 @@
 module Wizard.Questionnaires.Routing exposing
     ( isAllowed
-    , parses
+    , parsers
     , toUrl
     )
 
@@ -13,8 +13,8 @@ import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Questionnaires.Routes exposing (Route(..))
 
 
-parses : AppState -> (Route -> a) -> List (Parser (a -> c) c)
-parses appState wrapRoute =
+parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
+parsers appState wrapRoute =
     let
         moduleRoot =
             lr "questionnaires" appState

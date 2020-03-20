@@ -11,17 +11,13 @@ module Wizard.Utils exposing
     , pair
     , stringToInt
     , tuplePrepend
-    , validateRegex
     , withNoCmd
     )
 
 import Color
 import Color.Accessibility exposing (contrastRatio)
 import Color.Convert exposing (hexToColor)
-import Form.Error as Error exposing (Error, ErrorValue(..))
-import Form.Validate as Validate exposing (..)
 import Random exposing (Seed, step)
-import Regex exposing (Regex)
 import Task
 import Uuid
 
@@ -39,13 +35,6 @@ pair a b =
 tuplePrepend : a -> ( b, c ) -> ( a, b, c )
 tuplePrepend a ( b, c ) =
     ( a, b, c )
-
-
-validateRegex : String -> Validation e String
-validateRegex regex =
-    Validate.string
-        |> Validate.andThen
-            (\s -> Validate.format (createRegex regex) s |> mapError (\_ -> Error.value InvalidFormat))
 
 
 getUuid : Seed -> ( String, Seed )
@@ -70,11 +59,6 @@ dispatch msg =
 stringToInt : String -> Int
 stringToInt =
     String.toInt >> Maybe.withDefault 0
-
-
-createRegex : String -> Regex
-createRegex regex =
-    Maybe.withDefault Regex.never <| Regex.fromString regex
 
 
 boolToInt : Bool -> Int
