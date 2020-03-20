@@ -20,9 +20,6 @@ import Wizard.Common.Config.DashboardWidget as DashboardWidget exposing (Dashboa
 type alias ClientConfig =
     { appTitle : String
     , appTitleShort : String
-    , welcomeInfo : Maybe String
-    , welcomeWarning : Maybe String
-    , loginInfo : Maybe String
     , dashboard : Dict String (List DashboardWidget)
     , privacyUrl : String
     , customMenuLinks : List CustomMenuLink
@@ -67,9 +64,6 @@ decoder =
     D.succeed ClientConfig
         |> D.optional "appTitle" D.string defaultAppTitle
         |> D.optional "appTitleShort" D.string defaultAppTitleShort
-        |> D.optional "welcomeInfo" (D.maybe D.string) Nothing
-        |> D.optional "welcomeWarning" (D.maybe D.string) Nothing
-        |> D.optional "loginInfo" (D.maybe D.string) Nothing
         |> D.optional "dashboard" DashboardWidget.dictDecoder Dict.empty
         |> D.optional "privacyUrl" D.string defaultPrivacyUrl
         |> D.optional "customMenuLinks" (D.list CustomMenuLink.decoder) []
@@ -82,9 +76,6 @@ default : ClientConfig
 default =
     { appTitle = ""
     , appTitleShort = ""
-    , welcomeInfo = Nothing
-    , welcomeWarning = Nothing
-    , loginInfo = Nothing
     , dashboard = Dict.empty
     , privacyUrl = defaultPrivacyUrl
     , customMenuLinks = []

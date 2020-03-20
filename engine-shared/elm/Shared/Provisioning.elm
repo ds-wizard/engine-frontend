@@ -31,7 +31,7 @@ merge provisioningA provisioningB =
         dictMerge =
             Dict.merge
                 (\key a -> Dict.insert key a)
-                (\key _ b -> Dict.insert key b)
+                (\key a _ -> Dict.insert key a)
                 (\key b -> Dict.insert key b)
     in
     { locale = dictMerge provisioningA.locale provisioningB.locale Dict.empty

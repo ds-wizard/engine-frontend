@@ -16,9 +16,6 @@ import Wizard.Common.Config.DashboardWidget as DashboardWidget exposing (Dashboa
 type alias EditableClientConfig =
     { appTitle : Maybe String
     , appTitleShort : Maybe String
-    , welcomeInfo : Maybe String
-    , welcomeWarning : Maybe String
-    , loginInfo : Maybe String
     , dashboard : Maybe (Dict String (List DashboardWidget))
     , privacyUrl : Maybe String
     , customMenuLinks : List CustomMenuLink
@@ -33,9 +30,6 @@ decoder =
     D.succeed EditableClientConfig
         |> D.required "appTitle" (D.maybe D.string)
         |> D.required "appTitleShort" (D.maybe D.string)
-        |> D.required "welcomeInfo" (D.maybe D.string)
-        |> D.required "welcomeWarning" (D.maybe D.string)
-        |> D.required "loginInfo" (D.maybe D.string)
         |> D.required "dashboard" (D.maybe DashboardWidget.dictDecoder)
         |> D.required "privacyUrl" (D.maybe D.string)
         |> D.required "customMenuLinks" (D.list CustomMenuLink.decoder)
@@ -49,9 +43,6 @@ encode config =
     E.object
         [ ( "appTitle", E.maybe E.string config.appTitle )
         , ( "appTitleShort", E.maybe E.string config.appTitleShort )
-        , ( "welcomeInfo", E.maybe E.string config.welcomeInfo )
-        , ( "welcomeWarning", E.maybe E.string config.welcomeWarning )
-        , ( "loginInfo", E.maybe E.string config.loginInfo )
         , ( "dashboard", E.maybe (E.dict identity (E.list DashboardWidget.encode)) config.dashboard )
         , ( "privacyUrl", E.maybe E.string config.privacyUrl )
         , ( "customMenuLinks", E.list CustomMenuLink.encode config.customMenuLinks )

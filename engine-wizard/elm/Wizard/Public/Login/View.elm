@@ -25,14 +25,14 @@ view appState model =
             loginForm appState model
 
         splitScreenClass =
-            "col-12 d-flex justify-content-center align-items-center"
+            "col-12 d-flex align-items-center"
 
         content =
-            case appState.config.client.loginInfo of
+            case appState.config.info.loginInfo of
                 Just loginInfo ->
-                    [ div [ class <| splitScreenClass ++ " col-lg-7 col-md-6 side-info" ]
+                    [ div [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info" ]
                         [ Markdown.toHtml [] loginInfo ]
-                    , div [ class <| splitScreenClass ++ " col-lg-5 col-md-6 side-login" ]
+                    , div [ class <| splitScreenClass ++ " justify-content-center col-lg-5 col-md-6 side-login" ]
                         [ form ]
                     ]
 

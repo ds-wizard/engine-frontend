@@ -107,6 +107,7 @@ userFormView appState form current =
                 [ FormGroup.input appState form "email" <| lg "user.email" appState
                 , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
                 , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+                , FormGroup.inputWithTypehints appState.config.affiliation.affiliations appState form "affiliation" <| lg "user.affiliation" appState
                 , roleSelect
                 , activeToggle
                 ]

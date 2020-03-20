@@ -271,8 +271,8 @@ profileInfo model =
                     ]
     in
     div [ class "profile-info" ]
-        [ viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
-        , viewSettingsMenu model.appState model.menuModel.settingsMenuDropdownState
+        [ viewSettingsMenu model.appState
+        , viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
         , viewProfileMenu model.appState model.menuModel.profileMenuDropdownState
         , collapseLink
         ]

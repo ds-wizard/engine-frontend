@@ -1,4 +1,15 @@
-module Wizard.Auth.Permission exposing (dataManagementPlan, hasPerm, knowledgeModel, knowledgeModelPublish, knowledgeModelUpgrade, organization, packageManagementRead, packageManagementWrite, questionnaire, settings, userManagement)
+module Wizard.Auth.Permission exposing
+    ( dataManagementPlan
+    , hasPerm
+    , knowledgeModel
+    , knowledgeModelPublish
+    , knowledgeModelUpgrade
+    , packageManagementRead
+    , packageManagementWrite
+    , questionnaire
+    , settings
+    , userManagement
+    )
 
 import Wizard.Common.JwtToken exposing (JwtToken)
 
@@ -16,11 +27,6 @@ hasPerm maybeJwt perm =
 userManagement : String
 userManagement =
     "UM_PERM"
-
-
-organization : String
-organization =
-    "ORG_PERM"
 
 
 knowledgeModel : String

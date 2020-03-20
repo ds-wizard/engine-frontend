@@ -9,6 +9,7 @@ port module Wizard.Ports exposing
     , drawMetricsChart
     , fileContentRead
     , fileSelected
+    , refresh
     , scrollIntoView
     , scrollToTop
     , setUnloadMessage
@@ -72,6 +73,13 @@ port clearUnloadMessage : () -> Cmd msg
 
 
 port alert : String -> Cmd msg
+
+
+
+-- Refresh
+
+
+port refresh : () -> Cmd msg
 
 
 

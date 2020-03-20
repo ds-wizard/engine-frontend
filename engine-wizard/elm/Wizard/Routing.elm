@@ -27,6 +27,7 @@ import Wizard.Public.Routes
 import Wizard.Public.Routing
 import Wizard.Questionnaires.Routing
 import Wizard.Routes as Routes
+import Wizard.Settings.Routing
 import Wizard.Users.Routing
 
 
@@ -39,11 +40,10 @@ matchers appState =
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
-                ++ Wizard.Questionnaires.Routing.parses appState Routes.QuestionnairesRoute
+                ++ Wizard.Questionnaires.Routing.parsers appState Routes.QuestionnairesRoute
+                ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
                 ++ Wizard.Users.Routing.parses Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
-                   , map Routes.OrganizationRoute (s (lr "organization" appState))
-                   , map Routes.SettingsRoute (s (lr "settings" appState))
                    ]
     in
     oneOf parsers
@@ -73,17 +73,14 @@ isAllowed route maybeJwt =
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
             Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute maybeJwt
 
-        Routes.OrganizationRoute ->
-            hasPerm maybeJwt Perm.organization
-
         Routes.PublicRoute _ ->
             True
 
         Routes.QuestionnairesRoute questionnaireRoute ->
             Wizard.Questionnaires.Routing.isAllowed questionnaireRoute maybeJwt
 
-        Routes.SettingsRoute ->
-            hasPerm maybeJwt Perm.settings
+        Routes.SettingsRoute settingsRoute ->
+            Wizard.Settings.Routing.isAllowed settingsRoute maybeJwt
 
         Routes.UsersRoute usersRoute ->
             Wizard.Users.Routing.isAllowed usersRoute maybeJwt
@@ -115,14 +112,11 @@ toUrl appState route =
                 Routes.KnowledgeModelsRoute kmPackagesRoute ->
                     Wizard.KnowledgeModels.Routing.toUrl appState kmPackagesRoute
 
-                Routes.OrganizationRoute ->
-                    [ lr "organization" appState ]
-
                 Routes.PublicRoute publicRoute ->
                     Wizard.Public.Routing.toUrl appState publicRoute
 
-                Routes.SettingsRoute ->
-                    [ lr "settings" appState ]
+                Routes.SettingsRoute settingsRoute ->
+                    Wizard.Settings.Routing.toUrl appState settingsRoute
 
                 Routes.UsersRoute usersRoute ->
                     Wizard.Users.Routing.toUrl usersRoute

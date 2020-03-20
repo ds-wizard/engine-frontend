@@ -10,5 +10,4 @@ type Msg
     | SetAboutOpen Bool
     | GetBuildInfoCompleted (Result ApiError BuildInfo)
     | HelpMenuDropdownMsg Dropdown.State
-    | SettingsMenuDropdownMsg Dropdown.State
     | ProfileMenuDropdownMsg Dropdown.State

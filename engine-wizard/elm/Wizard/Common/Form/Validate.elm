@@ -1,51 +1,74 @@
-module Wizard.Common.Form.Validate exposing (uuidPattern, validateConfirmation, validateRegexWithCustomError, validateUuid)
+module Wizard.Common.Form.Validate exposing
+    ( confirmation
+    , maybeString
+    , regex
+    , uuid
+    )
 
-import Form.Validate as Validate exposing (..)
+import Form.Error as Error exposing (Error, ErrorValue(..))
+import Form.Validate as V exposing (Validation)
 import Regex exposing (Regex)
 import Wizard.Common.Form exposing (CustomFormError(..))
 
 
-validateConfirmation : String -> Validation CustomFormError String -> Validation CustomFormError String
-validateConfirmation confirmationField =
+confirmation : String -> Validation CustomFormError String -> Validation CustomFormError String
+confirmation confirmationField =
     let
         validate original =
-            Validate.field confirmationField
-                (Validate.string
-                    |> Validate.andThen
-                        (\confirmation ->
-                            if original == confirmation then
-                                Validate.succeed confirmation
+            V.field confirmationField
+                (V.string
+                    |> V.andThen
+                        (\conf ->
+                            if original == conf then
+                                V.succeed conf
 
                             else
-                                Validate.fail (customError ConfirmationError)
+                                V.fail (V.customError ConfirmationError)
                         )
                 )
     in
-    Validate.andThen validate
+    V.andThen validate
+
+
+maybeString : Validation CustomFormError (Maybe String)
+maybeString =
+    V.oneOf [ V.emptyString |> V.map (\_ -> Nothing), V.string |> V.map Just ]
+
+
+regex : String -> Validation e String
+regex r =
+    V.string
+        |> V.andThen
+            (\s -> V.format (createRegex r) s |> V.mapError (\_ -> Error.value InvalidFormat))
+
+
+uuid : Validation CustomFormError String
+uuid =
+    validateRegexWithCustomError uuidPattern InvalidUuid
 
 
 validateRegexWithCustomError : Regex -> CustomFormError -> Validation CustomFormError String
-validateRegexWithCustomError regex customFormError =
-    Validate.string
-        |> Validate.andThen
+validateRegexWithCustomError r customFormError =
+    V.string
+        |> V.andThen
             (\s ->
-                Validate.format regex s
-                    |> Validate.mapError (\_ -> customError customFormError)
+                V.format r s
+                    |> V.mapError (\_ -> V.customError customFormError)
             )
 
 
 uuidPattern : Regex
 uuidPattern =
     let
-        regex =
+        pattern =
             "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 
         options =
             { caseInsensitive = True, multiline = False }
     in
-    Maybe.withDefault Regex.never <| Regex.fromStringWith options regex
+    Maybe.withDefault Regex.never <| Regex.fromStringWith options pattern
 
 
-validateUuid : Validation CustomFormError String
-validateUuid =
-    validateRegexWithCustomError uuidPattern InvalidUuid
+createRegex : String -> Regex
+createRegex =
+    Maybe.withDefault Regex.never << Regex.fromString

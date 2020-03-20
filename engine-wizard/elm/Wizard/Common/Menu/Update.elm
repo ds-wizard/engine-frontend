@@ -49,8 +49,5 @@ update wrapMsg msg appState model =
         HelpMenuDropdownMsg dropdownState ->
             ( { model | helpMenuDropdownState = dropdownState }, Cmd.none )
 
-        SettingsMenuDropdownMsg dropdownState ->
-            ( { model | settingsMenuDropdownState = dropdownState }, Cmd.none )
-
         ProfileMenuDropdownMsg dropdownState ->
             ( { model | profileMenuDropdownState = dropdownState }, Cmd.none )
