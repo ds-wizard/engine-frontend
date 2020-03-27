@@ -86,7 +86,7 @@ publicHeader model =
                 emptyNode
 
         signUpLink =
-            if model.appState.config.features.registration.enabled then
+            if model.appState.config.auth.internal.registration.enabled then
                 li [ class "nav-item" ]
                     [ linkTo model.appState
                         signupRoute

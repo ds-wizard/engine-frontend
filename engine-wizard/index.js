@@ -45,6 +45,10 @@ function bootstrapErrorHTML() {
     return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>Bootstrap Error</h1><p>Application cannot load configuration.<br>Please, contact the administrator.</p></div></div>'
 }
 
+function clientUrl() {
+    return window.location.protocol + '//' + window.location.host
+}
+
 function loadApp(config, provisioning) {
     var app = program.Elm.Wizard.init({
         node: document.body,
@@ -52,6 +56,7 @@ function loadApp(config, provisioning) {
             seed: Math.floor(Math.random() * 0xFFFFFFFF),
             session: JSON.parse(localStorage.session || null),
             apiUrl: apiUrl(),
+            clientUrl: clientUrl(),
             config: config,
             provisioning: provisioning,
             localProvisioning: localProvisioning(),

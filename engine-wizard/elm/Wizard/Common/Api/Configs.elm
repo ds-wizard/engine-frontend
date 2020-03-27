@@ -4,6 +4,7 @@ import Json.Encode as E
 import Wizard.Common.Api exposing (ToMsg, jwtGet, jwtPut)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Settings.Common.EditableAffiliationConfig as EditableAffiliationConfig exposing (EditableAffiliationConfig)
+import Wizard.Settings.Common.EditableAuthConfig as EditableAuthConfig exposing (EditableAuthConfig)
 import Wizard.Settings.Common.EditableClientConfig as EditableClientConfig exposing (EditableClientConfig)
 import Wizard.Settings.Common.EditableFeaturesConfig as EditableFeaturesConfig exposing (EditableFeaturesConfig)
 import Wizard.Settings.Common.EditableInfoConfig as EditableInfoConfig exposing (EditableInfoConfig)
@@ -18,6 +19,16 @@ getAffiliationConfig =
 putAffiliationConfig : E.Value -> AppState -> ToMsg () msg -> Cmd msg
 putAffiliationConfig =
     jwtPut "/configs/affiliation"
+
+
+getAuthConfig : AppState -> ToMsg EditableAuthConfig msg -> Cmd msg
+getAuthConfig =
+    jwtGet "/configs/auth" EditableAuthConfig.decoder
+
+
+putAuthConfig : E.Value -> AppState -> ToMsg () msg -> Cmd msg
+putAuthConfig =
+    jwtPut "/configs/auth"
 
 
 getClientConfig : AppState -> ToMsg EditableClientConfig msg -> Cmd msg

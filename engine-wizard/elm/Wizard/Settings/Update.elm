@@ -6,6 +6,7 @@ module Wizard.Settings.Update exposing
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Affiliation.Update
+import Wizard.Settings.Auth.Update
 import Wizard.Settings.Client.Update
 import Wizard.Settings.Features.Update
 import Wizard.Settings.Info.Update
@@ -21,6 +22,10 @@ fetchData route appState model =
         AffiliationRoute ->
             Cmd.map AffiliationMsg <|
                 Wizard.Settings.Affiliation.Update.fetchData appState
+
+        AuthRoute ->
+            Cmd.map AuthMsg <|
+                Wizard.Settings.Auth.Update.fetchData appState
 
         ClientRoute ->
             Cmd.map ClientMsg <|
@@ -48,6 +53,13 @@ update wrapMsg msg appState model =
                     Wizard.Settings.Affiliation.Update.update (wrapMsg << AffiliationMsg) affiliationMsg appState model.affiliationModel
             in
             ( { model | affiliationModel = affiliationModel }, cmd )
+
+        AuthMsg authMsg ->
+            let
+                ( authModel, cmd ) =
+                    Wizard.Settings.Auth.Update.update (wrapMsg << AuthMsg) authMsg appState model.authModel
+            in
+            ( { model | authModel = authModel }, cmd )
 
         ClientMsg clientMsg ->
             let

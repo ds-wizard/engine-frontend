@@ -10,7 +10,6 @@ type alias EditableFeaturesConfig =
     { levels : SimpleFeatureConfig
     , publicQuestionnaire : SimpleFeatureConfig
     , questionnaireAccessibility : SimpleFeatureConfig
-    , registration : SimpleFeatureConfig
     }
 
 
@@ -20,7 +19,6 @@ decoder =
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "publicQuestionnaire" SimpleFeatureConfig.decoder
         |> D.required "questionnaireAccessibility" SimpleFeatureConfig.decoder
-        |> D.required "registration" SimpleFeatureConfig.decoder
 
 
 encode : EditableFeaturesConfig -> E.Value
@@ -29,5 +27,4 @@ encode config =
         [ ( "levels", SimpleFeatureConfig.encode config.levels )
         , ( "publicQuestionnaire", SimpleFeatureConfig.encode config.publicQuestionnaire )
         , ( "questionnaireAccessibility", SimpleFeatureConfig.encode config.questionnaireAccessibility )
-        , ( "registration", SimpleFeatureConfig.encode config.registration )
         ]

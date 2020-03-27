@@ -29,6 +29,7 @@ type alias AppState =
     , jwt : Maybe JwtToken
     , key : Key
     , apiUrl : String
+    , clientUrl : String
     , config : Config
     , provisioning : Provisioning
     , valid : Bool
@@ -72,6 +73,7 @@ init flagsValue key =
     , jwt = Maybe.andThen (.token >> JwtToken.parse) flags.session
     , key = key
     , apiUrl = flags.apiUrl
+    , clientUrl = flags.clientUrl
     , config = flags.config
     , provisioning = provisioning
     , valid = flags.success

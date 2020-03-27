@@ -6,6 +6,7 @@ module Wizard.Settings.Routes exposing
 
 type Route
     = AffiliationRoute
+    | AuthRoute
     | ClientRoute
     | FeaturesRoute
     | InfoRoute

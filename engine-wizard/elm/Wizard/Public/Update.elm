@@ -2,6 +2,7 @@ module Wizard.Public.Update exposing (fetchData, update)
 
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
+import Wizard.Public.Auth.Update
 import Wizard.Public.BookReference.Update
 import Wizard.Public.ForgottenPassword.Update
 import Wizard.Public.ForgottenPasswordConfirmation.Update
@@ -17,6 +18,10 @@ import Wizard.Public.SignupConfirmation.Update
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
+        AuthCallback id error code ->
+            Cmd.map AuthMsg <|
+                Wizard.Public.Auth.Update.fetchData id error code appState
+
         BookReferenceRoute uuid ->
             Cmd.map BookReferenceMsg <|
                 Wizard.Public.BookReference.Update.fetchData uuid appState
@@ -36,6 +41,13 @@ fetchData route appState =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
+        AuthMsg authMsg ->
+            let
+                ( authModel, cmd ) =
+                    Wizard.Public.Auth.Update.update authMsg appState model.authModel
+            in
+            ( { model | authModel = authModel }, cmd )
+
         BookReferenceMsg brMsg ->
             let
                 ( bookReferenceModel, cmd ) =
