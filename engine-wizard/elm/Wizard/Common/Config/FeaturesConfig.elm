@@ -1,4 +1,8 @@
-module Wizard.Common.Config.FeaturesConfig exposing (..)
+module Wizard.Common.Config.FeaturesConfig exposing
+    ( FeaturesConfig
+    , decoder
+    , default
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -10,7 +14,6 @@ type alias FeaturesConfig =
     { levels : SimpleFeatureConfig
     , publicQuestionnaire : SimpleFeatureConfig
     , questionnaireAccessibility : SimpleFeatureConfig
-    , registration : SimpleFeatureConfig
     , feedback : SimpleFeatureConfig
     , registry : RegistryConfig
     }
@@ -22,7 +25,6 @@ decoder =
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "publicQuestionnaire" SimpleFeatureConfig.decoder
         |> D.required "questionnaireAccessibility" SimpleFeatureConfig.decoder
-        |> D.required "registration" SimpleFeatureConfig.decoder
         |> D.required "feedback" SimpleFeatureConfig.decoder
         |> D.required "registry" RegistryConfig.decoder
 
@@ -32,7 +34,6 @@ default =
     { levels = SimpleFeatureConfig.enabled
     , publicQuestionnaire = SimpleFeatureConfig.enabled
     , questionnaireAccessibility = SimpleFeatureConfig.enabled
-    , registration = SimpleFeatureConfig.enabled
     , feedback = SimpleFeatureConfig.enabled
     , registry = RegistryDisabled
     }

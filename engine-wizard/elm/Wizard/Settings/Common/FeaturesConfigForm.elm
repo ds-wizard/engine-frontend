@@ -17,7 +17,6 @@ type alias FeaturesConfigForm =
     { levelsEnabled : Bool
     , publicQuestionnaireEnabled : Bool
     , questionnaireAccessibilityEnabled : Bool
-    , registrationEnabled : Bool
     }
 
 
@@ -37,7 +36,6 @@ validation =
         |> V.andMap (V.field "levelsEnabled" V.bool)
         |> V.andMap (V.field "publicQuestionnaireEnabled" V.bool)
         |> V.andMap (V.field "questionnaireAccessibilityEnabled" V.bool)
-        |> V.andMap (V.field "registrationEnabled" V.bool)
 
 
 featuresConfigToFormInitials : EditableFeaturesConfig -> List ( String, Field.Field )
@@ -45,7 +43,6 @@ featuresConfigToFormInitials config =
     [ ( "levelsEnabled", Field.bool config.levels.enabled )
     , ( "publicQuestionnaireEnabled", Field.bool config.publicQuestionnaire.enabled )
     , ( "questionnaireAccessibilityEnabled", Field.bool config.questionnaireAccessibility.enabled )
-    , ( "registrationEnabled", Field.bool config.registration.enabled )
     ]
 
 
@@ -54,5 +51,4 @@ toEditableFeaturesConfig form =
     { levels = { enabled = form.levelsEnabled }
     , publicQuestionnaire = { enabled = form.publicQuestionnaireEnabled }
     , questionnaireAccessibility = { enabled = form.questionnaireAccessibilityEnabled }
-    , registration = { enabled = form.registrationEnabled }
     }

@@ -45,6 +45,4 @@ formView appState form =
         , FormExtra.mdAfter (l_ "form.questionnaireAccessibility.desc" appState)
         , FormGroup.toggle form "levelsEnabled" (l_ "form.phases" appState)
         , FormExtra.mdAfter (l_ "form.phases.desc" appState)
-        , FormGroup.toggle form "registrationEnabled" (l_ "form.registration" appState)
-        , FormExtra.mdAfter (l_ "form.registration.desc" appState)
         ]

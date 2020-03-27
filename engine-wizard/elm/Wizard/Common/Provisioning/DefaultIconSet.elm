@@ -54,6 +54,7 @@ iconSet =
         , ( "kmImport.fromRegistry", "fas fa-cloud-download-alt" )
         , ( "kms.upload", "fas fa-upload" )
         , ( "listing.actions", "fas fa-ellipsis-v" )
+        , ( "login.externalService", "fab fa-openid" )
         , ( "menu.about", "fas fa-info" )
         , ( "menu.collapse", "fas fa-angle-double-left" )
         , ( "menu.documents", "fas fa-layer-group" )

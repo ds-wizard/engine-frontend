@@ -25,6 +25,11 @@ type alias ViewProps form =
 
 view : ViewProps form -> AppState -> Model config form -> Html (Msg config)
 view props appState model =
+    Page.actionResultView appState (viewForm props appState model) model.config
+
+
+viewForm : ViewProps form -> AppState -> Model config form -> config -> Html (Msg config)
+viewForm props appState model _ =
     div [ wideDetailClass "" ]
         [ Page.header (props.locTitle appState) []
         , div []

@@ -1,7 +1,5 @@
 module Wizard.Public.Routing exposing
-    ( forgottenPasswordConfirmation
-    , parsers
-    , signupConfirmation
+    ( parsers
     , toUrl
     )
 
@@ -24,7 +22,7 @@ parsers appState wrapRoute =
                 []
 
         signUpRoutes =
-            if appState.config.features.registration.enabled then
+            if appState.config.auth.internal.registration.enabled then
                 [ map (wrapRoute <| SignupRoute) (s (lr "public.signup" appState))
                 , map (signupConfirmation wrapRoute) (s (lr "public.signup" appState) </> string </> string)
                 ]
@@ -32,13 +30,19 @@ parsers appState wrapRoute =
             else
                 []
     in
-    [ map (wrapRoute << BookReferenceRoute) (s (lr "public.bookReferences" appState) </> string)
+    [ map (authCallback wrapRoute) (s "auth" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code")
+    , map (wrapRoute << BookReferenceRoute) (s (lr "public.bookReferences" appState) </> string)
     , map (wrapRoute <| ForgottenPasswordRoute) (s (lr "public.forgottenPassword" appState))
     , map (forgottenPasswordConfirmation wrapRoute) (s (lr "public.forgottenPassword" appState) </> string </> string)
     , map (wrapRoute << LoginRoute) (top <?> Query.string (lr "login.originalUrl" appState))
     ]
         ++ publicQuestionnaireRoutes
         ++ signUpRoutes
+
+
+authCallback : (Route -> a) -> String -> Maybe String -> Maybe String -> a
+authCallback wrapRoute id error code =
+    AuthCallback id error code |> wrapRoute
 
 
 signupConfirmation : (Route -> a) -> String -> String -> a
@@ -54,6 +58,9 @@ forgottenPasswordConfirmation wrapRoute userId hash =
 toUrl : AppState -> Route -> List String
 toUrl appState route =
     case route of
+        AuthCallback id error code ->
+            [ "auth", id, "callback", "?error=" ++ Maybe.withDefault "" error ++ "&code=" ++ Maybe.withDefault "" code ]
+
         BookReferenceRoute uuid ->
             [ lr "public.bookReferences" appState, uuid ]
 

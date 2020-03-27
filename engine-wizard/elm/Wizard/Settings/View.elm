@@ -7,6 +7,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes
 import Wizard.Settings.Affiliation.View
+import Wizard.Settings.Auth.View
 import Wizard.Settings.Client.View
 import Wizard.Settings.Features.View
 import Wizard.Settings.Info.View
@@ -34,6 +35,10 @@ view route appState model =
                 AffiliationRoute ->
                     Html.map AffiliationMsg <|
                         Wizard.Settings.Affiliation.View.view appState model.affiliationModel
+
+                AuthRoute ->
+                    Html.map AuthMsg <|
+                        Wizard.Settings.Auth.View.view appState model.authModel
 
                 ClientRoute ->
                     Html.map ClientMsg <|
@@ -68,6 +73,7 @@ navigation appState currentRoute =
 navigationLinks : AppState -> List ( Route, String )
 navigationLinks appState =
     [ ( FeaturesRoute, l_ "navigation.features" appState )
+    , ( AuthRoute, l_ "navigation.auth" appState )
     , ( ClientRoute, l_ "navigation.client" appState )
     , ( InfoRoute, l_ "navigation.info" appState )
     , ( AffiliationRoute, l_ "navigation.affiliation" appState )
