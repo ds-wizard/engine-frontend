@@ -16,7 +16,6 @@ import Wizard.KMEditor.Common.BranchState as BranchState exposing (BranchState)
 type alias Branch =
     { uuid : String
     , name : String
-    , organizationId : String
     , kmId : String
     , forkOfPackageId : Maybe String
     , previousPackageId : Maybe String
@@ -30,7 +29,6 @@ decoder =
     D.succeed Branch
         |> D.required "uuid" D.string
         |> D.required "name" D.string
-        |> D.required "organizationId" D.string
         |> D.required "kmId" D.string
         |> D.required "forkOfPackageId" (D.nullable D.string)
         |> D.required "previousPackageId" (D.nullable D.string)

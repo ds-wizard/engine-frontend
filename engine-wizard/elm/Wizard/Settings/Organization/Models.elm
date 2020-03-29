@@ -3,13 +3,12 @@ module Wizard.Settings.Organization.Models exposing
     , initialModel
     )
 
-import Wizard.Settings.Common.EditableOrganizationConfig exposing (EditableOrganizationConfig)
-import Wizard.Settings.Common.OrganizationConfigForm as OrganizationConfigForm exposing (OrganizationConfigForm)
+import Wizard.Settings.Common.Forms.OrganizationConfigForm as OrganizationConfigForm exposing (OrganizationConfigForm)
 import Wizard.Settings.Generic.Model as GenericModel
 
 
 type alias Model =
-    GenericModel.Model EditableOrganizationConfig OrganizationConfigForm
+    GenericModel.Model OrganizationConfigForm
 
 
 initialModel : Model

@@ -86,7 +86,7 @@ window.onload = function () {
             var provisioning = hasProvisioning ? results[1].data : null
             loadApp(config, provisioning)
         })
-        .catch(function () {
+        .catch(function (err) {
             document.body.innerHTML = bootstrapErrorHTML()
         })
 }

@@ -7,10 +7,10 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
-import Wizard.Settings.Common.OrganizationConfigForm exposing (OrganizationConfigForm)
+import Wizard.Settings.Common.Forms.OrganizationConfigForm exposing (OrganizationConfigForm)
+import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Organization.Models exposing (Model)
-import Wizard.Settings.Organization.Msgs exposing (Msg)
 
 
 l_ : String -> AppState -> String
@@ -43,4 +43,6 @@ formView appState form =
         , FormExtra.textAfter (l_ "form.name.desc" appState)
         , FormGroup.input appState form "organizationId" (l_ "form.organizationId" appState)
         , FormExtra.textAfter (l_ "form.organizationId.desc" appState)
+        , FormGroup.resizableTextarea appState form "affiliations" (l_ "form.affiliations" appState)
+        , FormExtra.mdAfter (l_ "form.affiliations.desc" appState)
         ]

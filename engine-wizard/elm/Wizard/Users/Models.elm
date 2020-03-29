@@ -1,5 +1,6 @@
 module Wizard.Users.Models exposing (Model, initLocalModel, initialModel)
 
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Users.Create.Models
 import Wizard.Users.Edit.Models
 import Wizard.Users.Index.Models
@@ -13,19 +14,19 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { createModel = Wizard.Users.Create.Models.initialModel
+initialModel : AppState -> Model
+initialModel appState =
+    { createModel = Wizard.Users.Create.Models.initialModel appState
     , editModel = Wizard.Users.Edit.Models.initialModel ""
     , indexModel = Wizard.Users.Index.Models.initialModel
     }
 
 
-initLocalModel : Route -> Model -> Model
-initLocalModel route model =
+initLocalModel : AppState -> Route -> Model -> Model
+initLocalModel appState route model =
     case route of
         CreateRoute ->
-            { model | createModel = Wizard.Users.Create.Models.initialModel }
+            { model | createModel = Wizard.Users.Create.Models.initialModel appState }
 
         EditRoute uuid ->
             { model | editModel = Wizard.Users.Edit.Models.initialModel uuid }

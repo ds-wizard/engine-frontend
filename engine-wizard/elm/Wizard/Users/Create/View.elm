@@ -38,18 +38,11 @@ view appState model =
 
 formView : AppState -> Form CustomFormError UserCreateForm -> Html Form.Msg
 formView appState form =
-    let
-        roleOptions =
-            ( "", "--" ) :: List.map (\o -> ( o, o )) Role.list
-
-        formHtml =
-            div []
-                [ FormGroup.input appState form "email" <| lg "user.email" appState
-                , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
-                , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
-                , FormGroup.inputWithTypehints appState.config.affiliation.affiliations appState form "affiliation" <| lg "user.affiliation" appState
-                , FormGroup.select appState roleOptions form "role" <| lg "user.role" appState
-                , FormGroup.password appState form "password" <| lg "user.password" appState
-                ]
-    in
-    formHtml
+    div []
+        [ FormGroup.input appState form "email" <| lg "user.email" appState
+        , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
+        , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
+        , FormGroup.select appState (Role.options appState) form "role" <| lg "user.role" appState
+        , FormGroup.password appState form "password" <| lg "user.password" appState
+        ]

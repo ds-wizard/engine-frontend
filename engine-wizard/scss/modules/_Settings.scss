@@ -1,3 +1,5 @@
+@import "../variables";
+
 .Settings {
     height: 100vh;
     display: flex;
@@ -13,6 +15,10 @@
 
         strong {
             margin-bottom: 0.5rem;
+
+            &:not(:first-child) {
+                margin-top: 1.5rem;
+            }
         }
     }
 
@@ -45,7 +51,7 @@
         }
     }
 
-    .custom-menu-links {
+    .input-table {
         .form-group {
             label {
                 display: none;
@@ -60,18 +66,64 @@
                     }
                 }
             }
+
+            .row {
+                margin-bottom: 0.25rem;
+            }
         }
 
-        .custom-menu-links-header {
+        .input-table-header {
             margin-bottom: 0.25rem;
         }
 
         .btn-secondary {
             margin-top: 0.5rem;
         }
+    }
 
-        .row {
-            margin-bottom: 0.25rem;
+    .settings-img {
+        max-width: 100%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border-radius: 0.25rem;
+    }
+
+    .nested-group {
+        margin-left: 1rem;
+        padding-left: 1rem;
+        border-left: 5px solid $gray-200;
+    }
+
+    .Dashboard {
+        .form-radio-group {
+            display: flex;
+
+
+            label {
+                font-weight: normal;
+                cursor: pointer;
+
+                & > div {
+                    padding-right: 1rem;
+                }
+
+                .settings-img {
+                    margin-bottom: 1rem;
+                }
+
+                &:first-child {
+                    margin-right: 0.75rem;
+                }
+
+                &:last-child {
+                    margin-left: 0.75rem;
+                }
+
+                &:not(.form-check-selected) {
+                    .settings-img {
+                        opacity: 0.8;
+                    }
+                }
+            }
         }
     }
 }

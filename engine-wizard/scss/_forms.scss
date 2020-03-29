@@ -4,6 +4,11 @@ textarea {
     resize: vertical;
 }
 
+.resizable-textarea {
+    white-space: nowrap;
+    overflow: auto;
+}
+
 .form-actions {
     display: flex;
     justify-content: space-between;

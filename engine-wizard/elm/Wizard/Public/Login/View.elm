@@ -1,16 +1,15 @@
 module Wizard.Public.Login.View exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, href, id, placeholder, style, type_)
+import Html.Attributes exposing (class, id, placeholder, type_)
 import Html.Events exposing (..)
 import Markdown
-import Shared.Html exposing (fa, faSet)
+import Shared.Html exposing (fa)
 import Shared.Locale exposing (l, lg, lx)
-import Wizard.Common.Api.Auth as AuthApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.AuthServiceConfig exposing (AuthServiceConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
@@ -38,7 +37,7 @@ view appState model =
             "col-12 d-flex align-items-center"
 
         content =
-            case appState.config.info.loginInfo of
+            case appState.config.lookAndFeel.loginInfo of
                 Just loginInfo ->
                     [ div [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info" ]
                         [ Markdown.toHtml [] loginInfo ]
@@ -51,34 +50,6 @@ view appState model =
     in
     div [ class "row justify-content-center Public__Login" ]
         content
-
-
-externalButton : AppState -> AuthServiceConfig -> Html Msg
-externalButton appState config =
-    let
-        background =
-            config.style
-                |> Maybe.andThen .background
-                |> Maybe.withDefault "#333"
-
-        color =
-            config.style
-                |> Maybe.andThen .color
-                |> Maybe.withDefault "#fff"
-
-        icon =
-            config.style
-                |> Maybe.andThen .icon
-                |> Maybe.map (\i -> fa i)
-                |> Maybe.withDefault (faSet "login.externalService" appState)
-    in
-    a
-        [ class "btn external-login-button"
-        , href <| AuthApi.authRedirectUrl config.id appState
-        , style "color" color
-        , style "background" background
-        ]
-        [ icon, text config.name ]
 
 
 formView : AppState -> Model -> Html Msg
@@ -100,11 +71,11 @@ formView appState model =
             ]
 
         externalLogin =
-            if List.length appState.config.auth.external.services > 0 then
+            if List.length appState.config.authentication.external.services > 0 then
                 [ div [ class "external-login-separator" ]
                     [ lx_ "connectWith" appState ]
                 ]
-                    ++ List.map (externalButton appState) appState.config.auth.external.services
+                    ++ List.map (ExternalLoginButton.view appState) appState.config.authentication.external.services
 
             else
                 []

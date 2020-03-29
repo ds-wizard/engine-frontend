@@ -6,14 +6,15 @@ import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes
-import Wizard.Settings.Affiliation.View
-import Wizard.Settings.Auth.View
-import Wizard.Settings.Client.View
-import Wizard.Settings.Features.View
-import Wizard.Settings.Info.View
+import Wizard.Settings.Authentication.View
+import Wizard.Settings.Dashboard.View
+import Wizard.Settings.KnowledgeModelRegistry.View
+import Wizard.Settings.LookAndFeel.View
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.View
+import Wizard.Settings.PrivacyAndSupport.View
+import Wizard.Settings.Questionnaires.View
 import Wizard.Settings.Routes exposing (Route(..))
 
 
@@ -32,29 +33,33 @@ view route appState model =
     let
         content =
             case route of
-                AffiliationRoute ->
-                    Html.map AffiliationMsg <|
-                        Wizard.Settings.Affiliation.View.view appState model.affiliationModel
-
-                AuthRoute ->
-                    Html.map AuthMsg <|
-                        Wizard.Settings.Auth.View.view appState model.authModel
-
-                ClientRoute ->
-                    Html.map ClientMsg <|
-                        Wizard.Settings.Client.View.view appState model.clientModel
-
-                FeaturesRoute ->
-                    Html.map FeaturesMsg <|
-                        Wizard.Settings.Features.View.view appState model.featuresModel
-
-                InfoRoute ->
-                    Html.map InfoMsg <|
-                        Wizard.Settings.Info.View.view appState model.infoModel
-
                 OrganizationRoute ->
                     Html.map OrganizationMsg <|
                         Wizard.Settings.Organization.View.view appState model.organizationModel
+
+                AuthenticationRoute ->
+                    Html.map AuthenticationMsg <|
+                        Wizard.Settings.Authentication.View.view appState model.authenticationModel
+
+                PrivacyAndSupportRoute ->
+                    Html.map PrivacyAndSupportMsg <|
+                        Wizard.Settings.PrivacyAndSupport.View.view appState model.privacyAndSupportModel
+
+                DashboardRoute ->
+                    Html.map DashboardMsg <|
+                        Wizard.Settings.Dashboard.View.view appState model.dashboardModel
+
+                LookAndFeelRoute ->
+                    Html.map LookAndFeelMsg <|
+                        Wizard.Settings.LookAndFeel.View.view appState model.lookAndFeelModel
+
+                KnowledgeModelRegistryRoute ->
+                    Html.map KnowledgeModelRegistryMsg <|
+                        Wizard.Settings.KnowledgeModelRegistry.View.view appState model.knowledgeModelRegistryModel
+
+                QuestionnairesRoute ->
+                    Html.map QuestionnairesMsg <|
+                        Wizard.Settings.Questionnaires.View.view appState model.questionnairesModel
     in
     div [ class "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
@@ -65,19 +70,34 @@ view route appState model =
 navigation : AppState -> Route -> Html Msg
 navigation appState currentRoute =
     div [ class "nav nav-pills flex-column" ]
-        ([ strong [] [ lx_ "navigation.title" appState ] ]
-            ++ List.map (navigationLink appState currentRoute) (navigationLinks appState)
+        ([ strong [] [ lx_ "navigation.title.system" appState ] ]
+            ++ List.map (navigationLink appState currentRoute) (navigationSystemLinks appState)
+            ++ [ strong [] [ lx_ "navigation.title.userInterface" appState ] ]
+            ++ List.map (navigationLink appState currentRoute) (navigationUserInterfaceLinks appState)
+            ++ [ strong [] [ lx_ "navigation.title.content" appState ] ]
+            ++ List.map (navigationLink appState currentRoute) (navigationContentLinks appState)
         )
 
 
-navigationLinks : AppState -> List ( Route, String )
-navigationLinks appState =
-    [ ( FeaturesRoute, l_ "navigation.features" appState )
-    , ( AuthRoute, l_ "navigation.auth" appState )
-    , ( ClientRoute, l_ "navigation.client" appState )
-    , ( InfoRoute, l_ "navigation.info" appState )
-    , ( AffiliationRoute, l_ "navigation.affiliation" appState )
-    , ( OrganizationRoute, l_ "navigation.organization" appState )
+navigationSystemLinks : AppState -> List ( Route, String )
+navigationSystemLinks appState =
+    [ ( OrganizationRoute, l_ "navigation.organization" appState )
+    , ( AuthenticationRoute, l_ "navigation.authentication" appState )
+    , ( PrivacyAndSupportRoute, l_ "navigation.privacyAndSupport" appState )
+    ]
+
+
+navigationUserInterfaceLinks : AppState -> List ( Route, String )
+navigationUserInterfaceLinks appState =
+    [ ( DashboardRoute, l_ "navigation.dashboard" appState )
+    , ( LookAndFeelRoute, l_ "navigation.lookAndFeel" appState )
+    ]
+
+
+navigationContentLinks : AppState -> List ( Route, String )
+navigationContentLinks appState =
+    [ ( KnowledgeModelRegistryRoute, l_ "navigation.knowledgeModelRegistry" appState )
+    , ( QuestionnairesRoute, l_ "navigation.questionnaires" appState )
     ]
 
 

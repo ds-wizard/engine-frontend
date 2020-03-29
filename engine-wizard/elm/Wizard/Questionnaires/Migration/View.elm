@@ -172,7 +172,7 @@ questionnaireView appState model migration levels questionnaireModel =
                 Nothing
 
         mbLevels =
-            if appState.config.features.levels.enabled then
+            if appState.config.questionnaires.levels.enabled then
                 Just levels
 
             else

@@ -122,7 +122,7 @@ listingTitleLastPublishedVersionBadge appState branch =
             span [ title <| l_ "badge.lastPublishedVersion.title" appState, class "badge badge-light" ]
                 [ text <| Version.toString version ]
     in
-    BranchUtils.lastVersion branch
+    BranchUtils.lastVersion appState branch
         |> Maybe.map badge
         |> Maybe.withDefault emptyNode
 

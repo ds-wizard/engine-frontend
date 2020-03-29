@@ -144,7 +144,7 @@ viewChapterAnsweredIndication : AppState -> Model -> Chapter -> Html Msg
 viewChapterAnsweredIndication appState model chapter =
     let
         effectiveLevel =
-            if appState.config.features.levels.enabled then
+            if appState.config.questionnaires.levels.enabled then
                 model.questionnaire.level
 
             else

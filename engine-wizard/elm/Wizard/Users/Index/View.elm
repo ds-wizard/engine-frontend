@@ -12,6 +12,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
+import Wizard.Users.Common.Role as Role
 import Wizard.Users.Common.User as User exposing (User)
 import Wizard.Users.Index.Models exposing (..)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
@@ -84,8 +85,8 @@ listingTitleBadge appState user =
                     [ lx_ "badge.inactive" appState ]
     in
     span []
-        [ span [ class "badge badge-light" ]
-            [ text user.role ]
+        [ span [ classList [ ( "badge", True ), ( "badge-light", user.role /= Role.admin ), ( "badge-dark", user.role == Role.admin ) ] ]
+            [ text <| Role.toReadableString appState user.role ]
         , activeBadge
         ]
 

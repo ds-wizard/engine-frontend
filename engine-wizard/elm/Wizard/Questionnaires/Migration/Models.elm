@@ -121,7 +121,7 @@ getQuestionChanges appState context chapter question =
                         answerChanges =
                             getAnswerChanges context question
                     in
-                    if not (List.isEmpty answerChanges) || isChanged appState.config.features.levels.enabled oldQuestion question then
+                    if not (List.isEmpty answerChanges) || isChanged appState.config.questionnaires.levels.enabled oldQuestion question then
                         QuestionnaireChanges [ QuestionChange <| QuestionChangeData question oldQuestion chapter ] answerChanges
 
                     else if isMoved context question then

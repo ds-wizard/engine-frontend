@@ -12,7 +12,6 @@ type alias BranchDetail =
     { uuid : String
     , name : String
     , kmId : String
-    , organizationId : String
     , forkOfPackageId : Maybe String
     , previousPackageId : Maybe String
     , events : List Event
@@ -25,7 +24,6 @@ decoder =
         |> D.required "uuid" D.string
         |> D.required "name" D.string
         |> D.required "kmId" D.string
-        |> D.required "organizationId" D.string
         |> D.required "forkOfPackageId" (D.nullable D.string)
         |> D.required "previousPackageId" (D.nullable D.string)
         |> D.required "events" (D.list Event.decoder)

@@ -61,7 +61,7 @@ formView appState model packages =
                     FormGroup.select appState packageOptions model.form "packageId"
 
         accessibilitySelect =
-            if appState.config.features.questionnaireAccessibility.enabled then
+            if appState.config.questionnaires.questionnaireAccessibility.enabled then
                 FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) model.form "accessibility" <| lg "questionnaire.accessibility" appState
 
             else

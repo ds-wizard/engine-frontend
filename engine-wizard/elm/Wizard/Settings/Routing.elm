@@ -18,12 +18,13 @@ parsers appState wrapRoute =
         moduleRoot =
             lr "settings" appState
     in
-    [ map (wrapRoute <| AffiliationRoute) (s moduleRoot </> s (lr "settings.affiliation" appState))
-    , map (wrapRoute <| AuthRoute) (s moduleRoot </> s (lr "settings.auth" appState))
-    , map (wrapRoute <| ClientRoute) (s moduleRoot </> s (lr "settings.client" appState))
-    , map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s (lr "settings.features" appState))
-    , map (wrapRoute <| InfoRoute) (s moduleRoot </> s (lr "settings.info" appState))
-    , map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s (lr "settings.organization" appState))
+    [ map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s (lr "settings.organization" appState))
+    , map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s (lr "settings.authentication" appState))
+    , map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s (lr "settings.privacyAndSupport" appState))
+    , map (wrapRoute <| DashboardRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))
+    , map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s (lr "settings.lookAndFeel" appState))
+    , map (wrapRoute <| KnowledgeModelRegistryRoute) (s moduleRoot </> s (lr "settings.knowledgeModelRegistry" appState))
+    , map (wrapRoute <| QuestionnairesRoute) (s moduleRoot </> s (lr "settings.questionnaires" appState))
     ]
 
 
@@ -34,23 +35,26 @@ toUrl appState route =
             lr "settings" appState
     in
     case route of
-        AuthRoute ->
-            [ moduleRoot, lr "settings.auth" appState ]
-
-        AffiliationRoute ->
-            [ moduleRoot, lr "settings.affiliation" appState ]
-
-        ClientRoute ->
-            [ moduleRoot, lr "settings.client" appState ]
-
-        FeaturesRoute ->
-            [ moduleRoot, lr "settings.features" appState ]
-
-        InfoRoute ->
-            [ moduleRoot, lr "settings.info" appState ]
-
         OrganizationRoute ->
             [ moduleRoot, lr "settings.organization" appState ]
+
+        AuthenticationRoute ->
+            [ moduleRoot, lr "settings.authentication" appState ]
+
+        PrivacyAndSupportRoute ->
+            [ moduleRoot, lr "settings.privacyAndSupport" appState ]
+
+        DashboardRoute ->
+            [ moduleRoot, lr "settings.dashboard" appState ]
+
+        LookAndFeelRoute ->
+            [ moduleRoot, lr "settings.lookAndFeel" appState ]
+
+        KnowledgeModelRegistryRoute ->
+            [ moduleRoot, lr "settings.knowledgeModelRegistry" appState ]
+
+        QuestionnairesRoute ->
+            [ moduleRoot, lr "settings.questionnaires" appState ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool

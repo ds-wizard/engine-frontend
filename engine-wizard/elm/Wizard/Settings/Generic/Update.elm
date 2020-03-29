@@ -7,41 +7,38 @@ module Wizard.Settings.Generic.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate exposing (Validation)
-import Json.Encode as E
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (ToMsg, getResultCmd)
+import Wizard.Common.Api.Configs as ConfigsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Msgs
 import Wizard.Ports as Ports
+import Wizard.Settings.Common.EditableConfig as EditableConfig exposing (EditableConfig)
 import Wizard.Settings.Generic.Model exposing (Model)
 import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 
 
-type alias UpdateProps config form =
-    { initForm : config -> Form CustomFormError form
-    , getConfig : AppState -> ToMsg config (Msg config) -> Cmd (Msg config)
-    , putConfig : E.Value -> AppState -> ToMsg () (Msg config) -> Cmd (Msg config)
-    , locApiGetError : AppState -> String
-    , locApiPutError : AppState -> String
-    , encodeConfig : config -> E.Value
-    , formToConfig : form -> config
+type alias UpdateProps form =
+    { initForm : EditableConfig -> Form CustomFormError form
+    , formToConfig : form -> EditableConfig -> EditableConfig
     , formValidation : Validation CustomFormError form
     }
 
 
-fetchData : UpdateProps config form -> AppState -> Cmd (Msg config)
-fetchData props appState =
-    props.getConfig appState GetConfigCompleted
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    ConfigsApi.getAppConfig appState GetConfigCompleted
 
 
 update :
-    UpdateProps config form
-    -> (Msg config -> Wizard.Msgs.Msg)
-    -> Msg config
+    UpdateProps form
+    -> (Msg -> Wizard.Msgs.Msg)
+    -> Msg
     -> AppState
-    -> Model config form
-    -> ( Model config form, Cmd Wizard.Msgs.Msg )
+    -> Model form
+    -> ( Model form, Cmd Wizard.Msgs.Msg )
 update props wrapMsg msg appState model =
     case msg of
         GetConfigCompleted result ->
@@ -55,11 +52,11 @@ update props wrapMsg msg appState model =
 
 
 handleGetConfigCompleted :
-    UpdateProps config form
+    UpdateProps form
     -> AppState
-    -> Model config form
-    -> Result ApiError config
-    -> ( Model config form, Cmd Wizard.Msgs.Msg )
+    -> Model form
+    -> Result ApiError EditableConfig
+    -> ( Model form, Cmd Wizard.Msgs.Msg )
 handleGetConfigCompleted props appState model result =
     let
         newModel =
@@ -68,7 +65,7 @@ handleGetConfigCompleted props appState model result =
                     { model | form = props.initForm config, config = Success config }
 
                 Err error ->
-                    { model | config = ApiError.toActionResult (props.locApiGetError appState) error }
+                    { model | config = ApiError.toActionResult (lg "apiError.config.app.getError" appState) error }
 
         cmd =
             getResultCmd result
@@ -77,11 +74,11 @@ handleGetConfigCompleted props appState model result =
 
 
 handlePutConfigCompleted :
-    UpdateProps config form
+    UpdateProps form
     -> AppState
-    -> Model config form
+    -> Model form
     -> Result ApiError ()
-    -> ( Model config form, Cmd Wizard.Msgs.Msg )
+    -> ( Model form, Cmd Wizard.Msgs.Msg )
 handlePutConfigCompleted props appState model result =
     let
         ( newResult, cmd ) =
@@ -92,7 +89,7 @@ handlePutConfigCompleted props appState model result =
                     )
 
                 Err error ->
-                    ( ApiError.toActionResult (props.locApiPutError appState) error
+                    ( ApiError.toActionResult (lg "apiError.config.app.putError" appState) error
                     , getResultCmd result
                     )
     in
@@ -100,22 +97,22 @@ handlePutConfigCompleted props appState model result =
 
 
 handleForm :
-    UpdateProps config form
+    UpdateProps form
     -> Form.Msg
-    -> (Msg config -> Wizard.Msgs.Msg)
+    -> (Msg -> Wizard.Msgs.Msg)
     -> AppState
-    -> Model config form
-    -> ( Model config form, Cmd Wizard.Msgs.Msg )
+    -> Model form
+    -> ( Model form, Cmd Wizard.Msgs.Msg )
 handleForm props formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.form ) of
-        ( Form.Submit, Just form ) ->
+    case ( formMsg, Form.getOutput model.form, model.config ) of
+        ( Form.Submit, Just form, Success config ) ->
             let
                 body =
-                    props.encodeConfig <| props.formToConfig form
+                    EditableConfig.encode <| props.formToConfig form config
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        props.putConfig body appState PutConfigCompleted
+                        ConfigsApi.putAppConfig body appState PutConfigCompleted
             in
             ( { model | savingConfig = Loading }, cmd )
 

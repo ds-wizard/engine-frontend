@@ -85,15 +85,12 @@ userView appState model =
 userFormView : AppState -> Form CustomFormError UserEditForm -> Bool -> Html Form.Msg
 userFormView appState form current =
     let
-        roleOptions =
-            ( "", "--" ) :: List.map (\o -> ( o, o )) Role.list
-
         roleSelect =
             if current then
                 emptyNode
 
             else
-                FormGroup.select appState roleOptions form "role" <| lg "user.role" appState
+                FormGroup.select appState (Role.options appState) form "role" <| lg "user.role" appState
 
         activeToggle =
             if current then
@@ -107,7 +104,7 @@ userFormView appState form current =
                 [ FormGroup.input appState form "email" <| lg "user.email" appState
                 , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
                 , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
-                , FormGroup.inputWithTypehints appState.config.affiliation.affiliations appState form "affiliation" <| lg "user.affiliation" appState
+                , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
                 , roleSelect
                 , activeToggle
                 ]

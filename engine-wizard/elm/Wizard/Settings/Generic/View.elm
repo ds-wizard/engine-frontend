@@ -5,6 +5,7 @@ module Wizard.Settings.Generic.View exposing
 
 import Form exposing (Form)
 import Html exposing (Html, div)
+import Html.Attributes exposing (class)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
@@ -23,18 +24,20 @@ type alias ViewProps form =
     }
 
 
-view : ViewProps form -> AppState -> Model config form -> Html (Msg config)
+view : ViewProps form -> AppState -> Model form -> Html Msg
 view props appState model =
     Page.actionResultView appState (viewForm props appState model) model.config
 
 
-viewForm : ViewProps form -> AppState -> Model config form -> config -> Html (Msg config)
+viewForm : ViewProps form -> AppState -> Model form -> config -> Html Msg
 viewForm props appState model _ =
     div [ wideDetailClass "" ]
         [ Page.header (props.locTitle appState) []
         , div []
             [ FormResult.errorOnlyView appState model.savingConfig
             , props.formView appState model.form |> Html.map FormMsg
-            , FormActions.viewActionOnly appState (ActionButton.ButtonConfig (props.locSave appState) model.savingConfig (FormMsg Form.Submit) False)
+            , div [ class "mt-5" ]
+                [ ActionButton.button appState (ActionButton.ButtonConfig (props.locSave appState) model.savingConfig (FormMsg Form.Submit) False)
+                ]
             ]
         ]
