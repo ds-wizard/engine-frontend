@@ -1,6 +1,8 @@
 module Wizard.Common.Form.Validate exposing
     ( confirmation
+    , ifElse
     , maybeString
+    , optionalString
     , regex
     , uuid
     )
@@ -30,9 +32,32 @@ confirmation confirmationField =
     V.andThen validate
 
 
+ifElse :
+    String
+    -> Validation CustomFormError a
+    -> Validation CustomFormError a
+    -> Validation CustomFormError Bool
+    -> Validation CustomFormError a
+ifElse dependentField trueValidation falseValidation =
+    let
+        validate main =
+            if main then
+                V.field dependentField trueValidation
+
+            else
+                V.field dependentField falseValidation
+    in
+    V.andThen validate
+
+
 maybeString : Validation CustomFormError (Maybe String)
 maybeString =
     V.oneOf [ V.emptyString |> V.map (\_ -> Nothing), V.string |> V.map Just ]
+
+
+optionalString : Validation CustomFormError String
+optionalString =
+    V.oneOf [ V.emptyString, V.string ]
 
 
 regex : String -> Validation e String

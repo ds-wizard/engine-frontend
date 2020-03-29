@@ -9,7 +9,7 @@ import Wizard.Questionnaires.Common.QuestionnaireAccessibility exposing (Questio
 
 accessibilityBadge : AppState -> QuestionnaireAccessibility -> Html msg
 accessibilityBadge appState questionnaireAccessibility =
-    if appState.config.features.questionnaireAccessibility.enabled then
+    if appState.config.questionnaires.questionnaireAccessibility.enabled then
         case questionnaireAccessibility of
             PublicQuestionnaire ->
                 span [ class "badge badge-cyan" ]

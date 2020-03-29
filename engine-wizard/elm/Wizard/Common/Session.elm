@@ -17,6 +17,7 @@ type alias Session =
     { token : String
     , user : Maybe User
     , sidebarCollapsed : Bool
+    , v1 : Bool
     }
 
 
@@ -25,6 +26,7 @@ init =
     { token = ""
     , user = Nothing
     , sidebarCollapsed = False
+    , v1 = True
     }
 
 
@@ -49,6 +51,7 @@ decoder =
         |> D.required "token" D.string
         |> D.required "user" (D.nullable User.decoder)
         |> D.optional "sidebarCollapsed" D.bool False
+        |> D.required "v1" D.bool
 
 
 exists : Session -> Bool

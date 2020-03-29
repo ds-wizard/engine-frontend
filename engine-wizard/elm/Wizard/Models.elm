@@ -50,7 +50,7 @@ initialModel appState =
     , questionnairesModel = Wizard.Questionnaires.Models.initialModel
     , publicModel = Wizard.Public.Models.initialModel
     , settingsModel = Wizard.Settings.Models.initialModel
-    , users = Wizard.Users.Models.initialModel
+    , users = Wizard.Users.Models.initialModel appState
     }
 
 
@@ -124,7 +124,7 @@ initLocalModel model =
             { model | settingsModel = Wizard.Settings.Models.initLocalModel route model.settingsModel }
 
         Routes.UsersRoute route ->
-            { model | users = Wizard.Users.Models.initLocalModel route model.users }
+            { model | users = Wizard.Users.Models.initLocalModel model.appState route model.users }
 
         _ ->
             model

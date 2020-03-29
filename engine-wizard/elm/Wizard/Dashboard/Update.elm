@@ -5,7 +5,7 @@ import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.Api.Levels as LevelsApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.Common.Config.DashboardWidget exposing (DashboardWidget(..))
+import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Common.Setters exposing (setLevels, setQuestionnaires)
 import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg(..))

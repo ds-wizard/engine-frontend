@@ -333,7 +333,7 @@ questionEditorView appState model editorData =
             }
 
         levelSelection =
-            if appState.config.features.levels.enabled then
+            if appState.config.questionnaires.levels.enabled then
                 questionRequiredLevelSelectGroup appState editorData model.levels
 
             else

@@ -65,7 +65,7 @@ formView : AppState -> Form CustomFormError BranchPublishForm -> BranchDetail ->
 formView appState form branch =
     let
         mbVersion =
-            BranchUtils.lastVersion branch
+            BranchUtils.lastVersion appState branch
     in
     div []
         [ Html.map FormMsg <| FormGroup.textView branch.name <| l_ "form.name" appState

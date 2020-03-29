@@ -15,14 +15,14 @@ parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
 parsers appState wrapRoute =
     let
         publicQuestionnaireRoutes =
-            if appState.config.features.publicQuestionnaire.enabled then
+            if appState.config.questionnaires.publicQuestionnaire.enabled then
                 [ map (wrapRoute <| QuestionnaireRoute) (s (lr "public.questionnaire" appState)) ]
 
             else
                 []
 
         signUpRoutes =
-            if appState.config.auth.internal.registration.enabled then
+            if appState.config.authentication.internal.registration.enabled then
                 [ map (wrapRoute <| SignupRoute) (s (lr "public.signup" appState))
                 , map (signupConfirmation wrapRoute) (s (lr "public.signup" appState) </> string </> string)
                 ]

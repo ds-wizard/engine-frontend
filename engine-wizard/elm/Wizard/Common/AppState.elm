@@ -12,7 +12,7 @@ import Random exposing (Seed)
 import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Time
 import Wizard.Common.Config exposing (Config)
-import Wizard.Common.Config.DashboardWidget exposing (DashboardWidget(..))
+import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Common.Flags as Flags
 import Wizard.Common.JwtToken as JwtToken exposing (JwtToken)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
@@ -94,5 +94,6 @@ getDashboardWidgets appState =
                 |> Maybe.map .role
                 |> Maybe.withDefault ""
     in
-    Dict.get role appState.config.client.dashboard
+    appState.config.dashboard.widgets
+        |> Maybe.andThen (Dict.get role)
         |> Maybe.withDefault [ WelcomeDashboardWidget ]

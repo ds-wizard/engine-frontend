@@ -1,17 +1,13 @@
 module Wizard.Settings.Msgs exposing (Msg(..))
 
-import Wizard.Settings.Affiliation.Msgs
-import Wizard.Settings.Auth.Msgs
-import Wizard.Settings.Client.Msgs
-import Wizard.Settings.Features.Msgs
-import Wizard.Settings.Info.Msgs
-import Wizard.Settings.Organization.Msgs
+import Wizard.Settings.Generic.Msgs
 
 
 type Msg
-    = AffiliationMsg Wizard.Settings.Affiliation.Msgs.Msg
-    | AuthMsg Wizard.Settings.Auth.Msgs.Msg
-    | ClientMsg Wizard.Settings.Client.Msgs.Msg
-    | FeaturesMsg Wizard.Settings.Features.Msgs.Msg
-    | InfoMsg Wizard.Settings.Info.Msgs.Msg
-    | OrganizationMsg Wizard.Settings.Organization.Msgs.Msg
+    = AuthenticationMsg Wizard.Settings.Generic.Msgs.Msg
+    | OrganizationMsg Wizard.Settings.Generic.Msgs.Msg
+    | PrivacyAndSupportMsg Wizard.Settings.Generic.Msgs.Msg
+    | DashboardMsg Wizard.Settings.Generic.Msgs.Msg
+    | LookAndFeelMsg Wizard.Settings.Generic.Msgs.Msg
+    | KnowledgeModelRegistryMsg Wizard.Settings.Generic.Msgs.Msg
+    | QuestionnairesMsg Wizard.Settings.Generic.Msgs.Msg

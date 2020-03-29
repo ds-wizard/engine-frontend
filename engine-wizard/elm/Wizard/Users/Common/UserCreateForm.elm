@@ -1,9 +1,11 @@
 module Wizard.Users.Common.UserCreateForm exposing (UserCreateForm, encode, init, validation)
 
 import Form exposing (Form)
+import Form.Field as Field
 import Form.Validate as V exposing (..)
 import Json.Encode as E exposing (..)
 import Json.Encode.Extra as E
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Form.Validate as V
 
@@ -18,9 +20,13 @@ type alias UserCreateForm =
     }
 
 
-init : Form CustomFormError UserCreateForm
-init =
-    Form.initial [] validation
+init : AppState -> Form CustomFormError UserCreateForm
+init appState =
+    let
+        fields =
+            [ ( "role", Field.string appState.config.authentication.defaultRole ) ]
+    in
+    Form.initial fields validation
 
 
 validation : Validation CustomFormError UserCreateForm

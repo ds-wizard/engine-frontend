@@ -5,7 +5,7 @@ import Html.Attributes exposing (class)
 import Markdown
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.Common.Config.DashboardWidget exposing (DashboardWidget(..))
+import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg)
 import Wizard.Dashboard.Widgets.DMPWorkflowWidget as DMPWorkflowWidget
@@ -21,8 +21,8 @@ view appState model =
                 |> List.map (viewWidget appState model)
     in
     div [ class "col Dashboard" ]
-        ([ viewAlert "warning" appState.config.info.welcomeWarning
-         , viewAlert "info" appState.config.info.welcomeInfo
+        ([ viewAlert "warning" appState.config.dashboard.welcomeWarning
+         , viewAlert "info" appState.config.dashboard.welcomeInfo
          ]
             ++ widgets
         )

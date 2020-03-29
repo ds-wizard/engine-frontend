@@ -144,7 +144,7 @@ viewChapterAnsweredIndication : AppState -> Model -> Chapter -> Html Msg
 viewChapterAnsweredIndication appState model chapter =
     let
         effectiveLevel =
-            if appState.config.features.levels.enabled then
+            if appState.config.questionnaires.levels.enabled then
                 model.questionnaire.level
 
             else
@@ -324,5 +324,5 @@ viewTodoAction appState model questionId path =
 
 viewFeedbackAction : AppState -> String -> List String -> Html CustomFormMessage
 viewFeedbackAction appState _ _ =
-    a [ class "action", onClick <| FeedbackMsg ]
+    a [ class "action", attribute "data-cy" "feedback", onClick <| FeedbackMsg ]
         [ faSet "questionnaire.feedback" appState ]

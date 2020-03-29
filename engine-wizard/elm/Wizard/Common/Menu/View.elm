@@ -18,6 +18,7 @@ import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
 import Wizard.Auth.Permission as Permissions
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
@@ -124,15 +125,19 @@ viewReportIssueModal : AppState -> Bool -> Html Wizard.Msgs.Msg
 viewReportIssueModal appState isOpen =
     let
         supportMailLink =
-            a [ href <| "mailto:" ++ appState.config.client.supportEmail ]
-                [ text appState.config.client.supportEmail ]
+            a [ href <| "mailto:" ++ PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
+                [ text <| PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
 
         modalContent =
             [ p [] [ lx_ "reportModal.info" appState ]
             , p []
-                [ a [ class "link-with-icon", href appState.config.client.supportRepositoryUrl, target "_blank" ]
+                [ a
+                    [ class "link-with-icon"
+                    , href <| PrivacyAndSupportConfig.getSupportRepositoryUrl appState.config.privacyAndSupport
+                    , target "_blank"
+                    ]
                     [ faSet "report.repository" appState
-                    , text appState.config.client.supportRepositoryName
+                    , text <| PrivacyAndSupportConfig.getSupportRepositoryName appState.config.privacyAndSupport
                     ]
                 ]
             , p [] (lh_ "reportModal.writeUs" [ supportMailLink ] appState)

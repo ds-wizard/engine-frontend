@@ -4,6 +4,7 @@ module Wizard.Common.View.FormGroup exposing
     , formGroup
     , formatRadioGroup
     , getErrors
+    , htmlRadioGroup
     , input
     , inputAttrs
     , inputWithTypehints
@@ -181,6 +182,30 @@ formatRadioGroup appState options =
     formGroup radioInput [] appState
 
 
+htmlRadioGroup : AppState -> List ( String, Html Form.Msg ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+htmlRadioGroup appState options =
+    let
+        radioInput state attrs =
+            let
+                buildOption ( k, html ) =
+                    label [ class "form-check", classList [ ( "form-check-selected", state.value == Just k ) ] ]
+                        [ Html.input
+                            [ value k
+                            , checked (state.value == Just k)
+                            , class "form-check-input"
+                            , type_ "radio"
+                            , id k
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String k)
+                            ]
+                            []
+                        , html
+                        ]
+            in
+            div [ class "form-radio-group" ] (List.map buildOption options)
+    in
+    formGroup radioInput [] appState
+
+
 {-| Helper for creating form group with textarea.
 -}
 textarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
@@ -196,7 +221,7 @@ resizableTextarea appState form fieldName =
                 |> Maybe.map (max 3 << List.length << String.split "\n")
                 |> Maybe.withDefault 3
     in
-    formGroup Input.textArea [ rows lines ] appState form fieldName
+    formGroup Input.textArea [ rows lines, class "resizable-textarea" ] appState form fieldName
 
 
 {-| Helper for creating form group with toggle
@@ -341,9 +366,16 @@ markdownEditor appState form fieldName labelText =
 
         previewActiveMsg =
             Form.Input previewActiveFieldName Form.Checkbox << Field.Bool
+
+        labelElement =
+            if String.isEmpty labelText then
+                emptyNode
+
+            else
+                label [ for fieldName ] [ text labelText ]
     in
     div [ class <| "form-group form-group-markdown " ++ errorClass ]
-        [ label [ for fieldName ] [ text labelText ]
+        [ labelElement
         , div [ class <| "card " ++ cardErrorClass ]
             [ div [ class "card-header" ]
                 [ ul [ class "nav nav-tabs card-header-tabs" ]

@@ -49,7 +49,7 @@ formView : AppState -> Form CustomFormError QuestionnaireEditForm -> Html Form.M
 formView appState form =
     let
         accessibilitySelect =
-            if appState.config.features.questionnaireAccessibility.enabled then
+            if appState.config.questionnaires.questionnaireAccessibility.enabled then
                 FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) form "accessibility" <| lg "questionnaire.accessibility" appState
 
             else

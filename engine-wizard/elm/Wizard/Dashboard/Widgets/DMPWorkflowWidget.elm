@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, href, src)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
@@ -38,7 +39,7 @@ view appState questionnaires =
     if visible then
         div [ class "DMPWorkflowWidget" ]
             [ div [ class "DMPWorkflowWidget__Message" ]
-                [ text <| lf_ "welcome" [ appState.config.client.appTitle ] appState
+                [ text <| lf_ "welcome" [ LookAndFeelConfig.getAppTitle appState.config.lookAndFeel ] appState
                 ]
             , div [ class "DMPWorkflowWidget__Workflow DMPWorkflowWidget__Workflow--Images" ]
                 [ div [ class "step" ]

@@ -6,37 +6,45 @@ module Wizard.Common.Config exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Wizard.Common.Config.AffiliationConfig as AffiliationConfig exposing (AffiliationConfig)
-import Wizard.Common.Config.AuthConfig as AuthConfig exposing (AuthConfig)
-import Wizard.Common.Config.ClientConfig as ClientConfig exposing (ClientConfig)
-import Wizard.Common.Config.FeaturesConfig as FeaturesConfig exposing (FeaturesConfig)
-import Wizard.Common.Config.InfoConfig as InfoConfig exposing (InfoConfig)
+import Wizard.Common.Config.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
+import Wizard.Common.Config.DashboardConfig as DashboardConfig exposing (DashboardConfig)
+import Wizard.Common.Config.KnowledgeModelRegistryConfig as KnowledgeModelRegistryConfig exposing (KnowledgeModelRegistryConfig)
+import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
+import Wizard.Common.Config.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
+import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
+import Wizard.Common.Config.QuestionnairesConfig as QuestionnairesConfig exposing (QuestionnairesConfig)
 
 
 type alias Config =
-    { affiliation : AffiliationConfig
-    , auth : AuthConfig
-    , client : ClientConfig
-    , features : FeaturesConfig
-    , info : InfoConfig
+    { organization : OrganizationConfig
+    , authentication : AuthenticationConfig
+    , privacyAndSupport : PrivacyAndSupportConfig
+    , dashboard : DashboardConfig
+    , lookAndFeel : LookAndFeelConfig
+    , knowledgeModelRegistry : KnowledgeModelRegistryConfig
+    , questionnaires : QuestionnairesConfig
     }
 
 
 decoder : Decoder Config
 decoder =
     D.succeed Config
-        |> D.required "affiliation" AffiliationConfig.decoder
-        |> D.required "auth" AuthConfig.decoder
-        |> D.required "client" ClientConfig.decoder
-        |> D.required "features" FeaturesConfig.decoder
-        |> D.required "info" InfoConfig.decoder
+        |> D.required "organization" OrganizationConfig.decoder
+        |> D.required "authentication" AuthenticationConfig.decoder
+        |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
+        |> D.required "dashboard" DashboardConfig.decoder
+        |> D.required "lookAndFeel" LookAndFeelConfig.decoder
+        |> D.required "knowledgeModelRegistry" KnowledgeModelRegistryConfig.decoder
+        |> D.required "questionnaire" QuestionnairesConfig.decoder
 
 
 default : Config
 default =
-    { affiliation = AffiliationConfig.default
-    , auth = AuthConfig.default
-    , client = ClientConfig.default
-    , features = FeaturesConfig.default
-    , info = InfoConfig.default
+    { organization = OrganizationConfig.default
+    , authentication = AuthenticationConfig.default
+    , privacyAndSupport = PrivacyAndSupportConfig.default
+    , dashboard = DashboardConfig.default
+    , lookAndFeel = LookAndFeelConfig.default
+    , knowledgeModelRegistry = KnowledgeModelRegistryConfig.default
+    , questionnaires = QuestionnairesConfig.default
     }

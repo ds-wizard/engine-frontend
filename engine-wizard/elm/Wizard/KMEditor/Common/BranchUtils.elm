@@ -2,16 +2,18 @@ module Wizard.KMEditor.Common.BranchUtils exposing (lastVersion)
 
 import List.Extra as List
 import Version exposing (Version)
+import Wizard.Common.AppState exposing (AppState)
 
 
 lastVersion :
-    { a
-        | kmId : String
-        , organizationId : String
-        , previousPackageId : Maybe String
-    }
+    AppState
+    ->
+        { a
+            | kmId : String
+            , previousPackageId : Maybe String
+        }
     -> Maybe Version
-lastVersion branch =
+lastVersion appState branch =
     let
         getVersion parent =
             let
@@ -25,7 +27,7 @@ lastVersion branch =
 
                 sameOrganization =
                     List.getAt 0 parts
-                        |> Maybe.map ((==) branch.organizationId)
+                        |> Maybe.map ((==) appState.config.organization.organizationId)
                         |> Maybe.withDefault False
             in
             if sameOrganization && samePackage then
