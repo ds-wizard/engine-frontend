@@ -11,6 +11,7 @@ type alias Flags =
     { session : Maybe Session
     , seed : Int
     , apiUrl : String
+    , clientUrl : String
     , config : Config
     , provisioning : Provisioning
     , localProvisioning : Provisioning
@@ -24,6 +25,7 @@ decoder =
         |> D.required "session" (D.nullable Session.decoder)
         |> D.required "seed" D.int
         |> D.required "apiUrl" D.string
+        |> D.required "clientUrl" D.string
         |> D.required "config" Config.decoder
         |> D.optional "provisioning" Provisioning.decoder Provisioning.default
         |> D.optional "localProvisioning" Provisioning.decoder Provisioning.default
@@ -35,7 +37,8 @@ default =
     { session = Nothing
     , seed = 0
     , apiUrl = ""
-    , config = Config.defaultConfig
+    , clientUrl = ""
+    , config = Config.default
     , provisioning = Provisioning.default
     , localProvisioning = Provisioning.default
     , success = False

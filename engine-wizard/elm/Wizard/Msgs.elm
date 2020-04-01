@@ -9,9 +9,9 @@ import Wizard.Dashboard.Msgs
 import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
-import Wizard.Organization.Msgs
 import Wizard.Public.Msgs
 import Wizard.Questionnaires.Msgs
+import Wizard.Settings.Msgs
 import Wizard.Users.Msgs
 
 
@@ -26,7 +26,7 @@ type Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
-    | OrganizationMsg Wizard.Organization.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg
     | QuestionnairesMsg Wizard.Questionnaires.Msgs.Msg
+    | SettingsMsg Wizard.Settings.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg

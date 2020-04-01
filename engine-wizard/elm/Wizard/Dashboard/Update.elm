@@ -5,7 +5,7 @@ import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.Api.Levels as LevelsApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.Common.Config exposing (Widget(..))
+import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Common.Setters exposing (setLevels, setQuestionnaires)
 import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg(..))
@@ -18,7 +18,7 @@ fetchData appState =
         widgets =
             AppState.getDashboardWidgets appState
     in
-    if List.any (\w -> w == DMPWorkflow || w == LevelsQuestionnaire) widgets then
+    if List.any (\w -> w == DMPWorkflowDashboardWidget || w == LevelsQuestionnaireDashboardWidget) widgets then
         Cmd.batch
             [ LevelsApi.getLevels appState GetLevelsCompleted
             , QuestionnairesApi.getQuestionnaires appState GetQuestionnairesCompleted

@@ -7,13 +7,15 @@ module Wizard.Common.View.Layout exposing
 import Browser exposing (Document)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config exposing (CustomMenuLink)
-import Wizard.Common.Html exposing (emptyNode, fa, faSet, linkTo)
+import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig
+import Wizard.Common.Config.Partials.CustomMenuLink exposing (CustomMenuLink)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
-import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal)
+import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
@@ -64,7 +66,7 @@ public model content =
                     [ content ]
                 ]
     in
-    { title = model.appState.config.client.appTitle
+    { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
     , body = [ html ]
     }
 
@@ -73,7 +75,7 @@ publicHeader : Model -> Html Msg
 publicHeader model =
     let
         questionnaireDemoLink =
-            if model.appState.config.publicQuestionnaireEnabled then
+            if model.appState.config.questionnaires.publicQuestionnaire.enabled then
                 li [ class "nav-item" ]
                     [ linkTo model.appState
                         questionnaireDemoRoute
@@ -85,7 +87,7 @@ publicHeader model =
                 emptyNode
 
         signUpLink =
-            if model.appState.config.registrationEnabled then
+            if model.appState.config.authentication.internal.registration.enabled then
                 li [ class "nav-item" ]
                     [ linkTo model.appState
                         signupRoute
@@ -111,7 +113,7 @@ publicHeader model =
                 [ questionnaireDemoLink
                 , li [ class "nav-item" ]
                     [ linkTo model.appState
-                        loginRoute
+                        (loginRoute Nothing)
                         [ class "nav-link" ]
                         [ lx_ "header.logIn" model.appState ]
                     ]
@@ -124,7 +126,7 @@ publicHeader model =
                 [ linkTo model.appState
                     homeRoute
                     [ class "navbar-brand" ]
-                    [ text model.appState.config.client.appTitle
+                    [ text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
                     ]
                 ]
             , ul [ class "nav navbar-nav ml-auto" ] links
@@ -144,7 +146,7 @@ app model content =
                 , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.apiBuildInfo
                 ]
     in
-    { title = model.appState.config.client.appTitle
+    { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
     , body = [ html ]
     }
 
@@ -164,7 +166,7 @@ logo model =
     let
         logoImg =
             span [ class "logo-full" ]
-                [ span [] [ text model.appState.config.client.appTitleShort ] ]
+                [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ] ]
     in
     linkTo model.appState Routes.DashboardRoute [ class "logo" ] [ logoImg ]
 
@@ -182,7 +184,7 @@ createMenu model =
                 |> List.map (menuItem model)
 
         customMenuItems =
-            List.map customMenuItem model.appState.config.client.customMenuLinks
+            List.map customMenuItem model.appState.config.lookAndFeel.customMenuLinks
     in
     defaultMenuItems ++ customMenuItems
 
@@ -190,11 +192,6 @@ createMenu model =
 menuItems : AppState -> List (MenuItem msg)
 menuItems appState =
     [ MenuItem
-        (l_ "menu.organization" appState)
-        (faSet "menu.organization" appState)
-        Routes.OrganizationRoute
-        Perm.organization
-    , MenuItem
         (l_ "menu.users" appState)
         (faSet "menu.users" appState)
         (Routes.UsersRoute Wizard.Users.Routes.IndexRoute)
@@ -275,7 +272,8 @@ profileInfo model =
                     ]
     in
     div [ class "profile-info" ]
-        [ viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
+        [ viewSettingsMenu model.appState
+        , viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
         , viewProfileMenu model.appState model.menuModel.profileMenuDropdownState
         , collapseLink
         ]

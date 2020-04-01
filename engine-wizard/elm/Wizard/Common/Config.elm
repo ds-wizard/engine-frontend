@@ -1,176 +1,50 @@
 module Wizard.Common.Config exposing
     ( Config
-    , CustomMenuLink
-    , Registry(..)
-    , Widget(..)
     , decoder
-    , defaultConfig
+    , default
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Wizard.Common.Config.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
+import Wizard.Common.Config.DashboardConfig as DashboardConfig exposing (DashboardConfig)
+import Wizard.Common.Config.KnowledgeModelRegistryConfig as KnowledgeModelRegistryConfig exposing (KnowledgeModelRegistryConfig)
+import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
+import Wizard.Common.Config.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
+import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
+import Wizard.Common.Config.QuestionnairesConfig as QuestionnairesConfig exposing (QuestionnairesConfig)
 
 
 type alias Config =
-    { client : ClientConfig
-    , feedbackEnabled : Bool
-    , registrationEnabled : Bool
-    , publicQuestionnaireEnabled : Bool
-    , questionnaireAccessibilityEnabled : Bool
-    , levelsEnabled : Bool
-    , registry : Registry
-    }
-
-
-type Widget
-    = DMPWorkflow
-    | LevelsQuestionnaire
-    | Welcome
-
-
-type Registry
-    = RegistryEnabled String
-    | RegistryDisabled
-
-
-type alias ClientConfig =
-    { appTitle : String
-    , appTitleShort : String
-    , welcomeInfo : Maybe String
-    , welcomeWarning : Maybe String
-    , dashboard : Dict String (List Widget)
-    , privacyUrl : String
-    , customMenuLinks : List CustomMenuLink
-    , supportEmail : String
-    , supportRepositoryName : String
-    , supportRepositoryUrl : String
-    }
-
-
-type alias CustomMenuLink =
-    { icon : String
-    , title : String
-    , url : String
-    , newWindow : Bool
-    }
-
-
-defaultPrivacyUrl : String
-defaultPrivacyUrl =
-    "{defaultPrivacyUrl}"
-
-
-defaultSupportEmail : String
-defaultSupportEmail =
-    "{defaultSupportEmail}"
-
-
-defaultSupportRepositoryName : String
-defaultSupportRepositoryName =
-    "{defaultSupportRepositoryName}"
-
-
-defaultSupportRepositoryUrl : String
-defaultSupportRepositoryUrl =
-    "{defaultSupportRepositoryUrl}"
-
-
-defaultConfig : Config
-defaultConfig =
-    { client =
-        { appTitle = ""
-        , appTitleShort = ""
-        , welcomeInfo = Nothing
-        , welcomeWarning = Nothing
-        , dashboard = Dict.empty
-        , privacyUrl = defaultPrivacyUrl
-        , customMenuLinks = []
-        , supportEmail = defaultSupportEmail
-        , supportRepositoryName = defaultSupportRepositoryName
-        , supportRepositoryUrl = defaultSupportRepositoryUrl
-        }
-    , feedbackEnabled = True
-    , registrationEnabled = True
-    , publicQuestionnaireEnabled = True
-    , questionnaireAccessibilityEnabled = True
-    , levelsEnabled = True
-    , registry = RegistryDisabled
+    { organization : OrganizationConfig
+    , authentication : AuthenticationConfig
+    , privacyAndSupport : PrivacyAndSupportConfig
+    , dashboard : DashboardConfig
+    , lookAndFeel : LookAndFeelConfig
+    , knowledgeModelRegistry : KnowledgeModelRegistryConfig
+    , questionnaires : QuestionnairesConfig
     }
 
 
 decoder : Decoder Config
 decoder =
     D.succeed Config
-        |> D.required "client" clientConfigDecoder
-        |> D.optional "feedbackEnabled" D.bool True
-        |> D.optional "registrationEnabled" D.bool True
-        |> D.optional "publicQuestionnaireEnabled" D.bool True
-        |> D.optional "questionnaireAccessibilityEnabled" D.bool True
-        |> D.optional "levelsEnabled" D.bool True
-        |> D.optional "registry" registryDecoder RegistryDisabled
+        |> D.required "organization" OrganizationConfig.decoder
+        |> D.required "authentication" AuthenticationConfig.decoder
+        |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
+        |> D.required "dashboard" DashboardConfig.decoder
+        |> D.required "lookAndFeel" LookAndFeelConfig.decoder
+        |> D.required "knowledgeModelRegistry" KnowledgeModelRegistryConfig.decoder
+        |> D.required "questionnaire" QuestionnairesConfig.decoder
 
 
-registryDecoder : Decoder Registry
-registryDecoder =
-    D.succeed Tuple.pair
-        |> D.required "enabled" D.bool
-        |> D.required "url" (D.maybe D.string)
-        |> D.andThen
-            (\( enabled, mbUrl ) ->
-                case ( enabled, mbUrl ) of
-                    ( True, Just url ) ->
-                        D.succeed <| RegistryEnabled url
-
-                    _ ->
-                        D.succeed RegistryDisabled
-            )
-
-
-clientConfigDecoder : Decoder ClientConfig
-clientConfigDecoder =
-    D.succeed ClientConfig
-        |> D.optional "appTitle" D.string "{defaultAppTitle}"
-        |> D.optional "appTitleShort" D.string "{defaultAppTitleShort}"
-        |> D.optional "welcomeInfo" (D.maybe D.string) Nothing
-        |> D.optional "welcomeWarning" (D.maybe D.string) Nothing
-        |> D.optional "dashboard" widgetDictDecoder Dict.empty
-        |> D.optional "privacyUrl" D.string defaultPrivacyUrl
-        |> D.optional "customMenuLinks" (D.list customMenuLinkDecoder) []
-        |> D.optional "supportEmail" D.string defaultSupportEmail
-        |> D.optional "supportRepositoryName" D.string defaultSupportRepositoryName
-        |> D.optional "supportRepositoryUrl" D.string defaultSupportRepositoryUrl
-
-
-customMenuLinkDecoder : Decoder CustomMenuLink
-customMenuLinkDecoder =
-    D.succeed CustomMenuLink
-        |> D.required "icon" D.string
-        |> D.required "title" D.string
-        |> D.required "url" D.string
-        |> D.required "newWindow" D.bool
-
-
-widgetDictDecoder : Decoder (Dict String (List Widget))
-widgetDictDecoder =
-    D.dict (D.list widgetDecoder)
-
-
-widgetDecoder : Decoder Widget
-widgetDecoder =
-    D.string
-        |> D.andThen
-            (\str ->
-                case str of
-                    "DMPWorkflow" ->
-                        D.succeed DMPWorkflow
-
-                    "LevelsQuestionnaire" ->
-                        D.succeed LevelsQuestionnaire
-
-                    "Welcome" ->
-                        D.succeed Welcome
-
-                    widgetType ->
-                        D.fail <| "Unknown widget: " ++ widgetType
-            )
+default : Config
+default =
+    { organization = OrganizationConfig.default
+    , authentication = AuthenticationConfig.default
+    , privacyAndSupport = PrivacyAndSupportConfig.default
+    , dashboard = DashboardConfig.default
+    , lookAndFeel = LookAndFeelConfig.default
+    , knowledgeModelRegistry = KnowledgeModelRegistryConfig.default
+    , questionnaires = QuestionnairesConfig.default
+    }

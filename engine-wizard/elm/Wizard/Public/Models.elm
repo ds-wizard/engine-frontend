@@ -1,5 +1,6 @@
 module Wizard.Public.Models exposing (Model, initLocalModel, initialModel)
 
+import Wizard.Public.Auth.Models
 import Wizard.Public.BookReference.Models
 import Wizard.Public.ForgottenPassword.Models
 import Wizard.Public.ForgottenPasswordConfirmation.Models
@@ -11,7 +12,8 @@ import Wizard.Public.SignupConfirmation.Models
 
 
 type alias Model =
-    { bookReferenceModel : Wizard.Public.BookReference.Models.Model
+    { authModel : Wizard.Public.Auth.Models.Model
+    , bookReferenceModel : Wizard.Public.BookReference.Models.Model
     , forgottenPasswordModel : Wizard.Public.ForgottenPassword.Models.Model
     , forgottenPasswordConfirmationModel : Wizard.Public.ForgottenPasswordConfirmation.Models.Model
     , loginModel : Wizard.Public.Login.Models.Model
@@ -23,10 +25,11 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { bookReferenceModel = Wizard.Public.BookReference.Models.initialModel
+    { authModel = Wizard.Public.Auth.Models.initialModel
+    , bookReferenceModel = Wizard.Public.BookReference.Models.initialModel
     , forgottenPasswordModel = Wizard.Public.ForgottenPassword.Models.initialModel
     , forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel "" ""
-    , loginModel = Wizard.Public.Login.Models.initialModel
+    , loginModel = Wizard.Public.Login.Models.initialModel Nothing
     , questionnaireModel = Wizard.Public.Questionnaire.Models.initialModel
     , signupModel = Wizard.Public.Signup.Models.initialModel
     , signupConfirmationModel = Wizard.Public.SignupConfirmation.Models.initialModel
@@ -36,6 +39,9 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
+        AuthCallback _ _ _ ->
+            { model | authModel = Wizard.Public.Auth.Models.initialModel }
+
         BookReferenceRoute _ ->
             { model | bookReferenceModel = Wizard.Public.BookReference.Models.initialModel }
 
@@ -45,8 +51,8 @@ initLocalModel route model =
         ForgottenPasswordConfirmationRoute userId hash ->
             { model | forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel userId hash }
 
-        LoginRoute ->
-            { model | loginModel = Wizard.Public.Login.Models.initialModel }
+        LoginRoute mbOriginalUrl ->
+            { model | loginModel = Wizard.Public.Login.Models.initialModel mbOriginalUrl }
 
         QuestionnaireRoute ->
             { model | questionnaireModel = Wizard.Public.Questionnaire.Models.initialModel }

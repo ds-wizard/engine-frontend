@@ -7,6 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
@@ -57,7 +58,7 @@ signupForm appState model =
             , actionResult = model.signingUp
             , submitLabel = l_ "form.submit" appState
             , formContent = formView appState model.form |> Html.map FormMsg
-            , link = Just ( Routes.PublicRoute LoginRoute, l_ "form.link" appState )
+            , link = Just ( Routes.PublicRoute (LoginRoute Nothing), l_ "form.link" appState )
             }
     in
     publicForm appState formConfig
@@ -82,7 +83,7 @@ formView appState form =
                 [ label [ for "accept" ]
                     ([ Input.checkboxInput acceptField [ id "accept", name "accept" ] ]
                         ++ lh_ "form.privacyText"
-                            [ a [ href appState.config.client.privacyUrl, target "_blank" ]
+                            [ a [ href <| PrivacyAndSupportConfig.getPrivacyUrl appState.config.privacyAndSupport, target "_blank" ]
                                 [ lx_ "form.privacy" appState ]
                             ]
                             appState
@@ -92,8 +93,11 @@ formView appState form =
     in
     div []
         [ FormGroup.input appState form "email" <| lg "user.email" appState
-        , FormGroup.input appState form "name" <| lg "user.name" appState
-        , FormGroup.input appState form "surname" <| lg "user.surname" appState
+        , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
+        , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+        , FormGroup.optionalWrapper appState <|
+            FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <|
+                lg "user.affiliation" appState
         , FormGroup.password appState form "password" <| lg "user.password" appState
         , FormGroup.password appState form "passwordConfirmation" <| lg "user.passwordConfirmation" appState
         , acceptGroup

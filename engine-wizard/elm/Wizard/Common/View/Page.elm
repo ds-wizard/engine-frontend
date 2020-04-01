@@ -11,9 +11,9 @@ module Wizard.Common.View.Page exposing
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, br, div, h1, h2, img, p, text)
 import Html.Attributes exposing (class, src)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, faSet)
 
 
 l_ : String -> AppState -> String

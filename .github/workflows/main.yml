@@ -1,0 +1,105 @@
+name: Engine Frontend CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  btp:
+    name: Build-Tag-Push
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        component: [registry, wizard, wizard-research]
+        node-version: [8.16.2]
+    
+    env:
+      COMPONENT: ${{ matrix.component }}
+      PUBLIC_IMAGE: datastewardshipwizard/${{ matrix.component }}-client
+      PRIVATE_IMAGE: ${{ secrets.PRIVATE_REGISTRY_URL }}/${{ matrix.component }}-client
+      TAG_DEVELOP: develop
+      TAG_LATEST: latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+# (1) -> Preparations
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+        
+    - name: Install
+      run: npm ci
+
+# (2) -> Test
+    - name: Test
+      run: |
+        npm run test:elm
+        node scripts/test-icon-set.js
+        node scripts/test-locale.js
+
+# (3) -> Build app and Docker image
+    - name: Build
+      run: |
+        ./scripts/build.sh
+        docker build -t $PRIVATE_IMAGE:$GITHUB_SHA -f engine-$COMPONENT/docker/Dockerfile .
+
+# (4) -> Docker image tagging
+    - name: Docker login
+      if: github.event_name == 'push'
+      run: |
+        docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
+        docker login -u "$PRIVATE_REGISTRY_USERNAME" -p "$PRIVATE_REGISTRY_PASSWORD" "$PRIVATE_REGISTRY_URL"
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        PRIVATE_REGISTRY_URL: ${{ secrets.PRIVATE_REGISTRY_URL }}
+        PRIVATE_REGISTRY_USERNAME: ${{ secrets.PRIVATE_REGISTRY_USERNAME }}
+        PRIVATE_REGISTRY_PASSWORD: ${{ secrets.PRIVATE_REGISTRY_PASSWORD }}
+
+    - name: Docker push - commit SHA (private)
+      if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
+      run: |
+        docker push $PRIVATE_IMAGE:$GITHUB_SHA
+
+    - name: Docker tag and push - branch (private)
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && !contains(github.ref, 'release')
+      run: |
+        GITHUB_BRANCH=`echo $GITHUB_REF | cut -d/ -f3- | sed 's#/#-#g'`
+        docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $PRIVATE_IMAGE:$GITHUB_BRANCH
+        docker push $PRIVATE_IMAGE:$GITHUB_BRANCH
+
+    - name: Docker tag and push - develop (public)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+      run: |
+        docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $PUBLIC_IMAGE:$TAG_DEVELOP
+        docker push $PUBLIC_IMAGE:$TAG_DEVELOP
+
+    - name: Docker tag and push - latest (public)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      run: |
+        docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $PUBLIC_IMAGE:$TAG_LATEST
+        docker push $PUBLIC_IMAGE:$TAG_LATEST
+
+    - name: Docker tag and push - version tag (public)
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      run: |
+        GITHUB_TAG=`echo $GITHUB_REF | cut -d/ -f3` 
+        # Release vX.Y.Z
+        if [[ $GITHUB_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          IMAGE_TAG_MAJOR="$PUBLIC_IMAGE:"`echo $GITHUB_TAG | sed -E "s/v(.*)\..*\..*/\1/g"`
+          IMAGE_TAG_MINOR="$PUBLIC_IMAGE:"`echo $GITHUB_TAG | sed -E "s/v(.*)\..*/\1/g"`
+          IMAGE_TAG_PATCH="$PUBLIC_IMAGE:"`echo $GITHUB_TAG | sed -E "s/v//g"`
+          echo "Publishing release: $IMAGE_TAG_PATCH";
+          docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $IMAGE_TAG_MAJOR && docker push $IMAGE_TAG_MAJOR;
+          docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $IMAGE_TAG_MINOR && docker push $IMAGE_TAG_MINOR;
+          docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $IMAGE_TAG_PATCH && docker push $IMAGE_TAG_PATCH;
+        fi
+        # Release candidate vX.Y.Z-rc.R
+        if [[ $GITHUB_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+          IMAGE_TAG_RC="$PUBLIC_IMAGE:"`echo $GITHUB_TAG | sed -E "s/v//g"`
+          echo "Publishing release candidate: $IMAGE_TAG_RC";
+          docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $IMAGE_TAG_RC && docker push $IMAGE_TAG_RC;
+        fi

@@ -8,9 +8,10 @@ import Wizard.Common.AppState as AppState
 import Wizard.Common.Time as Time
 import Wizard.Models exposing (..)
 import Wizard.Msgs exposing (Msg)
+import Wizard.Ports as Ports
 import Wizard.Public.Routes
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing exposing (cmdNavigate, homeRoute, routeIfAllowed)
+import Wizard.Routing as Routing exposing (cmdNavigate, loginRoute, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
 import Wizard.Update exposing (fetchData, update)
 import Wizard.View exposing (view)
@@ -19,10 +20,11 @@ import Wizard.View exposing (view)
 init : Value -> Url -> Key -> ( Model, Cmd Msg )
 init flags location key =
     let
+        originalRoute =
+            Routing.parseLocation appState location
+
         route =
-            location
-                |> Routing.parseLocation appState
-                |> routeIfAllowed appState.jwt
+            routeIfAllowed appState.jwt originalRoute
 
         appState =
             AppState.init flags key
@@ -32,17 +34,22 @@ init flags location key =
 
         model =
             initLocalModel <| initialModel appStateWithRoute
+
+        cmd =
+            if appState.invalidSession then
+                Ports.clearSessionAndReload ()
+
+            else
+                Cmd.batch
+                    [ decideInitialRoute model route originalRoute
+                    , Time.getTime
+                    ]
     in
-    ( model
-    , Cmd.batch
-        [ decideInitialRoute model route
-        , Time.getTime
-        ]
-    )
+    ( model, cmd )
 
 
-decideInitialRoute : Model -> Routes.Route -> Cmd Msg
-decideInitialRoute model route =
+decideInitialRoute : Model -> Routes.Route -> Routes.Route -> Cmd Msg
+decideInitialRoute model route originalRoute =
     case route of
         Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
@@ -63,7 +70,7 @@ decideInitialRoute model route =
                 fetchData model
 
             else
-                cmdNavigate model.appState homeRoute
+                cmdNavigate model.appState (loginRoute <| Just <| toUrl model.appState originalRoute)
 
 
 main : Program Value Model Msg

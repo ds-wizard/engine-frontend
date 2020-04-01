@@ -3,9 +3,9 @@ module Wizard.KMEditor.Editor.Preview.View exposing (view)
 import Html exposing (Html, a, div, strong)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lgx, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
@@ -33,7 +33,7 @@ view appState levels model =
             viewQuestionnaire
                 { features = []
                 , levels =
-                    if appState.config.levelsEnabled then
+                    if appState.config.questionnaires.levels.enabled then
                         Just levels
 
                     else

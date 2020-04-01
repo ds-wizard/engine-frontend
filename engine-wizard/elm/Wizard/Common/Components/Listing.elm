@@ -20,11 +20,11 @@ import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l)
 import Time
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page

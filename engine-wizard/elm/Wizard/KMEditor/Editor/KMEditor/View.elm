@@ -4,10 +4,10 @@ import Html exposing (..)
 import Html.Attributes exposing (class, id)
 import Html.Keyed
 import Maybe.Extra as Maybe
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l)
 import SplitPane exposing (ViewConfig, createViewConfig)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.View.Modal as Modal exposing (AlertConfig)
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (..)

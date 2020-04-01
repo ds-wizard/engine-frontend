@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Shared.Locale exposing (l, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, linkTo)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
@@ -49,7 +49,7 @@ content appState model ( questionnaireModel, levels ) =
                 , QuestionnaireFeature.todoList
                 ]
             , levels =
-                if appState.config.levelsEnabled then
+                if appState.config.questionnaires.levels.enabled then
                     Just levels
 
                 else

@@ -4,10 +4,15 @@ module Wizard.Common.View.FormGroup exposing
     , formGroup
     , formatRadioGroup
     , getErrors
+    , htmlRadioGroup
     , input
+    , inputAttrs
+    , inputWithTypehints
     , list
     , markdownEditor
+    , optionalWrapper
     , password
+    , resizableTextarea
     , richRadioGroup
     , select
     , textView
@@ -20,14 +25,15 @@ import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
 import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
-import Html.Attributes exposing (checked, class, classList, for, id, name, rows, style, type_, value)
-import Html.Events exposing (onCheck, onClick)
+import Html.Attributes exposing (autocomplete, checked, class, classList, for, id, name, rows, style, type_, value)
+import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Markdown
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lx)
 import String exposing (fromFloat)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError(..))
-import Wizard.Common.Html exposing (emptyNode, faSet)
+import Wizard.Documents.Common.TemplateFormat exposing (TemplateFormat)
 import Wizard.Utils exposing (getContrastColorHex)
 
 
@@ -46,11 +52,68 @@ lx_ =
     lx "Wizard.Common.View.FormGroup"
 
 
+optionalWrapper : AppState -> Html Form.Msg -> Html Form.Msg
+optionalWrapper appState content =
+    div [ class "form-group form-group-optional-wrapper" ]
+        [ span [ class "optional-label" ] [ lx_ "optional" appState ]
+        , content
+        ]
+
+
 {-| Helper for creating form group with text input field.
 -}
 input : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
 input =
     formGroup Input.textInput []
+
+
+inputAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+inputAttrs =
+    formGroup Input.textInput
+
+
+inputWithTypehints : List String -> AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+inputWithTypehints options appState form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, errorClass ) =
+            getErrors appState field labelText
+
+        typehintMessage =
+            Form.Input fieldName Form.Text << Field.String
+
+        contains a b =
+            String.contains (String.toLower a) (String.toLower b)
+
+        filteredOptions =
+            case field.value of
+                Just value ->
+                    List.filter (contains value) options
+
+                Nothing ->
+                    options
+
+        typehints =
+            if field.hasFocus then
+                ul [ class "typehints" ]
+                    (List.map
+                        (\option ->
+                            li [ onMouseDown <| typehintMessage option ] [ text option ]
+                        )
+                        filteredOptions
+                    )
+
+            else
+                emptyNode
+    in
+    div [ class "form-group" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , Input.textInput field [ class <| "form-control " ++ errorClass, id fieldName, name fieldName, autocomplete False ]
+        , typehints
+        , error
+        ]
 
 
 {-| Helper for creating form group with password input field.
@@ -94,26 +157,51 @@ richRadioGroup appState options =
     formGroup radioInput [] appState
 
 
-formatRadioGroup : AppState -> List ( Html Form.Msg, String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+formatRadioGroup : AppState -> List TemplateFormat -> Form CustomFormError o -> String -> String -> Html Form.Msg
 formatRadioGroup appState options =
     let
         radioInput state attrs =
             let
-                buildOption ( icon, format, formatLabel ) =
-                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just format ) ] ]
+                buildOption : TemplateFormat -> Html Form.Msg
+                buildOption format =
+                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just format.uuid ) ] ]
                         [ Html.input
-                            [ value format
-                            , checked (state.value == Just format)
+                            [ value format.uuid
+                            , checked (state.value == Just format.uuid)
                             , type_ "radio"
                             , name "format"
-                            , onCheck (\_ -> Input state.path Form.Text <| Field.String format)
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String format.uuid)
                             ]
                             []
-                        , icon
-                        , text formatLabel
+                        , fa format.icon
+                        , text format.name
                         ]
             in
             div [ class "export-formats" ] (List.map buildOption options)
+    in
+    formGroup radioInput [] appState
+
+
+htmlRadioGroup : AppState -> List ( String, Html Form.Msg ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+htmlRadioGroup appState options =
+    let
+        radioInput state attrs =
+            let
+                buildOption ( k, html ) =
+                    label [ class "form-check", classList [ ( "form-check-selected", state.value == Just k ) ] ]
+                        [ Html.input
+                            [ value k
+                            , checked (state.value == Just k)
+                            , class "form-check-input"
+                            , type_ "radio"
+                            , id k
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String k)
+                            ]
+                            []
+                        , html
+                        ]
+            in
+            div [ class "form-radio-group" ] (List.map buildOption options)
     in
     formGroup radioInput [] appState
 
@@ -123,6 +211,17 @@ formatRadioGroup appState options =
 textarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
 textarea =
     formGroup Input.textArea []
+
+
+resizableTextarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+resizableTextarea appState form fieldName =
+    let
+        lines =
+            (Form.getFieldAsString fieldName form).value
+                |> Maybe.map (max 3 << List.length << String.split "\n")
+                |> Maybe.withDefault 3
+    in
+    formGroup Input.textArea [ rows lines, class "resizable-textarea" ] appState form fieldName
 
 
 {-| Helper for creating form group with toggle
@@ -135,7 +234,7 @@ toggle form fieldName labelText =
     in
     div [ class "form-check" ]
         [ label [ class "form-check-label form-check-toggle" ]
-            [ Input.checkboxInput field [ class "form-check-input" ]
+            [ Input.checkboxInput field [ class "form-check-input", name fieldName, id fieldName ]
             , span [] [ text labelText ]
             ]
         ]
@@ -267,9 +366,16 @@ markdownEditor appState form fieldName labelText =
 
         previewActiveMsg =
             Form.Input previewActiveFieldName Form.Checkbox << Field.Bool
+
+        labelElement =
+            if String.isEmpty labelText then
+                emptyNode
+
+            else
+                label [ for fieldName ] [ text labelText ]
     in
     div [ class <| "form-group form-group-markdown " ++ errorClass ]
-        [ label [ for fieldName ] [ text labelText ]
+        [ labelElement
         , div [ class <| "card " ++ cardErrorClass ]
             [ div [ class "card-header" ]
                 [ ul [ class "nav nav-tabs card-header-tabs" ]

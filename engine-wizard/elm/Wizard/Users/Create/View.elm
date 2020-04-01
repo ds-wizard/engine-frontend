@@ -12,7 +12,7 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Users.Common.User as User
+import Wizard.Users.Common.Role as Role
 import Wizard.Users.Common.UserCreateForm exposing (UserCreateForm)
 import Wizard.Users.Create.Models exposing (..)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
@@ -38,17 +38,11 @@ view appState model =
 
 formView : AppState -> Form CustomFormError UserCreateForm -> Html Form.Msg
 formView appState form =
-    let
-        roleOptions =
-            ( "", "--" ) :: List.map (\o -> ( o, o )) User.roles
-
-        formHtml =
-            div []
-                [ FormGroup.input appState form "email" <| lg "user.email" appState
-                , FormGroup.input appState form "name" <| lg "user.name" appState
-                , FormGroup.input appState form "surname" <| lg "user.surname" appState
-                , FormGroup.select appState roleOptions form "role" <| lg "user.role" appState
-                , FormGroup.password appState form "password" <| lg "user.password" appState
-                ]
-    in
-    formHtml
+    div []
+        [ FormGroup.input appState form "email" <| lg "user.email" appState
+        , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
+        , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
+        , FormGroup.select appState (Role.options appState) form "role" <| lg "user.role" appState
+        , FormGroup.password appState form "password" <| lg "user.password" appState
+        ]

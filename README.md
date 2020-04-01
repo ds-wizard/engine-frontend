@@ -1,6 +1,6 @@
 # Data Stewardship Wizard Engine Frontend
 
-[![Build Status](https://travis-ci.org/ds-wizard/engine-frontend.svg?branch=master)](https://travis-ci.org/ds-wizard/engine-frontend)
+[![Engine Frontend CI](https://github.com/ds-wizard/engine-frontend/workflows/Engine%20Frontend%20CI/badge.svg?branch=master)](https://github.com/ds-wizard/engine-frontend/actions)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](LICENSE)
 
 ## License

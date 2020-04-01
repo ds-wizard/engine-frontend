@@ -1,11 +1,16 @@
 module Wizard.Public.Login.View exposing (view)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, for, id, placeholder, type_)
+import Html.Attributes exposing (class, id, placeholder, type_)
 import Html.Events exposing (..)
-import Shared.Locale exposing (l, lg, lgx)
+import Markdown
+import Shared.Html exposing (fa)
+import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Public.Common.View exposing (publicForm)
+import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
+import Wizard.Common.View.FormResult as FormResult
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
 import Wizard.Public.Routes exposing (Route(..))
@@ -17,34 +22,71 @@ l_ =
     l "Wizard.Public.Login.View"
 
 
+lx_ : String -> AppState -> Html Msg
+lx_ =
+    lx "Wizard.Public.Login.View"
+
+
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ class "row justify-content-center Public__Login" ]
-        [ loginForm appState model ]
-
-
-loginForm : AppState -> Model -> Html Msg
-loginForm appState model =
     let
-        formContent =
-            div []
-                [ div [ class "form-group" ]
-                    [ label [ for "email" ] [ lgx "user.email" appState ]
-                    , input [ onInput Email, id "email", type_ "text", class "form-control", placeholder <| lg "user.email" appState ] []
-                    ]
-                , div [ class "form-group" ]
-                    [ label [ for "password" ] [ lgx "user.password" appState ]
-                    , input [ onInput Password, id "password", type_ "password", class "form-control", placeholder <| lg "user.password" appState ] []
-                    ]
-                ]
+        form =
+            formView appState model
 
-        formConfig =
-            { title = l_ "form.title" appState
-            , submitMsg = DoLogin
-            , actionResult = model.loggingIn
-            , submitLabel = l_ "form.submit" appState
-            , formContent = formContent
-            , link = Just ( Routes.PublicRoute ForgottenPasswordRoute, l_ "form.link" appState )
-            }
+        splitScreenClass =
+            "col-12 d-flex align-items-center"
+
+        content =
+            case appState.config.lookAndFeel.loginInfo of
+                Just loginInfo ->
+                    [ div [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info" ]
+                        [ Markdown.toHtml [] loginInfo ]
+                    , div [ class <| splitScreenClass ++ " justify-content-center col-lg-5 col-md-6 side-login" ]
+                        [ form ]
+                    ]
+
+                Nothing ->
+                    [ form ]
     in
-    publicForm appState formConfig
+    div [ class "row justify-content-center Public__Login" ]
+        content
+
+
+formView : AppState -> Model -> Html Msg
+formView appState model =
+    let
+        loginForm =
+            [ div [ class "form-group" ]
+                [ span [ class "input-icon" ] [ fa "fas fa-envelope" ]
+                , input [ onInput Email, id "email", type_ "text", class "form-control", placeholder <| lg "user.email" appState ] []
+                ]
+            , div [ class "form-group" ]
+                [ span [ class "input-icon" ] [ fa "fas fa-key" ]
+                , input [ onInput Password, id "password", type_ "password", class "form-control", placeholder <| lg "user.password" appState ] []
+                ]
+            , div [ class "form-group d-flex align-items-baseline justify-content-between" ]
+                [ linkTo appState (Routes.PublicRoute ForgottenPasswordRoute) [] [ lx_ "form.link" appState ]
+                , ActionButton.submit appState <| ActionButton.SubmitConfig (l_ "form.submit" appState) model.loggingIn
+                ]
+            ]
+
+        externalLogin =
+            if List.length appState.config.authentication.external.services > 0 then
+                [ div [ class "external-login-separator" ]
+                    [ lx_ "connectWith" appState ]
+                ]
+                    ++ List.map (ExternalLoginButton.view appState) appState.config.authentication.external.services
+
+            else
+                []
+    in
+    div [ class "align-self-center col-xs-10 col-sm-8 col-md-6 col-lg-4" ]
+        [ form [ onSubmit DoLogin, class "card bg-light" ]
+            [ div [ class "card-header" ] [ lx_ "form.title" appState ]
+            , div [ class "card-body" ]
+                ([ FormResult.view appState model.loggingIn ]
+                    ++ loginForm
+                    ++ externalLogin
+                )
+            ]
+        ]

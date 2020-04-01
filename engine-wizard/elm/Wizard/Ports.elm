@@ -2,12 +2,14 @@ port module Wizard.Ports exposing
     ( FilePortData
     , alert
     , clearSession
+    , clearSessionAndReload
     , clearUnloadMessage
     , copyToClipboard
     , createDropzone
     , drawMetricsChart
     , fileContentRead
     , fileSelected
+    , refresh
     , scrollIntoView
     , scrollToTop
     , setUnloadMessage
@@ -26,6 +28,9 @@ port storeSession : Maybe Session -> Cmd msg
 
 
 port clearSession : () -> Cmd msg
+
+
+port clearSessionAndReload : () -> Cmd msg
 
 
 
@@ -68,6 +73,13 @@ port clearUnloadMessage : () -> Cmd msg
 
 
 port alert : String -> Cmd msg
+
+
+
+-- Refresh
+
+
+port refresh : () -> Cmd msg
 
 
 

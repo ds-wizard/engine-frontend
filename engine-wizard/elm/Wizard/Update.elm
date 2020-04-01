@@ -14,12 +14,12 @@ import Wizard.KMEditor.Update
 import Wizard.KnowledgeModels.Update
 import Wizard.Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
 import Wizard.Msgs exposing (Msg(..))
-import Wizard.Organization.Update
 import Wizard.Ports as Ports
 import Wizard.Public.Update
 import Wizard.Questionnaires.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation)
+import Wizard.Settings.Update
 import Wizard.Users.Update
 
 
@@ -48,13 +48,13 @@ fetchData model =
                     Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
                         Wizard.KnowledgeModels.Update.fetchData route model.appState
 
-                Routes.OrganizationRoute ->
-                    Cmd.map Wizard.Msgs.OrganizationMsg <|
-                        Wizard.Organization.Update.fetchData model.appState
-
                 Routes.PublicRoute route ->
                     Cmd.map Wizard.Msgs.PublicMsg <|
                         Wizard.Public.Update.fetchData route model.appState
+
+                Routes.SettingsRoute route ->
+                    Cmd.map Wizard.Msgs.SettingsMsg <|
+                        Wizard.Settings.Update.fetchData route model.appState model.settingsModel
 
                 Routes.UsersRoute route ->
                     Cmd.map Wizard.Msgs.UsersMsg <|
@@ -158,13 +158,6 @@ update msg model =
             in
             ( { model | kmPackagesModel = kmPackagesModel }, cmd )
 
-        Wizard.Msgs.OrganizationMsg organizationMsg ->
-            let
-                ( organizationModel, cmd ) =
-                    Wizard.Organization.Update.update organizationMsg Wizard.Msgs.OrganizationMsg model.appState model.organizationModel
-            in
-            ( { model | organizationModel = organizationModel }, cmd )
-
         Wizard.Msgs.PublicMsg publicMsg ->
             let
                 ( publicModel, cmd ) =
@@ -178,6 +171,13 @@ update msg model =
                     Wizard.Questionnaires.Update.update Wizard.Msgs.QuestionnairesMsg questionnairesMsg model.appState model.questionnairesModel
             in
             ( { model | questionnairesModel = questionnairesModel }, cmd )
+
+        Wizard.Msgs.SettingsMsg settingsMsg ->
+            let
+                ( settingsModel, cmd ) =
+                    Wizard.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
+            in
+            ( { model | settingsModel = settingsModel }, cmd )
 
         Wizard.Msgs.UsersMsg usersMsg ->
             let

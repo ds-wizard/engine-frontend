@@ -7,7 +7,7 @@ import Round
 import Shared.Locale exposing (l, lf, lgx, lx)
 import String exposing (fromFloat, fromInt)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, chapterReportCanvasId)
+import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, reportCanvasId, totalReportId)
 import Wizard.Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModels
@@ -35,6 +35,12 @@ view appState model summaryReport =
         title =
             [ h2 [] [ lgx "questionnaire.summaryReport" appState ] ]
 
+        totalReport =
+            [ viewIndications appState summaryReport.totalReport.indications
+            , viewMetrics appState model.metrics summaryReport.totalReport.metrics totalReportId
+            , hr [] []
+            ]
+
         chapters =
             viewChapters appState model model.metrics summaryReport
 
@@ -42,7 +48,7 @@ view appState model summaryReport =
             [ viewMetricsDescriptions appState model.metrics ]
     in
     div [ class "summary-report" ]
-        (List.concat [ title, chapters, metricDescriptions ])
+        (List.concat [ title, totalReport, chapters, metricDescriptions ])
 
 
 viewChapters : AppState -> Model -> List Metric -> SummaryReport -> List (Html Msg)
@@ -53,29 +59,35 @@ viewChapters appState model metrics summaryReport =
 viewChapterReport : AppState -> Model -> List Metric -> ChapterReport -> Html Msg
 viewChapterReport appState model metrics chapterReport =
     let
-        content =
-            if List.length chapterReport.metrics == 0 then
-                []
-
-            else if List.length chapterReport.metrics > 2 then
-                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState metrics chapterReport ]
-                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics chapterReport ]
-                ]
-
-            else
-                [ div [ class "col-12" ] [ viewMetricsTable appState metrics chapterReport ] ]
-
         chapterTitle =
             model.questionnaire.knowledgeModel
                 |> KnowledgeModels.getChapter chapterReport.chapterUuid
                 |> Maybe.map .title
-                |> Maybe.withDefault "Unknown"
+                |> Maybe.withDefault ""
     in
     div []
         [ h3 [] [ text chapterTitle ]
         , viewIndications appState chapterReport.indications
-        , div [ class "row" ] content
+        , viewMetrics appState metrics chapterReport.metrics chapterReport.chapterUuid
         ]
+
+
+viewMetrics : AppState -> List Metric -> List MetricReport -> String -> Html Msg
+viewMetrics appState metrics metricReports canvasId =
+    let
+        content =
+            if List.length metricReports == 0 then
+                []
+
+            else if List.length metricReports > 2 then
+                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState metrics metricReports ]
+                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics canvasId ]
+                ]
+
+            else
+                [ div [ class "col-12" ] [ viewMetricsTable appState metrics metricReports ] ]
+    in
+    div [ class "row" ] content
 
 
 viewIndications : AppState -> List IndicationReport -> Html Msg
@@ -111,8 +123,8 @@ viewAnsweredIndication appState title data =
         ]
 
 
-viewMetricsTable : AppState -> List Metric -> ChapterReport -> Html Msg
-viewMetricsTable appState metrics chapterReport =
+viewMetricsTable : AppState -> List Metric -> List MetricReport -> Html Msg
+viewMetricsTable appState metrics metricReports =
     table [ class "table table-metrics-report" ]
         [ thead []
             [ tr []
@@ -121,7 +133,7 @@ viewMetricsTable appState metrics chapterReport =
                 ]
             ]
         , tbody []
-            (List.map (viewMetricReportRow metrics) chapterReport.metrics)
+            (List.map (viewMetricReportRow metrics) metricReports)
         ]
 
 
@@ -153,10 +165,10 @@ viewProgressBar colorClass value =
         [ div [ class <| "progress-bar " ++ colorClass, style "width" width ] [] ]
 
 
-viewMetricsChart : List Metric -> ChapterReport -> Html Msg
-viewMetricsChart _ chapterReport =
+viewMetricsChart : List Metric -> String -> Html Msg
+viewMetricsChart _ canvasId =
     div [ class "metrics-chart" ]
-        [ canvas [ id <| chapterReportCanvasId chapterReport ] [] ]
+        [ canvas [ id <| reportCanvasId canvasId ] [] ]
 
 
 getTitleByUuid : List { a | uuid : String, title : String } -> String -> String

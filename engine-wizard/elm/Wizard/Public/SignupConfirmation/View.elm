@@ -2,9 +2,10 @@ module Wizard.Public.SignupConfirmation.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Html exposing (faSet)
 import Shared.Locale exposing (lh, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (faSet, linkTo)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Public.SignupConfirmation.Models exposing (Model)
@@ -34,7 +35,7 @@ successView appState _ =
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "confirmation"
-                [ linkTo appState (Routes.PublicRoute LoginRoute) [] [ lx_ "logIn" appState ]
+                [ linkTo appState (Routes.PublicRoute (LoginRoute Nothing)) [] [ lx_ "logIn" appState ]
                 ]
                 appState
             )

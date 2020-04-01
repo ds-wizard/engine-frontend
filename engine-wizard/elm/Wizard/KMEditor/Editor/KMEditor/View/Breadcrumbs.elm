@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, a, li, ol, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Wizard.Common.Html exposing (emptyNode)
+import Shared.Html exposing (emptyNode)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor, getEditorParentUuid, getEditorTitle, getEditorUuid)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
 

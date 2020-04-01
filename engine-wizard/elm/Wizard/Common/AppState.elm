@@ -7,14 +7,14 @@ module Wizard.Common.AppState exposing
 
 import Browser.Navigation as Navigation exposing (Key)
 import Dict
-import Json.Decode as D exposing (Decoder)
+import Json.Decode as D exposing (Decoder, Error(..))
 import Random exposing (Seed)
-import Shared.Provisioning as Provisioning
+import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Time
-import Wizard.Common.Config exposing (Config, Widget(..))
+import Wizard.Common.Config exposing (Config)
+import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Common.Flags as Flags
 import Wizard.Common.JwtToken as JwtToken exposing (JwtToken)
-import Wizard.Common.Provisioning exposing (Provisioning)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
 import Wizard.Common.Session as Session exposing (Session)
@@ -25,9 +25,11 @@ type alias AppState =
     { route : Routes.Route
     , seed : Seed
     , session : Session
+    , invalidSession : Bool
     , jwt : Maybe JwtToken
     , key : Key
     , apiUrl : String
+    , clientUrl : String
     , config : Config
     , provisioning : Provisioning
     , valid : Bool
@@ -38,9 +40,19 @@ type alias AppState =
 init : D.Value -> Navigation.Key -> AppState
 init flagsValue key =
     let
+        flagsResult =
+            D.decodeValue Flags.decoder flagsValue
+
+        invalidSession =
+            case flagsResult of
+                Err (Field "session" _) ->
+                    True
+
+                _ ->
+                    False
+
         flags =
-            Result.withDefault Flags.default <|
-                D.decodeValue Flags.decoder flagsValue
+            Result.withDefault Flags.default flagsResult
 
         defaultProvisioning =
             { locale = DefaultLocale.locale
@@ -57,9 +69,11 @@ init flagsValue key =
     { route = Routes.NotFoundRoute
     , seed = Random.initialSeed flags.seed
     , session = Maybe.withDefault Session.init flags.session
+    , invalidSession = invalidSession
     , jwt = Maybe.andThen (.token >> JwtToken.parse) flags.session
     , key = key
     , apiUrl = flags.apiUrl
+    , clientUrl = flags.clientUrl
     , config = flags.config
     , provisioning = provisioning
     , valid = flags.success
@@ -72,7 +86,7 @@ setCurrentTime appState time =
     { appState | currentTime = time }
 
 
-getDashboardWidgets : AppState -> List Widget
+getDashboardWidgets : AppState -> List DashboardWidget
 getDashboardWidgets appState =
     let
         role =
@@ -80,5 +94,6 @@ getDashboardWidgets appState =
                 |> Maybe.map .role
                 |> Maybe.withDefault ""
     in
-    Dict.get role appState.config.client.dashboard
-        |> Maybe.withDefault [ Welcome ]
+    appState.config.dashboard.widgets
+        |> Maybe.andThen (Dict.get role)
+        |> Maybe.withDefault [ WelcomeDashboardWidget ]

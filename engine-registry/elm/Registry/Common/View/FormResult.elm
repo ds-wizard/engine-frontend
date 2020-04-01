@@ -5,8 +5,8 @@ module Registry.Common.View.FormResult exposing
 
 import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
-import Registry.Common.Html exposing (..)
 import Registry.Common.View.Flash as Flash
+import Shared.Html exposing (emptyNode)
 import String
 
 

@@ -4,18 +4,21 @@ import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormActions as FormActions
+import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Users.Common.User as User exposing (User)
+import Wizard.Users.Common.Role as Role
+import Wizard.Users.Common.User exposing (User)
 import Wizard.Users.Common.UserEditForm exposing (UserEditForm)
 import Wizard.Users.Common.UserPasswordForm exposing (UserPasswordForm)
 import Wizard.Users.Edit.Models exposing (..)
@@ -39,12 +42,12 @@ view appState model =
 
 
 profileView : AppState -> Model -> User -> Html Msg
-profileView appState model _ =
+profileView appState model user =
     div [ detailClass "Users__Edit" ]
         [ Page.header (l_ "header.title" appState) []
         , div []
             [ navbar appState model
-            , userView appState model
+            , userView appState model user
             , passwordView appState model
             ]
         ]
@@ -72,27 +75,24 @@ navbar appState model =
         ]
 
 
-userView : AppState -> Model -> Html Msg
-userView appState model =
+userView : AppState -> Model -> User -> Html Msg
+userView appState model user =
     div [ classList [ ( "hidden", model.currentView /= Profile ) ] ]
         [ FormResult.view appState model.savingUser
-        , userFormView appState model.userForm (model.uuid == "current") |> Html.map EditFormMsg
+        , userFormView appState user model.userForm (model.uuid == "current") |> Html.map EditFormMsg
         , formActionsView appState model (ActionButton.ButtonConfig (l_ "userView.save" appState) model.savingUser (EditFormMsg Form.Submit) False)
         ]
 
 
-userFormView : AppState -> Form CustomFormError UserEditForm -> Bool -> Html Form.Msg
-userFormView appState form current =
+userFormView : AppState -> User -> Form CustomFormError UserEditForm -> Bool -> Html Form.Msg
+userFormView appState user form current =
     let
-        roleOptions =
-            ( "", "--" ) :: List.map (\o -> ( o, o )) User.roles
-
         roleSelect =
             if current then
                 emptyNode
 
             else
-                FormGroup.select appState roleOptions form "role" <| lg "user.role" appState
+                FormGroup.select appState (Role.options appState) form "role" <| lg "user.role" appState
 
         activeToggle =
             if current then
@@ -104,8 +104,10 @@ userFormView appState form current =
         formHtml =
             div []
                 [ FormGroup.input appState form "email" <| lg "user.email" appState
-                , FormGroup.input appState form "name" <| lg "user.name" appState
-                , FormGroup.input appState form "surname" <| lg "user.surname" appState
+                , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
+                , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
+                , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+                , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
                 , roleSelect
                 , activeToggle
                 ]

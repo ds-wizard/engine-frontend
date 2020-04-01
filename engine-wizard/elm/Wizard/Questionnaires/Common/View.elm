@@ -2,14 +2,14 @@ module Wizard.Questionnaires.Common.View exposing (accessibilityBadge)
 
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
+import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Questionnaires.Common.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 
 
 accessibilityBadge : AppState -> QuestionnaireAccessibility -> Html msg
 accessibilityBadge appState questionnaireAccessibility =
-    if appState.config.questionnaireAccessibilityEnabled then
+    if appState.config.questionnaires.questionnaireAccessibility.enabled then
         case questionnaireAccessibility of
             PublicQuestionnaire ->
                 span [ class "badge badge-cyan" ]

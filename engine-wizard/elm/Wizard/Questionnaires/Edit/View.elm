@@ -2,10 +2,10 @@ module Wizard.Questionnaires.Edit.View exposing (formView, questionnaireView, vi
 
 import Form exposing (Form)
 import Html exposing (Html, div)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
@@ -49,7 +49,7 @@ formView : AppState -> Form CustomFormError QuestionnaireEditForm -> Html Form.M
 formView appState form =
     let
         accessibilitySelect =
-            if appState.config.questionnaireAccessibilityEnabled then
+            if appState.config.questionnaires.questionnaireAccessibility.enabled then
                 FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) form "accessibility" <| lg "questionnaire.accessibility" appState
 
             else

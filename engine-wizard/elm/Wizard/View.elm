@@ -12,10 +12,10 @@ import Wizard.KMEditor.View
 import Wizard.KnowledgeModels.View
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
-import Wizard.Organization.View
 import Wizard.Public.View
 import Wizard.Questionnaires.View
 import Wizard.Routes as Routes
+import Wizard.Settings.View
 import Wizard.Users.View
 
 
@@ -60,17 +60,17 @@ view model =
                     |> Html.map KnowledgeModelsMsg
                     |> Layout.app model
 
-            Routes.OrganizationRoute ->
-                model.organizationModel
-                    |> Wizard.Organization.View.view model.appState
-                    |> Html.map OrganizationMsg
-                    |> Layout.app model
-
             Routes.PublicRoute route ->
                 model.publicModel
                     |> Wizard.Public.View.view route model.appState
                     |> Html.map PublicMsg
                     |> Layout.public model
+
+            Routes.SettingsRoute route ->
+                model.settingsModel
+                    |> Wizard.Settings.View.view route model.appState
+                    |> Html.map SettingsMsg
+                    |> Layout.app model
 
             Routes.UsersRoute route ->
                 model.users

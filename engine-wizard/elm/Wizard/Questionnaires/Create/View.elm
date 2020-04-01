@@ -2,10 +2,10 @@ module Wizard.Questionnaires.Create.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (..)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.FormActions as FormActions
@@ -61,7 +61,7 @@ formView appState model packages =
                     FormGroup.select appState packageOptions model.form "packageId"
 
         accessibilitySelect =
-            if appState.config.questionnaireAccessibilityEnabled then
+            if appState.config.questionnaires.questionnaireAccessibility.enabled then
                 FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) model.form "accessibility" <| lg "questionnaire.accessibility" appState
 
             else

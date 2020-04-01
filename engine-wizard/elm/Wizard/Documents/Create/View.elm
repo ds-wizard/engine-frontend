@@ -3,9 +3,10 @@ module Wizard.Documents.Create.View exposing (..)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Html exposing (..)
+import List.Extra as List
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
@@ -13,6 +14,7 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
+import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Documents.Create.Models exposing (Model)
 import Wizard.Documents.Create.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
@@ -77,10 +79,18 @@ formView appState model questionnaires =
                 _ ->
                     Flash.actionResult appState model.templates
 
+        mbSelectedTemplateUuid =
+            (Form.getFieldAsString "templateUuid" model.form).value
+
+        mbSelectedTemplate =
+            model.templates
+                |> ActionResult.map (List.find (.uuid >> Just >> (==) mbSelectedTemplateUuid))
+                |> ActionResult.withDefault Nothing
+
         formatInput =
-            case model.templates of
-                Success _ ->
-                    FormGroup.formatRadioGroup appState (exportFormats appState) model.form "format" <| lg "template.format" appState
+            case mbSelectedTemplate of
+                Just selectedTemplate ->
+                    FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" <| lg "template.format" appState
 
                 _ ->
                     emptyNode
@@ -91,15 +101,3 @@ formView appState model questionnaires =
         , templatesInput
         , formatInput
         ]
-
-
-exportFormats : AppState -> List ( Html msg, String, String )
-exportFormats appState =
-    [ ( faSet "format.pdf" appState, "pdf", lg "template.format.pdf" appState )
-    , ( faSet "format.text" appState, "latex", lg "template.format.latex" appState )
-    , ( faSet "format.word" appState, "docx", lg "template.format.docx" appState )
-    , ( faSet "format.code" appState, "html", lg "template.format.html" appState )
-    , ( faSet "format.code" appState, "json", lg "template.format.json" appState )
-    , ( faSet "format.text" appState, "odt", lg "template.format.odt" appState )
-    , ( faSet "format.text" appState, "markdown", lg "template.format.markdown" appState )
-    ]

@@ -5,6 +5,7 @@ module Wizard.Common.Menu.View exposing
     , viewHelpMenu
     , viewProfileMenu
     , viewReportIssueModal
+    , viewSettingsMenu
     )
 
 import ActionResult exposing (ActionResult(..))
@@ -12,10 +13,13 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (..)
 import Html.Attributes exposing (class, colspan, href, target)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
+import Wizard.Auth.Permission as Permissions
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (faSet)
+import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
@@ -24,7 +28,10 @@ import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Msgs
 import Wizard.Routes as Routes
+import Wizard.Settings.Routes
+import Wizard.Users.Common.User as User
 import Wizard.Users.Routes
+import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -66,13 +73,29 @@ viewHelpMenu appState dropdownState =
         }
 
 
+viewSettingsMenu : AppState -> Html Wizard.Msgs.Msg
+viewSettingsMenu appState =
+    if Permissions.hasPerm appState.jwt Permissions.settings then
+        div [ class "btn-group" ]
+            [ linkTo appState
+                (Routes.SettingsRoute Wizard.Settings.Routes.defaultRoute)
+                [ class "btn btn-link" ]
+                [ faSet "menu.settings" appState
+                , span [ class "sidebar-link" ] [ span [] [ lx_ "settingsMenu.settings" appState ] ]
+                ]
+            ]
+
+    else
+        emptyNode
+
+
 viewProfileMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg
 viewProfileMenu appState dropdownState =
     let
         name =
             case appState.session.user of
                 Just user ->
-                    user.name ++ " " ++ user.surname
+                    User.fullName user
 
                 Nothing ->
                     ""
@@ -102,15 +125,19 @@ viewReportIssueModal : AppState -> Bool -> Html Wizard.Msgs.Msg
 viewReportIssueModal appState isOpen =
     let
         supportMailLink =
-            a [ href <| "mailto:" ++ appState.config.client.supportEmail ]
-                [ text appState.config.client.supportEmail ]
+            a [ href <| "mailto:" ++ PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
+                [ text <| PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
 
         modalContent =
             [ p [] [ lx_ "reportModal.info" appState ]
             , p []
-                [ a [ class "link-with-icon", href appState.config.client.supportRepositoryUrl, target "_blank" ]
+                [ a
+                    [ class "link-with-icon"
+                    , href <| PrivacyAndSupportConfig.getSupportRepositoryUrl appState.config.privacyAndSupport
+                    , target "_blank"
+                    ]
                     [ faSet "report.repository" appState
-                    , text appState.config.client.supportRepositoryName
+                    , text <| PrivacyAndSupportConfig.getSupportRepositoryName appState.config.privacyAndSupport
                     ]
                 ]
             , p [] (lh_ "reportModal.writeUs" [ supportMailLink ] appState)

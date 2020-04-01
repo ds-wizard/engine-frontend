@@ -4,12 +4,13 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Version exposing (Version)
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
-import Wizard.Common.Html exposing (..)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Common.View.FormGroup as FormGroup
@@ -121,7 +122,7 @@ listingTitleLastPublishedVersionBadge appState branch =
             span [ title <| l_ "badge.lastPublishedVersion.title" appState, class "badge badge-light" ]
                 [ text <| Version.toString version ]
     in
-    BranchUtils.lastVersion branch
+    BranchUtils.lastVersion appState branch
         |> Maybe.map badge
         |> Maybe.withDefault emptyNode
 

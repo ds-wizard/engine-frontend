@@ -4,6 +4,7 @@
         "engine-registry/elm",
         "engine-shared/elm",
         "engine-wizard/elm",
+        "engine-wizard-research/elm",
         "vendor"
     ],
     "elm-version": "0.19.1",

@@ -7,12 +7,14 @@ type alias Model =
     { email : String
     , password : String
     , loggingIn : ActionResult String
+    , originalUrl : Maybe String
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : Maybe String -> Model
+initialModel mbOriginalUrl =
     { email = ""
     , password = ""
     , loggingIn = Unset
+    , originalUrl = mbOriginalUrl
     }

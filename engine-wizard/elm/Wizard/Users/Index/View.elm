@@ -2,16 +2,19 @@ module Wizard.Users.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
-import Wizard.Common.Html exposing (..)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Users.Common.User exposing (User)
+import Wizard.Users.Common.Role as Role
+import Wizard.Users.Common.User as User exposing (User)
 import Wizard.Users.Index.Models exposing (..)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
 import Wizard.Users.Routes exposing (Route(..))
@@ -54,9 +57,9 @@ indexActions appState =
 listingConfig : AppState -> ListingConfig User Msg
 listingConfig appState =
     { title = listingTitle appState
-    , description = listingDescription
+    , description = listingDescription appState
     , dropdownItems = listingActions appState
-    , textTitle = \u -> u.surname ++ u.name
+    , textTitle = User.fullName
     , emptyText = l_ "listing.empty" appState
     , updated = Nothing
     , wrapMsg = ListingMsg
@@ -66,7 +69,7 @@ listingConfig appState =
 listingTitle : AppState -> User -> Html Msg
 listingTitle appState user =
     span []
-        [ linkTo appState (detailRoute user) [] [ text <| user.name ++ " " ++ user.surname ]
+        [ linkTo appState (detailRoute user) [] [ text <| User.fullName user ]
         , listingTitleBadge appState user
         ]
 
@@ -83,18 +86,38 @@ listingTitleBadge appState user =
                     [ lx_ "badge.inactive" appState ]
     in
     span []
-        [ span [ class "badge badge-light" ]
-            [ text user.role ]
+        [ span [ classList [ ( "badge", True ), ( "badge-light", user.role /= Role.admin ), ( "badge-dark", user.role == Role.admin ) ] ]
+            [ text <| Role.toReadableString appState user.role ]
         , activeBadge
         ]
 
 
-listingDescription : User -> Html Msg
-listingDescription user =
+listingDescription : AppState -> User -> Html Msg
+listingDescription appState user =
+    let
+        affiliationFragment =
+            case user.affiliation of
+                Just affiliation ->
+                    [ span [ class "fragment" ] [ text affiliation ] ]
+
+                Nothing ->
+                    []
+
+        sources =
+            if List.length user.sources > 0 then
+                span [ class "fragment" ]
+                    (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
+
+            else
+                emptyNode
+    in
     span []
-        [ a [ class "fragment", href <| "mailto:" ++ user.email ]
+        ([ a [ class "fragment", href <| "mailto:" ++ user.email ]
             [ text user.email ]
-        ]
+         , sources
+         ]
+            ++ affiliationFragment
+        )
 
 
 listingActions : AppState -> User -> List (ListingDropdownItem Msg)
@@ -155,11 +178,11 @@ userCard : AppState -> User -> Html Msg
 userCard appState user =
     div [ class "user-card" ]
         [ div [ class "icon" ] [ faSet "userCard.icon" appState ]
-        , div [ class "name" ] [ text (user.name ++ " " ++ user.surname) ]
+        , div [ class "name" ] [ text <| User.fullName user ]
         , div [ class "email" ]
             [ a [ href ("mailto:" ++ user.email) ] [ text user.email ]
             ]
         , div [ class "role" ]
-            [ text (lg "user.role" appState ++ ": " ++ user.role)
+            [ text (lg "user.role" appState ++ ": " ++ Role.toReadableString appState user.role)
             ]
         ]

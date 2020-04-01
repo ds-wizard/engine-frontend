@@ -4,12 +4,12 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
+import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (l, lx)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.Model exposing (..)
 import Wizard.Common.FormEngine.Msgs exposing (Msg(..))
-import Wizard.Common.Html exposing (emptyNode, faKeyClass, faSet)
 
 
 l_ : String -> AppState -> String

@@ -9,12 +9,12 @@ import Html.Attributes exposing (class, classList, placeholder, title)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Reorderable
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lg, lgx, lx)
 import String exposing (fromInt, toLower)
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
@@ -333,7 +333,7 @@ questionEditorView appState model editorData =
             }
 
         levelSelection =
-            if appState.config.levelsEnabled then
+            if appState.config.questionnaires.levels.enabled then
                 questionRequiredLevelSelectGroup appState editorData model.levels
 
             else

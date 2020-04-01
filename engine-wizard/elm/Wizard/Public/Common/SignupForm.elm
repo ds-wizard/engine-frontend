@@ -8,16 +8,18 @@ module Wizard.Public.Common.SignupForm exposing
 import Form exposing (Form)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Field as Field exposing (Field, FieldValue(..))
-import Form.Validate as Validate exposing (..)
-import Json.Encode as Encode exposing (..)
+import Form.Validate as V exposing (..)
+import Json.Encode as E exposing (..)
+import Json.Encode.Extra as E
 import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate exposing (..)
+import Wizard.Common.Form.Validate as V
 
 
 type alias SignupForm =
     { email : String
-    , name : String
-    , surname : String
+    , firstName : String
+    , lastName : String
+    , affiliation : Maybe String
     , password : String
     , passwordConfirmation : String
     , accept : Bool
@@ -31,13 +33,14 @@ initEmpty =
 
 validation : Validation CustomFormError SignupForm
 validation =
-    Validate.map6 SignupForm
-        (Validate.field "email" Validate.email)
-        (Validate.field "name" Validate.string)
-        (Validate.field "surname" Validate.string)
-        (Validate.field "password" Validate.string)
-        (Validate.field "password" Validate.string |> validateConfirmation "passwordConfirmation")
-        (Validate.field "accept" validateAcceptField)
+    V.succeed SignupForm
+        |> V.andMap (V.field "email" V.email)
+        |> V.andMap (V.field "firstName" V.string)
+        |> V.andMap (V.field "lastName" V.string)
+        |> V.andMap (V.field "affiliation" V.maybeString)
+        |> V.andMap (V.field "password" V.string)
+        |> V.andMap (V.field "password" V.string |> V.confirmation "passwordConfirmation")
+        |> V.andMap (V.field "accept" validateAcceptField)
 
 
 validateAcceptField : Field -> Result (Error customError) Bool
@@ -49,12 +52,13 @@ validateAcceptField v =
         Err (Error.value Empty)
 
 
-encode : SignupForm -> Encode.Value
+encode : SignupForm -> E.Value
 encode form =
-    Encode.object
-        [ ( "email", Encode.string form.email )
-        , ( "name", Encode.string form.name )
-        , ( "surname", Encode.string form.surname )
-        , ( "password", Encode.string form.password )
-        , ( "role", Encode.null )
+    E.object
+        [ ( "email", E.string form.email )
+        , ( "firstName", E.string form.firstName )
+        , ( "lastName", E.string form.lastName )
+        , ( "affiliation", E.maybe E.string form.affiliation )
+        , ( "password", E.string form.password )
+        , ( "role", E.null )
         ]

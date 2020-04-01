@@ -3,6 +3,7 @@ module Wizard.Questionnaires.Common.Questionnaire exposing
     , compare
     , decoder
     , isEditable
+    , matchOwner
     )
 
 import Json.Decode as D exposing (..)
@@ -13,7 +14,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Common.Package as Package exposing (Package)
 import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 import Wizard.Questionnaires.Common.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
-import Wizard.Users.Common.User as User
+import Wizard.Users.Common.User as User exposing (User)
 
 
 type alias Questionnaire =
@@ -22,20 +23,13 @@ type alias Questionnaire =
     , package : Package
     , level : Int
     , accessibility : QuestionnaireAccessibility
-    , ownerUuid : Maybe String
+    , owner : Maybe User
     , state : QuestionnaireState
     , updatedAt : Time.Posix
     }
 
 
-isEditable :
-    AppState
-    ->
-        { a
-            | accessibility : QuestionnaireAccessibility
-            , ownerUuid : Maybe String
-        }
-    -> Bool
+isEditable : AppState -> Questionnaire -> Bool
 isEditable appState questionnaire =
     let
         isAdmin =
@@ -45,7 +39,7 @@ isEditable appState questionnaire =
             questionnaire.accessibility /= PublicReadOnlyQuestionnaire
 
         isOwner =
-            questionnaire.ownerUuid == Maybe.map .uuid appState.session.user
+            matchOwner questionnaire appState.session.user
     in
     isAdmin || isNotReadonly || isOwner
 
@@ -58,7 +52,7 @@ decoder =
         |> required "package" Package.decoder
         |> optional "level" D.int 0
         |> required "accessibility" QuestionnaireAccessibility.decoder
-        |> required "ownerUuid" (D.maybe D.string)
+        |> required "owner" (D.maybe User.decoder)
         |> required "state" QuestionnaireState.decoder
         |> required "updatedAt" D.datetime
 
@@ -66,3 +60,8 @@ decoder =
 compare : Questionnaire -> Questionnaire -> Order
 compare q1 q2 =
     Basics.compare (String.toLower q1.name) (String.toLower q2.name)
+
+
+matchOwner : Questionnaire -> Maybe User -> Bool
+matchOwner questionnaire mbUser =
+    Maybe.map .uuid questionnaire.owner == Maybe.map .uuid mbUser

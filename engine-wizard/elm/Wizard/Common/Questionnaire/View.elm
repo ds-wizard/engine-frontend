@@ -11,11 +11,11 @@ import Markdown
 import Maybe.Extra as Maybe
 import Roman exposing (toRomanNumber)
 import Shared.Error.ApiError exposing (ApiError)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lx)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
-import Wizard.Common.Html exposing (emptyNode, faSet)
 import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, calculateUnansweredQuestions, getActiveChapter)
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature exposing (QuestionnaireFeature)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
@@ -87,7 +87,7 @@ levelSelection : ViewQuestionnaireConfig -> AppState -> Model -> List Level -> I
 levelSelection cfg appState model levels selectedLevel =
     let
         isDisabled =
-            cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
+            cfg.forceDisabled || (not <| QuestionnaireDetail.isEditable appState model.questionnaire)
     in
     div [ class "level-selection card bg-light" ]
         [ div [ class "card-body" ]
@@ -144,7 +144,7 @@ viewChapterAnsweredIndication : AppState -> Model -> Chapter -> Html Msg
 viewChapterAnsweredIndication appState model chapter =
     let
         effectiveLevel =
-            if appState.config.levelsEnabled then
+            if appState.config.questionnaires.levels.enabled then
                 model.questionnaire.level
 
             else
@@ -276,7 +276,7 @@ formConfig appState cfg model =
     in
     { customActions = customActions
     , isDesirable = isDesirable
-    , disabled = cfg.forceDisabled || (not <| Questionnaire.isEditable appState model.questionnaire)
+    , disabled = cfg.forceDisabled || (not <| QuestionnaireDetail.isEditable appState model.questionnaire)
     , getExtraQuestionClass = cfg.getExtraQuestionClass
     , renderer = cfg.createRenderer model.questionnaire.knowledgeModel (Maybe.withDefault [] cfg.levels) model.metrics
     , appState = appState
@@ -324,5 +324,5 @@ viewTodoAction appState model questionId path =
 
 viewFeedbackAction : AppState -> String -> List String -> Html CustomFormMessage
 viewFeedbackAction appState _ _ =
-    a [ class "action", onClick <| FeedbackMsg ]
+    a [ class "action", attribute "data-cy" "feedback", onClick <| FeedbackMsg ]
         [ faSet "questionnaire.feedback" appState ]

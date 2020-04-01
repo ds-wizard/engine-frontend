@@ -4,17 +4,19 @@ module Wizard.Common.Questionnaire.Models exposing
     , Model
     , addLabel
     , calculateUnansweredQuestions
-    , chapterReportCanvasId
     , cleanDirty
+    , createChapterChartConfig
     , createChapterForm
-    , createChartConfig
+    , createTotalChartConfig
     , getActiveChapter
     , getReply
     , initialModel
     , removeLabel
     , removeLabelsFromItem
+    , reportCanvasId
     , setActiveChapter
     , setLevel
+    , totalReportId
     , updateReplies
     )
 
@@ -28,7 +30,7 @@ import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.FormEngine.Model exposing (..)
 import Wizard.Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Wizard.Common.Questionnaire.Models.FeedbackForm as FeedbackForm exposing (FeedbackForm)
-import Wizard.Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport)
+import Wizard.Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport, TotalReport)
 import Wizard.KMEditor.Common.Events.Event exposing (Event)
 import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
@@ -37,7 +39,6 @@ import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel ex
 import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.KMEditor.Common.KnowledgeModel.Question.CommonQuestionData exposing (CommonQuestionData)
-import Wizard.KMEditor.Common.KnowledgeModel.Question.ListQuestionData exposing (ListQuestionData)
 import Wizard.KMEditor.Common.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Wizard.KMEditor.Common.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
 import Wizard.KMEditor.Common.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
@@ -405,8 +406,17 @@ evaluateAnswerItem appState km currentLevel replies path questions index =
         |> List.foldl (+) 0
 
 
-createChartConfig : List Metric -> List Chapter -> ChapterReport -> ChartConfig
-createChartConfig metrics chapters chapterReport =
+createTotalChartConfig : List Metric -> TotalReport -> ChartConfig
+createTotalChartConfig metrics totalReport =
+    let
+        data =
+            List.map (createDataValue metrics) totalReport.metrics
+    in
+    createChartConfig data "" totalReportId
+
+
+createChapterChartConfig : List Metric -> List Chapter -> ChapterReport -> ChartConfig
+createChapterChartConfig metrics chapters chapterReport =
     let
         data =
             List.map (createDataValue metrics) chapterReport.metrics
@@ -414,9 +424,14 @@ createChartConfig metrics chapters chapterReport =
         label =
             List.find (.uuid >> (==) chapterReport.chapterUuid) chapters
                 |> Maybe.map .title
-                |> Maybe.withDefault "Chapter"
+                |> Maybe.withDefault ""
     in
-    { targetId = chapterReportCanvasId chapterReport
+    createChartConfig data label chapterReport.chapterUuid
+
+
+createChartConfig : List ( String, Float ) -> String -> String -> ChartConfig
+createChartConfig data label canvasId =
+    { targetId = reportCanvasId canvasId
     , data =
         { labels = List.map Tuple.first data
         , datasets =
@@ -443,6 +458,11 @@ createDataValue metrics report =
     ( label, report.measure )
 
 
-chapterReportCanvasId : ChapterReport -> String
-chapterReportCanvasId chapterReport =
-    "chapter-report-" ++ chapterReport.chapterUuid
+reportCanvasId : String -> String
+reportCanvasId canvasId =
+    "report-" ++ canvasId
+
+
+totalReportId : String
+totalReportId =
+    "total"
