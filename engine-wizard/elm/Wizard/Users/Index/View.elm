@@ -183,6 +183,6 @@ userCard appState user =
             [ a [ href ("mailto:" ++ user.email) ] [ text user.email ]
             ]
         , div [ class "role" ]
-            [ text (lg "user.role" appState ++ ": " ++ user.role)
+            [ text (lg "user.role" appState ++ ": " ++ Role.toReadableString appState user.role)
             ]
         ]
