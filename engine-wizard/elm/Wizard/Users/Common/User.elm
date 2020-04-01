@@ -19,6 +19,7 @@ type alias User =
     , affiliation : Maybe String
     , role : String
     , active : Bool
+    , sources : List String
     }
 
 
@@ -32,6 +33,7 @@ decoder =
         |> D.required "affiliation" (D.maybe D.string)
         |> D.required "role" D.string
         |> D.required "active" D.bool
+        |> D.required "sources" (D.list D.string)
 
 
 isAdmin : Maybe User -> Bool

@@ -8,6 +8,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -56,7 +57,7 @@ indexActions appState =
 listingConfig : AppState -> ListingConfig User Msg
 listingConfig appState =
     { title = listingTitle appState
-    , description = listingDescription
+    , description = listingDescription appState
     , dropdownItems = listingActions appState
     , textTitle = User.fullName
     , emptyText = l_ "listing.empty" appState
@@ -91,8 +92,8 @@ listingTitleBadge appState user =
         ]
 
 
-listingDescription : User -> Html Msg
-listingDescription user =
+listingDescription : AppState -> User -> Html Msg
+listingDescription appState user =
     let
         affiliationFragment =
             case user.affiliation of
@@ -101,10 +102,19 @@ listingDescription user =
 
                 Nothing ->
                     []
+
+        sources =
+            if List.length user.sources > 0 then
+                span [ class "fragment" ]
+                    (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
+
+            else
+                emptyNode
     in
     span []
         ([ a [ class "fragment", href <| "mailto:" ++ user.email ]
             [ text user.email ]
+         , sources
          ]
             ++ affiliationFragment
         )
