@@ -166,6 +166,18 @@ code {
     }
 }
 
+.badge {
+    &-external-service {
+        .fa {
+            margin-right: 5px;
+        }
+
+        &:not(:first-child) {
+            margin-left: 5px;
+        }
+    }
+}
+
 .badge-value-100 {
     background: $color-value-100;
     color: color-yiq($color-value-100);

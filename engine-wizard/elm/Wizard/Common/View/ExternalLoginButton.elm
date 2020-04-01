@@ -47,13 +47,13 @@ badgeWrapper appState sourceId =
             viewAsBadge appState service
 
         Nothing ->
-            span [ class "badge badge-light" ] [ text sourceId ]
+            span [ class "badge badge-external-service badge-light" ] [ text sourceId ]
 
 
 viewAsBadge : AppState -> OpenIDServiceConfig -> Html msg
 viewAsBadge appState config =
     span
-        [ class "badge link-with-icon"
+        [ class "badge badge-external-service"
         , color config.style.color
         , background config.style.background
         ]
