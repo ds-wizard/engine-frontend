@@ -22,7 +22,7 @@ const regexLX_ = /[\s+\(]lx_ "([^"]*)"/g
 
 const ignored = [
     defaultLocalePath,
-    `${componentSource}/${moduleName}/Common/Locale.elm`
+    'engine-shared/elm/Shared/Locale.elm'
 ]
 
 glob(`${componentSource}/**/*.elm`, (err, files) => {

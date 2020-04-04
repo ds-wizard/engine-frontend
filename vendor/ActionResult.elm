@@ -91,11 +91,11 @@ combine actionResult1 actionResult2 =
         ( Success a, Success b ) ->
             Success ( a, b )
 
-        ( Unset, _ ) ->
-            Unset
+        ( Error a, _ ) ->
+            Error a
 
-        ( _, Unset ) ->
-            Unset
+        ( _, Error b ) ->
+            Error b
 
         ( Loading, _ ) ->
             Loading
@@ -103,11 +103,11 @@ combine actionResult1 actionResult2 =
         ( _, Loading ) ->
             Loading
 
-        ( Error a, _ ) ->
-            Error a
+        ( Unset, _ ) ->
+            Unset
 
-        ( _, Error b ) ->
-            Error b
+        ( _, Unset ) ->
+            Unset
 
 
 combine3 : ActionResult a -> ActionResult b -> ActionResult c -> ActionResult ( a, b, c )

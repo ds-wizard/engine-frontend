@@ -1,4 +1,4 @@
-module String.Extra exposing (toMaybe)
+module String.Extra exposing (fromMaybe, toMaybe)
 
 
 toMaybe : String -> Maybe String
@@ -8,3 +8,8 @@ toMaybe str =
 
     else
         Just str
+
+
+fromMaybe : Maybe String -> String
+fromMaybe =
+    Maybe.withDefault ""

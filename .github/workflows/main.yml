@@ -36,9 +36,7 @@ jobs:
 # (2) -> Test
     - name: Test
       run: |
-        npm run test:elm
-        node scripts/test-icon-set.js
-        node scripts/test-locale.js
+        npm run test:$COMPONENT
 
 # (3) -> Build app and Docker image
     - name: Build
