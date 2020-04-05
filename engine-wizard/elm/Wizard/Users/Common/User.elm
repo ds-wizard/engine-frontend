@@ -3,12 +3,13 @@ module Wizard.Users.Common.User exposing
     , compare
     , decoder
     , fullName
-    , isAdmin
+    , toUserInfo
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (..)
 import Json.Decode.Pipeline as D
-import Wizard.Users.Common.Role as Role
+import Wizard.Common.UserInfo exposing (UserInfo)
 
 
 type alias User =
@@ -20,6 +21,14 @@ type alias User =
     , role : String
     , active : Bool
     , sources : List String
+    , submissionProps : List SubmissionProps
+    }
+
+
+type alias SubmissionProps =
+    { id : String
+    , name : String
+    , values : Dict String String
     }
 
 
@@ -34,11 +43,15 @@ decoder =
         |> D.required "role" D.string
         |> D.required "active" D.bool
         |> D.required "sources" (D.list D.string)
+        |> D.optional "submissionProps" (D.list decodeSubmissionProps) []
 
 
-isAdmin : Maybe User -> Bool
-isAdmin =
-    Maybe.map (.role >> (==) Role.admin) >> Maybe.withDefault False
+decodeSubmissionProps : Decoder SubmissionProps
+decodeSubmissionProps =
+    D.succeed SubmissionProps
+        |> D.required "id" D.string
+        |> D.required "name" D.string
+        |> D.required "values" (D.dict D.string)
 
 
 compare : User -> User -> Order
@@ -54,6 +67,15 @@ compare u1 u2 =
             Basics.compare (String.toLower u1.firstName) (String.toLower u2.firstName)
 
 
-fullName : User -> String
+fullName : { a | firstName : String, lastName : String } -> String
 fullName user =
     user.firstName ++ " " ++ user.lastName
+
+
+toUserInfo : User -> UserInfo
+toUserInfo user =
+    { uuid = user.uuid
+    , firstName = user.firstName
+    , lastName = user.lastName
+    , role = user.role
+    }

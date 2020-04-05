@@ -5,6 +5,8 @@ import List.Extra as List
 import Wizard.Common.Components.Listing as Listing
 import Wizard.Documents.Common.Document exposing (Document)
 import Wizard.Documents.Common.DocumentState exposing (DocumentState(..))
+import Wizard.Documents.Common.Submission exposing (Submission)
+import Wizard.Documents.Common.SubmissionService exposing (SubmissionService)
 import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
@@ -14,6 +16,10 @@ type alias Model =
     , deletingDocument : ActionResult String
     , questionnaireUuid : Maybe String
     , questionnaire : Maybe (ActionResult QuestionnaireDetail)
+    , documentToBeSubmitted : Maybe Document
+    , submittingDocument : ActionResult Submission
+    , submissionServices : ActionResult (List SubmissionService)
+    , selectedSubmissionServiceId : Maybe String
     }
 
 
@@ -24,6 +30,10 @@ initialModel questionnaireUuid =
     , deletingDocument = Unset
     , questionnaireUuid = questionnaireUuid
     , questionnaire = Maybe.map (\_ -> Loading) questionnaireUuid
+    , documentToBeSubmitted = Nothing
+    , submittingDocument = Unset
+    , submissionServices = Unset
+    , selectedSubmissionServiceId = Nothing
     }
 
 

@@ -1,4 +1,5 @@
 const fs = require('fs')
+const utils = require('./utils')
 
 const {defaultLocalePath} = utils.getComponentData()
 const fileContent = fs.readFileSync(defaultLocalePath, 'utf8')

@@ -1,4 +1,4 @@
-module Wizard.Settings.Common.EditableConfig exposing (EditableConfig, decoder, encode, updateAuthentication, updateDashboard, updateKnowledgeModelRegistry, updateLookAndFeel, updateOrganization, updatePrivacyAndSupport, updateQuestionnaires)
+module Wizard.Settings.Common.EditableConfig exposing (EditableConfig, decoder, encode, updateAuthentication, updateDashboard, updateKnowledgeModelRegistry, updateLookAndFeel, updateOrganization, updatePrivacyAndSupport, updateQuestionnaires, updateSubmission)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -10,6 +10,7 @@ import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig e
 import Wizard.Settings.Common.EditableAuthenticationConfig as EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
 import Wizard.Settings.Common.EditableKnowledgeModelRegistryConfig as EditableKnowledgeModelRegistryConfig exposing (EditableKnowledgeModelRegistryConfig)
 import Wizard.Settings.Common.EditableQuestionnairesConfig as EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
+import Wizard.Settings.Common.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 
 
 type alias EditableConfig =
@@ -20,6 +21,7 @@ type alias EditableConfig =
     , lookAndFeel : LookAndFeelConfig
     , knowledgeModelRegistry : EditableKnowledgeModelRegistryConfig
     , questionnaires : EditableQuestionnairesConfig
+    , submission : EditableSubmissionConfig
     }
 
 
@@ -58,6 +60,11 @@ updateQuestionnaires questionnaires config =
     { config | questionnaires = questionnaires }
 
 
+updateSubmission : EditableSubmissionConfig -> EditableConfig -> EditableConfig
+updateSubmission submission config =
+    { config | submission = submission }
+
+
 
 -- JSON
 
@@ -72,6 +79,7 @@ decoder =
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "knowledgeModelRegistry" EditableKnowledgeModelRegistryConfig.decoder
         |> D.required "questionnaire" EditableQuestionnairesConfig.decoder
+        |> D.required "submission" EditableSubmissionConfig.decoder
 
 
 encode : EditableConfig -> E.Value
@@ -84,4 +92,5 @@ encode config =
         , ( "lookAndFeel", LookAndFeelConfig.encode config.lookAndFeel )
         , ( "knowledgeModelRegistry", EditableKnowledgeModelRegistryConfig.encode config.knowledgeModelRegistry )
         , ( "questionnaire", EditableQuestionnairesConfig.encode config.questionnaires )
+        , ( "submission", EditableSubmissionConfig.encode config.submission )
         ]

@@ -12,7 +12,7 @@ import Wizard.Public.Login.Msgs
 import Wizard.Public.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate, cmdNavigateRaw, homeRoute)
-import Wizard.Users.Common.User exposing (User)
+import Wizard.Users.Common.User as User exposing (User)
 import Wizard.Utils exposing (dispatch)
 
 
@@ -43,7 +43,7 @@ getCurrentUserCompleted model mbOriginalUrl result =
         Ok user ->
             let
                 session =
-                    Session.setUser model.appState.session user
+                    Session.setUser model.appState.session (User.toUserInfo user)
 
                 cmd =
                     case mbOriginalUrl of

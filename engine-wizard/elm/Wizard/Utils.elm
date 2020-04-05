@@ -4,6 +4,7 @@ module Wizard.Utils exposing
     , flip
     , getContrastColorHex
     , getUuid
+    , httpMethodOptions
     , listFilterJust
     , listInsertIf
     , nilUuid
@@ -17,6 +18,7 @@ module Wizard.Utils exposing
 import Color
 import Color.Accessibility exposing (contrastRatio)
 import Color.Convert exposing (hexToColor)
+import List.Extra as List
 import Random exposing (Seed, step)
 import Task
 import Uuid
@@ -49,6 +51,15 @@ getUuid seed =
 nilUuid : String
 nilUuid =
     "00000000-0000-0000-0000-000000000000"
+
+
+httpMethodOptions : List ( String, String )
+httpMethodOptions =
+    let
+        httpMethods =
+            [ "GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS", "PATCH" ]
+    in
+    ( "", "--" ) :: List.zip httpMethods httpMethods
 
 
 dispatch : a -> Cmd a

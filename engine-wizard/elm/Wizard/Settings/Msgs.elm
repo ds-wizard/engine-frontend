@@ -1,6 +1,7 @@
 module Wizard.Settings.Msgs exposing (Msg(..))
 
 import Wizard.Settings.Generic.Msgs
+import Wizard.Settings.Submission.Msgs
 
 
 type Msg
@@ -11,3 +12,4 @@ type Msg
     | LookAndFeelMsg Wizard.Settings.Generic.Msgs.Msg
     | KnowledgeModelRegistryMsg Wizard.Settings.Generic.Msgs.Msg
     | QuestionnairesMsg Wizard.Settings.Generic.Msgs.Msg
+    | SubmissionMsg Wizard.Settings.Submission.Msgs.Msg

@@ -2,6 +2,7 @@ module Wizard.Common.Api.Documents exposing
     ( deleteDocument
     , downloadDocumentUrl
     , getDocuments
+    , getSubmissionServices
     , postDocument
     )
 
@@ -10,6 +11,7 @@ import Json.Encode exposing (Value)
 import Wizard.Common.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Common.Document as Document exposing (Document)
+import Wizard.Documents.Common.SubmissionService as SubmissionService exposing (SubmissionService)
 
 
 getDocuments : Maybe String -> AppState -> ToMsg (List Document) msg -> Cmd msg
@@ -32,6 +34,11 @@ postDocument =
 deleteDocument : String -> AppState -> ToMsg () msg -> Cmd msg
 deleteDocument uuid =
     jwtDelete ("/documents/" ++ uuid)
+
+
+getSubmissionServices : String -> AppState -> ToMsg (List SubmissionService) msg -> Cmd msg
+getSubmissionServices documentId =
+    jwtGet ("/documents/" ++ documentId ++ "/available-submission-services") (D.list SubmissionService.decoder)
 
 
 downloadDocumentUrl : String -> AppState -> String

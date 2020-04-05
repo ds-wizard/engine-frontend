@@ -1,8 +1,25 @@
-module Wizard.Common.Form.Field exposing (maybeString)
+module Wizard.Common.Form.Field exposing (dict, maybeString)
 
-import Form.Field as Field
+import Dict exposing (Dict)
+import Form.Field as Field exposing (Field)
 
 
-maybeString : Maybe String -> Field.Field
+maybeString : Maybe String -> Field
 maybeString =
     Field.string << Maybe.withDefault ""
+
+
+dict : (a -> Field) -> Dict String a -> Field
+dict valueField inputDict =
+    let
+        initEntry value =
+            [ ( "key", Field.string <| Tuple.first value )
+            , ( "value", valueField <| Tuple.second value )
+            ]
+
+        values =
+            inputDict
+                |> Dict.toList
+                |> List.map (Field.group << initEntry)
+    in
+    Field.list values

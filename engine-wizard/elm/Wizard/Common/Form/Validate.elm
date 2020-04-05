@@ -1,5 +1,6 @@
 module Wizard.Common.Form.Validate exposing
     ( confirmation
+    , dict
     , ifElse
     , maybeString
     , optionalString
@@ -7,6 +8,7 @@ module Wizard.Common.Form.Validate exposing
     , uuid
     )
 
+import Dict exposing (Dict)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Regex exposing (Regex)
@@ -97,3 +99,14 @@ uuidPattern =
 createRegex : String -> Regex
 createRegex =
     Maybe.withDefault Regex.never << Regex.fromString
+
+
+dict : Validation e a -> Validation e (Dict String a)
+dict valueValidation =
+    let
+        validateEntry =
+            V.succeed Tuple.pair
+                |> V.andMap (V.field "key" V.string)
+                |> V.andMap (V.field "value" valueValidation)
+    in
+    V.map Dict.fromList <| V.list validateEntry

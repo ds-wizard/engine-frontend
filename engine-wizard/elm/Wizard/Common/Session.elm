@@ -10,14 +10,14 @@ module Wizard.Common.Session exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Wizard.Users.Common.User as User exposing (User)
+import Wizard.Common.UserInfo as UserInfo exposing (UserInfo)
 
 
 type alias Session =
     { token : String
-    , user : Maybe User
+    , user : Maybe UserInfo
     , sidebarCollapsed : Bool
-    , v1 : Bool
+    , v2 : Bool
     }
 
 
@@ -26,7 +26,7 @@ init =
     { token = ""
     , user = Nothing
     , sidebarCollapsed = False
-    , v1 = True
+    , v2 = True
     }
 
 
@@ -35,7 +35,7 @@ setToken session token =
     { session | token = token }
 
 
-setUser : Session -> User -> Session
+setUser : Session -> UserInfo -> Session
 setUser session user =
     { session | user = Just user }
 
@@ -49,9 +49,9 @@ decoder : Decoder Session
 decoder =
     D.succeed Session
         |> D.required "token" D.string
-        |> D.required "user" (D.nullable User.decoder)
+        |> D.required "user" (D.nullable UserInfo.decoder)
         |> D.optional "sidebarCollapsed" D.bool False
-        |> D.required "v1" D.bool
+        |> D.required "v2" D.bool
 
 
 exists : Session -> Bool
