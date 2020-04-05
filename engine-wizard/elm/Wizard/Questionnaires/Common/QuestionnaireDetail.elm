@@ -16,6 +16,7 @@ import Json.Encode as E
 import List.Extra as List
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.Model exposing (FormValue, FormValues, decodeFormValues, encodeFormValues, getAnswerUuid, getItemListCount)
+import Wizard.Common.UserInfo as UserInfo
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
@@ -23,7 +24,6 @@ import Wizard.KnowledgeModels.Common.Package as Package exposing (Package)
 import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 import Wizard.Questionnaires.Common.QuestionnaireLabel as QuestionnaireLabel exposing (QuestionnaireLabel)
 import Wizard.Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
-import Wizard.Users.Common.User as User
 
 
 type alias QuestionnaireDetail =
@@ -70,7 +70,7 @@ isEditable : AppState -> QuestionnaireDetail -> Bool
 isEditable appState questionnaire =
     let
         isAdmin =
-            User.isAdmin appState.session.user
+            UserInfo.isAdmin appState.session.user
 
         isNotReadonly =
             questionnaire.accessibility /= PublicReadOnlyQuestionnaire

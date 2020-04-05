@@ -8,6 +8,7 @@ module Wizard.Auth.Permission exposing
     , packageManagementWrite
     , questionnaire
     , settings
+    , submission
     , userManagement
     )
 
@@ -62,6 +63,11 @@ questionnaire =
 dataManagementPlan : String
 dataManagementPlan =
     "DMP_PERM"
+
+
+submission : String
+submission =
+    "SUBM_PERM"
 
 
 settings : String

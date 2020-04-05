@@ -39,6 +39,10 @@ label {
 .btn {
     @include not-selectable();
 
+    &[disabled] {
+        cursor: not-allowed;
+    }
+
     &-danger {
         color: $white !important;
         text-decoration: none !important;

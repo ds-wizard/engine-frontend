@@ -16,35 +16,41 @@ import Wizard.Settings.Organization.Update
 import Wizard.Settings.PrivacyAndSupport.Update
 import Wizard.Settings.Questionnaires.Update
 import Wizard.Settings.Routes exposing (Route(..))
+import Wizard.Settings.Submission.Update
 
 
 fetchData : Route -> AppState -> Model -> Cmd Msg
 fetchData route appState model =
     let
-        wrapMsg =
-            case route of
-                OrganizationRoute ->
-                    OrganizationMsg
-
-                AuthenticationRoute ->
-                    AuthenticationMsg
-
-                PrivacyAndSupportRoute ->
-                    PrivacyAndSupportMsg
-
-                DashboardRoute ->
-                    DashboardMsg
-
-                LookAndFeelRoute ->
-                    LookAndFeelMsg
-
-                KnowledgeModelRegistryRoute ->
-                    KnowledgeModelRegistryMsg
-
-                QuestionnairesRoute ->
-                    QuestionnairesMsg
+        genericFetch wrapMsg =
+            Cmd.map wrapMsg <|
+                Wizard.Settings.Generic.Update.fetchData appState
     in
-    Cmd.map wrapMsg <| Wizard.Settings.Generic.Update.fetchData appState
+    case route of
+        OrganizationRoute ->
+            genericFetch OrganizationMsg
+
+        AuthenticationRoute ->
+            genericFetch AuthenticationMsg
+
+        PrivacyAndSupportRoute ->
+            genericFetch PrivacyAndSupportMsg
+
+        DashboardRoute ->
+            genericFetch DashboardMsg
+
+        LookAndFeelRoute ->
+            genericFetch LookAndFeelMsg
+
+        KnowledgeModelRegistryRoute ->
+            genericFetch KnowledgeModelRegistryMsg
+
+        QuestionnairesRoute ->
+            genericFetch QuestionnairesMsg
+
+        SubmissionRoute ->
+            Cmd.map SubmissionMsg <|
+                Wizard.Settings.Submission.Update.fetchData appState
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -98,3 +104,10 @@ update wrapMsg msg appState model =
                     Wizard.Settings.Questionnaires.Update.update (wrapMsg << QuestionnairesMsg) questionnairesMsg appState model.questionnairesModel
             in
             ( { model | questionnairesModel = questionnairesModel }, cmd )
+
+        SubmissionMsg documentSubmissionMsg ->
+            let
+                ( documentSubmissionModel, cmd ) =
+                    Wizard.Settings.Submission.Update.update (wrapMsg << SubmissionMsg) documentSubmissionMsg appState model.documentSubmissionModel
+            in
+            ( { model | documentSubmissionModel = documentSubmissionModel }, cmd )

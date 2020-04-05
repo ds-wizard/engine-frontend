@@ -6,10 +6,13 @@ import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Documents as DocumentsApi
 import Wizard.Common.Api.Questionnaires as QuestionnaireApi
+import Wizard.Common.Api.Submissions as SubmissionsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing
 import Wizard.Common.Setters exposing (setDocuments, setQuestionnaire)
 import Wizard.Documents.Common.Document as Document exposing (Document)
+import Wizard.Documents.Common.Submission exposing (Submission)
+import Wizard.Documents.Common.SubmissionService exposing (SubmissionService)
 import Wizard.Documents.Index.Models exposing (Model, updateStates)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Msgs
@@ -59,6 +62,21 @@ update wrapMsg msg appState model =
 
         RefreshDocumentsCompleted result ->
             handleRefreshDocumentsCompleted model result
+
+        ShowHideSubmitDocument mbDocument ->
+            handleShowHideSubmitDocument wrapMsg appState model mbDocument
+
+        GetSubmissionServicesCompleted result ->
+            handleGetSubmissionServicesCompleted appState model result
+
+        SelectSubmissionService id ->
+            handleSelectSubmissionService model id
+
+        SubmitDocument ->
+            handleSubmitDocument wrapMsg appState model
+
+        SubmitDocumentCompleted result ->
+            handleSubmitDocumentCompleted appState model result
 
 
 
@@ -154,3 +172,63 @@ handleRefreshDocumentsCompleted model result =
 
         Err _ ->
             ( model, getResultCmd result )
+
+
+handleShowHideSubmitDocument : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Maybe Document -> ( Model, Cmd Wizard.Msgs.Msg )
+handleShowHideSubmitDocument wrapMsg appState model mbDocument =
+    let
+        cmd =
+            case mbDocument of
+                Just document ->
+                    Cmd.map wrapMsg <|
+                        DocumentsApi.getSubmissionServices document.uuid appState GetSubmissionServicesCompleted
+
+                Nothing ->
+                    Cmd.none
+    in
+    ( { model
+        | documentToBeSubmitted = mbDocument
+        , submittingDocument = Unset
+        , submissionServices = Loading
+        , selectedSubmissionServiceId = Nothing
+      }
+    , cmd
+    )
+
+
+handleGetSubmissionServicesCompleted : AppState -> Model -> Result ApiError (List SubmissionService) -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetSubmissionServicesCompleted appState model result =
+    applyResult
+        { setResult = \value record -> { record | submissionServices = value }
+        , defaultError = lg "apiError.documents.getSubmissionServicesError" appState
+        , model = model
+        , result = result
+        }
+
+
+handleSelectSubmissionService : Model -> String -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSelectSubmissionService model id =
+    ( { model | selectedSubmissionServiceId = Just id }, Cmd.none )
+
+
+handleSubmitDocument : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSubmitDocument wrapMsg appState model =
+    case ( model.documentToBeSubmitted, model.selectedSubmissionServiceId ) of
+        ( Just document, Just serviceId ) ->
+            ( { model | submittingDocument = Loading }
+            , Cmd.map wrapMsg <|
+                SubmissionsApi.postSubmission serviceId document.uuid appState SubmitDocumentCompleted
+            )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleSubmitDocumentCompleted : AppState -> Model -> Result ApiError Submission -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSubmitDocumentCompleted appState model result =
+    applyResult
+        { setResult = \value record -> { record | submittingDocument = value }
+        , defaultError = lg "apiError.submissions.postError" appState
+        , model = model
+        , result = result
+        }

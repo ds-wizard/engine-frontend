@@ -1,6 +1,7 @@
 module Wizard.Users.Edit.View exposing (view)
 
 import Form exposing (Form)
+import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -101,6 +102,46 @@ userFormView appState user form current =
             else
                 FormGroup.toggle form "active" <| lg "user.active" appState
 
+        submissionSettings =
+            if current && appState.config.submission.enabled then
+                div [ class "mt-5" ]
+                    ([ h4 [] [ lx_ "submissionSettings.title" appState ] ]
+                        ++ List.map submissionSettingsSection (Form.getListIndexes "submissionProps" form)
+                    )
+
+            else
+                emptyNode
+
+        submissionSettingsSection i =
+            let
+                field name =
+                    "submissionProps." ++ String.fromInt i ++ "." ++ name
+
+                sectionName =
+                    Maybe.withDefault "" (Form.getFieldAsString (field "name") form).value
+            in
+            div [ class "mb-4" ]
+                [ strong [] [ text sectionName ]
+                , div []
+                    (List.map (submissionSettingsSectionProp (field "values")) (Form.getListIndexes (field "values") form))
+                ]
+
+        submissionSettingsSectionProp prefix i =
+            let
+                field name =
+                    prefix ++ "." ++ String.fromInt i ++ "." ++ name
+
+                valueField =
+                    Form.getFieldAsString (field "value") form
+
+                propName =
+                    Maybe.withDefault "" (Form.getFieldAsString (field "key") form).value
+            in
+            div [ class "row mb-1" ]
+                [ div [ class "col-4 d-flex align-items-center" ] [ text propName ]
+                , div [ class "col-8" ] [ Input.textInput valueField [ class "form-control" ] ]
+                ]
+
         formHtml =
             div []
                 [ FormGroup.input appState form "email" <| lg "user.email" appState
@@ -110,6 +151,7 @@ userFormView appState user form current =
                 , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
                 , roleSelect
                 , activeToggle
+                , submissionSettings
                 ]
     in
     formHtml

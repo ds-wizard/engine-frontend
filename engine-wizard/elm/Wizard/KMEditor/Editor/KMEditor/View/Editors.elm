@@ -26,6 +26,7 @@ import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, 
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, QuestionForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
+import Wizard.Utils exposing (httpMethodOptions)
 
 
 l_ : String -> AppState -> String
@@ -214,15 +215,6 @@ tagEditorView appState model editorData =
         , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
         ]
     )
-
-
-httpMethodOptions : List ( String, String )
-httpMethodOptions =
-    let
-        httpMethods =
-            [ "GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS", "PATCH" ]
-    in
-    List.zip httpMethods httpMethods
 
 
 integrationEditorView : AppState -> Model -> IntegrationEditorData -> ( String, Html Msg )

@@ -21,6 +21,7 @@ iconSet =
         , ( "_global.warning", "fas fa-exclamation-triangle" )
         , ( "colorButton.check", "fas fa-check" )
         , ( "documents.download", "fas fa-download" )
+        , ( "documents.submit", "fas fa-paper-plane" )
         , ( "km.answer", "far fa-check-square" )
         , ( "km.chapter", "far fa-file" )
         , ( "km.expert", "far fa-user" )
