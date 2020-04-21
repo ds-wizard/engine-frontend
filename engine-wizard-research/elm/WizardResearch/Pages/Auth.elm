@@ -3,13 +3,13 @@ module WizardResearch.Pages.Auth exposing (Model, Msg, init, update, view)
 -- MODEL
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, div, p, text)
+import Html.Styled exposing (Html, div, p, text)
 import Shared.Api.Auth as AuthApi
 import Shared.Api.Users as UsersApi
 import Shared.Data.Token as Token exposing (Token)
 import Shared.Data.UserInfo exposing (UserInfo)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode)
+import Shared.Html.Styled exposing (emptyNode)
 import WizardResearch.Common.AppState exposing (AppState)
 import WizardResearch.Common.Session exposing (Session)
 

@@ -13,6 +13,8 @@ type Route
     | Login
     | Logout
     | NotFound
+    | ProjectCreate
+    | Project String
 
 
 fromUrl : Url -> Route
@@ -27,6 +29,8 @@ parser =
         , Parser.map Dashboard Parser.top
         , Parser.map Login (s "login")
         , Parser.map Logout (s "logout")
+        , Parser.map ProjectCreate (s "create-project")
+        , Parser.map Project (s "projects" </> string)
         ]
 
 
@@ -54,6 +58,12 @@ toString route =
 
                 NotFound ->
                     []
+
+                ProjectCreate ->
+                    [ "create-project" ]
+
+                Project uuid ->
+                    [ "projects", uuid ]
     in
     "/" ++ String.join "/" parts
 

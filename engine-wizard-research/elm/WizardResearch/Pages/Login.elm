@@ -9,22 +9,21 @@ module WizardResearch.Pages.Login exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Html exposing (Html, a, div, h1, p, text)
-import Html.Attributes exposing (href, style)
+import Html.Styled exposing (Html, a, div, h1, p, text)
+import Html.Styled.Attributes exposing (href, style)
 import Shared.Api.Auth as AuthApi
 import Shared.Api.Tokens as TokensApi
 import Shared.Api.Users as UsersApi
-import Shared.Data.BootstrapConfig as BootstrapConfig
-import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig
-import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig as OpenIDServiceConfig
+import Shared.Data.BootstrapConfig
+import Shared.Data.BootstrapConfig.AuthenticationConfig
+import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig
 import Shared.Data.Token as Token exposing (Token)
 import Shared.Data.UserInfo exposing (UserInfo)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, fa)
-import Shared.Locale exposing (l, lx)
+import Shared.Html.Styled exposing (emptyNode, fa)
 import WizardResearch.Common.AppState exposing (AppState)
-import WizardResearch.Common.Session as Session exposing (Session)
+import WizardResearch.Common.Session exposing (Session)
 import WizardResearch.Pages.Login.LoginForm as LoginForm exposing (LoginForm)
 
 
@@ -155,10 +154,7 @@ view appState model =
                     emptyNode
 
         openIDServices =
-            appState.config
-                |> BootstrapConfig.authentication
-                |> AuthenticationConfig.services
-                |> List.map serviceView
+            List.map serviceView appState.config.authentication.external.services
 
         serviceView config =
             a
@@ -166,12 +162,12 @@ view appState model =
                 , style "padding" "1rem"
                 , style "margin-right" "1rem"
                 , style "display" "inline-block"
-                , style "background" (Maybe.withDefault "#333" (OpenIDServiceConfig.background config))
-                , style "color" (Maybe.withDefault "#fff" (OpenIDServiceConfig.color config))
+                , style "background" (Maybe.withDefault "#333" config.style.background)
+                , style "color" (Maybe.withDefault "#fff" config.style.color)
                 ]
-                [ fa (Maybe.withDefault "fab fa-openid" (OpenIDServiceConfig.icon config))
+                [ fa (Maybe.withDefault "fab fa-openid" config.style.icon)
                 , text " "
-                , text <| OpenIDServiceConfig.name config
+                , text config.name
                 ]
     in
     { title = "Login"
@@ -179,7 +175,7 @@ view appState model =
         div []
             [ h1 [] [ text "Login" ]
             , error
-            , LoginForm.view appState model.loginForm |> Html.map FormMsg
+            , LoginForm.view appState model.loginForm |> Html.Styled.map FormMsg
             , div [] openIDServices
             ]
     }

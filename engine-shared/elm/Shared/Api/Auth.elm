@@ -1,7 +1,7 @@
 module Shared.Api.Auth exposing (authRedirectUrl, getToken)
 
 import Shared.Api exposing (AppStateLike, ToMsg, httpGet)
-import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig as OpenIDServiceConfig exposing (OpenIDServiceConfig)
+import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Shared.Data.Token as Token exposing (Token)
 import String.Extra as String
 
@@ -13,4 +13,4 @@ getToken id mbError mbCode =
 
 authRedirectUrl : OpenIDServiceConfig -> AppStateLike a -> String
 authRedirectUrl config appState =
-    appState.apiConfig.apiUrl ++ "/auth/" ++ OpenIDServiceConfig.id config
+    appState.apiConfig.apiUrl ++ "/auth/" ++ config.id

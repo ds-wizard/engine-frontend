@@ -2,9 +2,16 @@ module WizardResearch exposing (main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
-import Html exposing (..)
-import Html.Attributes exposing (href)
+import Css exposing (backgroundColor, height, hex, pct, px, width)
+import Html
+import Html.Styled exposing (..)
+import Html.Styled.Attributes exposing (css, href)
 import Json.Decode exposing (Value)
+import Shared.Elemental.Atoms.Button as Button
+import Shared.Elemental.Atoms.Heading as Heading
+import Shared.Elemental.Foundations.Grid as Grid
+import Shared.Elemental.Foundations.Illustration as Illustration
+import Shared.Html.Styled exposing (fa)
 import Shared.Utils exposing (dispatch)
 import Url exposing (Url)
 import WizardResearch.Common.AppState as AppState exposing (AppState)
@@ -12,6 +19,8 @@ import WizardResearch.Common.Session as Session exposing (Session)
 import WizardResearch.Page as Page
 import WizardResearch.Pages.Auth as Auth
 import WizardResearch.Pages.Login as Login
+import WizardResearch.Pages.Project as Project
+import WizardResearch.Pages.ProjectCreate as ProjectCreate
 import WizardResearch.Ports as Ports
 import WizardResearch.Route as Route exposing (Route)
 
@@ -44,6 +53,8 @@ type PageModel
     = Auth Auth.Model
     | Dashboard ()
     | Login Login.Model
+    | ProjectCreate ProjectCreate.Model
+    | Project Project.Model
     | NotFound
 
 
@@ -88,6 +99,14 @@ initViewModel model =
             Route.NotFound ->
                 ( { model | pageModel = NotFound }, Cmd.none )
 
+            Route.ProjectCreate ->
+                ProjectCreate.init model.appState
+                    |> updateWith ProjectCreate ProjectCreateMsg model
+
+            Route.Project uuid ->
+                Project.init model.appState uuid
+                    |> updateWith Project ProjectMsg model
+
     else
         ( model, Route.replaceUrl model.navKey Route.Login )
 
@@ -103,6 +122,8 @@ type Msg
     | AuthMsg Auth.Msg
     | DashboardMsg ()
     | LoginMsg Login.Msg
+    | ProjectCreateMsg ProjectCreate.Msg
+    | ProjectMsg Project.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -150,6 +171,20 @@ update msg model =
             Login.update updateConfig model.appState loginMsg loginModel
                 |> updateWith Login identity model
 
+        ( ProjectCreateMsg projectCreateMsg, ProjectCreate projectCreateModel ) ->
+            let
+                updateConfig =
+                    { wrapMsg = ProjectCreateMsg
+                    , cmdNavigate = Nav.pushUrl model.navKey << Route.toString
+                    }
+            in
+            ProjectCreate.update updateConfig model.appState projectCreateMsg projectCreateModel
+                |> updateWith ProjectCreate identity model
+
+        ( ProjectMsg projectMsg, Project projectModel ) ->
+            Project.update model.appState projectMsg projectModel
+                |> updateWith Project ProjectMsg model
+
         ( _, _ ) ->
             ( model, Cmd.none )
 
@@ -182,26 +217,59 @@ view model =
             , body = List.map (Html.map toMsg) body
             }
     in
-    case model.pageModel of
-        Auth authModel ->
-            viewPage Page.Other AuthMsg (Auth.view model.appState authModel)
+    if model.appState.configurationError then
+        Page.view model.appState
+            Page.Public
+            { title = "Configuration Error"
+            , content = div [] [ text "Configuration Error" ]
+            }
 
-        Dashboard _ ->
-            viewPage Page.Dashboard
-                DashboardMsg
-                { title = "Dashboard"
-                , content =
-                    div []
-                        [ text "Dashboard"
-                        , a [ href (Route.toString Route.Logout) ] [ text "Log out" ]
-                        ]
-                }
+    else
+        case model.pageModel of
+            Auth authModel ->
+                viewPage Page.Public AuthMsg (Auth.view model.appState authModel)
 
-        Login loginModel ->
-            viewPage Page.Login LoginMsg (Login.view model.appState loginModel)
+            Dashboard _ ->
+                viewPage Page.App
+                    DashboardMsg
+                    { title = "Dashboard"
+                    , content =
+                        Grid.comfortable.container
+                            [ Grid.containerLimitedSmall ]
+                            [ Grid.comfortable.row []
+                                [ Grid.comfortable.col 12
+                                    []
+                                    [ Heading.h1 model.appState.theme "Dashboard"
+                                    ]
+                                ]
+                            , Grid.comfortable.row []
+                                [ Grid.comfortable.col 6
+                                    []
+                                    [ a [ href (Route.toString Route.Logout) ] [ text "Log out" ]
+                                    ]
+                                , Grid.comfortable.col 6
+                                    [ Grid.colTextRight ]
+                                    [ Button.primaryLink model.appState.theme
+                                        [ href (Route.toString Route.ProjectCreate) ]
+                                        [ fa "fas fa-plus"
+                                        , span [] [ text "Create project" ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                    }
 
-        NotFound ->
-            Page.view model.appState Page.Other { title = "Page not found", content = div [] [ text "Not Found" ] }
+            Login loginModel ->
+                viewPage Page.Public LoginMsg (Login.view model.appState loginModel)
+
+            NotFound ->
+                Page.view model.appState Page.Auto { title = "Page not found", content = div [] [ text "Not Found" ] }
+
+            ProjectCreate projectCreateModel ->
+                viewPage Page.App ProjectCreateMsg (ProjectCreate.view model.appState projectCreateModel)
+
+            Project projectModel ->
+                viewPage Page.App ProjectMsg (Project.view model.appState projectModel)
 
 
 

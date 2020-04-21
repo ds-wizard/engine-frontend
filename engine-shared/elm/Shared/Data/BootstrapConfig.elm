@@ -1,6 +1,5 @@
 module Shared.Data.BootstrapConfig exposing
     ( BootstrapConfig
-    , authentication
     , decoder
     , default
     )
@@ -8,29 +7,28 @@ module Shared.Data.BootstrapConfig exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
+import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig exposing (TemplateConfig)
 
 
-type BootstrapConfig
-    = BootstrapConfig Internals
-
-
-type alias Internals =
-    { authentication : AuthenticationConfig }
+type alias BootstrapConfig =
+    { authentication : AuthenticationConfig
+    , lookAndFeel : LookAndFeelConfig
+    , template : TemplateConfig
+    }
 
 
 default : BootstrapConfig
 default =
-    BootstrapConfig
-        { authentication = AuthenticationConfig.default }
-
-
-authentication : BootstrapConfig -> AuthenticationConfig
-authentication (BootstrapConfig config) =
-    config.authentication
+    { authentication = AuthenticationConfig.default
+    , lookAndFeel = LookAndFeelConfig.default
+    , template = TemplateConfig.default
+    }
 
 
 decoder : Decoder BootstrapConfig
 decoder =
-    D.succeed Internals
+    D.succeed BootstrapConfig
         |> D.required "authentication" AuthenticationConfig.decoder
-        |> D.map BootstrapConfig
+        |> D.required "lookAndFeel" LookAndFeelConfig.decoder
+        |> D.required "template" TemplateConfig.decoder

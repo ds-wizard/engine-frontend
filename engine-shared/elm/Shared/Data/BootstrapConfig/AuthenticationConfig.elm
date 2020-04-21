@@ -1,4 +1,8 @@
-module Shared.Data.BootstrapConfig.AuthenticationConfig exposing (AuthenticationConfig, decoder, default, services)
+module Shared.Data.BootstrapConfig.AuthenticationConfig exposing
+    ( AuthenticationConfig
+    , decoder
+    , default
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -6,11 +10,7 @@ import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig as O
 import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 
 
-type AuthenticationConfig
-    = AuthenticationConfig Internals
-
-
-type alias Internals =
+type alias AuthenticationConfig =
     { internal : Internal
     , external : External
     }
@@ -26,23 +26,16 @@ type alias External =
 
 default : AuthenticationConfig
 default =
-    AuthenticationConfig
-        { internal = { registration = SimpleFeatureConfig.init True }
-        , external = { services = [] }
-        }
-
-
-services : AuthenticationConfig -> List OpenIDServiceConfig
-services (AuthenticationConfig config) =
-    config.external.services
+    { internal = { registration = SimpleFeatureConfig.init True }
+    , external = { services = [] }
+    }
 
 
 decoder : Decoder AuthenticationConfig
 decoder =
-    D.succeed Internals
+    D.succeed AuthenticationConfig
         |> D.required "internal" internalDecoder
         |> D.required "external" externalDecoder
-        |> D.map AuthenticationConfig
 
 
 internalDecoder : Decoder Internal

@@ -109,8 +109,8 @@ combineTests =
         [ parametrized
             [ ( Success "abc", Success "def", Success ( "abc", "def" ) )
             , ( Unset, Success "def", Unset )
-            , ( Loading, Unset, Unset )
-            , ( Loading, Error "err", Loading )
+            , ( Loading, Unset, Loading )
+            , ( Loading, Error "err", Error "err" )
             , ( Success "abc", Loading, Loading )
             , ( Error "err", Success "def", Error "err" )
             , ( Success "abc", Error "err", Error "err" )
@@ -131,7 +131,7 @@ combine3Tests =
     describe "combine3"
         [ parametrized
             [ Combine3Test (Success 1) (Success 2) (Success 3) (Success ( 1, 2, 3 ))
-            , Combine3Test Unset (Success 2) Loading Unset
+            , Combine3Test Unset (Success 2) Loading Loading
             , Combine3Test (Success 1) Loading (Success 2) Loading
             , Combine3Test (Success 1) (Success 2) (Error "err") (Error "err")
             ]

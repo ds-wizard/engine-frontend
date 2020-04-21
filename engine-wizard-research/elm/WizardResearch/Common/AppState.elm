@@ -8,8 +8,10 @@ module WizardResearch.Common.AppState exposing
 import Json.Decode as D
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import Result.Extra as Result
 import Shared.Api exposing (ApiConfig)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
+import Shared.Elemental.Theme as Theme exposing (Theme)
 import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Shared.Setters exposing (setToken)
 import WizardResearch.Common.Flags as Flags
@@ -24,15 +26,22 @@ type alias AppState =
     , apiConfig : ApiConfig
     , config : BootstrapConfig
     , session : Maybe Session
+    , configurationError : Bool
+    , theme : Theme
     }
 
 
 init : D.Value -> AppState
 init flagsValue =
     let
+        flagsResult =
+            D.decodeValue Flags.decoder flagsValue
+
         flags =
-            Result.withDefault Flags.default <|
-                D.decodeValue Flags.decoder flagsValue
+            Result.withDefault Flags.default flagsResult
+
+        configurationError =
+            Result.isErr flagsResult
 
         defaultProvisioning =
             { locale = DefaultLocale.locale
@@ -50,10 +59,12 @@ init flagsValue =
     , provisioning = provisioning
     , apiConfig =
         { apiUrl = flags.apiUrl
-        , token = ""
+        , token = Maybe.unwrap "" .token flags.session
         }
     , config = flags.config
     , session = flags.session
+    , configurationError = configurationError
+    , theme = Theme.default
     }
 
 

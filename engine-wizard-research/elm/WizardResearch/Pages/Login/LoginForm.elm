@@ -9,9 +9,10 @@ module WizardResearch.Pages.Login.LoginForm exposing
 import Form exposing (Form)
 import Form.Input as Input
 import Form.Validate as V exposing (Validation)
-import Html exposing (Html, br, button, div, form, label, text)
-import Html.Attributes exposing (for, name, type_)
-import Html.Events exposing (onSubmit)
+import Html.Attributes exposing (name)
+import Html.Styled exposing (Html, br, button, form, fromUnstyled, label, text)
+import Html.Styled.Attributes exposing (for, type_)
+import Html.Styled.Events exposing (onSubmit)
 import Json.Encode as E
 import Maybe.Extra as Maybe
 import Shared.Form as Form
@@ -70,11 +71,11 @@ view appState loginForm =
     in
     form [ onSubmit Form.Submit ]
         [ label [ for "email" ] [ text "Email" ]
-        , Input.textInput emailField [ name "email" ]
+        , fromUnstyled <| Input.textInput emailField [ name "email" ]
         , text emailError
         , br [] []
         , label [ for "email" ] [ text "Password" ]
-        , Input.passwordInput passwordField [ name "password" ]
+        , fromUnstyled <| Input.passwordInput passwordField [ name "password" ]
         , text passwordError
         , br [] []
         , button [ type_ "submit" ] [ text "Log in" ]
