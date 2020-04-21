@@ -25,6 +25,6 @@ validation =
 encode : ForgottenPasswordForm -> E.Value
 encode form =
     E.object
-        [ ( "type", E.string "password" )
+        [ ( "type", E.string "ForgottenPasswordActionKey" )
         , ( "email", E.string form.email )
         ]
