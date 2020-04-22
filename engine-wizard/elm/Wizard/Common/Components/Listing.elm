@@ -20,6 +20,7 @@ import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
+import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l)
 import Time
@@ -63,6 +64,7 @@ type alias ListingConfig a msg =
     , emptyText : String
     , updated : Maybe (UpdatedConfig a)
     , wrapMsg : Msg -> msg
+    , iconView : Maybe (a -> Html msg)
     }
 
 
@@ -203,9 +205,14 @@ viewItem appState config index item =
 
             else
                 emptyNode
+
+        icon =
+            config.iconView
+                |> Maybe.andMap (Just item.item)
+                |> Maybe.withDefault (ItemIcon.view { text = config.textTitle item.item, image = Nothing })
     in
     div [ class "list-group-item" ]
-        [ ItemIcon.view { text = config.textTitle item.item, image = Nothing }
+        [ icon
         , div [ class "content" ]
             [ div [ class "title-row" ]
                 [ span [ class "title" ] [ config.title item.item ]

@@ -31,6 +31,7 @@
             "gingko/time-distance": "2.1.1",
             "jinjor/elm-debounce": "3.0.0",
             "jinjor/elm-diff": "1.0.6",
+            "kuzzmi/elm-gravatar": "2.0.2",
             "myrho/elm-round": "1.0.4",
             "noahzgordon/elm-color-extra": "1.0.2",
             "rundis/elm-bootstrap": "5.1.0",
@@ -43,7 +44,9 @@
             "elm/virtual-dom": "1.0.2",
             "fredcy/elm-parseint": "2.0.1",
             "rtfeldman/elm-iso8601-date-strings": "1.1.2",
-            "truqu/elm-base64": "2.0.4"
+            "truqu/elm-base64": "2.0.4",
+            "truqu/elm-md5": "1.1.0",
+            "zwilias/elm-utf-tools": "2.0.1"
         }
     },
     "test-dependencies": {

@@ -10,6 +10,7 @@ import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (setFormErrors)
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Users.Common.User exposing (User)
 import Wizard.Users.Common.UserEditForm as UserEditForm
 import Wizard.Users.Common.UserPasswordForm as UserPasswordForm
@@ -113,14 +114,19 @@ putUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizar
 putUserCompleted appState model result =
     case result of
         Ok _ ->
-            ( { model | savingUser = Success <| lg "apiSuccess.users.put" appState }, Cmd.none )
+            ( { model | savingUser = Success <| lg "apiSuccess.users.put" appState }
+            , Ports.scrollToTop ".Users__Edit__content"
+            )
 
         Err err ->
             ( { model
                 | savingUser = ApiError.toActionResult (lg "apiError.users.putError" appState) err
                 , userForm = setFormErrors err model.userForm
               }
-            , getResultCmd result
+            , Cmd.batch
+                [ getResultCmd result
+                , Ports.scrollToTop ".Users__Edit__content"
+                ]
             )
 
 
@@ -138,4 +144,6 @@ putUserPasswordCompleted appState model result =
         cmd =
             getResultCmd result
     in
-    ( { model | savingPassword = passwordResult }, cmd )
+    ( { model | savingPassword = passwordResult }
+    , Cmd.batch [ cmd, Ports.scrollToTop ".Users__Edit__content" ]
+    )
