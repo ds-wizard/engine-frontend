@@ -12,7 +12,7 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (..)
-import Html.Attributes exposing (class, colspan, href, target)
+import Html.Attributes exposing (class, colspan, href, src, target)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
@@ -31,7 +31,6 @@ import Wizard.Routes as Routes
 import Wizard.Settings.Routes
 import Wizard.Users.Common.User as User
 import Wizard.Users.Routes
-import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -92,20 +91,21 @@ viewSettingsMenu appState =
 viewProfileMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg
 viewProfileMenu appState dropdownState =
     let
-        name =
+        ( name, imageUrl ) =
             case appState.session.user of
                 Just user ->
-                    User.fullName user
+                    ( User.fullName user, User.imageUrl user )
 
                 Nothing ->
-                    ""
+                    ( "", "" )
     in
     Dropdown.dropdown dropdownState
         { options = [ Dropdown.dropRight ]
         , toggleMsg = Wizard.Msgs.MenuMsg << ProfileMenuDropdownMsg
         , toggleButton =
             Dropdown.toggle [ Button.roleLink ]
-                [ faSet "menu.user" appState
+                [ div [ class "user-icon-wrapper" ]
+                    [ img [ class "user-icon", src imageUrl ] [] ]
                 , span [ class "sidebar-link" ] [ span [] [ text name ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =

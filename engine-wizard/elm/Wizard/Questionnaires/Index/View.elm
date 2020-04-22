@@ -79,6 +79,7 @@ listingConfig appState =
             , currentTime = appState.currentTime
             }
     , wrapMsg = ListingMsg
+    , iconView = Nothing
     }
 
 
@@ -110,7 +111,7 @@ listingDescription appState questionnaire =
             case questionnaire.owner of
                 Just owner ->
                     span [ class "fragment fragment-icon-light" ]
-                        [ faSet "questionnaireList.owner" appState
+                        [ img [ src (User.imageUrl owner), class "user-icon user-icon-small" ] []
                         , text <| User.fullName owner
                         ]
 
