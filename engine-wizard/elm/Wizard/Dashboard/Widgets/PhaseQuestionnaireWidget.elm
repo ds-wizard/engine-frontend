@@ -89,6 +89,7 @@ listingConfig appState =
             , currentTime = appState.currentTime
             }
     , wrapMsg = ListingMsg
+    , iconView = Nothing
     }
 
 

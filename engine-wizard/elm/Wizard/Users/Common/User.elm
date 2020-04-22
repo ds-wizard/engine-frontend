@@ -3,10 +3,12 @@ module Wizard.Users.Common.User exposing
     , compare
     , decoder
     , fullName
+    , imageUrl
     , toUserInfo
     )
 
 import Dict exposing (Dict)
+import Gravatar
 import Json.Decode as D exposing (..)
 import Json.Decode.Pipeline as D
 import Wizard.Common.UserInfo exposing (UserInfo)
@@ -17,6 +19,7 @@ type alias User =
     , email : String
     , firstName : String
     , lastName : String
+    , imageUrl : Maybe String
     , affiliation : Maybe String
     , role : String
     , active : Bool
@@ -39,6 +42,7 @@ decoder =
         |> D.required "email" D.string
         |> D.required "firstName" D.string
         |> D.required "lastName" D.string
+        |> D.required "imageUrl" (D.maybe D.string)
         |> D.required "affiliation" (D.maybe D.string)
         |> D.required "role" D.string
         |> D.required "active" D.bool
@@ -75,7 +79,19 @@ fullName user =
 toUserInfo : User -> UserInfo
 toUserInfo user =
     { uuid = user.uuid
+    , email = user.email
     , firstName = user.firstName
     , lastName = user.lastName
     , role = user.role
+    , imageUrl = user.imageUrl
     }
+
+
+imageUrl : { a | email : String, imageUrl : Maybe String } -> String
+imageUrl user =
+    let
+        options =
+            Gravatar.defaultOptions
+                |> Gravatar.withDefault Gravatar.MysteryMan
+    in
+    Maybe.withDefault (Gravatar.url options user.email) user.imageUrl

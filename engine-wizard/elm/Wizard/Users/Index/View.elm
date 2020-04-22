@@ -12,6 +12,7 @@ import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Routes as Routes
 import Wizard.Users.Common.Role as Role
 import Wizard.Users.Common.User as User exposing (User)
@@ -63,6 +64,7 @@ listingConfig appState =
     , emptyText = l_ "listing.empty" appState
     , updated = Nothing
     , wrapMsg = ListingMsg
+    , iconView = Just UserIcon.view
     }
 
 
@@ -86,10 +88,18 @@ listingTitleBadge appState user =
                     [ lx_ "badge.inactive" appState ]
     in
     span []
-        [ span [ classList [ ( "badge", True ), ( "badge-light", user.role /= Role.admin ), ( "badge-dark", user.role == Role.admin ) ] ]
-            [ text <| Role.toReadableString appState user.role ]
+        [ roleBadge appState user
         , activeBadge
         ]
+
+
+roleBadge : AppState -> User -> Html msg
+roleBadge appState user =
+    span
+        [ class "badge"
+        , classList [ ( "badge-light", user.role /= Role.admin ), ( "badge-dark", user.role == Role.admin ) ]
+        ]
+        [ text <| Role.toReadableString appState user.role ]
 
 
 listingDescription : AppState -> User -> Html Msg
@@ -177,12 +187,14 @@ deleteModal appState model =
 userCard : AppState -> User -> Html Msg
 userCard appState user =
     div [ class "user-card" ]
-        [ div [ class "icon" ] [ faSet "userCard.icon" appState ]
-        , div [ class "name" ] [ text <| User.fullName user ]
-        , div [ class "email" ]
-            [ a [ href ("mailto:" ++ user.email) ] [ text user.email ]
-            ]
-        , div [ class "role" ]
-            [ text (lg "user.role" appState ++ ": " ++ Role.toReadableString appState user.role)
+        [ div [ class "icon" ] [ img [ src (User.imageUrl user), class "user-icon user-icon-large" ] [] ]
+        , div []
+            [ div []
+                [ strong [ class "name" ] [ text <| User.fullName user ]
+                , roleBadge appState user
+                ]
+            , div [ class "email" ]
+                [ a [ href ("mailto:" ++ user.email) ] [ text user.email ]
+                ]
             ]
         ]
