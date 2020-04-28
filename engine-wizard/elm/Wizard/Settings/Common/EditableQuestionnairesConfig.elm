@@ -14,7 +14,6 @@ type alias EditableQuestionnairesConfig =
     { questionnaireAccessibility : SimpleFeatureConfig
     , levels : SimpleFeatureConfig
     , feedback : Feedback
-    , publicQuestionnaire : SimpleFeatureConfig
     }
 
 
@@ -32,7 +31,6 @@ decoder =
         |> D.required "questionnaireAccessibility" SimpleFeatureConfig.decoder
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "feedback" feedbackDecoder
-        |> D.required "publicQuestionnaire" SimpleFeatureConfig.decoder
 
 
 feedbackDecoder : Decoder Feedback
@@ -50,7 +48,6 @@ encode config =
         [ ( "questionnaireAccessibility", SimpleFeatureConfig.encode config.questionnaireAccessibility )
         , ( "levels", SimpleFeatureConfig.encode config.levels )
         , ( "feedback", encodeFeedback config.feedback )
-        , ( "publicQuestionnaire", SimpleFeatureConfig.encode config.publicQuestionnaire )
         ]
 
 

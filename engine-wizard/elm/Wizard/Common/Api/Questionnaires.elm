@@ -8,7 +8,6 @@ module Wizard.Common.Api.Questionnaires exposing
     , fetchSummaryReport
     , getQuestionnaire
     , getQuestionnaireMigration
-    , getQuestionnairePublic
     , getQuestionnaires
     , postQuestionnaire
     , putQuestionnaire
@@ -17,7 +16,7 @@ module Wizard.Common.Api.Questionnaires exposing
 
 import Json.Decode as D
 import Json.Encode exposing (Value)
-import Wizard.Common.Api exposing (ToMsg, httpGet, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtPostEmpty, jwtPut)
+import Wizard.Common.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtPostEmpty, jwtPut)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models.SummaryReport exposing (SummaryReport, summaryReportDecoder)
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
@@ -38,11 +37,6 @@ getQuestionnaire uuid =
 getQuestionnaireMigration : String -> AppState -> ToMsg QuestionnaireMigration msg -> Cmd msg
 getQuestionnaireMigration uuid =
     jwtGet ("/questionnaires/" ++ uuid ++ "/migrations/current") QuestionnaireMigration.decoder
-
-
-getQuestionnairePublic : AppState -> ToMsg QuestionnaireDetail msg -> Cmd msg
-getQuestionnairePublic =
-    httpGet "/questionnaires/public" QuestionnaireDetail.decoder
 
 
 postQuestionnaire : Value -> AppState -> ToMsg Questionnaire msg -> Cmd msg

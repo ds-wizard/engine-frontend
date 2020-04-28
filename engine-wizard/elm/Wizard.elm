@@ -56,9 +56,6 @@ decideInitialRoute model route originalRoute =
                 ( True, Wizard.Public.Routes.BookReferenceRoute _ ) ->
                     fetchData model
 
-                ( True, Wizard.Public.Routes.QuestionnaireRoute ) ->
-                    fetchData model
-
                 ( True, _ ) ->
                     cmdNavigate model.appState Routes.DashboardRoute
 

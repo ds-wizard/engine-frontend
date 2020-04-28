@@ -9,7 +9,6 @@ import Wizard.Public.ForgottenPasswordConfirmation.Update
 import Wizard.Public.Login.Update
 import Wizard.Public.Models exposing (Model)
 import Wizard.Public.Msgs exposing (Msg(..))
-import Wizard.Public.Questionnaire.Update
 import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Public.Signup.Update
 import Wizard.Public.SignupConfirmation.Update
@@ -25,10 +24,6 @@ fetchData route appState =
         BookReferenceRoute uuid ->
             Cmd.map BookReferenceMsg <|
                 Wizard.Public.BookReference.Update.fetchData uuid appState
-
-        QuestionnaireRoute ->
-            Cmd.map QuestionnaireMsg <|
-                Wizard.Public.Questionnaire.Update.fetchData appState
 
         SignupConfirmationRoute userId hash ->
             Cmd.map SignupConfirmationMsg <|
@@ -75,13 +70,6 @@ update msg wrapMsg appState model =
                     Wizard.Public.Login.Update.update lMsg (wrapMsg << LoginMsg) appState model.loginModel
             in
             ( { model | loginModel = loginModel }, cmd )
-
-        QuestionnaireMsg qMsg ->
-            let
-                ( questionnaireModel, cmd ) =
-                    Wizard.Public.Questionnaire.Update.update qMsg (wrapMsg << QuestionnaireMsg) appState model.questionnaireModel
-            in
-            ( { model | questionnaireModel = questionnaireModel }, cmd )
 
         SignupMsg sMsg ->
             let
