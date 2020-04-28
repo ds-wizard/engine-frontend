@@ -43,7 +43,8 @@ fetchData route appState model =
             genericFetch LookAndFeelMsg
 
         KnowledgeModelRegistryRoute ->
-            genericFetch KnowledgeModelRegistryMsg
+            Cmd.map KnowledgeModelRegistryMsg <|
+                Wizard.Settings.KnowledgeModelRegistry.Update.fetchData appState
 
         QuestionnairesRoute ->
             genericFetch QuestionnairesMsg

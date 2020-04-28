@@ -4,6 +4,7 @@ module Wizard.Common.Form.Validate exposing
     , ifElse
     , maybeString
     , optionalString
+    , organizationId
     , regex
     , uuid
     )
@@ -72,6 +73,11 @@ regex r =
 uuid : Validation CustomFormError String
 uuid =
     validateRegexWithCustomError uuidPattern InvalidUuid
+
+
+organizationId : Validation CustomFormError String
+organizationId =
+    regex "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"
 
 
 validateRegexWithCustomError : Regex -> CustomFormError -> Validation CustomFormError String

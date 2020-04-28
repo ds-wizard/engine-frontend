@@ -20,6 +20,7 @@ import Wizard.KMEditor.Models
 import Wizard.KnowledgeModels.Models
 import Wizard.Public.Models
 import Wizard.Questionnaires.Models
+import Wizard.Registry.Models
 import Wizard.Routes as Routes
 import Wizard.Settings.Models
 import Wizard.Users.Models
@@ -34,6 +35,7 @@ type alias Model =
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
     , publicModel : Wizard.Public.Models.Model
     , questionnairesModel : Wizard.Questionnaires.Models.Model
+    , registryModel : Wizard.Registry.Models.Model
     , settingsModel : Wizard.Settings.Models.Model
     , users : Wizard.Users.Models.Model
     }
@@ -47,8 +49,9 @@ initialModel appState =
     , documentsModel = Wizard.Documents.Models.initialModel
     , kmEditorModel = Wizard.KMEditor.Models.initialModel
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
-    , questionnairesModel = Wizard.Questionnaires.Models.initialModel
     , publicModel = Wizard.Public.Models.initialModel
+    , questionnairesModel = Wizard.Questionnaires.Models.initialModel
+    , registryModel = Wizard.Registry.Models.initialModel
     , settingsModel = Wizard.Settings.Models.initialModel
     , users = Wizard.Users.Models.initialModel appState
     }
@@ -119,6 +122,9 @@ initLocalModel model =
 
         Routes.QuestionnairesRoute route ->
             { model | questionnairesModel = Wizard.Questionnaires.Models.initLocalModel route model.questionnairesModel }
+
+        Routes.RegistryRoute route ->
+            { model | registryModel = Wizard.Registry.Models.initLocalModel route model.registryModel }
 
         Routes.SettingsRoute route ->
             { model | settingsModel = Wizard.Settings.Models.initLocalModel route model.settingsModel }
