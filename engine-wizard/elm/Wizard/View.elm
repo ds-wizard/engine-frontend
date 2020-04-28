@@ -14,6 +14,7 @@ import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Public.View
 import Wizard.Questionnaires.View
+import Wizard.Registry.View
 import Wizard.Routes as Routes
 import Wizard.Settings.View
 import Wizard.Users.View
@@ -65,6 +66,12 @@ view model =
                     |> Wizard.Public.View.view route model.appState
                     |> Html.map PublicMsg
                     |> Layout.public model
+
+            Routes.RegistryRoute route ->
+                model.registryModel
+                    |> Wizard.Registry.View.view route model.appState
+                    |> Html.map RegistryMsg
+                    |> Layout.app model
 
             Routes.SettingsRoute route ->
                 model.settingsModel
