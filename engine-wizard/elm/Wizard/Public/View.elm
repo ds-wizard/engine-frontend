@@ -9,7 +9,6 @@ import Wizard.Public.ForgottenPasswordConfirmation.View
 import Wizard.Public.Login.View
 import Wizard.Public.Models exposing (Model)
 import Wizard.Public.Msgs exposing (Msg(..))
-import Wizard.Public.Questionnaire.View
 import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Public.Signup.View
 import Wizard.Public.SignupConfirmation.View
@@ -37,10 +36,6 @@ view route appState model =
         LoginRoute _ ->
             Html.map LoginMsg <|
                 Wizard.Public.Login.View.view appState model.loginModel
-
-        QuestionnaireRoute ->
-            Html.map QuestionnaireMsg <|
-                Wizard.Public.Questionnaire.View.view appState model.questionnaireModel
 
         SignupRoute ->
             Html.map SignupMsg <|

@@ -7,7 +7,6 @@ module Wizard.Routing exposing
     , loginRoute
     , matchers
     , parseLocation
-    , questionnaireDemoRoute
     , routeIfAllowed
     , signupRoute
     , toUrl
@@ -17,7 +16,6 @@ import Browser.Navigation exposing (Key, pushUrl)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing (..)
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Documents.Routing
@@ -171,11 +169,6 @@ loginRoute originalUrl =
 signupRoute : Routes.Route
 signupRoute =
     Routes.PublicRoute Wizard.Public.Routes.SignupRoute
-
-
-questionnaireDemoRoute : Routes.Route
-questionnaireDemoRoute =
-    Routes.PublicRoute Wizard.Public.Routes.QuestionnaireRoute
 
 
 appRoute : Routes.Route

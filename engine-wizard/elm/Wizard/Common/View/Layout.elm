@@ -24,7 +24,7 @@ import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Questionnaires.Routes
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing exposing (appRoute, homeRoute, loginRoute, questionnaireDemoRoute, signupRoute)
+import Wizard.Routing exposing (appRoute, homeRoute, loginRoute, signupRoute)
 import Wizard.Users.Routes
 
 
@@ -74,18 +74,6 @@ public model content =
 publicHeader : Model -> Html Msg
 publicHeader model =
     let
-        questionnaireDemoLink =
-            if model.appState.config.questionnaires.publicQuestionnaire.enabled then
-                li [ class "nav-item" ]
-                    [ linkTo model.appState
-                        questionnaireDemoRoute
-                        [ class "nav-link" ]
-                        [ lx_ "header.questionnaireDemo" model.appState ]
-                    ]
-
-            else
-                emptyNode
-
         signUpLink =
             if model.appState.config.authentication.internal.registration.enabled then
                 li [ class "nav-item" ]
@@ -100,8 +88,7 @@ publicHeader model =
 
         links =
             if userLoggedIn model then
-                [ questionnaireDemoLink
-                , li [ class "nav-item" ]
+                [ li [ class "nav-item" ]
                     [ linkTo model.appState
                         appRoute
                         [ class "nav-link" ]
@@ -110,8 +97,7 @@ publicHeader model =
                 ]
 
             else
-                [ questionnaireDemoLink
-                , li [ class "nav-item" ]
+                [ li [ class "nav-item" ]
                     [ linkTo model.appState
                         (loginRoute Nothing)
                         [ class "nav-link" ]
