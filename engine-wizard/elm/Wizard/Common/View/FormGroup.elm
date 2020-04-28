@@ -17,6 +17,7 @@ module Wizard.Common.View.FormGroup exposing
     , select
     , textView
     , textarea
+    , textareaAttrs
     , toggle
     )
 
@@ -211,6 +212,11 @@ htmlRadioGroup appState options =
 textarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
 textarea =
     formGroup Input.textArea []
+
+
+textareaAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+textareaAttrs =
+    formGroup Input.textArea
 
 
 resizableTextarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg

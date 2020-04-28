@@ -17,6 +17,7 @@ import Wizard.Common.Form.Validate as V
 type alias OrganizationConfigForm =
     { name : String
     , organizationId : String
+    , description : String
     , affiliations : Maybe String
     }
 
@@ -35,7 +36,8 @@ validation : Validation CustomFormError OrganizationConfigForm
 validation =
     V.succeed OrganizationConfigForm
         |> V.andMap (V.field "name" V.string)
-        |> V.andMap (V.field "organizationId" (V.regex "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"))
+        |> V.andMap (V.field "organizationId" V.organizationId)
+        |> V.andMap (V.field "description" V.string)
         |> V.andMap (V.field "affiliations" V.maybeString)
 
 
@@ -43,6 +45,7 @@ organizationConfigToFormInitials : OrganizationConfig -> List ( String, Field.Fi
 organizationConfigToFormInitials config =
     [ ( "name", Field.string config.name )
     , ( "organizationId", Field.string config.organizationId )
+    , ( "description", Field.string config.description )
     , ( "affiliations", Field.string <| String.join "\n" config.affiliations )
     ]
 
@@ -63,5 +66,6 @@ toOrganizationConfig form =
     in
     { name = form.name
     , organizationId = form.organizationId
+    , description = form.description
     , affiliations = affiliations
     }

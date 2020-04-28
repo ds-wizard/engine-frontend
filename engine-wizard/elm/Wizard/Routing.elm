@@ -26,6 +26,7 @@ import Wizard.KnowledgeModels.Routing
 import Wizard.Public.Routes
 import Wizard.Public.Routing
 import Wizard.Questionnaires.Routing
+import Wizard.Registry.Routing
 import Wizard.Routes as Routes
 import Wizard.Settings.Routing
 import Wizard.Users.Routing
@@ -41,6 +42,7 @@ matchers appState =
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
                 ++ Wizard.Questionnaires.Routing.parsers appState Routes.QuestionnairesRoute
+                ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
                 ++ Wizard.Users.Routing.parses Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
@@ -79,6 +81,9 @@ isAllowed route maybeJwt =
         Routes.QuestionnairesRoute questionnaireRoute ->
             Wizard.Questionnaires.Routing.isAllowed questionnaireRoute maybeJwt
 
+        Routes.RegistryRoute registryRoute ->
+            Wizard.Registry.Routing.isAllowed registryRoute maybeJwt
+
         Routes.SettingsRoute settingsRoute ->
             Wizard.Settings.Routing.isAllowed settingsRoute maybeJwt
 
@@ -114,6 +119,9 @@ toUrl appState route =
 
                 Routes.PublicRoute publicRoute ->
                     Wizard.Public.Routing.toUrl appState publicRoute
+
+                Routes.RegistryRoute registryRoute ->
+                    Wizard.Registry.Routing.toUrl appState registryRoute
 
                 Routes.SettingsRoute settingsRoute ->
                     Wizard.Settings.Routing.toUrl appState settingsRoute
