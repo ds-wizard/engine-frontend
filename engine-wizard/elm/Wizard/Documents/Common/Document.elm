@@ -6,11 +6,11 @@ import Json.Decode.Pipeline as D
 import List.Extra as List
 import Time
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.UserInfo as UserInfo
 import Wizard.Documents.Common.DocumentState as DocumentState exposing (DocumentState)
 import Wizard.Documents.Common.Template as Template exposing (Template)
 import Wizard.Documents.Common.TemplateFormat exposing (TemplateFormat)
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
-import Wizard.Users.Common.User as User
 
 
 type alias Document =
@@ -29,7 +29,7 @@ isEditable : AppState -> Document -> Bool
 isEditable appState document =
     let
         isAdmin =
-            User.isAdmin appState.session.user
+            UserInfo.isAdmin appState.session.user
 
         isOwner =
             appState.session.user

@@ -12,6 +12,7 @@ type Route
     | LookAndFeelRoute
     | KnowledgeModelRegistryRoute
     | QuestionnairesRoute
+    | SubmissionRoute
 
 
 defaultRoute : Route

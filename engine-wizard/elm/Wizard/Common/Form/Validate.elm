@@ -1,12 +1,15 @@
 module Wizard.Common.Form.Validate exposing
     ( confirmation
+    , dict
     , ifElse
     , maybeString
     , optionalString
+    , organizationId
     , regex
     , uuid
     )
 
+import Dict exposing (Dict)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Regex exposing (Regex)
@@ -72,6 +75,11 @@ uuid =
     validateRegexWithCustomError uuidPattern InvalidUuid
 
 
+organizationId : Validation CustomFormError String
+organizationId =
+    regex "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"
+
+
 validateRegexWithCustomError : Regex -> CustomFormError -> Validation CustomFormError String
 validateRegexWithCustomError r customFormError =
     V.string
@@ -97,3 +105,14 @@ uuidPattern =
 createRegex : String -> Regex
 createRegex =
     Maybe.withDefault Regex.never << Regex.fromString
+
+
+dict : Validation e a -> Validation e (Dict String a)
+dict valueValidation =
+    let
+        validateEntry =
+            V.succeed Tuple.pair
+                |> V.andMap (V.field "key" V.string)
+                |> V.andMap (V.field "value" valueValidation)
+    in
+    V.map Dict.fromList <| V.list validateEntry

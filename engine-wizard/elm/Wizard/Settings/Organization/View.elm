@@ -41,6 +41,7 @@ formView appState form =
     div []
         [ FormGroup.input appState form "name" (l_ "form.name" appState)
         , FormExtra.textAfter (l_ "form.name.desc" appState)
+        , FormGroup.textarea appState form "description" (l_ "form.description" appState)
         , FormGroup.input appState form "organizationId" (l_ "form.organizationId" appState)
         , FormExtra.textAfter (l_ "form.organizationId.desc" appState)
         , FormGroup.resizableTextarea appState form "affiliations" (l_ "form.affiliations" appState)

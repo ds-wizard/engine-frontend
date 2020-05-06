@@ -13,6 +13,7 @@ import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig exposing (Loo
 import Wizard.Common.Config.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Common.Config.QuestionnairesConfig as QuestionnairesConfig exposing (QuestionnairesConfig)
+import Wizard.Common.Config.SubmissionConfig as SubmissionConfig exposing (SubmissionConfig)
 
 
 type alias Config =
@@ -23,6 +24,7 @@ type alias Config =
     , lookAndFeel : LookAndFeelConfig
     , knowledgeModelRegistry : KnowledgeModelRegistryConfig
     , questionnaires : QuestionnairesConfig
+    , submission : SubmissionConfig
     }
 
 
@@ -36,6 +38,7 @@ decoder =
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "knowledgeModelRegistry" KnowledgeModelRegistryConfig.decoder
         |> D.required "questionnaire" QuestionnairesConfig.decoder
+        |> D.required "submission" SubmissionConfig.decoder
 
 
 default : Config
@@ -47,4 +50,5 @@ default =
     , lookAndFeel = LookAndFeelConfig.default
     , knowledgeModelRegistry = KnowledgeModelRegistryConfig.default
     , questionnaires = QuestionnairesConfig.default
+    , submission = SubmissionConfig.default
     }

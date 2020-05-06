@@ -9,7 +9,6 @@ type alias QuestionnairesConfig =
     { questionnaireAccessibility : SimpleFeatureConfig
     , levels : SimpleFeatureConfig
     , feedback : SimpleFeatureConfig
-    , publicQuestionnaire : SimpleFeatureConfig
     }
 
 
@@ -19,7 +18,6 @@ decoder =
         |> D.required "questionnaireAccessibility" SimpleFeatureConfig.decoder
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "feedback" SimpleFeatureConfig.decoder
-        |> D.required "publicQuestionnaire" SimpleFeatureConfig.decoder
 
 
 default : QuestionnairesConfig
@@ -27,5 +25,4 @@ default =
     { questionnaireAccessibility = SimpleFeatureConfig.enabled
     , levels = SimpleFeatureConfig.enabled
     , feedback = SimpleFeatureConfig.enabled
-    , publicQuestionnaire = SimpleFeatureConfig.enabled
     }

@@ -11,6 +11,7 @@ import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
 import Wizard.Public.Msgs
 import Wizard.Questionnaires.Msgs
+import Wizard.Registry.Msgs
 import Wizard.Settings.Msgs
 import Wizard.Users.Msgs
 
@@ -28,5 +29,6 @@ type Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg
     | QuestionnairesMsg Wizard.Questionnaires.Msgs.Msg
+    | RegistryMsg Wizard.Registry.Msgs.Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg

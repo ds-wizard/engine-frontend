@@ -2,14 +2,20 @@ module Wizard.Documents.Index.View exposing (..)
 
 import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
-import Html.Attributes exposing (class, href, target, title)
+import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
+import Html.Events exposing (onCheck, onClick)
+import Markdown
+import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lh, lx)
+import Shared.Locale exposing (l, lf, lh, lx)
+import Wizard.Auth.Permission as Permission
 import Wizard.Common.Api.Documents as DocumentsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -28,6 +34,11 @@ import Wizard.Utils exposing (listInsertIf)
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Documents.Index.View"
+
+
+lf_ : String -> List String -> AppState -> String
+lf_ =
+    lf "Wizard.Documents.Index.View"
 
 
 lx_ : String -> AppState -> Html msg
@@ -80,6 +91,7 @@ viewDocuments appState model ( documents, mbQuestionnaire ) =
         , FormResult.successOnlyView appState model.deletingDocument
         , Listing.view appState (listingConfig appState) documents
         , deleteModal appState model
+        , submitModal appState model
         ]
 
 
@@ -105,6 +117,7 @@ listingConfig appState =
             , currentTime = appState.currentTime
             }
     , wrapMsg = ListingMsg
+    , iconView = Nothing
     }
 
 
@@ -173,6 +186,14 @@ listingActions appState document =
                 , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl document.uuid appState)
                 }
 
+        submit =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "documents.submit" appState
+                , label = l_ "action.submit" appState
+                , msg = ListingActionMsg (ShowHideSubmitDocument <| Just document)
+                }
+
         delete =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
@@ -180,9 +201,15 @@ listingActions appState document =
                 , label = l_ "action.delete" appState
                 , msg = ListingActionMsg (ShowHideDeleteDocument <| Just document)
                 }
+
+        submitEnabled =
+            (document.state == DoneDocumentState)
+                && appState.config.submission.enabled
+                && Permission.hasPerm appState.jwt Permission.submission
     in
     []
         |> listInsertIf download (document.state == DoneDocumentState)
+        |> listInsertIf submit submitEnabled
         |> listInsertIf Listing.dropdownSeparator (document.state == DoneDocumentState)
         |> listInsertIf delete (Document.isEditable appState document)
 
@@ -215,8 +242,8 @@ deleteModal appState model =
     let
         ( visible, name ) =
             case model.documentToBeDeleted of
-                Just questionnaire ->
-                    ( True, questionnaire.name )
+                Just document ->
+                    ( True, document.name )
 
                 Nothing ->
                     ( False, "" )
@@ -238,3 +265,107 @@ deleteModal appState model =
             }
     in
     Modal.confirm appState modalConfig
+
+
+submitModal : AppState -> Model -> Html Msg
+submitModal appState model =
+    let
+        ( visible, name ) =
+            case model.documentToBeSubmitted of
+                Just document ->
+                    ( True, document.name )
+
+                Nothing ->
+                    ( False, "" )
+
+        submitButton =
+            if ActionResult.isSuccess model.submittingDocument then
+                button [ class "btn btn-primary", onClick <| ShowHideSubmitDocument Nothing ]
+                    [ lx_ "submitModal.button.done" appState ]
+
+            else if ActionResult.isSuccess model.submissionServices && Maybe.isJust model.selectedSubmissionServiceId then
+                ActionButton.button appState
+                    { label = l_ "submitModal.button.submit" appState
+                    , result = model.submittingDocument
+                    , msg = SubmitDocument
+                    , dangerous = False
+                    }
+
+            else
+                button [ class "btn btn-primary", disabled True ]
+                    [ lx_ "submitModal.button.submit" appState ]
+
+        cancelButton =
+            button [ onClick <| ShowHideSubmitDocument Nothing, class "btn btn-secondary", disabled <| ActionResult.isLoading model.submittingDocument ]
+                [ lx_ "submitModal.button.cancel" appState ]
+
+        viewOption submissionService =
+            div [ class "form-check", classList [ ( "form-check-selected", model.selectedSubmissionServiceId == Just submissionService.id ) ] ]
+                [ input
+                    [ type_ "radio"
+                    , class "form-check-input"
+                    , id submissionService.id
+                    , checked (model.selectedSubmissionServiceId == Just submissionService.id)
+                    , onCheck (\_ -> SelectSubmissionService submissionService.id)
+                    , disabled <| ActionResult.isLoading model.submittingDocument
+                    ]
+                    []
+                , label [ class "form-check-label", for submissionService.id ]
+                    [ text submissionService.name
+                    , Markdown.toHtml [ class "form-text text-muted" ] submissionService.description
+                    ]
+                ]
+
+        submissionBody submissionServices =
+            div []
+                [ FormResult.errorOnlyView appState model.submittingDocument
+                , div [ class "form-radio-group" ]
+                    (List.map viewOption submissionServices)
+                ]
+
+        resultBody submission =
+            let
+                link =
+                    case submission.location of
+                        Just location ->
+                            div [ class "mt-2" ]
+                                [ lx_ "submitModal.success.link" appState
+                                , a [ href location, target "_blank" ]
+                                    [ text location ]
+                                ]
+
+                        Nothing ->
+                            emptyNode
+            in
+            div [ class "alert alert-success" ]
+                [ faSet "_global.success" appState
+                , lx_ "submitModal.success.message" appState
+                , link
+                ]
+
+        body =
+            if ActionResult.isSuccess model.submittingDocument then
+                ActionResultBlock.view appState resultBody model.submittingDocument
+
+            else
+                ActionResultBlock.view appState submissionBody model.submissionServices
+
+        content =
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ text <| lf_ "submitModal.title" [ name ] appState ]
+                ]
+            , div [ class "modal-body" ]
+                [ body
+                ]
+            , div [ class "modal-footer" ]
+                [ submitButton
+                , cancelButton
+                ]
+            ]
+
+        modalConfig =
+            { modalContent = content
+            , visible = visible
+            }
+    in
+    Modal.simple modalConfig

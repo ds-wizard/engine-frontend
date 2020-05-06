@@ -21,7 +21,6 @@ type alias EditableQuestionnairesConfigForm =
     , feedbackToken : String
     , feedbackOwner : String
     , feedbackRepo : String
-    , publicQuestionnaireEnabled : Bool
     }
 
 
@@ -40,7 +39,6 @@ init config =
             , ( "feedbackToken", Field.string config.feedback.token )
             , ( "feedbackOwner", Field.string config.feedback.owner )
             , ( "feedbackRepo", Field.string config.feedback.repo )
-            , ( "publicQuestionnaireEnabled", Field.bool config.publicQuestionnaire.enabled )
             ]
     in
     Form.initial fields validation
@@ -55,7 +53,6 @@ validation =
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackOwner" V.string V.optionalString)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackRepo" V.string V.optionalString)
-        |> V.andMap (V.field "publicQuestionnaireEnabled" V.bool)
 
 
 toEditableQuestionnaireConfig : EditableQuestionnairesConfigForm -> EditableQuestionnairesConfig
@@ -68,5 +65,4 @@ toEditableQuestionnaireConfig form =
         , owner = form.feedbackOwner
         , repo = form.feedbackRepo
         }
-    , publicQuestionnaire = { enabled = form.publicQuestionnaireEnabled }
     }

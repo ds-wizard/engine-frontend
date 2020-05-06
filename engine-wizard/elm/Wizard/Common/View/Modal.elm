@@ -12,9 +12,15 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
+import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.Common.View.Modal"
 
 
 type alias SimpleConfig msg =
@@ -63,7 +69,7 @@ confirm appState cfg =
             case cfg.cancelMsg of
                 Just cancelMsg ->
                     button [ onClick cancelMsg, disabled cancelDisabled, class "btn btn-secondary" ]
-                        [ text "Cancel" ]
+                        [ lx_ "button.cancel" appState ]
 
                 Nothing ->
                     emptyNode

@@ -92,7 +92,7 @@ body {
 
                 .fa {
                     display: inline-block;
-                    width: 30px;
+                    width: 40px;
                     text-align: center
                 }
             }
@@ -138,8 +138,14 @@ body {
 
                 .fa {
                     display: inline-block;
-                    width: 30px;
+                    width: 40px;
                     text-align: center
+                }
+
+                .user-icon-wrapper {
+                    display: inline-block;
+                    width: 40px;
+                    text-align: center;
                 }
 
                 & > span {

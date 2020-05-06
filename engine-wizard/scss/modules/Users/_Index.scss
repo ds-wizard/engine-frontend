@@ -1,24 +1,29 @@
+@import "../../variables";
 @import "../../mixins";
 
 .Users__Index {
     .user-card {
-        text-align: center;
+        display: flex;
         background: $gray-200;
         @include border-radius(5px);
         padding: 20px;
         margin: auto;
+        justify-content: flex-start;
+        align-items: center;
 
         .icon {
-            font-size: 50px;
+            margin-right: 1rem;
         }
 
         .name {
-            font-size: 18px;
-            margin-top: 5px;
+            margin-right: 0.5rem;
+        }
+
+        .badge {
+            vertical-align: baseline;
         }
 
         .email {
-            margin-bottom: 10px;
             word-break: break-all;
         }
     }

@@ -17,6 +17,7 @@ import Wizard.Msgs exposing (Msg(..))
 import Wizard.Ports as Ports
 import Wizard.Public.Update
 import Wizard.Questionnaires.Update
+import Wizard.Registry.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation)
 import Wizard.Settings.Update
@@ -51,6 +52,10 @@ fetchData model =
                 Routes.PublicRoute route ->
                     Cmd.map Wizard.Msgs.PublicMsg <|
                         Wizard.Public.Update.fetchData route model.appState
+
+                Routes.RegistryRoute route ->
+                    Cmd.map Wizard.Msgs.RegistryMsg <|
+                        Wizard.Registry.Update.fetchData route model.appState
 
                 Routes.SettingsRoute route ->
                     Cmd.map Wizard.Msgs.SettingsMsg <|
@@ -171,6 +176,13 @@ update msg model =
                     Wizard.Questionnaires.Update.update Wizard.Msgs.QuestionnairesMsg questionnairesMsg model.appState model.questionnairesModel
             in
             ( { model | questionnairesModel = questionnairesModel }, cmd )
+
+        Wizard.Msgs.RegistryMsg registryMsg ->
+            let
+                ( registryModel, cmd ) =
+                    Wizard.Registry.Update.update registryMsg Wizard.Msgs.RegistryMsg model.appState model.registryModel
+            in
+            ( { model | registryModel = registryModel }, cmd )
 
         Wizard.Msgs.SettingsMsg settingsMsg ->
             let

@@ -5,6 +5,7 @@ import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Public.Routes
 import Wizard.Questionnaires.Routes
+import Wizard.Registry.Routes
 import Wizard.Settings.Routes
 import Wizard.Users.Routes
 
@@ -16,6 +17,7 @@ type Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
     | PublicRoute Wizard.Public.Routes.Route
     | QuestionnairesRoute Wizard.Questionnaires.Routes.Route
+    | RegistryRoute Wizard.Registry.Routes.Route
     | SettingsRoute Wizard.Settings.Routes.Route
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute

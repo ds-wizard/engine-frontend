@@ -14,13 +14,6 @@ import Wizard.Public.Routes exposing (Route(..))
 parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
 parsers appState wrapRoute =
     let
-        publicQuestionnaireRoutes =
-            if appState.config.questionnaires.publicQuestionnaire.enabled then
-                [ map (wrapRoute <| QuestionnaireRoute) (s (lr "public.questionnaire" appState)) ]
-
-            else
-                []
-
         signUpRoutes =
             if appState.config.authentication.internal.registration.enabled then
                 [ map (wrapRoute <| SignupRoute) (s (lr "public.signup" appState))
@@ -36,7 +29,6 @@ parsers appState wrapRoute =
     , map (forgottenPasswordConfirmation wrapRoute) (s (lr "public.forgottenPassword" appState) </> string </> string)
     , map (wrapRoute << LoginRoute) (top <?> Query.string (lr "login.originalUrl" appState))
     ]
-        ++ publicQuestionnaireRoutes
         ++ signUpRoutes
 
 
@@ -77,9 +69,6 @@ toUrl appState route =
 
                 Nothing ->
                     []
-
-        QuestionnaireRoute ->
-            [ lr "public.questionnaire" appState ]
 
         SignupRoute ->
             [ lr "public.signup" appState ]
