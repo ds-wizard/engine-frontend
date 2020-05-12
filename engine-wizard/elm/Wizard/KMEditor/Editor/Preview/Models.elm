@@ -97,7 +97,7 @@ createQuestionnaireModel appState packageId km =
         , package = { package | id = packageId }
         , knowledgeModel = km
         , replies = []
-        , level = 0
+        , level = 1
         , selectedTagUuids = []
         , labels = []
         }
