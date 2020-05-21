@@ -36,22 +36,22 @@ xs =
 
 sm : (Theme -> Color) -> Theme -> Style
 sm =
-    shadow 4 4
+    shadow 2 4
 
 
 md : (Theme -> Color) -> Theme -> Style
 md =
-    shadow 8 8
+    shadow 4 8
 
 
 lg : (Theme -> Color) -> Theme -> Style
 lg =
-    shadow 16 16
+    shadow 4 16
 
 
 xl : (Theme -> Color) -> Theme -> Style
 xl =
-    shadow 32 32
+    shadow 8 32
 
 
 shadow : Float -> Float -> (Theme -> Color) -> Theme -> Style

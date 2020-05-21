@@ -74,6 +74,11 @@ insetXL =
     padding (px2rem xl)
 
 
+insetSquishXS : Style
+insetSquishXS =
+    padding2 (px2rem (xs / 2)) (px2rem xs)
+
+
 insetSquishSM : Style
 insetSquishSM =
     padding2 (px2rem xs) (px2rem sm)

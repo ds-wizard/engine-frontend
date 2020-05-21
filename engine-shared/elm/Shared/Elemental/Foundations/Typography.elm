@@ -6,6 +6,7 @@ module Shared.Elemental.Foundations.Typography exposing
     , copy1link
     , copy2
     , copy2contrast
+    , copy2inversed
     , copy2light
     , copy2lighter
     , copy2link
@@ -90,9 +91,9 @@ heading3inversed theme =
 navbarBrand : Theme -> Style
 navbarBrand theme =
     Css.batch
-        [ important (color theme.colors.textInversed)
+        [ important (color theme.colors.textDefault)
         , important (fontSize (px2rem sizeLG))
-        , important (fontWeight normal)
+        , important (fontWeight bold)
         ]
 
 
@@ -165,6 +166,14 @@ copy2lighter theme =
         [ color theme.colors.textLighter
         , fontSize (px2rem sizeSM)
         , fontWeight normal
+        ]
+
+
+copy2inversed : Theme -> Style
+copy2inversed theme =
+    Css.batch
+        [ color theme.colors.textInversed
+        , fontSize (px2rem sizeSM)
         ]
 
 

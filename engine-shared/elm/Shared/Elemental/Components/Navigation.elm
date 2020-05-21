@@ -6,6 +6,8 @@ module Shared.Elemental.Components.Navigation exposing
 import Css exposing (..)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css, href)
+import Shared.Elemental.Foundations.Shadow as Shadow
+import Shared.Elemental.Foundations.Size as Size
 import Shared.Elemental.Foundations.Spacing as Spacing
 import Shared.Elemental.Foundations.Typography as Typography
 import Shared.Elemental.Theme exposing (Theme)
@@ -22,12 +24,14 @@ view : ViewConfig -> Html msg
 view cfg =
     let
         styles =
-            [ alignItems center
-            , backgroundColor cfg.theme.colors.primary
+            [ Shadow.xl Shadow.colorDefault cfg.theme
+            , borderBottom3 (px 1) solid cfg.theme.colors.border
+            , alignItems center
+            , backgroundColor cfg.theme.colors.background
             , displayFlex
-            , height (px2rem 50)
+            , height (px2rem Size.navigationHeight)
             , left zero
-            , padding2 zero (px2rem Spacing.gridCozy)
+            , padding2 zero (px2rem Spacing.gridComfortable)
             , position fixed
             , right zero
             , top zero

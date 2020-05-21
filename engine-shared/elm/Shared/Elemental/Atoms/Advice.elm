@@ -10,7 +10,7 @@ import Shared.Elemental.Foundations.Border as Border
 import Shared.Elemental.Foundations.Grid as Grid
 import Shared.Elemental.Foundations.Illustration as Illustration
 import Shared.Elemental.Foundations.Spacing as Spacing
-import Shared.Elemental.Foundations.Transition as Animation
+import Shared.Elemental.Foundations.Transition as Transition
 import Shared.Elemental.Foundations.Typography as Typography
 import Shared.Elemental.Theme exposing (Theme)
 import Shared.Elemental.Utils exposing (px2rem)
@@ -62,7 +62,7 @@ closeButton theme =
             , top zero
             , cursor pointer
             , transition
-                [ Animation.default Css.Transitions.color3
+                [ Transition.default Css.Transitions.color3
                 ]
             , hover
                 [ color theme.colors.primary

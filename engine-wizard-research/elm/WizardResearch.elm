@@ -2,15 +2,13 @@ module WizardResearch exposing (main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
-import Css exposing (backgroundColor, height, hex, pct, px, width)
 import Html
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (css, href)
+import Html.Styled.Attributes exposing (href)
 import Json.Decode exposing (Value)
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Atoms.Heading as Heading
 import Shared.Elemental.Foundations.Grid as Grid
-import Shared.Elemental.Foundations.Illustration as Illustration
 import Shared.Html.Styled exposing (fa)
 import Shared.Utils exposing (dispatch)
 import Url exposing (Url)
@@ -60,7 +58,7 @@ type PageModel
 
 init : Value -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =
-    initViewModel
+    initPageModel
         { appState = AppState.init flags
         , route = Route.fromUrl url
         , navKey = navKey
@@ -68,8 +66,8 @@ init flags url navKey =
         }
 
 
-initViewModel : Model -> ( Model, Cmd Msg )
-initViewModel model =
+initPageModel : Model -> ( Model, Cmd Msg )
+initPageModel model =
     if Route.isPublic model.route || AppState.authenticated model.appState then
         case model.route of
             Route.AuthCallback id mbError mbCode ->
@@ -103,8 +101,17 @@ initViewModel model =
                 ProjectCreate.init model.appState
                     |> updateWith ProjectCreate ProjectCreateMsg model
 
-            Route.Project uuid ->
-                Project.init model.appState uuid
+            Route.Project uuid projectRoute ->
+                let
+                    originalProjectModel =
+                        case model.pageModel of
+                            Project projectModel ->
+                                Just projectModel
+
+                            _ ->
+                                Nothing
+                in
+                Project.init model.appState uuid projectRoute originalProjectModel
                     |> updateWith Project ProjectMsg model
 
     else
@@ -130,7 +137,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.pageModel ) of
         ( OnUrlChange url, _ ) ->
-            initViewModel { model | route = Route.fromUrl url }
+            initPageModel { model | route = Route.fromUrl url }
 
         ( OnUrlRequest urlRequest, _ ) ->
             case urlRequest of
@@ -235,7 +242,7 @@ view model =
                     { title = "Dashboard"
                     , content =
                         Grid.comfortable.container
-                            [ Grid.containerLimitedSmall ]
+                            [ Grid.containerLimitedSmall, Grid.containerIndented ]
                             [ Grid.comfortable.row []
                                 [ Grid.comfortable.col 12
                                     []

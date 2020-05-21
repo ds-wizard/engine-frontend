@@ -41,6 +41,7 @@ import Task
 import WizardResearch.Common.AppState exposing (AppState)
 import WizardResearch.Pages.ProjectCreate.ProjectCreateForm as ProjectCreateForm exposing (ProjectCreateForm)
 import WizardResearch.Route as Route exposing (Route)
+import WizardResearch.Route.ProjectRoute as ProjectRoute
 
 
 
@@ -232,7 +233,7 @@ handlePostQuestionnaireComplete : UpdateConfig msg -> Model -> Result ApiError Q
 handlePostQuestionnaireComplete cfg model result =
     case result of
         Ok questionnaire ->
-            ( model, cfg.cmdNavigate (Route.Project questionnaire.uuid) )
+            ( model, cfg.cmdNavigate (Route.Project questionnaire.uuid ProjectRoute.Overview) )
 
         Err error ->
             ( { model | submitting = ApiError.toActionResult "Unable to create project" error }
@@ -454,7 +455,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
                 [ grid.col 12 [] [ Heading.h2 appState.theme "Choose a knowledge model" ] ]
             , grid.row []
                 [ grid.col 6 [] [ kmFormGroup appState.theme ]
-                , grid.col 6 tagViewAttributes [ ActionResultWrapper.block appState.theme viewTags model.knowledgeModel ]
+                , grid.col 6 tagViewAttributes [ ActionResultWrapper.blockSM appState.theme viewTags model.knowledgeModel ]
                 ]
             ]
         ]

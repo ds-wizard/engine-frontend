@@ -1,4 +1,4 @@
-module Shared.Elemental.Components.ActionResultWrapper exposing (block, page)
+module Shared.Elemental.Components.ActionResultWrapper exposing (blockLG, blockSM, page)
 
 import ActionResult exposing (ActionResult(..))
 import Html.Styled exposing (Html, div, text)
@@ -23,14 +23,30 @@ page theme viewContent actionResult =
             viewContent data
 
 
-block : Theme -> (a -> Html msg) -> ActionResult a -> Html msg
-block theme viewContent actionResult =
+blockSM : Theme -> (a -> Html msg) -> ActionResult a -> Html msg
+blockSM theme viewContent actionResult =
     case actionResult of
         Unset ->
             emptyNode
 
         Loading ->
-            Loader.block theme
+            Loader.blockSM theme
+
+        Error err ->
+            div [] [ text <| "error: " ++ err ]
+
+        Success data ->
+            viewContent data
+
+
+blockLG : Theme -> (a -> Html msg) -> ActionResult a -> Html msg
+blockLG theme viewContent actionResult =
+    case actionResult of
+        Unset ->
+            emptyNode
+
+        Loading ->
+            Loader.blockLG theme
 
         Error err ->
             div [] [ text <| "error: " ++ err ]

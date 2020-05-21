@@ -21,7 +21,7 @@ styles theme =
                         [ Spacing.stackSM ]
                     ]
                 ]
-            , selector "a:not(.button)"
+            , selector "a:not([class])"
                 [ Typography.copy1link theme
                 , cursor pointer
                 , textDecoration none

@@ -14,6 +14,7 @@ type alias Theme =
         , illustrations : Color
         , border : Color
         , shadow : Color
+        , danger : Color
         }
     , logo :
         { url : String
@@ -34,7 +35,8 @@ default =
         , background = hex "#FFFFFF"
         , illustrations = hex "#F15A24"
         , border = rgba 0 0 0 0.1
-        , shadow = rgba 0 0 0 0.25
+        , shadow = rgba 0 0 0 0.07
+        , danger = hex "#E02020"
         }
     , logo =
         { url = "/img/logo.svg"

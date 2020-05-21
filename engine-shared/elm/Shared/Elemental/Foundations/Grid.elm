@@ -17,6 +17,7 @@ module Shared.Elemental.Foundations.Grid exposing
 import Css exposing (..)
 import Html.Styled as Html exposing (Html, div)
 import Html.Styled.Attributes exposing (class, css)
+import Shared.Elemental.Foundations.Size as Size
 import Shared.Elemental.Foundations.Spacing as Spacing
 import Shared.Elemental.Theme exposing (Theme)
 import Shared.Elemental.Utils exposing (px2rem)
@@ -86,7 +87,7 @@ containerLimitedSmall =
 
 containerFullHeight : Html.Attribute msg
 containerFullHeight =
-    css [ height (calc (vh 100) minus (px2rem 50)) ]
+    css [ height (calc (vh 100) minus (px2rem Size.navigationHeight)) ]
 
 
 containerIndented : Html.Attribute msg

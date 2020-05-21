@@ -10,6 +10,7 @@ import Html.Styled.Attributes exposing (css)
 import Shared.Data.BootstrapConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig
 import Shared.Elemental.Components.Navigation as Navigation
+import Shared.Elemental.Foundations.Size as Size
 import Shared.Elemental.Global as Global
 import Shared.Elemental.Theme exposing (Theme)
 import Shared.Elemental.Utils exposing (px2rem)
@@ -45,7 +46,7 @@ layout appState page =
 layoutStyle : Theme -> List Style
 layoutStyle theme =
     [ Global.styles theme
-    , paddingTop (px2rem 50)
+    , paddingTop (px2rem Size.navigationHeight)
     ]
 
 
