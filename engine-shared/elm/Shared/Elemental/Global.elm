@@ -13,12 +13,28 @@ styles theme =
     Css.batch
         [ Typography.copy1 theme
         , descendants
-            [ typeSelector "ul"
+            [ typeSelector "h1"
+                [ Typography.heading1 theme
+                , Spacing.stackMD
+                ]
+            , typeSelector "h2"
+                [ Typography.heading2 theme
+                , Spacing.stackMD
+                ]
+            , selector "p + h2"
+                [ marginTop (px2rem Spacing.lg) ]
+            , typeSelector "h3"
+                [ Typography.heading3 theme
+                , Spacing.stackSM
+                ]
+            , selector "p + h3"
+                [ marginTop (px2rem Spacing.md) ]
+            , typeSelector "ul"
                 [ Spacing.stackMD
                 , paddingLeft (px2rem Spacing.md)
                 , descendants
                     [ typeSelector "li"
-                        [ Spacing.stackSM ]
+                        [ Spacing.stackXS ]
                     ]
                 ]
             , selector "a:not([class])"

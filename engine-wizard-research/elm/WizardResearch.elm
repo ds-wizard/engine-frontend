@@ -7,7 +7,6 @@ import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (href)
 import Json.Decode exposing (Value)
 import Shared.Elemental.Atoms.Button as Button
-import Shared.Elemental.Atoms.Heading as Heading
 import Shared.Elemental.Foundations.Grid as Grid
 import Shared.Html.Styled exposing (fa)
 import Shared.Utils exposing (dispatch)
@@ -246,7 +245,7 @@ view model =
                             [ Grid.comfortable.row []
                                 [ Grid.comfortable.col 12
                                     []
-                                    [ Heading.h1 model.appState.theme "Dashboard"
+                                    [ h1 [] [ text "Dashboard" ]
                                     ]
                                 ]
                             , Grid.comfortable.row []

@@ -1,9 +1,11 @@
 module Shared.Elemental.Foundations.Typography exposing
     ( copy1
     , copy1contrast
+    , copy1danger
     , copy1light
     , copy1lighter
     , copy1link
+    , copy1success
     , copy2
     , copy2contrast
     , copy2inversed
@@ -43,6 +45,10 @@ sizeSM =
     11
 
 
+
+-- Heading 1
+
+
 heading1 : Theme -> Style
 heading1 theme =
     Css.batch
@@ -50,6 +56,10 @@ heading1 theme =
         , fontSize (px2rem sizeXL)
         , fontWeight bold
         ]
+
+
+
+-- Heading 2
 
 
 heading2 : Theme -> Style
@@ -70,6 +80,19 @@ heading2inversed theme =
         ]
 
 
+navbarBrand : Theme -> Style
+navbarBrand theme =
+    Css.batch
+        [ important (color theme.colors.textDefault)
+        , important (fontSize (px2rem sizeLG))
+        , important (fontWeight bold)
+        ]
+
+
+
+-- Heading 3
+
+
 heading3 : Theme -> Style
 heading3 theme =
     Css.batch
@@ -88,13 +111,8 @@ heading3inversed theme =
         ]
 
 
-navbarBrand : Theme -> Style
-navbarBrand theme =
-    Css.batch
-        [ important (color theme.colors.textDefault)
-        , important (fontSize (px2rem sizeLG))
-        , important (fontWeight bold)
-        ]
+
+-- Copy 1
 
 
 copy1 : Theme -> Style
@@ -131,6 +149,33 @@ copy1lighter theme =
         , fontSize (px2rem sizeMD)
         , fontWeight normal
         ]
+
+
+copy1contrast : Theme -> Color -> Style
+copy1contrast =
+    copyContrast sizeMD
+
+
+copy1danger : Theme -> Style
+copy1danger theme =
+    Css.batch
+        [ color theme.colors.danger
+        , fontSize (px2rem sizeMD)
+        , fontWeight normal
+        ]
+
+
+copy1success : Theme -> Style
+copy1success theme =
+    Css.batch
+        [ color theme.colors.success
+        , fontSize (px2rem sizeMD)
+        , fontWeight normal
+        ]
+
+
+
+-- Copy 2
 
 
 copy2 : Theme -> Style
@@ -177,14 +222,13 @@ copy2inversed theme =
         ]
 
 
-copy1contrast : Theme -> Color -> Style
-copy1contrast =
-    copyContrast sizeMD
-
-
 copy2contrast : Theme -> Color -> Style
 copy2contrast =
     copyContrast sizeSM
+
+
+
+-- Utils
 
 
 copyContrast : Float -> Theme -> Color -> Style

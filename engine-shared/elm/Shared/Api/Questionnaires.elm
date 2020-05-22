@@ -1,4 +1,7 @@
-module Shared.Api.Questionnaires exposing (getQuestionnaire, postQuestionnaire)
+module Shared.Api.Questionnaires exposing
+    ( getQuestionnaire
+    , postQuestionnaire
+    )
 
 import Json.Encode as E
 import Shared.Api exposing (AppStateLike, ToMsg, jwtFetch, jwtGet)

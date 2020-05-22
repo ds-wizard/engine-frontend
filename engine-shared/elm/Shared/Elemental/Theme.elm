@@ -14,6 +14,8 @@ type alias Theme =
         , illustrations : Color
         , border : Color
         , shadow : Color
+        , overlay : Color
+        , success : Color
         , danger : Color
         }
     , logo :
@@ -36,6 +38,8 @@ default =
         , illustrations = hex "#F15A24"
         , border = rgba 0 0 0 0.1
         , shadow = rgba 0 0 0 0.07
+        , overlay = rgba 0 0 0 0.5
+        , success = hex "#28A745"
         , danger = hex "#E02020"
         }
     , logo =

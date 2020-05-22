@@ -1,4 +1,4 @@
-module Shared.Elemental.Atoms.Button exposing (actionResultPrimary, link, primary, primaryLink)
+module Shared.Elemental.Atoms.Button exposing (actionResultPrimary, inline, link, primary, primaryLink)
 
 import ActionResult exposing (ActionResult)
 import Css exposing (..)
@@ -67,7 +67,26 @@ link theme attributes content =
 
         style =
             [ Typography.copy1link theme
-            , Spacing.insetSM
+            , padding2 (px2rem Spacing.sm) zero
+            , backgroundColor transparent
+            , buttonSharedStyle
+            , hover
+                [ color colorHover ]
+            ]
+    in
+    button (css style :: attributes) content
+
+
+inline : Theme -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
+inline theme attributes content =
+    let
+        colorHover =
+            colorL10 theme.colors.primary
+
+        style =
+            [ Typography.copy1link theme
+            , padding zero
+            , backgroundColor transparent
             , buttonSharedStyle
             , hover
                 [ color colorHover ]

@@ -191,6 +191,8 @@ commonStyles theme =
             [ Spacing.inlineSM
             , width (px2rem 20)
             , textAlign center
+            , transition
+                [ Transition.default Css.Transitions.color3 ]
             ]
         ]
     ]

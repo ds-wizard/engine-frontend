@@ -1,5 +1,6 @@
 module Shared.Data.Template exposing
     ( Template
+    , compare
     , decoder
     , findByUuid
     , toFormRichOption
@@ -11,7 +12,6 @@ import List.Extra as List
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
 import Shared.Data.Template.TemplatePacakge as TemplatePackage exposing (TemplatePackage)
 import Uuid exposing (Uuid)
-import WizardResearch.Common.AppState exposing (AppState)
 
 
 type alias Template =
@@ -35,20 +35,34 @@ decoder =
         |> D.required "formats" (D.list TemplateFormat.decoder)
 
 
-toFormRichOption : AppState -> Template -> ( String, String, String )
-toFormRichOption appState { uuid, name, description } =
+toFormRichOption : Maybe String -> Template -> ( String, String, String )
+toFormRichOption recommendedTemplateUuid template =
     let
-        stringUuid =
-            Uuid.toString uuid
-
         visibleName =
-            if Just stringUuid == appState.config.template.recommendedTemplateUuid then
-                name ++ " (recommended)"
+            if matchUuid recommendedTemplateUuid template then
+                template.name ++ " (recommended)"
 
             else
-                name
+                template.name
     in
-    ( stringUuid, visibleName, description )
+    ( Uuid.toString template.uuid, visibleName, template.description )
+
+
+compare : Maybe String -> Template -> Template -> Order
+compare recommendedTemplateUuid t1 t2 =
+    if matchUuid recommendedTemplateUuid t1 then
+        LT
+
+    else if matchUuid recommendedTemplateUuid t2 then
+        GT
+
+    else
+        Basics.compare t1.name t2.name
+
+
+matchUuid : Maybe String -> Template -> Bool
+matchUuid mbStringUuid =
+    (==) mbStringUuid << Just << Uuid.toString << .uuid
 
 
 findByUuid : List Template -> String -> Maybe Template

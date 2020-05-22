@@ -1,5 +1,6 @@
 module Shared.Data.Template.TemplatePacakge exposing
     ( TemplatePackage
+    , compare
     , decoder
     , toFormRichOption
     )
@@ -24,13 +25,30 @@ decoder =
 
 
 toFormRichOption : Maybe String -> TemplatePackage -> ( String, String, String )
-toFormRichOption mbRecommendedId { id, name, description } =
+toFormRichOption mbRecommendedId tp =
     let
         visibleName =
-            if mbRecommendedId == Just id then
-                name ++ " (recommended)"
+            if matchId mbRecommendedId tp then
+                tp.name ++ " (recommended)"
 
             else
-                name
+                tp.name
     in
-    ( id, visibleName, description )
+    ( tp.id, visibleName, tp.description )
+
+
+compare : Maybe String -> TemplatePackage -> TemplatePackage -> Order
+compare mbRecommendedId tp1 tp2 =
+    if matchId mbRecommendedId tp1 then
+        LT
+
+    else if matchId mbRecommendedId tp2 then
+        GT
+
+    else
+        Basics.compare tp1.name tp2.name
+
+
+matchId : Maybe String -> TemplatePackage -> Bool
+matchId mbStringId =
+    (==) mbStringId << Just << .id

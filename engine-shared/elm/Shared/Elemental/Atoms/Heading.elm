@@ -1,4 +1,4 @@
-module Shared.Elemental.Atoms.Heading exposing (h1, h2, h3)
+module Shared.Elemental.Atoms.Heading exposing (h_)
 
 import Css exposing (..)
 import Html.Styled as Html exposing (Html, text)

@@ -1,4 +1,4 @@
-module Shared.Elemental.Atoms.FormInput exposing (richRadioGroup, tagsGroup, text)
+module Shared.Elemental.Atoms.FormInput exposing (richRadioGroup, tagsGroup, text, textWithAttrs)
 
 import Css exposing (..)
 import Css.Global exposing (descendants, typeSelector)
@@ -6,7 +6,7 @@ import Css.Transitions exposing (transition)
 import Form exposing (Form, Msg(..))
 import Form.Field as Field
 import Html.Styled as Html exposing (Attribute, Html, div, input, label, p, span, strong)
-import Html.Styled.Attributes as Attributes exposing (class, css, for, id, type_, value)
+import Html.Styled.Attributes as Attributes exposing (autocomplete, class, css, for, id, type_, value)
 import Html.Styled.Events exposing (onBlur, onCheck, onFocus, onInput)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Elemental.Foundations.Border as Border
@@ -20,12 +20,17 @@ import Shared.Form.FormError exposing (FormError)
 
 
 text : Form FormError o -> String -> Theme -> Html Form.Msg
-text form fieldName theme =
+text =
+    textWithAttrs []
+
+
+textWithAttrs : List (Attribute Form.Msg) -> Form FormError o -> String -> Theme -> Html Form.Msg
+textWithAttrs attributes form fieldName theme =
     let
         field =
             Form.getFieldAsString fieldName form
     in
-    text_ theme field [ id fieldName ]
+    text_ theme field (id fieldName :: attributes)
 
 
 richRadioGroup : List ( String, String, String ) -> Form FormError o -> String -> Theme -> Html Form.Msg

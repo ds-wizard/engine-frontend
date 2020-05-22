@@ -9,7 +9,7 @@ module WizardResearch.Pages.Project.Documents exposing
 -- MODEL
 
 import ActionResult exposing (ActionResult(..))
-import Html.Styled exposing (Html)
+import Html.Styled exposing (Html, h1, text)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Elemental.Atoms.Heading as Heading
@@ -75,7 +75,7 @@ viewContent appState model questionnaire =
         [ grid.row []
             [ grid.col 12
                 []
-                [ Heading.h1 appState.theme "Documents"
+                [ h1 [] [ text "Documents" ]
                 ]
             ]
         ]

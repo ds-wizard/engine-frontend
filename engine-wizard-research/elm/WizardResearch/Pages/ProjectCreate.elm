@@ -8,10 +8,11 @@ module WizardResearch.Pages.ProjectCreate exposing
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
+import Css exposing (listStyleType, none)
 import Form exposing (Form)
 import Form.Field as Field exposing (FieldValue)
-import Html.Styled exposing (Html, a, div, li, span, text, ul)
-import Html.Styled.Attributes exposing (disabled)
+import Html.Styled as Html exposing (Html, div, h1, h2, h3, li, span, text, ul)
+import Html.Styled.Attributes exposing (autocomplete, css, disabled)
 import Html.Styled.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
@@ -21,12 +22,12 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Template as Template exposing (Template)
-import Shared.Data.Template.TemplatePacakge as TemplatePackge
-import Shared.Elemental.Atoms.Advice as Advice
+import Shared.Data.Template.TemplatePacakge as TemplatePackage
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Atoms.Form as Form
 import Shared.Elemental.Atoms.FormInput as FormInput
 import Shared.Elemental.Atoms.Heading as Heading
+import Shared.Elemental.Atoms.Text as Text
 import Shared.Elemental.Components.ActionResultWrapper as ActionResultWrapper
 import Shared.Elemental.Components.Carousel as Carousel exposing (PageOptions)
 import Shared.Elemental.Components.FileIconList as FileIconList
@@ -39,6 +40,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html.Styled exposing (emptyNode, fa)
 import Task
 import WizardResearch.Common.AppState exposing (AppState)
+import WizardResearch.Pages.ProjectCreate.KnowledgeModelModal as KnowledgeModelModal
 import WizardResearch.Pages.ProjectCreate.ProjectCreateForm as ProjectCreateForm exposing (ProjectCreateForm)
 import WizardResearch.Route as Route exposing (Route)
 import WizardResearch.Route.ProjectRoute as ProjectRoute
@@ -54,6 +56,9 @@ type alias Model =
     , templates : ActionResult (List Template)
     , knowledgeModel : ActionResult KnowledgeModel
     , submitting : ActionResult ()
+    , templateListExpanded : Bool
+    , kmListExpanded : Bool
+    , kmModalModel : KnowledgeModelModal.Model
     }
 
 
@@ -70,6 +75,9 @@ init appState =
       , templates = Loading
       , knowledgeModel = Unset
       , submitting = Unset
+      , templateListExpanded = False
+      , kmListExpanded = False
+      , kmModalModel = KnowledgeModelModal.init
       }
     , TemplatesApi.getTemplates appState GetTemplatesComplete
     )
@@ -108,6 +116,9 @@ type Msg
     | GetTemplatesComplete (Result ApiError (List Template))
     | GetKnowledgeModelComplete (Result ApiError KnowledgeModel)
     | PostQuestionnaireComplete (Result ApiError Questionnaire)
+    | ExpandTemplateList Bool
+    | ExpandKMList Bool
+    | KnowledgeModelModalMsg KnowledgeModelModal.Msg
     | NoOp
 
 
@@ -134,6 +145,19 @@ update cfg appState msg model =
 
         PostQuestionnaireComplete result ->
             handlePostQuestionnaireComplete cfg model result
+
+        ExpandTemplateList expanded ->
+            ( { model | templateListExpanded = expanded }, Cmd.none )
+
+        ExpandKMList expanded ->
+            ( { model | kmListExpanded = expanded }, Cmd.none )
+
+        KnowledgeModelModalMsg kmModalMsg ->
+            let
+                ( kmModalModel, cmd ) =
+                    KnowledgeModelModal.update appState kmModalMsg model.kmModalModel
+            in
+            ( { model | kmModalModel = kmModalModel }, Cmd.map (cfg.wrapMsg << KnowledgeModelModalMsg) cmd )
 
         _ ->
             ( model, Cmd.none )
@@ -263,7 +287,11 @@ viewContent appState model templates =
                 [ projectNameContainer appState model grid, emptyNode ]
 
             else
-                [ emptyNode, projectSettingsCarouselContainer appState model templates grid ]
+                [ emptyNode
+                , projectSettingsCarouselContainer appState model templates grid
+                , Html.map KnowledgeModelModalMsg <|
+                    KnowledgeModelModal.view appState model.kmModalModel
+                ]
     in
     div [] content
 
@@ -274,7 +302,7 @@ projectNameContainer appState model grid =
         projectNameFormGroup =
             Form.group
                 { label = Form.labelBigger
-                , input = FormInput.text
+                , input = FormInput.textWithAttrs [ autocomplete False ]
                 , textBefore = Form.helpText
                 , textAfter = Form.helpText
                 , toMsg = FormMsg
@@ -326,7 +354,7 @@ projectSettingsCarouselContainer appState model templates grid =
     grid.container
         [ Grid.containerLimited, Grid.containerIndented, Animation.fadeIn, Animation.fast ]
         [ grid.row []
-            [ grid.col 12 [] [ Heading.h1 appState.theme (getProjectName model) ] ]
+            [ grid.col 12 [] [ h1 [] [ text (getProjectName model) ] ] ]
         , grid.row []
             [ grid.col 12
                 []
@@ -338,7 +366,7 @@ projectSettingsCarouselContainer appState model templates grid =
                     ]
                 ]
             ]
-        , grid.row []
+        , grid.row [ Grid.rowStackLG ]
             [ grid.col 12
                 []
                 [ Carousel.container
@@ -354,9 +382,25 @@ projectSettingsCarouselContainer appState model templates grid =
 projectSettingsCarouselTemplatePage : AppState -> Model -> Grid Msg -> List Template -> PageOptions -> Html Msg
 projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
     let
+        recommendedTemplateUuid =
+            appState.config.template.recommendedTemplateUuid
+
+        templateOptionsCount =
+            if model.templateListExpanded then
+                List.length templates
+
+            else
+                3
+
+        templateOptions =
+            templates
+                |> List.sortWith (Template.compare recommendedTemplateUuid)
+                |> List.take templateOptionsCount
+                |> List.map (Template.toFormRichOption recommendedTemplateUuid)
+
         templateFormGroup =
             Form.groupSimple
-                { input = FormInput.richRadioGroup (List.map (Template.toFormRichOption appState) templates)
+                { input = FormInput.richRadioGroup templateOptions
                 , toMsg = FormMsg
                 }
                 { form = model.createForm
@@ -366,10 +410,49 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
                 , mbTextAfter = Nothing
                 }
 
-        kmNames =
-            getSelectedTemplate model
-                |> Maybe.unwrap [] .allowedPackages
-                |> List.map .name
+        moreTemplatesLink =
+            if not model.templateListExpanded && List.length templates > 3 then
+                Button.link appState.theme
+                    [ onClick (ExpandTemplateList True) ]
+                    [ fa "fas fa-angle-down"
+                    , span [] [ text "More templates" ]
+                    ]
+
+            else
+                emptyNode
+
+        kms =
+            Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
+                |> List.sortWith (TemplatePackage.compare (Maybe.map .recommendedPackageId (getSelectedTemplate model)))
+
+        visibleKMs =
+            if List.length kms > 4 then
+                List.take 3 kms
+
+            else
+                kms
+
+        emptyKMs =
+            if List.isEmpty kms then
+                Text.danger appState.theme "There are no knowledge models configured for the template."
+
+            else
+                emptyNode
+
+        kmListItem km =
+            li []
+                [ Button.inline appState.theme
+                    [ onClick (KnowledgeModelModalMsg (KnowledgeModelModal.open km.id)) ]
+                    [ text km.name ]
+                ]
+
+        moreKMs =
+            if List.length kms > 4 then
+                li [ css [ listStyleType none ] ]
+                    [ Text.lighter appState.theme ("And " ++ String.fromInt (List.length kms - 3) ++ " more") ]
+
+            else
+                emptyNode
 
         formats =
             getSelectedTemplate model
@@ -379,16 +462,19 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
     Carousel.page pageOptions
         [ grid.block []
             [ grid.row []
-                [ grid.col 12 [] [ Heading.h2 appState.theme "Choose a document template" ] ]
+                [ grid.col 12 [] [ h2 [] [ text "Choose a document template" ] ] ]
             , grid.row []
-                [ grid.col 12 [] [ Advice.view appState.theme ] ]
-            , grid.row []
-                [ grid.col 6 [] [ templateFormGroup appState.theme ]
+                [ grid.col 6
+                    []
+                    [ templateFormGroup appState.theme
+                    , moreTemplatesLink
+                    ]
                 , grid.col 6
                     [ Grid.colSeparated appState.theme ]
-                    [ Heading.h3 appState.theme "Available knowledge models"
-                    , ul [] (List.map (\name -> li [] [ a [] [ text name ] ]) kmNames)
-                    , Heading.h3 appState.theme "Supported formats"
+                    [ h3 [] [ text "Available knowledge models" ]
+                    , emptyKMs
+                    , ul [] (List.map kmListItem visibleKMs ++ [ moreKMs ])
+                    , h3 [] [ text "Supported formats" ]
                     , FileIconList.view formats
                     ]
                 ]
@@ -399,13 +485,24 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
 projectSettingsCarouselKnowledgeModelPage : AppState -> Model -> Grid Msg -> PageOptions -> Html Msg
 projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
     let
+        packages =
+            Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
+
         recommendedPackage =
             Maybe.map .recommendedPackageId (getSelectedTemplate model)
 
+        packageOptionsCount =
+            if model.kmListExpanded then
+                List.length packages
+
+            else
+                3
+
         kmOptions =
-            getSelectedTemplate model
-                |> Maybe.unwrap [] .allowedPackages
-                |> List.map (TemplatePackge.toFormRichOption recommendedPackage)
+            packages
+                |> List.sortWith (TemplatePackage.compare recommendedPackage)
+                |> List.take packageOptionsCount
+                |> List.map (TemplatePackage.toFormRichOption recommendedPackage)
 
         kmFormGroup =
             Form.groupSimple
@@ -418,6 +515,24 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
                 , mbTextBefore = Nothing
                 , mbTextAfter = Nothing
                 }
+
+        moreKMsLink =
+            if not model.kmListExpanded && List.length packages > 3 then
+                Button.link appState.theme
+                    [ onClick (ExpandKMList True) ]
+                    [ fa "fas fa-angle-down"
+                    , span [] [ text "More knowledge models" ]
+                    ]
+
+            else
+                emptyNode
+
+        emptyKMs =
+            if List.isEmpty packages then
+                Text.danger appState.theme "There are no knowledge models configured for the selected template.\n\nTry to choose a different one."
+
+            else
+                emptyNode
 
         tagsFormGroup knowledgeModel =
             Form.groupSimple
@@ -452,9 +567,14 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
     Carousel.page pageOptions
         [ grid.block []
             [ grid.row []
-                [ grid.col 12 [] [ Heading.h2 appState.theme "Choose a knowledge model" ] ]
+                [ grid.col 12 [] [ h2 [] [ text "Choose a knowledge model" ] ] ]
             , grid.row []
-                [ grid.col 6 [] [ kmFormGroup appState.theme ]
+                [ grid.col 6
+                    []
+                    [ kmFormGroup appState.theme
+                    , moreKMsLink
+                    , emptyKMs
+                    ]
                 , grid.col 6 tagViewAttributes [ ActionResultWrapper.blockSM appState.theme viewTags model.knowledgeModel ]
                 ]
             ]
@@ -476,7 +596,7 @@ projectSettingsButtons appState model grid =
 
 projectSettingsCarouselTemplateButtons : AppState -> Grid Msg -> Html Msg
 projectSettingsCarouselTemplateButtons appState grid =
-    grid.row []
+    grid.row [ Grid.rowStackMD ]
         [ grid.col 6
             []
             [ Button.link appState.theme
@@ -498,7 +618,7 @@ projectSettingsCarouselTemplateButtons appState grid =
 
 projectSettingsCarouselKnowledgeModelButtons : AppState -> Model -> Grid Msg -> Html Msg
 projectSettingsCarouselKnowledgeModelButtons appState model grid =
-    grid.row []
+    grid.row [ Grid.rowStackMD ]
         [ grid.col 6
             []
             [ Button.link appState.theme

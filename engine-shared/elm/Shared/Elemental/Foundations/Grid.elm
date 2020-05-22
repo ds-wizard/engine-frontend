@@ -12,6 +12,8 @@ module Shared.Elemental.Foundations.Grid exposing
     , containerLimited
     , containerLimitedSmall
     , cozy
+    , rowStackLG
+    , rowStackMD
     )
 
 import Css exposing (..)
@@ -106,7 +108,9 @@ container : Float -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
 container spacing attributes =
     let
         style =
-            []
+            [ paddingLeft (px2rem (spacing / 2))
+            , paddingRight (px2rem (spacing / 2))
+            ]
     in
     div (class "container" :: css style :: attributes)
 
@@ -115,9 +119,19 @@ block : Float -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
 block spacing attributes =
     let
         style =
-            [ margin2 zero (px2rem (-spacing / 2)) ]
+            [ overflowX hidden ]
     in
     div (class "block" :: css style :: attributes)
+
+
+rowStackMD : Html.Attribute msg
+rowStackMD =
+    css [ Spacing.stackMD ]
+
+
+rowStackLG : Html.Attribute msg
+rowStackLG =
+    css [ Spacing.stackLG ]
 
 
 row : Float -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
@@ -125,7 +139,8 @@ row spacing attributes =
     let
         style =
             [ displayFlex
-            , width (pct 100)
+            , marginLeft (px2rem (-spacing / 2))
+            , marginRight (px2rem (-spacing / 2))
             ]
     in
     div (class "row" :: css style :: attributes)
