@@ -9,6 +9,7 @@ import Wizard.Settings.PrivacyAndSupport.Models
 import Wizard.Settings.Questionnaires.Models
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Models
+import Wizard.Settings.Template.Models
 
 
 type alias Model =
@@ -20,6 +21,7 @@ type alias Model =
     , knowledgeModelRegistryModel : Wizard.Settings.KnowledgeModelRegistry.Models.Model
     , questionnairesModel : Wizard.Settings.Questionnaires.Models.Model
     , documentSubmissionModel : Wizard.Settings.Submission.Models.Model
+    , templateModel : Wizard.Settings.Template.Models.Model
     }
 
 
@@ -33,6 +35,7 @@ initialModel =
     , knowledgeModelRegistryModel = Wizard.Settings.KnowledgeModelRegistry.Models.initialModel
     , questionnairesModel = Wizard.Settings.Questionnaires.Models.initialModel
     , documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel
+    , templateModel = Wizard.Settings.Template.Models.initialModel
     }
 
 
@@ -62,3 +65,6 @@ initLocalModel route model =
 
         SubmissionRoute ->
             { model | documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel }
+
+        TemplateRoute ->
+            { model | templateModel = Wizard.Settings.Template.Models.initialModel }

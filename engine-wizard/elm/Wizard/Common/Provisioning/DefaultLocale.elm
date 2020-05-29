@@ -43,6 +43,7 @@ locale =
         , ( "__routing.settings.privacyAndSupport", "privacy-and-support" )
         , ( "__routing.settings.questionnaires", "questionnaires" )
         , ( "__routing.settings.submission", "submission" )
+        , ( "__routing.settings.template", "template" )
 
         -- API messages
         , ( "_global.apiError.actionKey.passwordRecoveryError", "Forgotten password recovery failed." )
@@ -725,6 +726,9 @@ locale =
         , ( "Wizard.Settings.Submission.View.form.value", "Value" )
         , ( "Wizard.Settings.Submission.View.title", "Document Submission" )
         , ( "Wizard.Settings.Submission.View.save", "Save" )
+        , ( "Wizard.Settings.Template.View.form.recommendedTemplateUuid", "Recommended Template" )
+        , ( "Wizard.Settings.Template.View.title", "Document Templates" )
+        , ( "Wizard.Settings.Template.View.save", "Save" )
         , ( "Wizard.Settings.View.navigation.authentication", "Authentication" )
         , ( "Wizard.Settings.View.navigation.dashboard", "Dashboard" )
         , ( "Wizard.Settings.View.navigation.knowledgeModelRegistry", "Knowledge Model Registry" )
@@ -733,6 +737,7 @@ locale =
         , ( "Wizard.Settings.View.navigation.privacyAndSupport", "Privacy & Support" )
         , ( "Wizard.Settings.View.navigation.questionnaires", "Questionnaires" )
         , ( "Wizard.Settings.View.navigation.submission", "Document Submission" )
+        , ( "Wizard.Settings.View.navigation.template", "Document Templates" )
         , ( "Wizard.Settings.View.navigation.title.content", "Content Settings" )
         , ( "Wizard.Settings.View.navigation.title.system", "System Settings" )
         , ( "Wizard.Settings.View.navigation.title.userInterface", "User Interface Settings" )

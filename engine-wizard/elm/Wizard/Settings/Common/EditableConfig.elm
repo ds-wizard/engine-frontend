@@ -1,4 +1,4 @@
-module Wizard.Settings.Common.EditableConfig exposing (EditableConfig, decoder, encode, updateAuthentication, updateDashboard, updateKnowledgeModelRegistry, updateLookAndFeel, updateOrganization, updatePrivacyAndSupport, updateQuestionnaires, updateSubmission)
+module Wizard.Settings.Common.EditableConfig exposing (EditableConfig, decoder, encode, updateAuthentication, updateDashboard, updateKnowledgeModelRegistry, updateLookAndFeel, updateOrganization, updatePrivacyAndSupport, updateQuestionnaires, updateSubmission, updateTemplate)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -7,6 +7,7 @@ import Wizard.Common.Config.DashboardConfig as DashboardConfig exposing (Dashboa
 import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Wizard.Common.Config.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
+import Wizard.Common.Config.TemplateConfig as TemplateConfig exposing (TemplateConfig)
 import Wizard.Settings.Common.EditableAuthenticationConfig as EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
 import Wizard.Settings.Common.EditableKnowledgeModelRegistryConfig as EditableKnowledgeModelRegistryConfig exposing (EditableKnowledgeModelRegistryConfig)
 import Wizard.Settings.Common.EditableQuestionnairesConfig as EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
@@ -22,6 +23,7 @@ type alias EditableConfig =
     , knowledgeModelRegistry : EditableKnowledgeModelRegistryConfig
     , questionnaires : EditableQuestionnairesConfig
     , submission : EditableSubmissionConfig
+    , template : TemplateConfig
     }
 
 
@@ -65,6 +67,11 @@ updateSubmission submission config =
     { config | submission = submission }
 
 
+updateTemplate : TemplateConfig -> EditableConfig -> EditableConfig
+updateTemplate template config =
+    { config | template = template }
+
+
 
 -- JSON
 
@@ -80,6 +87,7 @@ decoder =
         |> D.required "knowledgeModelRegistry" EditableKnowledgeModelRegistryConfig.decoder
         |> D.required "questionnaire" EditableQuestionnairesConfig.decoder
         |> D.required "submission" EditableSubmissionConfig.decoder
+        |> D.required "template" TemplateConfig.decoder
 
 
 encode : EditableConfig -> E.Value
@@ -93,4 +101,5 @@ encode config =
         , ( "knowledgeModelRegistry", EditableKnowledgeModelRegistryConfig.encode config.knowledgeModelRegistry )
         , ( "questionnaire", EditableQuestionnairesConfig.encode config.questionnaires )
         , ( "submission", EditableSubmissionConfig.encode config.submission )
+        , ( "template", TemplateConfig.encode config.template )
         ]

@@ -26,6 +26,7 @@ parsers appState wrapRoute =
     , map (wrapRoute <| KnowledgeModelRegistryRoute) (s moduleRoot </> s (lr "settings.knowledgeModelRegistry" appState))
     , map (wrapRoute <| QuestionnairesRoute) (s moduleRoot </> s (lr "settings.questionnaires" appState))
     , map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))
+    , map (wrapRoute <| TemplateRoute) (s moduleRoot </> s (lr "settings.template" appState))
     ]
 
 
@@ -59,6 +60,9 @@ toUrl appState route =
 
         SubmissionRoute ->
             [ moduleRoot, lr "settings.submission" appState ]
+
+        TemplateRoute ->
+            [ moduleRoot, lr "settings.template" appState ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool

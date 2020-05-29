@@ -234,7 +234,7 @@ headerFormView appState prefix form index =
             prefix ++ "." ++ String.fromInt index ++ "." ++ name
 
         headerField =
-            Form.getFieldAsString (field "header") form
+            Form.getFieldAsString (field "key") form
 
         valueField =
             Form.getFieldAsString (field "value") form

@@ -4,6 +4,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
+import Json.Encode.Extra as E
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccesibility exposing (QuestionnaireAccessibility)
 
@@ -47,4 +48,5 @@ encode tagUuids form =
         , ( "packageId", E.string form.packageId )
         , ( "accessibility", QuestionnaireAccesibility.encode form.accessibility )
         , ( "tagUuids", E.list E.string tagUuids )
+        , ( "templateUuid", E.maybe E.string Nothing )
         ]

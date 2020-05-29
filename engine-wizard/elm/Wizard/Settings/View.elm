@@ -17,6 +17,7 @@ import Wizard.Settings.PrivacyAndSupport.View
 import Wizard.Settings.Questionnaires.View
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.View
+import Wizard.Settings.Template.View
 
 
 l_ : String -> AppState -> String
@@ -65,6 +66,10 @@ view route appState model =
                 SubmissionRoute ->
                     Html.map SubmissionMsg <|
                         Wizard.Settings.Submission.View.view appState model.documentSubmissionModel
+
+                TemplateRoute ->
+                    Html.map TemplateMsg <|
+                        Wizard.Settings.Template.View.view appState model.templateModel
     in
     div [ class "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
@@ -104,6 +109,7 @@ navigationContentLinks appState =
     [ ( KnowledgeModelRegistryRoute, l_ "navigation.knowledgeModelRegistry" appState )
     , ( QuestionnairesRoute, l_ "navigation.questionnaires" appState )
     , ( SubmissionRoute, l_ "navigation.submission" appState )
+    , ( TemplateRoute, l_ "navigation.template" appState )
     ]
 
 
