@@ -7,12 +7,13 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Markdown
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lx)
+import Shared.Locale exposing (l, lf, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (detailClass, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
@@ -33,6 +34,11 @@ l_ =
 lx_ : String -> AppState -> Html msg
 lx_ =
     lx "Wizard.Users.Edit.View"
+
+
+lf_ : String -> List String -> AppState -> String
+lf_ =
+    lf "Wizard.Users.Edit.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -117,11 +123,14 @@ userFormView appState user form current =
             else
                 FormGroup.toggle form "active" <| lg "user.active" appState
 
+        submissionPropsIndexes =
+            Form.getListIndexes "submissionProps" form
+
         submissionSettings =
-            if current && appState.config.submission.enabled then
+            if current && appState.config.submission.enabled && List.length submissionPropsIndexes > 0 then
                 div [ class "mt-5" ]
                     ([ h4 [] [ lx_ "submissionSettings.title" appState ] ]
-                        ++ List.map submissionSettingsSection (Form.getListIndexes "submissionProps" form)
+                        ++ List.map submissionSettingsSection submissionPropsIndexes
                     )
 
             else
@@ -134,11 +143,21 @@ userFormView appState user form current =
 
                 sectionName =
                     Maybe.withDefault "" (Form.getFieldAsString (field "name") form).value
+
+                valueIndexes =
+                    Form.getListIndexes (field "values") form
+
+                sectionContent =
+                    if List.length valueIndexes > 0 then
+                        div []
+                            (List.map (submissionSettingsSectionProp (field "values")) valueIndexes)
+
+                    else
+                        p [ class "text-muted" ] [ text <| lf_ "submissionSettings.empty" [ sectionName ] appState ]
             in
             div [ class "mb-4" ]
                 [ strong [] [ text sectionName ]
-                , div []
-                    (List.map (submissionSettingsSectionProp (field "values")) (Form.getListIndexes (field "values") form))
+                , sectionContent
                 ]
 
         submissionSettingsSectionProp prefix i =
