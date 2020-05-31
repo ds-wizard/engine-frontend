@@ -12,7 +12,7 @@ import Random exposing (Seed)
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
-import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
+import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (chapterFormValidation)
@@ -73,9 +73,12 @@ updateIfKMEditor update editor =
 
 
 addQuestion : Cmd Wizard.Msgs.Msg -> Seed -> Model -> ChapterEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
-addQuestion =
+addQuestion cmd seed model =
     addEntity
         { newEntity = Question.new
-        , createEntityEditor = createQuestionEditor
+        , createEntityEditor = createQuestionEditor (getCurrentIntegrations model)
         , addEntity = addChapterQuestion
         }
+        cmd
+        seed
+        model

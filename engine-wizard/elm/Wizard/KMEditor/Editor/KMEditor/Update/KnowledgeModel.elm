@@ -13,7 +13,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Common.KnowledgeModel.Chapter as Chapter
 import Wizard.KMEditor.Common.KnowledgeModel.Integration as Integration
 import Wizard.KMEditor.Common.KnowledgeModel.Tag as Tag
-import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
+import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (knowledgeModelFormValidation)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (addEntity, updateForm, withGenerateEvent)
@@ -49,12 +49,15 @@ withGenerateKMEditEvent appState =
 
 
 addChapter : Cmd Wizard.Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
-addChapter =
+addChapter cmd seed model =
     addEntity
         { newEntity = Chapter.new
-        , createEntityEditor = createChapterEditor
+        , createEntityEditor = createChapterEditor (getCurrentIntegrations model)
         , addEntity = addKMChapter
         }
+        cmd
+        seed
+        model
 
 
 addTag : Cmd Wizard.Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

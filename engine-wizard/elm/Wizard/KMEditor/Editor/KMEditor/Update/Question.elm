@@ -85,7 +85,7 @@ withGenerateQuestionEditEvent appState seed model =
         , alert = l_ "alert" appState
         , createAddEvent = createAddQuestionEvent
         , createEditEvent = createEditQuestionEvent
-        , updateEditorData = updateQuestionEditorData
+        , updateEditorData = updateQuestionEditorData (getCurrentIntegrations model)
         , updateEditors = Just updateEditorsWithQuestion
         }
         seed
@@ -117,21 +117,27 @@ updateIfChapterEditor update editor =
 
 
 addAnswer : Cmd Wizard.Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
-addAnswer =
+addAnswer cmd seed model =
     addEntity
         { newEntity = Answer.new
-        , createEntityEditor = createAnswerEditor
+        , createEntityEditor = createAnswerEditor (getCurrentIntegrations model)
         , addEntity = addQuestionAnswer
         }
+        cmd
+        seed
+        model
 
 
 addAnswerItemTemplateQuestion : Cmd Wizard.Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
-addAnswerItemTemplateQuestion =
+addAnswerItemTemplateQuestion cmd seed model =
     addEntity
         { newEntity = Question.new
-        , createEntityEditor = createQuestionEditor
+        , createEntityEditor = createQuestionEditor (getCurrentIntegrations model)
         , addEntity = addQuestionAnswerItemTemplateQuestion
         }
+        cmd
+        seed
+        model
 
 
 addReference : Cmd Wizard.Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
