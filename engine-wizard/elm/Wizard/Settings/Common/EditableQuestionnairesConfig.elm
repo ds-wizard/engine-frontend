@@ -7,11 +7,12 @@ module Wizard.Settings.Common.EditableQuestionnairesConfig exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Wizard.Common.Config.Partials.QuestionnaireVisibilityConfig as QuestionnaireVisibilityConfig exposing (QuestionnaireVisibilityConfig)
 import Wizard.Common.Config.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 
 
 type alias EditableQuestionnairesConfig =
-    { questionnaireVisibility : SimpleFeatureConfig
+    { questionnaireVisibility : QuestionnaireVisibilityConfig
     , levels : SimpleFeatureConfig
     , feedback : Feedback
     }
@@ -28,7 +29,7 @@ type alias Feedback =
 decoder : Decoder EditableQuestionnairesConfig
 decoder =
     D.succeed EditableQuestionnairesConfig
-        |> D.required "questionnaireVisibility" SimpleFeatureConfig.decoder
+        |> D.required "questionnaireVisibility" QuestionnaireVisibilityConfig.decoder
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "feedback" feedbackDecoder
 
@@ -45,7 +46,7 @@ feedbackDecoder =
 encode : EditableQuestionnairesConfig -> E.Value
 encode config =
     E.object
-        [ ( "questionnaireVisibility", SimpleFeatureConfig.encode config.questionnaireVisibility )
+        [ ( "questionnaireVisibility", QuestionnaireVisibilityConfig.encode config.questionnaireVisibility )
         , ( "levels", SimpleFeatureConfig.encode config.levels )
         , ( "feedback", encodeFeedback config.feedback )
         ]

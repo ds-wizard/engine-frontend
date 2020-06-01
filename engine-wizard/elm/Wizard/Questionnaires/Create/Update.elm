@@ -84,7 +84,7 @@ handleGetPackagesCompleted appState model result =
         newModel =
             case result of
                 Ok packages ->
-                    setSelectedPackage { model | packages = Success packages } packages
+                    setSelectedPackage appState { model | packages = Success packages } packages
 
                 Err error ->
                     { model | packages = ApiError.toActionResult (lg "apiError.packages.getListError" appState) error }
@@ -168,12 +168,12 @@ handlePostQuestionnaireCompleted appState model result =
 -- Helpers
 
 
-setSelectedPackage : Model -> List Package -> Model
-setSelectedPackage model packages =
+setSelectedPackage : AppState -> Model -> List Package -> Model
+setSelectedPackage appState model packages =
     case model.selectedPackage of
         Just id ->
             if List.any (.id >> (==) id) packages then
-                { model | form = QuestionnaireCreateForm.init model.selectedPackage }
+                { model | form = QuestionnaireCreateForm.init appState model.selectedPackage }
 
             else
                 model

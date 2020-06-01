@@ -18,6 +18,7 @@ import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibil
 import Shared.Data.Template as Template exposing (Template)
 import Shared.Form.FormError exposing (FormError)
 import Uuid
+import WizardResearch.Common.AppState exposing (AppState)
 
 
 type alias ProjectCreateForm =
@@ -60,14 +61,14 @@ init =
     Form.initial [] (validation [])
 
 
-encode : ProjectCreateForm -> E.Value
-encode form =
+encode : AppState -> ProjectCreateForm -> E.Value
+encode appState form =
     E.object
         [ ( "name", E.string form.name )
         , ( "templateUuid", E.string form.templateUuid )
         , ( "packageId", E.string form.packageId )
         , ( "tagUuids", E.list E.string form.tagUuids )
-        , ( "visibility", QuestionnaireVisibility.encode QuestionnaireVisibility.PrivateQuestionnaire )
+        , ( "visibility", QuestionnaireVisibility.encode appState.config.questionnaire.questionnaireVisibility.defaultValue )
         ]
 
 

@@ -2,17 +2,20 @@ module Wizard.Questionnaires.Common.QuestionnaireVisibility exposing
     ( QuestionnaireVisibility(..)
     , decoder
     , encode
+    , field
     , formOptions
+    , richFormOptions
     , toString
     , validation
     )
 
 import Form.Error as Error exposing (ErrorValue(..))
+import Form.Field as Field exposing (Field)
 import Form.Validate as Validate exposing (Validation)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Shared.Locale exposing (lg)
-import Wizard.Common.AppState exposing (AppState)
+import Shared.Provisioning exposing (Provisioning)
 
 
 type QuestionnaireVisibility
@@ -59,6 +62,11 @@ decoder =
             )
 
 
+field : QuestionnaireVisibility -> Field
+field =
+    toString >> Field.string
+
+
 validation : Validation e QuestionnaireVisibility
 validation =
     Validate.string
@@ -79,8 +87,8 @@ validation =
             )
 
 
-formOptions : AppState -> List ( String, String, String )
-formOptions appState =
+richFormOptions : { a | provisioning : Provisioning } -> List ( String, String, String )
+richFormOptions appState =
     [ ( toString PrivateQuestionnaire
       , lg "questionnaireVisibility.private" appState
       , lg "questionnaireVisibility.private.description" appState
@@ -92,5 +100,19 @@ formOptions appState =
     , ( toString PublicQuestionnaire
       , lg "questionnaireVisibility.public" appState
       , lg "questionnaireVisibility.public.description" appState
+      )
+    ]
+
+
+formOptions : { a | provisioning : Provisioning } -> List ( String, String )
+formOptions appState =
+    [ ( toString PrivateQuestionnaire
+      , lg "questionnaireVisibility.private" appState
+      )
+    , ( toString PublicReadOnlyQuestionnaire
+      , lg "questionnaireVisibility.publicReadOnly" appState
+      )
+    , ( toString PublicQuestionnaire
+      , lg "questionnaireVisibility.public" appState
       )
     ]

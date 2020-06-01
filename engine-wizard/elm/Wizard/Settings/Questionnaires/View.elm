@@ -11,6 +11,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
+import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
 import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.View as GenericView
@@ -63,6 +64,8 @@ formView appState form =
     div []
         [ FormGroup.toggle form "questionnaireVisibilityEnabled" (l_ "form.questionnaireVisibility" appState)
         , FormExtra.mdAfter (l_ "form.questionnaireVisibility.desc" appState)
+        , FormGroup.select appState (QuestionnaireVisibility.formOptions appState) form "questionnaireVisibilityDefaultValue" (l_ "form.questionnaireVisibilityDefaultValue" appState)
+        , FormExtra.mdAfter (l_ "form.questionnaireVisibilityDefaultValue.desc" appState)
         , FormGroup.toggle form "levelsEnabled" (l_ "form.phases" appState)
         , FormExtra.mdAfter (l_ "form.phases.desc" appState)
         , FormGroup.toggle form "feedbackEnabled" (l_ "form.feedback" appState)
