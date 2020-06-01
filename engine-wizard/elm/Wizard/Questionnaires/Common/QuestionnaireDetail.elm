@@ -21,9 +21,9 @@ import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.KnowledgeModels.Common.Package as Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 import Wizard.Questionnaires.Common.QuestionnaireLabel as QuestionnaireLabel exposing (QuestionnaireLabel)
 import Wizard.Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
+import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 
 
 type alias QuestionnaireDetail =
@@ -33,7 +33,7 @@ type alias QuestionnaireDetail =
     , knowledgeModel : KnowledgeModel
     , replies : FormValues
     , level : Int
-    , accessibility : QuestionnaireAccessibility
+    , visibility : QuestionnaireVisibility
     , ownerUuid : Maybe String
     , selectedTagUuids : List String
     , labels : List QuestionnaireLabel
@@ -49,7 +49,7 @@ decoder =
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" decodeFormValues
         |> D.required "level" D.int
-        |> D.required "accessibility" QuestionnaireAccessibility.decoder
+        |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "ownerUuid" (D.maybe D.string)
         |> D.required "selectedTagUuids" (D.list D.string)
         |> D.required "labels" (D.list QuestionnaireLabel.decoder)
@@ -59,7 +59,7 @@ encode : QuestionnaireDetail -> E.Value
 encode questionnaire =
     E.object
         [ ( "name", E.string questionnaire.name )
-        , ( "accessibility", QuestionnaireAccessibility.encode questionnaire.accessibility )
+        , ( "visibility", QuestionnaireVisibility.encode questionnaire.visibility )
         , ( "replies", encodeFormValues questionnaire.replies )
         , ( "level", E.int questionnaire.level )
         , ( "labels", E.list QuestionnaireLabel.encode questionnaire.labels )
@@ -73,7 +73,7 @@ isEditable appState questionnaire =
             UserInfo.isAdmin appState.session.user
 
         isNotReadonly =
-            questionnaire.accessibility /= PublicReadOnlyQuestionnaire
+            questionnaire.visibility /= PublicReadOnlyQuestionnaire
 
         isOwner =
             questionnaire.ownerUuid == Maybe.map .uuid appState.session.user

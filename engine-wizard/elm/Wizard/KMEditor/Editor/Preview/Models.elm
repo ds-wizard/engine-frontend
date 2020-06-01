@@ -13,7 +13,7 @@ import Wizard.KMEditor.Common.Events.Event exposing (Event)
 import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.KnowledgeModels.Common.Package as Package
-import Wizard.Questionnaires.Common.QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
+import Wizard.Questionnaires.Common.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 
 
 type alias Model =
@@ -92,7 +92,7 @@ createQuestionnaireModel appState packageId km =
         appState
         { uuid = ""
         , name = ""
-        , accessibility = PrivateQuestionnaire
+        , visibility = PrivateQuestionnaire
         , ownerUuid = Nothing
         , package = { package | id = packageId }
         , knowledgeModel = km

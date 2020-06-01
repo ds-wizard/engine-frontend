@@ -16,7 +16,7 @@ import Wizard.Documents.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Common.QuestionnaireState exposing (QuestionnaireState(..))
-import Wizard.Questionnaires.Common.View exposing (accessibilityBadge)
+import Wizard.Questionnaires.Common.View exposing (visibilityBadge)
 import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
@@ -95,7 +95,7 @@ listingTitle appState questionnaire =
     in
     span []
         [ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ]
-        , accessibilityBadge appState questionnaire.accessibility
+        , visibilityBadge appState questionnaire.visibility
         , migrationBadge appState questionnaire.state
         ]
 

@@ -15,7 +15,7 @@ import Wizard.Dashboard.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.KnowledgeModels.Routes
 import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.View exposing (accessibilityBadge)
+import Wizard.Questionnaires.Common.View exposing (visibilityBadge)
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
@@ -97,7 +97,7 @@ listingTitle : AppState -> Questionnaire -> Html msg
 listingTitle appState questionnaire =
     span []
         [ linkTo appState (Routes.QuestionnairesRoute <| DetailRoute <| questionnaire.uuid) [] [ text questionnaire.name ]
-        , accessibilityBadge appState questionnaire.accessibility
+        , visibilityBadge appState questionnaire.visibility
         ]
 
 
