@@ -5,6 +5,7 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 
@@ -16,8 +17,8 @@ type alias QuestionnaireCreateForm =
     }
 
 
-init : Maybe String -> Form CustomFormError QuestionnaireCreateForm
-init selectedPackage =
+init : AppState -> Maybe String -> Form CustomFormError QuestionnaireCreateForm
+init appState selectedPackage =
     let
         initials =
             case selectedPackage of
@@ -28,7 +29,7 @@ init selectedPackage =
                     []
 
         initialsWithVisibility =
-            initials ++ [ ( "visibility", Field.string <| QuestionnaireVisibility.toString QuestionnaireVisibility.PrivateQuestionnaire ) ]
+            initials ++ [ ( "visibility", QuestionnaireVisibility.field appState.config.questionnaires.questionnaireVisibility.defaultValue ) ]
     in
     Form.initial initialsWithVisibility validation
 

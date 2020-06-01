@@ -11,11 +11,13 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Form.Validate as V
+import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Wizard.Settings.Common.EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
 
 
 type alias EditableQuestionnairesConfigForm =
     { questionnaireVisibilityEnabled : Bool
+    , questionnaireVisibilityDefaultValue : QuestionnaireVisibility
     , levelsEnabled : Bool
     , feedbackEnabled : Bool
     , feedbackToken : String
@@ -34,6 +36,7 @@ init config =
     let
         fields =
             [ ( "questionnaireVisibilityEnabled", Field.bool config.questionnaireVisibility.enabled )
+            , ( "questionnaireVisibilityDefaultValue", QuestionnaireVisibility.field config.questionnaireVisibility.defaultValue )
             , ( "levelsEnabled", Field.bool config.levels.enabled )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
@@ -48,6 +51,7 @@ validation : Validation CustomFormError EditableQuestionnairesConfigForm
 validation =
     V.succeed EditableQuestionnairesConfigForm
         |> V.andMap (V.field "questionnaireVisibilityEnabled" V.bool)
+        |> V.andMap (V.field "questionnaireVisibilityDefaultValue" QuestionnaireVisibility.validation)
         |> V.andMap (V.field "levelsEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
@@ -57,7 +61,10 @@ validation =
 
 toEditableQuestionnaireConfig : EditableQuestionnairesConfigForm -> EditableQuestionnairesConfig
 toEditableQuestionnaireConfig form =
-    { questionnaireVisibility = { enabled = form.questionnaireVisibilityEnabled }
+    { questionnaireVisibility =
+        { enabled = form.questionnaireVisibilityEnabled
+        , defaultValue = form.questionnaireVisibilityDefaultValue
+        }
     , levels = { enabled = form.levelsEnabled }
     , feedback =
         { enabled = form.feedbackEnabled

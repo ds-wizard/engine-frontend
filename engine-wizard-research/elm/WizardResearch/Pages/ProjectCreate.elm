@@ -168,7 +168,7 @@ handleFormMsg cfg appState formMsg model =
     case ( formMsg, Form.getOutput model.createForm ) of
         ( Form.Submit, Just createForm ) ->
             ( { model | submitting = Loading }
-            , QuestionnairesApi.postQuestionnaire (ProjectCreateForm.encode createForm) appState (cfg.wrapMsg << PostQuestionnaireComplete)
+            , QuestionnairesApi.postQuestionnaire (ProjectCreateForm.encode appState createForm) appState (cfg.wrapMsg << PostQuestionnaireComplete)
             )
 
         _ ->

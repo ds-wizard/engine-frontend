@@ -1,5 +1,6 @@
 module Wizard.Questionnaires.Models exposing (Model, initLocalModel, initialModel)
 
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Questionnaires.Create.Models
 import Wizard.Questionnaires.CreateMigration.Models
 import Wizard.Questionnaires.Detail.Models
@@ -19,9 +20,9 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { createModel = Wizard.Questionnaires.Create.Models.initialModel Nothing
+initialModel : AppState -> Model
+initialModel appState =
+    { createModel = Wizard.Questionnaires.Create.Models.initialModel appState Nothing
     , createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel ""
     , detailModel = Wizard.Questionnaires.Detail.Models.initialModel ""
     , editModel = Wizard.Questionnaires.Edit.Models.initialModel ""
@@ -30,11 +31,11 @@ initialModel =
     }
 
 
-initLocalModel : Route -> Model -> Model
-initLocalModel route model =
+initLocalModel : AppState -> Route -> Model -> Model
+initLocalModel appState route model =
     case route of
         CreateRoute selectedPackage ->
-            { model | createModel = Wizard.Questionnaires.Create.Models.initialModel selectedPackage }
+            { model | createModel = Wizard.Questionnaires.Create.Models.initialModel appState selectedPackage }
 
         CreateMigrationRoute uuid ->
             { model | createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel uuid }

@@ -62,7 +62,7 @@ formView appState model packages =
 
         visibilitySelect =
             if appState.config.questionnaires.questionnaireVisibility.enabled then
-                FormGroup.richRadioGroup appState (QuestionnaireVisibility.formOptions appState) model.form "visibility" <| lg "questionnaire.visibility" appState
+                FormGroup.richRadioGroup appState (QuestionnaireVisibility.richFormOptions appState) model.form "visibility" <| lg "questionnaire.visibility" appState
 
             else
                 emptyNode
