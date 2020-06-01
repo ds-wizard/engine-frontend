@@ -61,8 +61,8 @@ formView appState form =
                 emptyNode
     in
     div []
-        [ FormGroup.toggle form "questionnaireAccessibilityEnabled" (l_ "form.questionnaireAccessibility" appState)
-        , FormExtra.mdAfter (l_ "form.questionnaireAccessibility.desc" appState)
+        [ FormGroup.toggle form "questionnaireVisibilityEnabled" (l_ "form.questionnaireVisibility" appState)
+        , FormExtra.mdAfter (l_ "form.questionnaireVisibility.desc" appState)
         , FormGroup.toggle form "levelsEnabled" (l_ "form.phases" appState)
         , FormExtra.mdAfter (l_ "form.phases.desc" appState)
         , FormGroup.toggle form "feedbackEnabled" (l_ "form.feedback" appState)

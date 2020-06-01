@@ -14,7 +14,7 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Data.Questionnaire.QuestionnaireAccessibility as QuestionnaireAccessibility
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.Template as Template exposing (Template)
 import Shared.Form.FormError exposing (FormError)
 import Uuid
@@ -67,7 +67,7 @@ encode form =
         , ( "templateUuid", E.string form.templateUuid )
         , ( "packageId", E.string form.packageId )
         , ( "tagUuids", E.list E.string form.tagUuids )
-        , ( "accessibility", QuestionnaireAccessibility.encode QuestionnaireAccessibility.PrivateQuestionnaire )
+        , ( "visibility", QuestionnaireVisibility.encode QuestionnaireVisibility.PrivateQuestionnaire )
         ]
 
 

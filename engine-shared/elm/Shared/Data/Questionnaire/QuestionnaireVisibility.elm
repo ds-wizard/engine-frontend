@@ -1,5 +1,5 @@
-module Shared.Data.Questionnaire.QuestionnaireAccessibility exposing
-    ( QuestionnaireAccessibility(..)
+module Shared.Data.Questionnaire.QuestionnaireVisibility exposing
+    ( QuestionnaireVisibility(..)
     , decoder
     , encode
     , toString
@@ -9,15 +9,15 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 
 
-type QuestionnaireAccessibility
+type QuestionnaireVisibility
     = PublicQuestionnaire
     | PrivateQuestionnaire
     | PublicReadOnlyQuestionnaire
 
 
-toString : QuestionnaireAccessibility -> String
-toString questionnaireAccessibility =
-    case questionnaireAccessibility of
+toString : QuestionnaireVisibility -> String
+toString questionnaireVisibility =
+    case questionnaireVisibility of
         PublicQuestionnaire ->
             "PublicQuestionnaire"
 
@@ -28,12 +28,12 @@ toString questionnaireAccessibility =
             "PrivateQuestionnaire"
 
 
-encode : QuestionnaireAccessibility -> E.Value
+encode : QuestionnaireVisibility -> E.Value
 encode =
     E.string << toString
 
 
-decoder : Decoder QuestionnaireAccessibility
+decoder : Decoder QuestionnaireVisibility
 decoder =
     D.string
         |> D.andThen
@@ -49,5 +49,5 @@ decoder =
                         D.succeed PublicReadOnlyQuestionnaire
 
                     valueType ->
-                        D.fail <| "Unknown questionnaire accessibility: " ++ valueType
+                        D.fail <| "Unknown questionnaire visibility: " ++ valueType
             )
