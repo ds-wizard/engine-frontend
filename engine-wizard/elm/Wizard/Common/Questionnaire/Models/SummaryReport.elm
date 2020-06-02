@@ -5,7 +5,10 @@ module Wizard.Common.Questionnaire.Models.SummaryReport exposing
     , MetricReport
     , SummaryReport
     , TotalReport
+    , compareIndicationReport
+    , indicationReportDecoder
     , summaryReportDecoder
+    , unwrapIndicationReport
     )
 
 import Json.Decode as Decode exposing (..)
@@ -47,6 +50,29 @@ type alias AnsweredIndicationData =
     { answeredQuestions : Int
     , unansweredQuestions : Int
     }
+
+
+compareIndicationReport : IndicationReport -> IndicationReport -> Order
+compareIndicationReport ir1 ir2 =
+    case ( ir1, ir2 ) of
+        ( AnsweredIndication _, LevelsAnsweredIndication _ ) ->
+            GT
+
+        ( LevelsAnsweredIndication _, AnsweredIndication _ ) ->
+            LT
+
+        _ ->
+            EQ
+
+
+unwrapIndicationReport : IndicationReport -> AnsweredIndicationData
+unwrapIndicationReport report =
+    case report of
+        AnsweredIndication data ->
+            data
+
+        LevelsAnsweredIndication data ->
+            data
 
 
 summaryReportDecoder : Decoder SummaryReport

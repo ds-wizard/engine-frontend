@@ -3,11 +3,14 @@ module Wizard.Documents.Create.View exposing (..)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Questionnaire.Views.SummaryReport exposing (viewIndications)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormActions as FormActions
@@ -52,6 +55,10 @@ formView appState model questionnaires =
         questionnaireOptions =
             ( "", "--" ) :: (List.map (\q -> ( q.uuid, q.name )) <| List.sortBy (String.toLower << .name) questionnaires)
 
+        selectedQuestionnaire =
+            (Form.getFieldAsString "questionnaireUuid" model.form).value
+                |> Maybe.andThen (\qUuid -> List.find (\q -> q.uuid == qUuid) questionnaires)
+
         questionnaireInput =
             case model.selectedQuestionnaire of
                 Just questionnaireUuid ->
@@ -67,6 +74,16 @@ formView appState model questionnaires =
                 Nothing ->
                     FormGroup.select appState questionnaireOptions model.form "questionnaireUuid" <| lg "questionnaire" appState
 
+        questionnaireDetail =
+            case selectedQuestionnaire of
+                Just questionnaire ->
+                    div [ class "form-group" ]
+                        [ viewIndications appState questionnaire.report.indications
+                        ]
+
+                Nothing ->
+                    emptyNode
+
         templatesInput =
             case model.templates of
                 Success templates ->
@@ -75,7 +92,7 @@ formView appState model questionnaires =
                             let
                                 visibleName =
                                     if appState.config.template.recommendedTemplateUuid == Just uuid then
-                                        name ++ " (recommended)"
+                                        name ++ " (" ++ l_ "template.recommended" appState ++ ")"
 
                                     else
                                         name
@@ -109,6 +126,7 @@ formView appState model questionnaires =
     div []
         [ FormGroup.input appState model.form "name" <| lg "document.name" appState
         , questionnaireInput
+        , questionnaireDetail
         , templatesInput
         , formatInput
         ]

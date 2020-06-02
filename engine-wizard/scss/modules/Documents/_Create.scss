@@ -1,0 +1,13 @@
+@import "../../variables";
+
+.Documents__Create {
+    .indication-table {
+        color: $gray-600;
+
+        .progress {
+            width: 15rem;
+            height: 10px;
+            margin-left: 1rem;
+        }
+    }
+}
