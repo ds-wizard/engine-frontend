@@ -2,6 +2,7 @@ module Wizard.Questionnaires.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import List.Extra as List
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Version exposing (Version)
@@ -9,6 +10,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Questionnaire.Models.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -103,10 +105,6 @@ listingTitle appState questionnaire =
 listingDescription : AppState -> Questionnaire -> Html Msg
 listingDescription appState questionnaire =
     let
-        kmRoute =
-            Routes.KnowledgeModelsRoute <|
-                Wizard.KnowledgeModels.Routes.DetailRoute questionnaire.package.id
-
         ownerName =
             case questionnaire.owner of
                 Just owner ->
@@ -117,20 +115,39 @@ listingDescription appState questionnaire =
 
                 Nothing ->
                     emptyNode
+
+        kmRoute =
+            Routes.KnowledgeModelsRoute <|
+                Wizard.KnowledgeModels.Routes.DetailRoute questionnaire.package.id
+
+        kmLink =
+            linkTo appState
+                kmRoute
+                [ title <| lg "knowledgeModel" appState, class "fragment" ]
+                [ text questionnaire.package.name
+                , text ", "
+                , text <| Version.toString questionnaire.package.version
+                , text " ("
+                , code [] [ text questionnaire.package.id ]
+                , text ")"
+                ]
+
+        toAnsweredInidcation answeredInidciation =
+            let
+                { answeredQuestions, unansweredQuestions } =
+                    unwrapIndicationReport answeredInidciation
+            in
+            span [ class "fragment", classList [ ( "text-success", unansweredQuestions == 0 ) ] ]
+                [ text ("Answered " ++ String.fromInt answeredQuestions ++ "/" ++ String.fromInt (answeredQuestions + unansweredQuestions)) ]
+
+        answered =
+            questionnaire.report.indications
+                |> List.sortWith compareIndicationReport
+                |> List.take 1
+                |> List.map toAnsweredInidcation
     in
     span []
-        [ ownerName
-        , linkTo appState
-            kmRoute
-            [ title <| lg "knowledgeModel" appState, class "fragment" ]
-            [ text questionnaire.package.name
-            , text ", "
-            , text <| Version.toString questionnaire.package.version
-            , text " ("
-            , code [] [ text questionnaire.package.id ]
-            , text ")"
-            ]
-        ]
+        (ownerName :: kmLink :: answered)
 
 
 listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)

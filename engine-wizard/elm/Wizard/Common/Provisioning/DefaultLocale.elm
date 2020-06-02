@@ -373,6 +373,7 @@ locale =
         , ( "Wizard.Dashboard.Widgets.WelcomeWidget.welcome", "Welcome to the %s!" )
         , ( "Wizard.Documents.Create.View.form.create", "Create" )
         , ( "Wizard.Documents.Create.View.header.title", "Create document" )
+        , ( "Wizard.Documents.Create.View.template.recommended", "recommended" )
         , ( "Wizard.Documents.Index.View.action.delete", "Delete" )
         , ( "Wizard.Documents.Index.View.action.download", "Download" )
         , ( "Wizard.Documents.Index.View.action.submit", "Submit" )

@@ -10,6 +10,7 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline exposing (optional, required)
 import Time
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Questionnaire.Models.SummaryReport exposing (IndicationReport, indicationReportDecoder)
 import Wizard.Common.UserInfo as UserInfo exposing (UserInfo)
 import Wizard.KnowledgeModels.Common.Package as Package exposing (Package)
 import Wizard.Questionnaires.Common.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
@@ -26,6 +27,12 @@ type alias Questionnaire =
     , owner : Maybe User
     , state : QuestionnaireState
     , updatedAt : Time.Posix
+    , report : Report
+    }
+
+
+type alias Report =
+    { indications : List IndicationReport
     }
 
 
@@ -55,6 +62,13 @@ decoder =
         |> required "owner" (D.maybe User.decoder)
         |> required "state" QuestionnaireState.decoder
         |> required "updatedAt" D.datetime
+        |> required "report" reportDecoder
+
+
+reportDecoder : Decoder { indications : List IndicationReport }
+reportDecoder =
+    D.succeed Report
+        |> required "indications" (D.list indicationReportDecoder)
 
 
 compare : Questionnaire -> Questionnaire -> Order
