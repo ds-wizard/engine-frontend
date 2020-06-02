@@ -699,6 +699,8 @@ locale =
         , ( "Wizard.Settings.Questionnaires.View.form.feedbackToken.desc", "[Personal Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) for GitHub account creating the issues. Make sure to select **public_repo** scope if the repository is public or **repo** if it is private. We recommend creating a bot account with the access to the feedback repository instead of using your own GitHub account." )
         , ( "Wizard.Settings.Questionnaires.View.form.phases", "Phases" )
         , ( "Wizard.Settings.Questionnaires.View.form.phases.desc", "If enabled, individual questions in questionnaires can relate to certain desirability phases, such as *Before Submitting the Proposal*" )
+        , ( "Wizard.Settings.Questionnaires.View.form.summaryReport", "Summary Report" )
+        , ( "Wizard.Settings.Questionnaires.View.form.summaryReport.desc", "If enabled, users can view a summary report showing various metrics for the questionnaire." )
         , ( "Wizard.Settings.Questionnaires.View.form.questionnaireVisibility", "Questionnaire Visibility" )
         , ( "Wizard.Settings.Questionnaires.View.form.questionnaireVisibility.desc", "If enabled, questionnaires can be private, public read-only, or public. Otherwise, all questionnaires use the *Default Questionnaire Visibility*." )
         , ( "Wizard.Settings.Questionnaires.View.form.questionnaireVisibilityDefaultValue", "Default Questionnaire Visibility" )

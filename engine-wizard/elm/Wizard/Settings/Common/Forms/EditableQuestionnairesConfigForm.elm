@@ -9,6 +9,7 @@ module Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
+import Wizard.Common.Config.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Form.Validate as V
 import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
@@ -18,11 +19,12 @@ import Wizard.Settings.Common.EditableQuestionnairesConfig exposing (EditableQue
 type alias EditableQuestionnairesConfigForm =
     { questionnaireVisibilityEnabled : Bool
     , questionnaireVisibilityDefaultValue : QuestionnaireVisibility
-    , levelsEnabled : Bool
+    , levels : SimpleFeatureConfig
     , feedbackEnabled : Bool
     , feedbackToken : String
     , feedbackOwner : String
     , feedbackRepo : String
+    , summaryReport : SimpleFeatureConfig
     }
 
 
@@ -37,11 +39,12 @@ init config =
         fields =
             [ ( "questionnaireVisibilityEnabled", Field.bool config.questionnaireVisibility.enabled )
             , ( "questionnaireVisibilityDefaultValue", QuestionnaireVisibility.field config.questionnaireVisibility.defaultValue )
-            , ( "levelsEnabled", Field.bool config.levels.enabled )
+            , ( "levels", SimpleFeatureConfig.field config.levels )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
             , ( "feedbackOwner", Field.string config.feedback.owner )
             , ( "feedbackRepo", Field.string config.feedback.repo )
+            , ( "summaryReport", SimpleFeatureConfig.field config.summaryReport )
             ]
     in
     Form.initial fields validation
@@ -52,11 +55,12 @@ validation =
     V.succeed EditableQuestionnairesConfigForm
         |> V.andMap (V.field "questionnaireVisibilityEnabled" V.bool)
         |> V.andMap (V.field "questionnaireVisibilityDefaultValue" QuestionnaireVisibility.validation)
-        |> V.andMap (V.field "levelsEnabled" V.bool)
+        |> V.andMap (V.field "levels" SimpleFeatureConfig.validation)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackOwner" V.string V.optionalString)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackRepo" V.string V.optionalString)
+        |> V.andMap (V.field "summaryReport" SimpleFeatureConfig.validation)
 
 
 toEditableQuestionnaireConfig : EditableQuestionnairesConfigForm -> EditableQuestionnairesConfig
@@ -65,11 +69,12 @@ toEditableQuestionnaireConfig form =
         { enabled = form.questionnaireVisibilityEnabled
         , defaultValue = form.questionnaireVisibilityDefaultValue
         }
-    , levels = { enabled = form.levelsEnabled }
+    , levels = form.levels
     , feedback =
         { enabled = form.feedbackEnabled
         , token = form.feedbackToken
         , owner = form.feedbackOwner
         , repo = form.feedbackRepo
         }
+    , summaryReport = form.summaryReport
     }

@@ -66,8 +66,10 @@ formView appState form =
         , FormExtra.mdAfter (l_ "form.questionnaireVisibility.desc" appState)
         , FormGroup.select appState (QuestionnaireVisibility.formOptions appState) form "questionnaireVisibilityDefaultValue" (l_ "form.questionnaireVisibilityDefaultValue" appState)
         , FormExtra.mdAfter (l_ "form.questionnaireVisibilityDefaultValue.desc" appState)
-        , FormGroup.toggle form "levelsEnabled" (l_ "form.phases" appState)
+        , FormGroup.toggle form "levels" (l_ "form.phases" appState)
         , FormExtra.mdAfter (l_ "form.phases.desc" appState)
+        , FormGroup.toggle form "summaryReport" (l_ "form.summaryReport" appState)
+        , FormExtra.mdAfter (l_ "form.summaryReport.desc" appState)
         , FormGroup.toggle form "feedbackEnabled" (l_ "form.feedback" appState)
         , FormExtra.mdAfter (l_ "form.feedback.desc" appState)
         , feedbackInput
