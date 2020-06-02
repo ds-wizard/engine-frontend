@@ -15,6 +15,7 @@ type alias EditableQuestionnairesConfig =
     { questionnaireVisibility : QuestionnaireVisibilityConfig
     , levels : SimpleFeatureConfig
     , feedback : Feedback
+    , summaryReport : SimpleFeatureConfig
     }
 
 
@@ -32,6 +33,7 @@ decoder =
         |> D.required "questionnaireVisibility" QuestionnaireVisibilityConfig.decoder
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "feedback" feedbackDecoder
+        |> D.required "summaryReport" SimpleFeatureConfig.decoder
 
 
 feedbackDecoder : Decoder Feedback
@@ -49,6 +51,7 @@ encode config =
         [ ( "questionnaireVisibility", QuestionnaireVisibilityConfig.encode config.questionnaireVisibility )
         , ( "levels", SimpleFeatureConfig.encode config.levels )
         , ( "feedback", encodeFeedback config.feedback )
+        , ( "summaryReport", SimpleFeatureConfig.encode config.summaryReport )
         ]
 
 

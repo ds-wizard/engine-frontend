@@ -21,6 +21,7 @@ import Wizard.Questionnaires.Detail.Models exposing (Model)
 import Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
+import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -41,13 +42,15 @@ view appState model =
 content : AppState -> Model -> ( Wizard.Common.Questionnaire.Models.Model, List Level ) -> Html Msg
 content appState model ( questionnaireModel, levels ) =
     let
+        features =
+            [ QuestionnaireFeature.feedback
+            , QuestionnaireFeature.todos
+            , QuestionnaireFeature.todoList
+            ]
+                |> listInsertIf QuestionnaireFeature.summaryReport appState.config.questionnaires.summaryReport.enabled
+
         questionnaireCfg =
-            { features =
-                [ QuestionnaireFeature.feedback
-                , QuestionnaireFeature.summaryReport
-                , QuestionnaireFeature.todos
-                , QuestionnaireFeature.todoList
-                ]
+            { features = features
             , levels =
                 if appState.config.questionnaires.levels.enabled then
                     Just levels
