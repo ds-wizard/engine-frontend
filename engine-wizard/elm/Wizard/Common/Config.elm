@@ -14,6 +14,7 @@ import Wizard.Common.Config.OrganizationConfig as OrganizationConfig exposing (O
 import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Common.Config.QuestionnairesConfig as QuestionnairesConfig exposing (QuestionnairesConfig)
 import Wizard.Common.Config.SubmissionConfig as SubmissionConfig exposing (SubmissionConfig)
+import Wizard.Common.Config.TemplateConfig as TemplateConfig exposing (TemplateConfig)
 
 
 type alias Config =
@@ -25,6 +26,7 @@ type alias Config =
     , knowledgeModelRegistry : KnowledgeModelRegistryConfig
     , questionnaires : QuestionnairesConfig
     , submission : SubmissionConfig
+    , template : TemplateConfig
     }
 
 
@@ -39,6 +41,7 @@ decoder =
         |> D.required "knowledgeModelRegistry" KnowledgeModelRegistryConfig.decoder
         |> D.required "questionnaire" QuestionnairesConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder
+        |> D.required "template" TemplateConfig.decoder
 
 
 default : Config
@@ -51,4 +54,5 @@ default =
     , knowledgeModelRegistry = KnowledgeModelRegistryConfig.default
     , questionnaires = QuestionnairesConfig.default
     , submission = SubmissionConfig.default
+    , template = TemplateConfig.default
     }

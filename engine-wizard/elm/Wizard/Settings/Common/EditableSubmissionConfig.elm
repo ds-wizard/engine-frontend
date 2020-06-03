@@ -106,7 +106,7 @@ encodeService definition =
     E.object
         [ ( "id", E.string definition.id )
         , ( "name", E.string definition.name )
-        , ( "description", E.string definition.name )
+        , ( "description", E.string definition.description )
         , ( "supportedFormats", E.list encodeSupportedFormat definition.supportedFormats )
         , ( "props", E.list E.string definition.props )
         , ( "request", encodeRequest definition.request )

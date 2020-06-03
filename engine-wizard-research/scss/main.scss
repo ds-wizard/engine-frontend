@@ -1,5 +1,6 @@
 @import "variables";
-@import "~bootstrap/scss/bootstrap";
+
+@import "engine-shared/scss/Elemental/main";
 
 @import "customizations/extra-app";
 @import "customizations/extra";
@@ -9,11 +10,6 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import '~@fortawesome/fontawesome-free/scss/solid';
 @import '~@fortawesome/fontawesome-free/scss/regular';
 @import '~@fortawesome/fontawesome-free/scss/brands';
-
-
-h1 {
-    color: $color;
-}
 
 @import "customizations/overrides-app";
 @import "customizations/overrides";

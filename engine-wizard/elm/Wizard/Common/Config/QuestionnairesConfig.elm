@@ -6,7 +6,7 @@ import Wizard.Common.Config.Partials.SimpleFeatureConfig as SimpleFeatureConfig 
 
 
 type alias QuestionnairesConfig =
-    { questionnaireAccessibility : SimpleFeatureConfig
+    { questionnaireVisibility : SimpleFeatureConfig
     , levels : SimpleFeatureConfig
     , feedback : SimpleFeatureConfig
     }
@@ -15,14 +15,14 @@ type alias QuestionnairesConfig =
 decoder : Decoder QuestionnairesConfig
 decoder =
     D.succeed QuestionnairesConfig
-        |> D.required "questionnaireAccessibility" SimpleFeatureConfig.decoder
+        |> D.required "questionnaireVisibility" SimpleFeatureConfig.decoder
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "feedback" SimpleFeatureConfig.decoder
 
 
 default : QuestionnairesConfig
 default =
-    { questionnaireAccessibility = SimpleFeatureConfig.enabled
+    { questionnaireVisibility = SimpleFeatureConfig.enabled
     , levels = SimpleFeatureConfig.enabled
     , feedback = SimpleFeatureConfig.enabled
     }

@@ -12,9 +12,9 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility)
 import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Common.QuestionnaireEditForm exposing (QuestionnaireEditForm)
+import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Wizard.Questionnaires.Edit.Models exposing (Model)
 import Wizard.Questionnaires.Edit.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
@@ -48,14 +48,14 @@ questionnaireView appState model _ =
 formView : AppState -> Form CustomFormError QuestionnaireEditForm -> Html Form.Msg
 formView appState form =
     let
-        accessibilitySelect =
-            if appState.config.questionnaires.questionnaireAccessibility.enabled then
-                FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) form "accessibility" <| lg "questionnaire.accessibility" appState
+        visibilitySelect =
+            if appState.config.questionnaires.questionnaireVisibility.enabled then
+                FormGroup.richRadioGroup appState (QuestionnaireVisibility.formOptions appState) form "visibility" <| lg "questionnaire.visibility" appState
 
             else
                 emptyNode
     in
     div []
         [ FormGroup.input appState form "name" <| lg "questionnaire.name" appState
-        , accessibilitySelect
+        , visibilitySelect
         ]

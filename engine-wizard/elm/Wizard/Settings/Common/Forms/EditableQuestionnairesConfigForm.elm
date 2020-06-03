@@ -15,7 +15,7 @@ import Wizard.Settings.Common.EditableQuestionnairesConfig exposing (EditableQue
 
 
 type alias EditableQuestionnairesConfigForm =
-    { questionnaireAccessibilityEnabled : Bool
+    { questionnaireVisibilityEnabled : Bool
     , levelsEnabled : Bool
     , feedbackEnabled : Bool
     , feedbackToken : String
@@ -33,7 +33,7 @@ init : EditableQuestionnairesConfig -> Form CustomFormError EditableQuestionnair
 init config =
     let
         fields =
-            [ ( "questionnaireAccessibilityEnabled", Field.bool config.questionnaireAccessibility.enabled )
+            [ ( "questionnaireVisibilityEnabled", Field.bool config.questionnaireVisibility.enabled )
             , ( "levelsEnabled", Field.bool config.levels.enabled )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
@@ -47,7 +47,7 @@ init config =
 validation : Validation CustomFormError EditableQuestionnairesConfigForm
 validation =
     V.succeed EditableQuestionnairesConfigForm
-        |> V.andMap (V.field "questionnaireAccessibilityEnabled" V.bool)
+        |> V.andMap (V.field "questionnaireVisibilityEnabled" V.bool)
         |> V.andMap (V.field "levelsEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
@@ -57,7 +57,7 @@ validation =
 
 toEditableQuestionnaireConfig : EditableQuestionnairesConfigForm -> EditableQuestionnairesConfig
 toEditableQuestionnaireConfig form =
-    { questionnaireAccessibility = { enabled = form.questionnaireAccessibilityEnabled }
+    { questionnaireVisibility = { enabled = form.questionnaireVisibilityEnabled }
     , levels = { enabled = form.levelsEnabled }
     , feedback =
         { enabled = form.feedbackEnabled

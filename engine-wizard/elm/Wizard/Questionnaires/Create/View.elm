@@ -14,7 +14,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.KnowledgeModels.Common.Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility
+import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility
 import Wizard.Questionnaires.Create.Models exposing (Model)
 import Wizard.Questionnaires.Create.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
@@ -60,9 +60,9 @@ formView appState model packages =
                 Nothing ->
                     FormGroup.select appState packageOptions model.form "packageId"
 
-        accessibilitySelect =
-            if appState.config.questionnaires.questionnaireAccessibility.enabled then
-                FormGroup.richRadioGroup appState (QuestionnaireAccessibility.formOptions appState) model.form "accessibility" <| lg "questionnaire.accessibility" appState
+        visibilitySelect =
+            if appState.config.questionnaires.questionnaireVisibility.enabled then
+                FormGroup.richRadioGroup appState (QuestionnaireVisibility.formOptions appState) model.form "visibility" <| lg "questionnaire.visibility" appState
 
             else
                 emptyNode
@@ -71,7 +71,7 @@ formView appState model packages =
             div []
                 [ FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
                 , parentInput <| lg "knowledgeModel" appState
-                , accessibilitySelect
+                , visibilitySelect
                 ]
     in
     formHtml

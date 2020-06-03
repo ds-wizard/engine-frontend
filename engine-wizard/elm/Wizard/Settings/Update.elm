@@ -17,6 +17,7 @@ import Wizard.Settings.PrivacyAndSupport.Update
 import Wizard.Settings.Questionnaires.Update
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Update
+import Wizard.Settings.Template.Update
 
 
 fetchData : Route -> AppState -> Model -> Cmd Msg
@@ -52,6 +53,10 @@ fetchData route appState model =
         SubmissionRoute ->
             Cmd.map SubmissionMsg <|
                 Wizard.Settings.Submission.Update.fetchData appState
+
+        TemplateRoute ->
+            Cmd.map TemplateMsg <|
+                Wizard.Settings.Template.Update.fetchData appState
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -112,3 +117,10 @@ update wrapMsg msg appState model =
                     Wizard.Settings.Submission.Update.update (wrapMsg << SubmissionMsg) documentSubmissionMsg appState model.documentSubmissionModel
             in
             ( { model | documentSubmissionModel = documentSubmissionModel }, cmd )
+
+        TemplateMsg templateMsg ->
+            let
+                ( templateModel, cmd ) =
+                    Wizard.Settings.Template.Update.update (wrapMsg << TemplateMsg) templateMsg appState model.templateModel
+            in
+            ( { model | templateModel = templateModel }, cmd )

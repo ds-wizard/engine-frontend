@@ -381,9 +381,9 @@ updateChapterWithForm chapter chapterForm =
 {- Question -}
 
 
-initQuestionForm : Question -> Form CustomFormError QuestionForm
-initQuestionForm =
-    questionFormInitials >> initForm (questionFormValidation [])
+initQuestionForm : List Integration -> Question -> Form CustomFormError QuestionForm
+initQuestionForm integrations =
+    questionFormInitials >> initForm (questionFormValidation integrations)
 
 
 questionFormValidation : List Integration -> Validation CustomFormError QuestionForm

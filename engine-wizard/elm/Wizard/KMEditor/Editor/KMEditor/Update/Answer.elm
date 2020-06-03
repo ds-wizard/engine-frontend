@@ -12,7 +12,7 @@ import Random exposing (Seed)
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
-import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
+import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, Editor(..), QuestionEditorData, addAnswerFollowUp, createQuestionEditor, isAnswerEditorDirty, updateAnswerEditorData)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (answerFormValidation)
@@ -73,9 +73,12 @@ updateIfQuestion update editor =
 
 
 addFollowUp : Cmd Wizard.Msgs.Msg -> Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
-addFollowUp =
+addFollowUp cmd seed model =
     addEntity
         { newEntity = Question.new
-        , createEntityEditor = createQuestionEditor
+        , createEntityEditor = createQuestionEditor (getCurrentIntegrations model)
         , addEntity = addAnswerFollowUp
         }
+        cmd
+        seed
+        model

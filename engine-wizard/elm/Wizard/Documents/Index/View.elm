@@ -16,6 +16,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -316,11 +317,18 @@ submitModal appState model =
                     ]
                 ]
 
+        options submissionServices =
+            if List.length submissionServices > 0 then
+                div [ class "form-radio-group" ]
+                    (List.map viewOption submissionServices)
+
+            else
+                Flash.info appState <| l_ "submitModal.noSubmission" appState
+
         submissionBody submissionServices =
             div []
                 [ FormResult.errorOnlyView appState model.submittingDocument
-                , div [ class "form-radio-group" ]
-                    (List.map viewOption submissionServices)
+                , options submissionServices
                 ]
 
         resultBody submission =

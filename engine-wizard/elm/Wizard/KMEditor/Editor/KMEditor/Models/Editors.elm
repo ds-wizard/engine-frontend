@@ -234,7 +234,7 @@ createKnowledgeModelEditor editorContext mbActiveEditorUuid getEditorState km ed
                 }
 
         withChapters =
-            List.foldl (createChapterEditor editorContext km.uuid getEditorState km) editors chapters
+            List.foldl (createChapterEditor integrations editorContext km.uuid getEditorState km) editors chapters
 
         withTags =
             List.foldl (createTagEditor editorContext km.uuid getEditorState km) withChapters tags
@@ -257,8 +257,8 @@ openActiveEditorPath activeEditorUuid editors =
             editors
 
 
-createChapterEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Chapter -> Dict String Editor -> Dict String Editor
-createChapterEditor editorContext parentUuid getEditorState km chapter editors =
+createChapterEditor : List Integration -> EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Chapter -> Dict String Editor -> Dict String Editor
+createChapterEditor integrations editorContext parentUuid getEditorState km chapter editors =
     let
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid km
@@ -275,7 +275,7 @@ createChapterEditor editorContext parentUuid getEditorState km chapter editors =
                 }
 
         withQuestions =
-            List.foldl (createQuestionEditor editorContext chapter.uuid getEditorState km) editors questions
+            List.foldl (createQuestionEditor integrations editorContext chapter.uuid getEditorState km) editors questions
     in
     Dict.insert chapter.uuid editor withQuestions
 
@@ -314,8 +314,8 @@ createIntegrationEditor editorContext parentUuid getEditorState km integration e
     Dict.insert integration.uuid editor editors
 
 
-createQuestionEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Question -> Dict String Editor -> Dict String Editor
-createQuestionEditor editorContext parentUuid getEditorState km question editors =
+createQuestionEditor : List Integration -> EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Question -> Dict String Editor -> Dict String Editor
+createQuestionEditor integrations editorContext parentUuid getEditorState km question editors =
     let
         questionUuid =
             Question.getUuid question
@@ -336,7 +336,7 @@ createQuestionEditor editorContext parentUuid getEditorState km question editors
             QuestionEditor
                 { uuid = questionUuid
                 , question = question
-                , form = initQuestionForm question
+                , form = initQuestionForm integrations question
                 , tagUuids = Question.getTagUuids question
                 , answers = Children.init <| List.map .uuid answers
                 , itemTemplateQuestions = Children.init <| List.map Question.getUuid itemTemplateQuestions
@@ -348,10 +348,10 @@ createQuestionEditor editorContext parentUuid getEditorState km question editors
                 }
 
         withAnswers =
-            List.foldl (createAnswerEditor editorContext questionUuid getEditorState km) editors answers
+            List.foldl (createAnswerEditor integrations editorContext questionUuid getEditorState km) editors answers
 
         withAnswerItemTemplateQuestions =
-            List.foldl (createQuestionEditor editorContext questionUuid getEditorState km) withAnswers itemTemplateQuestions
+            List.foldl (createQuestionEditor integrations editorContext questionUuid getEditorState km) withAnswers itemTemplateQuestions
 
         withReferences =
             List.foldl (createReferenceEditor editorContext questionUuid getEditorState km) withAnswerItemTemplateQuestions references
@@ -362,8 +362,8 @@ createQuestionEditor editorContext parentUuid getEditorState km question editors
     Dict.insert questionUuid editor withExperts
 
 
-createAnswerEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Answer -> Dict String Editor -> Dict String Editor
-createAnswerEditor editorContext parentUuid getEditorState km answer editors =
+createAnswerEditor : List Integration -> EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Answer -> Dict String Editor -> Dict String Editor
+createAnswerEditor integrations editorContext parentUuid getEditorState km answer editors =
     let
         followUps =
             KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
@@ -380,7 +380,7 @@ createAnswerEditor editorContext parentUuid getEditorState km answer editors =
                 }
 
         withFollowUps =
-            List.foldl (createQuestionEditor editorContext answer.uuid getEditorState km) editors followUps
+            List.foldl (createQuestionEditor integrations editorContext answer.uuid getEditorState km) editors followUps
     in
     Dict.insert answer.uuid editor withFollowUps
 
@@ -858,8 +858,8 @@ updateIntegrationWithProps props integration =
     { integration | props = props.list }
 
 
-updateQuestionEditorData : EditorContext -> EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
-updateQuestionEditorData editorContext newState form editorData =
+updateQuestionEditorData : List Integration -> EditorContext -> EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
+updateQuestionEditorData integrations editorContext newState form editorData =
     let
         newQuestion =
             updateQuestionWithForm editorData.question form
@@ -885,7 +885,7 @@ updateQuestionEditorData editorContext newState form editorData =
         , itemTemplateQuestions = newAnswerItemTemplateQuestions
         , references = Children.cleanDirty editorData.references
         , experts = Children.cleanDirty editorData.experts
-        , form = initQuestionForm newQuestion
+        , form = initQuestionForm integrations newQuestion
     }
 
 

@@ -71,8 +71,19 @@ formView appState model questionnaires =
             case model.templates of
                 Success templates ->
                     let
+                        createTemplateOption { uuid, name } =
+                            let
+                                visibleName =
+                                    if appState.config.template.recommendedTemplateUuid == Just uuid then
+                                        name ++ " (recommended)"
+
+                                    else
+                                        name
+                            in
+                            ( uuid, visibleName )
+
                         templateOptions =
-                            ( "", "--" ) :: (List.map (\t -> ( t.uuid, t.name )) <| List.sortBy (String.toLower << .name) templates)
+                            ( "", "--" ) :: (List.map createTemplateOption <| List.sortBy (String.toLower << .name) templates)
                     in
                     FormGroup.select appState templateOptions model.form "templateUuid" <| lg "template" appState
 

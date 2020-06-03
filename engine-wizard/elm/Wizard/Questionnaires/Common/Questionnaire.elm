@@ -12,8 +12,8 @@ import Time
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.UserInfo as UserInfo exposing (UserInfo)
 import Wizard.KnowledgeModels.Common.Package as Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireAccessibility as QuestionnaireAccessibility exposing (QuestionnaireAccessibility(..))
 import Wizard.Questionnaires.Common.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
+import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Wizard.Users.Common.User as User exposing (User)
 
 
@@ -22,7 +22,7 @@ type alias Questionnaire =
     , name : String
     , package : Package
     , level : Int
-    , accessibility : QuestionnaireAccessibility
+    , visibility : QuestionnaireVisibility
     , owner : Maybe User
     , state : QuestionnaireState
     , updatedAt : Time.Posix
@@ -36,7 +36,7 @@ isEditable appState questionnaire =
             UserInfo.isAdmin appState.session.user
 
         isNotReadonly =
-            questionnaire.accessibility /= PublicReadOnlyQuestionnaire
+            questionnaire.visibility /= PublicReadOnlyQuestionnaire
 
         isOwner =
             matchOwner questionnaire appState.session.user
@@ -51,7 +51,7 @@ decoder =
         |> required "name" D.string
         |> required "package" Package.decoder
         |> optional "level" D.int 0
-        |> required "accessibility" QuestionnaireAccessibility.decoder
+        |> required "visibility" QuestionnaireVisibility.decoder
         |> required "owner" (D.maybe User.decoder)
         |> required "state" QuestionnaireState.decoder
         |> required "updatedAt" D.datetime

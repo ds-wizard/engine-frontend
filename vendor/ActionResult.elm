@@ -8,6 +8,7 @@ module ActionResult exposing
     , isSuccess
     , isUnset
     , map
+    , unwrap
     , withDefault
     )
 
@@ -85,17 +86,22 @@ withDefault default result =
             default
 
 
+unwrap : b -> (a -> b) -> ActionResult a -> b
+unwrap default fn actionResult =
+    withDefault default (map fn actionResult)
+
+
 combine : ActionResult a -> ActionResult b -> ActionResult ( a, b )
 combine actionResult1 actionResult2 =
     case ( actionResult1, actionResult2 ) of
         ( Success a, Success b ) ->
             Success ( a, b )
 
-        ( Unset, _ ) ->
-            Unset
+        ( Error a, _ ) ->
+            Error a
 
-        ( _, Unset ) ->
-            Unset
+        ( _, Error b ) ->
+            Error b
 
         ( Loading, _ ) ->
             Loading
@@ -103,11 +109,11 @@ combine actionResult1 actionResult2 =
         ( _, Loading ) ->
             Loading
 
-        ( Error a, _ ) ->
-            Error a
+        ( Unset, _ ) ->
+            Unset
 
-        ( _, Error b ) ->
-            Error b
+        ( _, Unset ) ->
+            Unset
 
 
 combine3 : ActionResult a -> ActionResult b -> ActionResult c -> ActionResult ( a, b, c )

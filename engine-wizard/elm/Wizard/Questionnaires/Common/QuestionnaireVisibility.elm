@@ -1,5 +1,5 @@
-module Wizard.Questionnaires.Common.QuestionnaireAccessibility exposing
-    ( QuestionnaireAccessibility(..)
+module Wizard.Questionnaires.Common.QuestionnaireVisibility exposing
+    ( QuestionnaireVisibility(..)
     , decoder
     , encode
     , formOptions
@@ -15,15 +15,15 @@ import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 
 
-type QuestionnaireAccessibility
+type QuestionnaireVisibility
     = PublicQuestionnaire
     | PrivateQuestionnaire
     | PublicReadOnlyQuestionnaire
 
 
-toString : QuestionnaireAccessibility -> String
-toString questionnaireAccessibility =
-    case questionnaireAccessibility of
+toString : QuestionnaireVisibility -> String
+toString questionnaireVisibility =
+    case questionnaireVisibility of
         PublicQuestionnaire ->
             "PublicQuestionnaire"
 
@@ -34,12 +34,12 @@ toString questionnaireAccessibility =
             "PrivateQuestionnaire"
 
 
-encode : QuestionnaireAccessibility -> E.Value
+encode : QuestionnaireVisibility -> E.Value
 encode =
     E.string << toString
 
 
-decoder : Decoder QuestionnaireAccessibility
+decoder : Decoder QuestionnaireVisibility
 decoder =
     D.string
         |> D.andThen
@@ -55,11 +55,11 @@ decoder =
                         D.succeed PublicReadOnlyQuestionnaire
 
                     valueType ->
-                        D.fail <| "Unknown questionnaire accessibility: " ++ valueType
+                        D.fail <| "Unknown questionnaire visibility: " ++ valueType
             )
 
 
-validation : Validation e QuestionnaireAccessibility
+validation : Validation e QuestionnaireVisibility
 validation =
     Validate.string
         |> Validate.andThen
@@ -82,15 +82,15 @@ validation =
 formOptions : AppState -> List ( String, String, String )
 formOptions appState =
     [ ( toString PrivateQuestionnaire
-      , lg "questionnaireAccessibility.private" appState
-      , lg "questionnaireAccessibility.private.description" appState
+      , lg "questionnaireVisibility.private" appState
+      , lg "questionnaireVisibility.private.description" appState
       )
     , ( toString PublicReadOnlyQuestionnaire
-      , lg "questionnaireAccessibility.publicReadOnly" appState
-      , lg "questionnaireAccessibility.publicReadOnly.description" appState
+      , lg "questionnaireVisibility.publicReadOnly" appState
+      , lg "questionnaireVisibility.publicReadOnly.description" appState
       )
     , ( toString PublicQuestionnaire
-      , lg "questionnaireAccessibility.public" appState
-      , lg "questionnaireAccessibility.public.description" appState
+      , lg "questionnaireVisibility.public" appState
+      , lg "questionnaireVisibility.public.description" appState
       )
     ]
