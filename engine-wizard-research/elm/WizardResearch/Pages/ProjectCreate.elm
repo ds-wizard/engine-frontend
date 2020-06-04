@@ -26,7 +26,6 @@ import Shared.Data.Template.TemplatePacakge as TemplatePackage
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Atoms.Form as Form
 import Shared.Elemental.Atoms.FormInput as FormInput
-import Shared.Elemental.Atoms.Heading as Heading
 import Shared.Elemental.Atoms.Text as Text
 import Shared.Elemental.Components.ActionResultWrapper as ActionResultWrapper
 import Shared.Elemental.Components.Carousel as Carousel exposing (PageOptions)
@@ -309,6 +308,7 @@ projectNameContainer appState model grid =
                 }
                 { form = model.createForm
                 , fieldName = "name"
+                , fieldReadableName = "Name"
                 , mbFieldLabel = Just "Name your project"
                 , mbTextBefore = Nothing
                 , mbTextAfter = Just "Don't worry, you can always change it later."
@@ -324,7 +324,7 @@ projectNameContainer appState model grid =
             [ grid.col 5 [] [ Illustration.wizard appState.theme ]
             , grid.colOffset ( 1, 6 )
                 [ Grid.colVerticalCenter ]
-                [ projectNameFormGroup appState.theme
+                [ projectNameFormGroup appState
                 , Button.primary appState.theme
                     [ onClick (SetScreen TemplateScreen)
                     , disabled (String.length (getProjectName model) == 0)
@@ -405,6 +405,7 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
                 }
                 { form = model.createForm
                 , fieldName = "templateUuid"
+                , fieldReadableName = "Template"
                 , mbFieldLabel = Nothing
                 , mbTextBefore = Nothing
                 , mbTextAfter = Nothing
@@ -466,7 +467,7 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
             , grid.row []
                 [ grid.col 6
                     []
-                    [ templateFormGroup appState.theme
+                    [ templateFormGroup appState
                     , moreTemplatesLink
                     ]
                 , grid.col 6
@@ -511,6 +512,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
                 }
                 { form = model.createForm
                 , fieldName = "packageId"
+                , fieldReadableName = "Knowledge model"
                 , mbFieldLabel = Nothing
                 , mbTextBefore = Nothing
                 , mbTextAfter = Nothing
@@ -541,6 +543,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
                 }
                 { form = model.createForm
                 , fieldName = "tagUuids"
+                , fieldReadableName = "Tags"
                 , mbFieldLabel = Just "Tags (advanced)"
                 , mbTextBefore = Just "Use tags to filter the questions or select none to have all the questions available."
                 , mbTextAfter = Nothing
@@ -549,7 +552,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
         viewTags knowledgeModel =
             if List.length knowledgeModel.tagUuids > 0 then
                 div []
-                    [ tagsFormGroup knowledgeModel appState.theme ]
+                    [ tagsFormGroup knowledgeModel appState ]
 
             else
                 emptyNode
@@ -571,7 +574,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
             , grid.row []
                 [ grid.col 6
                     []
-                    [ kmFormGroup appState.theme
+                    [ kmFormGroup appState
                     , moreKMsLink
                     , emptyKMs
                     ]

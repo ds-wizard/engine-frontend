@@ -46,13 +46,12 @@ layout appState page =
 layoutStyle : Theme -> List Style
 layoutStyle theme =
     [ Global.styles theme
-    , paddingTop (px2rem Size.navigationHeight)
     ]
 
 
 layoutApp : AppState -> Html msg -> Html msg
 layoutApp appState content =
-    div [ css (layoutStyle appState.theme) ]
+    div [ css (paddingTop (px2rem Size.navigationHeight) :: layoutStyle appState.theme) ]
         [ Navigation.view
             { appTitle = appState.config.lookAndFeel.appTitle
             , theme = appState.theme
@@ -73,9 +72,5 @@ layoutAuto appState =
 layoutPublic : AppState -> Html msg -> Html msg
 layoutPublic appState content =
     div [ css (layoutStyle appState.theme) ]
-        [ Navigation.view
-            { appTitle = appState.config.lookAndFeel.appTitle
-            , theme = appState.theme
-            }
-        , content
+        [ content
         ]

@@ -29,6 +29,8 @@ styles theme =
                 ]
             , selector "p + h3"
                 [ marginTop (px2rem Spacing.md) ]
+            , typeSelector "p"
+                [ Spacing.stackMD ]
             , typeSelector "ul"
                 [ Spacing.stackMD
                 , paddingLeft (px2rem Spacing.md)
@@ -44,6 +46,9 @@ styles theme =
                 , hover
                     [ color (colorL10 theme.colors.primary)
                     ]
+                ]
+            , selector "::placeholder"
+                [ Typography.copy1light theme
                 ]
             ]
         ]

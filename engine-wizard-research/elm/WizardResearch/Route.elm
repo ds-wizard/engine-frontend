@@ -14,6 +14,8 @@ type Route
     | Dashboard
     | Login
     | Logout
+    | ForgottenPassword
+    | SignUp
     | NotFound
     | ProjectCreate
     | Project String ProjectRoute
@@ -31,6 +33,8 @@ parser =
         , Parser.map Dashboard Parser.top
         , Parser.map Login (s "login")
         , Parser.map Logout (s "logout")
+        , Parser.map ForgottenPassword (s "forgotten-password")
+        , Parser.map SignUp (s "sign-up")
         , Parser.map ProjectCreate (s "create-project")
         , Parser.map (flip Project ProjectRoute.Overview) (s "projects" </> string)
         , Parser.map (flip Project ProjectRoute.Planning) (s "projects" </> string </> s "planning")
@@ -60,6 +64,12 @@ toString route =
                 Logout ->
                     [ "logout" ]
 
+                ForgottenPassword ->
+                    [ "forgotten-password" ]
+
+                SignUp ->
+                    [ "sign-up" ]
+
                 Dashboard ->
                     [ "" ]
 
@@ -82,6 +92,12 @@ isPublic route =
             True
 
         Login ->
+            True
+
+        ForgottenPassword ->
+            True
+
+        SignUp ->
             True
 
         NotFound ->
