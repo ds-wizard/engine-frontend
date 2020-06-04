@@ -1,7 +1,7 @@
-module Shared.Elemental.Atoms.FormInput exposing (richRadioGroup, tagsGroup, text, textWithAttrs)
+module Shared.Elemental.Atoms.FormInput exposing (password, passwordWithAttrs, richRadioGroup, tagsGroup, text, textWithAttrs)
 
 import Css exposing (..)
-import Css.Global exposing (descendants, typeSelector)
+import Css.Global exposing (descendants, selector, typeSelector)
 import Css.Transitions exposing (transition)
 import Form exposing (Form, Msg(..))
 import Form.Field as Field
@@ -31,6 +31,20 @@ textWithAttrs attributes form fieldName theme =
             Form.getFieldAsString fieldName form
     in
     text_ theme field (id fieldName :: attributes)
+
+
+password : Form FormError o -> String -> Theme -> Html Form.Msg
+password =
+    passwordWithAttrs []
+
+
+passwordWithAttrs : List (Attribute Form.Msg) -> Form FormError o -> String -> Theme -> Html Form.Msg
+passwordWithAttrs attributes form fieldName theme =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+    in
+    password_ theme field (id fieldName :: attributes)
 
 
 richRadioGroup : List ( String, String, String ) -> Form FormError o -> String -> Theme -> Html Form.Msg
@@ -152,6 +166,11 @@ tagsGroup tags form fieldName theme =
 text_ : Theme -> Form.FieldState e String -> List (Attribute Form.Msg) -> Html Form.Msg
 text_ =
     baseInput "text" Field.String Form.Text
+
+
+password_ : Theme -> Form.FieldState e String -> List (Attribute Form.Msg) -> Html Form.Msg
+password_ =
+    baseInput "password" Field.String Form.Text
 
 
 inputStyle : Theme -> Style

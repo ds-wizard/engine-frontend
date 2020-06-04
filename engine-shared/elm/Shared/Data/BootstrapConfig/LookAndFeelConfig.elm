@@ -9,15 +9,20 @@ import Json.Decode.Pipeline as D
 
 
 type alias LookAndFeelConfig =
-    { appTitle : String }
+    { appTitle : String
+    , loginInfo : Maybe String
+    }
 
 
 default : LookAndFeelConfig
 default =
-    { appTitle = "Data Stewardship Wizard" }
+    { appTitle = "Data Stewardship Wizard"
+    , loginInfo = Nothing
+    }
 
 
 decoder : Decoder LookAndFeelConfig
 decoder =
     D.succeed LookAndFeelConfig
         |> D.optional "appTitle" D.string "DS Wizard"
+        |> D.optional "loginInfo" (D.maybe D.string) Nothing
