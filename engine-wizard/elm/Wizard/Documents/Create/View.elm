@@ -5,11 +5,11 @@ import Form
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import List.Extra as List
-import Maybe.Extra as Maybe
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Questionnaire.Views.SummaryReport exposing (viewIndications)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
@@ -43,7 +43,7 @@ content appState model questionnaires =
             [ FormResult.view appState model.savingDocument
             , Html.map FormMsg <| formView appState model questionnaires
             , FormActions.view appState
-                (Routes.DocumentsRoute <| IndexRoute Nothing)
+                (Routes.DocumentsRoute <| IndexRoute Nothing PaginationQueryString.empty)
                 (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingDocument (FormMsg Form.Submit) False)
             ]
         ]

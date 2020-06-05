@@ -8,6 +8,7 @@ import Shared.Locale exposing (l, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
@@ -84,7 +85,7 @@ questionnaireHeader appState savingQuestionnaire questionnaireModel =
 
             else
                 [ linkTo appState
-                    (Routes.QuestionnairesRoute IndexRoute)
+                    (Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty))
                     [ class "btn btn-outline-primary btn-with-loader" ]
                     [ lx_ "header.close" appState ]
                 ]

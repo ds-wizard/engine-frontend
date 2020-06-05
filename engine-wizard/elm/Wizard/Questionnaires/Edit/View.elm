@@ -7,6 +7,7 @@ import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
@@ -39,7 +40,7 @@ questionnaireView appState model _ =
             [ FormResult.errorOnlyView appState model.savingQuestionnaire
             , formView appState model.editForm |> Html.map FormMsg
             , FormActions.view appState
-                (Routes.QuestionnairesRoute IndexRoute)
+                (Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty))
                 (ActionButton.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
             ]
         ]

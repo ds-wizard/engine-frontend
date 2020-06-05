@@ -1,6 +1,7 @@
 module Wizard.Questionnaires.Models exposing (Model, initLocalModel, initialModel)
 
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Questionnaires.Create.Models
 import Wizard.Questionnaires.CreateMigration.Models
 import Wizard.Questionnaires.Detail.Models
@@ -26,7 +27,7 @@ initialModel appState =
     , createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel ""
     , detailModel = Wizard.Questionnaires.Detail.Models.initialModel ""
     , editModel = Wizard.Questionnaires.Edit.Models.initialModel ""
-    , indexModel = Wizard.Questionnaires.Index.Models.initialModel
+    , indexModel = Wizard.Questionnaires.Index.Models.initialModel PaginationQueryString.empty
     , migrationModel = Wizard.Questionnaires.Migration.Models.initialModel ""
     }
 
@@ -46,8 +47,8 @@ initLocalModel appState route model =
         EditRoute uuid ->
             { model | editModel = Wizard.Questionnaires.Edit.Models.initialModel uuid }
 
-        IndexRoute ->
-            { model | indexModel = Wizard.Questionnaires.Index.Models.initialModel }
+        IndexRoute paginationQueryString ->
+            { model | indexModel = Wizard.Questionnaires.Index.Models.initialModel paginationQueryString }
 
         MigrationRoute uuid ->
             { model | migrationModel = Wizard.Questionnaires.Migration.Models.initialModel uuid }

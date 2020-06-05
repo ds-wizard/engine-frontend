@@ -32,7 +32,7 @@ view route appState model =
             Html.map EditMsg <|
                 Wizard.Questionnaires.Edit.View.view appState model.editModel
 
-        IndexRoute ->
+        IndexRoute _ ->
             Html.map IndexMsg <|
                 Wizard.Questionnaires.Index.View.view appState model.indexModel
 

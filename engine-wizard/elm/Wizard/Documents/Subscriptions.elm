@@ -9,7 +9,7 @@ import Wizard.Documents.Routes exposing (Route(..))
 subscriptions : Route -> Model -> Sub Msg
 subscriptions route model =
     case route of
-        IndexRoute _ ->
+        IndexRoute _ _ ->
             Sub.map IndexMsg <| Wizard.Documents.Index.Subscriptions.subscriptions model.indexModel
 
         _ ->
