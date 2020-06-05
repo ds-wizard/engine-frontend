@@ -16,6 +16,7 @@ import Wizard.Common.Config.Partials.CustomMenuLink exposing (CustomMenuLink)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
@@ -195,12 +196,12 @@ menuItems appState =
     , MenuItem
         (l_ "menu.questionnaires" appState)
         (faSet "menu.questionnaires" appState)
-        (Routes.QuestionnairesRoute Wizard.Questionnaires.Routes.IndexRoute)
+        (Routes.QuestionnairesRoute <| Wizard.Questionnaires.Routes.IndexRoute PaginationQueryString.empty)
         Perm.questionnaire
     , MenuItem
         (l_ "menu.documents" appState)
         (faSet "menu.documents" appState)
-        (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute Nothing)
+        (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
         Perm.questionnaire
     ]
 

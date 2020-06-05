@@ -7,6 +7,7 @@ import Shared.Locale exposing (l, lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
@@ -40,7 +41,7 @@ content appState model packages =
             , formView appState model packages |> Html.map FormMsg
             , tagsView appState model
             , FormActions.view appState
-                (Routes.QuestionnairesRoute IndexRoute)
+                (Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty))
                 (ActionResult.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
             ]
         ]

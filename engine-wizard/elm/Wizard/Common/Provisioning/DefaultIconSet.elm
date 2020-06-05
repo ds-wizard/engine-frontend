@@ -15,6 +15,8 @@ iconSet =
         , ( "_global.error", "fas fa-exclamation-circle" )
         , ( "_global.info", "fas fa-info-circle" )
         , ( "_global.remove", "fas fa-times" )
+        , ( "_global.sortAsc", "fas fa-long-arrow-alt-down" )
+        , ( "_global.sortDesc", "fas fa-long-arrow-alt-up" )
         , ( "_global.spinner", "fas fa-spinner fa-spin" )
         , ( "_global.success", "fas fa-check" )
         , ( "_global.view", "far fa-eye" )

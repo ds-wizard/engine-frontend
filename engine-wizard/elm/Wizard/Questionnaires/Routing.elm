@@ -10,6 +10,7 @@ import Url.Parser.Query as Query
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.JwtToken exposing (JwtToken)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Questionnaires.Routes exposing (Route(..))
 
 
@@ -23,7 +24,7 @@ parsers appState wrapRoute =
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s (lr "questionnaires.createMigration" appState) </> string)
     , map (wrapRoute << DetailRoute) (s moduleRoot </> s (lr "questionnaires.detail" appState) </> string)
     , map (wrapRoute << EditRoute) (s moduleRoot </> s (lr "questionnaires.edit" appState) </> string)
-    , map (wrapRoute <| IndexRoute) (s moduleRoot)
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (s moduleRoot <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort")
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "questionnaires.migration" appState) </> string)
     ]
 
@@ -52,8 +53,8 @@ toUrl appState route =
         EditRoute uuid ->
             [ moduleRoot, lr "questionnaires.edit" appState, uuid ]
 
-        IndexRoute ->
-            [ moduleRoot ]
+        IndexRoute paginationQueryString ->
+            [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
         MigrationRoute uuid ->
             [ moduleRoot, lr "questionnaires.migration" appState, uuid ]

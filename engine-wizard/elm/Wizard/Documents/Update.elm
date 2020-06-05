@@ -16,7 +16,7 @@ fetchData route appState model =
             Cmd.map CreateMsg <|
                 Wizard.Documents.Create.Update.fetchData appState
 
-        IndexRoute _ ->
+        IndexRoute _ _ ->
             Cmd.map IndexMsg <|
                 Wizard.Documents.Index.Update.fetchData appState model.indexModel
 

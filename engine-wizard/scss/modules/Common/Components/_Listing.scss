@@ -1,7 +1,22 @@
+@import "../../../mixins";
 @import "../../../variables";
 
 .Listing {
     width: 100%;
+
+    .listing-toolbar {
+        & > .btn, & > .btn-group {
+            margin-left: 1rem;
+        }
+
+        & > .btn-group > .btn {
+            box-shadow: none !important;
+        }
+
+        .listing-toolbar-extra {
+            margin-right: 1rem;
+        }
+    }
 
     .list-group-item {
         display: flex;
@@ -9,6 +24,10 @@
 
         &:hover {
             background: $gray-200;
+        }
+
+        &:first-child {
+            border-top: 1px solid rgba(0, 0, 0, .125) !important;
         }
 
         &:last-child:first-child {
@@ -170,6 +189,43 @@
                     margin-right: 0.5rem;
                     display: inline-block;
                     text-decoration: none !important;
+                }
+            }
+        }
+    }
+
+    .pagination {
+        justify-content: center;
+        margin-top: 2rem;
+
+        .page-item {
+            @include not-selectable;
+
+            &.active {
+                .page-link {
+                    color: $white !important;
+                }
+            }
+
+            .page-link {
+                &:hover, &:active {
+                    text-decoration: none !important;
+                }
+            }
+
+            .fa {
+                font-size: 80%;
+            }
+
+            &.icon-left {
+                .fa {
+                    margin-right: 0.25rem;
+                }
+            }
+
+            &.icon-right {
+                .fa {
+                    margin-left: 0.25rem;
                 }
             }
         }

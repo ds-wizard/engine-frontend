@@ -7,11 +7,13 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (applyResult, applyResultCmd, getResultCmd)
+import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
 import Wizard.Common.Api.Documents as DocumentsApi
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.Api.Templates as TemplatesApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Pagination.Pagination exposing (Pagination)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Setters exposing (setQuestionnaires, setTemplates)
 import Wizard.Documents.Common.Document exposing (Document)
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm
@@ -28,7 +30,11 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    QuestionnairesApi.getQuestionnaires appState GetQuestionnairesCompleted
+    let
+        paginationQueryString =
+            PaginationQueryString.withSize Nothing PaginationQueryString.empty
+    in
+    QuestionnairesApi.getQuestionnaires paginationQueryString appState GetQuestionnairesCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -51,15 +57,16 @@ update wrapMsg msg appState model =
 -- Handlers
 
 
-handleGetQuestionnairesCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnairesCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError (Pagination Questionnaire) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnairesCompleted wrapMsg appState model result =
     let
         ( newModel, cmd ) =
-            applyResult
+            applyResultTransform
                 { setResult = setQuestionnaires
                 , defaultError = lg "apiError.questionnaires.getListError" appState
                 , model = model
                 , result = result
+                , transform = .items
                 }
     in
     case getSelectedQuestionnaire newModel of
@@ -125,7 +132,7 @@ handlePostDocumentCompleted appState model result =
     case result of
         Ok document ->
             ( model
-            , cmdNavigate appState <| Routes.DocumentsRoute <| IndexRoute <| Maybe.map .uuid document.questionnaire
+            , cmdNavigate appState <| Routes.DocumentsRoute <| IndexRoute (Maybe.map .uuid document.questionnaire) PaginationQueryString.empty
             )
 
         Err error ->
