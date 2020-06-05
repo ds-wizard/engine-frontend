@@ -16,6 +16,6 @@ view route appState model =
             Html.map CreateMsg <|
                 Wizard.Documents.Create.View.view appState model.createModel
 
-        IndexRoute _ ->
+        IndexRoute _ _ ->
             Html.map IndexMsg <|
                 Wizard.Documents.Index.View.view appState model.indexModel

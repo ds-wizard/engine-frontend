@@ -9,24 +9,34 @@ module Wizard.Common.Api.Questionnaires exposing
     , getQuestionnaire
     , getQuestionnaireMigration
     , getQuestionnaires
+    , getQuestionnairesTracker
     , postQuestionnaire
     , putQuestionnaire
     , putQuestionnaireMigration
     )
 
-import Json.Decode as D
 import Json.Encode exposing (Value)
-import Wizard.Common.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtPostEmpty, jwtPut)
+import Wizard.Common.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtGetWithTracker, jwtPostEmpty, jwtPut)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Pagination.Pagination as Pagination exposing (Pagination)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Common.Questionnaire.Models.SummaryReport exposing (SummaryReport, summaryReportDecoder)
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 
 
-getQuestionnaires : AppState -> ToMsg (List Questionnaire) msg -> Cmd msg
-getQuestionnaires =
-    jwtGet "/questionnaires" (D.list Questionnaire.decoder)
+getQuestionnairesTracker : String
+getQuestionnairesTracker =
+    "getQuestionnairesTracker"
+
+
+getQuestionnaires : PaginationQueryString -> AppState -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
+getQuestionnaires qs =
+    jwtGetWithTracker
+        getQuestionnairesTracker
+        ("/questionnaires" ++ PaginationQueryString.toApiUrl qs)
+        (Pagination.decoder "questionnaires" Questionnaire.decoder)
 
 
 getQuestionnaire : String -> AppState -> ToMsg QuestionnaireDetail msg -> Cmd msg

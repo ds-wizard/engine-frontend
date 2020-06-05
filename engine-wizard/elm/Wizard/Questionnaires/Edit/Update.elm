@@ -7,6 +7,7 @@ import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Msgs
 import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Common.QuestionnaireEditForm as QuestionnaireEditForm
@@ -84,7 +85,7 @@ handlePutQuestionnaireCompleted : AppState -> Model -> Result ApiError () -> ( M
 handlePutQuestionnaireCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute IndexRoute )
+            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty) )
 
         Err error ->
             ( { model | savingQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.putError" appState) error }

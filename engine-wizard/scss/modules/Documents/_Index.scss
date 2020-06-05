@@ -1,22 +1,23 @@
 @import "../../variables";
 
 .Documents__Index {
-    .filters {
-        margin-top: -20px;
-        margin-bottom: 30px;
+    .questionnaire-filter {
+        padding: .375rem .75rem;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        max-width: 25%;
+        white-space: nowrap;
         display: flex;
+        justify-content: center;
 
-        .badge {
-            font-size: $font-size-base;
-            font-weight: normal;
-            margin-left: 0.5rem;
-            display: flex;
-            align-items: center;
+        .questionnaire-name {
+            flex: 1 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: .5rem;
 
-            a {
-                margin-left: 0.5rem;
-                color: $white;
-                font-size: 0.75rem;
+            .fa {
+                margin-right: .5rem;
             }
         }
     }
