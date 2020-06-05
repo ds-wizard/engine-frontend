@@ -10,6 +10,7 @@ import Shared.Locale exposing (l, lg, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormActions as FormActions
@@ -97,7 +98,7 @@ createMigrationView appState model ( questionnaire, packages ) =
                 ]
             ]
         , FormActions.view appState
-            (Routes.QuestionnairesRoute IndexRoute)
+            (Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty))
             (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingMigration (FormMsg Form.Submit) False)
         ]
 

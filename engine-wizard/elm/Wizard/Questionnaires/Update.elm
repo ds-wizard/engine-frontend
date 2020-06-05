@@ -32,9 +32,9 @@ fetchData route appState model =
             Cmd.map EditMsg <|
                 Wizard.Questionnaires.Edit.Update.fetchData appState uuid
 
-        IndexRoute ->
+        IndexRoute _ ->
             Cmd.map IndexMsg <|
-                Wizard.Questionnaires.Index.Update.fetchData appState
+                Wizard.Questionnaires.Index.Update.fetchData
 
         MigrationRoute uuid ->
             Cmd.map MigrationMsg <|

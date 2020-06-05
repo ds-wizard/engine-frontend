@@ -2,7 +2,8 @@ module Wizard.Documents.Index.Models exposing (..)
 
 import ActionResult exposing (ActionResult(..))
 import List.Extra as List
-import Wizard.Common.Components.Listing as Listing
+import Wizard.Common.Components.Listing.Models as Listing
+import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Documents.Common.Document exposing (Document)
 import Wizard.Documents.Common.DocumentState exposing (DocumentState(..))
 import Wizard.Documents.Common.Submission exposing (Submission)
@@ -11,7 +12,7 @@ import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireD
 
 
 type alias Model =
-    { documents : ActionResult (Listing.Model Document)
+    { documents : Listing.Model Document
     , documentToBeDeleted : Maybe Document
     , deletingDocument : ActionResult String
     , questionnaireUuid : Maybe String
@@ -23,9 +24,9 @@ type alias Model =
     }
 
 
-initialModel : Maybe String -> Model
-initialModel questionnaireUuid =
-    { documents = Loading
+initialModel : Maybe String -> PaginationQueryString -> Model
+initialModel questionnaireUuid paginationQueryString =
+    { documents = Listing.initialModel paginationQueryString
     , documentToBeDeleted = Nothing
     , deletingDocument = Unset
     , questionnaireUuid = questionnaireUuid
@@ -58,16 +59,16 @@ updateStates model documents =
             in
             { listingModel | items = newItems }
     in
-    { model | documents = ActionResult.map transformItems model.documents }
+    { model | documents = transformItems model.documents }
 
 
 anyDocumentInProgress : Model -> Bool
 anyDocumentInProgress model =
     let
-        isInProgress item =
-            item.item.state == QueuedDocumentState || item.item.state == InProgressDocumentState
+        isInProgress document =
+            document.state == QueuedDocumentState || document.state == InProgressDocumentState
     in
-    model.documents
+    model.documents.pagination
         |> ActionResult.map .items
         |> ActionResult.withDefault []
         |> List.any isInProgress

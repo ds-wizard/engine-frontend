@@ -13,7 +13,8 @@ import Wizard.Public.Routes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, loginRoute, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
-import Wizard.Update exposing (fetchData, update)
+import Wizard.Update exposing (update)
+import Wizard.Utils exposing (dispatch)
 import Wizard.View exposing (view)
 
 
@@ -41,30 +42,30 @@ init flags location key =
 
             else
                 Cmd.batch
-                    [ decideInitialRoute model route originalRoute
+                    [ decideInitialRoute model location route originalRoute
                     , Time.getTime
                     ]
     in
     ( model, cmd )
 
 
-decideInitialRoute : Model -> Routes.Route -> Routes.Route -> Cmd Msg
-decideInitialRoute model route originalRoute =
+decideInitialRoute : Model -> Url -> Routes.Route -> Routes.Route -> Cmd Msg
+decideInitialRoute model location route originalRoute =
     case route of
         Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
                 ( True, Wizard.Public.Routes.BookReferenceRoute _ ) ->
-                    fetchData model
+                    dispatch (Wizard.Msgs.OnUrlChange location)
 
                 ( True, _ ) ->
                     cmdNavigate model.appState Routes.DashboardRoute
 
                 _ ->
-                    fetchData model
+                    dispatch (Wizard.Msgs.OnUrlChange location)
 
         _ ->
             if userLoggedIn model then
-                fetchData model
+                dispatch (Wizard.Msgs.OnUrlChange location)
 
             else
                 cmdNavigate model.appState (loginRoute <| Just <| toUrl model.appState originalRoute)

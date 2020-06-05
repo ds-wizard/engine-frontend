@@ -13,6 +13,7 @@ module Wizard.Common.Api exposing
     , jwtFetch
     , jwtFetchEmpty
     , jwtGet
+    , jwtGetWithTracker
     , jwtPost
     , jwtPostEmpty
     , jwtPostString
@@ -40,6 +41,22 @@ jwtGet url decoder appState toMsg =
         { url = appState.apiUrl ++ url
         , expect = expectJson toMsg decoder
         }
+
+
+jwtGetWithTracker : String -> String -> Decoder a -> AppState -> ToMsg a msg -> Cmd msg
+jwtGetWithTracker tracker url decoder appState toMsg =
+    let
+        options =
+            { method = "GET"
+            , headers = [ Http.header "Authorization" ("Bearer " ++ appState.session.token) ]
+            , url = appState.apiUrl ++ url
+            , body = Http.emptyBody
+            , expect = expectJson toMsg decoder
+            , timeout = Nothing
+            , tracker = Just tracker
+            }
+    in
+    Http.request options
 
 
 jwtPost : String -> Value -> AppState -> ToMsg () msg -> Cmd msg

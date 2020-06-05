@@ -2,14 +2,14 @@ module Wizard.Questionnaires.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import List.Extra as List
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Questionnaire.Models.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
@@ -44,17 +44,12 @@ lh_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewQuestionnaires appState model) model.questionnaires
-
-
-viewQuestionnaires : AppState -> Model -> Listing.Model Questionnaire -> Html Msg
-viewQuestionnaires appState model questionnaires =
     div [ listClass "Questionnaires__Index" ]
         [ Page.header (l_ "header.title" appState) (indexActions appState)
         , FormResult.successOnlyView appState model.deletingQuestionnaire
         , FormResult.view appState model.deletingMigration
         , FormResult.view appState model.cloningQuestionnaire
-        , Listing.view appState (listingConfig appState) questionnaires
+        , Listing.view appState (listingConfig appState) model.questionnaires
         , deleteModal appState model
         ]
 
@@ -68,7 +63,7 @@ indexActions appState =
     ]
 
 
-listingConfig : AppState -> ListingConfig Questionnaire Msg
+listingConfig : AppState -> ViewConfig Questionnaire Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
@@ -82,6 +77,13 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , sortOptions =
+        [ ( "name", lg "questionnaire.name" appState )
+        , ( "createdAt", lg "questionnaire.createdAt" appState )
+        , ( "updatedAt", lg "questionnaire.updatedAt" appState )
+        ]
+    , toRoute = Routes.QuestionnairesRoute << IndexRoute
+    , toolbarExtra = Nothing
     }
 
 
@@ -190,7 +192,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.viewDocuments" appState
                 , label = l_ "action.viewDocuments" appState
-                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute <| Just questionnaire.uuid)
+                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute (Just questionnaire.uuid) PaginationQueryString.empty)
                 }
 
         clone =

@@ -6,6 +6,7 @@ import Url.Parser.Query as Query
 import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.JwtToken exposing (JwtToken)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Documents.Routes exposing (Route(..))
 
 
@@ -16,8 +17,13 @@ parsers appState wrapRoute =
             lr "documents" appState
     in
     [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "documents.create" appState) <?> Query.string (lr "documents.create.selected" appState))
-    , map (wrapRoute << IndexRoute) (s moduleRoot <?> Query.string (lr "documents.index.questionnaireUuid" appState))
+    , map (indexRoute wrapRoute) (s moduleRoot <?> Query.string (lr "documents.index.questionnaireUuid" appState) <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort")
     ]
+
+
+indexRoute : (Route -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> a
+indexRoute wrapRoute documentUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << IndexRoute documentUuid) (Just "name")
 
 
 toUrl : AppState -> Route -> List String
@@ -35,13 +41,19 @@ toUrl appState route =
                 Nothing ->
                     [ moduleRoot, lr "documents.create" appState ]
 
-        IndexRoute questionnaireUuid ->
-            case questionnaireUuid of
-                Just uuid ->
-                    [ moduleRoot, "?" ++ lr "documents.index.questionnaireUuid" appState ++ "=" ++ uuid ]
+        IndexRoute questionnaireUuid paginationQueryString ->
+            let
+                queryString =
+                    PaginationQueryString.toUrlWith
+                        [ ( lr "documents.index.questionnaireUuid" appState, Maybe.withDefault "" questionnaireUuid )
+                        ]
+                        paginationQueryString
+            in
+            if String.isEmpty queryString then
+                [ moduleRoot ]
 
-                Nothing ->
-                    [ moduleRoot ]
+            else
+                [ moduleRoot, queryString ]
 
 
 isAllowed : Route -> Maybe JwtToken -> Bool

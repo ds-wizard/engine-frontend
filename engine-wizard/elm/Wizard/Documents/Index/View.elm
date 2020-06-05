@@ -7,13 +7,14 @@ import Html.Events exposing (onCheck, onClick)
 import Markdown
 import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lf, lh, lx)
+import Shared.Locale exposing (l, lf, lg, lh, lx)
 import Wizard.Auth.Permission as Permission
 import Wizard.Common.Api.Documents as DocumentsApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing exposing (ListingActionType(..), ListingConfig, ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
@@ -62,35 +63,37 @@ view appState model =
 
                 Nothing ->
                     Success Nothing
-
-        actionResult =
-            ActionResult.combine model.documents questionnaireActionResult
     in
-    Page.actionResultView appState (viewDocuments appState model) actionResult
+    Page.actionResultView appState (viewDocuments appState model) questionnaireActionResult
 
 
-viewDocuments : AppState -> Model -> ( Listing.Model Document, Maybe QuestionnaireDetail ) -> Html Msg
-viewDocuments appState model ( documents, mbQuestionnaire ) =
+viewDocuments : AppState -> Model -> Maybe QuestionnaireDetail -> Html Msg
+viewDocuments appState model mbQuestionnaire =
     let
-        questionnaireView =
+        mbQuestionnaireFilterView =
             case mbQuestionnaire of
                 Just questionnaire ->
-                    div [ class "filters" ]
-                        [ lx_ "listing.filter" appState
-                        , span [ class "badge badge-pill badge-secondary" ]
-                            [ text questionnaire.name
-                            , linkTo appState (Routes.DocumentsRoute (IndexRoute Nothing)) [] [ faSet "_global.remove" appState ]
+                    Just <|
+                        div [ class "listing-toolbar-extra questionnaire-filter" ]
+                            [ linkTo appState
+                                (Routes.QuestionnairesRoute (Wizard.Questionnaires.Routes.DetailRoute questionnaire.uuid))
+                                [ class "questionnaire-name" ]
+                                [ faSet "menu.questionnaires" appState
+                                , text questionnaire.name
+                                ]
+                            , linkTo appState
+                                (Routes.DocumentsRoute (IndexRoute Nothing PaginationQueryString.empty))
+                                [ class "text-danger" ]
+                                [ faSet "_global.remove" appState ]
                             ]
-                        ]
 
                 Nothing ->
-                    emptyNode
+                    Nothing
     in
     div [ listClass "Documents__Index" ]
         [ Page.header (l_ "header.title" appState) (indexActions appState)
-        , questionnaireView
         , FormResult.successOnlyView appState model.deletingDocument
-        , Listing.view appState (listingConfig appState) documents
+        , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
         ]
@@ -105,8 +108,8 @@ indexActions appState =
     ]
 
 
-listingConfig : AppState -> ListingConfig Document Msg
-listingConfig appState =
+listingConfig : AppState -> Model -> Maybe (Html Msg) -> Listing.ViewConfig Document Msg
+listingConfig appState model mbQuestionnaireFilterView =
     { title = listingTitle appState
     , description = listingDescription appState
     , dropdownItems = listingActions appState
@@ -119,6 +122,12 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , sortOptions =
+        [ ( "name", lg "document.name" appState )
+        , ( "createdAt", lg "document.createdAt" appState )
+        ]
+    , toRoute = Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
+    , toolbarExtra = mbQuestionnaireFilterView
     }
 
 
