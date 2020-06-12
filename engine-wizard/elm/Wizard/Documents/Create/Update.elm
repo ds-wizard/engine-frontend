@@ -5,6 +5,7 @@ module Wizard.Documents.Create.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Form.Field as Field
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
@@ -68,10 +69,28 @@ handleGetQuestionnairesCompleted wrapMsg appState model result =
                 , result = result
                 , transform = .items
                 }
+
+        form =
+            case ( newModel.selectedQuestionnaire, newModel.questionnaires ) of
+                ( Just questionnaireUuid, Success questionnaires ) ->
+                    let
+                        questionnaireName =
+                            List.filter (\q -> q.uuid == questionnaireUuid) questionnaires
+                                |> List.head
+                                |> Maybe.map .name
+                                |> Maybe.withDefault ""
+
+                        formMsg =
+                            Form.Input "name" Form.Text (Field.String questionnaireName)
+                    in
+                    Form.update DocumentCreateForm.validation formMsg newModel.form
+
+                _ ->
+                    newModel.form
     in
     case getSelectedQuestionnaire newModel of
         Just questionnaire ->
-            ( { newModel | lastFetchedTemplatesFor = Just questionnaire.uuid }
+            ( { newModel | lastFetchedTemplatesFor = Just questionnaire.uuid, form = form }
             , Cmd.map wrapMsg <|
                 TemplatesApi.getTemplatesFor questionnaire.package.id appState GetTemplatesCompleted
             )
