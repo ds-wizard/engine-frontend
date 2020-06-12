@@ -10,6 +10,7 @@ iconSet =
         , ( "_global.arrowLeft", "fas fa-long-arrow-alt-left" )
         , ( "_global.arrowRight", "fas fa-long-arrow-alt-right" )
         , ( "_global.cancel", "fas fa-ban" )
+        , ( "_global.close", "fas fa-times" )
         , ( "_global.delete", "fas fa-trash" )
         , ( "_global.edit", "fas fa-edit" )
         , ( "_global.error", "fas fa-exclamation-circle" )
