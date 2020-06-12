@@ -77,41 +77,38 @@ tagView config tag =
 selection : AppState -> TagListConfig msg -> ActionResult KnowledgeModel -> Html msg
 selection appState tagListConfig knowledgeModelResult =
     let
-        tagsContent =
-            case knowledgeModelResult of
-                Unset ->
-                    div [ class "alert alert-light" ]
-                        [ i []
-                            [ lx_ "selection.notSelected" appState ]
-                        ]
+        viewContent content =
+            div [ class "form-group form-group-tags" ]
+                [ label [] [ text "Tags" ]
+                , div []
+                    [ content ]
+                ]
+    in
+    case knowledgeModelResult of
+        Unset ->
+            emptyNode
 
-                Loading ->
-                    Flash.loader appState
+        Loading ->
+            emptyNode
 
-                Error err ->
-                    Flash.error appState err
+        Error err ->
+            viewContent <|
+                Flash.error appState err
 
-                Success knowledgeModel ->
-                    let
-                        tags =
-                            KnowledgeModel.getTags knowledgeModel
-
-                        extraText =
-                            if List.length tags > 0 then
-                                FormExtra.text <| l_ "selection.info" appState
-
-                            else
-                                emptyNode
-                    in
+        Success knowledgeModel ->
+            let
+                tags =
+                    KnowledgeModel.getTags knowledgeModel
+            in
+            if List.length tags > 0 then
+                viewContent <|
                     div []
                         [ list appState tagListConfig tags
-                        , extraText
+                        , FormExtra.text <| l_ "selection.info" appState
                         ]
-    in
-    div [ class "form-group form-group-tags" ]
-        [ label [] [ text "Tags" ]
-        , div [] [ tagsContent ]
-        ]
+
+            else
+                emptyNode
 
 
 readOnlyList : AppState -> List String -> List Tag -> Html msg
