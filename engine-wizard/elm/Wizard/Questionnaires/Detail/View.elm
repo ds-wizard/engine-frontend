@@ -1,9 +1,12 @@
 module Wizard.Questionnaires.Detail.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Button as Button
+import Bootstrap.Dropdown as Dropdown
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -16,12 +19,17 @@ import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
+import Wizard.Documents.Routes
 import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModalMsg
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescriptor as QuestionnaireDescriptor
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.View as DeleteQuestionnaireModal
 import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Detail.Models exposing (Model)
 import Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
+import Wizard.Routing as Routing
 import Wizard.Utils exposing (listInsertIf)
 
 
@@ -64,15 +72,16 @@ content appState model ( questionnaireModel, levels ) =
             }
     in
     div [ class "Questionnaires__Detail" ]
-        [ questionnaireHeader appState model.savingQuestionnaire questionnaireModel
+        [ questionnaireHeader appState model questionnaireModel
         , FormResult.view appState model.savingQuestionnaire
         , div [ class "questionnaire-wrapper" ]
             [ viewQuestionnaire questionnaireCfg appState questionnaireModel |> Html.map QuestionnaireMsg ]
+        , Html.map DeleteQuestionnaireModalMsg <| DeleteQuestionnaireModal.view appState model.deleteModalModel
         ]
 
 
-questionnaireHeader : AppState -> ActionResult String -> Wizard.Common.Questionnaire.Models.Model -> Html Msg
-questionnaireHeader appState savingQuestionnaire questionnaireModel =
+questionnaireHeader : AppState -> Model -> Wizard.Common.Questionnaire.Models.Model -> Html Msg
+questionnaireHeader appState model questionnaireModel =
     let
         actions =
             if questionnaireModel.dirty then
@@ -80,14 +89,60 @@ questionnaireHeader appState savingQuestionnaire questionnaireModel =
                 , button [ onClick Discard, class "btn btn-outline-danger btn-with-loader" ]
                     [ lx_ "header.discard" appState ]
                 , ActionButton.button appState <|
-                    ActionButton.ButtonConfig (l_ "header.save" appState) savingQuestionnaire Save False
+                    ActionButton.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire Save False
                 ]
 
             else
                 [ linkTo appState
                     (Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty))
-                    [ class "btn btn-outline-primary btn-with-loader" ]
-                    [ lx_ "header.close" appState ]
+                    [ class "link-with-icon" ]
+                    [ faSet "_global.close" appState
+                    , lx_ "header.close" appState
+                    ]
+                , linkTo appState
+                    (Routes.DocumentsRoute (Wizard.Documents.Routes.CreateRoute (Just questionnaireModel.questionnaire.uuid)))
+                    [ class "link-with-icon" ]
+                    [ faSet "questionnaireList.createDocument" appState
+                    , lx_ "header.createDocument" appState
+                    ]
+                , Dropdown.dropdown model.actionsDropdownState
+                    { options = [ Dropdown.alignMenuRight ]
+                    , toggleMsg = ActionsDropdownMsg
+                    , toggleButton =
+                        Dropdown.toggle [ Button.roleLink ] [ text "More" ]
+                    , items =
+                        [ Dropdown.anchorItem
+                            [ href (Routing.toUrl appState (Routes.QuestionnairesRoute (EditRoute questionnaireModel.questionnaire.uuid))) ]
+                            [ faSet "_global.edit" appState
+                            , lx_ "header.edit" appState
+                            ]
+                        , Dropdown.divider
+                        , Dropdown.anchorItem
+                            [ href (Routing.toUrl appState (Routes.DocumentsRoute (Wizard.Documents.Routes.IndexRoute (Just questionnaireModel.questionnaire.uuid) PaginationQueryString.empty))) ]
+                            [ faSet "questionnaireList.viewDocuments" appState
+                            , lx_ "header.viewDocuments" appState
+                            ]
+                        , Dropdown.divider
+                        , Dropdown.anchorItem
+                            [ onClick (CloneQuestionnaire questionnaireModel.questionnaire) ]
+                            [ faSet "questionnaireList.clone" appState
+                            , lx_ "header.clone" appState
+                            ]
+                        , Dropdown.anchorItem
+                            [ href (Routing.toUrl appState (Routes.QuestionnairesRoute (CreateMigrationRoute questionnaireModel.questionnaire.uuid))) ]
+                            [ faSet "questionnaireList.createMigration" appState
+                            , lx_ "header.createMigration" appState
+                            ]
+                        , Dropdown.divider
+                        , Dropdown.anchorItem
+                            [ onClick (DeleteQuestionnaireModalMsg <| DeleteQuestionnaireModalMsg.ShowHideDeleteQuestionnaire <| Just <| QuestionnaireDescriptor.fromQuestionnaireDetail questionnaireModel.questionnaire)
+                            , class "text-danger"
+                            ]
+                            [ faSet "_global.delete" appState
+                            , lx_ "header.delete" appState
+                            ]
+                        ]
+                    }
                 ]
     in
     div [ class "top-header" ]

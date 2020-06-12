@@ -12,10 +12,12 @@ import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Questionnaire.Models.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
 import Wizard.KnowledgeModels.Routes
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModalMsg
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescriptor as QuestionnaireDescriptor
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.View as DeleteQuestionnaireModal
 import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Common.QuestionnaireState exposing (QuestionnaireState(..))
 import Wizard.Questionnaires.Common.View exposing (visibilityBadge)
@@ -46,11 +48,11 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "Questionnaires__Index" ]
         [ Page.header (l_ "header.title" appState) (indexActions appState)
-        , FormResult.successOnlyView appState model.deletingQuestionnaire
+        , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
         , FormResult.view appState model.deletingMigration
         , FormResult.view appState model.cloningQuestionnaire
         , Listing.view appState (listingConfig appState) model.questionnaires
-        , deleteModal appState model
+        , Html.map DeleteQuestionnaireModalMsg <| DeleteQuestionnaireModal.view appState model.deleteModalModel
         ]
 
 
@@ -232,7 +234,12 @@ listingActions appState questionnaire =
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
                 , label = l_ "action.delete" appState
-                , msg = ListingActionMsg (ShowHideDeleteQuestionnaire <| Just questionnaire)
+                , msg =
+                    QuestionnaireDescriptor.fromQuestionnaire questionnaire
+                        |> Just
+                        |> DeleteQuestionnaireModalMsg.ShowHideDeleteQuestionnaire
+                        |> DeleteQuestionnaireModalMsg
+                        |> ListingActionMsg
                 }
 
         editable =
@@ -265,36 +272,6 @@ detailRoute =
 migrationRoute : Questionnaire -> Routes.Route
 migrationRoute =
     Routes.QuestionnairesRoute << MigrationRoute << .uuid
-
-
-deleteModal : AppState -> Model -> Html Msg
-deleteModal appState model =
-    let
-        ( visible, name ) =
-            case model.questionnaireToBeDeleted of
-                Just questionnaire ->
-                    ( True, questionnaire.name )
-
-                Nothing ->
-                    ( False, "" )
-
-        modalContent =
-            [ p []
-                (lh_ "deleteModal.message" [ strong [] [ text name ] ] appState)
-            ]
-
-        modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingQuestionnaire
-            , actionName = l_ "deleteModal.action" appState
-            , actionMsg = DeleteQuestionnaire
-            , cancelMsg = Just <| ShowHideDeleteQuestionnaire Nothing
-            , dangerous = True
-            }
-    in
-    Modal.confirm appState modalConfig
 
 
 migrationBadge : AppState -> QuestionnaireState -> Html msg

@@ -6,12 +6,14 @@ module Wizard.Questionnaires.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg, lgf)
+import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Update as DeleteQuestionnaireModal
 import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
@@ -27,15 +29,6 @@ fetchData =
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update wrapMsg msg appState model =
     case msg of
-        ShowHideDeleteQuestionnaire mbQuestionnaire ->
-            handleShowHideDeleteQuestionnaire model mbQuestionnaire
-
-        DeleteQuestionnaire ->
-            handleDeleteQuestionnaire wrapMsg appState model
-
-        DeleteQuestionnaireCompleted result ->
-            handleDeleteQuestionnaireCompleted wrapMsg appState model result
-
         DeleteQuestionnaireMigration uuid ->
             handleDeleteMigration wrapMsg appState model uuid
 
@@ -51,55 +44,19 @@ update wrapMsg msg appState model =
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
-
-
--- Handlers
-
-
-handleShowHideDeleteQuestionnaire : Model -> Maybe Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
-handleShowHideDeleteQuestionnaire model mbQuestionnaire =
-    ( { model | questionnaireToBeDeleted = mbQuestionnaire, deletingQuestionnaire = Unset }
-    , Cmd.none
-    )
-
-
-handleDeleteQuestionnaire : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteQuestionnaire wrapMsg appState model =
-    case model.questionnaireToBeDeleted of
-        Just questionnaire ->
+        DeleteQuestionnaireModalMsg modalMsg ->
             let
-                newModel =
-                    { model | deletingQuestionnaire = Loading }
+                updateConfig =
+                    { wrapMsg = wrapMsg << DeleteQuestionnaireModalMsg
+                    , deleteCompleteCmd =
+                        dispatch (wrapMsg <| ListingMsg ListingMsgs.Reload)
+                    }
 
-                cmd =
-                    Cmd.map wrapMsg <|
-                        QuestionnairesApi.deleteQuestionnaire questionnaire.uuid appState DeleteQuestionnaireCompleted
+                ( deleteModalModel, cmd ) =
+                    DeleteQuestionnaireModal.update updateConfig modalMsg appState model.deleteModalModel
             in
-            ( newModel, cmd )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-handleDeleteQuestionnaireCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteQuestionnaireCompleted wrapMsg appState model result =
-    case result of
-        Ok _ ->
-            let
-                ( questionnaires, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.questionnaires
-            in
-            ( { model
-                | deletingQuestionnaire = Success <| lg "apiSuccess.questionnaires.delete" appState
-                , questionnaires = questionnaires
-                , questionnaireToBeDeleted = Nothing
-              }
+            ( { model | deleteModalModel = deleteModalModel }
             , cmd
-            )
-
-        Err error ->
-            ( { model | deletingQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.deleteError" appState) error }
-            , getResultCmd result
             )
 
 
