@@ -101,12 +101,35 @@ handleGetQuestionnairesCompleted wrapMsg appState model result =
 
 handleGetTemplatesCompleted : AppState -> Model -> Result ApiError (List Template) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetTemplatesCompleted appState model result =
-    applyResult
-        { setResult = setTemplates
-        , defaultError = lg "apiError.templates.getListError" appState
-        , model = model
-        , result = result
-        }
+    let
+        ( newModel, cmd ) =
+            applyResult
+                { setResult = setTemplates
+                , defaultError = lg "apiError.templates.getListError" appState
+                , model = model
+                , result = result
+                }
+
+        form =
+            case newModel.templates of
+                Success (template :: []) ->
+                    let
+                        setFormat =
+                            case ( List.length template.formats, List.head template.formats ) of
+                                ( 1, Just format ) ->
+                                    Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String format.uuid))
+
+                                _ ->
+                                    identity
+                    in
+                    newModel.form
+                        |> Form.update DocumentCreateForm.validation (Form.Input "templateUuid" Form.Text (Field.String template.uuid))
+                        |> setFormat
+
+                _ ->
+                    newModel.form
+    in
+    ( { newModel | form = form }, cmd )
 
 
 handleForm : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
