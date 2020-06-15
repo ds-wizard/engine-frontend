@@ -159,7 +159,7 @@ logo model =
 
 
 type MenuItem msg
-    = MenuItem String (Html msg) Routes.Route String
+    = MenuItem String (Html msg) Routes.Route (Routes.Route -> Bool) String
 
 
 createMenu : Model -> List (Html Msg)
@@ -167,7 +167,7 @@ createMenu model =
     let
         defaultMenuItems =
             menuItems model.appState
-                |> List.filter (\(MenuItem _ _ _ perm) -> hasPerm model.appState.jwt perm)
+                |> List.filter (\(MenuItem _ _ _ _ perm) -> hasPerm model.appState.jwt perm)
                 |> List.map (menuItem model)
 
         customMenuItems =
@@ -178,39 +178,61 @@ createMenu model =
 
 menuItems : AppState -> List (MenuItem msg)
 menuItems appState =
+    let
+        isQuestionnaireIndex route =
+            case route of
+                Routes.QuestionnairesRoute (Wizard.Questionnaires.Routes.IndexRoute _) ->
+                    True
+
+                _ ->
+                    False
+
+        isDocumentsIndex route =
+            case route of
+                Routes.DocumentsRoute (Wizard.Documents.Routes.IndexRoute _ _) ->
+                    True
+
+                _ ->
+                    False
+    in
     [ MenuItem
         (l_ "menu.users" appState)
         (faSet "menu.users" appState)
         (Routes.UsersRoute Wizard.Users.Routes.IndexRoute)
+        ((==) (Routes.UsersRoute Wizard.Users.Routes.IndexRoute))
         Perm.userManagement
     , MenuItem
         (l_ "menu.kmEditor" appState)
         (faSet "menu.kmEditor" appState)
         (Routes.KMEditorRoute Wizard.KMEditor.Routes.IndexRoute)
+        ((==) (Routes.KMEditorRoute Wizard.KMEditor.Routes.IndexRoute))
         Perm.knowledgeModel
     , MenuItem
         (l_ "menu.knowledgeModels" appState)
         (faSet "menu.knowledgeModels" appState)
         (Routes.KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.IndexRoute)
+        ((==) (Routes.KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.IndexRoute))
         Perm.packageManagementRead
     , MenuItem
         (l_ "menu.questionnaires" appState)
         (faSet "menu.questionnaires" appState)
         (Routes.QuestionnairesRoute <| Wizard.Questionnaires.Routes.IndexRoute PaginationQueryString.empty)
+        isQuestionnaireIndex
         Perm.questionnaire
     , MenuItem
         (l_ "menu.documents" appState)
         (faSet "menu.documents" appState)
         (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
+        isDocumentsIndex
         Perm.questionnaire
     ]
 
 
 menuItem : Model -> MenuItem msg -> Html msg
-menuItem model (MenuItem label icon route _) =
+menuItem model (MenuItem label icon route isActive _) =
     let
         activeClass =
-            if model.appState.route == route then
+            if isActive model.appState.route then
                 "active"
 
             else
