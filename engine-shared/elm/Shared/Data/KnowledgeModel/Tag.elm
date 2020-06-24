@@ -1,4 +1,4 @@
-module Shared.Data.KnowledgeModel.Tag exposing (Tag, decoder)
+module Shared.Data.KnowledgeModel.Tag exposing (Tag, decoder, new)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -19,3 +19,12 @@ decoder =
         |> D.required "name" D.string
         |> D.required "description" (D.nullable D.string)
         |> D.required "color" D.string
+
+
+new : String -> Tag
+new uuid =
+    { uuid = uuid
+    , name = "New Tag"
+    , description = Nothing
+    , color = "#3498DB"
+    }

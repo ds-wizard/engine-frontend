@@ -3,12 +3,12 @@ module Wizard.Common.Questionnaire.Views.FeedbackModal exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Data.Feedback exposing (Feedback)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lh, lx)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model)
-import Wizard.Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal

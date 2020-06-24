@@ -11,12 +11,12 @@ module Wizard.KMEditor.Editor.TagEditor.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
 import Random exposing (Seed)
-import Wizard.KMEditor.Common.Events.EditQuestionEventData exposing (EditQuestionEventData(..))
-import Wizard.KMEditor.Common.Events.Event exposing (Event(..))
-import Wizard.KMEditor.Common.Events.EventField as EventField
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
-import Wizard.Utils exposing (getUuid)
+import Shared.Data.Event exposing (Event(..))
+import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
+import Shared.Data.Event.EventField as EventField
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Utils exposing (getUuid)
 
 
 type alias Model =

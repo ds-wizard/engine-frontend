@@ -3,17 +3,18 @@ module Wizard.Common.Components.Listing.Update exposing (UpdateConfig, fetchData
 import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
 import Debouncer.Extra as Debouncer
+import Shared.Api exposing (ToMsg)
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Wizard.Common.Api exposing (ToMsg, getResultCmd)
+import Shared.Utils exposing (dispatch)
+import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Model, setPagination)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
-import Wizard.Common.Pagination.Pagination exposing (Pagination)
-import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Msgs
 import Wizard.Routes exposing (Route)
 import Wizard.Routing as Routing
-import Wizard.Utils exposing (dispatch)
 
 
 type alias UpdateConfig a =

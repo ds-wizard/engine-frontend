@@ -5,19 +5,20 @@ module Wizard.Questionnaires.CreateMigration.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Form.FormError exposing (FormError)
+import Uuid exposing (Uuid)
 import Wizard.Questionnaires.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm exposing (QuestionnaireMigrationCreateForm)
 
 
 type alias Model =
-    { questionnaireUuid : String
+    { questionnaireUuid : Uuid
     , packages : ActionResult (List Package)
     , questionnaire : ActionResult QuestionnaireDetail
     , selectedPackage : Maybe Package
-    , form : Form CustomFormError QuestionnaireMigrationCreateForm
+    , form : Form FormError QuestionnaireMigrationCreateForm
     , selectedTags : List String
     , savingMigration : ActionResult String
     , knowledgeModelPreview : ActionResult KnowledgeModel
@@ -25,7 +26,7 @@ type alias Model =
     }
 
 
-initialModel : String -> Model
+initialModel : Uuid -> Model
 initialModel uuid =
     { questionnaireUuid = uuid
     , packages = Loading

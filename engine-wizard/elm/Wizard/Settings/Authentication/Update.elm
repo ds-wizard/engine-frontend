@@ -1,9 +1,9 @@
 module Wizard.Settings.Authentication.Update exposing (update)
 
+import Shared.Data.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Authentication.Models exposing (Model)
-import Wizard.Settings.Common.EditableConfig as EditableConfig
 import Wizard.Settings.Common.Forms.AuthenticationConfigForm as AuthenticationConfigForm exposing (AuthenticationConfigForm)
 import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.Update as GenericUpdate

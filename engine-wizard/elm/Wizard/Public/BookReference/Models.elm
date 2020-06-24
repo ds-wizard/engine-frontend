@@ -4,7 +4,7 @@ module Wizard.Public.BookReference.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Public.Common.BookReference exposing (BookReference)
+import Shared.Data.BookReference exposing (BookReference)
 
 
 type alias Model =

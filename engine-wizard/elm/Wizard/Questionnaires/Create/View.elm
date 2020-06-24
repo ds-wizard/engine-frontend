@@ -2,20 +2,20 @@ module Wizard.Questionnaires.Create.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (..)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility
 import Wizard.Questionnaires.Create.Models exposing (Model)
 import Wizard.Questionnaires.Create.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
@@ -62,7 +62,7 @@ formView appState model packages =
                     FormGroup.select appState packageOptions model.form "packageId"
 
         visibilitySelect =
-            if appState.config.questionnaires.questionnaireVisibility.enabled then
+            if appState.config.questionnaire.questionnaireVisibility.enabled then
                 FormGroup.richRadioGroup appState (QuestionnaireVisibility.richFormOptions appState) model.form "visibility" <| lg "questionnaire.visibility" appState
 
             else

@@ -5,30 +5,31 @@ module Wizard.Questionnaires.Migration.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Maybe.Extra as Maybe
+import Shared.Api.Levels as LevelsApi
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
+import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Setters exposing (setLevels)
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult)
-import Wizard.Common.Api.Levels as LevelsApi
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models exposing (initialModel)
 import Wizard.Common.Questionnaire.Msgs as QuestionnaireMsgs
 import Wizard.Common.Questionnaire.Update
-import Wizard.Common.Setters exposing (setLevels)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange)
-import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
-import Wizard.Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Questionnaires.Migration.Models exposing (Model, initializeChangeList)
 import Wizard.Questionnaires.Migration.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing exposing (cmdNavigate)
+import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> String -> Cmd Msg
+fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
     Cmd.batch
         [ QuestionnairesApi.getQuestionnaireMigration uuid appState GetQuestionnaireMigrationCompleted

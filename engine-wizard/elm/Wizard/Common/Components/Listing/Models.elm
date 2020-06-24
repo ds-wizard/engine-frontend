@@ -8,9 +8,9 @@ module Wizard.Common.Components.Listing.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Debouncer.Extra as Debouncer exposing (Debouncer)
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg)
-import Wizard.Common.Pagination.Pagination exposing (Pagination)
-import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString)
 
 
 type alias Model a =

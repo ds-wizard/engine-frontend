@@ -3,13 +3,13 @@ module Wizard.Common.Questionnaire.Views.Todos exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Data.KnowledgeModel.Question as Question
+import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Locale exposing (l, lgx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models exposing (Model)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
-import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
-import Wizard.Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 
 
 l_ : String -> AppState -> String

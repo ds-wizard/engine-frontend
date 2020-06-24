@@ -2,13 +2,14 @@ module Wizard.Settings.KnowledgeModelRegistry.View exposing (view)
 
 import ActionResult
 import Form exposing (Form)
-import Html exposing (Html, button, div, h5, text)
+import Html exposing (Html, button, div, h5)
 import Html.Attributes exposing (class, disabled, readonly)
 import Html.Events exposing (onClick)
+import Shared.Data.EditableConfig.EditableKnowledgeModelRegistryConfig exposing (EditableKnowledgeModelRegistryConfig)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
@@ -18,7 +19,6 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.Settings.Common.EditableKnowledgeModelRegistryConfig exposing (EditableKnowledgeModelRegistryConfig)
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.KnowledgeModelRegistry.Models exposing (Model)
 import Wizard.Settings.KnowledgeModelRegistry.Msgs exposing (Msg(..))
@@ -59,7 +59,7 @@ viewForm appState model _ =
         ]
 
 
-formView : AppState -> Form CustomFormError EditableKnowledgeModelRegistryConfig -> Html Msg
+formView : AppState -> Form FormError EditableKnowledgeModelRegistryConfig -> Html Msg
 formView appState form =
     let
         formWrap =

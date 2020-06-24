@@ -3,9 +3,9 @@ module Wizard.Dashboard.View exposing (view)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Markdown
+import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg)
 import Wizard.Dashboard.Widgets.DMPWorkflowWidget as DMPWorkflowWidget

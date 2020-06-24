@@ -2,6 +2,7 @@ module Wizard.Common.FormEngine.Update exposing (updateForm)
 
 import ActionResult exposing (ActionResult(..))
 import Debounce
+import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Locale exposing (lg)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
@@ -27,7 +28,7 @@ updateForm msg appState form loadTypeHints =
         InputTypehint path questionUuid value ->
             let
                 ( debounce, cmd ) =
-                    Debounce.push debounceConfig ( questionUuid, getStringReply value ) form.debounce
+                    Debounce.push debounceConfig ( questionUuid, ReplyValue.getStringReply value ) form.debounce
             in
             ( { form
                 | elements = List.map (updateElement (updateElementValue value) path) form.elements

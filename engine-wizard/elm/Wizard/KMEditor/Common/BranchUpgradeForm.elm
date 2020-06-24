@@ -8,19 +8,19 @@ module Wizard.KMEditor.Common.BranchUpgradeForm exposing
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as E exposing (..)
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Form.FormError exposing (FormError)
 
 
 type alias BranchUpgradeForm =
     { targetPackageId : String }
 
 
-init : Form CustomFormError BranchUpgradeForm
+init : Form FormError BranchUpgradeForm
 init =
     Form.initial [] validation
 
 
-validation : Validation CustomFormError BranchUpgradeForm
+validation : Validation FormError BranchUpgradeForm
 validation =
     Validate.map BranchUpgradeForm
         (Validate.field "targetPackageId" Validate.string)

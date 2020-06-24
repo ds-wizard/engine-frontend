@@ -14,14 +14,14 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Question exposing
 
 import Form
 import Random exposing (Seed)
+import Shared.Data.KnowledgeModel.Answer as Answer
+import Shared.Data.KnowledgeModel.Expert as Expert
+import Shared.Data.KnowledgeModel.Question as Question
+import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Common.KnowledgeModel.Answer as Answer
-import Wizard.KMEditor.Common.KnowledgeModel.Expert as Expert
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
-import Wizard.KMEditor.Common.KnowledgeModel.Reference as Reference
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations, getCurrentTags, insertEditor)
-import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
+import Wizard.KMEditor.Editor.KMEditor.Models.Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (questionFormValidation)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (addEntity, deleteEntity, updateForm, withGenerateEvent)

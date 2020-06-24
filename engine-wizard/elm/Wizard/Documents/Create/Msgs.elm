@@ -1,11 +1,11 @@
 module Wizard.Documents.Create.Msgs exposing (..)
 
 import Form
+import Shared.Data.Document exposing (Document)
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Common.Pagination.Pagination exposing (Pagination)
-import Wizard.Documents.Common.Document exposing (Document)
-import Wizard.Documents.Common.Template exposing (Template)
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type Msg

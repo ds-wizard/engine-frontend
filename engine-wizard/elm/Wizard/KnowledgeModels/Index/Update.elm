@@ -1,14 +1,14 @@
 module Wizard.KnowledgeModels.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Packages as PackagesApi
+import Shared.Data.Package as Package
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (l, lg)
+import Shared.Setters exposing (setPackages)
 import Wizard.Common.Api exposing (applyResultTransform, getResultCmd)
-import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.Common.Setters exposing (setPackages)
-import Wizard.KnowledgeModels.Common.Package as Package
 import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.Msgs

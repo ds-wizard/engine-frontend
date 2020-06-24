@@ -5,9 +5,9 @@ module Wizard.Users.Routing exposing
     , toUrl
     )
 
+import Shared.Auth.Permission as Perm
+import Shared.Auth.Session exposing (Session)
 import Url.Parser exposing (..)
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Users.Routes exposing (Route(..))
 
 
@@ -37,15 +37,15 @@ toUrl route =
             [ moduleRoot ]
 
 
-isAllowed : Route -> Maybe JwtToken -> Bool
-isAllowed route maybeJwt =
+isAllowed : Route -> Session -> Bool
+isAllowed route session =
     case route of
         EditRoute uuid ->
             if uuid == "current" then
                 True
 
             else
-                hasPerm maybeJwt Perm.userManagement
+                Perm.hasPerm session Perm.userManagement
 
         _ ->
-            hasPerm maybeJwt Perm.userManagement
+            Perm.hasPerm session Perm.userManagement

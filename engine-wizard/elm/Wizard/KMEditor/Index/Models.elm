@@ -5,11 +5,11 @@ module Wizard.KMEditor.Index.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Shared.Data.Branch exposing (Branch)
+import Shared.Data.PackageDetail exposing (PackageDetail)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.KMEditor.Common.Branch exposing (Branch)
 import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm exposing (BranchUpgradeForm)
-import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type alias Model =
@@ -19,7 +19,7 @@ type alias Model =
     , creatingMigration : ActionResult String
     , branchToBeUpgraded : Maybe Branch
     , package : ActionResult PackageDetail
-    , branchUpgradeForm : Form CustomFormError BranchUpgradeForm
+    , branchUpgradeForm : Form FormError BranchUpgradeForm
     , deletingMigration : ActionResult String
     }
 

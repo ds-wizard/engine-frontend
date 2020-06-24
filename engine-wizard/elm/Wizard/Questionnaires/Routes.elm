@@ -1,12 +1,13 @@
 module Wizard.Questionnaires.Routes exposing (Route(..))
 
-import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Uuid exposing (Uuid)
 
 
 type Route
     = CreateRoute (Maybe String)
-    | CreateMigrationRoute String
-    | DetailRoute String
-    | EditRoute String
+    | CreateMigrationRoute Uuid
+    | DetailRoute Uuid
+    | EditRoute Uuid
     | IndexRoute PaginationQueryString
-    | MigrationRoute String
+    | MigrationRoute Uuid

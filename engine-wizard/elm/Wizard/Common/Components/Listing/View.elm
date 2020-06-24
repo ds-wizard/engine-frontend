@@ -17,6 +17,9 @@ import Html.Attributes exposing (attribute, class, classList, href, id, placehol
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.Pagination.Page exposing (Page)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Time
@@ -25,9 +28,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Item, Model)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Pagination.Page exposing (Page)
-import Wizard.Common.Pagination.Pagination exposing (Pagination)
-import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page

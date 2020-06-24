@@ -1,9 +1,8 @@
 module Wizard.Settings.Organization.Update exposing (update)
 
-import Shared.Locale exposing (lg)
+import Shared.Data.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Settings.Common.EditableConfig as EditableConfig
 import Wizard.Settings.Common.Forms.OrganizationConfigForm as OrganizationConfigForm exposing (OrganizationConfigForm)
 import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.Update as GenericUpdate

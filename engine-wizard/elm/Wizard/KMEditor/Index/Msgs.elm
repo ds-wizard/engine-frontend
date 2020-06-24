@@ -1,10 +1,11 @@
 module Wizard.KMEditor.Index.Msgs exposing (Msg(..))
 
 import Form
+import Shared.Data.Branch exposing (Branch)
+import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError exposing (ApiError)
+import Uuid exposing (Uuid)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.KMEditor.Common.Branch exposing (Branch)
-import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type Msg
@@ -16,6 +17,6 @@ type Msg
     | ShowHideUpgradeModal (Maybe Branch)
     | GetPackageCompleted (Result ApiError PackageDetail)
     | UpgradeFormMsg Form.Msg
-    | DeleteMigration String
+    | DeleteMigration Uuid
     | DeleteMigrationCompleted (Result ApiError ())
     | ListingMsg Listing.Msg

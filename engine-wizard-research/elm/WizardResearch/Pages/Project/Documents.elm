@@ -6,24 +6,26 @@ module WizardResearch.Pages.Project.Documents exposing
     , view
     )
 
--- MODEL
-
 import ActionResult exposing (ActionResult(..))
 import Html.Styled exposing (Html, h1, text)
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Elemental.Atoms.Heading as Heading
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Elemental.Components.ActionResultWrapper as ActionResultWrapper
 import Shared.Elemental.Foundations.Grid as Grid
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Uuid exposing (Uuid)
 import WizardResearch.Common.AppState exposing (AppState)
 
 
+
+-- MODEL
+
+
 type alias Model =
-    { questionnaire : ActionResult Questionnaire }
+    { questionnaire : ActionResult QuestionnaireDetail }
 
 
-init : AppState -> String -> ( Model, Cmd Msg )
+init : AppState -> Uuid -> ( Model, Cmd Msg )
 init appState questionnaireUuid =
     ( { questionnaire = Loading }
     , QuestionnairesApi.getQuestionnaire questionnaireUuid appState GetQuestionnaireComplete
@@ -35,7 +37,7 @@ init appState questionnaireUuid =
 
 
 type Msg
-    = GetQuestionnaireComplete (Result ApiError Questionnaire)
+    = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
 
 
 update : AppState -> Msg -> Model -> ( Model, Cmd msg )
@@ -64,7 +66,7 @@ view appState model =
     ActionResultWrapper.blockLG appState.theme (viewContent appState model) model.questionnaire
 
 
-viewContent : AppState -> Model -> Questionnaire -> Html Msg
+viewContent : AppState -> Model -> QuestionnaireDetail -> Html Msg
 viewContent appState model questionnaire =
     let
         grid =

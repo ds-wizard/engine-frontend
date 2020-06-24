@@ -22,7 +22,7 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Template as Template exposing (Template)
-import Shared.Data.Template.TemplatePacakge as TemplatePackage
+import Shared.Data.Template.TemplatePackage as TemplatePackage
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Atoms.Form as Form
 import Shared.Elemental.Atoms.FormInput as FormInput
@@ -188,7 +188,7 @@ handleFormMsg cfg appState formMsg model =
                 ( knowledgeModel, cmd ) =
                     case formMsg of
                         Form.Input "packageId" _ (Field.String packageId) ->
-                            ( Loading, KnowledgeModelsApi.fetchPreview packageId appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
+                            ( Loading, KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
 
                         _ ->
                             ( model.knowledgeModel, Cmd.none )
@@ -208,7 +208,7 @@ handleSetScreen cfg appState model screen =
         ( knowledgeModel, cmd ) =
             case ( screen, (Form.getFieldAsString "packageId" model.createForm).value ) of
                 ( KnowledgeModelScreen, Just packageId ) ->
-                    ( Loading, KnowledgeModelsApi.fetchPreview packageId appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
+                    ( Loading, KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
 
                 _ ->
                     ( model.knowledgeModel, Cmd.none )
@@ -424,7 +424,7 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
 
         kms =
             Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
-                |> List.sortWith (TemplatePackage.compare (Maybe.map .recommendedPackageId (getSelectedTemplate model)))
+                |> List.sortWith (TemplatePackage.compare (Maybe.andThen .recommendedPackageId (getSelectedTemplate model)))
 
         visibleKMs =
             if List.length kms > 4 then
@@ -490,7 +490,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
             Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
 
         recommendedPackage =
-            Maybe.map .recommendedPackageId (getSelectedTemplate model)
+            Maybe.andThen .recommendedPackageId (getSelectedTemplate model)
 
         packageOptionsCount =
             if model.kmListExpanded then

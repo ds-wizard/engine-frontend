@@ -2,9 +2,9 @@ module WizardResearch.Common.Flags exposing (..)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Shared.Provisioning as Provisioning exposing (Provisioning)
-import WizardResearch.Common.Session as Session exposing (Session)
 
 
 type alias Flags =

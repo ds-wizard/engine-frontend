@@ -4,6 +4,9 @@ import ActionResult
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
@@ -11,9 +14,6 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.KMEditor.Editor.KMEditor.View
 import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))

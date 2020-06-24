@@ -1,6 +1,6 @@
 module Wizard.Documents.Models exposing (Model, initLocalModel, initialModel)
 
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Documents.Create.Models
 import Wizard.Documents.Index.Models
 import Wizard.Documents.Routes exposing (Route(..))

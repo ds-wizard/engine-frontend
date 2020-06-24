@@ -24,26 +24,28 @@ import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (ChartConfig)
 import Form
 import List.Extra as List
+import Shared.Data.Event exposing (Event)
+import Shared.Data.Feedback exposing (Feedback)
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Expert exposing (Expert)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.CommonQuestionData exposing (CommonQuestionData)
+import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
+import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.FormValue exposing (FormValue)
+import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Shared.Data.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport, TotalReport)
+import Shared.Form.FormError exposing (FormError)
+import Shared.Utils exposing (boolToInt)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.FormEngine.Model exposing (..)
-import Wizard.Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Wizard.Common.Questionnaire.Models.FeedbackForm as FeedbackForm exposing (FeedbackForm)
-import Wizard.Common.Questionnaire.Models.SummaryReport exposing (ChapterReport, MetricReport, SummaryReport, TotalReport)
-import Wizard.KMEditor.Common.Events.Event exposing (Event)
-import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Question.CommonQuestionData exposing (CommonQuestionData)
-import Wizard.KMEditor.Common.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
-import Wizard.KMEditor.Common.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
-import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Wizard.Utils exposing (boolToInt)
 
 
 type alias Model =
@@ -52,7 +54,7 @@ type alias Model =
     , activePage : ActivePage
     , feedback : ActionResult (List Feedback)
     , feedbackQuestionUuid : Maybe String
-    , feedbackForm : Form.Form CustomFormError FeedbackForm
+    , feedbackForm : Form.Form FormError FeedbackForm
     , sendingFeedback : ActionResult String
     , feedbackResult : Maybe Feedback
     , metrics : List Metric
@@ -189,7 +191,7 @@ updateReplies model =
                     getFormValues [ chapter.uuid ] form
                         ++ model.questionnaire.replies
                         |> List.uniqueBy .path
-                        |> List.filter (.value >> isEmptyReply >> not)
+                        |> List.filter (.value >> ReplyValue.isEmptyReply >> not)
 
                 _ ->
                     model.questionnaire.replies
@@ -314,20 +316,20 @@ cleanDirty model =
 {- Indications calculations -}
 
 
-calculateUnansweredQuestions : AppState -> KnowledgeModel -> Int -> FormValues -> Chapter -> Int
+calculateUnansweredQuestions : AppState -> KnowledgeModel -> Int -> List FormValue -> Chapter -> Int
 calculateUnansweredQuestions appState km currentLevel replies chapter =
     KnowledgeModel.getChapterQuestions chapter.uuid km
         |> List.map (evaluateQuestion appState km currentLevel replies [ chapter.uuid ])
         |> List.foldl (+) 0
 
 
-getReply : FormValues -> String -> Maybe ReplyValue
+getReply : List FormValue -> String -> Maybe ReplyValue
 getReply replies path =
     List.find (.path >> (==) path) replies
         |> Maybe.map .value
 
 
-evaluateQuestion : AppState -> KnowledgeModel -> Int -> FormValues -> List String -> Question -> Int
+evaluateQuestion : AppState -> KnowledgeModel -> Int -> List FormValue -> List String -> Question -> Int
 evaluateQuestion appState km currentLevel replies path question =
     let
         currentPath =
@@ -356,14 +358,14 @@ evaluateQuestion appState km currentLevel replies path question =
             case question of
                 OptionsQuestion _ questionData ->
                     questionData.answerUuids
-                        |> List.find ((==) (getAnswerUuid value))
+                        |> List.find ((==) (ReplyValue.getAnswerUuid value))
                         |> Maybe.map (evaluateFollowups appState km currentLevel replies currentPath)
                         |> Maybe.withDefault 1
 
                 ListQuestion commonData _ ->
                     let
                         itemCount =
-                            getItemListCount value
+                            ReplyValue.getItemListCount value
                     in
                     if itemCount > 0 then
                         List.range 0 (itemCount - 1)
@@ -384,7 +386,7 @@ evaluateQuestion appState km currentLevel replies path question =
                 0
 
 
-evaluateFollowups : AppState -> KnowledgeModel -> Int -> FormValues -> List String -> String -> Int
+evaluateFollowups : AppState -> KnowledgeModel -> Int -> List FormValue -> List String -> String -> Int
 evaluateFollowups appState km currentLevel replies path answerUuid =
     let
         currentPath =
@@ -395,7 +397,7 @@ evaluateFollowups appState km currentLevel replies path answerUuid =
         |> List.foldl (+) 0
 
 
-evaluateAnswerItem : AppState -> KnowledgeModel -> Int -> FormValues -> List String -> List Question -> Int -> Int
+evaluateAnswerItem : AppState -> KnowledgeModel -> Int -> List FormValue -> List String -> List Question -> Int -> Int
 evaluateAnswerItem appState km currentLevel replies path questions index =
     let
         currentPath =

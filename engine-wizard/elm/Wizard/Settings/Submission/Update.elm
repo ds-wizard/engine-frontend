@@ -3,14 +3,14 @@ module Wizard.Settings.Submission.Update exposing
     , update
     )
 
+import Shared.Api.Templates as TemplatesApi
+import Shared.Data.EditableConfig as EditableConfig
+import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Shared.Locale exposing (lg)
+import Shared.Setters exposing (setTemplates)
 import Wizard.Common.Api exposing (applyResult)
-import Wizard.Common.Api.Templates as TemplatesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Setters exposing (setTemplates)
 import Wizard.Msgs
-import Wizard.Settings.Common.EditableConfig as EditableConfig
-import Wizard.Settings.Common.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Wizard.Settings.Generic.Update as GenericUpdate
 import Wizard.Settings.Submission.Models exposing (Model)
 import Wizard.Settings.Submission.Msgs exposing (Msg(..))

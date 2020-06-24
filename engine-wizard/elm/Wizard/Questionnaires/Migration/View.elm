@@ -4,23 +4,23 @@ import ActionResult
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Question as Question
+import Shared.Data.Package exposing (Package)
+import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lgx, lx)
+import Shared.Utils exposing (boolToInt, flip)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
 import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 import Wizard.Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
-import Wizard.Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Questionnaires.Migration.DiffQuestionnaireRenderer exposing (diffQuestionnaireRenderer)
 import Wizard.Questionnaires.Migration.Models exposing (Model, isQuestionChangeResolved, isSelectedChangeResolved)
 import Wizard.Questionnaires.Migration.Msgs exposing (Msg(..))
-import Wizard.Utils exposing (boolToInt, flip)
 
 
 l_ : String -> AppState -> String
@@ -172,7 +172,7 @@ questionnaireView appState model migration levels questionnaireModel =
                 Nothing
 
         mbLevels =
-            if appState.config.questionnaires.levels.enabled then
+            if appState.config.questionnaire.levels.enabled then
                 Just levels
 
             else

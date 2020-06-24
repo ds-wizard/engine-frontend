@@ -12,17 +12,17 @@ import Css exposing (..)
 import Css.Global exposing (descendants, typeSelector)
 import Css.Transitions exposing (transition)
 import Form exposing (Form)
-import Html.Styled exposing (Html, a, div, fromUnstyled, h1, h2, p, span, strong, text)
-import Html.Styled.Attributes exposing (css, href, style)
+import Html.Styled exposing (Html, div, fromUnstyled, h1, h2, span, strong, text)
+import Html.Styled.Attributes exposing (css)
 import Markdown
-import Shared.Api.Auth as AuthApi
 import Shared.Api.Tokens as TokensApi
 import Shared.Api.Users as UsersApi
+import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.BootstrapConfig
 import Shared.Data.BootstrapConfig.AuthenticationConfig
 import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
-import Shared.Data.Token as Token exposing (Token)
-import Shared.Data.UserInfo exposing (UserInfo)
+import Shared.Data.Token exposing (Token)
+import Shared.Data.User as User exposing (User)
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Atoms.Flash as Flash
 import Shared.Elemental.Foundations.Animation as Animation
@@ -37,8 +37,8 @@ import Shared.Elemental.Utils exposing (px2rem)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html.Styled exposing (emptyNode, fa)
+import Shared.Setters exposing (setToken, setUser)
 import WizardResearch.Common.AppState exposing (AppState)
-import WizardResearch.Common.Session exposing (Session)
 import WizardResearch.Pages.Login.LoginForm as LoginForm exposing (LoginForm)
 
 
@@ -50,7 +50,7 @@ type alias Model =
     { loginForm : Form FormError LoginForm
     , rawToken : String
     , token : ActionResult Token
-    , userInfo : ActionResult UserInfo
+    , userInfo : ActionResult User
     }
 
 
@@ -72,7 +72,7 @@ init =
 type Msg
     = FormMsg Form.Msg
     | FetchTokenComplete (Result ApiError Token)
-    | GetUserInfoComplete (Result ApiError UserInfo)
+    | GetUserComplete (Result ApiError User)
 
 
 type alias UpdateConfig msg =
@@ -92,7 +92,7 @@ update cfg appState msg model =
             updateWith cfg <|
                 handleFetchTokenComplete appState result model
 
-        GetUserInfoComplete result ->
+        GetUserComplete result ->
             handleGetUserInfoComplete cfg result model
 
 
@@ -120,14 +120,11 @@ handleFetchTokenComplete appState result model =
     case result of
         Ok token ->
             let
-                rawToken =
-                    Token.value token
-
-                apiConfig =
-                    { apiUrl = appState.apiConfig.apiUrl, token = rawToken }
+                tempAppState =
+                    { appState | session = setToken token appState.session }
             in
-            ( { model | userInfo = Loading, token = Success token, rawToken = rawToken }
-            , UsersApi.getUserInfo { appState | apiConfig = apiConfig } GetUserInfoComplete
+            ( { model | userInfo = Loading, token = Success token, rawToken = token.token }
+            , UsersApi.getCurrentUser tempAppState GetUserComplete
             )
 
         Err error ->
@@ -136,12 +133,18 @@ handleFetchTokenComplete appState result model =
             )
 
 
-handleGetUserInfoComplete : UpdateConfig msg -> Result ApiError UserInfo -> Model -> ( Model, Cmd msg )
+handleGetUserInfoComplete : UpdateConfig msg -> Result ApiError User -> Model -> ( Model, Cmd msg )
 handleGetUserInfoComplete cfg result model =
     case result of
-        Ok userInfo ->
+        Ok user ->
+            let
+                session =
+                    Session.init
+                        |> setToken { token = model.rawToken }
+                        |> setUser (Just (User.toUserInfo user))
+            in
             ( model
-            , cfg.onAuthenticate <| Session model.rawToken userInfo
+            , cfg.onAuthenticate session
             )
 
         Err error ->

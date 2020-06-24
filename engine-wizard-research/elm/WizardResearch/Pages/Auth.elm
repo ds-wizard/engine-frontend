@@ -6,18 +6,19 @@ import ActionResult exposing (ActionResult(..))
 import Html.Styled exposing (Html, div, p, text)
 import Shared.Api.Auth as AuthApi
 import Shared.Api.Users as UsersApi
-import Shared.Data.Token as Token exposing (Token)
-import Shared.Data.UserInfo exposing (UserInfo)
+import Shared.Auth.Session as Session exposing (Session)
+import Shared.Data.Token exposing (Token)
+import Shared.Data.User as User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html.Styled exposing (emptyNode)
+import Shared.Setters exposing (setToken, setUser)
 import WizardResearch.Common.AppState exposing (AppState)
-import WizardResearch.Common.Session exposing (Session)
 
 
 type alias Model =
     { rawToken : String
     , token : ActionResult Token
-    , userInfo : ActionResult UserInfo
+    , userInfo : ActionResult User
     }
 
 
@@ -37,7 +38,7 @@ init appState id mbError mbCode =
 
 type Msg
     = GetTokenComplete (Result ApiError Token)
-    | GetUserInfoComplete (Result ApiError UserInfo)
+    | GetUserComplete (Result ApiError User)
 
 
 type alias UpdateConfig msg =
@@ -53,7 +54,7 @@ update cfg appState msg model =
             updateWith cfg <|
                 handleGetTokenComplete appState result model
 
-        GetUserInfoComplete result ->
+        GetUserComplete result ->
             handleGetUserInfoComplete cfg result model
 
 
@@ -67,14 +68,11 @@ handleGetTokenComplete appState result model =
     case result of
         Ok token ->
             let
-                rawToken =
-                    Token.value token
-
-                apiConfig =
-                    { apiUrl = appState.apiConfig.apiUrl, token = rawToken }
+                tempAppState =
+                    { appState | session = setToken token appState.session }
             in
-            ( { model | userInfo = Loading, token = Success token, rawToken = rawToken }
-            , UsersApi.getUserInfo { appState | apiConfig = apiConfig } GetUserInfoComplete
+            ( { model | userInfo = Loading, token = Success token, rawToken = token.token }
+            , UsersApi.getCurrentUser tempAppState GetUserComplete
             )
 
         Err error ->
@@ -83,12 +81,18 @@ handleGetTokenComplete appState result model =
             )
 
 
-handleGetUserInfoComplete : UpdateConfig msg -> Result ApiError UserInfo -> Model -> ( Model, Cmd msg )
+handleGetUserInfoComplete : UpdateConfig msg -> Result ApiError User -> Model -> ( Model, Cmd msg )
 handleGetUserInfoComplete cfg result model =
     case result of
-        Ok userInfo ->
+        Ok user ->
+            let
+                session =
+                    Session.init
+                        |> setToken { token = model.rawToken }
+                        |> setUser (Just (User.toUserInfo user))
+            in
             ( model
-            , cfg.onAuthenticate <| Session model.rawToken userInfo
+            , cfg.onAuthenticate session
             )
 
         Err error ->

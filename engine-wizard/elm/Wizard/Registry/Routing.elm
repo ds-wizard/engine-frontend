@@ -1,10 +1,10 @@
 module Wizard.Registry.Routing exposing (isAllowed, parsers, toUrl)
 
+import Shared.Auth.Permission as Perm
+import Shared.Auth.Session exposing (Session)
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Registry.Routes exposing (Route(..))
 
 
@@ -34,8 +34,8 @@ toUrl appState route =
             [ moduleRoot, lr "registry.signupConfirmation" appState, organizationId, hash ]
 
 
-isAllowed : Route -> Maybe JwtToken -> Bool
-isAllowed route maybeJwt =
+isAllowed : Route -> Session -> Bool
+isAllowed route session =
     case route of
         RegistrySignupConfirmationRoute _ _ ->
-            hasPerm maybeJwt Perm.settings
+            Perm.hasPerm session Perm.settings

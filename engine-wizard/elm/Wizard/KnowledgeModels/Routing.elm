@@ -5,12 +5,12 @@ module Wizard.KnowledgeModels.Routing exposing
     , toUrl
     )
 
+import Shared.Auth.Permission as Perm
+import Shared.Auth.Session exposing (Session)
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 
 
@@ -53,11 +53,11 @@ toUrl appState route =
             [ moduleRoot ]
 
 
-isAllowed : Route -> Maybe JwtToken -> Bool
-isAllowed route maybeJwt =
+isAllowed : Route -> Session -> Bool
+isAllowed route session =
     case route of
         ImportRoute _ ->
-            hasPerm maybeJwt Perm.packageManagementWrite
+            Perm.hasPerm session Perm.packageManagementWrite
 
         _ ->
-            hasPerm maybeJwt Perm.packageManagementRead
+            Perm.hasPerm session Perm.packageManagementRead

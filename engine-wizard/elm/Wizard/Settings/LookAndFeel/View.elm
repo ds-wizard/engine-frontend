@@ -6,11 +6,11 @@ import Html exposing (Html, a, button, div, img, label)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick)
 import Markdown
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Generic.Msgs exposing (Msg)
@@ -41,7 +41,7 @@ viewProps =
     }
 
 
-formView : AppState -> Form CustomFormError LookAndFeelConfig -> Html Form.Msg
+formView : AppState -> Form FormError LookAndFeelConfig -> Html Form.Msg
 formView appState form =
     div []
         [ div [ class "row" ]
@@ -93,7 +93,7 @@ formView appState form =
         ]
 
 
-customMenuLinksHeader : AppState -> Form CustomFormError LookAndFeelConfig -> Html msg
+customMenuLinksHeader : AppState -> Form FormError LookAndFeelConfig -> Html msg
 customMenuLinksHeader appState form =
     let
         isEmpty =
@@ -115,7 +115,7 @@ customMenuLinksHeader appState form =
             ]
 
 
-customMenuLinkItemView : AppState -> Form CustomFormError LookAndFeelConfig -> Int -> Html Form.Msg
+customMenuLinkItemView : AppState -> Form FormError LookAndFeelConfig -> Int -> Html Form.Msg
 customMenuLinkItemView appState form i =
     let
         iconField =

@@ -2,9 +2,10 @@ module Wizard.Users.Create.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (..)
+import Shared.Auth.Role as Role
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
@@ -12,7 +13,6 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Users.Common.Role as Role
 import Wizard.Users.Common.UserCreateForm exposing (UserCreateForm)
 import Wizard.Users.Create.Models exposing (..)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
@@ -36,7 +36,7 @@ view appState model =
         ]
 
 
-formView : AppState -> Form CustomFormError UserCreateForm -> Html Form.Msg
+formView : AppState -> Form FormError UserCreateForm -> Html Form.Msg
 formView appState form =
     div []
         [ FormGroup.input appState form "email" <| lg "user.email" appState

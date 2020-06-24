@@ -5,15 +5,15 @@ module Wizard.Settings.KnowledgeModelRegistry.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Shared.Api.Registry as RegistryApi
+import Shared.Data.EditableConfig as EditableConfig
+import Shared.Data.EditableConfig.EditableKnowledgeModelRegistryConfig as EditableKnowledgeModelRegistryConfig
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form exposing (setFormErrors)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Registry as RegistryApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (setFormErrors)
 import Wizard.Msgs
-import Wizard.Settings.Common.EditableConfig as EditableConfig
-import Wizard.Settings.Common.EditableKnowledgeModelRegistryConfig as EditableKnowledgeModelRegistryConfig exposing (EditableKnowledgeModelRegistryConfig)
 import Wizard.Settings.Common.Forms.RegistrySignupForm as RegistrySignupForm exposing (RegistrySignupForm)
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.Update as GenericUpdate

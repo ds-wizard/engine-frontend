@@ -10,10 +10,10 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
+import Shared.Data.BootstrapConfig.OrganizationConfig exposing (OrganizationConfig)
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.OrganizationConfig exposing (OrganizationConfig)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate as V
 
 
 type alias RegistrySignupForm =
@@ -24,12 +24,12 @@ type alias RegistrySignupForm =
     }
 
 
-initEmpty : Form CustomFormError RegistrySignupForm
+initEmpty : Form FormError RegistrySignupForm
 initEmpty =
     Form.initial [] validation
 
 
-init : AppState -> OrganizationConfig -> Form CustomFormError RegistrySignupForm
+init : AppState -> OrganizationConfig -> Form FormError RegistrySignupForm
 init appState config =
     let
         email =
@@ -47,7 +47,7 @@ init appState config =
     Form.initial initials validation
 
 
-validation : Validation CustomFormError RegistrySignupForm
+validation : Validation FormError RegistrySignupForm
 validation =
     V.succeed RegistrySignupForm
         |> V.andMap (V.field "organizationId" V.organizationId)

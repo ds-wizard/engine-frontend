@@ -12,10 +12,10 @@ import Form.Field as Field
 import Form.Validate as V exposing (..)
 import Json.Encode as E exposing (..)
 import Json.Encode.Extra as E
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Field as Field
-import Wizard.Common.Form.Validate as V
-import Wizard.Users.Common.User exposing (User)
+import Shared.Data.User exposing (User)
+import Shared.Form.Field as Field
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias UserEditForm =
@@ -36,12 +36,12 @@ type alias SubmissionProps =
     }
 
 
-initEmpty : Form CustomFormError UserEditForm
+initEmpty : Form FormError UserEditForm
 initEmpty =
     Form.initial [] validation
 
 
-init : User -> Form CustomFormError UserEditForm
+init : User -> Form FormError UserEditForm
 init user =
     Form.initial (initUser user) validation
 
@@ -70,7 +70,7 @@ initSubmission submission =
     ]
 
 
-validation : Validation CustomFormError UserEditForm
+validation : Validation FormError UserEditForm
 validation =
     V.succeed UserEditForm
         |> V.andMap (V.field "email" V.email)
@@ -82,7 +82,7 @@ validation =
         |> V.andMap (V.field "submissionProps" (V.list validateSubmissionProps))
 
 
-validateSubmissionProps : Validation CustomFormError SubmissionProps
+validateSubmissionProps : Validation FormError SubmissionProps
 validateSubmissionProps =
     V.succeed SubmissionProps
         |> V.andMap (V.field "id" V.string)

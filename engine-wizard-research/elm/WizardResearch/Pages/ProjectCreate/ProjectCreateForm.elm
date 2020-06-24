@@ -104,11 +104,16 @@ selectRecommendedPackage tags templates form =
     in
     case mbTemplate of
         Just template ->
-            let
-                msg =
-                    Form.Input "packageId" Form.Text (Field.String template.recommendedPackageId)
-            in
-            Form.update (validation tags) msg form
+            case template.recommendedPackageId of
+                Just recommendedPackageId ->
+                    let
+                        msg =
+                            Form.Input "packageId" Form.Text (Field.String recommendedPackageId)
+                    in
+                    Form.update (validation tags) msg form
+
+                Nothing ->
+                    form
 
         _ ->
             form

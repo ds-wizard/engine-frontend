@@ -2,15 +2,20 @@ module Wizard.Questionnaires.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
+import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
+import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
+import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Utils exposing (listInsertIf)
+import Uuid
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
-import Wizard.Common.Questionnaire.Models.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
@@ -18,15 +23,11 @@ import Wizard.KnowledgeModels.Routes
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModalMsg
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.View as DeleteQuestionnaireModal
-import Wizard.Questionnaires.Common.Questionnaire as Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.QuestionnaireState exposing (QuestionnaireState(..))
 import Wizard.Questionnaires.Common.View exposing (visibilityBadge)
 import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-import Wizard.Users.Common.User as User
-import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -178,7 +179,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "_global.edit" appState
                 , label = l_ "action.edit" appState
-                , msg = ListingActionLink (Routes.QuestionnairesRoute <| EditRoute <| questionnaire.uuid)
+                , msg = ListingActionLink (Routes.QuestionnairesRoute <| EditRoute questionnaire.uuid)
                 }
 
         createDocument =
@@ -186,7 +187,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createDocument" appState
                 , label = l_ "action.createDocument" appState
-                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.CreateRoute <| Just questionnaire.uuid)
+                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.CreateRoute <| Just <| questionnaire.uuid)
                 }
 
         viewDocuments =
@@ -210,7 +211,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.createMigration" appState
-                , msg = ListingActionLink (Routes.QuestionnairesRoute <| CreateMigrationRoute <| questionnaire.uuid)
+                , msg = ListingActionLink (Routes.QuestionnairesRoute <| CreateMigrationRoute questionnaire.uuid)
                 }
 
         continueMigration =
@@ -218,7 +219,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.continueMigration" appState
-                , msg = ListingActionLink (Routes.QuestionnairesRoute <| MigrationRoute <| questionnaire.uuid)
+                , msg = ListingActionLink (Routes.QuestionnairesRoute <| MigrationRoute questionnaire.uuid)
                 }
 
         cancelMigration =

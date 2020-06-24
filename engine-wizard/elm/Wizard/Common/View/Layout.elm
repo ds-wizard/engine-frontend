@@ -7,16 +7,16 @@ module Wizard.Common.View.Layout exposing
 import Browser exposing (Document)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Auth.Permission as Perm
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig
-import Wizard.Common.Config.Partials.CustomMenuLink exposing (CustomMenuLink)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
@@ -167,7 +167,7 @@ createMenu model =
     let
         defaultMenuItems =
             menuItems model.appState
-                |> List.filter (\(MenuItem _ _ _ _ perm) -> hasPerm model.appState.jwt perm)
+                |> List.filter (\(MenuItem _ _ _ _ perm) -> Perm.hasPerm model.appState.session perm)
                 |> List.map (menuItem model)
 
         customMenuItems =

@@ -10,11 +10,12 @@ module Wizard.KMEditor.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
-import Wizard.KMEditor.Common.Events.Event exposing (Event)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.Event exposing (Event)
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Uuid exposing (Uuid)
 import Wizard.KMEditor.Editor.KMEditor.Models as KMEditorModel
 import Wizard.KMEditor.Editor.Preview.Models
 import Wizard.KMEditor.Editor.TagEditor.Models as TagEditorModel
@@ -28,7 +29,7 @@ type EditorType
 
 
 type alias Model =
-    { kmUuid : String
+    { kmUuid : Uuid
     , km : ActionResult BranchDetail
     , metrics : ActionResult (List Metric)
     , levels : ActionResult (List Level)
@@ -43,7 +44,7 @@ type alias Model =
     }
 
 
-initialModel : String -> Model
+initialModel : Uuid -> Model
 initialModel kmUuid =
     { kmUuid = kmUuid
     , km = Loading

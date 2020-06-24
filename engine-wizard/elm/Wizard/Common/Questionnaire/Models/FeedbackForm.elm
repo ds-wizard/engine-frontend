@@ -8,7 +8,7 @@ module Wizard.Common.Questionnaire.Models.FeedbackForm exposing
 import Form
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Form.FormError exposing (FormError)
 
 
 type alias FeedbackForm =
@@ -17,12 +17,12 @@ type alias FeedbackForm =
     }
 
 
-initEmpty : Form.Form CustomFormError FeedbackForm
+initEmpty : Form.Form FormError FeedbackForm
 initEmpty =
     Form.initial [] validation
 
 
-validation : Validation CustomFormError FeedbackForm
+validation : Validation FormError FeedbackForm
 validation =
     Validate.map2 FeedbackForm
         (Validate.field "title" Validate.string)

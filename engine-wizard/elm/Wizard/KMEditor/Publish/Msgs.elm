@@ -1,10 +1,10 @@
 module Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
 
 import Form
+import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError exposing (ApiError)
 import Version exposing (Version)
-import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
-import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 
 
 type Msg

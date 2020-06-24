@@ -6,12 +6,16 @@ import Bootstrap.Dropdown as Dropdown
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Utils exposing (listInsertIf)
+import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
@@ -20,17 +24,14 @@ import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModalMsg
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.View as DeleteQuestionnaireModal
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Detail.Models exposing (Model)
 import Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
-import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -56,12 +57,12 @@ content appState model ( questionnaireModel, levels ) =
             , QuestionnaireFeature.todos
             , QuestionnaireFeature.todoList
             ]
-                |> listInsertIf QuestionnaireFeature.summaryReport appState.config.questionnaires.summaryReport.enabled
+                |> listInsertIf QuestionnaireFeature.summaryReport appState.config.questionnaire.summaryReport.enabled
 
         questionnaireCfg =
             { features = features
             , levels =
-                if appState.config.questionnaires.levels.enabled then
+                if appState.config.questionnaire.levels.enabled then
                     Just levels
 
                 else

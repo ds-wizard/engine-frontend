@@ -6,7 +6,7 @@ module Wizard.KnowledgeModels.Import.FileImport.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Ports as Ports exposing (FilePortData)
+import Shared.Data.FilePortData exposing (FilePortData)
 
 
 type alias Model =

@@ -3,18 +3,19 @@ module Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget exposing (view)
 import ActionResult exposing (ActionResult)
 import Html exposing (Html, code, div, h3, span, strong, text)
 import Html.Attributes exposing (class, title)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Time
+import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.Msgs exposing (Msg(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.KnowledgeModels.Routes
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Common.View exposing (visibilityBadge)
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
@@ -96,7 +97,7 @@ listingConfig appState =
 listingTitle : AppState -> Questionnaire -> Html msg
 listingTitle appState questionnaire =
     span []
-        [ linkTo appState (Routes.QuestionnairesRoute <| DetailRoute <| questionnaire.uuid) [] [ text questionnaire.name ]
+        [ linkTo appState (Routes.QuestionnairesRoute <| DetailRoute questionnaire.uuid) [] [ text questionnaire.name ]
         , visibilityBadge appState questionnaire.visibility
         ]
 

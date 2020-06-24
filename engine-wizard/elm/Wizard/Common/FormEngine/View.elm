@@ -4,6 +4,8 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
+import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue.IntegrationReplyValue exposing (IntegrationReplyValue(..))
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (l, lx)
 import String exposing (fromInt)
@@ -55,7 +57,7 @@ viewForm config form =
 
 stateValueToString : FormElementState -> String
 stateValueToString =
-    .value >> Maybe.map getStringReply >> Maybe.withDefault ""
+    .value >> Maybe.map ReplyValue.getStringReply >> Maybe.withDefault ""
 
 
 identifierToChar : Int -> String
@@ -355,7 +357,7 @@ viewAdvice config value options =
         isSelected descriptor =
             case ( value, descriptor ) of
                 ( Just v, { name } ) ->
-                    name == getAnswerUuid v
+                    name == ReplyValue.getAnswerUuid v
 
                 _ ->
                     False
@@ -379,7 +381,7 @@ viewFollowUps form config path humanIdentifiers value options =
         isSelected ( _, option ) =
             case ( value, option ) of
                 ( Just v, DetailedOptionElement { name } _ ) ->
-                    name == getAnswerUuid v
+                    name == ReplyValue.getAnswerUuid v
 
                 _ ->
                     False

@@ -6,31 +6,32 @@ import Html.Attributes exposing (checked, class, classList, disabled, for, href,
 import Html.Events exposing (onCheck, onClick)
 import Markdown
 import Maybe.Extra as Maybe
+import Shared.Api.Documents as DocumentsApi
+import Shared.Auth.Permission as Perm
+import Shared.Data.Document as Document exposing (Document)
+import Shared.Data.Document.DocumentState exposing (DocumentState(..))
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lg, lh, lx)
-import Wizard.Auth.Permission as Permission
-import Wizard.Common.Api.Documents as DocumentsApi
+import Shared.Utils exposing (listInsertIf)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.Documents.Common.Document as Document exposing (Document)
-import Wizard.Documents.Common.DocumentState exposing (DocumentState(..))
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Routes
 import Wizard.Routes as Routes exposing (Route(..))
-import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -137,7 +138,7 @@ listingTitle appState document =
         name =
             if document.state == DoneDocumentState then
                 a
-                    [ href <| DocumentsApi.downloadDocumentUrl document.uuid appState
+                    [ href <| DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState
                     , target "_blank"
                     , title <| l_ "listing.name.title" appState
                     ]
@@ -193,7 +194,7 @@ listingActions appState document =
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
                 , label = l_ "action.download" appState
-                , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl document.uuid appState)
+                , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState)
                 }
 
         submit =
@@ -215,7 +216,7 @@ listingActions appState document =
         submitEnabled =
             (document.state == DoneDocumentState)
                 && appState.config.submission.enabled
-                && Permission.hasPerm appState.jwt Permission.submission
+                && Perm.hasPerm appState.session Perm.submission
     in
     []
         |> listInsertIf download (document.state == DoneDocumentState)

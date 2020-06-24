@@ -6,13 +6,13 @@ import Html
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (href)
 import Json.Decode exposing (Value)
+import Shared.Auth.Session as Session exposing (Session)
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Foundations.Grid as Grid
 import Shared.Html.Styled exposing (fa)
 import Shared.Utils exposing (dispatch)
 import Url exposing (Url)
 import WizardResearch.Common.AppState as AppState exposing (AppState)
-import WizardResearch.Common.Session as Session exposing (Session)
 import WizardResearch.Page as Page
 import WizardResearch.Pages.Auth as Auth
 import WizardResearch.Pages.Login as Login

@@ -4,14 +4,14 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, div, i, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, style, type_)
 import Html.Events exposing (onClick)
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
+import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
-import Wizard.Utils exposing (getContrastColorHex)
 
 
 type alias TagListConfig msg =

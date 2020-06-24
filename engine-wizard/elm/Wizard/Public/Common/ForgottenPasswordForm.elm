@@ -3,7 +3,7 @@ module Wizard.Public.Common.ForgottenPasswordForm exposing (ForgottenPasswordFor
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as E exposing (..)
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Form.FormError exposing (FormError)
 
 
 type alias ForgottenPasswordForm =
@@ -11,12 +11,12 @@ type alias ForgottenPasswordForm =
     }
 
 
-initEmpty : Form CustomFormError ForgottenPasswordForm
+initEmpty : Form FormError ForgottenPasswordForm
 initEmpty =
     Form.initial [] validation
 
 
-validation : Validation CustomFormError ForgottenPasswordForm
+validation : Validation FormError ForgottenPasswordForm
 validation =
     Validate.map ForgottenPasswordForm
         (Validate.field "email" Validate.email)

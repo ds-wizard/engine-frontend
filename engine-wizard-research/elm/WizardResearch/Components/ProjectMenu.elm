@@ -2,7 +2,7 @@ module WizardResearch.Components.ProjectMenu exposing (..)
 
 import Html.Styled exposing (Html)
 import Html.Styled.Attributes exposing (href)
-import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Elemental.Components.SideNavigation as SideNavigation
 import WizardResearch.Common.AppState exposing (AppState)
 import WizardResearch.Route as Route
@@ -18,7 +18,7 @@ type ProjectMenuActivePage
     | Settings
 
 
-view : AppState -> Questionnaire -> ProjectMenuActivePage -> Html msg
+view : AppState -> QuestionnaireDetail -> ProjectMenuActivePage -> Html msg
 view appState questionnaire activePage =
     SideNavigation.view []
         [ SideNavigation.projectName appState.theme questionnaire.name

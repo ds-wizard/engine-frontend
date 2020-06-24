@@ -5,13 +5,13 @@ import Form.Input as Input
 import Html exposing (Html, button, div, label)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
-import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
 import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.View as GenericView
@@ -41,7 +41,7 @@ viewProps =
     }
 
 
-formView : AppState -> Form CustomFormError EditableQuestionnairesConfigForm -> Html Form.Msg
+formView : AppState -> Form FormError EditableQuestionnairesConfigForm -> Html Form.Msg
 formView appState form =
     let
         enabled =

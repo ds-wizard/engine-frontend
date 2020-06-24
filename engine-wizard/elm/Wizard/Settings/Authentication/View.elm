@@ -5,11 +5,12 @@ import Form.Input as Input
 import Html exposing (Html, a, div, h3, hr, label)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
+import Shared.Auth.Role as Role
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -17,7 +18,6 @@ import Wizard.Settings.Authentication.Models exposing (Model)
 import Wizard.Settings.Common.Forms.AuthenticationConfigForm exposing (AuthenticationConfigForm)
 import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.View as GenericView
-import Wizard.Users.Common.Role as Role
 
 
 l_ : String -> AppState -> String
@@ -43,7 +43,7 @@ viewProps =
     }
 
 
-formView : AppState -> Form CustomFormError AuthenticationConfigForm -> Html Form.Msg
+formView : AppState -> Form FormError AuthenticationConfigForm -> Html Form.Msg
 formView appState form =
     div []
         [ FormGroup.select appState (Role.options appState) form "defaultRole" (l_ "form.defaultRole" appState)
@@ -56,7 +56,7 @@ formView appState form =
         ]
 
 
-serviceFormView : AppState -> Form CustomFormError AuthenticationConfigForm -> Int -> Html Form.Msg
+serviceFormView : AppState -> Form FormError AuthenticationConfigForm -> Int -> Html Form.Msg
 serviceFormView appState form i =
     let
         idField =
@@ -162,7 +162,7 @@ serviceFormView appState form i =
         ]
 
 
-serviceParametersHeader : AppState -> String -> Form CustomFormError AuthenticationConfigForm -> Html msg
+serviceParametersHeader : AppState -> String -> Form FormError AuthenticationConfigForm -> Html msg
 serviceParametersHeader appState field form =
     let
         isEmpty =
@@ -178,7 +178,7 @@ serviceParametersHeader appState field form =
             ]
 
 
-serviceParameterView : AppState -> String -> Form CustomFormError AuthenticationConfigForm -> Int -> Html Form.Msg
+serviceParameterView : AppState -> String -> Form FormError AuthenticationConfigForm -> Int -> Html Form.Msg
 serviceParameterView appState prefix form i =
     let
         name =

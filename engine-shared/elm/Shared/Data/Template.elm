@@ -10,7 +10,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
-import Shared.Data.Template.TemplatePacakge as TemplatePackage exposing (TemplatePackage)
+import Shared.Data.Template.TemplatePackage as TemplatePackage exposing (TemplatePackage)
 import Uuid exposing (Uuid)
 
 
@@ -18,7 +18,7 @@ type alias Template =
     { uuid : Uuid
     , name : String
     , description : String
-    , recommendedPackageId : String
+    , recommendedPackageId : Maybe String
     , allowedPackages : List TemplatePackage
     , formats : List TemplateFormat
     }
@@ -30,7 +30,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" D.string
-        |> D.required "recommendedPackageId" D.string
+        |> D.required "recommendedPackageId" (D.maybe D.string)
         |> D.required "allowedPackages" (D.list TemplatePackage.decoder)
         |> D.required "formats" (D.list TemplateFormat.decoder)
 

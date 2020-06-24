@@ -2,24 +2,26 @@ module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Maybe.Extra as Maybe
+import Shared.Api.Branches as BranchesApi
+import Shared.Api.Packages as PackagesApi
+import Shared.Data.Branch as Branch exposing (Branch)
+import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (l, lg)
+import Shared.Setters exposing (setBranches, setPackage)
+import Shared.Utils exposing (withNoCmd)
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
-import Wizard.Common.Api.Branches as BranchesApi
-import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.Common.Setters exposing (setBranches, setPackage)
-import Wizard.KMEditor.Common.Branch as Branch exposing (Branch)
 import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm
 import Wizard.KMEditor.Index.Models exposing (Model)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
-import Wizard.Utils exposing (withNoCmd)
 
 
 l_ : String -> AppState -> String
@@ -123,9 +125,7 @@ handlePostMigrationCompleted appState model result =
         Ok _ ->
             let
                 kmUuid =
-                    model.branchToBeUpgraded
-                        |> Maybe.andThen (\branch -> Just branch.uuid)
-                        |> Maybe.withDefault ""
+                    Maybe.unwrap Uuid.nil .uuid model.branchToBeUpgraded
             in
             ( model, cmdNavigate appState <| Routes.KMEditorRoute <| MigrationRoute kmUuid )
 
@@ -183,7 +183,7 @@ handleGetPackageCompleted appState model result =
         }
 
 
-handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> String -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
     , Cmd.map wrapMsg <| BranchesApi.deleteMigration uuid appState DeleteBranchCompleted

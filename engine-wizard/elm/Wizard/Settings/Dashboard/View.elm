@@ -3,9 +3,9 @@ module Wizard.Settings.Dashboard.View exposing (view)
 import Form exposing (Form)
 import Html exposing (Html, div, img, label, p, strong, text)
 import Html.Attributes exposing (class, src)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.DashboardConfigForm as DashboardConfigForm exposing (DashboardConfigForm)
@@ -37,7 +37,7 @@ viewProps =
     }
 
 
-formView : AppState -> Form CustomFormError DashboardConfigForm -> Html Form.Msg
+formView : AppState -> Form FormError DashboardConfigForm -> Html Form.Msg
 formView appState form =
     let
         opts =

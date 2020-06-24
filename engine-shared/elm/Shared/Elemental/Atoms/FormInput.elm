@@ -69,7 +69,7 @@ richRadioGroup options form fieldName theme =
                     , width (pct 100)
                     , descendants
                         [ typeSelector "strong" [ Typography.heading3 theme ]
-                        , typeSelector "p" [ Typography.copy1 theme ]
+                        , typeSelector "p" [ Typography.copy1 theme, margin zero ]
                         ]
                     ]
                 ]

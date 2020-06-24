@@ -9,11 +9,11 @@ module Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Wizard.Common.Config.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate as V
-import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
-import Wizard.Settings.Common.EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
+import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
+import Shared.Data.EditableConfig.EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias EditableQuestionnairesConfigForm =
@@ -28,12 +28,12 @@ type alias EditableQuestionnairesConfigForm =
     }
 
 
-initEmpty : Form CustomFormError EditableQuestionnairesConfigForm
+initEmpty : Form FormError EditableQuestionnairesConfigForm
 initEmpty =
     Form.initial [] validation
 
 
-init : EditableQuestionnairesConfig -> Form CustomFormError EditableQuestionnairesConfigForm
+init : EditableQuestionnairesConfig -> Form FormError EditableQuestionnairesConfigForm
 init config =
     let
         fields =
@@ -50,7 +50,7 @@ init config =
     Form.initial fields validation
 
 
-validation : Validation CustomFormError EditableQuestionnairesConfigForm
+validation : Validation FormError EditableQuestionnairesConfigForm
 validation =
     V.succeed EditableQuestionnairesConfigForm
         |> V.andMap (V.field "questionnaireVisibilityEnabled" V.bool)

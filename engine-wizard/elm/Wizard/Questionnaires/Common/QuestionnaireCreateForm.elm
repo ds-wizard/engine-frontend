@@ -5,9 +5,9 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 
 
 type alias QuestionnaireCreateForm =
@@ -17,7 +17,7 @@ type alias QuestionnaireCreateForm =
     }
 
 
-init : AppState -> Maybe String -> Form CustomFormError QuestionnaireCreateForm
+init : AppState -> Maybe String -> Form FormError QuestionnaireCreateForm
 init appState selectedPackage =
     let
         initials =
@@ -29,12 +29,12 @@ init appState selectedPackage =
                     []
 
         initialsWithVisibility =
-            initials ++ [ ( "visibility", QuestionnaireVisibility.field appState.config.questionnaires.questionnaireVisibility.defaultValue ) ]
+            initials ++ [ ( "visibility", QuestionnaireVisibility.field appState.config.questionnaire.questionnaireVisibility.defaultValue ) ]
     in
     Form.initial initialsWithVisibility validation
 
 
-validation : Validation CustomFormError QuestionnaireCreateForm
+validation : Validation FormError QuestionnaireCreateForm
 validation =
     Validate.map3 QuestionnaireCreateForm
         (Validate.field "name" Validate.string)

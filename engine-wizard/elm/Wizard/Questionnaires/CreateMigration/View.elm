@@ -5,12 +5,15 @@ import Form
 import Html exposing (Html, div, label, option, select, text)
 import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onInput)
+import Shared.Data.KnowledgeModel as KnowledgeModel
+import Shared.Data.Package exposing (Package)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (listClass)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormActions as FormActions
@@ -18,9 +21,6 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.CreateMigration.Models exposing (Model)
 import Wizard.Questionnaires.CreateMigration.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))

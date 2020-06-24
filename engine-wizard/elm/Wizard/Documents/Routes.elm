@@ -1,8 +1,9 @@
 module Wizard.Documents.Routes exposing (Route(..))
 
-import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Uuid exposing (Uuid)
 
 
 type Route
-    = CreateRoute (Maybe String)
-    | IndexRoute (Maybe String) PaginationQueryString
+    = CreateRoute (Maybe Uuid)
+    | IndexRoute (Maybe Uuid) PaginationQueryString

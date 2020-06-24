@@ -1,7 +1,8 @@
 module Wizard.Questionnaires.Models exposing (Model, initLocalModel, initialModel)
 
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Questionnaires.Create.Models
 import Wizard.Questionnaires.CreateMigration.Models
 import Wizard.Questionnaires.Detail.Models
@@ -24,11 +25,11 @@ type alias Model =
 initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Questionnaires.Create.Models.initialModel appState Nothing
-    , createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel ""
-    , detailModel = Wizard.Questionnaires.Detail.Models.initialModel ""
-    , editModel = Wizard.Questionnaires.Edit.Models.initialModel ""
+    , createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel Uuid.nil
+    , detailModel = Wizard.Questionnaires.Detail.Models.initialModel Uuid.nil
+    , editModel = Wizard.Questionnaires.Edit.Models.initialModel Uuid.nil
     , indexModel = Wizard.Questionnaires.Index.Models.initialModel PaginationQueryString.empty
-    , migrationModel = Wizard.Questionnaires.Migration.Models.initialModel ""
+    , migrationModel = Wizard.Questionnaires.Migration.Models.initialModel Uuid.nil
     }
 
 
