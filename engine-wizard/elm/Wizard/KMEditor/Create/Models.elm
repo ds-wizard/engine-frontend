@@ -6,15 +6,15 @@ module Wizard.KMEditor.Create.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Data.Package exposing (Package)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 
 
 type alias Model =
     { packages : ActionResult (List Package)
     , savingBranch : ActionResult ()
-    , form : Form CustomFormError BranchCreateForm
+    , form : Form FormError BranchCreateForm
     , selectedPackage : Maybe String
     }
 

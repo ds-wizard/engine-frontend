@@ -4,12 +4,13 @@ module Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescri
     , fromQuestionnaireDetail
     )
 
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Uuid exposing (Uuid)
 
 
 type alias QuestionnaireDescriptor =
-    { name : String, uuid : String }
+    { name : String, uuid : Uuid }
 
 
 fromQuestionnaire : Questionnaire -> QuestionnaireDescriptor

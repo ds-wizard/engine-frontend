@@ -1,7 +1,7 @@
 module Wizard.KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
 
+import Shared.Data.FilePortData exposing (FilePortData)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Ports as Ports exposing (FilePortData)
 
 
 type Msg

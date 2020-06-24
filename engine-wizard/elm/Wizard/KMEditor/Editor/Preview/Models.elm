@@ -7,13 +7,13 @@ module Wizard.KMEditor.Editor.Preview.Models exposing
     , selectNoneTags
     )
 
+import Shared.Data.Event exposing (Event)
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.Package as Package
+import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models
-import Wizard.KMEditor.Common.Events.Event exposing (Event)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KnowledgeModels.Common.Package as Package
-import Wizard.Questionnaires.Common.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 
 
 type alias Model =
@@ -90,7 +90,7 @@ createQuestionnaireModel appState packageId km =
     in
     Wizard.Common.Questionnaire.Models.initialModel
         appState
-        { uuid = ""
+        { uuid = km.uuid
         , name = ""
         , visibility = PrivateQuestionnaire
         , ownerUuid = Nothing

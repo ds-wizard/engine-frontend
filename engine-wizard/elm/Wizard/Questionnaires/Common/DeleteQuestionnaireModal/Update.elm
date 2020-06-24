@@ -1,9 +1,10 @@
 module Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Models exposing (Model)

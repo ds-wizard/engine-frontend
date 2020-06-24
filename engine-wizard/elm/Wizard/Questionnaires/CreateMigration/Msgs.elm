@@ -1,11 +1,11 @@
 module Wizard.Questionnaires.CreateMigration.Msgs exposing (Msg(..))
 
 import Form
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Wizard.Questionnaires.Common.QuestionnaireMigration exposing (QuestionnaireMigration)
 
 
 type Msg

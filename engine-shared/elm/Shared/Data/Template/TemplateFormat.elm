@@ -13,6 +13,7 @@ type alias TemplateFormat =
     , name : String
     , shortName : String
     , color : String
+    , icon : String
     }
 
 
@@ -23,3 +24,4 @@ decoder =
         |> D.required "name" D.string
         |> D.required "shortName" D.string
         |> D.required "color" D.string
+        |> D.required "icon" D.string

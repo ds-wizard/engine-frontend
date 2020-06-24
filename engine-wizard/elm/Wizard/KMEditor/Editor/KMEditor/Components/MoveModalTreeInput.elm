@@ -11,10 +11,10 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Set exposing (Set)
+import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), getEditorParentUuid)
 
 

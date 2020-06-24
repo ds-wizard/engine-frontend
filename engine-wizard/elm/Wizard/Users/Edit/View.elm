@@ -6,20 +6,19 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Markdown
+import Shared.Auth.Role as Role
+import Shared.Data.User as User exposing (User)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (detailClass, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
-import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.Users.Common.Role as Role
-import Wizard.Users.Common.User as User exposing (User)
 import Wizard.Users.Common.UserEditForm exposing (UserEditForm)
 import Wizard.Users.Common.UserPasswordForm exposing (UserPasswordForm)
 import Wizard.Users.Edit.Models exposing (..)
@@ -106,7 +105,7 @@ userView appState model user =
         ]
 
 
-userFormView : AppState -> User -> Form CustomFormError UserEditForm -> Bool -> Html Form.Msg
+userFormView : AppState -> User -> Form FormError UserEditForm -> Bool -> Html Form.Msg
 userFormView appState user form current =
     let
         roleSelect =
@@ -202,7 +201,7 @@ passwordView appState model =
         ]
 
 
-passwordFormView : AppState -> Form CustomFormError UserPasswordForm -> Html Form.Msg
+passwordFormView : AppState -> Form FormError UserPasswordForm -> Html Form.Msg
 passwordFormView appState form =
     div []
         [ FormGroup.password appState form "password" <| l_ "passwordForm.password" appState

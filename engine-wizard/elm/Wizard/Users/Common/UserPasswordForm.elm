@@ -3,8 +3,8 @@ module Wizard.Users.Common.UserPasswordForm exposing (UserPasswordForm, encode, 
 import Form exposing (Form)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate as V
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias UserPasswordForm =
@@ -13,12 +13,12 @@ type alias UserPasswordForm =
     }
 
 
-init : Form CustomFormError UserPasswordForm
+init : Form FormError UserPasswordForm
 init =
     Form.initial [] validation
 
 
-validation : Validation CustomFormError UserPasswordForm
+validation : Validation FormError UserPasswordForm
 validation =
     V.map2 UserPasswordForm
         (V.field "password" V.string)

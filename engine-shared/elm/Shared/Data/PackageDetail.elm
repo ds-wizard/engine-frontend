@@ -1,7 +1,13 @@
-module Shared.Data.PackageDetail exposing (..)
+module Shared.Data.PackageDetail exposing
+    ( PackageDetail
+    , createFormOptions
+    , decoder
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import Shared.Data.Package.PackageState as PackageState exposing (PackageState)
 import Version exposing (Version)
 
 
@@ -18,10 +24,10 @@ type alias PackageDetail =
     , forkOfPackageId : Maybe String
     , previousPackageId : Maybe String
     , versions : List Version
-
-    --, organization : Maybe OrganizationInfo
+    , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
     , remoteLatestVersion : Maybe Version
+    , state : PackageState
     }
 
 
@@ -40,6 +46,27 @@ decoder =
         |> D.required "forkOfPackageId" (D.maybe D.string)
         |> D.required "previousPackageId" (D.maybe D.string)
         |> D.required "versions" (D.list Version.decoder)
-        --|> D.required "organization" (D.maybe OrganizationInfo.decoder)
+        |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
+        |> D.required "state" PackageState.decoder
+
+
+createFormOptions : PackageDetail -> List ( String, String )
+createFormOptions package =
+    package.versions
+        |> List.sortWith Version.compare
+        |> List.filter (Version.greaterThan package.version)
+        |> List.map (createFormOption package)
+
+
+createFormOption : PackageDetail -> Version -> ( String, String )
+createFormOption package version =
+    let
+        id =
+            package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version
+
+        optionText =
+            package.name ++ " " ++ Version.toString version ++ " (" ++ id ++ ")"
+    in
+    ( id, optionText )

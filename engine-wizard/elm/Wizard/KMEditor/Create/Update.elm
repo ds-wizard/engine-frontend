@@ -3,19 +3,19 @@ module Wizard.KMEditor.Create.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Result exposing (Result)
+import Shared.Api.Branches as BranchesApi
+import Shared.Api.Packages as PackagesApi
+import Shared.Data.Branch exposing (Branch)
+import Shared.Data.Package exposing (Package)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form exposing (setFormErrors)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Branches as BranchesApi
-import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (setFormErrors)
-import Wizard.KMEditor.Common.Branch exposing (Branch)
 import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm
 import Wizard.KMEditor.Create.Models exposing (..)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)

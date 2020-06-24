@@ -14,14 +14,14 @@ import Dict exposing (Dict)
 import Form
 import Form.Validate exposing (Validation)
 import Random exposing (Seed)
-import Wizard.KMEditor.Common.Events.Event exposing (Event)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Event exposing (Event)
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Utils exposing (getUuid)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getEditorContext, insertEditor, setAlert)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor, EditorLike, EditorState(..), getNewState)
 import Wizard.Msgs
-import Wizard.Utils exposing (getUuid)
 
 
 

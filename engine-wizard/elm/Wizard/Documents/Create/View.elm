@@ -5,11 +5,14 @@ import Form
 import Html exposing (..)
 import Html.Attributes exposing (class)
 import List.Extra as List
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.Template exposing (Template)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Questionnaire.Views.SummaryReport exposing (viewIndications)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
@@ -17,11 +20,9 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Documents.Create.Models exposing (Model)
 import Wizard.Documents.Create.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Routes as Routes
 
 
@@ -53,11 +54,11 @@ formView : AppState -> Model -> List Questionnaire -> Html Form.Msg
 formView appState model questionnaires =
     let
         questionnaireOptions =
-            ( "", "--" ) :: (List.map (\q -> ( q.uuid, q.name )) <| List.sortBy (String.toLower << .name) questionnaires)
+            ( "", "--" ) :: (List.map (\q -> ( Uuid.toString q.uuid, q.name )) <| List.sortBy (String.toLower << .name) questionnaires)
 
         selectedQuestionnaire =
             (Form.getFieldAsString "questionnaireUuid" model.form).value
-                |> Maybe.andThen (\qUuid -> List.find (\q -> q.uuid == qUuid) questionnaires)
+                |> Maybe.andThen (\qUuid -> List.find (\q -> Uuid.toString q.uuid == qUuid) questionnaires)
 
         questionnaireInput =
             case model.selectedQuestionnaire of
@@ -91,13 +92,13 @@ formView appState model questionnaires =
                         createTemplateOption { uuid, name } =
                             let
                                 visibleName =
-                                    if appState.config.template.recommendedTemplateUuid == Just uuid then
+                                    if appState.config.template.recommendedTemplateUuid == Just (Uuid.toString uuid) then
                                         name ++ " (" ++ l_ "template.recommended" appState ++ ")"
 
                                     else
                                         name
                             in
-                            ( uuid, visibleName )
+                            ( Uuid.toString uuid, visibleName )
 
                         templateOptions =
                             ( "", "--" ) :: (List.map createTemplateOption <| List.sortBy (String.toLower << .name) templates)
@@ -112,7 +113,7 @@ formView appState model questionnaires =
 
         mbSelectedTemplate =
             model.templates
-                |> ActionResult.map (List.find (.uuid >> Just >> (==) mbSelectedTemplateUuid))
+                |> ActionResult.map (List.find (.uuid >> Uuid.toString >> Just >> (==) mbSelectedTemplateUuid))
                 |> ActionResult.withDefault Nothing
 
         formatInput =

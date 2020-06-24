@@ -6,12 +6,14 @@ module Shared.Data.BootstrapConfig.AuthenticationConfig exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Auth.Role as Role
 import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig as OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 
 
 type alias AuthenticationConfig =
-    { internal : Internal
+    { defaultRole : String
+    , internal : Internal
     , external : External
     }
 
@@ -26,7 +28,8 @@ type alias External =
 
 default : AuthenticationConfig
 default =
-    { internal = { registration = SimpleFeatureConfig.init True }
+    { defaultRole = Role.researcher
+    , internal = { registration = SimpleFeatureConfig.init True }
     , external = { services = [] }
     }
 
@@ -34,6 +37,7 @@ default =
 decoder : Decoder AuthenticationConfig
 decoder =
     D.succeed AuthenticationConfig
+        |> D.required "defaultRole" D.string
         |> D.required "internal" internalDecoder
         |> D.required "external" externalDecoder
 

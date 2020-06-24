@@ -3,6 +3,7 @@ module Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents, update)
 import Dict
 import Random exposing (Seed)
 import Reorderable
+import Shared.Utils exposing (pair)
 import SplitPane
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
@@ -23,7 +24,6 @@ import Wizard.KMEditor.Editor.KMEditor.Update.Reference exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Tag exposing (deleteTag, updateTagForm, withGenerateTagEditEvent)
 import Wizard.Msgs
 import Wizard.Ports as Ports
-import Wizard.Utils exposing (pair)
 
 
 update : Msg -> AppState -> Model -> Cmd Wizard.Msgs.Msg -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

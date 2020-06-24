@@ -52,22 +52,22 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import List.Extra as List
 import Set
-import Shared.Locale exposing (l, lg)
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Expert exposing (Expert)
+import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
+import Shared.Form.FormError exposing (FormError(..))
+import Shared.Form.Validate as Validate
+import Shared.Locale exposing (lg)
 import String exposing (fromFloat, fromInt)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError(..))
-import Wizard.Common.Form.Validate as Validate
-import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
-import Wizard.KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 
 
@@ -186,12 +186,12 @@ type alias ExpertForm =
 {- Common utils -}
 
 
-initForm : Validation CustomFormError a -> List ( String, Field.Field ) -> Form CustomFormError a
+initForm : Validation FormError a -> List ( String, Field.Field ) -> Form FormError a
 initForm validation initials =
     Form.initial initials validation
 
 
-formChanged : Form CustomFormError a -> Bool
+formChanged : Form FormError a -> Bool
 formChanged form =
     Set.size (Form.getChangedFields form) > 0
 
@@ -200,12 +200,12 @@ formChanged form =
 {- Knowledge Model -}
 
 
-initKnowledgeModelFrom : KnowledgeModel -> Form CustomFormError KnowledgeModelForm
+initKnowledgeModelFrom : KnowledgeModel -> Form FormError KnowledgeModelForm
 initKnowledgeModelFrom =
     knowledgeModelFormInitials >> initForm knowledgeModelFormValidation
 
 
-knowledgeModelFormValidation : Validation CustomFormError KnowledgeModelForm
+knowledgeModelFormValidation : Validation FormError KnowledgeModelForm
 knowledgeModelFormValidation =
     Validate.map KnowledgeModelForm
         (Validate.field "name" Validate.string)
@@ -225,12 +225,12 @@ updateKnowledgeModelWithForm knowledgeModel knowledgeModelForm =
 {- Tag -}
 
 
-initTagForm : Tag -> Form CustomFormError TagForm
+initTagForm : Tag -> Form FormError TagForm
 initTagForm =
     tagFormInitials >> initForm tagFormValidation
 
 
-tagFormValidation : Validation CustomFormError TagForm
+tagFormValidation : Validation FormError TagForm
 tagFormValidation =
     Validate.map3 TagForm
         (Validate.field "name" Validate.string)
@@ -259,12 +259,12 @@ updateTagWithForm tag tagForm =
 {- Integration -}
 
 
-initIntegrationForm : List Integration -> String -> Integration -> Form CustomFormError IntegrationForm
+initIntegrationForm : List Integration -> String -> Integration -> Form FormError IntegrationForm
 initIntegrationForm integrations uuid =
     integrationFormInitials >> initForm (integrationFormValidation integrations uuid)
 
 
-integrationFormValidation : List Integration -> String -> Validation CustomFormError IntegrationForm
+integrationFormValidation : List Integration -> String -> Validation FormError IntegrationForm
 integrationFormValidation integrations uuid =
     Validate.map8 IntegrationForm
         (Validate.field "id" (validateIntegrationId integrations uuid))
@@ -280,7 +280,7 @@ integrationFormValidation integrations uuid =
         |> Validate.andMap (Validate.field "itemUrl" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
 
 
-validateIntegrationId : List Integration -> String -> Validation CustomFormError String
+validateIntegrationId : List Integration -> String -> Validation FormError String
 validateIntegrationId integrations uuid =
     let
         existingUuids =
@@ -298,7 +298,7 @@ validateIntegrationId integrations uuid =
             )
 
 
-requestHeaderValidation : Validation CustomFormError ( String, String )
+requestHeaderValidation : Validation FormError ( String, String )
 requestHeaderValidation =
     Validate.map2 Tuple.pair
         (Validate.field "header" Validate.string)
@@ -353,12 +353,12 @@ updateIntegrationWithForm integration integrationForm =
 {- Chapter -}
 
 
-initChapterForm : Chapter -> Form CustomFormError ChapterForm
+initChapterForm : Chapter -> Form FormError ChapterForm
 initChapterForm =
     chapterFormInitials >> initForm chapterFormValidation
 
 
-chapterFormValidation : Validation CustomFormError ChapterForm
+chapterFormValidation : Validation FormError ChapterForm
 chapterFormValidation =
     Validate.map2 ChapterForm
         (Validate.field "title" Validate.string)
@@ -381,18 +381,18 @@ updateChapterWithForm chapter chapterForm =
 {- Question -}
 
 
-initQuestionForm : List Integration -> Question -> Form CustomFormError QuestionForm
+initQuestionForm : List Integration -> Question -> Form FormError QuestionForm
 initQuestionForm integrations =
     questionFormInitials >> initForm (questionFormValidation integrations)
 
 
-questionFormValidation : List Integration -> Validation CustomFormError QuestionForm
+questionFormValidation : List Integration -> Validation FormError QuestionForm
 questionFormValidation integrations =
     Validate.succeed QuestionForm
         |> Validate.andMap (Validate.field "questionType" Validate.string |> Validate.andThen (validateQuestion integrations))
 
 
-validateQuestion : List Integration -> String -> Validation CustomFormError QuestionFormType
+validateQuestion : List Integration -> String -> Validation FormError QuestionFormType
 validateQuestion integrations questionType =
     case questionType of
         "OptionsQuestion" ->
@@ -430,7 +430,7 @@ validateQuestion integrations questionType =
             Validate.fail <| Error.value InvalidString
 
 
-validateIntegrationProps : List Integration -> String -> Validation CustomFormError (Dict String String)
+validateIntegrationProps : List Integration -> String -> Validation FormError (Dict String String)
 validateIntegrationProps integrations integration =
     let
         props =
@@ -448,7 +448,7 @@ validateIntegrationProps integrations integration =
     List.foldl fold (Validate.succeed Dict.empty) props
 
 
-validateValueType : Validation CustomFormError QuestionValueType
+validateValueType : Validation FormError QuestionValueType
 validateValueType =
     Validate.string
         |> Validate.andThen
@@ -598,7 +598,7 @@ questionValueTypeOptions appState =
     ]
 
 
-isOptionsQuestionForm : Form CustomFormError QuestionForm -> Bool
+isOptionsQuestionForm : Form FormError QuestionForm -> Bool
 isOptionsQuestionForm =
     let
         detectForm questionForm =
@@ -612,7 +612,7 @@ isOptionsQuestionForm =
     isFormType detectForm
 
 
-isListQuestionForm : Form CustomFormError QuestionForm -> Bool
+isListQuestionForm : Form FormError QuestionForm -> Bool
 isListQuestionForm =
     let
         detectForm questionForm =
@@ -626,7 +626,7 @@ isListQuestionForm =
     isFormType detectForm
 
 
-isFormType : (QuestionFormType -> Bool) -> Form CustomFormError QuestionForm -> Bool
+isFormType : (QuestionFormType -> Bool) -> Form FormError QuestionForm -> Bool
 isFormType detectForm form =
     Form.getOutput form
         |> Maybe.map (.question >> detectForm)
@@ -637,12 +637,12 @@ isFormType detectForm form =
 {- Answer -}
 
 
-initAnswerForm : EditorContext -> Answer -> Form CustomFormError AnswerForm
+initAnswerForm : EditorContext -> Answer -> Form FormError AnswerForm
 initAnswerForm editorContext =
     answerFormInitials editorContext >> initForm answerFormValidation
 
 
-answerFormValidation : Validation CustomFormError AnswerForm
+answerFormValidation : Validation FormError AnswerForm
 answerFormValidation =
     Validate.map3 AnswerForm
         (Validate.field "label" Validate.string)
@@ -650,7 +650,7 @@ answerFormValidation =
         (Validate.field "metricMeasures" (Validate.list metricMeasureValidation))
 
 
-metricMeasureValidation : Validation CustomFormError MetricMeasureForm
+metricMeasureValidation : Validation FormError MetricMeasureForm
 metricMeasureValidation =
     Validate.map3 MetricMeasureForm
         (Validate.field "enabled" Validate.bool)
@@ -658,7 +658,7 @@ metricMeasureValidation =
         (Validate.field "enabled" Validate.bool |> Validate.andThen validateMetricMeasureValues)
 
 
-validateMetricMeasureValues : Bool -> Validation CustomFormError (Maybe MetricMeasureValues)
+validateMetricMeasureValues : Bool -> Validation FormError (Maybe MetricMeasureValues)
 validateMetricMeasureValues enabled =
     if enabled then
         Validate.succeed MetricMeasureValues
@@ -733,18 +733,18 @@ metricMeasureFormToMetricMeasure form =
 {- Reference -}
 
 
-initReferenceForm : Reference -> Form CustomFormError ReferenceForm
+initReferenceForm : Reference -> Form FormError ReferenceForm
 initReferenceForm =
     referenceFormInitials >> initForm referenceFormValidation
 
 
-referenceFormValidation : Validation CustomFormError ReferenceForm
+referenceFormValidation : Validation FormError ReferenceForm
 referenceFormValidation =
     Validate.succeed ReferenceForm
         |> Validate.andMap (Validate.field "referenceType" Validate.string |> Validate.andThen validateReference)
 
 
-validateReference : String -> Validation CustomFormError ReferenceFormType
+validateReference : String -> Validation FormError ReferenceFormType
 validateReference referenceType =
     case referenceType of
         "ResourcePageReference" ->
@@ -822,12 +822,12 @@ referenceTypeOptions appState =
 {- Expert -}
 
 
-initExpertForm : Expert -> Form CustomFormError ExpertForm
+initExpertForm : Expert -> Form FormError ExpertForm
 initExpertForm =
     expertFormInitials >> initForm expertFormValidation
 
 
-expertFormValidation : Validation CustomFormError ExpertForm
+expertFormValidation : Validation FormError ExpertForm
 expertFormValidation =
     Validate.map2 ExpertForm
         (Validate.field "name" Validate.string)

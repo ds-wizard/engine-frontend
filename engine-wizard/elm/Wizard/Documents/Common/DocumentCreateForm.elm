@@ -9,7 +9,8 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Form.FormError exposing (FormError)
+import Uuid exposing (Uuid)
 
 
 type alias DocumentCreateForm =
@@ -20,13 +21,13 @@ type alias DocumentCreateForm =
     }
 
 
-init : Maybe String -> Form CustomFormError DocumentCreateForm
+init : Maybe Uuid -> Form FormError DocumentCreateForm
 init mbQuestionniareUuid =
     let
         initialFields =
             case mbQuestionniareUuid of
                 Just questionnaireUuid ->
-                    [ ( "questionnaireUuid", Field.string questionnaireUuid ) ]
+                    [ ( "questionnaireUuid", Field.string (Uuid.toString questionnaireUuid) ) ]
 
                 Nothing ->
                     []
@@ -34,7 +35,7 @@ init mbQuestionniareUuid =
     Form.initial initialFields validation
 
 
-validation : Validation CustomFormError DocumentCreateForm
+validation : Validation FormError DocumentCreateForm
 validation =
     Validate.map4 DocumentCreateForm
         (Validate.field "name" Validate.string)

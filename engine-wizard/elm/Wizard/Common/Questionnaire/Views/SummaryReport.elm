@@ -4,14 +4,14 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import List.Extra as List
 import Round
+import Shared.Data.KnowledgeModel as KnowledgeModels
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Shared.Locale exposing (l, lf, lgx, lx)
 import String exposing (fromFloat, fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, reportCanvasId, totalReportId)
-import Wizard.Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModels
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 
 
 l_ : String -> AppState -> String

@@ -10,11 +10,11 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.FormEngine.Model exposing (encodeFormValues)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Wizard.Questionnaires.Common.QuestionnaireLabel as QuestionnaireLabel
-import Wizard.Questionnaires.Common.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
+import Shared.Data.Questionnaire.QuestionnaireLabel as QuestionnaireLabel
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.FormValue as FormValue
+import Shared.Form.FormError exposing (FormError)
 
 
 type alias QuestionnaireEditForm =
@@ -23,12 +23,12 @@ type alias QuestionnaireEditForm =
     }
 
 
-initEmpty : Form CustomFormError QuestionnaireEditForm
+initEmpty : Form FormError QuestionnaireEditForm
 initEmpty =
     Form.initial [] validation
 
 
-init : QuestionnaireDetail -> Form CustomFormError QuestionnaireEditForm
+init : QuestionnaireDetail -> Form FormError QuestionnaireEditForm
 init questionnaire =
     Form.initial (questionnaireToFormInitials questionnaire) validation
 
@@ -40,7 +40,7 @@ questionnaireToFormInitials questionnaire =
     ]
 
 
-validation : Validation CustomFormError QuestionnaireEditForm
+validation : Validation FormError QuestionnaireEditForm
 validation =
     Validate.map2 QuestionnaireEditForm
         (Validate.field "name" Validate.string)
@@ -52,7 +52,7 @@ encode questionnaire form =
     E.object
         [ ( "name", E.string form.name )
         , ( "visibility", QuestionnaireVisibility.encode form.visibility )
-        , ( "replies", encodeFormValues questionnaire.replies )
+        , ( "replies", E.list FormValue.encode questionnaire.replies )
         , ( "level", E.int questionnaire.level )
         , ( "labels", E.list QuestionnaireLabel.encode questionnaire.labels )
         ]

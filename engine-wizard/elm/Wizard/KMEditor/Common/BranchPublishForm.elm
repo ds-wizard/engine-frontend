@@ -8,8 +8,8 @@ module Wizard.KMEditor.Common.BranchPublishForm exposing
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Json.Encode as E exposing (..)
+import Shared.Form.FormError exposing (FormError)
 import String exposing (fromInt)
-import Wizard.Common.Form exposing (CustomFormError)
 
 
 type alias BranchPublishForm =
@@ -22,12 +22,12 @@ type alias BranchPublishForm =
     }
 
 
-init : Form CustomFormError BranchPublishForm
+init : Form FormError BranchPublishForm
 init =
     Form.initial [] validation
 
 
-validation : Validation CustomFormError BranchPublishForm
+validation : Validation FormError BranchPublishForm
 validation =
     Validate.map6 BranchPublishForm
         (Validate.field "major" (Validate.int |> Validate.andThen (Validate.minInt 0)))

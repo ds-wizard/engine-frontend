@@ -2,11 +2,11 @@ module Wizard.Public.Signup.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Shared.Api.Users as UsersApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form exposing (setFormErrors)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (setFormErrors)
 import Wizard.Msgs
 import Wizard.Public.Common.SignupForm as SignupForm
 import Wizard.Public.Signup.Models exposing (..)

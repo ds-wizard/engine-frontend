@@ -6,25 +6,26 @@ module Wizard.Documents.Create.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
+import Shared.Api.Documents as DocumentsApi
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Api.Templates as TemplatesApi
+import Shared.Data.Document exposing (Document)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Setters exposing (setQuestionnaires, setTemplates)
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
-import Wizard.Common.Api.Documents as DocumentsApi
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
-import Wizard.Common.Api.Templates as TemplatesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Pagination.Pagination exposing (Pagination)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
-import Wizard.Common.Setters exposing (setQuestionnaires, setTemplates)
-import Wizard.Documents.Common.Document exposing (Document)
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm
-import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Documents.Create.Models exposing (Model)
 import Wizard.Documents.Create.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -117,13 +118,13 @@ handleGetTemplatesCompleted appState model result =
                         setFormat =
                             case ( List.length template.formats, List.head template.formats ) of
                                 ( 1, Just format ) ->
-                                    Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String format.uuid))
+                                    Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String (Uuid.toString format.uuid)))
 
                                 _ ->
                                     identity
                     in
                     newModel.form
-                        |> Form.update DocumentCreateForm.validation (Form.Input "templateUuid" Form.Text (Field.String template.uuid))
+                        |> Form.update DocumentCreateForm.validation (Form.Input "templateUuid" Form.Text (Field.String (Uuid.toString template.uuid)))
                         |> setFormat
 
                 _ ->
@@ -192,13 +193,13 @@ getSelectedQuestionnaire model =
     let
         findQuestionnaire qUuid =
             ActionResult.withDefault [] model.questionnaires
-                |> List.filter (\q -> q.uuid == qUuid)
+                |> List.filter (\q -> Uuid.toString q.uuid == qUuid)
                 |> List.head
     in
     (Form.getFieldAsString "questionnaireUuid" model.form).value
         |> Maybe.andThen findQuestionnaire
 
 
-needFetchTemplates : Model -> String -> Bool
+needFetchTemplates : Model -> Uuid -> Bool
 needFetchTemplates model questionnaireUuid =
     model.lastFetchedTemplatesFor /= Just questionnaireUuid

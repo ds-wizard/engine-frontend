@@ -1,24 +1,25 @@
 module Wizard.Documents.Index.Update exposing (..)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Documents as DocumentsApi
+import Shared.Api.Questionnaires as QuestionnaireApi
+import Shared.Api.Submissions as SubmissionsApi
+import Shared.Data.Document exposing (Document)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.Submission exposing (Submission)
+import Shared.Data.SubmissionService exposing (SubmissionService)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Setters exposing (setQuestionnaire)
+import Uuid
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
-import Wizard.Common.Api.Documents as DocumentsApi
-import Wizard.Common.Api.Questionnaires as QuestionnaireApi
-import Wizard.Common.Api.Submissions as SubmissionsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
-import Wizard.Common.Setters exposing (setQuestionnaire)
-import Wizard.Documents.Common.Document exposing (Document)
-import Wizard.Documents.Common.Submission exposing (Submission)
-import Wizard.Documents.Common.SubmissionService exposing (SubmissionService)
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Routes as Routes
 
 
@@ -100,7 +101,7 @@ handleDeleteDocument wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        DocumentsApi.deleteDocument questionnaire.uuid appState DeleteDocumentCompleted
+                        DocumentsApi.deleteDocument (Uuid.toString questionnaire.uuid) appState DeleteDocumentCompleted
             in
             ( newModel, cmd )
 
@@ -148,7 +149,7 @@ handleShowHideSubmitDocument wrapMsg appState model mbDocument =
             case mbDocument of
                 Just document ->
                     Cmd.map wrapMsg <|
-                        DocumentsApi.getSubmissionServices document.uuid appState GetSubmissionServicesCompleted
+                        DocumentsApi.getSubmissionServices (Uuid.toString document.uuid) appState GetSubmissionServicesCompleted
 
                 Nothing ->
                     Cmd.none
@@ -184,7 +185,7 @@ handleSubmitDocument wrapMsg appState model =
         ( Just document, Just serviceId ) ->
             ( { model | submittingDocument = Loading }
             , Cmd.map wrapMsg <|
-                SubmissionsApi.postSubmission serviceId document.uuid appState SubmitDocumentCompleted
+                SubmissionsApi.postSubmission serviceId (Uuid.toString document.uuid) appState SubmitDocumentCompleted
             )
 
         _ ->

@@ -1,0 +1,39 @@
+--module Wizard.Common.Form exposing
+--    ( FormError(..)
+--    , setFormErrors
+--    )
+--
+--import Form exposing (Form)
+--import Form.Validate as V exposing (..)
+--import Shared.Error.ApiError as ApiError exposing (ApiError)
+--
+--
+--type FormError
+--    = ConfirmationError
+--    | InvalidUuid
+--    | ServerValidationError String
+--    | Error String
+--    | IntegrationIdAlreadyUsed
+--
+--
+--setFormErrors : ApiError -> Form FormError a -> Form FormError a
+--setFormErrors apiError form =
+--    case ApiError.toServerError apiError of
+--        Just error ->
+--            List.foldl setFormError form error.fieldErrors
+--
+--        _ ->
+--            form
+--
+--
+--setFormError : ( String, String ) -> Form FormError a -> Form FormError a
+--setFormError fieldError form =
+--    Form.update (createFieldValidation fieldError) Form.Validate form
+--
+--
+--createFieldValidation : ( String, String ) -> Validation FormError a
+--createFieldValidation ( fieldName, fieldError ) =
+--    V.field fieldName (V.fail (customError (ServerValidationError fieldError)))
+
+
+module Main exposing (..)

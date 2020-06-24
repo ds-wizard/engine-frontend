@@ -1,16 +1,16 @@
 module Wizard.KnowledgeModels.Import.FileImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Packages as PackagesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
-import Wizard.Ports exposing (FilePortData, createDropzone, fileSelected)
+import Wizard.Ports exposing (createDropzone, fileSelected)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 

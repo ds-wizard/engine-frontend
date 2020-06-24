@@ -1,8 +1,8 @@
 module Wizard.KMEditor.Migration.Msgs exposing (Msg(..))
 
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.Migration exposing (Migration)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.Migration exposing (Migration)
 
 
 type Msg

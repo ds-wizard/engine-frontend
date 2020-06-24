@@ -5,14 +5,14 @@ module Wizard.Users.Create.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Users.Common.UserCreateForm as UserCreateForm exposing (UserCreateForm)
 
 
 type alias Model =
     { savingUser : ActionResult String
-    , form : Form CustomFormError UserCreateForm
+    , form : Form FormError UserCreateForm
     }
 
 

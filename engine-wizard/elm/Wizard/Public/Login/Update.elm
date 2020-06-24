@@ -1,16 +1,17 @@
 module Wizard.Public.Login.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Json.Encode as E
+import Shared.Api.Tokens as TokensApi
+import Shared.Data.Token exposing (Token)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs
-import Wizard.Common.Api.Tokens as TokensApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken as JwtToken
 import Wizard.Msgs
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
-import Wizard.Utils exposing (dispatch)
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -23,8 +24,15 @@ update msg wrapMsg appState model =
             ( { model | password = password }, Cmd.none )
 
         DoLogin ->
+            let
+                body =
+                    E.object
+                        [ ( "email", E.string model.email )
+                        , ( "password", E.string model.password )
+                        ]
+            in
             ( { model | loggingIn = Loading }
-            , Cmd.map wrapMsg <| TokensApi.fetchToken model appState LoginCompleted
+            , Cmd.map wrapMsg <| TokensApi.fetchToken body appState LoginCompleted
             )
 
         LoginCompleted result ->
@@ -34,16 +42,11 @@ update msg wrapMsg appState model =
             ( { model | loggingIn = error }, Cmd.none )
 
 
-loginCompleted : AppState -> Model -> Result ApiError String -> ( Model, Cmd Wizard.Msgs.Msg )
+loginCompleted : AppState -> Model -> Result ApiError Token -> ( Model, Cmd Wizard.Msgs.Msg )
 loginCompleted appState model result =
     case result of
         Ok token ->
-            case JwtToken.parse token of
-                Just jwt ->
-                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.Token token jwt model.originalUrl) )
-
-                Nothing ->
-                    ( { model | loggingIn = Error <| lg "apiError.tokens.fetchTokenError" appState }, Cmd.none )
+            ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token model.originalUrl) )
 
         Err error ->
             ( { model | loggingIn = ApiError.toActionResult (lg "apiError.tokens.fetchTokenError" appState) error }, Cmd.none )

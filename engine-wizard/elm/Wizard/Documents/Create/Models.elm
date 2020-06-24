@@ -2,23 +2,24 @@ module Wizard.Documents.Create.Models exposing (..)
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.Template exposing (Template)
+import Shared.Form.FormError exposing (FormError)
+import Uuid exposing (Uuid)
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing (DocumentCreateForm)
-import Wizard.Documents.Common.Template exposing (Template)
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type alias Model =
     { questionnaires : ActionResult (List Questionnaire)
     , templates : ActionResult (List Template)
-    , form : Form CustomFormError DocumentCreateForm
+    , form : Form FormError DocumentCreateForm
     , savingDocument : ActionResult String
-    , lastFetchedTemplatesFor : Maybe String
-    , selectedQuestionnaire : Maybe String
+    , lastFetchedTemplatesFor : Maybe Uuid
+    , selectedQuestionnaire : Maybe Uuid
     }
 
 
-initialModel : Maybe String -> Model
+initialModel : Maybe Uuid -> Model
 initialModel selected =
     { questionnaires = Loading
     , templates = Unset

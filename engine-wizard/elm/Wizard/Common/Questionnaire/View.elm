@@ -10,9 +10,17 @@ import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
 import Roman exposing (toRomanNumber)
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lx)
+import Shared.Utils exposing (listInsertIf)
 import String exposing (fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.View exposing (FormRenderer, FormViewConfig, viewForm)
@@ -23,15 +31,6 @@ import Wizard.Common.Questionnaire.Views.FeedbackModal as FeedbackModal
 import Wizard.Common.Questionnaire.Views.SummaryReport as SummaryReport
 import Wizard.Common.Questionnaire.Views.Todos as Todos
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
-import Wizard.Questionnaires.Common.Questionnaire as Questionnaire
-import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
-import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -144,7 +143,7 @@ viewChapterAnsweredIndication : AppState -> Model -> Chapter -> Html Msg
 viewChapterAnsweredIndication appState model chapter =
     let
         effectiveLevel =
-            if appState.config.questionnaires.levels.enabled then
+            if appState.config.questionnaire.levels.enabled then
                 model.questionnaire.level
 
             else

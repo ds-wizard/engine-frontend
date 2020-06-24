@@ -1,15 +1,16 @@
 module Wizard.Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Users as UsersApi
+import Shared.Data.User as User
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Setters exposing (setUsers)
+import Uuid
 import Wizard.Common.Api exposing (applyResultTransform, getResultCmd)
-import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.Common.Setters exposing (setUsers)
 import Wizard.Msgs
-import Wizard.Users.Common.User as User
 import Wizard.Users.Index.Models exposing (Model)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
 
@@ -52,7 +53,7 @@ handleDeleteUser wrapMsg appState model =
         Just user ->
             ( { model | deletingUser = Loading }
             , Cmd.map wrapMsg <|
-                UsersApi.deleteUser user.uuid appState DeleteUserCompleted
+                UsersApi.deleteUser (Uuid.toString user.uuid) appState DeleteUserCompleted
             )
 
         _ ->

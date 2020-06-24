@@ -5,39 +5,26 @@ module Wizard.Common.FormEngine.Model exposing
     , FormItem(..)
     , FormItemDescriptor
     , FormTree
-    , FormValue
-    , FormValues
-    , IntegrationReplyValue(..)
     , ItemElement
     , Option(..)
     , OptionDescriptor
     , OptionElement(..)
-    , ReplyValue(..)
     , TypeHint
     , TypeHintConfig
     , TypeHints
     , createForm
     , createItemElement
-    , decodeFormValues
-    , decodeTypeHint
-    , encodeFormValues
-    , getAnswerUuid
     , getDescriptor
     , getFormValues
-    , getItemListCount
     , getOptionDescriptor
-    , getStringReply
-    , isEmptyReply
     , setTypeHintsResult
     )
 
 import ActionResult exposing (ActionResult)
 import Debounce exposing (Debounce)
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Extra exposing (when)
-import Json.Decode.Pipeline exposing (required)
-import Json.Encode as Encode exposing (..)
 import List.Extra as List
+import Shared.Data.QuestionnaireDetail.FormValue exposing (FormValue)
+import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import String exposing (fromInt)
 
 
@@ -121,184 +108,6 @@ type alias Form question option =
     }
 
 
-type ReplyValue
-    = StringReply String
-    | AnswerReply String
-    | ItemListReply Int
-    | EmptyReply
-    | IntegrationReply IntegrationReplyValue
-
-
-type IntegrationReplyValue
-    = PlainValue String
-    | IntegrationValue String String
-
-
-type alias FormValues =
-    List FormValue
-
-
-type alias FormValue =
-    { path : String
-    , value : ReplyValue
-    }
-
-
-
-{- Decoders and encoders -}
-
-
-decodeFormValues : Decoder FormValues
-decodeFormValues =
-    Decode.list decodeFormValue
-
-
-decodeFormValue : Decoder FormValue
-decodeFormValue =
-    Decode.succeed FormValue
-        |> required "path" Decode.string
-        |> required "value" decodeReplyValue
-
-
-decodeReplyValue : Decoder ReplyValue
-decodeReplyValue =
-    Decode.oneOf
-        [ when replyValueType ((==) "StringReply") decodeStringReply
-        , when replyValueType ((==) "AnswerReply") decodeAnswerReply
-        , when replyValueType ((==) "ItemListReply") decodeItemListReply
-        , when replyValueType ((==) "IntegrationReply") decodeIntegrationReply
-        ]
-
-
-replyValueType : Decoder String
-replyValueType =
-    Decode.field "type" Decode.string
-
-
-decodeStringReply : Decoder ReplyValue
-decodeStringReply =
-    Decode.succeed StringReply
-        |> required "value" Decode.string
-
-
-decodeAnswerReply : Decoder ReplyValue
-decodeAnswerReply =
-    Decode.succeed AnswerReply
-        |> required "value" Decode.string
-
-
-decodeItemListReply : Decoder ReplyValue
-decodeItemListReply =
-    Decode.succeed ItemListReply
-        |> required "value" Decode.int
-
-
-decodeIntegrationReply : Decoder ReplyValue
-decodeIntegrationReply =
-    Decode.succeed IntegrationReply
-        |> required "value" decodeIntegrationReplyValue
-
-
-decodeIntegrationReplyValue : Decoder IntegrationReplyValue
-decodeIntegrationReplyValue =
-    Decode.oneOf
-        [ when integrationValueType ((==) "PlainValue") decodePlainValue
-        , when integrationValueType ((==) "IntegrationValue") decodeIntegrationValue
-        ]
-
-
-decodePlainValue : Decoder IntegrationReplyValue
-decodePlainValue =
-    Decode.succeed PlainValue
-        |> required "value" Decode.string
-
-
-decodeIntegrationValue : Decoder IntegrationReplyValue
-decodeIntegrationValue =
-    Decode.succeed IntegrationValue
-        |> required "id" Decode.string
-        |> required "value" Decode.string
-
-
-integrationValueType : Decoder String
-integrationValueType =
-    Decode.field "type" Decode.string
-
-
-decodeTypeHint : Decoder TypeHint
-decodeTypeHint =
-    Decode.succeed TypeHint
-        |> required "id" Decode.string
-        |> required "name" Decode.string
-
-
-encodeFormValues : FormValues -> Encode.Value
-encodeFormValues formValues =
-    Encode.list encodeFormValue formValues
-
-
-encodeFormValue : FormValue -> Encode.Value
-encodeFormValue formValue =
-    Encode.object
-        [ ( "path", Encode.string formValue.path )
-        , ( "value", encodeReplyValue formValue.value )
-        ]
-
-
-encodeReplyValue : ReplyValue -> Encode.Value
-encodeReplyValue replyValue =
-    case replyValue of
-        StringReply string ->
-            Encode.object
-                [ ( "type", Encode.string "StringReply" )
-                , ( "value", Encode.string string )
-                ]
-
-        AnswerReply uuid ->
-            Encode.object
-                [ ( "type", Encode.string "AnswerReply" )
-                , ( "value", Encode.string uuid )
-                ]
-
-        ItemListReply count ->
-            Encode.object
-                [ ( "type", Encode.string "ItemListReply" )
-                , ( "value", Encode.int count )
-                ]
-
-        EmptyReply ->
-            Encode.null
-
-        IntegrationReply integrationReplyValue ->
-            case integrationReplyValue of
-                PlainValue value ->
-                    Encode.object
-                        [ ( "type", Encode.string "IntegrationReply" )
-                        , ( "value"
-                          , Encode.object
-                                [ ( "type", Encode.string "PlainValue" )
-                                , ( "value", Encode.string value )
-                                ]
-                          )
-                        ]
-
-                IntegrationValue id value ->
-                    Encode.object
-                        [ ( "type", Encode.string "IntegrationReply" )
-                        , ( "value"
-                          , Encode.object
-                                [ ( "type", Encode.string "IntegrationValue" )
-                                , ( "id", Encode.string id )
-                                , ( "value", Encode.string value )
-                                ]
-                          )
-                        ]
-
-
-
-{- Type helpers -}
-
-
 getOptionDescriptor : OptionElement question option -> OptionDescriptor option
 getOptionDescriptor option =
     case option of
@@ -331,54 +140,6 @@ getDescriptor element =
             descriptor
 
 
-getItemListCount : ReplyValue -> Int
-getItemListCount replyValue =
-    case replyValue of
-        ItemListReply count ->
-            count
-
-        _ ->
-            0
-
-
-getAnswerUuid : ReplyValue -> String
-getAnswerUuid replyValue =
-    case replyValue of
-        AnswerReply uuid ->
-            uuid
-
-        _ ->
-            ""
-
-
-getStringReply : ReplyValue -> String
-getStringReply replyValue =
-    case replyValue of
-        StringReply string ->
-            string
-
-        IntegrationReply integrationReplyValue ->
-            case integrationReplyValue of
-                PlainValue value ->
-                    value
-
-                IntegrationValue id value ->
-                    value
-
-        _ ->
-            ""
-
-
-isEmptyReply : ReplyValue -> Bool
-isEmptyReply replyValue =
-    case replyValue of
-        EmptyReply ->
-            True
-
-        _ ->
-            False
-
-
 setTypeHintsResult : ActionResult (List TypeHint) -> Form question option -> Form question option
 setTypeHintsResult typeHintsResult form =
     let
@@ -392,7 +153,7 @@ setTypeHintsResult typeHintsResult form =
 {- Form creation -}
 
 
-createForm : FormTree question option -> FormValues -> List String -> Form question option
+createForm : FormTree question option -> List FormValue -> List String -> Form question option
 createForm formTree formValues defaultPath =
     { elements = List.map createFormElement formTree.items |> List.map (setInitialValue formValues defaultPath)
     , typeHints = Nothing
@@ -442,7 +203,7 @@ createItemElement formItems =
     List.map createFormElement formItems
 
 
-setInitialValue : FormValues -> List String -> FormElement question option -> FormElement question option
+setInitialValue : List FormValue -> List String -> FormElement question option -> FormElement question option
 setInitialValue formValues path element =
     case element of
         StringFormElement descriptor state ->
@@ -465,7 +226,7 @@ setInitialValue formValues path element =
             let
                 numberOfItems =
                     getInitialValue formValues path descriptor.name
-                        |> Maybe.map getItemListCount
+                        |> Maybe.map ReplyValue.getItemListCount
                         |> Maybe.withDefault 0
 
                 newItemElements =
@@ -481,7 +242,7 @@ setInitialValue formValues path element =
             TypeHintFormElement descriptor typeHintConfig { state | value = getInitialValue formValues path descriptor.name }
 
 
-getInitialValue : FormValues -> List String -> String -> Maybe ReplyValue
+getInitialValue : List FormValue -> List String -> String -> Maybe ReplyValue
 getInitialValue formValues path current =
     let
         key =
@@ -491,7 +252,7 @@ getInitialValue formValues path current =
         |> Maybe.map .value
 
 
-setInitialValuesOption : FormValues -> List String -> OptionElement question option -> OptionElement question option
+setInitialValuesOption : List FormValue -> List String -> OptionElement question option -> OptionElement question option
 setInitialValuesOption formValues path option =
     case option of
         DetailedOptionElement descriptor items ->
@@ -501,7 +262,7 @@ setInitialValuesOption formValues path option =
             option
 
 
-setInitialValuesItems : FormValues -> List String -> Int -> ItemElement question option -> ItemElement question option
+setInitialValuesItems : List FormValue -> List String -> Int -> ItemElement question option -> ItemElement question option
 setInitialValuesItems formValues path index itemElement =
     List.map (setInitialValue formValues (path ++ [ fromInt index ])) itemElement
 
@@ -510,12 +271,12 @@ setInitialValuesItems formValues path index itemElement =
 {- getting form values -}
 
 
-getFormValues : List String -> Form question option -> FormValues
+getFormValues : List String -> Form question option -> List FormValue
 getFormValues defaultPath form =
     List.foldl (getFieldValue defaultPath) [] form.elements
 
 
-getFieldValue : List String -> FormElement question option -> FormValues -> FormValues
+getFieldValue : List String -> FormElement question option -> List FormValue -> List FormValue
 getFieldValue path element values =
     case element of
         StringFormElement descriptor state ->
@@ -545,7 +306,7 @@ getFieldValue path element values =
             applyFieldValue values (pathToKey path descriptor.name) state.value
 
 
-getOptionValues : List String -> OptionElement question option -> FormValues -> FormValues
+getOptionValues : List String -> OptionElement question option -> List FormValue -> List FormValue
 getOptionValues path option values =
     case option of
         DetailedOptionElement descriptor items ->
@@ -555,7 +316,7 @@ getOptionValues path option values =
             values
 
 
-getItemValues : List String -> Int -> ItemElement question option -> FormValues -> FormValues
+getItemValues : List String -> Int -> ItemElement question option -> List FormValue -> List FormValue
 getItemValues path index item values =
     List.foldl (getFieldValue (path ++ [ fromInt index ])) values item
 
@@ -565,7 +326,7 @@ pathToKey path current =
     String.join "." (path ++ [ current ])
 
 
-applyFieldValue : FormValues -> String -> Maybe ReplyValue -> FormValues
+applyFieldValue : List FormValue -> String -> Maybe ReplyValue -> List FormValue
 applyFieldValue values key replyValue =
     case replyValue of
         Just value ->

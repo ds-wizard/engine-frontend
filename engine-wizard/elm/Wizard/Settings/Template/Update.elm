@@ -3,13 +3,13 @@ module Wizard.Settings.Template.Update exposing
     , update
     )
 
+import Shared.Api.Templates as TemplatesApi
+import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig
+import Shared.Data.EditableConfig as EditableConfig
+import Shared.Setters exposing (setTemplates)
 import Wizard.Common.Api exposing (applyResult)
-import Wizard.Common.Api.Templates as TemplatesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.TemplateConfig as Template
-import Wizard.Common.Setters exposing (setTemplates)
 import Wizard.Msgs
-import Wizard.Settings.Common.EditableConfig as EditableConfig
 import Wizard.Settings.Generic.Update as GenericUpdate
 import Wizard.Settings.Template.Models exposing (Model)
 import Wizard.Settings.Template.Msgs exposing (Msg(..))
@@ -29,9 +29,9 @@ update wrapMsg msg appState model =
         GenericMsg genericMsg ->
             let
                 updateProps =
-                    { initForm = .template >> Template.initForm
+                    { initForm = .template >> TemplateConfig.initForm
                     , formToConfig = EditableConfig.updateTemplate
-                    , formValidation = Template.validation
+                    , formValidation = TemplateConfig.validation
                     }
 
                 ( genericModel, cmd ) =

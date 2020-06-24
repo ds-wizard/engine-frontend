@@ -1,9 +1,9 @@
 module Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 
 import Form
+import Shared.Data.Branch exposing (Branch)
+import Shared.Data.Package exposing (Package)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.KMEditor.Common.Branch exposing (Branch)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 
 
 type Msg

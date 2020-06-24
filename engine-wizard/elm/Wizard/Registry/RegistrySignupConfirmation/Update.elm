@@ -4,9 +4,9 @@ module Wizard.Registry.RegistrySignupConfirmation.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Registry as RegistryApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api.Registry as RegistryApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Registry.RegistrySignupConfirmation.Models exposing (Model)

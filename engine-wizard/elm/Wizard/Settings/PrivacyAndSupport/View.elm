@@ -3,10 +3,10 @@ module Wizard.Settings.PrivacyAndSupport.View exposing (view)
 import Form exposing (Form)
 import Html exposing (Html, div, h3)
 import Html.Attributes exposing (placeholder)
+import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Generic.Msgs exposing (Msg)
@@ -37,7 +37,7 @@ viewProps =
     }
 
 
-formView : AppState -> Form CustomFormError PrivacyAndSupportConfig -> Html Form.Msg
+formView : AppState -> Form FormError PrivacyAndSupportConfig -> Html Form.Msg
 formView appState form =
     div []
         [ h3 [] [ lx_ "section.privacy" appState ]

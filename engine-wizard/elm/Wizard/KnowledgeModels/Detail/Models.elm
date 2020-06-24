@@ -4,7 +4,7 @@ module Wizard.KnowledgeModels.Detail.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
+import Shared.Data.PackageDetail exposing (PackageDetail)
 
 
 type alias Model =

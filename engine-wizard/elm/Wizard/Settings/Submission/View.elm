@@ -7,19 +7,20 @@ import Html.Attributes exposing (class, placeholder)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Markdown
+import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
+import Shared.Data.Template exposing (Template)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Utils exposing (httpMethodOptions)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
-import Wizard.Documents.Common.Template exposing (Template)
-import Wizard.Settings.Common.EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Submission.Models exposing (Model)
 import Wizard.Settings.Submission.Msgs exposing (Msg(..))
-import Wizard.Utils exposing (httpMethodOptions)
 
 
 l_ : String -> AppState -> String
@@ -51,7 +52,7 @@ viewProps templates =
     }
 
 
-formView : List Template -> AppState -> Form CustomFormError EditableSubmissionConfig -> Html Form.Msg
+formView : List Template -> AppState -> Form FormError EditableSubmissionConfig -> Html Form.Msg
 formView templates appState form =
     let
         enabled =
@@ -71,7 +72,7 @@ formView templates appState form =
         ]
 
 
-serviceFormView : AppState -> List Template -> Form CustomFormError EditableSubmissionConfig -> Int -> Html Form.Msg
+serviceFormView : AppState -> List Template -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 serviceFormView appState templates form i =
     let
         field name =
@@ -124,7 +125,7 @@ serviceFormView appState templates form i =
         ]
 
 
-supportedFormatFormView : AppState -> List Template -> String -> Form CustomFormError EditableSubmissionConfig -> Int -> Html Form.Msg
+supportedFormatFormView : AppState -> List Template -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 supportedFormatFormView appState templates prefix form index =
     let
         field name =
@@ -146,12 +147,12 @@ supportedFormatFormView appState templates prefix form index =
             ( "", "--" )
 
         templateOptions =
-            defaultOption :: List.map (\t -> ( t.uuid, t.name )) templates
+            defaultOption :: List.map (\t -> ( Uuid.toString t.uuid, t.name )) templates
 
         formatOptions =
             templateUuidField.value
-                |> Maybe.andThen (\uuid -> List.find (.uuid >> (==) uuid) templates)
-                |> Maybe.map (.formats >> List.map (\f -> ( f.uuid, f.name )) >> (::) defaultOption)
+                |> Maybe.andThen (\uuid -> List.find (.uuid >> Uuid.toString >> (==) uuid) templates)
+                |> Maybe.map (.formats >> List.map (\f -> ( Uuid.toString f.uuid, f.name )) >> (::) defaultOption)
                 |> Maybe.withDefault []
     in
     div [ class "input-group mb-2" ]
@@ -166,7 +167,7 @@ supportedFormatFormView appState templates prefix form index =
         ]
 
 
-propFormView : AppState -> String -> Form CustomFormError EditableSubmissionConfig -> Int -> Html Form.Msg
+propFormView : AppState -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 propFormView appState prefix form index =
     let
         field =
@@ -181,7 +182,7 @@ propFormView appState prefix form index =
         ]
 
 
-requestFormView : AppState -> Form CustomFormError EditableSubmissionConfig -> String -> Html Form.Msg
+requestFormView : AppState -> Form FormError EditableSubmissionConfig -> String -> Html Form.Msg
 requestFormView appState form prefix =
     let
         field name =
@@ -227,7 +228,7 @@ requestFormView appState form prefix =
         ]
 
 
-headerFormView : AppState -> String -> Form CustomFormError EditableSubmissionConfig -> Int -> Html Form.Msg
+headerFormView : AppState -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 headerFormView appState prefix form index =
     let
         field name =

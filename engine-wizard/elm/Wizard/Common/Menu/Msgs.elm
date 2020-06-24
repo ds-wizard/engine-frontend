@@ -1,8 +1,8 @@
 module Wizard.Common.Menu.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
+import Shared.Data.BuildInfo exposing (BuildInfo)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Common.Menu.Models exposing (BuildInfo)
 
 
 type Msg

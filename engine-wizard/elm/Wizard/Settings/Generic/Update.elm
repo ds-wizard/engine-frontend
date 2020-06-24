@@ -7,23 +7,23 @@ module Wizard.Settings.Generic.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate exposing (Validation)
+import Shared.Api.Configs as ConfigsApi
+import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (ToMsg, getResultCmd)
-import Wizard.Common.Api.Configs as ConfigsApi
+import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Msgs
 import Wizard.Ports as Ports
-import Wizard.Settings.Common.EditableConfig as EditableConfig exposing (EditableConfig)
 import Wizard.Settings.Generic.Model exposing (Model)
 import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 
 
 type alias UpdateProps form =
-    { initForm : EditableConfig -> Form CustomFormError form
+    { initForm : EditableConfig -> Form FormError form
     , formToConfig : form -> EditableConfig -> EditableConfig
-    , formValidation : Validation CustomFormError form
+    , formValidation : Validation FormError form
     }
 
 

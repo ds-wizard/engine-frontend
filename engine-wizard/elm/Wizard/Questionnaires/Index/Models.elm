@@ -4,10 +4,10 @@ module Wizard.Questionnaires.Index.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Wizard.Common.Components.Listing.Models as Listing
-import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Models as DeleteQuestionnaireModal
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type alias Model =

@@ -9,8 +9,8 @@ module Wizard.Settings.Common.Forms.AuthenticationConfigForm exposing
 import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Settings.Common.EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
+import Shared.Data.EditableConfig.EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.Settings.Common.Forms.OpenIDServiceConfigForm as OpenIDServiceConfigForm exposing (OpenIDServiceConfigForm)
 
 
@@ -21,17 +21,17 @@ type alias AuthenticationConfigForm =
     }
 
 
-initEmpty : Form CustomFormError AuthenticationConfigForm
+initEmpty : Form FormError AuthenticationConfigForm
 initEmpty =
     Form.initial [] validation
 
 
-init : EditableAuthenticationConfig -> Form CustomFormError AuthenticationConfigForm
+init : EditableAuthenticationConfig -> Form FormError AuthenticationConfigForm
 init config =
     Form.initial (configToFormInitials config) validation
 
 
-validation : Validation CustomFormError AuthenticationConfigForm
+validation : Validation FormError AuthenticationConfigForm
 validation =
     V.succeed AuthenticationConfigForm
         |> V.andMap (V.field "defaultRole" V.string)

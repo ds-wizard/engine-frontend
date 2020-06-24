@@ -5,26 +5,27 @@ module Wizard.Questionnaires.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Levels as LevelsApi
+import Shared.Api.Metrics as MetricsApi
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (l, lg, lgf)
+import Shared.Setters exposing (setLevels, setMetrics, setQuestionnaireDetail)
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
-import Wizard.Common.Api.Levels as LevelsApi
-import Wizard.Common.Api.Metrics as MetricsApi
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Pagination.PaginationQueryString as PaginationQueryString
 import Wizard.Common.Questionnaire.Models exposing (cleanDirty, initialModel, updateReplies)
 import Wizard.Common.Questionnaire.Msgs
 import Wizard.Common.Questionnaire.Update
-import Wizard.Common.Setters exposing (setLevels, setMetrics, setQuestionnaireDetail)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModalMsgs
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Update as DeleteQuestionnaireModal
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Detail.Models exposing (Model, isDirty)
 import Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
@@ -37,7 +38,7 @@ l_ =
     l "Wizard.Questionnaires.Detail.Update"
 
 
-fetchData : AppState -> String -> Cmd Msg
+fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
     Cmd.batch
         [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted

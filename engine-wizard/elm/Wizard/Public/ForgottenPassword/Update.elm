@@ -2,11 +2,11 @@ module Wizard.Public.ForgottenPassword.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Shared.Api.ActionKeys as ActionKeysApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form exposing (setFormErrors)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api.ActionKeys as ActionKeysApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (setFormErrors)
 import Wizard.Msgs
 import Wizard.Public.Common.ForgottenPasswordForm as ForgottenPasswordForm
 import Wizard.Public.ForgottenPassword.Models exposing (..)

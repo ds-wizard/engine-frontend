@@ -1,10 +1,10 @@
 module Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 
+import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.KMEditor.Editor.KMEditor.Msgs
 import Wizard.KMEditor.Editor.Models exposing (EditorType)
 import Wizard.KMEditor.Editor.Preview.Msgs

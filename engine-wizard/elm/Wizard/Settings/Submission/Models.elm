@@ -1,8 +1,8 @@
 module Wizard.Settings.Submission.Models exposing (..)
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Documents.Common.Template exposing (Template)
-import Wizard.Settings.Common.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
+import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
+import Shared.Data.Template exposing (Template)
 import Wizard.Settings.Generic.Model as GenericModel
 
 

@@ -1,7 +1,6 @@
 module Wizard.KnowledgeModels.Import.RegistryImport.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 
 
 type alias Model =

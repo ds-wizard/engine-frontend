@@ -2,15 +2,16 @@ module Wizard.Questionnaires.Detail.Models exposing (Model, initialModel, isDirt
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Uuid exposing (Uuid)
 import Wizard.Common.Questionnaire.Models
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Models as DeleteQuestionnaireModal
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 
 
 type alias Model =
-    { uuid : String
+    { uuid : Uuid
     , questionnaireModel : ActionResult Wizard.Common.Questionnaire.Models.Model
     , questionnaireDetail : ActionResult QuestionnaireDetail
     , levels : ActionResult (List Level)
@@ -22,7 +23,7 @@ type alias Model =
     }
 
 
-initialModel : String -> Model
+initialModel : Uuid -> Model
 initialModel uuid =
     { uuid = uuid
     , questionnaireModel = Loading

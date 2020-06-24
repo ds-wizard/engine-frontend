@@ -1,10 +1,10 @@
 module Wizard.Questionnaires.Migration.Msgs exposing (Msg(..))
 
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError exposing (ApiError)
 import Wizard.Common.Questionnaire.Msgs
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.Questionnaires.Common.QuestionChange exposing (QuestionChange)
-import Wizard.Questionnaires.Common.QuestionnaireMigration exposing (QuestionnaireMigration)
 
 
 type Msg

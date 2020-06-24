@@ -2,9 +2,9 @@ module Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
 import Debouncer.Extra as Debouncer
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Common.Pagination.Pagination exposing (Pagination)
-import Wizard.Common.Pagination.PaginationQueryString exposing (PaginationQueryString)
 
 
 type Msg a

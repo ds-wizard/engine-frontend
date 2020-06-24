@@ -12,21 +12,21 @@ import Html.Attributes exposing (class, href, target)
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Expert exposing (Expert)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
+import Shared.Data.KnowledgeModel.Reference exposing (Reference(..))
+import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
+import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.View exposing (FormRenderer)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage)
-import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
-import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question)
-import Wizard.KMEditor.Common.KnowledgeModel.Reference exposing (Reference(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
-import Wizard.KMEditor.Common.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 
 
 l_ : String -> AppState -> String

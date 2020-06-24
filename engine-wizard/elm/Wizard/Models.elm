@@ -2,7 +2,6 @@ module Wizard.Models exposing
     ( Model
     , initLocalModel
     , initialModel
-    , setJwt
     , setRoute
     , setSeed
     , setSession
@@ -10,10 +9,9 @@ module Wizard.Models exposing
     )
 
 import Random exposing (Seed)
+import Shared.Auth.Session as Session exposing (Session)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Common.Menu.Models
-import Wizard.Common.Session as Session exposing (Session)
 import Wizard.Dashboard.Models
 import Wizard.Documents.Models
 import Wizard.KMEditor.Models
@@ -65,18 +63,6 @@ setSession session model =
 
         newState =
             { appState | session = session }
-    in
-    { model | appState = newState }
-
-
-setJwt : Maybe JwtToken -> Model -> Model
-setJwt jwt model =
-    let
-        appState =
-            model.appState
-
-        newState =
-            { appState | jwt = jwt }
     in
     { model | appState = newState }
 

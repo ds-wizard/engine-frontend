@@ -1,7 +1,7 @@
 module Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model, initialModel)
 
+import Shared.Data.BootstrapConfig.KnowledgeModelRegistryConfig exposing (KnowledgeModelRegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.KnowledgeModelRegistryConfig exposing (KnowledgeModelRegistryConfig(..))
 import Wizard.KnowledgeModels.Import.FileImport.Models as FileImportModels
 import Wizard.KnowledgeModels.Import.RegistryImport.Models as RegistryImportModels
 

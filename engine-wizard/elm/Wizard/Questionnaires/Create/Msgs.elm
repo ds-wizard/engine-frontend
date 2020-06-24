@@ -1,10 +1,10 @@
 module Wizard.Questionnaires.Create.Msgs exposing (Msg(..))
 
 import Form
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type Msg

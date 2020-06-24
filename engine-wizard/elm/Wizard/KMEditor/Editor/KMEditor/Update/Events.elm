@@ -29,19 +29,20 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
 
 import Dict
 import Random exposing (Seed)
-import Wizard.KMEditor.Common.Events.AddQuestionEventData exposing (AddQuestionEventData(..))
-import Wizard.KMEditor.Common.Events.AddReferenceEventData exposing (AddReferenceEventData(..))
-import Wizard.KMEditor.Common.Events.CommonEventData exposing (CommonEventData)
-import Wizard.KMEditor.Common.Events.EditQuestionEventData exposing (EditQuestionEventData(..))
-import Wizard.KMEditor.Common.Events.EditReferenceEventData exposing (EditReferenceEventData(..))
-import Wizard.KMEditor.Common.Events.Event exposing (Event(..))
-import Wizard.KMEditor.Common.Events.EventField as EventField
-import Wizard.KMEditor.Common.Events.MoveEventData exposing (MoveEventData)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
-import Wizard.KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Shared.Data.Event exposing (Event(..))
+import Shared.Data.Event.AddQuestionEventData exposing (AddQuestionEventData(..))
+import Shared.Data.Event.AddReferenceEventData exposing (AddReferenceEventData(..))
+import Shared.Data.Event.CommonEventData exposing (CommonEventData)
+import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
+import Shared.Data.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
+import Shared.Data.Event.EventField as EventField
+import Shared.Data.Event.MoveEventData exposing (MoveEventData)
+import Shared.Data.KnowledgeModel.Question as Question
+import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Shared.Utils exposing (getUuid)
+import Uuid
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (..)
-import Wizard.Utils exposing (getUuid)
 
 
 createEditKnowledgeModelEvent : KnowledgeModelForm -> KMEditorData -> Seed -> ( Event, Seed )
@@ -54,7 +55,7 @@ createEditKnowledgeModelEvent form editorData =
             , integrationUuids = EventField.create editorData.integrations.list editorData.integrations.dirty
             }
     in
-    createEvent (EditKnowledgeModelEvent data) editorData.knowledgeModel.uuid editorData.parentUuid
+    createEvent (EditKnowledgeModelEvent data) (Uuid.toString editorData.knowledgeModel.uuid) editorData.parentUuid
 
 
 createAddChapterEvent : ChapterForm -> ChapterEditorData -> Seed -> ( Event, Seed )

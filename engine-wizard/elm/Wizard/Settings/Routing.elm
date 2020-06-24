@@ -4,11 +4,11 @@ module Wizard.Settings.Routing exposing
     , toUrl
     )
 
+import Shared.Auth.Permission as Perm
+import Shared.Auth.Session exposing (Session)
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Settings.Routes exposing (Route(..))
 
 
@@ -65,6 +65,6 @@ toUrl appState route =
             [ moduleRoot, lr "settings.template" appState ]
 
 
-isAllowed : Route -> Maybe JwtToken -> Bool
-isAllowed _ maybeJwt =
-    hasPerm maybeJwt Perm.settings
+isAllowed : Route -> Session -> Bool
+isAllowed _ session =
+    Perm.hasPerm session Perm.settings

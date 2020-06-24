@@ -66,21 +66,22 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
 
 import Dict exposing (Dict)
 import Form exposing (Form)
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Expert exposing (Expert)
+import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
+import Shared.Form.FormError exposing (FormError)
+import Shared.Utils exposing (nilUuid)
 import String.Format exposing (format)
+import Uuid
 import ValueList exposing (ValueList)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.KMEditor.Common.KnowledgeModel.Expert exposing (Expert)
-import Wizard.KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Reference as Reference exposing (Reference)
-import Wizard.KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (..)
-import Wizard.Utils exposing (nilUuid)
 
 
 type EditorState
@@ -115,7 +116,7 @@ type alias EditorLike editorData e form =
 type alias KMEditorData =
     { uuid : String
     , knowledgeModel : KnowledgeModel
-    , form : Form CustomFormError KnowledgeModelForm
+    , form : Form FormError KnowledgeModelForm
     , chapters : Children
     , tags : Children
     , integrations : Children
@@ -128,7 +129,7 @@ type alias KMEditorData =
 type alias TagEditorData =
     { uuid : String
     , tag : Tag
-    , form : Form CustomFormError TagForm
+    , form : Form FormError TagForm
     , treeOpen : Bool
     , editorState : EditorState
     , parentUuid : String
@@ -138,7 +139,7 @@ type alias TagEditorData =
 type alias IntegrationEditorData =
     { uuid : String
     , integration : Integration
-    , form : Form CustomFormError IntegrationForm
+    , form : Form FormError IntegrationForm
     , treeOpen : Bool
     , editorState : EditorState
     , parentUuid : String
@@ -150,7 +151,7 @@ type alias IntegrationEditorData =
 type alias ChapterEditorData =
     { uuid : String
     , chapter : Chapter
-    , form : Form CustomFormError ChapterForm
+    , form : Form FormError ChapterForm
     , questions : Children
     , treeOpen : Bool
     , editorState : EditorState
@@ -161,7 +162,7 @@ type alias ChapterEditorData =
 type alias QuestionEditorData =
     { uuid : String
     , question : Question
-    , form : Form CustomFormError QuestionForm
+    , form : Form FormError QuestionForm
     , tagUuids : List String
     , answers : Children
     , itemTemplateQuestions : Children
@@ -176,7 +177,7 @@ type alias QuestionEditorData =
 type alias AnswerEditorData =
     { uuid : String
     , answer : Answer
-    , form : Form CustomFormError AnswerForm
+    , form : Form FormError AnswerForm
     , followUps : Children
     , treeOpen : Bool
     , editorState : EditorState
@@ -187,7 +188,7 @@ type alias AnswerEditorData =
 type alias ReferenceEditorData =
     { uuid : String
     , reference : Reference
-    , form : Form CustomFormError ReferenceForm
+    , form : Form FormError ReferenceForm
     , treeOpen : Bool
     , editorState : EditorState
     , parentUuid : String
@@ -197,7 +198,7 @@ type alias ReferenceEditorData =
 type alias ExpertEditorData =
     { uuid : String
     , expert : Expert
-    , form : Form CustomFormError ExpertForm
+    , form : Form FormError ExpertForm
     , treeOpen : Bool
     , editorState : EditorState
     , parentUuid : String
@@ -222,27 +223,27 @@ createKnowledgeModelEditor editorContext mbActiveEditorUuid getEditorState km ed
 
         editor =
             KMEditor
-                { uuid = km.uuid
+                { uuid = Uuid.toString km.uuid
                 , knowledgeModel = km
                 , form = initKnowledgeModelFrom km
                 , chapters = Children.init <| List.map .uuid chapters
                 , tags = Children.init <| List.map .uuid tags
                 , integrations = Children.init <| List.map .uuid integrations
                 , treeOpen = True
-                , editorState = getEditorState km.uuid
+                , editorState = getEditorState (Uuid.toString km.uuid)
                 , parentUuid = nilUuid
                 }
 
         withChapters =
-            List.foldl (createChapterEditor integrations editorContext km.uuid getEditorState km) editors chapters
+            List.foldl (createChapterEditor integrations editorContext (Uuid.toString km.uuid) getEditorState km) editors chapters
 
         withTags =
-            List.foldl (createTagEditor editorContext km.uuid getEditorState km) withChapters tags
+            List.foldl (createTagEditor editorContext (Uuid.toString km.uuid) getEditorState km) withChapters tags
 
         withIntegrations =
-            List.foldl (createIntegrationEditor editorContext km.uuid getEditorState km) withTags integrations
+            List.foldl (createIntegrationEditor editorContext (Uuid.toString km.uuid) getEditorState km) withTags integrations
     in
-    openActiveEditorPath mbActiveEditorUuid <| Dict.insert km.uuid editor withIntegrations
+    openActiveEditorPath mbActiveEditorUuid <| Dict.insert (Uuid.toString km.uuid) editor withIntegrations
 
 
 openActiveEditorPath : Maybe String -> Dict String Editor -> Dict String Editor
@@ -547,7 +548,7 @@ getEditorUuid : Editor -> String
 getEditorUuid editor =
     case editor of
         KMEditor data ->
-            data.knowledgeModel.uuid
+            Uuid.toString data.knowledgeModel.uuid
 
         ChapterEditor data ->
             data.chapter.uuid

@@ -1,16 +1,14 @@
 module Wizard.Public.Auth.Update exposing (..)
 
-import ActionResult exposing (ActionResult(..))
+import Shared.Api.Auth as AuthApi
 import Shared.Error.ApiError as ApiError
 import Shared.Locale exposing (lg)
+import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs
-import Wizard.Common.Api.Auth as AuthApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken as JwtToken
 import Wizard.Msgs
 import Wizard.Public.Auth.Models exposing (Model)
 import Wizard.Public.Auth.Msgs exposing (Msg(..))
-import Wizard.Utils exposing (dispatch)
 
 
 fetchData : String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
@@ -24,12 +22,7 @@ update msg appState model =
         AuthenticationCompleted result ->
             case result of
                 Ok token ->
-                    case JwtToken.parse token of
-                        Just jwt ->
-                            ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.Token token jwt Nothing) )
-
-                        Nothing ->
-                            ( { model | authenticating = Error "It failed" }, Cmd.none )
+                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token Nothing) )
 
                 Err error ->
                     ( { model | authenticating = ApiError.toActionResult (lg "apiError.tokens.fetchTokenError" appState) error }, Cmd.none )

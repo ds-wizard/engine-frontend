@@ -1,30 +1,28 @@
 module Wizard.Auth.Update exposing (update)
 
+import Shared.Api.Users as UsersApi
+import Shared.Auth.Session as Session
+import Shared.Data.User as User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs as AuthMsgs
-import Wizard.Common.Api.Users as UsersApi
-import Wizard.Common.Session as Session
-import Wizard.Models exposing (Model, setJwt, setSession)
+import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
 import Wizard.Public.Login.Msgs
 import Wizard.Public.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate, cmdNavigateRaw, homeRoute)
-import Wizard.Users.Common.User as User exposing (User)
-import Wizard.Utils exposing (dispatch)
 
 
 update : AuthMsgs.Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AuthMsgs.Token token jwt mbOriginalUrl ->
+        AuthMsgs.GotToken token mbOriginalUrl ->
             let
                 newModel =
-                    model
-                        |> setSession (Session.setToken model.appState.session token)
-                        |> setJwt (Just jwt)
+                    setSession (Session.setToken model.appState.session token) model
             in
             ( newModel
             , UsersApi.getCurrentUser newModel.appState (AuthMsgs.GetCurrentUserCompleted mbOriginalUrl >> Wizard.Msgs.AuthMsg)
@@ -55,7 +53,7 @@ getCurrentUserCompleted model mbOriginalUrl result =
             in
             ( setSession session model
             , Cmd.batch
-                [ Ports.storeSession <| Just session
+                [ Ports.storeSession <| Session.encode session
                 , cmd
                 ]
             )

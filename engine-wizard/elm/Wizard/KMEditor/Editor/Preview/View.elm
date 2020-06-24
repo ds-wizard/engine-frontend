@@ -3,6 +3,8 @@ module Wizard.KMEditor.Editor.Preview.View exposing (view)
 import Html exposing (Html, a, div, strong)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Shared.Data.KnowledgeModel as KnowledgeModels
+import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lgx, lx)
 import Wizard.Common.AppState exposing (AppState)
@@ -10,8 +12,6 @@ import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaul
 import Wizard.Common.Questionnaire.Models
 import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
 import Wizard.Common.View.Tag as Tag
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModels
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
 import Wizard.KMEditor.Editor.Preview.Models exposing (Model)
 import Wizard.KMEditor.Editor.Preview.Msgs exposing (Msg(..))
 
@@ -33,7 +33,7 @@ view appState levels model =
             viewQuestionnaire
                 { features = []
                 , levels =
-                    if appState.config.questionnaires.levels.enabled then
+                    if appState.config.questionnaire.levels.enabled then
                         Just levels
 
                     else

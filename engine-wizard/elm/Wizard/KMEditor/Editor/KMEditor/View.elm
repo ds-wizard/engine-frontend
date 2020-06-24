@@ -7,6 +7,7 @@ import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l)
 import SplitPane exposing (ViewConfig, createViewConfig)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal exposing (AlertConfig)
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
@@ -35,7 +36,7 @@ view appState model =
 
         moveModalViewProps =
             { editors = model.editors
-            , kmUuid = model.knowledgeModel.uuid
+            , kmUuid = Uuid.toString model.knowledgeModel.uuid
             , movingUuid = Maybe.withDefault "" model.activeEditorUuid
             }
     in
@@ -59,7 +60,7 @@ viewConfig =
 viewTree : AppState -> Model -> Html Msg
 viewTree appState model =
     div [ class "tree-col" ]
-        [ treeView appState (Maybe.withDefault "" model.activeEditorUuid) model.editors model.knowledgeModel.uuid
+        [ treeView appState (Maybe.withDefault "" model.activeEditorUuid) model.editors (Uuid.toString model.knowledgeModel.uuid)
         ]
 
 

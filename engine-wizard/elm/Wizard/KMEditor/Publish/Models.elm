@@ -5,16 +5,16 @@ module Wizard.KMEditor.Publish.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Form.FormError exposing (FormError)
 import String
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
 import Wizard.KMEditor.Common.BranchPublishForm as BranchPublishForm exposing (BranchPublishForm)
 
 
 type alias Model =
     { branch : ActionResult BranchDetail
     , publishingBranch : ActionResult String
-    , form : Form CustomFormError BranchPublishForm
+    , form : Form FormError BranchPublishForm
     }
 
 

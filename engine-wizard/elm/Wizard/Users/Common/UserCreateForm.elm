@@ -5,9 +5,9 @@ import Form.Field as Field
 import Form.Validate as V exposing (..)
 import Json.Encode as E exposing (..)
 import Json.Encode.Extra as E
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate as V
 
 
 type alias UserCreateForm =
@@ -20,7 +20,7 @@ type alias UserCreateForm =
     }
 
 
-init : AppState -> Form CustomFormError UserCreateForm
+init : AppState -> Form FormError UserCreateForm
 init appState =
     let
         fields =
@@ -29,7 +29,7 @@ init appState =
     Form.initial fields validation
 
 
-validation : Validation CustomFormError UserCreateForm
+validation : Validation FormError UserCreateForm
 validation =
     V.succeed UserCreateForm
         |> V.andMap (V.field "email" V.email)

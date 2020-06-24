@@ -1,8 +1,8 @@
 module Wizard.Settings.Dashboard.Update exposing (..)
 
+import Shared.Data.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Settings.Common.EditableConfig as EditableConfig
 import Wizard.Settings.Common.Forms.DashboardConfigForm as DashboardConfigForm exposing (DashboardConfigForm)
 import Wizard.Settings.Dashboard.Models exposing (Model)
 import Wizard.Settings.Generic.Msgs exposing (Msg)

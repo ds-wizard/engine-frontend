@@ -1,4 +1,7 @@
-module Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState, decoder)
+module Shared.Data.Questionnaire.QuestionnaireState exposing
+    ( QuestionnaireState(..)
+    , decoder
+    )
 
 import Json.Decode as D exposing (Decoder)
 

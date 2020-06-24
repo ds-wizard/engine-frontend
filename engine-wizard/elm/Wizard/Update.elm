@@ -2,11 +2,11 @@ module Wizard.Update exposing (fetchData, update)
 
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
+import Shared.Auth.Session as Session
 import Url exposing (Url)
 import Wizard.Auth.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Menu.Update
-import Wizard.Common.Session as Session
 import Wizard.Common.Time as Time
 import Wizard.Dashboard.Update
 import Wizard.Documents.Update
@@ -126,7 +126,7 @@ update msg model =
                 newModel =
                     setSession newSession model
             in
-            ( newModel, Ports.storeSession <| Just newSession )
+            ( newModel, Ports.storeSession <| Session.encode newSession )
 
         Wizard.Msgs.MenuMsg menuMsg ->
             let

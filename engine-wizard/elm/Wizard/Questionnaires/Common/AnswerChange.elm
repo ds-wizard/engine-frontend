@@ -1,6 +1,6 @@
 module Wizard.Questionnaires.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData, getAnswerUuid)
 
-import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 
 
 type AnswerChange
