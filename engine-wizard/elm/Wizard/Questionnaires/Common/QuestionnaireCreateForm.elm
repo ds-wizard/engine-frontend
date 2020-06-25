@@ -49,5 +49,5 @@ encode tagUuids form =
         , ( "packageId", E.string form.packageId )
         , ( "visibility", QuestionnaireVisibility.encode form.visibility )
         , ( "tagUuids", E.list E.string tagUuids )
-        , ( "templateUuid", E.maybe E.string Nothing )
+        , ( "templateId", E.maybe E.string Nothing )
         ]

@@ -23,7 +23,7 @@ import WizardResearch.Common.AppState exposing (AppState)
 
 type alias ProjectCreateForm =
     { name : String
-    , templateUuid : String
+    , templateId : String
     , packageId : String
     , tagUuids : List String
     }
@@ -51,7 +51,7 @@ validation tags =
     in
     V.succeed ProjectCreateForm
         |> V.andMap (V.field "name" V.string)
-        |> V.andMap (V.field "templateUuid" V.string)
+        |> V.andMap (V.field "templateId" V.string)
         |> V.andMap (V.field "packageId" V.string)
         |> V.andMap (V.field "tagUuids" validateTagUuids)
 
@@ -65,7 +65,7 @@ encode : AppState -> ProjectCreateForm -> E.Value
 encode appState form =
     E.object
         [ ( "name", E.string form.name )
-        , ( "templateUuid", E.string form.templateUuid )
+        , ( "templateId", E.string form.templateId )
         , ( "packageId", E.string form.packageId )
         , ( "tagUuids", E.list E.string form.tagUuids )
         , ( "visibility", QuestionnaireVisibility.encode appState.config.questionnaire.questionnaireVisibility.defaultValue )
@@ -73,21 +73,21 @@ encode appState form =
 
 
 selectRecommendedOrFirstTemplate : List Tag -> List Template -> Maybe String -> Form FormError ProjectCreateForm -> Form FormError ProjectCreateForm
-selectRecommendedOrFirstTemplate tags templates mbRecommendedTemplateUuid form =
+selectRecommendedOrFirstTemplate tags templates mbRecommendedTemplateId form =
     let
-        mbTemplateUuid =
-            case mbRecommendedTemplateUuid of
+        mbTemplateId =
+            case mbRecommendedTemplateId of
                 Just uuid ->
                     Just uuid
 
                 Nothing ->
-                    Maybe.map (Uuid.toString << .uuid) (List.head templates)
+                    Maybe.map .id (List.head templates)
     in
-    case mbTemplateUuid of
-        Just templateUuid ->
+    case mbTemplateId of
+        Just templateId ->
             let
                 msg =
-                    Form.Input "templateUuid" Form.Text (Field.String templateUuid)
+                    Form.Input "templateId" Form.Text (Field.String templateId)
             in
             Form.update (validation tags) msg form
 
@@ -99,8 +99,8 @@ selectRecommendedPackage : List Tag -> List Template -> Form FormError ProjectCr
 selectRecommendedPackage tags templates form =
     let
         mbTemplate =
-            (Form.getFieldAsString "templateUuid" form).value
-                |> Maybe.andThen (Template.findByUuid templates)
+            (Form.getFieldAsString "templateId" form).value
+                |> Maybe.andThen (Template.findById templates)
     in
     case mbTemplate of
         Just template ->

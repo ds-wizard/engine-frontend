@@ -730,7 +730,7 @@ locale =
                , ( "Wizard.Settings.Submission.View.form.value", "Value" )
                , ( "Wizard.Settings.Submission.View.title", "Document Submission" )
                , ( "Wizard.Settings.Submission.View.save", "Save" )
-               , ( "Wizard.Settings.Template.View.form.recommendedTemplateUuid", "Recommended Template" )
+               , ( "Wizard.Settings.Template.View.form.recommendedTemplateId", "Recommended Template" )
                , ( "Wizard.Settings.Template.View.title", "Document Templates" )
                , ( "Wizard.Settings.Template.View.save", "Save" )
                , ( "Wizard.Settings.View.navigation.authentication", "Authentication" )

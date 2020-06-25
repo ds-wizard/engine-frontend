@@ -89,31 +89,31 @@ formView appState model questionnaires =
             case model.templates of
                 Success templates ->
                     let
-                        createTemplateOption { uuid, name } =
+                        createTemplateOption { id, name } =
                             let
                                 visibleName =
-                                    if appState.config.template.recommendedTemplateUuid == Just (Uuid.toString uuid) then
+                                    if appState.config.template.recommendedTemplateId == Just id then
                                         name ++ " (" ++ l_ "template.recommended" appState ++ ")"
 
                                     else
                                         name
                             in
-                            ( Uuid.toString uuid, visibleName )
+                            ( id, visibleName )
 
                         templateOptions =
                             ( "", "--" ) :: (List.map createTemplateOption <| List.sortBy (String.toLower << .name) templates)
                     in
-                    FormGroup.select appState templateOptions model.form "templateUuid" <| lg "template" appState
+                    FormGroup.select appState templateOptions model.form "templateId" <| lg "template" appState
 
                 _ ->
                     Flash.actionResult appState model.templates
 
-        mbSelectedTemplateUuid =
-            (Form.getFieldAsString "templateUuid" model.form).value
+        mbSelectedTemplateId =
+            (Form.getFieldAsString "templateId" model.form).value
 
         mbSelectedTemplate =
             model.templates
-                |> ActionResult.map (List.find (.uuid >> Uuid.toString >> Just >> (==) mbSelectedTemplateUuid))
+                |> ActionResult.map (List.find (.id >> Just >> (==) mbSelectedTemplateId))
                 |> ActionResult.withDefault Nothing
 
         formatInput =

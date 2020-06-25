@@ -124,7 +124,7 @@ handleGetTemplatesCompleted appState model result =
                                     identity
                     in
                     newModel.form
-                        |> Form.update DocumentCreateForm.validation (Form.Input "templateUuid" Form.Text (Field.String (Uuid.toString template.uuid)))
+                        |> Form.update DocumentCreateForm.validation (Form.Input "templateId" Form.Text (Field.String template.id))
                         |> setFormat
 
                 _ ->

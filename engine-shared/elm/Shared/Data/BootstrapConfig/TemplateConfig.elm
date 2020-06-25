@@ -20,13 +20,13 @@ import Shared.Form.Validate as V
 
 
 type alias TemplateConfig =
-    { recommendedTemplateUuid : Maybe String
+    { recommendedTemplateId : Maybe String
     }
 
 
 default : TemplateConfig
 default =
-    { recommendedTemplateUuid = Nothing }
+    { recommendedTemplateId = Nothing }
 
 
 
@@ -36,13 +36,13 @@ default =
 decoder : Decoder TemplateConfig
 decoder =
     D.succeed TemplateConfig
-        |> D.required "recommendedTemplateUuid" (D.maybe D.string)
+        |> D.required "recommendedTemplateId" (D.maybe D.string)
 
 
 encode : TemplateConfig -> E.Value
 encode config =
     E.object
-        [ ( "recommendedTemplateUuid", E.maybe E.string config.recommendedTemplateUuid ) ]
+        [ ( "recommendedTemplateId", E.maybe E.string config.recommendedTemplateId ) ]
 
 
 
@@ -52,7 +52,7 @@ encode config =
 validation : Validation FormError TemplateConfig
 validation =
     V.succeed TemplateConfig
-        |> V.andMap (V.field "recommendedTemplateUuid" V.maybeString)
+        |> V.andMap (V.field "recommendedTemplateId" V.maybeString)
 
 
 initEmptyForm : Form FormError TemplateConfig
@@ -64,6 +64,6 @@ initForm : TemplateConfig -> Form FormError TemplateConfig
 initForm config =
     let
         fields =
-            [ ( "recommendedTemplateUuid", Field.maybeString config.recommendedTemplateUuid ) ]
+            [ ( "recommendedTemplateId", Field.maybeString config.recommendedTemplateId ) ]
     in
     Form.initial fields validation
