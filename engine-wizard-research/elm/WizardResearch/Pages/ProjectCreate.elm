@@ -93,8 +93,8 @@ getSelectedTemplate : Model -> Maybe Template
 getSelectedTemplate model =
     case model.templates of
         Success templates ->
-            (Form.getFieldAsString "templateUuid" model.createForm).value
-                |> Maybe.andThen (Template.findByUuid templates)
+            (Form.getFieldAsString "templateId" model.createForm).value
+                |> Maybe.andThen (Template.findById templates)
 
         _ ->
             Nothing
@@ -178,7 +178,7 @@ handleFormMsg cfg appState formMsg model =
                 -- Select recommended package for selected template
                 createFormWithPackageIdSet =
                     case ( formMsg, model.templates ) of
-                        ( Form.Input "templateUuid" _ _, Success templates ) ->
+                        ( Form.Input "templateId" _ _, Success templates ) ->
                             ProjectCreateForm.selectRecommendedPackage (getTags model) templates createForm
 
                         _ ->
@@ -224,7 +224,7 @@ handleGetTemplatesComplete cfg appState model result =
                 | templates = Success templates
                 , createForm =
                     model.createForm
-                        |> ProjectCreateForm.selectRecommendedOrFirstTemplate (getTags model) templates appState.config.template.recommendedTemplateUuid
+                        |> ProjectCreateForm.selectRecommendedOrFirstTemplate (getTags model) templates appState.config.template.recommendedTemplateId
                         |> ProjectCreateForm.selectRecommendedPackage (getTags model) templates
               }
             , Task.attempt (\_ -> cfg.wrapMsg NoOp) (Dom.focus "name")
@@ -382,8 +382,8 @@ projectSettingsCarouselContainer appState model templates grid =
 projectSettingsCarouselTemplatePage : AppState -> Model -> Grid Msg -> List Template -> PageOptions -> Html Msg
 projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
     let
-        recommendedTemplateUuid =
-            appState.config.template.recommendedTemplateUuid
+        recommendedTemplateId =
+            appState.config.template.recommendedTemplateId
 
         templateOptionsCount =
             if model.templateListExpanded then
@@ -394,9 +394,9 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
 
         templateOptions =
             templates
-                |> List.sortWith (Template.compare recommendedTemplateUuid)
+                |> List.sortWith (Template.compare recommendedTemplateId)
                 |> List.take templateOptionsCount
-                |> List.map (Template.toFormRichOption recommendedTemplateUuid)
+                |> List.map (Template.toFormRichOption recommendedTemplateId)
 
         templateFormGroup =
             Form.groupSimple
@@ -404,7 +404,7 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
                 , toMsg = FormMsg
                 }
                 { form = model.createForm
-                , fieldName = "templateUuid"
+                , fieldName = "templateId"
                 , fieldReadableName = "Template"
                 , mbFieldLabel = Nothing
                 , mbTextBefore = Nothing

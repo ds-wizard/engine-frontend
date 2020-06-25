@@ -47,11 +47,11 @@ viewProps templates =
 formView : List Template -> AppState -> Form FormError TemplateConfig -> Html Form.Msg
 formView templates appState form =
     let
-        toFormOption { uuid, name } =
-            ( Uuid.toString uuid, name )
+        toFormOption { id, name } =
+            ( id, name )
 
         options =
             ( "", "- none -" ) :: List.map toFormOption templates
     in
     div []
-        [ FormGroup.select appState options form "recommendedTemplateUuid" (l_ "form.recommendedTemplateUuid" appState) ]
+        [ FormGroup.select appState options form "recommendedTemplateId" (l_ "form.recommendedTemplateId" appState) ]

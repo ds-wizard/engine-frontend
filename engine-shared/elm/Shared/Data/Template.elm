@@ -2,7 +2,7 @@ module Shared.Data.Template exposing
     ( Template
     , compare
     , decoder
-    , findByUuid
+    , findById
     , toFormRichOption
     )
 
@@ -15,7 +15,7 @@ import Uuid exposing (Uuid)
 
 
 type alias Template =
-    { uuid : Uuid
+    { id : String
     , name : String
     , description : String
     , recommendedPackageId : Maybe String
@@ -27,7 +27,7 @@ type alias Template =
 decoder : Decoder Template
 decoder =
     D.succeed Template
-        |> D.required "uuid" Uuid.decoder
+        |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "description" D.string
         |> D.required "recommendedPackageId" (D.maybe D.string)
@@ -36,35 +36,35 @@ decoder =
 
 
 toFormRichOption : Maybe String -> Template -> ( String, String, String )
-toFormRichOption recommendedTemplateUuid template =
+toFormRichOption recommendedTemplateId template =
     let
         visibleName =
-            if matchUuid recommendedTemplateUuid template then
+            if matchId recommendedTemplateId template then
                 template.name ++ " (recommended)"
 
             else
                 template.name
     in
-    ( Uuid.toString template.uuid, visibleName, template.description )
+    ( template.id, visibleName, template.description )
 
 
 compare : Maybe String -> Template -> Template -> Order
-compare recommendedTemplateUuid t1 t2 =
-    if matchUuid recommendedTemplateUuid t1 then
+compare recommendedTemplateId t1 t2 =
+    if matchId recommendedTemplateId t1 then
         LT
 
-    else if matchUuid recommendedTemplateUuid t2 then
+    else if matchId recommendedTemplateId t2 then
         GT
 
     else
         Basics.compare t1.name t2.name
 
 
-matchUuid : Maybe String -> Template -> Bool
-matchUuid mbStringUuid =
-    (==) mbStringUuid << Just << Uuid.toString << .uuid
+matchId : Maybe String -> Template -> Bool
+matchId mbId =
+    (==) mbId << Just << .id
 
 
-findByUuid : List Template -> String -> Maybe Template
-findByUuid templates templateUuid =
-    List.find (.uuid >> Uuid.toString >> (==) templateUuid) templates
+findById : List Template -> String -> Maybe Template
+findById templates templateId =
+    List.find (.id >> (==) templateId) templates

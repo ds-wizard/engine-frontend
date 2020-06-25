@@ -131,14 +131,14 @@ supportedFormatFormView appState templates prefix form index =
         field name =
             prefix ++ "." ++ String.fromInt index ++ "." ++ name
 
-        templateUuidField =
-            Form.getFieldAsString (field "templateUuid") form
+        templateIdField =
+            Form.getFieldAsString (field "templateId") form
 
         formatUuidField =
             Form.getFieldAsString (field "formatUuid") form
 
-        ( templateUuidError, templateUuidErrorClass ) =
-            FormGroup.getErrors appState templateUuidField (l_ "form.template" appState)
+        ( templateIdError, templateIdErrorClass ) =
+            FormGroup.getErrors appState templateIdField (l_ "form.template" appState)
 
         ( formatUuidError, formatUuidErrorClass ) =
             FormGroup.getErrors appState formatUuidField (l_ "form.format" appState)
@@ -147,22 +147,22 @@ supportedFormatFormView appState templates prefix form index =
             ( "", "--" )
 
         templateOptions =
-            defaultOption :: List.map (\t -> ( Uuid.toString t.uuid, t.name )) templates
+            defaultOption :: List.map (\t -> ( t.id, t.name )) templates
 
         formatOptions =
-            templateUuidField.value
-                |> Maybe.andThen (\uuid -> List.find (.uuid >> Uuid.toString >> (==) uuid) templates)
+            templateIdField.value
+                |> Maybe.andThen (\uuid -> List.find (.id >> (==) uuid) templates)
                 |> Maybe.map (.formats >> List.map (\f -> ( Uuid.toString f.uuid, f.name )) >> (::) defaultOption)
                 |> Maybe.withDefault []
     in
     div [ class "input-group mb-2" ]
-        [ Input.selectInput templateOptions templateUuidField [ class "form-control", class templateUuidErrorClass ]
+        [ Input.selectInput templateOptions templateIdField [ class "form-control", class templateIdErrorClass ]
         , Input.selectInput formatOptions formatUuidField [ class "form-control", class formatUuidErrorClass ]
         , div [ class "input-group-append" ]
             [ button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
                 [ faSet "_global.delete" appState ]
             ]
-        , templateUuidError
+        , templateIdError
         , formatUuidError
         ]
 

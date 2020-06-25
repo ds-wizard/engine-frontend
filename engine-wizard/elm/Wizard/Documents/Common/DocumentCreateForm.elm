@@ -16,7 +16,7 @@ import Uuid exposing (Uuid)
 type alias DocumentCreateForm =
     { name : String
     , questionnaireUuid : String
-    , templateUuid : String
+    , templateId : String
     , formatUuid : String
     }
 
@@ -40,7 +40,7 @@ validation =
     Validate.map4 DocumentCreateForm
         (Validate.field "name" Validate.string)
         (Validate.field "questionnaireUuid" Validate.string)
-        (Validate.field "templateUuid" Validate.string)
+        (Validate.field "templateId" Validate.string)
         (Validate.field "formatUuid" Validate.string)
 
 
@@ -49,6 +49,6 @@ encode form =
     E.object
         [ ( "name", E.string form.name )
         , ( "questionnaireUuid", E.string form.questionnaireUuid )
-        , ( "templateUuid", E.string form.templateUuid )
+        , ( "templateId", E.string form.templateId )
         , ( "formatUuid", E.string form.formatUuid )
         ]

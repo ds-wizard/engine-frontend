@@ -10,7 +10,7 @@ import Uuid exposing (Uuid)
 
 
 type alias TemplateSimple =
-    { uuid : Uuid
+    { id : String
     , name : String
     , formats : List TemplateFormat
     }
@@ -19,6 +19,6 @@ type alias TemplateSimple =
 decoder : Decoder TemplateSimple
 decoder =
     D.succeed TemplateSimple
-        |> D.required "uuid" Uuid.decoder
+        |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "formats" (D.list TemplateFormat.decoder)

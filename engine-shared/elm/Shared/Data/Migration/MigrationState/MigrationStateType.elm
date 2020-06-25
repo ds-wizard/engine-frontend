@@ -32,5 +32,5 @@ decoder =
                         D.succeed RunningState
 
                     unknownStateType ->
-                        D.fail <| "Unknown migration appState type " ++ unknownStateType
+                        D.fail <| "Unknown migration state type: " ++ unknownStateType
             )

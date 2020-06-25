@@ -38,7 +38,7 @@ type alias Service =
 
 
 type alias SupportedFormat =
-    { templateUuid : String
+    { templateId : String
     , formatUuid : String
     }
 
@@ -82,7 +82,7 @@ decodeService =
 decodeSupportedFormat : Decoder SupportedFormat
 decodeSupportedFormat =
     D.succeed SupportedFormat
-        |> D.required "templateUuid" D.string
+        |> D.required "templateId" D.string
         |> D.required "formatUuid" D.string
 
 
@@ -125,7 +125,7 @@ encodeService definition =
 encodeSupportedFormat : SupportedFormat -> E.Value
 encodeSupportedFormat supportedFormat =
     E.object
-        [ ( "templateUuid", E.string supportedFormat.templateUuid )
+        [ ( "templateId", E.string supportedFormat.templateId )
         , ( "formatUuid", E.string supportedFormat.formatUuid )
         ]
 
@@ -173,7 +173,7 @@ validateService =
 validateSupportedFormat : Validation FormError SupportedFormat
 validateSupportedFormat =
     V.succeed SupportedFormat
-        |> V.andMap (V.field "templateUuid" V.string)
+        |> V.andMap (V.field "templateId" V.string)
         |> V.andMap (V.field "formatUuid" V.string)
 
 
@@ -234,7 +234,7 @@ initService definition =
 
 initSupportedFormat : SupportedFormat -> List ( String, Field )
 initSupportedFormat supportedFormat =
-    [ ( "templateUuid", Field.string supportedFormat.templateUuid )
+    [ ( "templateId", Field.string supportedFormat.templateId )
     , ( "formatUuid", Field.string supportedFormat.formatUuid )
     ]
 
