@@ -85,6 +85,8 @@ formView appState form =
                         ++ lh_ "form.privacyText"
                             [ a [ href <| PrivacyAndSupportConfig.getPrivacyUrl appState.config.privacyAndSupport, target "_blank" ]
                                 [ lx_ "form.privacy" appState ]
+                            , a [ href <| PrivacyAndSupportConfig.getTermsOfServiceUrl appState.config.privacyAndSupport, target "_blank" ]
+                                [ lx_ "form.termsOfService" appState ]
                             ]
                             appState
                     )

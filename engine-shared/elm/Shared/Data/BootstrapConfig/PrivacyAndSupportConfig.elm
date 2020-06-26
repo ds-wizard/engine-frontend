@@ -6,11 +6,13 @@ module Shared.Data.BootstrapConfig.PrivacyAndSupportConfig exposing
     , defaultSupportEmail
     , defaultSupportRepositoryName
     , defaultSupportRepositoryUrl
+    , defaultTermsOfServiceUrl
     , encode
     , getPrivacyUrl
     , getSupportEmail
     , getSupportRepositoryName
     , getSupportRepositoryUrl
+    , getTermsOfServiceUrl
     , initEmptyForm
     , initForm
     , validation
@@ -29,6 +31,7 @@ import Shared.Form.Validate as V
 
 type alias PrivacyAndSupportConfig =
     { privacyUrl : Maybe String
+    , termsOfServiceUrl : Maybe String
     , supportEmail : Maybe String
     , supportRepositoryName : Maybe String
     , supportRepositoryUrl : Maybe String
@@ -38,6 +41,7 @@ type alias PrivacyAndSupportConfig =
 default : PrivacyAndSupportConfig
 default =
     { privacyUrl = Nothing
+    , termsOfServiceUrl = Nothing
     , supportEmail = Nothing
     , supportRepositoryName = Nothing
     , supportRepositoryUrl = Nothing
@@ -47,6 +51,11 @@ default =
 getPrivacyUrl : PrivacyAndSupportConfig -> String
 getPrivacyUrl config =
     Maybe.withDefault defaultPrivacyUrl config.privacyUrl
+
+
+getTermsOfServiceUrl : PrivacyAndSupportConfig -> String
+getTermsOfServiceUrl config =
+    Maybe.withDefault defaultTermsOfServiceUrl config.termsOfServiceUrl
 
 
 getSupportEmail : PrivacyAndSupportConfig -> String
@@ -67,6 +76,11 @@ getSupportRepositoryUrl config =
 defaultPrivacyUrl : String
 defaultPrivacyUrl =
     "{defaultPrivacyUrl}"
+
+
+defaultTermsOfServiceUrl : String
+defaultTermsOfServiceUrl =
+    "{defaultTermsOfServiceUrl}"
 
 
 defaultSupportEmail : String
@@ -92,6 +106,7 @@ decoder : Decoder PrivacyAndSupportConfig
 decoder =
     D.succeed PrivacyAndSupportConfig
         |> D.required "privacyUrl" (D.maybe D.string)
+        |> D.required "termsOfServiceUrl" (D.maybe D.string)
         |> D.required "supportEmail" (D.maybe D.string)
         |> D.required "supportRepositoryName" (D.maybe D.string)
         |> D.required "supportRepositoryUrl" (D.maybe D.string)
@@ -101,6 +116,7 @@ encode : PrivacyAndSupportConfig -> E.Value
 encode config =
     E.object
         [ ( "privacyUrl", E.maybe E.string config.privacyUrl )
+        , ( "termsOfServiceUrl", E.maybe E.string config.termsOfServiceUrl )
         , ( "supportEmail", E.maybe E.string config.supportEmail )
         , ( "supportRepositoryName", E.maybe E.string config.supportRepositoryName )
         , ( "supportRepositoryUrl", E.maybe E.string config.supportRepositoryUrl )
@@ -115,6 +131,7 @@ validation : Validation FormError PrivacyAndSupportConfig
 validation =
     V.succeed PrivacyAndSupportConfig
         |> V.andMap (V.field "privacyUrl" V.maybeString)
+        |> V.andMap (V.field "termsOfServiceUrl" V.maybeString)
         |> V.andMap (V.field "supportEmail" V.maybeString)
         |> V.andMap (V.field "supportRepositoryName" V.maybeString)
         |> V.andMap (V.field "supportRepositoryUrl" V.maybeString)
@@ -130,6 +147,7 @@ initForm config =
     let
         fields =
             [ ( "privacyUrl", Field.maybeString config.privacyUrl )
+            , ( "termsOfServiceUrl", Field.maybeString config.termsOfServiceUrl )
             , ( "supportEmail", Field.maybeString config.supportEmail )
             , ( "supportRepositoryName", Field.maybeString config.supportRepositoryName )
             , ( "supportRepositoryUrl", Field.maybeString config.supportRepositoryUrl )
