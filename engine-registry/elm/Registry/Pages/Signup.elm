@@ -181,6 +181,8 @@ formView appState model =
                         ++ lh_ "formView.privacyRead"
                             [ a [ href "https://ds-wizard.org/privacy.html", target "_blank" ]
                                 [ lx_ "formView.privacy" appState ]
+                            , a [ href "https://ds-wizard.org/terms.html", target "_blank" ]
+                                [ lx_ "formView.termsOfService" appState ]
                             ]
                             appState
                     )
