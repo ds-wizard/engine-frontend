@@ -9,6 +9,7 @@ module Shared.Auth.Permission exposing
     , questionnaire
     , settings
     , submission
+    , templates
     , userManagement
     )
 
@@ -21,9 +22,9 @@ hasPerm session perm =
     List.any ((==) perm) (Maybe.unwrap [] .permissions session.user)
 
 
-userManagement : String
-userManagement =
-    "UM_PERM"
+dataManagementPlan : String
+dataManagementPlan =
+    "DMP_PERM"
 
 
 knowledgeModel : String
@@ -31,19 +32,14 @@ knowledgeModel =
     "KM_PERM"
 
 
-knowledgeModelUpgrade : String
-knowledgeModelUpgrade =
-    "KM_UPGRADE_PERM"
-
-
 knowledgeModelPublish : String
 knowledgeModelPublish =
     "KM_PUBLISH_PERM"
 
 
-packageManagementWrite : String
-packageManagementWrite =
-    "PM_WRITE_PERM"
+knowledgeModelUpgrade : String
+knowledgeModelUpgrade =
+    "KM_UPGRADE_PERM"
 
 
 packageManagementRead : String
@@ -51,14 +47,19 @@ packageManagementRead =
     "PM_READ_PERM"
 
 
+packageManagementWrite : String
+packageManagementWrite =
+    "PM_WRITE_PERM"
+
+
 questionnaire : String
 questionnaire =
     "QTN_PERM"
 
 
-dataManagementPlan : String
-dataManagementPlan =
-    "DMP_PERM"
+settings : String
+settings =
+    "CFG_PERM"
 
 
 submission : String
@@ -66,6 +67,11 @@ submission =
     "SUBM_PERM"
 
 
-settings : String
-settings =
-    "CFG_PERM"
+templates : String
+templates =
+    "TML_PERM"
+
+
+userManagement : String
+userManagement =
+    "UM_PERM"

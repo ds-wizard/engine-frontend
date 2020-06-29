@@ -13,6 +13,7 @@ import Wizard.Public.Msgs
 import Wizard.Questionnaires.Msgs
 import Wizard.Registry.Msgs
 import Wizard.Settings.Msgs
+import Wizard.Templates.Msgs
 import Wizard.Users.Msgs
 
 
@@ -31,4 +32,5 @@ type Msg
     | QuestionnairesMsg Wizard.Questionnaires.Msgs.Msg
     | RegistryMsg Wizard.Registry.Msgs.Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
+    | TemplatesMsg Wizard.Templates.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg

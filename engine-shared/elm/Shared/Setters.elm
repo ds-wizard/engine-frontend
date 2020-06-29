@@ -11,6 +11,7 @@ module Shared.Setters exposing
     , setQuestionnaire
     , setQuestionnaireDetail
     , setQuestionnaires
+    , setTemplate
     , setTemplates
     , setToken
     , setUser
@@ -76,6 +77,11 @@ setQuestionnaireDetail value record =
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }
 setQuestionnaires value record =
     { record | questionnaires = value }
+
+
+setTemplate : a -> { b | template : a } -> { b | template : a }
+setTemplate value record =
+    { record | template = value }
 
 
 setTemplates : a -> { b | templates : a } -> { b | templates : a }

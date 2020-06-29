@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Markdown
 import Shared.Api.Packages as PackagesApi
 import Shared.Auth.Permission as Perm
-import Shared.Data.BootstrapConfig.KnowledgeModelRegistryConfig exposing (KnowledgeModelRegistryConfig(..))
+import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
@@ -125,8 +125,8 @@ readme appState package =
 
 newVersionInRegistryWarning : AppState -> PackageDetail -> Html msg
 newVersionInRegistryWarning appState package =
-    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.knowledgeModelRegistry ) of
-        ( Just remoteLatestVersion, True, KnowledgeModelRegistryEnabled _ ) ->
+    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
+        ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 latestPackageId =
                     package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion

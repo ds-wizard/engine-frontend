@@ -21,6 +21,7 @@ import Wizard.Questionnaires.Models
 import Wizard.Registry.Models
 import Wizard.Routes as Routes
 import Wizard.Settings.Models
+import Wizard.Templates.Models
 import Wizard.Users.Models
 
 
@@ -35,6 +36,7 @@ type alias Model =
     , questionnairesModel : Wizard.Questionnaires.Models.Model
     , registryModel : Wizard.Registry.Models.Model
     , settingsModel : Wizard.Settings.Models.Model
+    , templatesModel : Wizard.Templates.Models.Model
     , users : Wizard.Users.Models.Model
     }
 
@@ -51,6 +53,7 @@ initialModel appState =
     , questionnairesModel = Wizard.Questionnaires.Models.initialModel appState
     , registryModel = Wizard.Registry.Models.initialModel
     , settingsModel = Wizard.Settings.Models.initialModel
+    , templatesModel = Wizard.Templates.Models.initialModel appState
     , users = Wizard.Users.Models.initialModel appState
     }
 
@@ -114,6 +117,9 @@ initLocalModel model =
 
         Routes.SettingsRoute route ->
             { model | settingsModel = Wizard.Settings.Models.initLocalModel route model.settingsModel }
+
+        Routes.TemplatesRoute route ->
+            { model | templatesModel = Wizard.Templates.Models.initLocalModel route model.appState model.templatesModel }
 
         Routes.UsersRoute route ->
             { model | users = Wizard.Users.Models.initLocalModel model.appState route model.users }

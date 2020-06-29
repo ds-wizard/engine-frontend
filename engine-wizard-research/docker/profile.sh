@@ -1,6 +1,7 @@
 DEFAULT_APP_TITLE="DS Wizard"
 DEFAULT_APP_TITLE_SHORT="DS Wizard"
 DEFAULT_PRIVACY_URL="https://ds-wizard.org/privacy.html"
+DEFAULT_TERMS_OF_SERVICE_URL="https://ds-wizard.org/terms.html"
 DEFAULT_SUPPORT_EMAIL="support@ds-wizard.org"
 DEFAULT_SUPPORT_REPOSITORY_NAME="ds-wizard/ds-wizard"
 DEFAULT_SUPPORT_REPOSITORY_URL="https://github.com/ds-wizard/ds-wizard"

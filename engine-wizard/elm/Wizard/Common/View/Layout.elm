@@ -26,6 +26,7 @@ import Wizard.Msgs exposing (Msg)
 import Wizard.Questionnaires.Routes
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (appRoute, homeRoute, loginRoute, signupRoute)
+import Wizard.Templates.Routes
 import Wizard.Users.Routes
 
 
@@ -225,6 +226,12 @@ menuItems appState =
         (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
         isDocumentsIndex
         Perm.questionnaire
+    , MenuItem
+        (l_ "menu.templates" appState)
+        (faSet "menu.templates" appState)
+        (Routes.TemplatesRoute Wizard.Templates.Routes.IndexRoute)
+        ((==) (Routes.TemplatesRoute Wizard.Templates.Routes.IndexRoute))
+        Perm.templates
     ]
 
 

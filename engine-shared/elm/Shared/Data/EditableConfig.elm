@@ -1,4 +1,17 @@
-module Shared.Data.EditableConfig exposing (EditableConfig, decoder, encode, updateAuthentication, updateDashboard, updateKnowledgeModelRegistry, updateLookAndFeel, updateOrganization, updatePrivacyAndSupport, updateQuestionnaires, updateSubmission, updateTemplate)
+module Shared.Data.EditableConfig exposing
+    ( EditableConfig
+    , decoder
+    , encode
+    , updateAuthentication
+    , updateDashboard
+    , updateLookAndFeel
+    , updateOrganization
+    , updatePrivacyAndSupport
+    , updateQuestionnaires
+    , updateRegistry
+    , updateSubmission
+    , updateTemplate
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -9,8 +22,8 @@ import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig expo
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig exposing (TemplateConfig)
 import Shared.Data.EditableConfig.EditableAuthenticationConfig as EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
-import Shared.Data.EditableConfig.EditableKnowledgeModelRegistryConfig as EditableKnowledgeModelRegistryConfig exposing (EditableKnowledgeModelRegistryConfig)
 import Shared.Data.EditableConfig.EditableQuestionnairesConfig as EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
+import Shared.Data.EditableConfig.EditableRegistryConfig as EditableRegistryConfig exposing (EditableRegistryConfig)
 import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 
 
@@ -20,7 +33,7 @@ type alias EditableConfig =
     , privacyAndSupport : PrivacyAndSupportConfig
     , dashboard : DashboardConfig
     , lookAndFeel : LookAndFeelConfig
-    , knowledgeModelRegistry : EditableKnowledgeModelRegistryConfig
+    , registry : EditableRegistryConfig
     , questionnaires : EditableQuestionnairesConfig
     , submission : EditableSubmissionConfig
     , template : TemplateConfig
@@ -52,9 +65,9 @@ updateLookAndFeel lookAndFeel config =
     { config | lookAndFeel = lookAndFeel }
 
 
-updateKnowledgeModelRegistry : EditableKnowledgeModelRegistryConfig -> EditableConfig -> EditableConfig
-updateKnowledgeModelRegistry knowledgeModelRegistry config =
-    { config | knowledgeModelRegistry = knowledgeModelRegistry }
+updateRegistry : EditableRegistryConfig -> EditableConfig -> EditableConfig
+updateRegistry registry config =
+    { config | registry = registry }
 
 
 updateQuestionnaires : EditableQuestionnairesConfig -> EditableConfig -> EditableConfig
@@ -84,7 +97,7 @@ decoder =
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
         |> D.required "dashboard" DashboardConfig.decoder
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
-        |> D.required "knowledgeModelRegistry" EditableKnowledgeModelRegistryConfig.decoder
+        |> D.required "registry" EditableRegistryConfig.decoder
         |> D.required "questionnaire" EditableQuestionnairesConfig.decoder
         |> D.required "submission" EditableSubmissionConfig.decoder
         |> D.required "template" TemplateConfig.decoder
@@ -98,7 +111,7 @@ encode config =
         , ( "privacyAndSupport", PrivacyAndSupportConfig.encode config.privacyAndSupport )
         , ( "dashboard", DashboardConfig.encode config.dashboard )
         , ( "lookAndFeel", LookAndFeelConfig.encode config.lookAndFeel )
-        , ( "knowledgeModelRegistry", EditableKnowledgeModelRegistryConfig.encode config.knowledgeModelRegistry )
+        , ( "registry", EditableRegistryConfig.encode config.registry )
         , ( "questionnaire", EditableQuestionnairesConfig.encode config.questionnaires )
         , ( "submission", EditableSubmissionConfig.encode config.submission )
         , ( "template", TemplateConfig.encode config.template )

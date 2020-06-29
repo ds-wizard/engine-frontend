@@ -1,4 +1,4 @@
-module Wizard.Settings.KnowledgeModelRegistry.Msgs exposing (Msg(..))
+module Wizard.Settings.Registry.Msgs exposing (Msg(..))
 
 import Form
 import Shared.Error.ApiError exposing (ApiError)

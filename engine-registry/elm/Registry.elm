@@ -2,8 +2,8 @@ module Registry exposing (main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
-import Html exposing (Html, a, div, img, li, text, ul)
-import Html.Attributes exposing (class, href, src)
+import Html exposing (Html, a, div, img, li, ul)
+import Html.Attributes exposing (class, classList, href, src)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Json.Encode as E
@@ -18,6 +18,8 @@ import Registry.Pages.Login as Login
 import Registry.Pages.Organization as Organization
 import Registry.Pages.Signup as Signup
 import Registry.Pages.SignupConfirmation as SignupConfirmation
+import Registry.Pages.TemplateDetail as TemplateDetail
+import Registry.Pages.Templates as Templates
 import Registry.Ports as Ports
 import Registry.Routing as Routing
 import Registry.Utils exposing (dispatch)
@@ -64,6 +66,8 @@ type PageModel
     | OrganizationModel Organization.Model
     | SignupModel Signup.Model
     | SignupConfirmationModel SignupConfirmation.Model
+    | TemplatesModel Templates.Model
+    | TemplateDetailModel TemplateDetail.Model
     | NotFoundModel
 
 
@@ -79,6 +83,8 @@ type Msg
     | OrganizationMsg Organization.Msg
     | SignupMsg Signup.Msg
     | SignupConfirmationMsg SignupConfirmation.Msg
+    | TemplatesMsg Templates.Msg
+    | TemplateDetailMsg TemplateDetail.Msg
 
 
 init : D.Value -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -188,6 +194,16 @@ update msg model =
             , Cmd.none
             )
 
+        ( TemplatesMsg templatesMsg, TemplatesModel templatesModel ) ->
+            ( { model | pageModel = TemplatesModel <| Templates.update templatesMsg model.appState templatesModel }
+            , Cmd.none
+            )
+
+        ( TemplateDetailMsg templateDetailMsg, TemplateDetailModel templateDetailModel ) ->
+            ( { model | pageModel = TemplateDetailModel <| TemplateDetail.update templateDetailMsg model.appState templateDetailModel }
+            , Cmd.none
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -267,6 +283,24 @@ initChildModel model =
                 , Cmd.map SignupConfirmationMsg signupConfirmationCmd
                 )
 
+        Routing.Templates ->
+            let
+                ( templatesModel, templatesCmd ) =
+                    Templates.init model.appState
+            in
+            ( { model | pageModel = TemplatesModel templatesModel }
+            , Cmd.map TemplatesMsg templatesCmd
+            )
+
+        Routing.TemplateDetail templateId ->
+            let
+                ( templateDetailModel, templateDetailCmd ) =
+                    TemplateDetail.init model.appState templateId
+            in
+            ( { model | pageModel = TemplateDetailModel templateDetailModel }
+            , Cmd.map TemplateDetailMsg templateDetailCmd
+            )
+
         Routing.NotFound ->
             ( { model | pageModel = NotFoundModel }
             , Cmd.none
@@ -320,6 +354,12 @@ view model =
                     SignupConfirmationModel signupConfirmationModel ->
                         Html.map SignupConfirmationMsg <| SignupConfirmation.view model.appState signupConfirmationModel
 
+                    TemplatesModel templatesModel ->
+                        Html.map TemplatesMsg <| Templates.view templatesModel
+
+                    TemplateDetailModel templateDetailModel ->
+                        Html.map TemplateDetailMsg <| TemplateDetail.view model.appState templateDetailModel
+
                     NotFoundModel ->
                         Page.illustratedMessage
                             { image = "page_not_found"
@@ -328,7 +368,7 @@ view model =
                             }
 
         html =
-            [ header model.appState
+            [ header model
             , div [ class "container" ]
                 [ content ]
             ]
@@ -338,9 +378,12 @@ view model =
     }
 
 
-header : AppState -> Html Msg
-header appState =
+header : Model -> Html Msg
+header model =
     let
+        appState =
+            model.appState
+
         navigation =
             appState.credentials
                 |> Maybe.map (always (loggedInHeaderNavigation appState))
@@ -352,6 +395,22 @@ header appState =
                 [ img [ class "logo", src "/img/logo.svg" ] []
                 , lx_ "header.brandTitle" appState
                 ]
+            , ul [ class "nav navbar-nav" ]
+                [ li
+                    [ class "nav-item"
+                    , classList [ ( "active", model.route == Routing.Index ) ]
+                    ]
+                    [ a [ href <| Routing.toString Routing.Index, class "nav-link" ]
+                        [ lx_ "header.knowledgeModels" appState ]
+                    ]
+                , li
+                    [ class "nav-item"
+                    , classList [ ( "active", model.route == Routing.Templates ) ]
+                    ]
+                    [ a [ href <| Routing.toString Routing.Templates, class "nav-link" ]
+                        [ lx_ "header.templates" appState ]
+                    ]
+                ]
             , navigation
             ]
         ]
@@ -359,38 +418,34 @@ header appState =
 
 loggedInHeaderNavigation : AppState -> Html Msg
 loggedInHeaderNavigation appState =
-    div []
-        [ ul [ class "nav navbar-nav ml-auto" ]
-            [ li [ class "nav-item" ]
-                [ a
-                    [ href <| Routing.toString Routing.Organization
-                    , class "nav-link"
-                    ]
-                    [ lx_ "loggedInNavigation.profile" appState ]
+    ul [ class "nav navbar-nav ml-auto" ]
+        [ li [ class "nav-item" ]
+            [ a
+                [ href <| Routing.toString Routing.Organization
+                , class "nav-link"
                 ]
-            , li [ class "nav-item" ]
-                [ a
-                    [ onClick <| SetCredentials Nothing
-                    , class "nav-link"
-                    ]
-                    [ lx_ "loggedInNavigation.logOut" appState ]
+                [ lx_ "loggedInNavigation.profile" appState ]
+            ]
+        , li [ class "nav-item" ]
+            [ a
+                [ onClick <| SetCredentials Nothing
+                , class "nav-link"
                 ]
+                [ lx_ "loggedInNavigation.logOut" appState ]
             ]
         ]
 
 
 publicHeaderNavigation : AppState -> Html Msg
 publicHeaderNavigation appState =
-    div []
-        [ ul [ class "nav navbar-nav ml-auto" ]
-            [ li [ class "nav-item" ]
-                [ a [ href <| Routing.toString Routing.Login, class "nav-link" ]
-                    [ lx_ "publicHeaderNavigation.logIn" appState ]
-                ]
-            , li [ class "nav-item" ]
-                [ a [ href <| Routing.toString Routing.Signup, class "nav-link" ]
-                    [ lx_ "publicHeaderNavigation.signUp" appState ]
-                ]
+    ul [ class "nav navbar-nav ml-auto" ]
+        [ li [ class "nav-item" ]
+            [ a [ href <| Routing.toString Routing.Login, class "nav-link" ]
+                [ lx_ "publicHeaderNavigation.logIn" appState ]
+            ]
+        , li [ class "nav-item" ]
+            [ a [ href <| Routing.toString Routing.Signup, class "nav-link" ]
+                [ lx_ "publicHeaderNavigation.signUp" appState ]
             ]
         ]
 

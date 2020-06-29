@@ -10,10 +10,12 @@ module Shared.Api exposing
     , jwtGet
     , jwtPost
     , jwtPostEmpty
+    , jwtPostFile
     , jwtPostString
     , jwtPut
     )
 
+import File exposing (File)
 import Http
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
@@ -48,6 +50,15 @@ jwtPostString url mime contents appState toMsg =
     Jwt.Http.post appState.session.token.token
         { url = appState.apiUrl ++ url
         , body = Http.stringBody mime contents
+        , expect = expectWhatever toMsg
+        }
+
+
+jwtPostFile : String -> File -> AbstractAppState b -> ToMsg () msg -> Cmd msg
+jwtPostFile url file appState toMsg =
+    Jwt.Http.post appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.multipartBody [ Http.filePart "file" file ]
         , expect = expectWhatever toMsg
         }
 

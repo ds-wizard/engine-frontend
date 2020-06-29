@@ -1,4 +1,4 @@
-module Wizard.Settings.KnowledgeModelRegistry.Update exposing
+module Wizard.Settings.Registry.Update exposing
     ( fetchData
     , update
     )
@@ -7,7 +7,7 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Shared.Api.Registry as RegistryApi
 import Shared.Data.EditableConfig as EditableConfig
-import Shared.Data.EditableConfig.EditableKnowledgeModelRegistryConfig as EditableKnowledgeModelRegistryConfig
+import Shared.Data.EditableConfig.EditableRegistryConfig as EditableRegistryConfig
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
 import Shared.Locale exposing (lg)
@@ -17,8 +17,8 @@ import Wizard.Msgs
 import Wizard.Settings.Common.Forms.RegistrySignupForm as RegistrySignupForm exposing (RegistrySignupForm)
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.Update as GenericUpdate
-import Wizard.Settings.KnowledgeModelRegistry.Models exposing (Model)
-import Wizard.Settings.KnowledgeModelRegistry.Msgs exposing (Msg(..))
+import Wizard.Settings.Registry.Models exposing (Model)
+import Wizard.Settings.Registry.Msgs exposing (Msg(..))
 
 
 fetchData : AppState -> Cmd Msg
@@ -46,9 +46,9 @@ handleGenericMsg : (Msg -> Wizard.Msgs.Msg) -> GenericMsgs.Msg -> AppState -> Mo
 handleGenericMsg wrapMsg genericMsg appState model =
     let
         updateProps =
-            { initForm = .knowledgeModelRegistry >> EditableKnowledgeModelRegistryConfig.initForm
-            , formToConfig = EditableConfig.updateKnowledgeModelRegistry
-            , formValidation = EditableKnowledgeModelRegistryConfig.validation
+            { initForm = .registry >> EditableRegistryConfig.initForm
+            , formToConfig = EditableConfig.updateRegistry
+            , formValidation = EditableRegistryConfig.validation
             }
 
         ( genericModel, cmd ) =
