@@ -6,9 +6,9 @@ import Json.Decode.Pipeline as D
 import List.Extra as List
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Data.Document.DocumentState as DocumentState exposing (DocumentState)
+import Shared.Data.Document.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
-import Shared.Data.TemplateSimple as TemplateSimple exposing (TemplateSimple)
 import Shared.Data.UserInfo as UserInfo
 import Time
 import Uuid exposing (Uuid)
@@ -19,7 +19,7 @@ type alias Document =
     , name : String
     , createdAt : Time.Posix
     , questionnaire : Maybe Questionnaire
-    , template : TemplateSimple
+    , template : DocumentTemplate
     , formatUuid : Uuid
     , state : DocumentState
     , ownerUuid : Uuid
@@ -47,7 +47,7 @@ decoder =
         |> D.required "name" D.string
         |> D.required "createdAt" D.datetime
         |> D.optional "questionnaire" (D.maybe Questionnaire.decoder) Nothing
-        |> D.required "template" TemplateSimple.decoder
+        |> D.required "template" DocumentTemplate.decoder
         |> D.required "formatUuid" Uuid.decoder
         |> D.required "state" DocumentState.decoder
         |> D.required "ownerUuid" Uuid.decoder

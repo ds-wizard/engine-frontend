@@ -16,7 +16,6 @@ port module Wizard.Ports exposing
     )
 
 import Json.Encode as E exposing (Value)
-import Shared.Data.FilePortData exposing (FilePortData)
 
 
 
@@ -39,7 +38,7 @@ port clearSessionAndReload : () -> Cmd msg
 port fileSelected : String -> Cmd msg
 
 
-port fileContentRead : (FilePortData -> msg) -> Sub msg
+port fileContentRead : (E.Value -> msg) -> Sub msg
 
 
 port createDropzone : String -> Cmd msg

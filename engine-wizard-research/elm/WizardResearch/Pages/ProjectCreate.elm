@@ -423,7 +423,7 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
                 emptyNode
 
         kms =
-            Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
+            Maybe.unwrap [] .usablePackages (getSelectedTemplate model)
                 |> List.sortWith (TemplatePackage.compare (Maybe.andThen .recommendedPackageId (getSelectedTemplate model)))
 
         visibleKMs =
@@ -487,7 +487,7 @@ projectSettingsCarouselKnowledgeModelPage : AppState -> Model -> Grid Msg -> Pag
 projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
     let
         packages =
-            Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
+            Maybe.unwrap [] .usablePackages (getSelectedTemplate model)
 
         recommendedPackage =
             Maybe.andThen .recommendedPackageId (getSelectedTemplate model)

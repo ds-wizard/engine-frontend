@@ -8,6 +8,7 @@ import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Subscriptions
 import Wizard.Routes as Routes
+import Wizard.Templates.Subscriptions
 import Wizard.Users.Subscriptions
 
 
@@ -27,6 +28,9 @@ subscriptions model =
 
                 Routes.QuestionnairesRoute route ->
                     Sub.map QuestionnairesMsg <| Wizard.Questionnaires.Subscriptions.subscriptions route model.questionnairesModel
+
+                Routes.TemplatesRoute route ->
+                    Sub.map TemplatesMsg <| Wizard.Templates.Subscriptions.subscriptions route model.templatesModel
 
                 Routes.UsersRoute route ->
                     Sub.map UsersMsg <| Wizard.Users.Subscriptions.subscriptions route model.users

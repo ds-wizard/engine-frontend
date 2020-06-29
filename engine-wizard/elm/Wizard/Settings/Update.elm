@@ -8,13 +8,13 @@ import Wizard.Msgs
 import Wizard.Settings.Authentication.Update
 import Wizard.Settings.Dashboard.Update
 import Wizard.Settings.Generic.Update
-import Wizard.Settings.KnowledgeModelRegistry.Update
 import Wizard.Settings.LookAndFeel.Update
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.Update
 import Wizard.Settings.PrivacyAndSupport.Update
 import Wizard.Settings.Questionnaires.Update
+import Wizard.Settings.Registry.Update
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Update
 import Wizard.Settings.Template.Update
@@ -43,9 +43,9 @@ fetchData route appState model =
         LookAndFeelRoute ->
             genericFetch LookAndFeelMsg
 
-        KnowledgeModelRegistryRoute ->
-            Cmd.map KnowledgeModelRegistryMsg <|
-                Wizard.Settings.KnowledgeModelRegistry.Update.fetchData appState
+        RegistryRoute ->
+            Cmd.map RegistryMsg <|
+                Wizard.Settings.Registry.Update.fetchData appState
 
         QuestionnairesRoute ->
             genericFetch QuestionnairesMsg
@@ -97,12 +97,12 @@ update wrapMsg msg appState model =
             in
             ( { model | lookAndFeelModel = lookAndFeelModel }, cmd )
 
-        KnowledgeModelRegistryMsg knowledgeModelRegistryMsg ->
+        RegistryMsg registryMsg ->
             let
-                ( knowledgeModelRegistryModel, cmd ) =
-                    Wizard.Settings.KnowledgeModelRegistry.Update.update (wrapMsg << KnowledgeModelRegistryMsg) knowledgeModelRegistryMsg appState model.knowledgeModelRegistryModel
+                ( registryModel, cmd ) =
+                    Wizard.Settings.Registry.Update.update (wrapMsg << RegistryMsg) registryMsg appState model.registryModel
             in
-            ( { model | knowledgeModelRegistryModel = knowledgeModelRegistryModel }, cmd )
+            ( { model | registryModel = registryModel }, cmd )
 
         QuestionnairesMsg questionnairesMsg ->
             let

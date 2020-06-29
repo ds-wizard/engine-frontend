@@ -1,5 +1,5 @@
-module Shared.Data.TemplateSimple exposing
-    ( TemplateSimple
+module Shared.Data.Document.DocumentTemplate exposing
+    ( DocumentTemplate
     , decoder
     )
 
@@ -9,16 +9,16 @@ import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateF
 import Uuid exposing (Uuid)
 
 
-type alias TemplateSimple =
+type alias DocumentTemplate =
     { id : String
     , name : String
     , formats : List TemplateFormat
     }
 
 
-decoder : Decoder TemplateSimple
+decoder : Decoder DocumentTemplate
 decoder =
-    D.succeed TemplateSimple
+    D.succeed DocumentTemplate
         |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "formats" (D.list TemplateFormat.decoder)

@@ -8,13 +8,13 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes
 import Wizard.Settings.Authentication.View
 import Wizard.Settings.Dashboard.View
-import Wizard.Settings.KnowledgeModelRegistry.View
 import Wizard.Settings.LookAndFeel.View
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.View
 import Wizard.Settings.PrivacyAndSupport.View
 import Wizard.Settings.Questionnaires.View
+import Wizard.Settings.Registry.View
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.View
 import Wizard.Settings.Template.View
@@ -55,9 +55,9 @@ view route appState model =
                     Html.map LookAndFeelMsg <|
                         Wizard.Settings.LookAndFeel.View.view appState model.lookAndFeelModel
 
-                KnowledgeModelRegistryRoute ->
-                    Html.map KnowledgeModelRegistryMsg <|
-                        Wizard.Settings.KnowledgeModelRegistry.View.view appState model.knowledgeModelRegistryModel
+                RegistryRoute ->
+                    Html.map RegistryMsg <|
+                        Wizard.Settings.Registry.View.view appState model.registryModel
 
                 QuestionnairesRoute ->
                     Html.map QuestionnairesMsg <|
@@ -106,7 +106,7 @@ navigationUserInterfaceLinks appState =
 
 navigationContentLinks : AppState -> List ( Route, String )
 navigationContentLinks appState =
-    [ ( KnowledgeModelRegistryRoute, l_ "navigation.knowledgeModelRegistry" appState )
+    [ ( RegistryRoute, l_ "navigation.registry" appState )
     , ( QuestionnairesRoute, l_ "navigation.questionnaires" appState )
     , ( SubmissionRoute, l_ "navigation.submission" appState )
     , ( TemplateRoute, l_ "navigation.template" appState )

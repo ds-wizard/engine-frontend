@@ -74,6 +74,7 @@ iconSet =
                , ( "menu.questionnaires", "fas fa-list-alt" )
                , ( "menu.reportIssue", "fas fa-exclamation-triangle" )
                , ( "menu.settings", "fas fa-cog" )
+               , ( "menu.templates", "far fa-file-code" )
                , ( "menu.users", "fas fa-users" )
                , ( "questionnaire.answeredIndication", "fas fa-check" )
                , ( "questionnaire.clearAnswer", "fas fa-undo-alt" )

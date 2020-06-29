@@ -1,5 +1,5 @@
-module Shared.Data.EditableConfig.EditableKnowledgeModelRegistryConfig exposing
-    ( EditableKnowledgeModelRegistryConfig
+module Shared.Data.EditableConfig.EditableRegistryConfig exposing
+    ( EditableRegistryConfig
     , decoder
     , encode
     , initEmptyForm
@@ -17,7 +17,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 
 
-type alias EditableKnowledgeModelRegistryConfig =
+type alias EditableRegistryConfig =
     { enabled : Bool
     , token : String
     }
@@ -27,14 +27,14 @@ type alias EditableKnowledgeModelRegistryConfig =
 -- JSON
 
 
-decoder : Decoder EditableKnowledgeModelRegistryConfig
+decoder : Decoder EditableRegistryConfig
 decoder =
-    D.succeed EditableKnowledgeModelRegistryConfig
+    D.succeed EditableRegistryConfig
         |> D.required "enabled" D.bool
         |> D.required "token" D.string
 
 
-encode : EditableKnowledgeModelRegistryConfig -> E.Value
+encode : EditableRegistryConfig -> E.Value
 encode config =
     E.object
         [ ( "enabled", E.bool config.enabled )
@@ -46,19 +46,19 @@ encode config =
 -- Form
 
 
-validation : Validation FormError EditableKnowledgeModelRegistryConfig
+validation : Validation FormError EditableRegistryConfig
 validation =
-    V.succeed EditableKnowledgeModelRegistryConfig
+    V.succeed EditableRegistryConfig
         |> V.andMap (V.field "enabled" V.bool)
         |> V.andMap (V.field "enabled" V.bool |> V.ifElse "token" V.string V.optionalString)
 
 
-initEmptyForm : Form FormError EditableKnowledgeModelRegistryConfig
+initEmptyForm : Form FormError EditableRegistryConfig
 initEmptyForm =
     Form.initial [] validation
 
 
-initForm : EditableKnowledgeModelRegistryConfig -> Form FormError EditableKnowledgeModelRegistryConfig
+initForm : EditableRegistryConfig -> Form FormError EditableRegistryConfig
 initForm config =
     let
         fields =

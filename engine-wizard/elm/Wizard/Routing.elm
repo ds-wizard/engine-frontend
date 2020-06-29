@@ -27,6 +27,7 @@ import Wizard.Questionnaires.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
 import Wizard.Settings.Routing
+import Wizard.Templates.Routing
 import Wizard.Users.Routing
 
 
@@ -42,6 +43,7 @@ matchers appState =
                 ++ Wizard.Questionnaires.Routing.parsers appState Routes.QuestionnairesRoute
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
+                ++ Wizard.Templates.Routing.parsers appState Routes.TemplatesRoute
                 ++ Wizard.Users.Routing.parses Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    ]
@@ -85,6 +87,9 @@ isAllowed route session =
         Routes.SettingsRoute settingsRoute ->
             Wizard.Settings.Routing.isAllowed settingsRoute session
 
+        Routes.TemplatesRoute templatesRoute ->
+            Wizard.Templates.Routing.isAllowed templatesRoute session
+
         Routes.UsersRoute usersRoute ->
             Wizard.Users.Routing.isAllowed usersRoute session
 
@@ -123,6 +128,9 @@ toUrl appState route =
 
                 Routes.SettingsRoute settingsRoute ->
                     Wizard.Settings.Routing.toUrl appState settingsRoute
+
+                Routes.TemplatesRoute templatesRoute ->
+                    Wizard.Templates.Routing.toUrl appState templatesRoute
 
                 Routes.UsersRoute usersRoute ->
                     Wizard.Users.Routing.toUrl usersRoute

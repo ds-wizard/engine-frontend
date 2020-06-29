@@ -6,12 +6,12 @@ module Wizard.KnowledgeModels.Import.FileImport.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.FilePortData exposing (FilePortData)
+import File exposing (File)
 
 
 type alias Model =
     { dnd : Int
-    , file : Maybe FilePortData
+    , file : Maybe File
     , importing : ActionResult String
     }
 

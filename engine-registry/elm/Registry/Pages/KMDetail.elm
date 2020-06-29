@@ -145,11 +145,11 @@ viewDetail appState package =
                 Nothing ->
                     []
     in
-    div [ class "KMDetail" ]
+    div [ class "Detail" ]
         [ div [ class "row" ]
             [ div [ class "col-12 col-md-8" ]
                 [ Markdown.toHtml [] package.readme ]
-            , div [ class "KMDetail__Panel col-12 col-md-4" ]
+            , div [ class "Detail__Panel col-12 col-md-4" ]
                 (viewKmId
                     ++ viewPublishedBy
                     ++ viewLicense

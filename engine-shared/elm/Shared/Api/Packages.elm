@@ -8,10 +8,10 @@ module Shared.Api.Packages exposing
     , pullPackage
     )
 
+import File exposing (File)
 import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostString)
-import Shared.Data.FilePortData exposing (FilePortData)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 
@@ -41,11 +41,11 @@ pullPackage packageId =
     jwtPostEmpty ("/packages/" ++ packageId ++ "/pull")
 
 
-importPackage : FilePortData -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-importPackage file =
-    jwtPostString "/packages" "application/json" file.contents
+importPackage : File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+importPackage =
+    jwtPostFile "/packages/bundle"
 
 
 exportPackageUrl : String -> AbstractAppState a -> String
 exportPackageUrl packageId appState =
-    appState.apiUrl ++ "/export/" ++ packageId
+    appState.apiUrl ++ "/packages/" ++ packageId ++ "/bundle"

@@ -1,6 +1,7 @@
 module Wizard.KnowledgeModels.Import.FileImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import File
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -30,7 +31,7 @@ view appState model =
         content =
             case model.file of
                 Just file ->
-                    fileView appState model file.filename
+                    fileView appState model (File.name file)
 
                 Nothing ->
                     dropzone appState model

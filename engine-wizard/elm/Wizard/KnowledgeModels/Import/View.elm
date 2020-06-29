@@ -3,7 +3,7 @@ module Wizard.KnowledgeModels.Import.View exposing (view)
 import Html exposing (Html, a, div, li, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Shared.Data.BootstrapConfig.KnowledgeModelRegistryConfig exposing (KnowledgeModelRegistryConfig(..))
+import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
@@ -43,8 +43,8 @@ view appState model =
                     )
 
         navbar =
-            case appState.config.knowledgeModelRegistry of
-                KnowledgeModelRegistryEnabled _ ->
+            case appState.config.registry of
+                RegistryEnabled _ ->
                     viewNavbar appState registryActive
 
                 _ ->
