@@ -61,6 +61,10 @@ function loadApp(config, provisioning) {
     app.ports.clearSession.subscribe(function() {
         localStorage.removeItem(sessionKey)
     })
+
+    app.ports.replaceUrl.subscribe(function (url) {
+        window.history.replaceState({}, null, url)
+    })
 }
 
 window.onload = function () {

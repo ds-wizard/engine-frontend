@@ -9,7 +9,6 @@ module WizardResearch.Pages.Project exposing
 import ActionResult exposing (ActionResult(..))
 import Html.Styled as Html exposing (Html)
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Elemental.Components.ActionResultWrapper as ActionResultWrapper
 import Shared.Elemental.Components.SideNavigation as SideNavigation

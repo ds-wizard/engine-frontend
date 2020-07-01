@@ -1,5 +1,6 @@
 port module WizardResearch.Ports exposing
     ( clearSession
+    , replaceUrl
     , storeSession
     )
 
@@ -12,3 +13,6 @@ port storeSession : E.Value -> Cmd msg
 
 
 port clearSession : () -> Cmd msg
+
+
+port replaceUrl : String -> Cmd msg

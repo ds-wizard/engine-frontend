@@ -1,4 +1,4 @@
-module Shared.Elemental.Atoms.FormInput exposing (password, passwordWithAttrs, richRadioGroup, tagsGroup, text, textWithAttrs)
+module Shared.Elemental.Atoms.FormInput exposing (inputStyle, password, passwordWithAttrs, richRadioGroup, tagsGroup, text, textWithAttrs)
 
 import Css exposing (..)
 import Css.Global exposing (descendants, selector, typeSelector)
@@ -130,6 +130,7 @@ tagsGroup tags form fieldName theme =
             , descendants
                 [ typeSelector "input"
                     [ Spacing.inlineSM
+                    , verticalAlign middle
                     ]
                 ]
             ]
