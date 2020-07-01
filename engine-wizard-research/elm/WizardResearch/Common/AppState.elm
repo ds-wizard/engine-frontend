@@ -2,6 +2,7 @@ module WizardResearch.Common.AppState exposing
     ( AppState
     , authenticated
     , init
+    , setCurrentTime
     , setSession
     )
 
@@ -12,6 +13,7 @@ import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Elemental.Theme as Theme exposing (Theme)
 import Shared.Provisioning as Provisioning exposing (Provisioning)
+import Time
 import WizardResearch.Common.Flags as Flags
 import WizardResearch.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import WizardResearch.Common.Provisioning.DefaultLocale as DefaultLocale
@@ -25,6 +27,7 @@ type alias AppState =
     , session : Session
     , configurationError : Bool
     , theme : Theme
+    , currentTime : Time.Posix
     }
 
 
@@ -59,12 +62,18 @@ init flagsValue =
     , session = Maybe.withDefault Session.init flags.session
     , configurationError = configurationError
     , theme = Theme.default
+    , currentTime = Time.millisToPosix 0
     }
 
 
 setSession : Maybe Session -> AppState -> AppState
 setSession mbSession appState =
     { appState | session = Maybe.withDefault Session.init mbSession }
+
+
+setCurrentTime : Time.Posix -> AppState -> AppState
+setCurrentTime time appState =
+    { appState | currentTime = time }
 
 
 authenticated : AppState -> Bool

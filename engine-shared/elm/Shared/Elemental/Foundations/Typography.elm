@@ -2,6 +2,7 @@ module Shared.Elemental.Foundations.Typography exposing
     ( copy1
     , copy1contrast
     , copy1danger
+    , copy1inversed
     , copy1light
     , copy1lighter
     , copy1link
@@ -162,6 +163,14 @@ copy1lighter theme =
         [ color theme.colors.textLighter
         , fontSize (px2rem sizeMD)
         , fontWeight normal
+        ]
+
+
+copy1inversed : Theme -> Style
+copy1inversed theme =
+    Css.batch
+        [ color theme.colors.textInversed
+        , fontSize (px2rem sizeMD)
         ]
 
 
