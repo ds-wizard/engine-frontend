@@ -10,9 +10,9 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline exposing (optional, required)
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Data.Package as Package exposing (Package)
+import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport exposing (QuestionnaireReport)
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Data.SummaryReport exposing (IndicationReport, indicationReportDecoder)
 import Shared.Data.User as User exposing (User)
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
 import Time
@@ -28,12 +28,7 @@ type alias Questionnaire =
     , owner : Maybe User
     , state : QuestionnaireState
     , updatedAt : Time.Posix
-    , report : Report
-    }
-
-
-type alias Report =
-    { indications : List IndicationReport
+    , report : QuestionnaireReport
     }
 
 
@@ -63,13 +58,7 @@ decoder =
         |> required "owner" (D.maybe User.decoder)
         |> required "state" QuestionnaireState.decoder
         |> required "updatedAt" D.datetime
-        |> required "report" reportDecoder
-
-
-reportDecoder : Decoder { indications : List IndicationReport }
-reportDecoder =
-    D.succeed Report
-        |> required "indications" (D.list indicationReportDecoder)
+        |> required "report" QuestionnaireReport.decoder
 
 
 compare : Questionnaire -> Questionnaire -> Order

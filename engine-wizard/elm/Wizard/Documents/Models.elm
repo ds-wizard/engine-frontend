@@ -14,7 +14,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { createModel = Wizard.Documents.Create.Models.initialModel Nothing
+    { createModel = Wizard.Documents.Create.Models.initialModel
     , indexModel = Wizard.Documents.Index.Models.initialModel Nothing PaginationQueryString.empty
     }
 
@@ -22,8 +22,8 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        CreateRoute selected ->
-            { model | createModel = Wizard.Documents.Create.Models.initialModel selected }
+        CreateRoute _ ->
+            { model | createModel = Wizard.Documents.Create.Models.initialModel }
 
         IndexRoute questionnaireUuid paginationQueryString ->
             { model | indexModel = Wizard.Documents.Index.Models.initialModel questionnaireUuid paginationQueryString }

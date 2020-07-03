@@ -22,6 +22,7 @@ import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.Questionnaire.QuestionnaireLabel as QuestionnaireLabel exposing (QuestionnaireLabel)
+import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport exposing (QuestionnaireReport)
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireDetail.FormValue as FormValue exposing (FormValue)
@@ -41,6 +42,7 @@ type alias QuestionnaireDetail =
     , ownerUuid : Maybe Uuid
     , selectedTagUuids : List String
     , labels : List QuestionnaireLabel
+    , report : QuestionnaireReport
     }
 
 
@@ -57,6 +59,7 @@ decoder =
         |> D.required "ownerUuid" (D.maybe Uuid.decoder)
         |> D.required "selectedTagUuids" (D.list D.string)
         |> D.required "labels" (D.list QuestionnaireLabel.decoder)
+        |> D.required "report" QuestionnaireReport.decoder
 
 
 encode : QuestionnaireDetail -> E.Value

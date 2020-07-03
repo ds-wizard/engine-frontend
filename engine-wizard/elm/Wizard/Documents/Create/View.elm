@@ -6,11 +6,10 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import List.Extra as List
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Template exposing (Template)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
-import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.Questionnaire.Views.SummaryReport exposing (viewIndications)
@@ -33,16 +32,16 @@ l_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (content appState model) model.questionnaires
+    Page.actionResultView appState (content appState model) model.questionnaire
 
 
-content : AppState -> Model -> List Questionnaire -> Html Msg
-content appState model questionnaires =
+content : AppState -> Model -> QuestionnaireDetail -> Html Msg
+content appState model questionnaire =
     div [ detailClass "Documents__Create" ]
         [ Page.header (l_ "header.title" appState) []
         , div []
             [ FormResult.view appState model.savingDocument
-            , Html.map FormMsg <| formView appState model questionnaires
+            , Html.map FormMsg <| formView appState model questionnaire
             , FormActions.view appState
                 (Routes.DocumentsRoute <| IndexRoute Nothing PaginationQueryString.empty)
                 (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingDocument (FormMsg Form.Submit) False)
@@ -50,40 +49,16 @@ content appState model questionnaires =
         ]
 
 
-formView : AppState -> Model -> List Questionnaire -> Html Form.Msg
-formView appState model questionnaires =
+formView : AppState -> Model -> QuestionnaireDetail -> Html Form.Msg
+formView appState model questionnaire =
     let
-        questionnaireOptions =
-            ( "", "--" ) :: (List.map (\q -> ( Uuid.toString q.uuid, q.name )) <| List.sortBy (String.toLower << .name) questionnaires)
-
-        selectedQuestionnaire =
-            (Form.getFieldAsString "questionnaireUuid" model.form).value
-                |> Maybe.andThen (\qUuid -> List.find (\q -> Uuid.toString q.uuid == qUuid) questionnaires)
-
         questionnaireInput =
-            case model.selectedQuestionnaire of
-                Just questionnaireUuid ->
-                    let
-                        questionnaireName =
-                            List.filter (\q -> q.uuid == questionnaireUuid) questionnaires
-                                |> List.head
-                                |> Maybe.map .name
-                                |> Maybe.withDefault ""
-                    in
-                    FormGroup.textView questionnaireName <| lg "questionnaire" appState
-
-                Nothing ->
-                    FormGroup.select appState questionnaireOptions model.form "questionnaireUuid" <| lg "questionnaire" appState
+            FormGroup.textView questionnaire.name <| lg "questionnaire" appState
 
         questionnaireDetail =
-            case selectedQuestionnaire of
-                Just questionnaire ->
-                    div [ class "form-group" ]
-                        [ viewIndications appState questionnaire.report.indications
-                        ]
-
-                Nothing ->
-                    emptyNode
+            div [ class "form-group" ]
+                [ viewIndications appState questionnaire.report.indications
+                ]
 
         templatesInput =
             case model.templates of
