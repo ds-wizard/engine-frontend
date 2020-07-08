@@ -12,12 +12,12 @@ import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Wizard.Common.Config.DashboardConfig exposing (DashboardConfig)
-import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Field as Field
-import Wizard.Common.Form.Validate as V
-import Wizard.Users.Common.Role as Role
+import Shared.Auth.Role as Role
+import Shared.Data.BootstrapConfig.DashboardConfig exposing (DashboardConfig)
+import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
+import Shared.Form.Field as Field
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias DashboardConfigForm =
@@ -27,12 +27,12 @@ type alias DashboardConfigForm =
     }
 
 
-initEmpty : Form CustomFormError DashboardConfigForm
+initEmpty : Form FormError DashboardConfigForm
 initEmpty =
     Form.initial [] validation
 
 
-init : DashboardConfig -> Form CustomFormError DashboardConfigForm
+init : DashboardConfig -> Form FormError DashboardConfigForm
 init config =
     let
         widgets =
@@ -52,7 +52,7 @@ init config =
     Form.initial fields validation
 
 
-validation : Validation CustomFormError DashboardConfigForm
+validation : Validation FormError DashboardConfigForm
 validation =
     V.succeed DashboardConfigForm
         |> V.andMap (V.field "widgets" V.string)

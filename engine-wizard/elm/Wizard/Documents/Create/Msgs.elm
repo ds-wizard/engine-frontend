@@ -1,14 +1,14 @@
 module Wizard.Documents.Create.Msgs exposing (..)
 
 import Form
+import Shared.Data.Document exposing (Document)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Documents.Common.Document exposing (Document)
-import Wizard.Documents.Common.Template exposing (Template)
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 
 
 type Msg
-    = GetQuestionnairesCompleted (Result ApiError (List Questionnaire))
+    = GetQuestionnaireCompleted (Result ApiError QuestionnaireDetail)
     | GetTemplatesCompleted (Result ApiError (List Template))
     | FormMsg Form.Msg
     | PostDocumentCompleted (Result ApiError Document)

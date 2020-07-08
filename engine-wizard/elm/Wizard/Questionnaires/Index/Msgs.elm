@@ -1,17 +1,16 @@
 module Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Common.Components.Listing as Listing
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
+import Uuid exposing (Uuid)
+import Wizard.Common.Components.Listing.Msgs as Listing
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModal
 
 
 type Msg
-    = GetQuestionnairesCompleted (Result ApiError (List Questionnaire))
-    | ShowHideDeleteQuestionnaire (Maybe Questionnaire)
-    | DeleteQuestionnaire
-    | DeleteQuestionnaireCompleted (Result ApiError ())
-    | DeleteQuestionnaireMigration String
+    = DeleteQuestionnaireMigration Uuid
     | DeleteQuestionnaireMigrationCompleted (Result ApiError ())
     | CloneQuestionnaire Questionnaire
     | CloneQuestionnaireCompleted (Result ApiError Questionnaire)
-    | ListingMsg Listing.Msg
+    | ListingMsg (Listing.Msg Questionnaire)
+    | DeleteQuestionnaireModalMsg DeleteQuestionnaireModal.Msg

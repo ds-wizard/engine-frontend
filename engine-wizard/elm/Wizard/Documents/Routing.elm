@@ -1,11 +1,16 @@
 module Wizard.Documents.Routing exposing (..)
 
+import Maybe.Extra as Maybe
+import Shared.Auth.Permission as Perm
+import Shared.Auth.Session exposing (Session)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
+import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
+import Url.Parser.Query.Extra as Query
+import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Documents.Routes exposing (Route(..))
 
 
@@ -15,9 +20,14 @@ parsers appState wrapRoute =
         moduleRoot =
             lr "documents" appState
     in
-    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "documents.create" appState) <?> Query.string (lr "documents.create.selected" appState))
-    , map (wrapRoute << IndexRoute) (s moduleRoot <?> Query.string (lr "documents.index.questionnaireUuid" appState))
+    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "documents.create" appState) </> uuid)
+    , map (indexRoute wrapRoute) (s moduleRoot <?> Query.uuid (lr "documents.index.questionnaireUuid" appState) <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort")
     ]
+
+
+indexRoute : (Route -> a) -> Maybe Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
+indexRoute wrapRoute documentUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << IndexRoute documentUuid) (Just "name")
 
 
 toUrl : AppState -> Route -> List String
@@ -27,23 +37,24 @@ toUrl appState route =
             lr "documents" appState
     in
     case route of
-        CreateRoute selected ->
-            case selected of
-                Just uuid ->
-                    [ moduleRoot, lr "documents.create" appState, "?" ++ lr "questionnaires.create.selected" appState ++ "=" ++ uuid ]
+        CreateRoute uuid ->
+            [ moduleRoot, lr "documents.create" appState, Uuid.toString uuid ]
 
-                Nothing ->
-                    [ moduleRoot, lr "documents.create" appState ]
+        IndexRoute questionnaireUuid paginationQueryString ->
+            let
+                queryString =
+                    PaginationQueryString.toUrlWith
+                        [ ( lr "documents.index.questionnaireUuid" appState, Maybe.unwrap "" Uuid.toString questionnaireUuid )
+                        ]
+                        paginationQueryString
+            in
+            if String.isEmpty queryString then
+                [ moduleRoot ]
 
-        IndexRoute questionnaireUuid ->
-            case questionnaireUuid of
-                Just uuid ->
-                    [ moduleRoot, "?" ++ lr "documents.index.questionnaireUuid" appState ++ "=" ++ uuid ]
-
-                Nothing ->
-                    [ moduleRoot ]
+            else
+                [ moduleRoot, queryString ]
 
 
-isAllowed : Route -> Maybe JwtToken -> Bool
-isAllowed _ maybeJwt =
-    hasPerm maybeJwt Perm.dataManagementPlan
+isAllowed : Route -> Session -> Bool
+isAllowed _ session =
+    Perm.hasPerm session Perm.dataManagementPlan

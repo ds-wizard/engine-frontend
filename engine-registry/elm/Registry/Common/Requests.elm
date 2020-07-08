@@ -2,6 +2,8 @@ module Registry.Common.Requests exposing
     ( getOrganization
     , getPackage
     , getPackages
+    , getTemplate
+    , getTemplates
     , getToken
     , postForgottenTokenActionKey
     , postOrganization
@@ -17,6 +19,8 @@ import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Entities.OrganizationDetail as OrganizationDetail exposing (OrganizationDetail)
 import Registry.Common.Entities.Package as Package exposing (Package)
 import Registry.Common.Entities.PackageDetail as PackageDetail exposing (PackageDetail)
+import Registry.Common.Entities.Template as Template exposing (Template)
+import Registry.Common.Entities.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 import Shared.Error.ApiError exposing (ApiError(..))
 
 
@@ -198,6 +202,22 @@ getPackage appState pkgId msg =
     Http.get
         { url = appState.apiUrl ++ "/packages/" ++ pkgId
         , expect = expectJson msg PackageDetail.decoder
+        }
+
+
+getTemplates : AppState -> ToMsg (List Template) msg -> Cmd msg
+getTemplates appState msg =
+    Http.get
+        { url = appState.apiUrl ++ "/templates"
+        , expect = expectJson msg (D.list Template.decoder)
+        }
+
+
+getTemplate : AppState -> String -> ToMsg TemplateDetail msg -> Cmd msg
+getTemplate appState templateId msg =
+    Http.get
+        { url = appState.apiUrl ++ "/templates/" ++ templateId
+        , expect = expectJson msg TemplateDetail.decoder
         }
 
 

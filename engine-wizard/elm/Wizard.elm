@@ -3,6 +3,7 @@ module Wizard exposing (main)
 import Browser
 import Browser.Navigation exposing (Key)
 import Json.Decode exposing (Value)
+import Shared.Utils exposing (dispatch)
 import Url exposing (Url)
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Time as Time
@@ -13,7 +14,7 @@ import Wizard.Public.Routes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, loginRoute, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
-import Wizard.Update exposing (fetchData, update)
+import Wizard.Update exposing (update)
 import Wizard.View exposing (view)
 
 
@@ -24,7 +25,7 @@ init flags location key =
             Routing.parseLocation appState location
 
         route =
-            routeIfAllowed appState.jwt originalRoute
+            routeIfAllowed appState.session originalRoute
 
         appState =
             AppState.init flags key
@@ -41,30 +42,30 @@ init flags location key =
 
             else
                 Cmd.batch
-                    [ decideInitialRoute model route originalRoute
+                    [ decideInitialRoute model location route originalRoute
                     , Time.getTime
                     ]
     in
     ( model, cmd )
 
 
-decideInitialRoute : Model -> Routes.Route -> Routes.Route -> Cmd Msg
-decideInitialRoute model route originalRoute =
+decideInitialRoute : Model -> Url -> Routes.Route -> Routes.Route -> Cmd Msg
+decideInitialRoute model location route originalRoute =
     case route of
         Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
                 ( True, Wizard.Public.Routes.BookReferenceRoute _ ) ->
-                    fetchData model
+                    dispatch (Wizard.Msgs.OnUrlChange location)
 
                 ( True, _ ) ->
                     cmdNavigate model.appState Routes.DashboardRoute
 
                 _ ->
-                    fetchData model
+                    dispatch (Wizard.Msgs.OnUrlChange location)
 
         _ ->
             if userLoggedIn model then
-                fetchData model
+                dispatch (Wizard.Msgs.OnUrlChange location)
 
             else
                 cmdNavigate model.appState (loginRoute <| Just <| toUrl model.appState originalRoute)

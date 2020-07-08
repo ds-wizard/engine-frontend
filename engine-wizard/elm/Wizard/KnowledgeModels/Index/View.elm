@@ -2,10 +2,12 @@ module Wizard.KnowledgeModels.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Auth.Permission as Perm
+import Shared.Data.Package exposing (Package)
+import Shared.Data.Package.PackageState as PackageState
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Version
-import Wizard.Auth.Permission exposing (hasPerm, packageManagementWrite)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
@@ -13,8 +15,6 @@ import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
-import Wizard.KnowledgeModels.Common.PackageState as PackageState
 import Wizard.KnowledgeModels.Index.Models exposing (..)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
@@ -53,7 +53,7 @@ viewKnowledgeModels appState model packages =
 
 indexActions : AppState -> List (Html Msg)
 indexActions appState =
-    if hasPerm appState.jwt packageManagementWrite then
+    if Perm.hasPerm appState.session Perm.packageManagementWrite then
         [ linkTo appState
             (Routes.KnowledgeModelsRoute <| ImportRoute Nothing)
             [ class "btn btn-primary link-with-icon" ]
@@ -147,7 +147,7 @@ listingActions appState package =
                 }
             ]
     in
-    if hasPerm appState.jwt packageManagementWrite then
+    if Perm.hasPerm appState.session Perm.packageManagementWrite then
         actions
             ++ [ Listing.dropdownSeparator
                , Listing.dropdownAction

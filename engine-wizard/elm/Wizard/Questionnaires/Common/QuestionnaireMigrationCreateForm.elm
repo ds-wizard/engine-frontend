@@ -8,7 +8,7 @@ module Wizard.Questionnaires.Common.QuestionnaireMigrationCreateForm exposing
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Form.FormError exposing (FormError)
 
 
 type alias QuestionnaireMigrationCreateForm =
@@ -16,12 +16,12 @@ type alias QuestionnaireMigrationCreateForm =
     }
 
 
-initEmpty : Form CustomFormError QuestionnaireMigrationCreateForm
+initEmpty : Form FormError QuestionnaireMigrationCreateForm
 initEmpty =
     Form.initial [] validation
 
 
-validation : Validation CustomFormError QuestionnaireMigrationCreateForm
+validation : Validation FormError QuestionnaireMigrationCreateForm
 validation =
     Validate.map QuestionnaireMigrationCreateForm
         (Validate.field "packageId" Validate.string)

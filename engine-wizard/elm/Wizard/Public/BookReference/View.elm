@@ -3,12 +3,12 @@ module Wizard.Public.BookReference.View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Markdown
+import Shared.Data.BookReference exposing (BookReference)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.Public.BookReference.Models exposing (Model)
 import Wizard.Public.BookReference.Msgs exposing (Msg)
-import Wizard.Public.Common.BookReference exposing (BookReference)
 
 
 l_ : String -> AppState -> String

@@ -6,11 +6,10 @@ module Wizard.Settings.Generic.View exposing
 import Form exposing (Form)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
-import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Settings.Generic.Model exposing (Model)
@@ -20,7 +19,7 @@ import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 type alias ViewProps form =
     { locTitle : AppState -> String
     , locSave : AppState -> String
-    , formView : AppState -> Form CustomFormError form -> Html Form.Msg
+    , formView : AppState -> Form FormError form -> Html Form.Msg
     }
 
 

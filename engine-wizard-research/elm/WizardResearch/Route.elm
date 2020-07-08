@@ -5,7 +5,9 @@ import Shared.Utils exposing (flip)
 import String.Extra as String
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), (<?>), Parser, s, string)
+import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
+import Uuid exposing (Uuid)
 import WizardResearch.Route.ProjectRoute as ProjectRoute exposing (ProjectRoute)
 
 
@@ -14,9 +16,11 @@ type Route
     | Dashboard
     | Login
     | Logout
+    | ForgottenPassword
+    | SignUp
     | NotFound
     | ProjectCreate
-    | Project String ProjectRoute
+    | Project Uuid ProjectRoute
 
 
 fromUrl : Url -> Route
@@ -31,13 +35,15 @@ parser =
         , Parser.map Dashboard Parser.top
         , Parser.map Login (s "login")
         , Parser.map Logout (s "logout")
+        , Parser.map ForgottenPassword (s "forgotten-password")
+        , Parser.map SignUp (s "sign-up")
         , Parser.map ProjectCreate (s "create-project")
-        , Parser.map (flip Project ProjectRoute.Overview) (s "projects" </> string)
-        , Parser.map (flip Project ProjectRoute.Planning) (s "projects" </> string </> s "planning")
-        , Parser.map (flip Project ProjectRoute.Starred) (s "projects" </> string </> s "starred")
-        , Parser.map (flip Project ProjectRoute.Metrics) (s "projects" </> string </> s "metrics")
-        , Parser.map (flip Project ProjectRoute.Documents) (s "projects" </> string </> s "documents")
-        , Parser.map (flip Project ProjectRoute.Settings) (s "projects" </> string </> s "settings")
+        , Parser.map (flip Project ProjectRoute.Overview) (s "projects" </> uuid)
+        , Parser.map (flip Project ProjectRoute.Planning) (s "projects" </> uuid </> s "planning")
+        , Parser.map (flip Project ProjectRoute.Starred) (s "projects" </> uuid </> s "starred")
+        , Parser.map (flip Project ProjectRoute.Metrics) (s "projects" </> uuid </> s "metrics")
+        , Parser.map (flip Project ProjectRoute.Documents) (s "projects" </> uuid </> s "documents")
+        , Parser.map (flip Project ProjectRoute.Settings) (s "projects" </> uuid </> s "settings")
         ]
 
 
@@ -60,6 +66,12 @@ toString route =
                 Logout ->
                     [ "logout" ]
 
+                ForgottenPassword ->
+                    [ "forgotten-password" ]
+
+                SignUp ->
+                    [ "sign-up" ]
+
                 Dashboard ->
                     [ "" ]
 
@@ -70,7 +82,7 @@ toString route =
                     [ "create-project" ]
 
                 Project uuid projectRoute ->
-                    [ "projects", uuid, ProjectRoute.toString projectRoute ]
+                    [ "projects", Uuid.toString uuid, ProjectRoute.toString projectRoute ]
     in
     "/" ++ String.join "/" (List.filter (not << String.isEmpty) parts)
 
@@ -82,6 +94,12 @@ isPublic route =
             True
 
         Login ->
+            True
+
+        ForgottenPassword ->
+            True
+
+        SignUp ->
             True
 
         NotFound ->

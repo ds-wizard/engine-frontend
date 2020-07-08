@@ -1,9 +1,11 @@
-module Wizard.Common.Menu.Models exposing (BuildInfo, Model, buildInfoDecoder, clientBuildInfo, initialModel)
+module Wizard.Common.Menu.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Json.Decode as Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
+import Shared.Data.BuildInfo exposing (BuildInfo)
 
 
 type alias Model =
@@ -15,12 +17,6 @@ type alias Model =
     }
 
 
-type alias BuildInfo =
-    { version : String
-    , builtAt : String
-    }
-
-
 initialModel : Model
 initialModel =
     { reportIssueOpen = False
@@ -29,17 +25,3 @@ initialModel =
     , aboutOpen = False
     , apiBuildInfo = Unset
     }
-
-
-clientBuildInfo : BuildInfo
-clientBuildInfo =
-    { version = "{version}"
-    , builtAt = "{builtAt}"
-    }
-
-
-buildInfoDecoder : Decoder BuildInfo
-buildInfoDecoder =
-    Decode.succeed BuildInfo
-        |> required "version" Decode.string
-        |> required "builtAt" Decode.string

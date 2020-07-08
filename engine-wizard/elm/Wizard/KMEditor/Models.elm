@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Models exposing (Model, initLocalModel, initialModel)
 
+import Uuid
 import Wizard.KMEditor.Create.Models
 import Wizard.KMEditor.Editor.Models
 import Wizard.KMEditor.Index.Models
@@ -20,9 +21,9 @@ type alias Model =
 initialModel : Model
 initialModel =
     { createModel = Wizard.KMEditor.Create.Models.initialModel Nothing
-    , editorModel = Wizard.KMEditor.Editor.Models.initialModel ""
+    , editorModel = Wizard.KMEditor.Editor.Models.initialModel Uuid.nil
     , indexModel = Wizard.KMEditor.Index.Models.initialModel
-    , migrationModel = Wizard.KMEditor.Migration.Models.initialModel ""
+    , migrationModel = Wizard.KMEditor.Migration.Models.initialModel Uuid.nil
     , publishModel = Wizard.KMEditor.Publish.Models.initialModel
     }
 

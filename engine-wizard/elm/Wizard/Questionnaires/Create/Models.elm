@@ -5,16 +5,17 @@ module Wizard.Questionnaires.Create.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Package exposing (Package)
+import Shared.Form.FormError exposing (FormError)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Questionnaires.Common.QuestionnaireCreateForm as QuestionnaireCreateForm exposing (QuestionnaireCreateForm)
 
 
 type alias Model =
     { packages : ActionResult (List Package)
     , savingQuestionnaire : ActionResult String
-    , form : Form CustomFormError QuestionnaireCreateForm
+    , form : Form FormError QuestionnaireCreateForm
     , selectedPackage : Maybe String
     , selectedTags : List String
     , lastFetchedPreview : Maybe String
@@ -22,11 +23,11 @@ type alias Model =
     }
 
 
-initialModel : Maybe String -> Model
-initialModel selectedPackage =
+initialModel : AppState -> Maybe String -> Model
+initialModel appState selectedPackage =
     { packages = Loading
     , savingQuestionnaire = Unset
-    , form = QuestionnaireCreateForm.init selectedPackage
+    , form = QuestionnaireCreateForm.init appState selectedPackage
     , selectedPackage = selectedPackage
     , selectedTags = []
     , lastFetchedPreview = Nothing

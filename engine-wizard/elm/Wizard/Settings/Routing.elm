@@ -4,11 +4,11 @@ module Wizard.Settings.Routing exposing
     , toUrl
     )
 
+import Shared.Auth.Permission as Perm
+import Shared.Auth.Session exposing (Session)
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Settings.Routes exposing (Route(..))
 
 
@@ -23,7 +23,7 @@ parsers appState wrapRoute =
     , map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s (lr "settings.privacyAndSupport" appState))
     , map (wrapRoute <| DashboardRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))
     , map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s (lr "settings.lookAndFeel" appState))
-    , map (wrapRoute <| KnowledgeModelRegistryRoute) (s moduleRoot </> s (lr "settings.knowledgeModelRegistry" appState))
+    , map (wrapRoute <| RegistryRoute) (s moduleRoot </> s (lr "settings.registry" appState))
     , map (wrapRoute <| QuestionnairesRoute) (s moduleRoot </> s (lr "settings.questionnaires" appState))
     , map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))
     , map (wrapRoute <| TemplateRoute) (s moduleRoot </> s (lr "settings.template" appState))
@@ -52,8 +52,8 @@ toUrl appState route =
         LookAndFeelRoute ->
             [ moduleRoot, lr "settings.lookAndFeel" appState ]
 
-        KnowledgeModelRegistryRoute ->
-            [ moduleRoot, lr "settings.knowledgeModelRegistry" appState ]
+        RegistryRoute ->
+            [ moduleRoot, lr "settings.registry" appState ]
 
         QuestionnairesRoute ->
             [ moduleRoot, lr "settings.questionnaires" appState ]
@@ -65,6 +65,6 @@ toUrl appState route =
             [ moduleRoot, lr "settings.template" appState ]
 
 
-isAllowed : Route -> Maybe JwtToken -> Bool
-isAllowed _ maybeJwt =
-    hasPerm maybeJwt Perm.settings
+isAllowed : Route -> Session -> Bool
+isAllowed _ session =
+    Perm.hasPerm session Perm.settings

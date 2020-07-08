@@ -5,10 +5,11 @@ import Form.Input as Input
 import Html exposing (Html, button, div, label)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
@@ -40,7 +41,7 @@ viewProps =
     }
 
 
-formView : AppState -> Form CustomFormError EditableQuestionnairesConfigForm -> Html Form.Msg
+formView : AppState -> Form FormError EditableQuestionnairesConfigForm -> Html Form.Msg
 formView appState form =
     let
         enabled =
@@ -63,8 +64,12 @@ formView appState form =
     div []
         [ FormGroup.toggle form "questionnaireVisibilityEnabled" (l_ "form.questionnaireVisibility" appState)
         , FormExtra.mdAfter (l_ "form.questionnaireVisibility.desc" appState)
-        , FormGroup.toggle form "levelsEnabled" (l_ "form.phases" appState)
+        , FormGroup.select appState (QuestionnaireVisibility.formOptions appState) form "questionnaireVisibilityDefaultValue" (l_ "form.questionnaireVisibilityDefaultValue" appState)
+        , FormExtra.mdAfter (l_ "form.questionnaireVisibilityDefaultValue.desc" appState)
+        , FormGroup.toggle form "levels" (l_ "form.phases" appState)
         , FormExtra.mdAfter (l_ "form.phases.desc" appState)
+        , FormGroup.toggle form "summaryReport" (l_ "form.summaryReport" appState)
+        , FormExtra.mdAfter (l_ "form.summaryReport.desc" appState)
         , FormGroup.toggle form "feedbackEnabled" (l_ "form.feedback" appState)
         , FormExtra.mdAfter (l_ "form.feedback.desc" appState)
         , feedbackInput

@@ -14,17 +14,18 @@ module Wizard.KMEditor.Editor.KMEditor.Models exposing
 import Dict exposing (Dict)
 import Maybe.Extra as Maybe
 import Reorderable
+import Shared.Data.Event as Event exposing (Event(..))
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
+import Shared.Utils exposing (listFilterJust)
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
-import Wizard.KMEditor.Common.Events.Event as Event exposing (Event(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Integration exposing (Integration)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
+import Uuid
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
 import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
-import Wizard.Utils exposing (listFilterJust)
 
 
 type alias Model =
@@ -46,10 +47,10 @@ initialModel : KnowledgeModel -> Maybe String -> List Metric -> List Level -> Li
 initialModel knowledgeModel mbActiveEditorUuid metrics levels =
     let
         activeEditorUuid =
-            Maybe.or mbActiveEditorUuid (Just knowledgeModel.uuid)
+            Maybe.or mbActiveEditorUuid (Just (Uuid.toString knowledgeModel.uuid))
     in
     createEditors mbActiveEditorUuid
-        { kmUuid = knowledgeModel.uuid
+        { kmUuid = Uuid.toString knowledgeModel.uuid
         , knowledgeModel = knowledgeModel
         , metrics = metrics
         , levels = levels
@@ -59,7 +60,7 @@ initialModel knowledgeModel mbActiveEditorUuid metrics levels =
         , events = []
         , alert = Nothing
         , splitPane = SplitPane.init Horizontal |> configureSplitter (percentage 0.2 (Just ( 0.05, 0.7 )))
-        , moveModal = MoveModal.initialModel knowledgeModel.uuid
+        , moveModal = MoveModal.initialModel (Uuid.toString knowledgeModel.uuid)
         }
 
 

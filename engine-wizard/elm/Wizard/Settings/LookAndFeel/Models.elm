@@ -1,6 +1,6 @@
 module Wizard.Settings.LookAndFeel.Models exposing (..)
 
-import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Wizard.Settings.Generic.Model as GenericModel
 
 

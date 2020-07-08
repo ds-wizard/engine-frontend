@@ -1,6 +1,5 @@
 port module Wizard.Ports exposing
-    ( FilePortData
-    , alert
+    ( alert
     , clearSession
     , clearSessionAndReload
     , clearUnloadMessage
@@ -16,15 +15,14 @@ port module Wizard.Ports exposing
     , storeSession
     )
 
-import Json.Encode as Encode exposing (Value)
-import Wizard.Common.Session exposing (Session)
+import Json.Encode as E exposing (Value)
 
 
 
 -- Session
 
 
-port storeSession : Maybe Session -> Cmd msg
+port storeSession : E.Value -> Cmd msg
 
 
 port clearSession : () -> Cmd msg
@@ -37,16 +35,10 @@ port clearSessionAndReload : () -> Cmd msg
 -- Import
 
 
-type alias FilePortData =
-    { contents : String
-    , filename : String
-    }
-
-
 port fileSelected : String -> Cmd msg
 
 
-port fileContentRead : (FilePortData -> msg) -> Sub msg
+port fileContentRead : (E.Value -> msg) -> Sub msg
 
 
 port createDropzone : String -> Cmd msg
@@ -86,7 +78,7 @@ port refresh : () -> Cmd msg
 -- Charts
 
 
-port drawMetricsChart : Encode.Value -> Cmd msg
+port drawMetricsChart : E.Value -> Cmd msg
 
 
 

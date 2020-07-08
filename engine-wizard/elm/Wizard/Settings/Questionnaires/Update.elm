@@ -1,8 +1,8 @@
 module Wizard.Settings.Questionnaires.Update exposing (update)
 
+import Shared.Data.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Settings.Common.EditableConfig as EditableConfig
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm as EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
 import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.Update as GenericUpdate

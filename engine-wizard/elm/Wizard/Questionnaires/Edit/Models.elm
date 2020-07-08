@@ -5,20 +5,21 @@ module Wizard.Questionnaires.Edit.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Form.FormError exposing (FormError)
+import Uuid exposing (Uuid)
 import Wizard.Questionnaires.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
 
 
 type alias Model =
-    { uuid : String
+    { uuid : Uuid
     , questionnaire : ActionResult QuestionnaireDetail
-    , editForm : Form CustomFormError QuestionnaireEditForm
+    , editForm : Form FormError QuestionnaireEditForm
     , savingQuestionnaire : ActionResult String
     }
 
 
-initialModel : String -> Model
+initialModel : Uuid -> Model
 initialModel uuid =
     { uuid = uuid
     , questionnaire = Loading

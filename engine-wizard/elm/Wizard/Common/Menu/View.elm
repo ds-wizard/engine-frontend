@@ -13,23 +13,23 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (..)
 import Html.Attributes exposing (class, colspan, href, src, target)
+import Shared.Auth.Permission as Perm
+import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
+import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
+import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
-import Wizard.Auth.Permission as Permissions
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
-import Wizard.Common.Menu.Models exposing (BuildInfo, clientBuildInfo)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Settings.Routes
-import Wizard.Users.Common.User as User
 import Wizard.Users.Routes
 
 
@@ -74,7 +74,7 @@ viewHelpMenu appState dropdownState =
 
 viewSettingsMenu : AppState -> Html Wizard.Msgs.Msg
 viewSettingsMenu appState =
-    if Permissions.hasPerm appState.jwt Permissions.settings then
+    if Perm.hasPerm appState.session Perm.settings then
         div [ class "btn-group" ]
             [ linkTo appState
                 (Routes.SettingsRoute Wizard.Settings.Routes.defaultRoute)
@@ -180,7 +180,7 @@ viewAboutModal appState isOpen serverBuildInfoActionResult =
 viewAboutModalContent : AppState -> BuildInfo -> Html Wizard.Msgs.Msg
 viewAboutModalContent appState serverBuildInfo =
     div []
-        [ viewBuildInfo appState (l_ "about.client" appState) clientBuildInfo
+        [ viewBuildInfo appState (l_ "about.client" appState) BuildInfo.client
         , viewBuildInfo appState (l_ "about.server" appState) serverBuildInfo
         ]
 

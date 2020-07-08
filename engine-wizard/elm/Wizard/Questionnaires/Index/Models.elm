@@ -4,24 +4,24 @@ module Wizard.Questionnaires.Index.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Common.Components.Listing as Listing
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Wizard.Common.Components.Listing.Models as Listing
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Models as DeleteQuestionnaireModal
 
 
 type alias Model =
-    { questionnaires : ActionResult (Listing.Model Questionnaire)
-    , questionnaireToBeDeleted : Maybe Questionnaire
-    , deletingQuestionnaire : ActionResult String
+    { questionnaires : Listing.Model Questionnaire
     , deletingMigration : ActionResult String
     , cloningQuestionnaire : ActionResult String
+    , deleteModalModel : DeleteQuestionnaireModal.Model
     }
 
 
-initialModel : Model
-initialModel =
-    { questionnaires = Loading
-    , questionnaireToBeDeleted = Nothing
-    , deletingQuestionnaire = Unset
+initialModel : PaginationQueryString -> Model
+initialModel paginationQueryString =
+    { questionnaires = Listing.initialModel paginationQueryString
     , deletingMigration = Unset
     , cloningQuestionnaire = Unset
+    , deleteModalModel = DeleteQuestionnaireModal.initialModel
     }

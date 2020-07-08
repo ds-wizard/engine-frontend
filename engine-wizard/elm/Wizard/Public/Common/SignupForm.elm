@@ -11,8 +11,8 @@ import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Validate as V exposing (..)
 import Json.Encode as E exposing (..)
 import Json.Encode.Extra as E
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate as V
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias SignupForm =
@@ -26,12 +26,12 @@ type alias SignupForm =
     }
 
 
-initEmpty : Form CustomFormError SignupForm
+initEmpty : Form FormError SignupForm
 initEmpty =
     Form.initial [] validation
 
 
-validation : Validation CustomFormError SignupForm
+validation : Validation FormError SignupForm
 validation =
     V.succeed SignupForm
         |> V.andMap (V.field "email" V.email)

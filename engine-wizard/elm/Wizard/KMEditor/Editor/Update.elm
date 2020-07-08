@@ -7,16 +7,17 @@ module Wizard.KMEditor.Editor.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Maybe.Extra exposing (isJust)
 import Random exposing (Seed)
+import Shared.Api.Branches as BranchesApi
+import Shared.Api.KnowledgeModels as KnowledgeModelsApi
+import Shared.Api.Levels as LevelsApi
+import Shared.Api.Metrics as MetricsApi
+import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Error.ApiError as ApiError
 import Shared.Locale exposing (l, lg)
 import Task
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Branches as BranchesApi
-import Wizard.Common.Api.KnowledgeModels as KnowledgeModelsApi
-import Wizard.Common.Api.Levels as LevelsApi
-import Wizard.Common.Api.Metrics as MetricsApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
 import Wizard.KMEditor.Editor.KMEditor.Models
 import Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents)
 import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, getCurrentActiveEditorUuid, initialModel)
@@ -34,7 +35,7 @@ l_ =
     l "Wizard.KMEditor.Editor.Update"
 
 
-fetchData : String -> AppState -> Cmd Msg
+fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
     Cmd.batch
         [ BranchesApi.getBranch uuid appState GetKnowledgeModelCompleted

@@ -5,12 +5,12 @@ module Wizard.Public.ForgottenPasswordConfirmation.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Wizard.Common.Form exposing (CustomFormError)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.Public.Common.PasswordForm as PasswordForm exposing (PasswordForm)
 
 
 type alias Model =
-    { form : Form CustomFormError PasswordForm
+    { form : Form FormError PasswordForm
     , submitting : ActionResult String
     , userId : String
     , hash : String

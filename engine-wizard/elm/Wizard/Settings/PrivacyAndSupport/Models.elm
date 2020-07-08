@@ -1,6 +1,6 @@
 module Wizard.Settings.PrivacyAndSupport.Models exposing (..)
 
-import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
+import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Settings.Generic.Model as GenericModel
 
 

@@ -3,10 +3,10 @@ module Wizard.Common.View.ExternalLoginButton exposing (badgeWrapper, defaultBac
 import Html exposing (Attribute, Html, a, span, text)
 import Html.Attributes exposing (class, href, style)
 import List.Extra as List
+import Shared.Api.Auth as AuthApi
+import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Shared.Html exposing (fa, faKey, faSet)
-import Wizard.Common.Api.Auth as AuthApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.Partials.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 
 
 defaultBackground : String
@@ -27,7 +27,7 @@ defaultIcon appState =
 view : AppState -> OpenIDServiceConfig -> Html msg
 view appState config =
     render
-        [ href <| AuthApi.authRedirectUrl config.id appState ]
+        [ href <| AuthApi.authRedirectUrl config appState ]
         appState
         config.name
         config.style.icon

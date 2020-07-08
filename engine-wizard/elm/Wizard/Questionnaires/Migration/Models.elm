@@ -10,23 +10,25 @@ module Wizard.Questionnaires.Migration.Models exposing
 import ActionResult exposing (ActionResult(..))
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.FormValue exposing (FormValue)
+import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue as ReplyValue
+import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Shared.Utils exposing (flip, listFilterJust)
+import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.FormEngine.Model exposing (FormValue, getAnswerUuid)
 import Wizard.Common.Questionnaire.Models
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Questionnaires.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData)
 import Wizard.Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionAddData, QuestionChange(..), QuestionChangeData, QuestionMoveData)
 import Wizard.Questionnaires.Common.QuestionnaireChanges as QuestionnaireChanges exposing (QuestionnaireChanges)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Wizard.Questionnaires.Common.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
-import Wizard.Utils exposing (flip, listFilterJust)
 
 
 type alias Model =
-    { questionnaireUuid : String
+    { questionnaireUuid : Uuid
     , questionnaireMigration : ActionResult QuestionnaireMigration
     , levels : ActionResult (List Level)
     , changes : QuestionnaireChanges
@@ -35,7 +37,7 @@ type alias Model =
     }
 
 
-initialModel : String -> Model
+initialModel : Uuid -> Model
 initialModel questionnaireUuid =
     { questionnaireUuid = questionnaireUuid
     , questionnaireMigration = Loading
@@ -121,7 +123,7 @@ getQuestionChanges appState context chapter question =
                         answerChanges =
                             getAnswerChanges context question
                     in
-                    if not (List.isEmpty answerChanges) || isChanged appState.config.questionnaires.levels.enabled oldQuestion question then
+                    if not (List.isEmpty answerChanges) || isChanged appState.config.questionnaire.levels.enabled oldQuestion question then
                         QuestionnaireChanges [ QuestionChange <| QuestionChangeData question oldQuestion chapter ] answerChanges
 
                     else if isMoved context question then
@@ -142,7 +144,7 @@ getQuestionChanges appState context chapter question =
                 Just formValue ->
                     case question of
                         OptionsQuestion _ _ ->
-                            case KnowledgeModel.getAnswer (getAnswerUuid formValue.value) context.newKM of
+                            case KnowledgeModel.getAnswer (ReplyValue.getAnswerUuid formValue.value) context.newKM of
                                 Just answer ->
                                     QuestionnaireChanges.foldMap
                                         (getQuestionChanges appState context chapter)

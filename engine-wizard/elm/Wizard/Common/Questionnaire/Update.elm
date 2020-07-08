@@ -3,27 +3,28 @@ module Wizard.Common.Questionnaire.Update exposing (update)
 import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (encodeChartConfig)
 import Form exposing (Form)
+import Shared.Api.Feedbacks as FeedbacksApi
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Api.TypeHints as TypeHintsApi
+import Shared.Data.Event exposing (Event)
+import Shared.Data.Feedback exposing (Feedback)
+import Shared.Data.KnowledgeModel as KnowledgeModel
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.Questionnaire.QuestionnaireTodo as QuestionnaireTodo exposing (QuestionnaireTodo)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
+import Shared.Data.SummaryReport exposing (SummaryReport)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api.Feedbacks as FeedbacksApi
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
-import Wizard.Common.Api.TypeHints as TypeHintsApi
+import Shared.Utils exposing (stringToInt, withNoCmd)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.Model exposing (TypeHint, setTypeHintsResult)
 import Wizard.Common.FormEngine.Msgs
 import Wizard.Common.FormEngine.Update exposing (updateForm)
 import Wizard.Common.Questionnaire.Models exposing (..)
-import Wizard.Common.Questionnaire.Models.Feedback exposing (Feedback)
 import Wizard.Common.Questionnaire.Models.FeedbackForm as FeedbackForm
-import Wizard.Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Wizard.KMEditor.Common.Events.Event exposing (Event)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
 import Wizard.Ports as Ports
-import Wizard.Questionnaires.Common.QuestionnaireDetail as QuestionnaireDetail
-import Wizard.Questionnaires.Common.QuestionnaireTodo as QuestionnaireTodo exposing (QuestionnaireTodo)
-import Wizard.Utils exposing (stringToInt, withNoCmd)
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Msg )

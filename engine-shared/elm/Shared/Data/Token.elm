@@ -1,28 +1,34 @@
 module Shared.Data.Token exposing
     ( Token
     , decoder
-    , value
+    , empty
+    , encode
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Json.Encode as E
 
 
-type Token
-    = Token Internals
+type alias Token =
+    { token : String
+    }
 
 
-type alias Internals =
-    { value : String }
-
-
-value : Token -> String
-value (Token token) =
-    token.value
+empty : Token
+empty =
+    { token = ""
+    }
 
 
 decoder : Decoder Token
 decoder =
-    D.succeed Internals
+    D.succeed Token
         |> D.required "token" D.string
-        |> D.map Token
+
+
+encode : Token -> E.Value
+encode token =
+    E.object
+        [ ( "token", E.string token.token )
+        ]

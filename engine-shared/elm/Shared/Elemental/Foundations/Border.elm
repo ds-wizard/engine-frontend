@@ -1,4 +1,4 @@
-module Shared.Elemental.Foundations.Border exposing (default, roundedDefault, roundedFull)
+module Shared.Elemental.Foundations.Border exposing (default, radiusDefault, roundedDefault, roundedFull)
 
 import Css exposing (Style, border3, borderRadius, px, solid)
 import Shared.Elemental.Theme exposing (Theme)

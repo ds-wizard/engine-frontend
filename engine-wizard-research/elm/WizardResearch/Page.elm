@@ -8,7 +8,7 @@ import Css exposing (Style, paddingTop)
 import Html.Styled exposing (Html, div, toUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Shared.Data.BootstrapConfig
-import Shared.Data.BootstrapConfig.LookAndFeelConfig
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Elemental.Components.Navigation as Navigation
 import Shared.Elemental.Foundations.Size as Size
 import Shared.Elemental.Global as Global
@@ -25,7 +25,7 @@ type Page
 
 view : AppState -> Page -> { title : String, content : Html msg } -> Document msg
 view appState page { title, content } =
-    { title = title ++ " | Data Stewardship Wizard"
+    { title = title ++ " | " ++ LookAndFeelConfig.getAppTitle appState.config.lookAndFeel
     , body = [ toUnstyled <| layout appState page content ]
     }
 
@@ -46,15 +46,14 @@ layout appState page =
 layoutStyle : Theme -> List Style
 layoutStyle theme =
     [ Global.styles theme
-    , paddingTop (px2rem Size.navigationHeight)
     ]
 
 
 layoutApp : AppState -> Html msg -> Html msg
 layoutApp appState content =
-    div [ css (layoutStyle appState.theme) ]
+    div [ css (paddingTop (px2rem Size.navigationHeight) :: layoutStyle appState.theme) ]
         [ Navigation.view
-            { appTitle = appState.config.lookAndFeel.appTitle
+            { appTitle = LookAndFeelConfig.getAppTitle appState.config.lookAndFeel
             , theme = appState.theme
             }
         , content
@@ -73,9 +72,5 @@ layoutAuto appState =
 layoutPublic : AppState -> Html msg -> Html msg
 layoutPublic appState content =
     div [ css (layoutStyle appState.theme) ]
-        [ Navigation.view
-            { appTitle = appState.config.lookAndFeel.appTitle
-            , theme = appState.theme
-            }
-        , content
+        [ content
         ]

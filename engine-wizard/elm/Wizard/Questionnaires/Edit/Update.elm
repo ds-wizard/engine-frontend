@@ -2,13 +2,15 @@ module Wizard.Questionnaires.Edit.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Common.QuestionnaireEditForm as QuestionnaireEditForm
 import Wizard.Questionnaires.Edit.Models exposing (Model)
 import Wizard.Questionnaires.Edit.Msgs exposing (Msg(..))
@@ -17,7 +19,7 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> String -> Cmd Msg
+fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
     QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted
 
@@ -84,7 +86,7 @@ handlePutQuestionnaireCompleted : AppState -> Model -> Result ApiError () -> ( M
 handlePutQuestionnaireCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute IndexRoute )
+            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty) )
 
         Err error ->
             ( { model | savingQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.putError" appState) error }

@@ -2,8 +2,11 @@ module Wizard.Users.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Auth.Role as Role
+import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
@@ -14,8 +17,6 @@ import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Routes as Routes
-import Wizard.Users.Common.Role as Role
-import Wizard.Users.Common.User as User exposing (User)
 import Wizard.Users.Index.Models exposing (..)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
 import Wizard.Users.Routes exposing (Route(..))
@@ -150,7 +151,7 @@ listingActions appState user =
 
 detailRoute : User -> Routes.Route
 detailRoute =
-    Routes.UsersRoute << EditRoute << .uuid
+    Routes.UsersRoute << EditRoute << Uuid.toString << .uuid
 
 
 deleteModal : AppState -> Model -> Html Msg

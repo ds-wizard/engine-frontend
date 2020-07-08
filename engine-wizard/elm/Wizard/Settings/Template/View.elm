@@ -2,13 +2,14 @@ module Wizard.Settings.Template.View exposing (..)
 
 import Form exposing (Form)
 import Html exposing (Html, div)
+import Shared.Data.BootstrapConfig.TemplateConfig exposing (TemplateConfig)
+import Shared.Data.Template exposing (Template)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.TemplateConfig exposing (TemplateConfig)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
-import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Template.Models exposing (Model)
 import Wizard.Settings.Template.Msgs exposing (Msg(..))
@@ -43,14 +44,14 @@ viewProps templates =
     }
 
 
-formView : List Template -> AppState -> Form CustomFormError TemplateConfig -> Html Form.Msg
+formView : List Template -> AppState -> Form FormError TemplateConfig -> Html Form.Msg
 formView templates appState form =
     let
-        toFormOption { uuid, name } =
-            ( uuid, name )
+        toFormOption { id, name } =
+            ( id, name )
 
         options =
             ( "", "- none -" ) :: List.map toFormOption templates
     in
     div []
-        [ FormGroup.select appState options form "recommendedTemplateUuid" (l_ "form.recommendedTemplateUuid" appState) ]
+        [ FormGroup.select appState options form "recommendedTemplateId" (l_ "form.recommendedTemplateId" appState) ]

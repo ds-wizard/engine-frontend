@@ -7,11 +7,11 @@ module Shared.Elemental.Foundations.Grid exposing
     , compact
     , containerExtraIndented
     , containerFluid
-    , containerFullHeight
     , containerIndented
     , containerLimited
     , containerLimitedSmall
     , cozy
+    , fullHeight
     , rowStackLG
     , rowStackMD
     )
@@ -64,6 +64,11 @@ compact =
     }
 
 
+fullHeight : Html.Attribute msg
+fullHeight =
+    css [ minHeight (calc (vh 100) minus (px2rem Size.navigationHeight)) ]
+
+
 containerFluid : Html.Attribute msg
 containerFluid =
     css
@@ -85,11 +90,6 @@ containerLimitedSmall =
         [ maxWidth (px 960)
         , margin2 zero auto
         ]
-
-
-containerFullHeight : Html.Attribute msg
-containerFullHeight =
-    css [ height (calc (vh 100) minus (px2rem Size.navigationHeight)) ]
 
 
 containerIndented : Html.Attribute msg

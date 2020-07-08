@@ -9,8 +9,8 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (..)
 import Json.Encode as E exposing (..)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate as Validate
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as Validate
 
 
 type alias BranchCreateForm =
@@ -20,7 +20,7 @@ type alias BranchCreateForm =
     }
 
 
-init : Maybe String -> Form CustomFormError BranchCreateForm
+init : Maybe String -> Form FormError BranchCreateForm
 init selectedPackage =
     let
         initials =
@@ -34,7 +34,7 @@ init selectedPackage =
     Form.initial initials validation
 
 
-validation : Validation CustomFormError BranchCreateForm
+validation : Validation FormError BranchCreateForm
 validation =
     Validate.map3 BranchCreateForm
         (Validate.field "name" Validate.string)

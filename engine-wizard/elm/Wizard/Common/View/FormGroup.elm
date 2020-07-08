@@ -29,13 +29,15 @@ import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, for, id, name, rows, style, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Markdown
+import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
+import Shared.Form exposing (errorToString)
+import Shared.Form.FormError exposing (FormError(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lx)
+import Shared.Utils exposing (getContrastColorHex)
 import String exposing (fromFloat)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError(..))
-import Wizard.Documents.Common.TemplateFormat exposing (TemplateFormat)
-import Wizard.Utils exposing (getContrastColorHex)
 
 
 l_ : String -> AppState -> String
@@ -63,17 +65,17 @@ optionalWrapper appState content =
 
 {-| Helper for creating form group with text input field.
 -}
-input : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+input : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 input =
     formGroup Input.textInput []
 
 
-inputAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+inputAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form FormError o -> String -> String -> Html.Html Form.Msg
 inputAttrs =
     formGroup Input.textInput
 
 
-inputWithTypehints : List String -> AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+inputWithTypehints : List String -> AppState -> Form FormError o -> String -> String -> Html Form.Msg
 inputWithTypehints options appState form fieldName labelText =
     let
         field =
@@ -119,19 +121,19 @@ inputWithTypehints options appState form fieldName labelText =
 
 {-| Helper for creating form group with password input field.
 -}
-password : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+password : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 password =
     formGroup Input.passwordInput []
 
 
 {-| Helper for creating form group with select field.
 -}
-select : AppState -> List ( String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+select : AppState -> List ( String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 select appState options =
     formGroup (Input.selectInput options) [] appState
 
 
-richRadioGroup : AppState -> List ( String, String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+richRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 richRadioGroup appState options =
     let
         radioInput state attrs =
@@ -158,20 +160,20 @@ richRadioGroup appState options =
     formGroup radioInput [] appState
 
 
-formatRadioGroup : AppState -> List TemplateFormat -> Form CustomFormError o -> String -> String -> Html Form.Msg
+formatRadioGroup : AppState -> List TemplateFormat -> Form FormError o -> String -> String -> Html Form.Msg
 formatRadioGroup appState options =
     let
         radioInput state attrs =
             let
                 buildOption : TemplateFormat -> Html Form.Msg
                 buildOption format =
-                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just format.uuid ) ] ]
+                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just (Uuid.toString format.uuid) ) ] ]
                         [ Html.input
-                            [ value format.uuid
-                            , checked (state.value == Just format.uuid)
+                            [ value (Uuid.toString format.uuid)
+                            , checked (state.value == Just (Uuid.toString format.uuid))
                             , type_ "radio"
                             , name "format"
-                            , onCheck (\_ -> Input state.path Form.Text <| Field.String format.uuid)
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String <| Uuid.toString format.uuid)
                             ]
                             []
                         , fa format.icon
@@ -183,7 +185,7 @@ formatRadioGroup appState options =
     formGroup radioInput [] appState
 
 
-htmlRadioGroup : AppState -> List ( String, Html Form.Msg ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+htmlRadioGroup : AppState -> List ( String, Html Form.Msg ) -> Form FormError o -> String -> String -> Html Form.Msg
 htmlRadioGroup appState options =
     let
         radioInput state attrs =
@@ -209,17 +211,17 @@ htmlRadioGroup appState options =
 
 {-| Helper for creating form group with textarea.
 -}
-textarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+textarea : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 textarea =
     formGroup Input.textArea []
 
 
-textareaAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+textareaAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form FormError o -> String -> String -> Html Form.Msg
 textareaAttrs =
     formGroup Input.textArea
 
 
-resizableTextarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+resizableTextarea : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 resizableTextarea appState form fieldName =
     let
         lines =
@@ -232,7 +234,7 @@ resizableTextarea appState form fieldName =
 
 {-| Helper for creating form group with toggle
 -}
-toggle : Form CustomFormError o -> String -> String -> Html Form.Msg
+toggle : Form FormError o -> String -> String -> Html Form.Msg
 toggle form fieldName labelText =
     let
         field =
@@ -248,7 +250,7 @@ toggle form fieldName labelText =
 
 {-| Helper for creating form group with color input field
 -}
-color : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+color : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 color appState form fieldName labelText =
     let
         field =
@@ -312,7 +314,7 @@ colorButton appState maybeValue fieldName colorHex =
         [ check ]
 
 
-list : AppState -> (Form CustomFormError o -> Int -> Html Form.Msg) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+list : AppState -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> Html Form.Msg
 list appState itemView form fieldName labelText =
     let
         field =
@@ -330,7 +332,7 @@ list appState itemView form fieldName labelText =
         ]
 
 
-markdownEditor : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+markdownEditor : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 markdownEditor appState form fieldName labelText =
     let
         field =
@@ -415,7 +417,7 @@ markdownEditor appState form fieldName labelText =
 
 {-| Create Html for a form field using the given input field.
 -}
-formGroup : Input.Input CustomFormError String -> List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+formGroup : Input.Input FormError String -> List (Html.Attribute Form.Msg) -> AppState -> Form FormError o -> String -> String -> Html.Html Form.Msg
 formGroup inputFn attrs appState form fieldName labelText =
     let
         field =
@@ -461,53 +463,11 @@ plainGroup valueHtml labelText =
 {-| Get Html and form group error class for a given field. If the field
 contains no errors, the returned Html and error class are empty.
 -}
-getErrors : AppState -> Form.FieldState CustomFormError String -> String -> ( Html msg, String )
+getErrors : AppState -> Form.FieldState FormError String -> String -> ( Html msg, String )
 getErrors appState field labelText =
     case field.liveError of
         Just error ->
-            ( p [ class "invalid-feedback" ] [ text (toReadable appState error labelText) ], "is-invalid" )
+            ( p [ class "invalid-feedback" ] [ text (errorToString appState labelText error) ], "is-invalid" )
 
         Nothing ->
             ( text "", "" )
-
-
-toReadable : AppState -> ErrorValue CustomFormError -> String -> String
-toReadable appState error labelText =
-    case error of
-        Empty ->
-            lf_ "error.empty" [ labelText ] appState
-
-        InvalidString ->
-            lf_ "error.invalidString" [ labelText ] appState
-
-        InvalidEmail ->
-            l_ "error.invalidEmail" appState
-
-        InvalidFloat ->
-            l_ "error.invalidFloat" appState
-
-        SmallerFloatThan n ->
-            lf_ "error.smallerFloatThan" [ fromFloat n ] appState
-
-        GreaterFloatThan n ->
-            lf_ "error.greaterFloatThan" [ fromFloat n ] appState
-
-        CustomError err ->
-            case err of
-                ConfirmationError ->
-                    l_ "error.confirmationError" appState
-
-                InvalidUuid ->
-                    l_ "error.invalidUuid" appState
-
-                ServerValidationError msg ->
-                    msg
-
-                Error msg ->
-                    msg
-
-                IntegrationIdAlreadyUsed ->
-                    l_ "error.integrationIdAlreadyUsed" appState
-
-        _ ->
-            l_ "error.default" appState

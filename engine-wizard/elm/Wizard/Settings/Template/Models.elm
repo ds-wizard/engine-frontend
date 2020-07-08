@@ -1,8 +1,8 @@
 module Wizard.Settings.Template.Models exposing (..)
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Common.Config.TemplateConfig as TemplateConfig exposing (TemplateConfig)
-import Wizard.Documents.Common.Template exposing (Template)
+import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig exposing (TemplateConfig)
+import Shared.Data.Template exposing (Template)
 import Wizard.Settings.Generic.Model as GenericModel
 
 

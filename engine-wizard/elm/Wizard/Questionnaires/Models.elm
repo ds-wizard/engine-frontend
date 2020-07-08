@@ -1,5 +1,8 @@
 module Wizard.Questionnaires.Models exposing (Model, initLocalModel, initialModel)
 
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Uuid
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Questionnaires.Create.Models
 import Wizard.Questionnaires.CreateMigration.Models
 import Wizard.Questionnaires.Detail.Models
@@ -19,22 +22,22 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { createModel = Wizard.Questionnaires.Create.Models.initialModel Nothing
-    , createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel ""
-    , detailModel = Wizard.Questionnaires.Detail.Models.initialModel ""
-    , editModel = Wizard.Questionnaires.Edit.Models.initialModel ""
-    , indexModel = Wizard.Questionnaires.Index.Models.initialModel
-    , migrationModel = Wizard.Questionnaires.Migration.Models.initialModel ""
+initialModel : AppState -> Model
+initialModel appState =
+    { createModel = Wizard.Questionnaires.Create.Models.initialModel appState Nothing
+    , createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel Uuid.nil
+    , detailModel = Wizard.Questionnaires.Detail.Models.initialModel Uuid.nil
+    , editModel = Wizard.Questionnaires.Edit.Models.initialModel Uuid.nil
+    , indexModel = Wizard.Questionnaires.Index.Models.initialModel PaginationQueryString.empty
+    , migrationModel = Wizard.Questionnaires.Migration.Models.initialModel Uuid.nil
     }
 
 
-initLocalModel : Route -> Model -> Model
-initLocalModel route model =
+initLocalModel : AppState -> Route -> Model -> Model
+initLocalModel appState route model =
     case route of
         CreateRoute selectedPackage ->
-            { model | createModel = Wizard.Questionnaires.Create.Models.initialModel selectedPackage }
+            { model | createModel = Wizard.Questionnaires.Create.Models.initialModel appState selectedPackage }
 
         CreateMigrationRoute uuid ->
             { model | createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel uuid }
@@ -45,8 +48,8 @@ initLocalModel route model =
         EditRoute uuid ->
             { model | editModel = Wizard.Questionnaires.Edit.Models.initialModel uuid }
 
-        IndexRoute ->
-            { model | indexModel = Wizard.Questionnaires.Index.Models.initialModel }
+        IndexRoute paginationQueryString ->
+            { model | indexModel = Wizard.Questionnaires.Index.Models.initialModel paginationQueryString }
 
         MigrationRoute uuid ->
             { model | migrationModel = Wizard.Questionnaires.Migration.Models.initialModel uuid }

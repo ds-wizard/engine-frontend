@@ -2,6 +2,7 @@ module Wizard.KMEditor.Create.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (..)
+import Shared.Data.Package as Package exposing (Package)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
@@ -14,7 +15,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Create.Models exposing (..)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Common.Package as Package exposing (Package)
 import Wizard.Routes as Routes
 
 

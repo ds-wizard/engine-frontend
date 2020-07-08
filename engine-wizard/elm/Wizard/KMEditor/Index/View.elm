@@ -4,29 +4,29 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Auth.Permission as Perm
+import Shared.Auth.Session exposing (Session)
+import Shared.Data.Branch as Branch exposing (Branch)
+import Shared.Data.Branch.BranchState as BranchState
+import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Utils exposing (listInsertIf, packageIdToComponents)
 import Version exposing (Version)
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Common.Branch as Branch exposing (Branch)
-import Wizard.KMEditor.Common.BranchState as BranchState
 import Wizard.KMEditor.Common.BranchUtils as BranchUtils
 import Wizard.KMEditor.Index.Models exposing (..)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Common.PackageDetail as PackageDetail exposing (PackageDetail)
 import Wizard.KnowledgeModels.Routes
 import Wizard.Routes as Routes
-import Wizard.Utils exposing (listInsertIf, packageIdToComponents)
 
 
 l_ : String -> AppState -> String
@@ -99,14 +99,14 @@ linkToKM : AppState -> Branch -> List (Attribute Msg) -> List (Html Msg) -> Html
 linkToKM appState branch =
     case branch.state of
         BranchState.Migrating ->
-            if continueMigrationActionVisible appState.jwt branch then
+            if continueMigrationActionVisible appState.session branch then
                 linkTo appState (Routes.KMEditorRoute <| MigrationRoute <| branch.uuid)
 
             else
                 span
 
         BranchState.Migrated ->
-            if publishActionVisible appState.jwt branch then
+            if publishActionVisible appState.session branch then
                 linkTo appState (Routes.KMEditorRoute <| PublishRoute <| branch.uuid)
 
             else
@@ -200,7 +200,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.edit" appState
                 , label = l_ "action.openEditor" appState
-                , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute <| branch.uuid)
+                , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute branch.uuid)
                 }
 
         publish =
@@ -208,7 +208,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.publish" appState
                 , label = l_ "action.publish" appState
-                , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute <| branch.uuid
+                , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute branch.uuid
                 }
 
         upgrade =
@@ -224,7 +224,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.continueMigration" appState
                 , label = l_ "action.continueMigration" appState
-                , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute <| branch.uuid
+                , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute branch.uuid
                 }
 
         cancelMigration =
@@ -232,7 +232,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faSet "_global.cancel" appState
                 , label = l_ "action.cancelMigration" appState
-                , msg = ListingActionMsg <| DeleteMigration <| branch.uuid
+                , msg = ListingActionMsg <| DeleteMigration branch.uuid
                 }
 
         delete =
@@ -247,16 +247,16 @@ listingActions appState branch =
             openEditorActionVisible branch
 
         showPublish =
-            publishActionVisible appState.jwt branch
+            publishActionVisible appState.session branch
 
         showUpgrade =
-            upgradeActionVisible appState.jwt branch
+            upgradeActionVisible appState.session branch
 
         showContinueMigration =
-            continueMigrationActionVisible appState.jwt branch
+            continueMigrationActionVisible appState.session branch
 
         showCancelMigration =
-            tableActionCancelMigrationVisible appState.jwt branch
+            tableActionCancelMigrationVisible appState.session branch
     in
     []
         |> listInsertIf openEditor showOpenEditor
@@ -275,24 +275,24 @@ openEditorActionVisible =
     Branch.matchState [ BranchState.Default, BranchState.Edited, BranchState.Outdated ]
 
 
-publishActionVisible : Maybe JwtToken -> Branch -> Bool
-publishActionVisible jwt branch =
-    hasPerm jwt Perm.knowledgeModelPublish && Branch.matchState [ BranchState.Edited, BranchState.Migrated ] branch
+publishActionVisible : Session -> Branch -> Bool
+publishActionVisible session branch =
+    Perm.hasPerm session Perm.knowledgeModelPublish && Branch.matchState [ BranchState.Edited, BranchState.Migrated ] branch
 
 
-upgradeActionVisible : Maybe JwtToken -> Branch -> Bool
-upgradeActionVisible jwt km =
-    hasPerm jwt Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Outdated ] km
+upgradeActionVisible : Session -> Branch -> Bool
+upgradeActionVisible session km =
+    Perm.hasPerm session Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Outdated ] km
 
 
-continueMigrationActionVisible : Maybe JwtToken -> Branch -> Bool
-continueMigrationActionVisible jwt km =
-    hasPerm jwt Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Migrating ] km
+continueMigrationActionVisible : Session -> Branch -> Bool
+continueMigrationActionVisible session km =
+    Perm.hasPerm session Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Migrating ] km
 
 
-tableActionCancelMigrationVisible : Maybe JwtToken -> Branch -> Bool
-tableActionCancelMigrationVisible jwt km =
-    hasPerm jwt Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Migrating, BranchState.Migrated ] km
+tableActionCancelMigrationVisible : Session -> Branch -> Bool
+tableActionCancelMigrationVisible session km =
+    Perm.hasPerm session Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Migrating, BranchState.Migrated ] km
 
 
 deleteModal : AppState -> Model -> Html Msg

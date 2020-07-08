@@ -1,9 +1,11 @@
 module Wizard.KMEditor.Routes exposing (Route(..))
 
+import Uuid exposing (Uuid)
+
 
 type Route
     = CreateRoute (Maybe String)
-    | EditorRoute String
+    | EditorRoute Uuid
     | IndexRoute
-    | MigrationRoute String
-    | PublishRoute String
+    | MigrationRoute Uuid
+    | PublishRoute Uuid

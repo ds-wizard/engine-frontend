@@ -10,7 +10,7 @@ type Route
     | PrivacyAndSupportRoute
     | DashboardRoute
     | LookAndFeelRoute
-    | KnowledgeModelRegistryRoute
+    | RegistryRoute
     | QuestionnairesRoute
     | SubmissionRoute
     | TemplateRoute

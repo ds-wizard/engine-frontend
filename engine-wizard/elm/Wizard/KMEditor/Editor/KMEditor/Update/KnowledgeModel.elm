@@ -8,11 +8,11 @@ module Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing
 
 import Form
 import Random exposing (Seed)
+import Shared.Data.KnowledgeModel.Chapter as Chapter
+import Shared.Data.KnowledgeModel.Integration as Integration
+import Shared.Data.KnowledgeModel.Tag as Tag
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter as Chapter
-import Wizard.KMEditor.Common.KnowledgeModel.Integration as Integration
-import Wizard.KMEditor.Common.KnowledgeModel.Tag as Tag
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (knowledgeModelFormValidation)

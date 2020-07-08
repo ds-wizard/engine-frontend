@@ -22,11 +22,10 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Template as Template exposing (Template)
-import Shared.Data.Template.TemplatePacakge as TemplatePackage
+import Shared.Data.Template.TemplatePackage as TemplatePackage
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Atoms.Form as Form
 import Shared.Elemental.Atoms.FormInput as FormInput
-import Shared.Elemental.Atoms.Heading as Heading
 import Shared.Elemental.Atoms.Text as Text
 import Shared.Elemental.Components.ActionResultWrapper as ActionResultWrapper
 import Shared.Elemental.Components.Carousel as Carousel exposing (PageOptions)
@@ -94,8 +93,8 @@ getSelectedTemplate : Model -> Maybe Template
 getSelectedTemplate model =
     case model.templates of
         Success templates ->
-            (Form.getFieldAsString "templateUuid" model.createForm).value
-                |> Maybe.andThen (Template.findByUuid templates)
+            (Form.getFieldAsString "templateId" model.createForm).value
+                |> Maybe.andThen (Template.findById templates)
 
         _ ->
             Nothing
@@ -168,7 +167,7 @@ handleFormMsg cfg appState formMsg model =
     case ( formMsg, Form.getOutput model.createForm ) of
         ( Form.Submit, Just createForm ) ->
             ( { model | submitting = Loading }
-            , QuestionnairesApi.postQuestionnaire (ProjectCreateForm.encode createForm) appState (cfg.wrapMsg << PostQuestionnaireComplete)
+            , QuestionnairesApi.postQuestionnaire (ProjectCreateForm.encode appState createForm) appState (cfg.wrapMsg << PostQuestionnaireComplete)
             )
 
         _ ->
@@ -179,7 +178,7 @@ handleFormMsg cfg appState formMsg model =
                 -- Select recommended package for selected template
                 createFormWithPackageIdSet =
                     case ( formMsg, model.templates ) of
-                        ( Form.Input "templateUuid" _ _, Success templates ) ->
+                        ( Form.Input "templateId" _ _, Success templates ) ->
                             ProjectCreateForm.selectRecommendedPackage (getTags model) templates createForm
 
                         _ ->
@@ -189,7 +188,7 @@ handleFormMsg cfg appState formMsg model =
                 ( knowledgeModel, cmd ) =
                     case formMsg of
                         Form.Input "packageId" _ (Field.String packageId) ->
-                            ( Loading, KnowledgeModelsApi.fetchPreview packageId appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
+                            ( Loading, KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
 
                         _ ->
                             ( model.knowledgeModel, Cmd.none )
@@ -209,7 +208,7 @@ handleSetScreen cfg appState model screen =
         ( knowledgeModel, cmd ) =
             case ( screen, (Form.getFieldAsString "packageId" model.createForm).value ) of
                 ( KnowledgeModelScreen, Just packageId ) ->
-                    ( Loading, KnowledgeModelsApi.fetchPreview packageId appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
+                    ( Loading, KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState (cfg.wrapMsg << GetKnowledgeModelComplete) )
 
                 _ ->
                     ( model.knowledgeModel, Cmd.none )
@@ -225,7 +224,7 @@ handleGetTemplatesComplete cfg appState model result =
                 | templates = Success templates
                 , createForm =
                     model.createForm
-                        |> ProjectCreateForm.selectRecommendedOrFirstTemplate (getTags model) templates appState.config.template.recommendedTemplateUuid
+                        |> ProjectCreateForm.selectRecommendedOrFirstTemplate (getTags model) templates appState.config.template.recommendedTemplateId
                         |> ProjectCreateForm.selectRecommendedPackage (getTags model) templates
               }
             , Task.attempt (\_ -> cfg.wrapMsg NoOp) (Dom.focus "name")
@@ -309,6 +308,7 @@ projectNameContainer appState model grid =
                 }
                 { form = model.createForm
                 , fieldName = "name"
+                , fieldReadableName = "Name"
                 , mbFieldLabel = Just "Name your project"
                 , mbTextBefore = Nothing
                 , mbTextAfter = Just "Don't worry, you can always change it later."
@@ -324,7 +324,7 @@ projectNameContainer appState model grid =
             [ grid.col 5 [] [ Illustration.wizard appState.theme ]
             , grid.colOffset ( 1, 6 )
                 [ Grid.colVerticalCenter ]
-                [ projectNameFormGroup appState.theme
+                [ projectNameFormGroup appState
                 , Button.primary appState.theme
                     [ onClick (SetScreen TemplateScreen)
                     , disabled (String.length (getProjectName model) == 0)
@@ -382,8 +382,8 @@ projectSettingsCarouselContainer appState model templates grid =
 projectSettingsCarouselTemplatePage : AppState -> Model -> Grid Msg -> List Template -> PageOptions -> Html Msg
 projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
     let
-        recommendedTemplateUuid =
-            appState.config.template.recommendedTemplateUuid
+        recommendedTemplateId =
+            appState.config.template.recommendedTemplateId
 
         templateOptionsCount =
             if model.templateListExpanded then
@@ -394,9 +394,9 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
 
         templateOptions =
             templates
-                |> List.sortWith (Template.compare recommendedTemplateUuid)
+                |> List.sortWith (Template.compare recommendedTemplateId)
                 |> List.take templateOptionsCount
-                |> List.map (Template.toFormRichOption recommendedTemplateUuid)
+                |> List.map (Template.toFormRichOption recommendedTemplateId)
 
         templateFormGroup =
             Form.groupSimple
@@ -404,7 +404,8 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
                 , toMsg = FormMsg
                 }
                 { form = model.createForm
-                , fieldName = "templateUuid"
+                , fieldName = "templateId"
+                , fieldReadableName = "Template"
                 , mbFieldLabel = Nothing
                 , mbTextBefore = Nothing
                 , mbTextAfter = Nothing
@@ -422,8 +423,8 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
                 emptyNode
 
         kms =
-            Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
-                |> List.sortWith (TemplatePackage.compare (Maybe.map .recommendedPackageId (getSelectedTemplate model)))
+            Maybe.unwrap [] .usablePackages (getSelectedTemplate model)
+                |> List.sortWith (TemplatePackage.compare (Maybe.andThen .recommendedPackageId (getSelectedTemplate model)))
 
         visibleKMs =
             if List.length kms > 4 then
@@ -466,7 +467,7 @@ projectSettingsCarouselTemplatePage appState model grid templates pageOptions =
             , grid.row []
                 [ grid.col 6
                     []
-                    [ templateFormGroup appState.theme
+                    [ templateFormGroup appState
                     , moreTemplatesLink
                     ]
                 , grid.col 6
@@ -486,10 +487,10 @@ projectSettingsCarouselKnowledgeModelPage : AppState -> Model -> Grid Msg -> Pag
 projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
     let
         packages =
-            Maybe.unwrap [] .allowedPackages (getSelectedTemplate model)
+            Maybe.unwrap [] .usablePackages (getSelectedTemplate model)
 
         recommendedPackage =
-            Maybe.map .recommendedPackageId (getSelectedTemplate model)
+            Maybe.andThen .recommendedPackageId (getSelectedTemplate model)
 
         packageOptionsCount =
             if model.kmListExpanded then
@@ -511,6 +512,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
                 }
                 { form = model.createForm
                 , fieldName = "packageId"
+                , fieldReadableName = "Knowledge model"
                 , mbFieldLabel = Nothing
                 , mbTextBefore = Nothing
                 , mbTextAfter = Nothing
@@ -541,6 +543,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
                 }
                 { form = model.createForm
                 , fieldName = "tagUuids"
+                , fieldReadableName = "Tags"
                 , mbFieldLabel = Just "Tags (advanced)"
                 , mbTextBefore = Just "Use tags to filter the questions or select none to have all the questions available."
                 , mbTextAfter = Nothing
@@ -549,7 +552,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
         viewTags knowledgeModel =
             if List.length knowledgeModel.tagUuids > 0 then
                 div []
-                    [ tagsFormGroup knowledgeModel appState.theme ]
+                    [ tagsFormGroup knowledgeModel appState ]
 
             else
                 emptyNode
@@ -571,7 +574,7 @@ projectSettingsCarouselKnowledgeModelPage appState model grid pageOptions =
             , grid.row []
                 [ grid.col 6
                     []
-                    [ kmFormGroup appState.theme
+                    [ kmFormGroup appState
                     , moreKMsLink
                     , emptyKMs
                     ]

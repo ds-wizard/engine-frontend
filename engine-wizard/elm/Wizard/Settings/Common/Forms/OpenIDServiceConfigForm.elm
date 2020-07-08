@@ -9,10 +9,10 @@ module Wizard.Settings.Common.Forms.OpenIDServiceConfigForm exposing
 import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Field as Field
-import Wizard.Common.Form.Validate as V
-import Wizard.Settings.Common.Partials.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
+import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
+import Shared.Form.Field as Field
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias OpenIDServiceConfigForm =
@@ -28,12 +28,12 @@ type alias OpenIDServiceConfigForm =
     }
 
 
-init : EditableOpenIDServiceConfig -> Form CustomFormError OpenIDServiceConfigForm
+init : EditableOpenIDServiceConfig -> Form FormError OpenIDServiceConfigForm
 init config =
     Form.initial (configToFormInitials config) validation
 
 
-validation : Validation CustomFormError OpenIDServiceConfigForm
+validation : Validation FormError OpenIDServiceConfigForm
 validation =
     let
         validateParameter =

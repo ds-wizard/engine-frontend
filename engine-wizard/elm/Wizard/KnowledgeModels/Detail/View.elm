@@ -4,27 +4,27 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Markdown
+import Shared.Api.Packages as PackagesApi
+import Shared.Auth.Permission as Perm
+import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
+import Shared.Data.Package.PackageState as PackageState
+import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
-import Wizard.Auth.Permission as Perm exposing (hasPerm)
-import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.KnowledgeModelRegistryConfig exposing (KnowledgeModelRegistryConfig(..))
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Common.OrganizationInfo exposing (OrganizationInfo)
-import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
-import Wizard.KnowledgeModels.Common.PackageState as PackageState
 import Wizard.KnowledgeModels.Detail.Models exposing (..)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (..)
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Questionnaires.Routes
 import Wizard.Routes as Routes
-import Wizard.Utils exposing (listFilterJust, listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -90,10 +90,10 @@ header appState package =
 
         actions =
             []
-                |> listInsertIf exportAction (hasPerm appState.jwt Perm.packageManagementWrite)
-                |> listInsertIf forkAction (hasPerm appState.jwt Perm.knowledgeModel)
-                |> listInsertIf questionnaireAction (hasPerm appState.jwt Perm.questionnaire)
-                |> listInsertIf deleteAction (hasPerm appState.jwt Perm.packageManagementWrite)
+                |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
+                |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
+                |> listInsertIf questionnaireAction (Perm.hasPerm appState.session Perm.questionnaire)
+                |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
@@ -125,8 +125,8 @@ readme appState package =
 
 newVersionInRegistryWarning : AppState -> PackageDetail -> Html msg
 newVersionInRegistryWarning appState package =
-    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.knowledgeModelRegistry ) of
-        ( Just remoteLatestVersion, True, KnowledgeModelRegistryEnabled _ ) ->
+    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
+        ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 latestPackageId =
                     package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion

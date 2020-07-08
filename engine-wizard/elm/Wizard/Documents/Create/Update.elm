@@ -5,37 +5,50 @@ module Wizard.Documents.Create.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Form.Field as Field
+import Shared.Api.Documents as DocumentsApi
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Api.Templates as TemplatesApi
+import Shared.Data.Document exposing (Document)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (applyResult, applyResultCmd, getResultCmd)
-import Wizard.Common.Api.Documents as DocumentsApi
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
-import Wizard.Common.Api.Templates as TemplatesApi
+import Shared.Setters exposing (setQuestionnaire, setQuestionnaires, setTemplates)
+import Uuid exposing (Uuid)
+import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Setters exposing (setQuestionnaires, setTemplates)
-import Wizard.Documents.Common.Document exposing (Document)
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm
-import Wizard.Documents.Common.Template exposing (Template)
 import Wizard.Documents.Create.Models exposing (Model)
 import Wizard.Documents.Create.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> Cmd Msg
-fetchData appState =
-    QuestionnairesApi.getQuestionnaires appState GetQuestionnairesCompleted
+fetchData : AppState -> Uuid -> Cmd Msg
+fetchData appState questionnaireUuid =
+    QuestionnairesApi.getQuestionnaire questionnaireUuid appState GetQuestionnaireCompleted
+
+
+
+--let
+--    paginationQueryString =
+--        PaginationQueryString.withSize Nothing PaginationQueryString.empty
+--in
+--QuestionnairesApi.getQuestionnaires paginationQueryString appState GetQuestionnairesCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update wrapMsg msg appState model =
     case msg of
-        GetQuestionnairesCompleted result ->
-            handleGetQuestionnairesCompleted wrapMsg appState model result
+        GetQuestionnaireCompleted result ->
+            handleGetQuestionnaireCompleted wrapMsg appState model result
 
         GetTemplatesCompleted result ->
             handleGetTemplatesCompleted appState model result
@@ -51,45 +64,74 @@ update wrapMsg msg appState model =
 -- Handlers
 
 
-handleGetQuestionnairesCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError (List Questionnaire) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetQuestionnairesCompleted wrapMsg appState model result =
+handleGetQuestionnaireCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireCompleted wrapMsg appState model result =
     let
         ( newModel, cmd ) =
             applyResult
-                { setResult = setQuestionnaires
-                , defaultError = lg "apiError.questionnaires.getListError" appState
+                { setResult = setQuestionnaire
+                , defaultError = lg "apiError.questionnaires.getError" appState
                 , model = model
                 , result = result
                 }
     in
-    case getSelectedQuestionnaire newModel of
-        Just questionnaire ->
-            ( { newModel | lastFetchedTemplatesFor = Just questionnaire.uuid }
-            , Cmd.map wrapMsg <|
-                TemplatesApi.getTemplatesFor questionnaire.package.id appState GetTemplatesCompleted
+    case newModel.questionnaire of
+        Success questionnaire ->
+            let
+                formMsg =
+                    Form.Input "name" Form.Text (Field.String questionnaire.name)
+
+                form =
+                    Form.update DocumentCreateForm.validation formMsg newModel.form
+            in
+            ( { newModel | form = form }
+            , Cmd.map wrapMsg <| TemplatesApi.getTemplatesFor questionnaire.package.id appState GetTemplatesCompleted
             )
 
-        Nothing ->
+        _ ->
             ( newModel, cmd )
 
 
 handleGetTemplatesCompleted : AppState -> Model -> Result ApiError (List Template) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetTemplatesCompleted appState model result =
-    applyResult
-        { setResult = setTemplates
-        , defaultError = lg "apiError.templates.getListError" appState
-        , model = model
-        , result = result
-        }
+    let
+        ( newModel, cmd ) =
+            applyResult
+                { setResult = setTemplates
+                , defaultError = lg "apiError.templates.getListError" appState
+                , model = model
+                , result = result
+                }
+
+        form =
+            case newModel.templates of
+                Success (template :: []) ->
+                    let
+                        setFormat =
+                            case ( List.length template.formats, List.head template.formats ) of
+                                ( 1, Just format ) ->
+                                    Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String (Uuid.toString format.uuid)))
+
+                                _ ->
+                                    identity
+                    in
+                    newModel.form
+                        |> Form.update DocumentCreateForm.validation (Form.Input "templateId" Form.Text (Field.String template.id))
+                        |> setFormat
+
+                _ ->
+                    newModel.form
+    in
+    ( { newModel | form = form }, cmd )
 
 
 handleForm : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleForm wrapMsg formMsg appState model =
-    case ( formMsg, Form.getOutput model.form ) of
-        ( Form.Submit, Just form ) ->
+    case ( formMsg, Form.getOutput model.form, model.questionnaire ) of
+        ( Form.Submit, Just form, Success questionnaire ) ->
             let
                 body =
-                    DocumentCreateForm.encode form
+                    DocumentCreateForm.encode questionnaire.uuid form
 
                 cmd =
                     Cmd.map wrapMsg <|
@@ -102,22 +144,7 @@ handleForm wrapMsg formMsg appState model =
                 newModel =
                     { model | form = Form.update DocumentCreateForm.validation formMsg model.form }
             in
-            case getSelectedQuestionnaire newModel of
-                Just questionnaire ->
-                    if needFetchTemplates model questionnaire.uuid then
-                        ( { newModel
-                            | lastFetchedTemplatesFor = Just questionnaire.uuid
-                            , templates = Loading
-                          }
-                        , Cmd.map wrapMsg <|
-                            TemplatesApi.getTemplatesFor questionnaire.package.id appState GetTemplatesCompleted
-                        )
-
-                    else
-                        ( newModel, Cmd.none )
-
-                _ ->
-                    ( newModel, Cmd.none )
+            ( newModel, Cmd.none )
 
 
 handlePostDocumentCompleted : AppState -> Model -> Result ApiError Document -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -125,31 +152,10 @@ handlePostDocumentCompleted appState model result =
     case result of
         Ok document ->
             ( model
-            , cmdNavigate appState <| Routes.DocumentsRoute <| IndexRoute <| Maybe.map .uuid document.questionnaire
+            , cmdNavigate appState <| Routes.DocumentsRoute <| IndexRoute (Maybe.map .uuid document.questionnaire) PaginationQueryString.empty
             )
 
         Err error ->
             ( { model | savingDocument = ApiError.toActionResult (lg "apiError.documents.postError" appState) error }
             , getResultCmd result
             )
-
-
-
--- Helpers
-
-
-getSelectedQuestionnaire : Model -> Maybe Questionnaire
-getSelectedQuestionnaire model =
-    let
-        findQuestionnaire qUuid =
-            ActionResult.withDefault [] model.questionnaires
-                |> List.filter (\q -> q.uuid == qUuid)
-                |> List.head
-    in
-    (Form.getFieldAsString "questionnaireUuid" model.form).value
-        |> Maybe.andThen findQuestionnaire
-
-
-needFetchTemplates : Model -> String -> Bool
-needFetchTemplates model questionnaireUuid =
-    model.lastFetchedTemplatesFor /= Just questionnaireUuid

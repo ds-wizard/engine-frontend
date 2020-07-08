@@ -2,29 +2,30 @@ module Wizard.Questionnaires.CreateMigration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Shared.Api.KnowledgeModels as KnowledgeModelsApi
+import Shared.Api.Packages as PackagesApi
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Setters exposing (setPackages, setQuestionnaire)
+import Shared.Utils exposing (withNoCmd)
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
-import Wizard.Common.Api.KnowledgeModels as KnowledgeModelsApi
-import Wizard.Common.Api.Packages as PackagesApi
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Setters exposing (setPackages, setQuestionnaire)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Wizard.Questionnaires.Common.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Questionnaires.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
 import Wizard.Questionnaires.CreateMigration.Models exposing (Model)
 import Wizard.Questionnaires.CreateMigration.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing exposing (cmdNavigate)
-import Wizard.Utils exposing (withNoCmd)
+import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> String -> Cmd Msg
+fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
     let
         getPackagesCmd =
@@ -158,7 +159,7 @@ handlePostMigrationCompleted : AppState -> Model -> Result ApiError Questionnair
 handlePostMigrationCompleted appState model result =
     case result of
         Ok migration ->
-            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute << MigrationRoute <| migration.newQuestionnaire.uuid )
+            ( model, cmdNavigate appState <| Routes.QuestionnairesRoute <| MigrationRoute migration.newQuestionnaire.uuid )
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult (lg "apiError.questionnaires.migrations.postError" appState) error }

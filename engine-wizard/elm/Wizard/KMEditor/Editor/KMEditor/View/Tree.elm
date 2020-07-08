@@ -4,11 +4,11 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Shared.Data.KnowledgeModel.Question as Question
+import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question
-import Wizard.KMEditor.Common.KnowledgeModel.Reference as Reference
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isOptionsQuestionForm)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))

@@ -10,10 +10,12 @@ import ActionResult exposing (ActionResult(..))
 import Html.Styled as Html exposing (Html)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Elemental.Components.ActionResultWrapper as ActionResultWrapper
 import Shared.Elemental.Components.SideNavigation as SideNavigation
 import Shared.Elemental.Foundations.Animation as Animation
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Uuid exposing (Uuid)
 import WizardResearch.Common.AppState exposing (AppState)
 import WizardResearch.Components.ProjectMenu as ProjectMenu
 import WizardResearch.Pages.Project.Documents as Documents
@@ -30,7 +32,7 @@ import WizardResearch.Route.ProjectRoute as ProjectRoute exposing (ProjectRoute)
 
 
 type alias Model =
-    { questionnaire : ActionResult Questionnaire
+    { questionnaire : ActionResult QuestionnaireDetail
     , pageModel : PageModel
     }
 
@@ -44,7 +46,7 @@ type PageModel
     | Settings Settings.Model
 
 
-init : AppState -> String -> ProjectRoute -> Maybe Model -> ( Model, Cmd Msg )
+init : AppState -> Uuid -> ProjectRoute -> Maybe Model -> ( Model, Cmd Msg )
 init appState questionnaireUuid projectRoute mbOriginalModel =
     let
         ( pageModel, pageCmd ) =
@@ -82,7 +84,7 @@ init appState questionnaireUuid projectRoute mbOriginalModel =
     )
 
 
-initPageModel : AppState -> String -> ProjectRoute -> ( PageModel, Cmd Msg )
+initPageModel : AppState -> Uuid -> ProjectRoute -> ( PageModel, Cmd Msg )
 initPageModel appState questionnaireUuid projectRoute =
     let
         map toModel toMsg ( subModel, subCmd ) =
@@ -119,7 +121,7 @@ initPageModel appState questionnaireUuid projectRoute =
 
 
 type Msg
-    = GetQuestionnaireComplete (Result ApiError Questionnaire)
+    = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
     | OverviewMsg Overview.Msg
     | PlanningMsg Planning.Msg
     | StarredMsg Starred.Msg
@@ -195,7 +197,7 @@ view appState model =
     }
 
 
-viewContent : AppState -> Model -> Questionnaire -> Html Msg
+viewContent : AppState -> Model -> QuestionnaireDetail -> Html Msg
 viewContent appState model questionnaire =
     let
         activePage =

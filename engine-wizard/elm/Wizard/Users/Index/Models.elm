@@ -1,8 +1,8 @@
 module Wizard.Users.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Data.User exposing (User)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.Users.Common.User exposing (User)
 
 
 type alias Model =

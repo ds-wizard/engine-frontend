@@ -6,10 +6,12 @@ import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Data.BranchDetail as BranchDetail exposing (BranchDetail)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lh, lx)
+import Shared.Utils exposing (flip)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
@@ -17,14 +19,12 @@ import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Common.BranchDetail as BranchDetail exposing (BranchDetail)
 import Wizard.KMEditor.Common.BranchPublishForm exposing (BranchPublishForm)
 import Wizard.KMEditor.Common.BranchUtils as BranchUtils
 import Wizard.KMEditor.Publish.Models exposing (Model)
 import Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-import Wizard.Utils exposing (flip)
 
 
 l_ : String -> AppState -> String
@@ -61,7 +61,7 @@ contentView appState model branch =
         ]
 
 
-formView : AppState -> Form CustomFormError BranchPublishForm -> BranchDetail -> Html Msg
+formView : AppState -> Form FormError BranchPublishForm -> BranchDetail -> Html Msg
 formView appState form branch =
     let
         mbVersion =
@@ -89,7 +89,7 @@ lastVersion appState mbVersion =
         |> flip FormGroup.textView (l_ "form.lastVersion" appState)
 
 
-versionInputGroup : AppState -> Form CustomFormError BranchPublishForm -> Maybe Version -> Html Msg
+versionInputGroup : AppState -> Form FormError BranchPublishForm -> Maybe Version -> Html Msg
 versionInputGroup appState form mbVersion =
     let
         majorField =

@@ -3,11 +3,12 @@ module Wizard.Users.Create.Update exposing (update)
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Random exposing (Seed, step)
+import Shared.Api.Users as UsersApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Utils exposing (tuplePrepend)
 import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Routes as Routes
@@ -16,7 +17,6 @@ import Wizard.Users.Common.UserCreateForm as UserCreateForm
 import Wizard.Users.Create.Models exposing (..)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
 import Wizard.Users.Routes exposing (Route(..))
-import Wizard.Utils exposing (tuplePrepend)
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

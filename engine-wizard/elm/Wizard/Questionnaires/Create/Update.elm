@@ -3,24 +3,25 @@ module Wizard.Questionnaires.Create.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Result exposing (Result)
+import Shared.Api.KnowledgeModels as KnowledgeModelsApi
+import Shared.Api.Packages as PackagesApi
+import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Shared.Utils exposing (withNoCmd)
+import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.KnowledgeModels as KnowledgeModelsApi
-import Wizard.Common.Api.Packages as PackagesApi
-import Wizard.Common.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
 import Wizard.Questionnaires.Create.Models exposing (Model)
 import Wizard.Questionnaires.Create.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing exposing (cmdNavigate)
-import Wizard.Utils exposing (withNoCmd)
+import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Model -> Cmd Msg
@@ -84,7 +85,7 @@ handleGetPackagesCompleted appState model result =
         newModel =
             case result of
                 Ok packages ->
-                    setSelectedPackage { model | packages = Success packages } packages
+                    setSelectedPackage appState { model | packages = Success packages } packages
 
                 Err error ->
                     { model | packages = ApiError.toActionResult (lg "apiError.packages.getListError" appState) error }
@@ -168,12 +169,12 @@ handlePostQuestionnaireCompleted appState model result =
 -- Helpers
 
 
-setSelectedPackage : Model -> List Package -> Model
-setSelectedPackage model packages =
+setSelectedPackage : AppState -> Model -> List Package -> Model
+setSelectedPackage appState model packages =
     case model.selectedPackage of
         Just id ->
             if List.any (.id >> (==) id) packages then
-                { model | form = QuestionnaireCreateForm.init model.selectedPackage }
+                { model | form = QuestionnaireCreateForm.init appState model.selectedPackage }
 
             else
                 model

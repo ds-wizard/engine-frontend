@@ -9,24 +9,24 @@ import Html.Attributes exposing (class, classList, placeholder, title)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Reorderable
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lg, lgx, lx)
+import Shared.Utils exposing (httpMethodOptions)
 import String exposing (fromInt, toLower)
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, getCurrentIntegrations, getCurrentTags)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, QuestionForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
-import Wizard.Utils exposing (httpMethodOptions)
 
 
 l_ : String -> AppState -> String
@@ -271,7 +271,7 @@ integrationEditorView appState model editorData =
     )
 
 
-integrationHeaderItemView : AppState -> Form CustomFormError IntegrationForm -> Int -> Html Form.Msg
+integrationHeaderItemView : AppState -> Form FormError IntegrationForm -> Int -> Html Form.Msg
 integrationHeaderItemView appState form i =
     let
         headerField =
@@ -325,7 +325,7 @@ questionEditorView appState model editorData =
             }
 
         levelSelection =
-            if appState.config.questionnaires.levels.enabled then
+            if appState.config.questionnaire.levels.enabled then
                 questionRequiredLevelSelectGroup appState editorData model.levels
 
             else
@@ -600,7 +600,7 @@ metricsView appState editorData metrics =
         |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
 
 
-metricView : AppState -> Form CustomFormError AnswerForm -> Int -> Metric -> Html Form.Msg
+metricView : AppState -> Form FormError AnswerForm -> Int -> Metric -> Html Form.Msg
 metricView appState form i metric =
     let
         enabled =

@@ -1,17 +1,17 @@
-module Wizard.Common.Questionnaire.Views.SummaryReport exposing (view)
+module Wizard.Common.Questionnaire.Views.SummaryReport exposing (view, viewIndications)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import List.Extra as List
 import Round
+import Shared.Data.KnowledgeModel as KnowledgeModels
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Shared.Locale exposing (l, lf, lgx, lx)
 import String exposing (fromFloat, fromInt)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models exposing (ActivePage(..), FormExtraData, Model, reportCanvasId, totalReportId)
-import Wizard.Common.Questionnaire.Models.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport)
 import Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..))
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModels
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
 
 
 l_ : String -> AppState -> String
@@ -90,12 +90,12 @@ viewMetrics appState metrics metricReports canvasId =
     div [ class "row" ] content
 
 
-viewIndications : AppState -> List IndicationReport -> Html Msg
+viewIndications : AppState -> List IndicationReport -> Html msg
 viewIndications appState indications =
     table [ class "indication-table" ] (List.map (viewIndication appState) indications)
 
 
-viewIndication : AppState -> IndicationReport -> Html Msg
+viewIndication : AppState -> IndicationReport -> Html msg
 viewIndication appState indicationReport =
     case indicationReport of
         AnsweredIndication data ->
@@ -105,7 +105,7 @@ viewIndication appState indicationReport =
             viewAnsweredIndication appState (lf_ "levelsAnsweredIndication.label") data
 
 
-viewAnsweredIndication : AppState -> (List String -> AppState -> String) -> AnsweredIndicationData -> Html Msg
+viewAnsweredIndication : AppState -> (List String -> AppState -> String) -> AnsweredIndicationData -> Html msg
 viewAnsweredIndication appState title data =
     let
         progress =

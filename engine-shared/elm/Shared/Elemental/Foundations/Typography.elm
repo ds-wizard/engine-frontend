@@ -16,8 +16,13 @@ module Shared.Elemental.Foundations.Typography exposing
     , heading2
     , heading2inversed
     , heading3
+    , heading3color
     , heading3inversed
     , navbarBrand
+    , sizeLG
+    , sizeMD
+    , sizeSM
+    , sizeXL
     )
 
 import Css exposing (Color, FontSize, Rem, Style, bold, color, fontSize, fontWeight, important, normal)
@@ -106,6 +111,15 @@ heading3inversed : Theme -> Style
 heading3inversed theme =
     Css.batch
         [ color theme.colors.textInversed
+        , fontSize (px2rem sizeMD)
+        , fontWeight bold
+        ]
+
+
+heading3color : Color -> Style
+heading3color c =
+    Css.batch
+        [ color c
         , fontSize (px2rem sizeMD)
         , fontWeight bold
         ]

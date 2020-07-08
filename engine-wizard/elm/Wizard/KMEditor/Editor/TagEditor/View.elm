@@ -3,18 +3,18 @@ module Wizard.KMEditor.Editor.TagEditor.View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
+import Shared.Data.KnowledgeModel as KnowledgeModel
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l)
+import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash
-import Wizard.KMEditor.Common.KnowledgeModel.Answer exposing (Answer)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.KMEditor.Common.KnowledgeModel.KnowledgeModel as KnowledgeModel
-import Wizard.KMEditor.Common.KnowledgeModel.Question as Question exposing (Question(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Tag exposing (Tag)
 import Wizard.KMEditor.Editor.TagEditor.Models exposing (Model, hasQuestionTag)
 import Wizard.KMEditor.Editor.TagEditor.Msgs exposing (Msg(..))
-import Wizard.Utils exposing (getContrastColorHex)
 
 
 l_ : String -> AppState -> String

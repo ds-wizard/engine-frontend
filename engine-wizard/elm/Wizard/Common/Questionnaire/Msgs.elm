@@ -2,13 +2,13 @@ module Wizard.Common.Questionnaire.Msgs exposing (CustomFormMessage(..), Msg(..)
 
 import Form
 import Result exposing (Result)
+import Shared.Data.Feedback exposing (Feedback)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
+import Shared.Data.SummaryReport exposing (SummaryReport)
 import Shared.Error.ApiError exposing (ApiError)
 import Wizard.Common.FormEngine.Model exposing (TypeHint)
 import Wizard.Common.FormEngine.Msgs
-import Wizard.Common.Questionnaire.Models.Feedback exposing (Feedback)
-import Wizard.Common.Questionnaire.Models.SummaryReport exposing (SummaryReport)
-import Wizard.KMEditor.Common.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.Questionnaires.Common.QuestionnaireTodo exposing (QuestionnaireTodo)
 
 
 type Msg

@@ -1,4 +1,12 @@
-module Shared.Elemental.Atoms.Button exposing (actionResultPrimary, inline, link, primary, primaryLink)
+module Shared.Elemental.Atoms.Button exposing
+    ( actionResultPrimary
+    , colorful
+    , inline
+    , link
+    , primary
+    , primaryLink
+    , primaryLoader
+    )
 
 import ActionResult exposing (ActionResult)
 import Css exposing (..)
@@ -12,7 +20,7 @@ import Shared.Elemental.Foundations.Spacing as Spacing
 import Shared.Elemental.Foundations.Transition as Transition
 import Shared.Elemental.Foundations.Typography as Typography
 import Shared.Elemental.Theme exposing (Theme)
-import Shared.Elemental.Utils exposing (colorD05, colorL10, colorL20, px2rem)
+import Shared.Elemental.Utils exposing (colorD05, colorL10, colorL20, colorL40, px2rem)
 import Shared.Html.Styled exposing (fa)
 
 
@@ -22,7 +30,32 @@ primary theme attributes content =
         styles =
             [ Typography.heading3inversed theme
             , buttonSharedStyle
-            , buttonFilledStyle theme
+            , buttonFilledStyle theme.colors.primary theme
+            ]
+    in
+    button (css styles :: attributes) content
+
+
+primaryLoader : Theme -> ActionResult a -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
+primaryLoader theme actionResult attributes content =
+    let
+        visibleContent =
+            if ActionResult.isLoading actionResult then
+                [ fa "fa fa-spinner fa-spin" ]
+
+            else
+                content
+    in
+    primary theme ([ Attributes.disabled (ActionResult.isLoading actionResult) ] ++ attributes) visibleContent
+
+
+colorful : Color -> Color -> Theme -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
+colorful color backgroundColor theme attributes content =
+    let
+        styles =
+            [ Typography.heading3color color
+            , buttonSharedStyle
+            , buttonFilledStyle backgroundColor theme
             ]
     in
     button (css styles :: attributes) content
@@ -34,7 +67,7 @@ primaryLink theme attributes content =
         styles =
             [ Typography.heading3inversed theme
             , buttonSharedStyle
-            , buttonFilledStyle theme
+            , buttonFilledStyle theme.colors.primary theme
             , textDecoration none
             ]
     in
@@ -122,34 +155,38 @@ buttonSharedStyle =
         ]
 
 
-buttonFilledStyle : Theme -> Style
-buttonFilledStyle theme =
+buttonFilledStyle : Color -> Theme -> Style
+buttonFilledStyle color theme =
     let
         buttonColorHover =
-            colorL10 theme.colors.primary
+            colorL10 color
 
         buttonColorActive =
-            colorD05 theme.colors.primary
+            colorD05 color
 
         buttonColorDisabled =
-            colorL20 theme.colors.primary
+            colorL20 color
+
+        shadowColor =
+            colorL40 color
     in
     Css.batch
         [ Border.roundedFull
         , Spacing.insetSquishMD
-        , backgroundColor theme.colors.primary
+        , justifyContent center
+        , backgroundColor color
         , transition
             [ Transition.default Css.Transitions.boxShadow3
             , Transition.default Css.Transitions.transform3
             , Transition.default Css.Transitions.backgroundColor3
             ]
         , hover
-            [ Shadow.sm Shadow.colorPrimary theme
+            [ Shadow.sm (\_ -> shadowColor) ()
             , transform (translateY (px -1))
             , backgroundColor buttonColorHover
             ]
         , active
-            [ Shadow.sm Shadow.colorPrimary theme
+            [ Shadow.sm (\_ -> shadowColor) ()
             , backgroundColor buttonColorActive
             , transform (translateY zero)
             ]

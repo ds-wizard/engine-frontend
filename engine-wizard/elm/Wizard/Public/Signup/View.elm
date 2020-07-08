@@ -5,10 +5,10 @@ import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
+import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.PrivacyAndSupportConfig as PrivacyAndSupportConfig
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
 import Wizard.Public.Common.SignupForm exposing (SignupForm)
@@ -64,7 +64,7 @@ signupForm appState model =
     publicForm appState formConfig
 
 
-formView : AppState -> Form CustomFormError SignupForm -> Html Form.Msg
+formView : AppState -> Form FormError SignupForm -> Html Form.Msg
 formView appState form =
     let
         acceptField =
@@ -85,6 +85,8 @@ formView appState form =
                         ++ lh_ "form.privacyText"
                             [ a [ href <| PrivacyAndSupportConfig.getPrivacyUrl appState.config.privacyAndSupport, target "_blank" ]
                                 [ lx_ "form.privacy" appState ]
+                            , a [ href <| PrivacyAndSupportConfig.getTermsOfServiceUrl appState.config.privacyAndSupport, target "_blank" ]
+                                [ lx_ "form.termsOfService" appState ]
                             ]
                             appState
                     )

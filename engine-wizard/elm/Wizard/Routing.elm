@@ -13,11 +13,11 @@ module Wizard.Routing exposing
     )
 
 import Browser.Navigation exposing (Key, pushUrl)
+import Shared.Auth.Session exposing (Session)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing (..)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
@@ -27,6 +27,7 @@ import Wizard.Questionnaires.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
 import Wizard.Settings.Routing
+import Wizard.Templates.Routing
 import Wizard.Users.Routing
 
 
@@ -42,6 +43,7 @@ matchers appState =
                 ++ Wizard.Questionnaires.Routing.parsers appState Routes.QuestionnairesRoute
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
+                ++ Wizard.Templates.Routing.parsers appState Routes.TemplatesRoute
                 ++ Wizard.Users.Routing.parses Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    ]
@@ -49,44 +51,47 @@ matchers appState =
     oneOf parsers
 
 
-routeIfAllowed : Maybe JwtToken -> Routes.Route -> Routes.Route
-routeIfAllowed maybeJwt route =
-    if isAllowed route maybeJwt then
+routeIfAllowed : Session -> Routes.Route -> Routes.Route
+routeIfAllowed session route =
+    if isAllowed route session then
         route
 
     else
         Routes.NotAllowedRoute
 
 
-isAllowed : Routes.Route -> Maybe JwtToken -> Bool
-isAllowed route maybeJwt =
+isAllowed : Routes.Route -> Session -> Bool
+isAllowed route session =
     case route of
         Routes.DashboardRoute ->
             True
 
         Routes.DocumentsRoute documentsRoute ->
-            Wizard.Documents.Routing.isAllowed documentsRoute maybeJwt
+            Wizard.Documents.Routing.isAllowed documentsRoute session
 
         Routes.KMEditorRoute kmEditorRoute ->
-            Wizard.KMEditor.Routing.isAllowed kmEditorRoute maybeJwt
+            Wizard.KMEditor.Routing.isAllowed kmEditorRoute session
 
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
-            Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute maybeJwt
+            Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute session
 
         Routes.PublicRoute _ ->
             True
 
         Routes.QuestionnairesRoute questionnaireRoute ->
-            Wizard.Questionnaires.Routing.isAllowed questionnaireRoute maybeJwt
+            Wizard.Questionnaires.Routing.isAllowed questionnaireRoute session
 
         Routes.RegistryRoute registryRoute ->
-            Wizard.Registry.Routing.isAllowed registryRoute maybeJwt
+            Wizard.Registry.Routing.isAllowed registryRoute session
 
         Routes.SettingsRoute settingsRoute ->
-            Wizard.Settings.Routing.isAllowed settingsRoute maybeJwt
+            Wizard.Settings.Routing.isAllowed settingsRoute session
+
+        Routes.TemplatesRoute templatesRoute ->
+            Wizard.Templates.Routing.isAllowed templatesRoute session
 
         Routes.UsersRoute usersRoute ->
-            Wizard.Users.Routing.isAllowed usersRoute maybeJwt
+            Wizard.Users.Routing.isAllowed usersRoute session
 
         Routes.NotFoundRoute ->
             True
@@ -123,6 +128,9 @@ toUrl appState route =
 
                 Routes.SettingsRoute settingsRoute ->
                     Wizard.Settings.Routing.toUrl appState settingsRoute
+
+                Routes.TemplatesRoute templatesRoute ->
+                    Wizard.Templates.Routing.toUrl appState templatesRoute
 
                 Routes.UsersRoute usersRoute ->
                     Wizard.Users.Routing.toUrl usersRoute

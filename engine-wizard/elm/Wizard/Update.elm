@@ -2,11 +2,11 @@ module Wizard.Update exposing (fetchData, update)
 
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
+import Shared.Auth.Session as Session
 import Url exposing (Url)
 import Wizard.Auth.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Menu.Update
-import Wizard.Common.Session as Session
 import Wizard.Common.Time as Time
 import Wizard.Dashboard.Update
 import Wizard.Documents.Update
@@ -21,6 +21,7 @@ import Wizard.Registry.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation)
 import Wizard.Settings.Update
+import Wizard.Templates.Update
 import Wizard.Users.Update
 
 
@@ -60,6 +61,10 @@ fetchData model =
                 Routes.SettingsRoute route ->
                     Cmd.map Wizard.Msgs.SettingsMsg <|
                         Wizard.Settings.Update.fetchData route model.appState model.settingsModel
+
+                Routes.TemplatesRoute route ->
+                    Cmd.map Wizard.Msgs.TemplatesMsg <|
+                        Wizard.Templates.Update.fetchData route model.appState
 
                 Routes.UsersRoute route ->
                     Cmd.map Wizard.Msgs.UsersMsg <|
@@ -126,7 +131,7 @@ update msg model =
                 newModel =
                     setSession newSession model
             in
-            ( newModel, Ports.storeSession <| Just newSession )
+            ( newModel, Ports.storeSession <| Session.encode newSession )
 
         Wizard.Msgs.MenuMsg menuMsg ->
             let
@@ -190,6 +195,13 @@ update msg model =
                     Wizard.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
             in
             ( { model | settingsModel = settingsModel }, cmd )
+
+        Wizard.Msgs.TemplatesMsg templatesMsg ->
+            let
+                ( templatesModel, cmd ) =
+                    Wizard.Templates.Update.update templatesMsg Wizard.Msgs.TemplatesMsg model.appState model.templatesModel
+            in
+            ( { model | templatesModel = templatesModel }, cmd )
 
         Wizard.Msgs.UsersMsg usersMsg ->
             let

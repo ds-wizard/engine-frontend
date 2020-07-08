@@ -6,12 +6,19 @@ import Html.Attributes exposing (checked, class, classList, disabled, for, href,
 import Html.Events exposing (onCheck, onClick)
 import Markdown
 import Maybe.Extra as Maybe
+import Shared.Api.Documents as DocumentsApi
+import Shared.Auth.Permission as Perm
+import Shared.Data.Document as Document exposing (Document)
+import Shared.Data.Document.DocumentState exposing (DocumentState(..))
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lf, lh, lx)
-import Wizard.Auth.Permission as Permission
-import Wizard.Common.Api.Documents as DocumentsApi
+import Shared.Locale exposing (l, lf, lg, lh, lx)
+import Shared.Utils exposing (listInsertIf)
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing exposing (ListingActionType(..), ListingConfig, ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -20,16 +27,11 @@ import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.Documents.Common.Document as Document exposing (Document)
-import Wizard.Documents.Common.DocumentState exposing (DocumentState(..))
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Questionnaires.Routes
 import Wizard.Routes as Routes exposing (Route(..))
-import Wizard.Utils exposing (listInsertIf)
 
 
 l_ : String -> AppState -> String
@@ -62,51 +64,44 @@ view appState model =
 
                 Nothing ->
                     Success Nothing
-
-        actionResult =
-            ActionResult.combine model.documents questionnaireActionResult
     in
-    Page.actionResultView appState (viewDocuments appState model) actionResult
+    Page.actionResultView appState (viewDocuments appState model) questionnaireActionResult
 
 
-viewDocuments : AppState -> Model -> ( Listing.Model Document, Maybe QuestionnaireDetail ) -> Html Msg
-viewDocuments appState model ( documents, mbQuestionnaire ) =
+viewDocuments : AppState -> Model -> Maybe QuestionnaireDetail -> Html Msg
+viewDocuments appState model mbQuestionnaire =
     let
-        questionnaireView =
+        mbQuestionnaireFilterView =
             case mbQuestionnaire of
                 Just questionnaire ->
-                    div [ class "filters" ]
-                        [ lx_ "listing.filter" appState
-                        , span [ class "badge badge-pill badge-secondary" ]
-                            [ text questionnaire.name
-                            , linkTo appState (Routes.DocumentsRoute (IndexRoute Nothing)) [] [ faSet "_global.remove" appState ]
+                    Just <|
+                        div [ class "listing-toolbar-extra questionnaire-filter" ]
+                            [ linkTo appState
+                                (Routes.QuestionnairesRoute (Wizard.Questionnaires.Routes.DetailRoute questionnaire.uuid))
+                                [ class "questionnaire-name" ]
+                                [ faSet "menu.questionnaires" appState
+                                , text questionnaire.name
+                                ]
+                            , linkTo appState
+                                (Routes.DocumentsRoute (IndexRoute Nothing PaginationQueryString.empty))
+                                [ class "text-danger" ]
+                                [ faSet "_global.remove" appState ]
                             ]
-                        ]
 
                 Nothing ->
-                    emptyNode
+                    Nothing
     in
     div [ listClass "Documents__Index" ]
-        [ Page.header (l_ "header.title" appState) (indexActions appState)
-        , questionnaireView
+        [ Page.header (l_ "header.title" appState) []
         , FormResult.successOnlyView appState model.deletingDocument
-        , Listing.view appState (listingConfig appState) documents
+        , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
         ]
 
 
-indexActions : AppState -> List (Html Msg)
-indexActions appState =
-    [ linkTo appState
-        (Routes.DocumentsRoute <| CreateRoute Nothing)
-        [ class "btn btn-primary" ]
-        [ lx_ "header.create" appState ]
-    ]
-
-
-listingConfig : AppState -> ListingConfig Document Msg
-listingConfig appState =
+listingConfig : AppState -> Model -> Maybe (Html Msg) -> Listing.ViewConfig Document Msg
+listingConfig appState model mbQuestionnaireFilterView =
     { title = listingTitle appState
     , description = listingDescription appState
     , dropdownItems = listingActions appState
@@ -119,6 +114,12 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , sortOptions =
+        [ ( "name", lg "document.name" appState )
+        , ( "createdAt", lg "document.createdAt" appState )
+        ]
+    , toRoute = Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
+    , toolbarExtra = mbQuestionnaireFilterView
     }
 
 
@@ -128,7 +129,7 @@ listingTitle appState document =
         name =
             if document.state == DoneDocumentState then
                 a
-                    [ href <| DocumentsApi.downloadDocumentUrl document.uuid appState
+                    [ href <| DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState
                     , target "_blank"
                     , title <| l_ "listing.name.title" appState
                     ]
@@ -184,7 +185,7 @@ listingActions appState document =
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
                 , label = l_ "action.download" appState
-                , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl document.uuid appState)
+                , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState)
                 }
 
         submit =
@@ -206,7 +207,7 @@ listingActions appState document =
         submitEnabled =
             (document.state == DoneDocumentState)
                 && appState.config.submission.enabled
-                && Permission.hasPerm appState.jwt Permission.submission
+                && Perm.hasPerm appState.session Perm.submission
     in
     []
         |> listInsertIf download (document.state == DoneDocumentState)

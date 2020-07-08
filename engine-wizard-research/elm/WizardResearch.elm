@@ -6,13 +6,13 @@ import Html
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (href)
 import Json.Decode exposing (Value)
+import Shared.Auth.Session as Session exposing (Session)
 import Shared.Elemental.Atoms.Button as Button
 import Shared.Elemental.Foundations.Grid as Grid
 import Shared.Html.Styled exposing (fa)
 import Shared.Utils exposing (dispatch)
 import Url exposing (Url)
 import WizardResearch.Common.AppState as AppState exposing (AppState)
-import WizardResearch.Common.Session as Session exposing (Session)
 import WizardResearch.Page as Page
 import WizardResearch.Pages.Auth as Auth
 import WizardResearch.Pages.Login as Login
@@ -50,6 +50,8 @@ type PageModel
     = Auth Auth.Model
     | Dashboard ()
     | Login Login.Model
+    | ForgottenPassword ()
+    | Signup ()
     | ProjectCreate ProjectCreate.Model
     | Project Project.Model
     | NotFound
@@ -93,6 +95,12 @@ initPageModel model =
                     ]
                 )
 
+            Route.ForgottenPassword ->
+                ( (), Cmd.none ) |> updateWith ForgottenPassword ForgottenPasswordMsg model
+
+            Route.SignUp ->
+                ( (), Cmd.none ) |> updateWith Signup SignupMsg model
+
             Route.NotFound ->
                 ( { model | pageModel = NotFound }, Cmd.none )
 
@@ -128,6 +136,8 @@ type Msg
     | AuthMsg Auth.Msg
     | DashboardMsg ()
     | LoginMsg Login.Msg
+    | ForgottenPasswordMsg ()
+    | SignupMsg ()
     | ProjectCreateMsg ProjectCreate.Msg
     | ProjectMsg Project.Msg
 
@@ -222,6 +232,13 @@ view model =
             { title = title
             , body = List.map (Html.map toMsg) body
             }
+
+        dummyPage title =
+            viewPage Page.Public
+                ForgottenPasswordMsg
+                { title = title
+                , content = div [] [ h1 [] [ text title ] ]
+                }
     in
     if model.appState.configurationError then
         Page.view model.appState
@@ -267,6 +284,12 @@ view model =
 
             Login loginModel ->
                 viewPage Page.Public LoginMsg (Login.view model.appState loginModel)
+
+            ForgottenPassword _ ->
+                dummyPage "Forgotten password"
+
+            Signup _ ->
+                dummyPage "Sign up"
 
             NotFound ->
                 Page.view model.appState Page.Auto { title = "Page not found", content = div [] [ text "Not Found" ] }

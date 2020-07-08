@@ -1,10 +1,13 @@
 module Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
 
+import Bootstrap.Dropdown as Dropdown
+import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Error.ApiError exposing (ApiError)
 import Wizard.Common.Questionnaire.Msgs
-import Wizard.KMEditor.Common.KnowledgeModel.Level exposing (Level)
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModal
 
 
 type Msg
@@ -15,3 +18,7 @@ type Msg
     | Save
     | PutRepliesCompleted (Result ApiError ())
     | Discard
+    | ActionsDropdownMsg Dropdown.State
+    | DeleteQuestionnaireModalMsg DeleteQuestionnaireModal.Msg
+    | CloneQuestionnaire QuestionnaireDetail
+    | CloneQuestionnaireCompleted (Result ApiError Questionnaire)

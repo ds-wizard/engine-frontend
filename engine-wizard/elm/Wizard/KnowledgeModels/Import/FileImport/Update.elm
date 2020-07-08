@@ -1,16 +1,18 @@
 module Wizard.KnowledgeModels.Import.FileImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import File
+import Json.Decode exposing (decodeValue)
+import Shared.Api.Packages as PackagesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
-import Wizard.Ports exposing (FilePortData, createDropzone, fileSelected)
+import Wizard.Ports exposing (createDropzone, fileSelected)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -28,7 +30,12 @@ update msg wrapMsg appState model =
             ( model, fileSelected fileInputId )
 
         FileRead data ->
-            ( { model | file = Just data }, Cmd.none )
+            case decodeValue File.decoder data of
+                Ok fileData ->
+                    ( { model | file = Just fileData }, Cmd.none )
+
+                Err err ->
+                    ( model, Cmd.none )
 
         Submit ->
             handleSubmit wrapMsg appState model

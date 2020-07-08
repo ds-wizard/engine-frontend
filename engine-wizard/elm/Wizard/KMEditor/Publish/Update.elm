@@ -3,25 +3,26 @@ module Wizard.KMEditor.Publish.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
+import Shared.Api.Branches as BranchesApi
+import Shared.Api.Packages as PackagesApi
+import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Common.Api exposing (getResultCmd)
-import Wizard.Common.Api.Branches as BranchesApi
-import Wizard.Common.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Common.BranchDetail exposing (BranchDetail)
 import Wizard.KMEditor.Common.BranchPublishForm as BranchPublishForm
 import Wizard.KMEditor.Publish.Models exposing (Model)
 import Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Common.PackageDetail exposing (PackageDetail)
 import Wizard.KnowledgeModels.Routes
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : String -> AppState -> Cmd Msg
+fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
     BranchesApi.getBranch uuid appState GetBranchCompleted
 

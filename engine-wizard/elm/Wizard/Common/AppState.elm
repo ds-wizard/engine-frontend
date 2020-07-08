@@ -9,15 +9,14 @@ import Browser.Navigation as Navigation exposing (Key)
 import Dict
 import Json.Decode as D exposing (Decoder, Error(..))
 import Random exposing (Seed)
+import Shared.Auth.Session as Session exposing (Session)
+import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
+import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Time
-import Wizard.Common.Config exposing (Config)
-import Wizard.Common.Config.Partials.DashboardWidget exposing (DashboardWidget(..))
 import Wizard.Common.Flags as Flags
-import Wizard.Common.JwtToken as JwtToken exposing (JwtToken)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
-import Wizard.Common.Session as Session exposing (Session)
 import Wizard.Routes as Routes
 
 
@@ -26,11 +25,10 @@ type alias AppState =
     , seed : Seed
     , session : Session
     , invalidSession : Bool
-    , jwt : Maybe JwtToken
     , key : Key
     , apiUrl : String
     , clientUrl : String
-    , config : Config
+    , config : BootstrapConfig
     , provisioning : Provisioning
     , valid : Bool
     , currentTime : Time.Posix
@@ -70,7 +68,6 @@ init flagsValue key =
     , seed = Random.initialSeed flags.seed
     , session = Maybe.withDefault Session.init flags.session
     , invalidSession = invalidSession
-    , jwt = Maybe.andThen (.token >> JwtToken.parse) flags.session
     , key = key
     , apiUrl = flags.apiUrl
     , clientUrl = flags.clientUrl

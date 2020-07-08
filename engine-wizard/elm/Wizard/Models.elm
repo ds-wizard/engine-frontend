@@ -2,7 +2,6 @@ module Wizard.Models exposing
     ( Model
     , initLocalModel
     , initialModel
-    , setJwt
     , setRoute
     , setSeed
     , setSession
@@ -10,10 +9,9 @@ module Wizard.Models exposing
     )
 
 import Random exposing (Seed)
+import Shared.Auth.Session as Session exposing (Session)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.JwtToken exposing (JwtToken)
 import Wizard.Common.Menu.Models
-import Wizard.Common.Session as Session exposing (Session)
 import Wizard.Dashboard.Models
 import Wizard.Documents.Models
 import Wizard.KMEditor.Models
@@ -23,6 +21,7 @@ import Wizard.Questionnaires.Models
 import Wizard.Registry.Models
 import Wizard.Routes as Routes
 import Wizard.Settings.Models
+import Wizard.Templates.Models
 import Wizard.Users.Models
 
 
@@ -37,6 +36,7 @@ type alias Model =
     , questionnairesModel : Wizard.Questionnaires.Models.Model
     , registryModel : Wizard.Registry.Models.Model
     , settingsModel : Wizard.Settings.Models.Model
+    , templatesModel : Wizard.Templates.Models.Model
     , users : Wizard.Users.Models.Model
     }
 
@@ -50,9 +50,10 @@ initialModel appState =
     , kmEditorModel = Wizard.KMEditor.Models.initialModel
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
     , publicModel = Wizard.Public.Models.initialModel
-    , questionnairesModel = Wizard.Questionnaires.Models.initialModel
+    , questionnairesModel = Wizard.Questionnaires.Models.initialModel appState
     , registryModel = Wizard.Registry.Models.initialModel
     , settingsModel = Wizard.Settings.Models.initialModel
+    , templatesModel = Wizard.Templates.Models.initialModel appState
     , users = Wizard.Users.Models.initialModel appState
     }
 
@@ -65,18 +66,6 @@ setSession session model =
 
         newState =
             { appState | session = session }
-    in
-    { model | appState = newState }
-
-
-setJwt : Maybe JwtToken -> Model -> Model
-setJwt jwt model =
-    let
-        appState =
-            model.appState
-
-        newState =
-            { appState | jwt = jwt }
     in
     { model | appState = newState }
 
@@ -121,13 +110,16 @@ initLocalModel model =
             { model | publicModel = Wizard.Public.Models.initLocalModel route model.publicModel }
 
         Routes.QuestionnairesRoute route ->
-            { model | questionnairesModel = Wizard.Questionnaires.Models.initLocalModel route model.questionnairesModel }
+            { model | questionnairesModel = Wizard.Questionnaires.Models.initLocalModel model.appState route model.questionnairesModel }
 
         Routes.RegistryRoute route ->
             { model | registryModel = Wizard.Registry.Models.initLocalModel route model.registryModel }
 
         Routes.SettingsRoute route ->
             { model | settingsModel = Wizard.Settings.Models.initLocalModel route model.settingsModel }
+
+        Routes.TemplatesRoute route ->
+            { model | templatesModel = Wizard.Templates.Models.initLocalModel route model.appState model.templatesModel }
 
         Routes.UsersRoute route ->
             { model | users = Wizard.Users.Models.initLocalModel model.appState route model.users }

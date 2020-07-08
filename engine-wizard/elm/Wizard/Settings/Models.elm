@@ -2,11 +2,11 @@ module Wizard.Settings.Models exposing (Model, initLocalModel, initialModel)
 
 import Wizard.Settings.Authentication.Models
 import Wizard.Settings.Dashboard.Models
-import Wizard.Settings.KnowledgeModelRegistry.Models
 import Wizard.Settings.LookAndFeel.Models
 import Wizard.Settings.Organization.Models
 import Wizard.Settings.PrivacyAndSupport.Models
 import Wizard.Settings.Questionnaires.Models
+import Wizard.Settings.Registry.Models
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Models
 import Wizard.Settings.Template.Models
@@ -18,7 +18,7 @@ type alias Model =
     , privacyAndSupportModel : Wizard.Settings.PrivacyAndSupport.Models.Model
     , dashboardModel : Wizard.Settings.Dashboard.Models.Model
     , lookAndFeelModel : Wizard.Settings.LookAndFeel.Models.Model
-    , knowledgeModelRegistryModel : Wizard.Settings.KnowledgeModelRegistry.Models.Model
+    , registryModel : Wizard.Settings.Registry.Models.Model
     , questionnairesModel : Wizard.Settings.Questionnaires.Models.Model
     , documentSubmissionModel : Wizard.Settings.Submission.Models.Model
     , templateModel : Wizard.Settings.Template.Models.Model
@@ -32,7 +32,7 @@ initialModel =
     , privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel
     , dashboardModel = Wizard.Settings.Dashboard.Models.initialModel
     , lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel
-    , knowledgeModelRegistryModel = Wizard.Settings.KnowledgeModelRegistry.Models.initialModel
+    , registryModel = Wizard.Settings.Registry.Models.initialModel
     , questionnairesModel = Wizard.Settings.Questionnaires.Models.initialModel
     , documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel
     , templateModel = Wizard.Settings.Template.Models.initialModel
@@ -57,8 +57,8 @@ initLocalModel route model =
         LookAndFeelRoute ->
             { model | lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel }
 
-        KnowledgeModelRegistryRoute ->
-            { model | knowledgeModelRegistryModel = Wizard.Settings.KnowledgeModelRegistry.Models.initialModel }
+        RegistryRoute ->
+            { model | registryModel = Wizard.Settings.Registry.Models.initialModel }
 
         QuestionnairesRoute ->
             { model | questionnairesModel = Wizard.Settings.Questionnaires.Models.initialModel }

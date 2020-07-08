@@ -1,7 +1,8 @@
 module Wizard.Common.FormEngine.Msgs exposing (Msg(..))
 
 import Debounce
-import Wizard.Common.FormEngine.Model exposing (ReplyValue, TypeHint)
+import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue exposing (ReplyValue)
+import Wizard.Common.FormEngine.Model exposing (TypeHint)
 
 
 type Msg a err

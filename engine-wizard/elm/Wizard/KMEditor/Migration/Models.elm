@@ -1,19 +1,20 @@
 module Wizard.KMEditor.Migration.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.Migration exposing (Migration)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.Migration exposing (Migration)
+import Uuid exposing (Uuid)
 
 
 type alias Model =
-    { branchUuid : String
+    { branchUuid : Uuid
     , migration : ActionResult Migration
     , metrics : ActionResult (List Metric)
     , conflict : ActionResult String
     }
 
 
-initialModel : String -> Model
+initialModel : Uuid -> Model
 initialModel branchUuid =
     { branchUuid = branchUuid
     , migration = Loading

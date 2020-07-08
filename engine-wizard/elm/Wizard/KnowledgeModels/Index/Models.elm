@@ -1,8 +1,8 @@
 module Wizard.KnowledgeModels.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Data.Package exposing (Package)
 import Wizard.Common.Components.Listing as Listing
-import Wizard.KnowledgeModels.Common.Package exposing (Package)
 
 
 type alias Model =

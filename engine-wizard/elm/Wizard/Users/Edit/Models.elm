@@ -6,8 +6,8 @@ module Wizard.Users.Edit.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Users.Common.User exposing (User)
+import Shared.Data.User exposing (User)
+import Shared.Form.FormError exposing (FormError)
 import Wizard.Users.Common.UserEditForm as UserEditForm exposing (UserEditForm)
 import Wizard.Users.Common.UserPasswordForm as UserPasswordForm exposing (UserPasswordForm)
 
@@ -23,8 +23,8 @@ type alias Model =
     , user : ActionResult User
     , savingUser : ActionResult String
     , savingPassword : ActionResult String
-    , userForm : Form CustomFormError UserEditForm
-    , passwordForm : Form CustomFormError UserPasswordForm
+    , userForm : Form FormError UserEditForm
+    , passwordForm : Form FormError UserPasswordForm
     }
 
 

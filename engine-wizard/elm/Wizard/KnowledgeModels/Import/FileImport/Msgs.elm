@@ -1,7 +1,7 @@
 module Wizard.KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
 
+import Json.Encode as E
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Ports as Ports exposing (FilePortData)
 
 
 type Msg
@@ -9,7 +9,7 @@ type Msg
     | DragOver
     | DragLeave
     | FileSelected
-    | FileRead FilePortData
+    | FileRead E.Value
     | Submit
     | Cancel
     | ImportPackageCompleted (Result ApiError ())

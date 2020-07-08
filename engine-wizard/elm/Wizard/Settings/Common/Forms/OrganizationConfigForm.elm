@@ -9,9 +9,9 @@ module Wizard.Settings.Common.Forms.OrganizationConfigForm exposing
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Wizard.Common.Config.OrganizationConfig exposing (OrganizationConfig)
-import Wizard.Common.Form exposing (CustomFormError)
-import Wizard.Common.Form.Validate as V
+import Shared.Data.BootstrapConfig.OrganizationConfig exposing (OrganizationConfig)
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias OrganizationConfigForm =
@@ -22,17 +22,17 @@ type alias OrganizationConfigForm =
     }
 
 
-initEmpty : Form CustomFormError OrganizationConfigForm
+initEmpty : Form FormError OrganizationConfigForm
 initEmpty =
     Form.initial [] validation
 
 
-init : OrganizationConfig -> Form CustomFormError OrganizationConfigForm
+init : OrganizationConfig -> Form FormError OrganizationConfigForm
 init config =
     Form.initial (organizationConfigToFormInitials config) validation
 
 
-validation : Validation CustomFormError OrganizationConfigForm
+validation : Validation FormError OrganizationConfigForm
 validation =
     V.succeed OrganizationConfigForm
         |> V.andMap (V.field "name" V.string)

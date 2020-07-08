@@ -3,11 +3,11 @@ module Wizard.Dashboard.Widgets.DMPWorkflowWidget exposing (view)
 import ActionResult exposing (ActionResult)
 import Html exposing (Html, a, div, img, p, text)
 import Html.Attributes exposing (class, href, src)
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Config.LookAndFeelConfig as LookAndFeelConfig
-import Wizard.Questionnaires.Common.Questionnaire exposing (Questionnaire)
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing

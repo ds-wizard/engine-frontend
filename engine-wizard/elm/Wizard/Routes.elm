@@ -7,6 +7,7 @@ import Wizard.Public.Routes
 import Wizard.Questionnaires.Routes
 import Wizard.Registry.Routes
 import Wizard.Settings.Routes
+import Wizard.Templates.Routes
 import Wizard.Users.Routes
 
 
@@ -19,6 +20,7 @@ type Route
     | QuestionnairesRoute Wizard.Questionnaires.Routes.Route
     | RegistryRoute Wizard.Registry.Routes.Route
     | SettingsRoute Wizard.Settings.Routes.Route
+    | TemplatesRoute Wizard.Templates.Routes.Route
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute

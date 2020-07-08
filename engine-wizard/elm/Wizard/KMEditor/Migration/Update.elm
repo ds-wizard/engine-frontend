@@ -1,23 +1,24 @@
 module Wizard.KMEditor.Migration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Branches as BranchesApi
+import Shared.Api.Metrics as MetricsApi
+import Shared.Data.Event as Event
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.Migration exposing (Migration)
+import Shared.Data.MigrationResolution as MigrationResolution exposing (MigrationResolution)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lg)
+import Shared.Locale exposing (lg)
+import Shared.Setters exposing (setMetrics, setMigration)
+import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
-import Wizard.Common.Api.Branches as BranchesApi
-import Wizard.Common.Api.Metrics as MetricsApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Setters exposing (setMetrics, setMigration)
-import Wizard.KMEditor.Common.Events.Event as Event
-import Wizard.KMEditor.Common.KnowledgeModel.Metric exposing (Metric)
-import Wizard.KMEditor.Common.Migration exposing (Migration)
-import Wizard.KMEditor.Common.MigrationResolution as MigrationResolution exposing (MigrationResolution)
 import Wizard.KMEditor.Migration.Models exposing (Model)
 import Wizard.KMEditor.Migration.Msgs exposing (Msg(..))
 import Wizard.Msgs
 
 
-fetchData : String -> AppState -> Cmd Msg
+fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
     Cmd.batch
         [ BranchesApi.getMigration uuid appState GetMigrationCompleted
@@ -116,7 +117,7 @@ resolveChange createMigrationResolution wrapMsg appState model =
     ( { model | conflict = Loading }, cmd )
 
 
-postMigrationConflictCmd : (Msg -> Wizard.Msgs.Msg) -> String -> AppState -> MigrationResolution -> Cmd Wizard.Msgs.Msg
+postMigrationConflictCmd : (Msg -> Wizard.Msgs.Msg) -> Uuid -> AppState -> MigrationResolution -> Cmd Wizard.Msgs.Msg
 postMigrationConflictCmd wrapMsg uuid appState resolution =
     let
         body =

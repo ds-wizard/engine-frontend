@@ -13,6 +13,8 @@ type Route
     | Organization
     | Signup
     | SignupConfirmation String String
+    | Templates
+    | TemplateDetail String
     | NotFound
 
 
@@ -27,6 +29,8 @@ routeParser =
         , map Organization (s "organization")
         , map Signup (s "signup")
         , map SignupConfirmation (s "signup" </> string </> string)
+        , map Templates (s "templates")
+        , map TemplateDetail (s "templates" </> string)
         ]
 
 
@@ -61,6 +65,12 @@ toString route =
 
         SignupConfirmation orgId hash ->
             "/signup/" ++ orgId ++ "/" ++ hash
+
+        Templates ->
+            "/templates"
+
+        TemplateDetail tepmlateId ->
+            "/templates/" ++ tepmlateId
 
         _ ->
             "/"

@@ -4,10 +4,10 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Form exposing (CustomFormError)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -64,7 +64,7 @@ signupForm appState model =
     publicForm appState formConfig
 
 
-formView : AppState -> Form CustomFormError PasswordForm -> Html Form.Msg
+formView : AppState -> Form FormError PasswordForm -> Html Form.Msg
 formView appState form =
     div []
         [ FormExtra.text <| l_ "form.text" appState

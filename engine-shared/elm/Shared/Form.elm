@@ -1,6 +1,9 @@
 module Shared.Form exposing (..)
 
+import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
+import Form.Validate as V exposing (Validation, customError)
+import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError(..))
 import Shared.Locale exposing (l, lf)
 import Shared.Provisioning exposing (Provisioning)
@@ -56,3 +59,23 @@ errorToString appState labelText error =
 
         _ ->
             l_ "error.default" appState
+
+
+setFormErrors : ApiError -> Form FormError a -> Form FormError a
+setFormErrors apiError form =
+    case ApiError.toServerError apiError of
+        Just error ->
+            List.foldl setFormError form error.fieldErrors
+
+        _ ->
+            form
+
+
+setFormError : ( String, String ) -> Form FormError a -> Form FormError a
+setFormError fieldError form =
+    Form.update (createFieldValidation fieldError) Form.Validate form
+
+
+createFieldValidation : ( String, String ) -> Validation FormError a
+createFieldValidation ( fieldName, fieldError ) =
+    V.field fieldName (V.fail (customError (ServerValidationError fieldError)))

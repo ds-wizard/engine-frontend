@@ -9,7 +9,7 @@ module.exports = function (app) {
             return;
         }
 
-        readFile(node.files[0]);
+        sendFile(node.files[0]);
     }
 
 
@@ -23,7 +23,7 @@ module.exports = function (app) {
             event.preventDefault();
             event.stopPropagation();
             var file = getDroppedFile(event);
-            readFile(file);
+            sendFile(file);
         };
     }
 
@@ -43,17 +43,7 @@ module.exports = function (app) {
     }
 
 
-    function readFile(file) {
-        var reader = new FileReader();
-
-        reader.onload = function (event) {
-            var portData = {
-                contents: event.target.result,
-                filename: file.name
-            };
-            app.ports.fileContentRead.send(portData)
-        };
-
-        reader.readAsText(file);
+    function sendFile(file) {
+        app.ports.fileContentRead.send(file)
     }
 };

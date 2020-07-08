@@ -1,22 +1,26 @@
 module Wizard.Documents.Index.Update exposing (..)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Api.Documents as DocumentsApi
+import Shared.Api.Questionnaires as QuestionnaireApi
+import Shared.Api.Submissions as SubmissionsApi
+import Shared.Data.Document exposing (Document)
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.Submission exposing (Submission)
+import Shared.Data.SubmissionService exposing (SubmissionService)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
-import Wizard.Common.Api.Documents as DocumentsApi
-import Wizard.Common.Api.Questionnaires as QuestionnaireApi
-import Wizard.Common.Api.Submissions as SubmissionsApi
+import Shared.Setters exposing (setQuestionnaire)
+import Uuid
+import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing
-import Wizard.Common.Setters exposing (setDocuments, setQuestionnaire)
-import Wizard.Documents.Common.Document as Document exposing (Document)
-import Wizard.Documents.Common.Submission exposing (Submission)
-import Wizard.Documents.Common.SubmissionService exposing (SubmissionService)
-import Wizard.Documents.Index.Models exposing (Model, updateStates)
+import Wizard.Common.Components.Listing.Msgs as ListingMsgs
+import Wizard.Common.Components.Listing.Update as Listing
+import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
+import Wizard.Documents.Routes exposing (Route(..))
 import Wizard.Msgs
-import Wizard.Questionnaires.Common.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Wizard.Routes as Routes
 
 
 fetchData : AppState -> Model -> Cmd Msg
@@ -31,7 +35,7 @@ fetchData appState model =
                     Cmd.none
     in
     Cmd.batch
-        [ DocumentsApi.getDocuments model.questionnaireUuid appState GetDocumentsCompleted
+        [ Cmd.map ListingMsg Listing.fetchData
         , questionnaireCmd
         ]
 
@@ -39,9 +43,6 @@ fetchData appState model =
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update wrapMsg msg appState model =
     case msg of
-        GetDocumentsCompleted result ->
-            handleGetDocumentsCompleted appState model result
-
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted appState model result
 
@@ -55,13 +56,7 @@ update wrapMsg msg appState model =
             handleDeleteDocumentCompleted wrapMsg appState model result
 
         ListingMsg listingMsg ->
-            handleListingMsg listingMsg model
-
-        RefreshDocuments ->
-            handleRefreshDocuments wrapMsg appState model
-
-        RefreshDocumentsCompleted result ->
-            handleRefreshDocumentsCompleted model result
+            handleListingMsg wrapMsg appState listingMsg model
 
         ShowHideSubmitDocument mbDocument ->
             handleShowHideSubmitDocument wrapMsg appState model mbDocument
@@ -77,21 +72,6 @@ update wrapMsg msg appState model =
 
         SubmitDocumentCompleted result ->
             handleSubmitDocumentCompleted appState model result
-
-
-
--- Handlers
-
-
-handleGetDocumentsCompleted : AppState -> Model -> Result ApiError (List Document) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetDocumentsCompleted appState model result =
-    applyResultTransform
-        { setResult = setDocuments
-        , defaultError = lg "apiError.documents.getListError" appState
-        , model = model
-        , result = result
-        , transform = Listing.modelFromList << List.sortWith Document.compare
-        }
 
 
 handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -121,7 +101,7 @@ handleDeleteDocument wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        DocumentsApi.deleteDocument questionnaire.uuid appState DeleteDocumentCompleted
+                        DocumentsApi.deleteDocument (Uuid.toString questionnaire.uuid) appState DeleteDocumentCompleted
             in
             ( newModel, cmd )
 
@@ -133,45 +113,33 @@ handleDeleteDocumentCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model ->
 handleDeleteDocumentCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
+            let
+                ( documents, cmd ) =
+                    Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.documents
+            in
             ( { model
                 | deletingDocument = Success <| lg "apiSuccess.documents.delete" appState
-                , documents = Loading
+                , documents = documents
                 , documentToBeDeleted = Nothing
               }
-            , Cmd.map wrapMsg <| fetchData appState model
+            , cmd
             )
 
         Err error ->
-            ( { model
-                | deletingDocument = ApiError.toActionResult (lg "apiError.documents.deleteError" appState) error
-              }
+            ( { model | deletingDocument = ApiError.toActionResult (lg "apiError.documents.deleteError" appState) error }
             , getResultCmd result
             )
 
 
-handleListingMsg : Listing.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleListingMsg listingMsg model =
-    ( { model | documents = ActionResult.map (Listing.update listingMsg) model.documents }
-    , Cmd.none
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Document -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg wrapMsg appState listingMsg model =
+    let
+        ( documents, cmd ) =
+            Listing.update (listingUpdateConfig wrapMsg appState model) appState listingMsg model.documents
+    in
+    ( { model | documents = documents }
+    , cmd
     )
-
-
-handleRefreshDocuments : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleRefreshDocuments wrapMsg appState model =
-    ( model
-    , Cmd.map wrapMsg <|
-        DocumentsApi.getDocuments model.questionnaireUuid appState RefreshDocumentsCompleted
-    )
-
-
-handleRefreshDocumentsCompleted : Model -> Result ApiError (List Document) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleRefreshDocumentsCompleted model result =
-    case result of
-        Ok documents ->
-            ( updateStates model documents, Cmd.none )
-
-        Err _ ->
-            ( model, getResultCmd result )
 
 
 handleShowHideSubmitDocument : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Maybe Document -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -181,7 +149,7 @@ handleShowHideSubmitDocument wrapMsg appState model mbDocument =
             case mbDocument of
                 Just document ->
                     Cmd.map wrapMsg <|
-                        DocumentsApi.getSubmissionServices document.uuid appState GetSubmissionServicesCompleted
+                        DocumentsApi.getSubmissionServices (Uuid.toString document.uuid) appState GetSubmissionServicesCompleted
 
                 Nothing ->
                     Cmd.none
@@ -198,8 +166,21 @@ handleShowHideSubmitDocument wrapMsg appState model mbDocument =
 
 handleGetSubmissionServicesCompleted : AppState -> Model -> Result ApiError (List SubmissionService) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetSubmissionServicesCompleted appState model result =
+    let
+        setResult value record =
+            let
+                selectedSubmissionServiceId =
+                    value
+                        |> ActionResult.map (Maybe.map .id << List.head)
+                        |> ActionResult.withDefault Nothing
+            in
+            { record
+                | submissionServices = value
+                , selectedSubmissionServiceId = selectedSubmissionServiceId
+            }
+    in
     applyResult
-        { setResult = \value record -> { record | submissionServices = value }
+        { setResult = setResult
         , defaultError = lg "apiError.documents.getSubmissionServicesError" appState
         , model = model
         , result = result
@@ -217,7 +198,7 @@ handleSubmitDocument wrapMsg appState model =
         ( Just document, Just serviceId ) ->
             ( { model | submittingDocument = Loading }
             , Cmd.map wrapMsg <|
-                SubmissionsApi.postSubmission serviceId document.uuid appState SubmitDocumentCompleted
+                SubmissionsApi.postSubmission serviceId (Uuid.toString document.uuid) appState SubmitDocumentCompleted
             )
 
         _ ->
@@ -232,3 +213,16 @@ handleSubmitDocumentCompleted appState model result =
         , model = model
         , result = result
         }
+
+
+
+-- Utils
+
+
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig Document
+listingUpdateConfig wrapMsg appState model =
+    { getRequest = DocumentsApi.getDocuments model.questionnaireUuid
+    , getError = lg "apiError.documents.getListError" appState
+    , wrapMsg = wrapMsg << ListingMsg
+    , toRoute = Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
+    }
