@@ -92,21 +92,12 @@ viewDocuments appState model mbQuestionnaire =
                     Nothing
     in
     div [ listClass "Documents__Index" ]
-        [ Page.header (l_ "header.title" appState) (indexActions appState)
+        [ Page.header (l_ "header.title" appState) []
         , FormResult.successOnlyView appState model.deletingDocument
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
         ]
-
-
-indexActions : AppState -> List (Html Msg)
-indexActions appState =
-    [ linkTo appState
-        (Routes.DocumentsRoute <| CreateRoute Nothing)
-        [ class "btn btn-primary" ]
-        [ lx_ "header.create" appState ]
-    ]
 
 
 listingConfig : AppState -> Model -> Maybe (Html Msg) -> Listing.ViewConfig Document Msg

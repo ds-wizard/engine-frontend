@@ -6,6 +6,7 @@ import Shared.Auth.Session exposing (Session)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
+import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
 import Url.Parser.Query.Extra as Query
 import Uuid exposing (Uuid)
@@ -19,7 +20,7 @@ parsers appState wrapRoute =
         moduleRoot =
             lr "documents" appState
     in
-    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "documents.create" appState) <?> Query.uuid (lr "documents.create.selected" appState))
+    [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "documents.create" appState) </> uuid)
     , map (indexRoute wrapRoute) (s moduleRoot <?> Query.uuid (lr "documents.index.questionnaireUuid" appState) <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort")
     ]
 
@@ -36,13 +37,8 @@ toUrl appState route =
             lr "documents" appState
     in
     case route of
-        CreateRoute selected ->
-            case selected of
-                Just uuid ->
-                    [ moduleRoot, lr "documents.create" appState, "?" ++ lr "questionnaires.create.selected" appState ++ "=" ++ Uuid.toString uuid ]
-
-                Nothing ->
-                    [ moduleRoot, lr "documents.create" appState ]
+        CreateRoute uuid ->
+            [ moduleRoot, lr "documents.create" appState, Uuid.toString uuid ]
 
         IndexRoute questionnaireUuid paginationQueryString ->
             let

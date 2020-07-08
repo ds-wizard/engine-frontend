@@ -187,7 +187,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createDocument" appState
                 , label = l_ "action.createDocument" appState
-                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.CreateRoute <| Just <| questionnaire.uuid)
+                , msg = ListingActionLink (Routes.DocumentsRoute <| Wizard.Documents.Routes.CreateRoute questionnaire.uuid)
                 }
 
         viewDocuments =

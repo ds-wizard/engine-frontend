@@ -12,7 +12,6 @@ import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (listInsertIf)
-import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -101,7 +100,7 @@ questionnaireHeader appState model questionnaireModel =
                     , lx_ "header.close" appState
                     ]
                 , linkTo appState
-                    (Routes.DocumentsRoute (Wizard.Documents.Routes.CreateRoute (Just questionnaireModel.questionnaire.uuid)))
+                    (Routes.DocumentsRoute (Wizard.Documents.Routes.CreateRoute questionnaireModel.questionnaire.uuid))
                     [ class "link-with-icon" ]
                     [ faSet "questionnaireList.createDocument" appState
                     , lx_ "header.createDocument" appState

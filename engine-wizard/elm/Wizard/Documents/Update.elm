@@ -12,9 +12,9 @@ import Wizard.Msgs
 fetchData : Route -> AppState -> Model -> Cmd Msg
 fetchData route appState model =
     case route of
-        CreateRoute _ ->
+        CreateRoute questionnaireUuid ->
             Cmd.map CreateMsg <|
-                Wizard.Documents.Create.Update.fetchData appState
+                Wizard.Documents.Create.Update.fetchData appState questionnaireUuid
 
         IndexRoute _ _ ->
             Cmd.map IndexMsg <|

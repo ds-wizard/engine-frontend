@@ -12,6 +12,7 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Package as Package
 import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Questionnaire.Models
 
@@ -90,7 +91,7 @@ createQuestionnaireModel appState packageId km =
     in
     Wizard.Common.Questionnaire.Models.initialModel
         appState
-        { uuid = km.uuid
+        { uuid = Uuid.nil
         , name = ""
         , visibility = PrivateQuestionnaire
         , ownerUuid = Nothing
@@ -100,4 +101,5 @@ createQuestionnaireModel appState packageId km =
         , level = 1
         , selectedTagUuids = []
         , labels = []
+        , report = { indications = [] }
         }

@@ -166,8 +166,21 @@ handleShowHideSubmitDocument wrapMsg appState model mbDocument =
 
 handleGetSubmissionServicesCompleted : AppState -> Model -> Result ApiError (List SubmissionService) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetSubmissionServicesCompleted appState model result =
+    let
+        setResult value record =
+            let
+                selectedSubmissionServiceId =
+                    value
+                        |> ActionResult.map (Maybe.map .id << List.head)
+                        |> ActionResult.withDefault Nothing
+            in
+            { record
+                | submissionServices = value
+                , selectedSubmissionServiceId = selectedSubmissionServiceId
+            }
+    in
     applyResult
-        { setResult = \value record -> { record | submissionServices = value }
+        { setResult = setResult
         , defaultError = lg "apiError.documents.getSubmissionServicesError" appState
         , model = model
         , result = result
