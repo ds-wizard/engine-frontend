@@ -11,6 +11,7 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Shared.Data.Questionnaire.QuestionnaireLabel as QuestionnaireLabel
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.FormValue as FormValue
@@ -20,6 +21,7 @@ import Shared.Form.FormError exposing (FormError)
 type alias QuestionnaireEditForm =
     { name : String
     , visibility : QuestionnaireVisibility
+    , sharing : QuestionnaireSharing
     }
 
 
@@ -36,23 +38,23 @@ init questionnaire =
 questionnaireToFormInitials : QuestionnaireDetail -> List ( String, Field.Field )
 questionnaireToFormInitials questionnaire =
     [ ( "name", Field.string questionnaire.name )
-    , ( "visibility", Field.string <| QuestionnaireVisibility.toString questionnaire.visibility )
+    , ( "visibility", QuestionnaireVisibility.field questionnaire.visibility )
+    , ( "sharing", QuestionnaireSharing.field questionnaire.sharing )
     ]
 
 
 validation : Validation FormError QuestionnaireEditForm
 validation =
-    Validate.map2 QuestionnaireEditForm
+    Validate.map3 QuestionnaireEditForm
         (Validate.field "name" Validate.string)
         (Validate.field "visibility" QuestionnaireVisibility.validation)
+        (Validate.field "sharing" QuestionnaireSharing.validation)
 
 
-encode : QuestionnaireDetail -> QuestionnaireEditForm -> E.Value
-encode questionnaire form =
+encode : QuestionnaireEditForm -> E.Value
+encode form =
     E.object
         [ ( "name", E.string form.name )
         , ( "visibility", QuestionnaireVisibility.encode form.visibility )
-        , ( "replies", E.list FormValue.encode questionnaire.replies )
-        , ( "level", E.int questionnaire.level )
-        , ( "labels", E.list QuestionnaireLabel.encode questionnaire.labels )
+        , ( "sharing", QuestionnaireSharing.encode form.sharing )
         ]

@@ -8,12 +8,13 @@ import ActionResult exposing (ActionResult(..))
 import Shared.Api.Levels as LevelsApi
 import Shared.Api.Metrics as MetricsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Auth.Session as Session
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Error.ApiError as ApiError exposing (ApiError(..))
 import Shared.Locale exposing (l, lg, lgf)
 import Shared.Setters exposing (setLevels, setMetrics, setQuestionnaireDetail)
 import Uuid exposing (Uuid)
@@ -24,13 +25,14 @@ import Wizard.Common.Questionnaire.Msgs
 import Wizard.Common.Questionnaire.Update
 import Wizard.Msgs
 import Wizard.Ports as Ports
+import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModalMsgs
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Update as DeleteQuestionnaireModal
 import Wizard.Questionnaires.Detail.Models exposing (Model, isDirty)
 import Wizard.Questionnaires.Detail.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 l_ : String -> AppState -> String
@@ -99,13 +101,32 @@ update wrapMsg msg appState model =
 
 handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireCompleted appState model result =
-    initQuestionnaireModel appState <|
-        applyResult
-            { setResult = setQuestionnaireDetail
-            , defaultError = lg "apiError.questionnaires.getError" appState
-            , model = model
-            , result = result
-            }
+    case result of
+        Ok questionnaireDetail ->
+            initQuestionnaireModel appState <|
+                ( { model | questionnaireDetail = Success questionnaireDetail }
+                , Cmd.none
+                )
+
+        Err error ->
+            case ( error, Session.exists appState.session ) of
+                ( BadStatus 403 _, False ) ->
+                    let
+                        redirectRoute =
+                            Routing.toUrl appState
+                                (Routes.QuestionnairesRoute (DetailRoute model.uuid))
+                    in
+                    ( model
+                    , cmdNavigate appState (Routes.PublicRoute (LoginRoute (Just redirectRoute)))
+                    )
+
+                _ ->
+                    initQuestionnaireModel appState <|
+                        ( { model
+                            | questionnaireDetail = ApiError.toActionResult (lg "apiError.questionnaires.getError" appState) error
+                          }
+                        , Cmd.none
+                        )
 
 
 handleGetLevelsCompleted : AppState -> Model -> Result ApiError (List Level) -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -175,7 +196,7 @@ handleSave wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        QuestionnairesApi.putQuestionnaire model.uuid body appState PutRepliesCompleted
+                        QuestionnairesApi.putQuestionnaireContent model.uuid body appState PutRepliesCompleted
             in
             ( { model | questionnaireModel = Success newQuestionnaireModel, savingQuestionnaire = Loading }, cmd )
 

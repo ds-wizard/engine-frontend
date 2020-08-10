@@ -4,7 +4,8 @@ import Form exposing (Form)
 import Html exposing (..)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
 import Version
@@ -68,11 +69,31 @@ formView appState model packages =
             else
                 emptyNode
 
+        visibilityValue =
+            (Form.getFieldAsString "visibility" model.form).value
+                |> Maybe.andThen QuestionnaireVisibility.fromString
+
+        sharingSelect =
+            case
+                ( appState.config.questionnaire.questionnaireSharing.enabled
+                , visibilityValue
+                )
+            of
+                ( _, Just PrivateQuestionnaire ) ->
+                    emptyNode
+
+                ( True, Just visibility ) ->
+                    FormGroup.richRadioGroup appState (QuestionnaireSharing.richFormOptions appState visibility) model.form "sharing" <| lg "questionnaire.sharing" appState
+
+                _ ->
+                    emptyNode
+
         formHtml =
             div []
                 [ FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
                 , parentInput <| lg "knowledgeModel" appState
                 , visibilitySelect
+                , sharingSelect
                 ]
     in
     formHtml

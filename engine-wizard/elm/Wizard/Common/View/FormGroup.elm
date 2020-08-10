@@ -151,7 +151,7 @@ richRadioGroup appState options =
                             []
                         , label [ class "form-check-label", for k ]
                             [ text v
-                            , p [ class "form-text text-muted" ] [ text d ]
+                            , p [ class "form-text text-muted" ] [ Markdown.toHtml [] d ]
                             ]
                         ]
             in

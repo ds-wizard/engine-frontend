@@ -48,7 +48,7 @@ view model =
                 model.questionnairesModel
                     |> Wizard.Questionnaires.View.view route model.appState
                     |> Html.map QuestionnairesMsg
-                    |> Layout.app model
+                    |> Layout.mixed model
 
             Routes.KMEditorRoute route ->
                 model.kmEditorModel
@@ -97,11 +97,7 @@ view model =
                     |> Layout.app model
 
             Routes.NotFoundRoute ->
-                if model.appState.session.user == Nothing then
-                    Layout.public model <| notFoundView model.appState
-
-                else
-                    Layout.app model <| notFoundView model.appState
+                Layout.mixed model <| notFoundView model.appState
 
 
 notFoundView : AppState -> Html msg

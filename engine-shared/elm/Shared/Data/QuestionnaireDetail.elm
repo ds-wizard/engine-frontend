@@ -23,6 +23,7 @@ import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.Questionnaire.QuestionnaireLabel as QuestionnaireLabel exposing (QuestionnaireLabel)
 import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport exposing (QuestionnaireReport)
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireDetail.FormValue as FormValue exposing (FormValue)
@@ -39,6 +40,7 @@ type alias QuestionnaireDetail =
     , replies : List FormValue
     , level : Int
     , visibility : QuestionnaireVisibility
+    , sharing : QuestionnaireSharing
     , ownerUuid : Maybe Uuid
     , selectedTagUuids : List String
     , labels : List QuestionnaireLabel
@@ -56,6 +58,7 @@ decoder =
         |> D.required "replies" (D.list FormValue.decoder)
         |> D.required "level" D.int
         |> D.required "visibility" QuestionnaireVisibility.decoder
+        |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "ownerUuid" (D.maybe Uuid.decoder)
         |> D.required "selectedTagUuids" (D.list D.string)
         |> D.required "labels" (D.list QuestionnaireLabel.decoder)
@@ -65,9 +68,7 @@ decoder =
 encode : QuestionnaireDetail -> E.Value
 encode questionnaire =
     E.object
-        [ ( "name", E.string questionnaire.name )
-        , ( "visibility", QuestionnaireVisibility.encode questionnaire.visibility )
-        , ( "replies", E.list FormValue.encode questionnaire.replies )
+        [ ( "replies", E.list FormValue.encode questionnaire.replies )
         , ( "level", E.int questionnaire.level )
         , ( "labels", E.list QuestionnaireLabel.encode questionnaire.labels )
         ]

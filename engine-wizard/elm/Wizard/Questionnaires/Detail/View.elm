@@ -6,6 +6,7 @@ import Bootstrap.Dropdown as Dropdown
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Shared.Auth.Session as Session
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -92,7 +93,7 @@ questionnaireHeader appState model questionnaireModel =
                     ActionButton.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire Save False
                 ]
 
-            else
+            else if Session.exists appState.session then
                 [ linkTo appState
                     (Routes.QuestionnairesRoute (IndexRoute PaginationQueryString.empty))
                     [ class "link-with-icon" ]
@@ -144,6 +145,9 @@ questionnaireHeader appState model questionnaireModel =
                         ]
                     }
                 ]
+
+            else
+                []
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]

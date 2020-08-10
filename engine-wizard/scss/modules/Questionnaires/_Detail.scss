@@ -58,3 +58,16 @@
         margin-bottom: -20px;
     }
 }
+
+.public {
+    .Questionnaires__Detail {
+        .top-header {
+            left: 0;
+            top: 53px;
+        }
+
+        .questionnaire-wrapper {
+            height: calc(100vh - #{110px});
+        }
+    }
+}

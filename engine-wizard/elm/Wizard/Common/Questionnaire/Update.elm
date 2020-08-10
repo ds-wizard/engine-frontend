@@ -16,7 +16,6 @@ import Shared.Data.SummaryReport exposing (SummaryReport)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (stringToInt, withNoCmd)
-import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FormEngine.Model exposing (TypeHint, setTypeHintsResult)
 import Wizard.Common.FormEngine.Msgs
