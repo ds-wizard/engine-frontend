@@ -43,11 +43,11 @@ update wrapMsg msg appState model =
 
 handleForm : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleForm wrapMsg formMsg appState model =
-    case ( formMsg, Form.getOutput model.editForm, model.questionnaire ) of
-        ( Form.Submit, Just editForm, Success questionnaire ) ->
+    case ( formMsg, Form.getOutput model.editForm ) of
+        ( Form.Submit, Just editForm ) ->
             let
                 body =
-                    QuestionnaireEditForm.encode questionnaire editForm
+                    QuestionnaireEditForm.encode editForm
 
                 cmd =
                     Cmd.map wrapMsg <|

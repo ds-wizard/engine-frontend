@@ -4,6 +4,7 @@ module Shared.Data.Questionnaire.QuestionnaireVisibility exposing
     , encode
     , field
     , formOptions
+    , fromString
     , richFormOptions
     , toString
     , validation
@@ -37,6 +38,22 @@ toString questionnaireVisibility =
             "PrivateQuestionnaire"
 
 
+fromString : String -> Maybe QuestionnaireVisibility
+fromString str =
+    case str of
+        "PublicQuestionnaire" ->
+            Just PublicQuestionnaire
+
+        "PrivateQuestionnaire" ->
+            Just PrivateQuestionnaire
+
+        "PublicReadOnlyQuestionnaire" ->
+            Just PublicReadOnlyQuestionnaire
+
+        _ ->
+            Nothing
+
+
 encode : QuestionnaireVisibility -> E.Value
 encode =
     E.string << toString
@@ -47,18 +64,12 @@ decoder =
     D.string
         |> D.andThen
             (\str ->
-                case str of
-                    "PublicQuestionnaire" ->
-                        D.succeed PublicQuestionnaire
+                case fromString str of
+                    Just visibility ->
+                        D.succeed visibility
 
-                    "PrivateQuestionnaire" ->
-                        D.succeed PrivateQuestionnaire
-
-                    "PublicReadOnlyQuestionnaire" ->
-                        D.succeed PublicReadOnlyQuestionnaire
-
-                    valueType ->
-                        D.fail <| "Unknown questionnaire visibility: " ++ valueType
+                    Nothing ->
+                        D.fail <| "Unknown questionnaire visibility: " ++ str
             )
 
 

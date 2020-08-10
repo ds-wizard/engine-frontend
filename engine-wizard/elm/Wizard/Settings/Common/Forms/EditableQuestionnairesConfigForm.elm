@@ -11,6 +11,7 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Shared.Data.EditableConfig.EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
@@ -19,6 +20,8 @@ import Shared.Form.Validate as V
 type alias EditableQuestionnairesConfigForm =
     { questionnaireVisibilityEnabled : Bool
     , questionnaireVisibilityDefaultValue : QuestionnaireVisibility
+    , questionnaireSharingEnabled : Bool
+    , questionnaireSharingDefaultValue : QuestionnaireSharing
     , levels : SimpleFeatureConfig
     , feedbackEnabled : Bool
     , feedbackToken : String
@@ -39,6 +42,8 @@ init config =
         fields =
             [ ( "questionnaireVisibilityEnabled", Field.bool config.questionnaireVisibility.enabled )
             , ( "questionnaireVisibilityDefaultValue", QuestionnaireVisibility.field config.questionnaireVisibility.defaultValue )
+            , ( "questionnaireSharingEnabled", Field.bool config.questionnaireSharing.enabled )
+            , ( "questionnaireSharingDefaultValue", QuestionnaireSharing.field config.questionnaireSharing.defaultValue )
             , ( "levels", SimpleFeatureConfig.field config.levels )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
@@ -55,6 +60,8 @@ validation =
     V.succeed EditableQuestionnairesConfigForm
         |> V.andMap (V.field "questionnaireVisibilityEnabled" V.bool)
         |> V.andMap (V.field "questionnaireVisibilityDefaultValue" QuestionnaireVisibility.validation)
+        |> V.andMap (V.field "questionnaireSharingEnabled" V.bool)
+        |> V.andMap (V.field "questionnaireSharingDefaultValue" QuestionnaireSharing.validation)
         |> V.andMap (V.field "levels" SimpleFeatureConfig.validation)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
@@ -68,6 +75,10 @@ toEditableQuestionnaireConfig form =
     { questionnaireVisibility =
         { enabled = form.questionnaireVisibilityEnabled
         , defaultValue = form.questionnaireVisibilityDefaultValue
+        }
+    , questionnaireSharing =
+        { enabled = form.questionnaireSharingEnabled
+        , defaultValue = form.questionnaireSharingDefaultValue
         }
     , levels = form.levels
     , feedback =

@@ -5,7 +5,8 @@ import Form.Input as Input
 import Html exposing (Html, button, div, label)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
@@ -66,6 +67,10 @@ formView appState form =
         , FormExtra.mdAfter (l_ "form.questionnaireVisibility.desc" appState)
         , FormGroup.select appState (QuestionnaireVisibility.formOptions appState) form "questionnaireVisibilityDefaultValue" (l_ "form.questionnaireVisibilityDefaultValue" appState)
         , FormExtra.mdAfter (l_ "form.questionnaireVisibilityDefaultValue.desc" appState)
+        , FormGroup.toggle form "questionnaireSharingEnabled" (l_ "form.questionnaireSharing" appState)
+        , FormExtra.mdAfter (l_ "form.questionnaireSharing.desc" appState)
+        , FormGroup.select appState (QuestionnaireSharing.formOptions appState) form "questionnaireSharingDefaultValue" (l_ "form.questionnaireSharingDefaultValue" appState)
+        , FormExtra.mdAfter (l_ "form.questionnaireSharingDefaultValue.desc" appState)
         , FormGroup.toggle form "levels" (l_ "form.phases" appState)
         , FormExtra.mdAfter (l_ "form.phases.desc" appState)
         , FormGroup.toggle form "summaryReport" (l_ "form.summaryReport" appState)

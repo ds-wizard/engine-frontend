@@ -3,7 +3,8 @@ module Wizard.Questionnaires.Edit.View exposing (formView, questionnaireView, vi
 import Form exposing (Form)
 import Html exposing (Html, div)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
@@ -55,8 +56,28 @@ formView appState form =
 
             else
                 emptyNode
+
+        visibilityValue =
+            (Form.getFieldAsString "visibility" form).value
+                |> Maybe.andThen QuestionnaireVisibility.fromString
+
+        sharingSelect =
+            case
+                ( appState.config.questionnaire.questionnaireSharing.enabled
+                , visibilityValue
+                )
+            of
+                ( _, Just PrivateQuestionnaire ) ->
+                    emptyNode
+
+                ( True, Just visibility ) ->
+                    FormGroup.richRadioGroup appState (QuestionnaireSharing.richFormOptions appState visibility) form "sharing" <| lg "questionnaire.sharing" appState
+
+                _ ->
+                    emptyNode
     in
     div []
         [ FormGroup.input appState form "name" <| lg "questionnaire.name" appState
         , visibilitySelect
+        , sharingSelect
         ]

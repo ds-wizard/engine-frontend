@@ -11,6 +11,7 @@ import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Package as Package
+import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
@@ -94,6 +95,7 @@ createQuestionnaireModel appState packageId km =
         { uuid = Uuid.nil
         , name = ""
         , visibility = PrivateQuestionnaire
+        , sharing = RestrictedQuestionnaire
         , ownerUuid = Nothing
         , package = { package | id = packageId }
         , knowledgeModel = km

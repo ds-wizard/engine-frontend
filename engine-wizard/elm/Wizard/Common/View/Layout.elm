@@ -1,6 +1,7 @@
 module Wizard.Common.View.Layout exposing
     ( app
     , misconfigured
+    , mixed
     , public
     )
 
@@ -56,6 +57,15 @@ misconfigured appState =
     { title = l_ "misconfigured.configurationError" appState
     , body = [ html ]
     }
+
+
+mixed : Model -> Html Msg -> Document Msg
+mixed model =
+    if model.appState.session.user == Nothing then
+        public model
+
+    else
+        app model
 
 
 public : Model -> Html Msg -> Document Msg

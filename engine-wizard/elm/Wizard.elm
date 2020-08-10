@@ -11,6 +11,7 @@ import Wizard.Models exposing (..)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
 import Wizard.Public.Routes
+import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, loginRoute, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
@@ -62,6 +63,9 @@ decideInitialRoute model location route originalRoute =
 
                 _ ->
                     dispatch (Wizard.Msgs.OnUrlChange location)
+
+        Routes.QuestionnairesRoute (DetailRoute _) ->
+            dispatch (Wizard.Msgs.OnUrlChange location)
 
         _ ->
             if userLoggedIn model then
