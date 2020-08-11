@@ -1,8 +1,9 @@
 module Wizard.Common.View.Layout exposing
     ( app
     , misconfigured
-    , mixed
+    , mixedApp
     , public
+    , publicApp
     )
 
 import Browser exposing (Document)
@@ -59,10 +60,10 @@ misconfigured appState =
     }
 
 
-mixed : Model -> Html Msg -> Document Msg
-mixed model =
+mixedApp : Model -> Html Msg -> Document Msg
+mixedApp model =
     if model.appState.session.user == Nothing then
-        public model
+        publicApp model
 
     else
         app model
@@ -73,9 +74,8 @@ public model content =
     let
         html =
             div [ class "public" ]
-                [ publicHeader model
-                , div [ class "container" ]
-                    [ content ]
+                [ publicHeader False model
+                , div [ class "container" ] [ content ]
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
@@ -83,8 +83,22 @@ public model content =
     }
 
 
-publicHeader : Model -> Html Msg
-publicHeader model =
+publicApp : Model -> Html Msg -> Document Msg
+publicApp model content =
+    let
+        html =
+            div [ class "public public--app" ]
+                [ publicHeader True model
+                , div [ class "container-fluid" ] [ content ]
+                ]
+    in
+    { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
+    , body = [ html ]
+    }
+
+
+publicHeader : Bool -> Model -> Html Msg
+publicHeader fluid model =
     let
         signUpLink =
             if model.appState.config.authentication.internal.registration.enabled then
@@ -119,7 +133,7 @@ publicHeader model =
                 ]
     in
     nav [ class "navbar navbar-expand-sm fixed-top" ]
-        [ div [ class "container" ]
+        [ div [ classList [ ( "container-fluid", fluid ), ( "container", not fluid ) ] ]
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState
                     homeRoute

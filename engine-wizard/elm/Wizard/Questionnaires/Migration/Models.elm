@@ -8,6 +8,7 @@ module Wizard.Questionnaires.Migration.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
@@ -15,13 +16,12 @@ import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.QuestionnaireDetail.FormValue exposing (FormValue)
-import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue as ReplyValue
+import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Utils exposing (flip, listFilterJust)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Questionnaire.Models
+import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Questionnaires.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData)
 import Wizard.Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionAddData, QuestionChange(..), QuestionChangeData, QuestionMoveData)
 import Wizard.Questionnaires.Common.QuestionnaireChanges as QuestionnaireChanges exposing (QuestionnaireChanges)
@@ -33,7 +33,7 @@ type alias Model =
     , levels : ActionResult (List Level)
     , changes : QuestionnaireChanges
     , selectedChange : Maybe QuestionChange
-    , questionnaireModel : Maybe Wizard.Common.Questionnaire.Models.Model
+    , questionnaireModel : Maybe Questionnaire.Model
     }
 
 
@@ -141,10 +141,10 @@ getQuestionChanges appState context chapter question =
 
         childChanges =
             case getReply context.newQuestionnaire question of
-                Just formValue ->
+                Just replyValue ->
                     case question of
                         OptionsQuestion _ _ ->
-                            case KnowledgeModel.getAnswer (ReplyValue.getAnswerUuid formValue.value) context.newKM of
+                            case KnowledgeModel.getAnswer (ReplyValue.getAnswerUuid replyValue) context.newKM of
                                 Just answer ->
                                     QuestionnaireChanges.foldMap
                                         (getQuestionChanges appState context chapter)
@@ -167,9 +167,11 @@ getQuestionChanges appState context chapter question =
     QuestionnaireChanges.merge questionChange childChanges
 
 
-getReply : QuestionnaireDetail -> Question -> Maybe FormValue
+getReply : QuestionnaireDetail -> Question -> Maybe ReplyValue
 getReply questionnaire question =
-    List.find (.path >> getUuidFromPath >> (==) (Question.getUuid question)) questionnaire.replies
+    Dict.toList questionnaire.replies
+        |> List.find (Tuple.first >> getUuidFromPath >> (==) (Question.getUuid question))
+        |> Maybe.map Tuple.second
 
 
 isNew : QuestionnaireDetail -> Question -> Bool

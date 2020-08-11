@@ -14,6 +14,7 @@ module Shared.Data.KnowledgeModel.Question exposing
     , getTypeString
     , getUuid
     , getValueType
+    , isDesirable
     , isList
     , isOptions
     , new
@@ -22,6 +23,8 @@ module Shared.Data.KnowledgeModel.Question exposing
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
+import Maybe.Extra as Maybe
+import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
 import Shared.Data.KnowledgeModel.Question.IntegrationQuestionData as IntegrationQuestionData exposing (IntegrationQuestionData)
 import Shared.Data.KnowledgeModel.Question.ListQuestionData as ListQuestionData exposing (ListQuestionData)
@@ -216,3 +219,16 @@ isList question =
 
         _ ->
             False
+
+
+
+-- Utils
+
+
+isDesirable : { a | config : BootstrapConfig } -> Int -> Question -> Bool
+isDesirable appState currentLevel question =
+    if appState.config.questionnaire.levels.enabled then
+        Maybe.unwrap False ((>=) currentLevel) (getRequiredLevel question)
+
+    else
+        True

@@ -1,34 +1,38 @@
 module Shared.Data.QuestionnaireDetail exposing
     ( QuestionnaireDetail
+    , calculateUnansweredQuestionsForChapter
+    , clearReplyValue
     , decoder
     , encode
     , getTodos
+    , hasReply
     , isEditable
+    , setLabels
     , setLevel
+    , setReplyValue
+    , todoUuid
     , todosLength
-    , updateLabels
-    , updateReplies
     )
 
--- TODO: Move FormEngine to Shared
-
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Shared.AbstractAppState exposing (AbstractAppState)
+import Shared.Auth.Session as Session
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.Package as Package exposing (Package)
-import Shared.Data.Questionnaire.QuestionnaireLabel as QuestionnaireLabel exposing (QuestionnaireLabel)
 import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport exposing (QuestionnaireReport)
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Data.QuestionnaireDetail.FormValue as FormValue exposing (FormValue)
-import Shared.Data.QuestionnaireDetail.FormValue.ReplyValue as ReplyValue
+import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.UserInfo as UserInfo
+import Shared.Utils exposing (boolToInt)
 import Uuid exposing (Uuid)
 
 
@@ -37,13 +41,13 @@ type alias QuestionnaireDetail =
     , name : String
     , package : Package
     , knowledgeModel : KnowledgeModel
-    , replies : List FormValue
+    , replies : Dict String ReplyValue
     , level : Int
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
     , ownerUuid : Maybe Uuid
     , selectedTagUuids : List String
-    , labels : List QuestionnaireLabel
+    , labels : Dict String (List String)
     , report : QuestionnaireReport
     }
 
@@ -55,22 +59,22 @@ decoder =
         |> D.required "name" D.string
         |> D.required "package" Package.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
-        |> D.required "replies" (D.list FormValue.decoder)
+        |> D.required "replies" (D.dict ReplyValue.decoder)
         |> D.required "level" D.int
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "ownerUuid" (D.maybe Uuid.decoder)
         |> D.required "selectedTagUuids" (D.list D.string)
-        |> D.required "labels" (D.list QuestionnaireLabel.decoder)
+        |> D.required "labels" (D.dict (D.list D.string))
         |> D.required "report" QuestionnaireReport.decoder
 
 
 encode : QuestionnaireDetail -> E.Value
 encode questionnaire =
     E.object
-        [ ( "replies", E.list FormValue.encode questionnaire.replies )
+        [ ( "replies", E.dict identity ReplyValue.encode questionnaire.replies )
         , ( "level", E.int questionnaire.level )
-        , ( "labels", E.list QuestionnaireLabel.encode questionnaire.labels )
+        , ( "labels", E.dict identity (E.list E.string) questionnaire.labels )
         ]
 
 
@@ -80,28 +84,40 @@ isEditable appState questionnaire =
         isAdmin =
             UserInfo.isAdmin appState.session.user
 
-        isNotReadonly =
-            questionnaire.visibility /= PublicReadOnlyQuestionnaire
+        isReadonly =
+            if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then
+                False
+
+            else if Session.exists appState.session then
+                questionnaire.visibility == VisibleViewQuestionnaire || (questionnaire.visibility == PrivateQuestionnaire && not isOwner)
+
+            else
+                questionnaire.sharing == AnyoneWithLinkViewQuestionnaire
 
         isOwner =
-            questionnaire.ownerUuid == Maybe.map .uuid appState.session.user
+            Maybe.isJust questionnaire.ownerUuid && questionnaire.ownerUuid == Maybe.map .uuid appState.session.user
     in
-    isAdmin || isNotReadonly || isOwner
+    isAdmin || not isReadonly || isOwner
 
 
-updateReplies : List FormValue -> QuestionnaireDetail -> QuestionnaireDetail
-updateReplies replies questionnaire =
-    { questionnaire | replies = replies }
-
-
-updateLabels : List QuestionnaireLabel -> QuestionnaireDetail -> QuestionnaireDetail
-updateLabels labels questionnaire =
-    { questionnaire | labels = labels }
-
-
-setLevel : QuestionnaireDetail -> Int -> QuestionnaireDetail
-setLevel questionnaire level =
+setLevel : Int -> QuestionnaireDetail -> QuestionnaireDetail
+setLevel level questionnaire =
     { questionnaire | level = level }
+
+
+setReplyValue : String -> ReplyValue -> QuestionnaireDetail -> QuestionnaireDetail
+setReplyValue path replyValue questionnaire =
+    { questionnaire | replies = Dict.insert path replyValue questionnaire.replies }
+
+
+clearReplyValue : String -> QuestionnaireDetail -> QuestionnaireDetail
+clearReplyValue path questionnaire =
+    { questionnaire | replies = Dict.remove path questionnaire.replies }
+
+
+setLabels : String -> List String -> QuestionnaireDetail -> QuestionnaireDetail
+setLabels path labels questionnaire =
+    { questionnaire | labels = Dict.insert path labels questionnaire.labels }
 
 
 todosLength : QuestionnaireDetail -> Int
@@ -145,10 +161,10 @@ getQuestionTodos questionnaire chapter path question =
 
         childTodos =
             case getReply questionnaire (pathToString currentPath) of
-                Just formValue ->
+                Just replyValue ->
                     case question of
                         OptionsQuestion commonData _ ->
-                            case List.find (.uuid >> (==) (ReplyValue.getAnswerUuid formValue.value)) (KnowledgeModel.getQuestionAnswers commonData.uuid km) of
+                            case List.find (.uuid >> (==) (ReplyValue.getAnswerUuid replyValue)) (KnowledgeModel.getQuestionAnswers commonData.uuid km) of
                                 Just answer ->
                                     List.concatMap
                                         (getQuestionTodos questionnaire chapter (currentPath ++ [ answer.uuid ]))
@@ -159,13 +175,12 @@ getQuestionTodos questionnaire chapter path question =
 
                         ListQuestion commonData _ ->
                             let
-                                getItemQuestionTodos index =
+                                getItemQuestionTodos itemUuid =
                                     List.concatMap
-                                        (getQuestionTodos questionnaire chapter (currentPath ++ [ String.fromInt index ]))
+                                        (getQuestionTodos questionnaire chapter (currentPath ++ [ itemUuid ]))
                                         (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid km)
                             in
-                            List.range 0 (ReplyValue.getItemListCount formValue.value)
-                                |> List.concatMap getItemQuestionTodos
+                            List.concatMap getItemQuestionTodos (ReplyValue.getItemUuids replyValue)
 
                         _ ->
                             []
@@ -176,16 +191,116 @@ getQuestionTodos questionnaire chapter path question =
     questionTodo ++ childTodos
 
 
-getReply : QuestionnaireDetail -> String -> Maybe FormValue
+getReply : QuestionnaireDetail -> String -> Maybe ReplyValue
 getReply questionnaire path =
-    List.find (.path >> (==) path) questionnaire.replies
+    Dict.get path questionnaire.replies
 
 
 hasTodo : QuestionnaireDetail -> String -> Bool
 hasTodo questionnaire path =
-    List.any (.path >> (==) path) questionnaire.labels
+    Maybe.unwrap False (List.member todoUuid) (Dict.get path questionnaire.labels)
 
 
 pathToString : List String -> String
 pathToString =
     String.join "."
+
+
+todoUuid : String
+todoUuid =
+    "615b9028-5e3f-414f-b245-12d2ae2eeb20"
+
+
+hasReply : String -> QuestionnaireDetail -> Bool
+hasReply path questionnaire =
+    Maybe.unwrap False (not << ReplyValue.isEmpty) (getReply questionnaire path)
+
+
+
+-- Evaluations
+
+
+calculateUnansweredQuestionsForChapter : QuestionnaireDetail -> Int -> Chapter -> Int
+calculateUnansweredQuestionsForChapter questionnaire currentLevel chapter =
+    KnowledgeModel.getChapterQuestions chapter.uuid questionnaire.knowledgeModel
+        |> List.map (evaluateQuestion questionnaire currentLevel [ chapter.uuid ])
+        |> List.foldl (+) 0
+
+
+evaluateQuestion : QuestionnaireDetail -> Int -> List String -> Question -> Int
+evaluateQuestion questionnaire currentLevel path question =
+    let
+        currentPath =
+            path ++ [ Question.getUuid question ]
+
+        requiredNow =
+            (Question.getRequiredLevel question |> Maybe.withDefault 100) <= currentLevel
+
+        rawValue =
+            Dict.get (pathToString currentPath) questionnaire.replies
+
+        adjustedValue =
+            if Question.isList question then
+                case rawValue of
+                    Nothing ->
+                        Just <| ItemListReply []
+
+                    _ ->
+                        rawValue
+
+            else
+                rawValue
+    in
+    case adjustedValue of
+        Just value ->
+            case question of
+                OptionsQuestion _ questionData ->
+                    questionData.answerUuids
+                        |> List.find ((==) (ReplyValue.getAnswerUuid value))
+                        |> Maybe.map (evaluateFollowups questionnaire currentLevel currentPath)
+                        |> Maybe.withDefault 1
+
+                ListQuestion commonData _ ->
+                    let
+                        itemUuids =
+                            ReplyValue.getItemUuids value
+                    in
+                    if not (List.isEmpty itemUuids) then
+                        itemUuids
+                            |> List.map (evaluateAnswerItem questionnaire currentLevel currentPath (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid questionnaire.knowledgeModel))
+                            |> List.foldl (+) 0
+
+                    else
+                        boolToInt requiredNow
+
+                _ ->
+                    if ReplyValue.isEmpty value then
+                        boolToInt requiredNow
+
+                    else
+                        0
+
+        Nothing ->
+            boolToInt requiredNow
+
+
+evaluateFollowups : QuestionnaireDetail -> Int -> List String -> String -> Int
+evaluateFollowups questionnaire currentLevel path answerUuid =
+    let
+        currentPath =
+            path ++ [ answerUuid ]
+    in
+    KnowledgeModel.getAnswerFollowupQuestions answerUuid questionnaire.knowledgeModel
+        |> List.map (evaluateQuestion questionnaire currentLevel currentPath)
+        |> List.foldl (+) 0
+
+
+evaluateAnswerItem : QuestionnaireDetail -> Int -> List String -> List Question -> String -> Int
+evaluateAnswerItem questionnaire currentLevel path questions uuid =
+    let
+        currentPath =
+            path ++ [ uuid ]
+    in
+    questions
+        |> List.map (evaluateQuestion questionnaire currentLevel currentPath)
+        |> List.foldl (+) 0

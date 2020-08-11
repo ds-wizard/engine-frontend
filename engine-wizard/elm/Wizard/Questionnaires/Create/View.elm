@@ -1,18 +1,22 @@
 module Wizard.Questionnaires.Create.View exposing (view)
 
 import Form exposing (Form)
+import Form.Input as Input
 import Html exposing (..)
+import Html.Attributes exposing (class, classList)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
+import Shared.Data.QuestionnairePermission as QuestionnairePermission
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg)
+import Shared.Locale exposing (l, lg, lgh)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.FormActions as FormActions
+import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
@@ -62,38 +66,66 @@ formView appState model packages =
                 Nothing ->
                     FormGroup.select appState packageOptions model.form "packageId"
 
-        visibilitySelect =
+        visibilityEnabled =
+            Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" model.form).value
+
+        visibilityEnabledInput =
             if appState.config.questionnaire.questionnaireVisibility.enabled then
-                FormGroup.richRadioGroup appState (QuestionnaireVisibility.richFormOptions appState) model.form "visibility" <| lg "questionnaire.visibility" appState
+                FormGroup.toggle model.form "visibilityEnabled" (lg "questionnaire.visibility" appState)
 
             else
                 emptyNode
 
-        visibilityValue =
-            (Form.getFieldAsString "visibility" model.form).value
-                |> Maybe.andThen QuestionnaireVisibility.fromString
+        visibilityPermissionInput =
+            if appState.config.questionnaire.questionnaireVisibility.enabled then
+                div
+                    [ class "form-group form-group-toggle-extra"
+                    , classList [ ( "visible", visibilityEnabled ) ]
+                    ]
+                    (lgh "questionnaire.visibilityPermission" [ visibilitySelect ] appState)
+
+            else
+                emptyNode
+
+        visibilitySelect =
+            if (Form.getFieldAsString "sharingPermission" model.form).value == Just "edit" then
+                strong [] [ text "edit" ]
+
+            else
+                FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) model.form "visibilityPermission"
+
+        sharingEnabled =
+            Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" model.form).value
+
+        sharingEnabledInput =
+            if appState.config.questionnaire.questionnaireSharing.enabled then
+                FormGroup.toggle model.form "sharingEnabled" (lg "questionnaire.sharing" appState)
+
+            else
+                emptyNode
+
+        sharingPermissionInput =
+            if appState.config.questionnaire.questionnaireSharing.enabled then
+                div
+                    [ class "form-group form-group-toggle-extra"
+                    , classList [ ( "visible", sharingEnabled ) ]
+                    ]
+                    (lgh "questionnaire.sharingPermission" [ sharingSelect ] appState)
+
+            else
+                emptyNode
 
         sharingSelect =
-            case
-                ( appState.config.questionnaire.questionnaireSharing.enabled
-                , visibilityValue
-                )
-            of
-                ( _, Just PrivateQuestionnaire ) ->
-                    emptyNode
-
-                ( True, Just visibility ) ->
-                    FormGroup.richRadioGroup appState (QuestionnaireSharing.richFormOptions appState visibility) model.form "sharing" <| lg "questionnaire.sharing" appState
-
-                _ ->
-                    emptyNode
+            FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) model.form "sharingPermission"
 
         formHtml =
             div []
                 [ FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
                 , parentInput <| lg "knowledgeModel" appState
-                , visibilitySelect
-                , sharingSelect
+                , visibilityEnabledInput
+                , visibilityPermissionInput
+                , sharingEnabledInput
+                , sharingPermissionInput
                 ]
     in
     formHtml

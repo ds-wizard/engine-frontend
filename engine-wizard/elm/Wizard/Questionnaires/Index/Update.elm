@@ -15,11 +15,13 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
+import Wizard.Questionnaires.Common.CloneQuestionnaireModal.Update as CloneQuestionnaireModal
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Update as DeleteQuestionnaireModal
 import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
+import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : Cmd Msg
@@ -36,12 +38,6 @@ update wrapMsg msg appState model =
         DeleteQuestionnaireMigrationCompleted result ->
             handleDeleteMigrationCompleted wrapMsg appState model result
 
-        CloneQuestionnaire questionnaire ->
-            handleCloneQuestionnaire wrapMsg appState model questionnaire
-
-        CloneQuestionnaireCompleted result ->
-            handleCloneQuestionnaireCompleted wrapMsg appState model result
-
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
@@ -57,6 +53,21 @@ update wrapMsg msg appState model =
                     DeleteQuestionnaireModal.update updateConfig modalMsg appState model.deleteModalModel
             in
             ( { model | deleteModalModel = deleteModalModel }
+            , cmd
+            )
+
+        CloneQuestionnaireModalMsg modalMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << CloneQuestionnaireModalMsg
+                    , cloneCompleteCmd =
+                        cmdNavigate appState << Routes.QuestionnairesRoute << DetailRoute << .uuid
+                    }
+
+                ( deleteModalModel, cmd ) =
+                    CloneQuestionnaireModal.update updateConfig modalMsg appState model.cloneModalModel
+            in
+            ( { model | cloneModalModel = deleteModalModel }
             , cmd
             )
 
@@ -85,27 +96,6 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | deletingMigration = ApiError.toActionResult (lg "apiError.questionnaires.migrations.deleteError" appState) error }
-            , getResultCmd result
-            )
-
-
-handleCloneQuestionnaire : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
-handleCloneQuestionnaire wrapMsg appState model questionnaire =
-    ( { model | cloningQuestionnaire = Loading }
-    , QuestionnairesApi.cloneQuestionnaire questionnaire.uuid appState (wrapMsg << CloneQuestionnaireCompleted)
-    )
-
-
-handleCloneQuestionnaireCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
-handleCloneQuestionnaireCompleted wrapMsg appState model result =
-    case result of
-        Ok questionnaire ->
-            ( { model | cloningQuestionnaire = Success <| lgf "apiSuccess.questionnaires.clone" [ questionnaire.name ] appState }
-            , Cmd.map wrapMsg fetchData
-            )
-
-        Err error ->
-            ( { model | cloningQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.cloneError" appState) error }
             , getResultCmd result
             )
 

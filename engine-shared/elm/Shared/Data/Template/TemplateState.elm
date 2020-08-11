@@ -1,23 +1,17 @@
 module Shared.Data.Template.TemplateState exposing
-    ( TemplateState
+    ( TemplateState(..)
     , decoder
-    , isOutdated
-    , unknown
     )
 
 import Json.Decode as D exposing (Decoder)
 
 
 type TemplateState
-    = UnknownTemplateState
-    | OutdatedTemplateState
-    | UpToDateTemplateState
-    | UnpublishedTemplateState
-
-
-unknown : TemplateState
-unknown =
-    UnknownTemplateState
+    = Unknown
+    | Outdated
+    | UpToDate
+    | Unpublished
+    | UnsupportedMetamodelVersion
 
 
 decoder : Decoder TemplateState
@@ -27,22 +21,20 @@ decoder =
             (\str ->
                 case str of
                     "UnknownTemplateState" ->
-                        D.succeed UnknownTemplateState
+                        D.succeed Unknown
 
                     "OutdatedTemplateState" ->
-                        D.succeed OutdatedTemplateState
+                        D.succeed Outdated
 
                     "UpToDateTemplateState" ->
-                        D.succeed UpToDateTemplateState
+                        D.succeed UpToDate
 
                     "UnpublishedTemplateState" ->
-                        D.succeed UnpublishedTemplateState
+                        D.succeed Unpublished
+
+                    "UnsupportedMetamodelVersionTemplateState" ->
+                        D.succeed UnsupportedMetamodelVersion
 
                     _ ->
                         D.fail <| "Unknown template state: " ++ str
             )
-
-
-isOutdated : TemplateState -> Bool
-isOutdated =
-    (==) OutdatedTemplateState
