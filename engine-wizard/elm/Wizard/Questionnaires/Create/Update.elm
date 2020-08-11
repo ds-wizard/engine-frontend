@@ -12,7 +12,6 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (withNoCmd)
-import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs

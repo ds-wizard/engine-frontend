@@ -3,6 +3,7 @@ module Wizard.Common.View.Page exposing
     , error
     , header
     , illustratedMessage
+    , illustratedMessageHtml
     , loader
     , message
     , success
@@ -83,12 +84,20 @@ illustratedMessage { image, heading, lines } =
                 |> List.map text
                 |> List.intersperse (br [] [])
     in
+    illustratedMessageHtml { image = image, heading = heading, content = [ p [] content ] }
+
+
+illustratedMessageHtml :
+    { image : String
+    , heading : String
+    , content : List (Html msg)
+    }
+    -> Html msg
+illustratedMessageHtml { image, heading, content } =
     div [ class "full-page-illustrated-message" ]
         [ img [ src <| "/img/illustrations/undraw_" ++ image ++ ".svg" ] []
         , div []
-            [ h1 [] [ text heading ]
-            , p [] content
-            ]
+            (h1 [] [ text heading ] :: content)
         ]
 
 

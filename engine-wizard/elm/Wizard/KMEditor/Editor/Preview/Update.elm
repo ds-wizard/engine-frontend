@@ -1,37 +1,43 @@
 module Wizard.KMEditor.Editor.Preview.Update exposing (update)
 
+import Random exposing (Seed)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Questionnaire.Msgs
-import Wizard.Common.Questionnaire.Update
+import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.KMEditor.Editor.Preview.Models exposing (..)
 import Wizard.KMEditor.Editor.Preview.Msgs exposing (Msg(..))
 
 
-update : Msg -> AppState -> Model -> ( Model, Cmd Msg )
+update : Msg -> AppState -> Model -> ( Seed, Model, Cmd Msg )
 update msg appState model =
     case msg of
         QuestionnaireMsg questionnaireMsg ->
             handleQuestionnaireMsg questionnaireMsg appState model
 
         AddTag uuid ->
-            ( addTag appState uuid model, Cmd.none )
+            ( appState.seed, addTag uuid model, Cmd.none )
 
         RemoveTag uuid ->
-            ( removeTag appState uuid model, Cmd.none )
+            ( appState.seed, removeTag uuid model, Cmd.none )
 
         SelectAllTags ->
-            ( selectAllTags appState model, Cmd.none )
+            ( appState.seed, selectAllTags model, Cmd.none )
 
         SelectNoneTags ->
-            ( selectNoneTags appState model, Cmd.none )
+            ( appState.seed, selectNoneTags model, Cmd.none )
 
 
-handleQuestionnaireMsg : Wizard.Common.Questionnaire.Msgs.Msg -> AppState -> Model -> ( Model, Cmd Msg )
+handleQuestionnaireMsg : Questionnaire.Msg -> AppState -> Model -> ( Seed, Model, Cmd Msg )
 handleQuestionnaireMsg msg appState model =
     let
-        ( newQuestionnaireModel, cmd ) =
-            Wizard.Common.Questionnaire.Update.update msg appState model.questionnaireModel
+        ( newSeed, newQuestionnaireModel, cmd ) =
+            Questionnaire.update msg
+                appState
+                { levels = model.levels
+                , metrics = model.metrics
+                }
+                model.questionnaireModel
     in
-    ( { model | questionnaireModel = newQuestionnaireModel }
+    ( newSeed
+    , { model | questionnaireModel = newQuestionnaireModel }
     , Cmd.map QuestionnaireMsg cmd
     )

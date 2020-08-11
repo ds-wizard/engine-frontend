@@ -4,7 +4,9 @@ module Shared.Data.Questionnaire.QuestionnaireSharing exposing
     , encode
     , field
     , formOptions
+    , fromFormValues
     , richFormOptions
+    , toFormValues
     , toString
     , validation
     )
@@ -14,14 +16,15 @@ import Form.Field as Field exposing (Field)
 import Form.Validate as Validate exposing (Validation)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
-import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Locale exposing (lg, lgf)
+import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
+import Shared.Locale exposing (lg)
 import Shared.Provisioning exposing (Provisioning)
 
 
 type QuestionnaireSharing
     = RestrictedQuestionnaire
-    | AnyoneWithLinkQuestionnaire
+    | AnyoneWithLinkViewQuestionnaire
+    | AnyoneWithLinkEditQuestionnaire
 
 
 toString : QuestionnaireSharing -> String
@@ -30,8 +33,11 @@ toString questionnaireSharing =
         RestrictedQuestionnaire ->
             "RestrictedQuestionnaire"
 
-        AnyoneWithLinkQuestionnaire ->
-            "AnyoneWithLinkQuestionnaire"
+        AnyoneWithLinkViewQuestionnaire ->
+            "AnyoneWithLinkViewQuestionnaire"
+
+        AnyoneWithLinkEditQuestionnaire ->
+            "AnyoneWithLinkEditQuestionnaire"
 
 
 encode : QuestionnaireSharing -> E.Value
@@ -48,12 +54,41 @@ decoder =
                     "RestrictedQuestionnaire" ->
                         D.succeed RestrictedQuestionnaire
 
-                    "AnyoneWithLinkQuestionnaire" ->
-                        D.succeed AnyoneWithLinkQuestionnaire
+                    "AnyoneWithLinkViewQuestionnaire" ->
+                        D.succeed AnyoneWithLinkViewQuestionnaire
+
+                    "AnyoneWithLinkEditQuestionnaire" ->
+                        D.succeed AnyoneWithLinkEditQuestionnaire
 
                     valueType ->
                         D.fail <| "Unknown questionnaire sharing: " ++ valueType
             )
+
+
+toFormValues : QuestionnaireSharing -> ( Bool, QuestionnairePermission )
+toFormValues sharing =
+    case sharing of
+        RestrictedQuestionnaire ->
+            ( False, QuestionnairePermission.View )
+
+        AnyoneWithLinkViewQuestionnaire ->
+            ( True, QuestionnairePermission.View )
+
+        AnyoneWithLinkEditQuestionnaire ->
+            ( True, QuestionnairePermission.Edit )
+
+
+fromFormValues : Bool -> QuestionnairePermission -> QuestionnaireSharing
+fromFormValues enabled perm =
+    if enabled then
+        if perm == QuestionnairePermission.Edit then
+            AnyoneWithLinkEditQuestionnaire
+
+        else
+            AnyoneWithLinkViewQuestionnaire
+
+    else
+        RestrictedQuestionnaire
 
 
 field : QuestionnaireSharing -> Field
@@ -70,23 +105,30 @@ validation =
                     "RestrictedQuestionnaire" ->
                         Validate.succeed RestrictedQuestionnaire
 
-                    "AnyoneWithLinkQuestionnaire" ->
-                        Validate.succeed AnyoneWithLinkQuestionnaire
+                    "AnyoneWithLinkViewQuestionnaire" ->
+                        Validate.succeed AnyoneWithLinkViewQuestionnaire
+
+                    "AnyoneWithLinkEditQuestionnaire" ->
+                        Validate.succeed AnyoneWithLinkEditQuestionnaire
 
                     _ ->
                         Validate.fail <| Error.value InvalidString
             )
 
 
-richFormOptions : { a | provisioning : Provisioning } -> QuestionnaireVisibility -> List ( String, String, String )
-richFormOptions appState visibility =
+richFormOptions : { a | provisioning : Provisioning } -> List ( String, String, String )
+richFormOptions appState =
     [ ( toString RestrictedQuestionnaire
       , lg "questionnaireSharing.restricted" appState
-      , lgf "questionnaireSharing.restricted.description" [ allowedAction appState visibility ] appState
+      , lg "questionnaireSharing.restricted.description" appState
       )
-    , ( toString AnyoneWithLinkQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLink" appState
-      , lgf "questionnaireSharing.anyoneWithLink.description" [ allowedAction appState visibility ] appState
+    , ( toString AnyoneWithLinkViewQuestionnaire
+      , lg "questionnaireSharing.anyoneWithLinkView" appState
+      , lg "questionnaireSharing.anyoneWithLinkView.description" appState
+      )
+    , ( toString AnyoneWithLinkEditQuestionnaire
+      , lg "questionnaireSharing.anyoneWithLinkEdit" appState
+      , lg "questionnaireSharing.anyoneWithLinkEdit.description" appState
       )
     ]
 
@@ -96,17 +138,10 @@ formOptions appState =
     [ ( toString RestrictedQuestionnaire
       , lg "questionnaireSharing.restricted" appState
       )
-    , ( toString AnyoneWithLinkQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLink" appState
+    , ( toString AnyoneWithLinkViewQuestionnaire
+      , lg "questionnaireSharing.anyoneWithLinkView" appState
+      )
+    , ( toString AnyoneWithLinkEditQuestionnaire
+      , lg "questionnaireSharing.anyoneWithLinkEdit" appState
       )
     ]
-
-
-allowedAction : { a | provisioning : Provisioning } -> QuestionnaireVisibility -> String
-allowedAction appState visibility =
-    case visibility of
-        PublicQuestionnaire ->
-            lg "questionnaireSharing.action.edit" appState
-
-        _ ->
-            lg "questionnaireSharing.action.view" appState

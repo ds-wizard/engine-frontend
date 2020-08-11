@@ -1,5 +1,10 @@
-module Wizard.Questionnaires.Update exposing (fetchData, isGuarded, update)
+module Wizard.Questionnaires.Update exposing
+    ( fetchData
+    , onUnload
+    , update
+    )
 
+import Random exposing (Seed)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Questionnaires.Create.Update
@@ -41,17 +46,17 @@ fetchData route appState model =
                 Wizard.Questionnaires.Migration.Update.fetchData appState uuid
 
 
-isGuarded : Route -> AppState -> Model -> Maybe String
-isGuarded route appState model =
+onUnload : Route -> Model -> Cmd Wizard.Msgs.Msg
+onUnload route model =
     case route of
         DetailRoute _ ->
-            Wizard.Questionnaires.Detail.Update.isGuarded appState model.detailModel
+            Wizard.Questionnaires.Detail.Update.onUnload model.detailModel
 
         _ ->
-            Nothing
+            Cmd.none
 
 
-update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 update wrapMsg msg appState model =
     case msg of
         CreateMsg cMsg ->
@@ -59,39 +64,39 @@ update wrapMsg msg appState model =
                 ( createModel, cmd ) =
                     Wizard.Questionnaires.Create.Update.update (wrapMsg << CreateMsg) cMsg appState model.createModel
             in
-            ( { model | createModel = createModel }, cmd )
+            ( appState.seed, { model | createModel = createModel }, cmd )
 
         CreateMigrationMsg cmMsg ->
             let
                 ( createMigrationModel, cmd ) =
                     Wizard.Questionnaires.CreateMigration.Update.update (wrapMsg << CreateMigrationMsg) cmMsg appState model.createMigrationModel
             in
-            ( { model | createMigrationModel = createMigrationModel }, cmd )
+            ( appState.seed, { model | createMigrationModel = createMigrationModel }, cmd )
 
         DetailMsg dMsg ->
             let
-                ( detailModel, cmd ) =
+                ( newSeed, detailModel, cmd ) =
                     Wizard.Questionnaires.Detail.Update.update (wrapMsg << DetailMsg) dMsg appState model.detailModel
             in
-            ( { model | detailModel = detailModel }, cmd )
+            ( newSeed, { model | detailModel = detailModel }, cmd )
 
         EditMsg eMsg ->
             let
                 ( editModel, cmd ) =
                     Wizard.Questionnaires.Edit.Update.update (wrapMsg << EditMsg) eMsg appState model.editModel
             in
-            ( { model | editModel = editModel }, cmd )
+            ( appState.seed, { model | editModel = editModel }, cmd )
 
         IndexMsg iMsg ->
             let
                 ( indexModel, cmd ) =
                     Wizard.Questionnaires.Index.Update.update (wrapMsg << IndexMsg) iMsg appState model.indexModel
             in
-            ( { model | indexModel = indexModel }, cmd )
+            ( appState.seed, { model | indexModel = indexModel }, cmd )
 
         MigrationMsg mMsg ->
             let
-                ( migrationModel, cmd ) =
+                ( newSeed, migrationModel, cmd ) =
                     Wizard.Questionnaires.Migration.Update.update (wrapMsg << MigrationMsg) mMsg appState model.migrationModel
             in
-            ( { model | migrationModel = migrationModel }, cmd )
+            ( newSeed, { model | migrationModel = migrationModel }, cmd )

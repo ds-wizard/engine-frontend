@@ -5,6 +5,7 @@ module Wizard.Questionnaires.Migration.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Maybe.Extra as Maybe
+import Random exposing (Seed)
 import Shared.Api.Levels as LevelsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel.Level exposing (Level)
@@ -13,12 +14,11 @@ import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (Qu
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setLevels)
+import Triple
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Questionnaire.Models exposing (initialModel)
-import Wizard.Common.Questionnaire.Msgs as QuestionnaireMsgs
-import Wizard.Common.Questionnaire.Update
+import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange)
@@ -37,17 +37,21 @@ fetchData appState uuid =
         ]
 
 
-update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 update wrapMsg msg appState model =
+    let
+        withSeed ( m, c ) =
+            ( appState.seed, m, c )
+    in
     case msg of
         GetQuestionnaireMigrationCompleted result ->
             handleGetQuestionnaireMigrationCompleted appState model result
 
         PutQuestionnaireMigrationCompleted result ->
-            handlePutQuestionnaireMigrationCompleted appState model result
+            withSeed <| handlePutQuestionnaireMigrationCompleted appState model result
 
         GetLevelsCompleted result ->
-            handleGetLevelsCompleted appState model result
+            withSeed <| handleGetLevelsCompleted appState model result
 
         SelectChange change ->
             handleSelectChange appState model (Just change)
@@ -59,23 +63,23 @@ update wrapMsg msg appState model =
             handleResolveCurrentChange wrapMsg appState model
 
         UndoResolveCurrentChange ->
-            handleUndoResolveCurrentChange wrapMsg appState model
+            withSeed <| handleUndoResolveCurrentChange wrapMsg appState model
 
         FinalizeMigration ->
-            handleFinalizeMigration wrapMsg appState model
+            withSeed <| handleFinalizeMigration wrapMsg appState model
 
         FinalizeMigrationCompleted result ->
-            handleFinalizeMigrationCompleted appState model result
+            withSeed <| handleFinalizeMigrationCompleted appState model result
 
-        PutQuestionnaireCompleted _ ->
-            ( model, Cmd.none )
+        PutQuestionnaireContentCompleted _ ->
+            ( appState.seed, model, Cmd.none )
 
 
 
 -- Handlers
 
 
-handleGetQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError QuestionnaireMigration -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError QuestionnaireMigration -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireMigrationCompleted appState model result =
     let
         ( modelWithMigration, cmd ) =
@@ -86,10 +90,10 @@ handleGetQuestionnaireMigrationCompleted appState model result =
                 , model = model
                 }
 
-        ( newModel, scrollCmd ) =
+        ( newSeed, newModel, scrollCmd ) =
             handleSelectChange appState modelWithMigration modelWithMigration.selectedChange
     in
-    ( newModel, Cmd.batch [ cmd, scrollCmd ] )
+    ( newSeed, newModel, Cmd.batch [ cmd, scrollCmd ] )
 
 
 handlePutQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -112,63 +116,64 @@ handleGetLevelsCompleted appState model result =
         }
 
 
-handleSelectChange : AppState -> Model -> Maybe QuestionChange -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSelectChange : AppState -> Model -> Maybe QuestionChange -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleSelectChange appState model mbChange =
     case mbChange of
         Just change ->
             let
-                newModelWithChapter =
-                    case model.questionnaireModel of
-                        Just questionnaireModel ->
-                            let
-                                ( newQuestionnaireModel, _ ) =
-                                    Wizard.Common.Questionnaire.Update.update
-                                        (QuestionnaireMsgs.SetActiveChapter <| QuestionChange.getChapter change)
-                                        appState
-                                        questionnaireModel
-                            in
-                            { model | questionnaireModel = Just newQuestionnaireModel }
-
-                        Nothing ->
-                            model
+                questionnaireModel =
+                    Maybe.map
+                        (Questionnaire.setActiveChapterUuid (QuestionChange.getChapter change).uuid)
+                        model.questionnaireModel
 
                 newModel =
-                    { newModelWithChapter | selectedChange = Just change }
+                    { model
+                        | selectedChange = Just change
+                        , questionnaireModel = questionnaireModel
+                    }
             in
-            ( newModel, scrollToQuestion newModel )
+            ( appState.seed, newModel, scrollToQuestion newModel )
 
         Nothing ->
-            ( model, Cmd.none )
+            ( appState.seed, model, Cmd.none )
 
 
-handleQuestionnaireMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> QuestionnaireMsgs.Msg -> ( Model, Cmd Wizard.Msgs.Msg )
+handleQuestionnaireMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Questionnaire.Msg -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
-    case model.questionnaireModel of
-        Just questionnaireModel ->
+    case ( model.levels, model.questionnaireModel ) of
+        ( Success levels, Just questionnaireModel ) ->
             let
-                ( updatedQuestionnaireModel, _ ) =
-                    Wizard.Common.Questionnaire.Update.update questionnaireMsg appState questionnaireModel
+                ( newSeed, newQuestionnaireModel, questionnaireCmd ) =
+                    Questionnaire.update
+                        questionnaireMsg
+                        appState
+                        { levels = levels, metrics = [] }
+                        questionnaireModel
 
-                body =
-                    QuestionnaireDetail.encode updatedQuestionnaireModel.questionnaire
+                saveCmd =
+                    case questionnaireMsg of
+                        Questionnaire.SetLabels _ _ ->
+                            QuestionnairesApi.putQuestionnaireContent model.questionnaireUuid
+                                (QuestionnaireDetail.encode newQuestionnaireModel.questionnaire)
+                                appState
+                                PutQuestionnaireContentCompleted
 
-                ( newQuestionnaireModel, cmd ) =
-                    if updatedQuestionnaireModel.dirty then
-                        ( { updatedQuestionnaireModel | dirty = False }
-                        , Cmd.map wrapMsg <|
-                            QuestionnairesApi.putQuestionnaire model.questionnaireUuid body appState PutQuestionnaireCompleted
-                        )
-
-                    else
-                        ( updatedQuestionnaireModel, Cmd.none )
+                        _ ->
+                            Cmd.none
             in
-            ( { model | questionnaireModel = Just newQuestionnaireModel }, cmd )
+            ( newSeed
+            , { model | questionnaireModel = Just newQuestionnaireModel }
+            , Cmd.batch
+                [ Cmd.map (wrapMsg << QuestionnaireMsg) <| questionnaireCmd
+                , Cmd.map wrapMsg <| saveCmd
+                ]
+            )
 
-        Nothing ->
-            ( model, Cmd.none )
+        _ ->
+            ( appState.seed, model, Cmd.none )
 
 
-handleResolveCurrentChange : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleResolveCurrentChange : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleResolveCurrentChange wrapMsg appState model =
     let
         newQuestionnaireMigration =
@@ -192,13 +197,13 @@ handleResolveCurrentChange wrapMsg appState model =
         modelWithMigration =
             { model | questionnaireMigration = newQuestionnaireMigration }
 
-        ( newModel, scrollCmd ) =
+        ( newSeed, newModel, scrollCmd ) =
             handleSelectChange appState modelWithMigration nextChange
 
         putCmd =
             putCurrentResolvedIds wrapMsg appState newModel
     in
-    ( newModel, Cmd.batch [ scrollCmd, putCmd ] )
+    ( newSeed, newModel, Cmd.batch [ scrollCmd, putCmd ] )
 
 
 handleUndoResolveCurrentChange : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -262,7 +267,7 @@ setResult appState migration model =
         questionnaireModel =
             case migration of
                 Success m ->
-                    Just <| initialModel appState m.newQuestionnaire [] []
+                    Just <| Questionnaire.init m.newQuestionnaire
 
                 _ ->
                     Nothing

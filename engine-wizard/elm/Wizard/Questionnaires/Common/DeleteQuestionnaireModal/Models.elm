@@ -4,7 +4,7 @@ module Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Questionnaires.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
 
 
 type alias Model =

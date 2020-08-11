@@ -7,8 +7,6 @@ module Shared.Data.EditableConfig.EditableSubmissionConfig exposing
     , validation
     )
 
--- TODO Move Wizard.Common.Form to Shared
-
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Field as Field exposing (Field)

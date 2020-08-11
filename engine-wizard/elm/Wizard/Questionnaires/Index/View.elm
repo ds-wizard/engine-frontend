@@ -7,7 +7,7 @@ import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf)
 import Uuid
@@ -20,10 +20,12 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Routes
 import Wizard.KnowledgeModels.Routes
+import Wizard.Questionnaires.Common.CloneQuestionnaireModal.Msgs as CloneQuestionnaireModalMsg
+import Wizard.Questionnaires.Common.CloneQuestionnaireModal.View as CloneQuestionnaireModal
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs as DeleteQuestionnaireModalMsg
-import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.View as DeleteQuestionnaireModal
-import Wizard.Questionnaires.Common.View exposing (visibilityBadge)
+import Wizard.Questionnaires.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
+import Wizard.Questionnaires.Common.View exposing (visibilityIcons)
 import Wizard.Questionnaires.Index.Models exposing (Model)
 import Wizard.Questionnaires.Index.Msgs exposing (Msg(..))
 import Wizard.Questionnaires.Routes exposing (Route(..))
@@ -51,9 +53,9 @@ view appState model =
         [ Page.header (l_ "header.title" appState) (indexActions appState)
         , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
         , FormResult.view appState model.deletingMigration
-        , FormResult.view appState model.cloningQuestionnaire
         , Listing.view appState (listingConfig appState) model.questionnaires
         , Html.map DeleteQuestionnaireModalMsg <| DeleteQuestionnaireModal.view appState model.deleteModalModel
+        , Html.map CloneQuestionnaireModalMsg <| CloneQuestionnaireModal.view appState model.cloneModalModel
         ]
 
 
@@ -101,10 +103,10 @@ listingTitle appState questionnaire =
                 detailRoute
     in
     span []
-        [ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ]
-        , visibilityBadge appState questionnaire.visibility
-        , migrationBadge appState questionnaire.state
-        ]
+        ([ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ] ]
+            ++ visibilityIcons appState questionnaire
+            ++ [ stateBadge appState questionnaire.state ]
+        )
 
 
 listingDescription : AppState -> Questionnaire -> Html Msg
@@ -203,7 +205,12 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.clone" appState
                 , label = l_ "action.clone" appState
-                , msg = ListingActionMsg (CloneQuestionnaire questionnaire)
+                , msg =
+                    QuestionnaireDescriptor.fromQuestionnaire questionnaire
+                        |> Just
+                        |> CloneQuestionnaireModalMsg.ShowHideCloneQuestionnaire
+                        |> CloneQuestionnaireModalMsg
+                        |> ListingActionMsg
                 }
 
         createMigration =
@@ -275,8 +282,8 @@ migrationRoute =
     Routes.QuestionnairesRoute << MigrationRoute << .uuid
 
 
-migrationBadge : AppState -> QuestionnaireState -> Html msg
-migrationBadge appState state =
+stateBadge : AppState -> QuestionnaireState -> Html msg
+stateBadge appState state =
     case state of
         Migrating ->
             span [ class "badge badge-info" ]

@@ -110,10 +110,9 @@ update msg wrapMsg appState model =
                                         , previewEditorModel =
                                             Just <|
                                                 Wizard.KMEditor.Editor.Preview.Models.initialModel
-                                                    appState
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
-                                                    ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
+                                                    (ActionResult.withDefault [] model.levels)
                                                     (ActionResult.withDefault "" <| ActionResult.map (Maybe.withDefault "" << .previousPackageId) model.km)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
                                         , editorModel =
@@ -146,21 +145,22 @@ update msg wrapMsg appState model =
 
                 PreviewEditorMsg previewMsg ->
                     let
-                        ( previewEditorModel, cmd ) =
+                        ( newSeed, previewEditorModel, cmd ) =
                             case model.previewEditorModel of
                                 Just m ->
                                     let
-                                        ( newPreviewEditorModel, newCmd ) =
+                                        ( newSeed1, newPreviewEditorModel, newCmd ) =
                                             Wizard.KMEditor.Editor.Preview.Update.update previewMsg appState m
                                     in
-                                    ( Just newPreviewEditorModel
+                                    ( newSeed1
+                                    , Just newPreviewEditorModel
                                     , Cmd.map (wrapMsg << PreviewEditorMsg) newCmd
                                     )
 
                                 Nothing ->
-                                    ( Nothing, Cmd.none )
+                                    ( appState.seed, Nothing, Cmd.none )
                     in
-                    ( appState.seed, { model | previewEditorModel = previewEditorModel }, cmd )
+                    ( newSeed, { model | previewEditorModel = previewEditorModel }, cmd )
 
                 TagEditorMsg tagMsg ->
                     let

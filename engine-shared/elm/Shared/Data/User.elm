@@ -4,6 +4,7 @@ module Shared.Data.User exposing
     , decoder
     , fullName
     , imageUrl
+    , imageUrlOrGravatar
     , toUserInfo
     )
 
@@ -99,3 +100,13 @@ imageUrl user =
                 |> Gravatar.withDefault Gravatar.MysteryMan
     in
     Maybe.withDefault (Gravatar.url options user.email) user.imageUrl
+
+
+imageUrlOrGravatar : { a | gravatarHash : String, imageUrl : Maybe String } -> String
+imageUrlOrGravatar user =
+    let
+        options =
+            Gravatar.defaultOptions
+                |> Gravatar.withDefault Gravatar.MysteryMan
+    in
+    Maybe.withDefault (Gravatar.urlFromHash options user.gravatarHash) user.imageUrl

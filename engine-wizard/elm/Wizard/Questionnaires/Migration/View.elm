@@ -13,12 +13,10 @@ import Shared.Locale exposing (l, lf, lgx, lx)
 import Shared.Utils exposing (boolToInt, flip)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Questionnaire.Models
-import Wizard.Common.Questionnaire.Models.QuestionnaireFeature as QuestionnaireFeature
-import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
+import Wizard.Common.Components.Questionnaire as Questionnaire
+import Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer as DiffQuestionnaireRenderer
 import Wizard.Common.View.Page as Page
 import Wizard.Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
-import Wizard.Questionnaires.Migration.DiffQuestionnaireRenderer exposing (diffQuestionnaireRenderer)
 import Wizard.Questionnaires.Migration.Models exposing (Model, isQuestionChangeResolved, isSelectedChangeResolved)
 import Wizard.Questionnaires.Migration.Msgs exposing (Msg(..))
 
@@ -80,10 +78,7 @@ contentView appState model ( migration, levels ) =
                     , div [ class "right-view" ]
                         [ changeView appState model migration
                         , div [ class "questionnaire-view" ]
-                            [ model.questionnaireModel
-                                |> Maybe.map (questionnaireView appState model migration levels)
-                                |> Maybe.withDefault emptyNode
-                            ]
+                            [ questionnaireView appState model migration levels ]
                         ]
                     ]
     in
@@ -157,37 +152,28 @@ changeView appState model migration =
         ]
 
 
-questionnaireView : AppState -> Model -> QuestionnaireMigration -> List Level -> Wizard.Common.Questionnaire.Models.Model -> Html Msg
-questionnaireView appState model migration levels questionnaireModel =
-    let
-        getExtraQuestionClass uuid =
-            if Just uuid == Maybe.map QuestionChange.getQuestionUuid model.selectedChange then
-                if QuestionnaireMigration.isQuestionResolved uuid migration then
-                    Just "highlighted highlighted-resolved"
+questionnaireView : AppState -> Model -> QuestionnaireMigration -> List Level -> Html Msg
+questionnaireView appState model migration levels =
+    case model.questionnaireModel of
+        Just questionnaireModel ->
+            Html.map QuestionnaireMsg <|
+                Questionnaire.view appState
+                    { features =
+                        { feedbackEnabled = False
+                        , summaryReportEnabled = False
+                        , todosEnabled = True
+                        , todoListEnabled = False
+                        , readonly = True
+                        }
+                    , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newQuestionnaire.knowledgeModel levels [] model.selectedChange
+                    }
+                    { levels = levels
+                    , metrics = []
+                    }
+                    questionnaireModel
 
-                else
-                    Just "highlighted"
-
-            else
-                Nothing
-
-        mbLevels =
-            if appState.config.questionnaire.levels.enabled then
-                Just levels
-
-            else
-                Nothing
-    in
-    viewQuestionnaire
-        { features = [ QuestionnaireFeature.todos ]
-        , levels = mbLevels
-        , getExtraQuestionClass = getExtraQuestionClass
-        , forceDisabled = True
-        , createRenderer = diffQuestionnaireRenderer appState model.changes
-        }
-        appState
-        questionnaireModel
-        |> Html.map QuestionnaireMsg
+        Nothing ->
+            emptyNode
 
 
 viewChanges : AppState -> Model -> QuestionnaireMigration -> Html Msg

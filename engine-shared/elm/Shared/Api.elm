@@ -16,6 +16,7 @@ module Shared.Api exposing
     , jwtPostFile
     , jwtPostString
     , jwtPut
+    , wsUrl
     )
 
 import File exposing (File)
@@ -163,6 +164,19 @@ httpPut url body appState toMsg =
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+wsUrl : String -> AbstractAppState b -> String
+wsUrl url appState =
+    let
+        token =
+            if not <| String.isEmpty appState.session.token.token then
+                "?" ++ "Authorization=Bearer%20" ++ appState.session.token.token
+
+            else
+                ""
+    in
+    String.replace "http" "ws" appState.apiUrl ++ url ++ token
 
 
 expectJson : ToMsg a msg -> Decoder a -> Http.Expect msg

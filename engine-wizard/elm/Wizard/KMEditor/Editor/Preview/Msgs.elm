@@ -1,10 +1,10 @@
 module Wizard.KMEditor.Editor.Preview.Msgs exposing (Msg(..))
 
-import Wizard.Common.Questionnaire.Msgs
+import Wizard.Common.Components.Questionnaire as Questionnaire
 
 
 type Msg
-    = QuestionnaireMsg Wizard.Common.Questionnaire.Msgs.Msg
+    = QuestionnaireMsg Questionnaire.Msg
     | AddTag String
     | RemoveTag String
     | SelectAllTags

@@ -8,15 +8,17 @@ module Shared.Api.Questionnaires exposing
     , getQuestionnaire
     , getQuestionnaireMigration
     , getQuestionnaires
+    , getSummaryReport
     , postQuestionnaire
     , putQuestionnaire
     , putQuestionnaireContent
     , putQuestionnaireMigration
+    , websocket
     )
 
 import Json.Encode exposing (Value)
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpPut, jwtPostEmpty, jwtPut)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpPut, jwtPostEmpty, jwtPut, wsUrl)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
@@ -96,3 +98,13 @@ deleteQuestionnaire uuid =
 fetchSummaryReport : Uuid -> Value -> AbstractAppState a -> ToMsg SummaryReport msg -> Cmd msg
 fetchSummaryReport questionnaireUuid =
     jwtOrHttpFetch ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/report/preview") SummaryReport.decoder
+
+
+getSummaryReport : Uuid -> AbstractAppState a -> ToMsg SummaryReport msg -> Cmd msg
+getSummaryReport questionnaireUuid =
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/report") SummaryReport.decoder
+
+
+websocket : Uuid -> AbstractAppState a -> String
+websocket questionnaireUuid =
+    wsUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/websocket")

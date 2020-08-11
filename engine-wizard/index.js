@@ -12,6 +12,7 @@ var registerPageUnloadPorts = require('./ports/page-unload')
 var registerRefreshPorts = require('./ports/refresh')
 var registerScrollPorts = require('./ports/scroll')
 var registerSessionPorts = require('./ports/session')
+var registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
 
 
 axiosRetry(axios, {
@@ -70,6 +71,7 @@ function loadApp(config, provisioning) {
     registerRefreshPorts(app)
     registerScrollPorts(app)
     registerSessionPorts(app)
+    registerWebsocketPorts(app)
 }
 
 

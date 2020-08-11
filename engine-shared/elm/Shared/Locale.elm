@@ -49,3 +49,8 @@ lf moduleKey termKey terms appState =
 lh : String -> String -> List (Html msg) -> { a | provisioning : Provisioning } -> List (Html msg)
 lh moduleKey termKey elements appState =
     String.formatHtml (l moduleKey termKey appState) elements
+
+
+lgh : String -> List (Html msg) -> { a | provisioning : Provisioning } -> List (Html msg)
+lgh =
+    lh "_global"

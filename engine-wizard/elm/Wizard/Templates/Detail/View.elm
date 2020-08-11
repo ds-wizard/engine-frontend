@@ -99,6 +99,7 @@ readme appState template =
     in
     div [ class "KnowledgeModels__Detail__Readme" ]
         [ warning
+        , unsupportedMetamodelVersionWarning appState template
         , Markdown.toHtml [ class "readme" ] template.readme
         ]
 
@@ -125,6 +126,18 @@ newVersionInRegistryWarning appState template =
 
         _ ->
             emptyNode
+
+
+unsupportedMetamodelVersionWarning : AppState -> TemplateDetail -> Html msg
+unsupportedMetamodelVersionWarning appState template =
+    if TemplateState.isUnsupported template.state then
+        div [ class "alert alert-danger" ]
+            [ faSet "_global.warning" appState
+            , lx_ "readme.unsupportedMetamodelVersion" appState
+            ]
+
+    else
+        emptyNode
 
 
 sidePanel : AppState -> TemplateDetail -> Html msg

@@ -1,73 +1,137 @@
+@import "../../mixins";
 @import "../../variables";
 
+.page > .Questionnaires__Detail {
+    margin-top: -20px;
+    margin-bottom: -20px;
+}
 
-.Questionnaires__Detail {
-    width: 100%;
-    margin-top: 30px;
+.public .Questionnaires__Detail {
+    height: calc(100vh - #{$public-header-height});
 
-    .top-header {
-        .top-header-content {
-            .top-header-actions {
-                margin-left: 1rem;
-
-                .btn {
-                    margin-left: 1rem;
-                }
-
-                .link-with-icon {
-                    margin-right: 1.5rem;
-                }
-
-                .btn-group {
-                    vertical-align: baseline;
-
-                    .btn {
-                        padding: 0;
-                        border: 0;
-                        margin: 0;
-                    }
-                }
-
-                .dropdown-item {
-                    padding: 0.25rem 1rem;
-
-                    color: $gray-900;
-                    text-decoration: none;
-
-                    &:active {
-                        color: $light;
-
-                        &.text-danger {
-                            background-color: $danger;
-                            color: $light !important;
-                        }
-                    }
-
-                    .fa {
-                        width: 1.5rem;
-                        text-align: center;
-                        margin-right: 0.25rem;
-                    }
-                }
-            }
-        }
-    }
-
-    .questionnaire-wrapper {
-        height: calc(100vh - #{$top-header-height});
-        margin-bottom: -20px;
+    .questionnaire {
+        height: calc(100vh - #{$public-header-height} - #{$top-header-height});
     }
 }
 
-.public {
-    .Questionnaires__Detail {
-        .top-header {
-            left: 0;
-            top: 53px;
+.Questionnaires__Detail {
+    width: 100%;
+    overflow-x: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    .questionnaire-header {
+        width: 100%;
+        height: $top-header-height;
+        flex: 0 0 $top-header-height;
+        background: $gray-100;
+        border-bottom: 1px solid $gray-400;
+        padding: 0 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &__section {
+            display: flex;
+            align-items: center;
+
+            &:first-child {
+                flex-basis: 0;
+                flex-grow: 1;
+                min-width: 0;
+            }
+
+            & > .fa {
+                margin-left: 0.5rem;
+                color: $gray-500;
+            }
         }
 
-        .questionnaire-wrapper {
-            height: calc(100vh - #{110px});
+        &__title {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        &__saving {
+            color: $gray-600;
+            margin-left: 0.75rem;
+            margin-right: 2rem;
+            white-space: nowrap;
+
+            .fa {
+                margin-right: 0.25rem;
+            }
+
+            & + .popover {
+                .popover-body {
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        &__online-users {
+            display: inline-flex;
+            margin-right: 1rem;
+            padding-right: 1rem;
+            border-right: 1px solid $gray-400;
+
+            .OnlineUser {
+                margin-left: 0.25rem;
+            }
+
+            &--stacked {
+                padding-left: 0.75rem;
+
+                .OnlineUser {
+                    margin-left: -0.75rem;
+                }
+            }
+
+            &:last-child {
+                border-right: none;
+                padding-right: 0;
+                margin-right: 0;
+            }
+
+            .extra-users-count {
+                height: 32px;
+                margin-left: 0.25rem;
+                display: inline-flex;
+                align-items: center;
+                color: $gray-600;
+            }
+        }
+
+        &__actions {
+            display: flex;
+            align-items: center;
+            margin-right: -0.75rem;
+            white-space: nowrap;
+
+            .dropdown-item {
+                padding: 0.25rem 1rem;
+
+                color: $gray-900;
+                text-decoration: none;
+
+                &:active {
+                    color: $light;
+
+                    &.text-danger {
+                        background-color: $danger;
+                        color: $light !important;
+                    }
+                }
+
+                .fa {
+                    width: 1.5rem;
+                    text-align: center;
+                    margin-right: 0.25rem;
+                }
+            }
         }
     }
 }

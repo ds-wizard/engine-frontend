@@ -8,7 +8,6 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Time
-import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingConfig)
@@ -16,7 +15,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes
-import Wizard.Questionnaires.Common.View exposing (visibilityBadge)
+import Wizard.Questionnaires.Common.View exposing (visibilityIcons)
 import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
@@ -97,9 +96,9 @@ listingConfig appState =
 listingTitle : AppState -> Questionnaire -> Html msg
 listingTitle appState questionnaire =
     span []
-        [ linkTo appState (Routes.QuestionnairesRoute <| DetailRoute questionnaire.uuid) [] [ text questionnaire.name ]
-        , visibilityBadge appState questionnaire.visibility
-        ]
+        (linkTo appState (Routes.QuestionnairesRoute <| DetailRoute questionnaire.uuid) [] [ text questionnaire.name ]
+            :: visibilityIcons appState questionnaire
+        )
 
 
 listingDescription : AppState -> Questionnaire -> Html msg

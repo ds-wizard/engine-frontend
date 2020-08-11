@@ -2,6 +2,7 @@ module Shared.Data.Template.TemplateState exposing
     ( TemplateState
     , decoder
     , isOutdated
+    , isUnsupported
     , unknown
     )
 
@@ -13,6 +14,7 @@ type TemplateState
     | OutdatedTemplateState
     | UpToDateTemplateState
     | UnpublishedTemplateState
+    | UnsupportedMetamodelVersion
 
 
 unknown : TemplateState
@@ -38,6 +40,9 @@ decoder =
                     "UnpublishedTemplateState" ->
                         D.succeed UnpublishedTemplateState
 
+                    "UnsupportedMetamodelVersion" ->
+                        D.succeed UnsupportedMetamodelVersion
+
                     _ ->
                         D.fail <| "Unknown template state: " ++ str
             )
@@ -46,3 +51,8 @@ decoder =
 isOutdated : TemplateState -> Bool
 isOutdated =
     (==) OutdatedTemplateState
+
+
+isUnsupported : TemplateState -> Bool
+isUnsupported =
+    (==) UnsupportedMetamodelVersion

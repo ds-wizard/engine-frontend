@@ -1,0 +1,41 @@
+@import "../../../variables";
+
+$userColors: #E02020, #0091FF, #6DD400, #F7B500, #B620E0, #44D7B6, #FA6400, #32C5FF, #F58CBA, #C79C6E, #6236FF, #699D32;
+
+.OnlineUser {
+    width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    background: gray;
+    border: 2px solid gray;
+    overflow: hidden;
+
+    @for $i from 1 through 12 {
+        &.color-#{$i - 1} {
+            background: nth($userColors, $i);
+            border: 2px solid nth($userColors, $i);
+        }
+    }
+
+    .Logged {
+        img {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .Anonymous {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        color: $white;
+    }
+
+    & + .popover {
+        .popover-body {
+            white-space: nowrap;
+        }
+    }
+}

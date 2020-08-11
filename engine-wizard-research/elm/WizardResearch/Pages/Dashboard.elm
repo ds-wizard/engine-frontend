@@ -121,13 +121,13 @@ viewContent appState model levels =
             let
                 ( icon, iconTitle ) =
                     case questionnaire.visibility of
-                        PublicQuestionnaire ->
+                        VisibleEditQuestionnaire ->
                             ( "fa-globe", "Public" )
 
                         PrivateQuestionnaire ->
                             ( "fa-lock", "Private" )
 
-                        PublicReadOnlyQuestionnaire ->
+                        VisibleViewQuestionnaire ->
                             ( "fa-shield-alt", "Public Read-Only" )
             in
             span [ class "fragment" ]

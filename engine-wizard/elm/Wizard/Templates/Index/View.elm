@@ -93,6 +93,7 @@ listingTitle appState template =
             ]
             [ text <| Version.toString template.version ]
         , listingTitleOutdatedBadge appState template
+        , listingTitleUnsupportedBadge appState template
         ]
 
 
@@ -100,6 +101,15 @@ listingTitleOutdatedBadge : AppState -> Template -> Html Msg
 listingTitleOutdatedBadge appState template =
     if TemplateState.isOutdated template.state then
         span [ class "badge badge-warning" ] [ lx_ "badge.outdated" appState ]
+
+    else
+        emptyNode
+
+
+listingTitleUnsupportedBadge : AppState -> Template -> Html Msg
+listingTitleUnsupportedBadge appState template =
+    if TemplateState.isUnsupported template.state then
+        span [ class "badge badge-danger" ] [ lx_ "badge.unsupported" appState ]
 
     else
         emptyNode

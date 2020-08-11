@@ -7,6 +7,8 @@ $primary: #0033aa !default;
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
 
+// public layout
+$public-header-height: 50px !default;
 
 // side navigation
 $side-navigation-logo-url: url(/img/logo.svg) !default;
