@@ -5,5 +5,4 @@ import Uuid exposing (Uuid)
 
 
 type Route
-    = CreateRoute Uuid
-    | IndexRoute (Maybe Uuid) PaginationQueryString
+    = IndexRoute (Maybe Uuid) PaginationQueryString

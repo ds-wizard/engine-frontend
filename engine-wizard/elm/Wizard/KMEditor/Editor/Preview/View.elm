@@ -32,9 +32,7 @@ view appState model =
                 Questionnaire.view appState
                     { features =
                         { feedbackEnabled = False
-                        , summaryReportEnabled = False
                         , todosEnabled = False
-                        , todoListEnabled = False
                         , readonly = False
                         }
                     , renderer = DefaultQuestionnaireRenderer.create appState model.knowledgeModel model.levels model.metrics

@@ -104,9 +104,11 @@ view appState config model =
 viewToolbar : AppState -> ViewConfig a msg -> Model a -> Html msg
 viewToolbar appState cfg model =
     div [ class "listing-toolbar mb-3 form-inline" ]
-        [ Maybe.withDefault emptyNode cfg.toolbarExtra
-        , viewToolbarFilter appState cfg model
-        , viewToolbarSort appState cfg model
+        [ div [ class "filter-sort" ]
+            [ viewToolbarFilter appState cfg model
+            , viewToolbarSort appState cfg model
+            ]
+        , Maybe.withDefault emptyNode cfg.toolbarExtra
         ]
 
 

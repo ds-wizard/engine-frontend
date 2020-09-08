@@ -1,0 +1,230 @@
+@import "../../mixins";
+@import "../../variables";
+
+$nav-row-height: 32px;
+$nav-row-padding: 16px;
+$header-height: 2 * ($nav-row-height + $nav-row-padding) + 1;
+$content-height: calc(100vh - #{$header-height});
+$public-content-height: calc(100vh - #{$header-height + $public-header-height});
+
+
+.Plans__Detail {
+    width: 100%;
+    overflow-x: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    .public--app & {
+        height: calc(100vh - #{$public-header-height});
+
+        .questionnaire {
+            height: $public-content-height;
+        }
+    }
+
+    &__Content {
+        height: $content-height;
+        overflow: auto;
+
+        .public--app & {
+            height: $public-content-height;
+        }
+
+        &--Todos {
+            .container {
+                margin: 2rem auto;
+
+                .list-group {
+                    a {
+                        color: $body-color;
+
+                        &:hover {
+                            text-decoration: none;
+                            color: $primary;
+                        }
+
+                        p {
+                            margin-bottom: 0;
+
+                            &.nested {
+                                border-left: 5px $gray-300 solid;
+                                padding-left: 10px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        &--Metrics {
+            .container {
+                margin: 2rem auto;
+            }
+        }
+
+        &--Preview {
+            overflow: hidden;
+
+            iframe {
+                width: 100%;
+                border: 0;
+                height: $content-height;
+                padding: 0;
+                margin: 0;
+            }
+        }
+
+        &--Documents {
+            .container {
+                margin: 2rem auto;
+            }
+        }
+
+        &--NewDocument {
+            .container {
+                margin: 2rem auto;
+            }
+
+            .indication-table {
+                color: $gray-600;
+                width: 100%;
+
+                .progress {
+                    width: 15rem;
+                    height: 10px;
+                    margin-left: 1rem;
+                    float: right;
+                }
+            }
+        }
+
+        &--Settings {
+            .container {
+                margin: 2rem auto;
+            }
+
+            hr {
+                margin: 3rem 0;
+            }
+
+            .card {
+                margin-top: 1rem;
+
+                .card-body {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .card-text {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+    }
+
+    .page > & {
+        margin-top: -20px;
+        margin-bottom: -20px;
+    }
+
+    &__Navigation {
+        background: $gray-100;
+        border-bottom: 1px solid $gray-400;
+
+        &__Row {
+            height: $nav-row-height;
+            margin-top: $nav-row-padding;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            &__Section {
+                display: flex;
+                align-items: center;
+
+                &:first-child {
+                    flex-basis: 0;
+                    flex-grow: 1;
+                    min-width: 0;
+                }
+
+                & > .fa {
+                    margin-left: 0.5rem;
+                    color: $gray-500;
+                }
+
+                .title {
+                    font-weight: bold;
+                    font-size: 1.125rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .questionnaire-header__saving {
+                    color: $gray-600;
+                    margin-left: 0.75rem;
+                    margin-right: 2rem;
+                    white-space: nowrap;
+
+                    .fa {
+                        margin-right: 0.25rem;
+                    }
+
+                    & + .popover {
+                        .popover-body {
+                            white-space: nowrap;
+                        }
+                    }
+                }
+
+                &__Online-Users {
+                    display: inline-flex;
+                    margin-right: 1rem;
+                    padding-right: 1rem;
+                    border-right: 1px solid $gray-400;
+
+                    .OnlineUser {
+                        margin-left: 0.25rem;
+                    }
+
+                    &--Stacked {
+                        padding-left: 0.75rem;
+
+                        .OnlineUser {
+                            margin-left: -0.75rem;
+                        }
+                    }
+
+                    &:last-child {
+                        border-right: none;
+                        padding-right: 0;
+                        margin-right: 0;
+                    }
+
+                    .extra-users-count {
+                        height: 32px;
+                        margin-left: 0.25rem;
+                        display: inline-flex;
+                        align-items: center;
+                        color: $gray-600;
+                    }
+                }
+
+                &__Actions {
+                    display: flex;
+                    align-items: center;
+                    //margin-right: -0.75rem;
+                    white-space: nowrap;
+                }
+            }
+        }
+    }
+
+    .questionnaire {
+        height: $content-height;
+    }
+}

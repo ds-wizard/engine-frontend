@@ -114,6 +114,8 @@ createQuestionnaireDetail packageId km =
     , replies = Dict.fromList []
     , level = 1
     , selectedTagUuids = []
+    , templateId = Nothing
+    , formatUuid = Nothing
+    , format = Nothing
     , labels = Dict.fromList []
-    , report = { indications = [] }
     }

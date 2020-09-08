@@ -15,8 +15,9 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes
-import Wizard.Questionnaires.Common.View exposing (visibilityIcons)
-import Wizard.Questionnaires.Routes exposing (Route(..))
+import Wizard.Projects.Common.View exposing (visibilityIcons)
+import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -39,7 +40,7 @@ viewQuestionnaires : AppState -> ( List Questionnaire, List Level ) -> Html Msg
 viewQuestionnaires appState ( questionnaires, levels ) =
     if List.length questionnaires > 0 then
         div [ class "PhaseQuestionnaireWidget" ]
-            [ h3 [] [ lx_ "recentQuestionnaires" appState ]
+            [ h3 [] [ lx_ "recentProjects" appState ]
             , div [] (List.map (viewLevelGroup appState questionnaires) levels)
             ]
 
@@ -68,7 +69,7 @@ viewLevelGroupWithData appState questionnaires level =
 
             else
                 div [ class "empty" ]
-                    [ lx_ "noQuestionnairesInPhase" appState ]
+                    [ lx_ "noProjectsInPhase" appState ]
     in
     div []
         [ strong [] [ text level.title ]
@@ -96,7 +97,7 @@ listingConfig appState =
 listingTitle : AppState -> Questionnaire -> Html msg
 listingTitle appState questionnaire =
     span []
-        (linkTo appState (Routes.QuestionnairesRoute <| DetailRoute questionnaire.uuid) [] [ text questionnaire.name ]
+        (linkTo appState (Routes.PlansRoute <| DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire) [] [ text questionnaire.name ]
             :: visibilityIcons appState questionnaire
         )
 

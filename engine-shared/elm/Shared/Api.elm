@@ -1,5 +1,6 @@
 module Shared.Api exposing
     ( ToMsg
+    , authorizedUrl
     , httpFetch
     , httpGet
     , httpPost
@@ -10,6 +11,7 @@ module Shared.Api exposing
     , jwtGet
     , jwtOrHttpFetch
     , jwtOrHttpGet
+    , jwtOrHttpHead
     , jwtOrHttpPut
     , jwtPost
     , jwtPostEmpty
@@ -46,6 +48,27 @@ jwtOrHttpPut url body appState =
 jwtOrHttpFetch : String -> Decoder a -> E.Value -> AbstractAppState b -> ToMsg a msg -> Cmd msg
 jwtOrHttpFetch url decoder body appState =
     jwtOrHttp appState jwtFetch httpFetch url decoder body appState
+
+
+jwtOrHttpHead : String -> AbstractAppState b -> ToMsg Http.Metadata msg -> Cmd msg
+jwtOrHttpHead url appState toMsg =
+    let
+        headers =
+            if not <| String.isEmpty appState.session.token.token then
+                [ Http.header "Authorization" ("Bearer " ++ appState.session.token.token) ]
+
+            else
+                []
+    in
+    Http.request
+        { method = "HEAD"
+        , headers = headers
+        , url = appState.apiUrl ++ url
+        , body = Http.emptyBody
+        , expect = expectMetadata toMsg
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 jwtGet : String -> Decoder a -> AbstractAppState b -> ToMsg a msg -> Cmd msg
@@ -168,6 +191,11 @@ httpPut url body appState toMsg =
 
 wsUrl : String -> AbstractAppState b -> String
 wsUrl url appState =
+    String.replace "http" "ws" <| authorizedUrl url appState
+
+
+authorizedUrl : String -> AbstractAppState b -> String
+authorizedUrl url appState =
     let
         token =
             if not <| String.isEmpty appState.session.token.token then
@@ -176,7 +204,7 @@ wsUrl url appState =
             else
                 ""
     in
-    String.replace "http" "ws" appState.apiUrl ++ url ++ token
+    appState.apiUrl ++ url ++ token
 
 
 expectJson : ToMsg a msg -> Decoder a -> Http.Expect msg
@@ -192,6 +220,27 @@ expectWhatever toMsg =
     Http.expectStringResponse toMsg <|
         resolve <|
             \_ -> Ok ()
+
+
+expectMetadata : ToMsg Http.Metadata msg -> Http.Expect msg
+expectMetadata toMsg =
+    Http.expectStringResponse toMsg <|
+        \response ->
+            case response of
+                Http.BadUrl_ url ->
+                    Err (BadUrl url)
+
+                Http.Timeout_ ->
+                    Err Timeout
+
+                Http.NetworkError_ ->
+                    Err NetworkError
+
+                Http.BadStatus_ metadata body ->
+                    Err (BadStatus metadata.statusCode body)
+
+                Http.GoodStatus_ metadata _ ->
+                    Ok metadata
 
 
 resolve : (String -> Result String a) -> Http.Response String -> Result ApiError a

@@ -22,7 +22,7 @@ type alias Document =
     , template : DocumentTemplate
     , formatUuid : Uuid
     , state : DocumentState
-    , ownerUuid : Uuid
+    , creatorUuid : Maybe Uuid
     }
 
 
@@ -34,7 +34,7 @@ isEditable appState document =
 
         isOwner =
             appState.session.user
-                |> Maybe.map (.uuid >> (==) document.ownerUuid)
+                |> Maybe.map (.uuid >> Just >> (==) document.creatorUuid)
                 |> Maybe.withDefault False
     in
     isAdmin || isOwner
@@ -50,7 +50,7 @@ decoder =
         |> D.required "template" DocumentTemplate.decoder
         |> D.required "formatUuid" Uuid.decoder
         |> D.required "state" DocumentState.decoder
-        |> D.required "ownerUuid" Uuid.decoder
+        |> D.required "creatorUuid" (D.maybe Uuid.decoder)
 
 
 compare : Document -> Document -> Order
