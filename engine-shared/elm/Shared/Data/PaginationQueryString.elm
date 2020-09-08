@@ -123,8 +123,11 @@ parseSort defaultSortBy mbSort =
         parts =
             Maybe.unwrap [] (String.split ",") mbSort
 
+        defaultParts =
+            Maybe.unwrap [] (String.split ",") defaultSortBy
+
         sortBy =
-            case ( List.head parts, defaultSortBy ) of
+            case ( List.head parts, List.head defaultParts ) of
                 ( Just s, _ ) ->
                     Just s
 
@@ -135,8 +138,19 @@ parseSort defaultSortBy mbSort =
                     Nothing
 
         sortDirection =
-            List.last parts
-                |> Maybe.unwrap SortASC parseSortDirection
+            case
+                ( Maybe.map parseSortDirection (List.last parts)
+                , Maybe.map parseSortDirection (List.last defaultParts)
+                )
+            of
+                ( Just d, _ ) ->
+                    d
+
+                ( Nothing, Just d ) ->
+                    d
+
+                _ ->
+                    SortASC
     in
     ( sortBy, sortDirection )
 

@@ -23,7 +23,7 @@ import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.KnowledgeModels.Detail.Models exposing (..)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (..)
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
-import Wizard.Questionnaires.Routes
+import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 
 
@@ -76,7 +76,7 @@ header appState package =
 
         questionnaireAction =
             linkTo appState
-                (Routes.QuestionnairesRoute <| Wizard.Questionnaires.Routes.CreateRoute <| Just package.id)
+                (Routes.PlansRoute <| Wizard.Projects.Routes.CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
                 [ faSet "kmDetail.createQuestionnaire" appState
                 , lx_ "header.createQuestionnaire" appState

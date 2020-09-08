@@ -8,7 +8,7 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Questionnaires.Routes exposing (Route(..))
+import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
@@ -64,7 +64,7 @@ view appState questionnaires =
                     ]
                 ]
             , div [ class "DMPWorkflowWidget__Start" ]
-                [ a [ class "btn btn-primary", href <| Routing.toUrl appState <| Routes.QuestionnairesRoute <| CreateRoute Nothing ]
+                [ a [ class "btn btn-primary", href <| Routing.toUrl appState <| Routes.PlansRoute <| CreateRoute Nothing ]
                     [ lx_ "startPlanning" appState ]
                 ]
             ]

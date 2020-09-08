@@ -11,6 +11,3 @@ subscriptions route model =
     case route of
         IndexRoute _ _ ->
             Sub.map IndexMsg <| Wizard.Documents.Index.Subscriptions.subscriptions model.indexModel
-
-        _ ->
-            Sub.none
