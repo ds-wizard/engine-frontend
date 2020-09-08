@@ -85,7 +85,10 @@ canonical Uuids, Versions 1-5 and will refuse to parse other Uuid variants.
 -}
 fromString : String -> Maybe Uuid
 fromString text =
-    if isValidUuid text then
+    if Uuid text == nil then
+        Just nil
+
+    else if isValidUuid text then
         Just <| Uuid <| String.toLower text
 
     else

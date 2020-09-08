@@ -1,27 +1,42 @@
-module Wizard.Questionnaires.Common.View exposing (visibilityBadge)
+module Wizard.Questionnaires.Common.View exposing (visibilityIcons)
 
-import Html exposing (Html, span, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, i)
+import Html.Attributes exposing (class, title)
+import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Html exposing (emptyNode)
+import Shared.Locale exposing (l)
+import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
 
 
-visibilityBadge : AppState -> QuestionnaireVisibility -> Html msg
-visibilityBadge appState questionnaireVisibility =
-    if appState.config.questionnaire.questionnaireVisibility.enabled then
-        case questionnaireVisibility of
-            PublicQuestionnaire ->
-                span [ class "badge badge-cyan" ]
-                    [ text "public" ]
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.Questionnaires.Common.View"
 
-            PublicReadOnlyQuestionnaire ->
-                span [ class "badge badge-purple" ]
-                    [ text "read-only" ]
 
-            PrivateQuestionnaire ->
-                span [ class "badge badge-red" ]
-                    [ text "private" ]
+visibilityIcons : AppState -> { q | visibility : QuestionnaireVisibility, sharing : QuestionnaireSharing } -> List (Html msg)
+visibilityIcons appState questionnaire =
+    let
+        visibleIcon =
+            i [ class "fa fas fa-user-friends", title visibleTitle ] []
 
-    else
-        emptyNode
+        visibleTitle =
+            if questionnaire.visibility == VisibleEditQuestionnaire then
+                l_ "visibilityIcons.titleLoggedEdit" appState
+
+            else
+                l_ "visibilityIcons.titleLoggedView" appState
+
+        linkIcon =
+            i [ class "fa fas fa-link", title linkTitle ] []
+
+        linkTitle =
+            if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then
+                l_ "visibilityIcons.titleAnyoneEdit" appState
+
+            else
+                l_ "visibilityIcons.titleAnyoneView" appState
+    in
+    []
+        |> listInsertIf visibleIcon (questionnaire.visibility /= PrivateQuestionnaire)
+        |> listInsertIf linkIcon (questionnaire.sharing /= RestrictedQuestionnaire)

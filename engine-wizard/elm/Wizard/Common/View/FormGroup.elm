@@ -15,6 +15,7 @@ module Wizard.Common.View.FormGroup exposing
     , resizableTextarea
     , richRadioGroup
     , select
+    , selectWithDisabled
     , textView
     , textarea
     , textareaAttrs
@@ -25,9 +26,10 @@ import Form exposing (Form, InputType(..), Msg(..))
 import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
-import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
-import Html.Attributes exposing (autocomplete, checked, class, classList, for, id, name, rows, style, type_, value)
-import Html.Events exposing (onCheck, onClick, onMouseDown)
+import Html exposing (Html, a, button, code, div, label, li, option, p, span, text, ul)
+import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, selected, style, type_, value)
+import Html.Events exposing (on, onBlur, onCheck, onClick, onFocus, onMouseDown, targetValue)
+import Json.Decode as Json
 import Markdown
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
@@ -133,6 +135,27 @@ select appState options =
     formGroup (Input.selectInput options) [] appState
 
 
+selectWithDisabled : AppState -> List ( String, String, Bool ) -> Form FormError o -> String -> String -> Html Form.Msg
+selectWithDisabled appState options =
+    let
+        input_ state attrs =
+            let
+                formAttrs =
+                    [ on
+                        "change"
+                        (targetValue |> Json.map (Field.String >> Input state.path Select))
+                    , onFocus (Focus state.path)
+                    , onBlur (Blur state.path)
+                    ]
+
+                buildOption ( k, v, d ) =
+                    option [ value k, selected (state.value == Just k), disabled d ] [ text v ]
+            in
+            Html.select (formAttrs ++ attrs) (List.map buildOption options)
+    in
+    formGroup input_ [] appState
+
+
 richRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 richRadioGroup appState options =
     let
@@ -151,7 +174,7 @@ richRadioGroup appState options =
                             []
                         , label [ class "form-check-label", for k ]
                             [ text v
-                            , p [ class "form-text text-muted" ] [ text d ]
+                            , p [ class "form-text text-muted" ] [ Markdown.toHtml [] d ]
                             ]
                         ]
             in

@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        component: [registry, wizard, wizard-research]
+        component: [registry, wizard]
         node-version: [8.16.2]
     
     env:

@@ -10,16 +10,19 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Shared.Data.Questionnaire.QuestionnaireLabel as QuestionnaireLabel
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.QuestionnaireDetail.FormValue as FormValue
+import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
 import Shared.Form.FormError exposing (FormError)
 
 
 type alias QuestionnaireEditForm =
     { name : String
-    , visibility : QuestionnaireVisibility
+    , visibilityEnabled : Bool
+    , visibilityPermission : QuestionnairePermission
+    , sharingEnabled : Bool
+    , sharingPermission : QuestionnairePermission
     }
 
 
@@ -35,24 +38,35 @@ init questionnaire =
 
 questionnaireToFormInitials : QuestionnaireDetail -> List ( String, Field.Field )
 questionnaireToFormInitials questionnaire =
+    let
+        ( visibilityEnabled, visibilityPermission ) =
+            QuestionnaireVisibility.toFormValues questionnaire.visibility
+
+        ( sharingEnabled, sharingPermission ) =
+            QuestionnaireSharing.toFormValues questionnaire.sharing
+    in
     [ ( "name", Field.string questionnaire.name )
-    , ( "visibility", Field.string <| QuestionnaireVisibility.toString questionnaire.visibility )
+    , ( "visibilityEnabled", Field.bool visibilityEnabled )
+    , ( "visibilityPermission", QuestionnairePermission.field visibilityPermission )
+    , ( "sharingEnabled", Field.bool sharingEnabled )
+    , ( "sharingPermission", QuestionnairePermission.field sharingPermission )
     ]
 
 
 validation : Validation FormError QuestionnaireEditForm
 validation =
-    Validate.map2 QuestionnaireEditForm
+    Validate.map5 QuestionnaireEditForm
         (Validate.field "name" Validate.string)
-        (Validate.field "visibility" QuestionnaireVisibility.validation)
+        (Validate.field "visibilityEnabled" Validate.bool)
+        (Validate.field "visibilityPermission" QuestionnairePermission.validation)
+        (Validate.field "sharingEnabled" Validate.bool)
+        (Validate.field "sharingPermission" QuestionnairePermission.validation)
 
 
-encode : QuestionnaireDetail -> QuestionnaireEditForm -> E.Value
-encode questionnaire form =
+encode : QuestionnaireEditForm -> E.Value
+encode form =
     E.object
         [ ( "name", E.string form.name )
-        , ( "visibility", QuestionnaireVisibility.encode form.visibility )
-        , ( "replies", E.list FormValue.encode questionnaire.replies )
-        , ( "level", E.int questionnaire.level )
-        , ( "labels", E.list QuestionnaireLabel.encode questionnaire.labels )
+        , ( "visibility", QuestionnaireVisibility.encode (QuestionnaireVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission) )
+        , ( "sharing", QuestionnaireSharing.encode (QuestionnaireSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
         ]

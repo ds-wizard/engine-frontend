@@ -9,7 +9,7 @@ import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Template.TemplateState as TemplateState
-import Shared.Data.TemplateDetail exposing (TemplateDetail)
+import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
@@ -87,25 +87,28 @@ readme : AppState -> TemplateDetail -> Html msg
 readme appState template =
     let
         containsNewerVersions =
-            (List.length <| List.filter (Version.greaterThan template.version) template.versions) > 0
+            not <| TemplateDetail.isLatestVersion template
 
         warning =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
-                    [ lx_ "readme.versionWarning" appState ]
+                    [ faSet "_global.warning" appState
+                    , lx_ "readme.versionWarning" appState
+                    ]
 
             else
                 newVersionInRegistryWarning appState template
     in
     div [ class "KnowledgeModels__Detail__Readme" ]
         [ warning
+        , unsupportedMetamodelVersionWarning appState template
         , Markdown.toHtml [ class "readme" ] template.readme
         ]
 
 
 newVersionInRegistryWarning : AppState -> TemplateDetail -> Html msg
 newVersionInRegistryWarning appState template =
-    case ( template.remoteLatestVersion, TemplateState.isOutdated template.state, appState.config.registry ) of
+    case ( template.remoteLatestVersion, template.state == TemplateState.Outdated, appState.config.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 latestPackageId =
@@ -125,6 +128,41 @@ newVersionInRegistryWarning appState template =
 
         _ ->
             emptyNode
+
+
+unsupportedMetamodelVersionWarning : AppState -> TemplateDetail -> Html msg
+unsupportedMetamodelVersionWarning appState template =
+    if template.state == TemplateState.UnsupportedMetamodelVersion then
+        let
+            link =
+                case ( TemplateDetail.isLatestVersion template, template.remoteLatestVersion, appState.config.registry ) of
+                    ( True, Just remoteLatestVersion, RegistryEnabled _ ) ->
+                        let
+                            latestPackageId =
+                                template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
+                        in
+                        text " "
+                            :: lh_ "registryVersion.warning"
+                                [ text (Version.toString remoteLatestVersion)
+                                , linkTo appState
+                                    (Routes.TemplatesRoute <| ImportRoute <| Just <| latestPackageId)
+                                    []
+                                    [ lx_ "registryVersion.warning.import" appState ]
+                                ]
+                                appState
+
+                    _ ->
+                        []
+        in
+        div [ class "alert alert-danger" ]
+            ([ faSet "_global.warning" appState
+             , lx_ "readme.unsupportedMetamodelVersion" appState
+             ]
+                ++ link
+            )
+
+    else
+        emptyNode
 
 
 sidePanel : AppState -> TemplateDetail -> Html msg

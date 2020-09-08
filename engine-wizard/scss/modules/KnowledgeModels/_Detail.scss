@@ -25,6 +25,10 @@
         margin-top: $top-header-height;
         overflow-x: auto;
 
+        .alert + .alert {
+            margin-top: -1rem;
+        }
+
         .readme {
             max-width: 50rem;
             margin: 20px auto;

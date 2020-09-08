@@ -7,10 +7,13 @@ module Shared.Data.Questionnaire exposing
 
 import Json.Decode as D exposing (..)
 import Json.Decode.Extra as D
-import Json.Decode.Pipeline exposing (optional, required)
+import Json.Decode.Pipeline as D
+import Maybe.Extra as Maybe
 import Shared.AbstractAppState exposing (AbstractAppState)
+import Shared.Auth.Session as Session
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport exposing (QuestionnaireReport)
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.User as User exposing (User)
@@ -25,6 +28,7 @@ type alias Questionnaire =
     , package : Package
     , level : Int
     , visibility : QuestionnaireVisibility
+    , sharing : QuestionnaireSharing
     , owner : Maybe User
     , state : QuestionnaireState
     , updatedAt : Time.Posix
@@ -38,27 +42,35 @@ isEditable appState questionnaire =
         isAdmin =
             UserInfo.isAdmin appState.session.user
 
-        isNotReadonly =
-            questionnaire.visibility /= PublicReadOnlyQuestionnaire
+        isReadonly =
+            if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then
+                False
+
+            else if Session.exists appState.session then
+                questionnaire.visibility == VisibleViewQuestionnaire || (questionnaire.visibility == PrivateQuestionnaire && not isOwner)
+
+            else
+                questionnaire.sharing == AnyoneWithLinkViewQuestionnaire
 
         isOwner =
-            matchOwner questionnaire appState.session.user
+            Maybe.isJust questionnaire.owner && Maybe.map .uuid questionnaire.owner == Maybe.map .uuid appState.session.user
     in
-    isAdmin || isNotReadonly || isOwner
+    isAdmin || not isReadonly || isOwner
 
 
 decoder : Decoder Questionnaire
 decoder =
     D.succeed Questionnaire
-        |> required "uuid" Uuid.decoder
-        |> required "name" D.string
-        |> required "package" Package.decoder
-        |> optional "level" D.int 0
-        |> required "visibility" QuestionnaireVisibility.decoder
-        |> required "owner" (D.maybe User.decoder)
-        |> required "state" QuestionnaireState.decoder
-        |> required "updatedAt" D.datetime
-        |> required "report" QuestionnaireReport.decoder
+        |> D.required "uuid" Uuid.decoder
+        |> D.required "name" D.string
+        |> D.required "package" Package.decoder
+        |> D.optional "level" D.int 0
+        |> D.required "visibility" QuestionnaireVisibility.decoder
+        |> D.required "sharing" QuestionnaireSharing.decoder
+        |> D.required "owner" (D.maybe User.decoder)
+        |> D.required "state" QuestionnaireState.decoder
+        |> D.required "updatedAt" D.datetime
+        |> D.required "report" QuestionnaireReport.decoder
 
 
 compare : Questionnaire -> Questionnaire -> Order

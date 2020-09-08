@@ -8,11 +8,12 @@ import List.Extra as List
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Template exposing (Template)
+import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Questionnaire.SummaryReport exposing (viewIndications)
 import Wizard.Common.Html.Attribute exposing (detailClass)
-import Wizard.Common.Questionnaire.Views.SummaryReport exposing (viewIndications)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormActions as FormActions
@@ -64,7 +65,7 @@ formView appState model questionnaire =
             case model.templates of
                 Success templates ->
                     let
-                        createTemplateOption { id, name } =
+                        createTemplateOption { id, name, state } =
                             let
                                 visibleName =
                                     if appState.config.template.recommendedTemplateId == Just id then
@@ -73,12 +74,12 @@ formView appState model questionnaire =
                                     else
                                         name
                             in
-                            ( id, visibleName )
+                            ( id, visibleName, state == TemplateState.UnsupportedMetamodelVersion )
 
                         templateOptions =
-                            ( "", "--" ) :: (List.map createTemplateOption <| List.sortBy (String.toLower << .name) templates)
+                            ( "", "--", False ) :: (List.map createTemplateOption <| List.sortBy (String.toLower << .name) templates)
                     in
-                    FormGroup.select appState templateOptions model.form "templateId" <| lg "template" appState
+                    FormGroup.selectWithDisabled appState templateOptions model.form "templateId" <| lg "template" appState
 
                 _ ->
                     Flash.actionResult appState model.templates

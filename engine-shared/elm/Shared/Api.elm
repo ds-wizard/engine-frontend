@@ -8,11 +8,15 @@ module Shared.Api exposing
     , jwtFetch
     , jwtFetchEmpty
     , jwtGet
+    , jwtOrHttpFetch
+    , jwtOrHttpGet
+    , jwtOrHttpPut
     , jwtPost
     , jwtPostEmpty
     , jwtPostFile
     , jwtPostString
     , jwtPut
+    , wsUrl
     )
 
 import File exposing (File)
@@ -21,11 +25,27 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Jwt.Http
 import Shared.AbstractAppState exposing (AbstractAppState)
+import Shared.Auth.Session as Session
 import Shared.Error.ApiError exposing (ApiError(..))
 
 
 type alias ToMsg a msg =
     Result ApiError a -> msg
+
+
+jwtOrHttpGet : String -> Decoder a -> AbstractAppState b -> ToMsg a msg -> Cmd msg
+jwtOrHttpGet url decoder appState =
+    jwtOrHttp appState jwtGet httpGet url decoder appState
+
+
+jwtOrHttpPut : String -> E.Value -> AbstractAppState b -> ToMsg () msg -> Cmd msg
+jwtOrHttpPut url body appState =
+    jwtOrHttp appState jwtPut httpPut url body appState
+
+
+jwtOrHttpFetch : String -> Decoder a -> E.Value -> AbstractAppState b -> ToMsg a msg -> Cmd msg
+jwtOrHttpFetch url decoder body appState =
+    jwtOrHttp appState jwtFetch httpFetch url decoder body appState
 
 
 jwtGet : String -> Decoder a -> AbstractAppState b -> ToMsg a msg -> Cmd msg
@@ -146,6 +166,19 @@ httpPut url body appState toMsg =
         }
 
 
+wsUrl : String -> AbstractAppState b -> String
+wsUrl url appState =
+    let
+        token =
+            if not <| String.isEmpty appState.session.token.token then
+                "?" ++ "Authorization=Bearer%20" ++ appState.session.token.token
+
+            else
+                ""
+    in
+    String.replace "http" "ws" appState.apiUrl ++ url ++ token
+
+
 expectJson : ToMsg a msg -> Decoder a -> Http.Expect msg
 expectJson toMsg decoder =
     Http.expectStringResponse toMsg <|
@@ -178,3 +211,12 @@ resolve toResult response =
 
         Http.GoodStatus_ _ body ->
             Result.mapError BadBody (toResult body)
+
+
+jwtOrHttp : AbstractAppState b -> a -> a -> a
+jwtOrHttp appState jwtMethod httpMethod =
+    if Session.exists appState.session then
+        jwtMethod
+
+    else
+        httpMethod

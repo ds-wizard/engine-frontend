@@ -82,11 +82,18 @@ isGuarded model =
         Routes.KMEditorRoute route ->
             Wizard.KMEditor.Update.isGuarded route model.appState model.kmEditorModel
 
-        Routes.QuestionnairesRoute route ->
-            Wizard.Questionnaires.Update.isGuarded route model.appState model.questionnairesModel
-
         _ ->
             Nothing
+
+
+onUnload : Model -> Cmd Msg
+onUnload model =
+    case model.appState.route of
+        Routes.QuestionnairesRoute route ->
+            Wizard.Questionnaires.Update.onUnload route model.questionnairesModel
+
+        _ ->
+            Cmd.none
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -98,7 +105,7 @@ update msg model =
                     setRoute (parseLocation model.appState location) model
                         |> initLocalModel
             in
-            ( newModel, fetchData newModel )
+            ( newModel, Cmd.batch [ onUnload model, fetchData newModel ] )
 
         Wizard.Msgs.OnUrlRequest urlRequest ->
             case urlRequest of
@@ -177,10 +184,10 @@ update msg model =
 
         Wizard.Msgs.QuestionnairesMsg questionnairesMsg ->
             let
-                ( questionnairesModel, cmd ) =
+                ( seed, questionnairesModel, cmd ) =
                     Wizard.Questionnaires.Update.update Wizard.Msgs.QuestionnairesMsg questionnairesMsg model.appState model.questionnairesModel
             in
-            ( { model | questionnairesModel = questionnairesModel }, cmd )
+            ( setSeed seed { model | questionnairesModel = questionnairesModel }, cmd )
 
         Wizard.Msgs.RegistryMsg registryMsg ->
             let

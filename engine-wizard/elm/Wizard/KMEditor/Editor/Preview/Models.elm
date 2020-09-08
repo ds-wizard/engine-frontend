@@ -7,99 +7,113 @@ module Wizard.KMEditor.Editor.Preview.Models exposing
     , selectNoneTags
     )
 
-import Shared.Data.Event exposing (Event)
+import Dict
+import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Package as Package
+import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
+import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Uuid
-import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Questionnaire.Models
+import Wizard.Common.Components.Questionnaire as Questionnaire
 
 
 type alias Model =
-    { questionnaireModel : Wizard.Common.Questionnaire.Models.Model
+    { questionnaireModel : Questionnaire.Model
     , knowledgeModel : KnowledgeModel
     , tags : List String
     , packageId : String
+    , metrics : List Metric
+    , levels : List Level
     }
 
 
-initialModel : AppState -> KnowledgeModel -> List Metric -> List Event -> String -> Model
-initialModel appState km metrics events packageId =
-    { questionnaireModel = createQuestionnaireModel appState packageId km metrics events
+initialModel : KnowledgeModel -> List Metric -> List Level -> String -> Model
+initialModel km metrics levels packageId =
+    let
+        chapterUuid =
+            Maybe.unwrap "" .uuid <|
+                List.head (KnowledgeModel.getChapters km)
+
+        questionnaire =
+            createQuestionnaireDetail packageId km
+    in
+    { questionnaireModel = Questionnaire.setActiveChapterUuid chapterUuid <| Questionnaire.init questionnaire
     , knowledgeModel = km
     , tags = []
     , packageId = packageId
+    , metrics = metrics
+    , levels = levels
     }
 
 
-addTag : AppState -> String -> Model -> Model
-addTag appState uuid model =
+addTag : String -> Model -> Model
+addTag uuid model =
     let
         tags =
             uuid :: model.tags
     in
-    createFilteredQuestionnaireModel appState tags model
+    createFilteredQuestionnaireModel tags model
 
 
-removeTag : AppState -> String -> Model -> Model
-removeTag appState uuid model =
+removeTag : String -> Model -> Model
+removeTag uuid model =
     let
         tags =
             List.filter (\t -> t /= uuid) model.tags
     in
-    createFilteredQuestionnaireModel appState tags model
+    createFilteredQuestionnaireModel tags model
 
 
-selectAllTags : AppState -> Model -> Model
-selectAllTags appState model =
+selectAllTags : Model -> Model
+selectAllTags model =
     let
         tags =
             List.map .uuid (KnowledgeModel.getTags model.knowledgeModel)
     in
-    createFilteredQuestionnaireModel appState tags model
+    createFilteredQuestionnaireModel tags model
 
 
-selectNoneTags : AppState -> Model -> Model
-selectNoneTags appState model =
-    createFilteredQuestionnaireModel appState [] model
+selectNoneTags : Model -> Model
+selectNoneTags model =
+    createFilteredQuestionnaireModel [] model
 
 
-createFilteredQuestionnaireModel : AppState -> List String -> Model -> Model
-createFilteredQuestionnaireModel appState tags model =
+createFilteredQuestionnaireModel : List String -> Model -> Model
+createFilteredQuestionnaireModel tags model =
     let
-        questionnaireModel =
-            createQuestionnaireModel
-                appState
+        questionnaireDetail =
+            createQuestionnaireDetail
                 model.packageId
                 (KnowledgeModel.filterWithTags tags model.knowledgeModel)
-                model.questionnaireModel.metrics
-                model.questionnaireModel.events
+
+        questionnaireModel =
+            model.questionnaireModel
     in
     { model
-        | questionnaireModel = questionnaireModel
+        | questionnaireModel = { questionnaireModel | questionnaire = questionnaireDetail }
         , tags = tags
     }
 
 
-createQuestionnaireModel : AppState -> String -> KnowledgeModel -> List Metric -> List Event -> Wizard.Common.Questionnaire.Models.Model
-createQuestionnaireModel appState packageId km =
+createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireDetail
+createQuestionnaireDetail packageId km =
     let
         package =
             Package.dummy
     in
-    Wizard.Common.Questionnaire.Models.initialModel
-        appState
-        { uuid = Uuid.nil
-        , name = ""
-        , visibility = PrivateQuestionnaire
-        , ownerUuid = Nothing
-        , package = { package | id = packageId }
-        , knowledgeModel = km
-        , replies = []
-        , level = 1
-        , selectedTagUuids = []
-        , labels = []
-        , report = { indications = [] }
-        }
+    { uuid = Uuid.nil
+    , name = ""
+    , visibility = PrivateQuestionnaire
+    , sharing = RestrictedQuestionnaire
+    , ownerUuid = Nothing
+    , package = { package | id = packageId }
+    , knowledgeModel = km
+    , replies = Dict.fromList []
+    , level = 1
+    , selectedTagUuids = []
+    , labels = Dict.fromList []
+    , report = { indications = [] }
+    }

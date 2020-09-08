@@ -9,7 +9,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Models exposing (Model)
 import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.Msgs exposing (Msg(..))
-import Wizard.Questionnaires.Common.DeleteQuestionnaireModal.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Questionnaires.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
 
 
 type alias UpdateConfig =

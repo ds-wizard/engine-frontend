@@ -135,7 +135,7 @@ tagsEditorView appState model =
 previewView : AppState -> Model -> List Level -> Html Msg
 previewView appState model levels =
     model.previewEditorModel
-        |> Maybe.map (Html.map PreviewEditorMsg << Wizard.KMEditor.Editor.Preview.View.view appState levels)
+        |> Maybe.map (Html.map PreviewEditorMsg << Wizard.KMEditor.Editor.Preview.View.view appState)
         |> Maybe.withDefault (Page.error appState <| l_ "preview.error" appState)
 
 

@@ -12,6 +12,7 @@ type alias Theme =
         , textLight : Color
         , textInversed : Color
         , background : Color
+        , backgroundTint : Color
         , illustrations : Color
         , border : Color
         , shadowDefault : Color
@@ -38,8 +39,9 @@ default =
         , textLight = hex "#CCC9C8"
         , textInversed = hex "#FFFFFF"
         , background = hex "#FFFFFF"
+        , backgroundTint = rgba 0 0 0 0.05
         , illustrations = hex "#F15A24"
-        , border = rgba 0 0 0 0.1
+        , border = rgba 0 0 0 0.15
         , shadowDefault = rgba 0 0 0 0.07
         , shadowDarker = rgba 0 0 0 0.15
         , overlay = rgba 0 0 0 0.5

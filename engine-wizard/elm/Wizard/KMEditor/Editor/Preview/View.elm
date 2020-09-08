@@ -3,14 +3,12 @@ module Wizard.KMEditor.Editor.Preview.View exposing (view)
 import Html exposing (Html, a, div, strong)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Data.KnowledgeModel as KnowledgeModels
-import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel as KnowledgeModels exposing (KnowledgeModel)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lgx, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Questionnaire.DefaultQuestionnaireRenderer exposing (defaultQuestionnaireRenderer)
-import Wizard.Common.Questionnaire.Models
-import Wizard.Common.Questionnaire.View exposing (viewQuestionnaire)
+import Wizard.Common.Components.Questionnaire as Questionnaire
+import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.View.Tag as Tag
 import Wizard.KMEditor.Editor.Preview.Models exposing (Model)
 import Wizard.KMEditor.Editor.Preview.Msgs exposing (Msg(..))
@@ -26,38 +24,38 @@ lx_ =
     lx "Wizard.KMEditor.Editor.Preview.View"
 
 
-view : AppState -> List Level -> Model -> Html Msg
-view appState levels model =
+view : AppState -> Model -> Html Msg
+view appState model =
     let
         questionnaire =
-            viewQuestionnaire
-                { features = []
-                , levels =
-                    if appState.config.questionnaire.levels.enabled then
-                        Just levels
-
-                    else
-                        Nothing
-                , getExtraQuestionClass = always Nothing
-                , forceDisabled = False
-                , createRenderer = defaultQuestionnaireRenderer appState
-                }
-                appState
-                model.questionnaireModel
-                |> Html.map QuestionnaireMsg
+            Html.map QuestionnaireMsg <|
+                Questionnaire.view appState
+                    { features =
+                        { feedbackEnabled = False
+                        , summaryReportEnabled = False
+                        , todosEnabled = False
+                        , todoListEnabled = False
+                        , readonly = False
+                        }
+                    , renderer = DefaultQuestionnaireRenderer.create appState model.knowledgeModel model.levels model.metrics
+                    }
+                    { metrics = model.metrics
+                    , levels = model.levels
+                    }
+                    model.questionnaireModel
     in
     div [ class "col KMEditor__Editor__Preview" ]
-        [ tagSelection appState model.tags model.questionnaireModel
+        [ tagSelection appState model.tags model.knowledgeModel
         , questionnaire
         ]
 
 
-tagSelection : AppState -> List String -> Wizard.Common.Questionnaire.Models.Model -> Html Msg
-tagSelection appState selected questionnaireModel =
-    if List.length questionnaireModel.questionnaire.knowledgeModel.tagUuids > 0 then
+tagSelection : AppState -> List String -> KnowledgeModel -> Html Msg
+tagSelection appState selected knowledgeModel =
+    if List.length knowledgeModel.tagUuids > 0 then
         let
             tags =
-                KnowledgeModels.getTags questionnaireModel.questionnaire.knowledgeModel
+                KnowledgeModels.getTags knowledgeModel
 
             tagListConfig =
                 { selected = selected

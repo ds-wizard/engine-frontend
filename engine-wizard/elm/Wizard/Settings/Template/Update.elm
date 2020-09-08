@@ -6,6 +6,7 @@ module Wizard.Settings.Template.Update exposing
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig
 import Shared.Data.EditableConfig as EditableConfig
+import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setTemplates)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -42,9 +43,7 @@ update wrapMsg msg appState model =
         GetTemplatesComplete result ->
             applyResult
                 { setResult = setTemplates
-
-                -- TODO
-                , defaultError = "Unable to get templates"
+                , defaultError = lg "apiError.templates.getListError" appState
                 , model = model
                 , result = result
                 }

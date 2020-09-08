@@ -5,8 +5,27 @@
 @import "./Public/Signup";
 
 .public {
-    padding-top: 160px;
+    padding-top: 80px;
     padding-bottom: 50px;
+
+    &--app {
+        padding-top: $public-header-height;
+        padding-bottom: 0;
+
+        .navbar {
+            .container-fluid {
+                padding: 0;
+            }
+        }
+
+        & > .container-fluid {
+            padding: 0;
+        }
+    }
+
+    .navbar {
+        height: $public-header-height;
+    }
 
     .navbar-brand {
         color: $side-navigation-title-color;

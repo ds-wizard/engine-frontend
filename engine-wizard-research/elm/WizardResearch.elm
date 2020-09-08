@@ -4,17 +4,17 @@ import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
 import Html
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (href)
 import Json.Decode exposing (Value)
 import Shared.Auth.Session as Session exposing (Session)
-import Shared.Elemental.Atoms.Button as Button
-import Shared.Elemental.Foundations.Grid as Grid
-import Shared.Html.Styled exposing (fa)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Utils exposing (dispatch)
+import Task
+import Time
 import Url exposing (Url)
 import WizardResearch.Common.AppState as AppState exposing (AppState)
 import WizardResearch.Page as Page
 import WizardResearch.Pages.Auth as Auth
+import WizardResearch.Pages.Dashboard as Dashboard
 import WizardResearch.Pages.Login as Login
 import WizardResearch.Pages.Project as Project
 import WizardResearch.Pages.ProjectCreate as ProjectCreate
@@ -48,7 +48,7 @@ type alias Model =
 
 type PageModel
     = Auth Auth.Model
-    | Dashboard ()
+    | Dashboard Dashboard.Model
     | Login Login.Model
     | ForgottenPassword ()
     | Signup ()
@@ -75,13 +75,13 @@ initPageModel model =
                 Auth.init model.appState id mbError mbCode
                     |> updateWith Auth AuthMsg model
 
-            Route.Dashboard ->
-                ( (), Cmd.none )
+            Route.Dashboard paginationQueryString ->
+                Dashboard.init model.appState paginationQueryString
                     |> updateWith Dashboard DashboardMsg model
 
             Route.Login ->
                 if AppState.authenticated model.appState then
-                    ( model, Route.replaceUrl model.navKey Route.Dashboard )
+                    ( model, Route.replaceUrl model.navKey (Route.Dashboard PaginationQueryString.empty) )
 
                 else
                     Login.init
@@ -133,8 +133,9 @@ type Msg
     = OnUrlChange Url
     | OnUrlRequest UrlRequest
     | OnAuthenticate Session
+    | OnTime Time.Posix
     | AuthMsg Auth.Msg
-    | DashboardMsg ()
+    | DashboardMsg Dashboard.Msg
     | LoginMsg Login.Msg
     | ForgottenPasswordMsg ()
     | SignupMsg ()
@@ -159,9 +160,14 @@ update msg model =
         ( OnAuthenticate session, _ ) ->
             ( { model | appState = AppState.setSession (Just session) model.appState }
             , Cmd.batch
-                [ Route.replaceUrl model.navKey Route.Dashboard
+                [ Route.replaceUrl model.navKey (Route.Dashboard PaginationQueryString.empty)
                 , Ports.storeSession (Session.encode session)
                 ]
+            )
+
+        ( OnTime time, _ ) ->
+            ( { model | appState = AppState.setCurrentTime time model.appState }
+            , Cmd.none
             )
 
         ( AuthMsg authMsg, Auth authModel ) ->
@@ -174,8 +180,15 @@ update msg model =
             Auth.update updateConfig model.appState authMsg authModel
                 |> updateWith Auth identity model
 
-        ( DashboardMsg _, Dashboard _ ) ->
-            ( model, Cmd.none )
+        ( DashboardMsg dashboardMsg, Dashboard dashboardModel ) ->
+            let
+                updateConfig =
+                    { wrapMsg = DashboardMsg
+                    , cmdNavigate = Nav.replaceUrl model.navKey << Route.toString
+                    }
+            in
+            Dashboard.update updateConfig model.appState dashboardMsg dashboardModel
+                |> updateWith Dashboard identity model
 
         ( LoginMsg loginMsg, Login loginModel ) ->
             let
@@ -213,7 +226,10 @@ updateWith :
     -> ( Model, Cmd Msg )
 updateWith toModel toMsg model ( subModel, subCmd ) =
     ( { model | pageModel = toModel subModel }
-    , Cmd.map toMsg subCmd
+    , Cmd.batch
+        [ Cmd.map toMsg subCmd
+        , Task.perform OnTime Time.now
+        ]
     )
 
 
@@ -252,35 +268,8 @@ view model =
             Auth authModel ->
                 viewPage Page.Public AuthMsg (Auth.view model.appState authModel)
 
-            Dashboard _ ->
-                viewPage Page.App
-                    DashboardMsg
-                    { title = "Dashboard"
-                    , content =
-                        Grid.comfortable.container
-                            [ Grid.containerLimitedSmall, Grid.containerIndented ]
-                            [ Grid.comfortable.row []
-                                [ Grid.comfortable.col 12
-                                    []
-                                    [ h1 [] [ text "Dashboard" ]
-                                    ]
-                                ]
-                            , Grid.comfortable.row []
-                                [ Grid.comfortable.col 6
-                                    []
-                                    [ a [ href (Route.toString Route.Logout) ] [ text "Log out" ]
-                                    ]
-                                , Grid.comfortable.col 6
-                                    [ Grid.colTextRight ]
-                                    [ Button.primaryLink model.appState.theme
-                                        [ href (Route.toString Route.ProjectCreate) ]
-                                        [ fa "fas fa-plus"
-                                        , span [] [ text "Create project" ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                    }
+            Dashboard dashboardModel ->
+                viewPage Page.App DashboardMsg (Dashboard.view model.appState dashboardModel)
 
             Login loginModel ->
                 viewPage Page.Public LoginMsg (Login.view model.appState loginModel)

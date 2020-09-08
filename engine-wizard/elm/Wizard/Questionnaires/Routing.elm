@@ -63,5 +63,10 @@ toUrl appState route =
 
 
 isAllowed : Route -> Session -> Bool
-isAllowed _ session =
-    Perm.hasPerm session Perm.questionnaire
+isAllowed route session =
+    case route of
+        DetailRoute _ ->
+            True
+
+        _ ->
+            Perm.hasPerm session Perm.questionnaire

@@ -26,7 +26,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Questionnaires.Create.Models.initialModel appState Nothing
     , createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel Uuid.nil
-    , detailModel = Wizard.Questionnaires.Detail.Models.initialModel Uuid.nil
+    , detailModel = Wizard.Questionnaires.Detail.Models.initialModel appState Uuid.nil
     , editModel = Wizard.Questionnaires.Edit.Models.initialModel Uuid.nil
     , indexModel = Wizard.Questionnaires.Index.Models.initialModel PaginationQueryString.empty
     , migrationModel = Wizard.Questionnaires.Migration.Models.initialModel Uuid.nil
@@ -43,7 +43,7 @@ initLocalModel appState route model =
             { model | createMigrationModel = Wizard.Questionnaires.CreateMigration.Models.initialModel uuid }
 
         DetailRoute uuid ->
-            { model | detailModel = Wizard.Questionnaires.Detail.Models.initialModel uuid }
+            { model | detailModel = Wizard.Questionnaires.Detail.Models.initialModel appState uuid }
 
         EditRoute uuid ->
             { model | editModel = Wizard.Questionnaires.Edit.Models.initialModel uuid }

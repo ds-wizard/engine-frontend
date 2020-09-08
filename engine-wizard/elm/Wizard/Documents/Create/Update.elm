@@ -11,16 +11,16 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.Document exposing (Document)
 import Shared.Data.Package exposing (Package)
-import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Template exposing (Template)
+import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setQuestionnaire, setQuestionnaires, setTemplates)
+import Shared.Setters exposing (setQuestionnaire, setTemplates)
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
+import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm
 import Wizard.Documents.Create.Models exposing (Model)
@@ -34,14 +34,6 @@ import Wizard.Routing exposing (cmdNavigate)
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState questionnaireUuid =
     QuestionnairesApi.getQuestionnaire questionnaireUuid appState GetQuestionnaireCompleted
-
-
-
---let
---    paginationQueryString =
---        PaginationQueryString.withSize Nothing PaginationQueryString.empty
---in
---QuestionnairesApi.getQuestionnaires paginationQueryString appState GetQuestionnairesCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -106,18 +98,22 @@ handleGetTemplatesCompleted appState model result =
         form =
             case newModel.templates of
                 Success (template :: []) ->
-                    let
-                        setFormat =
-                            case ( List.length template.formats, List.head template.formats ) of
-                                ( 1, Just format ) ->
-                                    Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String (Uuid.toString format.uuid)))
+                    if template.state /= TemplateState.UnsupportedMetamodelVersion then
+                        let
+                            setFormat =
+                                case ( List.length template.formats, List.head template.formats ) of
+                                    ( 1, Just format ) ->
+                                        Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String (Uuid.toString format.uuid)))
 
-                                _ ->
-                                    identity
-                    in
-                    newModel.form
-                        |> Form.update DocumentCreateForm.validation (Form.Input "templateId" Form.Text (Field.String template.id))
-                        |> setFormat
+                                    _ ->
+                                        identity
+                        in
+                        newModel.form
+                            |> Form.update DocumentCreateForm.validation (Form.Input "templateId" Form.Text (Field.String template.id))
+                            |> setFormat
+
+                    else
+                        newModel.form
 
                 _ ->
                     newModel.form

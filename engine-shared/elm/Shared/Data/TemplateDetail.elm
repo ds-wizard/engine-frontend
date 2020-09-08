@@ -1,4 +1,4 @@
-module Shared.Data.TemplateDetail exposing (TemplateDetail, decoder)
+module Shared.Data.TemplateDetail exposing (TemplateDetail, decoder, isLatestVersion)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -54,3 +54,8 @@ decoder =
         |> D.required "usablePackages" (D.list TemplatePackage.decoder)
         |> D.required "version" Version.decoder
         |> D.required "versions" (D.list Version.decoder)
+
+
+isLatestVersion : TemplateDetail -> Bool
+isLatestVersion template =
+    List.isEmpty <| List.filter (Version.greaterThan template.version) template.versions

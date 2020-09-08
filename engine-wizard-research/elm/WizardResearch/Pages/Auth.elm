@@ -1,7 +1,5 @@
 module WizardResearch.Pages.Auth exposing (Model, Msg, init, update, view)
 
--- MODEL
-
 import ActionResult exposing (ActionResult(..))
 import Html.Styled exposing (Html, div, p, text)
 import Shared.Api.Auth as AuthApi
@@ -13,6 +11,10 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html.Styled exposing (emptyNode)
 import Shared.Setters exposing (setToken, setUser)
 import WizardResearch.Common.AppState exposing (AppState)
+
+
+
+-- MODEL
 
 
 type alias Model =

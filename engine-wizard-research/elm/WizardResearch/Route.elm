@@ -1,6 +1,7 @@
 module WizardResearch.Route exposing (Route(..), fromUrl, isPublic, replaceUrl, toString)
 
 import Browser.Navigation as Nav
+import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Utils exposing (flip)
 import String.Extra as String
 import Url exposing (Url)
@@ -13,7 +14,7 @@ import WizardResearch.Route.ProjectRoute as ProjectRoute exposing (ProjectRoute)
 
 type Route
     = AuthCallback String (Maybe String) (Maybe String)
-    | Dashboard
+    | Dashboard PaginationQueryString
     | Login
     | Logout
     | ForgottenPassword
@@ -32,7 +33,7 @@ parser : Parser (Route -> a) a
 parser =
     Parser.oneOf
         [ Parser.map AuthCallback (s "auth" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code")
-        , Parser.map Dashboard Parser.top
+        , Parser.map (PaginationQueryString.wrapRoute Dashboard (Just "name")) (Parser.top <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort")
         , Parser.map Login (s "login")
         , Parser.map Logout (s "logout")
         , Parser.map ForgottenPassword (s "forgotten-password")
@@ -72,8 +73,8 @@ toString route =
                 SignUp ->
                     [ "sign-up" ]
 
-                Dashboard ->
-                    [ "" ]
+                Dashboard paginationQueryString ->
+                    [ PaginationQueryString.toUrl paginationQueryString ]
 
                 NotFound ->
                     []
