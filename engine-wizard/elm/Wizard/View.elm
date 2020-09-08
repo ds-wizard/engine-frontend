@@ -12,8 +12,8 @@ import Wizard.KMEditor.View
 import Wizard.KnowledgeModels.View
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.Projects.View
 import Wizard.Public.View
-import Wizard.Questionnaires.View
 import Wizard.Registry.View
 import Wizard.Routes as Routes
 import Wizard.Settings.View
@@ -44,12 +44,6 @@ view model =
                     |> Html.map DocumentsMsg
                     |> Layout.app model
 
-            Routes.QuestionnairesRoute route ->
-                model.questionnairesModel
-                    |> Wizard.Questionnaires.View.view route model.appState
-                    |> Html.map QuestionnairesMsg
-                    |> Layout.mixedApp model
-
             Routes.KMEditorRoute route ->
                 model.kmEditorModel
                     |> Wizard.KMEditor.View.view route model.appState
@@ -61,6 +55,12 @@ view model =
                     |> Wizard.KnowledgeModels.View.view route model.appState
                     |> Html.map KnowledgeModelsMsg
                     |> Layout.app model
+
+            Routes.PlansRoute route ->
+                model.plansModel
+                    |> Wizard.Projects.View.view route model.appState
+                    |> Html.map PlansMsg
+                    |> Layout.mixedApp model
 
             Routes.PublicRoute route ->
                 model.publicModel

@@ -22,6 +22,22 @@ axiosRetry(axios, {
     }
 })
 
+function getPdfSupport() {
+    function hasAcrobatInstalled() {
+        function getActiveXObject(name) {
+            try { return new ActiveXObject(name); } catch(e) {}
+        }
+
+        return getActiveXObject('AcroPDF.PDF') || getActiveXObject('PDF.PdfCtrl')
+    }
+
+    function isIos() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+    }
+
+    return !!(navigator.mimeTypes['application/pdf'] || hasAcrobatInstalled() || isIos())
+}
+
 
 function apiUrl() {
     if (window.wizard && window.wizard['apiUrl']) return window.wizard['apiUrl']
@@ -61,6 +77,9 @@ function loadApp(config, provisioning) {
             config: config,
             provisioning: provisioning,
             localProvisioning: localProvisioning(),
+            navigator: {
+                pdf: getPdfSupport()
+            }
         }
     })
 

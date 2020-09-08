@@ -12,7 +12,7 @@ module Shared.Api.Templates exposing
 import File exposing (File)
 import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.Template as Template exposing (Template)
 import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 
@@ -24,7 +24,7 @@ getTemplates =
 
 getTemplate : String -> AbstractAppState a -> ToMsg TemplateDetail msg -> Cmd msg
 getTemplate templateId =
-    jwtGet ("/templates/" ++ templateId) TemplateDetail.decoder
+    jwtOrHttpGet ("/templates/" ++ templateId) TemplateDetail.decoder
 
 
 getTemplatesFor : String -> AbstractAppState a -> ToMsg (List Template) msg -> Cmd msg

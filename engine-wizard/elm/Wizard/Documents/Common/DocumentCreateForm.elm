@@ -2,12 +2,15 @@ module Wizard.Documents.Common.DocumentCreateForm exposing
     ( DocumentCreateForm
     , encode
     , init
+    , initEmpty
     , validation
     )
 
 import Form exposing (Form)
+import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
+import Maybe.Extra as Maybe
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 
@@ -19,9 +22,19 @@ type alias DocumentCreateForm =
     }
 
 
-init : Form FormError DocumentCreateForm
-init =
+initEmpty : Form FormError DocumentCreateForm
+initEmpty =
     Form.initial [] validation
+
+
+init : { q | name : String, templateId : Maybe String, formatUuid : Maybe Uuid } -> Form FormError DocumentCreateForm
+init questionnaire =
+    Form.initial
+        [ ( "name", Field.string questionnaire.name )
+        , ( "templateId", Field.string (Maybe.withDefault "" questionnaire.templateId) )
+        , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString questionnaire.formatUuid) )
+        ]
+        validation
 
 
 validation : Validation FormError DocumentCreateForm

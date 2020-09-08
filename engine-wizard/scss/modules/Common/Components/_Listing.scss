@@ -5,12 +5,17 @@
     width: 100%;
 
     .listing-toolbar {
-        & > .btn, & > .btn-group {
-            margin-left: 1rem;
-        }
+        display: flex;
+        justify-content: space-between;
 
-        & > .btn-group > .btn {
-            box-shadow: none !important;
+        .filter-sort {
+            & > .btn, & > .btn-group {
+                margin-left: 1rem;
+            }
+
+            & > .btn-group > .btn {
+                box-shadow: none !important;
+            }
         }
 
         .listing-toolbar-extra {

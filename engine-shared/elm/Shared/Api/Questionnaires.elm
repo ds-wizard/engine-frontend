@@ -3,12 +3,15 @@ module Shared.Api.Questionnaires exposing
     , completeQuestionnaireMigration
     , deleteQuestionnaire
     , deleteQuestionnaireMigration
+    , documentPreviewUrl
     , fetchQuestionnaireMigration
     , fetchSummaryReport
+    , getDocuments
     , getQuestionnaire
     , getQuestionnaireMigration
     , getQuestionnaires
     , getSummaryReport
+    , headDocumentPreview
     , postQuestionnaire
     , putQuestionnaire
     , putQuestionnaireContent
@@ -16,9 +19,11 @@ module Shared.Api.Questionnaires exposing
     , websocket
     )
 
+import Http
 import Json.Encode exposing (Value)
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpPut, jwtPostEmpty, jwtPut, wsUrl)
+import Shared.Api exposing (ToMsg, authorizedUrl, jwtDelete, jwtFetch, jwtFetchEmpty, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpHead, jwtOrHttpPut, jwtPostEmpty, jwtPut, wsUrl)
+import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
@@ -108,3 +113,22 @@ getSummaryReport questionnaireUuid =
 websocket : Uuid -> AbstractAppState a -> String
 websocket questionnaireUuid =
     wsUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/websocket")
+
+
+headDocumentPreview : Uuid -> AbstractAppState a -> ToMsg Http.Metadata msg -> Cmd msg
+headDocumentPreview questionnaireUuid =
+    jwtOrHttpHead ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents/preview")
+
+
+documentPreviewUrl : Uuid -> AbstractAppState a -> String
+documentPreviewUrl questionnaireUuid =
+    authorizedUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents/preview")
+
+
+getDocuments : Uuid -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Document) msg -> Cmd msg
+getDocuments questionnaireUuid qs =
+    let
+        url =
+            "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents" ++ PaginationQueryString.toApiUrl qs
+    in
+    jwtOrHttpGet url (Pagination.decoder "documents" Document.decoder)

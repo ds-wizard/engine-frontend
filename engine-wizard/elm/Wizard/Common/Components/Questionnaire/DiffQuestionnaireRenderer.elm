@@ -13,10 +13,10 @@ import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (Qu
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
-import Wizard.Questionnaires.Common.AnswerChange as AnswerChange exposing (AnswerChange(..))
-import Wizard.Questionnaires.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
-import Wizard.Questionnaires.Common.QuestionnaireChanges exposing (QuestionnaireChanges)
-import Wizard.Questionnaires.Migration.Models exposing (areQuestionDetailsChanged)
+import Wizard.Projects.Common.AnswerChange as AnswerChange exposing (AnswerChange(..))
+import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
+import Wizard.Projects.Common.QuestionnaireChanges exposing (QuestionnaireChanges)
+import Wizard.Projects.Migration.Models exposing (areQuestionDetailsChanged)
 
 
 create : AppState -> QuestionnaireMigration -> QuestionnaireChanges -> KnowledgeModel -> List Level -> List Metric -> Maybe QuestionChange -> QuestionnaireRenderer msg

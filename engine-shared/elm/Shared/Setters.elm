@@ -10,6 +10,7 @@ module Shared.Setters exposing
     , setPulling
     , setQuestionnaire
     , setQuestionnaireDetail
+    , setQuestionnaireModel
     , setQuestionnaires
     , setTemplate
     , setTemplates
@@ -72,6 +73,11 @@ setQuestionnaire value record =
 setQuestionnaireDetail : a -> { b | questionnaireDetail : a } -> { b | questionnaireDetail : a }
 setQuestionnaireDetail value record =
     { record | questionnaireDetail = value }
+
+
+setQuestionnaireModel : a -> { b | questionnaireModel : a } -> { b | questionnaireModel : a }
+setQuestionnaireModel value record =
+    { record | questionnaireModel = value }
 
 
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }

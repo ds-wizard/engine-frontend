@@ -10,8 +10,8 @@ import Wizard.Common.Time as Time
 import Wizard.Models exposing (..)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
+import Wizard.Projects.Routes as PlansRoutes exposing (Route(..))
 import Wizard.Public.Routes
-import Wizard.Questionnaires.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, loginRoute, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
@@ -64,7 +64,7 @@ decideInitialRoute model location route originalRoute =
                 _ ->
                     dispatch (Wizard.Msgs.OnUrlChange location)
 
-        Routes.QuestionnairesRoute (DetailRoute _) ->
+        Routes.PlansRoute (PlansRoutes.DetailRoute _ _) ->
             dispatch (Wizard.Msgs.OnUrlChange location)
 
         _ ->

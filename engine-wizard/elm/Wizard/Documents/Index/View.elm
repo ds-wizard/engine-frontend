@@ -30,7 +30,8 @@ import Wizard.Common.View.Page as Page
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.Questionnaires.Routes
+import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Routes
 import Wizard.Routes as Routes exposing (Route(..))
 
 
@@ -77,11 +78,9 @@ viewDocuments appState model mbQuestionnaire =
                     Just <|
                         div [ class "listing-toolbar-extra questionnaire-filter" ]
                             [ linkTo appState
-                                (Routes.QuestionnairesRoute (Wizard.Questionnaires.Routes.DetailRoute questionnaire.uuid))
+                                (Routes.PlansRoute (Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire))
                                 [ class "questionnaire-name" ]
-                                [ faSet "menu.questionnaires" appState
-                                , text questionnaire.name
-                                ]
+                                [ text questionnaire.name ]
                             , linkTo appState
                                 (Routes.DocumentsRoute (IndexRoute Nothing PaginationQueryString.empty))
                                 [ class "text-danger" ]
@@ -152,8 +151,8 @@ listingDescription appState document =
                 Just questionnaire ->
                     let
                         questionnaireRoute =
-                            Routes.QuestionnairesRoute <|
-                                Wizard.Questionnaires.Routes.DetailRoute questionnaire.uuid
+                            Routes.PlansRoute <|
+                                Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire
                     in
                     linkTo appState
                         questionnaireRoute

@@ -25,7 +25,7 @@ import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
-import Wizard.Questionnaires.Routes
+import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (appRoute, homeRoute, loginRoute, signupRoute)
 import Wizard.Templates.Routes
@@ -206,7 +206,7 @@ menuItems appState =
     let
         isQuestionnaireIndex route =
             case route of
-                Routes.QuestionnairesRoute (Wizard.Questionnaires.Routes.IndexRoute _) ->
+                Routes.PlansRoute (Wizard.Projects.Routes.IndexRoute _) ->
                     True
 
                 _ ->
@@ -239,9 +239,9 @@ menuItems appState =
         ((==) (Routes.KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.IndexRoute))
         Perm.packageManagementRead
     , MenuItem
-        (l_ "menu.questionnaires" appState)
-        (faSet "menu.questionnaires" appState)
-        (Routes.QuestionnairesRoute <| Wizard.Questionnaires.Routes.IndexRoute PaginationQueryString.empty)
+        (l_ "menu.projects" appState)
+        (faSet "menu.projects" appState)
+        (Routes.PlansRoute <| Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty)
         isQuestionnaireIndex
         Perm.questionnaire
     , MenuItem
@@ -249,7 +249,7 @@ menuItems appState =
         (faSet "menu.documents" appState)
         (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
         isDocumentsIndex
-        Perm.questionnaire
+        Perm.documents
     , MenuItem
         (l_ "menu.templates" appState)
         (faSet "menu.templates" appState)

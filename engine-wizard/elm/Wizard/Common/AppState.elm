@@ -10,6 +10,7 @@ import Dict
 import Json.Decode as D exposing (Decoder, Error(..))
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
+import Shared.Common.Navigator exposing (Navigator)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Provisioning as Provisioning exposing (Provisioning)
@@ -32,6 +33,7 @@ type alias AppState =
     , provisioning : Provisioning
     , valid : Bool
     , currentTime : Time.Posix
+    , navigator : Navigator
     }
 
 
@@ -75,6 +77,7 @@ init flagsValue key =
     , provisioning = provisioning
     , valid = flags.success
     , currentTime = Time.millisToPosix 0
+    , navigator = flags.navigator
     }
 
 
