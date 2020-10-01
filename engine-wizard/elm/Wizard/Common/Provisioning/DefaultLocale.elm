@@ -139,7 +139,7 @@ locale =
                , ( "_global.integration", "Integration" )
                , ( "_global.integration.id", "Id" )
                , ( "_global.integration.itemUrl", "Item URL" )
-               , ( "_global.integration.logo", "Logo" )
+               , ( "_global.integration.logo", "Logo URL" )
                , ( "_global.integration.name", "Name" )
                , ( "_global.integration.props", "Props" )
                , ( "_global.integration.request", "Request" )
