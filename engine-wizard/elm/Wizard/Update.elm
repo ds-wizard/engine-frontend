@@ -15,8 +15,8 @@ import Wizard.KnowledgeModels.Update
 import Wizard.Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Ports as Ports
+import Wizard.Projects.Update
 import Wizard.Public.Update
-import Wizard.Questionnaires.Update
 import Wizard.Registry.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation)
@@ -38,10 +38,6 @@ fetchData model =
                     Cmd.map DocumentsMsg <|
                         Wizard.Documents.Update.fetchData route model.appState model.documentsModel
 
-                Routes.QuestionnairesRoute route ->
-                    Cmd.map Wizard.Msgs.QuestionnairesMsg <|
-                        Wizard.Questionnaires.Update.fetchData route model.appState model.questionnairesModel
-
                 Routes.KMEditorRoute route ->
                     Cmd.map Wizard.Msgs.KMEditorMsg <|
                         Wizard.KMEditor.Update.fetchData route model.kmEditorModel model.appState
@@ -49,6 +45,10 @@ fetchData model =
                 Routes.KnowledgeModelsRoute route ->
                     Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
                         Wizard.KnowledgeModels.Update.fetchData route model.appState
+
+                Routes.PlansRoute route ->
+                    Cmd.map Wizard.Msgs.PlansMsg <|
+                        Wizard.Projects.Update.fetchData route model.appState model.plansModel
 
                 Routes.PublicRoute route ->
                     Cmd.map Wizard.Msgs.PublicMsg <|
@@ -86,11 +86,11 @@ isGuarded model =
             Nothing
 
 
-onUnload : Model -> Cmd Msg
-onUnload model =
+onUnload : Routes.Route -> Model -> Cmd Msg
+onUnload newRoute model =
     case model.appState.route of
-        Routes.QuestionnairesRoute route ->
-            Wizard.Questionnaires.Update.onUnload route model.questionnairesModel
+        Routes.PlansRoute route ->
+            Wizard.Projects.Update.onUnload route newRoute model.plansModel
 
         _ ->
             Cmd.none
@@ -101,11 +101,14 @@ update msg model =
     case msg of
         Wizard.Msgs.OnUrlChange location ->
             let
+                newRoute =
+                    parseLocation model.appState location
+
                 newModel =
-                    setRoute (parseLocation model.appState location) model
+                    setRoute newRoute model
                         |> initLocalModel
             in
-            ( newModel, Cmd.batch [ onUnload model, fetchData newModel ] )
+            ( newModel, Cmd.batch [ onUnload newRoute model, fetchData newModel ] )
 
         Wizard.Msgs.OnUrlRequest urlRequest ->
             case urlRequest of
@@ -175,19 +178,19 @@ update msg model =
             in
             ( { model | kmPackagesModel = kmPackagesModel }, cmd )
 
+        Wizard.Msgs.PlansMsg plansMsg ->
+            let
+                ( seed, plansModel, cmd ) =
+                    Wizard.Projects.Update.update Wizard.Msgs.PlansMsg plansMsg model.appState model.plansModel
+            in
+            ( setSeed seed { model | plansModel = plansModel }, cmd )
+
         Wizard.Msgs.PublicMsg publicMsg ->
             let
                 ( publicModel, cmd ) =
                     Wizard.Public.Update.update publicMsg Wizard.Msgs.PublicMsg model.appState model.publicModel
             in
             ( { model | publicModel = publicModel }, cmd )
-
-        Wizard.Msgs.QuestionnairesMsg questionnairesMsg ->
-            let
-                ( seed, questionnairesModel, cmd ) =
-                    Wizard.Questionnaires.Update.update Wizard.Msgs.QuestionnairesMsg questionnairesMsg model.appState model.questionnairesModel
-            in
-            ( setSeed seed { model | questionnairesModel = questionnairesModel }, cmd )
 
         Wizard.Msgs.RegistryMsg registryMsg ->
             let

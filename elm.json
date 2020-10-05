@@ -36,13 +36,12 @@
             "jinjor/elm-diff": "1.0.6",
             "myrho/elm-round": "1.0.4",
             "noahzgordon/elm-color-extra": "1.0.2",
-            "rtfeldman/elm-css": "16.0.1",
+            "rtfeldman/elm-css": "16.1.0",
             "rundis/elm-bootstrap": "5.1.0",
             "simonh1000/elm-jwt": "7.0.0",
             "truqu/elm-md5": "1.1.0"
         },
         "indirect": {
-            "Skinney/murmur3": "2.0.8",
             "elm/bytes": "1.0.8",
             "elm/parser": "1.1.0",
             "elm/virtual-dom": "1.0.2",

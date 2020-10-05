@@ -1,5 +1,6 @@
 module Wizard.Common.Components.Questionnaire exposing
-    ( Model
+    ( Context
+    , Model
     , Msg(..)
     , QuestionnaireRenderer
     , clearReply
@@ -45,7 +46,7 @@ import String exposing (fromInt)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
-import Wizard.Common.Components.Questionnaire.SummaryReport as SummaryReport
+import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.View.Page as Page
 import Wizard.Ports as Ports
 
@@ -72,7 +73,6 @@ type alias Model =
     , typeHints : Maybe TypeHints
     , typeHintsDebounce : Debounce ( List String, String, String )
     , feedbackModalModel : FeedbackModal.Model
-    , summaryReportModel : SummaryReport.Model
     }
 
 
@@ -85,8 +85,6 @@ type alias TypeHints =
 type ActivePage
     = PageNone
     | PageChapter String
-    | PageTodos
-    | PageSummaryReport
 
 
 init : QuestionnaireDetail -> Model
@@ -97,7 +95,6 @@ init questionnaire =
     , typeHints = Nothing
     , typeHintsDebounce = Debounce.init
     , feedbackModalModel = FeedbackModal.init
-    , summaryReportModel = SummaryReport.init
     }
 
 
@@ -139,9 +136,7 @@ type alias Config =
 
 type alias FeaturesConfig =
     { feedbackEnabled : Bool
-    , summaryReportEnabled : Bool
     , todosEnabled : Bool
-    , todoListEnabled : Bool
     , readonly : Bool
     }
 
@@ -188,7 +183,6 @@ type Msg
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
-    | SummaryReportMsg SummaryReport.Msg
     | SetLevel String
     | SetReply String ReplyValue
     | ClearReply String
@@ -207,7 +201,7 @@ update msg appState ctx model =
     in
     case msg of
         SetActivePage activePage ->
-            withSeed <| handleSetActivePage appState model activePage
+            withSeed <| ( { model | activePage = activePage }, Cmd.none )
 
         ScrollToTodo todo ->
             withSeed <| handleScrollToTodo model todo
@@ -230,9 +224,6 @@ update msg appState ctx model =
         FeedbackModalMsg feedbackModalMsg ->
             withSeed <| handleFeedbackModalMsg appState model feedbackModalMsg
 
-        SummaryReportMsg summaryReportMsg ->
-            withSeed <| handleSummaryReportMsg appState ctx model summaryReportMsg
-
         SetLevel levelString ->
             wrap <| setLevel (Maybe.withDefault 1 (String.toInt levelString)) model
 
@@ -247,22 +238,6 @@ update msg appState ctx model =
 
         SetLabels path value ->
             wrap <| setLabels path value model
-
-
-handleSetActivePage : AppState -> Model -> ActivePage -> ( Model, Cmd Msg )
-handleSetActivePage appState model activePage =
-    case activePage of
-        PageSummaryReport ->
-            let
-                ( summaryReportModel, cmd ) =
-                    SummaryReport.fetchData appState model.uuid model.summaryReportModel
-            in
-            ( { model | activePage = PageSummaryReport, summaryReportModel = summaryReportModel }
-            , Cmd.map SummaryReportMsg cmd
-            )
-
-        _ ->
-            ( { model | activePage = activePage }, Cmd.none )
 
 
 handleScrollToTodo : Model -> QuestionnaireTodo -> ( Model, Cmd Msg )
@@ -356,17 +331,6 @@ handleFeedbackModalMsg appState model feedbackModalMsg =
     )
 
 
-handleSummaryReportMsg : AppState -> Context -> Model -> SummaryReport.Msg -> ( Model, Cmd Msg )
-handleSummaryReportMsg appState ctx model summaryReportMsg =
-    let
-        ( summaryReportModel, cmd ) =
-            SummaryReport.update summaryReportMsg appState (toSummaryReportContext ctx model) model.summaryReportModel
-    in
-    ( { model | summaryReportModel = summaryReportModel }
-    , Cmd.map SummaryReportMsg cmd
-    )
-
-
 handleAddItem : AppState -> Model -> String -> List String -> ( Seed, Model, Cmd Msg )
 handleAddItem appState model path originalItems =
     let
@@ -421,7 +385,6 @@ viewQuestionnairePanel appState cfg ctx model =
     div [ class "questionnaire__panel" ]
         [ viewQuestionnairePanelPhaseSelection appState cfg ctx model
         , viewQuestionnairePanelChapters appState model
-        , viewQuestionnairePanelMore appState cfg model
         ]
 
 
@@ -518,72 +481,6 @@ viewQuestionnairePanelChaptersChapterIndication appState questionnaire chapter =
 
 
 
--- QUESTIONNAIRE - PANEL - MORE
-
-
-viewQuestionnairePanelMore : AppState -> Config -> Model -> Html Msg
-viewQuestionnairePanelMore appState cfg model =
-    let
-        todosLength =
-            QuestionnaireDetail.todosLength model.questionnaire
-
-        todosVisible =
-            cfg.features.todoListEnabled
-
-        todosBadge =
-            if todosLength > 0 then
-                Just todosLength
-
-            else
-                Nothing
-
-        todosLink =
-            viewLink (lg "questionnaire.todos" appState) PageTodos todosBadge model.activePage
-
-        summaryReportLink =
-            viewLink (lg "questionnaire.summaryReport" appState) PageSummaryReport Nothing model.activePage
-
-        summaryReportVisible =
-            appState.config.questionnaire.summaryReport.enabled && cfg.features.summaryReportEnabled
-
-        extraNavigation =
-            []
-                |> listInsertIf todosLink todosVisible
-                |> listInsertIf summaryReportLink summaryReportVisible
-    in
-    if List.isEmpty extraNavigation then
-        emptyNode
-
-    else
-        div [ class "questionnaire__panel__more" ]
-            [ strong [] [ lx_ "panel.more" appState ]
-            , div [ class "nav nav-pills flex-column" ] extraNavigation
-            ]
-
-
-viewLink : String -> ActivePage -> Maybe Int -> ActivePage -> Html Msg
-viewLink linkText targetPage mbCount activePage =
-    let
-        indication =
-            case mbCount of
-                Just count ->
-                    span [ class "badge badge-light badge-pill" ]
-                        [ text <| fromInt count ]
-
-                Nothing ->
-                    span [] []
-    in
-    a
-        [ class "nav-link"
-        , classList [ ( "active", activePage == targetPage ) ]
-        , onClick (SetActivePage targetPage)
-        ]
-        [ text linkText
-        , indication
-        ]
-
-
-
 -- QUESTIONNAIRE -- CONTENT
 
 
@@ -600,68 +497,10 @@ viewQuestionnaireContent appState cfg ctx model =
                         Nothing ->
                             emptyNode
 
-                PageTodos ->
-                    viewTodos appState model
-
-                PageSummaryReport ->
-                    viewSummaryReport appState ctx model
-
                 _ ->
                     emptyNode
     in
     div [ class "questionnaire__content" ] [ content ]
-
-
-
--- QUESTIONNAIRE -- CONTENT -- TODOS
-
-
-viewTodos : AppState -> Model -> Html Msg
-viewTodos appState model =
-    let
-        todos =
-            QuestionnaireDetail.getTodos model.questionnaire
-
-        content =
-            if List.isEmpty todos then
-                [ Page.illustratedMessage
-                    { image = "feeling_happy"
-                    , heading = l_ "todos.doneTitle" appState
-                    , lines = [ l_ "todos.doneText" appState ]
-                    }
-                ]
-
-            else
-                [ h2 [] [ lgx "questionnaire.todos" appState ]
-                , div [ class "list-group list-group-hover" ]
-                    (List.map viewTodo todos)
-                ]
-    in
-    div [ class "questionnaire__todos container" ] content
-
-
-viewTodo : QuestionnaireTodo -> Html Msg
-viewTodo todo =
-    let
-        isNested =
-            (List.length <| String.split "." todo.path) > 2
-    in
-    a
-        [ class "list-group-item flex-column"
-        , onClick (ScrollToTodo todo)
-        ]
-        [ div [] [ small [] [ text todo.chapter.title ] ]
-        , p [ classList [ ( "nested", isNested ) ] ] [ text <| Question.getTitle todo.question ]
-        ]
-
-
-
--- QUESTIONNAIRE -- CONTENT -- SUMMARY REPORT
-
-
-viewSummaryReport : AppState -> Context -> Model -> Html Msg
-viewSummaryReport appState ctx model =
-    SummaryReport.view appState (toSummaryReportContext ctx model) model.summaryReportModel
 
 
 

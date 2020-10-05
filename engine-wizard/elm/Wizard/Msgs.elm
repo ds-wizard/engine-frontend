@@ -9,8 +9,8 @@ import Wizard.Dashboard.Msgs
 import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
+import Wizard.Projects.Msgs
 import Wizard.Public.Msgs
-import Wizard.Questionnaires.Msgs
 import Wizard.Registry.Msgs
 import Wizard.Settings.Msgs
 import Wizard.Templates.Msgs
@@ -28,8 +28,8 @@ type Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
+    | PlansMsg Wizard.Projects.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg
-    | QuestionnairesMsg Wizard.Questionnaires.Msgs.Msg
     | RegistryMsg Wizard.Registry.Msgs.Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
     | TemplatesMsg Wizard.Templates.Msgs.Msg

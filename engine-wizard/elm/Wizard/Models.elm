@@ -16,8 +16,8 @@ import Wizard.Dashboard.Models
 import Wizard.Documents.Models
 import Wizard.KMEditor.Models
 import Wizard.KnowledgeModels.Models
+import Wizard.Projects.Models
 import Wizard.Public.Models
-import Wizard.Questionnaires.Models
 import Wizard.Registry.Models
 import Wizard.Routes as Routes
 import Wizard.Settings.Models
@@ -32,8 +32,8 @@ type alias Model =
     , documentsModel : Wizard.Documents.Models.Model
     , kmEditorModel : Wizard.KMEditor.Models.Model
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
+    , plansModel : Wizard.Projects.Models.Model
     , publicModel : Wizard.Public.Models.Model
-    , questionnairesModel : Wizard.Questionnaires.Models.Model
     , registryModel : Wizard.Registry.Models.Model
     , settingsModel : Wizard.Settings.Models.Model
     , templatesModel : Wizard.Templates.Models.Model
@@ -49,8 +49,8 @@ initialModel appState =
     , documentsModel = Wizard.Documents.Models.initialModel
     , kmEditorModel = Wizard.KMEditor.Models.initialModel
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
+    , plansModel = Wizard.Projects.Models.initialModel appState
     , publicModel = Wizard.Public.Models.initialModel
-    , questionnairesModel = Wizard.Questionnaires.Models.initialModel appState
     , registryModel = Wizard.Registry.Models.initialModel
     , settingsModel = Wizard.Settings.Models.initialModel
     , templatesModel = Wizard.Templates.Models.initialModel appState
@@ -106,11 +106,11 @@ initLocalModel model =
         Routes.KnowledgeModelsRoute route ->
             { model | kmPackagesModel = Wizard.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
 
+        Routes.PlansRoute route ->
+            { model | plansModel = Wizard.Projects.Models.initLocalModel model.appState route model.plansModel }
+
         Routes.PublicRoute route ->
             { model | publicModel = Wizard.Public.Models.initLocalModel route model.publicModel }
-
-        Routes.QuestionnairesRoute route ->
-            { model | questionnairesModel = Wizard.Questionnaires.Models.initLocalModel model.appState route model.questionnairesModel }
 
         Routes.RegistryRoute route ->
             { model | registryModel = Wizard.Registry.Models.initLocalModel route model.registryModel }

@@ -21,9 +21,9 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
+import Wizard.Projects.Routing
 import Wizard.Public.Routes
 import Wizard.Public.Routing
-import Wizard.Questionnaires.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
 import Wizard.Settings.Routing
@@ -39,8 +39,8 @@ matchers appState =
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
+                ++ Wizard.Projects.Routing.parsers appState Routes.PlansRoute
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
-                ++ Wizard.Questionnaires.Routing.parsers appState Routes.QuestionnairesRoute
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
                 ++ Wizard.Templates.Routing.parsers appState Routes.TemplatesRoute
@@ -75,11 +75,11 @@ isAllowed route session =
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
             Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute session
 
+        Routes.PlansRoute plansRoute ->
+            Wizard.Projects.Routing.isAllowed plansRoute session
+
         Routes.PublicRoute _ ->
             True
-
-        Routes.QuestionnairesRoute questionnaireRoute ->
-            Wizard.Questionnaires.Routing.isAllowed questionnaireRoute session
 
         Routes.RegistryRoute registryRoute ->
             Wizard.Registry.Routing.isAllowed registryRoute session
@@ -111,14 +111,14 @@ toUrl appState route =
                 Routes.DocumentsRoute documentsRoute ->
                     Wizard.Documents.Routing.toUrl appState documentsRoute
 
-                Routes.QuestionnairesRoute questionnairesRoute ->
-                    Wizard.Questionnaires.Routing.toUrl appState questionnairesRoute
-
                 Routes.KMEditorRoute kmEditorRoute ->
                     Wizard.KMEditor.Routing.toUrl appState kmEditorRoute
 
                 Routes.KnowledgeModelsRoute kmPackagesRoute ->
                     Wizard.KnowledgeModels.Routing.toUrl appState kmPackagesRoute
+
+                Routes.PlansRoute plansRoute ->
+                    Wizard.Projects.Routing.toUrl appState plansRoute
 
                 Routes.PublicRoute publicRoute ->
                     Wizard.Public.Routing.toUrl appState publicRoute

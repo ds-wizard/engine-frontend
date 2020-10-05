@@ -7,6 +7,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , getTodos
     , hasReply
     , isEditable
+    , isOwner
     , setLabels
     , setLevel
     , setReplyValue
@@ -31,6 +32,7 @@ import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing ex
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
 import Shared.Data.UserInfo as UserInfo
 import Shared.Utils exposing (boolToInt)
 import Uuid exposing (Uuid)
@@ -47,8 +49,10 @@ type alias QuestionnaireDetail =
     , sharing : QuestionnaireSharing
     , ownerUuid : Maybe Uuid
     , selectedTagUuids : List String
+    , templateId : Maybe String
+    , formatUuid : Maybe Uuid
+    , format : Maybe TemplateFormat
     , labels : Dict String (List String)
-    , report : QuestionnaireReport
     }
 
 
@@ -65,8 +69,10 @@ decoder =
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "ownerUuid" (D.maybe Uuid.decoder)
         |> D.required "selectedTagUuids" (D.list D.string)
+        |> D.required "templateId" (D.maybe D.string)
+        |> D.required "formatUuid" (D.maybe Uuid.decoder)
+        |> D.required "format" (D.maybe TemplateFormat.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
-        |> D.required "report" QuestionnaireReport.decoder
 
 
 encode : QuestionnaireDetail -> E.Value
@@ -81,23 +87,32 @@ encode questionnaire =
 isEditable : AbstractAppState a -> QuestionnaireDetail -> Bool
 isEditable appState questionnaire =
     let
-        isAdmin =
-            UserInfo.isAdmin appState.session.user
+        owner =
+            isOwner appState questionnaire
 
         isReadonly =
             if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then
                 False
 
             else if Session.exists appState.session then
-                questionnaire.visibility == VisibleViewQuestionnaire || (questionnaire.visibility == PrivateQuestionnaire && not isOwner)
+                questionnaire.visibility == VisibleViewQuestionnaire || (questionnaire.visibility == PrivateQuestionnaire && not owner)
 
             else
                 questionnaire.sharing == AnyoneWithLinkViewQuestionnaire
+    in
+    owner || not isReadonly
 
-        isOwner =
+
+isOwner : AbstractAppState a -> QuestionnaireDetail -> Bool
+isOwner appState questionnaire =
+    let
+        admin =
+            UserInfo.isAdmin appState.session.user
+
+        owner =
             Maybe.isJust questionnaire.ownerUuid && questionnaire.ownerUuid == Maybe.map .uuid appState.session.user
     in
-    isAdmin || not isReadonly || isOwner
+    admin || owner
 
 
 setLevel : Int -> QuestionnaireDetail -> QuestionnaireDetail
