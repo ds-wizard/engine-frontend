@@ -62,7 +62,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << CloneQuestionnaireModalMsg
                     , cloneCompleteCmd =
-                        cmdNavigate appState << Routes.PlansRoute << flip DetailRoute PlanDetailRoute.Questionnaire << .uuid
+                        cmdNavigate appState << Routes.ProjectsRoute << flip DetailRoute PlanDetailRoute.Questionnaire << .uuid
                     }
 
                 ( deleteModalModel, cmd ) =
@@ -121,5 +121,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = QuestionnairesApi.getQuestionnaires
     , getError = lg "apiError.questionnaires.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.PlansRoute << IndexRoute
+    , toRoute = Routes.ProjectsRoute << IndexRoute
     }

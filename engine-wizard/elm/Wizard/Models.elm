@@ -106,7 +106,7 @@ initLocalModel model =
         Routes.KnowledgeModelsRoute route ->
             { model | kmPackagesModel = Wizard.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
 
-        Routes.PlansRoute route ->
+        Routes.ProjectsRoute route ->
             { model | plansModel = Wizard.Projects.Models.initLocalModel model.appState route model.plansModel }
 
         Routes.PublicRoute route ->

@@ -1,5 +1,20 @@
-module Wizard.Routes exposing (Route(..))
+module Wizard.Routes exposing
+    ( Route(..)
+    , documentsIndex
+    , isDocumentsIndex
+    , isKmEditorIndex
+    , isKnowledgeModelsIndex
+    , isProjectsIndex
+    , isTemplateIndex
+    , isUsersIndex
+    , kmEditorIndex
+    , knowledgeModelsIndex
+    , projectsIndex
+    , templatesIndex
+    , usersIndex
+    )
 
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
@@ -16,7 +31,7 @@ type Route
     | DocumentsRoute Wizard.Documents.Routes.Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
-    | PlansRoute Wizard.Projects.Routes.Route
+    | ProjectsRoute Wizard.Projects.Routes.Route
     | PublicRoute Wizard.Public.Routes.Route
     | RegistryRoute Wizard.Registry.Routes.Route
     | SettingsRoute Wizard.Settings.Routes.Route
@@ -24,3 +39,93 @@ type Route
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute
+
+
+usersIndex : Route
+usersIndex =
+    UsersRoute (Wizard.Users.Routes.IndexRoute PaginationQueryString.empty)
+
+
+isUsersIndex : Route -> Bool
+isUsersIndex route =
+    case route of
+        UsersRoute (Wizard.Users.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False
+
+
+projectsIndex : Route
+projectsIndex =
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty)
+
+
+isProjectsIndex : Route -> Bool
+isProjectsIndex route =
+    case route of
+        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False
+
+
+documentsIndex : Route
+documentsIndex =
+    DocumentsRoute (Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
+
+
+isDocumentsIndex : Route -> Bool
+isDocumentsIndex route =
+    case route of
+        DocumentsRoute (Wizard.Documents.Routes.IndexRoute _ _) ->
+            True
+
+        _ ->
+            False
+
+
+kmEditorIndex : Route
+kmEditorIndex =
+    KMEditorRoute (Wizard.KMEditor.Routes.IndexRoute PaginationQueryString.empty)
+
+
+isKmEditorIndex : Route -> Bool
+isKmEditorIndex route =
+    case route of
+        KMEditorRoute (Wizard.KMEditor.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False
+
+
+knowledgeModelsIndex : Route
+knowledgeModelsIndex =
+    KnowledgeModelsRoute (Wizard.KnowledgeModels.Routes.IndexRoute PaginationQueryString.empty)
+
+
+isKnowledgeModelsIndex : Route -> Bool
+isKnowledgeModelsIndex route =
+    case route of
+        KnowledgeModelsRoute (Wizard.KnowledgeModels.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False
+
+
+templatesIndex : Route
+templatesIndex =
+    TemplatesRoute (Wizard.Templates.Routes.IndexRoute PaginationQueryString.empty)
+
+
+isTemplateIndex : Route -> Bool
+isTemplateIndex route =
+    case route of
+        TemplatesRoute (Wizard.Templates.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False

@@ -78,7 +78,7 @@ viewDocuments appState model mbQuestionnaire =
                     Just <|
                         div [ class "listing-toolbar-extra questionnaire-filter" ]
                             [ linkTo appState
-                                (Routes.PlansRoute (Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire))
+                                (Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire))
                                 [ class "questionnaire-name" ]
                                 [ text questionnaire.name ]
                             , linkTo appState
@@ -151,7 +151,7 @@ listingDescription appState document =
                 Just questionnaire ->
                     let
                         questionnaireRoute =
-                            Routes.PlansRoute <|
+                            Routes.ProjectsRoute <|
                                 Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire
                     in
                     linkTo appState

@@ -159,7 +159,7 @@ handlePostMigrationCompleted : AppState -> Model -> Result ApiError Questionnair
 handlePostMigrationCompleted appState model result =
     case result of
         Ok migration ->
-            ( model, cmdNavigate appState <| Routes.PlansRoute <| MigrationRoute migration.newQuestionnaire.uuid )
+            ( model, cmdNavigate appState <| Routes.ProjectsRoute <| MigrationRoute migration.newQuestionnaire.uuid )
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult (lg "apiError.questionnaires.migrations.postError" appState) error }

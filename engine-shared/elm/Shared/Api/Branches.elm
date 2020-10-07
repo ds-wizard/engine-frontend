@@ -11,7 +11,6 @@ module Shared.Api.Branches exposing
     , putVersion
     )
 
-import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtPost, jwtPut)
@@ -19,12 +18,21 @@ import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.BranchDetail as BranchDetail exposing (BranchDetail)
 import Shared.Data.Event as Event exposing (Event)
 import Shared.Data.Migration as Migration exposing (Migration)
+import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 
 
-getBranches : AbstractAppState a -> ToMsg (List Branch) msg -> Cmd msg
-getBranches =
-    jwtGet "/branches" (D.list Branch.decoder)
+getBranches : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Branch) msg -> Cmd msg
+getBranches qs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrl qs
+
+        url =
+            "/branches/page" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "branches" Branch.decoder)
 
 
 getBranch : Uuid -> AbstractAppState a -> ToMsg BranchDetail msg -> Cmd msg

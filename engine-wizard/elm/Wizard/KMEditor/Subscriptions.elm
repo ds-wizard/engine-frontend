@@ -14,7 +14,7 @@ subscriptions wrapMsg route model =
         EditorRoute _ ->
             Wizard.KMEditor.Editor.Subscriptions.subscriptions (wrapMsg << EditorMsg) model.editorModel
 
-        IndexRoute ->
+        IndexRoute _ ->
             Sub.map (wrapMsg << IndexMsg) <|
                 Wizard.KMEditor.Index.Subscriptions.subscriptions model.indexModel
 

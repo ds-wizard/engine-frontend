@@ -137,7 +137,7 @@ handlePutBranchCompleted : AppState -> Model -> Result ApiError () -> ( Model, C
 handlePutBranchCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState (Routes.KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.IndexRoute) )
+            ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
             ( { model | publishingBranch = ApiError.toActionResult (lg "apiError.packages.version.postError" appState) error }

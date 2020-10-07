@@ -56,7 +56,7 @@ view model =
                     |> Html.map KnowledgeModelsMsg
                     |> Layout.app model
 
-            Routes.PlansRoute route ->
+            Routes.ProjectsRoute route ->
                 model.plansModel
                     |> Wizard.Projects.View.view route model.appState
                     |> Html.map PlansMsg

@@ -78,7 +78,7 @@ editorHeader appState model =
 
             else
                 [ linkTo appState
-                    (Routes.KMEditorRoute IndexRoute)
+                    Routes.kmEditorIndex
                     [ class "btn btn-outline-primary btn-with-loader" ]
                     [ lx_ "header.close" appState ]
                 ]

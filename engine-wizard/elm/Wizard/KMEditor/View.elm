@@ -23,7 +23,7 @@ view route appState model =
             Html.map EditorMsg <|
                 Wizard.KMEditor.Editor.View.view appState model.editorModel
 
-        IndexRoute ->
+        IndexRoute _ ->
             Html.map IndexMsg <|
                 Wizard.KMEditor.Index.View.view appState model.indexModel
 

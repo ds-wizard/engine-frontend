@@ -66,7 +66,7 @@ importPackageCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd
 importPackageCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState (Routes.KnowledgeModelsRoute IndexRoute) )
+            ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
             ( { model | importing = ApiError.toActionResult (lg "apiError.packages.importError" appState) error }

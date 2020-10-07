@@ -7,7 +7,6 @@ import Html.Attributes exposing (class, selected, value)
 import Html.Events exposing (onInput)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.Package exposing (Package)
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)
@@ -23,7 +22,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -98,7 +96,7 @@ createMigrationView appState model ( questionnaire, packages ) =
                 ]
             ]
         , FormActions.view appState
-            (Routes.PlansRoute (IndexRoute PaginationQueryString.empty))
+            Routes.projectsIndex
             (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingMigration (FormMsg Form.Submit) False)
         ]
 

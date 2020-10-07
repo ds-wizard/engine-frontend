@@ -29,9 +29,9 @@ fetchData route model appState =
                 Cmd.map EditorMsg <|
                     Wizard.KMEditor.Editor.Update.fetchData uuid appState
 
-        IndexRoute ->
+        IndexRoute _ ->
             Cmd.map IndexMsg <|
-                Wizard.KMEditor.Index.Update.fetchData appState
+                Wizard.KMEditor.Index.Update.fetchData
 
         MigrationRoute uuid ->
             Cmd.map MigrationMsg <|

@@ -67,7 +67,7 @@ importTemplateCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cm
 importTemplateCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState (Routes.TemplatesRoute IndexRoute) )
+            ( model, cmdNavigate appState Routes.templatesIndex )
 
         Err error ->
             ( { model | importing = ApiError.toActionResult (lg "apiError.templates.importError" appState) error }

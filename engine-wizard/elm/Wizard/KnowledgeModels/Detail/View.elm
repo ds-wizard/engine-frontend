@@ -76,7 +76,7 @@ header appState package =
 
         questionnaireAction =
             linkTo appState
-                (Routes.PlansRoute <| Wizard.Projects.Routes.CreateRoute <| Just package.id)
+                (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
                 [ faSet "kmDetail.createQuestionnaire" appState
                 , lx_ "header.createQuestionnaire" appState

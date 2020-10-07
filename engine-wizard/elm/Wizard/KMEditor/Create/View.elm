@@ -14,7 +14,6 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Create.Models exposing (..)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
-import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -36,7 +35,7 @@ content appState model packages =
             [ FormResult.errorOnlyView appState model.savingBranch
             , formView appState model packages
             , FormActions.view appState
-                (Routes.KMEditorRoute IndexRoute)
+                Routes.kmEditorIndex
                 (ActionButton.ButtonConfig (l_ "save" appState) model.savingBranch (FormMsg Form.Submit) False)
             ]
         ]
