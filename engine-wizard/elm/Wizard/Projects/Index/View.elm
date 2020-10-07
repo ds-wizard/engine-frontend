@@ -48,7 +48,7 @@ lh_ =
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "Questionnaires__Index" ]
-        [ Page.header (l_ "header.title" appState) (indexActions appState)
+        [ Page.header (l_ "header.title" appState) []
         , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
         , FormResult.view appState model.deletingMigration
         , Listing.view appState (listingConfig appState) model.questionnaires
@@ -57,13 +57,12 @@ view appState model =
         ]
 
 
-indexActions : AppState -> List (Html Msg)
-indexActions appState =
-    [ linkTo appState
-        (Routes.PlansRoute <| CreateRoute Nothing)
+createButton : AppState -> Html Msg
+createButton appState =
+    linkTo appState
+        (Routes.ProjectsRoute <| CreateRoute Nothing)
         [ class "btn btn-primary" ]
         [ lx_ "header.create" appState ]
-    ]
 
 
 listingConfig : AppState -> ViewConfig Questionnaire Msg
@@ -85,8 +84,8 @@ listingConfig appState =
         , ( "createdAt", lg "questionnaire.createdAt" appState )
         , ( "updatedAt", lg "questionnaire.updatedAt" appState )
         ]
-    , toRoute = Routes.PlansRoute << IndexRoute
-    , toolbarExtra = Nothing
+    , toRoute = Routes.ProjectsRoute << IndexRoute
+    , toolbarExtra = Just (createButton appState)
     }
 
 
@@ -184,7 +183,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.createMigration" appState
-                , msg = ListingActionLink (Routes.PlansRoute <| CreateMigrationRoute questionnaire.uuid)
+                , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
                 }
 
         continueMigration =
@@ -192,7 +191,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.continueMigration" appState
-                , msg = ListingActionLink (Routes.PlansRoute <| MigrationRoute questionnaire.uuid)
+                , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute questionnaire.uuid)
                 }
 
         cancelMigration =
@@ -235,12 +234,12 @@ listingActions appState questionnaire =
 
 detailRoute : Questionnaire -> Routes.Route
 detailRoute =
-    Routes.PlansRoute << flip Wizard.Projects.Routes.DetailRoute PlanDetailRoute.Questionnaire << .uuid
+    Routes.ProjectsRoute << flip Wizard.Projects.Routes.DetailRoute PlanDetailRoute.Questionnaire << .uuid
 
 
 migrationRoute : Questionnaire -> Routes.Route
 migrationRoute =
-    Routes.PlansRoute << MigrationRoute << .uuid
+    Routes.ProjectsRoute << MigrationRoute << .uuid
 
 
 stateBadge : AppState -> QuestionnaireState -> Html msg

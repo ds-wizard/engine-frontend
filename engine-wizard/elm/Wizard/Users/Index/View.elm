@@ -8,7 +8,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
@@ -34,29 +34,23 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewUserList appState model) model.users
-
-
-viewUserList : AppState -> Model -> Listing.Model User -> Html Msg
-viewUserList appState model users =
     div [ listClass "Users__Index" ]
-        [ Page.header (lg "users" appState) (indexActions appState)
+        [ Page.header (lg "users" appState) []
         , FormResult.successOnlyView appState model.deletingUser
-        , Listing.view appState (listingConfig appState) users
+        , Listing.view appState (listingConfig appState) model.users
         , deleteModal appState model
         ]
 
 
-indexActions : AppState -> List (Html Msg)
-indexActions appState =
-    [ linkTo appState
+createButton : AppState -> Html msg
+createButton appState =
+    linkTo appState
         (Routes.UsersRoute CreateRoute)
         [ class "btn btn-primary" ]
         [ lx_ "header.create" appState ]
-    ]
 
 
-listingConfig : AppState -> ListingConfig User Msg
+listingConfig : AppState -> ViewConfig User Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
@@ -66,6 +60,14 @@ listingConfig appState =
     , updated = Nothing
     , wrapMsg = ListingMsg
     , iconView = Just UserIcon.view
+    , sortOptions =
+        [ ( "firstName", lg "user.firstName" appState )
+        , ( "lastName", lg "user.lastName" appState )
+        , ( "email", lg "user.email" appState )
+        , ( "role", lg "user.role" appState )
+        ]
+    , toRoute = Routes.UsersRoute << IndexRoute
+    , toolbarExtra = Just (createButton appState)
     }
 
 

@@ -1,29 +1,20 @@
 module Wizard.Projects.Create.View exposing (view)
 
 import Form exposing (Form)
-import Form.Input as Input
 import Html exposing (..)
-import Html.Attributes exposing (class, classList)
 import Shared.Data.Package exposing (Package)
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Data.QuestionnairePermission as QuestionnairePermission
-import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lgh)
+import Shared.Locale exposing (l, lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.FormActions as FormActions
-import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.Projects.Create.Models exposing (Model)
 import Wizard.Projects.Create.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -46,7 +37,7 @@ content appState model packages =
             , formView appState model packages |> Html.map FormMsg
             , tagsView appState model
             , FormActions.view appState
-                (Routes.PlansRoute (IndexRoute PaginationQueryString.empty))
+                Routes.projectsIndex
                 (ActionResult.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
             ]
         ]

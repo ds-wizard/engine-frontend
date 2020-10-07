@@ -16,7 +16,6 @@ import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Users.Common.UserCreateForm as UserCreateForm
 import Wizard.Users.Create.Models exposing (..)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
-import Wizard.Users.Routes exposing (Route(..))
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -58,7 +57,7 @@ postUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wiza
 postUserCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.UsersRoute IndexRoute )
+            ( model, cmdNavigate appState Routes.usersIndex )
 
         Err error ->
             ( { model | savingUser = ApiError.toActionResult (lg "apiError.users.postError" appState) error }

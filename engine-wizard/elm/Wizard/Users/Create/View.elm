@@ -16,7 +16,6 @@ import Wizard.Routes as Routes
 import Wizard.Users.Common.UserCreateForm exposing (UserCreateForm)
 import Wizard.Users.Create.Models exposing (..)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
-import Wizard.Users.Routes exposing (Route(..))
 
 
 l_ : String -> AppState -> String
@@ -31,7 +30,7 @@ view appState model =
         , FormResult.view appState model.savingUser
         , formView appState model.form |> Html.map FormMsg
         , FormActions.view appState
-            (Routes.UsersRoute IndexRoute)
+            Routes.usersIndex
             (ActionButton.ButtonConfig (l_ "header.save" appState) model.savingUser (FormMsg Form.Submit) False)
         ]
 

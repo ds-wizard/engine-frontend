@@ -224,7 +224,7 @@ viewFormState appState questionnaireUuid model form ( summaryReport, template ) 
                 [ FormResult.view appState model.savingDocument
                 , Html.map FormMsg <| formView appState form summaryReport template
                 , FormActions.view appState
-                    (Routes.PlansRoute <| DetailRoute questionnaireUuid <| PlanDetailRoute.Documents PaginationQueryString.empty)
+                    (Routes.ProjectsRoute <| DetailRoute questionnaireUuid <| PlanDetailRoute.Documents PaginationQueryString.empty)
                     (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingDocument (FormMsg Form.Submit) False)
                 ]
             ]

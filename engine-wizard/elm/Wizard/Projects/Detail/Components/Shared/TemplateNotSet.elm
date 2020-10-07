@@ -31,7 +31,7 @@ view appState questionnaire =
                 [ p [] [ lx_ "textOwner" appState ]
                 , p []
                     [ linkTo appState
-                        (Wizard.Routes.PlansRoute (PlansRoutes.DetailRoute questionnaire.uuid PlanDetailRoute.Settings))
+                        (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute questionnaire.uuid PlanDetailRoute.Settings))
                         [ class "btn btn-primary btn-lg link-with-icon-after" ]
                         [ lx_ "link" appState
                         , faSet "_global.arrowRight" appState

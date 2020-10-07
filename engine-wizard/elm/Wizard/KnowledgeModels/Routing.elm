@@ -7,6 +7,7 @@ module Wizard.KnowledgeModels.Routing exposing
 
 import Shared.Auth.Permission as Perm
 import Shared.Auth.Session exposing (Session)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
@@ -22,7 +23,7 @@ parsers appState wrapRoute =
     in
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "knowledgeModels.import" appState) <?> Query.string (lr "knowledgeModels.import.packageId" appState))
     , map (detail wrapRoute) (s moduleRoot </> string)
-    , map (wrapRoute <| IndexRoute) (s moduleRoot)
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "versions.name")) (PaginationQueryString.parser (s moduleRoot))
     ]
 
 
@@ -49,8 +50,8 @@ toUrl appState route =
                 Nothing ->
                     [ moduleRoot, lr "knowledgeModels.import" appState ]
 
-        IndexRoute ->
-            [ moduleRoot ]
+        IndexRoute paginationQueryString ->
+            [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
 
 isAllowed : Route -> Session -> Bool

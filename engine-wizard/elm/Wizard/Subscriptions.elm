@@ -26,7 +26,7 @@ subscriptions model =
                 Routes.KnowledgeModelsRoute route ->
                     Sub.map KnowledgeModelsMsg <| Wizard.KnowledgeModels.Subscriptions.subscriptions route model.kmPackagesModel
 
-                Routes.PlansRoute route ->
+                Routes.ProjectsRoute route ->
                     Sub.map PlansMsg <| Wizard.Projects.Subscriptions.subscriptions route model.plansModel
 
                 Routes.TemplatesRoute route ->

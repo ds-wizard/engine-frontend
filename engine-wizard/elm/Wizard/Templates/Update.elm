@@ -17,9 +17,9 @@ fetchData route appState =
             Cmd.map DetailMsg <|
                 Wizard.Templates.Detail.Update.fetchData packageId appState
 
-        IndexRoute ->
+        IndexRoute _ ->
             Cmd.map IndexMsg <|
-                Wizard.Templates.Index.Update.fetchData appState
+                Wizard.Templates.Index.Update.fetchData
 
         _ ->
             Cmd.none

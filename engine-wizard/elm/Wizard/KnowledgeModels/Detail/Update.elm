@@ -57,7 +57,7 @@ deleteVersionCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd
 deleteVersionCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.KnowledgeModelsRoute IndexRoute )
+            ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
             ( { model | deletingVersion = ApiError.toActionResult (lg "apiError.packages.deleteError" appState) error }

@@ -46,7 +46,7 @@ fetchData model =
                     Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
                         Wizard.KnowledgeModels.Update.fetchData route model.appState
 
-                Routes.PlansRoute route ->
+                Routes.ProjectsRoute route ->
                     Cmd.map Wizard.Msgs.PlansMsg <|
                         Wizard.Projects.Update.fetchData route model.appState model.plansModel
 
@@ -89,7 +89,7 @@ isGuarded model =
 onUnload : Routes.Route -> Model -> Cmd Msg
 onUnload newRoute model =
     case model.appState.route of
-        Routes.PlansRoute route ->
+        Routes.ProjectsRoute route ->
             Wizard.Projects.Update.onUnload route newRoute model.plansModel
 
         _ ->

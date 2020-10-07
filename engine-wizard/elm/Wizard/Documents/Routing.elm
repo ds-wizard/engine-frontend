@@ -6,7 +6,6 @@ import Shared.Auth.Session exposing (Session)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
-import Url.Parser.Query as Query
 import Url.Parser.Query.Extra as Query
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -19,7 +18,7 @@ parsers appState wrapRoute =
         moduleRoot =
             lr "documents" appState
     in
-    [ map (indexRoute wrapRoute) (s moduleRoot <?> Query.uuid (lr "documents.index.questionnaireUuid" appState) <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort")
+    [ map (indexRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot <?> Query.uuid (lr "documents.index.questionnaireUuid" appState)))
     ]
 
 

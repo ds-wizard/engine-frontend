@@ -9,7 +9,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
@@ -38,35 +38,29 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewKnowledgeModels appState model) model.packages
-
-
-viewKnowledgeModels : AppState -> Model -> Listing.Model Package -> Html Msg
-viewKnowledgeModels appState model packages =
     div [ listClass "KnowledgeModels__Index" ]
-        [ Page.header (l_ "header.title" appState) (indexActions appState)
+        [ Page.header (l_ "header.title" appState) []
         , FormResult.successOnlyView appState model.deletingPackage
-        , Listing.view appState (listingConfig appState) packages
+        , Listing.view appState (listingConfig appState) model.packages
         , deleteModal appState model
         ]
 
 
-indexActions : AppState -> List (Html Msg)
-indexActions appState =
+createButton : AppState -> Html Msg
+createButton appState =
     if Perm.hasPerm appState.session Perm.packageManagementWrite then
-        [ linkTo appState
+        linkTo appState
             (Routes.KnowledgeModelsRoute <| ImportRoute Nothing)
             [ class "btn btn-primary link-with-icon" ]
             [ faSet "kms.upload" appState
             , lx_ "header.import" appState
             ]
-        ]
 
     else
-        []
+        emptyNode
 
 
-listingConfig : AppState -> ListingConfig Package Msg
+listingConfig : AppState -> ViewConfig Package Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
@@ -80,6 +74,13 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , sortOptions =
+        [ ( "versions.name", lg "package.name" appState )
+        , ( "versions.createdAt", lg "package.createdAt" appState )
+        , ( "versions.updatedAt", lg "package.updatedAt" appState )
+        ]
+    , toRoute = Routes.KnowledgeModelsRoute << IndexRoute
+    , toolbarExtra = Just (createButton appState)
     }
 
 

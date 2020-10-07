@@ -13,7 +13,7 @@ subscriptions route model =
         ImportRoute _ ->
             Sub.map ImportMsg <| Wizard.Templates.Import.Subscriptions.subscriptions model.importModel
 
-        IndexRoute ->
+        IndexRoute _ ->
             Sub.map IndexMsg <| Wizard.Templates.Index.Subscriptions.subscriptions model.indexModel
 
         _ ->

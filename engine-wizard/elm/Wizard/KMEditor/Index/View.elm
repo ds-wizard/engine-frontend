@@ -14,7 +14,7 @@ import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf, packageIdToComponents)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing exposing (ListingActionConfig, ListingActionType(..), ListingConfig, ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormGroup as FormGroup
@@ -46,30 +46,24 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewKMEditors appState model) model.branches
-
-
-viewKMEditors : AppState -> Model -> Listing.Model Branch -> Html Msg
-viewKMEditors appState model branches =
     div [ listClass "KMEditor__Index" ]
-        [ Page.header (l_ "header.title" appState) (indexActions appState)
+        [ Page.header (l_ "header.title" appState) []
         , FormResult.view appState model.deletingMigration
-        , Listing.view appState (listingConfig appState) branches
+        , Listing.view appState (listingConfig appState) model.branches
         , deleteModal appState model
         , upgradeModal appState model
         ]
 
 
-indexActions : AppState -> List (Html Msg)
-indexActions appState =
-    [ linkTo appState
+createButton : AppState -> Html Msg
+createButton appState =
+    linkTo appState
         (Routes.KMEditorRoute <| CreateRoute Nothing)
         [ class "btn btn-primary" ]
         [ lx_ "header.create" appState ]
-    ]
 
 
-listingConfig : AppState -> ListingConfig Branch Msg
+listingConfig : AppState -> ViewConfig Branch Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
@@ -83,6 +77,13 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , sortOptions =
+        [ ( "name", lg "branch.name" appState )
+        , ( "createdAt", lg "branch.createdAt" appState )
+        , ( "updatedAt", lg "branch.updatedAt" appState )
+        ]
+    , toRoute = Routes.KMEditorRoute << IndexRoute
+    , toolbarExtra = Just (createButton appState)
     }
 
 

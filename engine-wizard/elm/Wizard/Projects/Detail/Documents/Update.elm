@@ -201,5 +201,5 @@ listingUpdateConfig wrapMsg appState questionnaireUuid =
     { getRequest = QuestionnairesApi.getDocuments questionnaireUuid
     , getError = lg "apiError.documents.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.PlansRoute << DetailRoute questionnaireUuid << PlanDetailRoute.Documents
+    , toRoute = Routes.ProjectsRoute << DetailRoute questionnaireUuid << PlanDetailRoute.Documents
     }

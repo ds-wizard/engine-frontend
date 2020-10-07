@@ -11,16 +11,24 @@ module Shared.Api.Users exposing
     , putUserPasswordPublic
     )
 
-import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, httpPost, httpPut, jwtDelete, jwtGet, jwtPost, jwtPut)
+import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.User as User exposing (User)
 
 
-getUsers : AbstractAppState a -> ToMsg (List User) msg -> Cmd msg
-getUsers =
-    jwtGet "/users" (D.list User.decoder)
+getUsers : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination User) msg -> Cmd msg
+getUsers qs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrl qs
+
+        url =
+            "/users/page" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "users" User.decoder)
 
 
 getUser : String -> AbstractAppState a -> ToMsg User msg -> Cmd msg

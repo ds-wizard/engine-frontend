@@ -19,5 +19,5 @@ view route appState model =
         ImportRoute _ ->
             Html.map ImportMsg <| Wizard.KnowledgeModels.Import.View.view appState model.importModel
 
-        IndexRoute ->
+        IndexRoute _ ->
             Html.map IndexMsg <| Wizard.KnowledgeModels.Index.View.view appState model.indexModel

@@ -97,7 +97,7 @@ listingConfig appState =
 listingTitle : AppState -> Questionnaire -> Html msg
 listingTitle appState questionnaire =
     span []
-        (linkTo appState (Routes.PlansRoute <| DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire) [] [ text questionnaire.name ]
+        (linkTo appState (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire) [] [ text questionnaire.name ]
             :: visibilityIcons appState questionnaire
         )
 
