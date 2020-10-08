@@ -147,7 +147,7 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                     Questionnaire.update
                         questionnaireMsg
                         appState
-                        { levels = levels, metrics = [] }
+                        { levels = levels, metrics = [], events = [] }
                         questionnaireModel
 
                 saveCmd =

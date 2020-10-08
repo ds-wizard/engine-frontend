@@ -167,6 +167,7 @@ questionnaireView appState model migration levels =
                     }
                     { levels = levels
                     , metrics = []
+                    , events = []
                     }
                     questionnaireModel
 

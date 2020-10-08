@@ -134,7 +134,7 @@ update wrapMsg msg appState model =
                     case ( model.questionnaireModel, model.levels, model.metrics ) of
                         ( Success questionnaireModel, Success levels, Success metrics ) ->
                             Triple.mapSnd Success <|
-                                Questionnaire.update questionnaireMsg appState { levels = levels, metrics = metrics } questionnaireModel
+                                Questionnaire.update questionnaireMsg appState { levels = levels, metrics = metrics, events = [] } questionnaireModel
 
                         _ ->
                             ( appState.seed, model.questionnaireModel, Cmd.none )
