@@ -45,6 +45,7 @@ init flags location key =
                 Cmd.batch
                     [ decideInitialRoute model location route originalRoute
                     , Time.getTime
+                    , Time.getTimeZone
                     ]
     in
     ( model, cmd )

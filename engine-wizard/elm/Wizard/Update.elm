@@ -130,6 +130,9 @@ update msg model =
         Wizard.Msgs.OnTime time ->
             ( { model | appState = AppState.setCurrentTime model.appState time }, Cmd.none )
 
+        Wizard.Msgs.OnTimeZone timeZone ->
+            ( { model | appState = AppState.setTimeZone model.appState timeZone }, Cmd.none )
+
         Wizard.Msgs.AuthMsg authMsg ->
             Wizard.Auth.Update.update authMsg model
 
