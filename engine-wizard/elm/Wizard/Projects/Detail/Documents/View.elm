@@ -172,7 +172,7 @@ listingActions appState cfg document =
     []
         |> listInsertIf download (document.state == DoneDocumentState)
         |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator cfg.questionnaireEditable
+        |> listInsertIf Listing.dropdownSeparator (cfg.questionnaireEditable && document.state == DoneDocumentState)
         |> listInsertIf delete cfg.questionnaireEditable
 
 
