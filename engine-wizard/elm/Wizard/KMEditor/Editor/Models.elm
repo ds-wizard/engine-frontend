@@ -3,6 +3,7 @@ module Wizard.KMEditor.Editor.Models exposing
     , Model
     , addSessionEvents
     , containsChanges
+    , getAllEvents
     , getCurrentActiveEditorUuid
     , getSavingError
     , hasSavingError
@@ -95,6 +96,11 @@ getSavingError model =
 
         _ ->
             ""
+
+
+getAllEvents : Model -> List Event
+getAllEvents model =
+    ActionResult.unwrap [] .events model.km ++ model.sessionEvents
 
 
 getCurrentActiveEditorUuid : Model -> Maybe String

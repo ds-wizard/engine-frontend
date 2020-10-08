@@ -34,6 +34,7 @@ handleQuestionnaireMsg msg appState model =
                 appState
                 { levels = model.levels
                 , metrics = model.metrics
+                , events = model.events
                 }
                 model.questionnaireModel
     in

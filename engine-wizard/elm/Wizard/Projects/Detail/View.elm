@@ -332,7 +332,7 @@ viewPlanContent appState route model qm levels metrics =
                         }
                     , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel levels metrics
                     }
-                    { levels = levels, metrics = metrics }
+                    { levels = levels, metrics = metrics, events = [] }
                     qm
 
         PlanDetailRoute.Preview ->

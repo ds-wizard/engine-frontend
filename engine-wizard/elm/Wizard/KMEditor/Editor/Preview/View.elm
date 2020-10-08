@@ -39,6 +39,7 @@ view appState model =
                     }
                     { metrics = model.metrics
                     , levels = model.levels
+                    , events = model.events
                     }
                     model.questionnaireModel
     in
