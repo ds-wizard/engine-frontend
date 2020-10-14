@@ -229,6 +229,7 @@ locale =
                , ( "_global.document.createdAt", "Created" )
                , ( "_global.document.name", "Name" )
                , ( "_global.kmMigration", "Migration" )
+               , ( "_global.loading", "Loading..." )
                , ( "_global.package", "Knowledge Model" )
                , ( "_global.package.createdAt", "Created" )
                , ( "_global.package.id", "ID" )

@@ -33,7 +33,7 @@ parsers appState wrapRoute =
     , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
     , map (wrapRoute << flip DetailRoute PlanDetailRoute.NewDocument) (s moduleRoot </> uuid </> s "documents" </> s "new")
     , map (wrapRoute << flip DetailRoute PlanDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
-    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "updatedAt,desc")) (PaginationQueryString.parser (s moduleRoot))
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "projects.migration" appState) </> uuid)
     ]
 

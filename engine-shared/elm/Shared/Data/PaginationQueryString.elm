@@ -2,6 +2,7 @@ module Shared.Data.PaginationQueryString exposing
     ( PaginationQueryString
     , SortDirection(..)
     , empty
+    , fromQ
     , parser
     , toApiUrl
     , toApiUrlWith
@@ -35,6 +36,11 @@ type SortDirection
 empty : PaginationQueryString
 empty =
     PaginationQueryString Nothing Nothing Nothing SortASC (Just defaultPageSize)
+
+
+fromQ : String -> PaginationQueryString
+fromQ q =
+    { empty | q = Just q }
 
 
 withSize : Maybe Int -> PaginationQueryString -> PaginationQueryString

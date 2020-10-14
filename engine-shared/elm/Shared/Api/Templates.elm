@@ -4,8 +4,8 @@ module Shared.Api.Templates exposing
     , exportTemplateUrl
     , getTemplate
     , getTemplates
+    , getTemplatesAll
     , getTemplatesFor
-    , getTemplatesPaginated
     , importTemplate
     , pullTemplate
     )
@@ -18,23 +18,24 @@ import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Template as Template exposing (Template)
 import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
+import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 
 
-getTemplates : AbstractAppState a -> ToMsg (List Template) msg -> Cmd msg
-getTemplates =
-    jwtGet "/templates" (D.list Template.decoder)
-
-
-getTemplatesPaginated : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Template) msg -> Cmd msg
-getTemplatesPaginated qs =
+getTemplates : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Template) msg -> Cmd msg
+getTemplates qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs
 
         url =
-            "/templates/page" ++ queryString
+            "/templates" ++ queryString
     in
     jwtGet url (Pagination.decoder "templates" Template.decoder)
+
+
+getTemplatesAll : AbstractAppState a -> ToMsg (List Template) msg -> Cmd msg
+getTemplatesAll =
+    jwtGet "/templates/all" (D.list Template.decoder)
 
 
 getTemplate : String -> AbstractAppState a -> ToMsg TemplateDetail msg -> Cmd msg
@@ -42,9 +43,16 @@ getTemplate templateId =
     jwtOrHttpGet ("/templates/" ++ templateId) TemplateDetail.decoder
 
 
-getTemplatesFor : String -> AbstractAppState a -> ToMsg (List Template) msg -> Cmd msg
-getTemplatesFor pkgId =
-    jwtGet ("/templates?pkgId=" ++ pkgId) (D.list Template.decoder)
+getTemplatesFor : String -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination TemplateSuggestion) msg -> Cmd msg
+getTemplatesFor pkgId qs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrlWith [ ( "pkgId", pkgId ) ] qs
+
+        url =
+            "/templates/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "templates" TemplateSuggestion.decoder)
 
 
 deleteTemplate : String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg

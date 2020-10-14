@@ -81,15 +81,6 @@ fetchSubrouteData appState model =
                         _ ->
                             Cmd.none
 
-                PlanDetailRoute.Settings ->
-                    case model.questionnaireModel of
-                        Success qm ->
-                            Cmd.map SettingsMsg <|
-                                Settings.fetchData appState qm.questionnaire.package.id
-
-                        _ ->
-                            Cmd.none
-
                 _ ->
                     Cmd.none
 
@@ -400,6 +391,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
                     , redirectCmd = cmdNavigate appState Routes.projectsIndex
+                    , packageId = ActionResult.unwrap "" (.questionnaire >> .package >> .id) model.questionnaireModel
                     }
 
                 ( settingsModel, cmd ) =

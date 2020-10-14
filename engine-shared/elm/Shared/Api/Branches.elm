@@ -30,7 +30,7 @@ getBranches qs =
             PaginationQueryString.toApiUrl qs
 
         url =
-            "/branches/page" ++ queryString
+            "/branches" ++ queryString
     in
     jwtGet url (Pagination.decoder "branches" Branch.decoder)
 

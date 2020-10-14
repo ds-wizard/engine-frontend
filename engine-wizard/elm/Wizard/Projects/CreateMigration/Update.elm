@@ -6,16 +6,17 @@ import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.Package exposing (Package)
+import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setPackages, setQuestionnaire)
+import Shared.Setters exposing (setQuestionnaire, setSelected)
 import Shared.Utils exposing (withNoCmd)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Msgs
 import Wizard.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
 import Wizard.Projects.CreateMigration.Models exposing (Model)
@@ -28,13 +29,10 @@ import Wizard.Routing exposing (cmdNavigate)
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
     let
-        getPackagesCmd =
-            PackagesApi.getPackages appState GetPackagesCompleted
-
         getQuestionnaireCmd =
             QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted
     in
-    Cmd.batch [ getPackagesCmd, getQuestionnaireCmd ]
+    Cmd.batch [ getQuestionnaireCmd ]
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -46,23 +44,23 @@ update wrapMsg msg appState model =
         RemoveTag tagUuid ->
             handleRemoveTag model tagUuid
 
-        GetPackagesCompleted result ->
-            handleGetPackagesCompleted appState model result
-
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted appState model result
 
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model
 
-        SelectPackage packageId ->
-            handleSelectPackage model packageId
+        SelectPackage package ->
+            handleSelectPackage model package
 
         PostMigrationCompleted result ->
             handlePostMigrationCompleted appState model result
 
         GetKnowledgeModelPreviewCompleted result ->
             handleGetKnowledgeModelPreviewCompleted appState model result
+
+        PackageTypeHintInputMsg typeHintInputMsg ->
+            handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
 
 
 
@@ -79,17 +77,6 @@ handleRemoveTag : Model -> String -> ( Model, Cmd Wizard.Msgs.Msg )
 handleRemoveTag model tagUuid =
     withNoCmd <|
         { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }
-
-
-handleGetPackagesCompleted : AppState -> Model -> Result ApiError (List Package) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetPackagesCompleted appState model result =
-    preselectKnowledgeModel <|
-        applyResult
-            { setResult = setPackages
-            , defaultError = lg "apiError.packages.getListError" appState
-            , model = model
-            , result = result
-            }
 
 
 handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -141,18 +128,9 @@ handleForm wrapMsg formMsg appState model =
                     ( newModel, Cmd.none )
 
 
-handleSelectPackage : Model -> String -> ( Model, Cmd Wizard.Msgs.Msg )
-handleSelectPackage model packageId =
-    let
-        selectPackage =
-            List.head << List.filter (.id >> (==) packageId)
-
-        selectedPackage =
-            model.packages
-                |> ActionResult.map selectPackage
-                |> ActionResult.withDefault Nothing
-    in
-    ( { model | selectedPackage = selectedPackage }, Cmd.none )
+handleSelectPackage : Model -> PackageSuggestion -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSelectPackage model package =
+    ( { model | selectedPackage = Just package }, Cmd.none )
 
 
 handlePostMigrationCompleted : AppState -> Model -> Result ApiError QuestionnaireMigration -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -184,6 +162,23 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
     ( newModel, cmd )
 
 
+handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg PackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
+    let
+        cfg =
+            { wrapMsg = wrapMsg << PackageTypeHintInputMsg
+            , getTypeHints = PackagesApi.getPackagesSuggestions
+            , getError = lg "apiError.packages.getListError" appState
+            , setReply = wrapMsg << SelectPackage
+            , clearReply = Nothing
+            }
+
+        ( packageTypeHintInputModel, cmd ) =
+            TypeHintInput.update cfg typeHintInputMsg appState model.packageTypeHintInputModel
+    in
+    ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
+
+
 
 -- Helpers
 
@@ -191,13 +186,17 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
 preselectKnowledgeModel : ( Model, Cmd Wizard.Msgs.Msg ) -> ( Model, Cmd Wizard.Msgs.Msg )
 preselectKnowledgeModel ( model, cmd ) =
     let
-        isSamePackage package1 package2 =
-            package1.organizationId == package2.organizationId && package1.kmId == package2.kmId
-
         newModel =
-            case ActionResult.combine model.questionnaire model.packages of
-                Success ( questionnaire, packages ) ->
-                    { model | selectedPackage = List.head <| List.filter (isSamePackage questionnaire.package) packages }
+            case model.questionnaire of
+                Success questionnaire ->
+                    let
+                        packageSuggestion =
+                            Just <| PackageSuggestion.fromPackage questionnaire.package
+                    in
+                    { model
+                        | selectedPackage = packageSuggestion
+                        , packageTypeHintInputModel = setSelected packageSuggestion model.packageTypeHintInputModel
+                    }
 
                 _ ->
                     model

@@ -2,35 +2,36 @@ module Wizard.Projects.Detail.Components.Settings exposing
     ( Model
     , Msg
     , UpdateConfig
-    , fetchData
     , init
+    , subscriptions
     , update
     , view
     )
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Html exposing (Html, br, button, div, h2, hr, p, strong)
+import Form.Field as Field
+import Html exposing (Html, br, button, div, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.Template exposing (Template)
-import Shared.Data.Template.TemplateState as TemplateState
+import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg, lx)
+import Shared.Setters exposing (setSelected)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.TypeHintInput as TypeHintInput
+import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
-import Wizard.Common.View.Page as Page
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
@@ -53,17 +54,21 @@ lx_ =
 
 type alias Model =
     { form : Form FormError QuestionnaireEditForm
+    , templateTypeHintInputModel : TypeHintInput.Model TemplateSuggestion
     , savingQuestionnaire : ActionResult String
-    , templates : ActionResult (List Template)
     , deleteModalModel : DeleteModal.Model
     }
 
 
 init : Maybe QuestionnaireDetail -> Model
 init mbQuestionnaire =
+    let
+        setSelectedTemplate =
+            setSelected (Maybe.andThen .template mbQuestionnaire)
+    in
     { form = Maybe.unwrap QuestionnaireEditForm.initEmpty QuestionnaireEditForm.init mbQuestionnaire
+    , templateTypeHintInputModel = setSelectedTemplate <| TypeHintInput.init "templateId"
     , savingQuestionnaire = Unset
-    , templates = Loading
     , deleteModalModel = DeleteModal.initialModel
     }
 
@@ -75,18 +80,14 @@ init mbQuestionnaire =
 type Msg
     = FormMsg Form.Msg
     | PutQuestionnaireComplete (Result ApiError ())
-    | GetTemplatesComplete (Result ApiError (List Template))
     | DeleteModalMsg DeleteModal.Msg
-
-
-fetchData : AppState -> String -> Cmd Msg
-fetchData appState packageId =
-    TemplatesApi.getTemplatesFor packageId appState GetTemplatesComplete
+    | TemplateTypeHintInputMsg (TypeHintInput.Msg TemplateSuggestion)
 
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , redirectCmd : Cmd msg
+    , packageId : String
     }
 
 
@@ -99,11 +100,11 @@ update cfg msg appState questionnaireUuid model =
         PutQuestionnaireComplete result ->
             handlePutQuestionnaireComplete appState model result
 
-        GetTemplatesComplete result ->
-            handleGetTemplatesComplete appState model result
-
         DeleteModalMsg deleteModalMsg ->
             handleDeleteModalMsg cfg deleteModalMsg appState model
+
+        TemplateTypeHintInputMsg typeHintInputMsg ->
+            handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model
 
 
 handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Uuid -> Model -> ( Model, Cmd msg )
@@ -142,18 +143,6 @@ handlePutQuestionnaireComplete appState model result =
             )
 
 
-handleGetTemplatesComplete : AppState -> Model -> Result ApiError (List Template) -> ( Model, Cmd msg )
-handleGetTemplatesComplete appState model result =
-    case result of
-        Ok templates ->
-            ( { model | templates = Success templates }, Cmd.none )
-
-        Err error ->
-            ( { model | templates = ApiError.toActionResult (lg "apiError.templates.getError" appState) error }
-            , Cmd.none
-            )
-
-
 handleDeleteModalMsg : UpdateConfig msg -> DeleteModal.Msg -> AppState -> Model -> ( Model, Cmd msg )
 handleDeleteModalMsg cfg deleteModalMsg appState model =
     let
@@ -168,6 +157,36 @@ handleDeleteModalMsg cfg deleteModalMsg appState model =
     ( { model | deleteModalModel = deleteModalModel }, cmd )
 
 
+handleTemplateTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg TemplateSuggestion -> AppState -> Model -> ( Model, Cmd msg )
+handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
+    let
+        formMsg =
+            cfg.wrapMsg << FormMsg << Form.Input "templateId" Form.Select << Field.String
+
+        typeHintInputCfg =
+            { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
+            , getTypeHints = TemplatesApi.getTemplatesFor cfg.packageId
+            , getError = lg "apiError.packages.getListError" appState
+            , setReply = formMsg << .id
+            , clearReply = Just <| formMsg ""
+            }
+
+        ( templateTypeHintInputModel, cmd ) =
+            TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.templateTypeHintInputModel
+    in
+    ( { model | templateTypeHintInputModel = templateTypeHintInputModel }, cmd )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.map TemplateTypeHintInputMsg <|
+        TypeHintInput.subscriptions model.templateTypeHintInputModel
+
+
 
 -- VIEW
 
@@ -178,14 +197,9 @@ type alias ViewConfig =
 
 view : AppState -> ViewConfig -> Model -> Html Msg
 view appState cfg model =
-    Page.actionResultView appState (viewContent appState cfg model) model.templates
-
-
-viewContent : AppState -> ViewConfig -> Model -> List Template -> Html Msg
-viewContent appState cfg model templates =
     div [ class "Plans__Detail__Content Plans__Detail__Content--Settings" ]
         [ div [ detailClass "container" ]
-            [ Html.map FormMsg (formView appState model templates)
+            [ formView appState model
             , hr [] []
             , dangerZone cfg appState
             ]
@@ -193,34 +207,21 @@ viewContent appState cfg model templates =
         ]
 
 
-formView : AppState -> Model -> List Template -> Html Form.Msg
-formView appState model templates =
+formView : AppState -> Model -> Html Msg
+formView appState model =
     let
-        templateInput =
-            FormGroup.selectWithDisabled appState templateOptions model.form "templateId" (lg "questionnaire.template" appState)
+        cfg =
+            { viewItem = TypeHintItem.templateSuggestion appState
+            , wrapMsg = TemplateTypeHintInputMsg
+            , nothingSelectedItem = text "--"
+            , clearEnabled = True
+            }
 
-        createTemplateOption { id, name, state } =
-            let
-                visibleName =
-                    if appState.config.template.recommendedTemplateId == Just id then
-                        name ++ " (" ++ lg "questionnaire.template.recommended" appState ++ ")"
-
-                    else
-                        name
-            in
-            ( id, visibleName, state == TemplateState.UnsupportedMetamodelVersion )
-
-        templateOptions =
-            ( "", "--", False ) :: (List.map createTemplateOption <| List.sortBy (String.toLower << .name) templates)
-
-        mbSelectedTemplateId =
-            (Form.getFieldAsString "templateId" model.form).value
-
-        mbSelectedTemplate =
-            List.find (.id >> Just >> (==) mbSelectedTemplateId) templates
+        typeHintInput =
+            TypeHintInput.view appState cfg model.templateTypeHintInputModel
 
         formatInput =
-            case mbSelectedTemplate of
+            case model.templateTypeHintInputModel.selected of
                 Just selectedTemplate ->
                     FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" (lg "questionnaire.defaultFormat" appState)
 
@@ -229,11 +230,11 @@ formView appState model templates =
     in
     div []
         [ h2 [] [ lx_ "settings.title" appState ]
-        , FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
-        , templateInput
-        , formatInput
+        , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
+        , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.template" appState
+        , Html.map FormMsg <| formatInput
         , FormActions.viewActionOnly appState
-            (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire Form.Submit False)
+            (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
         ]
 
 

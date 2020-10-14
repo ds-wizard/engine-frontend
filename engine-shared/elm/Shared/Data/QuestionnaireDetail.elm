@@ -33,6 +33,7 @@ import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
+import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.UserInfo as UserInfo
 import Shared.Utils exposing (boolToInt)
 import Uuid exposing (Uuid)
@@ -50,6 +51,7 @@ type alias QuestionnaireDetail =
     , ownerUuid : Maybe Uuid
     , selectedTagUuids : List String
     , templateId : Maybe String
+    , template : Maybe TemplateSuggestion
     , formatUuid : Maybe Uuid
     , format : Maybe TemplateFormat
     , labels : Dict String (List String)
@@ -70,6 +72,7 @@ decoder =
         |> D.required "ownerUuid" (D.maybe Uuid.decoder)
         |> D.required "selectedTagUuids" (D.list D.string)
         |> D.required "templateId" (D.maybe D.string)
+        |> D.required "template" (D.maybe TemplateSuggestion.decoder)
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe TemplateFormat.decoder)
         |> D.required "labels" (D.dict (D.list D.string))

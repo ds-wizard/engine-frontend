@@ -94,7 +94,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Template
 listingUpdateConfig wrapMsg appState =
-    { getRequest = TemplatesApi.getTemplatesPaginated
+    { getRequest = TemplatesApi.getTemplates
     , getError = lg "apiError.templates.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.TemplatesRoute << IndexRoute
