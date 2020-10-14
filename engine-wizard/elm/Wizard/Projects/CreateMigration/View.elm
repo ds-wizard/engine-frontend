@@ -1,17 +1,17 @@
 module Wizard.Projects.CreateMigration.View exposing (view)
 
-import ActionResult
 import Form
-import Html exposing (Html, div, label, option, select, text)
+import Html exposing (Html, div, label, option, text)
 import Html.Attributes exposing (class, selected, value)
-import Html.Events exposing (onInput)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.Package exposing (Package)
+import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
@@ -37,11 +37,11 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (createMigrationView appState model) <| ActionResult.combine model.questionnaire model.packages
+    Page.actionResultView appState (createMigrationView appState model) model.questionnaire
 
 
-createMigrationView : AppState -> Model -> ( QuestionnaireDetail, List Package ) -> Html Msg
-createMigrationView appState model ( questionnaire, packages ) =
+createMigrationView : AppState -> Model -> QuestionnaireDetail -> Html Msg
+createMigrationView appState model questionnaire =
     let
         createVersionOption package version =
             let
@@ -49,7 +49,9 @@ createMigrationView appState model ( questionnaire, packages ) =
                     Version.toString version
 
                 packageId =
-                    String.join ":" [ package.organizationId, package.kmId, versionString ]
+                    String.join ":" <|
+                        List.take 2 (String.split ":" package.id)
+                            ++ [ versionString ]
             in
             ( packageId, versionString )
 
@@ -64,6 +66,16 @@ createMigrationView appState model ( questionnaire, packages ) =
                 [ label [] [ lx_ "form.originalTags" appState ]
                 , div [] [ Tag.readOnlyList appState questionnaire.selectedTagUuids tags ]
                 ]
+
+        cfg =
+            { viewItem = \pkg -> text pkg.name
+            , wrapMsg = PackageTypeHintInputMsg
+            , nothingSelectedItem = text "--"
+            , clearEnabled = False
+            }
+
+        typeHintInput =
+            TypeHintInput.view appState cfg model.packageTypeHintInputModel
 
         versionSelect =
             case model.selectedPackage of
@@ -88,8 +100,7 @@ createMigrationView appState model ( questionnaire, packages ) =
             , div []
                 [ div [ class "form-group" ]
                     [ label [] [ lx_ "form.newKM" appState ]
-                    , select [ class "form-control", onInput SelectPackage ]
-                        (List.map (packageToOption model.selectedPackage) <| List.sortBy (String.toLower << .name) packages)
+                    , typeHintInput False
                     ]
                 , Html.map FormMsg <| versionSelect <| l_ "form.newVersion" appState
                 , tagsView appState model
@@ -111,9 +122,3 @@ tagsView appState model =
             }
     in
     Tag.selection appState tagListConfig model.knowledgeModelPreview
-
-
-packageToOption : Maybe Package -> Package -> Html Msg
-packageToOption selectedPackage package =
-    option [ value package.id, selected <| selectedPackage == Just package ]
-        [ text package.name ]

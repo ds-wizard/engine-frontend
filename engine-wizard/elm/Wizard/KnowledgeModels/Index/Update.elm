@@ -94,7 +94,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Package
 listingUpdateConfig wrapMsg appState =
-    { getRequest = PackagesApi.getPackagesPaginated
+    { getRequest = PackagesApi.getPackages
     , getError = lg "apiError.packages.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.KnowledgeModelsRoute << IndexRoute

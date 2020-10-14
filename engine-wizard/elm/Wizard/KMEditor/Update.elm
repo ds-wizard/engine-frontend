@@ -17,10 +17,6 @@ import Wizard.Msgs
 fetchData : Route -> Model -> AppState -> Cmd Msg
 fetchData route model appState =
     case route of
-        CreateRoute _ ->
-            Cmd.map CreateMsg <|
-                Wizard.KMEditor.Create.Update.fetchData appState
-
         EditorRoute uuid ->
             if model.editorModel.kmUuid == uuid && Wizard.KMEditor.Editor.Models.containsChanges model.editorModel then
                 Cmd.none
@@ -40,6 +36,9 @@ fetchData route model appState =
         PublishRoute uuid ->
             Cmd.map PublishMsg <|
                 Wizard.KMEditor.Publish.Update.fetchData uuid appState
+
+        _ ->
+            Cmd.none
 
 
 isGuarded : Route -> AppState -> Model -> Maybe String

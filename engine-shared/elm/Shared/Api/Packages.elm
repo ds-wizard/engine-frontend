@@ -4,36 +4,43 @@ module Shared.Api.Packages exposing
     , exportPackageUrl
     , getPackage
     , getPackages
-    , getPackagesPaginated
+    , getPackagesSuggestions
     , importPackage
     , pullPackage
     )
 
 import File exposing (File)
-import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
+import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 
 
-getPackages : AbstractAppState a -> ToMsg (List Package) msg -> Cmd msg
-getPackages =
-    jwtGet "/packages" (D.list Package.decoder)
-
-
-getPackagesPaginated : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Package) msg -> Cmd msg
-getPackagesPaginated qs =
+getPackages : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Package) msg -> Cmd msg
+getPackages qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs
 
         url =
-            "/packages/page" ++ queryString
+            "/packages" ++ queryString
     in
     jwtGet url (Pagination.decoder "packages" Package.decoder)
+
+
+getPackagesSuggestions : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination PackageSuggestion) msg -> Cmd msg
+getPackagesSuggestions qs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrl qs
+
+        url =
+            "/packages/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "packages" PackageSuggestion.decoder)
 
 
 getPackage : String -> AbstractAppState a -> ToMsg PackageDetail msg -> Cmd msg

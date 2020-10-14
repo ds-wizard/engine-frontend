@@ -19,7 +19,7 @@ import Wizard.Settings.Submission.Msgs exposing (Msg(..))
 fetchData : AppState -> Cmd Msg
 fetchData appState =
     Cmd.batch
-        [ TemplatesApi.getTemplates appState GetTemplatesCompleted
+        [ TemplatesApi.getTemplatesAll appState GetTemplatesCompleted
         , Cmd.map GenericMsg <| GenericUpdate.fetchData appState
         ]
 

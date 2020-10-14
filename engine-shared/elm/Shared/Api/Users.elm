@@ -26,7 +26,7 @@ getUsers qs =
             PaginationQueryString.toApiUrl qs
 
         url =
-            "/users/page" ++ queryString
+            "/users" ++ queryString
     in
     jwtGet url (Pagination.decoder "users" User.decoder)
 

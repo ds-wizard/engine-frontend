@@ -12,6 +12,7 @@ module Shared.Setters exposing
     , setQuestionnaireDetail
     , setQuestionnaireModel
     , setQuestionnaires
+    , setSelected
     , setTemplate
     , setTemplates
     , setToken
@@ -83,6 +84,11 @@ setQuestionnaireModel value record =
 setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }
 setQuestionnaires value record =
     { record | questionnaires = value }
+
+
+setSelected : a -> { b | selected : a } -> { b | selected : a }
+setSelected value record =
+    { record | selected = value }
 
 
 setTemplate : a -> { b | template : a } -> { b | template : a }

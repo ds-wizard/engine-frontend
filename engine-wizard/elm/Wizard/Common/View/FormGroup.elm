@@ -2,6 +2,7 @@ module Wizard.Common.View.FormGroup exposing
     ( codeView
     , color
     , formGroup
+    , formGroupCustom
     , formatRadioGroup
     , getErrors
     , htmlRadioGroup
@@ -31,6 +32,7 @@ import Html.Attributes exposing (autocomplete, checked, class, classList, disabl
 import Html.Events exposing (on, onBlur, onCheck, onClick, onFocus, onMouseDown, targetValue)
 import Json.Decode as Json
 import Markdown
+import Maybe.Extra as Maybe
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError(..))
@@ -452,6 +454,22 @@ formGroup inputFn attrs appState form fieldName labelText =
     div [ class "form-group" ]
         [ label [ for fieldName ] [ text labelText ]
         , inputFn field (attrs ++ [ class <| "form-control " ++ errorClass, id fieldName, name fieldName ])
+        , error
+        ]
+
+
+formGroupCustom : (Bool -> Html msg) -> AppState -> Form FormError o -> String -> String -> Html msg
+formGroupCustom customInput appState form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, _ ) =
+            getErrors appState field labelText
+    in
+    div [ class "form-group" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , customInput (Maybe.isJust field.liveError)
         , error
         ]
 

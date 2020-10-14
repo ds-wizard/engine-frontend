@@ -78,7 +78,8 @@ init appState =
       , kmListExpanded = False
       , kmModalModel = KnowledgeModelModal.init
       }
-    , TemplatesApi.getTemplates appState GetTemplatesComplete
+    , Cmd.none
+      --, TemplatesApi.getTemplates appState GetTemplatesComplete
     )
 
 

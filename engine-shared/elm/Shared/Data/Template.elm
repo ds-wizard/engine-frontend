@@ -12,7 +12,6 @@ import Json.Decode.Pipeline as D
 import List.Extra as List
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
-import Shared.Data.Template.TemplatePackage as TemplatePackage exposing (TemplatePackage)
 import Shared.Data.Template.TemplateState as TemplateState exposing (TemplateState)
 import Time
 import Version exposing (Version)
@@ -23,16 +22,12 @@ type alias Template =
     , description : String
     , formats : List TemplateFormat
     , id : String
-    , license : String
-    , metamodelVersion : Int
     , name : String
     , organization : Maybe OrganizationInfo
     , organizationId : String
-    , readme : String
     , recommendedPackageId : Maybe String
     , state : TemplateState
     , templateId : String
-    , usablePackages : List TemplatePackage
     , version : Version
     }
 
@@ -44,16 +39,12 @@ decoder =
         |> D.required "description" D.string
         |> D.required "formats" (D.list TemplateFormat.decoder)
         |> D.required "id" D.string
-        |> D.required "license" D.string
-        |> D.required "metamodelVersion" D.int
         |> D.required "name" D.string
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing
         |> D.required "organizationId" D.string
-        |> D.required "readme" D.string
         |> D.required "recommendedPackageId" (D.maybe D.string)
         |> D.required "state" TemplateState.decoder
         |> D.required "templateId" D.string
-        |> D.required "usablePackages" (D.list TemplatePackage.decoder)
         |> D.required "version" Version.decoder
 
 
