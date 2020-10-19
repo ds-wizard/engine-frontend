@@ -4,16 +4,14 @@
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "npm run build:registry && npm run build:wizard && npm run build:wizard-research",
+    "build": "npm run build:registry && npm run build:wizard",
     "build:registry": "COMPONENT=registry ./scripts/build.sh",
     "build:wizard": "COMPONENT=wizard ./scripts/build.sh",
-    "build:wizard-research": "COMPONENT=wizard-research ./scripts/build.sh",
     "clean": "rm -rf dist",
     "start": "npm run start:wizard",
     "start:registry": "COMPONENT=registry webpack-dev-server --port 8081",
     "start:wizard": "COMPONENT=wizard webpack-dev-server --port 8080",
-    "start:wizard-research": "COMPONENT=wizard-research webpack-dev-server --port 8082",
-    "test": "npm run test:elm && npm run test:registry:icon-set && npm run test:registry:locale && npm run test:shared:icon-set && npm run test:shared:locale && npm run test:wizard:icon-set && npm run test:wizard:locale && npm run test:wizard-research:icon-set && npm run test:wizard-research:locale",
+    "test": "npm run test:elm && npm run test:registry:icon-set && npm run test:registry:locale && npm run test:shared:icon-set && npm run test:shared:locale && npm run test:wizard:icon-set && npm run test:wizard:locale",
     "test:elm": "elm-test",
     "test:registry": "npm run test:elm && npm run test:registry:icon-set && npm run test:registry:locale",
     "test:registry:icon-set": "COMPONENT=registry node scripts/test-icon-set.js",
@@ -23,12 +21,8 @@
     "test:wizard": "npm run test:elm && npm run test:wizard:icon-set && npm run test:wizard:locale",
     "test:wizard:icon-set": "COMPONENT=wizard node scripts/test-icon-set.js",
     "test:wizard:locale": "COMPONENT=wizard node scripts/test-locale.js",
-    "test:wizard-research": "npm run test:elm && npm run test:shared:icon-set && npm run test:shared:locale && npm run test:wizard-research:icon-set && npm run test:wizard-research:locale",
-    "test:wizard-research:icon-set": "COMPONENT=wizard-research node scripts/test-icon-set.js",
-    "test:wizard-research:locale": "COMPONENT=wizard-research node scripts/test-locale.js",
     "extract-locale:registry": "COMPONENT=registry node scripts/extract-locale.js",
-    "extract-locale:wizard": "COMPONENT=wizard node scripts/extract-locale.js",
-    "extract-locale:wizard-research": "COMPONENT=wizard-research node scripts/extract-locale.js"
+    "extract-locale:wizard": "COMPONENT=wizard node scripts/extract-locale.js"
   },
   "devDependencies": {
     "bootstrap": "^4.3.1",
