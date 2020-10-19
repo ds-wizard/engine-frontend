@@ -73,13 +73,8 @@ fetchSubrouteData appState model =
                         Documents.fetchData
 
                 PlanDetailRoute.NewDocument ->
-                    case model.questionnaireModel of
-                        Success qm ->
-                            Cmd.map NewDocumentMsg <|
-                                NewDocument.fetchData appState uuid qm.questionnaire.templateId
-
-                        _ ->
-                            Cmd.none
+                    Cmd.map NewDocumentMsg <|
+                        NewDocument.fetchData appState uuid
 
                 _ ->
                     Cmd.none
@@ -238,6 +233,7 @@ update wrapMsg msg appState model =
                             NewDocument.update
                                 { wrapMsg = wrapMsg << NewDocumentMsg
                                 , questionnaireUuid = qm.questionnaire.uuid
+                                , packageId = qm.questionnaire.package.id
                                 , documentsNavigateCmd = cmdNavigate appState <| ProjectsRoute <| DetailRoute qm.questionnaire.uuid <| PlanDetailRoute.Documents PaginationQueryString.empty
                                 }
                                 newDocumentMsg
