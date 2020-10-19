@@ -111,7 +111,7 @@ createQuestionnaireDetail packageId km =
     , name = ""
     , visibility = PrivateQuestionnaire
     , sharing = RestrictedQuestionnaire
-    , ownerUuid = Nothing
+    , permissions = []
     , package = { package | id = packageId }
     , knowledgeModel = km
     , replies = Dict.fromList []

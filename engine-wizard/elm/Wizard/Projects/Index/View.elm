@@ -110,10 +110,10 @@ listingDescription : AppState -> Questionnaire -> Html Msg
 listingDescription appState questionnaire =
     let
         ownerName =
-            case questionnaire.owner of
+            case Maybe.map .member (List.head questionnaire.permissions) of
                 Just owner ->
                     span [ class "fragment fragment-icon-light" ]
-                        [ img [ src (User.imageUrl owner), class "user-icon user-icon-small" ] []
+                        [ img [ src (User.imageUrlOrGravatar owner), class "user-icon user-icon-small" ] []
                         , text <| User.fullName owner
                         ]
 
@@ -225,11 +225,11 @@ listingActions appState questionnaire =
         |> listInsertIf openProject (not migrating)
         |> listInsertIf Listing.dropdownSeparator (not migrating)
         |> listInsertIf clone (not migrating)
-        |> listInsertIf continueMigration migrating
-        |> listInsertIf cancelMigration migrating
-        |> listInsertIf createMigration (not migrating)
-        |> listInsertIf Listing.dropdownSeparator (editable && not migrating)
-        |> listInsertIf delete (editable && not migrating)
+        |> listInsertIf continueMigration (editable && migrating)
+        |> listInsertIf cancelMigration (editable && migrating)
+        |> listInsertIf createMigration (editable && not migrating)
+        |> listInsertIf Listing.dropdownSeparator editable
+        |> listInsertIf delete editable
 
 
 detailRoute : Questionnaire -> Routes.Route
