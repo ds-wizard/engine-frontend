@@ -64,7 +64,7 @@ init appState uuid =
     , questionnaireModel = Loading
     , summaryReportModel = SummaryReport.init
     , documentsModel = Documents.initialModel PaginationQueryString.empty
-    , newDocumentModel = NewDocument.initialModel { name = "", templateId = Nothing, formatUuid = Nothing }
+    , newDocumentModel = NewDocument.initialModel { name = "", template = Nothing, formatUuid = Nothing }
     , settingsModel = Settings.init Nothing
     }
 
@@ -97,7 +97,7 @@ initPageModel route model =
                             NewDocument.initialModel qm.questionnaire
 
                         _ ->
-                            NewDocument.initialModel { name = "", templateId = Nothing, formatUuid = Nothing }
+                            NewDocument.initialModel { name = "", template = Nothing, formatUuid = Nothing }
             }
 
         PlanDetailRoute.Settings ->

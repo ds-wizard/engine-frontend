@@ -231,7 +231,7 @@ formView appState model =
     div []
         [ h2 [] [ lx_ "settings.title" appState ]
         , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
-        , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.template" appState
+        , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
         , Html.map FormMsg <| formatInput
         , FormActions.viewActionOnly appState
             (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
