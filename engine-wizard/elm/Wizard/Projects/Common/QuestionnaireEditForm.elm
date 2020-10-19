@@ -12,6 +12,7 @@ import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
+import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -72,12 +73,13 @@ validation =
         (Validate.field "formatUuid" (Validate.maybe Validate.string))
 
 
-encode : QuestionnaireEditForm -> E.Value
-encode form =
+encode : List Permission -> QuestionnaireEditForm -> E.Value
+encode permissions form =
     E.object
         [ ( "name", E.string form.name )
         , ( "visibility", QuestionnaireVisibility.encode (QuestionnaireVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission) )
         , ( "sharing", QuestionnaireSharing.encode (QuestionnaireSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
         , ( "templateId", E.maybe E.string form.templateId )
         , ( "formatUuid", E.maybe E.string form.formatUuid )
+        , ( "permissions", E.list Permission.encode permissions )
         ]

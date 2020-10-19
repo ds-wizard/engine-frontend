@@ -13,6 +13,7 @@ import Form exposing (Form)
 import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class, classList)
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnairePermission as QuestionnairePermission
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -75,6 +76,7 @@ openMsg =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , questionnaireUuid : Uuid
+    , permissions : List Permission
     }
 
 
@@ -97,7 +99,7 @@ handleFormMsg cfg formMsg appState model =
         ( Form.Submit, Just form ) ->
             let
                 body =
-                    QuestionnaireEditForm.encode form
+                    QuestionnaireEditForm.encode cfg.permissions form
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|

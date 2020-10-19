@@ -17,6 +17,7 @@ import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
+import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -32,6 +33,7 @@ import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
+import Wizard.Common.View.FormResult as FormResult
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
@@ -88,14 +90,16 @@ type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , redirectCmd : Cmd msg
     , packageId : String
+    , questionnaireUuid : Uuid
+    , permissions : List Permission
     }
 
 
-update : UpdateConfig msg -> Msg -> AppState -> Uuid -> Model -> ( Model, Cmd msg )
-update cfg msg appState questionnaireUuid model =
+update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
+update cfg msg appState model =
     case msg of
         FormMsg formMsg ->
-            handleFormMsg cfg formMsg appState questionnaireUuid model
+            handleFormMsg cfg formMsg appState model
 
         PutQuestionnaireComplete result ->
             handlePutQuestionnaireComplete appState model result
@@ -107,17 +111,17 @@ update cfg msg appState questionnaireUuid model =
             handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model
 
 
-handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Uuid -> Model -> ( Model, Cmd msg )
-handleFormMsg cfg formMsg appState questionnaireUuid model =
+handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Model -> ( Model, Cmd msg )
+handleFormMsg cfg formMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just form ) ->
             let
                 body =
-                    QuestionnaireEditForm.encode form
+                    QuestionnaireEditForm.encode cfg.permissions form
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.putQuestionnaire questionnaireUuid body appState PutQuestionnaireComplete
+                        QuestionnairesApi.putQuestionnaire cfg.questionnaireUuid body appState PutQuestionnaireComplete
             in
             ( { model | savingQuestionnaire = Loading }
             , cmd
@@ -230,6 +234,7 @@ formView appState model =
     in
     div []
         [ h2 [] [ lx_ "settings.title" appState ]
+        , FormResult.errorOnlyView appState model.savingQuestionnaire
         , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
         , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
         , Html.map FormMsg <| formatInput

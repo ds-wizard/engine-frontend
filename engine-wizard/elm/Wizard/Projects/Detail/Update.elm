@@ -375,6 +375,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << ShareModalMsg
                     , questionnaireUuid = model.uuid
+                    , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
                     }
 
                 ( shareModalModel, cmd ) =
@@ -388,10 +389,12 @@ update wrapMsg msg appState model =
                     { wrapMsg = wrapMsg << SettingsMsg
                     , redirectCmd = cmdNavigate appState Routes.projectsIndex
                     , packageId = ActionResult.unwrap "" (.questionnaire >> .package >> .id) model.questionnaireModel
+                    , questionnaireUuid = model.uuid
+                    , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
                     }
 
                 ( settingsModel, cmd ) =
-                    Settings.update updateConfig settingsMsg appState model.uuid model.settingsModel
+                    Settings.update updateConfig settingsMsg appState model.settingsModel
             in
             withSeed ( { model | settingsModel = settingsModel }, cmd )
 
