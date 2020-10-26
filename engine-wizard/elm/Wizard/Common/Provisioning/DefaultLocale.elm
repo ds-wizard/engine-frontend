@@ -621,7 +621,7 @@ locale =
                , ( "Wizard.Projects.Detail.Documents.View.deleteModal.action", "Delete" )
                , ( "Wizard.Projects.Detail.Documents.View.deleteModal.message", "Are you sure you want to permanently delete %h?" )
                , ( "Wizard.Projects.Detail.Documents.View.deleteModal.title", "Delete document" )
-               , ( "Wizard.Projects.Detail.Documents.View.listing.empty", "Click \"Create\" button to add a new Document." )
+               , ( "Wizard.Projects.Detail.Documents.View.listing.empty", "Click \"New document\" button to add a new document." )
                , ( "Wizard.Projects.Detail.Documents.View.listing.name.title", "Click to download the document" )
                , ( "Wizard.Projects.Detail.Documents.View.newDocument", "New document" )
                , ( "Wizard.Projects.Detail.Documents.View.submitModal.button.cancel", "Cancel" )
