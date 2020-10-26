@@ -243,7 +243,6 @@ locale =
                , ( "_global.package.parentKM", "Parent Knowledge Model" )
                , ( "_global.package.publishedBy", "Published by" )
                , ( "_global.package.registryLink", "Registry Link" )
-               , ( "_global.package.updatedAt", "Updated" )
                , ( "_global.package.version", "Version" )
                , ( "_global.project", "Project" )
                , ( "_global.projectMigration", "Project Migration" )

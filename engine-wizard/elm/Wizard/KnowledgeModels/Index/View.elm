@@ -77,7 +77,6 @@ listingConfig appState =
     , sortOptions =
         [ ( "versions.name", lg "package.name" appState )
         , ( "versions.createdAt", lg "package.createdAt" appState )
-        , ( "versions.updatedAt", lg "package.updatedAt" appState )
         ]
     , toRoute = Routes.KnowledgeModelsRoute << IndexRoute
     , toolbarExtra = Just (createButton appState)
