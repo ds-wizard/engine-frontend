@@ -75,11 +75,15 @@ validation =
 
 encode : List Permission -> QuestionnaireEditForm -> E.Value
 encode permissions form =
+    let
+        formatUuid =
+            Maybe.andThen (always form.formatUuid) form.templateId
+    in
     E.object
         [ ( "name", E.string form.name )
         , ( "visibility", QuestionnaireVisibility.encode (QuestionnaireVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission) )
         , ( "sharing", QuestionnaireSharing.encode (QuestionnaireSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
         , ( "templateId", E.maybe E.string form.templateId )
-        , ( "formatUuid", E.maybe E.string form.formatUuid )
+        , ( "formatUuid", E.maybe E.string formatUuid )
         , ( "permissions", E.list Permission.encode permissions )
         ]
