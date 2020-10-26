@@ -122,7 +122,14 @@
 
                 .fragment {
                     img {
-                        margin-right: 0.25rem;
+                        &:not(:last-child) {
+                            margin-right: .25rem;
+                        }
+
+                        &.user-icon-mr {
+                            margin-right: .25rem;
+                        }
+
                         vertical-align: middle;
                     }
                 }

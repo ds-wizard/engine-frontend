@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
@@ -109,16 +110,38 @@ listingTitle appState questionnaire =
 listingDescription : AppState -> Questionnaire -> Html Msg
 listingDescription appState questionnaire =
     let
-        ownerName =
-            case Maybe.map .member (List.head questionnaire.permissions) of
-                Just owner ->
-                    span [ class "fragment fragment-icon-light" ]
-                        [ img [ src (User.imageUrlOrGravatar owner), class "user-icon user-icon-small" ] []
-                        , text <| User.fullName owner
-                        ]
+        owner =
+            if questionnaire.visibility == QuestionnaireVisibility.VisibleEditQuestionnaire then
+                emptyNode
 
-                Nothing ->
-                    emptyNode
+            else
+                case questionnaire.permissions of
+                    [] ->
+                        emptyNode
+
+                    perm :: [] ->
+                        span [ class "fragment" ]
+                            [ img [ src (User.imageUrlOrGravatar perm.member), class "user-icon user-icon-small user-icon-mr" ] []
+                            , text <| User.fullName perm.member
+                            ]
+
+                    perms ->
+                        let
+                            ownerIcon member =
+                                img
+                                    [ src (User.imageUrlOrGravatar member)
+                                    , class "user-icon user-icon-small"
+                                    , title <| User.fullName member
+                                    ]
+                                    []
+
+                            users =
+                                perms
+                                    |> List.map .member
+                                    |> List.sortWith User.compare
+                                    |> List.map ownerIcon
+                        in
+                        span [ class "fragment" ] users
 
         kmRoute =
             Routes.KnowledgeModelsRoute <|
@@ -151,7 +174,7 @@ listingDescription appState questionnaire =
                 |> List.map toAnsweredInidcation
     in
     span []
-        (ownerName :: kmLink :: answered)
+        (owner :: kmLink :: answered)
 
 
 listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)

@@ -62,7 +62,7 @@ decodeSubmissionProps =
         |> D.required "values" (D.dict D.string)
 
 
-compare : User -> User -> Order
+compare : { a | firstName : String, lastName : String } -> { a | firstName : String, lastName : String } -> Order
 compare u1 u2 =
     case Basics.compare (String.toLower u1.lastName) (String.toLower u2.lastName) of
         LT ->
