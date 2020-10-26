@@ -340,6 +340,8 @@ locale =
                , ( "Wizard.Common.Components.SummaryReport.metricsDescriptions.metricsExplanation", "Metrics Explanation" )
                , ( "Wizard.Common.Menu.Update.error.buildInfo", "Cannot get build info" )
                , ( "Wizard.Common.Menu.View.about.action", "Ok" )
+               , ( "Wizard.Common.Menu.View.about.apiDocs", "API Docs" )
+               , ( "Wizard.Common.Menu.View.about.apiUrl", "API URL" )
                , ( "Wizard.Common.Menu.View.about.builtAt", "Built at" )
                , ( "Wizard.Common.Menu.View.about.client", "Client" )
                , ( "Wizard.Common.Menu.View.about.server", "Server" )

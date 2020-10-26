@@ -179,27 +179,45 @@ viewAboutModal appState isOpen serverBuildInfoActionResult =
 
 viewAboutModalContent : AppState -> BuildInfo -> Html Wizard.Msgs.Msg
 viewAboutModalContent appState serverBuildInfo =
+    let
+        swaggerUrl =
+            appState.apiUrl ++ "/swagger-ui/"
+
+        extraServerInfo =
+            [ ( l_ "about.apiUrl" appState, a [ href appState.apiUrl, target "_blank" ] [ text appState.apiUrl ] )
+            , ( l_ "about.apiDocs" appState, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
+            ]
+    in
     div []
-        [ viewBuildInfo appState (l_ "about.client" appState) BuildInfo.client
-        , viewBuildInfo appState (l_ "about.server" appState) serverBuildInfo
+        [ viewBuildInfo appState (l_ "about.client" appState) BuildInfo.client []
+        , viewBuildInfo appState (l_ "about.server" appState) serverBuildInfo extraServerInfo
         ]
 
 
-viewBuildInfo : AppState -> String -> BuildInfo -> Html Wizard.Msgs.Msg
-viewBuildInfo appState name buildInfo =
+viewBuildInfo : AppState -> String -> BuildInfo -> List ( String, Html msg ) -> Html msg
+viewBuildInfo appState name buildInfo extra =
+    let
+        viewExtraRow ( title, value ) =
+            tr []
+                [ td [] [ text title ]
+                , td [] [ value ]
+                ]
+    in
     table [ class "table table-borderless table-build-info" ]
         [ thead []
             [ tr []
                 [ th [ colspan 2 ] [ text name ] ]
             ]
         , tbody []
-            [ tr []
+            ([ tr []
                 [ td [] [ lx_ "about.version" appState ]
                 , td [] [ code [] [ text buildInfo.version ] ]
                 ]
-            , tr []
+             , tr []
                 [ td [] [ lx_ "about.builtAt" appState ]
                 , td [] [ em [] [ text buildInfo.builtAt ] ]
                 ]
-            ]
+             ]
+                ++ List.map viewExtraRow extra
+            )
         ]
