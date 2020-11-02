@@ -121,7 +121,7 @@ listingDescription appState questionnaire =
 
                     perm :: [] ->
                         span [ class "fragment" ]
-                            [ img [ src (User.imageUrlOrGravatar perm.member), class "user-icon user-icon-small user-icon-mr" ] []
+                            [ img [ src (User.imageUrlOrGravatar perm.member), class "user-icon user-icon-small" ] []
                             , text <| User.fullName perm.member
                             ]
 
@@ -130,7 +130,7 @@ listingDescription appState questionnaire =
                             ownerIcon member =
                                 img
                                     [ src (User.imageUrlOrGravatar member)
-                                    , class "user-icon user-icon-small"
+                                    , class "user-icon user-icon-small user-icon-only"
                                     , title <| User.fullName member
                                     ]
                                     []
