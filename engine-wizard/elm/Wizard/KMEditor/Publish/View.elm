@@ -6,7 +6,7 @@ import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Shared.Data.BranchDetail as BranchDetail exposing (BranchDetail)
+import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lh, lx)
 import Shared.Utils exposing (flip)
@@ -23,7 +23,6 @@ import Wizard.KMEditor.Common.BranchPublishForm exposing (BranchPublishForm)
 import Wizard.KMEditor.Common.BranchUtils as BranchUtils
 import Wizard.KMEditor.Publish.Models exposing (Model)
 import Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
-import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -55,7 +54,7 @@ contentView appState model branch =
             [ FormResult.view appState model.publishingBranch
             , formView appState model.form branch
             , FormActions.view appState
-                (Routes.KMEditorRoute IndexRoute)
+                Routes.kmEditorIndex
                 (ActionButton.ButtonConfig (l_ "action" appState) model.publishingBranch (FormMsg Form.Submit) False)
             ]
         ]

@@ -233,7 +233,7 @@ viewPlanNavigationNav appState route model qm =
         questionnaireLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.PlansRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Questionnaire))
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Questionnaire))
                     [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Questionnaire ) ] ]
                     [ fa "fa far fa-list-alt"
                     , span [ attribute "data-content" (l_ "nav.questionnaire" appState) ] [ lx_ "nav.questionnaire" appState ]
@@ -243,7 +243,7 @@ viewPlanNavigationNav appState route model qm =
         todosLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.PlansRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.TODOs))
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.TODOs))
                     [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.TODOs ) ] ]
                     [ fa "fa far fa-check-square"
                     , span [ attribute "data-content" (l_ "nav.todos" appState) ] [ lx_ "nav.todos" appState ]
@@ -254,7 +254,7 @@ viewPlanNavigationNav appState route model qm =
         metricsLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.PlansRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Metrics))
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Metrics))
                     [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Metrics ) ] ]
                     [ fa "fa far fa-chart-bar"
                     , span [ attribute "data-content" (l_ "nav.metrics" appState) ] [ lx_ "nav.metrics" appState ]
@@ -264,7 +264,7 @@ viewPlanNavigationNav appState route model qm =
         previewLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.PlansRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Preview))
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Preview))
                     [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Preview ) ] ]
                     [ fa "fa far fa-eye"
                     , span [ attribute "data-content" (l_ "nav.preview" appState) ] [ lx_ "nav.preview" appState ]
@@ -274,7 +274,7 @@ viewPlanNavigationNav appState route model qm =
         documentsLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.PlansRoute (PlansRoutes.DetailRoute model.uuid (PlanDetailRoute.Documents PaginationQueryString.empty)))
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid (PlanDetailRoute.Documents PaginationQueryString.empty)))
                     [ class "nav-link", classList [ ( "active", isDocumentRoute route ) ] ]
                     [ fa "fa far fa-copy"
                     , span [ attribute "data-content" (l_ "nav.documents" appState) ] [ lx_ "nav.documents" appState ]
@@ -284,7 +284,7 @@ viewPlanNavigationNav appState route model qm =
         settingsLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.PlansRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Settings))
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Settings))
                     [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Settings ) ] ]
                     [ fa "fa fas fa-cogs"
                     , span [ attribute "data-content" (l_ "nav.settings" appState) ] [ lx_ "nav.settings" appState ]
@@ -332,7 +332,7 @@ viewPlanContent appState route model qm levels metrics =
                         }
                     , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel levels metrics
                     }
-                    { levels = levels, metrics = metrics }
+                    { levels = levels, metrics = metrics, events = [] }
                     qm
 
         PlanDetailRoute.Preview ->

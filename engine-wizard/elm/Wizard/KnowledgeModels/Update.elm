@@ -17,9 +17,9 @@ fetchData route appState =
             Cmd.map DetailMsg <|
                 Wizard.KnowledgeModels.Detail.Update.fetchData packageId appState
 
-        IndexRoute ->
+        IndexRoute _ ->
             Cmd.map IndexMsg <|
-                Wizard.KnowledgeModels.Index.Update.fetchData appState
+                Wizard.KnowledgeModels.Index.Update.fetchData
 
         _ ->
             Cmd.none

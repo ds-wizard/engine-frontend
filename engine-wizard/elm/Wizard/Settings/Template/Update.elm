@@ -20,7 +20,7 @@ fetchData : AppState -> Cmd Msg
 fetchData appState =
     Cmd.batch
         [ Cmd.map GenericMsg <| GenericUpdate.fetchData appState
-        , TemplatesApi.getTemplates appState GetTemplatesComplete
+        , TemplatesApi.getTemplatesAll appState GetTemplatesComplete
         ]
 
 

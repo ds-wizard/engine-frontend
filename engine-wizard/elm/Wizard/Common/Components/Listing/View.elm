@@ -13,16 +13,17 @@ module Wizard.Common.Components.Listing.View exposing
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, a, div, input, li, nav, span, text, ul)
-import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, target, type_, value)
+import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, target, title, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
-import Time
+import Time exposing (Month(..))
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Item, Model)
@@ -327,8 +328,15 @@ viewUpdated : AppState -> ViewConfig a msg -> a -> Html msg
 viewUpdated appState config item =
     case config.updated of
         Just updated ->
-            span []
-                [ text <| l_ "item.updated" appState ++ inWordsWithConfig { withAffix = True } (locale appState) (updated.getTime item) updated.currentTime ]
+            let
+                time =
+                    updated.getTime item
+
+                readableTime =
+                    TimeUtils.toReadableDateTime appState.timeZone time
+            in
+            span [ title readableTime ]
+                [ text <| l_ "item.updated" appState ++ inWordsWithConfig { withAffix = True } (locale appState) time updated.currentTime ]
 
         Nothing ->
             emptyNode

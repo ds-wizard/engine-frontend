@@ -1,5 +1,6 @@
 module Wizard.Templates.Models exposing (Model, initLocalModel, initialModel)
 
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Templates.Detail.Models
 import Wizard.Templates.Import.Models
@@ -18,7 +19,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { detailModel = Wizard.Templates.Detail.Models.initialModel
     , importModel = Wizard.Templates.Import.Models.initialModel appState Nothing
-    , indexModel = Wizard.Templates.Index.Models.initialModel
+    , indexModel = Wizard.Templates.Index.Models.initialModel PaginationQueryString.empty
     }
 
 
@@ -31,5 +32,5 @@ initLocalModel route appState model =
         ImportRoute packageId ->
             { model | importModel = Wizard.Templates.Import.Models.initialModel appState packageId }
 
-        IndexRoute ->
-            { model | indexModel = Wizard.Templates.Index.Models.initialModel }
+        IndexRoute paginationQuerystring ->
+            { model | indexModel = Wizard.Templates.Index.Models.initialModel paginationQuerystring }

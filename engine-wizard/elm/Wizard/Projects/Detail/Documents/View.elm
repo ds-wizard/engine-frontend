@@ -85,12 +85,12 @@ listingConfig appState cfg =
         [ ( "name", lg "document.name" appState )
         , ( "createdAt", lg "document.createdAt" appState )
         ]
-    , toRoute = Routes.PlansRoute << DetailRoute cfg.questionnaireUuid << PlanDetailRoute.Documents
+    , toRoute = Routes.ProjectsRoute << DetailRoute cfg.questionnaireUuid << PlanDetailRoute.Documents
     , toolbarExtra =
         if cfg.questionnaireEditable then
             Just <|
                 linkTo appState
-                    (Routes.PlansRoute <| DetailRoute cfg.questionnaireUuid <| PlanDetailRoute.NewDocument)
+                    (Routes.ProjectsRoute <| DetailRoute cfg.questionnaireUuid <| PlanDetailRoute.NewDocument)
                     [ class "btn btn-primary" ]
                     [ lx_ "newDocument" appState ]
 
@@ -172,7 +172,7 @@ listingActions appState cfg document =
     []
         |> listInsertIf download (document.state == DoneDocumentState)
         |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator cfg.questionnaireEditable
+        |> listInsertIf Listing.dropdownSeparator (cfg.questionnaireEditable && document.state == DoneDocumentState)
         |> listInsertIf delete cfg.questionnaireEditable
 
 

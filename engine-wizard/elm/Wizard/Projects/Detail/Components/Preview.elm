@@ -16,15 +16,18 @@ import Http
 import Maybe.Extra as Maybe
 import Process
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Task
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
-import Wizard.Projects.Detail.Components.Shared.TemplateNotSet as TemplateNotSet
+import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Routes as ProjectRoutes
+import Wizard.Routes
 
 
 l_ : String -> AppState -> String
@@ -117,7 +120,7 @@ view appState questionnaire model =
                     Page.actionResultView appState (viewContent appState model) preview
 
                 TemplateNotSet ->
-                    TemplateNotSet.view appState questionnaire
+                    viewTemplateNotSet appState questionnaire
     in
     content
 
@@ -133,19 +136,51 @@ viewContent appState model mbContentType =
             [ iframe [ src documentUrl ] [] ]
 
     else
-        Page.illustratedMessageHtml
-            { image = "download_files"
-            , heading = l_ "notSupported.title" appState
-            , content =
-                [ p [] [ lx_ "notSupported.text" appState ]
+        viewNotSupported appState documentUrl
+
+
+viewNotSupported : AppState -> String -> Html msg
+viewNotSupported appState documentUrl =
+    Page.illustratedMessageHtml
+        { image = "download_files"
+        , heading = l_ "notSupported.title" appState
+        , content =
+            [ p [] [ lx_ "notSupported.text" appState ]
+            , p []
+                [ a [ class "btn btn-primary btn-lg link-with-icon", href documentUrl, target "_blank" ]
+                    [ faSet "_global.download" appState
+                    , lx_ "notSupported.download" appState
+                    ]
+                ]
+            ]
+        }
+
+
+viewTemplateNotSet : AppState -> QuestionnaireDetail -> Html msg
+viewTemplateNotSet appState questionnaire =
+    let
+        content =
+            if QuestionnaireDetail.isOwner appState questionnaire then
+                [ p [] [ lx_ "templateNotSet.textOwner" appState ]
                 , p []
-                    [ a [ class "btn btn-primary btn-lg link-with-icon", href documentUrl, target "_blank" ]
-                        [ faSet "_global.download" appState
-                        , lx_ "notSupported.download" appState
+                    [ linkTo appState
+                        (Wizard.Routes.ProjectsRoute (ProjectRoutes.DetailRoute questionnaire.uuid PlanDetailRoute.Settings))
+                        [ class "btn btn-primary btn-lg link-with-icon-after" ]
+                        [ lx_ "templateNotSet.link" appState
+                        , faSet "_global.arrowRight" appState
                         ]
                     ]
                 ]
-            }
+
+            else
+                [ p [] [ lx_ "templateNotSet.textNotOwner" appState ]
+                ]
+    in
+    Page.illustratedMessageHtml
+        { image = "website_builder"
+        , heading = l_ "templateNotSet.heading" appState
+        , content = content
+        }
 
 
 isSupportedInBrowser : AppState -> String -> Bool

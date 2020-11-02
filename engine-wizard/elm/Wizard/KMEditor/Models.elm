@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Models exposing (Model, initLocalModel, initialModel)
 
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Uuid
 import Wizard.KMEditor.Create.Models
 import Wizard.KMEditor.Editor.Models
@@ -22,7 +23,7 @@ initialModel : Model
 initialModel =
     { createModel = Wizard.KMEditor.Create.Models.initialModel Nothing
     , editorModel = Wizard.KMEditor.Editor.Models.initialModel Uuid.nil
-    , indexModel = Wizard.KMEditor.Index.Models.initialModel
+    , indexModel = Wizard.KMEditor.Index.Models.initialModel PaginationQueryString.empty
     , migrationModel = Wizard.KMEditor.Migration.Models.initialModel Uuid.nil
     , publishModel = Wizard.KMEditor.Publish.Models.initialModel
     }
@@ -41,8 +42,8 @@ initLocalModel route model =
             else
                 { model | editorModel = Wizard.KMEditor.Editor.Models.initialModel uuid }
 
-        IndexRoute ->
-            { model | indexModel = Wizard.KMEditor.Index.Models.initialModel }
+        IndexRoute paginationQueryString ->
+            { model | indexModel = Wizard.KMEditor.Index.Models.initialModel paginationQueryString }
 
         MigrationRoute uuid ->
             { model | migrationModel = Wizard.KMEditor.Migration.Models.initialModel uuid }

@@ -1,17 +1,19 @@
-module Wizard.KMEditor.Create.Update exposing (fetchData, update)
+module Wizard.KMEditor.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Form.Field as Field
 import Result exposing (Result)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.Branch exposing (Branch)
-import Shared.Data.Package exposing (Package)
+import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm
 import Wizard.KMEditor.Create.Models exposing (..)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
@@ -21,43 +23,17 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> Cmd Msg
-fetchData appState =
-    PackagesApi.getPackages appState GetPackagesCompleted
-
-
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetPackagesCompleted result ->
-            handleGetPackageCompleted appState model result
-
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model
 
         PostBranchCompleted result ->
             handlePostBranchCompleted appState model result
 
-
-
--- Handlers
-
-
-handleGetPackageCompleted : AppState -> Model -> Result ApiError (List Package) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetPackageCompleted appState model result =
-    let
-        newModel =
-            case result of
-                Ok packages ->
-                    setSelectedPackage { model | packages = Success packages } packages
-
-                Err error ->
-                    { model | packages = ApiError.toActionResult (lg "apiError.packages.getListError" appState) error }
-
-        cmd =
-            getResultCmd result
-    in
-    ( newModel, cmd )
+        PackageTypeHintInputMsg typeHintInputMsg ->
+            handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
 
 
 handleFormMsg : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -97,3 +73,23 @@ handlePostBranchCompleted appState model result =
               }
             , getResultCmd result
             )
+
+
+handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg PackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
+    let
+        formMsg =
+            wrapMsg << FormMsg << Form.Input "previousPackageId" Form.Select << Field.String
+
+        cfg =
+            { wrapMsg = wrapMsg << PackageTypeHintInputMsg
+            , getTypeHints = PackagesApi.getPackagesSuggestions
+            , getError = lg "apiError.packages.getListError" appState
+            , setReply = formMsg << .id
+            , clearReply = Just <| formMsg ""
+            }
+
+        ( packageTypeHintInputModel, cmd ) =
+            TypeHintInput.update cfg typeHintInputMsg appState model.packageTypeHintInputModel
+    in
+    ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )

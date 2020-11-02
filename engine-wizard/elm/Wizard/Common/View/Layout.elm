@@ -203,58 +203,41 @@ createMenu model =
 
 menuItems : AppState -> List (MenuItem msg)
 menuItems appState =
-    let
-        isQuestionnaireIndex route =
-            case route of
-                Routes.PlansRoute (Wizard.Projects.Routes.IndexRoute _) ->
-                    True
-
-                _ ->
-                    False
-
-        isDocumentsIndex route =
-            case route of
-                Routes.DocumentsRoute (Wizard.Documents.Routes.IndexRoute _ _) ->
-                    True
-
-                _ ->
-                    False
-    in
     [ MenuItem
         (l_ "menu.users" appState)
         (faSet "menu.users" appState)
-        (Routes.UsersRoute Wizard.Users.Routes.IndexRoute)
-        ((==) (Routes.UsersRoute Wizard.Users.Routes.IndexRoute))
+        Routes.usersIndex
+        Routes.isUsersIndex
         Perm.userManagement
     , MenuItem
         (l_ "menu.kmEditor" appState)
         (faSet "menu.kmEditor" appState)
-        (Routes.KMEditorRoute Wizard.KMEditor.Routes.IndexRoute)
-        ((==) (Routes.KMEditorRoute Wizard.KMEditor.Routes.IndexRoute))
+        Routes.kmEditorIndex
+        Routes.isKmEditorIndex
         Perm.knowledgeModel
     , MenuItem
         (l_ "menu.knowledgeModels" appState)
         (faSet "menu.knowledgeModels" appState)
-        (Routes.KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.IndexRoute)
-        ((==) (Routes.KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.IndexRoute))
+        Routes.knowledgeModelsIndex
+        Routes.isKnowledgeModelsIndex
         Perm.packageManagementRead
     , MenuItem
         (l_ "menu.projects" appState)
         (faSet "menu.projects" appState)
-        (Routes.PlansRoute <| Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty)
-        isQuestionnaireIndex
+        Routes.projectsIndex
+        Routes.isProjectsIndex
         Perm.questionnaire
     , MenuItem
         (l_ "menu.documents" appState)
         (faSet "menu.documents" appState)
-        (Routes.DocumentsRoute <| Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
-        isDocumentsIndex
+        Routes.documentsIndex
+        Routes.isDocumentsIndex
         Perm.documents
     , MenuItem
         (l_ "menu.templates" appState)
         (faSet "menu.templates" appState)
-        (Routes.TemplatesRoute Wizard.Templates.Routes.IndexRoute)
-        ((==) (Routes.TemplatesRoute Wizard.Templates.Routes.IndexRoute))
+        Routes.templatesIndex
+        Routes.isTemplateIndex
         Perm.templates
     ]
 

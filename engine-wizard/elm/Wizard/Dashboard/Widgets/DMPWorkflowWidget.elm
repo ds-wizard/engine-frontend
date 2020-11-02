@@ -64,7 +64,7 @@ view appState questionnaires =
                     ]
                 ]
             , div [ class "DMPWorkflowWidget__Start" ]
-                [ a [ class "btn btn-primary", href <| Routing.toUrl appState <| Routes.PlansRoute <| CreateRoute Nothing ]
+                [ a [ class "btn btn-primary", href <| Routing.toUrl appState <| Routes.ProjectsRoute <| CreateRoute Nothing ]
                     [ lx_ "startPlanning" appState ]
                 ]
             ]

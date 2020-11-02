@@ -21,6 +21,10 @@
         .listing-toolbar-extra {
             margin-right: 1rem;
         }
+
+        .btn-primary {
+            min-width: 100px;
+        }
     }
 
     .list-group-item {
@@ -118,8 +122,13 @@
 
                 .fragment {
                     img {
-                        margin-right: 0.25rem;
-                        vertical-align: middle;
+                        margin-right: .25rem;
+
+                        &.user-icon-only:last-child {
+                            margin-right: 0;
+                        }
+
+                        vertical-align: text-top;
                     }
                 }
             }

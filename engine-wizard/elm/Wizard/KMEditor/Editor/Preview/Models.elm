@@ -9,6 +9,7 @@ module Wizard.KMEditor.Editor.Preview.Models exposing
 
 import Dict
 import Maybe.Extra as Maybe
+import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
@@ -27,11 +28,12 @@ type alias Model =
     , packageId : String
     , metrics : List Metric
     , levels : List Level
+    , events : List Event
     }
 
 
-initialModel : KnowledgeModel -> List Metric -> List Level -> String -> Model
-initialModel km metrics levels packageId =
+initialModel : KnowledgeModel -> List Metric -> List Level -> List Event -> String -> Model
+initialModel km metrics levels events packageId =
     let
         chapterUuid =
             Maybe.unwrap "" .uuid <|
@@ -46,6 +48,7 @@ initialModel km metrics levels packageId =
     , packageId = packageId
     , metrics = metrics
     , levels = levels
+    , events = events
     }
 
 
@@ -108,13 +111,14 @@ createQuestionnaireDetail packageId km =
     , name = ""
     , visibility = PrivateQuestionnaire
     , sharing = RestrictedQuestionnaire
-    , ownerUuid = Nothing
+    , permissions = []
     , package = { package | id = packageId }
     , knowledgeModel = km
     , replies = Dict.fromList []
     , level = 1
     , selectedTagUuids = []
     , templateId = Nothing
+    , template = Nothing
     , formatUuid = Nothing
     , format = Nothing
     , labels = Dict.fromList []

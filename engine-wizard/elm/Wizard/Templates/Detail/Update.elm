@@ -57,7 +57,7 @@ deleteVersionCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd
 deleteVersionCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.TemplatesRoute IndexRoute )
+            ( model, cmdNavigate appState Routes.templatesIndex )
 
         Err error ->
             ( { model | deletingVersion = ApiError.toActionResult (lg "apiError.templates.deleteError" appState) error }

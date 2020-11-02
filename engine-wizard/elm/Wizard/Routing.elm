@@ -39,7 +39,7 @@ matchers appState =
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
-                ++ Wizard.Projects.Routing.parsers appState Routes.PlansRoute
+                ++ Wizard.Projects.Routing.parsers appState Routes.ProjectsRoute
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
@@ -75,7 +75,7 @@ isAllowed route session =
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
             Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute session
 
-        Routes.PlansRoute plansRoute ->
+        Routes.ProjectsRoute plansRoute ->
             Wizard.Projects.Routing.isAllowed plansRoute session
 
         Routes.PublicRoute _ ->
@@ -117,7 +117,7 @@ toUrl appState route =
                 Routes.KnowledgeModelsRoute kmPackagesRoute ->
                     Wizard.KnowledgeModels.Routing.toUrl appState kmPackagesRoute
 
-                Routes.PlansRoute plansRoute ->
+                Routes.ProjectsRoute plansRoute ->
                     Wizard.Projects.Routing.toUrl appState plansRoute
 
                 Routes.PublicRoute publicRoute ->

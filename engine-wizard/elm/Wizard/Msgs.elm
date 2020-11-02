@@ -21,6 +21,7 @@ type Msg
     = OnUrlChange Url
     | OnUrlRequest UrlRequest
     | OnTime Time.Posix
+    | OnTimeZone Time.Zone
     | AuthMsg Wizard.Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
     | MenuMsg Wizard.Common.Menu.Msgs.Msg

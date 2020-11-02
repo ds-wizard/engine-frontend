@@ -20,7 +20,7 @@ import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Models
 import Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents)
-import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, getCurrentActiveEditorUuid, initialModel)
+import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, getAllEvents, getCurrentActiveEditorUuid, initialModel)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Editor.Preview.Models
 import Wizard.KMEditor.Editor.Preview.Update
@@ -113,6 +113,7 @@ update msg wrapMsg appState model =
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
                                                     (ActionResult.withDefault [] model.levels)
+                                                    (getAllEvents model)
                                                     (ActionResult.withDefault "" <| ActionResult.map (Maybe.withDefault "" << .previousPackageId) model.km)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
                                         , editorModel =
@@ -261,7 +262,7 @@ fetchPreview wrapMsg appState model =
             , Cmd.map wrapMsg <|
                 KnowledgeModelsApi.fetchPreview
                     km.previousPackageId
-                    (km.events ++ model.sessionEvents)
+                    (getAllEvents model)
                     []
                     appState
                     GetPreviewCompleted

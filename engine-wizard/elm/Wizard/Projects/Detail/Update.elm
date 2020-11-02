@@ -35,7 +35,7 @@ import Wizard.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Public.Routes exposing (Route(..))
-import Wizard.Routes exposing (Route(..))
+import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
@@ -58,7 +58,7 @@ fetchData appState uuid model =
 fetchSubrouteData : AppState -> Model -> Cmd Msg
 fetchSubrouteData appState model =
     case appState.route of
-        PlansRoute (DetailRoute uuid route) ->
+        ProjectsRoute (DetailRoute uuid route) ->
             case route of
                 PlanDetailRoute.Preview ->
                     Cmd.map PreviewMsg <|
@@ -73,22 +73,8 @@ fetchSubrouteData appState model =
                         Documents.fetchData
 
                 PlanDetailRoute.NewDocument ->
-                    case model.questionnaireModel of
-                        Success qm ->
-                            Cmd.map NewDocumentMsg <|
-                                NewDocument.fetchData appState uuid qm.questionnaire.templateId
-
-                        _ ->
-                            Cmd.none
-
-                PlanDetailRoute.Settings ->
-                    case model.questionnaireModel of
-                        Success qm ->
-                            Cmd.map SettingsMsg <|
-                                Settings.fetchData appState qm.questionnaire.package.id
-
-                        _ ->
-                            Cmd.none
+                    Cmd.map NewDocumentMsg <|
+                        NewDocument.fetchData appState uuid
 
                 _ ->
                     Cmd.none
@@ -100,17 +86,17 @@ fetchSubrouteData appState model =
 fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 fetchSubrouteDataFromAfter wrapMsg appState model =
     case ( ActionResult.combine3 model.questionnaireModel model.metrics model.levels, appState.route ) of
-        ( Success _, PlansRoute (DetailRoute _ route) ) ->
+        ( Success _, ProjectsRoute (DetailRoute _ route) ) ->
             ( initPageModel route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
 
         _ ->
             ( model, Cmd.none )
 
 
-onUnload : Wizard.Routes.Route -> Model -> Cmd msg
+onUnload : Routes.Route -> Model -> Cmd msg
 onUnload newRoute model =
     case newRoute of
-        PlansRoute (DetailRoute uuid _) ->
+        ProjectsRoute (DetailRoute uuid _) ->
             if uuid == model.uuid then
                 Cmd.none
 
@@ -134,7 +120,7 @@ update wrapMsg msg appState model =
                     case ( model.questionnaireModel, model.levels, model.metrics ) of
                         ( Success questionnaireModel, Success levels, Success metrics ) ->
                             Triple.mapSnd Success <|
-                                Questionnaire.update questionnaireMsg appState { levels = levels, metrics = metrics } questionnaireModel
+                                Questionnaire.update questionnaireMsg appState { levels = levels, metrics = metrics, events = [] } questionnaireModel
 
                         _ ->
                             ( appState.seed, model.questionnaireModel, Cmd.none )
@@ -247,7 +233,8 @@ update wrapMsg msg appState model =
                             NewDocument.update
                                 { wrapMsg = wrapMsg << NewDocumentMsg
                                 , questionnaireUuid = qm.questionnaire.uuid
-                                , documentsNavigateCmd = cmdNavigate appState <| PlansRoute <| DetailRoute qm.questionnaire.uuid <| PlanDetailRoute.Documents PaginationQueryString.empty
+                                , packageId = qm.questionnaire.package.id
+                                , documentsNavigateCmd = cmdNavigate appState <| ProjectsRoute <| DetailRoute qm.questionnaire.uuid <| PlanDetailRoute.Documents PaginationQueryString.empty
                                 }
                                 newDocumentMsg
                                 appState
@@ -298,7 +285,7 @@ update wrapMsg msg appState model =
                             let
                                 questionnaireRoute =
                                     Routing.toUrl appState
-                                        (PlansRoute (DetailRoute model.uuid PlanDetailRoute.Questionnaire))
+                                        (ProjectsRoute (DetailRoute model.uuid PlanDetailRoute.Questionnaire))
 
                                 loginRoute =
                                     PublicRoute (LoginRoute (Just questionnaireRoute))
@@ -369,7 +356,7 @@ update wrapMsg msg appState model =
                         | questionnaireModel = Success newQuestionnaireModel
                       }
                     , Cmd.batch
-                        [ cmdNavigate appState (PlansRoute (DetailRoute model.uuid PlanDetailRoute.Questionnaire))
+                        [ cmdNavigate appState (ProjectsRoute (DetailRoute model.uuid PlanDetailRoute.Questionnaire))
                         , Ports.scrollIntoView selector
                         ]
                     )
@@ -388,6 +375,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << ShareModalMsg
                     , questionnaireUuid = model.uuid
+                    , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
                     }
 
                 ( shareModalModel, cmd ) =
@@ -399,11 +387,14 @@ update wrapMsg msg appState model =
             let
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
-                    , redirectCmd = cmdNavigate appState (PlansRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty))
+                    , redirectCmd = cmdNavigate appState Routes.projectsIndex
+                    , packageId = ActionResult.unwrap "" (.questionnaire >> .package >> .id) model.questionnaireModel
+                    , questionnaireUuid = model.uuid
+                    , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
                     }
 
                 ( settingsModel, cmd ) =
-                    Settings.update updateConfig settingsMsg appState model.uuid model.settingsModel
+                    Settings.update updateConfig settingsMsg appState model.settingsModel
             in
             withSeed ( { model | settingsModel = settingsModel }, cmd )
 

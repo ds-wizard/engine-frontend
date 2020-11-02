@@ -147,7 +147,7 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                     Questionnaire.update
                         questionnaireMsg
                         appState
-                        { levels = levels, metrics = [] }
+                        { levels = levels, metrics = [], events = [] }
                         questionnaireModel
 
                 saveCmd =
@@ -235,7 +235,7 @@ handleFinalizeMigrationCompleted : AppState -> Model -> Result ApiError () -> ( 
 handleFinalizeMigrationCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.PlansRoute <| DetailRoute model.questionnaireUuid PlanDetailRoute.Questionnaire )
+            ( model, cmdNavigate appState <| Routes.ProjectsRoute <| DetailRoute model.questionnaireUuid PlanDetailRoute.Questionnaire )
 
         _ ->
             ( model, Cmd.none )

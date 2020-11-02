@@ -45,6 +45,7 @@ init flags location key =
                 Cmd.batch
                     [ decideInitialRoute model location route originalRoute
                     , Time.getTime
+                    , Time.getTimeZone
                     ]
     in
     ( model, cmd )
@@ -64,7 +65,7 @@ decideInitialRoute model location route originalRoute =
                 _ ->
                     dispatch (Wizard.Msgs.OnUrlChange location)
 
-        Routes.PlansRoute (PlansRoutes.DetailRoute _ _) ->
+        Routes.ProjectsRoute (PlansRoutes.DetailRoute _ _) ->
             dispatch (Wizard.Msgs.OnUrlChange location)
 
         _ ->

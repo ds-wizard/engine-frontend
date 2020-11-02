@@ -2,19 +2,20 @@ module Wizard.KnowledgeModels.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.Package exposing (Package)
-import Wizard.Common.Components.Listing as Listing
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Wizard.Common.Components.Listing.Models as Listing
 
 
 type alias Model =
-    { packages : ActionResult (Listing.Model Package)
+    { packages : Listing.Model Package
     , packageToBeDeleted : Maybe Package
     , deletingPackage : ActionResult String
     }
 
 
-initialModel : Model
-initialModel =
-    { packages = Loading
+initialModel : PaginationQueryString -> Model
+initialModel paginationQueryString =
+    { packages = Listing.initialModel paginationQueryString
     , packageToBeDeleted = Nothing
     , deletingPackage = Unset
     }

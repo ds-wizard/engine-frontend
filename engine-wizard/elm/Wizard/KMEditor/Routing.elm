@@ -6,6 +6,7 @@ module Wizard.KMEditor.Routing exposing
 
 import Shared.Auth.Permission as Perm
 import Shared.Auth.Session exposing (Session)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Url.Parser.Extra exposing (uuid)
@@ -23,7 +24,7 @@ parsers appState wrapRoute =
     in
     [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "kmEditor.create" appState) <?> Query.string (lr "kmEditor.create.selected" appState))
     , map (wrapRoute << EditorRoute) (s moduleRoot </> s (lr "kmEditor.edit" appState) </> uuid)
-    , map (wrapRoute <| IndexRoute) (s moduleRoot)
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "kmEditor.migration" appState) </> uuid)
     , map (wrapRoute << PublishRoute) (s moduleRoot </> s (lr "kmEditor.publish" appState) </> uuid)
     ]
@@ -47,8 +48,8 @@ toUrl appState route =
         EditorRoute uuid ->
             [ moduleRoot, lr "kmEditor.edit" appState, Uuid.toString uuid ]
 
-        IndexRoute ->
-            [ moduleRoot ]
+        IndexRoute paginationQueryString ->
+            [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
         MigrationRoute uuid ->
             [ moduleRoot, lr "kmEditor.migration" appState, Uuid.toString uuid ]
@@ -66,7 +67,7 @@ isAllowed route session =
         EditorRoute _ ->
             Perm.hasPerm session Perm.knowledgeModel
 
-        IndexRoute ->
+        IndexRoute _ ->
             Perm.hasPerm session Perm.knowledgeModel
 
         MigrationRoute _ ->

@@ -18,9 +18,9 @@ fetchData route appState =
             Cmd.map EditMsg <|
                 Wizard.Users.Edit.Update.fetchData appState uuid
 
-        IndexRoute ->
+        IndexRoute _ ->
             Cmd.map IndexMsg <|
-                Wizard.Users.Index.Update.fetchData appState
+                Wizard.Users.Index.Update.fetchData
 
         _ ->
             Cmd.none

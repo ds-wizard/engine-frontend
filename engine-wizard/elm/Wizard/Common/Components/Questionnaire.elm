@@ -25,6 +25,7 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Roman
 import Shared.Api.TypeHints as TypeHintsApi
+import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
@@ -154,13 +155,7 @@ type alias QuestionnaireRenderer msg =
 type alias Context =
     { levels : List Level
     , metrics : List Metric
-    }
-
-
-toSummaryReportContext : Context -> Model -> SummaryReport.Context
-toSummaryReportContext ctx model =
-    { questionnaire = model.questionnaire
-    , metrics = ctx.metrics
+    , events : List Event
     }
 
 
@@ -207,7 +202,7 @@ update msg appState ctx model =
             withSeed <| handleScrollToTodo model todo
 
         ShowTypeHints path questionUuid value ->
-            withSeed <| handleShowTypeHints appState model path questionUuid value
+            withSeed <| handleShowTypeHints appState ctx model path questionUuid value
 
         HideTypeHints ->
             wrap { model | typeHints = Nothing }
@@ -216,7 +211,7 @@ update msg appState ctx model =
             withSeed <| handleTypeHintsInput model path value
 
         TypeHintDebounceMsg debounceMsg ->
-            withSeed <| handleTypeHintDebounceMsg appState model debounceMsg
+            withSeed <| handleTypeHintDebounceMsg appState ctx model debounceMsg
 
         TypeHintsLoaded path result ->
             wrap <| handleTypeHintsLoaded appState model path result
@@ -249,8 +244,8 @@ handleScrollToTodo model todo =
     ( { model | activePage = PageChapter todo.chapter.uuid }, Ports.scrollIntoView selector )
 
 
-handleShowTypeHints : AppState -> Model -> List String -> String -> String -> ( Model, Cmd Msg )
-handleShowTypeHints appState model path questionUuid value =
+handleShowTypeHints : AppState -> Context -> Model -> List String -> String -> String -> ( Model, Cmd Msg )
+handleShowTypeHints appState ctx model path questionUuid value =
     let
         typeHints =
             Just
@@ -259,7 +254,7 @@ handleShowTypeHints appState model path questionUuid value =
                 }
 
         cmd =
-            loadTypeHints appState model path questionUuid value
+            loadTypeHints appState ctx model path questionUuid value
     in
     ( { model | typeHints = typeHints }, cmd )
 
@@ -285,11 +280,11 @@ handleTypeHintsInput model path value =
     )
 
 
-handleTypeHintDebounceMsg : AppState -> Model -> Debounce.Msg -> ( Model, Cmd Msg )
-handleTypeHintDebounceMsg appState model debounceMsg =
+handleTypeHintDebounceMsg : AppState -> Context -> Model -> Debounce.Msg -> ( Model, Cmd Msg )
+handleTypeHintDebounceMsg appState ctx model debounceMsg =
     let
         load ( path, questionUuid, value ) =
-            loadTypeHints appState model path questionUuid value
+            loadTypeHints appState ctx model path questionUuid value
 
         ( typeHintsDebounce, cmd ) =
             Debounce.update
@@ -352,11 +347,11 @@ debounceConfig =
     }
 
 
-loadTypeHints : AppState -> Model -> List String -> String -> String -> Cmd Msg
-loadTypeHints appState model path questionUuid value =
+loadTypeHints : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
+loadTypeHints appState ctx model path questionUuid value =
     TypeHintsApi.fetchTypeHints
         (Just model.questionnaire.package.id)
-        []
+        ctx.events
         questionUuid
         value
         appState

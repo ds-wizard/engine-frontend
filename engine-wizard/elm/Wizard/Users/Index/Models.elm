@@ -1,20 +1,21 @@
 module Wizard.Users.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.User exposing (User)
-import Wizard.Common.Components.Listing as Listing
+import Wizard.Common.Components.Listing.Models as Listing
 
 
 type alias Model =
-    { users : ActionResult (Listing.Model User)
+    { users : Listing.Model User
     , userToBeDeleted : Maybe User
     , deletingUser : ActionResult String
     }
 
 
-initialModel : Model
-initialModel =
-    { users = Loading
+initialModel : PaginationQueryString -> Model
+initialModel paginationQueryString =
+    { users = Listing.initialModel paginationQueryString
     , userToBeDeleted = Nothing
     , deletingUser = Unset
     }

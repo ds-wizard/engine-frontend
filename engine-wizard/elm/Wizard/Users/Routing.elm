@@ -7,7 +7,9 @@ module Wizard.Users.Routing exposing
 
 import Shared.Auth.Permission as Perm
 import Shared.Auth.Session exposing (Session)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Url.Parser exposing (..)
+import Url.Parser.Query as Query
 import Wizard.Users.Routes exposing (Route(..))
 
 
@@ -20,7 +22,7 @@ parses : (Route -> a) -> List (Parser (a -> c) c)
 parses wrapRoute =
     [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
     , map (wrapRoute << EditRoute) (s moduleRoot </> s "edit" </> string)
-    , map (wrapRoute <| IndexRoute) (s moduleRoot)
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "lastName")) (PaginationQueryString.parser (s moduleRoot))
     ]
 
 
@@ -33,8 +35,8 @@ toUrl route =
         EditRoute uuid ->
             [ moduleRoot, "edit", uuid ]
 
-        IndexRoute ->
-            [ moduleRoot ]
+        IndexRoute paginationQueryString ->
+            [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
 
 isAllowed : Route -> Session -> Bool

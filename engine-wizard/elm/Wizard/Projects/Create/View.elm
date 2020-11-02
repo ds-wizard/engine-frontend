@@ -1,29 +1,23 @@
 module Wizard.Projects.Create.View exposing (view)
 
 import Form exposing (Form)
-import Form.Input as Input
 import Html exposing (..)
-import Html.Attributes exposing (class, classList)
-import Shared.Data.Package exposing (Package)
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Data.QuestionnairePermission as QuestionnairePermission
-import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lgh)
+import Html.Attributes exposing (class)
+import Shared.Locale exposing (l, lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.TypeHintInput as TypeHintInput
+import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.FormActions as FormActions
-import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
+import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.Projects.Create.Models exposing (Model)
 import Wizard.Projects.Create.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -34,29 +28,31 @@ l_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (content appState model) model.packages
-
-
-content : AppState -> Model -> List Package -> Html Msg
-content appState model packages =
     div [ detailClass "Questionnaires__Create" ]
         [ Page.header (l_ "header.title" appState) []
         , div []
             [ FormResult.view appState model.savingQuestionnaire
-            , formView appState model packages |> Html.map FormMsg
+            , formView appState model
             , tagsView appState model
             , FormActions.view appState
-                (Routes.PlansRoute (IndexRoute PaginationQueryString.empty))
+                Routes.projectsIndex
                 (ActionResult.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
             ]
         ]
 
 
-formView : AppState -> Model -> List Package -> Html Form.Msg
-formView appState model packages =
+formView : AppState -> Model -> Html Msg
+formView appState model =
     let
-        packageOptions =
-            ( "", "--" ) :: (List.map createOption <| List.sortBy .name packages)
+        cfg =
+            { viewItem = TypeHintItem.packageSuggestion
+            , wrapMsg = PackageTypeHintInputMsg
+            , nothingSelectedItem = text "--"
+            , clearEnabled = True
+            }
+
+        typeHintInput =
+            TypeHintInput.view appState cfg model.packageTypeHintInputModel
 
         parentInput =
             case model.selectedPackage of
@@ -64,15 +60,12 @@ formView appState model packages =
                     FormGroup.codeView package
 
                 Nothing ->
-                    FormGroup.select appState packageOptions model.form "packageId"
-
-        formHtml =
-            div []
-                [ FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
-                , parentInput <| lg "knowledgeModel" appState
-                ]
+                    FormGroup.formGroupCustom typeHintInput appState model.form "packageId"
     in
-    formHtml
+    div []
+        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
+        , parentInput <| lg "knowledgeModel" appState
+        ]
 
 
 tagsView : AppState -> Model -> Html Msg
@@ -85,12 +78,3 @@ tagsView appState model =
             }
     in
     Tag.selection appState tagListConfig model.knowledgeModelPreview
-
-
-createOption : Package -> ( String, String )
-createOption package =
-    let
-        optionText =
-            package.name ++ " " ++ Version.toString package.version ++ " (" ++ package.id ++ ")"
-    in
-    ( package.id, optionText )

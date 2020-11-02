@@ -3,6 +3,7 @@ module Wizard.Common.AppState exposing
     , getDashboardWidgets
     , init
     , setCurrentTime
+    , setTimeZone
     )
 
 import Browser.Navigation as Navigation exposing (Key)
@@ -33,6 +34,7 @@ type alias AppState =
     , provisioning : Provisioning
     , valid : Bool
     , currentTime : Time.Posix
+    , timeZone : Time.Zone
     , navigator : Navigator
     }
 
@@ -77,6 +79,7 @@ init flagsValue key =
     , provisioning = provisioning
     , valid = flags.success
     , currentTime = Time.millisToPosix 0
+    , timeZone = Time.utc
     , navigator = flags.navigator
     }
 
@@ -84,6 +87,11 @@ init flagsValue key =
 setCurrentTime : AppState -> Time.Posix -> AppState
 setCurrentTime appState time =
     { appState | currentTime = time }
+
+
+setTimeZone : AppState -> Time.Zone -> AppState
+setTimeZone appState timeZone =
+    { appState | timeZone = timeZone }
 
 
 getDashboardWidgets : AppState -> List DashboardWidget

@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
@@ -48,7 +49,7 @@ lh_ =
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "Questionnaires__Index" ]
-        [ Page.header (l_ "header.title" appState) (indexActions appState)
+        [ Page.header (l_ "header.title" appState) []
         , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
         , FormResult.view appState model.deletingMigration
         , Listing.view appState (listingConfig appState) model.questionnaires
@@ -57,13 +58,12 @@ view appState model =
         ]
 
 
-indexActions : AppState -> List (Html Msg)
-indexActions appState =
-    [ linkTo appState
-        (Routes.PlansRoute <| CreateRoute Nothing)
+createButton : AppState -> Html Msg
+createButton appState =
+    linkTo appState
+        (Routes.ProjectsRoute <| CreateRoute Nothing)
         [ class "btn btn-primary" ]
         [ lx_ "header.create" appState ]
-    ]
 
 
 listingConfig : AppState -> ViewConfig Questionnaire Msg
@@ -85,8 +85,8 @@ listingConfig appState =
         , ( "createdAt", lg "questionnaire.createdAt" appState )
         , ( "updatedAt", lg "questionnaire.updatedAt" appState )
         ]
-    , toRoute = Routes.PlansRoute << IndexRoute
-    , toolbarExtra = Nothing
+    , toRoute = Routes.ProjectsRoute << IndexRoute
+    , toolbarExtra = Just (createButton appState)
     }
 
 
@@ -110,16 +110,38 @@ listingTitle appState questionnaire =
 listingDescription : AppState -> Questionnaire -> Html Msg
 listingDescription appState questionnaire =
     let
-        ownerName =
-            case questionnaire.owner of
-                Just owner ->
-                    span [ class "fragment fragment-icon-light" ]
-                        [ img [ src (User.imageUrl owner), class "user-icon user-icon-small" ] []
-                        , text <| User.fullName owner
-                        ]
+        owner =
+            if questionnaire.visibility == QuestionnaireVisibility.VisibleEditQuestionnaire then
+                emptyNode
 
-                Nothing ->
-                    emptyNode
+            else
+                case questionnaire.permissions of
+                    [] ->
+                        emptyNode
+
+                    perm :: [] ->
+                        span [ class "fragment" ]
+                            [ img [ src (User.imageUrlOrGravatar perm.member), class "user-icon user-icon-small" ] []
+                            , text <| User.fullName perm.member
+                            ]
+
+                    perms ->
+                        let
+                            ownerIcon member =
+                                img
+                                    [ src (User.imageUrlOrGravatar member)
+                                    , class "user-icon user-icon-small user-icon-only"
+                                    , title <| User.fullName member
+                                    ]
+                                    []
+
+                            users =
+                                perms
+                                    |> List.map .member
+                                    |> List.sortWith User.compare
+                                    |> List.map ownerIcon
+                        in
+                        span [ class "fragment" ] users
 
         kmRoute =
             Routes.KnowledgeModelsRoute <|
@@ -152,7 +174,7 @@ listingDescription appState questionnaire =
                 |> List.map toAnsweredInidcation
     in
     span []
-        (ownerName :: kmLink :: answered)
+        (owner :: kmLink :: answered)
 
 
 listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)
@@ -184,7 +206,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.createMigration" appState
-                , msg = ListingActionLink (Routes.PlansRoute <| CreateMigrationRoute questionnaire.uuid)
+                , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
                 }
 
         continueMigration =
@@ -192,7 +214,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.continueMigration" appState
-                , msg = ListingActionLink (Routes.PlansRoute <| MigrationRoute questionnaire.uuid)
+                , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute questionnaire.uuid)
                 }
 
         cancelMigration =
@@ -226,21 +248,21 @@ listingActions appState questionnaire =
         |> listInsertIf openProject (not migrating)
         |> listInsertIf Listing.dropdownSeparator (not migrating)
         |> listInsertIf clone (not migrating)
-        |> listInsertIf continueMigration migrating
-        |> listInsertIf cancelMigration migrating
-        |> listInsertIf createMigration (not migrating)
-        |> listInsertIf Listing.dropdownSeparator (editable && not migrating)
-        |> listInsertIf delete (editable && not migrating)
+        |> listInsertIf continueMigration (editable && migrating)
+        |> listInsertIf cancelMigration (editable && migrating)
+        |> listInsertIf createMigration (editable && not migrating)
+        |> listInsertIf Listing.dropdownSeparator editable
+        |> listInsertIf delete editable
 
 
 detailRoute : Questionnaire -> Routes.Route
 detailRoute =
-    Routes.PlansRoute << flip Wizard.Projects.Routes.DetailRoute PlanDetailRoute.Questionnaire << .uuid
+    Routes.ProjectsRoute << flip Wizard.Projects.Routes.DetailRoute PlanDetailRoute.Questionnaire << .uuid
 
 
 migrationRoute : Questionnaire -> Routes.Route
 migrationRoute =
-    Routes.PlansRoute << MigrationRoute << .uuid
+    Routes.ProjectsRoute << MigrationRoute << .uuid
 
 
 stateBadge : AppState -> QuestionnaireState -> Html msg
