@@ -69,6 +69,6 @@ importPackageCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | importing = ApiError.toActionResult (lg "apiError.packages.importError" appState) error }
+            ( { model | importing = ApiError.toActionResult appState (lg "apiError.packages.importError" appState) error }
             , getResultCmd result
             )

@@ -54,9 +54,9 @@ handlePostPasswordActionKeyCompleted appState result model =
         Err error ->
             let
                 form =
-                    setFormErrors error model.form
+                    setFormErrors appState error model.form
 
                 errorMessage =
-                    ApiError.toActionResult (lg "apiError.actionKey.passwordRecoveryError" appState) error
+                    ApiError.toActionResult appState (lg "apiError.actionKey.passwordRecoveryError" appState) error
             in
             ( { model | submitting = errorMessage, form = form }, Cmd.none )

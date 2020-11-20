@@ -69,7 +69,7 @@ handleGetBranchCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | branch = ApiError.toActionResult (lg "apiError.branches.getError" appState) error }
+            ( { model | branch = ApiError.toActionResult appState (lg "apiError.branches.getError" appState) error }
             , getResultCmd result
             )
 
@@ -140,6 +140,6 @@ handlePutBranchCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | publishingBranch = ApiError.toActionResult (lg "apiError.packages.version.postError" appState) error }
+            ( { model | publishingBranch = ApiError.toActionResult appState (lg "apiError.packages.version.postError" appState) error }
             , getResultCmd result
             )

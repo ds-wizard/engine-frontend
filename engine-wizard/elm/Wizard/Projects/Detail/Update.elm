@@ -295,14 +295,14 @@ update wrapMsg msg appState model =
 
                         _ ->
                             withSeed <|
-                                ( { model | questionnaireModel = ApiError.toActionResult (lg "apiError.questionnaires.getError" appState) error }
+                                ( { model | questionnaireModel = ApiError.toActionResult appState (lg "apiError.questionnaires.getError" appState) error }
                                 , Cmd.none
                                 )
 
         GetLevelsComplete result ->
             let
                 ( newModel1, cmd ) =
-                    applyResult
+                    applyResult appState
                         { setResult = setLevels
                         , defaultError = lg "apiError.levels.getListError" appState
                         , model = model
@@ -320,7 +320,7 @@ update wrapMsg msg appState model =
         GetMetricsComplete result ->
             let
                 ( newModel1, cmd ) =
-                    applyResult
+                    applyResult appState
                         { setResult = setMetrics
                         , defaultError = lg "apiError.metrics.getListError" appState
                         , model = model

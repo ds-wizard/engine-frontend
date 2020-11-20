@@ -98,7 +98,7 @@ update msg appState model =
                             ( { model | feedbacks = Success feedbacks }, Cmd.none )
 
                         Err error ->
-                            ( { model | feedbacks = ApiError.toActionResult (lg "apiError.feedbacks.getError" appState) error }
+                            ( { model | feedbacks = ApiError.toActionResult appState (lg "apiError.feedbacks.getError" appState) error }
                             , Cmd.none
                             )
 
@@ -111,7 +111,7 @@ update msg appState model =
                     ( { model | feedbackResult = Success feedbackResult }, Cmd.none )
 
                 Err error ->
-                    ( { model | feedbackResult = ApiError.toActionResult (lg "apiError.feedbacks.postError" appState) error }
+                    ( { model | feedbackResult = ApiError.toActionResult appState (lg "apiError.feedbacks.postError" appState) error }
                     , Cmd.none
                     )
 

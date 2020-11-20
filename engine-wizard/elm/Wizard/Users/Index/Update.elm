@@ -68,7 +68,7 @@ deleteUserCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | deletingUser = ApiError.toActionResult (lg "apiError.users.deleteError" appState) error }
+            ( { model | deletingUser = ApiError.toActionResult appState (lg "apiError.users.deleteError" appState) error }
             , getResultCmd result
             )
 

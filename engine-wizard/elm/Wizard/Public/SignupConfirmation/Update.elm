@@ -29,4 +29,4 @@ handleSendConfirmationCompleted appState result model =
             { model | confirmation = Success "" }
 
         Err error ->
-            { model | confirmation = ApiError.toActionResult (lg "apiError.users.activation.putError" appState) error }
+            { model | confirmation = ApiError.toActionResult appState (lg "apiError.users.activation.putError" appState) error }

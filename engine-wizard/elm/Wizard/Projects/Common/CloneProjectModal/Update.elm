@@ -72,6 +72,6 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
             )
 
         Err error ->
-            ( { model | cloningQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.cloneError" appState) error }
+            ( { model | cloningQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.cloneError" appState) error }
             , Cmd.none
             )

@@ -54,9 +54,9 @@ handlePostSignupCompleted appState result model =
         Err error ->
             let
                 form =
-                    setFormErrors error model.form
+                    setFormErrors appState error model.form
 
                 errorMessage =
-                    ApiError.toActionResult (lg "apiError.users.public.postError" appState) error
+                    ApiError.toActionResult appState (lg "apiError.users.public.postError" appState) error
             in
             ( { model | signingUp = errorMessage, form = form }, Cmd.none )

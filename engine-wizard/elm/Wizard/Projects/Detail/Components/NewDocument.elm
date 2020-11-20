@@ -122,7 +122,7 @@ handleGetSummaryReportCompleted appState model result =
                     Success summaryReport
 
                 Err error ->
-                    ApiError.toActionResult (lg "apiError.questionnaires.summaryReport.fetchError" appState) error
+                    ApiError.toActionResult appState (lg "apiError.questionnaires.summaryReport.fetchError" appState) error
     in
     ( { model | summaryReport = newSummaryReport }, Cmd.none )
 
@@ -176,7 +176,7 @@ handlePostDocumentCompleted cfg appState model result =
             ( model, cfg.documentsNavigateCmd )
 
         Err error ->
-            ( { model | savingDocument = ApiError.toActionResult (lg "apiError.documents.postError" appState) error }, Cmd.none )
+            ( { model | savingDocument = ApiError.toActionResult appState (lg "apiError.documents.postError" appState) error }, Cmd.none )
 
 
 

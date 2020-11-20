@@ -14,13 +14,13 @@ import Html.Attributes exposing (class, href)
 import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Credentials exposing (Credentials)
-import Registry.Common.FormExtra exposing (CustomFormError)
 import Registry.Common.Requests as Requests
 import Registry.Common.View.ActionButton as ActionButton
 import Registry.Common.View.FormGroup as FormGroup
 import Registry.Common.View.FormResult as FormResult
 import Registry.Routing as Routing
 import Shared.Error.ApiError exposing (ApiError)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
 
 
@@ -46,7 +46,7 @@ init =
 
 
 type alias Model =
-    { form : Form CustomFormError LoginForm
+    { form : Form FormError LoginForm
     , loggingIn : ActionResult ()
     }
 

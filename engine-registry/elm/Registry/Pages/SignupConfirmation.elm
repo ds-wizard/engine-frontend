@@ -70,7 +70,7 @@ update : Msg -> AppState -> Model -> Model
 update msg appState =
     case msg of
         PutOrganizationStateCompleted result ->
-            ActionResult.apply setOrganization (ApiError.toActionResult (l_ "update.putError" appState)) result
+            ActionResult.apply setOrganization (ApiError.toActionResult appState (l_ "update.putError" appState)) result
 
 
 

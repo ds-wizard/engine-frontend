@@ -22,7 +22,7 @@ update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg appState model =
     case msg of
         GetBookReferenceCompleted result ->
-            applyResult
+            applyResult appState
                 { setResult = setBookReference
                 , defaultError = lg "apiError.bookReferences.getError" appState
                 , model = model

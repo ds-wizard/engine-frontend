@@ -71,7 +71,7 @@ update cfg appState msg model =
                         ( model, Cmd.none )
 
                 Err error ->
-                    ( { model | pagination = ApiError.toActionResult cfg.getError error }
+                    ( { model | pagination = ApiError.toActionResult appState cfg.getError error }
                     , getResultCmd result
                     )
 

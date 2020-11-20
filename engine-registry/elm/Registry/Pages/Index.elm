@@ -55,7 +55,7 @@ update : Msg -> AppState -> Model -> Model
 update msg appState =
     case msg of
         GetPackagesCompleted result ->
-            ActionResult.apply setPackages (ApiError.toActionResult (l_ "update.getError" appState)) result
+            ActionResult.apply setPackages (ApiError.toActionResult appState (l_ "update.getError" appState)) result
 
 
 

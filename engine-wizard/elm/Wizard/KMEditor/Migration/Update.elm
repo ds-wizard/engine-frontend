@@ -51,7 +51,7 @@ update msg wrapMsg appState model =
 
 handleGetMigrationCompleted : AppState -> Model -> Result ApiError Migration -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetMigrationCompleted appState model result =
-    applyResult
+    applyResult appState
         { setResult = setMigration
         , defaultError = lg "apiError.branches.migrations.getError" appState
         , model = model
@@ -61,7 +61,7 @@ handleGetMigrationCompleted appState model result =
 
 handleGetMetricsCompleted : AppState -> Model -> Result ApiError (List Metric) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetMetricsCompleted appState model result =
-    applyResult
+    applyResult appState
         { setResult = setMetrics
         , defaultError = lg "apiError.metrics.getListError" appState
         , model = model
@@ -90,7 +90,7 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
         Err error ->
-            ( { model | conflict = ApiError.toActionResult (lg "apiError.branches.migrations.conflict.postError" appState) error }
+            ( { model | conflict = ApiError.toActionResult appState (lg "apiError.branches.migrations.conflict.postError" appState) error }
             , getResultCmd result
             )
 

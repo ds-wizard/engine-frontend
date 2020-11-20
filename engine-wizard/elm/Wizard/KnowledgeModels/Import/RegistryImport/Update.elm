@@ -27,7 +27,7 @@ update msg wrapMsg appState model =
                 ( model, Cmd.none )
 
         PullPackageCompleted result ->
-            applyResult
+            applyResult appState
                 { setResult = setPulling
                 , defaultError = lg "apiError.packages.pullError" appState
                 , model = model

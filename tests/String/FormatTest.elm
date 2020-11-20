@@ -31,13 +31,13 @@ formatHtmlTests =
     describe "String Format HTML"
         [ parametrized
             [ ( "My String", [], [ text "My String" ] )
-            , ( "My %h String", [ strong [] [ text "Super" ] ], [ text "My ", strong [] [ text "Super" ], text " String" ] )
-            , ( "My String %h", [ strong [] [ text "Super" ] ], [ text "My String ", strong [] [ text "Super" ] ] )
-            , ( "%h My String", [ strong [] [ text "Super" ] ], [ strong [] [ text "Super" ], text " My String" ] )
-            , ( "My %%h String", [ strong [] [ text "Super" ] ], [ text "My %h String" ] )
-            , ( "My %h String", [], [ text "My %h String" ] )
-            , ( "My %h String %h %h", [ strong [] [ text "Super" ], i [] [ text "abc" ], a [] [ text "123" ] ], [ text "My ", strong [] [ text "Super" ], text " String ", i [] [ text "abc" ], text " ", a [] [ text "123" ] ] )
-            , ( "My %h String %h %h", [ strong [] [ text "Super" ], i [] [ text "abc" ] ], [ text "My ", strong [] [ text "Super" ], text " String ", i [] [ text "abc" ], text " %h" ] )
+            , ( "My %s String", [ strong [] [ text "Super" ] ], [ text "My ", strong [] [ text "Super" ], text " String" ] )
+            , ( "My String %s", [ strong [] [ text "Super" ] ], [ text "My String ", strong [] [ text "Super" ] ] )
+            , ( "%s My String", [ strong [] [ text "Super" ] ], [ strong [] [ text "Super" ], text " My String" ] )
+            , ( "My %%s String", [ strong [] [ text "Super" ] ], [ text "My %s String" ] )
+            , ( "My %s String", [], [ text "My %s String" ] )
+            , ( "My %s String %s %s", [ strong [] [ text "Super" ], i [] [ text "abc" ], a [] [ text "123" ] ], [ text "My ", strong [] [ text "Super" ], text " String ", i [] [ text "abc" ], text " ", a [] [ text "123" ] ] )
+            , ( "My %s String %s %s", [ strong [] [ text "Super" ], i [] [ text "abc" ] ], [ text "My ", strong [] [ text "Super" ], text " String ", i [] [ text "abc" ], text " %s" ] )
             ]
             "works"
           <|

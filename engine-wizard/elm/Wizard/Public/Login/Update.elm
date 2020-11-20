@@ -49,4 +49,4 @@ loginCompleted appState model result =
             ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token model.originalUrl) )
 
         Err error ->
-            ( { model | loggingIn = ApiError.toActionResult (lg "apiError.tokens.fetchTokenError" appState) error }, Cmd.none )
+            ( { model | loggingIn = ApiError.toActionResult appState (lg "apiError.tokens.fetchTokenError" appState) error }, Cmd.none )

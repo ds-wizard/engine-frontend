@@ -120,8 +120,8 @@ putUserCompleted appState model result =
 
         Err err ->
             ( { model
-                | savingUser = ApiError.toActionResult (lg "apiError.users.putError" appState) err
-                , userForm = setFormErrors err model.userForm
+                | savingUser = ApiError.toActionResult appState (lg "apiError.users.putError" appState) err
+                , userForm = setFormErrors appState err model.userForm
               }
             , Cmd.batch
                 [ getResultCmd result
@@ -139,7 +139,7 @@ putUserPasswordCompleted appState model result =
                     Success <| lg "apiSuccess.users.password.put" appState
 
                 Err error ->
-                    ApiError.toActionResult (lg "apiError.users.password.putError" appState) error
+                    ApiError.toActionResult appState (lg "apiError.users.password.putError" appState) error
 
         cmd =
             getResultCmd result

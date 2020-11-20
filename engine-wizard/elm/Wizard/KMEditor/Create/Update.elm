@@ -68,8 +68,8 @@ handlePostBranchCompleted appState model result =
 
         Err error ->
             ( { model
-                | form = setFormErrors error model.form
-                , savingBranch = ApiError.toActionResult (lg "apiError.branches.postError" appState) error
+                | form = setFormErrors appState error model.form
+                , savingBranch = ApiError.toActionResult appState (lg "apiError.branches.postError" appState) error
               }
             , getResultCmd result
             )

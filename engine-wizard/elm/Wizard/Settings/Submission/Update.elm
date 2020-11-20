@@ -35,7 +35,7 @@ update wrapMsg msg appState model =
             ( { model | genericModel = genericModel }, cmd )
 
         GetTemplatesCompleted result ->
-            applyResult
+            applyResult appState
                 { setResult = setTemplates
                 , defaultError = lg "apiError.templates.getListError" appState
                 , model = model
