@@ -12,11 +12,10 @@ import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Input as Input
 import Form.Validate as Validate exposing (Validation)
-import Html exposing (Html, a, div, form, label, p, text)
+import Html exposing (Html, a, div, form, label, p)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
-import Registry.Common.FormExtra exposing (CustomFormError, setFormErrors)
 import Registry.Common.Requests as Requests
 import Registry.Common.View.ActionButton as ActionButton
 import Registry.Common.View.FormGroup as FormGroup
@@ -25,6 +24,8 @@ import Registry.Common.View.Page as Page
 import Registry.Utils exposing (validateRegex)
 import Result exposing (Result)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form exposing (setFormErrors)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lh, lx)
 
 
@@ -55,7 +56,7 @@ init =
 
 
 type alias Model =
-    { form : Form CustomFormError SignupForm
+    { form : Form FormError SignupForm
     , signingUp : ActionResult ()
     }
 
@@ -115,8 +116,8 @@ update msg appState model =
 
                 Err err ->
                     ( { model
-                        | signingUp = ApiError.toActionResult (l_ "update.postError" appState) err
-                        , form = setFormErrors err model.form
+                        | signingUp = ApiError.toActionResult appState (l_ "update.postError" appState) err
+                        , form = setFormErrors appState err model.form
                       }
                     , Cmd.none
                     )

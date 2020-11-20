@@ -83,7 +83,7 @@ handleGetQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError 
 handleGetQuestionnaireMigrationCompleted appState model result =
     let
         ( modelWithMigration, cmd ) =
-            applyResult
+            applyResult appState
                 { setResult = setResult appState
                 , defaultError = lg "apiError.questionnaires.migrations.getError" appState
                 , result = result
@@ -98,7 +98,7 @@ handleGetQuestionnaireMigrationCompleted appState model result =
 
 handlePutQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePutQuestionnaireMigrationCompleted appState model result =
-    applyResult
+    applyResult appState
         { setResult = \_ _ -> model
         , defaultError = lg "apiError.questionnaires.migrations.putError" appState
         , result = result
@@ -108,7 +108,7 @@ handlePutQuestionnaireMigrationCompleted appState model result =
 
 handleGetLevelsCompleted : AppState -> Model -> Result ApiError (List Level) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetLevelsCompleted appState model result =
-    applyResult
+    applyResult appState
         { setResult = setLevels
         , defaultError = lg "apiError.levels.getListError" appState
         , result = result

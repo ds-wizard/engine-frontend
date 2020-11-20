@@ -15,12 +15,13 @@ import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Credentials exposing (Credentials)
 import Registry.Common.Entities.OrganizationDetail exposing (OrganizationDetail)
-import Registry.Common.FormExtra exposing (CustomFormError, setFormErrors)
 import Registry.Common.Requests as Requests
 import Registry.Common.View.ActionButton as ActionButton
 import Registry.Common.View.FormGroup as FormGroup
 import Registry.Common.View.FormResult as FormResult
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form exposing (setFormErrors)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
 
 
@@ -50,7 +51,7 @@ init appState credentials =
 
 type alias Model =
     { organization : ActionResult OrganizationDetail
-    , form : Form CustomFormError OrganizationForm
+    , form : Form FormError OrganizationForm
     , saving : ActionResult String
     }
 
@@ -117,7 +118,7 @@ update msg appState model =
             handleFormMsg formMsg appState model
 
         GetOrganizationCompleted result ->
-            ( ActionResult.apply setOrganization (ApiError.toActionResult (l_ "update.getError" appState)) result model
+            ( ActionResult.apply setOrganization (ApiError.toActionResult appState (l_ "update.getError" appState)) result model
             , Cmd.none
             )
 
@@ -133,8 +134,8 @@ update msg appState model =
 
                         Err err ->
                             { model
-                                | saving = ApiError.toActionResult (l_ "update.putError" appState) err
-                                , form = setFormErrors err model.form
+                                | saving = ApiError.toActionResult appState (l_ "update.putError" appState) err
+                                , form = setFormErrors appState err model.form
                             }
             in
             ( newModel, Cmd.none )

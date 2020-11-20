@@ -96,7 +96,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult (lg "apiError.questionnaires.migrations.deleteError" appState) error }
+            ( { model | deletingMigration = ApiError.toActionResult appState (lg "apiError.questionnaires.migrations.deleteError" appState) error }
             , getResultCmd result
             )
 

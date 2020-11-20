@@ -70,7 +70,7 @@ update msg appState =
     case msg of
         PutOrganizationTokenCompleted result ->
             ActionResult.apply setOrganization
-                (ApiError.toActionResult (l_ "update.putError" appState))
+                (ApiError.toActionResult appState (l_ "update.putError" appState))
                 result
 
 

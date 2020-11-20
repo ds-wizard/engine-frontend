@@ -100,7 +100,7 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.deleteError" appState) error }
+            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.deleteError" appState) error }
             , Cmd.none
             )
 

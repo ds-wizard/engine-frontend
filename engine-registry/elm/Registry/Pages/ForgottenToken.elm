@@ -9,11 +9,10 @@ module Registry.Pages.ForgottenToken exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
-import Html exposing (Html, div, form, p, text)
+import Html exposing (Html, div, form, p)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Registry.Common.AppState as AppState exposing (AppState)
-import Registry.Common.FormExtra exposing (CustomFormError)
+import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Requests as Requests
 import Registry.Common.View.ActionButton as ActionButton
 import Registry.Common.View.FormGroup as FormGroup
@@ -21,6 +20,7 @@ import Registry.Common.View.FormResult as FormResult
 import Registry.Common.View.Page as Page
 import Result exposing (Result)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
 
 
@@ -46,7 +46,7 @@ init =
 
 
 type alias Model =
-    { form : Form CustomFormError RecoveryForm
+    { form : Form FormError RecoveryForm
     , submitting : ActionResult ()
     }
 
@@ -87,7 +87,7 @@ update msg appState model =
             handleFormMsg formMsg appState model
 
         PostForgottenTokenActionKeyCompleted result ->
-            ( ActionResult.apply setSubmitting (ApiError.toActionResult "Could not recover token.") result model
+            ( ActionResult.apply setSubmitting (ApiError.toActionResult appState "Could not recover token.") result model
             , Cmd.none
             )
 

@@ -60,6 +60,6 @@ postUserCompleted appState model result =
             ( model, cmdNavigate appState Routes.usersIndex )
 
         Err error ->
-            ( { model | savingUser = ApiError.toActionResult (lg "apiError.users.postError" appState) error }
+            ( { model | savingUser = ApiError.toActionResult appState (lg "apiError.users.postError" appState) error }
             , getResultCmd result
             )

@@ -24,7 +24,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         GetTemplateCompleted result ->
-            applyResult
+            applyResult appState
                 { setResult = setTemplate
                 , defaultError = lg "apiError.templates.getError" appState
                 , model = model
@@ -60,6 +60,6 @@ deleteVersionCompleted appState model result =
             ( model, cmdNavigate appState Routes.templatesIndex )
 
         Err error ->
-            ( { model | deletingVersion = ApiError.toActionResult (lg "apiError.templates.deleteError" appState) error }
+            ( { model | deletingVersion = ApiError.toActionResult appState (lg "apiError.templates.deleteError" appState) error }
             , getResultCmd result
             )

@@ -1,9 +1,11 @@
 module Shared.Form exposing (..)
 
+import Dict
 import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation, customError)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Error.ServerError as ServerError
 import Shared.Form.FormError exposing (FormError(..))
 import Shared.Locale exposing (l, lf)
 import Shared.Provisioning exposing (Provisioning)
@@ -61,21 +63,31 @@ errorToString appState labelText error =
             l_ "error.default" appState
 
 
-setFormErrors : ApiError -> Form FormError a -> Form FormError a
-setFormErrors apiError form =
+setFormErrors : { b | provisioning : Provisioning } -> ApiError -> Form FormError a -> Form FormError a
+setFormErrors appState apiError form =
     case ApiError.toServerError apiError of
-        Just error ->
-            List.foldl setFormError form error.fieldErrors
+        Just (ServerError.UserFormError error) ->
+            List.foldl (setFormError appState) form <| Dict.toList error.fieldErrors
 
         _ ->
             form
 
 
-setFormError : ( String, String ) -> Form FormError a -> Form FormError a
-setFormError fieldError form =
-    Form.update (createFieldValidation fieldError) Form.Validate form
+setFormError : { b | provisioning : Provisioning } -> ( String, List ServerError.Message ) -> Form FormError a -> Form FormError a
+setFormError appState ( fieldName, fieldErrors ) form =
+    case List.head fieldErrors of
+        Just fieldError ->
+            Form.update (createFieldValidation appState fieldName fieldError) Form.Validate form
+
+        _ ->
+            form
 
 
-createFieldValidation : ( String, String ) -> Validation FormError a
-createFieldValidation ( fieldName, fieldError ) =
-    V.field fieldName (V.fail (customError (ServerValidationError fieldError)))
+createFieldValidation : { b | provisioning : Provisioning } -> String -> ServerError.Message -> Validation FormError a
+createFieldValidation appState fieldName fieldError =
+    let
+        error =
+            Maybe.withDefault "" <|
+                ServerError.messageToReadable appState fieldError
+    in
+    V.field fieldName (V.fail (customError (ServerValidationError error)))

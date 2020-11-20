@@ -65,7 +65,7 @@ handleGetConfigCompleted props appState model result =
                     { model | form = props.initForm config, config = Success config }
 
                 Err error ->
-                    { model | config = ApiError.toActionResult (lg "apiError.config.app.getError" appState) error }
+                    { model | config = ApiError.toActionResult appState (lg "apiError.config.app.getError" appState) error }
 
         cmd =
             getResultCmd result
@@ -89,7 +89,7 @@ handlePutConfigCompleted props appState model result =
                     )
 
                 Err error ->
-                    ( ApiError.toActionResult (lg "apiError.config.app.putError" appState) error
+                    ( ApiError.toActionResult appState (lg "apiError.config.app.putError" appState) error
                     , getResultCmd result
                     )
     in

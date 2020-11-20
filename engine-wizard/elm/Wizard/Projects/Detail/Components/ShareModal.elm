@@ -122,7 +122,7 @@ handlePutQuestionnaireComplete appState model result =
             ( { model | visible = False, savingSharing = Unset }, Ports.refresh () )
 
         Err error ->
-            ( { model | savingSharing = ApiError.toActionResult (lg "apiError.questionnaires.putError" appState) error }
+            ( { model | savingSharing = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }
             , Cmd.none
             )
 

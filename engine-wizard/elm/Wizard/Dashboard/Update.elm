@@ -36,7 +36,7 @@ update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg appState model =
     case msg of
         GetLevelsCompleted result ->
-            applyResult
+            applyResult appState
                 { setResult = setLevels
                 , defaultError = lg "apiError.levels.getListError" appState
                 , model = model
@@ -44,7 +44,7 @@ update msg appState model =
                 }
 
         GetQuestionnairesCompleted result ->
-            applyResultTransform
+            applyResultTransform appState
                 { setResult = setQuestionnaires
                 , defaultError = lg "apiError.questionnaires.getListError" appState
                 , model = model

@@ -103,7 +103,7 @@ handleDeleteDocumentCompleted wrapMsg appState questionnaireUuid model result =
             )
 
         Err error ->
-            ( { model | deletingDocument = ApiError.toActionResult (lg "apiError.documents.deleteError" appState) error }
+            ( { model | deletingDocument = ApiError.toActionResult appState (lg "apiError.documents.deleteError" appState) error }
             , getResultCmd result
             )
 
@@ -156,7 +156,7 @@ handleGetSubmissionServicesCompleted appState model result =
                 , selectedSubmissionServiceId = selectedSubmissionServiceId
             }
     in
-    applyResult
+    applyResult appState
         { setResult = setResult
         , defaultError = lg "apiError.documents.getSubmissionServicesError" appState
         , model = model
@@ -184,7 +184,7 @@ handleSubmitDocument wrapMsg appState model =
 
 handleSubmitDocumentCompleted : AppState -> Model -> Result ApiError Submission -> ( Model, Cmd Wizard.Msgs.Msg )
 handleSubmitDocumentCompleted appState model result =
-    applyResult
+    applyResult appState
         { setResult = \value record -> { record | submittingDocument = value }
         , defaultError = lg "apiError.submissions.postError" appState
         , model = model

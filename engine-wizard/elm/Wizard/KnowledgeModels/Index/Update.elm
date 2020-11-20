@@ -72,7 +72,7 @@ deletePackageCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | deletingPackage = ApiError.toActionResult (lg "apiError.packages.deleteError" appState) error }
+            ( { model | deletingPackage = ApiError.toActionResult appState (lg "apiError.packages.deleteError" appState) error }
             , getResultCmd result
             )
 

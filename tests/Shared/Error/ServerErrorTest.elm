@@ -1,5 +1,6 @@
 module Shared.Error.ServerErrorTest exposing (errorDecoderTests)
 
+import Dict
 import Expect
 import Json.Decode exposing (..)
 import Shared.Error.ServerError as ServerError
@@ -9,37 +10,51 @@ import Test exposing (..)
 errorDecoderTests : Test
 errorDecoderTests =
     describe "errorDecoderTests"
-        [ test "should decode message" <|
+        [ test "UserSimpleError" <|
             \_ ->
                 let
                     rawError =
-                        "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"User could not be created\",\"fieldErrors\":[]}"
+                        "{\"type\":\"UserSimpleError\",\"error\":{\"code\":\"error-code\",\"params\":[\"foo\"]}}"
 
-                    message =
+                    result =
                         case decodeString ServerError.decoder rawError of
-                            Ok error ->
-                                error.message
+                            Ok (ServerError.UserSimpleError message) ->
+                                Ok message
 
-                            Err _ ->
-                                ""
+                            Err err ->
+                                let
+                                    _ =
+                                        Debug.log "err" err
+                                in
+                                Err ()
+
+                            _ ->
+                                Err ()
                 in
-                Expect.equal "User could not be created" message
-        , test "should decode field errors" <|
+                Expect.equal result (Ok { code = "error-code", params = [ "foo" ] })
+        , test "UserFormError" <|
             \_ ->
                 let
                     rawError =
-                        "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"\",\"fieldErrors\":[[\"field1\", \"error1\"], [\"field2\", \"error2\"]]}"
+                        "{\"type\":\"UserFormError\",\"formErrors\":[{\"code\":\"form-error-code\",\"params\":[\"foo\"]}],\"fieldErrors\":{\"field\":[{\"code\":\"field-error-code\",\"params\":[\"bar\"]}]}}"
 
-                    fieldErrors =
+                    result =
                         case decodeString ServerError.decoder rawError of
-                            Ok error ->
-                                error.fieldErrors
+                            Ok (ServerError.UserFormError error) ->
+                                Ok error
 
-                            Err _ ->
-                                []
+                            _ ->
+                                Err ()
 
-                    expectedFieldErrors =
-                        [ ( "field1", "error1" ), ( "field2", "error2" ) ]
+                    expected =
+                        { formErrors = [ { code = "form-error-code", params = [ "foo" ] } ]
+                        , fieldErrors =
+                            Dict.fromList
+                                [ ( "field"
+                                  , [ { code = "field-error-code", params = [ "bar" ] } ]
+                                  )
+                                ]
+                        }
                 in
-                Expect.equal expectedFieldErrors fieldErrors
+                Expect.equal result (Ok expected)
         ]

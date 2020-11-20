@@ -83,7 +83,7 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
                     { model | knowledgeModelPreview = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelPreview = ApiError.toActionResult (lg "apiError.knowledgeModels.tags.getError" appState) error }
+                    { model | knowledgeModelPreview = ApiError.toActionResult appState (lg "apiError.knowledgeModels.tags.getError" appState) error }
 
         cmd =
             getResultCmd result
@@ -138,7 +138,7 @@ handlePostQuestionnaireCompleted appState model result =
             )
 
         Err error ->
-            ( { model | savingQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.postError" appState) error }
+            ( { model | savingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.postError" appState) error }
             , getResultCmd result
             )
 

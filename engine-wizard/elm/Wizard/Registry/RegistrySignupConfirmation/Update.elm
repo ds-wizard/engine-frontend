@@ -32,4 +32,4 @@ handlePostConfirmationComplete appState model result =
             { model | confirmation = Success () }
 
         Err error ->
-            { model | confirmation = ApiError.toActionResult (lg "apiError.registry.confirmation" appState) error }
+            { model | confirmation = ApiError.toActionResult appState (lg "apiError.registry.confirmation" appState) error }
