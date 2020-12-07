@@ -27,8 +27,8 @@
     "extract-locale:wizard": "mkdir -p locale && COMPONENT=wizard node scripts/extract-locale.js",
     "apply-locale": "npm run apply-locale:registry && npm run apply-locale:shared && npm run apply-locale:wizard",
     "apply-locale:registry": "COMPONENT=registry node scripts/apply-locale.js",
-    "apply-locale:shared": "COMPONENT=registry node scripts/apply-locale.js",
-    "apply-locale:wizard": "COMPONENT=registry node scripts/apply-locale.js"
+    "apply-locale:shared": "COMPONENT=shared node scripts/apply-locale.js",
+    "apply-locale:wizard": "COMPONENT=wizard node scripts/apply-locale.js"
   },
   "devDependencies": {
     "bootstrap": "^4.3.1",
