@@ -291,34 +291,38 @@ update msg appState model fetchPreviewCmd =
 
         MoveModalMsg moveModalMsg ->
             let
-                createMoveEvent constructor entityUuid parentUuid =
+                createMoveEvent constructor entityUuid parentUuid seed newModel _ =
                     let
                         ( moveEvent, newSeed ) =
                             constructor
-                                (MoveModal.getSelectedTargetUuid model.moveModal)
+                                (MoveModal.getSelectedTargetUuid newModel.moveModal)
                                 entityUuid
                                 parentUuid
-                                appState.seed
+                                seed
 
                         events =
-                            model.events ++ [ moveEvent ]
+                            newModel.events ++ [ moveEvent ]
                     in
-                    ( newSeed, { model | events = events }, fetchPreviewCmd )
+                    ( newSeed, { newModel | events = events }, fetchPreviewCmd )
             in
             case moveModalMsg of
                 MoveModal.Submit ->
                     case getActiveEditor model of
                         Just (QuestionEditor questionEditor) ->
                             createMoveEvent createMoveQuestionEvent questionEditor.uuid questionEditor.parentUuid
+                                |> withGenerateQuestionEditEvent appState appState.seed model questionEditor
 
                         Just (AnswerEditor answerEditor) ->
                             createMoveEvent createMoveAnswerEvent answerEditor.uuid answerEditor.parentUuid
+                                |> withGenerateAnswerEditEvent appState appState.seed model answerEditor
 
                         Just (ReferenceEditor referenceEditor) ->
                             createMoveEvent createMoveReferenceEvent referenceEditor.uuid referenceEditor.parentUuid
+                                |> withGenerateReferenceEditEvent appState appState.seed model referenceEditor
 
                         Just (ExpertEditor expertEditor) ->
                             createMoveEvent createMoveExpertEvent expertEditor.uuid expertEditor.parentUuid
+                                |> withGenerateExpertEditEvent appState appState.seed model expertEditor
 
                         _ ->
                             ( appState.seed, { model | moveModal = MoveModal.update moveModalMsg model.moveModal { editors = model.editors } }, Cmd.none )
