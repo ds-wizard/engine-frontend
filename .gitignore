@@ -11,3 +11,6 @@ docs
 
 # local config
 config.js
+
+# locale
+locale

@@ -64,7 +64,7 @@ update : Msg -> AppState -> Model -> Model
 update msg appState =
     case msg of
         GetTemplateCompleted result ->
-            ActionResult.apply setTemplate (ApiError.toActionResult (l_ "update.getError" appState)) result
+            ActionResult.apply setTemplate (ApiError.toActionResult appState (l_ "update.getError" appState)) result
 
 
 

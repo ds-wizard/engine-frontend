@@ -112,7 +112,7 @@ update msg appState ctx model =
                     )
 
                 Err error ->
-                    ( { model | summaryReport = ApiError.toActionResult (lg "apiError.questionnaires.summaryReport.fetchError" appState) error }
+                    ( { model | summaryReport = ApiError.toActionResult appState (lg "apiError.questionnaires.summaryReport.fetchError" appState) error }
                     , Cmd.none
                     )
 

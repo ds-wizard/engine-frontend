@@ -25,4 +25,4 @@ update msg appState model =
                     ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token Nothing) )
 
                 Err error ->
-                    ( { model | authenticating = ApiError.toActionResult (lg "apiError.tokens.fetchTokenError" appState) error }, Cmd.none )
+                    ( { model | authenticating = ApiError.toActionResult appState (lg "apiError.tokens.fetchTokenError" appState) error }, Cmd.none )

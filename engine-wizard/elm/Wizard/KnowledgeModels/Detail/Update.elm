@@ -24,7 +24,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         GetPackageCompleted result ->
-            applyResult
+            applyResult appState
                 { setResult = setPackage
                 , defaultError = lg "apiError.packages.getError" appState
                 , model = model
@@ -60,6 +60,6 @@ deleteVersionCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | deletingVersion = ApiError.toActionResult (lg "apiError.packages.deleteError" appState) error }
+            ( { model | deletingVersion = ApiError.toActionResult appState (lg "apiError.packages.deleteError" appState) error }
             , getResultCmd result
             )

@@ -8,6 +8,7 @@ module Wizard.Common.Api exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
+import Shared.Provisioning exposing (Provisioning)
 import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs
 import Wizard.Msgs
@@ -29,14 +30,16 @@ getResultCmd result =
 
 
 applyResult :
-    { setResult : ActionResult data -> model -> model
-    , defaultError : String
-    , model : model
-    , result : Result ApiError data
-    }
+    { a | provisioning : Provisioning }
+    ->
+        { setResult : ActionResult data -> model -> model
+        , defaultError : String
+        , model : model
+        , result : Result ApiError data
+        }
     -> ( model, Cmd Wizard.Msgs.Msg )
-applyResult { setResult, defaultError, model, result } =
-    applyResultTransform
+applyResult appState { setResult, defaultError, model, result } =
+    applyResultTransform appState
         { setResult = setResult
         , defaultError = defaultError
         , model = model
@@ -46,15 +49,17 @@ applyResult { setResult, defaultError, model, result } =
 
 
 applyResultTransform :
-    { setResult : ActionResult data2 -> model -> model
-    , defaultError : String
-    , model : model
-    , result : Result ApiError data1
-    , transform : data1 -> data2
-    }
+    { a | provisioning : Provisioning }
+    ->
+        { setResult : ActionResult data2 -> model -> model
+        , defaultError : String
+        , model : model
+        , result : Result ApiError data1
+        , transform : data1 -> data2
+        }
     -> ( model, Cmd Wizard.Msgs.Msg )
-applyResultTransform { setResult, defaultError, model, result, transform } =
-    applyResultTransformCmd
+applyResultTransform appState { setResult, defaultError, model, result, transform } =
+    applyResultTransformCmd appState
         { setResult = setResult
         , defaultError = defaultError
         , model = model
@@ -65,15 +70,17 @@ applyResultTransform { setResult, defaultError, model, result, transform } =
 
 
 applyResultCmd :
-    { setResult : ActionResult data -> model -> model
-    , defaultError : String
-    , model : model
-    , result : Result ApiError data
-    , cmd : Cmd Wizard.Msgs.Msg
-    }
+    { a | provisioning : Provisioning }
+    ->
+        { setResult : ActionResult data -> model -> model
+        , defaultError : String
+        , model : model
+        , result : Result ApiError data
+        , cmd : Cmd Wizard.Msgs.Msg
+        }
     -> ( model, Cmd Wizard.Msgs.Msg )
-applyResultCmd { setResult, defaultError, model, result, cmd } =
-    applyResultTransformCmd
+applyResultCmd appState { setResult, defaultError, model, result, cmd } =
+    applyResultTransformCmd appState
         { setResult = setResult
         , defaultError = defaultError
         , model = model
@@ -84,15 +91,17 @@ applyResultCmd { setResult, defaultError, model, result, cmd } =
 
 
 applyResultTransformCmd :
-    { setResult : ActionResult data2 -> model -> model
-    , defaultError : String
-    , model : model
-    , result : Result ApiError data1
-    , transform : data1 -> data2
-    , cmd : Cmd Wizard.Msgs.Msg
-    }
+    { a | provisioning : Provisioning }
+    ->
+        { setResult : ActionResult data2 -> model -> model
+        , defaultError : String
+        , model : model
+        , result : Result ApiError data1
+        , transform : data1 -> data2
+        , cmd : Cmd Wizard.Msgs.Msg
+        }
     -> ( model, Cmd Wizard.Msgs.Msg )
-applyResultTransformCmd { setResult, defaultError, model, result, transform, cmd } =
+applyResultTransformCmd appState { setResult, defaultError, model, result, transform, cmd } =
     case result of
         Ok data ->
             ( setResult (Success <| transform data) model
@@ -100,6 +109,6 @@ applyResultTransformCmd { setResult, defaultError, model, result, transform, cmd
             )
 
         Err error ->
-            ( setResult (ApiError.toActionResult defaultError error) model
+            ( setResult (ApiError.toActionResult appState defaultError error) model
             , getResultCmd result
             )

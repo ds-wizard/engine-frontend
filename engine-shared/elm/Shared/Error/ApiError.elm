@@ -7,6 +7,7 @@ module Shared.Error.ApiError exposing
 import ActionResult exposing (ActionResult(..))
 import Json.Decode exposing (decodeString)
 import Shared.Error.ServerError as ServerError exposing (ServerError)
+import Shared.Provisioning exposing (Provisioning)
 
 
 type ApiError
@@ -20,6 +21,9 @@ type ApiError
 toServerError : ApiError -> Maybe ServerError
 toServerError error =
     case error of
+        BadStatus 403 _ ->
+            Just ServerError.ForbiddenError
+
         BadStatus 500 _ ->
             Nothing
 
@@ -28,22 +32,28 @@ toServerError error =
                 Ok err ->
                     Just err
 
-                _ ->
+                Err _ ->
                     Nothing
 
         _ ->
             Nothing
 
 
-toActionResult : String -> ApiError -> ActionResult a
-toActionResult defaultMessage error =
+toActionResult : { b | provisioning : Provisioning } -> String -> ApiError -> ActionResult a
+toActionResult appState defaultMessage error =
     case toServerError error of
         Just err ->
-            if String.isEmpty err.message then
-                Error defaultMessage
+            case err of
+                ServerError.UserSimpleError message ->
+                    Error <|
+                        Maybe.withDefault defaultMessage <|
+                            ServerError.messageToReadable appState message
 
-            else
-                Error err.message
+                ServerError.ForbiddenError ->
+                    Error (ServerError.forbiddenMessage appState)
+
+                _ ->
+                    Error defaultMessage
 
         Nothing ->
             Error defaultMessage

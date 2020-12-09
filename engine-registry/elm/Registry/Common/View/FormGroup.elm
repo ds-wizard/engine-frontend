@@ -16,7 +16,8 @@ import Form.Input as Input
 import Html exposing (Html, code, div, label, p, span, text)
 import Html.Attributes exposing (class, for, id, name)
 import Registry.Common.AppState exposing (AppState)
-import Registry.Common.FormExtra exposing (CustomFormError(..))
+import Shared.Form exposing (errorToString)
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf)
 
@@ -33,35 +34,35 @@ lf_ =
 
 {-| Helper for creating form group with text input field.
 -}
-input : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+input : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 input =
     formGroup Input.textInput []
 
 
 {-| Helper for creating form group with password input field.
 -}
-password : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+password : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 password =
     formGroup Input.passwordInput []
 
 
 {-| Helper for creating form group with select field.
 -}
-select : AppState -> List ( String, String ) -> Form CustomFormError o -> String -> String -> Html Form.Msg
+select : AppState -> List ( String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 select appState options =
     formGroup (Input.selectInput options) [] appState
 
 
 {-| Helper for creating form group with textarea.
 -}
-textarea : AppState -> Form CustomFormError o -> String -> String -> Html Form.Msg
+textarea : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 textarea =
     formGroup Input.textArea []
 
 
 {-| Helper for creating form group with toggle
 -}
-toggle : Form CustomFormError o -> String -> String -> Html Form.Msg
+toggle : Form FormError o -> String -> String -> Html Form.Msg
 toggle form fieldName labelText =
     let
         field =
@@ -77,7 +78,7 @@ toggle form fieldName labelText =
 
 {-| Create Html for a form field using the given input field.
 -}
-formGroup : Input.Input CustomFormError String -> List (Html.Attribute Form.Msg) -> AppState -> Form CustomFormError o -> String -> String -> Html.Html Form.Msg
+formGroup : Input.Input FormError String -> List (Html.Attribute Form.Msg) -> AppState -> Form FormError o -> String -> String -> Html.Html Form.Msg
 formGroup inputFn attrs appState form fieldName labelText =
     let
         field =
@@ -123,38 +124,11 @@ plainGroup valueHtml labelText =
 {-| Get Html and form group error class for a given field. If the field
 contains no errors, the returned Html and error class are empty.
 -}
-getErrors : AppState -> Form.FieldState CustomFormError String -> String -> ( Html msg, String )
+getErrors : AppState -> Form.FieldState FormError String -> String -> ( Html msg, String )
 getErrors appState field labelText =
     case field.liveError of
         Just error ->
-            ( p [ class "invalid-feedback" ] [ text (toReadable appState error labelText) ], "is-invalid" )
+            ( p [ class "invalid-feedback" ] [ text (errorToString appState labelText error) ], "is-invalid" )
 
         Nothing ->
             ( emptyNode, "" )
-
-
-toReadable : AppState -> ErrorValue CustomFormError -> String -> String
-toReadable appState error labelText =
-    case error of
-        Empty ->
-            lf_ "error.empty" [ labelText ] appState
-
-        InvalidString ->
-            lf_ "error.invalidString" [ labelText ] appState
-
-        InvalidEmail ->
-            l_ "error.invalidEmail" appState
-
-        InvalidFloat ->
-            l_ "error.invalidFloat" appState
-
-        CustomError err ->
-            case err of
-                ServerValidationError msg ->
-                    msg
-
-                Error msg ->
-                    msg
-
-        _ ->
-            l_ "error.general" appState

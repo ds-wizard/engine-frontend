@@ -7,6 +7,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs as AuthMsgs
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
@@ -61,7 +62,7 @@ getCurrentUserCompleted model mbOriginalUrl result =
         Err error ->
             let
                 msg =
-                    ApiError.toActionResult (lg "apiError.users.current.getError" model.appState) error
+                    ApiError.toActionResult model.appState (lg "apiError.users.current.getError" model.appState) error
                         |> Wizard.Public.Login.Msgs.GetProfileInfoFailed
                         |> Wizard.Public.Msgs.LoginMsg
                         |> Wizard.Msgs.PublicMsg

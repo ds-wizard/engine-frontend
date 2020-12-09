@@ -66,7 +66,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | km = Success km }
 
                                 Err error ->
-                                    ( { model | km = ApiError.toActionResult (lg "apiError.branches.getError" appState) error }
+                                    ( { model | km = ApiError.toActionResult appState (lg "apiError.branches.getError" appState) error }
                                     , getResultCmd result
                                     )
                     in
@@ -80,7 +80,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | metrics = Success metrics }
 
                                 Err error ->
-                                    ( { model | metrics = ApiError.toActionResult (lg "apiError.metrics.getListError" appState) error }
+                                    ( { model | metrics = ApiError.toActionResult appState (lg "apiError.metrics.getListError" appState) error }
                                     , getResultCmd result
                                     )
                     in
@@ -94,7 +94,7 @@ update msg wrapMsg appState model =
                                     fetchPreview wrapMsg appState { model | levels = Success levels }
 
                                 Err error ->
-                                    ( { model | levels = ApiError.toActionResult (lg "apiError.levels.getListError" appState) error }
+                                    ( { model | levels = ApiError.toActionResult appState (lg "apiError.levels.getListError" appState) error }
                                     , getResultCmd result
                                     )
                     in
@@ -127,7 +127,7 @@ update msg wrapMsg appState model =
                                     }
 
                                 Err error ->
-                                    { model | preview = ApiError.toActionResult (lg "apiError.knowledgeModels.preview.fetchError" appState) error }
+                                    { model | preview = ApiError.toActionResult appState (lg "apiError.knowledgeModels.preview.fetchError" appState) error }
 
                         cmd =
                             getResultCmd result
@@ -242,7 +242,7 @@ update msg wrapMsg appState model =
 
                         Err error ->
                             ( appState.seed
-                            , { model | saving = ApiError.toActionResult (lg "apiError.branches.putError" appState) error }
+                            , { model | saving = ApiError.toActionResult appState (lg "apiError.branches.putError" appState) error }
                             , getResultCmd result
                             )
     in

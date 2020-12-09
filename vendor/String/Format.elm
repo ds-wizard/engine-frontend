@@ -41,16 +41,16 @@ formatHtml_ currentText chars elements =
                 [ text currentText ]
     in
     case chars of
-        '%' :: 'h' :: rest ->
+        '%' :: 's' :: rest ->
             case List.head elements of
                 Just element ->
                     toHtml currentText ++ [ element ] ++ formatHtml_ "" rest (List.drop 1 elements)
 
                 Nothing ->
-                    formatHtml_ (currentText ++ "%h") rest []
+                    formatHtml_ (currentText ++ "%s") rest []
 
-        '%' :: '%' :: 'h' :: rest ->
-            formatHtml_ (currentText ++ "%h") rest elements
+        '%' :: '%' :: 's' :: rest ->
+            formatHtml_ (currentText ++ "%s") rest elements
 
         a :: rest ->
             formatHtml_ (currentText ++ String.fromChar a) rest elements

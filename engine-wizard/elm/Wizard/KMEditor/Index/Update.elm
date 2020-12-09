@@ -101,7 +101,7 @@ handleDeleteBranchCompleted appState model result =
             ( model, cmdNavigate appState Routes.kmEditorIndex )
 
         Err error ->
-            ( { model | deletingKnowledgeModel = ApiError.toActionResult (lg "apiError.branches.deleteError" appState) error }
+            ( { model | deletingKnowledgeModel = ApiError.toActionResult appState (lg "apiError.branches.deleteError" appState) error }
             , getResultCmd result
             )
 
@@ -117,7 +117,7 @@ handlePostMigrationCompleted appState model result =
             ( model, cmdNavigate appState <| Routes.KMEditorRoute <| MigrationRoute kmUuid )
 
         Err error ->
-            ( { model | creatingMigration = ApiError.toActionResult (lg "apiError.branches.migrations.postError" appState) error }
+            ( { model | creatingMigration = ApiError.toActionResult appState (lg "apiError.branches.migrations.postError" appState) error }
             , getResultCmd result
             )
 
@@ -162,7 +162,7 @@ handleUpgradeFormMsg formMsg wrapMsg appState model =
 
 handleGetPackageCompleted : AppState -> Model -> Result ApiError PackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetPackageCompleted appState model result =
-    applyResult
+    applyResult appState
         { setResult = setPackage
         , defaultError = lg "apiError.packages.getError" appState
         , model = model
@@ -193,7 +193,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult (lg "apiError.branches.migrations.deleteError" appState) error }
+            ( { model | deletingMigration = ApiError.toActionResult appState (lg "apiError.branches.migrations.deleteError" appState) error }
             , getResultCmd result
             )
 

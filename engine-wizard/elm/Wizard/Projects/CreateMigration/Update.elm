@@ -82,7 +82,7 @@ handleRemoveTag model tagUuid =
 handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireCompleted appState model result =
     preselectKnowledgeModel <|
-        applyResult
+        applyResult appState
             { setResult = setQuestionnaire
             , defaultError = lg "apiError.questionnaires.getError" appState
             , model = model
@@ -140,7 +140,7 @@ handlePostMigrationCompleted appState model result =
             ( model, cmdNavigate appState <| Routes.ProjectsRoute <| MigrationRoute migration.newQuestionnaire.uuid )
 
         Err error ->
-            ( { model | savingMigration = ApiError.toActionResult (lg "apiError.questionnaires.migrations.postError" appState) error }
+            ( { model | savingMigration = ApiError.toActionResult appState (lg "apiError.questionnaires.migrations.postError" appState) error }
             , getResultCmd result
             )
 
@@ -154,7 +154,7 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
                     { model | knowledgeModelPreview = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelPreview = ApiError.toActionResult (lg "apiError.knowledgeModels.tags.getError" appState) error }
+                    { model | knowledgeModelPreview = ApiError.toActionResult appState (lg "apiError.knowledgeModels.tags.getError" appState) error }
 
         cmd =
             getResultCmd result

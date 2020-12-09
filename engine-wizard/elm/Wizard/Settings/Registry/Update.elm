@@ -106,8 +106,8 @@ handlePostSignupComplete appState model result =
 
         Err error ->
             ( { model
-                | registrySigningUp = ApiError.toActionResult (lg "apiError.registry.signup.postError" appState) error
-                , registrySignupForm = setFormErrors error model.registrySignupForm
+                | registrySigningUp = ApiError.toActionResult appState (lg "apiError.registry.signup.postError" appState) error
+                , registrySignupForm = setFormErrors appState error model.registrySignupForm
               }
             , getResultCmd result
             )

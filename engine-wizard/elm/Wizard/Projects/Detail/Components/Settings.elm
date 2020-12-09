@@ -142,7 +142,7 @@ handlePutQuestionnaireComplete appState model result =
             )
 
         Err error ->
-            ( { model | savingQuestionnaire = ApiError.toActionResult (lg "apiError.questionnaires.putError" appState) error }
+            ( { model | savingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }
             , Cmd.none
             )
 
