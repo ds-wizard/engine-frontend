@@ -168,24 +168,11 @@ viewPlanNavigationOnlineUsers appState model =
 
 viewPlanNavigationActions : AppState -> QuestionnaireDetail -> Html Msg
 viewPlanNavigationActions appState questionnaire =
-    let
-        isEditable =
-            QuestionnaireDetail.isEditable appState questionnaire
-
-        isAuthenticated =
-            Session.exists appState.session
-
-        visibilityEnabled =
-            appState.config.questionnaire.questionnaireVisibility.enabled
-
-        sharingEnabled =
-            appState.config.questionnaire.questionnaireSharing.enabled
-    in
-    if isEditable && isAuthenticated && (visibilityEnabled || sharingEnabled) then
+    if QuestionnaireDetail.isOwner appState questionnaire then
         div [ class "Plans__Detail__Navigation__Row__Section__Actions" ]
             [ button
                 [ class "btn btn-info link-with-icon"
-                , onClick (ShareModalMsg ShareModal.openMsg)
+                , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
                 ]
                 [ fa "fas fa-user-friends"
                 , lx_ "actions.share" appState
@@ -203,11 +190,11 @@ viewPlanNavigationActions appState questionnaire =
 viewPlanNavigationNav : AppState -> PlanDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewPlanNavigationNav appState route model qm =
     let
-        isEditable =
-            QuestionnaireDetail.isEditable appState qm.questionnaire
+        isEditor =
+            QuestionnaireDetail.isEditor appState qm.questionnaire
 
-        isAuthenticated =
-            Session.exists appState.session
+        isOwner =
+            QuestionnaireDetail.isOwner appState qm.questionnaire
 
         isDocumentRoute r =
             case r of
@@ -294,11 +281,11 @@ viewPlanNavigationNav appState route model qm =
         links =
             []
                 |> listInsertIf questionnaireLink True
-                |> listInsertIf todosLink isEditable
+                |> listInsertIf todosLink isEditor
                 |> listInsertIf metricsLink appState.config.questionnaire.summaryReport.enabled
                 |> listInsertIf previewLink True
                 |> listInsertIf documentsLink True
-                |> listInsertIf settingsLink (isEditable && isAuthenticated)
+                |> listInsertIf settingsLink isOwner
     in
     div [ class "Plans__Detail__Navigation__Row" ]
         [ ul [ class "nav nav-underline-tabs" ] links
@@ -313,7 +300,7 @@ viewPlanContent : AppState -> PlanDetailRoute -> Model -> Questionnaire.Model ->
 viewPlanContent appState route model qm levels metrics =
     let
         isEditable =
-            QuestionnaireDetail.isEditable appState qm.questionnaire
+            QuestionnaireDetail.isEditor appState qm.questionnaire
 
         isAuthenticated =
             Session.exists appState.session

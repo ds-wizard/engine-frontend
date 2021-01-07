@@ -161,6 +161,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             , getError = lg "apiError.packages.getListError" appState
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
+            , filterResults = Nothing
             }
 
         ( templateTypeHintInputModel, cmd ) =

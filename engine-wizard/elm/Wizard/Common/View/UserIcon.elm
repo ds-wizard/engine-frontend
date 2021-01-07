@@ -9,3 +9,9 @@ view : User -> Html msg
 view user =
     div [ class "ItemIcon" ]
         [ img [ src (User.imageUrl user) ] [] ]
+
+
+viewSmall : { a | gravatarHash : String, imageUrl : Maybe String } -> Html msg
+viewSmall user =
+    div [ class "ItemIcon ItemIcon--small" ]
+        [ img [ src (User.imageUrlOrGravatar user) ] [] ]

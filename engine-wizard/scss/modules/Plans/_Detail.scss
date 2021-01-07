@@ -227,4 +227,49 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
     .questionnaire {
         height: $content-height;
     }
+
+    .ShareModal__Users {
+        .form-group {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-left: -1rem;
+            margin-right: -1rem;
+        }
+
+        .user-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-left: 0.5rem;
+            padding: 0.25rem 1rem 0.25rem 0.5rem;
+            border-top-left-radius: 5rem;
+            border-bottom-left-radius: 5rem;
+
+            &:hover {
+                background: $gray-200;
+            }
+
+            & > div {
+                display: flex;
+                align-items: center;
+            }
+
+            .ItemIcon {
+                margin-right: 0.5rem;
+            }
+
+            .form-control-inline {
+                font-weight: normal;
+            }
+
+            .fa {
+                margin-left: 0.5rem;
+            }
+        }
+
+        hr {
+            margin-left: -1rem;
+            margin-right: -1rem;
+        }
+    }
 }
