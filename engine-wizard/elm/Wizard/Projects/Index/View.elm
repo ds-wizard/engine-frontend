@@ -110,38 +110,42 @@ listingTitle appState questionnaire =
 listingDescription : AppState -> Questionnaire -> Html Msg
 listingDescription appState questionnaire =
     let
-        owner =
-            if questionnaire.visibility == QuestionnaireVisibility.VisibleEditQuestionnaire then
-                emptyNode
+        collaborators =
+            case questionnaire.permissions of
+                [] ->
+                    emptyNode
 
-            else
-                case questionnaire.permissions of
-                    [] ->
-                        emptyNode
+                perm :: [] ->
+                    span [ class "fragment" ]
+                        [ img [ src (User.imageUrlOrGravatar perm.member), class "user-icon user-icon-small" ] []
+                        , text <| User.fullName perm.member
+                        ]
 
-                    perm :: [] ->
-                        span [ class "fragment" ]
-                            [ img [ src (User.imageUrlOrGravatar perm.member), class "user-icon user-icon-small" ] []
-                            , text <| User.fullName perm.member
-                            ]
+                perms ->
+                    let
+                        ownerIcon member =
+                            img
+                                [ src (User.imageUrlOrGravatar member)
+                                , class "user-icon user-icon-small user-icon-only"
+                                , title <| User.fullName member
+                                ]
+                                []
 
-                    perms ->
-                        let
-                            ownerIcon member =
-                                img
-                                    [ src (User.imageUrlOrGravatar member)
-                                    , class "user-icon user-icon-small user-icon-only"
-                                    , title <| User.fullName member
-                                    ]
-                                    []
+                        users =
+                            perms
+                                |> List.map .member
+                                |> List.sortWith User.compare
+                                |> List.take 5
+                                |> List.map ownerIcon
 
-                            users =
-                                perms
-                                    |> List.map .member
-                                    |> List.sortWith User.compare
-                                    |> List.map ownerIcon
-                        in
-                        span [ class "fragment" ] users
+                        extraUsers =
+                            if List.length perms > 5 then
+                                span [] [ text ("+" ++ String.fromInt (List.length perms - 5)) ]
+
+                            else
+                                emptyNode
+                    in
+                    span [ class "fragment" ] (users ++ [ extraUsers ])
 
         kmRoute =
             Routes.KnowledgeModelsRoute <|
@@ -174,7 +178,7 @@ listingDescription appState questionnaire =
                 |> List.map toAnsweredInidcation
     in
     span []
-        (owner :: kmLink :: answered)
+        (collaborators :: kmLink :: answered)
 
 
 listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)

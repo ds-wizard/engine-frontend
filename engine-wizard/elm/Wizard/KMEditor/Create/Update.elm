@@ -87,6 +87,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             , getError = lg "apiError.packages.getListError" appState
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
+            , filterResults = Nothing
             }
 
         ( packageTypeHintInputModel, cmd ) =

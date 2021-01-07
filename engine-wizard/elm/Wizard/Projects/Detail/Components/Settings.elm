@@ -117,7 +117,7 @@ handleFormMsg cfg formMsg appState model =
         ( Form.Submit, Just form ) ->
             let
                 body =
-                    QuestionnaireEditForm.encode cfg.permissions form
+                    QuestionnaireEditForm.encode form
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
@@ -173,6 +173,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             , getError = lg "apiError.packages.getListError" appState
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
+            , filterResults = Nothing
             }
 
         ( templateTypeHintInputModel, cmd ) =

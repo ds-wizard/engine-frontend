@@ -1,6 +1,7 @@
 module Wizard.Projects.Common.QuestionnaireEditForm exposing
     ( QuestionnaireEditForm
     , encode
+    , getUserUuids
     , init
     , initEmpty
     , validation
@@ -8,17 +9,19 @@ module Wizard.Projects.Common.QuestionnaireEditForm exposing
 
 import Form exposing (Form)
 import Form.Field as Field
-import Form.Validate as Validate exposing (Validation)
+import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
-import Shared.Data.Permission as Permission exposing (Permission)
+import Shared.Data.Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
+import Shared.Data.User as User
 import Shared.Form.FormError exposing (FormError)
-import Uuid
+import Uuid exposing (Uuid)
+import Wizard.Projects.Common.QuestionnaireEditFormPermission as QuestionnaireEditFormPermission exposing (QuestionnaireEditFormPermission)
 
 
 type alias QuestionnaireEditForm =
@@ -29,6 +32,7 @@ type alias QuestionnaireEditForm =
     , sharingPermission : QuestionnairePermission
     , templateId : Maybe String
     , formatUuid : Maybe String
+    , permissions : List QuestionnaireEditFormPermission
     }
 
 
@@ -42,6 +46,18 @@ init questionnaire =
     Form.initial (questionnaireToFormInitials questionnaire) validation
 
 
+getUserUuids : Form FormError QuestionnaireEditForm -> List String
+getUserUuids form =
+    let
+        indexes =
+            Form.getListIndexes "permissions" form
+
+        toUserUuid index =
+            Maybe.withDefault "" (Form.getFieldAsString ("permissions." ++ String.fromInt index ++ ".member.uuid") form).value
+    in
+    List.map toUserUuid indexes
+
+
 questionnaireToFormInitials : QuestionnaireDetail -> List ( String, Field.Field )
 questionnaireToFormInitials questionnaire =
     let
@@ -50,6 +66,10 @@ questionnaireToFormInitials questionnaire =
 
         ( sharingEnabled, sharingPermission ) =
             QuestionnaireSharing.toFormValues questionnaire.sharing
+
+        permissionFields =
+            List.map QuestionnaireEditFormPermission.initFromPermission <|
+                List.sortWith (\p1 p2 -> User.compare p1.member p2.member) questionnaire.permissions
     in
     [ ( "name", Field.string questionnaire.name )
     , ( "visibilityEnabled", Field.bool visibilityEnabled )
@@ -58,23 +78,25 @@ questionnaireToFormInitials questionnaire =
     , ( "sharingPermission", QuestionnairePermission.field sharingPermission )
     , ( "templateId", Field.string (Maybe.withDefault "" questionnaire.templateId) )
     , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString questionnaire.formatUuid) )
+    , ( "permissions", Field.list permissionFields )
     ]
 
 
 validation : Validation FormError QuestionnaireEditForm
 validation =
-    Validate.map7 QuestionnaireEditForm
-        (Validate.field "name" Validate.string)
-        (Validate.field "visibilityEnabled" Validate.bool)
-        (Validate.field "visibilityPermission" QuestionnairePermission.validation)
-        (Validate.field "sharingEnabled" Validate.bool)
-        (Validate.field "sharingPermission" QuestionnairePermission.validation)
-        (Validate.field "templateId" (Validate.maybe Validate.string))
-        (Validate.field "formatUuid" (Validate.maybe Validate.string))
+    V.map8 QuestionnaireEditForm
+        (V.field "name" V.string)
+        (V.field "visibilityEnabled" V.bool)
+        (V.field "visibilityPermission" QuestionnairePermission.validation)
+        (V.field "sharingEnabled" V.bool)
+        (V.field "sharingPermission" QuestionnairePermission.validation)
+        (V.field "templateId" (V.maybe V.string))
+        (V.field "formatUuid" (V.maybe V.string))
+        (V.field "permissions" (V.list QuestionnaireEditFormPermission.validation))
 
 
-encode : List Permission -> QuestionnaireEditForm -> E.Value
-encode permissions form =
+encode : QuestionnaireEditForm -> E.Value
+encode form =
     let
         formatUuid =
             Maybe.andThen (always form.formatUuid) form.templateId
@@ -85,5 +107,5 @@ encode permissions form =
         , ( "sharing", QuestionnaireSharing.encode (QuestionnaireSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
         , ( "templateId", E.maybe E.string form.templateId )
         , ( "formatUuid", E.maybe E.string formatUuid )
-        , ( "permissions", E.list Permission.encode permissions )
+        , ( "permissions", E.list QuestionnaireEditFormPermission.encode form.permissions )
         ]

@@ -1,13 +1,28 @@
-module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing (packageSuggestion, templateSuggestion)
+module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
+    ( memberSuggestion
+    , packageSuggestion
+    , templateSuggestion
+    )
 
 import Html exposing (Html, div, span, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
+import Shared.Data.User as User
+import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Locale exposing (lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.ItemIcon as ItemIcon
+import Wizard.Common.View.UserIcon as UserIcon
+
+
+memberSuggestion : UserSuggestion -> Html msg
+memberSuggestion user =
+    complexItem
+        [ div [] [ UserIcon.viewSmall user ]
+        , div [] [ text <| User.fullName user ]
+        ]
 
 
 packageSuggestion : PackageSuggestion -> Html msg

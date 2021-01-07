@@ -6,7 +6,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , encode
     , getTodos
     , hasReply
-    , isEditable
+    , isEditor
     , isOwner
     , setLabels
     , setLevel
@@ -32,6 +32,7 @@ import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing ex
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
@@ -87,40 +88,67 @@ encode questionnaire =
         ]
 
 
-isEditable : AbstractAppState a -> QuestionnaireDetail -> Bool
-isEditable appState questionnaire =
-    let
-        owner =
-            isOwner appState questionnaire
-
-        isReadonly =
-            if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then
-                False
-
-            else if Session.exists appState.session then
-                questionnaire.visibility == VisibleViewQuestionnaire || (questionnaire.visibility == PrivateQuestionnaire && not owner)
-
-            else
-                questionnaire.sharing == AnyoneWithLinkViewQuestionnaire
-    in
-    owner || not isReadonly
+isEditor : AbstractAppState a -> QuestionnaireDetail -> Bool
+isEditor appState questionnaire =
+    hasPerm appState questionnaire QuestionnairePerm.edit
 
 
 isOwner : AbstractAppState a -> QuestionnaireDetail -> Bool
 isOwner appState questionnaire =
+    hasPerm appState questionnaire QuestionnairePerm.admin
+
+
+hasPerm : AbstractAppState a -> QuestionnaireDetail -> String -> Bool
+hasPerm appState questionnaire role =
     let
-        admin =
-            UserInfo.isAdmin appState.session.user
+        mbUser =
+            appState.session.user
 
-        owner =
-            matchOwner questionnaire appState.session.user
+        isAuthenticated =
+            Session.exists appState.session
+
+        globalPerms =
+            if UserInfo.isAdmin mbUser then
+                QuestionnairePerm.all
+
+            else
+                []
+
+        visibilityPerms =
+            if isAuthenticated then
+                case questionnaire.visibility of
+                    VisibleEditQuestionnaire ->
+                        [ QuestionnairePerm.view, QuestionnairePerm.edit ]
+
+                    VisibleViewQuestionnaire ->
+                        [ QuestionnairePerm.view ]
+
+                    PrivateQuestionnaire ->
+                        []
+
+            else
+                []
+
+        sharingPerms =
+            case questionnaire.sharing of
+                AnyoneWithLinkEditQuestionnaire ->
+                    [ QuestionnairePerm.view, QuestionnairePerm.edit ]
+
+                AnyoneWithLinkViewQuestionnaire ->
+                    [ QuestionnairePerm.view ]
+
+                RestrictedQuestionnaire ->
+                    []
+
+        userPerms =
+            mbUser
+                |> Maybe.andThen (\u -> List.find (.member >> .uuid >> (==) u.uuid) questionnaire.permissions)
+                |> Maybe.unwrap [] .perms
+
+        appliedPerms =
+            globalPerms ++ visibilityPerms ++ sharingPerms ++ userPerms
     in
-    admin || owner
-
-
-matchOwner : QuestionnaireDetail -> Maybe UserInfo -> Bool
-matchOwner questionnaire mbUser =
-    List.any (.member >> .uuid >> Just >> (==) (Maybe.map .uuid mbUser)) questionnaire.permissions
+    List.member role appliedPerms
 
 
 setLevel : Int -> QuestionnaireDetail -> QuestionnaireDetail

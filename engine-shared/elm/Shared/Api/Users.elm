@@ -3,6 +3,7 @@ module Shared.Api.Users exposing
     , getCurrentUser
     , getUser
     , getUsers
+    , getUsersSuggestions
     , postUser
     , postUserPublic
     , putUser
@@ -14,9 +15,11 @@ module Shared.Api.Users exposing
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, httpPost, httpPut, jwtDelete, jwtGet, jwtPost, jwtPut)
+import Shared.Data.Member as Member exposing (Member)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.User as User exposing (User)
+import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 getUsers : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination User) msg -> Cmd msg
@@ -29,6 +32,18 @@ getUsers qs =
             "/users" ++ queryString
     in
     jwtGet url (Pagination.decoder "users" User.decoder)
+
+
+getUsersSuggestions : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination UserSuggestion) msg -> Cmd msg
+getUsersSuggestions qs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrl qs
+
+        url =
+            "/users/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "users" UserSuggestion.decoder)
 
 
 getUser : String -> AbstractAppState a -> ToMsg User msg -> Cmd msg

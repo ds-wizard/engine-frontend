@@ -21,10 +21,10 @@ module Wizard.Common.View.FormGroup exposing
     , textarea
     , textareaAttrs
     , toggle
+    , viewList
     )
 
 import Form exposing (Form, InputType(..), Msg(..))
-import Form.Error exposing (ErrorValue(..))
 import Form.Field as Field
 import Form.Input as Input
 import Html exposing (Html, a, button, code, div, label, li, option, p, span, text, ul)
@@ -39,7 +39,7 @@ import Shared.Form.FormError exposing (FormError(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lx)
 import Shared.Utils exposing (getContrastColorHex)
-import String exposing (fromFloat)
+import String
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 
@@ -354,6 +354,22 @@ list appState itemView form fieldName labelText =
         , div [ class "form-list-error" ] [ error ]
         , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
             [ lx_ "list.add" appState ]
+        ]
+
+
+viewList : AppState -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> Html Form.Msg
+viewList appState itemView form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, _ ) =
+            getErrors appState field labelText
+    in
+    div [ class "form-group" ]
+        [ label [] [ text labelText ]
+        , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , div [ class "form-list-error" ] [ error ]
         ]
 
 
