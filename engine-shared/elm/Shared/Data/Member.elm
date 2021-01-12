@@ -2,11 +2,13 @@ module Shared.Data.Member exposing
     ( Member
     , decoder
     , encode
+    , toUserSuggestion
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Uuid exposing (Uuid)
 
 
@@ -37,3 +39,13 @@ encode member =
         [ ( "uuid", E.string (Uuid.toString member.uuid) )
         , ( "type", E.string member.type_ )
         ]
+
+
+toUserSuggestion : Member -> UserSuggestion
+toUserSuggestion user =
+    { uuid = user.uuid
+    , firstName = user.firstName
+    , lastName = user.lastName
+    , gravatarHash = user.gravatarHash
+    , imageUrl = user.imageUrl
+    }

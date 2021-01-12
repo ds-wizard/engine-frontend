@@ -171,6 +171,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             , getError = lg "apiError.packages.getListError" appState
             , setReply = wrapMsg << SelectPackage
             , clearReply = Nothing
+            , filterResults = Nothing
             }
 
         ( packageTypeHintInputModel, cmd ) =

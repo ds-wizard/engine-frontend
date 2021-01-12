@@ -3,6 +3,7 @@ module Wizard.Common.Components.TypeHintInput exposing
     , Msg
     , UpdateCofnig
     , ViewConfig
+    , clear
     , init
     , subscriptions
     , update
@@ -54,6 +55,11 @@ init fieldId =
     }
 
 
+clear : Model a -> Model a
+clear model =
+    { model | selected = Nothing }
+
+
 
 -- UPDATE
 
@@ -76,6 +82,7 @@ type alias UpdateCofnig a msg =
     , getError : String
     , setReply : a -> msg
     , clearReply : Maybe msg
+    , filterResults : Maybe (a -> Bool)
     }
 
 
@@ -127,7 +134,16 @@ update cfg msg appState model =
                     if q == model.q then
                         case result of
                             Ok typehints ->
-                                ( { model | typehints = Just <| Success typehints }, Cmd.none )
+                                let
+                                    filteredTypehints =
+                                        case cfg.filterResults of
+                                            Just filter ->
+                                                { typehints | items = List.filter filter typehints.items }
+
+                                            Nothing ->
+                                                typehints
+                                in
+                                ( { model | typehints = Just <| Success filteredTypehints }, Cmd.none )
 
                             Err _ ->
                                 ( { model | typehints = Just <| Error cfg.getError }, Cmd.none )

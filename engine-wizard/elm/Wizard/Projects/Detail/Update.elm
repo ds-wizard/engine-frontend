@@ -266,10 +266,7 @@ update wrapMsg msg appState model =
                         ( newModel, fetchCmd ) =
                             fetchSubrouteDataFromAfter wrapMsg
                                 appState
-                                { model
-                                    | questionnaireModel = questionnaireModelWithChapter
-                                    , shareModalModel = ShareModal.setQuestionnaire questionnaire model.shareModalModel
-                                }
+                                { model | questionnaireModel = questionnaireModelWithChapter }
                     in
                     withSeed <|
                         ( newModel
