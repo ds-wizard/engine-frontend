@@ -183,6 +183,17 @@ generateQuestionEvent model question parentUuid seed =
                             , props = EventField.empty
                             }
 
+                    MultiChoiceQuestion _ _ ->
+                        EditQuestionMultiChoiceEvent
+                            { title = EventField.empty
+                            , text = EventField.empty
+                            , requiredLevel = EventField.empty
+                            , tagUuids = EventField.create newTags True
+                            , referenceUuids = EventField.empty
+                            , expertUuids = EventField.empty
+                            , choiceUuids = EventField.empty
+                            }
+
             event =
                 EditQuestionEvent eventData commonData
         in

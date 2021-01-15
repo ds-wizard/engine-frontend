@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     ( AnswerForm
     , ChapterForm
+    , ChoiceForm
     , ExpertForm
     , IntegrationForm
     , KnowledgeModelForm
@@ -12,11 +13,13 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , TagForm
     , answerFormValidation
     , chapterFormValidation
+    , choiceFormValidation
     , expertFormValidation
     , formChanged
     , getMetricMesures
     , initAnswerForm
     , initChapterForm
+    , initChoiceForm
     , initExpertForm
     , initForm
     , initIntegrationForm
@@ -26,6 +29,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , initTagForm
     , integrationFormValidation
     , isListQuestionForm
+    , isMultiChoiceQuestionForm
     , isOptionsQuestionForm
     , knowledgeModelFormValidation
     , metricMeasureValidation
@@ -37,6 +41,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , tagFormValidation
     , updateAnswerWithForm
     , updateChapterWithForm
+    , updateChoiceWithForm
     , updateExpertWithForm
     , updateIntegrationWithForm
     , updateKnowledgeModelWithForm
@@ -55,6 +60,7 @@ import Set
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
@@ -112,6 +118,7 @@ type QuestionFormType
     | ListQuestionForm ListQuestionFormData
     | ValueQuestionForm ValueQuestionFormData
     | IntegrationQuestionForm IntegrationQuestionFormData
+    | MultiChoiceQuestionForm MultiChoiceQuestionFormData
 
 
 type alias OptionsQuestionFormData =
@@ -145,10 +152,22 @@ type alias IntegrationQuestionFormData =
     }
 
 
+type alias MultiChoiceQuestionFormData =
+    { title : String
+    , text : Maybe String
+    , requiredLevel : Maybe Int
+    }
+
+
 type alias AnswerForm =
     { label : String
     , advice : Maybe String
     , metricMeasures : List MetricMeasureForm
+    }
+
+
+type alias ChoiceForm =
+    { label : String
     }
 
 
@@ -426,6 +445,13 @@ validateQuestion integrations questionType =
                 (Validate.field "integrationUuid" Validate.string |> Validate.andThen (validateIntegrationProps integrations))
                 |> Validate.map IntegrationQuestionForm
 
+        "MultiChoiceQuestion" ->
+            Validate.map3 MultiChoiceQuestionFormData
+                (Validate.field "title" Validate.string)
+                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                |> Validate.map MultiChoiceQuestionForm
+
         _ ->
             Validate.fail <| Error.value InvalidString
 
@@ -487,6 +513,9 @@ questionFormInitials question =
 
                 IntegrationQuestion _ _ ->
                     "IntegrationQuestion"
+
+                MultiChoiceQuestion _ _ ->
+                    "MultiChoiceQuestion"
 
         props =
             case question of
@@ -563,6 +592,19 @@ updateQuestionWithForm question questionForm =
                 , props = formData.props
                 }
 
+        MultiChoiceQuestionForm formData ->
+            MultiChoiceQuestion
+                { uuid = Question.getUuid question
+                , title = formData.title
+                , text = formData.text
+                , requiredLevel = formData.requiredLevel
+                , tagUuids = Question.getTagUuids question
+                , referenceUuids = Question.getReferenceUuids question
+                , expertUuids = Question.getExpertUuids question
+                }
+                { choiceUuids = Question.getChoiceUuids question
+                }
+
 
 questionTypeOptions : AppState -> List ( String, String )
 questionTypeOptions appState =
@@ -570,6 +612,7 @@ questionTypeOptions appState =
     , ( "ListQuestion", lg "questionType.list" appState )
     , ( "ValueQuestion", lg "questionType.value" appState )
     , ( "IntegrationQuestion", lg "questionType.integration" appState )
+    , ( "MultiChoiceQuestion", lg "questionType.multiChoice" appState )
     ]
 
 
@@ -618,6 +661,20 @@ isListQuestionForm =
         detectForm questionForm =
             case questionForm of
                 ListQuestionForm _ ->
+                    True
+
+                _ ->
+                    False
+    in
+    isFormType detectForm
+
+
+isMultiChoiceQuestionForm : Form FormError QuestionForm -> Bool
+isMultiChoiceQuestionForm =
+    let
+        detectForm questionForm =
+            case questionForm of
+                MultiChoiceQuestionForm _ ->
                     True
 
                 _ ->
@@ -714,6 +771,11 @@ updateAnswerWithForm answer answerForm =
     }
 
 
+updateChoiceWithForm : Choice -> ChoiceForm -> Choice
+updateChoiceWithForm choice choiceForm =
+    { choice | label = choiceForm.label }
+
+
 getMetricMesures : AnswerForm -> List MetricMeasure
 getMetricMesures answerForm =
     answerForm.metricMeasures
@@ -727,6 +789,27 @@ metricMeasureFormToMetricMeasure form =
     , measure = form.values |> Maybe.map .measure |> Maybe.withDefault 0
     , weight = form.values |> Maybe.map .weight |> Maybe.withDefault 0
     }
+
+
+
+{- Choice -}
+
+
+initChoiceForm : Choice -> Form FormError ChoiceForm
+initChoiceForm =
+    choiceFormInitials >> initForm choiceFormValidation
+
+
+choiceFormValidation : Validation FormError ChoiceForm
+choiceFormValidation =
+    Validate.map ChoiceForm
+        (Validate.field "label" Validate.string)
+
+
+choiceFormInitials : Choice -> List ( String, Field.Field )
+choiceFormInitials choice =
+    [ ( "label", Field.string choice.label )
+    ]
 
 
 

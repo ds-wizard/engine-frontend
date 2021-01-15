@@ -127,6 +127,9 @@ foldQuestion appState model indent tags question =
         IntegrationQuestion _ _ ->
             questionRow
 
+        MultiChoiceQuestion _ _ ->
+            questionRow
+
 
 foldAnswer : AppState -> Model -> Int -> List Tag -> Answer -> List (Html Msg)
 foldAnswer appState model indent tags answer =

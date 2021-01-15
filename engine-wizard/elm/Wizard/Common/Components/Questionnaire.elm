@@ -29,6 +29,7 @@ import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
@@ -149,6 +150,7 @@ type alias QuestionnaireRenderer msg =
     , renderAnswerLabel : Answer -> Html msg
     , renderAnswerBadges : Answer -> Html msg
     , renderAnswerAdvice : Answer -> Html msg
+    , renderChoiceLabel : Choice -> Html msg
     }
 
 
@@ -546,6 +548,9 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 IntegrationQuestion _ _ ->
                     ( viewQuestionIntegration appState cfg model newPath question, [] )
 
+                MultiChoiceQuestion _ _ ->
+                    ( viewQuestionMultiChoice cfg model newPath question, [] )
+
         viewLabel =
             viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question
 
@@ -553,7 +558,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
             cfg.renderer.renderQuestionDescription question
 
         content =
-            if Question.isList question || Question.isOptions question then
+            if Question.isList question || Question.isOptions question || Question.isMultiChoice question then
                 viewLabel :: viewDescription :: viewInput :: viewExtensions
 
             else
@@ -682,6 +687,19 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
 
     else
         div [ class "followups-group" ] followUpQuestions
+
+
+viewQuestionMultiChoice : Config -> Model -> List String -> Question -> Html Msg
+viewQuestionMultiChoice cfg model path question =
+    let
+        choices =
+            KnowledgeModel.getQuestionChoices (Question.getUuid question) model.questionnaire.knowledgeModel
+
+        selectedChoicesUuids =
+            Dict.get (pathToString path) model.questionnaire.replies
+                |> Maybe.unwrap [] ReplyValue.getChoiceUuid
+    in
+    div [] (List.indexedMap (viewChoice cfg path selectedChoicesUuids) choices)
 
 
 viewQuestionList : AppState -> Config -> Context -> Model -> List String -> List String -> Question -> Html Msg
@@ -895,6 +913,45 @@ viewQuestionIntegrationReplyExtra mbIntegration mbReplyValue =
 
         _ ->
             emptyNode
+
+
+viewChoice : Config -> List String -> List String -> Int -> Choice -> Html Msg
+viewChoice cfg path selectedChoicesUuids order choice =
+    let
+        checkboxName =
+            pathToString (path ++ [ choice.uuid ])
+
+        humanIdentifier =
+            identifierToChar order ++ ". "
+
+        isSelected =
+            List.member choice.uuid selectedChoicesUuids
+
+        extraArgs =
+            if cfg.features.readonly then
+                [ disabled True ]
+
+            else
+                let
+                    newSelectedUuids =
+                        if isSelected then
+                            List.filter ((/=) choice.uuid) selectedChoicesUuids
+
+                        else
+                            choice.uuid :: selectedChoicesUuids
+                in
+                [ onClick (SetReply (pathToString path) (MultiChoiceReply newSelectedUuids)) ]
+    in
+    div
+        [ class "radio"
+        , classList [ ( "radio-selected", isSelected ), ( "radio-disabled", cfg.features.readonly ) ]
+        ]
+        [ label []
+            [ input ([ type_ "checkbox", name checkboxName, checked isSelected ] ++ extraArgs) []
+            , text humanIdentifier
+            , cfg.renderer.renderChoiceLabel choice
+            ]
+        ]
 
 
 viewAnswer : AppState -> Config -> List String -> Maybe String -> Int -> Answer -> Html Msg

@@ -10,7 +10,7 @@ import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isOptionsQuestionForm)
+import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isMultiChoiceQuestionForm, isOptionsQuestionForm)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
 
 
@@ -58,6 +58,9 @@ treeNodeEditor appState activeUuid editors editorUuid =
 
         Just (AnswerEditor data) ->
             treeNodeAnswer appState activeUuid editors data
+
+        Just (ChoiceEditor data) ->
+            treeNodeChoice appState activeUuid editors data
 
         Just (ReferenceEditor data) ->
             treeNodeReference appState activeUuid editors data
@@ -147,6 +150,13 @@ treeNodeQuestion appState activeUuid editors editorData =
             else
                 []
 
+        choices =
+            if isMultiChoiceQuestionForm editorData.form then
+                editorData.choices.list ++ editorData.choices.deleted
+
+            else
+                []
+
         references =
             editorData.references.list ++ editorData.references.deleted
 
@@ -157,7 +167,7 @@ treeNodeQuestion appState activeUuid editors editorData =
             { editorData = editorData
             , icon = faSet "km.question" appState
             , label = Question.getTitle editorData.question
-            , children = itemTemplateQuestions ++ answers ++ references ++ experts
+            , children = itemTemplateQuestions ++ answers ++ choices ++ references ++ experts
             }
     in
     treeNode appState config activeUuid editors
@@ -171,6 +181,19 @@ treeNodeAnswer appState activeUuid editors editorData =
             , icon = faSet "km.answer" appState
             , label = editorData.answer.label
             , children = editorData.followUps.list
+            }
+    in
+    treeNode appState config activeUuid editors
+
+
+treeNodeChoice : AppState -> String -> Dict String Editor -> ChoiceEditorData -> Html Msg
+treeNodeChoice appState activeUuid editors editorData =
+    let
+        config =
+            { editorData = editorData
+            , icon = faSet "km.choice" appState
+            , label = editorData.choice.label
+            , children = []
             }
     in
     treeNode appState config activeUuid editors

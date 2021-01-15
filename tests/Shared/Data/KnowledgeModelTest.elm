@@ -25,6 +25,7 @@ knowledgeModelDecoderTest =
                                 "chapters": {},
                                 "questions": {},
                                 "answers": {},
+                                "choices": {},
                                 "experts": {},
                                 "references": {},
                                 "integrations": {},
@@ -43,6 +44,7 @@ knowledgeModelDecoderTest =
                             { chapters = Dict.empty
                             , questions = Dict.empty
                             , answers = Dict.empty
+                            , choices = Dict.empty
                             , experts = Dict.empty
                             , references = Dict.empty
                             , integrations = Dict.empty
@@ -73,6 +75,7 @@ knowledgeModelDecoderTest =
                                 },
                                 "questions": {},
                                 "answers": {},
+                                "choices": {},
                                 "experts": {},
                                 "references": {},
                                 "integrations": {},
@@ -100,6 +103,7 @@ knowledgeModelDecoderTest =
                                     ]
                             , questions = Dict.empty
                             , answers = Dict.empty
+                            , choices = Dict.empty
                             , experts = Dict.empty
                             , references = Dict.empty
                             , integrations = Dict.empty
@@ -123,6 +127,7 @@ knowledgeModelDecoderTest =
                                 "chapters": {},
                                 "questions": {},
                                 "answers": {},
+                                "choices": {},
                                 "experts": {},
                                 "references": {},
                                 "integrations": {},
@@ -148,6 +153,7 @@ knowledgeModelDecoderTest =
                             { chapters = Dict.empty
                             , questions = Dict.empty
                             , answers = Dict.empty
+                            , choices = Dict.empty
                             , experts = Dict.empty
                             , references = Dict.empty
                             , integrations = Dict.empty
@@ -180,6 +186,7 @@ knowledgeModelDecoderTest =
                                 "chapters": {},
                                 "questions": {},
                                 "answers": {},
+                                "choices": {},
                                 "experts": {},
                                 "references": {},
                                 "integrations": {
@@ -214,6 +221,7 @@ knowledgeModelDecoderTest =
                             { chapters = Dict.empty
                             , questions = Dict.empty
                             , answers = Dict.empty
+                            , choices = Dict.empty
                             , experts = Dict.empty
                             , references = Dict.empty
                             , integrations =

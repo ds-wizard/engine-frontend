@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     ( createAddAnswerEvent
     , createAddChapterEvent
+    , createAddChoiceEvent
     , createAddExpertEvent
     , createAddIntegrationEvent
     , createAddQuestionEvent
@@ -8,6 +9,7 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     , createAddTagEvent
     , createDeleteAnswerEvent
     , createDeleteChapterEvent
+    , createDeleteChoiceEvent
     , createDeleteExpertEvent
     , createDeleteIntegrationEvent
     , createDeleteQuestionEvent
@@ -15,6 +17,7 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     , createDeleteTagEvent
     , createEditAnswerEvent
     , createEditChapterEvent
+    , createEditChoiceEvent
     , createEditExpertEvent
     , createEditIntegrationEvent
     , createEditKnowledgeModelEvent
@@ -22,6 +25,7 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     , createEditReferenceEvent
     , createEditTagEvent
     , createMoveAnswerEvent
+    , createMoveChoiceEvent
     , createMoveExpertEvent
     , createMoveQuestionEvent
     , createMoveReferenceEvent
@@ -204,6 +208,14 @@ createAddQuestionEvent form editorData =
                         , integrationUuid = formData.integrationUuid
                         , props = formData.props
                         }
+
+                MultiChoiceQuestionForm formData ->
+                    AddQuestionMultiChoiceEvent
+                        { title = formData.title
+                        , text = formData.text
+                        , requiredLevel = formData.requiredLevel
+                        , tagUuids = editorData.tagUuids
+                        }
     in
     createEvent (AddQuestionEvent data) (Question.getUuid editorData.question) editorData.parentUuid
 
@@ -257,6 +269,17 @@ createEditQuestionEvent form editorData =
                         , integrationUuid = EventField.create formData.integrationUuid (Question.getIntegrationUuid editorData.question /= Just formData.integrationUuid)
                         , props = EventField.create formData.props (Question.getProps editorData.question /= Just formData.props)
                         }
+
+                MultiChoiceQuestionForm formData ->
+                    EditQuestionMultiChoiceEvent
+                        { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
+                        , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
+                        , requiredLevel = EventField.create formData.requiredLevel (Question.getRequiredLevel editorData.question /= formData.requiredLevel)
+                        , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
+                        , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
+                        , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
+                        , choiceUuids = EventField.create editorData.choices.list editorData.choices.dirty
+                        }
     in
     createEvent (EditQuestionEvent data) (Question.getUuid editorData.question) editorData.parentUuid
 
@@ -297,6 +320,31 @@ createEditAnswerEvent form editorData =
 createDeleteAnswerEvent : String -> String -> Seed -> ( Event, Seed )
 createDeleteAnswerEvent =
     createEvent DeleteAnswerEvent
+
+
+createAddChoiceEvent : ChoiceForm -> ChoiceEditorData -> Seed -> ( Event, Seed )
+createAddChoiceEvent form editorData =
+    let
+        data =
+            { label = form.label
+            }
+    in
+    createEvent (AddChoiceEvent data) editorData.choice.uuid editorData.parentUuid
+
+
+createEditChoiceEvent : ChoiceForm -> ChoiceEditorData -> Seed -> ( Event, Seed )
+createEditChoiceEvent form editorData =
+    let
+        data =
+            { label = EventField.create form.label (editorData.choice.label /= form.label)
+            }
+    in
+    createEvent (EditChoiceEvent data) editorData.choice.uuid editorData.parentUuid
+
+
+createDeleteChoiceEvent : String -> String -> Seed -> ( Event, Seed )
+createDeleteChoiceEvent =
+    createEvent DeleteChoiceEvent
 
 
 createAddReferenceEvent : ReferenceForm -> ReferenceEditorData -> Seed -> ( Event, Seed )
@@ -425,6 +473,11 @@ createMoveQuestionEvent =
 createMoveAnswerEvent : String -> String -> String -> Seed -> ( Event, Seed )
 createMoveAnswerEvent =
     createMoveEvent MoveAnswerEvent
+
+
+createMoveChoiceEvent : String -> String -> String -> Seed -> ( Event, Seed )
+createMoveChoiceEvent =
+    createMoveEvent MoveChoiceEvent
 
 
 createMoveReferenceEvent : String -> String -> String -> Seed -> ( Event, Seed )

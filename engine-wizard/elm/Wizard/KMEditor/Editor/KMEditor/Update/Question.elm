@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.KMEditor.Update.Question exposing
     ( addAnswer
     , addAnswerItemTemplateQuestion
+    , addChoice
     , addExpert
     , addQuestionTag
     , addReference
@@ -15,6 +16,7 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Question exposing
 import Form
 import Random exposing (Seed)
 import Shared.Data.KnowledgeModel.Answer as Answer
+import Shared.Data.KnowledgeModel.Choice as Choice
 import Shared.Data.KnowledgeModel.Expert as Expert
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.KnowledgeModel.Reference as Reference
@@ -138,6 +140,15 @@ addAnswerItemTemplateQuestion cmd seed model =
         cmd
         seed
         model
+
+
+addChoice : Cmd Wizard.Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+addChoice =
+    addEntity
+        { newEntity = Choice.new
+        , createEntityEditor = createChoiceEditor
+        , addEntity = addQuestionChoice
+        }
 
 
 addReference : Cmd Wizard.Msgs.Msg -> Seed -> Model -> QuestionEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

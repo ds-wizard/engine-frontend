@@ -23,6 +23,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Projects.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData)
+import Wizard.Projects.Common.ChoiceChange exposing (ChoiceAddData, ChoiceChange(..), ChoiceChangeData)
 import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionAddData, QuestionChange(..), QuestionChangeData, QuestionMoveData)
 import Wizard.Projects.Common.QuestionnaireChanges as QuestionnaireChanges exposing (QuestionnaireChanges)
 
@@ -122,19 +123,25 @@ getQuestionChanges appState context chapter question =
                     let
                         answerChanges =
                             getAnswerChanges context question
+
+                        choiceChanges =
+                            getChoiceChanges context question
                     in
-                    if not (List.isEmpty answerChanges) || isChanged appState.config.questionnaire.levels.enabled oldQuestion question then
-                        QuestionnaireChanges [ QuestionChange <| QuestionChangeData question oldQuestion chapter ] answerChanges
+                    if not (List.isEmpty answerChanges) || not (List.isEmpty choiceChanges) || isChanged appState.config.questionnaire.levels.enabled oldQuestion question then
+                        QuestionnaireChanges
+                            [ QuestionChange <| QuestionChangeData question oldQuestion chapter ]
+                            answerChanges
+                            choiceChanges
 
                     else if isMoved context question then
-                        QuestionnaireChanges [ QuestionMove <| QuestionMoveData question chapter ] []
+                        QuestionnaireChanges [ QuestionMove <| QuestionMoveData question chapter ] [] []
 
                     else
                         QuestionnaireChanges.empty
 
                 Nothing ->
                     if isNew context.oldQuestionnaire question then
-                        QuestionnaireChanges [ QuestionAdd <| QuestionAddData question chapter ] []
+                        QuestionnaireChanges [ QuestionAdd <| QuestionAddData question chapter ] [] []
 
                     else
                         QuestionnaireChanges.empty
@@ -222,6 +229,26 @@ getAnswerChanges context newQuestion =
     in
     KnowledgeModel.getQuestionAnswers (Question.getUuid newQuestion) context.newKM
         |> List.map createAnswerChange
+        |> listFilterJust
+
+
+getChoiceChanges : ChangeListContext -> Question -> List ChoiceChange
+getChoiceChanges context newQuestion =
+    let
+        createChoiceChange choice =
+            case KnowledgeModel.getChoice choice.uuid context.oldKM of
+                Just oldChoice ->
+                    if oldChoice.label /= choice.label then
+                        Just <| ChoiceChange <| ChoiceChangeData choice oldChoice
+
+                    else
+                        Nothing
+
+                Nothing ->
+                    Just <| ChoiceAdd <| ChoiceAddData choice
+    in
+    KnowledgeModel.getQuestionChoices (Question.getUuid newQuestion) context.newKM
+        |> List.map createChoiceChange
         |> listFilterJust
 
 

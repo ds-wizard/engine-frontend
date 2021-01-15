@@ -3,6 +3,7 @@ module Shared.Data.QuestionnaireDetail.ReplyValue exposing
     , decoder
     , encode
     , getAnswerUuid
+    , getChoiceUuid
     , getItemListCount
     , getItemUuids
     , getStringReply
@@ -20,6 +21,7 @@ import Shared.Data.QuestionnaireDetail.ReplyValue.IntegrationReplyValue as Integ
 type ReplyValue
     = StringReply String
     | AnswerReply String
+    | MultiChoiceReply (List String)
     | ItemListReply (List String)
     | EmptyReply
     | IntegrationReply IntegrationReplyValue
@@ -30,6 +32,7 @@ decoder =
     D.oneOf
         [ D.when replyValueType ((==) "StringReply") decodeStringReply
         , D.when replyValueType ((==) "AnswerReply") decodeAnswerReply
+        , D.when replyValueType ((==) "MultiChoiceReply") decodeMultiChoiceReply
         , D.when replyValueType ((==) "ItemListReply") decodeItemListReply
         , D.when replyValueType ((==) "IntegrationReply") decodeIntegrationReply
         ]
@@ -50,6 +53,12 @@ decodeAnswerReply : Decoder ReplyValue
 decodeAnswerReply =
     D.succeed AnswerReply
         |> D.required "value" D.string
+
+
+decodeMultiChoiceReply : Decoder ReplyValue
+decodeMultiChoiceReply =
+    D.succeed MultiChoiceReply
+        |> D.required "value" (D.list D.string)
 
 
 decodeItemListReply : Decoder ReplyValue
@@ -77,6 +86,12 @@ encode replyValue =
             E.object
                 [ ( "type", E.string "AnswerReply" )
                 , ( "value", E.string uuid )
+                ]
+
+        MultiChoiceReply choiceUuids ->
+            E.object
+                [ ( "type", E.string "MultiChoiceReply" )
+                , ( "value", E.list E.string choiceUuids )
                 ]
 
         ItemListReply itemUuids ->
@@ -122,6 +137,16 @@ getAnswerUuid replyValue =
             ""
 
 
+getChoiceUuid : ReplyValue -> List String
+getChoiceUuid replyValue =
+    case replyValue of
+        MultiChoiceReply uuids ->
+            uuids
+
+        _ ->
+            []
+
+
 getStringReply : ReplyValue -> String
 getStringReply replyValue =
     case replyValue of
@@ -161,6 +186,9 @@ isEmpty replyValue =
 
         ItemListReply items ->
             List.isEmpty items
+
+        MultiChoiceReply choices ->
+            List.isEmpty choices
 
         _ ->
             False

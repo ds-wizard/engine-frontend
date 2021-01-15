@@ -1,11 +1,12 @@
 module Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer exposing (create)
 
-import Diff
+import Diff exposing (Change)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import List.Extra as List
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
@@ -14,6 +15,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Projects.Common.AnswerChange as AnswerChange exposing (AnswerChange(..))
+import Wizard.Projects.Common.ChoiceChange as ChoiceChange exposing (ChoiceChange(..))
 import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
 import Wizard.Projects.Common.QuestionnaireChanges exposing (QuestionnaireChanges)
 import Wizard.Projects.Migration.Models exposing (areQuestionDetailsChanged)
@@ -42,6 +44,7 @@ create appState migration changes km levels metrics mbSelectedChange =
     , renderAnswerLabel = renderAnswerLabelDiff changes.answers
     , renderAnswerBadges = defaultRenderer.renderAnswerBadges
     , renderAnswerAdvice = defaultRenderer.renderAnswerAdvice
+    , renderChoiceLabel = renderChoiceLabelDiff changes.choices
     }
 
 
@@ -119,6 +122,25 @@ renderAnswerLabelDiff changes answer =
             text answer.label
 
 
+renderChoiceLabelDiff : List ChoiceChange -> Choice -> Html msg
+renderChoiceLabelDiff changes choice =
+    let
+        mbChange =
+            List.find (ChoiceChange.getChoiceUuid >> (==) choice.uuid) changes
+    in
+    case mbChange of
+        Just change ->
+            case change of
+                ChoiceAdd data ->
+                    renderChoiceAdd data.choice
+
+                ChoiceChange data ->
+                    renderChoiceChange data.originalChoice data.choice
+
+        Nothing ->
+            text choice.label
+
+
 
 -- Diff views
 
@@ -143,9 +165,9 @@ getQuestionDiffableTitle =
 
 
 renderAnswerAdd : Answer -> Html msg
-renderAnswerAdd question =
+renderAnswerAdd answer =
     renderDiff <|
-        Diff.diff [] (getAnswerDiffableTitle question)
+        Diff.diff [] (getAnswerDiffableTitle answer)
 
 
 renderAnswerChange : Answer -> Answer -> Html msg
@@ -158,6 +180,25 @@ renderAnswerChange original new =
 
 getAnswerDiffableTitle : Answer -> List String
 getAnswerDiffableTitle =
+    String.split "" << .label
+
+
+renderChoiceAdd : Choice -> Html msg
+renderChoiceAdd choice =
+    renderDiff <|
+        Diff.diff [] (getChoiceDiffableTitle choice)
+
+
+renderChoiceChange : Choice -> Choice -> Html msg
+renderChoiceChange original new =
+    renderDiff <|
+        Diff.diff
+            (getChoiceDiffableTitle original)
+            (getChoiceDiffableTitle new)
+
+
+getChoiceDiffableTitle : Choice -> List String
+getChoiceDiffableTitle =
     String.split "" << .label
 
 

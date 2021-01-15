@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     ( AnswerEditorData
     , ChapterEditorData
+    , ChoiceEditorData
     , Editor(..)
     , EditorLike
     , EditorState(..)
@@ -17,10 +18,12 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , addKMTag
     , addQuestionAnswer
     , addQuestionAnswerItemTemplateQuestion
+    , addQuestionChoice
     , addQuestionExpert
     , addQuestionReference
     , createAnswerEditor
     , createChapterEditor
+    , createChoiceEditor
     , createExpertEditor
     , createIntegrationEditor
     , createKnowledgeModelEditor
@@ -42,6 +45,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , getNewState
     , isAnswerEditorDirty
     , isChapterEditorDirty
+    , isChoiceEditorDirty
     , isEditorDeleted
     , isEditorDirty
     , isExpertEditorDirty
@@ -55,6 +59,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , toggleEditorOpen
     , updateAnswerEditorData
     , updateChapterEditorData
+    , updateChoiceEditorData
     , updateEditorsWithQuestion
     , updateExpertEditorData
     , updateIntegrationEditorData
@@ -69,6 +74,7 @@ import Form exposing (Form)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
@@ -99,6 +105,7 @@ type Editor
     | ChapterEditor ChapterEditorData
     | QuestionEditor QuestionEditorData
     | AnswerEditor AnswerEditorData
+    | ChoiceEditor ChoiceEditorData
     | ReferenceEditor ReferenceEditorData
     | ExpertEditor ExpertEditorData
 
@@ -166,6 +173,7 @@ type alias QuestionEditorData =
     , tagUuids : List String
     , answers : Children
     , itemTemplateQuestions : Children
+    , choices : Children
     , references : Children
     , experts : Children
     , treeOpen : Bool
@@ -179,6 +187,16 @@ type alias AnswerEditorData =
     , answer : Answer
     , form : Form FormError AnswerForm
     , followUps : Children
+    , treeOpen : Bool
+    , editorState : EditorState
+    , parentUuid : String
+    }
+
+
+type alias ChoiceEditorData =
+    { uuid : String
+    , choice : Choice
+    , form : Form FormError ChoiceForm
     , treeOpen : Bool
     , editorState : EditorState
     , parentUuid : String
@@ -324,6 +342,9 @@ createQuestionEditor integrations editorContext parentUuid getEditorState km que
         answers =
             KnowledgeModel.getQuestionAnswers questionUuid km
 
+        choices =
+            KnowledgeModel.getQuestionChoices questionUuid km
+
         itemTemplateQuestions =
             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
 
@@ -340,6 +361,7 @@ createQuestionEditor integrations editorContext parentUuid getEditorState km que
                 , form = initQuestionForm integrations question
                 , tagUuids = Question.getTagUuids question
                 , answers = Children.init <| List.map .uuid answers
+                , choices = Children.init <| List.map .uuid choices
                 , itemTemplateQuestions = Children.init <| List.map Question.getUuid itemTemplateQuestions
                 , references = Children.init <| List.map Reference.getUuid references
                 , experts = Children.init <| List.map .uuid experts
@@ -351,8 +373,11 @@ createQuestionEditor integrations editorContext parentUuid getEditorState km que
         withAnswers =
             List.foldl (createAnswerEditor integrations editorContext questionUuid getEditorState km) editors answers
 
+        withChoices =
+            List.foldl (createChoiceEditor editorContext questionUuid getEditorState km) withAnswers choices
+
         withAnswerItemTemplateQuestions =
-            List.foldl (createQuestionEditor integrations editorContext questionUuid getEditorState km) withAnswers itemTemplateQuestions
+            List.foldl (createQuestionEditor integrations editorContext questionUuid getEditorState km) withChoices itemTemplateQuestions
 
         withReferences =
             List.foldl (createReferenceEditor editorContext questionUuid getEditorState km) withAnswerItemTemplateQuestions references
@@ -384,6 +409,22 @@ createAnswerEditor integrations editorContext parentUuid getEditorState km answe
             List.foldl (createQuestionEditor integrations editorContext answer.uuid getEditorState km) editors followUps
     in
     Dict.insert answer.uuid editor withFollowUps
+
+
+createChoiceEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Choice -> Dict String Editor -> Dict String Editor
+createChoiceEditor editorContext parentUuid getEditorState km choice editors =
+    let
+        editor =
+            ChoiceEditor
+                { uuid = choice.uuid
+                , choice = choice
+                , form = initChoiceForm choice
+                , treeOpen = False
+                , editorState = getEditorState choice.uuid
+                , parentUuid = parentUuid
+                }
+    in
+    Dict.insert choice.uuid editor editors
 
 
 createReferenceEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Reference -> Dict String Editor -> Dict String Editor
@@ -537,6 +578,9 @@ getEditorTitle editor =
         AnswerEditor data ->
             data.answer.label
 
+        ChoiceEditor data ->
+            data.choice.label
+
         ReferenceEditor data ->
             Reference.getVisibleName data.reference
 
@@ -565,6 +609,9 @@ getEditorUuid editor =
         AnswerEditor data ->
             data.answer.uuid
 
+        ChoiceEditor data ->
+            data.choice.uuid
+
         ReferenceEditor data ->
             Reference.getUuid data.reference
 
@@ -591,6 +638,9 @@ getEditorParentUuid editor =
             data.parentUuid
 
         AnswerEditor data ->
+            data.parentUuid
+
+        ChoiceEditor data ->
             data.parentUuid
 
         ReferenceEditor data ->
@@ -648,6 +698,9 @@ updateEditorOpen updateFn editor =
         AnswerEditor data ->
             AnswerEditor { data | treeOpen = updateFn data.treeOpen }
 
+        ChoiceEditor data ->
+            ChoiceEditor { data | treeOpen = updateFn data.treeOpen }
+
         ReferenceEditor data ->
             ReferenceEditor { data | treeOpen = updateFn data.treeOpen }
 
@@ -683,6 +736,9 @@ isEditorDeleted editor =
         AnswerEditor data ->
             data.editorState == Deleted
 
+        ChoiceEditor data ->
+            data.editorState == Deleted
+
         ReferenceEditor data ->
             data.editorState == Deleted
 
@@ -710,6 +766,9 @@ isEditorDirty editor =
 
         AnswerEditor data ->
             isAnswerEditorDirty data
+
+        ChoiceEditor data ->
+            isChoiceEditorDirty data
 
         ReferenceEditor data ->
             isReferenceEditorDirty data
@@ -775,6 +834,7 @@ isQuestionEditorDirty editorData =
         || formChanged editorData.form
         || (Question.getTagUuids editorData.question /= editorData.tagUuids)
         || editorData.answers.dirty
+        || editorData.choices.dirty
         || editorData.itemTemplateQuestions.dirty
         || editorData.references.dirty
         || editorData.experts.dirty
@@ -785,6 +845,12 @@ isAnswerEditorDirty editorData =
     (editorData.editorState == Added)
         || formChanged editorData.form
         || editorData.followUps.dirty
+
+
+isChoiceEditorDirty : ChoiceEditorData -> Bool
+isChoiceEditorDirty editorData =
+    (editorData.editorState == Added)
+        || formChanged editorData.form
 
 
 isReferenceEditorDirty : ReferenceEditorData -> Bool
@@ -919,6 +985,19 @@ updateAnswerEditorData editorContext newState form editorData =
     }
 
 
+updateChoiceEditorData : EditorContext -> EditorState -> ChoiceForm -> ChoiceEditorData -> ChoiceEditorData
+updateChoiceEditorData editorContext newState form editorData =
+    let
+        newChoice =
+            updateChoiceWithForm editorData.choice form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , choice = newChoice
+        , form = initChoiceForm newChoice
+    }
+
+
 updateReferenceEditorData : EditorContext -> EditorState -> ReferenceForm -> ReferenceEditorData -> ReferenceEditorData
 updateReferenceEditorData editorContext newState form editorData =
     let
@@ -990,6 +1069,16 @@ addQuestionAnswer answer editorData =
     QuestionEditor
         { editorData
             | answers = Children.addChild answer.uuid editorData.answers
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
+
+
+addQuestionChoice : Choice -> QuestionEditorData -> Editor
+addQuestionChoice choice editorData =
+    QuestionEditor
+        { editorData
+            | choices = Children.addChild choice.uuid editorData.choices
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }

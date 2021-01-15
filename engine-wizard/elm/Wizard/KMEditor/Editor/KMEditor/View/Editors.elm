@@ -67,6 +67,9 @@ activeEditor appState model =
                 AnswerEditor data ->
                     answerEditorView appState model data
 
+                ChoiceEditor data ->
+                    choiceEditorView appState data
+
                 ReferenceEditor data ->
                     referenceEditorView appState data
 
@@ -430,6 +433,16 @@ questionEditorView appState model editorData =
                     in
                     ( formData, extraData )
 
+                Just "MultiChoiceQuestion" ->
+                    let
+                        formData =
+                            div [] formFields
+
+                        extraData =
+                            [ questionEditorChoicesView appState model editorData ]
+                    in
+                    ( formData, extraData )
+
                 _ ->
                     ( emptyNode, [] )
     in
@@ -490,6 +503,21 @@ questionEditorAnswersView appState model editorData =
         , children = editorData.answers.list |> List.filter (editorNotDeleted model.editors)
         , reorderMsg = ReorderAnswers >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddAnswer |> QuestionEditorMsg |> EditorMsg
+        , toId = identity
+        , getName = getChildName model.editors
+        , viewMsg = SetActiveEditor
+        }
+
+
+questionEditorChoicesView : AppState -> Model -> QuestionEditorData -> Html Msg
+questionEditorChoicesView appState model editorData =
+    inputChildren appState
+        { childName = lg "choice" appState
+        , childNamePlural = lg "choices" appState
+        , reorderableState = model.reorderableState
+        , children = editorData.choices.list |> List.filter (editorNotDeleted model.editors)
+        , reorderMsg = ReorderChoices >> QuestionEditorMsg >> EditorMsg
+        , addMsg = AddChoice |> QuestionEditorMsg |> EditorMsg
         , toId = identity
         , getName = getChildName model.editors
         , viewMsg = SetActiveEditor
@@ -615,6 +643,29 @@ metricView appState form i metric =
             , FormGroup.input appState form ("metricMeasures." ++ fromInt i ++ ".measure") (lg "metric.measure" appState)
             ]
         ]
+
+
+choiceEditorView : AppState -> ChoiceEditorData -> ( String, Html Msg )
+choiceEditorView appState editorData =
+    let
+        editorTitleConfig =
+            { title = lg "choice" appState
+            , uuid = editorData.uuid
+            , deleteAction = DeleteChoice editorData.uuid |> ChoiceEditorMsg |> EditorMsg |> Just
+            , movable = True
+            }
+
+        form =
+            div []
+                [ FormGroup.input appState editorData.form "label" <| lg "choice.label" appState
+                ]
+    in
+    ( editorData.uuid
+    , div [ class editorClass ]
+        [ editorTitle appState editorTitleConfig
+        , form |> Html.map (ChoiceFormMsg >> ChoiceEditorMsg >> EditorMsg)
+        ]
+    )
 
 
 referenceEditorView : AppState -> ReferenceEditorData -> ( String, Html Msg )

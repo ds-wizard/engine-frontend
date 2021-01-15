@@ -2,6 +2,7 @@ module Shared.Data.KnowledgeModel.Question exposing
     ( Question(..)
     , decoder
     , getAnswerUuids
+    , getChoiceUuids
     , getExpertUuids
     , getIntegrationUuid
     , getItemQuestionUuids
@@ -16,6 +17,7 @@ module Shared.Data.KnowledgeModel.Question exposing
     , getValueType
     , isDesirable
     , isList
+    , isMultiChoice
     , isOptions
     , new
     )
@@ -28,6 +30,7 @@ import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
 import Shared.Data.KnowledgeModel.Question.IntegrationQuestionData as IntegrationQuestionData exposing (IntegrationQuestionData)
 import Shared.Data.KnowledgeModel.Question.ListQuestionData as ListQuestionData exposing (ListQuestionData)
+import Shared.Data.KnowledgeModel.Question.MultiChoiceQuestionData as MultiChoiceQuestionData exposing (MultiChoiceQuestionData)
 import Shared.Data.KnowledgeModel.Question.OptionsQuestionData as OptionsQuestionData exposing (OptionsQuestionData)
 import Shared.Data.KnowledgeModel.Question.QuestionType as QuestionType exposing (QuestionType(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType)
@@ -39,6 +42,7 @@ type Question
     | ListQuestion CommonQuestionData ListQuestionData
     | ValueQuestion CommonQuestionData ValueQuestionData
     | IntegrationQuestion CommonQuestionData IntegrationQuestionData
+    | MultiChoiceQuestion CommonQuestionData MultiChoiceQuestionData
 
 
 new : String -> Question
@@ -57,6 +61,7 @@ decoder =
         , D.when QuestionType.decoder ((==) ListQuestionType) listQuestionDecoder
         , D.when QuestionType.decoder ((==) ValueQuestionType) valueQuestionDecoder
         , D.when QuestionType.decoder ((==) IntegrationQuestionType) integrationQuestionDecoder
+        , D.when QuestionType.decoder ((==) MultiChoiceQuestionType) multiChoiceQuestionDecoder
         ]
 
 
@@ -80,6 +85,11 @@ integrationQuestionDecoder =
     D.map2 IntegrationQuestion CommonQuestionData.decoder IntegrationQuestionData.decoder
 
 
+multiChoiceQuestionDecoder : Decoder Question
+multiChoiceQuestionDecoder =
+    D.map2 MultiChoiceQuestion CommonQuestionData.decoder MultiChoiceQuestionData.decoder
+
+
 
 -- Helpers
 
@@ -97,6 +107,9 @@ getCommonQuestionData question =
             data
 
         IntegrationQuestion data _ ->
+            data
+
+        MultiChoiceQuestion data _ ->
             data
 
 
@@ -130,6 +143,9 @@ getTypeString question =
         IntegrationQuestion _ _ ->
             "Integration"
 
+        MultiChoiceQuestion _ _ ->
+            "MultiChoice"
+
 
 getRequiredLevel : Question -> Maybe Int
 getRequiredLevel =
@@ -156,6 +172,16 @@ getAnswerUuids question =
     case question of
         OptionsQuestion _ data ->
             data.answerUuids
+
+        _ ->
+            []
+
+
+getChoiceUuids : Question -> List String
+getChoiceUuids question =
+    case question of
+        MultiChoiceQuestion _ data ->
+            data.choiceUuids
 
         _ ->
             []
@@ -205,6 +231,16 @@ isOptions : Question -> Bool
 isOptions question =
     case question of
         OptionsQuestion _ _ ->
+            True
+
+        _ ->
+            False
+
+
+isMultiChoice : Question -> Bool
+isMultiChoice question =
+    case question of
+        MultiChoiceQuestion _ _ ->
             True
 
         _ ->
