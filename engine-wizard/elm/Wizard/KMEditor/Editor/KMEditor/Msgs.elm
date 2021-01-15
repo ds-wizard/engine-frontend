@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.KMEditor.Msgs exposing
     ( AnswerEditorMsg(..)
     , ChapterEditorMsg(..)
+    , ChoiceEditorMsg(..)
     , EditorMsg(..)
     , ExpertEditorMsg(..)
     , IntegrationEditorMsg(..)
@@ -39,6 +40,7 @@ type EditorMsg
     | ChapterEditorMsg ChapterEditorMsg
     | QuestionEditorMsg QuestionEditorMsg
     | AnswerEditorMsg AnswerEditorMsg
+    | ChoiceEditorMsg ChoiceEditorMsg
     | ReferenceEditorMsg ReferenceEditorMsg
     | ExpertEditorMsg ExpertEditorMsg
 
@@ -79,6 +81,8 @@ type QuestionEditorMsg
     | DeleteQuestion String
     | ReorderAnswers (List String)
     | AddAnswer
+    | ReorderChoices (List String)
+    | AddChoice
     | ReorderItemQuestions (List String)
     | AddAnswerItemTemplateQuestion
     | ReorderReferences (List String)
@@ -92,6 +96,11 @@ type AnswerEditorMsg
     | DeleteAnswer String
     | ReorderFollowUps (List String)
     | AddFollowUp
+
+
+type ChoiceEditorMsg
+    = ChoiceFormMsg Form.Msg
+    | DeleteChoice String
 
 
 type ReferenceEditorMsg

@@ -11,6 +11,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Shared.Data.Event.AddQuestionIntegrationEventData as AddQuestionIntegrationEventData exposing (AddQuestionIntegrationEventData)
 import Shared.Data.Event.AddQuestionListEventData as AddQuestionListEventData exposing (AddQuestionListEventData)
+import Shared.Data.Event.AddQuestionMultiChoiceEventData as AddQuestionMultiChoiceEventData exposing (AddQuestionMultiChoiceEventData)
 import Shared.Data.Event.AddQuestionOptionsEventData as AddQuestionOptionsEventData exposing (AddQuestionOptionsEventData)
 import Shared.Data.Event.AddQuestionValueEventData as AddQuestionValueEventData exposing (AddQuestionValueEventData)
 
@@ -20,6 +21,7 @@ type AddQuestionEventData
     | AddQuestionListEvent AddQuestionListEventData
     | AddQuestionValueEvent AddQuestionValueEventData
     | AddQuestionIntegrationEvent AddQuestionIntegrationEventData
+    | AddQuestionMultiChoiceEvent AddQuestionMultiChoiceEventData
 
 
 decoder : Decoder AddQuestionEventData
@@ -40,6 +42,9 @@ decoder =
                     "IntegrationQuestion" ->
                         D.map AddQuestionIntegrationEvent AddQuestionIntegrationEventData.decoder
 
+                    "MultiChoiceQuestion" ->
+                        D.map AddQuestionMultiChoiceEvent AddQuestionMultiChoiceEventData.decoder
+
                     _ ->
                         D.fail <| "Unknown question type: " ++ questionType
             )
@@ -54,6 +59,7 @@ encode data =
                 AddQuestionListEventData.encode
                 AddQuestionValueEventData.encode
                 AddQuestionIntegrationEventData.encode
+                AddQuestionMultiChoiceEventData.encode
                 data
     in
     [ ( "eventType", E.string "AddQuestionEvent" ) ] ++ eventData
@@ -66,11 +72,12 @@ getTypeString =
         (\_ -> "List")
         (\_ -> "Value")
         (\_ -> "Integration")
+        (\_ -> "MultiChoice")
 
 
 getEntityVisibleName : AddQuestionEventData -> Maybe String
 getEntityVisibleName =
-    Just << map .title .title .title .title
+    Just << map .title .title .title .title .title
 
 
 map :
@@ -78,9 +85,10 @@ map :
     -> (AddQuestionListEventData -> a)
     -> (AddQuestionValueEventData -> a)
     -> (AddQuestionIntegrationEventData -> a)
+    -> (AddQuestionMultiChoiceEventData -> a)
     -> AddQuestionEventData
     -> a
-map optionsQuestion listQuestion valueQuestion integrationQuestion question =
+map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQuestion question =
     case question of
         AddQuestionOptionsEvent data ->
             optionsQuestion data
@@ -93,3 +101,6 @@ map optionsQuestion listQuestion valueQuestion integrationQuestion question =
 
         AddQuestionIntegrationEvent data ->
             integrationQuestion data
+
+        AddQuestionMultiChoiceEvent data ->
+            multiChoiceQuestion data

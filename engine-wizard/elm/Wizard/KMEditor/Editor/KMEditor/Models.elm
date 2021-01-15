@@ -158,6 +158,15 @@ eventToEditorState event =
         DeleteAnswerEvent _ ->
             Deleted
 
+        AddChoiceEvent _ _ ->
+            AddedEdited
+
+        EditChoiceEvent _ _ ->
+            Edited
+
+        DeleteChoiceEvent _ ->
+            Deleted
+
         AddReferenceEvent _ _ ->
             AddedEdited
 
@@ -180,6 +189,9 @@ eventToEditorState event =
             Edited
 
         MoveAnswerEvent _ _ ->
+            Edited
+
+        MoveChoiceEvent _ _ ->
             Edited
 
         MoveReferenceEvent _ _ ->
