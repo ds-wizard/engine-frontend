@@ -31,6 +31,8 @@ handleQuestionnaireMsg msg appState model =
     let
         ( newSeed, newQuestionnaireModel, cmd ) =
             Questionnaire.update msg
+                QuestionnaireMsg
+                Nothing
                 appState
                 { levels = model.levels
                 , metrics = model.metrics
@@ -40,5 +42,5 @@ handleQuestionnaireMsg msg appState model =
     in
     ( newSeed
     , { model | questionnaireModel = newQuestionnaireModel }
-    , Cmd.map QuestionnaireMsg cmd
+    , cmd
     )

@@ -9,13 +9,16 @@ module Wizard.Common.Components.Questionnaire exposing
     , setLabels
     , setLevel
     , setReply
+    , subscriptions
     , update
     , view
     )
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Button as Button
+import Bootstrap.Dropdown as Dropdown
 import Debounce exposing (Debounce)
-import Dict
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
@@ -25,6 +28,7 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Roman
 import Shared.Api.TypeHints as TypeHintsApi
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -37,21 +41,32 @@ import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue(..))
-import Shared.Data.QuestionnaireDetail.ReplyValue.IntegrationReplyValue exposing (IntegrationReplyValue(..))
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
+import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.TypeHint exposing (TypeHint)
+import Shared.Data.User as User
+import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode, faKeyClass, faSet)
-import Shared.Locale exposing (l, lf, lg, lgx, lx)
-import Shared.Utils exposing (dispatch, flip, getUuid, listFilterJust, listInsertIf)
+import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
+import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
+import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust)
 import String exposing (fromInt)
+import Time.Distance as Time
 import Uuid exposing (Uuid)
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
-import Wizard.Common.Components.SummaryReport as SummaryReport
-import Wizard.Common.View.Page as Page
+import Wizard.Common.Components.Questionnaire.History as History
+import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
+import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
+import Wizard.Common.Html exposing (illustratedMessage)
+import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Tag as Tag
 import Wizard.Ports as Ports
+import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
 
 
 l_ : String -> AppState -> String
@@ -64,18 +79,33 @@ lf_ =
     lf "Wizard.Common.Components.Questionnaire"
 
 
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "Wizard.Common.Components.Questionnaire"
+
+
 lx_ : String -> AppState -> Html msg
 lx_ =
     lx "Wizard.Common.Components.Questionnaire"
 
 
+
+-- MODEL
+
+
 type alias Model =
     { uuid : Uuid
     , activePage : ActivePage
+    , rightPanel : RightPanel
     , questionnaire : QuestionnaireDetail
     , typeHints : Maybe TypeHints
     , typeHintsDebounce : Debounce ( List String, String, String )
     , feedbackModalModel : FeedbackModal.Model
+    , viewSettings : QuestionnaireViewSettings
+    , viewSettingsDropdown : Dropdown.State
+    , historyModel : History.Model
+    , versionModalModel : VersionModal.Model
+    , deleteVersionModalModel : DeleteVersionModal.Model
     }
 
 
@@ -90,14 +120,35 @@ type ActivePage
     | PageChapter String
 
 
-init : QuestionnaireDetail -> Model
-init questionnaire =
+type RightPanel
+    = RightPanelNone
+    | RightPanelTODOs
+    | RightPanelHistory
+
+
+init : AppState -> QuestionnaireDetail -> Model
+init appState questionnaire =
+    let
+        activePage =
+            case List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel) of
+                Just chapter ->
+                    PageChapter chapter.uuid
+
+                Nothing ->
+                    PageNone
+    in
     { uuid = questionnaire.uuid
-    , activePage = PageNone
+    , activePage = activePage
+    , rightPanel = RightPanelNone
     , questionnaire = questionnaire
     , typeHints = Nothing
     , typeHintsDebounce = Debounce.init
     , feedbackModalModel = FeedbackModal.init
+    , viewSettings = QuestionnaireViewSettings.all
+    , viewSettingsDropdown = Dropdown.initialState
+    , historyModel = History.init appState
+    , versionModalModel = VersionModal.init
+    , deleteVersionModalModel = DeleteVersionModal.init
     }
 
 
@@ -111,9 +162,9 @@ setLevel level =
     updateQuestionnaire <| QuestionnaireDetail.setLevel level
 
 
-setReply : String -> ReplyValue -> Model -> Model
-setReply path replyValue =
-    updateQuestionnaire <| QuestionnaireDetail.setReplyValue path replyValue
+setReply : String -> Reply -> Model -> Model
+setReply path reply =
+    updateQuestionnaire <| QuestionnaireDetail.setReply path reply
 
 
 clearReply : String -> Model -> Model
@@ -131,9 +182,12 @@ updateQuestionnaire fn model =
     { model | questionnaire = fn model.questionnaire }
 
 
-type alias Config =
+type alias Config msg =
     { features : FeaturesConfig
     , renderer : QuestionnaireRenderer Msg
+    , wrapMsg : Msg -> msg
+    , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
+    , revertQuestionnaireMsg : Maybe (QuestionnaireEvent -> msg)
     }
 
 
@@ -141,12 +195,13 @@ type alias FeaturesConfig =
     { feedbackEnabled : Bool
     , todosEnabled : Bool
     , readonly : Bool
+    , toolbarEnabled : Bool
     }
 
 
 type alias QuestionnaireRenderer msg =
     { renderQuestionLabel : Question -> Html msg
-    , renderQuestionDescription : Question -> Html msg
+    , renderQuestionDescription : QuestionnaireViewSettings -> Question -> Html msg
     , getQuestionExtraClass : Question -> Maybe String
     , renderAnswerLabel : Answer -> Html msg
     , renderAnswerBadges : Answer -> Html msg
@@ -174,35 +229,59 @@ type QuestionViewState
 
 type Msg
     = SetActivePage ActivePage
-    | ScrollToTodo QuestionnaireTodo
+    | SetRightPanel RightPanel
+    | SetFullscreen Bool
+    | ScrollToPath String
     | ShowTypeHints (List String) String String
     | HideTypeHints
-    | TypeHintInput (List String) ReplyValue
+    | TypeHintInput (List String) Reply
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
     | SetLevel String
-    | SetReply String ReplyValue
+    | SetReply String Reply
     | ClearReply String
     | AddItem String (List String)
     | SetLabels String (List String)
+    | ViewSettingsDropdownMsg Dropdown.State
+    | SetViewSettings QuestionnaireViewSettings
+    | HistoryMsg History.Msg
+    | VersionModalMsg VersionModal.Msg
+    | DeleteVersionModalMsg DeleteVersionModal.Msg
+    | CreateNamedVersion Uuid
+    | RenameVersion QuestionnaireVersion
+    | DeleteVersion QuestionnaireVersion
+    | AddQuestionnaireVersion QuestionnaireVersion
+    | UpdateQuestionnaireVersion QuestionnaireVersion
+    | DeleteQuestionnaireVersion QuestionnaireVersion
 
 
-update : Msg -> AppState -> Context -> Model -> ( Seed, Model, Cmd Msg )
-update msg appState ctx model =
+update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
+update msg wrapMsg mbSetFullscreenMsg appState ctx model =
     let
         withSeed ( newModel, cmd ) =
-            ( appState.seed, newModel, cmd )
+            ( appState.seed, newModel, Cmd.map wrapMsg cmd )
 
         wrap newModel =
             ( appState.seed, newModel, Cmd.none )
     in
     case msg of
         SetActivePage activePage ->
-            withSeed <| ( { model | activePage = activePage }, Cmd.none )
+            withSeed <| ( { model | activePage = activePage }, Ports.scrollToTop ".questionnaire__content" )
 
-        ScrollToTodo todo ->
-            withSeed <| handleScrollToTodo model todo
+        SetRightPanel rightPanel ->
+            wrap { model | rightPanel = rightPanel }
+
+        SetFullscreen fullscreen ->
+            case mbSetFullscreenMsg of
+                Just setFullscreenMsg ->
+                    ( appState.seed, model, dispatch (setFullscreenMsg fullscreen) )
+
+                Nothing ->
+                    ( appState.seed, model, Cmd.none )
+
+        ScrollToPath path ->
+            withSeed <| handleScrollToPath model path
 
         ShowTypeHints path questionUuid value ->
             withSeed <| handleShowTypeHints appState ctx model path questionUuid value
@@ -232,19 +311,109 @@ update msg appState ctx model =
             wrap <| clearReply path model
 
         AddItem path originalItems ->
-            handleAddItem appState model path originalItems
+            handleAddItem appState wrapMsg model path originalItems
 
         SetLabels path value ->
             wrap <| setLabels path value model
 
+        ViewSettingsDropdownMsg state ->
+            wrap { model | viewSettingsDropdown = state }
 
-handleScrollToTodo : Model -> QuestionnaireTodo -> ( Model, Cmd Msg )
-handleScrollToTodo model todo =
+        SetViewSettings viewSettings ->
+            wrap { model | viewSettings = viewSettings }
+
+        HistoryMsg historyMsg ->
+            wrap { model | historyModel = History.update historyMsg model.historyModel }
+
+        VersionModalMsg versionModalMsg ->
+            let
+                cfg =
+                    { wrapMsg = VersionModalMsg
+                    , questionnaireUuid = model.questionnaire.uuid
+                    , addVersionCmd = dispatch << AddQuestionnaireVersion
+                    , renameVersionCmd = dispatch << UpdateQuestionnaireVersion
+                    }
+
+                ( versionModalModel, cmd ) =
+                    VersionModal.update cfg appState versionModalMsg model.versionModalModel
+
+                newModel =
+                    { model | versionModalModel = versionModalModel }
+            in
+            withSeed ( newModel, cmd )
+
+        DeleteVersionModalMsg modalMsg ->
+            let
+                cfg =
+                    { wrapMsg = DeleteVersionModalMsg
+                    , questionnaireUuid = model.questionnaire.uuid
+                    , deleteVersionCmd = dispatch << DeleteQuestionnaireVersion
+                    }
+
+                ( deleteVersionModalModel, cmd ) =
+                    DeleteVersionModal.update cfg appState modalMsg model.deleteVersionModalModel
+
+                newModel =
+                    { model | deleteVersionModalModel = deleteVersionModalModel }
+            in
+            withSeed ( newModel, cmd )
+
+        CreateNamedVersion eventUuid ->
+            wrap { model | versionModalModel = VersionModal.setEventUuid eventUuid model.versionModalModel }
+
+        RenameVersion questionnaireVersion ->
+            wrap { model | versionModalModel = VersionModal.setVersion questionnaireVersion model.versionModalModel }
+
+        DeleteVersion questionnaireVersion ->
+            wrap { model | deleteVersionModalModel = DeleteVersionModal.setVersion questionnaireVersion model.deleteVersionModalModel }
+
+        AddQuestionnaireVersion questionnaireVersion ->
+            let
+                questionnaire =
+                    model.questionnaire
+            in
+            wrap { model | questionnaire = { questionnaire | versions = questionnaireVersion :: questionnaire.versions } }
+
+        UpdateQuestionnaireVersion questionnaireVersion ->
+            let
+                questionnaire =
+                    model.questionnaire
+
+                updateVersion version =
+                    if version.uuid == questionnaireVersion.uuid then
+                        { version | name = questionnaireVersion.name, description = questionnaireVersion.description }
+
+                    else
+                        version
+            in
+            wrap { model | questionnaire = { questionnaire | versions = List.map updateVersion questionnaire.versions } }
+
+        DeleteQuestionnaireVersion questionnaireVersion ->
+            let
+                questionnaire =
+                    model.questionnaire
+            in
+            wrap
+                { model
+                    | questionnaire =
+                        { questionnaire
+                            | versions = List.filter (not << (==) questionnaireVersion.uuid << .uuid) questionnaire.versions
+                        }
+                }
+
+
+handleScrollToPath : Model -> String -> ( Model, Cmd Msg )
+handleScrollToPath model path =
     let
+        chapterUuid =
+            String.split "." path
+                |> List.head
+                |> Maybe.withDefault ""
+
         selector =
-            "[data-path=\"" ++ todo.path ++ "\"]"
+            "[data-path=\"" ++ path ++ "\"]"
     in
-    ( { model | activePage = PageChapter todo.chapter.uuid }, Ports.scrollIntoView selector )
+    ( { model | activePage = PageChapter chapterUuid }, Ports.scrollIntoView selector )
 
 
 handleShowTypeHints : AppState -> Context -> Model -> List String -> String -> String -> ( Model, Cmd Msg )
@@ -262,8 +431,8 @@ handleShowTypeHints appState ctx model path questionUuid value =
     ( { model | typeHints = typeHints }, cmd )
 
 
-handleTypeHintsInput : Model -> List String -> ReplyValue -> ( Model, Cmd Msg )
-handleTypeHintsInput model path value =
+handleTypeHintsInput : Model -> List String -> Reply -> ( Model, Cmd Msg )
+handleTypeHintsInput model path reply =
     let
         questionUuid =
             Maybe.withDefault "" (List.last path)
@@ -271,12 +440,12 @@ handleTypeHintsInput model path value =
         ( debounce, debounceCmd ) =
             Debounce.push
                 debounceConfig
-                ( path, questionUuid, ReplyValue.getStringReply value )
+                ( path, questionUuid, ReplyValue.getStringReply reply.value )
                 model.typeHintsDebounce
 
         dispatchCmd =
             dispatch <|
-                SetReply (String.join "." path) value
+                SetReply (String.join "." path) reply
     in
     ( { model | typeHintsDebounce = debounce }
     , Cmd.batch [ debounceCmd, dispatchCmd ]
@@ -329,16 +498,18 @@ handleFeedbackModalMsg appState model feedbackModalMsg =
     )
 
 
-handleAddItem : AppState -> Model -> String -> List String -> ( Seed, Model, Cmd Msg )
-handleAddItem appState model path originalItems =
+handleAddItem : AppState -> (Msg -> msg) -> Model -> String -> List String -> ( Seed, Model, Cmd msg )
+handleAddItem appState wrapMsg model path originalItems =
     let
         ( uuid, newSeed ) =
-            getUuid appState.seed
+            getUuidString appState.seed
 
         dispatchCmd =
-            dispatch <|
-                SetReply path <|
-                    ItemListReply (originalItems ++ [ uuid ])
+            ItemListReply (originalItems ++ [ uuid ])
+                |> createReply appState
+                |> SetReply path
+                |> wrapMsg
+                |> dispatch
     in
     ( newSeed, model, dispatchCmd )
 
@@ -362,36 +533,166 @@ loadTypeHints appState ctx model path questionUuid value =
 
 
 
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
+        , Sub.map HistoryMsg <| History.subscriptions model.historyModel
+        ]
+
+
+
 -- VIEW
 
 
-view : AppState -> Config -> Context -> Model -> Html Msg
+view : AppState -> Config msg -> Context -> Model -> Html msg
 view appState cfg ctx model =
-    div [ class "questionnaire" ]
-        [ viewQuestionnairePanel appState cfg ctx model
-        , viewQuestionnaireContent appState cfg ctx model
-        , Html.map FeedbackModalMsg <| FeedbackModal.view appState model.feedbackModalModel
+    let
+        ( toolbar, toolbarEnabled ) =
+            if cfg.features.toolbarEnabled && not cfg.features.readonly then
+                ( Html.map cfg.wrapMsg <| viewQuestionnaireToolbar appState model, True )
+
+            else
+                ( emptyNode, False )
+    in
+    div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ) ] ]
+        [ toolbar
+        , div [ class "questionnaire__body" ]
+            [ Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg ctx model
+            , Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model
+            , viewQuestionnaireRightPanel appState cfg ctx model
+            ]
+        , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
         ]
 
 
 
--- QUESTIONNAIRE - PANEL
+-- QUESTIONNAIRE - TOOLBAR
 
 
-viewQuestionnairePanel : AppState -> Config -> Context -> Model -> Html Msg
-viewQuestionnairePanel appState cfg ctx model =
-    div [ class "questionnaire__panel" ]
-        [ viewQuestionnairePanelPhaseSelection appState cfg ctx model
-        , viewQuestionnairePanelChapters appState model
+viewQuestionnaireToolbar : AppState -> Model -> Html Msg
+viewQuestionnaireToolbar appState model =
+    let
+        ( todosPanel, todosOpen ) =
+            case model.rightPanel of
+                RightPanelTODOs ->
+                    ( RightPanelNone, True )
+
+                _ ->
+                    ( RightPanelTODOs, False )
+
+        ( versionsPanel, versionsOpen ) =
+            case model.rightPanel of
+                RightPanelHistory ->
+                    ( RightPanelNone, True )
+
+                _ ->
+                    ( RightPanelHistory, False )
+
+        todosLength =
+            QuestionnaireDetail.todosLength model.questionnaire
+
+        todosBadge =
+            if todosLength > 0 then
+                span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt todosLength) ]
+
+            else
+                emptyNode
+
+        ( expandIcon, expandMsg ) =
+            if AppState.isFullscreen appState then
+                ( faSet "questionnaire.shrink" appState, SetFullscreen False )
+
+            else
+                ( faSet "questionnaire.expand" appState, SetFullscreen True )
+
+        dropdown =
+            let
+                viewSettings =
+                    model.viewSettings
+
+                settingsIcon enabled =
+                    if enabled then
+                        faSet "_global.success" appState
+
+                    else
+                        emptyNode
+            in
+            div [ class "item-group" ]
+                [ Dropdown.dropdown model.viewSettingsDropdown
+                    { options = []
+                    , toggleMsg = ViewSettingsDropdownMsg
+                    , toggleButton =
+                        Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
+                            [ lx_ "toolbar.view" appState ]
+                    , items =
+                        [ Dropdown.anchorItem
+                            [ onClick (SetViewSettings QuestionnaireViewSettings.all) ]
+                            [ lx_ "toolbar.view.showAll" appState ]
+                        , Dropdown.anchorItem
+                            [ onClick (SetViewSettings QuestionnaireViewSettings.none) ]
+                            [ lx_ "toolbar.view.hideAll" appState ]
+                        , Dropdown.divider
+                        , Dropdown.anchorItem
+                            [ class "dropdown-item-icon", onClick (SetViewSettings (QuestionnaireViewSettings.toggleAnsweredBy viewSettings)) ]
+                            [ settingsIcon viewSettings.answeredBy, lx_ "toolbar.view.answeredBy" appState ]
+                        , Dropdown.anchorItem
+                            [ class "dropdown-item-icon"
+                            , onClick (SetViewSettings (QuestionnaireViewSettings.togglePhases viewSettings))
+                            ]
+                            [ settingsIcon viewSettings.phases, lx_ "toolbar.view.phases" appState ]
+                        , Dropdown.anchorItem
+                            [ class "dropdown-item-icon"
+                            , onClick (SetViewSettings (QuestionnaireViewSettings.toggleTags viewSettings))
+                            ]
+                            [ settingsIcon viewSettings.tags, lx_ "toolbar.view.tags" appState ]
+                        ]
+                    }
+                ]
+    in
+    div [ class "questionnaire__toolbar" ]
+        [ div [ class "questionnaire__toolbar__left" ]
+            [ dropdown
+            ]
+        , div [ class "questionnaire__toolbar__right" ]
+            [ div [ class "item-group" ]
+                [ a [ class "item", classList [ ( "selected", todosOpen ) ], onClick (SetRightPanel todosPanel) ]
+                    [ lx_ "toolbar.todos" appState
+                    , todosBadge
+                    ]
+                ]
+            , div [ class "item-group" ]
+                [ a [ class "item", classList [ ( "selected", versionsOpen ) ], onClick (SetRightPanel versionsPanel) ]
+                    [ lx_ "toolbar.versionHistory" appState ]
+                ]
+            , div [ class "item-group" ]
+                [ a [ class "item", onClick expandMsg ] [ expandIcon ]
+                ]
+            ]
         ]
 
 
 
--- QUESTIONNAIRE - PANEL - PHASE SELECTION
+-- QUESTIONNAIRE - LEFT PANEL
 
 
-viewQuestionnairePanelPhaseSelection : AppState -> Config -> Context -> Model -> Html Msg
-viewQuestionnairePanelPhaseSelection appState cfg ctx model =
+viewQuestionnaireLeftPanel : AppState -> Config msg -> Context -> Model -> Html Msg
+viewQuestionnaireLeftPanel appState cfg ctx model =
+    div [ class "questionnaire__left-panel" ]
+        [ viewQuestionnaireLeftPanelPhaseSelection appState cfg ctx model
+        , viewQuestionnaireLeftPanelChapters appState model
+        ]
+
+
+
+-- QUESTIONNAIRE - LEFT PANEL - PHASE SELECTION
+
+
+viewQuestionnaireLeftPanelPhaseSelection : AppState -> Config msg -> Context -> Model -> Html Msg
+viewQuestionnaireLeftPanelPhaseSelection appState cfg ctx model =
     if appState.config.questionnaire.levels.enabled then
         let
             selectAttrs =
@@ -401,28 +702,28 @@ viewQuestionnairePanelPhaseSelection appState cfg ctx model =
                 else
                     [ onInput SetLevel ]
         in
-        div [ class "questionnaire__panel__phase" ]
+        div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ lgx "questionnaire.currentPhase" appState ]
             , select (class "form-control" :: selectAttrs)
-                (List.map (viewQuestionnairePanelPhaseSelectionOption model.questionnaire.level) ctx.levels)
+                (List.map (viewQuestionnaireLeftPanelPhaseSelectionOption model.questionnaire.level) ctx.levels)
             ]
 
     else
         emptyNode
 
 
-viewQuestionnairePanelPhaseSelectionOption : Int -> Level -> Html Msg
-viewQuestionnairePanelPhaseSelectionOption selectedLevel level =
+viewQuestionnaireLeftPanelPhaseSelectionOption : Int -> Level -> Html Msg
+viewQuestionnaireLeftPanelPhaseSelectionOption selectedLevel level =
     option [ value (fromInt level.level), selected (selectedLevel == level.level) ]
         [ text level.title ]
 
 
 
--- QUESTIONNAIRE - PANEL - CHAPTERS
+-- QUESTIONNAIRE - LEFT PANEL - CHAPTERS
 
 
-viewQuestionnairePanelChapters : AppState -> Model -> Html Msg
-viewQuestionnairePanelChapters appState model =
+viewQuestionnaireLeftPanelChapters : AppState -> Model -> Html Msg
+viewQuestionnaireLeftPanelChapters appState model =
     let
         mbActiveChapterUuid =
             case model.activePage of
@@ -435,15 +736,15 @@ viewQuestionnairePanelChapters appState model =
         chapters =
             KnowledgeModel.getChapters model.questionnaire.knowledgeModel
     in
-    div [ class "questionnaire__panel__chapters" ]
+    div [ class "questionnaire__left-panel__chapters" ]
         [ strong [] [ lgx "chapters" appState ]
         , div [ class "nav nav-pills flex-column" ]
-            (List.indexedMap (viewQuestionnairePanelChaptersChapter appState model mbActiveChapterUuid) chapters)
+            (List.indexedMap (viewQuestionnaireLeftPanelChaptersChapter appState model mbActiveChapterUuid) chapters)
         ]
 
 
-viewQuestionnairePanelChaptersChapter : AppState -> Model -> Maybe String -> Int -> Chapter -> Html Msg
-viewQuestionnairePanelChaptersChapter appState model mbActiveChapterUuid order chapter =
+viewQuestionnaireLeftPanelChaptersChapter : AppState -> Model -> Maybe String -> Int -> Chapter -> Html Msg
+viewQuestionnaireLeftPanelChaptersChapter appState model mbActiveChapterUuid order chapter =
     a
         [ class "nav-link"
         , classList [ ( "active", mbActiveChapterUuid == Just chapter.uuid ) ]
@@ -451,12 +752,12 @@ viewQuestionnairePanelChaptersChapter appState model mbActiveChapterUuid order c
         ]
         [ span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
         , span [ class "chapter-name" ] [ text chapter.title ]
-        , viewQuestionnairePanelChaptersChapterIndication appState model.questionnaire chapter
+        , viewQuestionnaireLeftPanelChaptersChapterIndication appState model.questionnaire chapter
         ]
 
 
-viewQuestionnairePanelChaptersChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html Msg
-viewQuestionnairePanelChaptersChapterIndication appState questionnaire chapter =
+viewQuestionnaireLeftPanelChaptersChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html Msg
+viewQuestionnaireLeftPanelChaptersChapterIndication appState questionnaire chapter =
     let
         effectiveLevel =
             if appState.config.questionnaire.levels.enabled then
@@ -479,10 +780,81 @@ viewQuestionnairePanelChaptersChapterIndication appState questionnaire chapter =
 
 
 
+-- QUESTIONNAIRE - RIGHT PANEL
+
+
+viewQuestionnaireRightPanel : AppState -> Config msg -> Context -> Model -> Html msg
+viewQuestionnaireRightPanel appState cfg ctx model =
+    let
+        wrapPanel content =
+            div [ class "questionnaire__right-panel" ]
+                content
+    in
+    case model.rightPanel of
+        RightPanelNone ->
+            emptyNode
+
+        RightPanelTODOs ->
+            wrapPanel <|
+                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelTodos appState model ]
+
+        RightPanelHistory ->
+            let
+                historyCfg =
+                    { questionnaire = model.questionnaire
+                    , levels = ctx.levels
+                    , wrapMsg = cfg.wrapMsg << HistoryMsg
+                    , scrollMsg = cfg.wrapMsg << ScrollToPath
+                    , createVersionMsg = cfg.wrapMsg << CreateNamedVersion
+                    , renameVersionMsg = cfg.wrapMsg << RenameVersion
+                    , deleteVersionMsg = cfg.wrapMsg << DeleteVersion
+                    , previewQuestionnaireEventMsg = cfg.previewQuestionnaireEventMsg
+                    , revertQuestionnaireMsg = cfg.revertQuestionnaireMsg
+                    }
+            in
+            wrapPanel <|
+                [ History.view appState historyCfg model.historyModel
+                , Html.map (cfg.wrapMsg << VersionModalMsg) <| VersionModal.view appState model.versionModalModel
+                , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
+                ]
+
+
+
+-- QUESTIONNAIRE - RIGHT PANEL - TODOS
+
+
+viewQuestionnaireRightPanelTodos : AppState -> Model -> Html Msg
+viewQuestionnaireRightPanelTodos appState model =
+    let
+        todos =
+            QuestionnaireDetail.getTodos model.questionnaire
+
+        viewTodoGroup group =
+            div []
+                [ strong [] [ text group.chapter.title ]
+                , ul [ class "fa-ul" ] (List.map viewTodo group.todos)
+                ]
+
+        viewTodo todo =
+            li []
+                [ span [ class "fa-li" ] [ fa "far fa-check-square" ]
+                , a [ onClick (ScrollToPath todo.path) ] [ text <| Question.getTitle todo.question ]
+                ]
+    in
+    if List.isEmpty todos then
+        div [ class "todos todos-empty" ] <|
+            [ illustratedMessage "feeling_happy" (l_ "todos.completed" appState) ]
+
+    else
+        div [ class "todos" ] <|
+            List.map viewTodoGroup (QuestionnaireTodoGroup.groupTodos todos)
+
+
+
 -- QUESTIONNAIRE -- CONTENT
 
 
-viewQuestionnaireContent : AppState -> Config -> Context -> Model -> Html Msg
+viewQuestionnaireContent : AppState -> Config msg -> Context -> Model -> Html Msg
 viewQuestionnaireContent appState cfg ctx model =
     let
         content =
@@ -505,7 +877,7 @@ viewQuestionnaireContent appState cfg ctx model =
 -- QUESTIONNAIRE -- CONTENT -- CHAPTER
 
 
-viewQuestionnaireContentChapter : AppState -> Config -> Context -> Model -> Chapter -> Html Msg
+viewQuestionnaireContentChapter : AppState -> Config msg -> Context -> Model -> Chapter -> Html Msg
 viewQuestionnaireContentChapter appState cfg ctx model chapter =
     let
         chapterNumber =
@@ -526,7 +898,7 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
         ]
 
 
-viewQuestion : AppState -> Config -> Context -> Model -> List String -> List String -> Int -> Question -> Html Msg
+viewQuestion : AppState -> Config msg -> Context -> Model -> List String -> List String -> Int -> Question -> Html Msg
 viewQuestion appState cfg ctx model path humanIdentifiers order question =
     let
         newHumanIdentifiers =
@@ -544,36 +916,66 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                     ( viewQuestionList appState cfg ctx model newPath newHumanIdentifiers question, [] )
 
                 ValueQuestion _ _ ->
-                    ( viewQuestionValue cfg model newPath question, [] )
+                    ( viewQuestionValue appState cfg model newPath question, [] )
 
                 IntegrationQuestion _ _ ->
                     ( viewQuestionIntegration appState cfg model newPath question, [] )
 
                 MultiChoiceQuestion _ _ ->
-                    ( viewQuestionMultiChoice cfg model newPath question, [] )
+                    ( viewQuestionMultiChoice appState cfg model newPath question, [] )
 
         viewLabel =
             viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question
 
         viewTags =
-            let
-                tags =
-                    Question.getTagUuids question
-                        |> List.map (flip KnowledgeModel.getTag model.questionnaire.knowledgeModel)
-                        |> listFilterJust
-                        |> List.sortBy .name
-            in
-            Tag.viewList tags
-
-        viewDescription =
-            cfg.renderer.renderQuestionDescription question
-
-        content =
-            if Question.isList question || Question.isOptions question || Question.isMultiChoice question then
-                viewLabel :: viewTags :: viewDescription :: viewInput :: viewExtensions
+            if model.viewSettings.tags then
+                let
+                    tags =
+                        Question.getTagUuids question
+                            |> List.map (flip KnowledgeModel.getTag model.questionnaire.knowledgeModel)
+                            |> listFilterJust
+                            |> List.sortBy .name
+                in
+                Tag.viewList tags
 
             else
-                viewLabel :: viewTags :: viewInput :: viewDescription :: viewExtensions
+                emptyNode
+
+        viewDescription =
+            cfg.renderer.renderQuestionDescription model.viewSettings question
+
+        mbReply =
+            Dict.get (pathToString newPath) model.questionnaire.replies
+
+        viewAnsweredBy =
+            case ( mbReply, model.viewSettings.answeredBy && not (Question.isList question) ) of
+                ( Just reply, True ) ->
+                    let
+                        userName =
+                            case reply.createdBy of
+                                Just userInfo ->
+                                    User.fullName userInfo
+
+                                Nothing ->
+                                    l_ "question.answeredBy.anonymous" appState
+
+                        readableTime =
+                            TimeUtils.toReadableDateTime appState.timeZone reply.createdAt
+
+                        timeDiff =
+                            Time.inWordsWithConfig { withAffix = True } (TimeDistance.locale appState) reply.createdAt appState.currentTime
+
+                        time =
+                            span [ title readableTime ] [ text timeDiff ]
+                    in
+                    div [ class "answered" ]
+                        (lh_ "question.answeredBy" [ time, text userName ] appState)
+
+                _ ->
+                    emptyNode
+
+        content =
+            viewLabel :: viewTags :: viewDescription :: viewInput :: viewAnsweredBy :: viewExtensions
 
         questionExtraClass =
             Maybe.withDefault "" (cfg.renderer.getQuestionExtraClass question)
@@ -586,7 +988,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
         content
 
 
-viewQuestionLabel : AppState -> Config -> Context -> Model -> List String -> List String -> Question -> Html Msg
+viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
 viewQuestionLabel appState cfg ctx model path humanIdentifiers question =
     let
         questionState =
@@ -630,7 +1032,7 @@ viewQuestionLabel appState cfg ctx model path humanIdentifiers question =
         ]
 
 
-viewQuestionOptions : AppState -> Config -> Context -> Model -> List String -> List String -> Question -> ( Html Msg, List (Html Msg) )
+viewQuestionOptions : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> ( Html Msg, List (Html Msg) )
 viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
     let
         answers =
@@ -638,7 +1040,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
 
         selectedAnswerUuid =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.map ReplyValue.getAnswerUuid
+                |> Maybe.map (.value >> ReplyValue.getAnswerUuid)
 
         mbSelectedAnswer =
             List.find (.uuid >> Just >> (==) selectedAnswerUuid) answers
@@ -662,7 +1064,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
     )
 
 
-viewQuestionOptionsClearButton : AppState -> Config -> List String -> Maybe Answer -> Html Msg
+viewQuestionOptionsClearButton : AppState -> Config msg -> List String -> Maybe Answer -> Html Msg
 viewQuestionOptionsClearButton appState cfg path mbSelectedAnswer =
     if cfg.features.readonly || Maybe.isNothing mbSelectedAnswer then
         emptyNode
@@ -674,7 +1076,7 @@ viewQuestionOptionsClearButton appState cfg path mbSelectedAnswer =
             ]
 
 
-viewQuestionOptionsFollowUps : AppState -> Config -> Context -> Model -> List Answer -> List String -> List String -> Answer -> Html Msg
+viewQuestionOptionsFollowUps : AppState -> Config msg -> Context -> Model -> List Answer -> List String -> List String -> Answer -> Html Msg
 viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifiers answer =
     let
         index =
@@ -700,20 +1102,20 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
         div [ class "followups-group" ] followUpQuestions
 
 
-viewQuestionMultiChoice : Config -> Model -> List String -> Question -> Html Msg
-viewQuestionMultiChoice cfg model path question =
+viewQuestionMultiChoice : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
+viewQuestionMultiChoice appState cfg model path question =
     let
         choices =
             KnowledgeModel.getQuestionChoices (Question.getUuid question) model.questionnaire.knowledgeModel
 
         selectedChoicesUuids =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.unwrap [] ReplyValue.getChoiceUuid
+                |> Maybe.unwrap [] (.value >> ReplyValue.getChoiceUuid)
     in
-    div [] (List.indexedMap (viewChoice cfg path selectedChoicesUuids) choices)
+    div [] (List.indexedMap (viewChoice appState cfg path selectedChoicesUuids) choices)
 
 
-viewQuestionList : AppState -> Config -> Context -> Model -> List String -> List String -> Question -> Html Msg
+viewQuestionList : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
 viewQuestionList appState cfg ctx model path humanIdentifiers question =
     let
         viewItem =
@@ -721,7 +1123,7 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
 
         itemUuids =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.unwrap [] ReplyValue.getItemUuids
+                |> Maybe.unwrap [] (.value >> ReplyValue.getItemUuids)
 
         noAnswersInfo =
             if cfg.features.readonly && List.isEmpty itemUuids then
@@ -737,7 +1139,7 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
         ]
 
 
-viewQuestionListAdd : AppState -> Config -> List String -> List String -> Html Msg
+viewQuestionListAdd : AppState -> Config msg -> List String -> List String -> Html Msg
 viewQuestionListAdd appState cfg itemUuids path =
     if cfg.features.readonly then
         emptyNode
@@ -752,7 +1154,7 @@ viewQuestionListAdd appState cfg itemUuids path =
             ]
 
 
-viewQuestionListItem : AppState -> Config -> Context -> Model -> Question -> List String -> List String -> List String -> Int -> String -> Html Msg
+viewQuestionListItem : AppState -> Config msg -> Context -> Model -> Question -> List String -> List String -> List String -> Int -> String -> Html Msg
 viewQuestionListItem appState cfg ctx model question itemUuids path humanIdentifiers index uuid =
     let
         newItems =
@@ -777,7 +1179,7 @@ viewQuestionListItem appState cfg ctx model question itemUuids path humanIdentif
             else
                 button
                     [ class "btn btn-outline-danger btn-item-delete"
-                    , onClick (SetReply (pathToString path) (ItemListReply newItems))
+                    , onClick (SetReply (pathToString path) (createReply appState (ItemListReply newItems)))
                     ]
                     [ faSet "_global.delete" appState ]
     in
@@ -789,12 +1191,12 @@ viewQuestionListItem appState cfg ctx model question itemUuids path humanIdentif
         ]
 
 
-viewQuestionValue : Config -> Model -> List String -> Question -> Html Msg
-viewQuestionValue cfg model path question =
+viewQuestionValue : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
+viewQuestionValue appState cfg model path question =
     let
         answer =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.unwrap "" ReplyValue.getStringReply
+                |> Maybe.unwrap "" (.value >> ReplyValue.getStringReply)
 
         defaultAttrs =
             [ class "form-control", value answer ]
@@ -804,7 +1206,7 @@ viewQuestionValue cfg model path question =
                 [ disabled True ]
 
             else
-                [ onInput (SetReply (pathToString path) << StringReply) ]
+                [ onInput (SetReply (pathToString path) << createReply appState << StringReply) ]
 
         inputView =
             case Question.getValueType question of
@@ -820,7 +1222,7 @@ viewQuestionValue cfg model path question =
     div [] [ inputView ]
 
 
-viewQuestionIntegration : AppState -> Config -> Model -> List String -> Question -> Html Msg
+viewQuestionIntegration : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
 viewQuestionIntegration appState cfg model path question =
     let
         extraArgs =
@@ -828,16 +1230,17 @@ viewQuestionIntegration appState cfg model path question =
                 [ disabled True ]
 
             else
-                [ onInput (TypeHintInput path << IntegrationReply << PlainValue)
+                [ onInput (TypeHintInput path << createReply appState << IntegrationReply << PlainType)
                 , onFocus (ShowTypeHints path (Question.getUuid question) questionValue)
                 , onBlur HideTypeHints
                 ]
 
-        mbReply =
-            Dict.get (pathToString path) model.questionnaire.replies
+        mbReplyValue =
+            Maybe.map .value <|
+                Dict.get (pathToString path) model.questionnaire.replies
 
         questionValue =
-            Maybe.unwrap "" ReplyValue.getStringReply mbReply
+            Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
 
         integrationUuid =
             Maybe.withDefault "" <| Question.getIntegrationUuid question
@@ -858,17 +1261,17 @@ viewQuestionIntegration appState cfg model path question =
     div []
         [ input ([ class "form-control", type_ "text", value questionValue ] ++ extraArgs) []
         , viewTypeHints
-        , viewQuestionIntegrationReplyExtra integration mbReply
+        , viewQuestionIntegrationReplyExtra integration mbReplyValue
         ]
 
 
-viewQuestionIntegrationTypeHints : AppState -> Config -> Model -> List String -> Html Msg
+viewQuestionIntegrationTypeHints : AppState -> Config msg -> Model -> List String -> Html Msg
 viewQuestionIntegrationTypeHints appState cfg model path =
     let
         content =
             case Maybe.unwrap Unset .hints model.typeHints of
                 Success hints ->
-                    ul [] (List.map (viewQuestionIntegrationTypeHint cfg path) hints)
+                    ul [] (List.map (viewQuestionIntegrationTypeHint appState cfg path) hints)
 
                 Loading ->
                     div [ class "loading" ]
@@ -888,15 +1291,15 @@ viewQuestionIntegrationTypeHints appState cfg model path =
     div [ class "typehints" ] [ content ]
 
 
-viewQuestionIntegrationTypeHint : Config -> List String -> TypeHint -> Html Msg
-viewQuestionIntegrationTypeHint cfg path typeHint =
+viewQuestionIntegrationTypeHint : AppState -> Config msg -> List String -> TypeHint -> Html Msg
+viewQuestionIntegrationTypeHint appState cfg path typeHint =
     if cfg.features.readonly then
         emptyNode
 
     else
         li []
             [ a
-                [ onMouseDown <| SetReply (pathToString path) <| IntegrationReply <| IntegrationValue typeHint.id typeHint.name ]
+                [ onMouseDown <| SetReply (pathToString path) <| createReply appState <| IntegrationReply <| IntegrationType typeHint.id typeHint.name ]
                 [ text typeHint.name
                 ]
             ]
@@ -905,7 +1308,7 @@ viewQuestionIntegrationTypeHint cfg path typeHint =
 viewQuestionIntegrationReplyExtra : Maybe Integration -> Maybe ReplyValue -> Html Msg
 viewQuestionIntegrationReplyExtra mbIntegration mbReplyValue =
     case ( mbIntegration, mbReplyValue ) of
-        ( Just integration, Just (IntegrationReply (IntegrationValue id _)) ) ->
+        ( Just integration, Just (IntegrationReply (IntegrationType id _)) ) ->
             let
                 url =
                     String.replace "${id}" id integration.itemUrl
@@ -926,8 +1329,8 @@ viewQuestionIntegrationReplyExtra mbIntegration mbReplyValue =
             emptyNode
 
 
-viewChoice : Config -> List String -> List String -> Int -> Choice -> Html Msg
-viewChoice cfg path selectedChoicesUuids order choice =
+viewChoice : AppState -> Config msg -> List String -> List String -> Int -> Choice -> Html Msg
+viewChoice appState cfg path selectedChoicesUuids order choice =
     let
         checkboxName =
             pathToString (path ++ [ choice.uuid ])
@@ -951,7 +1354,7 @@ viewChoice cfg path selectedChoicesUuids order choice =
                         else
                             choice.uuid :: selectedChoicesUuids
                 in
-                [ onClick (SetReply (pathToString path) (MultiChoiceReply newSelectedUuids)) ]
+                [ onClick (SetReply (pathToString path) (createReply appState (MultiChoiceReply newSelectedUuids))) ]
     in
     div
         [ class "radio"
@@ -965,7 +1368,7 @@ viewChoice cfg path selectedChoicesUuids order choice =
         ]
 
 
-viewAnswer : AppState -> Config -> List String -> Maybe String -> Int -> Answer -> Html Msg
+viewAnswer : AppState -> Config msg -> List String -> Maybe String -> Int -> Answer -> Html Msg
 viewAnswer appState cfg path selectedAnswerUuid order answer =
     let
         radioName =
@@ -979,7 +1382,7 @@ viewAnswer appState cfg path selectedAnswerUuid order answer =
                 [ disabled True ]
 
             else
-                [ onClick (SetReply (pathToString path) (AnswerReply answer.uuid)) ]
+                [ onClick (SetReply (pathToString path) (createReply appState (AnswerReply answer.uuid))) ]
 
         followUpsIndicator =
             if List.isEmpty answer.followUpUuids then
@@ -1009,7 +1412,7 @@ viewAnswer appState cfg path selectedAnswerUuid order answer =
         ]
 
 
-viewTodoAction : AppState -> Config -> Model -> List String -> Html Msg
+viewTodoAction : AppState -> Config msg -> Model -> List String -> Html Msg
 viewTodoAction appState cfg model path =
     let
         currentPath =
@@ -1050,7 +1453,7 @@ viewTodoAction appState cfg model path =
         emptyNode
 
 
-viewFeedbackAction : AppState -> Config -> Model -> Question -> Html Msg
+viewFeedbackAction : AppState -> Config msg -> Model -> Question -> Html Msg
 viewFeedbackAction appState cfg model question =
     let
         openFeedbackModal =
@@ -1083,3 +1486,11 @@ pathToString =
 identifierToChar : Int -> String
 identifierToChar =
     (+) 97 >> Char.fromCode >> String.fromChar
+
+
+createReply : AppState -> ReplyValue -> Reply
+createReply appState value =
+    { value = value
+    , createdAt = appState.currentTime
+    , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
+    }

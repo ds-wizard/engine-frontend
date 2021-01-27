@@ -28,20 +28,23 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         questionnaire =
-            Html.map QuestionnaireMsg <|
-                Questionnaire.view appState
-                    { features =
-                        { feedbackEnabled = False
-                        , todosEnabled = False
-                        , readonly = False
-                        }
-                    , renderer = DefaultQuestionnaireRenderer.create appState model.knowledgeModel model.levels model.metrics
+            Questionnaire.view appState
+                { features =
+                    { feedbackEnabled = False
+                    , todosEnabled = False
+                    , readonly = False
+                    , toolbarEnabled = False
                     }
-                    { metrics = model.metrics
-                    , levels = model.levels
-                    , events = model.events
-                    }
-                    model.questionnaireModel
+                , renderer = DefaultQuestionnaireRenderer.create appState model.knowledgeModel model.levels model.metrics
+                , wrapMsg = QuestionnaireMsg
+                , previewQuestionnaireEventMsg = Nothing
+                , revertQuestionnaireMsg = Nothing
+                }
+                { metrics = model.metrics
+                , levels = model.levels
+                , events = model.events
+                }
+                model.questionnaireModel
     in
     div [ class "col KMEditor__Editor__Preview" ]
         [ tagSelection appState model.tags model.knowledgeModel

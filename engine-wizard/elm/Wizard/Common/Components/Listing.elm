@@ -15,17 +15,17 @@ module Wizard.Common.Components.Listing exposing
     , viewItem
     )
 
-import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l)
 import Time
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
@@ -194,12 +194,9 @@ viewItem appState config index item =
 
         dropdown =
             if List.length actions > 0 then
-                Dropdown.dropdown item.dropdownState
-                    { options = [ Dropdown.alignMenuRight ]
+                ListingDropdown.dropdown appState
+                    { dropdownState = item.dropdownState
                     , toggleMsg = config.wrapMsg << DropdownMsg index
-                    , toggleButton =
-                        Dropdown.toggle [ Button.roleLink ]
-                            [ faSet "listing.actions" appState ]
                     , items = List.map (viewAction appState) actions
                     }
 

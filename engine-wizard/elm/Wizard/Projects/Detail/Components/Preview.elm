@@ -25,7 +25,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes as ProjectRoutes
 import Wizard.Routes
 

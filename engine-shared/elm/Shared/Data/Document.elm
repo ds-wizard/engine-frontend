@@ -19,6 +19,7 @@ type alias Document =
     , name : String
     , createdAt : Time.Posix
     , questionnaire : Maybe Questionnaire
+    , questionnaireEventUuid : Maybe Uuid
     , template : DocumentTemplate
     , formatUuid : Uuid
     , state : DocumentState
@@ -47,6 +48,7 @@ decoder =
         |> D.required "name" D.string
         |> D.required "createdAt" D.datetime
         |> D.optional "questionnaire" (D.maybe Questionnaire.decoder) Nothing
+        |> D.required "questionnaireEventUuid" (D.maybe Uuid.decoder)
         |> D.required "template" DocumentTemplate.decoder
         |> D.required "formatUuid" Uuid.decoder
         |> D.required "state" DocumentState.decoder

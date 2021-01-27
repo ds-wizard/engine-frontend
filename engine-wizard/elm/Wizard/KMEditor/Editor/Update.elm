@@ -109,7 +109,7 @@ update msg wrapMsg appState model =
                                         | preview = Success km
                                         , previewEditorModel =
                                             Just <|
-                                                Wizard.KMEditor.Editor.Preview.Models.initialModel
+                                                Wizard.KMEditor.Editor.Preview.Models.initialModel appState
                                                     km
                                                     (ActionResult.withDefault [] model.metrics)
                                                     (ActionResult.withDefault [] model.levels)

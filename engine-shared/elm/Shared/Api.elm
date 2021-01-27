@@ -8,6 +8,7 @@ module Shared.Api exposing
     , jwtDelete
     , jwtFetch
     , jwtFetchEmpty
+    , jwtFetchPut
     , jwtGet
     , jwtOrHttpFetch
     , jwtOrHttpGet
@@ -139,6 +140,15 @@ jwtPut url body appState toMsg =
         { url = appState.apiUrl ++ url
         , body = Http.jsonBody body
         , expect = expectWhatever toMsg
+        }
+
+
+jwtFetchPut : String -> Decoder a -> E.Value -> AbstractAppState b -> ToMsg a msg -> Cmd msg
+jwtFetchPut url decoder body appState toMsg =
+    Jwt.Http.put appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.jsonBody body
+        , expect = expectJson toMsg decoder
         }
 
 

@@ -14,7 +14,7 @@ import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 
 
@@ -23,16 +23,18 @@ parsers appState wrapRoute =
     let
         moduleRoot =
             lr "projects" appState
+
+        newDocumentRoute projectUuid mbEventUuid =
+            wrapRoute <| DetailRoute projectUuid <| ProjectDetailRoute.NewDocument mbEventUuid
     in
     [ map (wrapRoute << CreateRoute) (s moduleRoot </> s (lr "projects.create" appState) <?> Query.string (lr "projects.create.selected" appState))
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s (lr "projects.createMigration" appState) </> uuid)
-    , map (wrapRoute << flip DetailRoute PlanDetailRoute.Questionnaire) (s moduleRoot </> uuid)
-    , map (wrapRoute << flip DetailRoute PlanDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
-    , map (wrapRoute << flip DetailRoute PlanDetailRoute.TODOs) (s moduleRoot </> uuid </> s "todos")
-    , map (wrapRoute << flip DetailRoute PlanDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
+    , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Questionnaire) (s moduleRoot </> uuid)
+    , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
+    , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
     , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
-    , map (wrapRoute << flip DetailRoute PlanDetailRoute.NewDocument) (s moduleRoot </> uuid </> s "documents" </> s "new")
-    , map (wrapRoute << flip DetailRoute PlanDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
+    , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.string "eventUuid")
+    , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "updatedAt,desc")) (PaginationQueryString.parser (s moduleRoot))
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "projects.migration" appState) </> uuid)
     ]
@@ -40,7 +42,7 @@ parsers appState wrapRoute =
 
 detailDocumentsRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
 detailDocumentsRoute wrapRoute questionnaireUuid =
-    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << PlanDetailRoute.Documents) (Just "createdAt,desc")
+    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << ProjectDetailRoute.Documents) (Just "createdAt,desc")
 
 
 toUrl : AppState -> Route -> List String
@@ -63,25 +65,27 @@ toUrl appState route =
 
         DetailRoute uuid subroute ->
             case subroute of
-                PlanDetailRoute.Questionnaire ->
+                ProjectDetailRoute.Questionnaire ->
                     [ moduleRoot, Uuid.toString uuid ]
 
-                PlanDetailRoute.Preview ->
+                ProjectDetailRoute.Preview ->
                     [ moduleRoot, Uuid.toString uuid, "preview" ]
 
-                PlanDetailRoute.TODOs ->
-                    [ moduleRoot, Uuid.toString uuid, "todos" ]
-
-                PlanDetailRoute.Metrics ->
+                ProjectDetailRoute.Metrics ->
                     [ moduleRoot, Uuid.toString uuid, "metrics" ]
 
-                PlanDetailRoute.Documents paginationQueryString ->
+                ProjectDetailRoute.Documents paginationQueryString ->
                     [ moduleRoot, Uuid.toString uuid, "documents" ++ PaginationQueryString.toUrl paginationQueryString ]
 
-                PlanDetailRoute.NewDocument ->
-                    [ moduleRoot, Uuid.toString uuid, "documents", "new" ]
+                ProjectDetailRoute.NewDocument mbEventUuid ->
+                    case mbEventUuid of
+                        Just eventUuid ->
+                            [ moduleRoot, Uuid.toString uuid, "documents", "new", "?eventUuid=" ++ eventUuid ]
 
-                PlanDetailRoute.Settings ->
+                        Nothing ->
+                            [ moduleRoot, Uuid.toString uuid, "documents", "new" ]
+
+                ProjectDetailRoute.Settings ->
                     [ moduleRoot, Uuid.toString uuid, "settings" ]
 
         IndexRoute paginationQueryString ->

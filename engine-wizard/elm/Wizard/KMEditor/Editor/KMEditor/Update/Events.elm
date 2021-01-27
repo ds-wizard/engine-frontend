@@ -43,7 +43,7 @@ import Shared.Data.Event.EventField as EventField
 import Shared.Data.Event.MoveEventData exposing (MoveEventData)
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
-import Shared.Utils exposing (getUuid)
+import Shared.Utils exposing (getUuidString)
 import Uuid
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (..)
@@ -503,7 +503,7 @@ createEvent : (CommonEventData -> Event) -> String -> String -> Seed -> ( Event,
 createEvent create entityUuid parentUuid seed =
     let
         ( uuid, newSeed ) =
-            getUuid seed
+            getUuidString seed
 
         event =
             create

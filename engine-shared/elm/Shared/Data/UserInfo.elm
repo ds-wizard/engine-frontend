@@ -3,13 +3,16 @@ module Shared.Data.UserInfo exposing
     , decoder
     , encode
     , isAdmin
+    , toUserSuggestion
     )
 
+import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Auth.Role as Role
+import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Uuid exposing (Uuid)
 
 
@@ -52,3 +55,13 @@ encode userInfo =
 isAdmin : Maybe UserInfo -> Bool
 isAdmin =
     Maybe.map (.role >> (==) Role.admin) >> Maybe.withDefault False
+
+
+toUserSuggestion : UserInfo -> UserSuggestion
+toUserSuggestion userInfo =
+    { uuid = userInfo.uuid
+    , firstName = userInfo.firstName
+    , lastName = userInfo.lastName
+    , gravatarHash = Gravatar.hashEmail userInfo.email
+    , imageUrl = userInfo.imageUrl
+    }

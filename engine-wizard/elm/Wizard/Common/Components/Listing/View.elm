@@ -28,6 +28,7 @@ import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Item, Model)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
+import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
@@ -289,12 +290,9 @@ viewItem appState config index item =
 
         dropdown =
             if List.length actions > 0 then
-                Dropdown.dropdown item.dropdownState
-                    { options = [ Dropdown.alignMenuRight ]
+                ListingDropdown.dropdown appState
+                    { dropdownState = item.dropdownState
                     , toggleMsg = config.wrapMsg << ItemDropdownMsg index
-                    , toggleButton =
-                        Dropdown.toggle [ Button.roleLink ]
-                            [ faSet "listing.actions" appState ]
                     , items = List.map (viewAction appState) actions
                     }
 

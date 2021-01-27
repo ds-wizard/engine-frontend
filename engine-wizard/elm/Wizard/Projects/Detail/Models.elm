@@ -1,5 +1,6 @@
 module Wizard.Projects.Detail.Models exposing
     ( Model
+    , addQuestionnaireEvent
     , addSavingActionUuid
     , hasTemplate
     , init
@@ -13,6 +14,7 @@ import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -22,10 +24,12 @@ import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Preview as Preview exposing (PreviewState(..))
+import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
+import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.Models as Documents
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute exposing (PlanDetailRoute)
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute)
 
 
 type alias Model =
@@ -45,6 +49,8 @@ type alias Model =
     , documentsModel : Documents.Model
     , settingsModel : Settings.Model
     , newDocumentModel : NewDocument.Model
+    , questionnaireVersionViewModalModel : QuestionnaireVersionViewModal.Model
+    , revertModalModel : RevertModal.Model
     }
 
 
@@ -64,12 +70,14 @@ init appState uuid =
     , questionnaireModel = Loading
     , summaryReportModel = SummaryReport.init
     , documentsModel = Documents.initialModel PaginationQueryString.empty
-    , newDocumentModel = NewDocument.initialModel { name = "", template = Nothing, formatUuid = Nothing }
+    , newDocumentModel = NewDocument.initEmpty
     , settingsModel = Settings.init Nothing
+    , questionnaireVersionViewModalModel = QuestionnaireVersionViewModal.initEmpty
+    , revertModalModel = RevertModal.init
     }
 
 
-initPageModel : PlanDetailRoute -> Model -> Model
+initPageModel : ProjectDetailRoute -> Model -> Model
 initPageModel route model =
     case route of
         PlanDetailRoute.Preview ->
@@ -89,15 +97,15 @@ initPageModel route model =
         PlanDetailRoute.Documents paginationQueryString ->
             { model | documentsModel = Documents.initialModel paginationQueryString }
 
-        PlanDetailRoute.NewDocument ->
+        PlanDetailRoute.NewDocument mbEventUuid ->
             { model
                 | newDocumentModel =
                     case model.questionnaireModel of
                         Success qm ->
-                            NewDocument.initialModel qm.questionnaire
+                            NewDocument.initialModel qm.questionnaire (Maybe.andThen Uuid.fromString mbEventUuid)
 
                         _ ->
-                            NewDocument.initialModel { name = "", template = Nothing, formatUuid = Nothing }
+                            NewDocument.initEmpty
             }
 
         PlanDetailRoute.Settings ->
@@ -119,6 +127,21 @@ addSavingActionUuid uuid model =
         | savingActionUuids = model.savingActionUuids ++ [ uuid ]
         , planSavingModel = PlanSaving.setSaving model.planSavingModel
     }
+
+
+addQuestionnaireEvent : QuestionnaireEvent -> Model -> Model
+addQuestionnaireEvent event model =
+    let
+        setEvent questionnaireModel =
+            let
+                questionnaire =
+                    questionnaireModel.questionnaire
+            in
+            { questionnaireModel
+                | questionnaire = { questionnaire | events = questionnaire.events ++ [ event ] }
+            }
+    in
+    { model | questionnaireModel = ActionResult.map setEvent model.questionnaireModel }
 
 
 removeSavingActionUuid : Uuid -> Model -> ( Model, Bool )
