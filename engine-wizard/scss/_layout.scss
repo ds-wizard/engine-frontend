@@ -12,6 +12,14 @@ body {
     &.side-navigation-collapsed {
         margin-left: $side-navigation-width-collapsed;
     }
+
+    &.app-fullscreen {
+        margin-left: 0;
+
+        .side-navigation {
+            display: none;
+        }
+    }
 }
 
 .page {

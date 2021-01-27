@@ -24,6 +24,7 @@ type Msg
     | OnTimeZone Time.Zone
     | AuthMsg Wizard.Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
+    | SetFullscreen Bool
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
     | DashboardMsg Wizard.Dashboard.Msgs.Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg

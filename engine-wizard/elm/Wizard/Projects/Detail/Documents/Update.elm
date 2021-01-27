@@ -20,7 +20,7 @@ import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
 import Wizard.Projects.Detail.Documents.Models exposing (Model)
 import Wizard.Projects.Detail.Documents.Msgs exposing (Msg(..))
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 

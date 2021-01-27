@@ -5,14 +5,19 @@ module Shared.Data.QuestionnaireDetail exposing
     , decoder
     , encode
     , getTodos
+    , getVersionByEventUuid
     , hasReply
+    , isCurrentVersion
     , isEditor
     , isOwner
+    , isVersion
+    , lastVisibleEvent
     , setLabels
     , setLevel
-    , setReplyValue
+    , setReply
     , todoUuid
     , todosLength
+    , updateContent
     )
 
 import Dict exposing (Dict)
@@ -31,8 +36,12 @@ import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireDetail.Reply as Reply exposing (Reply)
+import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
+import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
@@ -45,7 +54,7 @@ type alias QuestionnaireDetail =
     , name : String
     , package : Package
     , knowledgeModel : KnowledgeModel
-    , replies : Dict String ReplyValue
+    , replies : Dict String Reply
     , level : Int
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
@@ -56,6 +65,8 @@ type alias QuestionnaireDetail =
     , formatUuid : Maybe Uuid
     , format : Maybe TemplateFormat
     , labels : Dict String (List String)
+    , events : List QuestionnaireEvent
+    , versions : List QuestionnaireVersion
     }
 
 
@@ -66,7 +77,7 @@ decoder =
         |> D.required "name" D.string
         |> D.required "package" Package.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
-        |> D.required "replies" (D.dict ReplyValue.decoder)
+        |> D.required "replies" (D.dict Reply.decoder)
         |> D.required "level" D.int
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
@@ -77,13 +88,14 @@ decoder =
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe TemplateFormat.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
+        |> D.required "events" (D.list QuestionnaireEvent.decoder)
+        |> D.required "versions" (D.list QuestionnaireVersion.decoder)
 
 
 encode : QuestionnaireDetail -> E.Value
 encode questionnaire =
     E.object
-        [ ( "replies", E.dict identity ReplyValue.encode questionnaire.replies )
-        , ( "level", E.int questionnaire.level )
+        [ ( "level", E.int questionnaire.level )
         , ( "labels", E.dict identity (E.list E.string) questionnaire.labels )
         ]
 
@@ -156,9 +168,9 @@ setLevel level questionnaire =
     { questionnaire | level = level }
 
 
-setReplyValue : String -> ReplyValue -> QuestionnaireDetail -> QuestionnaireDetail
-setReplyValue path replyValue questionnaire =
-    { questionnaire | replies = Dict.insert path replyValue questionnaire.replies }
+setReply : String -> Reply -> QuestionnaireDetail -> QuestionnaireDetail
+setReply path reply questionnaire =
+    { questionnaire | replies = Dict.insert path reply questionnaire.replies }
 
 
 clearReplyValue : String -> QuestionnaireDetail -> QuestionnaireDetail
@@ -211,7 +223,7 @@ getQuestionTodos questionnaire chapter path question =
                 []
 
         childTodos =
-            case getReply questionnaire (pathToString currentPath) of
+            case getReplyValue questionnaire (pathToString currentPath) of
                 Just replyValue ->
                     case question of
                         OptionsQuestion commonData _ ->
@@ -242,9 +254,10 @@ getQuestionTodos questionnaire chapter path question =
     questionTodo ++ childTodos
 
 
-getReply : QuestionnaireDetail -> String -> Maybe ReplyValue
-getReply questionnaire path =
-    Dict.get path questionnaire.replies
+getReplyValue : QuestionnaireDetail -> String -> Maybe ReplyValue
+getReplyValue questionnaire path =
+    Maybe.map .value <|
+        Dict.get path questionnaire.replies
 
 
 hasTodo : QuestionnaireDetail -> String -> Bool
@@ -264,7 +277,30 @@ todoUuid =
 
 hasReply : String -> QuestionnaireDetail -> Bool
 hasReply path questionnaire =
-    Maybe.unwrap False (not << ReplyValue.isEmpty) (getReply questionnaire path)
+    Maybe.unwrap False (not << ReplyValue.isEmpty) (getReplyValue questionnaire path)
+
+
+getVersionByEventUuid : { q | versions : List QuestionnaireVersion } -> Uuid -> Maybe QuestionnaireVersion
+getVersionByEventUuid questionnaire eventUuid =
+    List.find (.eventUuid >> (==) eventUuid) questionnaire.versions
+
+
+lastVisibleEvent : QuestionnaireDetail -> Maybe QuestionnaireEvent
+lastVisibleEvent =
+    .events
+        >> List.reverse
+        >> List.dropWhile QuestionnaireEvent.isInvisible
+        >> List.head
+
+
+isCurrentVersion : QuestionnaireDetail -> Uuid -> Bool
+isCurrentVersion questionnaire eventUuid =
+    Maybe.map QuestionnaireEvent.getUuid (lastVisibleEvent questionnaire) == Just eventUuid
+
+
+isVersion : QuestionnaireDetail -> QuestionnaireEvent -> Bool
+isVersion questionnaire event =
+    List.any (.eventUuid >> (==) (QuestionnaireEvent.getUuid event)) questionnaire.versions
 
 
 
@@ -288,7 +324,7 @@ evaluateQuestion questionnaire currentLevel path question =
             (Question.getRequiredLevel question |> Maybe.withDefault 100) <= currentLevel
 
         rawValue =
-            Dict.get (pathToString currentPath) questionnaire.replies
+            getReplyValue questionnaire (pathToString currentPath)
 
         adjustedValue =
             if Question.isList question then
@@ -355,3 +391,18 @@ evaluateAnswerItem questionnaire currentLevel path questions uuid =
     questions
         |> List.map (evaluateQuestion questionnaire currentLevel currentPath)
         |> List.foldl (+) 0
+
+
+
+-- Utils
+
+
+updateContent : QuestionnaireDetail -> QuestionnaireContent -> QuestionnaireDetail
+updateContent detail content =
+    { detail
+        | replies = content.replies
+        , level = content.level
+        , labels = content.labels
+        , events = content.events
+        , versions = content.versions
+    }

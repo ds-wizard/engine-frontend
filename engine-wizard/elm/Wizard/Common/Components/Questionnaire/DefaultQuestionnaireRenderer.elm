@@ -19,6 +19,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
+import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 
 
 l_ : String -> AppState -> String
@@ -48,8 +49,8 @@ renderQuestionLabel question =
     text <| Question.getTitle question
 
 
-renderQuestionDescription : AppState -> List Level -> KnowledgeModel -> Question -> Html msg
-renderQuestionDescription appState levels km question =
+renderQuestionDescription : AppState -> List Level -> KnowledgeModel -> QuestionnaireViewSettings -> Question -> Html msg
+renderQuestionDescription appState levels km qvs question =
     let
         description =
             Question.getText question
@@ -57,7 +58,7 @@ renderQuestionDescription appState levels km question =
                 |> Maybe.withDefault (text "")
 
         extraData =
-            viewExtraData appState levels <| createQuestionExtraData km question
+            viewExtraData appState qvs levels <| createQuestionExtraData km question
     in
     div []
         [ description
@@ -150,8 +151,8 @@ createQuestionExtraData km question =
         |> List.foldl foldReferences newExtraData
 
 
-viewExtraData : AppState -> List Level -> FormExtraData -> Html msg
-viewExtraData appState levels data =
+viewExtraData : AppState -> QuestionnaireViewSettings -> List Level -> FormExtraData -> Html msg
+viewExtraData appState qvs levels data =
     let
         isEmpty =
             List.isEmpty data.resourcePageReferences
@@ -164,17 +165,17 @@ viewExtraData appState levels data =
 
     else
         p [ class "extra-data" ]
-            [ viewRequiredLevel appState levels data.requiredLevel
+            [ viewRequiredLevel appState qvs levels data.requiredLevel
             , viewResourcePageReferences appState data.resourcePageReferences
             , viewUrlReferences appState data.urlReferences
             , viewExperts appState data.experts
             ]
 
 
-viewRequiredLevel : AppState -> List Level -> Maybe Int -> Html msg
-viewRequiredLevel appState levels questionLevel =
-    case List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels of
-        Just level ->
+viewRequiredLevel : AppState -> QuestionnaireViewSettings -> List Level -> Maybe Int -> Html msg
+viewRequiredLevel appState qvs levels questionLevel =
+    case ( qvs.phases, List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels ) of
+        ( True, Just level ) ->
             span []
                 [ span [ class "caption" ]
                     [ faSet "questionnaire.desirable" appState
@@ -183,7 +184,7 @@ viewRequiredLevel appState levels questionLevel =
                     ]
                 ]
 
-        Nothing ->
+        _ ->
             emptyNode
 
 

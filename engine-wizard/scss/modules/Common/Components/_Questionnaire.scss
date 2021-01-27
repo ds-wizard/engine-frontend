@@ -1,12 +1,106 @@
 @import "../../../mixins";
 @import "../../../variables";
 
-.questionnaire {
-    display: flex;
-    width: 100%;
-    height: calc(100vh - #{$top-header-height});
+$toolbar-height: 40px;
 
-    &__panel {
+.questionnaire {
+    &.toolbar-enabled {
+        .questionnaire__body {
+            height: calc(100% - #{$toolbar-height});
+        }
+    }
+
+    &__body {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+
+    &__toolbar {
+        width: 100%;
+        height: $toolbar-height;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: $gray-100;
+        border-bottom: 1px solid $gray-400;
+
+        .badge {
+            margin-left: 0.5rem
+        }
+
+        .item-group {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .item {
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+            padding: 8px;
+            border-radius: .25rem;
+            color: $gray-900 !important;
+            text-decoration: none !important;
+
+
+            &:hover {
+                background: $gray-200;
+            }
+
+            &.selected {
+                background: $gray-500;
+                color: $white !important;
+            }
+        }
+
+        &__left {
+            display: flex;
+            margin-left: 16px;
+            align-items: center;
+
+            .item-group {
+                margin-right: 32px;
+            }
+        }
+
+        &__right {
+            display: flex;
+            margin-right: 16px;
+            align-items: center;
+
+            .item-group {
+                margin-left: 32px;
+            }
+        }
+
+        .dropdown-toggle {
+            &::after {
+                display: none;
+            }
+        }
+
+        .dropdown-item {
+            color: $body-color !important;
+            text-decoration: none !important;
+
+            &:active {
+                background-color: $gray-100 !important;
+            }
+
+            &-icon {
+                padding-left: 3rem;
+                position: relative;
+
+                .fa {
+                    position: absolute;
+                    left: 1.5rem;
+                    top: 0.5rem;
+                }
+            }
+        }
+    }
+
+    &__left-panel {
         flex: 0 0 20rem;
         overflow: auto;
         padding: 1rem;
@@ -61,6 +155,170 @@
         .chapter-description {
             margin-bottom: 50px;
             text-align: justify;
+        }
+    }
+
+    &__right-panel {
+        flex: 0 0 20rem;
+        overflow: auto;
+        padding: 1rem;
+        border-left: 1px solid $gray-400;
+
+
+        .history {
+            .form-check {
+                background: $gray-100;
+                margin: -1rem -1rem 0 -1rem;
+                padding: 1rem;
+                border-bottom: 1px solid $gray-400;
+
+                label {
+                    font-weight: 600;
+                }
+            }
+
+            .fa-ul {
+                margin-left: 1.5rem;
+                margin-bottom: 0;
+
+                .fa-li {
+                    color: $gray-600;
+                }
+
+                .fa-li-content {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 100%;
+                    display: inline-block;
+                }
+            }
+
+            .user {
+                color: $gray-600;
+
+                .user-icon {
+                    margin-right: 0.25rem;
+                    opacity: 0.7;
+                }
+            }
+
+            .history-month {
+                margin-left: -1rem;
+                margin-right: -1rem;
+                margin-bottom: 2rem;
+
+                h5 {
+                    margin-top: 1rem;
+                    padding: 0.5rem;
+                }
+
+                .history-day {
+                    border-top: 1px solid $gray-400;
+
+                    &:last-child {
+                        border-bottom: 1px solid $gray-400;
+                    }
+
+                    .date {
+                        display: block;
+                        background: $gray-100;
+                        color: $body-color;
+                        text-decoration: none;
+                        padding: 0.25rem 0.5rem 0.25rem 1.25rem;
+                        position: relative;
+
+                        &.named-only-open {
+                            padding-left: 0.5rem;
+                        }
+
+                        &.open {
+                            .fa {
+                                position: absolute;
+                                left: 8px;
+                                top: 8px;
+                            }
+                        }
+
+                        &.closed {
+                            .fa {
+                                position: absolute;
+                                left: 9px;
+                                top: 8px;
+                            }
+
+                        }
+                    }
+
+                    .history-day-users {
+                        border-top: 1px solid $gray-400;
+                        padding: 0.5rem 0.5rem 1rem;
+                    }
+
+                    .history-event {
+                        border-top: 1px solid $gray-400;
+                        padding: 0.5rem;
+
+                        .event-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            color: $gray-600;
+                        }
+
+                        .event-badges {
+                            .badge {
+                                margin-right: 0.5rem;
+                            }
+                        }
+
+                        .event-detail {
+                            margin: .5rem -.5rem .5rem 0;
+                            padding: 0.5rem;
+                            background-color: $gray-100;
+                            border-top-left-radius: $border-radius;
+                            border-bottom-left-radius: $border-radius;
+
+                            strong {
+                                font-weight: 600;
+                            }
+
+                            .answer {
+                                display: flex;
+                                margin-top: 0.5rem;
+                                align-items: flex-start;
+
+                                .fa {
+                                    width: 2rem;
+                                    margin-top: 0.25rem;
+                                    color: $gray-600;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .todos {
+            min-height: 100%;
+
+            &-empty {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .fa-ul {
+                margin-left: 1.5rem;
+
+                li {
+                    margin-top: 0.5rem;
+                }
+
+                .fa-li {
+                    color: $gray-600;
+                }
+            }
         }
     }
 
@@ -372,6 +630,10 @@
             .fa {
                 margin-right: 10px;
             }
+        }
+
+        .answered {
+            margin-top: 0.5rem;
         }
 
         .badge-human-identifier {

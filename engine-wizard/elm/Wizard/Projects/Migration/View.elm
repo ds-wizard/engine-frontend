@@ -156,20 +156,23 @@ questionnaireView : AppState -> Model -> QuestionnaireMigration -> List Level ->
 questionnaireView appState model migration levels =
     case model.questionnaireModel of
         Just questionnaireModel ->
-            Html.map QuestionnaireMsg <|
-                Questionnaire.view appState
-                    { features =
-                        { feedbackEnabled = False
-                        , todosEnabled = True
-                        , readonly = True
-                        }
-                    , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newQuestionnaire.knowledgeModel levels [] model.selectedChange
+            Questionnaire.view appState
+                { features =
+                    { feedbackEnabled = False
+                    , todosEnabled = True
+                    , readonly = True
+                    , toolbarEnabled = False
                     }
-                    { levels = levels
-                    , metrics = []
-                    , events = []
-                    }
-                    questionnaireModel
+                , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newQuestionnaire.knowledgeModel levels [] model.selectedChange
+                , wrapMsg = QuestionnaireMsg
+                , previewQuestionnaireEventMsg = Nothing
+                , revertQuestionnaireMsg = Nothing
+                }
+                { levels = levels
+                , metrics = []
+                , events = []
+                }
+                questionnaireModel
 
         Nothing ->
             emptyNode

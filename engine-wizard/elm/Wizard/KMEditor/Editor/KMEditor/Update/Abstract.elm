@@ -16,7 +16,7 @@ import Form.Validate exposing (Validation)
 import Random exposing (Seed)
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Utils exposing (getUuid)
+import Shared.Utils exposing (getUuidString)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getEditorContext, insertEditor, setAlert)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
@@ -39,7 +39,7 @@ addEntity : AddEntityConfig b (EditorLike a e o) -> Cmd Wizard.Msgs.Msg -> Seed 
 addEntity cfg cmd seed model editorData =
     let
         ( newUuid, newSeed ) =
-            getUuid seed
+            getUuidString seed
 
         entity =
             cfg.newEntity newUuid

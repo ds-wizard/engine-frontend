@@ -1,4 +1,12 @@
 .tag-list {
+    &-view {
+        .tag {
+            .tag-label{
+                cursor: default !important;
+            }
+        }
+    }
+
     .tag {
         display: inline-block;
         margin-bottom: 0.5rem;

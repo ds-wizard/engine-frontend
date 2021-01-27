@@ -30,7 +30,7 @@ import Wizard.Common.View.Page as Page
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes
 import Wizard.Routes as Routes exposing (Route(..))
 

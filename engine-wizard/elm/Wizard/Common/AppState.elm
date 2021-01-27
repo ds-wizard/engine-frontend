@@ -2,6 +2,7 @@ module Wizard.Common.AppState exposing
     ( AppState
     , getDashboardWidgets
     , init
+    , isFullscreen
     , setCurrentTime
     , setTimeZone
     )
@@ -19,6 +20,8 @@ import Time
 import Wizard.Common.Flags as Flags
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
+import Wizard.Projects.Detail.ProjectDetailRoute
+import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 
 
@@ -105,3 +108,17 @@ getDashboardWidgets appState =
     appState.config.dashboard.widgets
         |> Maybe.andThen (Dict.get role)
         |> Maybe.withDefault [ WelcomeDashboardWidget ]
+
+
+isFullscreen : AppState -> Bool
+isFullscreen appState =
+    let
+        allowedFullscreenRoute =
+            case appState.route of
+                Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute _ Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire) ->
+                    True
+
+                _ ->
+                    False
+    in
+    allowedFullscreenRoute && appState.session.fullscreen

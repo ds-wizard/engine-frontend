@@ -1,4 +1,4 @@
-module Shared.Data.QuestionnaireDetail.ReplyValue exposing
+module Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing
     ( ReplyValue(..)
     , decoder
     , encode
@@ -15,7 +15,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Data.QuestionnaireDetail.ReplyValue.IntegrationReplyValue as IntegrationReplyValue exposing (IntegrationReplyValue(..))
+import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyValue exposing (IntegrationReplyType(..))
 
 
 type ReplyValue
@@ -24,7 +24,7 @@ type ReplyValue
     | MultiChoiceReply (List String)
     | ItemListReply (List String)
     | EmptyReply
-    | IntegrationReply IntegrationReplyValue
+    | IntegrationReply IntegrationReplyType
 
 
 decoder : Decoder ReplyValue
@@ -100,11 +100,11 @@ encode replyValue =
                 , ( "value", E.list E.string itemUuids )
                 ]
 
-        EmptyReply ->
-            E.null
-
         IntegrationReply integrationReplyValue ->
             IntegrationReplyValue.encode integrationReplyValue
+
+        EmptyReply ->
+            E.null
 
 
 getItemListCount : ReplyValue -> Int
@@ -155,10 +155,10 @@ getStringReply replyValue =
 
         IntegrationReply integrationReplyValue ->
             case integrationReplyValue of
-                PlainValue value ->
+                PlainType value ->
                     value
 
-                IntegrationValue id value ->
+                IntegrationType id value ->
                     value
 
         _ ->

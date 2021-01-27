@@ -4,16 +4,20 @@ module Wizard.Projects.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Json.Encode as E
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Levels as LevelsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setLevels)
+import Shared.Utils exposing (getUuid, getUuidString)
+import Time
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -21,7 +25,7 @@ import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionChange)
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Migration.Models exposing (Model, initializeChangeList)
 import Wizard.Projects.Migration.Msgs exposing (Msg(..))
 import Wizard.Projects.Routes exposing (Route(..))
@@ -146,25 +150,42 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                 ( newSeed, newQuestionnaireModel, questionnaireCmd ) =
                     Questionnaire.update
                         questionnaireMsg
+                        (wrapMsg << QuestionnaireMsg)
+                        (Just Wizard.Msgs.SetFullscreen)
                         appState
                         { levels = levels, metrics = [], events = [] }
                         questionnaireModel
 
-                saveCmd =
+                ( newSeed2, saveCmd ) =
                     case questionnaireMsg of
-                        Questionnaire.SetLabels _ _ ->
-                            QuestionnairesApi.putQuestionnaireContent model.questionnaireUuid
-                                (QuestionnaireDetail.encode newQuestionnaireModel.questionnaire)
+                        Questionnaire.SetLabels path value ->
+                            let
+                                ( uuid, newSeed2_ ) =
+                                    getUuid newSeed
+
+                                event =
+                                    QuestionnaireEvent.SetLabels
+                                        { uuid = uuid
+                                        , path = path
+                                        , value = value
+                                        , createdAt = Time.millisToPosix 0
+                                        , createdBy = Nothing
+                                        }
+                            in
+                            ( newSeed2_
+                            , QuestionnairesApi.putQuestionnaireContent model.questionnaireUuid
+                                [ event ]
                                 appState
                                 PutQuestionnaireContentCompleted
+                            )
 
                         _ ->
-                            Cmd.none
+                            ( newSeed, Cmd.none )
             in
-            ( newSeed
+            ( newSeed2
             , { model | questionnaireModel = Just newQuestionnaireModel }
             , Cmd.batch
-                [ Cmd.map (wrapMsg << QuestionnaireMsg) <| questionnaireCmd
+                [ questionnaireCmd
                 , Cmd.map wrapMsg <| saveCmd
                 ]
             )
@@ -267,7 +288,7 @@ setResult appState migration model =
         questionnaireModel =
             case migration of
                 Success m ->
-                    Just <| Questionnaire.init m.newQuestionnaire
+                    Just <| Questionnaire.init appState m.newQuestionnaire
 
                 _ ->
                     Nothing

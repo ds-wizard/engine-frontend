@@ -16,7 +16,7 @@ import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes
 import Wizard.Projects.Common.View exposing (visibilityIcons)
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 

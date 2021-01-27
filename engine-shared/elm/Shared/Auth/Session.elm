@@ -4,6 +4,7 @@ module Shared.Auth.Session exposing
     , encode
     , exists
     , init
+    , setFullscreen
     , setSidebarCollapsed
     , setToken
     , setUser
@@ -21,7 +22,8 @@ type alias Session =
     { token : Token
     , user : Maybe UserInfo
     , sidebarCollapsed : Bool
-    , v4 : Bool
+    , fullscreen : Bool
+    , v5 : Bool
     }
 
 
@@ -30,7 +32,8 @@ init =
     { token = Token.empty
     , user = Nothing
     , sidebarCollapsed = False
-    , v4 = True
+    , fullscreen = False
+    , v5 = True
     }
 
 
@@ -49,13 +52,19 @@ setSidebarCollapsed session collapsed =
     { session | sidebarCollapsed = collapsed }
 
 
+setFullscreen : Session -> Bool -> Session
+setFullscreen session fullscreen =
+    { session | fullscreen = fullscreen }
+
+
 decoder : Decoder Session
 decoder =
     D.succeed Session
         |> D.required "token" Token.decoder
         |> D.required "user" (D.nullable UserInfo.decoder)
         |> D.optional "sidebarCollapsed" D.bool False
-        |> D.required "v4" D.bool
+        |> D.optional "fullscreen" D.bool False
+        |> D.required "v5" D.bool
 
 
 encode : Session -> E.Value
@@ -64,7 +73,8 @@ encode session =
         [ ( "token", Token.encode session.token )
         , ( "user", E.maybe UserInfo.encode session.user )
         , ( "sidebarCollapsed", E.bool session.sidebarCollapsed )
-        , ( "v4", E.bool session.v4 )
+        , ( "fullscreen", E.bool session.fullscreen )
+        , ( "v5", E.bool session.v5 )
         ]
 
 

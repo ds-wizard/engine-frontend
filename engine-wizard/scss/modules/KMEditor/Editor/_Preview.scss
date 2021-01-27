@@ -1,15 +1,15 @@
 @import "../../../variables";
 
+$menu-height: 50px;
+$tag-selection-height: 80px;
 
 .KMEditor__Editor__Preview {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 50px);
+    height: calc(100vh - #{$menu-height});
     padding: 0;
 
     .tag-selection {
-        margin: 0 0 20px;
         padding: 0.5rem 1rem;
+        height: $tag-selection-height;
         background: $gray-200;
         border-bottom: 1px solid $gray-400;
 
@@ -22,7 +22,7 @@
         }
     }
 
-    .Questionnaire {
-        flex-grow: 1;
+    .questionnaire {
+        height:  calc(100vh - #{$menu-height} - #{$tag-selection-height});
     }
 }

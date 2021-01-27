@@ -15,7 +15,7 @@ import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (Cu
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
@@ -150,7 +150,13 @@ app : Model -> Html Msg -> Document Msg
 app model content =
     let
         html =
-            div [ class "app-view", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
+            div
+                [ class "app-view"
+                , classList
+                    [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed )
+                    , ( "app-fullscreen", AppState.isFullscreen model.appState )
+                    ]
+                ]
                 [ menu model
                 , div [ class "page row justify-content-center" ]
                     [ content ]

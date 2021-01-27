@@ -12,7 +12,7 @@ import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (Question
 import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (listInsertIf)
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
@@ -24,13 +24,14 @@ import Wizard.Projects.Common.View exposing (visibilityIcons)
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Preview as Preview
+import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
+import Wizard.Projects.Detail.Components.RevertModal as ReverModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
-import Wizard.Projects.Detail.Components.Todos as Todos
 import Wizard.Projects.Detail.Documents.View as Documents
 import Wizard.Projects.Detail.Models exposing (Model)
 import Wizard.Projects.Detail.Msgs exposing (Msg(..))
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute exposing (PlanDetailRoute)
+import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute exposing (ProjectDetailRoute)
 import Wizard.Projects.Routes as PlansRoutes
 import Wizard.Routes
 
@@ -45,7 +46,7 @@ lx_ =
     lx "Wizard.Projects.Detail.View"
 
 
-view : PlanDetailRoute -> AppState -> Model -> Html Msg
+view : ProjectDetailRoute -> AppState -> Model -> Html Msg
 view route appState model =
     if model.error then
         viewError appState
@@ -96,12 +97,29 @@ viewError appState =
 -- PLAN
 
 
-viewPlan : PlanDetailRoute -> AppState -> Model -> ( Questionnaire.Model, List Level, List Metric ) -> Html Msg
+viewPlan : ProjectDetailRoute -> AppState -> Model -> ( Questionnaire.Model, List Level, List Metric ) -> Html Msg
 viewPlan route appState model ( qm, levels, metrics ) =
+    let
+        navigation =
+            if AppState.isFullscreen appState then
+                emptyNode
+
+            else
+                viewPlanNavigation appState route model qm
+
+        modalConfig =
+            { levels = levels
+            , metrics = metrics
+            , events = qm.questionnaire.events
+            , versions = qm.questionnaire.versions
+            }
+    in
     div [ class "Plans__Detail" ]
-        [ viewPlanNavigation appState route model qm
+        [ navigation
         , viewPlanContent appState route model qm levels metrics
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
+        , Html.map QuestionnaireVersionViewModalMsg <| QuestionnaireVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
+        , Html.map RevertModalMsg <| ReverModal.view appState model.revertModalModel
         ]
 
 
@@ -109,7 +127,7 @@ viewPlan route appState model ( qm, levels, metrics ) =
 -- PLAN - NAVIGATION
 
 
-viewPlanNavigation : AppState -> PlanDetailRoute -> Model -> Questionnaire.Model -> Html Msg
+viewPlanNavigation : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewPlanNavigation appState route model qm =
     div [ class "Plans__Detail__Navigation" ]
         [ viewPlanNavigationTitleRow appState model qm.questionnaire
@@ -188,62 +206,38 @@ viewPlanNavigationActions appState questionnaire =
 -- PLAN - NAVIGATION - NAV ROW
 
 
-viewPlanNavigationNav : AppState -> PlanDetailRoute -> Model -> Questionnaire.Model -> Html Msg
+viewPlanNavigationNav : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewPlanNavigationNav appState route model qm =
     let
-        isEditor =
-            QuestionnaireDetail.isEditor appState qm.questionnaire
-
         isOwner =
             QuestionnaireDetail.isOwner appState qm.questionnaire
 
         isDocumentRoute r =
             case r of
-                PlanDetailRoute.Documents _ ->
+                ProjectDetailRoute.Documents _ ->
                     True
 
-                PlanDetailRoute.NewDocument ->
+                ProjectDetailRoute.NewDocument _ ->
                     True
 
                 _ ->
                     False
 
-        todosLength =
-            QuestionnaireDetail.todosLength qm.questionnaire
-
-        todosBadge =
-            if todosLength > 0 then
-                span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt todosLength) ]
-
-            else
-                emptyNode
-
         questionnaireLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Questionnaire))
-                    [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Questionnaire ) ] ]
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Questionnaire))
+                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Questionnaire ) ] ]
                     [ fa "fa far fa-list-alt"
                     , span [ attribute "data-content" (l_ "nav.questionnaire" appState) ] [ lx_ "nav.questionnaire" appState ]
-                    ]
-                ]
-
-        todosLink =
-            li [ class "nav-item" ]
-                [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.TODOs))
-                    [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.TODOs ) ] ]
-                    [ fa "fa far fa-check-square"
-                    , span [ attribute "data-content" (l_ "nav.todos" appState) ] [ lx_ "nav.todos" appState ]
-                    , todosBadge
                     ]
                 ]
 
         metricsLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Metrics))
-                    [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Metrics ) ] ]
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Metrics))
+                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Metrics ) ] ]
                     [ fa "fa far fa-chart-bar"
                     , span [ attribute "data-content" (l_ "nav.metrics" appState) ] [ lx_ "nav.metrics" appState ]
                     ]
@@ -252,8 +246,8 @@ viewPlanNavigationNav appState route model qm =
         previewLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Preview))
-                    [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Preview ) ] ]
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Preview))
+                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Preview ) ] ]
                     [ fa "fa far fa-eye"
                     , span [ attribute "data-content" (l_ "nav.preview" appState) ] [ lx_ "nav.preview" appState ]
                     ]
@@ -262,7 +256,7 @@ viewPlanNavigationNav appState route model qm =
         documentsLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid (PlanDetailRoute.Documents PaginationQueryString.empty)))
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid (ProjectDetailRoute.Documents PaginationQueryString.empty)))
                     [ class "nav-link", classList [ ( "active", isDocumentRoute route ) ] ]
                     [ fa "fa far fa-copy"
                     , span [ attribute "data-content" (l_ "nav.documents" appState) ] [ lx_ "nav.documents" appState ]
@@ -272,8 +266,8 @@ viewPlanNavigationNav appState route model qm =
         settingsLink =
             li [ class "nav-item" ]
                 [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid PlanDetailRoute.Settings))
-                    [ class "nav-link", classList [ ( "active", route == PlanDetailRoute.Settings ) ] ]
+                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Settings))
+                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Settings ) ] ]
                     [ fa "fa fas fa-cogs"
                     , span [ attribute "data-content" (l_ "nav.settings" appState) ] [ lx_ "nav.settings" appState ]
                     ]
@@ -282,7 +276,6 @@ viewPlanNavigationNav appState route model qm =
         links =
             []
                 |> listInsertIf questionnaireLink True
-                |> listInsertIf todosLink isEditor
                 |> listInsertIf metricsLink appState.config.questionnaire.summaryReport.enabled
                 |> listInsertIf previewLink True
                 |> listInsertIf documentsLink True
@@ -297,7 +290,7 @@ viewPlanNavigationNav appState route model qm =
 -- PLAN - CONTENT
 
 
-viewPlanContent : AppState -> PlanDetailRoute -> Model -> Questionnaire.Model -> List Level -> List Metric -> Html Msg
+viewPlanContent : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> List Level -> List Metric -> Html Msg
 viewPlanContent appState route model qm levels metrics =
     let
         isEditable =
@@ -310,47 +303,48 @@ viewPlanContent appState route model qm levels metrics =
             Page.error appState (l_ "forbidden" appState)
     in
     case route of
-        PlanDetailRoute.Questionnaire ->
-            Html.map QuestionnaireMsg <|
-                Questionnaire.view appState
-                    { features =
-                        { feedbackEnabled = True
-                        , todosEnabled = isEditable
-                        , readonly = not isEditable
-                        }
-                    , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel levels metrics
+        ProjectDetailRoute.Questionnaire ->
+            Questionnaire.view appState
+                { features =
+                    { feedbackEnabled = True
+                    , todosEnabled = isEditable
+                    , readonly = not isEditable
+                    , toolbarEnabled = True
                     }
-                    { levels = levels, metrics = metrics, events = [] }
-                    qm
+                , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel levels metrics
+                , wrapMsg = QuestionnaireMsg
+                , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
+                , revertQuestionnaireMsg = Just OpenRevertModal
+                }
+                { levels = levels, metrics = metrics, events = [] }
+                qm
 
-        PlanDetailRoute.Preview ->
+        ProjectDetailRoute.Preview ->
             Html.map PreviewMsg <|
                 Preview.view appState qm.questionnaire model.previewModel
 
-        PlanDetailRoute.TODOs ->
-            if isEditable then
-                Todos.view appState qm.questionnaire
-
-            else
-                forbiddenPage
-
-        PlanDetailRoute.Metrics ->
+        ProjectDetailRoute.Metrics ->
             Html.map SummaryReportMsg <|
                 SummaryReport.view appState { questionnaire = qm.questionnaire, metrics = metrics } model.summaryReportModel
 
-        PlanDetailRoute.Documents _ ->
-            Html.map DocumentsMsg <|
-                Documents.view appState { questionnaireUuid = qm.questionnaire.uuid, questionnaireEditable = isEditable } model.documentsModel
+        ProjectDetailRoute.Documents _ ->
+            Documents.view appState
+                { questionnaire = qm.questionnaire
+                , questionnaireEditable = isEditable
+                , wrapMsg = DocumentsMsg
+                , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
+                }
+                model.documentsModel
 
-        PlanDetailRoute.NewDocument ->
+        ProjectDetailRoute.NewDocument mbEventUuid ->
             if isEditable then
                 Html.map NewDocumentMsg <|
-                    NewDocument.view appState qm.questionnaire model.newDocumentModel
+                    NewDocument.view appState qm.questionnaire mbEventUuid model.newDocumentModel
 
             else
                 forbiddenPage
 
-        PlanDetailRoute.Settings ->
+        ProjectDetailRoute.Settings ->
             if isEditable && isAuthenticated then
                 Html.map SettingsMsg <|
                     Settings.view appState { questionnaire = QuestionnaireDetail.fromQuestionnaireDetail qm.questionnaire } model.settingsModel

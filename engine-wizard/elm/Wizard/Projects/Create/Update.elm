@@ -20,7 +20,7 @@ import Wizard.Msgs
 import Wizard.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
 import Wizard.Projects.Create.Models exposing (Model)
 import Wizard.Projects.Create.Msgs exposing (Msg(..))
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)

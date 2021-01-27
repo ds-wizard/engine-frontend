@@ -1,0 +1,36 @@
+@import "../../../mixins";
+@import "../../../variables";
+
+.ListingDropdown {
+    .dropdown-toggle {
+        &::after {
+            display: none;
+        }
+    }
+
+    .dropdown-item {
+        padding: 0.25rem 1rem;
+
+        color: $gray-900;
+        text-decoration: none !important;
+
+        &:not([href]) {
+            color: $gray-900;
+        }
+
+        &:active, &:not([href]):active {
+            color: $light;
+
+            &.text-danger {
+                background-color: $danger;
+                color: $light !important;
+            }
+        }
+
+        .fa {
+            width: 1.5rem;
+            text-align: center;
+            margin-right: 0.25rem;
+        }
+    }
+}

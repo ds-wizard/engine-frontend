@@ -24,7 +24,7 @@ import Wizard.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModalMsg
 import Wizard.Projects.Common.DeleteProjectModal.View as DeleteProjectModal
 import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Projects.Common.View exposing (visibilityIcons)
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute exposing (PlanDetailRoute(..))
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute(..))
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
 import Wizard.Projects.Routes exposing (Route(..))
