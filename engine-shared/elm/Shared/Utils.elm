@@ -109,13 +109,19 @@ getContrastColorHex colorHex =
     case hexToColor colorHex of
         Ok color ->
             let
-                blackContrast =
-                    contrastRatio Color.black color
+                rgba =
+                    Color.toRgba color
 
-                whiteContrast =
-                    contrastRatio Color.white color
+                redValue =
+                    255 * 0.299 * rgba.red
+
+                blueValue =
+                    255 * 0.587 * rgba.blue
+
+                greenValue =
+                    255 * 0.114 * rgba.green
             in
-            if blackContrast > whiteContrast then
+            if redValue + blueValue + greenValue > 186 then
                 "#000000"
 
             else
