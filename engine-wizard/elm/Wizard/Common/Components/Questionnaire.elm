@@ -43,13 +43,14 @@ import Shared.Data.TypeHint exposing (TypeHint)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (l, lf, lg, lgx, lx)
-import Shared.Utils exposing (dispatch, getUuid, listInsertIf)
+import Shared.Utils exposing (dispatch, flip, getUuid, listFilterJust, listInsertIf)
 import String exposing (fromInt)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.View.Page as Page
+import Wizard.Common.View.Tag as Tag
 import Wizard.Ports as Ports
 
 
@@ -554,15 +555,25 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
         viewLabel =
             viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question
 
+        viewTags =
+            let
+                tags =
+                    Question.getTagUuids question
+                        |> List.map (flip KnowledgeModel.getTag model.questionnaire.knowledgeModel)
+                        |> listFilterJust
+                        |> List.sortBy .name
+            in
+            Tag.viewList tags
+
         viewDescription =
             cfg.renderer.renderQuestionDescription question
 
         content =
             if Question.isList question || Question.isOptions question || Question.isMultiChoice question then
-                viewLabel :: viewDescription :: viewInput :: viewExtensions
+                viewLabel :: viewTags :: viewDescription :: viewInput :: viewExtensions
 
             else
-                viewLabel :: viewInput :: viewDescription :: viewExtensions
+                viewLabel :: viewTags :: viewInput :: viewDescription :: viewExtensions
 
         questionExtraClass =
             Maybe.withDefault "" (cfg.renderer.getQuestionExtraClass question)
