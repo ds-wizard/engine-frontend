@@ -8,6 +8,7 @@ import Html.Events exposing (onClick)
 import Shared.Data.Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
+import Shared.Data.Event.AddChoiceEventData exposing (AddChoiceEventData)
 import Shared.Data.Event.AddExpertEventData exposing (AddExpertEventData)
 import Shared.Data.Event.AddIntegrationEventData exposing (AddIntegrationEventData)
 import Shared.Data.Event.AddQuestionEventData as AddQuestionEventQuestion exposing (AddQuestionEventData(..))
@@ -18,6 +19,7 @@ import Shared.Data.Event.AddReferenceURLEventData exposing (AddReferenceURLEvent
 import Shared.Data.Event.AddTagEventData exposing (AddTagEventData)
 import Shared.Data.Event.EditAnswerEventData exposing (EditAnswerEventData)
 import Shared.Data.Event.EditChapterEventData exposing (EditChapterEventData)
+import Shared.Data.Event.EditChoiceEventData exposing (EditChoiceEventData)
 import Shared.Data.Event.EditExpertEventData exposing (EditExpertEventData)
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData)
 import Shared.Data.Event.EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
@@ -31,6 +33,7 @@ import Shared.Data.Event.EventField as EventField
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
@@ -235,6 +238,22 @@ getEventView appState model migration metrics event =
                 |> Maybe.map (viewEvent appState model (lg "event.deleteAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
+        AddChoiceEvent eventData _ ->
+            viewAddChoiceDiff appState eventData
+                |> viewEvent appState model (lg "event.addChoice" appState)
+
+        EditChoiceEvent eventData commonData ->
+            KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewEditChoiceDiff appState eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editChoice" appState))
+                |> Maybe.withDefault errorMessage
+
+        DeleteChoiceEvent commonData ->
+            KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewDeleteChoiceDiff appState)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteChoice" appState))
+                |> Maybe.withDefault errorMessage
+
         AddReferenceEvent eventData _ ->
             viewAddReferenceDiff appState eventData
                 |> viewEvent appState model (lg "event.addReference" appState)
@@ -277,6 +296,12 @@ getEventView appState model migration metrics event =
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveAnswer appState migration.currentKnowledgeModel metrics)
                 |> Maybe.map (viewEvent appState model (lg "event.moveAnswer" appState))
+                |> Maybe.withDefault errorMessage
+
+        MoveChoiceEvent _ commonData ->
+            KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewMoveChoice appState)
+                |> Maybe.map (viewEvent appState model (lg "event.moveChoice" appState))
                 |> Maybe.withDefault errorMessage
 
         MoveReferenceEvent _ commonData ->
@@ -620,8 +645,8 @@ viewAddQuestionDiff appState km event =
                 , lg "question.text" appState
                 ]
                 [ AddQuestionEventQuestion.getTypeString event
-                , AddQuestionEventQuestion.map .title .title .title .title event
-                , AddQuestionEventQuestion.map .text .text .text .text event |> Maybe.withDefault ""
+                , AddQuestionEventQuestion.map .title .title .title .title .title event
+                , AddQuestionEventQuestion.map .text .text .text .text .text event |> Maybe.withDefault ""
                 ]
 
         extraFields =
@@ -654,7 +679,7 @@ viewAddQuestionDiff appState km event =
             KnowledgeModel.getTags km
 
         tagUuids =
-            AddQuestionEventQuestion.map .tagUuids .tagUuids .tagUuids .tagUuids event
+            AddQuestionEventQuestion.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
@@ -677,10 +702,10 @@ viewEditQuestionDiff appState km event question =
             Question.getUuid question
 
         title =
-            EditQuestionEventData.map .title .title .title .title event
+            EditQuestionEventData.map .title .title .title .title .title event
 
         questionText =
-            EditQuestionEventData.map .text .text .text .text event
+            EditQuestionEventData.map .text .text .text .text .text event
 
         fields =
             List.map3 (\a b c -> ( a, b, c ))
@@ -772,7 +797,7 @@ viewEditQuestionDiff appState km event question =
         tagsDiff =
             viewDiffChildren (lg "tags" appState)
                 originalTags
-                (EventField.getValueWithDefault (EditQuestionEventData.map .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags)
+                (EventField.getValueWithDefault (EditQuestionEventData.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags)
                 tagNames
 
         -- Answers
@@ -793,6 +818,17 @@ viewEditQuestionDiff appState km event question =
                         originalAnswers
                         (EventField.getValueWithDefault data.answerUuids originalAnswers)
                         answerNames
+
+                _ ->
+                    emptyNode
+
+        -- Choices
+        choicesDiff =
+            case question of
+                MultiChoiceQuestion _ _ ->
+                    viewPlainChildren (lg "choices" appState) <|
+                        List.map .label <|
+                            KnowledgeModel.getQuestionChoices questionUuid km
 
                 _ ->
                     emptyNode
@@ -832,7 +868,7 @@ viewEditQuestionDiff appState km event question =
         referencesDiff =
             viewDiffChildren (lg "references" appState)
                 originalReferences
-                (EventField.getValueWithDefault (EditQuestionEventData.map .referenceUuids .referenceUuids .referenceUuids .referenceUuids event) originalReferences)
+                (EventField.getValueWithDefault (EditQuestionEventData.map .referenceUuids .referenceUuids .referenceUuids .referenceUuids .referenceUuids event) originalReferences)
                 referenceNames
 
         -- Experts
@@ -848,11 +884,11 @@ viewEditQuestionDiff appState km event question =
         expertsDiff =
             viewDiffChildren (lg "experts" appState)
                 originalExperts
-                (EventField.getValueWithDefault (EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids event) originalExperts)
+                (EventField.getValueWithDefault (EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids event) originalExperts)
                 expertNames
     in
     div []
-        (fieldDiff ++ [ integrationPropsDiff, tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ integrationPropsDiff, tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
 viewDeleteQuestionDiff : AppState -> KnowledgeModel -> Question -> Html Msg
@@ -908,6 +944,17 @@ viewDeleteQuestionDiff appState km question =
                 _ ->
                     emptyNode
 
+        -- Choices
+        choicesDiff =
+            case question of
+                MultiChoiceQuestion _ _ ->
+                    viewPlainChildren (lg "choices" appState) <|
+                        List.map .label <|
+                            KnowledgeModel.getQuestionChoices questionUuid km
+
+                _ ->
+                    emptyNode
+
         -- Item Template Questions
         itemTemplateQuestionsDiff =
             case question of
@@ -934,7 +981,7 @@ viewDeleteQuestionDiff appState km question =
             viewDeletedChildren (lg "experts" appState) <| List.map .name experts
     in
     div []
-        (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
 viewMoveQuestion : AppState -> KnowledgeModel -> Question -> Html Msg
@@ -990,6 +1037,17 @@ viewMoveQuestion appState km question =
                 _ ->
                     emptyNode
 
+        -- Choices
+        choicesDiff =
+            case question of
+                MultiChoiceQuestion _ _ ->
+                    viewPlainChildren (lg "choices" appState) <|
+                        List.map .label <|
+                            KnowledgeModel.getQuestionChoices questionUuid km
+
+                _ ->
+                    emptyNode
+
         -- Item Template Questions
         itemTemplateQuestionsDiff =
             case question of
@@ -1016,7 +1074,7 @@ viewMoveQuestion appState km question =
             viewPlainChildren (lg "experts" appState) <| List.map .name experts
     in
     div []
-        (fieldDiff ++ [ tagsDiff, answersDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
 
 
 getIntegrationName : KnowledgeModel -> String -> String
@@ -1169,6 +1227,52 @@ metricMeasureToString metrics metricMeasure =
         , String.fromFloat metricMeasure.weight
         , String.fromFloat metricMeasure.measure
         ]
+
+
+viewAddChoiceDiff : AppState -> AddChoiceEventData -> Html Msg
+viewAddChoiceDiff appState event =
+    div [] <|
+        viewAdd <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "choice.label" appState
+                ]
+                [ event.label
+                ]
+
+
+viewEditChoiceDiff : AppState -> EditChoiceEventData -> Choice -> Html Msg
+viewEditChoiceDiff appState event choice =
+    div [] <|
+        viewDiff <|
+            List.map3 (\a b c -> ( a, b, c ))
+                [ lg "choice.label" appState
+                ]
+                [ choice.label
+                ]
+                [ EventField.getValueWithDefault event.label choice.label
+                ]
+
+
+viewDeleteChoiceDiff : AppState -> Choice -> Html Msg
+viewDeleteChoiceDiff appState choice =
+    div [] <|
+        viewDelete <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "choice.label" appState
+                ]
+                [ choice.label
+                ]
+
+
+viewMoveChoice : AppState -> Choice -> Html Msg
+viewMoveChoice appState choice =
+    div [] <|
+        viewPlain <|
+            List.map2 (\a b -> ( a, b ))
+                [ lg "choice.label" appState
+                ]
+                [ choice.label
+                ]
 
 
 viewAddReferenceDiff : AppState -> AddReferenceEventData -> Html Msg

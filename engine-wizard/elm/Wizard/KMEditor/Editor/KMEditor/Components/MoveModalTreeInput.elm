@@ -39,6 +39,7 @@ type alias Model =
 type MovingEntity
     = MovingQuestion
     | MovingAnswer
+    | MovingChoice
     | MovingReference
     | MovingExpert
     | Other
@@ -178,6 +179,7 @@ treeNodeQuestion appState model props isChild questionUuid =
                         && ((props.movingEntity == MovingReference)
                                 || (props.movingEntity == MovingExpert)
                                 || (Question.isOptions questionEditorData.question && props.movingEntity == MovingAnswer)
+                                || (Question.isMultiChoice questionEditorData.question && props.movingEntity == MovingChoice)
                                 || (Question.isList questionEditorData.question && props.movingEntity == MovingQuestion)
                            )
             in
@@ -299,6 +301,9 @@ getMovingEntity editors uuid =
 
         Just (AnswerEditor _) ->
             MovingAnswer
+
+        Just (ChoiceEditor _) ->
+            MovingChoice
 
         Just (ReferenceEditor _) ->
             MovingReference

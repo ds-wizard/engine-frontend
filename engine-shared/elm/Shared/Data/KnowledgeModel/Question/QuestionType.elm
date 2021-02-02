@@ -12,6 +12,7 @@ type QuestionType
     | ListQuestionType
     | ValueQuestionType
     | IntegrationQuestionType
+    | MultiChoiceQuestionType
 
 
 decoder : Decoder QuestionType
@@ -32,6 +33,9 @@ decoder =
                     "IntegrationQuestion" ->
                         D.succeed IntegrationQuestionType
 
+                    "MultiChoiceQuestion" ->
+                        D.succeed MultiChoiceQuestionType
+
                     valueType ->
                         D.fail <| "Unknown question type: " ++ valueType
             )
@@ -51,3 +55,6 @@ toString questionType =
 
         IntegrationQuestionType ->
             "Integration"
+
+        MultiChoiceQuestionType ->
+            "MultiChoiceQuestion"

@@ -7,6 +7,7 @@ import Markdown
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
@@ -38,6 +39,7 @@ create appState km levels metrics =
     , renderAnswerLabel = renderAnswerLabel
     , renderAnswerBadges = renderAnswerBadges metrics
     , renderAnswerAdvice = renderAnswerAdvice
+    , renderChoiceLabel = renderChoiceLabel
     }
 
 
@@ -104,6 +106,11 @@ renderAnswerAdvice answer =
 
         _ ->
             emptyNode
+
+
+renderChoiceLabel : Choice -> Html msg
+renderChoiceLabel choice =
+    text choice.label
 
 
 

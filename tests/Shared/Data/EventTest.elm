@@ -1,6 +1,7 @@
 module Shared.Data.EventTest exposing
     ( addAnswerEventTest
     , addChapterEventTest
+    , addChoiceEventTest
     , addExpertEventTest
     , addIntegrationEventTest
     , addQuestionEventTest
@@ -8,6 +9,7 @@ module Shared.Data.EventTest exposing
     , addTagEventTest
     , deleteAnswerEventTest
     , deleteChapterEventTest
+    , deleteChoiceEventTest
     , deleteExpertEventTest
     , deleteIntegrationEventTest
     , deleteQuestionEventTest
@@ -15,6 +17,7 @@ module Shared.Data.EventTest exposing
     , deleteTagEventTest
     , editAnswerEventTest
     , editChapterEventTest
+    , editChoiceEventTest
     , editExpertEventTest
     , editIntegrationEventTest
     , editKnowledgeModelEventTest
@@ -22,6 +25,7 @@ module Shared.Data.EventTest exposing
     , editReferenceEventTest
     , editTagEventTest
     , moveAnswerEventTest
+    , moveChoiceEventTest
     , moveExpertEventTest
     , moveQuestionEventTest
     , moveReferenceEventTest
@@ -889,6 +893,127 @@ moveAnswerEventTest =
         , test "get event entity visible name" <|
             \_ ->
                 Expect.equal Nothing (Event.getEntityVisibleName moveAnswerEvent)
+        ]
+
+
+
+{- choice events -}
+
+
+addChoiceEvent : Event
+addChoiceEvent =
+    AddChoiceEvent
+        { label = "Choice"
+        }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+addChoiceEventTest : Test
+addChoiceEventTest =
+    describe "AddChoiceEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode addChoiceEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid addChoiceEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Choice") (Event.getEntityVisibleName addChoiceEvent)
+        ]
+
+
+editChoiceEvent : Event
+editChoiceEvent =
+    EditChoiceEvent
+        { label =
+            { changed = True
+            , value = Just "New Choice"
+            }
+        }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+editChoiceEventTest : Test
+editChoiceEventTest =
+    describe "EditChoiceEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editChoiceEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid editChoiceEvent)
+        , test "get event entity visible name when not changed" <|
+            \_ ->
+                let
+                    event =
+                        EditChoiceEvent
+                            { label =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            }
+                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                            }
+                in
+                Expect.equal Nothing (Event.getEntityVisibleName event)
+        , test "get event entity visible name when changed" <|
+            \_ ->
+                Expect.equal (Just "New Choice") (Event.getEntityVisibleName editChoiceEvent)
+        ]
+
+
+deleteChoiceEvent : Event
+deleteChoiceEvent =
+    DeleteChoiceEvent
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+deleteChoiceEventTest : Test
+deleteChoiceEventTest =
+    describe "DeleteChoiceEvent"
+        [ test "should encode and decode" <|
+            \_ ->
+                expectEventEncodeDecode deleteChoiceEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid deleteChoiceEvent)
+        , test "get entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName deleteChoiceEvent)
+        ]
+
+
+moveChoiceEvent : Event
+moveChoiceEvent =
+    MoveChoiceEvent
+        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        }
+
+
+moveChoiceEventTest : Test
+moveChoiceEventTest =
+    describe "MoveChoiceEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode moveChoiceEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid moveChoiceEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName moveChoiceEvent)
         ]
 
 

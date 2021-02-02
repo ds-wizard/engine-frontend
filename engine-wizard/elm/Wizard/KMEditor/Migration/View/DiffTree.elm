@@ -48,6 +48,9 @@ viewEvent appState km event =
         getAnswerLabel commonData =
             Maybe.map .label <| KnowledgeModel.getAnswer commonData.entityUuid km
 
+        getChoiceLabel commonData =
+            Maybe.map .label <| KnowledgeModel.getChoice commonData.entityUuid km
+
         getReferenceName commonData =
             Maybe.map Reference.getVisibleName <| KnowledgeModel.getReference commonData.entityUuid km
 
@@ -71,6 +74,9 @@ viewEvent appState km event =
 
         viewAnswerNode_ =
             viewAnswerNode appState km getParent Nothing
+
+        viewChoiceNode_ =
+            viewChoiceNode appState km getParent
 
         viewReferenceNode_ =
             viewReferenceNode appState km getParent
@@ -130,6 +136,15 @@ viewEvent appState km event =
         DeleteAnswerEvent commonData ->
             viewAnswerNode_ stateClass.deleted (getAnswerLabel commonData) commonData.parentUuid
 
+        AddChoiceEvent _ commonData ->
+            viewChoiceNode_ stateClass.added eventEntityName commonData.parentUuid
+
+        EditChoiceEvent _ commonData ->
+            viewChoiceNode_ stateClass.edited (eventEntityNameOrDefault (getChoiceLabel commonData)) commonData.parentUuid
+
+        DeleteChoiceEvent commonData ->
+            viewChoiceNode_ stateClass.deleted (getChoiceLabel commonData) commonData.parentUuid
+
         AddReferenceEvent _ commonData ->
             viewReferenceNode_ stateClass.added eventEntityName commonData.parentUuid
 
@@ -158,6 +173,12 @@ viewEvent appState km event =
             div []
                 [ viewAnswerNode_ stateClass.deleted (getAnswerLabel commonData) commonData.parentUuid
                 , viewAnswerNode_ stateClass.added (getAnswerLabel commonData) eventData.targetUuid
+                ]
+
+        MoveChoiceEvent eventData commonData ->
+            div []
+                [ viewChoiceNode_ stateClass.deleted (getChoiceLabel commonData) commonData.parentUuid
+                , viewChoiceNode_ stateClass.added (getChoiceLabel commonData) eventData.targetUuid
                 ]
 
         MoveReferenceEvent eventData commonData ->
@@ -280,6 +301,26 @@ viewAnswerNode appState km getParent mbChildNode cssClass mbTitle parentUuid =
         |> Maybe.withDefault answerNode
 
 
+viewChoiceNode :
+    AppState
+    -> KnowledgeModel
+    -> (String -> String)
+    -> String
+    -> Maybe String
+    -> String
+    -> Html msg
+viewChoiceNode appState km getParent cssClass mbTitle parentUuid =
+    let
+        choiceNode =
+            viewNode (faSet "km.choice" appState) cssClass mbTitle Nothing
+
+        parentQuestion =
+            getParentQuestionNode appState km getParent parentUuid choiceNode
+    in
+    parentQuestion
+        |> Maybe.withDefault choiceNode
+
+
 viewReferenceNode :
     AppState
     -> KnowledgeModel
@@ -310,14 +351,14 @@ viewExpertNode :
     -> Html msg
 viewExpertNode appState km getParent cssClass mbTitle parentUuid =
     let
-        referenceNode =
+        expertNode =
             viewNode (faSet "km.expert" appState) cssClass mbTitle Nothing
 
         parentQuestion =
-            getParentQuestionNode appState km getParent parentUuid referenceNode
+            getParentQuestionNode appState km getParent parentUuid expertNode
     in
     parentQuestion
-        |> Maybe.withDefault referenceNode
+        |> Maybe.withDefault expertNode
 
 
 viewNode : Html msg -> String -> Maybe String -> Maybe (Html msg) -> Html msg

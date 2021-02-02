@@ -10,12 +10,14 @@ module Shared.Data.KnowledgeModel exposing
     , getChapter
     , getChapterQuestions
     , getChapters
+    , getChoice
     , getExpert
     , getIntegration
     , getIntegrations
     , getParent
     , getQuestion
     , getQuestionAnswers
+    , getQuestionChoices
     , getQuestionExperts
     , getQuestionItemTemplateQuestions
     , getQuestionReferences
@@ -30,6 +32,7 @@ import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.KnowledgeModelEntities as KnowledgeModelEntities exposing (KnowledgeModelEntities)
@@ -99,6 +102,11 @@ getAnswer uuid km =
     Dict.get uuid km.entities.answers
 
 
+getChoice : String -> KnowledgeModel -> Maybe Choice
+getChoice uuid km =
+    Dict.get uuid km.entities.choices
+
+
 getReference : String -> KnowledgeModel -> Maybe Reference
 getReference uuid km =
     Dict.get uuid km.entities.references
@@ -136,6 +144,11 @@ getChapterQuestions =
 getQuestionAnswers : String -> KnowledgeModel -> List Answer
 getQuestionAnswers =
     getEntities .questions Question.getAnswerUuids .answers
+
+
+getQuestionChoices : String -> KnowledgeModel -> List Choice
+getQuestionChoices =
+    getEntities .questions Question.getChoiceUuids .choices
 
 
 getQuestionReferences : String -> KnowledgeModel -> List Reference

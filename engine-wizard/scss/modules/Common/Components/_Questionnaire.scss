@@ -149,6 +149,17 @@
                     background: theme-color-level("success", $highlighted-bg-level);
                 }
             }
+
+            .tag-list {
+                .tag {
+                    margin-right: .25rem;
+
+                    label {
+                        font-size: .75rem;
+                        padding: .125rem .5rem;
+                    }
+                }
+            }
         }
 
         .extra-data {
@@ -233,7 +244,7 @@
             color: $gray-500;
         }
 
-        input[type="radio"] {
+        input[type="radio"], input[type="checkbox"] {
             margin-right: 10px;
         }
 

@@ -1,4 +1,4 @@
-module Wizard.Common.View.Tag exposing (TagListConfig, list, readOnlyList, selection)
+module Wizard.Common.View.Tag exposing (TagListConfig, list, readOnlyList, selection, viewList)
 
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, div, i, input, label, text)
@@ -145,5 +145,27 @@ readOnlyTagView selected tag =
                 ]
                 []
             , text tag.name
+            ]
+        ]
+
+
+viewList : List Tag -> Html msg
+viewList tags =
+    if List.isEmpty tags then
+        emptyNode
+
+    else
+        div [ class "tag-list" ] (List.map viewListTagView tags)
+
+
+viewListTagView : Tag -> Html msg
+viewListTagView tag =
+    div [ class "tag" ]
+        [ label
+            [ class "tag-label"
+            , style "background" tag.color
+            , style "color" <| getContrastColorHex tag.color
+            ]
+            [ text tag.name
             ]
         ]

@@ -1,4 +1,9 @@
-module Wizard.Projects.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData, getAnswerUuid)
+module Wizard.Projects.Common.AnswerChange exposing
+    ( AnswerAddData
+    , AnswerChange(..)
+    , AnswerChangeData
+    , getAnswerUuid
+    )
 
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 

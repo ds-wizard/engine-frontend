@@ -20,6 +20,7 @@ knowledgeModelEntitiesDecoderTest =
                             "chapters": {},
                             "questions": {},
                             "answers": {},
+                            "choices": {},
                             "experts": {},
                             "references": {},
                             "integrations": {},
@@ -31,6 +32,7 @@ knowledgeModelEntitiesDecoderTest =
                         { chapters = Dict.empty
                         , questions = Dict.empty
                         , answers = Dict.empty
+                        , choices = Dict.empty
                         , experts = Dict.empty
                         , references = Dict.empty
                         , integrations = Dict.empty
@@ -54,6 +56,7 @@ knowledgeModelEntitiesDecoderTest =
                             },
                             "questions": {},
                             "answers": {},
+                            "choices": {},
                             "experts": {},
                             "references": {},
                             "integrations": {},
@@ -74,6 +77,7 @@ knowledgeModelEntitiesDecoderTest =
                                 ]
                         , questions = Dict.empty
                         , answers = Dict.empty
+                        , choices = Dict.empty
                         , experts = Dict.empty
                         , references = Dict.empty
                         , integrations = Dict.empty
@@ -105,6 +109,7 @@ knowledgeModelEntitiesDecoderTest =
                                 }
                             },
                             "answers": {},
+                            "choices": {},
                             "experts": {},
                             "references": {},
                             "integrations": {},
@@ -132,6 +137,7 @@ knowledgeModelEntitiesDecoderTest =
                                   )
                                 ]
                         , answers = Dict.empty
+                        , choices = Dict.empty
                         , experts = Dict.empty
                         , references = Dict.empty
                         , integrations = Dict.empty
@@ -156,6 +162,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "followUpUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"]
                                 }
                             },
+                            "choices": {},
                             "experts": {},
                             "references": {},
                             "integrations": {},
@@ -177,6 +184,48 @@ knowledgeModelEntitiesDecoderTest =
                                     }
                                   )
                                 ]
+                        , choices = Dict.empty
+                        , experts = Dict.empty
+                        , references = Dict.empty
+                        , integrations = Dict.empty
+                        , tags = Dict.empty
+                        }
+                in
+                expectDecoder KnowledgeModelEntities.decoder raw expected
+        , test "should decode choices" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "chapters": {},
+                            "questions": {},
+                            "answers": {},
+                            "choices": {
+                                "8a703cfa-450f-421a-8819-875619ccb54d": {
+                                    "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                                    "label": "Choice"
+                                }
+                            },
+                            "experts": {},
+                            "references": {},
+                            "integrations": {},
+                            "tags": {}
+                        }
+                        """
+
+                    expected =
+                        { chapters = Dict.empty
+                        , questions = Dict.empty
+                        , answers = Dict.empty
+                        , choices =
+                            Dict.fromList
+                                [ ( "8a703cfa-450f-421a-8819-875619ccb54d"
+                                  , { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                                    , label = "Choice"
+                                    }
+                                  )
+                                ]
                         , experts = Dict.empty
                         , references = Dict.empty
                         , integrations = Dict.empty
@@ -193,6 +242,7 @@ knowledgeModelEntitiesDecoderTest =
                             "chapters": {},
                             "questions": {},
                             "answers": {},
+                            "choices": {},
                             "experts": {
                                 "8a703cfa-450f-421a-8819-875619ccb54d": {
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
@@ -210,6 +260,7 @@ knowledgeModelEntitiesDecoderTest =
                         { chapters = Dict.empty
                         , questions = Dict.empty
                         , answers = Dict.empty
+                        , choices = Dict.empty
                         , experts =
                             Dict.fromList
                                 [ ( "8a703cfa-450f-421a-8819-875619ccb54d"
@@ -234,6 +285,7 @@ knowledgeModelEntitiesDecoderTest =
                             "chapters": {},
                             "questions": {},
                             "answers": {},
+                            "choices": {},
                             "experts": {},
                             "references": {
                                 "8a703cfa-450f-421a-8819-875619ccb54d": {
@@ -251,6 +303,7 @@ knowledgeModelEntitiesDecoderTest =
                         { chapters = Dict.empty
                         , questions = Dict.empty
                         , answers = Dict.empty
+                        , choices = Dict.empty
                         , experts = Dict.empty
                         , references =
                             Dict.fromList
@@ -275,6 +328,7 @@ knowledgeModelEntitiesDecoderTest =
                             "chapters": {},
                             "questions": {},
                             "answers": {},
+                            "choices": {},
                             "experts": {},
                             "references": {},
                             "integrations": {
@@ -302,6 +356,7 @@ knowledgeModelEntitiesDecoderTest =
                         { chapters = Dict.empty
                         , questions = Dict.empty
                         , answers = Dict.empty
+                        , choices = Dict.empty
                         , experts = Dict.empty
                         , references = Dict.empty
                         , integrations =
@@ -336,6 +391,7 @@ knowledgeModelEntitiesDecoderTest =
                             "chapters": {},
                             "questions": {},
                             "answers": {},
+                            "choices": {},
                             "experts": {},
                             "references": {},
                             "integrations": {},
@@ -354,6 +410,7 @@ knowledgeModelEntitiesDecoderTest =
                         { chapters = Dict.empty
                         , questions = Dict.empty
                         , answers = Dict.empty
+                        , choices = Dict.empty
                         , experts = Dict.empty
                         , references = Dict.empty
                         , integrations = Dict.empty

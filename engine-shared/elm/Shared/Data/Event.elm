@@ -29,6 +29,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData as AddChapterEventData exposing (AddChapterEventData)
+import Shared.Data.Event.AddChoiceEventData as AddChoiceEventData exposing (AddChoiceEventData)
 import Shared.Data.Event.AddExpertEventData as AddExpertEventData exposing (AddExpertEventData)
 import Shared.Data.Event.AddIntegrationEventData as AddIntegrationEventData exposing (AddIntegrationEventData)
 import Shared.Data.Event.AddKnowledgeModelEventData as AddKnowledgeModelEventData exposing (AddKnowledgeModelEventData)
@@ -38,6 +39,7 @@ import Shared.Data.Event.AddTagEventData as AddTagEventData exposing (AddTagEven
 import Shared.Data.Event.CommonEventData as CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData exposing (EditAnswerEventData)
 import Shared.Data.Event.EditChapterEventData as EditChapterEventData exposing (EditChapterEventData)
+import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData exposing (EditChoiceEventData)
 import Shared.Data.Event.EditExpertEventData as EditExpertEventData exposing (EditExpertEventData)
 import Shared.Data.Event.EditIntegrationEventData as EditIntegrationEventData exposing (EditIntegrationEventData)
 import Shared.Data.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
@@ -74,6 +76,9 @@ type Event
     | AddAnswerEvent AddAnswerEventData CommonEventData
     | EditAnswerEvent EditAnswerEventData CommonEventData
     | DeleteAnswerEvent CommonEventData
+    | AddChoiceEvent AddChoiceEventData CommonEventData
+    | EditChoiceEvent EditChoiceEventData CommonEventData
+    | DeleteChoiceEvent CommonEventData
     | AddReferenceEvent AddReferenceEventData CommonEventData
     | EditReferenceEvent EditReferenceEventData CommonEventData
     | DeleteReferenceEvent CommonEventData
@@ -82,6 +87,7 @@ type Event
     | DeleteExpertEvent CommonEventData
     | MoveQuestionEvent MoveEventData CommonEventData
     | MoveAnswerEvent MoveEventData CommonEventData
+    | MoveChoiceEvent MoveEventData CommonEventData
     | MoveReferenceEvent MoveEventData CommonEventData
     | MoveExpertEvent MoveEventData CommonEventData
 
@@ -146,6 +152,15 @@ decoderByType eventType =
         "DeleteAnswerEvent" ->
             D.map DeleteAnswerEvent CommonEventData.decoder
 
+        "AddChoiceEvent" ->
+            D.map2 AddChoiceEvent AddChoiceEventData.decoder CommonEventData.decoder
+
+        "EditChoiceEvent" ->
+            D.map2 EditChoiceEvent EditChoiceEventData.decoder CommonEventData.decoder
+
+        "DeleteChoiceEvent" ->
+            D.map DeleteChoiceEvent CommonEventData.decoder
+
         "AddReferenceEvent" ->
             D.map2 AddReferenceEvent AddReferenceEventData.decoder CommonEventData.decoder
 
@@ -169,6 +184,9 @@ decoderByType eventType =
 
         "MoveAnswerEvent" ->
             D.map2 MoveAnswerEvent MoveEventData.decoder CommonEventData.decoder
+
+        "MoveChoiceEvent" ->
+            D.map2 MoveChoiceEvent MoveEventData.decoder CommonEventData.decoder
 
         "MoveReferenceEvent" ->
             D.map2 MoveReferenceEvent MoveEventData.decoder CommonEventData.decoder
@@ -236,6 +254,15 @@ encode event =
                 DeleteAnswerEvent commonData ->
                     ( [ ( "eventType", E.string "DeleteAnswerEvent" ) ], CommonEventData.encode commonData )
 
+                AddChoiceEvent eventData commonData ->
+                    ( AddChoiceEventData.encode eventData, CommonEventData.encode commonData )
+
+                EditChoiceEvent eventData commonData ->
+                    ( EditChoiceEventData.encode eventData, CommonEventData.encode commonData )
+
+                DeleteChoiceEvent commonData ->
+                    ( [ ( "eventType", E.string "DeleteChoiceEvent" ) ], CommonEventData.encode commonData )
+
                 AddReferenceEvent eventData commonData ->
                     ( AddReferenceEventData.encode eventData, CommonEventData.encode commonData )
 
@@ -259,6 +286,9 @@ encode event =
 
                 MoveAnswerEvent eventData commonData ->
                     ( MoveEventData.encode "MoveAnswerEvent" eventData, CommonEventData.encode commonData )
+
+                MoveChoiceEvent eventData commonData ->
+                    ( MoveEventData.encode "MoveChoiceEvent" eventData, CommonEventData.encode commonData )
 
                 MoveReferenceEvent eventData commonData ->
                     ( MoveEventData.encode "MoveReferenceEvent" eventData, CommonEventData.encode commonData )
@@ -333,6 +363,15 @@ getCommonData event =
         DeleteAnswerEvent commonData ->
             commonData
 
+        AddChoiceEvent _ commonData ->
+            commonData
+
+        EditChoiceEvent _ commonData ->
+            commonData
+
+        DeleteChoiceEvent commonData ->
+            commonData
+
         AddReferenceEvent _ commonData ->
             commonData
 
@@ -355,6 +394,9 @@ getCommonData event =
             commonData
 
         MoveAnswerEvent _ commonData ->
+            commonData
+
+        MoveChoiceEvent _ commonData ->
             commonData
 
         MoveReferenceEvent _ commonData ->
@@ -401,6 +443,12 @@ getEntityVisibleName event =
             Just eventData.label
 
         EditAnswerEvent eventData _ ->
+            EventField.getValue eventData.label
+
+        AddChoiceEvent eventData _ ->
+            Just eventData.label
+
+        EditChoiceEvent eventData _ ->
             EventField.getValue eventData.label
 
         AddReferenceEvent eventData _ ->

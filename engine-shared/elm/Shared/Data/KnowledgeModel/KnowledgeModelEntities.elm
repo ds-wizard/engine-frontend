@@ -5,6 +5,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.KnowledgeModel.Answer as Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter as Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Choice as Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert as Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
@@ -16,6 +17,7 @@ type alias KnowledgeModelEntities =
     { chapters : Dict String Chapter
     , questions : Dict String Question
     , answers : Dict String Answer
+    , choices : Dict String Choice
     , experts : Dict String Expert
     , references : Dict String Reference
     , integrations : Dict String Integration
@@ -29,6 +31,7 @@ decoder =
         |> D.required "chapters" (D.dict Chapter.decoder)
         |> D.required "questions" (D.dict Question.decoder)
         |> D.required "answers" (D.dict Answer.decoder)
+        |> D.required "choices" (D.dict Choice.decoder)
         |> D.required "experts" (D.dict Expert.decoder)
         |> D.required "references" (D.dict Reference.decoder)
         |> D.required "integrations" (D.dict Integration.decoder)

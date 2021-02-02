@@ -15,7 +15,8 @@ import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (updateEditor)
 import Wizard.KMEditor.Editor.KMEditor.Update.Answer exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Chapter exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createMoveAnswerEvent, createMoveExpertEvent, createMoveQuestionEvent, createMoveReferenceEvent)
+import Wizard.KMEditor.Editor.KMEditor.Update.Choice exposing (deleteChoice, updateChoiceForm, withGenerateChoiceEditEvent)
+import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createMoveAnswerEvent, createMoveChoiceEvent, createMoveExpertEvent, createMoveQuestionEvent, createMoveReferenceEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Expert exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing (..)
@@ -69,6 +70,10 @@ update msg appState model fetchPreviewCmd =
                         AnswerEditor data ->
                             setActiveEditor uuid
                                 |> withGenerateAnswerEditEvent appState appState.seed model data
+
+                        ChoiceEditor data ->
+                            setActiveEditor uuid
+                                |> withGenerateChoiceEditEvent appState appState.seed model data
 
                         ReferenceEditor data ->
                             setActiveEditor uuid
@@ -204,6 +209,16 @@ update msg appState model fetchPreviewCmd =
                             addAnswer scrollTopCmd
                                 |> withGenerateQuestionEditEvent appState appState.seed model editorData
 
+                        ReorderChoices choiceList ->
+                            model
+                                |> insertEditor (QuestionEditor { editorData | choices = Children.updateList choiceList editorData.choices })
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        AddChoice ->
+                            addChoice scrollTopCmd
+                                |> withGenerateQuestionEditEvent appState appState.seed model editorData
+
                         ReorderItemQuestions itemQuestionList ->
                             model
                                 |> insertEditor (QuestionEditor { editorData | itemTemplateQuestions = Children.updateList itemQuestionList editorData.itemTemplateQuestions })
@@ -254,6 +269,17 @@ update msg appState model fetchPreviewCmd =
                         AddFollowUp ->
                             addFollowUp scrollTopCmd
                                 |> withGenerateAnswerEditEvent appState appState.seed model editorData
+
+                ( ChoiceEditorMsg choiceEditorMsg, Just (ChoiceEditor editorData) ) ->
+                    case choiceEditorMsg of
+                        ChoiceFormMsg formMsg ->
+                            updateChoiceForm model formMsg editorData
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        DeleteChoice uuid ->
+                            deleteChoice appState.seed model uuid editorData
+                                |> withNoCmd
 
                 ( ReferenceEditorMsg referenceEditorMsg, Just (ReferenceEditor editorData) ) ->
                     case referenceEditorMsg of
@@ -316,6 +342,10 @@ update msg appState model fetchPreviewCmd =
                             createMoveEvent createMoveAnswerEvent answerEditor.uuid answerEditor.parentUuid
                                 |> withGenerateAnswerEditEvent appState appState.seed model answerEditor
 
+                        Just (ChoiceEditor choiceEditor) ->
+                            createMoveEvent createMoveChoiceEvent choiceEditor.uuid choiceEditor.parentUuid
+                                |> withGenerateChoiceEditEvent appState appState.seed model choiceEditor
+
                         Just (ReferenceEditor referenceEditor) ->
                             createMoveEvent createMoveReferenceEvent referenceEditor.uuid referenceEditor.parentUuid
                                 |> withGenerateReferenceEditEvent appState appState.seed model referenceEditor
@@ -371,6 +401,9 @@ generateEvents appState seed model =
 
                 AnswerEditor data ->
                     withGenerateAnswerEditEvent appState seed model data updateModel
+
+                ChoiceEditor data ->
+                    withGenerateChoiceEditEvent appState seed model data updateModel
 
                 ReferenceEditor data ->
                     withGenerateReferenceEditEvent appState seed model data updateModel
