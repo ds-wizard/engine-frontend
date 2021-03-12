@@ -18,6 +18,7 @@ import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSha
 import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Uuid
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 
 
@@ -32,17 +33,13 @@ type alias Model =
     }
 
 
-initialModel : KnowledgeModel -> List Metric -> List Level -> List Event -> String -> Model
-initialModel km metrics levels events packageId =
+initialModel : AppState -> KnowledgeModel -> List Metric -> List Level -> List Event -> String -> Model
+initialModel appState km metrics levels events packageId =
     let
-        chapterUuid =
-            Maybe.unwrap "" .uuid <|
-                List.head (KnowledgeModel.getChapters km)
-
         questionnaire =
             createQuestionnaireDetail packageId km
     in
-    { questionnaireModel = Questionnaire.setActiveChapterUuid chapterUuid <| Questionnaire.init questionnaire
+    { questionnaireModel = Questionnaire.init appState questionnaire
     , knowledgeModel = km
     , tags = []
     , packageId = packageId
@@ -122,4 +119,6 @@ createQuestionnaireDetail packageId km =
     , formatUuid = Nothing
     , format = Nothing
     , labels = Dict.fromList []
+    , events = []
+    , versions = []
     }

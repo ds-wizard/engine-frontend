@@ -14,6 +14,7 @@ import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (Qu
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Projects.Common.AnswerChange as AnswerChange exposing (AnswerChange(..))
 import Wizard.Projects.Common.ChoiceChange as ChoiceChange exposing (ChoiceChange(..))
 import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
@@ -70,8 +71,8 @@ renderQuestionLabelDiff changes question =
             text <| Question.getTitle question
 
 
-renderQuestionDescriptionDiff : QuestionnaireRenderer msg -> List QuestionChange -> Question -> Html msg
-renderQuestionDescriptionDiff defaultRenderer changes question =
+renderQuestionDescriptionDiff : QuestionnaireRenderer msg -> List QuestionChange -> QuestionnaireViewSettings -> Question -> Html msg
+renderQuestionDescriptionDiff defaultRenderer changes qvs question =
     let
         mbChange =
             List.find (QuestionChange.getQuestionUuid >> (==) (Question.getUuid question)) changes
@@ -81,26 +82,26 @@ renderQuestionDescriptionDiff defaultRenderer changes question =
             case change of
                 QuestionAdd _ ->
                     div [ class "diff" ]
-                        [ div [ class "diff-added" ] [ defaultRenderer.renderQuestionDescription question ]
+                        [ div [ class "diff-added" ] [ defaultRenderer.renderQuestionDescription qvs question ]
                         ]
 
                 QuestionChange data ->
                     if areQuestionDetailsChanged True data.originalQuestion data.question then
                         div [ class "diff" ]
-                            [ div [ class "diff-removed" ] [ defaultRenderer.renderQuestionDescription data.originalQuestion ]
-                            , div [ class "diff-added" ] [ defaultRenderer.renderQuestionDescription question ]
+                            [ div [ class "diff-removed" ] [ defaultRenderer.renderQuestionDescription qvs data.originalQuestion ]
+                            , div [ class "diff-added" ] [ defaultRenderer.renderQuestionDescription qvs question ]
                             ]
 
                     else
-                        defaultRenderer.renderQuestionDescription question
+                        defaultRenderer.renderQuestionDescription qvs question
 
                 QuestionMove _ ->
                     div [ class "diff" ]
-                        [ div [] [ defaultRenderer.renderQuestionDescription question ]
+                        [ div [] [ defaultRenderer.renderQuestionDescription qvs question ]
                         ]
 
         Nothing ->
-            defaultRenderer.renderQuestionDescription question
+            defaultRenderer.renderQuestionDescription qvs question
 
 
 renderAnswerLabelDiff : List AnswerChange -> Answer -> Html msg

@@ -16,7 +16,7 @@ import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(.
 import Shared.Data.Event.EventField as EventField
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Utils exposing (getUuid)
+import Shared.Utils exposing (getUuidString)
 
 
 type alias Model =
@@ -128,7 +128,7 @@ generateQuestionEvent model question parentUuid seed =
     if originalTags /= newTags then
         let
             ( uuid, newSeed ) =
-                getUuid seed
+                getUuidString seed
 
             commonData =
                 { uuid = uuid

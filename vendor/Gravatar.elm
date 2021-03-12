@@ -1,7 +1,7 @@
 module Gravatar exposing
     ( img, url
     , Options, defaultOptions, Default(..), Rating(..), withSize, withRating, withDefault, forceDefault
-    , urlFromHash
+    , hashEmail, urlFromHash
     )
 
 {-| Returns URL or img DOM element for a given `email`,

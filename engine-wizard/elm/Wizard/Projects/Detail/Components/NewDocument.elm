@@ -3,6 +3,7 @@ module Wizard.Projects.Detail.Components.NewDocument exposing
     , Msg
     , UpdateConfig
     , fetchData
+    , initEmpty
     , initialModel
     , update
     , view
@@ -13,24 +14,28 @@ import Form exposing (Form)
 import Form.Field as Field
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import List.Extra as List
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document exposing (Document)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.SummaryReport exposing (SummaryReport)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg)
+import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Setters exposing (setSelected)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.SummaryReport exposing (viewIndications)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.FormActions as FormActions
@@ -38,7 +43,7 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing (DocumentCreateForm)
-import Wizard.Projects.Detail.PlanDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
@@ -46,6 +51,16 @@ import Wizard.Routes as Routes
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Projects.Detail.Components.NewDocument"
+
+
+lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+lh_ =
+    lh "Wizard.Projects.Detail.Components.NewDocument"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.Projects.Detail.Components.NewDocument"
 
 
 
@@ -60,13 +75,21 @@ type alias Model =
     }
 
 
-initialModel : { q | name : String, template : Maybe TemplateSuggestion, formatUuid : Maybe Uuid } -> Model
-initialModel questionnaire =
+initialModel :
+    { q | name : String, template : Maybe TemplateSuggestion, formatUuid : Maybe Uuid, events : List QuestionnaireEvent }
+    -> Maybe Uuid
+    -> Model
+initialModel questionnaire mbEventUuid =
     { summaryReport = Loading
-    , form = DocumentCreateForm.init questionnaire
+    , form = DocumentCreateForm.init questionnaire mbEventUuid
     , templateTypeHintInputModel = setSelected questionnaire.template <| TypeHintInput.init "templateId"
     , savingDocument = Unset
     }
+
+
+initEmpty : Model
+initEmpty =
+    initialModel { name = "", template = Nothing, formatUuid = Nothing, events = [] } Nothing
 
 
 
@@ -107,10 +130,6 @@ update cfg msg appState model =
 
         PostDocumentCompleted result ->
             handlePostDocumentCompleted cfg appState model result
-
-
-
--- Handlers
 
 
 handleGetSummaryReportCompleted : AppState -> Model -> Result ApiError SummaryReport -> ( Model, Cmd msg )
@@ -184,29 +203,29 @@ handlePostDocumentCompleted cfg appState model result =
 -- VIEW
 
 
-view : AppState -> QuestionnaireDetail -> Model -> Html Msg
-view appState questionnaire model =
-    Page.actionResultView appState (viewFormState appState questionnaire.uuid model) model.summaryReport
+view : AppState -> QuestionnaireDetail -> Maybe String -> Model -> Html Msg
+view appState questionnaire mbEventUuid model =
+    Page.actionResultView appState (viewFormState appState questionnaire mbEventUuid model) model.summaryReport
 
 
-viewFormState : AppState -> Uuid -> Model -> SummaryReport -> Html Msg
-viewFormState appState questionnaireUuid model summaryReport =
+viewFormState : AppState -> QuestionnaireDetail -> Maybe String -> Model -> SummaryReport -> Html Msg
+viewFormState appState questionnaire mbEventUuid model summaryReport =
     div [ class "Plans__Detail__Content Plans__Detail__Content--NewDocument" ]
         [ div [ detailClass "container" ]
             [ Page.header (l_ "header.title" appState) []
             , div []
                 [ FormResult.view appState model.savingDocument
-                , formView appState model summaryReport
+                , formView appState questionnaire mbEventUuid model summaryReport
                 , FormActions.view appState
-                    (Routes.ProjectsRoute <| DetailRoute questionnaireUuid <| PlanDetailRoute.Documents PaginationQueryString.empty)
+                    (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid <| ProjectDetailRoute.Documents PaginationQueryString.empty)
                     (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingDocument (FormMsg Form.Submit) False)
                 ]
             ]
         ]
 
 
-formView : AppState -> Model -> SummaryReport -> Html Msg
-formView appState model summaryReport =
+formView : AppState -> QuestionnaireDetail -> Maybe String -> Model -> SummaryReport -> Html Msg
+formView appState questionnaire mbEventUuid model summaryReport =
     let
         cfg =
             { viewItem = TypeHintItem.templateSuggestion appState
@@ -228,10 +247,36 @@ formView appState model summaryReport =
 
                 _ ->
                     emptyNode
+
+        mbEvent =
+            List.find (QuestionnaireEvent.getUuid >> Uuid.toString >> Just >> (==) mbEventUuid) questionnaire.events
+
+        extraInfo =
+            case mbEvent of
+                Just event ->
+                    let
+                        datetime =
+                            QuestionnaireEvent.getCreatedAt event
+                                |> TimeUtils.toReadableDateTime appState.timeZone
+
+                        currentLink =
+                            linkTo appState
+                                (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid <| ProjectDetailRoute.NewDocument Nothing)
+                                []
+                                [ lx_ "oldVersionInfo.link" appState ]
+                    in
+                    div [ class "alert alert-info" ]
+                        [ p []
+                            (lh_ "oldVersionInfo.text" [ strong [] [ br [] [], text datetime ] ] appState)
+                        , currentLink
+                        ]
+
+                Nothing ->
+                    viewIndications appState summaryReport.totalReport.indications
     in
     div []
         [ Html.map FormMsg <| nameInput
-        , div [ class "form-group" ] [ viewIndications appState summaryReport.totalReport.indications ]
+        , div [ class "form-group" ] [ extraInfo ]
         , FormGroup.formGroupCustom templateInput appState model.form "templateId" <| lg "questionnaire.template" appState
         , Html.map FormMsg <| formatInput
         ]

@@ -1,13 +1,12 @@
-module Wizard.Projects.Detail.PlanDetailRoute exposing (PlanDetailRoute(..))
+module Wizard.Projects.Detail.ProjectDetailRoute exposing (ProjectDetailRoute(..))
 
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 
 
-type PlanDetailRoute
+type ProjectDetailRoute
     = Questionnaire
     | Preview
-    | TODOs
     | Metrics
     | Documents PaginationQueryString
-    | NewDocument
+    | NewDocument (Maybe String)
     | Settings

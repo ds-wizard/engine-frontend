@@ -4,6 +4,7 @@ module Shared.Utils exposing
     , flip
     , getContrastColorHex
     , getUuid
+    , getUuidString
     , httpMethodOptions
     , listFilterJust
     , listInsertIf
@@ -21,7 +22,7 @@ import Color.Convert exposing (hexToColor)
 import List.Extra as List
 import Random exposing (Seed, step)
 import Task
-import Uuid
+import Uuid exposing (Uuid)
 
 
 flip : (a -> b -> c) -> b -> a -> c
@@ -39,13 +40,18 @@ tuplePrepend a ( b, c ) =
     ( a, b, c )
 
 
-getUuid : Seed -> ( String, Seed )
+getUuidString : Seed -> ( String, Seed )
+getUuidString =
+    Tuple.mapFirst Uuid.toString << getUuid
+
+
+getUuid : Seed -> ( Uuid, Seed )
 getUuid seed =
     let
         ( uuid, newSeed ) =
             step Uuid.uuidGenerator seed
     in
-    ( Uuid.toString uuid, newSeed )
+    ( uuid, newSeed )
 
 
 nilUuid : String

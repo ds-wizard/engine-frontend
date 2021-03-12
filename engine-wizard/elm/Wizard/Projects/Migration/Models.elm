@@ -16,7 +16,7 @@ import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.QuestionnaireDetail.ReplyValue as ReplyValue exposing (ReplyValue)
+import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Utils exposing (flip, listFilterJust)
 import Uuid exposing (Uuid)
@@ -178,7 +178,7 @@ getReply : QuestionnaireDetail -> Question -> Maybe ReplyValue
 getReply questionnaire question =
     Dict.toList questionnaire.replies
         |> List.find (Tuple.first >> getUuidFromPath >> (==) (Question.getUuid question))
-        |> Maybe.map Tuple.second
+        |> Maybe.map (Tuple.second >> .value)
 
 
 isNew : QuestionnaireDetail -> Question -> Bool

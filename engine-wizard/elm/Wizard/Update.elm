@@ -146,6 +146,16 @@ update msg model =
             in
             ( newModel, Ports.storeSession <| Session.encode newSession )
 
+        Wizard.Msgs.SetFullscreen fullscreen ->
+            let
+                newSession =
+                    Session.setFullscreen model.appState.session fullscreen
+
+                newModel =
+                    setSession newSession model
+            in
+            ( newModel, Ports.storeSession <| Session.encode newSession )
+
         Wizard.Msgs.MenuMsg menuMsg ->
             let
                 ( menuModel, cmd ) =

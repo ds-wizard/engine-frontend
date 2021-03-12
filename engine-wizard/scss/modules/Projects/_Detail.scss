@@ -1,6 +1,8 @@
 @import "../../mixins";
 @import "../../variables";
 
+@import "Detail/QuestionnaireVersionViewModal";
+
 $nav-row-height: 32px;
 $nav-row-padding: 16px;
 $header-height: 2 * ($nav-row-height + $nav-row-padding) + 1;
@@ -20,6 +22,14 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
 
         .questionnaire {
             height: $public-content-height;
+        }
+    }
+
+    .app-fullscreen & {
+        height: 100vh;
+
+        .questionnaire {
+            height: 100vh;
         }
     }
 
@@ -217,7 +227,6 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
                 &__Actions {
                     display: flex;
                     align-items: center;
-                    //margin-right: -0.75rem;
                     white-space: nowrap;
                 }
             }

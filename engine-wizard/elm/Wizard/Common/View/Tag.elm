@@ -155,7 +155,7 @@ viewList tags =
         emptyNode
 
     else
-        div [ class "tag-list" ] (List.map viewListTagView tags)
+        div [ class "tag-list tag-list-view" ] (List.map viewListTagView tags)
 
 
 viewListTagView : Tag -> Html msg
