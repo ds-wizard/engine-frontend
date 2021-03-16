@@ -1,12 +1,13 @@
 module Wizard.Common.Html.Attribute exposing
     ( detailClass
+    , grammarlyAttributes
     , linkToAttributes
     , listClass
     , wideDetailClass
     )
 
 import Html exposing (..)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (attribute, class, href)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
@@ -31,3 +32,8 @@ wideDetailClass otherClass =
 listClass : String -> Html.Attribute msg
 listClass otherClass =
     class <| "col col-list " ++ otherClass
+
+
+grammarlyAttributes : List (Attribute msg)
+grammarlyAttributes =
+    [ attribute "data-gramm" "false" ]
