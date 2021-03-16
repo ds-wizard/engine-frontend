@@ -16,6 +16,10 @@
 
         &:not([href]) {
             color: $gray-900;
+
+            &:hover {
+                color: $gray-900;
+            }
         }
 
         &:active, &:not([href]):active {
