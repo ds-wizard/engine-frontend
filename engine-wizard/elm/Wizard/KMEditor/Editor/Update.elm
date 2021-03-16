@@ -5,6 +5,7 @@ module Wizard.KMEditor.Editor.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import List.Extra as List
 import Maybe.Extra exposing (isJust)
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
@@ -12,6 +13,7 @@ import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.Levels as LevelsApi
 import Shared.Api.Metrics as MetricsApi
 import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.Event as Event
 import Shared.Error.ApiError as ApiError
 import Shared.Locale exposing (l, lg)
 import Task
@@ -274,12 +276,16 @@ fetchPreview wrapMsg appState model =
 
 putBranchCmd : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> BranchDetail -> Cmd Wizard.Msgs.Msg
 putBranchCmd wrapMsg appState model km =
+    let
+        sessionEvents =
+            List.uniqueBy Event.toUniqueIdentifier model.sessionEvents
+    in
     Cmd.map wrapMsg <|
         BranchesApi.putBranch
             model.kmUuid
             km.name
             km.kmId
-            (km.events ++ model.sessionEvents)
+            (km.events ++ sessionEvents)
             appState
             SaveCompleted
 
