@@ -63,6 +63,7 @@ import Wizard.Common.Components.Questionnaire.History as History
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Html exposing (illustratedMessage)
+import Wizard.Common.Html.Attribute exposing (grammarlyAttributes)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Tag as Tag
 import Wizard.Ports as Ports
@@ -1214,7 +1215,7 @@ viewQuestionValue appState cfg model path question =
                     input (type_ "number" :: defaultAttrs ++ extraAttrs) []
 
                 Just TextQuestionValueType ->
-                    textarea (defaultAttrs ++ extraAttrs) []
+                    textarea (defaultAttrs ++ extraAttrs ++ grammarlyAttributes) []
 
                 _ ->
                     input (type_ "text" :: defaultAttrs ++ extraAttrs) []

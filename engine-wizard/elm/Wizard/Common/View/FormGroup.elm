@@ -42,6 +42,7 @@ import Shared.Utils exposing (getContrastColorHex)
 import String
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (grammarlyAttributes)
 
 
 l_ : String -> AppState -> String
@@ -238,12 +239,12 @@ htmlRadioGroup appState options =
 -}
 textarea : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 textarea =
-    formGroup Input.textArea []
+    formGroup Input.textArea grammarlyAttributes
 
 
 textareaAttrs : List (Html.Attribute Form.Msg) -> AppState -> Form FormError o -> String -> String -> Html Form.Msg
-textareaAttrs =
-    formGroup Input.textArea
+textareaAttrs attrs =
+    formGroup Input.textArea (attrs ++ grammarlyAttributes)
 
 
 resizableTextarea : AppState -> Form FormError o -> String -> String -> Html Form.Msg
@@ -253,8 +254,11 @@ resizableTextarea appState form fieldName =
             (Form.getFieldAsString fieldName form).value
                 |> Maybe.map (max 3 << List.length << String.split "\n")
                 |> Maybe.withDefault 3
+
+        attributes =
+            [ rows lines, class "resizable-textarea" ] ++ grammarlyAttributes
     in
-    formGroup Input.textArea [ rows lines, class "resizable-textarea" ] appState form fieldName
+    formGroup Input.textArea attributes appState form fieldName
 
 
 {-| Helper for creating form group with toggle
@@ -407,11 +411,13 @@ markdownEditor appState form fieldName labelText =
 
             else
                 Input.textArea field
-                    [ class <| "form-control " ++ errorClass
-                    , id fieldName
-                    , name fieldName
-                    , rows <| List.length <| String.lines valueString
-                    ]
+                    (grammarlyAttributes
+                        ++ [ class <| "form-control " ++ errorClass
+                           , id fieldName
+                           , name fieldName
+                           , rows <| List.length <| String.lines valueString
+                           ]
+                    )
 
         previewActiveMsg =
             Form.Input previewActiveFieldName Form.Checkbox << Field.Bool
