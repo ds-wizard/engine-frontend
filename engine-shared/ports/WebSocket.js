@@ -17,7 +17,7 @@ module.exports = function (app) {
                 }
             }
 
-            ws.addEventListener('open', function () {
+            ws.addEventListener('open', function (event) {
                 sendMsg('open', {})
             })
 
@@ -26,11 +26,17 @@ module.exports = function (app) {
             })
 
             ws.addEventListener("close", function (event) {
-                sendMsg('close', null)
-                delete websockets[url]
+                var reconnect = !event.wasClean && websockets[url]
+
+                if (reconnect) {
+                    delete websockets[url]
+                    wsOpen(url)
+                } else {
+                    sendMsg('close', null)
+                }
             })
 
-            ws.addEventListener("error", function (err) {
+            ws.addEventListener("error", function (event) {
 
             })
         }
