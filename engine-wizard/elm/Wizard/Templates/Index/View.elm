@@ -2,6 +2,7 @@ module Wizard.Templates.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Api.Templates as TemplatesApi
 import Shared.Auth.Permission as Perm
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Template.TemplateState as TemplateState
@@ -153,6 +154,12 @@ listingActions appState template =
                 , icon = faSet "_global.view" appState
                 , label = l_ "action.viewDetail" appState
                 , msg = ListingActionLink (detailRoute template)
+                }
+            , Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "_global.export" appState
+                , label = l_ "action.export" appState
+                , msg = ListingActionExternalLink (TemplatesApi.exportTemplateUrl template.id appState)
                 }
             ]
     in

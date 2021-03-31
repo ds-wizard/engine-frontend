@@ -11,7 +11,7 @@ import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -62,8 +62,8 @@ header appState package =
     let
         exportAction =
             a [ class "link-with-icon", href <| PackagesApi.exportPackageUrl package.id appState, target "_blank" ]
-                [ faSet "kmDetail.export" appState
-                , lx_ "header.export" appState
+                [ faSet "_global.export" appState
+                , lgx "km.action.export" appState
                 ]
 
         forkAction =
@@ -71,7 +71,7 @@ header appState package =
                 (Routes.KMEditorRoute <| CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
                 [ faSet "kmDetail.createKMEditor" appState
-                , lx_ "header.createKMEditor" appState
+                , lgx "km.action.kmEditor" appState
                 ]
 
         questionnaireAction =
@@ -79,13 +79,13 @@ header appState package =
                 (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
                 [ faSet "kmDetail.createQuestionnaire" appState
-                , lx_ "header.createQuestionnaire" appState
+                , lgx "km.action.project" appState
                 ]
 
         deleteAction =
             a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
                 [ faSet "_global.delete" appState
-                , lx_ "header.delete" appState
+                , lgx "km.action.delete" appState
                 ]
 
         actions =

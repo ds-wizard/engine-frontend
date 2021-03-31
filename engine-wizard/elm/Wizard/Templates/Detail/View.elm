@@ -60,7 +60,7 @@ header appState template =
     let
         exportAction =
             a [ class "link-with-icon", href <| TemplatesApi.exportTemplateUrl template.id appState, target "_blank" ]
-                [ faSet "kmDetail.export" appState
+                [ faSet "_global.export" appState
                 , lx_ "header.export" appState
                 ]
 
