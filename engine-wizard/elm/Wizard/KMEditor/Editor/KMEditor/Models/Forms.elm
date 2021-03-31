@@ -897,7 +897,6 @@ referenceTypeOptions : AppState -> List ( String, String )
 referenceTypeOptions appState =
     [ ( "ResourcePageReference", lg "referenceType.resourcePage" appState )
     , ( "URLReference", lg "referenceType.url" appState )
-    , ( "CrossReference", lg "referenceType.cross" appState )
     ]
 
 
