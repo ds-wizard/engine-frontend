@@ -2,11 +2,13 @@ module Wizard.KnowledgeModels.Index.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Api.Packages as PackagesApi
 import Shared.Auth.Permission as Perm
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Utils exposing (listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
@@ -15,9 +17,11 @@ import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Index.Models exposing (..)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
+import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 
 
@@ -138,28 +142,54 @@ listingDescription appState package =
 listingActions : AppState -> Package -> List (ListingDropdownItem Msg)
 listingActions appState package =
     let
-        actions =
-            [ Listing.dropdownAction
+        viewAction =
+            Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.view" appState
-                , label = l_ "action.viewDetail" appState
+                , label = lg "km.action.view" appState
                 , msg = ListingActionLink (detailRoute package)
                 }
-            ]
-    in
-    if Perm.hasPerm appState.session Perm.packageManagementWrite then
-        actions
-            ++ [ Listing.dropdownSeparator
-               , Listing.dropdownAction
-                    { extraClass = Just "text-danger"
-                    , icon = faSet "_global.delete" appState
-                    , label = l_ "action.delete" appState
-                    , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
-                    }
-               ]
 
-    else
-        actions
+        exportAction =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "_global.export" appState
+                , label = lg "km.action.export" appState
+                , msg = ListingActionExternalLink (PackagesApi.exportPackageUrl package.id appState)
+                }
+
+        forkAction =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "kmDetail.createKMEditor" appState
+                , label = lg "km.action.kmEditor" appState
+                , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute <| Just package.id)
+                }
+
+        questionnaireAction =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "kmDetail.createQuestionnaire" appState
+                , label = lg "km.action.project" appState
+                , msg = ListingActionLink (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Just package.id)
+                }
+
+        deleteAction =
+            Listing.dropdownAction
+                { extraClass = Just "text-danger"
+                , icon = faSet "_global.delete" appState
+                , label = lg "km.action.delete" appState
+                , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
+                }
+    in
+    []
+        |> listInsertIf viewAction True
+        |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
+        |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.knowledgeModel || Perm.hasPerm appState.session Perm.questionnaire)
+        |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
+        |> listInsertIf questionnaireAction (Perm.hasPerm appState.session Perm.questionnaire)
+        |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.packageManagementWrite)
+        |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
 
 
 detailRoute : Package -> Routes.Route
