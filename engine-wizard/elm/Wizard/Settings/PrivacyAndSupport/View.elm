@@ -40,9 +40,9 @@ viewProps =
 formView : AppState -> Form FormError PrivacyAndSupportConfig -> Html Form.Msg
 formView appState form =
     div []
-        [ FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultPrivacyUrl ] appState form "privacyUrl" (l_ "form.privacyUrl" appState)
+        [ FormGroup.inputAttrs [] appState form "privacyUrl" (l_ "form.privacyUrl" appState)
         , FormExtra.mdAfter (l_ "form.privacyUrl.desc" appState)
-        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultTermsOfServiceUrl ] appState form "termsOfServiceUrl" (l_ "form.termsOfServiceUrl" appState)
+        , FormGroup.inputAttrs [] appState form "termsOfServiceUrl" (l_ "form.termsOfServiceUrl" appState)
         , FormExtra.mdAfter (l_ "form.termsOfServiceUrl.desc" appState)
         , h3 [] [ lx_ "section.support" appState ]
         , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportEmail ] appState form "supportEmail" (l_ "form.supportEmail" appState)

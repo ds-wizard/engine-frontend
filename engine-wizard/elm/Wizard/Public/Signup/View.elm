@@ -7,6 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Shared.Form.FormError exposing (FormError)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormGroup as FormGroup
@@ -78,20 +79,43 @@ formView appState form =
                 Nothing ->
                     False
 
-        acceptGroup =
+        viewAcceptGroup privacyText =
             div [ class "form-group form-group-accept", classList [ ( "has-error", hasError ) ] ]
                 [ label [ for "accept" ]
                     ([ Input.checkboxInput acceptField [ id "accept", name "accept" ] ]
-                        ++ lh_ "form.privacyText"
-                            [ a [ href <| PrivacyAndSupportConfig.getPrivacyUrl appState.config.privacyAndSupport, target "_blank" ]
-                                [ lx_ "form.privacy" appState ]
-                            , a [ href <| PrivacyAndSupportConfig.getTermsOfServiceUrl appState.config.privacyAndSupport, target "_blank" ]
-                                [ lx_ "form.termsOfService" appState ]
-                            ]
-                            appState
+                        ++ privacyText
                     )
                 , p [ class "invalid-feedback" ] [ lx_ "form.privacyError" appState ]
                 ]
+
+        privacyLink privacyUrl =
+            a [ href privacyUrl, target "_blank" ]
+                [ lx_ "form.privacy" appState ]
+
+        termsOfServiceLink termsOfServiceUrl =
+            a [ href termsOfServiceUrl, target "_blank" ]
+                [ lx_ "form.termsOfService" appState ]
+
+        acceptGroup =
+            case ( appState.config.privacyAndSupport.privacyUrl, appState.config.privacyAndSupport.termsOfServiceUrl ) of
+                ( Just privacyUrl, Just termsOfServiceUrl ) ->
+                    viewAcceptGroup <|
+                        lh_ "form.privacyTextBoth"
+                            [ privacyLink privacyUrl
+                            , termsOfServiceLink termsOfServiceUrl
+                            ]
+                            appState
+
+                ( Just privacyUrl, Nothing ) ->
+                    viewAcceptGroup <|
+                        lh_ "form.privacyText" [ privacyLink privacyUrl ] appState
+
+                ( Nothing, Just termsOfServiceUrl ) ->
+                    viewAcceptGroup <|
+                        lh_ "form.privacyText" [ termsOfServiceLink termsOfServiceUrl ] appState
+
+                _ ->
+                    emptyNode
     in
     div []
         [ FormGroup.input appState form "email" <| lg "user.email" appState
