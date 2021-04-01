@@ -5,6 +5,7 @@ module Wizard.KMEditor.Editor.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Form
 import List.Extra as List
 import Maybe.Extra exposing (isJust)
 import Random exposing (Seed)
@@ -20,6 +21,7 @@ import Task
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.KMEditor.Common.BranchEditForm as BranchEditForm
 import Wizard.KMEditor.Editor.KMEditor.Models
 import Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents)
 import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, addSessionEvents, containsChanges, getAllEvents, getCurrentActiveEditorUuid, initialModel)
@@ -65,7 +67,12 @@ update msg wrapMsg appState model =
                         ( newModel, cmd ) =
                             case result of
                                 Ok km ->
-                                    fetchPreview wrapMsg appState { model | km = Success km }
+                                    fetchPreview wrapMsg
+                                        appState
+                                        { model
+                                            | km = Success km
+                                            , kmForm = BranchEditForm.init km
+                                        }
 
                                 Err error ->
                                     ( { model | km = ApiError.toActionResult appState (lg "apiError.branches.getError" appState) error }
@@ -199,6 +206,9 @@ update msg wrapMsg appState model =
                     in
                     ( newSeed, { model | editorModel = newEditorModel }, cmd )
 
+                SettingsFormMsg formMsg ->
+                    ( appState.seed, { model | kmForm = Form.update BranchEditForm.validation formMsg model.kmForm }, Cmd.none )
+
                 Discard ->
                     let
                         ( newModel, cmd ) =
@@ -279,12 +289,20 @@ putBranchCmd wrapMsg appState model km =
     let
         sessionEvents =
             List.uniqueBy Event.toUniqueIdentifier model.sessionEvents
+
+        ( kmName, kmId ) =
+            case Form.getOutput model.kmForm of
+                Just kmForm ->
+                    ( kmForm.name, kmForm.kmId )
+
+                Nothing ->
+                    ( km.name, km.kmId )
     in
     Cmd.map wrapMsg <|
         BranchesApi.putBranch
             model.kmUuid
-            km.name
-            km.kmId
+            kmName
+            kmId
             (km.events ++ sessionEvents)
             appState
             SaveCompleted

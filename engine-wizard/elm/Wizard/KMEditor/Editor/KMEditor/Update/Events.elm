@@ -53,8 +53,7 @@ createEditKnowledgeModelEvent : KnowledgeModelForm -> KMEditorData -> Seed -> ( 
 createEditKnowledgeModelEvent form editorData =
     let
         data =
-            { name = EventField.create form.name (editorData.knowledgeModel.name /= form.name)
-            , chapterUuids = EventField.create editorData.chapters.list editorData.chapters.dirty
+            { chapterUuids = EventField.create editorData.chapters.list editorData.chapters.dirty
             , tagUuids = EventField.create editorData.tags.list editorData.tags.dirty
             , integrationUuids = EventField.create editorData.integrations.list editorData.integrations.dirty
             }

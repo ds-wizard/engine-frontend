@@ -12,6 +12,7 @@ import Uuid exposing (Uuid)
 
 type alias Migration =
     { branchUuid : Uuid
+    , branchName : String
     , migrationState : MigrationState
     , branchPreviousPackageId : String
     , targetPackageId : String
@@ -23,6 +24,7 @@ decoder : Decoder Migration
 decoder =
     D.succeed Migration
         |> D.required "branchUuid" Uuid.decoder
+        |> D.required "branchName" D.string
         |> D.required "migrationState" MigrationState.decoder
         |> D.required "branchPreviousPackageId" D.string
         |> D.required "targetPackageId" D.string

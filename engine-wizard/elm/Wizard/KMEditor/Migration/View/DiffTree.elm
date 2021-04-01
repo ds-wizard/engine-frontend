@@ -11,14 +11,14 @@ import Shared.Html exposing (emptyNode, faSet)
 import Wizard.Common.AppState exposing (AppState)
 
 
-view : AppState -> KnowledgeModel -> Event -> Html msg
-view appState km event =
+view : AppState -> String -> KnowledgeModel -> Event -> Html msg
+view appState kmName km event =
     div [ class "diff-tree" ]
-        [ ul [] [ viewEvent appState km event ] ]
+        [ ul [] [ viewEvent appState kmName km event ] ]
 
 
-viewEvent : AppState -> KnowledgeModel -> Event -> Html msg
-viewEvent appState km event =
+viewEvent : AppState -> String -> KnowledgeModel -> Event -> Html msg
+viewEvent appState kmName km event =
     let
         parentMap =
             KnowledgeModel.createParentMap km
@@ -61,35 +61,35 @@ viewEvent appState km event =
             viewKnowledgeModelNode appState Nothing
 
         viewChapterNode_ =
-            viewChapterNode appState km Nothing
+            viewChapterNode appState kmName Nothing
 
         viewTagNode_ =
-            viewTagNode appState km
+            viewTagNode appState kmName
 
         viewIntegrationNode_ =
-            viewIntegrationNode appState km
+            viewIntegrationNode appState kmName
 
         viewQuestionNode_ =
-            viewQuestionNode appState km getParent Nothing
+            viewQuestionNode appState kmName km getParent Nothing
 
         viewAnswerNode_ =
-            viewAnswerNode appState km getParent Nothing
+            viewAnswerNode appState kmName km getParent Nothing
 
         viewChoiceNode_ =
-            viewChoiceNode appState km getParent
+            viewChoiceNode appState kmName km getParent
 
         viewReferenceNode_ =
-            viewReferenceNode appState km getParent
+            viewReferenceNode appState kmName km getParent
 
         viewExpertNode_ =
-            viewExpertNode appState km getParent
+            viewExpertNode appState kmName km getParent
     in
     case event of
         AddKnowledgeModelEvent _ _ ->
             viewKnolwedgeModelNode_ stateClass.added eventEntityName
 
         EditKnowledgeModelEvent _ _ ->
-            viewKnolwedgeModelNode_ stateClass.edited (eventEntityNameOrDefault (Just km.name))
+            viewKnolwedgeModelNode_ stateClass.edited (eventEntityNameOrDefault (Just kmName))
 
         AddChapterEvent _ _ ->
             viewChapterNode_ stateClass.added eventEntityName
@@ -210,49 +210,50 @@ viewKnowledgeModelNode appState mbChildNode cssClass mbTitle =
 
 viewChapterNode :
     AppState
-    -> KnowledgeModel
+    -> String
     -> Maybe (Html msg)
     -> String
     -> Maybe String
     -> Html msg
-viewChapterNode appState km mbChildNode cssClass mbTitle =
+viewChapterNode appState kmName mbChildNode cssClass mbTitle =
     let
         chapterNode =
             viewNode (faSet "km.chapter" appState) cssClass mbTitle mbChildNode
     in
-    viewKnowledgeModelNode appState (Just chapterNode) stateClass.none (Just km.name)
+    viewKnowledgeModelNode appState (Just chapterNode) stateClass.none (Just kmName)
 
 
 viewTagNode :
     AppState
-    -> KnowledgeModel
+    -> String
     -> String
     -> Maybe String
     -> Html msg
-viewTagNode appState km cssClass mbTitle =
+viewTagNode appState kmName cssClass mbTitle =
     let
         tagNode =
             viewNode (faSet "km.tag" appState) cssClass mbTitle Nothing
     in
-    viewKnowledgeModelNode appState (Just tagNode) stateClass.none (Just km.name)
+    viewKnowledgeModelNode appState (Just tagNode) stateClass.none (Just kmName)
 
 
 viewIntegrationNode :
     AppState
-    -> KnowledgeModel
+    -> String
     -> String
     -> Maybe String
     -> Html msg
-viewIntegrationNode appState km cssClass mbTitle =
+viewIntegrationNode appState kmName cssClass mbTitle =
     let
         integrationNode =
             viewNode (faSet "km.integration" appState) cssClass mbTitle Nothing
     in
-    viewKnowledgeModelNode appState (Just integrationNode) stateClass.none (Just km.name)
+    viewKnowledgeModelNode appState (Just integrationNode) stateClass.none (Just kmName)
 
 
 viewQuestionNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> (String -> String)
     -> Maybe (Html msg)
@@ -260,19 +261,19 @@ viewQuestionNode :
     -> Maybe String
     -> String
     -> Html msg
-viewQuestionNode appState km getParent mbChildNode cssClass mbTitle parentUuid =
+viewQuestionNode appState kmName km getParent mbChildNode cssClass mbTitle parentUuid =
     let
         questionNode =
             viewNode (faSet "km.question" appState) cssClass mbTitle mbChildNode
 
         parentChapter =
-            getParentChapterNode appState km parentUuid questionNode
+            getParentChapterNode appState kmName km parentUuid questionNode
 
         parentQuestion =
-            getParentQuestionNode appState km getParent parentUuid questionNode
+            getParentQuestionNode appState kmName km getParent parentUuid questionNode
 
         parentAnswer =
-            getParentAnswerNode appState km getParent parentUuid questionNode
+            getParentAnswerNode appState kmName km getParent parentUuid questionNode
     in
     parentChapter
         |> Maybe.orElseLazy (\_ -> parentQuestion)
@@ -282,6 +283,7 @@ viewQuestionNode appState km getParent mbChildNode cssClass mbTitle parentUuid =
 
 viewAnswerNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> (String -> String)
     -> Maybe (Html msg)
@@ -289,13 +291,13 @@ viewAnswerNode :
     -> Maybe String
     -> String
     -> Html msg
-viewAnswerNode appState km getParent mbChildNode cssClass mbTitle parentUuid =
+viewAnswerNode appState kmName km getParent mbChildNode cssClass mbTitle parentUuid =
     let
         answerNode =
             viewNode (faSet "km.answer" appState) cssClass mbTitle mbChildNode
 
         parentQuestion =
-            getParentQuestionNode appState km getParent parentUuid answerNode
+            getParentQuestionNode appState kmName km getParent parentUuid answerNode
     in
     parentQuestion
         |> Maybe.withDefault answerNode
@@ -303,19 +305,20 @@ viewAnswerNode appState km getParent mbChildNode cssClass mbTitle parentUuid =
 
 viewChoiceNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> (String -> String)
     -> String
     -> Maybe String
     -> String
     -> Html msg
-viewChoiceNode appState km getParent cssClass mbTitle parentUuid =
+viewChoiceNode appState kmName km getParent cssClass mbTitle parentUuid =
     let
         choiceNode =
             viewNode (faSet "km.choice" appState) cssClass mbTitle Nothing
 
         parentQuestion =
-            getParentQuestionNode appState km getParent parentUuid choiceNode
+            getParentQuestionNode appState kmName km getParent parentUuid choiceNode
     in
     parentQuestion
         |> Maybe.withDefault choiceNode
@@ -323,19 +326,20 @@ viewChoiceNode appState km getParent cssClass mbTitle parentUuid =
 
 viewReferenceNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> (String -> String)
     -> String
     -> Maybe String
     -> String
     -> Html msg
-viewReferenceNode appState km getParent cssClass mbTitle parentUuid =
+viewReferenceNode appState kmName km getParent cssClass mbTitle parentUuid =
     let
         referenceNode =
             viewNode (faSet "km.reference" appState) cssClass mbTitle Nothing
 
         parentQuestion =
-            getParentQuestionNode appState km getParent parentUuid referenceNode
+            getParentQuestionNode appState kmName km getParent parentUuid referenceNode
     in
     parentQuestion
         |> Maybe.withDefault referenceNode
@@ -343,19 +347,20 @@ viewReferenceNode appState km getParent cssClass mbTitle parentUuid =
 
 viewExpertNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> (String -> String)
     -> String
     -> Maybe String
     -> String
     -> Html msg
-viewExpertNode appState km getParent cssClass mbTitle parentUuid =
+viewExpertNode appState kmName km getParent cssClass mbTitle parentUuid =
     let
         expertNode =
             viewNode (faSet "km.expert" appState) cssClass mbTitle Nothing
 
         parentQuestion =
-            getParentQuestionNode appState km getParent parentUuid expertNode
+            getParentQuestionNode appState kmName km getParent parentUuid expertNode
     in
     parentQuestion
         |> Maybe.withDefault expertNode
@@ -392,17 +397,18 @@ stateClass =
 
 getParentChapterNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> String
     -> Html msg
     -> Maybe (Html msg)
-getParentChapterNode appState km chapterUuid node =
+getParentChapterNode appState kmName km chapterUuid node =
     KnowledgeModel.getChapter chapterUuid km
         |> Maybe.map
             (\chapter ->
                 viewChapterNode
                     appState
-                    km
+                    kmName
                     (Just node)
                     stateClass.none
                     (Just chapter.title)
@@ -411,17 +417,19 @@ getParentChapterNode appState km chapterUuid node =
 
 getParentQuestionNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> (String -> String)
     -> String
     -> Html msg
     -> Maybe (Html msg)
-getParentQuestionNode appState km getParent questionUuid node =
+getParentQuestionNode appState kmName km getParent questionUuid node =
     KnowledgeModel.getQuestion questionUuid km
         |> Maybe.map
             (\question ->
                 viewQuestionNode
                     appState
+                    kmName
                     km
                     getParent
                     (Just node)
@@ -433,17 +441,19 @@ getParentQuestionNode appState km getParent questionUuid node =
 
 getParentAnswerNode :
     AppState
+    -> String
     -> KnowledgeModel
     -> (String -> String)
     -> String
     -> Html msg
     -> Maybe (Html msg)
-getParentAnswerNode appState km getParent answerUuid node =
+getParentAnswerNode appState kmName km getParent answerUuid node =
     KnowledgeModel.getAnswer answerUuid km
         |> Maybe.map
             (\answer ->
                 viewAnswerNode
                     appState
+                    kmName
                     km
                     getParent
                     (Just node)

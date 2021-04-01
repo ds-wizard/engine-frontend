@@ -67,6 +67,7 @@ iconSet =
                , ( "kmEditor.knowledgeModel", "fas fa-sitemap" )
                , ( "kmEditor.move", "fas fa-reply" )
                , ( "kmEditor.preview", "fas fa-eye" )
+               , ( "kmEditor.settings", "fas fa-cogs" )
                , ( "kmEditor.tags", "fas fa-tags" )
                , ( "kmEditor.treeOpened", "fas fa-caret-down" )
                , ( "kmEditor.treeClosed", "fas fa-caret-right" )

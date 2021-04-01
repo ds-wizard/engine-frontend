@@ -17,7 +17,6 @@ knowledgeModelDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "name": "My knowledge model",
                             "chapterUuids": [],
                             "tagUuids": [],
                             "integrationUuids": [],
@@ -36,7 +35,6 @@ knowledgeModelDecoderTest =
 
                     expected =
                         { uuid = Uuid.fromUuidString "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , name = "My knowledge model"
                         , chapterUuids = []
                         , tagUuids = []
                         , integrationUuids = []
@@ -60,7 +58,6 @@ knowledgeModelDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "name": "My knowledge model",
                             "chapterUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
                             "tagUuids": [],
                             "integrationUuids": [],
@@ -86,7 +83,6 @@ knowledgeModelDecoderTest =
 
                     expected =
                         { uuid = Uuid.fromUuidString "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , name = "My knowledge model"
                         , chapterUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
                         , tagUuids = []
                         , integrationUuids = []
@@ -119,7 +115,6 @@ knowledgeModelDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "name": "My knowledge model",
                             "chapterUuids": [],
                             "tagUuids": ["b5b6ed23-2afa-11e9-b210-d663bd873d93"],
                             "integrationUuids": [],
@@ -145,7 +140,6 @@ knowledgeModelDecoderTest =
 
                     expected =
                         { uuid = Uuid.fromUuidString "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , name = "My knowledge model"
                         , chapterUuids = []
                         , tagUuids = [ "b5b6ed23-2afa-11e9-b210-d663bd873d93" ]
                         , integrationUuids = []
@@ -178,7 +172,6 @@ knowledgeModelDecoderTest =
                         """
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "name": "My knowledge model",
                             "chapterUuids": [],
                             "tagUuids": [],
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
@@ -213,7 +206,6 @@ knowledgeModelDecoderTest =
 
                     expected =
                         { uuid = Uuid.fromUuidString "8a703cfa-450f-421a-8819-875619ccb54d"
-                        , name = "My knowledge model"
                         , chapterUuids = []
                         , tagUuids = []
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]

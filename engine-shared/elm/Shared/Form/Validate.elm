@@ -2,6 +2,7 @@ module Shared.Form.Validate exposing
     ( confirmation
     , dict
     , ifElse
+    , kmId
     , maybeString
     , optionalString
     , organizationId
@@ -78,6 +79,11 @@ uuid =
 organizationId : Validation e String
 organizationId =
     regex "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"
+
+
+kmId : Validation e String
+kmId =
+    regex "^^(?![-])(?!.*[-]$)[a-zA-Z0-9-]+$"
 
 
 validateRegexWithCustomError : Regex -> e -> Validation e String

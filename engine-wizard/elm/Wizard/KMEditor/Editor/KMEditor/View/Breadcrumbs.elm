@@ -9,14 +9,14 @@ import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor, getEdito
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
 
 
-breadcrumbs : String -> Dict String Editor -> Html Msg
-breadcrumbs activeUuid editors =
+breadcrumbs : String -> String -> Dict String Editor -> Html Msg
+breadcrumbs activeUuid kmName editors =
     case Dict.get activeUuid editors of
         Just editor ->
             let
                 nodes =
                     getEditorUuid editor
-                        |> createBreadCrumbs editors maxBreadcrumbsNodeCount
+                        |> createBreadCrumbs kmName editors maxBreadcrumbsNodeCount
                         |> List.map breadcrumbNode
             in
             ol [ class "breadcrumb" ]
@@ -31,14 +31,15 @@ maxBreadcrumbsNodeCount =
     4
 
 
-createBreadCrumbs : Dict String Editor -> Int -> String -> List ( Maybe String, String )
-createBreadCrumbs editors depth editorUuid =
+createBreadCrumbs : String -> Dict String Editor -> Int -> String -> List ( Maybe String, String )
+createBreadCrumbs kmName editors depth editorUuid =
     case ( Dict.get editorUuid editors, depth ) of
         ( _, 0 ) ->
             [ ( Nothing, "..." ) ]
 
         ( Just editor, _ ) ->
-            (createBreadCrumbs editors (depth - 1) <| getEditorParentUuid editor) ++ [ ( Just editorUuid, getEditorTitle editor ) ]
+            (createBreadCrumbs kmName editors (depth - 1) <| getEditorParentUuid editor)
+                ++ [ ( Just editorUuid, getEditorTitle kmName editor ) ]
 
         ( Nothing, _ ) ->
             []

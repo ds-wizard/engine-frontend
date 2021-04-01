@@ -1,4 +1,4 @@
-module Wizard.KMEditor.Editor.KMEditor.View.Tree exposing (treeView)
+module Wizard.KMEditor.Editor.KMEditor.View.Tree exposing (TreeNodeContext, treeView)
 
 import Dict exposing (Dict)
 import Html exposing (..)
@@ -19,8 +19,15 @@ lx_ =
     lx "Wizard.KMEditor.Editor.KMEditor.View.Tree"
 
 
-treeView : AppState -> String -> Dict String Editor -> String -> Html Msg
-treeView appState activeUuid editors kmUuid =
+type alias TreeNodeContext =
+    { activeUuid : String
+    , editors : Dict String Editor
+    , kmName : String
+    }
+
+
+treeView : AppState -> TreeNodeContext -> String -> Html Msg
+treeView appState ctx kmUuid =
     div [ class "diff-tree" ]
         [ div [ class "inner" ]
             [ div [ class "actions" ]
@@ -33,47 +40,47 @@ treeView appState activeUuid editors kmUuid =
                     , lx_ "collapseAll" appState
                     ]
                 ]
-            , ul [] [ treeNodeEditor appState activeUuid editors kmUuid ]
+            , ul [] [ treeNodeEditor appState ctx kmUuid ]
             ]
         ]
 
 
-treeNodeEditor : AppState -> String -> Dict String Editor -> String -> Html Msg
-treeNodeEditor appState activeUuid editors editorUuid =
-    case Dict.get editorUuid editors of
+treeNodeEditor : AppState -> TreeNodeContext -> String -> Html Msg
+treeNodeEditor appState ctx editorUuid =
+    case Dict.get editorUuid ctx.editors of
         Just (KMEditor data) ->
-            treeNodeKM appState activeUuid editors data
+            treeNodeKM appState ctx data
 
         Just (TagEditor data) ->
-            treeNodeTag appState activeUuid editors data
+            treeNodeTag appState ctx data
 
         Just (IntegrationEditor data) ->
-            treeNodeIntegration appState activeUuid editors data
+            treeNodeIntegration appState ctx data
 
         Just (ChapterEditor data) ->
-            treeNodeChapter appState activeUuid editors data
+            treeNodeChapter appState ctx data
 
         Just (QuestionEditor data) ->
-            treeNodeQuestion appState activeUuid editors data
+            treeNodeQuestion appState ctx data
 
         Just (AnswerEditor data) ->
-            treeNodeAnswer appState activeUuid editors data
+            treeNodeAnswer appState ctx data
 
         Just (ChoiceEditor data) ->
-            treeNodeChoice appState activeUuid editors data
+            treeNodeChoice appState ctx data
 
         Just (ReferenceEditor data) ->
-            treeNodeReference appState activeUuid editors data
+            treeNodeReference appState ctx data
 
         Just (ExpertEditor data) ->
-            treeNodeExpert appState activeUuid editors data
+            treeNodeExpert appState ctx data
 
         _ ->
             emptyNode
 
 
-treeNodeKM : AppState -> String -> Dict String Editor -> KMEditorData -> Html Msg
-treeNodeKM appState activeUuid editors editorData =
+treeNodeKM : AppState -> TreeNodeContext -> KMEditorData -> Html Msg
+treeNodeKM appState ctx editorData =
     let
         chapters =
             editorData.chapters.list ++ editorData.chapters.deleted
@@ -87,15 +94,15 @@ treeNodeKM appState activeUuid editors editorData =
         config =
             { editorData = editorData
             , icon = faSet "km.knowledgeModel" appState
-            , label = editorData.knowledgeModel.name
+            , label = ctx.kmName
             , children = chapters ++ tags ++ integrations
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeTag : AppState -> String -> Dict String Editor -> TagEditorData -> Html Msg
-treeNodeTag appState activeUuid editors editorData =
+treeNodeTag : AppState -> TreeNodeContext -> TagEditorData -> Html Msg
+treeNodeTag appState ctx editorData =
     let
         config =
             { editorData = editorData
@@ -104,11 +111,11 @@ treeNodeTag appState activeUuid editors editorData =
             , children = []
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeIntegration : AppState -> String -> Dict String Editor -> IntegrationEditorData -> Html Msg
-treeNodeIntegration appState activeUuid editors editorData =
+treeNodeIntegration : AppState -> TreeNodeContext -> IntegrationEditorData -> Html Msg
+treeNodeIntegration appState ctx editorData =
     let
         config =
             { editorData = editorData
@@ -117,11 +124,11 @@ treeNodeIntegration appState activeUuid editors editorData =
             , children = []
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeChapter : AppState -> String -> Dict String Editor -> ChapterEditorData -> Html Msg
-treeNodeChapter appState activeUuid editors editorData =
+treeNodeChapter : AppState -> TreeNodeContext -> ChapterEditorData -> Html Msg
+treeNodeChapter appState ctx editorData =
     let
         config =
             { editorData = editorData
@@ -130,11 +137,11 @@ treeNodeChapter appState activeUuid editors editorData =
             , children = editorData.questions.list ++ editorData.questions.deleted
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeQuestion : AppState -> String -> Dict String Editor -> QuestionEditorData -> Html Msg
-treeNodeQuestion appState activeUuid editors editorData =
+treeNodeQuestion : AppState -> TreeNodeContext -> QuestionEditorData -> Html Msg
+treeNodeQuestion appState ctx editorData =
     let
         itemTemplateQuestions =
             if isListQuestionForm editorData.form then
@@ -170,11 +177,11 @@ treeNodeQuestion appState activeUuid editors editorData =
             , children = itemTemplateQuestions ++ answers ++ choices ++ references ++ experts
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeAnswer : AppState -> String -> Dict String Editor -> AnswerEditorData -> Html Msg
-treeNodeAnswer appState activeUuid editors editorData =
+treeNodeAnswer : AppState -> TreeNodeContext -> AnswerEditorData -> Html Msg
+treeNodeAnswer appState ctx editorData =
     let
         config =
             { editorData = editorData
@@ -183,11 +190,11 @@ treeNodeAnswer appState activeUuid editors editorData =
             , children = editorData.followUps.list
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeChoice : AppState -> String -> Dict String Editor -> ChoiceEditorData -> Html Msg
-treeNodeChoice appState activeUuid editors editorData =
+treeNodeChoice : AppState -> TreeNodeContext -> ChoiceEditorData -> Html Msg
+treeNodeChoice appState ctx editorData =
     let
         config =
             { editorData = editorData
@@ -196,11 +203,11 @@ treeNodeChoice appState activeUuid editors editorData =
             , children = []
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeReference : AppState -> String -> Dict String Editor -> ReferenceEditorData -> Html Msg
-treeNodeReference appState activeUuid editors editorData =
+treeNodeReference : AppState -> TreeNodeContext -> ReferenceEditorData -> Html Msg
+treeNodeReference appState ctx editorData =
     let
         config =
             { editorData = editorData
@@ -209,11 +216,11 @@ treeNodeReference appState activeUuid editors editorData =
             , children = []
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
-treeNodeExpert : AppState -> String -> Dict String Editor -> ExpertEditorData -> Html Msg
-treeNodeExpert appState activeUuid editors editorData =
+treeNodeExpert : AppState -> TreeNodeContext -> ExpertEditorData -> Html Msg
+treeNodeExpert appState ctx editorData =
     let
         config =
             { editorData = editorData
@@ -222,7 +229,7 @@ treeNodeExpert appState activeUuid editors editorData =
             , children = []
             }
     in
-    treeNode appState config activeUuid editors
+    treeNode appState config ctx
 
 
 type alias TreeNodeConfig a e o =
@@ -233,8 +240,8 @@ type alias TreeNodeConfig a e o =
     }
 
 
-treeNode : AppState -> TreeNodeConfig a e o -> String -> Dict String Editor -> Html Msg
-treeNode appState config activeUuid editors =
+treeNode : AppState -> TreeNodeConfig a e o -> TreeNodeContext -> Html Msg
+treeNode appState config ctx =
     let
         caret =
             if List.length config.children > 0 && config.editorData.editorState /= Deleted then
@@ -245,7 +252,7 @@ treeNode appState config activeUuid editors =
 
         children =
             if config.editorData.treeOpen then
-                ul [] (List.map (treeNodeEditor appState activeUuid editors) config.children)
+                ul [] (List.map (treeNodeEditor appState ctx) config.children)
 
             else
                 emptyNode
@@ -259,7 +266,7 @@ treeNode appState config activeUuid editors =
     in
     li
         [ classList
-            [ ( "active", config.editorData.uuid == activeUuid )
+            [ ( "active", config.editorData.uuid == ctx.activeUuid )
             , ( "state-edited", config.editorData.editorState == Edited )
             , ( "state-deleted", config.editorData.editorState == Deleted )
             , ( "state-added", config.editorData.editorState == Added || config.editorData.editorState == AddedEdited )

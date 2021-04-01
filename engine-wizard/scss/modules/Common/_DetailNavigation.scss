@@ -1,0 +1,103 @@
+@import "../../variables";
+
+$nav-row-height: 32px;
+$nav-row-padding: 16px;
+
+
+.DetailNavigation {
+    background: $gray-100;
+    border-bottom: 1px solid $gray-400;
+
+    .nav-link {
+        text-decoration: none !important;
+    }
+
+    &__Row {
+        height: $nav-row-height;
+        margin-top: $nav-row-padding;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &__Section {
+            display: flex;
+            align-items: center;
+
+            &:first-child {
+                flex-basis: 0;
+                flex-grow: 1;
+                min-width: 0;
+            }
+
+            & > .fa {
+                margin-left: 0.5rem;
+                color: $gray-500;
+            }
+
+            .title {
+                font-weight: bold;
+                font-size: 1.125rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .questionnaire-header__saving {
+                color: $gray-600;
+                margin-left: 0.75rem;
+                margin-right: 2rem;
+                white-space: nowrap;
+
+                .fa {
+                    margin-right: 0.25rem;
+                }
+
+                & + .popover {
+                    .popover-body {
+                        white-space: nowrap;
+                    }
+                }
+            }
+
+            &__Online-Users {
+                display: inline-flex;
+                margin-right: 1rem;
+                padding-right: 1rem;
+                border-right: 1px solid $gray-400;
+
+                .OnlineUser {
+                    margin-left: 0.25rem;
+                }
+
+                &--Stacked {
+                    padding-left: 0.75rem;
+
+                    .OnlineUser {
+                        margin-left: -0.75rem;
+                    }
+                }
+
+                &:last-child {
+                    border-right: none;
+                    padding-right: 0;
+                    margin-right: 0;
+                }
+
+                .extra-users-count {
+                    height: 32px;
+                    margin-left: 0.25rem;
+                    display: inline-flex;
+                    align-items: center;
+                    color: $gray-600;
+                }
+            }
+
+            &__Actions {
+                display: flex;
+                align-items: center;
+                white-space: nowrap;
+            }
+        }
+    }
+}
