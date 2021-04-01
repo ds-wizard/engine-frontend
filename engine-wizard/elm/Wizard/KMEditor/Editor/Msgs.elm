@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 
+import Form
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
@@ -20,6 +21,7 @@ type Msg
     | KMEditorMsg Wizard.KMEditor.Editor.KMEditor.Msgs.Msg
     | TagEditorMsg Wizard.KMEditor.Editor.TagEditor.Msgs.Msg
     | PreviewEditorMsg Wizard.KMEditor.Editor.Preview.Msgs.Msg
+    | SettingsFormMsg Form.Msg
     | Discard
     | Save
     | SaveCompleted (Result ApiError ())

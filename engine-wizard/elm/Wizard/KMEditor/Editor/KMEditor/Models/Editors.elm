@@ -557,11 +557,11 @@ deleteExpertEditor editorData editors =
 {- utils -}
 
 
-getEditorTitle : Editor -> String
-getEditorTitle editor =
+getEditorTitle : String -> Editor -> String
+getEditorTitle kmName editor =
     case editor of
-        KMEditor data ->
-            data.knowledgeModel.name
+        KMEditor _ ->
+            kmName
 
         ChapterEditor data ->
             data.chapter.title

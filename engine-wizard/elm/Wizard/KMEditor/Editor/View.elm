@@ -18,6 +18,7 @@ import Wizard.KMEditor.Editor.KMEditor.View
 import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Editor.Preview.View
+import Wizard.KMEditor.Editor.Settings.View
 import Wizard.KMEditor.Editor.TagEditor.View
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
@@ -55,10 +56,13 @@ editorView appState model ( _, _, levels ) =
 
                 HistoryEditor ->
                     historyView
+
+                SettingsEditor ->
+                    settingsView appState model
     in
     div [ class "KMEditor__Editor" ]
         [ editorHeader appState model
-        , div [ class "editor-body", classList [ ( "with-error", hasSavingError model ) ] ]
+        , div [ class "editor-body" ]
             [ Page.actionResultView appState content model.preview
             ]
         ]
@@ -83,45 +87,72 @@ editorHeader appState model =
                     [ lx_ "header.close" appState ]
                 ]
 
+        kmName =
+            ActionResult.unwrap "" .name model.km
+
         errorMsg =
             if hasSavingError model then
-                Flash.error appState <| getSavingError model
+                span [ class "text-danger error" ] [ text <| getSavingError model ]
 
             else
                 emptyNode
     in
-    div [ class "editor-header", classList [ ( "with-error", hasSavingError model ) ] ]
-        [ div [ class "navigation" ]
-            [ ul [ class "nav" ]
-                [ a
-                    [ class "nav-link"
-                    , classList [ ( "active", model.currentEditor == KMEditor ) ]
-                    , onClick <| OpenEditor KMEditor
-                    ]
-                    [ faSet "kmEditor.knowledgeModel" appState, lx_ "nav.knowledgeModel" appState ]
-                , a
-                    [ class "nav-link"
-                    , classList [ ( "active", model.currentEditor == TagsEditor ) ]
-                    , onClick <| OpenEditor TagsEditor
-                    ]
-                    [ faSet "kmEditor.tags" appState, lx_ "nav.tags" appState ]
-                , a
-                    [ class "nav-link"
-                    , classList [ ( "active", model.currentEditor == PreviewEditor ) ]
-                    , onClick <| OpenEditor PreviewEditor
-                    ]
-                    [ faSet "kmEditor.preview" appState, lx_ "nav.preview" appState ]
+    div [ class "DetailNavigation" ]
+        [ div [ class "DetailNavigation__Row" ]
+            [ div [ class "DetailNavigation__Row__Section" ]
+                [ div [ class "title" ] [ text kmName ]
                 ]
-            , div [ class "actions" ] actions
+            , div [ class "DetailNavigation__Row__Section" ]
+                [ div [ class "DetailNavigation__Row__Section__Actions" ] (errorMsg :: actions)
+                ]
             ]
-        , errorMsg
+        , div [ class "DetailNavigation__Row" ]
+            [ ul [ class "nav nav-underline-tabs" ]
+                [ li [ class "nav-item" ]
+                    [ a
+                        [ class "nav-link"
+                        , classList [ ( "active", model.currentEditor == KMEditor ) ]
+                        , onClick <| OpenEditor KMEditor
+                        ]
+                        [ faSet "kmEditor.knowledgeModel" appState, lx_ "nav.knowledgeModel" appState ]
+                    ]
+                , li [ class "nav-item" ]
+                    [ a
+                        [ class "nav-link"
+                        , classList [ ( "active", model.currentEditor == TagsEditor ) ]
+                        , onClick <| OpenEditor TagsEditor
+                        ]
+                        [ faSet "kmEditor.tags" appState, lx_ "nav.tags" appState ]
+                    ]
+                , li [ class "nav-item" ]
+                    [ a
+                        [ class "nav-link"
+                        , classList [ ( "active", model.currentEditor == PreviewEditor ) ]
+                        , onClick <| OpenEditor PreviewEditor
+                        ]
+                        [ faSet "kmEditor.preview" appState, lx_ "nav.preview" appState ]
+                    ]
+                , li [ class "nav-item" ]
+                    [ a
+                        [ class "nav-link"
+                        , classList [ ( "active", model.currentEditor == SettingsEditor ) ]
+                        , onClick <| OpenEditor SettingsEditor
+                        ]
+                        [ faSet "kmEditor.settings" appState, lx_ "nav.settings" appState ]
+                    ]
+                ]
+            ]
         ]
 
 
 kmEditorView : AppState -> Model -> Html Msg
 kmEditorView appState model =
+    let
+        kmName =
+            ActionResult.unwrap "" .name model.km
+    in
     model.editorModel
-        |> Maybe.map (Html.map KMEditorMsg << Wizard.KMEditor.Editor.KMEditor.View.view appState)
+        |> Maybe.map (Html.map KMEditorMsg << Wizard.KMEditor.Editor.KMEditor.View.view appState kmName)
         |> Maybe.withDefault (Page.error appState <| l_ "kmEditor.error" appState)
 
 
@@ -142,3 +173,9 @@ previewView appState model levels =
 historyView : Html Msg
 historyView =
     div [] [ text "History" ]
+
+
+settingsView : AppState -> Model -> Html Msg
+settingsView appState model =
+    Html.map SettingsFormMsg <|
+        Wizard.KMEditor.Editor.Settings.View.view appState model.kmForm

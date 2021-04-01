@@ -508,11 +508,11 @@ getCommonData event =
 getEntityVisibleName : Event -> Maybe String
 getEntityVisibleName event =
     case event of
-        AddKnowledgeModelEvent eventData _ ->
-            Just eventData.name
+        AddKnowledgeModelEvent _ _ ->
+            Nothing
 
-        EditKnowledgeModelEvent eventData _ ->
-            EventField.getValue eventData.name
+        EditKnowledgeModelEvent _ _ ->
+            Nothing
 
         AddTagEvent eventData _ ->
             Just eventData.name

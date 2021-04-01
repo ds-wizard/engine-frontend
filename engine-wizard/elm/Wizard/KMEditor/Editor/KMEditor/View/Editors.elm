@@ -44,13 +44,13 @@ lx_ =
     lx "Wizard.KMEditor.Editor.KMEditor.View.Editors"
 
 
-activeEditor : AppState -> Model -> ( String, Html Msg )
-activeEditor appState model =
+activeEditor : AppState -> String -> Model -> ( String, Html Msg )
+activeEditor appState kmName model =
     case getActiveEditor model of
         Just editor ->
             case editor of
                 KMEditor data ->
-                    kmEditorView appState model data
+                    kmEditorView appState kmName model data
 
                 TagEditor data ->
                     tagEditorView appState model data
@@ -59,13 +59,13 @@ activeEditor appState model =
                     integrationEditorView appState model data
 
                 ChapterEditor data ->
-                    chapterEditorView appState model data
+                    chapterEditorView appState kmName model data
 
                 QuestionEditor data ->
-                    questionEditorView appState model data
+                    questionEditorView appState kmName model data
 
                 AnswerEditor data ->
-                    answerEditorView appState model data
+                    answerEditorView appState kmName model data
 
                 ChoiceEditor data ->
                     choiceEditorView appState data
@@ -84,10 +84,10 @@ activeEditor appState model =
             )
 
 
-getChildName : Dict String Editor -> String -> String
-getChildName editors uuid =
+getChildName : String -> Dict String Editor -> String -> String
+getChildName kmName editors uuid =
     Dict.get uuid editors
-        |> Maybe.map getEditorTitle
+        |> Maybe.map (getEditorTitle kmName)
         |> Maybe.withDefault "-"
 
 
@@ -96,8 +96,8 @@ editorClass =
     "col-xl-10 col-lg-12"
 
 
-kmEditorView : AppState -> Model -> KMEditorData -> ( String, Html Msg )
-kmEditorView appState model editorData =
+kmEditorView : AppState -> String -> Model -> KMEditorData -> ( String, Html Msg )
+kmEditorView appState kmName model editorData =
     let
         editorTitleConfig =
             { title = lg "knowledgeModel" appState
@@ -114,7 +114,7 @@ kmEditorView appState model editorData =
             , reorderMsg = ReorderChapters >> KMEditorMsg >> EditorMsg
             , addMsg = AddChapter |> KMEditorMsg |> EditorMsg
             , toId = identity
-            , getName = getChildName model.editors
+            , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
             }
 
@@ -126,7 +126,7 @@ kmEditorView appState model editorData =
             , reorderMsg = ReorderTags >> KMEditorMsg >> EditorMsg
             , addMsg = AddTag |> KMEditorMsg |> EditorMsg
             , toId = identity
-            , getName = getChildName model.editors
+            , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
             }
 
@@ -138,19 +138,13 @@ kmEditorView appState model editorData =
             , reorderMsg = ReorderIntegrations >> KMEditorMsg >> EditorMsg
             , addMsg = AddIntegration |> KMEditorMsg |> EditorMsg
             , toId = identity
-            , getName = getChildName model.editors
+            , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
             }
-
-        form =
-            div []
-                [ FormGroup.input appState editorData.form "name" <| lg "knowledgeModel.name" appState
-                ]
     in
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (KMEditorFormMsg >> KMEditorMsg >> EditorMsg)
         , inputChildren appState chaptersConfig
         , inputChildren appState tagsConfig
         , inputChildren appState integrationsConfig
@@ -158,8 +152,8 @@ kmEditorView appState model editorData =
     )
 
 
-chapterEditorView : AppState -> Model -> ChapterEditorData -> ( String, Html Msg )
-chapterEditorView appState model editorData =
+chapterEditorView : AppState -> String -> Model -> ChapterEditorData -> ( String, Html Msg )
+chapterEditorView appState kmName model editorData =
     let
         editorTitleConfig =
             { title = lg "chapter" appState
@@ -176,7 +170,7 @@ chapterEditorView appState model editorData =
             , reorderMsg = ReorderQuestions >> ChapterEditorMsg >> EditorMsg
             , addMsg = AddQuestion |> ChapterEditorMsg |> EditorMsg
             , toId = identity
-            , getName = getChildName model.editors
+            , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
             }
 
@@ -317,8 +311,8 @@ integrationDeleteConfirm appState editorData =
         }
 
 
-questionEditorView : AppState -> Model -> QuestionEditorData -> ( String, Html Msg )
-questionEditorView appState model editorData =
+questionEditorView : AppState -> String -> Model -> QuestionEditorData -> ( String, Html Msg )
+questionEditorView appState kmName model editorData =
     let
         editorTitleConfig =
             { title = lg "question" appState
@@ -353,7 +347,7 @@ questionEditorView appState model editorData =
                             div [] formFields
 
                         extraData =
-                            [ questionEditorAnswersView appState model editorData ]
+                            [ questionEditorAnswersView appState kmName model editorData ]
                     in
                     ( formData, extraData )
 
@@ -363,7 +357,7 @@ questionEditorView appState model editorData =
                             div [] formFields
 
                         extraData =
-                            [ questionEditorItemView appState model editorData ]
+                            [ questionEditorItemView appState kmName model editorData ]
                     in
                     ( formData, extraData )
 
@@ -439,7 +433,7 @@ questionEditorView appState model editorData =
                             div [] formFields
 
                         extraData =
-                            [ questionEditorChoicesView appState model editorData ]
+                            [ questionEditorChoicesView appState kmName model editorData ]
                     in
                     ( formData, extraData )
 
@@ -453,8 +447,8 @@ questionEditorView appState model editorData =
          , questionTagList appState model editorData
          ]
             ++ extra
-            ++ [ questionEditorReferencesView appState model editorData
-               , questionEditorExpertsView appState model editorData
+            ++ [ questionEditorReferencesView appState kmName model editorData
+               , questionEditorExpertsView appState kmName model editorData
                ]
         )
     )
@@ -494,8 +488,8 @@ createLevelOption level =
     ( fromInt level.level, level.title )
 
 
-questionEditorAnswersView : AppState -> Model -> QuestionEditorData -> Html Msg
-questionEditorAnswersView appState model editorData =
+questionEditorAnswersView : AppState -> String -> Model -> QuestionEditorData -> Html Msg
+questionEditorAnswersView appState kmName model editorData =
     inputChildren appState
         { childName = lg "answer" appState
         , childNamePlural = lg "answers" appState
@@ -504,13 +498,13 @@ questionEditorAnswersView appState model editorData =
         , reorderMsg = ReorderAnswers >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddAnswer |> QuestionEditorMsg |> EditorMsg
         , toId = identity
-        , getName = getChildName model.editors
+        , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
         }
 
 
-questionEditorChoicesView : AppState -> Model -> QuestionEditorData -> Html Msg
-questionEditorChoicesView appState model editorData =
+questionEditorChoicesView : AppState -> String -> Model -> QuestionEditorData -> Html Msg
+questionEditorChoicesView appState kmName model editorData =
     inputChildren appState
         { childName = lg "choice" appState
         , childNamePlural = lg "choices" appState
@@ -519,13 +513,13 @@ questionEditorChoicesView appState model editorData =
         , reorderMsg = ReorderChoices >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddChoice |> QuestionEditorMsg |> EditorMsg
         , toId = identity
-        , getName = getChildName model.editors
+        , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
         }
 
 
-questionEditorItemView : AppState -> Model -> QuestionEditorData -> Html Msg
-questionEditorItemView appState model editorData =
+questionEditorItemView : AppState -> String -> Model -> QuestionEditorData -> Html Msg
+questionEditorItemView appState kmName model editorData =
     let
         config =
             { childName = lg "question" appState
@@ -535,7 +529,7 @@ questionEditorItemView appState model editorData =
             , reorderMsg = ReorderItemQuestions >> QuestionEditorMsg >> EditorMsg
             , addMsg = AddAnswerItemTemplateQuestion |> QuestionEditorMsg >> EditorMsg
             , toId = identity
-            , getName = getChildName model.editors
+            , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
             }
     in
@@ -548,8 +542,8 @@ questionEditorItemView appState model editorData =
         ]
 
 
-questionEditorReferencesView : AppState -> Model -> QuestionEditorData -> Html Msg
-questionEditorReferencesView appState model editorData =
+questionEditorReferencesView : AppState -> String -> Model -> QuestionEditorData -> Html Msg
+questionEditorReferencesView appState kmName model editorData =
     inputChildren appState
         { childName = lg "reference" appState
         , childNamePlural = lg "references" appState
@@ -558,13 +552,13 @@ questionEditorReferencesView appState model editorData =
         , reorderMsg = ReorderReferences >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddReference |> QuestionEditorMsg |> EditorMsg
         , toId = identity
-        , getName = getChildName model.editors
+        , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
         }
 
 
-questionEditorExpertsView : AppState -> Model -> QuestionEditorData -> Html Msg
-questionEditorExpertsView appState model editorData =
+questionEditorExpertsView : AppState -> String -> Model -> QuestionEditorData -> Html Msg
+questionEditorExpertsView appState kmName model editorData =
     inputChildren appState
         { childName = lg "expert" appState
         , childNamePlural = lg "experts" appState
@@ -573,13 +567,13 @@ questionEditorExpertsView appState model editorData =
         , reorderMsg = ReorderExperts >> QuestionEditorMsg >> EditorMsg
         , addMsg = AddExpert |> QuestionEditorMsg |> EditorMsg
         , toId = identity
-        , getName = getChildName model.editors
+        , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
         }
 
 
-answerEditorView : AppState -> Model -> AnswerEditorData -> ( String, Html Msg )
-answerEditorView appState model editorData =
+answerEditorView : AppState -> String -> Model -> AnswerEditorData -> ( String, Html Msg )
+answerEditorView appState kmName model editorData =
     let
         editorTitleConfig =
             { title = lg "answer" appState
@@ -599,7 +593,7 @@ answerEditorView appState model editorData =
             , reorderMsg = ReorderFollowUps >> AnswerEditorMsg >> EditorMsg
             , addMsg = AddFollowUp |> AnswerEditorMsg |> EditorMsg
             , toId = identity
-            , getName = getChildName model.editors
+            , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
             }
 

@@ -23,13 +23,13 @@ l_ =
     l "Wizard.KMEditor.Editor.KMEditor.View"
 
 
-view : AppState -> Model -> Html Msg
-view appState model =
+view : AppState -> String -> Model -> Html Msg
+view appState kmName model =
     let
         breadcrumbsView =
             case model.activeEditorUuid of
                 Just activeUuid ->
-                    breadcrumbs activeUuid model.editors
+                    breadcrumbs activeUuid kmName model.editors
 
                 _ ->
                     emptyNode
@@ -37,13 +37,14 @@ view appState model =
         moveModalViewProps =
             { editors = model.editors
             , kmUuid = Uuid.toString model.knowledgeModel.uuid
+            , kmName = kmName
             , movingUuid = Maybe.withDefault "" model.activeEditorUuid
             }
     in
     div [ class "KMEditor__Editor__KMEditor" ]
         [ div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
-        , SplitPane.view viewConfig (viewTree appState model) (viewEditor appState model) model.splitPane
+        , SplitPane.view viewConfig (viewTree appState kmName model) (viewEditor appState kmName model) model.splitPane
         , Modal.alert (alertConfig appState model)
         , MoveModal.view appState moveModalViewProps model.moveModal |> Html.map MoveModalMsg
         ]
@@ -57,18 +58,25 @@ viewConfig =
         }
 
 
-viewTree : AppState -> Model -> Html Msg
-viewTree appState model =
+viewTree : AppState -> String -> Model -> Html Msg
+viewTree appState kmName model =
+    let
+        cfg =
+            { activeUuid = Maybe.withDefault "" model.activeEditorUuid
+            , editors = model.editors
+            , kmName = kmName
+            }
+    in
     div [ class "tree-col" ]
-        [ treeView appState (Maybe.withDefault "" model.activeEditorUuid) model.editors (Uuid.toString model.knowledgeModel.uuid)
+        [ treeView appState cfg (Uuid.toString model.knowledgeModel.uuid)
         ]
 
 
-viewEditor : AppState -> Model -> Html Msg
-viewEditor appState model =
+viewEditor : AppState -> String -> Model -> Html Msg
+viewEditor appState kmName model =
     Html.Keyed.node "div"
         [ class "editor-form-view", id "editor-view" ]
-        [ activeEditor appState model
+        [ activeEditor appState kmName model
         ]
 
 

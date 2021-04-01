@@ -79,6 +79,7 @@ update msg model props =
 type alias ViewProps =
     { editors : Dict String Editor
     , kmUuid : String
+    , kmName : String
     , movingUuid : String
     }
 
@@ -105,7 +106,7 @@ view appState model props =
                 ]
             ]
         , div [ class "diff-tree diff-tree-input" ]
-            [ div [ class "inner" ] [ ul [] [ treeNodeKM appState model treeNodeProps props.kmUuid ] ]
+            [ div [ class "inner" ] [ ul [] [ treeNodeKM appState model treeNodeProps props.kmName props.kmUuid ] ]
             ]
         ]
 
@@ -118,12 +119,12 @@ type alias TreeNodeProps =
     }
 
 
-treeNodeKM : AppState -> Model -> TreeNodeProps -> String -> Html Msg
-treeNodeKM appState model props kmUuid =
+treeNodeKM : AppState -> Model -> TreeNodeProps -> String -> String -> Html Msg
+treeNodeKM appState model props kmName kmUuid =
     case Dict.get kmUuid props.editors of
         Just (KMEditor kmEditorData) ->
             treeNode appState
-                { title = kmEditorData.knowledgeModel.name
+                { title = kmName
                 , uuid = kmEditorData.uuid
                 , children = List.map (treeNodeChapter appState model props) kmEditorData.chapters.list
                 , allowed = False

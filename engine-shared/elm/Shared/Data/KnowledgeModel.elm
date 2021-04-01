@@ -45,7 +45,6 @@ import Uuid exposing (Uuid)
 
 type alias KnowledgeModel =
     { uuid : Uuid
-    , name : String
     , chapterUuids : List String
     , tagUuids : List String
     , integrationUuids : List String
@@ -61,7 +60,6 @@ decoder : Decoder KnowledgeModel
 decoder =
     D.succeed KnowledgeModel
         |> D.required "uuid" Uuid.decoder
-        |> D.required "name" D.string
         |> D.required "chapterUuids" (D.list D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "integrationUuids" (D.list D.string)

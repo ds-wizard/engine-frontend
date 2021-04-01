@@ -1,0 +1,12 @@
+@import "variables";
+
+.KMEditor__Editor__SettingsEditor {
+    height: calc(100vh - #{$editor-header-height});
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+
+    .header {
+        margin-top: 1rem;
+    }
+}

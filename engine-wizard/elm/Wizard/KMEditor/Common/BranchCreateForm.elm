@@ -7,10 +7,10 @@ module Wizard.KMEditor.Common.BranchCreateForm exposing
 
 import Form exposing (Form)
 import Form.Field as Field
-import Form.Validate as Validate exposing (..)
+import Form.Validate as V exposing (..)
 import Json.Encode as E exposing (..)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as Validate
+import Shared.Form.Validate as V
 
 
 type alias BranchCreateForm =
@@ -36,10 +36,10 @@ init selectedPackage =
 
 validation : Validation FormError BranchCreateForm
 validation =
-    Validate.map3 BranchCreateForm
-        (Validate.field "name" Validate.string)
-        (Validate.field "kmId" (Validate.regex "^^(?![-])(?!.*[-]$)[a-zA-Z0-9-]+$"))
-        (Validate.field "previousPackageId" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+    V.map3 BranchCreateForm
+        (V.field "name" V.string)
+        (V.field "kmId" V.kmId)
+        (V.field "previousPackageId" (V.oneOf [ V.emptyString |> V.map (\_ -> Nothing), V.string |> V.map Just ]))
 
 
 encode : BranchCreateForm -> E.Value

@@ -1,10 +1,10 @@
 @import "../../../variables";
+@import "variables";
 
-$menu-height: 50px;
 $tag-selection-height: 80px;
 
 .KMEditor__Editor__Preview {
-    height: calc(100vh - #{$menu-height});
+    height: calc(100vh - #{$editor-header-height});
     padding: 0;
 
     .tag-selection {
@@ -20,9 +20,13 @@ $tag-selection-height: 80px;
                 margin-left: 1rem;
             }
         }
+
+        .tag-list {
+            margin-top: -10px;
+        }
     }
 
     .questionnaire {
-        height:  calc(100vh - #{$menu-height} - #{$tag-selection-height});
+        height:  calc(100vh - #{$editor-header-height} - #{$tag-selection-height});
     }
 }

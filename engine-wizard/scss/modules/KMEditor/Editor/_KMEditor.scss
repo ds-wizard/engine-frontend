@@ -4,14 +4,6 @@
 
 $breadcrumbs-height: 40px;
 
-.with-error {
-    .KMEditor__Editor__KMEditor {
-        .pane-container {
-            height: calc(100vh - #{$editor-header-height + $editor-header-error-height + $breadcrumbs-height}) !important;
-        }
-    }
-}
-
 .KMEditor__Editor__KMEditor {
     .editor-breadcrumbs {
         width: 100%;
@@ -56,7 +48,7 @@ $breadcrumbs-height: 40px;
     }
 
     .editor-form-view {
-        height: calc(100vh - #{$editor-header-height + $editor-header-error-height});
+        height: calc(100vh - #{$editor-header-height});
         overflow: auto;
         padding: 25px;
         width: 100%;

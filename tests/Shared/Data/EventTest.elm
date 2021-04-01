@@ -51,11 +51,7 @@ import TestUtils exposing (expectEncodeDecode, parametrized)
 editKnowledgeModelEvent : Event
 editKnowledgeModelEvent =
     EditKnowledgeModelEvent
-        { name =
-            { changed = True
-            , value = Just "My Knowledge Model"
-            }
-        , chapterUuids =
+        { chapterUuids =
             { changed = False
             , value = Nothing
             }
@@ -88,11 +84,7 @@ editKnowledgeModelEventTest =
                 let
                     event =
                         EditKnowledgeModelEvent
-                            { name =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , chapterUuids =
+                            { chapterUuids =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -113,7 +105,7 @@ editKnowledgeModelEventTest =
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
             \_ ->
-                Expect.equal (Just "My Knowledge Model") (Event.getEntityVisibleName editKnowledgeModelEvent)
+                Expect.equal Nothing (Event.getEntityVisibleName editKnowledgeModelEvent)
         ]
 
 
