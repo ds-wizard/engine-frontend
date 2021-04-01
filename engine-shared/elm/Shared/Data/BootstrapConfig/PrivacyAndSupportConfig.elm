@@ -2,17 +2,13 @@ module Shared.Data.BootstrapConfig.PrivacyAndSupportConfig exposing
     ( PrivacyAndSupportConfig
     , decoder
     , default
-    , defaultPrivacyUrl
     , defaultSupportEmail
     , defaultSupportRepositoryName
     , defaultSupportRepositoryUrl
-    , defaultTermsOfServiceUrl
     , encode
-    , getPrivacyUrl
     , getSupportEmail
     , getSupportRepositoryName
     , getSupportRepositoryUrl
-    , getTermsOfServiceUrl
     , initEmptyForm
     , initForm
     , validation
@@ -48,16 +44,6 @@ default =
     }
 
 
-getPrivacyUrl : PrivacyAndSupportConfig -> String
-getPrivacyUrl config =
-    Maybe.withDefault defaultPrivacyUrl config.privacyUrl
-
-
-getTermsOfServiceUrl : PrivacyAndSupportConfig -> String
-getTermsOfServiceUrl config =
-    Maybe.withDefault defaultTermsOfServiceUrl config.termsOfServiceUrl
-
-
 getSupportEmail : PrivacyAndSupportConfig -> String
 getSupportEmail config =
     Maybe.withDefault defaultSupportEmail config.supportEmail
@@ -71,16 +57,6 @@ getSupportRepositoryName config =
 getSupportRepositoryUrl : PrivacyAndSupportConfig -> String
 getSupportRepositoryUrl config =
     Maybe.withDefault defaultSupportRepositoryUrl config.supportRepositoryUrl
-
-
-defaultPrivacyUrl : String
-defaultPrivacyUrl =
-    "{defaultPrivacyUrl}"
-
-
-defaultTermsOfServiceUrl : String
-defaultTermsOfServiceUrl =
-    "{defaultTermsOfServiceUrl}"
 
 
 defaultSupportEmail : String
