@@ -11,13 +11,17 @@ module Wizard.KMEditor.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Form exposing (Form)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
+import Wizard.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
 import Wizard.KMEditor.Editor.KMEditor.Models as KMEditorModel
+import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (formChanged)
 import Wizard.KMEditor.Editor.Preview.Models
 import Wizard.KMEditor.Editor.TagEditor.Models as TagEditorModel
 
@@ -27,11 +31,13 @@ type EditorType
     | TagsEditor
     | PreviewEditor
     | HistoryEditor
+    | SettingsEditor
 
 
 type alias Model =
     { kmUuid : Uuid
     , km : ActionResult BranchDetail
+    , kmForm : Form FormError BranchEditForm
     , metrics : ActionResult (List Metric)
     , levels : ActionResult (List Level)
     , preview : ActionResult KnowledgeModel
@@ -49,6 +55,7 @@ initialModel : Uuid -> Model
 initialModel kmUuid =
     { kmUuid = kmUuid
     , km = Loading
+    , kmForm = BranchEditForm.initEmpty
     , metrics = Loading
     , levels = Loading
     , preview = Unset
@@ -74,8 +81,11 @@ containsChanges model =
             model.editorModel
                 |> Maybe.map KMEditorModel.containsChanges
                 |> Maybe.withDefault False
+
+        kmFormDirty =
+            formChanged model.kmForm
     in
-    List.length model.sessionEvents > 0 || tagEditorDirty || kmEditorDirty
+    List.length model.sessionEvents > 0 || tagEditorDirty || kmEditorDirty || kmFormDirty
 
 
 addSessionEvents : List Event -> Model -> Model

@@ -23,6 +23,7 @@ module Shared.Data.Event exposing
     , isEditQuestion
     , isEditReference
     , isEditTag
+    , toUniqueIdentifier
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -299,6 +300,104 @@ encode event =
     E.object <| encodedCommonData ++ encodedEventData
 
 
+toUniqueIdentifier : Event -> String
+toUniqueIdentifier event =
+    String.join ":" <|
+        case event of
+            AddKnowledgeModelEvent _ { entityUuid } ->
+                [ "AddKnowledgeModelEvent", entityUuid ]
+
+            EditKnowledgeModelEvent _ { uuid, entityUuid } ->
+                [ "EditKnowledgeModelEvent", entityUuid, uuid ]
+
+            AddChapterEvent _ { entityUuid } ->
+                [ "AddChapterEvent", entityUuid ]
+
+            EditChapterEvent _ { uuid, entityUuid } ->
+                [ "EditChapterEvent", entityUuid, uuid ]
+
+            DeleteChapterEvent { entityUuid } ->
+                [ "DeleteChapterEvent", entityUuid ]
+
+            AddTagEvent _ { entityUuid } ->
+                [ "AddTagEvent", entityUuid ]
+
+            EditTagEvent _ { uuid, entityUuid } ->
+                [ "EditTagEvent", entityUuid, uuid ]
+
+            DeleteTagEvent { entityUuid } ->
+                [ "DeleteTagEvent", entityUuid ]
+
+            AddIntegrationEvent _ { entityUuid } ->
+                [ "AddIntegrationEvent", entityUuid ]
+
+            EditIntegrationEvent _ { uuid, entityUuid } ->
+                [ "EditIntegrationEvent", entityUuid, uuid ]
+
+            DeleteIntegrationEvent { entityUuid } ->
+                [ "DeleteIntegrationEvent", entityUuid ]
+
+            AddQuestionEvent _ { entityUuid } ->
+                [ "AddQuestionEvent", entityUuid ]
+
+            EditQuestionEvent _ { uuid, entityUuid } ->
+                [ "EditQuestionEvent", entityUuid, uuid ]
+
+            DeleteQuestionEvent { entityUuid } ->
+                [ "DeleteQuestionEvent", entityUuid ]
+
+            AddAnswerEvent _ { entityUuid } ->
+                [ "AddAnswerEvent", entityUuid ]
+
+            EditAnswerEvent _ { uuid, entityUuid } ->
+                [ "EditAnswerEvent", entityUuid, uuid ]
+
+            DeleteAnswerEvent { entityUuid } ->
+                [ "DeleteAnswerEvent", entityUuid ]
+
+            AddChoiceEvent _ { entityUuid } ->
+                [ "AddChoiceEvent", entityUuid ]
+
+            EditChoiceEvent _ { uuid, entityUuid } ->
+                [ "EditChoiceEvent", entityUuid, uuid ]
+
+            DeleteChoiceEvent { entityUuid } ->
+                [ "DeleteChoiceEvent", entityUuid ]
+
+            AddReferenceEvent _ { entityUuid } ->
+                [ "AddReferenceEvent", entityUuid ]
+
+            EditReferenceEvent _ { uuid, entityUuid } ->
+                [ "EditReferenceEvent", entityUuid, uuid ]
+
+            DeleteReferenceEvent { entityUuid } ->
+                [ "DeleteReferenceEvent", entityUuid ]
+
+            AddExpertEvent _ { entityUuid } ->
+                [ "AddExpertEvent", entityUuid ]
+
+            EditExpertEvent _ { uuid, entityUuid } ->
+                [ "EditExpertEvent", entityUuid, uuid ]
+
+            DeleteExpertEvent { entityUuid } ->
+                [ "DeleteExpertEvent", entityUuid ]
+
+            MoveQuestionEvent _ { uuid, entityUuid } ->
+                [ "MoveQuestionEvent", entityUuid, uuid ]
+
+            MoveAnswerEvent _ { uuid, entityUuid } ->
+                [ "MoveAnswerEvent", entityUuid, uuid ]
+
+            MoveChoiceEvent _ { uuid, entityUuid } ->
+                [ "MoveChoiceEvent", entityUuid, uuid ]
+
+            MoveReferenceEvent _ { uuid, entityUuid } ->
+                [ "MoveReferenceEvent", entityUuid, uuid ]
+
+            MoveExpertEvent _ { uuid, entityUuid } ->
+                [ "MoveExpertEvent", entityUuid, uuid ]
+
+
 getUuid : Event -> String
 getUuid =
     getCommonData >> .uuid
@@ -409,11 +508,11 @@ getCommonData event =
 getEntityVisibleName : Event -> Maybe String
 getEntityVisibleName event =
     case event of
-        AddKnowledgeModelEvent eventData _ ->
-            Just eventData.name
+        AddKnowledgeModelEvent _ _ ->
+            Nothing
 
-        EditKnowledgeModelEvent eventData _ ->
-            EventField.getValue eventData.name
+        EditKnowledgeModelEvent _ _ ->
+            Nothing
 
         AddTagEvent eventData _ ->
             Just eventData.name

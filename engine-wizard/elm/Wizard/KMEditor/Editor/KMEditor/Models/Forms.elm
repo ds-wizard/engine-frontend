@@ -78,7 +78,7 @@ import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorCont
 
 
 type alias KnowledgeModelForm =
-    { name : String }
+    {}
 
 
 type alias TagForm =
@@ -226,18 +226,17 @@ initKnowledgeModelFrom =
 
 knowledgeModelFormValidation : Validation FormError KnowledgeModelForm
 knowledgeModelFormValidation =
-    Validate.map KnowledgeModelForm
-        (Validate.field "name" Validate.string)
+    Validate.map (\_ -> KnowledgeModelForm) Validate.string
 
 
 knowledgeModelFormInitials : KnowledgeModel -> List ( String, Field.Field )
-knowledgeModelFormInitials knowledgeModel =
-    [ ( "name", Field.string knowledgeModel.name ) ]
+knowledgeModelFormInitials _ =
+    []
 
 
 updateKnowledgeModelWithForm : KnowledgeModel -> KnowledgeModelForm -> KnowledgeModel
-updateKnowledgeModelWithForm knowledgeModel knowledgeModelForm =
-    { knowledgeModel | name = knowledgeModelForm.name }
+updateKnowledgeModelWithForm knowledgeModel _ =
+    knowledgeModel
 
 
 
@@ -897,7 +896,6 @@ referenceTypeOptions : AppState -> List ( String, String )
 referenceTypeOptions appState =
     [ ( "ResourcePageReference", lg "referenceType.resourcePage" appState )
     , ( "URLReference", lg "referenceType.url" appState )
-    , ( "CrossReference", lg "referenceType.cross" appState )
     ]
 
 

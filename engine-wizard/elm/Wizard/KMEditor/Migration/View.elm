@@ -102,9 +102,12 @@ migrationView appState model ( migration, metrics ) =
                                 |> Maybe.map (List.singleton >> div [ class "col-8" ])
                                 |> Maybe.withDefault (div [ class "col-12" ] [ errorMessage ])
 
+                        kmName =
+                            ActionResult.unwrap "" .branchName model.migration
+
                         diffTree =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (DiffTree.view appState migration.currentKnowledgeModel)
+                                |> Maybe.map (DiffTree.view appState kmName migration.currentKnowledgeModel)
                                 |> Maybe.map (List.singleton >> div [ class "col-4" ])
                                 |> Maybe.withDefault emptyNode
                     in
@@ -132,7 +135,7 @@ migrationSummary appState migration =
     div [ class "col-12" ]
         [ p []
             (lh_ "summary"
-                [ strong [] [ text migration.currentKnowledgeModel.name ]
+                [ strong [] [ text migration.branchName ]
                 , code [] [ text migration.branchPreviousPackageId ]
                 , code [] [ text migration.targetPackageId ]
                 ]
@@ -333,13 +336,6 @@ viewEvent appState model name diffView =
 viewEditKnowledgeModelDiff : AppState -> EditKnowledgeModelEventData -> KnowledgeModel -> Html Msg
 viewEditKnowledgeModelDiff appState event km =
     let
-        fieldDiff =
-            viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "knowledgeModel.name" appState ]
-                    [ km.name ]
-                    [ EventField.getValueWithDefault event.name km.name ]
-
         chapters =
             KnowledgeModel.getChapters km
 
@@ -383,7 +379,7 @@ viewEditKnowledgeModelDiff appState event km =
                 integrationNames
     in
     div []
-        (fieldDiff ++ [ chaptersDiff, tagsDiff, integrationsDiff ])
+        [ chaptersDiff, tagsDiff, integrationsDiff ]
 
 
 viewAddTagDiff : AppState -> AddTagEventData -> Html Msg

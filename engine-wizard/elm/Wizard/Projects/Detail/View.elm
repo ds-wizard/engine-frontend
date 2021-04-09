@@ -129,7 +129,7 @@ viewPlan route appState model ( qm, levels, metrics ) =
 
 viewPlanNavigation : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewPlanNavigation appState route model qm =
-    div [ class "Plans__Detail__Navigation" ]
+    div [ class "DetailNavigation" ]
         [ viewPlanNavigationTitleRow appState model qm.questionnaire
         , viewPlanNavigationNav appState route model qm
         ]
@@ -141,13 +141,13 @@ viewPlanNavigation appState route model qm =
 
 viewPlanNavigationTitleRow : AppState -> Model -> QuestionnaireDetail -> Html Msg
 viewPlanNavigationTitleRow appState model questionnaire =
-    div [ class "Plans__Detail__Navigation__Row" ]
-        [ div [ class "Plans__Detail__Navigation__Row__Section" ]
+    div [ class "DetailNavigation__Row" ]
+        [ div [ class "DetailNavigation__Row__Section" ]
             (div [ class "title" ] [ text questionnaire.name ]
                 :: visibilityIcons appState questionnaire
                 ++ [ viewPlanNavigationPlanSaving appState model ]
             )
-        , div [ class "Plans__Detail__Navigation__Row__Section" ]
+        , div [ class "DetailNavigation__Row__Section" ]
             [ viewPlanNavigationOnlineUsers appState model
             , viewPlanNavigationActions appState questionnaire
             ]
@@ -176,8 +176,8 @@ viewPlanNavigationOnlineUsers appState model =
                     emptyNode
         in
         div
-            [ class "Plans__Detail__Navigation__Row__Section__Online-Users"
-            , classList [ ( "Plans__Detail__Navigation__Row__Section__Online-Users--Stacked", List.length model.onlineUsers > 5 ) ]
+            [ class "DetailNavigation__Row__Section__Online-Users"
+            , classList [ ( "DetailNavigation__Row__Section__Online-Users--Stacked", List.length model.onlineUsers > 5 ) ]
             ]
             (List.indexedMap (\i u -> Html.map (OnlineUserMsg i) (OnlineUser.view appState u)) (List.take 10 model.onlineUsers)
                 ++ [ extraUsers ]
@@ -187,7 +187,7 @@ viewPlanNavigationOnlineUsers appState model =
 viewPlanNavigationActions : AppState -> QuestionnaireDetail -> Html Msg
 viewPlanNavigationActions appState questionnaire =
     if QuestionnaireDetail.isOwner appState questionnaire then
-        div [ class "Plans__Detail__Navigation__Row__Section__Actions" ]
+        div [ class "DetailNavigation__Row__Section__Actions" ]
             [ button
                 [ class "btn btn-info link-with-icon"
                 , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
@@ -281,7 +281,7 @@ viewPlanNavigationNav appState route model qm =
                 |> listInsertIf documentsLink True
                 |> listInsertIf settingsLink isOwner
     in
-    div [ class "Plans__Detail__Navigation__Row" ]
+    div [ class "DetailNavigation__Row" ]
         [ ul [ class "nav nav-underline-tabs" ] links
         ]
 

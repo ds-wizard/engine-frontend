@@ -80,6 +80,7 @@ update msg model props =
 type alias ViewProps =
     { editors : Dict String Editor
     , kmUuid : String
+    , kmName : String
     , movingUuid : String
     }
 

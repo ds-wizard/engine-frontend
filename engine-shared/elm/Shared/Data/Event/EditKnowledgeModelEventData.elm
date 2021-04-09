@@ -11,8 +11,7 @@ import Shared.Data.Event.EventField as EventField exposing (EventField)
 
 
 type alias EditKnowledgeModelEventData =
-    { name : EventField String
-    , chapterUuids : EventField (List String)
+    { chapterUuids : EventField (List String)
     , tagUuids : EventField (List String)
     , integrationUuids : EventField (List String)
     }
@@ -21,7 +20,6 @@ type alias EditKnowledgeModelEventData =
 decoder : Decoder EditKnowledgeModelEventData
 decoder =
     D.succeed EditKnowledgeModelEventData
-        |> D.required "name" (EventField.decoder D.string)
         |> D.required "chapterUuids" (EventField.decoder (D.list D.string))
         |> D.required "tagUuids" (EventField.decoder (D.list D.string))
         |> D.required "integrationUuids" (EventField.decoder (D.list D.string))
@@ -30,7 +28,6 @@ decoder =
 encode : EditKnowledgeModelEventData -> List ( String, E.Value )
 encode data =
     [ ( "eventType", E.string "EditKnowledgeModelEvent" )
-    , ( "name", EventField.encode E.string data.name )
     , ( "chapterUuids", EventField.encode (E.list E.string) data.chapterUuids )
     , ( "tagUuids", EventField.encode (E.list E.string) data.tagUuids )
     , ( "integrationUuids", EventField.encode (E.list E.string) data.integrationUuids )
