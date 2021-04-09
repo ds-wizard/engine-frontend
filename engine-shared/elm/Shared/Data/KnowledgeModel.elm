@@ -263,11 +263,23 @@ filterWithTags tags km =
 
     else
         let
-            filter _ question =
+            filterQuestion _ question =
                 Question.getTagUuids question
                     |> List.any (\t -> List.member t tags)
 
-            questions =
-                Dict.filter filter km.entities.questions
+            filteredQuestions =
+                Dict.filter filterQuestion km.entities.questions
+
+            filterTag _ tag =
+                List.member tag.uuid tags
+
+            filteredTags =
+                Dict.filter filterTag km.entities.tags
         in
-        { km | entities = KnowledgeModelEntities.updateQuestions questions km.entities }
+        { km
+            | entities =
+                km.entities
+                    |> KnowledgeModelEntities.updateQuestions filteredQuestions
+                    |> KnowledgeModelEntities.updateTags filteredTags
+            , tagUuids = tags
+        }
