@@ -103,7 +103,7 @@ listingTitle appState questionnaire =
     span []
         ([ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ] ]
             ++ visibilityIcons appState questionnaire
-            ++ [ stateBadge appState questionnaire.state ]
+            ++ [ stateBadge appState questionnaire ]
         )
 
 
@@ -269,15 +269,17 @@ migrationRoute =
     Routes.ProjectsRoute << MigrationRoute << .uuid
 
 
-stateBadge : AppState -> QuestionnaireState -> Html msg
-stateBadge appState state =
-    case state of
+stateBadge : AppState -> Questionnaire -> Html msg
+stateBadge appState questionnaire =
+    case questionnaire.state of
         Migrating ->
             span [ class "badge badge-info" ]
                 [ lx_ "badge.migrating" appState ]
 
         Outdated ->
-            span [ class "badge badge-warning" ]
+            linkTo appState
+                (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
+                [ class "badge badge-warning" ]
                 [ lx_ "badge.outdated" appState ]
 
         Default ->

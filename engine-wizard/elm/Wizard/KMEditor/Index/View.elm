@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Shared.Auth.Permission as Perm
 import Shared.Auth.Session exposing (Session)
 import Shared.Data.Branch as Branch exposing (Branch)
@@ -129,13 +130,14 @@ listingTitleLastPublishedVersionBadge appState branch =
         |> Maybe.withDefault emptyNode
 
 
-listingTitleBadge : AppState -> Branch -> Html msg
+listingTitleBadge : AppState -> Branch -> Html Msg
 listingTitleBadge appState branch =
     case branch.state of
         BranchState.Outdated ->
-            span
+            a
                 [ title <| l_ "badge.outdated.title" appState
                 , class "badge badge-warning"
+                , onClick (ShowHideUpgradeModal <| Just branch)
                 ]
                 [ lx_ "badge.outdated" appState ]
 
