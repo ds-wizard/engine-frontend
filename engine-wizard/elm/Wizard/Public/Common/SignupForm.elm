@@ -11,8 +11,10 @@ import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Validate as V exposing (..)
 import Json.Encode as E exposing (..)
 import Json.Encode.Extra as E
+import Maybe.Extra as Maybe
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias SignupForm =
@@ -26,9 +28,23 @@ type alias SignupForm =
     }
 
 
-initEmpty : Form FormError SignupForm
-initEmpty =
-    Form.initial [] validation
+initEmpty : AppState -> Form FormError SignupForm
+initEmpty appState =
+    let
+        privacyUrlSet =
+            Maybe.isJust appState.config.privacyAndSupport.privacyUrl
+
+        termsUrlSet =
+            Maybe.isJust appState.config.privacyAndSupport.termsOfServiceUrl
+
+        initials =
+            if not privacyUrlSet && not termsUrlSet then
+                [ ( "accept", Field.bool True ) ]
+
+            else
+                []
+    in
+    Form.initial initials validation
 
 
 validation : Validation FormError SignupForm
