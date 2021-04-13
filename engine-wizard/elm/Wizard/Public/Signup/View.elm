@@ -79,13 +79,13 @@ formView appState form =
                 Nothing ->
                     False
 
-        viewAcceptGroup privacyText =
+        viewAcceptGroup privacyText privacyError =
             div [ class "form-group form-group-accept", classList [ ( "has-error", hasError ) ] ]
                 [ label [ for "accept" ]
                     ([ Input.checkboxInput acceptField [ id "accept", name "accept" ] ]
                         ++ privacyText
                     )
-                , p [ class "invalid-feedback" ] [ lx_ "form.privacyError" appState ]
+                , p [ class "invalid-feedback" ] [ privacyError ]
                 ]
 
         privacyLink privacyUrl =
@@ -99,20 +99,24 @@ formView appState form =
         acceptGroup =
             case ( appState.config.privacyAndSupport.privacyUrl, appState.config.privacyAndSupport.termsOfServiceUrl ) of
                 ( Just privacyUrl, Just termsOfServiceUrl ) ->
-                    viewAcceptGroup <|
-                        lh_ "form.privacyTextBoth"
+                    viewAcceptGroup
+                        (lh_ "form.privacyTextBoth"
                             [ privacyLink privacyUrl
                             , termsOfServiceLink termsOfServiceUrl
                             ]
                             appState
+                        )
+                        (lx_ "form.privacyErrorBoth" appState)
 
                 ( Just privacyUrl, Nothing ) ->
-                    viewAcceptGroup <|
-                        lh_ "form.privacyText" [ privacyLink privacyUrl ] appState
+                    viewAcceptGroup
+                        (lh_ "form.privacyText" [ privacyLink privacyUrl ] appState)
+                        (lx_ "form.privacyErrorPrivacy" appState)
 
                 ( Nothing, Just termsOfServiceUrl ) ->
-                    viewAcceptGroup <|
-                        lh_ "form.privacyText" [ termsOfServiceLink termsOfServiceUrl ] appState
+                    viewAcceptGroup
+                        (lh_ "form.privacyText" [ termsOfServiceLink termsOfServiceUrl ] appState)
+                        (lx_ "form.privacyErrorTerms" appState)
 
                 _ ->
                     emptyNode
