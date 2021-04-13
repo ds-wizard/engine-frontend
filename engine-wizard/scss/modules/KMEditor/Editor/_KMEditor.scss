@@ -48,7 +48,6 @@ $breadcrumbs-height: 40px;
     }
 
     .editor-form-view {
-        height: calc(100vh - #{$editor-header-height});
         overflow: auto;
         padding: 25px;
         width: 100%;
@@ -87,7 +86,7 @@ $breadcrumbs-height: 40px;
     }
 
     .form-group {
-        margin-bottom: 40px;
+        padding-bottom: 40px;
     }
 
     .form-text {
