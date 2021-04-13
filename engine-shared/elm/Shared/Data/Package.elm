@@ -24,6 +24,7 @@ type alias Package =
     , description : String
     , versions : List Version
     , organization : Maybe OrganizationInfo
+    , remoteLatestVersion : Maybe String
     , state : PackageState
     , createdAt : Time.Posix
     }
@@ -40,6 +41,7 @@ decoder =
         |> D.required "description" D.string
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
+        |> D.required "remoteLatestVersion" (D.maybe D.string)
         |> D.required "state" PackageState.decoder
         |> D.required "createdAt" D.datetime
 
@@ -54,6 +56,7 @@ dummy =
     , description = ""
     , versions = []
     , organization = Nothing
+    , remoteLatestVersion = Nothing
     , state = PackageState.unknown
     , createdAt = Time.millisToPosix 0
     }

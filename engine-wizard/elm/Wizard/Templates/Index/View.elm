@@ -100,7 +100,14 @@ listingTitle appState template =
 listingTitleOutdatedBadge : AppState -> Template -> Html Msg
 listingTitleOutdatedBadge appState template =
     if template.state == TemplateState.Outdated then
-        span [ class "badge badge-warning" ] [ lx_ "badge.outdated" appState ]
+        let
+            templateId =
+                Maybe.map ((++) (template.organizationId ++ ":" ++ template.templateId ++ ":")) template.remoteLatestVersion
+        in
+        linkTo appState
+            (Routes.TemplatesRoute <| ImportRoute templateId)
+            [ class "badge badge-warning" ]
+            [ lx_ "badge.outdated" appState ]
 
     else
         emptyNode

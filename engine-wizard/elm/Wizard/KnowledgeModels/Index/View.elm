@@ -103,7 +103,14 @@ listingTitle appState package =
 listingTitleOutdatedBadge : AppState -> Package -> Html Msg
 listingTitleOutdatedBadge appState package =
     if PackageState.isOutdated package.state then
-        span [ class "badge badge-warning" ] [ lx_ "badge.outdated" appState ]
+        let
+            packageId =
+                Maybe.map ((++) (package.organizationId ++ ":" ++ package.kmId ++ ":")) package.remoteLatestVersion
+        in
+        linkTo appState
+            (Routes.KnowledgeModelsRoute <| ImportRoute packageId)
+            [ class "badge badge-warning" ]
+            [ lx_ "badge.outdated" appState ]
 
     else
         emptyNode
