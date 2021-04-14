@@ -1,4 +1,4 @@
-module Wizard.KMEditor.Create.Update exposing (update)
+module Wizard.KMEditor.Create.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
@@ -23,6 +23,16 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
+fetchData : AppState -> Model -> Cmd Msg
+fetchData appState model =
+    case ( model.selectedPackage, model.edit ) of
+        ( Just packageId, True ) ->
+            PackagesApi.getPackage packageId appState GetPackageCompleted
+
+        _ ->
+            Cmd.none
+
+
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
@@ -34,6 +44,20 @@ update msg wrapMsg appState model =
 
         PackageTypeHintInputMsg typeHintInputMsg ->
             handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
+
+        GetPackageCompleted result ->
+            case result of
+                Ok package ->
+                    let
+                        form =
+                            model.form
+                                |> Form.update BranchCreateForm.validation (Form.Input "name" Form.Text (Field.String package.name))
+                                |> Form.update BranchCreateForm.validation (Form.Input "kmId" Form.Text (Field.String package.kmId))
+                    in
+                    ( { model | package = Success package, form = form }, Cmd.none )
+
+                Err error ->
+                    ( { model | package = ApiError.toActionResult appState (lg "apiError.packages.getError" appState) error }, Cmd.none )
 
 
 handleFormMsg : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
