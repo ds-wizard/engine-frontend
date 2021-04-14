@@ -59,7 +59,7 @@ view appState model =
 createButton : AppState -> Html Msg
 createButton appState =
     linkTo appState
-        (Routes.KMEditorRoute <| CreateRoute Nothing)
+        (Routes.KMEditorRoute <| CreateRoute Nothing Nothing)
         [ class "btn btn-primary" ]
         [ lx_ "header.create" appState ]
 

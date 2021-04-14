@@ -21,7 +21,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { createModel = Wizard.KMEditor.Create.Models.initialModel Nothing
+    { createModel = Wizard.KMEditor.Create.Models.initialModel Nothing Nothing
     , editorModel = Wizard.KMEditor.Editor.Models.initialModel Uuid.nil
     , indexModel = Wizard.KMEditor.Index.Models.initialModel PaginationQueryString.empty
     , migrationModel = Wizard.KMEditor.Migration.Models.initialModel Uuid.nil
@@ -32,8 +32,8 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        CreateRoute selectedPackage ->
-            { model | createModel = Wizard.KMEditor.Create.Models.initialModel selectedPackage }
+        CreateRoute selectedPackage edit ->
+            { model | createModel = Wizard.KMEditor.Create.Models.initialModel selectedPackage edit }
 
         EditorRoute uuid ->
             if model.editorModel.kmUuid == uuid && Wizard.KMEditor.Editor.Models.containsChanges model.editorModel then

@@ -66,12 +66,20 @@ header appState package =
                 , lgx "km.action.export" appState
                 ]
 
-        forkAction =
+        createEditorAction =
             linkTo appState
-                (Routes.KMEditorRoute <| CreateRoute <| Just package.id)
+                (Routes.KMEditorRoute <| CreateRoute (Just package.id) (Just True))
                 [ class "link-with-icon" ]
                 [ faSet "kmDetail.createKMEditor" appState
                 , lgx "km.action.kmEditor" appState
+                ]
+
+        forkAction =
+            linkTo appState
+                (Routes.KMEditorRoute <| CreateRoute (Just package.id) Nothing)
+                [ class "link-with-icon" ]
+                [ faSet "kmDetail.fork" appState
+                , lgx "km.action.fork" appState
                 ]
 
         questionnaireAction =
@@ -91,6 +99,7 @@ header appState package =
         actions =
             []
                 |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
+                |> listInsertIf createEditorAction (Perm.hasPerm appState.session Perm.knowledgeModel)
                 |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
                 |> listInsertIf questionnaireAction (Perm.hasPerm appState.session Perm.questionnaire)
                 |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)

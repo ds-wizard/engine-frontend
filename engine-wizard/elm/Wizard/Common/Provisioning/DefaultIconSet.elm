@@ -77,6 +77,7 @@ iconSet =
                , ( "kmEditorList.publish", "fas fa-cloud-upload-alt" )
                , ( "kmEditorList.upgrade", "fas fa-sort-amount-up" )
                , ( "kmDetail.createKMEditor", "fas fa-edit" )
+               , ( "kmDetail.fork", "fas fa-code-branch" )
                , ( "kmDetail.createQuestionnaire", "far fa-list-alt" )
                , ( "kmDetail.registryLink", "fas fa-external-link-alt" )
                , ( "kmImport.file", "fas fa-file" )

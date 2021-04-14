@@ -12,7 +12,7 @@ import Wizard.Msgs
 subscriptions : (Msg -> Wizard.Msgs.Msg) -> Route -> Model -> Sub Wizard.Msgs.Msg
 subscriptions wrapMsg route model =
     case route of
-        CreateRoute _ ->
+        CreateRoute _ _ ->
             Sub.map (wrapMsg << CreateMsg) <|
                 Wizard.KMEditor.Create.Subscriptions.subscriptions model.createModel
 
