@@ -8,6 +8,7 @@ import Shared.Api.Templates as TemplatesApi
 import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
+import Shared.Data.Template.TemplatePackage as TemplatePackage
 import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 import Shared.Html exposing (emptyNode, faSet)
@@ -19,6 +20,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.KnowledgeModels.Routes
 import Wizard.Routes as Routes
 import Wizard.Templates.Detail.Models exposing (..)
 import Wizard.Templates.Detail.Msgs exposing (..)
@@ -173,6 +175,7 @@ sidePanel appState template =
             , sidePanelOtherVersions appState template
             , sidePanelOrganizationInfo appState template
             , sidePanelRegistryLink appState template
+            , sidePanelUsableWith appState template
             ]
     in
     div [ class "KnowledgeModels__Detail__SidePanel" ]
@@ -241,6 +244,29 @@ sidePanelRegistryLink appState template =
 
         Nothing ->
             Nothing
+
+
+sidePanelUsableWith : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelUsableWith appState template =
+    let
+        packageLink package =
+            li []
+                [ linkTo appState
+                    (Routes.KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.DetailRoute <| package.id)
+                    []
+                    [ text package.id ]
+                ]
+
+        packageLinks =
+            template.usablePackages
+                |> List.sortWith TemplatePackage.compareById
+                |> List.map packageLink
+    in
+    if List.length packageLinks > 0 then
+        Just ( lg "template.usableWith" appState, ul [] packageLinks )
+
+    else
+        Nothing
 
 
 list : Int -> Int -> List ( String, Html msg ) -> Html msg

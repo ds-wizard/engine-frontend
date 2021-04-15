@@ -287,6 +287,7 @@ locale =
                , ( "_global.template.publishedBy", "Published by" )
                , ( "_global.template.registryLink", "Registry Link" )
                , ( "_global.template.templateId", "Template ID" )
+               , ( "_global.template.usableWith", "Usable with" )
                , ( "_global.template.version", "Version" )
                , ( "_global.user.active", "Active" )
                , ( "_global.user.affiliation", "Affiliation" )
