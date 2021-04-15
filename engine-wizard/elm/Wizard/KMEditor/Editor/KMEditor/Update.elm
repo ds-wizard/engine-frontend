@@ -3,6 +3,7 @@ module Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents, update)
 import Dict
 import Random exposing (Seed)
 import Reorderable
+import Shared.Copy as Copy
 import Shared.Utils exposing (pair)
 import SplitPane
 import ValueList
@@ -310,7 +311,7 @@ update msg appState model fetchPreviewCmd =
             ( appState.seed, { model | reorderableState = Reorderable.update reorderableMsg model.reorderableState }, Cmd.none )
 
         CopyUuid uuid ->
-            ( appState.seed, model, Ports.copyToClipboard uuid )
+            ( appState.seed, model, Copy.copyToClipboard uuid )
 
         OpenMoveModal ->
             ( appState.seed, { model | moveModal = MoveModal.open model.moveModal }, Cmd.none )

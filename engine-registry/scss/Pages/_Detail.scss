@@ -1,9 +1,20 @@
+@import "../variables";
+
 .Detail {
     &__Panel {
         border-left: 1px solid $gray-300;
 
         p, ul, .organization {
             margin-bottom: 2rem;
+        }
+
+        .entity-id {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in;
+
+            &:hover {
+                background-color: $code-block-bg;
+            }
         }
 
         .organization {

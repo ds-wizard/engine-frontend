@@ -3,7 +3,6 @@ port module Wizard.Ports exposing
     , clearSession
     , clearSessionAndReload
     , clearUnloadMessage
-    , copyToClipboard
     , createDropzone
     , drawMetricsChart
     , fileContentRead
@@ -79,10 +78,3 @@ port refresh : () -> Cmd msg
 
 
 port drawMetricsChart : E.Value -> Cmd msg
-
-
-
--- Copy
-
-
-port copyToClipboard : String -> Cmd msg
