@@ -8,5 +8,6 @@ module.exports = function (app) {
         input.value = string
         input.select()
         document.execCommand('copy')
+        input.remove()
     }
 }

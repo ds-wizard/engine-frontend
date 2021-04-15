@@ -2,6 +2,8 @@
 
 var program = require('./elm/Registry.elm')
 
+var registerCopyPorts = require('../engine-shared/ports/copy')
+
 function getApiUrl() {
     if (window.registry && window.registry['apiUrl']) return window.registry['apiUrl']
     return 'http://localhost:3000'
@@ -31,6 +33,8 @@ function loadApp(provisioning) {
     app.ports.saveCredentials.subscribe(function (credentials) {
         localStorage.setItem('credentials', JSON.stringify(credentials))
     })
+
+    registerCopyPorts(app)
 }
 
 function jsonp(src) {

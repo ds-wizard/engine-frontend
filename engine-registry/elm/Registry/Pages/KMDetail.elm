@@ -7,8 +7,9 @@ module Registry.Pages.KMDetail exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, a, br, code, div, h5, li, p, strong, text, ul)
-import Html.Attributes exposing (class, href, target)
+import Html exposing (Html, a, br, code, div, h5, li, p, span, strong, text, ul)
+import Html.Attributes exposing (class, href, target, title)
+import Html.Events exposing (onClick)
 import Markdown
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Entities.OrganizationInfo exposing (OrganizationInfo)
@@ -17,7 +18,9 @@ import Registry.Common.Requests as Requests
 import Registry.Common.View.ItemIcon as ItemIcon
 import Registry.Common.View.Page as Page
 import Registry.Routing as Routing
+import Shared.Copy as Copy
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Version
 
@@ -34,7 +37,9 @@ lx_ =
 
 init : AppState -> String -> ( Model, Cmd Msg )
 init appState packageId =
-    ( { package = Loading }
+    ( { package = Loading
+      , copied = False
+      }
     , Requests.getPackage appState packageId GetPackageCompleted
     )
 
@@ -44,7 +49,9 @@ init appState packageId =
 
 
 type alias Model =
-    { package : ActionResult PackageDetail }
+    { package : ActionResult PackageDetail
+    , copied : Bool
+    }
 
 
 setPackage : ActionResult PackageDetail -> Model -> Model
@@ -58,13 +65,19 @@ setPackage package model =
 
 type Msg
     = GetPackageCompleted (Result ApiError PackageDetail)
+    | CopyKmId String
 
 
-update : Msg -> AppState -> Model -> Model
-update msg appState =
+update : Msg -> AppState -> Model -> ( Model, Cmd msg )
+update msg appState model =
     case msg of
         GetPackageCompleted result ->
-            ActionResult.apply setPackage (ApiError.toActionResult appState (l_ "update.getError" appState)) result
+            ( ActionResult.apply setPackage (ApiError.toActionResult appState (l_ "update.getError" appState)) result model
+            , Cmd.none
+            )
+
+        CopyKmId kmId ->
+            ( { model | copied = True }, Copy.copyToClipboard kmId )
 
 
 
@@ -73,16 +86,30 @@ update msg appState =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (viewDetail appState) model.package
+    Page.actionResultView (viewDetail appState model) model.package
 
 
-viewDetail : AppState -> PackageDetail -> Html Msg
-viewDetail appState package =
+viewDetail : AppState -> Model -> PackageDetail -> Html Msg
+viewDetail appState model package =
     let
+        viewKmIdCopied =
+            if model.copied then
+                span [ class "ml-2 text-muted" ] [ lx_ "view.kmId.copied" appState ]
+
+            else
+                emptyNode
+
         viewKmId =
             [ h5 [] [ lx_ "view.kmId" appState ]
             , p []
-                [ code [] [ text package.id ] ]
+                [ code
+                    [ onClick (CopyKmId package.id)
+                    , title (l_ "view.kmId.copy" appState)
+                    , class "entity-id"
+                    ]
+                    [ text package.id ]
+                , viewKmIdCopied
+                ]
             ]
 
         viewPublishedBy =
