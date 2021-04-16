@@ -11,12 +11,13 @@ module Wizard.Projects.Detail.Components.ShareModal exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
-import Html exposing (Html, a, div, hr, span, strong, text)
-import Html.Attributes exposing (class, classList, title)
+import Html exposing (Html, a, button, div, hr, input, span, strong, text)
+import Html.Attributes exposing (class, classList, readonly, title, value)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Users as UsersApi
+import Shared.Copy as Copy
 import Shared.Data.Member as Member
 import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -26,7 +27,7 @@ import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lgh, lgx)
+import Shared.Locale exposing (l, lg, lgh, lgx, lx)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -38,11 +39,20 @@ import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
 import Wizard.Projects.Common.QuestionnaireEditFormMemberPerms as QuestionnaireEditFormMemberPerms
+import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
+import Wizard.Projects.Routes as Routes
+import Wizard.Routes as Routes
+import Wizard.Routing as Routing
 
 
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Projects.Detail.Components.ShareModal"
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.Projects.Detail.Components.ShareModal"
 
 
 
@@ -53,6 +63,7 @@ type alias Model =
     { visible : Bool
     , savingSharing : ActionResult String
     , questionnaireEditForm : Form FormError QuestionnaireEditForm
+    , questionnaireUuid : Uuid
     , userTypeHintInputModel : TypeHintInput.Model UserSuggestion
     , users : List UserSuggestion
     }
@@ -63,6 +74,7 @@ init =
     { visible = False
     , savingSharing = Unset
     , questionnaireEditForm = QuestionnaireEditForm.initEmpty
+    , questionnaireUuid = Uuid.nil
     , userTypeHintInputModel = TypeHintInput.init "memberId"
     , users = []
     }
@@ -72,6 +84,7 @@ setQuestionnaire : QuestionnaireDetail -> Model -> Model
 setQuestionnaire questionnaire model =
     { model
         | questionnaireEditForm = QuestionnaireEditForm.init questionnaire
+        , questionnaireUuid = questionnaire.uuid
         , users = List.map (.member >> Member.toUserSuggestion) questionnaire.permissions
     }
 
@@ -87,6 +100,7 @@ type Msg
     | AddUser UserSuggestion
     | FormMsg Form.Msg
     | PutQuestionnaireComplete (Result ApiError ())
+    | CopyPublicLink String
 
 
 openMsg : QuestionnaireDetail -> Msg
@@ -121,6 +135,9 @@ update cfg msg appState model =
 
         PutQuestionnaireComplete result ->
             handlePutQuestionnaireComplete appState model result
+
+        CopyPublicLink publicLink ->
+            ( model, Copy.copyToClipboard publicLink )
 
 
 handleUserTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserSuggestion -> AppState -> Model -> ( Model, Cmd msg )
@@ -230,7 +247,7 @@ view appState model =
     let
         modalContent =
             [ usersView appState model
-            , Html.map FormMsg <| formView appState model.questionnaireEditForm
+            , formView appState model.questionnaireUuid model.questionnaireEditForm
             ]
 
         modalConfig =
@@ -312,29 +329,21 @@ userView appState users form i =
             emptyNode
 
 
-formView : AppState -> Form FormError QuestionnaireEditForm -> Html Form.Msg
-formView appState form =
+formView : AppState -> Uuid -> Form FormError QuestionnaireEditForm -> Html Msg
+formView appState questionnaireUuid form =
     let
         visibilityEnabled =
             Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" form).value
 
         visibilityEnabledInput =
-            if appState.config.questionnaire.questionnaireVisibility.enabled then
-                FormGroup.toggle form "visibilityEnabled" (lg "questionnaire.visibility" appState)
-
-            else
-                emptyNode
+            FormGroup.toggle form "visibilityEnabled" (lg "questionnaire.visibility" appState)
 
         visibilityPermissionInput =
-            if appState.config.questionnaire.questionnaireVisibility.enabled then
-                div
-                    [ class "form-group form-group-toggle-extra"
-                    , classList [ ( "visible", visibilityEnabled ) ]
-                    ]
-                    (lgh "questionnaire.visibilityPermission" [ visibilitySelect ] appState)
-
-            else
-                emptyNode
+            div
+                [ class "form-group form-group-toggle-extra"
+                , classList [ ( "visible", visibilityEnabled ) ]
+                ]
+                (lgh "questionnaire.visibilityPermission" [ visibilitySelect ] appState)
 
         visibilitySelect =
             if (Form.getFieldAsString "sharingPermission" form).value == Just "edit" then
@@ -345,8 +354,8 @@ formView appState form =
 
         visibilityInputs =
             if appState.config.questionnaire.questionnaireVisibility.enabled then
-                [ visibilityEnabledInput
-                , visibilityPermissionInput
+                [ Html.map FormMsg visibilityEnabledInput
+                , Html.map FormMsg visibilityPermissionInput
                 ]
 
             else
@@ -356,30 +365,37 @@ formView appState form =
             Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
 
         sharingEnabledInput =
-            if appState.config.questionnaire.questionnaireSharing.enabled then
-                FormGroup.toggle form "sharingEnabled" (lg "questionnaire.sharing" appState)
-
-            else
-                emptyNode
+            FormGroup.toggle form "sharingEnabled" (lg "questionnaire.sharing" appState)
 
         sharingPermissionInput =
-            if appState.config.questionnaire.questionnaireSharing.enabled then
-                div
-                    [ class "form-group form-group-toggle-extra"
-                    , classList [ ( "visible", sharingEnabled ) ]
-                    ]
-                    (lgh "questionnaire.sharingPermission" [ sharingSelect ] appState)
-
-            else
-                emptyNode
+            div
+                [ class "form-group form-group-toggle-extra"
+                , classList [ ( "visible", sharingEnabled ) ]
+                ]
+                (lgh "questionnaire.sharingPermission" [ sharingSelect ] appState)
 
         sharingSelect =
             FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "sharingPermission"
 
+        publicLink =
+            appState.clientUrl ++ Routing.toUrl appState (Routes.ProjectsRoute (Routes.DetailRoute questionnaireUuid ProjectDetailRoute.Questionnaire))
+
+        publicLinkView =
+            div
+                [ class "form-group form-group-toggle-extra"
+                , classList [ ( "visible", sharingEnabled ) ]
+                ]
+                [ div [ class "d-flex" ]
+                    [ input [ readonly True, class "form-control", value publicLink ] []
+                    , button [ class "btn btn-link", onClick (CopyPublicLink publicLink) ] [ lx_ "copyLink" appState ]
+                    ]
+                ]
+
         sharingInputs =
             if appState.config.questionnaire.questionnaireSharing.enabled then
-                [ sharingEnabledInput
-                , sharingPermissionInput
+                [ Html.map FormMsg sharingEnabledInput
+                , Html.map FormMsg sharingPermissionInput
+                , publicLinkView
                 ]
 
             else
