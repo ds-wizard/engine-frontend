@@ -664,6 +664,7 @@ locale =
                , ( "Wizard.Projects.Detail.Components.Settings.form.save", "Save" )
                , ( "Wizard.Projects.Detail.Components.ShareModal.action", "Save" )
                , ( "Wizard.Projects.Detail.Components.ShareModal.addUsers", "Add users" )
+               , ( "Wizard.Projects.Detail.Components.ShareModal.copyLink", "Copy link" )
                , ( "Wizard.Projects.Detail.Components.ShareModal.remove", "Remove" )
                , ( "Wizard.Projects.Detail.Components.ShareModal.title", "Share Project" )
                , ( "Wizard.Projects.Detail.Documents.View.action.delete", "Delete" )
