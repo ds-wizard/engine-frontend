@@ -4,6 +4,7 @@ import ActionResult
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onBlur)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Locale exposing (l, lg)
 import Version
