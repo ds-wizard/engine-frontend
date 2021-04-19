@@ -17,6 +17,9 @@ echo -n "window.wizard={apiUrl:'"$API_URL"'" > ${config}
 if [[ ! -z "$PROVISIONING_URL" ]]; then
   echo -n ",provisioningUrl:'"$PROVISIONING_URL"'" >> ${config}
 fi
+if [[ ! -z "$GA_ID" ]]; then
+  echo -n ",gaID:'"$GA_ID"'" >> ${config}
+fi
 provisioning=/configuration/provisioning.json
 if [[ -f "$provisioning" ]]; then
   echo -n ",provisioning:" >> ${config}

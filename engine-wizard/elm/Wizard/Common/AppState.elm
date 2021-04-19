@@ -1,5 +1,6 @@
 module Wizard.Common.AppState exposing
     ( AppState
+    , acceptCookies
     , getDashboardWidgets
     , init
     , isFullscreen
@@ -39,6 +40,8 @@ type alias AppState =
     , currentTime : Time.Posix
     , timeZone : Time.Zone
     , navigator : Navigator
+    , gaEnabled : Bool
+    , cookieConsent : Bool
     }
 
 
@@ -84,6 +87,8 @@ init flagsValue key =
     , currentTime = Time.millisToPosix 0
     , timeZone = Time.utc
     , navigator = flags.navigator
+    , gaEnabled = flags.gaEnabled
+    , cookieConsent = flags.cookieConsent
     }
 
 
@@ -95,6 +100,11 @@ setCurrentTime appState time =
 setTimeZone : AppState -> Time.Zone -> AppState
 setTimeZone appState timeZone =
     { appState | timeZone = timeZone }
+
+
+acceptCookies : AppState -> AppState
+acceptCookies appState =
+    { appState | cookieConsent = True }
 
 
 getDashboardWidgets : AppState -> List DashboardWidget
