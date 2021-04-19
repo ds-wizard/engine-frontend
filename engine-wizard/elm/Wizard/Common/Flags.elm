@@ -17,6 +17,8 @@ type alias Flags =
     , provisioning : Provisioning
     , localProvisioning : Provisioning
     , navigator : Navigator
+    , gaEnabled : Bool
+    , cookieConsent : Bool
     , success : Bool
     }
 
@@ -32,6 +34,8 @@ decoder =
         |> D.optional "provisioning" Provisioning.decoder Provisioning.default
         |> D.optional "localProvisioning" Provisioning.decoder Provisioning.default
         |> D.required "navigator" Navigator.decoder
+        |> D.required "gaEnabled" D.bool
+        |> D.required "cookieConsent" D.bool
         |> D.hardcoded True
 
 
@@ -45,5 +49,7 @@ default =
     , provisioning = Provisioning.default
     , localProvisioning = Provisioning.default
     , navigator = Navigator.default
+    , gaEnabled = False
+    , cookieConsent = False
     , success = False
     }

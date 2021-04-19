@@ -1,0 +1,22 @@
+@import "../../../mixins";
+@import "../../../variables";
+
+.CookieConsent {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+
+    .container {
+        background-color: $white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 0.5rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: .25rem;
+    }
+}

@@ -22,6 +22,7 @@ type Msg
     | OnUrlRequest UrlRequest
     | OnTime Time.Posix
     | OnTimeZone Time.Zone
+    | AcceptCookies
     | AuthMsg Wizard.Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
     | SetFullscreen Bool

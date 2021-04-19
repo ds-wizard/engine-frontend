@@ -1,5 +1,6 @@
 port module Wizard.Ports exposing
-    ( alert
+    ( acceptCookies
+    , alert
     , clearSession
     , clearSessionAndReload
     , clearUnloadMessage
@@ -78,3 +79,10 @@ port refresh : () -> Cmd msg
 
 
 port drawMetricsChart : E.Value -> Cmd msg
+
+
+
+-- Cookies
+
+
+port acceptCookies : () -> Cmd msg
