@@ -3,7 +3,7 @@ module Wizard.KnowledgeModels.Import.RegistryImport.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onSubmit)
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
@@ -52,7 +52,7 @@ viewForm appState model =
     div []
         [ FormResult.errorOnlyView appState model.pulling
         , div [ class "jumbotron" ]
-            [ div [ class "input-group" ]
+            [ Html.form [ onSubmit Submit, class "input-group" ]
                 [ input
                     [ onInput ChangePackageId
                     , type_ "text"
@@ -62,11 +62,9 @@ viewForm appState model =
                     ]
                     []
                 , div [ class "input-group-append" ]
-                    [ ActionButton.button appState
+                    [ ActionButton.submit appState
                         { label = l_ "form.import" appState
                         , result = model.pulling
-                        , msg = Submit
-                        , dangerous = False
                         }
                     ]
                 ]

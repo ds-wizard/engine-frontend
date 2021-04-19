@@ -2,6 +2,7 @@ module Wizard.Users.Create.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (..)
+import Html.Events exposing (onSubmit)
 import Shared.Auth.Role as Role
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lg)
@@ -25,13 +26,13 @@ l_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ detailClass "Users__Create" ]
+    Html.form [ onSubmit (FormMsg Form.Submit), detailClass "Users__Create" ]
         [ Page.header (l_ "header.title" appState) []
         , FormResult.view appState model.savingUser
         , formView appState model.form |> Html.map FormMsg
-        , FormActions.view appState
+        , FormActions.viewSubmit appState
             Routes.usersIndex
-            (ActionButton.ButtonConfig (l_ "header.save" appState) model.savingUser (FormMsg Form.Submit) False)
+            (ActionButton.SubmitConfig (l_ "header.save" appState) model.savingUser)
         ]
 
 
