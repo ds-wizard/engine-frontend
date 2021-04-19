@@ -1,4 +1,4 @@
-module Wizard.Common.View.FormActions exposing (view, viewActionOnly)
+module Wizard.Common.View.FormActions exposing (view, viewActionOnly, viewSubmit)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -25,6 +25,14 @@ view appState cancelRoute actionButtonConfig =
     div [ class "form-actions" ]
         [ linkTo appState cancelRoute [ class "btn btn-secondary" ] [ lx_ "cancelButton.cancel" appState ]
         , ActionButton.button appState actionButtonConfig
+        ]
+
+
+viewSubmit : AppState -> Routes.Route -> ActionButton.SubmitConfig a -> Html msg
+viewSubmit appState cancelRoute submitConfig =
+    div [ class "form-actions" ]
+        [ linkTo appState cancelRoute [ class "btn btn-secondary" ] [ lx_ "cancelButton.cancel" appState ]
+        , ActionButton.submit appState submitConfig
         ]
 
 

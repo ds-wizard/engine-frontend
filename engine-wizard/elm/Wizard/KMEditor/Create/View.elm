@@ -4,7 +4,7 @@ import ActionResult
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onBlur)
+import Html.Events exposing (onBlur, onSubmit)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Locale exposing (l, lg)
 import Version
@@ -47,12 +47,12 @@ viewCreate : AppState -> Model -> a -> Html Msg
 viewCreate appState model _ =
     div [ detailClass "KMEditor__Create" ]
         [ Page.header (l_ "header" appState) []
-        , div []
+        , Html.form [ onSubmit (FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingBranch
             , formView appState model
-            , FormActions.view appState
+            , FormActions.viewSubmit appState
                 Routes.kmEditorIndex
-                (ActionButton.ButtonConfig (l_ "create" appState) model.savingBranch (FormMsg Form.Submit) False)
+                (ActionButton.SubmitConfig (l_ "create" appState) model.savingBranch)
             ]
         ]
 
