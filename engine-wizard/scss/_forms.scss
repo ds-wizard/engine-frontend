@@ -274,7 +274,7 @@ textarea {
             width: 40px;
             background: $white;
             border: solid 1px $gray-400;
-            transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
+            transition: background 0.3s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
             border-radius: 15px;
         }
 
@@ -289,7 +289,7 @@ textarea {
             top: 0;
             display: block;
             background: $white;
-            transition: margin-left 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            transition: margin-left 0.3s ease-in-out, box-shadow 0.15s ease-in-out;
             text-align: center;
             font-weight: bold;
             content: '';
@@ -309,6 +309,13 @@ textarea {
                 background-color: $primary;
                 border-color: $primary;
                 transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
+            }
+        }
+
+        &:focus + span {
+            &:before {
+                border-color: lighten($primary, 25%);
+                box-shadow: 0 0 0 0.2rem transparentize($primary, 0.75);
             }
         }
     }
