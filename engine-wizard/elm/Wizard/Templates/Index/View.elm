@@ -76,7 +76,7 @@ listingConfig appState =
     , wrapMsg = ListingMsg
     , iconView = Nothing
     , sortOptions =
-        [ ( "versions.name", lg "template.name" appState )
+        [ ( "name", lg "template.name" appState )
         ]
     , toRoute = Routes.TemplatesRoute << IndexRoute
     , toolbarExtra = Just (createButton appState)

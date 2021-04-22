@@ -840,7 +840,7 @@ validateReference referenceType =
 
         "CrossReference" ->
             Validate.succeed CrossReferenceFormType
-                |> Validate.andMap (Validate.field "targetUuid" Validate.uuid)
+                |> Validate.andMap (Validate.field "targetUuid" Validate.uuidString)
                 |> Validate.andMap (Validate.field "description" Validate.string)
 
         _ ->

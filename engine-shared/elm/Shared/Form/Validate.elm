@@ -8,6 +8,7 @@ module Shared.Form.Validate exposing
     , organizationId
     , regex
     , uuid
+    , uuidString
     )
 
 import Dict exposing (Dict)
@@ -15,6 +16,7 @@ import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Regex exposing (Regex)
 import Shared.Form.FormError exposing (FormError(..))
+import Uuid exposing (Uuid)
 
 
 confirmation : String -> Validation FormError String -> Validation FormError String
@@ -71,9 +73,15 @@ regex r =
             (\s -> V.format (createRegex r) s |> V.mapError (\_ -> Error.value InvalidFormat))
 
 
-uuid : Validation FormError String
+uuidString : Validation FormError String
+uuidString =
+    validateRegexWithCustomError uuidPattern InvalidUuid
+
+
+uuid : Validation FormError Uuid
 uuid =
     validateRegexWithCustomError uuidPattern InvalidUuid
+        |> V.map Uuid.fromUuidString
 
 
 organizationId : Validation e String

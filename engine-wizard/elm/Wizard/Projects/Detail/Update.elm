@@ -393,10 +393,10 @@ update wrapMsg msg appState model =
                     , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
                     }
 
-                ( shareModalModel, cmd ) =
+                ( newSeed, shareModalModel, cmd ) =
                     ShareModal.update updateConfig shareModalMsg appState model.shareModalModel
             in
-            withSeed ( { model | shareModalModel = shareModalModel }, cmd )
+            ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
 
         SettingsMsg settingsMsg ->
             let
