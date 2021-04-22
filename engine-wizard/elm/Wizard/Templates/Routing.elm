@@ -23,7 +23,7 @@ parsers appState wrapRoute =
     in
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "templates.import" appState) <?> Query.string (lr "templates.import.templateId" appState))
     , map (detail wrapRoute) (s moduleRoot </> string)
-    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "versions.name")) (PaginationQueryString.parser (s moduleRoot))
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     ]
 
 
