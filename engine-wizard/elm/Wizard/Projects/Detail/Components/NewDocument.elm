@@ -183,10 +183,23 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             , filterResults = Nothing
             }
 
+        form =
+            case typeHintInputMsg of
+                TypeHintInput.SetReply _ ->
+                    Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String "")) model.form
+
+                _ ->
+                    model.form
+
         ( templateTypeHintInputModel, cmd ) =
             TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.templateTypeHintInputModel
     in
-    ( { model | templateTypeHintInputModel = templateTypeHintInputModel }, cmd )
+    ( { model
+        | templateTypeHintInputModel = templateTypeHintInputModel
+        , form = form
+      }
+    , cmd
+    )
 
 
 handlePostDocumentCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError Document -> ( Model, Cmd msg )
