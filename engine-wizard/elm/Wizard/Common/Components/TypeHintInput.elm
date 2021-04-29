@@ -1,6 +1,6 @@
 module Wizard.Common.Components.TypeHintInput exposing
     ( Model
-    , Msg
+    , Msg(..)
     , UpdateCofnig
     , ViewConfig
     , clear
