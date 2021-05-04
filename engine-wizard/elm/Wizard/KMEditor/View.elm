@@ -15,7 +15,7 @@ import Wizard.KMEditor.Routes exposing (Route(..))
 view : Route -> AppState -> Model -> Html Msg
 view route appState model =
     case route of
-        CreateRoute _ ->
+        CreateRoute _ _ ->
             Html.map CreateMsg <|
                 Wizard.KMEditor.Create.View.view appState model.createModel
 

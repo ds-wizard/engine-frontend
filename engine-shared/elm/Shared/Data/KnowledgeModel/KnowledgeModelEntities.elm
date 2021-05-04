@@ -1,4 +1,4 @@
-module Shared.Data.KnowledgeModel.KnowledgeModelEntities exposing (KnowledgeModelEntities, decoder, updateQuestions)
+module Shared.Data.KnowledgeModel.KnowledgeModelEntities exposing (KnowledgeModelEntities, decoder, updateQuestions, updateTags)
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
@@ -41,3 +41,8 @@ decoder =
 updateQuestions : Dict String Question -> KnowledgeModelEntities -> KnowledgeModelEntities
 updateQuestions newQuestions entities =
     { entities | questions = newQuestions }
+
+
+updateTags : Dict String Tag -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateTags newTags entities =
+    { entities | tags = newTags }

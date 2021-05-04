@@ -238,8 +238,8 @@ update msg wrapMsg appState model =
                     ( newSeed, newModel2, cmd )
 
                 SaveCompleted result ->
-                    case result of
-                        Ok _ ->
+                    case ( result, model.saving ) of
+                        ( Ok _, Loading ) ->
                             let
                                 newModel =
                                     initialModel model.kmUuid
@@ -252,11 +252,14 @@ update msg wrapMsg appState model =
                                 ]
                             )
 
-                        Err error ->
+                        ( Err error, Loading ) ->
                             ( appState.seed
                             , { model | saving = ApiError.toActionResult appState (lg "apiError.branches.putError" appState) error }
                             , getResultCmd result
                             )
+
+                        _ ->
+                            ( appState.seed, model, Cmd.none )
     in
     withSetUnloadMsgCmd appState updateResult
 

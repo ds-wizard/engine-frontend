@@ -5,7 +5,7 @@ import Uuid exposing (Uuid)
 
 
 type Route
-    = CreateRoute (Maybe String)
+    = CreateRoute (Maybe String) (Maybe Bool)
     | EditorRoute Uuid
     | IndexRoute PaginationQueryString
     | MigrationRoute Uuid

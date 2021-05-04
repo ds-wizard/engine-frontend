@@ -133,6 +133,9 @@ update msg model =
         Wizard.Msgs.OnTimeZone timeZone ->
             ( { model | appState = AppState.setTimeZone model.appState timeZone }, Cmd.none )
 
+        Wizard.Msgs.AcceptCookies ->
+            ( { model | appState = AppState.acceptCookies model.appState }, Ports.acceptCookies () )
+
         Wizard.Msgs.AuthMsg authMsg ->
             Wizard.Auth.Update.update authMsg model
 

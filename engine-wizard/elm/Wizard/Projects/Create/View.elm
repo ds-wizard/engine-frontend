@@ -3,6 +3,7 @@ module Wizard.Projects.Create.View exposing (view)
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onSubmit)
 import Shared.Locale exposing (l, lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -30,7 +31,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ detailClass "Questionnaires__Create" ]
         [ Page.header (l_ "header.title" appState) []
-        , div []
+        , div [ onSubmit (FormMsg Form.Submit) ]
             [ FormResult.view appState model.savingQuestionnaire
             , formView appState model
             , tagsView appState model

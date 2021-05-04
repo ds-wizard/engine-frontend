@@ -103,7 +103,14 @@ listingTitle appState package =
 listingTitleOutdatedBadge : AppState -> Package -> Html Msg
 listingTitleOutdatedBadge appState package =
     if PackageState.isOutdated package.state then
-        span [ class "badge badge-warning" ] [ lx_ "badge.outdated" appState ]
+        let
+            packageId =
+                Maybe.map ((++) (package.organizationId ++ ":" ++ package.kmId ++ ":")) package.remoteLatestVersion
+        in
+        linkTo appState
+            (Routes.KnowledgeModelsRoute <| ImportRoute packageId)
+            [ class "badge badge-warning" ]
+            [ lx_ "badge.outdated" appState ]
 
     else
         emptyNode
@@ -158,12 +165,20 @@ listingActions appState package =
                 , msg = ListingActionExternalLink (PackagesApi.exportPackageUrl package.id appState)
                 }
 
-        forkAction =
+        createKMEditor =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmDetail.createKMEditor" appState
                 , label = lg "km.action.kmEditor" appState
-                , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute <| Just package.id)
+                , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute (Just package.id) (Just True))
+                }
+
+        forkAction =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "kmDetail.fork" appState
+                , label = lg "km.action.fork" appState
+                , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute (Just package.id) Nothing)
                 }
 
         questionnaireAction =
@@ -186,6 +201,7 @@ listingActions appState package =
         |> listInsertIf viewAction True
         |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
         |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.knowledgeModel || Perm.hasPerm appState.session Perm.questionnaire)
+        |> listInsertIf createKMEditor (Perm.hasPerm appState.session Perm.knowledgeModel)
         |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
         |> listInsertIf questionnaireAction (Perm.hasPerm appState.session Perm.questionnaire)
         |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.packageManagementWrite)

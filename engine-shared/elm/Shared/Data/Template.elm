@@ -26,6 +26,7 @@ type alias Template =
     , organization : Maybe OrganizationInfo
     , organizationId : String
     , recommendedPackageId : Maybe String
+    , remoteLatestVersion : Maybe String
     , state : TemplateState
     , templateId : String
     , version : Version
@@ -43,6 +44,7 @@ decoder =
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing
         |> D.required "organizationId" D.string
         |> D.required "recommendedPackageId" (D.maybe D.string)
+        |> D.required "remoteLatestVersion" (D.maybe D.string)
         |> D.required "state" TemplateState.decoder
         |> D.required "templateId" D.string
         |> D.required "version" Version.decoder

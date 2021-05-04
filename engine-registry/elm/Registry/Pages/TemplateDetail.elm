@@ -7,8 +7,9 @@ module Registry.Pages.TemplateDetail exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, a, br, code, div, h5, li, p, strong, text, ul)
-import Html.Attributes exposing (class, href, target)
+import Html exposing (Html, a, br, code, div, h5, li, p, span, strong, text, ul)
+import Html.Attributes exposing (class, href, target, title)
+import Html.Events exposing (onClick)
 import Markdown
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Entities.OrganizationInfo exposing (OrganizationInfo)
@@ -17,7 +18,9 @@ import Registry.Common.Requests as Requests
 import Registry.Common.View.ItemIcon as ItemIcon
 import Registry.Common.View.Page as Page
 import Registry.Routing as Routing
+import Shared.Copy as Copy
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Version
 
@@ -34,7 +37,9 @@ lx_ =
 
 init : AppState -> String -> ( Model, Cmd Msg )
 init appState templateId =
-    ( { template = Loading }
+    ( { template = Loading
+      , copied = False
+      }
     , Requests.getTemplate appState templateId GetTemplateCompleted
     )
 
@@ -44,7 +49,9 @@ init appState templateId =
 
 
 type alias Model =
-    { template : ActionResult TemplateDetail }
+    { template : ActionResult TemplateDetail
+    , copied : Bool
+    }
 
 
 setTemplate : ActionResult TemplateDetail -> Model -> Model
@@ -58,13 +65,19 @@ setTemplate template model =
 
 type Msg
     = GetTemplateCompleted (Result ApiError TemplateDetail)
+    | CopyTemplateId String
 
 
-update : Msg -> AppState -> Model -> Model
-update msg appState =
+update : Msg -> AppState -> Model -> ( Model, Cmd msg )
+update msg appState model =
     case msg of
         GetTemplateCompleted result ->
-            ActionResult.apply setTemplate (ApiError.toActionResult appState (l_ "update.getError" appState)) result
+            ( ActionResult.apply setTemplate (ApiError.toActionResult appState (l_ "update.getError" appState)) result model
+            , Cmd.none
+            )
+
+        CopyTemplateId templateId ->
+            ( { model | copied = True }, Copy.copyToClipboard templateId )
 
 
 
@@ -73,16 +86,30 @@ update msg appState =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView (viewDetail appState) model.template
+    Page.actionResultView (viewDetail appState model) model.template
 
 
-viewDetail : AppState -> TemplateDetail -> Html Msg
-viewDetail appState template =
+viewDetail : AppState -> Model -> TemplateDetail -> Html Msg
+viewDetail appState model template =
     let
-        viewKmId =
+        viewTemplateIdCopied =
+            if model.copied then
+                span [ class "ml-2 text-muted" ] [ lx_ "view.templateId.copied" appState ]
+
+            else
+                emptyNode
+
+        viewTemplateId =
             [ h5 [] [ lx_ "view.templateId" appState ]
             , p []
-                [ code [] [ text template.id ] ]
+                [ code
+                    [ onClick (CopyTemplateId template.id)
+                    , title (l_ "view.templateId.copy" appState)
+                    , class "entity-id"
+                    ]
+                    [ text template.id ]
+                , viewTemplateIdCopied
+                ]
             ]
 
         viewPublishedBy =
@@ -136,7 +163,7 @@ viewDetail appState template =
             [ div [ class "col-12 col-md-8" ]
                 [ Markdown.toHtml [] template.readme ]
             , div [ class "Detail__Panel col-12 col-md-4" ]
-                (viewKmId
+                (viewTemplateId
                     ++ viewPublishedBy
                     ++ viewLicense
                     ++ viewCurrentVersion

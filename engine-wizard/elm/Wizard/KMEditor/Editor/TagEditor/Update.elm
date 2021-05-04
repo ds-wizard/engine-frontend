@@ -1,8 +1,8 @@
 module Wizard.KMEditor.Editor.TagEditor.Update exposing (update)
 
+import Shared.Copy as Copy
 import Wizard.KMEditor.Editor.TagEditor.Models exposing (Model, addQuestionTag, removeQuestionTag)
 import Wizard.KMEditor.Editor.TagEditor.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -21,4 +21,4 @@ update msg model =
             ( removeQuestionTag model questionUuid tagUuid, Cmd.none )
 
         CopyUuid uuid ->
-            ( model, Ports.copyToClipboard uuid )
+            ( model, Copy.copyToClipboard uuid )

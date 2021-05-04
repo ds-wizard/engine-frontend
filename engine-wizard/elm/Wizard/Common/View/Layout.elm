@@ -9,27 +9,22 @@ module Wizard.Common.View.Layout exposing
 import Browser exposing (Document)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Components.CookieConsent as CookieConsent
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
 import Wizard.Common.View.Page as Page
-import Wizard.Documents.Routes
-import Wizard.KMEditor.Routes
-import Wizard.KnowledgeModels.Routes
 import Wizard.Models exposing (Model, userLoggedIn)
-import Wizard.Msgs exposing (Msg)
-import Wizard.Projects.Routes
+import Wizard.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (appRoute, homeRoute, loginRoute, signupRoute)
-import Wizard.Templates.Routes
-import Wizard.Users.Routes
 
 
 l_ : String -> AppState -> String
@@ -79,7 +74,7 @@ public model content =
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
-    , body = [ html ]
+    , body = [ html, CookieConsent.view model.appState ]
     }
 
 
@@ -93,7 +88,7 @@ publicApp model content =
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
-    , body = [ html ]
+    , body = [ html, CookieConsent.view model.appState ]
     }
 
 
@@ -165,7 +160,7 @@ app model content =
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
-    , body = [ html ]
+    , body = [ html, CookieConsent.view model.appState ]
     }
 
 

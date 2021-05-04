@@ -152,8 +152,12 @@ update msg model =
             )
 
         ( KMDetailMsg kmDetailMsg, KMDetailModel kmDetailModel ) ->
-            ( { model | pageModel = KMDetailModel <| KMDetail.update kmDetailMsg model.appState kmDetailModel }
-            , Cmd.none
+            let
+                ( newKmModel, cmd ) =
+                    KMDetail.update kmDetailMsg model.appState kmDetailModel
+            in
+            ( { model | pageModel = KMDetailModel newKmModel }
+            , cmd
             )
 
         ( LoginMsg loginMsg, LoginModel loginModel ) ->
@@ -200,8 +204,12 @@ update msg model =
             )
 
         ( TemplateDetailMsg templateDetailMsg, TemplateDetailModel templateDetailModel ) ->
-            ( { model | pageModel = TemplateDetailModel <| TemplateDetail.update templateDetailMsg model.appState templateDetailModel }
-            , Cmd.none
+            let
+                ( newTemplateModel, cmd ) =
+                    TemplateDetail.update templateDetailMsg model.appState templateDetailModel
+            in
+            ( { model | pageModel = TemplateDetailModel newTemplateModel }
+            , cmd
             )
 
         _ ->

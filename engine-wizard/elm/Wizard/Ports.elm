@@ -1,9 +1,9 @@
 port module Wizard.Ports exposing
-    ( alert
+    ( acceptCookies
+    , alert
     , clearSession
     , clearSessionAndReload
     , clearUnloadMessage
-    , copyToClipboard
     , createDropzone
     , drawMetricsChart
     , fileContentRead
@@ -82,7 +82,7 @@ port drawMetricsChart : E.Value -> Cmd msg
 
 
 
--- Copy
+-- Cookies
 
 
-port copyToClipboard : String -> Cmd msg
+port acceptCookies : () -> Cmd msg

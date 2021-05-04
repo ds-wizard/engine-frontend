@@ -5,13 +5,14 @@ var axiosRetry = require('axios-retry')
 
 var program = require('./elm/Wizard.elm')
 
+var cookies = require('./ports/cookies')
 var registerChartPorts = require('./ports/chart')
-var registerCopyPorts = require('./ports/copy')
 var registerImportPorts = require('./ports/import')
 var registerPageUnloadPorts = require('./ports/page-unload')
 var registerRefreshPorts = require('./ports/refresh')
 var registerScrollPorts = require('./ports/scroll')
 var registerSessionPorts = require('./ports/session')
+var registerCopyPorts = require('../engine-shared/ports/copy')
 var registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
 
 
@@ -79,7 +80,9 @@ function loadApp(config, provisioning) {
             localProvisioning: localProvisioning(),
             navigator: {
                 pdf: getPdfSupport()
-            }
+            },
+            gaEnabled: cookies.getGaEnabled(),
+            cookieConsent: cookies.getCookieConsent()
         }
     })
 
@@ -91,8 +94,10 @@ function loadApp(config, provisioning) {
     registerScrollPorts(app)
     registerSessionPorts(app)
     registerWebsocketPorts(app)
-}
+    cookies.registerCookiePorts(app)
 
+    cookies.init()
+}
 
 window.onload = function () {
     var promises = [axios.get(configUrl())]

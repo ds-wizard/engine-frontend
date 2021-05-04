@@ -4,7 +4,7 @@ import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onSubmit)
 import Markdown
 import Shared.Auth.Role as Role
 import Shared.Data.User as User exposing (User)
@@ -82,15 +82,11 @@ userView appState model user =
     div [ wideDetailClass "", classList [ ( "hidden", model.currentView /= Profile ) ] ]
         [ Page.header (l_ "navbar.profile" appState) []
         , div [ class "row" ]
-            [ div [ class "col-8" ]
+            [ Html.form [ onSubmit (EditFormMsg Form.Submit), class "col-8" ]
                 [ FormResult.view appState model.savingUser
-                ]
-            ]
-        , div [ class "row" ]
-            [ div [ class "col-8" ]
-                [ userFormView appState user model.userForm (model.uuid == "current") |> Html.map EditFormMsg
+                , userFormView appState user model.userForm (model.uuid == "current") |> Html.map EditFormMsg
                 , div [ class "mt-5" ]
-                    [ ActionButton.button appState (ActionButton.ButtonConfig (l_ "userView.save" appState) model.savingUser (EditFormMsg Form.Submit) False) ]
+                    [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "userView.save" appState) model.savingUser) ]
                 ]
             , div [ class "col-4" ]
                 [ div [ class "col-user-image" ]
@@ -192,12 +188,12 @@ userFormView appState user form current =
 
 passwordView : AppState -> Model -> Html Msg
 passwordView appState model =
-    div [ detailClass "", classList [ ( "hidden", model.currentView /= Password ) ] ]
+    Html.form [ onSubmit (PasswordFormMsg Form.Submit), detailClass "", classList [ ( "hidden", model.currentView /= Password ) ] ]
         [ Page.header (l_ "navbar.password" appState) []
         , FormResult.view appState model.savingPassword
         , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
         , div [ class "mt-5" ]
-            [ ActionButton.button appState (ActionButton.ButtonConfig (l_ "passwordView.save" appState) model.savingPassword (PasswordFormMsg Form.Submit) False) ]
+            [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "passwordView.save" appState) model.savingPassword) ]
         ]
 
 

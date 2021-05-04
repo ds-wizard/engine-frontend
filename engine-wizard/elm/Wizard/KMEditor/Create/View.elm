@@ -1,8 +1,10 @@
 module Wizard.KMEditor.Create.View exposing (view)
 
+import ActionResult
 import Form exposing (Form)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onBlur, onSubmit)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Locale exposing (l, lg)
 import Version
@@ -29,14 +31,28 @@ l_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
+    let
+        pageView =
+            Page.actionResultView appState (viewCreate appState model)
+    in
+    case ( model.selectedPackage, model.edit ) of
+        ( Just _, True ) ->
+            pageView model.package
+
+        _ ->
+            pageView (ActionResult.Success ())
+
+
+viewCreate : AppState -> Model -> a -> Html Msg
+viewCreate appState model _ =
     div [ detailClass "KMEditor__Create" ]
         [ Page.header (l_ "header" appState) []
-        , div []
+        , Html.form [ onSubmit (FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingBranch
             , formView appState model
-            , FormActions.view appState
+            , FormActions.viewSubmit appState
                 Routes.kmEditorIndex
-                (ActionButton.ButtonConfig (l_ "save" appState) model.savingBranch (FormMsg Form.Submit) False)
+                (ActionButton.SubmitConfig (l_ "create" appState) model.savingBranch)
             ]
         ]
 
