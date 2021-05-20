@@ -65,6 +65,10 @@ handleGetConfigCompleted props appState model result =
                     { model | form = props.initForm config, config = Success config }
 
                 Err error ->
+                    let
+                        _ =
+                            Debug.log "error" error
+                    in
                     { model | config = ApiError.toActionResult appState (lg "apiError.config.app.getError" appState) error }
 
         cmd =

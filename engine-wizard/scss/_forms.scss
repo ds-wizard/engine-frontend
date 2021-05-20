@@ -39,6 +39,17 @@ textarea {
     margin-top: -0.75rem;
 }
 
+.form-list-header {
+    display: flex;
+    padding-right: 37px;
+
+    span {
+        flex: 1 1 auto;
+        width: 1%;
+        padding: 0 0.15rem;
+    }
+}
+
 .form-list-error {
     .invalid-feedback {
         display: block;

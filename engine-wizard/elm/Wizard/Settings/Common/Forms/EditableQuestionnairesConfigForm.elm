@@ -22,6 +22,7 @@ type alias EditableQuestionnairesConfigForm =
     , questionnaireVisibilityDefaultValue : QuestionnaireVisibility
     , questionnaireSharingEnabled : Bool
     , questionnaireSharingDefaultValue : QuestionnaireSharing
+    , questionnaireSharingAnonymousEnabled : Bool
     , levels : SimpleFeatureConfig
     , feedbackEnabled : Bool
     , feedbackToken : String
@@ -44,6 +45,7 @@ init config =
             , ( "questionnaireVisibilityDefaultValue", QuestionnaireVisibility.field config.questionnaireVisibility.defaultValue )
             , ( "questionnaireSharingEnabled", Field.bool config.questionnaireSharing.enabled )
             , ( "questionnaireSharingDefaultValue", QuestionnaireSharing.field config.questionnaireSharing.defaultValue )
+            , ( "questionnaireSharingAnonymousEnabled", Field.bool config.questionnaireSharing.anonymousEnabled )
             , ( "levels", SimpleFeatureConfig.field config.levels )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
@@ -62,6 +64,7 @@ validation =
         |> V.andMap (V.field "questionnaireVisibilityDefaultValue" QuestionnaireVisibility.validation)
         |> V.andMap (V.field "questionnaireSharingEnabled" V.bool)
         |> V.andMap (V.field "questionnaireSharingDefaultValue" QuestionnaireSharing.validation)
+        |> V.andMap (V.field "questionnaireSharingAnonymousEnabled" V.bool)
         |> V.andMap (V.field "levels" SimpleFeatureConfig.validation)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
@@ -79,6 +82,7 @@ toEditableQuestionnaireConfig form =
     , questionnaireSharing =
         { enabled = form.questionnaireSharingEnabled
         , defaultValue = form.questionnaireSharingDefaultValue
+        , anonymousEnabled = form.questionnaireSharingAnonymousEnabled
         }
     , levels = form.levels
     , feedback =

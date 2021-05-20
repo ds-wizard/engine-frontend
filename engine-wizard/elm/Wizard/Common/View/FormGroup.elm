@@ -10,6 +10,7 @@ module Wizard.Common.View.FormGroup exposing
     , inputAttrs
     , inputWithTypehints
     , list
+    , listWithHeader
     , markdownEditor
     , optionalWrapper
     , password
@@ -354,6 +355,25 @@ list appState itemView form fieldName labelText =
     in
     div [ class "form-group" ]
         [ label [] [ text labelText ]
+        , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , div [ class "form-list-error" ] [ error ]
+        , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
+            [ lx_ "list.add" appState ]
+        ]
+
+
+listWithHeader : AppState -> Html Form.Msg -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> Html Form.Msg
+listWithHeader appState header itemView form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, _ ) =
+            getErrors appState field labelText
+    in
+    div [ class "form-group" ]
+        [ label [] [ text labelText ]
+        , header
         , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
         , div [ class "form-list-error" ] [ error ]
         , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
