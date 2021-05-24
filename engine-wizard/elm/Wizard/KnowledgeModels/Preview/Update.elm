@@ -6,19 +6,27 @@ module Wizard.KnowledgeModels.Preview.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
 import Dict.Extra as Dict
+import Json.Encode as E
+import Json.Encode.Extra as E
 import Random exposing (Seed)
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.Levels as LevelsApi
 import Shared.Api.Metrics as MetricsApi
 import Shared.Api.Packages as PackagesApi
+import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.PackageDetail as PackageDetail
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
+import Shared.Error.ApiError as ApiError
+import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setKnowledgeModel, setLevels, setMetrics, setPackage)
-import Shared.Utils exposing (getUuidString)
+import Shared.Utils exposing (getUuid, getUuidString)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
@@ -26,6 +34,10 @@ import Wizard.KnowledgeModels.Preview.Models exposing (Model)
 import Wizard.KnowledgeModels.Preview.Msgs exposing (Msg(..))
 import Wizard.Msgs
 import Wizard.Ports as Ports
+import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
+import Wizard.Projects.Routes exposing (Route(..))
+import Wizard.Routes
+import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> String -> Cmd Msg
@@ -49,7 +61,7 @@ update msg wrapMsg appState model =
             initQuestionnaireModel appState <|
                 applyResult appState
                     { setResult = setKnowledgeModel
-                    , defaultError = "Unable to get knowledge model"
+                    , defaultError = lg "apiError.knowledgeModels.preview.fetchError" appState
                     , model = model
                     , result = result
                     }
@@ -58,7 +70,7 @@ update msg wrapMsg appState model =
             initQuestionnaireModel appState <|
                 applyResult appState
                     { setResult = setPackage
-                    , defaultError = "Unable to get package"
+                    , defaultError = lg "apiError.packages.getListError" appState
                     , model = model
                     , result = result
                     }
@@ -67,7 +79,7 @@ update msg wrapMsg appState model =
             withSeed <|
                 applyResult appState
                     { setResult = setLevels
-                    , defaultError = "Unable to get levels"
+                    , defaultError = lg "apiError.levels.getListError" appState
                     , model = model
                     , result = result
                     }
@@ -76,13 +88,89 @@ update msg wrapMsg appState model =
             withSeed <|
                 applyResult appState
                     { setResult = setMetrics
-                    , defaultError = "Unable to get metrics"
+                    , defaultError = lg "apiError.metrics.getListError" appState
                     , model = model
                     , result = result
                     }
 
         QuestionnaireMsg qtnMsg ->
             handleQuestionnaireMsg qtnMsg wrapMsg appState model
+
+        CreateProjectMsg ->
+            case model.questionnaireModel of
+                Success questionnaireModel ->
+                    let
+                        body =
+                            E.object
+                                [ ( "name", E.string questionnaireModel.questionnaire.package.name )
+                                , ( "packageId", E.string questionnaireModel.questionnaire.package.id )
+                                , ( "visibility", QuestionnaireVisibility.encode appState.config.questionnaire.questionnaireVisibility.defaultValue )
+                                , ( "sharing", QuestionnaireSharing.encode QuestionnaireSharing.AnyoneWithLinkEditQuestionnaire )
+                                , ( "tagUuids", E.list E.string [] )
+                                , ( "templateId", E.maybe E.string Nothing )
+                                ]
+
+                        cmd =
+                            Cmd.map wrapMsg <|
+                                QuestionnairesApi.postQuestionnaire body appState PostQuestionnaireCompleted
+                    in
+                    ( appState.seed, { model | creatingQuestionnaire = Loading }, cmd )
+
+                _ ->
+                    ( appState.seed, model, Cmd.none )
+
+        PostQuestionnaireCompleted result ->
+            case result of
+                Ok questionnaire ->
+                    case ( ActionResult.unwrap True (.questionnaire >> .replies >> Dict.isEmpty) model.questionnaireModel, model.questionnaireModel ) of
+                        ( False, Success questionnaireModel ) ->
+                            let
+                                toEvent ( path, reply ) ( seed, list ) =
+                                    let
+                                        ( uuid, nextSeed ) =
+                                            getUuid seed
+
+                                        event =
+                                            SetReply
+                                                { uuid = uuid
+                                                , path = path
+                                                , value = reply.value
+                                                , createdAt = reply.createdAt
+                                                , createdBy = reply.createdBy
+                                                }
+                                    in
+                                    ( nextSeed, event :: list )
+
+                                ( newSeed, events ) =
+                                    Dict.toList questionnaireModel.questionnaire.replies
+                                        |> List.sortBy (Tuple.first >> String.length)
+                                        |> List.foldr toEvent ( appState.seed, [] )
+
+                                cmd =
+                                    Cmd.map wrapMsg <|
+                                        QuestionnairesApi.putQuestionnaireContent questionnaire.uuid events appState (PutQuestionnaireContentComplete questionnaire.uuid)
+                            in
+                            ( newSeed, model, cmd )
+
+                        _ ->
+                            ( appState.seed, model, cmdNavigate appState (Wizard.Routes.ProjectsRoute (DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire)) )
+
+                Err error ->
+                    ( appState.seed
+                    , { model | creatingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.postError" appState) error }
+                    , Cmd.none
+                    )
+
+        PutQuestionnaireContentComplete questionnaireUuid result ->
+            case result of
+                Ok _ ->
+                    ( appState.seed, model, cmdNavigate appState (Wizard.Routes.ProjectsRoute (DetailRoute questionnaireUuid PlanDetailRoute.Questionnaire)) )
+
+                Err error ->
+                    ( appState.seed
+                    , { model | creatingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }
+                    , Cmd.none
+                    )
 
 
 initQuestionnaireModel : AppState -> ( Model, Cmd Wizard.Msgs.Msg ) -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

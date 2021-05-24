@@ -51,6 +51,7 @@ type alias Model =
     , newDocumentModel : NewDocument.Model
     , questionnaireVersionViewModalModel : QuestionnaireVersionViewModal.Model
     , revertModalModel : RevertModal.Model
+    , addingToMyProjects : ActionResult ()
     }
 
 
@@ -74,6 +75,7 @@ init appState uuid =
     , settingsModel = Settings.init Nothing
     , questionnaireVersionViewModalModel = QuestionnaireVersionViewModal.initEmpty
     , revertModalModel = RevertModal.init
+    , addingToMyProjects = Unset
     }
 
 

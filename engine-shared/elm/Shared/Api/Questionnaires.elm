@@ -65,7 +65,7 @@ getQuestionnaireMigration uuid =
 
 postQuestionnaire : Value -> AbstractAppState a -> ToMsg Questionnaire msg -> Cmd msg
 postQuestionnaire =
-    jwtFetch "/questionnaires" Questionnaire.decoder
+    jwtOrHttpFetch "/questionnaires" Questionnaire.decoder
 
 
 cloneQuestionnaire : Uuid -> AbstractAppState a -> ToMsg Questionnaire msg -> Cmd msg
