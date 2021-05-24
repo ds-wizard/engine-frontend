@@ -54,7 +54,7 @@ view model =
                 model.kmPackagesModel
                     |> Wizard.KnowledgeModels.View.view route model.appState
                     |> Html.map KnowledgeModelsMsg
-                    |> Layout.app model
+                    |> Layout.mixedApp model
 
             Routes.ProjectsRoute route ->
                 model.plansModel

@@ -1,11 +1,13 @@
 module Wizard.KnowledgeModels.Update exposing (fetchData, update)
 
+import Random exposing (Seed)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Detail.Update
 import Wizard.KnowledgeModels.Import.Update
 import Wizard.KnowledgeModels.Index.Update
 import Wizard.KnowledgeModels.Models exposing (Model)
 import Wizard.KnowledgeModels.Msgs exposing (Msg(..))
+import Wizard.KnowledgeModels.Preview.Update
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
 
@@ -21,11 +23,15 @@ fetchData route appState =
             Cmd.map IndexMsg <|
                 Wizard.KnowledgeModels.Index.Update.fetchData
 
+        PreviewRoute packageId _ ->
+            Cmd.map ProjectMsg <|
+                Wizard.KnowledgeModels.Preview.Update.fetchData appState packageId
+
         _ ->
             Cmd.none
 
 
-update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         DetailMsg dMsg ->
@@ -33,18 +39,25 @@ update msg wrapMsg appState model =
                 ( detailModel, cmd ) =
                     Wizard.KnowledgeModels.Detail.Update.update dMsg (wrapMsg << DetailMsg) appState model.detailModel
             in
-            ( { model | detailModel = detailModel }, cmd )
+            ( appState.seed, { model | detailModel = detailModel }, cmd )
 
         ImportMsg impMsg ->
             let
                 ( importModel, cmd ) =
                     Wizard.KnowledgeModels.Import.Update.update impMsg (wrapMsg << ImportMsg) appState model.importModel
             in
-            ( { model | importModel = importModel }, cmd )
+            ( appState.seed, { model | importModel = importModel }, cmd )
 
         IndexMsg iMsg ->
             let
                 ( indexModel, cmd ) =
                     Wizard.KnowledgeModels.Index.Update.update iMsg (wrapMsg << IndexMsg) appState model.indexModel
             in
-            ( { model | indexModel = indexModel }, cmd )
+            ( appState.seed, { model | indexModel = indexModel }, cmd )
+
+        ProjectMsg pMsg ->
+            let
+                ( newSeed, projectModel, cmd ) =
+                    Wizard.KnowledgeModels.Preview.Update.update pMsg (wrapMsg << ProjectMsg) appState model.projectModel
+            in
+            ( newSeed, { model | projectModel = projectModel }, cmd )

@@ -7,6 +7,7 @@ import Shared.Utils exposing (dispatch)
 import Url exposing (Url)
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Time as Time
+import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Models exposing (..)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
@@ -53,24 +54,34 @@ init flags location key =
 
 decideInitialRoute : Model -> Url -> Routes.Route -> Routes.Route -> Cmd Msg
 decideInitialRoute model location route originalRoute =
+    let
+        dispatchUrlChange =
+            dispatch (Wizard.Msgs.OnUrlChange location)
+    in
     case route of
         Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
                 ( True, Wizard.Public.Routes.BookReferenceRoute _ ) ->
-                    dispatch (Wizard.Msgs.OnUrlChange location)
+                    dispatchUrlChange
 
                 ( True, _ ) ->
                     cmdNavigate model.appState Routes.DashboardRoute
 
                 _ ->
-                    dispatch (Wizard.Msgs.OnUrlChange location)
+                    dispatchUrlChange
 
         Routes.ProjectsRoute (PlansRoutes.DetailRoute _ _) ->
-            dispatch (Wizard.Msgs.OnUrlChange location)
+            dispatchUrlChange
+
+        Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute _) ->
+            dispatchUrlChange
+
+        Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.PreviewRoute _ _) ->
+            dispatchUrlChange
 
         _ ->
             if userLoggedIn model then
-                dispatch (Wizard.Msgs.OnUrlChange location)
+                dispatchUrlChange
 
             else
                 cmdNavigate model.appState (loginRoute <| Just <| toUrl model.appState originalRoute)
