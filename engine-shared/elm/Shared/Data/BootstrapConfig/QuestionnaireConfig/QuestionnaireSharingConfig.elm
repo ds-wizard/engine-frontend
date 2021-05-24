@@ -12,6 +12,7 @@ import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing ex
 type alias QuestionnaireSharingConfig =
     { enabled : Bool
     , defaultValue : QuestionnaireSharing
+    , anonymousEnabled : Bool
     }
 
 
@@ -20,10 +21,12 @@ decoder =
     D.succeed QuestionnaireSharingConfig
         |> D.required "enabled" D.bool
         |> D.required "defaultValue" QuestionnaireSharing.decoder
+        |> D.required "anonymousEnabled" D.bool
 
 
 default : QuestionnaireSharingConfig
 default =
     { enabled = True
     , defaultValue = QuestionnaireSharing.RestrictedQuestionnaire
+    , anonymousEnabled = False
     }

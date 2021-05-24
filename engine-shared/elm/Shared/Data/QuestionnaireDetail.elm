@@ -8,6 +8,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , getTodos
     , getVersionByEventUuid
     , hasReply
+    , isAnonymousProject
     , isCurrentVersion
     , isEditor
     , isOwner
@@ -109,6 +110,11 @@ isEditor appState questionnaire =
 isOwner : AbstractAppState a -> QuestionnaireDetail -> Bool
 isOwner appState questionnaire =
     hasPerm appState questionnaire QuestionnairePerm.admin
+
+
+isAnonymousProject : QuestionnaireDetail -> Bool
+isAnonymousProject questionnaire =
+    List.isEmpty questionnaire.permissions
 
 
 createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireDetail
