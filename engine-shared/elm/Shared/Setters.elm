@@ -2,6 +2,7 @@ module Shared.Setters exposing
     ( setBookReference
     , setBranches
     , setDocuments
+    , setKnowledgeModel
     , setLevels
     , setMetrics
     , setMigration
@@ -34,6 +35,11 @@ setBranches value record =
 setDocuments : a -> { b | documents : a } -> { b | documents : a }
 setDocuments value record =
     { record | documents = value }
+
+
+setKnowledgeModel : a -> { b | knowledgeModel : a } -> { b | knowledgeModel : a }
+setKnowledgeModel value record =
+    { record | knowledgeModel = value }
 
 
 setLevels : a -> { b | levels : a } -> { b | levels : a }

@@ -7,17 +7,12 @@ module Wizard.KMEditor.Editor.Preview.Models exposing
     , selectNoneTags
     )
 
-import Dict
-import Maybe.Extra as Maybe
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Package as Package
-import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
-import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Uuid
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 
@@ -104,21 +99,4 @@ createQuestionnaireDetail packageId km =
         package =
             Package.dummy
     in
-    { uuid = Uuid.nil
-    , name = ""
-    , visibility = PrivateQuestionnaire
-    , sharing = RestrictedQuestionnaire
-    , permissions = []
-    , package = { package | id = packageId }
-    , knowledgeModel = km
-    , replies = Dict.fromList []
-    , level = 1
-    , selectedTagUuids = []
-    , templateId = Nothing
-    , template = Nothing
-    , formatUuid = Nothing
-    , format = Nothing
-    , labels = Dict.fromList []
-    , events = []
-    , versions = []
-    }
+    QuestionnaireDetail.createQuestionnaireDetail { package | id = packageId } km

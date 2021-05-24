@@ -76,3 +76,14 @@
         }
     }
 }
+
+.public--app {
+    .KnowledgeModels__Detail {
+        margin-top: 0;
+        height: calc(100vh - #{$public-header-height});
+
+        &__Readme, &__SidePanel {
+            height: calc(100vh - #{$top-header-height} - #{$public-header-height});
+        }
+    }
+}

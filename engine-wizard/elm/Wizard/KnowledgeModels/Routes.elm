@@ -7,3 +7,4 @@ type Route
     = DetailRoute String
     | ImportRoute (Maybe String)
     | IndexRoute PaginationQueryString
+    | PreviewRoute String (Maybe String)

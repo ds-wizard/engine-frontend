@@ -11,7 +11,7 @@ module Shared.Api.Packages exposing
 
 import File exposing (File)
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
@@ -45,7 +45,7 @@ getPackagesSuggestions qs =
 
 getPackage : String -> AbstractAppState a -> ToMsg PackageDetail msg -> Cmd msg
 getPackage packageId =
-    jwtGet ("/packages/" ++ packageId) PackageDetail.decoder
+    jwtOrHttpGet ("/packages/" ++ packageId) PackageDetail.decoder
 
 
 deletePackage : String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
