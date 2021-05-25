@@ -363,7 +363,9 @@ viewPlanContent appState route model qm levels metrics =
         ProjectDetailRoute.Settings ->
             if isEditable && isAuthenticated then
                 Html.map SettingsMsg <|
-                    Settings.view appState { questionnaire = QuestionnaireDetail.fromQuestionnaireDetail qm.questionnaire } model.settingsModel
+                    Settings.view appState
+                        { questionnaire = QuestionnaireDetail.fromQuestionnaireDetail qm.questionnaire, package = qm.questionnaire.package }
+                        model.settingsModel
 
             else
                 forbiddenPage
