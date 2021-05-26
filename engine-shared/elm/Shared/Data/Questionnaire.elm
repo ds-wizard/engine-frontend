@@ -11,6 +11,7 @@ import Json.Decode.Pipeline as D
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
 import Shared.Data.Package as Package exposing (Package)
+import Shared.Data.PackageInfo as PackageInfo exposing (PackageInfo)
 import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport exposing (QuestionnaireReport)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
@@ -24,7 +25,7 @@ import Uuid exposing (Uuid)
 type alias Questionnaire =
     { uuid : Uuid
     , name : String
-    , package : Package
+    , package : PackageInfo
     , level : Int
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
@@ -62,7 +63,7 @@ decoder =
     D.succeed Questionnaire
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
-        |> D.required "package" Package.decoder
+        |> D.required "package" PackageInfo.decoder
         |> D.optional "level" D.int 0
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
