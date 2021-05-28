@@ -27,15 +27,19 @@ handleForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Mode
 handleForm formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just signupForm ) ->
-            let
-                body =
-                    SignupForm.encode signupForm
+            if signupForm.acceptFake then
+                ( { model | signingUp = Success "" }, Cmd.none )
 
-                cmd =
-                    Cmd.map wrapMsg <|
-                        UsersApi.postUserPublic body appState PostSignupCompleted
-            in
-            ( { model | signingUp = Loading }, cmd )
+            else
+                let
+                    body =
+                        SignupForm.encode signupForm
+
+                    cmd =
+                        Cmd.map wrapMsg <|
+                            UsersApi.postUserPublic body appState PostSignupCompleted
+                in
+                ( { model | signingUp = Loading }, cmd )
 
         _ ->
             let
