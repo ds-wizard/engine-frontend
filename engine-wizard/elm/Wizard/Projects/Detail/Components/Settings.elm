@@ -17,6 +17,8 @@ import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
+import Shared.Data.Package exposing (Package)
+import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
@@ -29,15 +31,19 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
+import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
 import Wizard.Projects.Detail.Components.Settings.DeleteModal as DeleteModal
+import Wizard.Projects.Routes as ProjectsRoutes
+import Wizard.Routes
 
 
 l_ : String -> AppState -> String
@@ -197,7 +203,9 @@ subscriptions model =
 
 
 type alias ViewConfig =
-    { questionnaire : QuestionnaireDescriptor }
+    { questionnaire : QuestionnaireDescriptor
+    , package : Package
+    }
 
 
 view : AppState -> ViewConfig -> Model -> Html Msg
@@ -206,7 +214,9 @@ view appState cfg model =
         [ div [ detailClass "container" ]
             [ formView appState model
             , hr [] []
-            , dangerZone cfg appState
+            , knowledgeModel appState cfg
+            , hr [] []
+            , dangerZone appState cfg
             ]
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModalModel
         ]
@@ -244,8 +254,25 @@ formView appState model =
         ]
 
 
-dangerZone : ViewConfig -> AppState -> Html Msg
-dangerZone cfg appState =
+knowledgeModel : AppState -> ViewConfig -> Html Msg
+knowledgeModel appState cfg =
+    div []
+        [ h2 [] [ lx_ "knowledgeModel.title" appState ]
+        , linkTo appState
+            (Wizard.Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute cfg.package.id))
+            [ class "package-link" ]
+            [ TypeHintItem.packageSuggestion (PackageSuggestion.fromPackage cfg.package) ]
+        , div [ class "text-right mt-3" ]
+            [ linkTo appState
+                (Wizard.Routes.ProjectsRoute (ProjectsRoutes.CreateMigrationRoute cfg.questionnaire.uuid))
+                [ class "btn btn-outline-secondary migration-link" ]
+                [ lx_ "knowledgeModel.createMigration" appState ]
+            ]
+        ]
+
+
+dangerZone : AppState -> ViewConfig -> Html Msg
+dangerZone appState cfg =
     div []
         [ h2 [] [ lx_ "dangerZone.title" appState ]
         , div [ class "card border-danger" ]

@@ -4,6 +4,7 @@ module Shared.Data.EditableConfig exposing
     , encode
     , updateAuthentication
     , updateDashboard
+    , updateKnowledgeModel
     , updateLookAndFeel
     , updateOrganization
     , updatePrivacyAndSupport
@@ -22,6 +23,7 @@ import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig expo
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig exposing (TemplateConfig)
 import Shared.Data.EditableConfig.EditableAuthenticationConfig as EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
+import Shared.Data.EditableConfig.EditableKnowledgeModelConfig as EditableKnowledgeModelConfig exposing (EditableKnowledgeModelConfig)
 import Shared.Data.EditableConfig.EditableQuestionnairesConfig as EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
 import Shared.Data.EditableConfig.EditableRegistryConfig as EditableRegistryConfig exposing (EditableRegistryConfig)
 import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
@@ -37,6 +39,7 @@ type alias EditableConfig =
     , questionnaires : EditableQuestionnairesConfig
     , submission : EditableSubmissionConfig
     , template : TemplateConfig
+    , knowledgeModel : EditableKnowledgeModelConfig
     }
 
 
@@ -85,6 +88,11 @@ updateTemplate template config =
     { config | template = template }
 
 
+updateKnowledgeModel : EditableKnowledgeModelConfig -> EditableConfig -> EditableConfig
+updateKnowledgeModel knowledgeModel config =
+    { config | knowledgeModel = knowledgeModel }
+
+
 
 -- JSON
 
@@ -101,6 +109,7 @@ decoder =
         |> D.required "questionnaire" EditableQuestionnairesConfig.decoder
         |> D.required "submission" EditableSubmissionConfig.decoder
         |> D.required "template" TemplateConfig.decoder
+        |> D.required "knowledgeModel" EditableKnowledgeModelConfig.decoder
 
 
 encode : EditableConfig -> E.Value
@@ -115,4 +124,5 @@ encode config =
         , ( "questionnaire", EditableQuestionnairesConfig.encode config.questionnaires )
         , ( "submission", EditableSubmissionConfig.encode config.submission )
         , ( "template", TemplateConfig.encode config.template )
+        , ( "knowledgeModel", EditableKnowledgeModelConfig.encode config.knowledgeModel )
         ]

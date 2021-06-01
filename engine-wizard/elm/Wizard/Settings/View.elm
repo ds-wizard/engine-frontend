@@ -8,6 +8,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes
 import Wizard.Settings.Authentication.View
 import Wizard.Settings.Dashboard.View
+import Wizard.Settings.KnowledgeModels.View
 import Wizard.Settings.LookAndFeel.View
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
@@ -70,6 +71,10 @@ view route appState model =
                 TemplateRoute ->
                     Html.map TemplateMsg <|
                         Wizard.Settings.Template.View.view appState model.templateModel
+
+                KnowledgeModelsRoute ->
+                    Html.map KnowledgeModelsMsg <|
+                        Wizard.Settings.KnowledgeModels.View.view appState model.knowledgeModelsModel
     in
     div [ class "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
@@ -107,6 +112,7 @@ navigationUserInterfaceLinks appState =
 navigationContentLinks : AppState -> List ( Route, String )
 navigationContentLinks appState =
     [ ( RegistryRoute, l_ "navigation.registry" appState )
+    , ( KnowledgeModelsRoute, l_ "navigation.knowledgeModels" appState )
     , ( QuestionnairesRoute, l_ "navigation.questionnaires" appState )
     , ( SubmissionRoute, l_ "navigation.submission" appState )
     , ( TemplateRoute, l_ "navigation.template" appState )

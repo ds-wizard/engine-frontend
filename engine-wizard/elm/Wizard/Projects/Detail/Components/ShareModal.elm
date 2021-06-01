@@ -15,6 +15,7 @@ import Html exposing (Html, a, button, div, hr, input, span, strong, text)
 import Html.Attributes exposing (class, classList, id, readonly, title, value)
 import Html.Events exposing (onClick)
 import List.Extra as List
+import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Users as UsersApi
 import Shared.Copy as Copy
@@ -28,6 +29,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgh, lgx, lx)
+import Shared.Utils exposing (getUuid)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -115,29 +117,33 @@ type alias UpdateConfig msg =
     }
 
 
-update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
+update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Seed, Model, Cmd msg )
 update cfg msg appState model =
+    let
+        withSeed ( m, c ) =
+            ( appState.seed, m, c )
+    in
     case msg of
         Open questionnaire ->
-            ( setQuestionnaire questionnaire { model | visible = True }, Cmd.none )
+            withSeed ( setQuestionnaire questionnaire { model | visible = True }, Cmd.none )
 
         Close ->
-            ( { model | visible = False }, Cmd.none )
+            withSeed ( { model | visible = False }, Cmd.none )
 
         UserTypeHintInputMsg typeHintInputMsg ->
-            handleUserTypeHintInputMsg cfg typeHintInputMsg appState model
+            withSeed <| handleUserTypeHintInputMsg cfg typeHintInputMsg appState model
 
         AddUser user ->
-            handleAddUser model user
+            handleAddUser appState.seed model user
 
         FormMsg formMsg ->
-            handleFormMsg cfg formMsg appState model
+            withSeed <| handleFormMsg cfg formMsg appState model
 
         PutQuestionnaireComplete result ->
-            handlePutQuestionnaireComplete appState model result
+            withSeed <| handlePutQuestionnaireComplete appState model result
 
         CopyPublicLink publicLink ->
-            ( model, Copy.copyToClipboard publicLink )
+            withSeed ( model, Copy.copyToClipboard publicLink )
 
 
 handleUserTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserSuggestion -> AppState -> Model -> ( Model, Cmd msg )
@@ -164,8 +170,8 @@ handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
     ( { model | userTypeHintInputModel = userTypeHintInputModel }, cmd )
 
 
-handleAddUser : Model -> UserSuggestion -> ( Model, Cmd msg )
-handleAddUser model user =
+handleAddUser : Seed -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
+handleAddUser seed model user =
     let
         userTypeHintInputModel =
             TypeHintInput.clear model.userTypeHintInputModel
@@ -176,16 +182,25 @@ handleAddUser model user =
         formUpdate =
             Form.update QuestionnaireEditForm.validation
 
+        createInputMessage field value =
+            Form.Input field Form.Text (Field.String value)
+
+        ( newUuid, newSeed ) =
+            getUuid seed
+
         msgs =
             [ Form.Append "permissions"
-            , Form.Input ("permissions." ++ String.fromInt permissionsLength ++ ".member.uuid") Form.Text (Field.String <| Uuid.toString user.uuid)
-            , Form.Input ("permissions." ++ String.fromInt permissionsLength ++ ".perms") Form.Text (Field.String (QuestionnaireEditFormMemberPerms.toString QuestionnaireEditFormMemberPerms.Viewer))
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".uuid") (Uuid.toString newUuid)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".questionnaireUuid") (Uuid.toString model.questionnaireUuid)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".member.uuid") (Uuid.toString user.uuid)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".perms") (QuestionnaireEditFormMemberPerms.toString QuestionnaireEditFormMemberPerms.Viewer)
             ]
 
         newForm =
             List.foldl formUpdate model.questionnaireEditForm msgs
     in
-    ( { model
+    ( newSeed
+    , { model
         | userTypeHintInputModel = userTypeHintInputModel
         , questionnaireEditForm = newForm
         , users = List.uniqueBy (Uuid.toString << .uuid) (user :: model.users)

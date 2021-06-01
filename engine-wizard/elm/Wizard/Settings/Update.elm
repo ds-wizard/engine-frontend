@@ -8,6 +8,7 @@ import Wizard.Msgs
 import Wizard.Settings.Authentication.Update
 import Wizard.Settings.Dashboard.Update
 import Wizard.Settings.Generic.Update
+import Wizard.Settings.KnowledgeModels.Update
 import Wizard.Settings.LookAndFeel.Update
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
@@ -57,6 +58,9 @@ fetchData route appState model =
         TemplateRoute ->
             Cmd.map TemplateMsg <|
                 Wizard.Settings.Template.Update.fetchData appState
+
+        KnowledgeModelsRoute ->
+            genericFetch KnowledgeModelsMsg
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -124,3 +128,10 @@ update wrapMsg msg appState model =
                     Wizard.Settings.Template.Update.update (wrapMsg << TemplateMsg) templateMsg appState model.templateModel
             in
             ( { model | templateModel = templateModel }, cmd )
+
+        KnowledgeModelsMsg knowledgeModelsMsg ->
+            let
+                ( knowledgeModelsModel, cmd ) =
+                    Wizard.Settings.KnowledgeModels.Update.update (wrapMsg << KnowledgeModelsMsg) knowledgeModelsMsg appState model.knowledgeModelsModel
+            in
+            ( { model | knowledgeModelsModel = knowledgeModelsModel }, cmd )

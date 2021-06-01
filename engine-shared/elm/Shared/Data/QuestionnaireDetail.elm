@@ -2,11 +2,13 @@ module Shared.Data.QuestionnaireDetail exposing
     ( QuestionnaireDetail
     , calculateUnansweredQuestionsForChapter
     , clearReplyValue
+    , createQuestionnaireDetail
     , decoder
     , encode
     , getTodos
     , getVersionByEventUuid
     , hasReply
+    , isAnonymousProject
     , isCurrentVersion
     , isEditor
     , isOwner
@@ -108,6 +110,33 @@ isEditor appState questionnaire =
 isOwner : AbstractAppState a -> QuestionnaireDetail -> Bool
 isOwner appState questionnaire =
     hasPerm appState questionnaire QuestionnairePerm.admin
+
+
+isAnonymousProject : QuestionnaireDetail -> Bool
+isAnonymousProject questionnaire =
+    List.isEmpty questionnaire.permissions
+
+
+createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireDetail
+createQuestionnaireDetail package km =
+    { uuid = Uuid.nil
+    , name = ""
+    , visibility = PrivateQuestionnaire
+    , sharing = RestrictedQuestionnaire
+    , permissions = []
+    , package = package
+    , knowledgeModel = km
+    , replies = Dict.fromList []
+    , level = 1
+    , selectedTagUuids = []
+    , templateId = Nothing
+    , template = Nothing
+    , formatUuid = Nothing
+    , format = Nothing
+    , labels = Dict.fromList []
+    , events = []
+    , versions = []
+    }
 
 
 hasPerm : AbstractAppState a -> QuestionnaireDetail -> String -> Bool

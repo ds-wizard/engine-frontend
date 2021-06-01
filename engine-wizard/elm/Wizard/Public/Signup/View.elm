@@ -71,6 +71,9 @@ formView appState form =
         acceptField =
             Form.getFieldAsBool "accept" form
 
+        acceptFakeField =
+            Form.getFieldAsBool "acceptFake" form
+
         hasError =
             case acceptField.liveError of
                 Just _ ->
@@ -120,6 +123,14 @@ formView appState form =
 
                 _ ->
                     emptyNode
+
+        acceptFakeGroup =
+            div [ class "form-group form-group-accept2" ]
+                [ label [ for "accept2" ]
+                    [ Input.checkboxInput acceptFakeField [ id "accept2", name "accept2" ]
+                    , text "I accept this."
+                    ]
+                ]
     in
     div []
         [ FormGroup.input appState form "email" <| lg "user.email" appState
@@ -131,4 +142,5 @@ formView appState form =
         , FormGroup.password appState form "password" <| lg "user.password" appState
         , FormGroup.password appState form "passwordConfirmation" <| lg "user.passwordConfirmation" appState
         , acceptGroup
+        , acceptFakeGroup
         ]

@@ -16,3 +16,4 @@ type Msg
     | QuestionnairesMsg Wizard.Settings.Generic.Msgs.Msg
     | SubmissionMsg Wizard.Settings.Submission.Msgs.Msg
     | TemplateMsg Wizard.Settings.Template.Msgs.Msg
+    | KnowledgeModelsMsg Wizard.Settings.Generic.Msgs.Msg

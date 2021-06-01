@@ -43,3 +43,5 @@ type Msg
     | OpenVersionPreview Uuid Uuid
     | RevertModalMsg RevertModal.Msg
     | OpenRevertModal QuestionnaireEvent
+    | AddToMyProjects
+    | PutQuestionnaireComplete (Result ApiError ())

@@ -13,11 +13,13 @@ import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Components.ActionResultView as ActionResultView
 import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDetail
 import Wizard.Projects.Common.View exposing (visibilityIcons)
@@ -149,7 +151,7 @@ viewPlanNavigationTitleRow appState model questionnaire =
             )
         , div [ class "DetailNavigation__Row__Section" ]
             [ viewPlanNavigationOnlineUsers appState model
-            , viewPlanNavigationActions appState questionnaire
+            , viewPlanNavigationActions appState model questionnaire
             ]
         ]
 
@@ -184,9 +186,23 @@ viewPlanNavigationOnlineUsers appState model =
             )
 
 
-viewPlanNavigationActions : AppState -> QuestionnaireDetail -> Html Msg
-viewPlanNavigationActions appState questionnaire =
-    if QuestionnaireDetail.isOwner appState questionnaire then
+viewPlanNavigationActions : AppState -> Model -> QuestionnaireDetail -> Html Msg
+viewPlanNavigationActions appState model questionnaire =
+    if QuestionnaireDetail.isAnonymousProject questionnaire && Session.exists appState.session then
+        div [ class "DetailNavigation__Row__Section__Actions" ]
+            [ ActionResultView.error model.addingToMyProjects
+            , ActionButton.buttonExtra appState
+                { content =
+                    [ fa "fas fa-plus"
+                    , lx_ "actions.add" appState
+                    ]
+                , result = model.addingToMyProjects
+                , msg = AddToMyProjects
+                , dangerous = False
+                }
+            ]
+
+    else if QuestionnaireDetail.isOwner appState questionnaire then
         div [ class "DetailNavigation__Row__Section__Actions" ]
             [ button
                 [ class "btn btn-info link-with-icon"
@@ -347,7 +363,9 @@ viewPlanContent appState route model qm levels metrics =
         ProjectDetailRoute.Settings ->
             if isEditable && isAuthenticated then
                 Html.map SettingsMsg <|
-                    Settings.view appState { questionnaire = QuestionnaireDetail.fromQuestionnaireDetail qm.questionnaire } model.settingsModel
+                    Settings.view appState
+                        { questionnaire = QuestionnaireDetail.fromQuestionnaireDetail qm.questionnaire, package = qm.questionnaire.package }
+                        model.settingsModel
 
             else
                 forbiddenPage

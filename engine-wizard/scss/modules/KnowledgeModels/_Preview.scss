@@ -1,0 +1,21 @@
+@import "../../variables";
+
+.KnowledgeModels__Preview {
+    margin: -20px 0;
+    width: 100%;
+
+    .questionnaire {
+        height: calc(100vh - #{$top-header-height});
+        margin-top: $top-header-height;
+    }
+}
+
+.public--app {
+    .KnowledgeModels__Preview {
+        margin: 0;
+
+        .questionnaire {
+            height: calc(100vh - #{$public-header-height} - #{$top-header-height});
+        }
+    }
+}

@@ -2,12 +2,15 @@ module Shared.Data.PackageDetail exposing
     ( PackageDetail
     , createFormOptions
     , decoder
+    , toPackage
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackageState as PackageState exposing (PackageState)
+import Time
 import Version exposing (Version)
 
 
@@ -58,6 +61,22 @@ createFormOptions package =
         |> List.sortWith Version.compare
         |> List.filter (Version.greaterThan package.version)
         |> List.map (createFormOption package)
+
+
+toPackage : PackageDetail -> Package
+toPackage package =
+    { id = package.id
+    , name = package.name
+    , organizationId = package.organizationId
+    , kmId = package.kmId
+    , version = package.version
+    , description = package.description
+    , versions = package.versions
+    , organization = package.organization
+    , remoteLatestVersion = Maybe.map Version.toString package.remoteLatestVersion
+    , state = package.state
+    , createdAt = Time.millisToPosix 0
+    }
 
 
 createFormOption : PackageDetail -> Version -> ( String, String )

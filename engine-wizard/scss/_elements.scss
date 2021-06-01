@@ -416,6 +416,13 @@ code {
     }
 }
 
+.public--app {
+    .top-header {
+        top: $public-header-height;
+        left: 0;
+    }
+}
+
 .side-navigation-collapsed {
     .top-header {
         left: $side-navigation-width-collapsed;

@@ -14,6 +14,7 @@ type Route
     | QuestionnairesRoute
     | SubmissionRoute
     | TemplateRoute
+    | KnowledgeModelsRoute
 
 
 defaultRoute : Route

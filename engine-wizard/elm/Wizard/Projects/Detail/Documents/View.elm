@@ -9,6 +9,7 @@ import Markdown
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
 import Shared.Auth.Permission as Perm
+import Shared.Auth.Session as Session
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -78,7 +79,12 @@ listingConfig cfg appState =
     , description = listingDescription cfg appState
     , dropdownItems = listingActions appState cfg
     , textTitle = .name
-    , emptyText = l_ "listing.empty" appState
+    , emptyText =
+        if Session.exists appState.session then
+            l_ "listing.empty" appState
+
+        else
+            l_ "listing.emptyAnonymous" appState
     , updated =
         Just
             { getTime = .createdAt
@@ -92,7 +98,7 @@ listingConfig cfg appState =
         ]
     , toRoute = Routes.ProjectsRoute << DetailRoute cfg.questionnaire.uuid << PlanDetailRoute.Documents
     , toolbarExtra =
-        if cfg.questionnaireEditable then
+        if cfg.questionnaireEditable && Session.exists appState.session then
             Just <|
                 linkTo appState
                     (Routes.ProjectsRoute <| DetailRoute cfg.questionnaire.uuid <| PlanDetailRoute.NewDocument Nothing)

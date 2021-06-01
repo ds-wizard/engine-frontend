@@ -60,10 +60,12 @@ viewPackage appState model package =
 header : AppState -> PackageDetail -> Html Msg
 header appState package =
     let
-        exportAction =
-            a [ class "link-with-icon", href <| PackagesApi.exportPackageUrl package.id appState, target "_blank" ]
-                [ faSet "_global.export" appState
-                , lgx "km.action.export" appState
+        previewAction =
+            linkTo appState
+                (Routes.KnowledgeModelsRoute <| PreviewRoute package.id Nothing)
+                [ class "link-with-icon" ]
+                [ faSet "kmDetail.preview" appState
+                , lgx "km.action.preview" appState
                 ]
 
         createEditorAction =
@@ -90,6 +92,12 @@ header appState package =
                 , lgx "km.action.project" appState
                 ]
 
+        exportAction =
+            a [ class "link-with-icon", href <| PackagesApi.exportPackageUrl package.id appState, target "_blank" ]
+                [ faSet "_global.export" appState
+                , lgx "km.action.export" appState
+                ]
+
         deleteAction =
             a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
                 [ faSet "_global.delete" appState
@@ -98,10 +106,11 @@ header appState package =
 
         actions =
             []
-                |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
+                |> listInsertIf previewAction True
                 |> listInsertIf createEditorAction (Perm.hasPerm appState.session Perm.knowledgeModel)
                 |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
                 |> listInsertIf questionnaireAction (Perm.hasPerm appState.session Perm.questionnaire)
+                |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
                 |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
     in
     div [ class "top-header" ]

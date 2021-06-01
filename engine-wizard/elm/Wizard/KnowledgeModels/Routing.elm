@@ -23,13 +23,19 @@ parsers appState wrapRoute =
     in
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "knowledgeModels.import" appState) <?> Query.string (lr "knowledgeModels.import.packageId" appState))
     , map (detail wrapRoute) (s moduleRoot </> string)
-    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "versions.name")) (PaginationQueryString.parser (s moduleRoot))
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
+    , map (project wrapRoute) (s moduleRoot </> string </> s (lr "knowledgeModels.preview" appState) <?> Query.string (lr "knowledgeModels.preview.questionUuid" appState))
     ]
 
 
 detail : (Route -> a) -> String -> a
 detail wrapRoute packageId =
-    DetailRoute packageId |> wrapRoute
+    wrapRoute <| DetailRoute packageId
+
+
+project : (Route -> a) -> String -> Maybe String -> a
+project wrapRoute packageId mbQuestionUuid =
+    wrapRoute <| PreviewRoute packageId mbQuestionUuid
 
 
 toUrl : AppState -> Route -> List String
@@ -53,10 +59,24 @@ toUrl appState route =
         IndexRoute paginationQueryString ->
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
+        PreviewRoute packageId mbQuestionUuid ->
+            case mbQuestionUuid of
+                Just uuid ->
+                    [ moduleRoot, packageId, lr "knowledgeModels.preview" appState, "?" ++ lr "knowledgeModels.preview.questionUuid" appState ++ "=" ++ uuid ]
+
+                Nothing ->
+                    [ moduleRoot, packageId, lr "knowledgeModels.preview" appState ]
+
 
 isAllowed : Route -> Session -> Bool
 isAllowed route session =
     case route of
+        DetailRoute _ ->
+            True
+
+        PreviewRoute _ _ ->
+            True
+
         ImportRoute _ ->
             Perm.hasPerm session Perm.packageManagementWrite
 

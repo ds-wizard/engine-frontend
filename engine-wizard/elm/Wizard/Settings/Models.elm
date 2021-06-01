@@ -2,6 +2,7 @@ module Wizard.Settings.Models exposing (Model, initLocalModel, initialModel)
 
 import Wizard.Settings.Authentication.Models
 import Wizard.Settings.Dashboard.Models
+import Wizard.Settings.KnowledgeModels.Models
 import Wizard.Settings.LookAndFeel.Models
 import Wizard.Settings.Organization.Models
 import Wizard.Settings.PrivacyAndSupport.Models
@@ -22,6 +23,7 @@ type alias Model =
     , questionnairesModel : Wizard.Settings.Questionnaires.Models.Model
     , documentSubmissionModel : Wizard.Settings.Submission.Models.Model
     , templateModel : Wizard.Settings.Template.Models.Model
+    , knowledgeModelsModel : Wizard.Settings.KnowledgeModels.Models.Model
     }
 
 
@@ -36,6 +38,7 @@ initialModel =
     , questionnairesModel = Wizard.Settings.Questionnaires.Models.initialModel
     , documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel
     , templateModel = Wizard.Settings.Template.Models.initialModel
+    , knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel
     }
 
 
@@ -68,3 +71,6 @@ initLocalModel route model =
 
         TemplateRoute ->
             { model | templateModel = Wizard.Settings.Template.Models.initialModel }
+
+        KnowledgeModelsRoute ->
+            { model | knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel }

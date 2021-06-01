@@ -25,6 +25,7 @@ type alias SignupForm =
     , password : String
     , passwordConfirmation : String
     , accept : Bool
+    , acceptFake : Bool
     }
 
 
@@ -57,6 +58,7 @@ validation =
         |> V.andMap (V.field "password" V.string)
         |> V.andMap (V.field "password" V.string |> V.confirmation "passwordConfirmation")
         |> V.andMap (V.field "accept" validateAcceptField)
+        |> V.andMap (V.field "acceptFake" V.bool)
 
 
 validateAcceptField : Field -> Result (Error customError) Bool

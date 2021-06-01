@@ -8,6 +8,7 @@ import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Data.Document.DocumentState as DocumentState exposing (DocumentState)
 import Shared.Data.Document.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireInfo as QuestionnaireInfo exposing (QuestionnaireInfo)
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Data.UserInfo as UserInfo
 import Time
@@ -18,7 +19,7 @@ type alias Document =
     { uuid : Uuid
     , name : String
     , createdAt : Time.Posix
-    , questionnaire : Maybe Questionnaire
+    , questionnaire : Maybe QuestionnaireInfo
     , questionnaireEventUuid : Maybe Uuid
     , template : DocumentTemplate
     , formatUuid : Uuid
@@ -47,7 +48,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "createdAt" D.datetime
-        |> D.optional "questionnaire" (D.maybe Questionnaire.decoder) Nothing
+        |> D.optional "questionnaire" (D.maybe QuestionnaireInfo.decoder) Nothing
         |> D.required "questionnaireEventUuid" (D.maybe Uuid.decoder)
         |> D.required "template" DocumentTemplate.decoder
         |> D.required "formatUuid" Uuid.decoder

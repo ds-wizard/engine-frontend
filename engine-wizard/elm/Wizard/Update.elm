@@ -189,10 +189,10 @@ update msg model =
 
         Wizard.Msgs.KnowledgeModelsMsg kmPackagesMsg ->
             let
-                ( kmPackagesModel, cmd ) =
+                ( seed, kmPackagesModel, cmd ) =
                     Wizard.KnowledgeModels.Update.update kmPackagesMsg Wizard.Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
             in
-            ( { model | kmPackagesModel = kmPackagesModel }, cmd )
+            ( setSeed seed { model | kmPackagesModel = kmPackagesModel }, cmd )
 
         Wizard.Msgs.PlansMsg plansMsg ->
             let

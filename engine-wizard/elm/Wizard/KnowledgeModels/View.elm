@@ -7,6 +7,7 @@ import Wizard.KnowledgeModels.Import.View
 import Wizard.KnowledgeModels.Index.View
 import Wizard.KnowledgeModels.Models exposing (Model)
 import Wizard.KnowledgeModels.Msgs exposing (Msg(..))
+import Wizard.KnowledgeModels.Preview.View
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 
 
@@ -21,3 +22,6 @@ view route appState model =
 
         IndexRoute _ ->
             Html.map IndexMsg <| Wizard.KnowledgeModels.Index.View.view appState model.indexModel
+
+        PreviewRoute _ _ ->
+            Html.map ProjectMsg <| Wizard.KnowledgeModels.Preview.View.view appState model.projectModel

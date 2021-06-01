@@ -1,6 +1,8 @@
 module Wizard.Projects.Detail.Update exposing (fetchData, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
+import Form
+import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Levels as LevelsApi
 import Shared.Api.Metrics as MetricsApi
@@ -17,6 +19,7 @@ import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
 import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setLevels, setMetrics)
+import Shared.Utils exposing (getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
@@ -27,6 +30,7 @@ import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Msgs
 import Wizard.Ports as Ports
+import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Preview as Preview
@@ -393,10 +397,10 @@ update wrapMsg msg appState model =
                     , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
                     }
 
-                ( shareModalModel, cmd ) =
+                ( newSeed, shareModalModel, cmd ) =
                     ShareModal.update updateConfig shareModalMsg appState model.shareModalModel
             in
-            withSeed ( { model | shareModalModel = shareModalModel }, cmd )
+            ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
 
         SettingsMsg settingsMsg ->
             let
@@ -465,6 +469,63 @@ update wrapMsg msg appState model =
                     RevertModal.setEvent event model.revertModalModel
             in
             withSeed ( { model | revertModalModel = newRevertModalModel }, Cmd.none )
+
+        AddToMyProjects ->
+            case model.questionnaireModel of
+                Success questionnaireModel ->
+                    let
+                        questionnaireDetail =
+                            questionnaireModel.questionnaire
+
+                        member =
+                            { uuid = Maybe.unwrap Uuid.nil .uuid appState.session.user
+                            , firstName = ""
+                            , lastName = ""
+                            , gravatarHash = ""
+                            , imageUrl = Nothing
+                            , type_ = ""
+                            }
+
+                        ( uuid, newSeed ) =
+                            getUuid appState.seed
+
+                        permission =
+                            { uuid = uuid
+                            , questionnaireUuid = questionnaireDetail.uuid
+                            , member = member
+                            , perms = [ "VIEW", "EDIT", "ADMIN" ]
+                            }
+
+                        detail =
+                            { questionnaireDetail | permissions = [ permission ] }
+
+                        questionnaireEditForm =
+                            QuestionnaireEditForm.init detail
+
+                        cmd =
+                            case Form.getOutput questionnaireEditForm of
+                                Just form ->
+                                    Cmd.map wrapMsg <|
+                                        QuestionnairesApi.putQuestionnaire questionnaireDetail.uuid
+                                            (QuestionnaireEditForm.encode form)
+                                            appState
+                                            PutQuestionnaireComplete
+
+                                _ ->
+                                    Cmd.none
+                    in
+                    ( newSeed, { model | addingToMyProjects = Loading }, cmd )
+
+                _ ->
+                    ( appState.seed, model, Cmd.none )
+
+        PutQuestionnaireComplete result ->
+            case result of
+                Ok _ ->
+                    ( appState.seed, model, Ports.refresh () )
+
+                Err error ->
+                    ( appState.seed, { model | addingToMyProjects = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }, Cmd.none )
 
 
 handleWebsocketMsg : WebSocket.RawMsg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
