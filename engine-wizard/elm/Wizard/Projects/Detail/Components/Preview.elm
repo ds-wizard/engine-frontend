@@ -16,6 +16,7 @@ import Http
 import Maybe.Extra as Maybe
 import Process
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Auth.Session as Session
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (faSet)
@@ -160,7 +161,11 @@ viewTemplateNotSet : AppState -> QuestionnaireDetail -> Html msg
 viewTemplateNotSet appState questionnaire =
     let
         content =
-            if QuestionnaireDetail.isOwner appState questionnaire then
+            if not (Session.exists appState.session) then
+                [ p [] [ lx_ "templateNotSet.textAnonymous" appState ]
+                ]
+
+            else if QuestionnaireDetail.isOwner appState questionnaire then
                 [ p [] [ lx_ "templateNotSet.textOwner" appState ]
                 , p []
                     [ linkTo appState

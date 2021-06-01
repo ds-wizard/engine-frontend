@@ -79,7 +79,12 @@ listingConfig cfg appState =
     , description = listingDescription cfg appState
     , dropdownItems = listingActions appState cfg
     , textTitle = .name
-    , emptyText = l_ "listing.empty" appState
+    , emptyText =
+        if Session.exists appState.session then
+            l_ "listing.empty" appState
+
+        else
+            l_ "listing.emptyAnonymous" appState
     , updated =
         Just
             { getTime = .createdAt
