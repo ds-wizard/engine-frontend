@@ -83,7 +83,8 @@ listingConfig appState =
         , ( "createdAt", lg "branch.createdAt" appState )
         , ( "updatedAt", lg "branch.updatedAt" appState )
         ]
-    , toRoute = Routes.KMEditorRoute << IndexRoute
+    , filters = []
+    , toRoute = \_ -> Routes.KMEditorRoute << IndexRoute
     , toolbarExtra = Just (createButton appState)
     }
 

@@ -43,6 +43,10 @@ $nav-row-padding: 16px;
                 text-overflow: ellipsis;
             }
 
+            .badge {
+                margin-left: .5rem;
+            }
+
             .questionnaire-header__saving {
                 color: $gray-600;
                 margin-left: 0.75rem;

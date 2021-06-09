@@ -22,10 +22,10 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { createModel = Wizard.Projects.Create.Models.initialModel appState Nothing
+    { createModel = Wizard.Projects.Create.Models.empty
     , createMigrationModel = Wizard.Projects.CreateMigration.Models.initialModel Uuid.nil
     , detailModel = Detail.init appState Uuid.nil
-    , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty
+    , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing
     , migrationModel = Wizard.Projects.Migration.Models.initialModel Uuid.nil
     }
 
@@ -33,8 +33,8 @@ initialModel appState =
 initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
-        CreateRoute selectedPackage ->
-            { model | createModel = Wizard.Projects.Create.Models.initialModel appState selectedPackage }
+        CreateRoute subroute ->
+            { model | createModel = Wizard.Projects.Create.Models.initialModel appState subroute }
 
         CreateMigrationRoute uuid ->
             { model | createMigrationModel = Wizard.Projects.CreateMigration.Models.initialModel uuid }
@@ -46,8 +46,8 @@ initLocalModel appState route model =
             else
                 { model | detailModel = Detail.initPageModel subroute <| Detail.init appState uuid }
 
-        IndexRoute paginationQueryString ->
-            { model | indexModel = Wizard.Projects.Index.Models.initialModel paginationQueryString }
+        IndexRoute paginationQueryString mbIsTemplate ->
+            { model | indexModel = Wizard.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate }
 
         MigrationRoute uuid ->
             { model | migrationModel = Wizard.Projects.Migration.Models.initialModel uuid }

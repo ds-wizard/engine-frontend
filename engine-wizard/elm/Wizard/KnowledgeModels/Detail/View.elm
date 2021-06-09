@@ -10,6 +10,7 @@ import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
@@ -23,6 +24,7 @@ import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.KnowledgeModels.Detail.Models exposing (..)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (..)
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
+import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 
@@ -84,9 +86,13 @@ header appState package =
                 , lgx "km.action.fork" appState
                 ]
 
+        questionnaireActionVisible =
+            (QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation || Perm.hasPerm appState.session Perm.questionnaireTemplate)
+                && Perm.hasPerm appState.session Perm.questionnaire
+
         questionnaireAction =
             linkTo appState
-                (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Just package.id)
+                (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute <| Just package.id)
                 [ class "link-with-icon" ]
                 [ faSet "kmDetail.createQuestionnaire" appState
                 , lgx "km.action.project" appState
@@ -109,7 +115,7 @@ header appState package =
                 |> listInsertIf previewAction True
                 |> listInsertIf createEditorAction (Perm.hasPerm appState.session Perm.knowledgeModel)
                 |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
-                |> listInsertIf questionnaireAction (Perm.hasPerm appState.session Perm.questionnaire)
+                |> listInsertIf questionnaireAction questionnaireActionVisible
                 |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
                 |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
     in

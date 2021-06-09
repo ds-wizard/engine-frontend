@@ -66,7 +66,8 @@ listingConfig appState =
         , ( "email", lg "user.email" appState )
         , ( "role", lg "user.role" appState )
         ]
-    , toRoute = Routes.UsersRoute << IndexRoute
+    , filters = []
+    , toRoute = \_ -> Routes.UsersRoute << IndexRoute
     , toolbarExtra = Just (createButton appState)
     }
 

@@ -25,6 +25,8 @@ import Uuid exposing (Uuid)
 type alias Questionnaire =
     { uuid : Uuid
     , name : String
+    , description : Maybe String
+    , isTemplate : Bool
     , package : PackageInfo
     , level : Int
     , visibility : QuestionnaireVisibility
@@ -63,6 +65,8 @@ decoder =
     D.succeed Questionnaire
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
+        |> D.required "description" (D.maybe D.string)
+        |> D.required "isTemplate" D.bool
         |> D.required "package" PackageInfo.decoder
         |> D.optional "level" D.int 0
         |> D.required "visibility" QuestionnaireVisibility.decoder

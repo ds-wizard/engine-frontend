@@ -25,7 +25,7 @@ fetchData appState =
     if List.any (\w -> w == DMPWorkflowDashboardWidget || w == LevelsQuestionnaireDashboardWidget) widgets then
         Cmd.batch
             [ LevelsApi.getLevels appState GetLevelsCompleted
-            , QuestionnairesApi.getQuestionnaires pagination appState GetQuestionnairesCompleted
+            , QuestionnairesApi.getQuestionnaires { isTemplate = Just False } pagination appState GetQuestionnairesCompleted
             ]
 
     else

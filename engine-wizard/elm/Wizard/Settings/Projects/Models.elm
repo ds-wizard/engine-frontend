@@ -1,4 +1,4 @@
-module Wizard.Settings.Questionnaires.Models exposing (..)
+module Wizard.Settings.Projects.Models exposing (..)
 
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm as EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
 import Wizard.Settings.Generic.Model as GenericModel

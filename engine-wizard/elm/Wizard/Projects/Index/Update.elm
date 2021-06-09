@@ -4,11 +4,12 @@ module Wizard.Projects.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Shared.Utils exposing (dispatch, flip)
+import Shared.Utils exposing (dispatch, flip, stringToBool)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -20,7 +21,7 @@ import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -86,7 +87,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
         Ok _ ->
             let
                 ( questionnaires, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.questionnaires
+                    Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.questionnaires
             in
             ( { model
                 | deletingMigration = Success <| lg "apiSuccess.questionnaires.migration.delete" appState
@@ -105,7 +106,7 @@ handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Quest
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( questionnaires, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.questionnaires
+            Listing.update (listingUpdateConfig wrapMsg appState model) appState listingMsg model.questionnaires
     in
     ( { model | questionnaires = questionnaires }
     , cmd
@@ -116,10 +117,15 @@ handleListingMsg wrapMsg appState listingMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Questionnaire
-listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnairesApi.getQuestionnaires
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig Questionnaire
+listingUpdateConfig wrapMsg appState model =
+    let
+        isTemplate =
+            Maybe.map stringToBool <|
+                Dict.get indexRouteIsTemplateFilterId model.questionnaires.filters
+    in
+    { getRequest = QuestionnairesApi.getQuestionnaires { isTemplate = isTemplate }
     , getError = lg "apiError.questionnaires.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.ProjectsRoute << IndexRoute
+    , toRoute = Routes.projectIndexWithFilters model.questionnaires.filters
     }

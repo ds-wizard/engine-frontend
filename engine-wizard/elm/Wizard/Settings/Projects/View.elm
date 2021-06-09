@@ -1,8 +1,9 @@
-module Wizard.Settings.Questionnaires.View exposing (view)
+module Wizard.Settings.Projects.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (Html, div, hr)
 import Html.Attributes exposing (class)
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Form.FormError exposing (FormError)
@@ -14,17 +15,17 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
 import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.View as GenericView
-import Wizard.Settings.Questionnaires.Models exposing (Model)
+import Wizard.Settings.Projects.Models exposing (Model)
 
 
 l_ : String -> AppState -> String
 l_ =
-    l "Wizard.Settings.Questionnaires.View"
+    l "Wizard.Settings.Projects.View"
 
 
 lx_ : String -> AppState -> Html msg
 lx_ =
-    lx "Wizard.Settings.Questionnaires.View"
+    lx "Wizard.Settings.Projects.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -85,6 +86,8 @@ formView appState form =
          ]
             ++ anonymousProjectEnabledInput
             ++ [ hr [] []
+               , FormGroup.richRadioGroup appState (QuestionnaireCreation.richFormOptions appState) form "questionnaireCreation" (l_ "form.questionnaireCreation" appState)
+               , hr [] []
                , FormGroup.toggle form "levels" (l_ "form.phases" appState)
                , FormExtra.mdAfter (l_ "form.phases.desc" appState)
                , FormGroup.toggle form "summaryReport" (l_ "form.summaryReport" appState)

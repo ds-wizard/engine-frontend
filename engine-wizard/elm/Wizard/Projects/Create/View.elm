@@ -1,24 +1,21 @@
 module Wizard.Projects.Create.View exposing (view)
 
-import Form exposing (Form)
 import Html exposing (..)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onSubmit)
-import Shared.Locale exposing (l, lg)
-import Version
+import Html.Attributes exposing (class, classList)
+import Shared.Auth.Permission as Permission
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
+import Shared.Html exposing (emptyNode)
+import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.TypeHintInput as TypeHintInput
-import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (detailClass)
-import Wizard.Common.View.ActionButton as ActionResult
-import Wizard.Common.View.FormActions as FormActions
-import Wizard.Common.View.FormGroup as FormGroup
-import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
-import Wizard.Common.View.Tag as Tag
-import Wizard.Projects.Create.Models exposing (Model)
+import Wizard.Projects.Create.CustomCreate.View as CustomCreateView
+import Wizard.Projects.Create.Models exposing (CreateModel(..), Model)
 import Wizard.Projects.Create.Msgs exposing (Msg(..))
+import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
+import Wizard.Projects.Create.TemplateCreate.View as TemplateCreateView
+import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -27,55 +24,59 @@ l_ =
     l "Wizard.Projects.Create.View"
 
 
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.Projects.Create.View"
+
+
 view : AppState -> Model -> Html Msg
 view appState model =
+    let
+        ( templateActive, content ) =
+            case model.createModel of
+                TemplateCreateModel templateCreateModel ->
+                    ( True
+                    , Html.map TemplateCreateMsg <| TemplateCreateView.view appState templateCreateModel
+                    )
+
+                CustomCreateModel customCreateModel ->
+                    ( False
+                    , Html.map CustomCreateMsg <| CustomCreateView.view appState customCreateModel
+                    )
+
+        navbar =
+            if appState.config.questionnaire.questionnaireCreation == QuestionnaireCreation.TemplateAndCustomQuestionnaireCreation || Permission.hasPerm appState.session Permission.questionnaireTemplate then
+                viewNavbar appState templateActive
+
+            else
+                emptyNode
+    in
     div [ detailClass "Questionnaires__Create" ]
         [ Page.header (l_ "header.title" appState) []
-        , div [ onSubmit (FormMsg Form.Submit) ]
-            [ FormResult.view appState model.savingQuestionnaire
-            , formView appState model
-            , tagsView appState model
-            , FormActions.view appState
-                Routes.projectsIndex
-                (ActionResult.ButtonConfig (l_ "header.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
+        , navbar
+        , content
+        ]
+
+
+viewNavbar : AppState -> Bool -> Html Msg
+viewNavbar appState templateActive =
+    ul [ class "nav nav-tabs" ]
+        [ li [ class "nav-item" ]
+            [ linkTo appState
+                (Routes.ProjectsRoute <| CreateRoute <| TemplateCreateRoute Nothing)
+                [ class "nav-link link-with-icon"
+                , classList [ ( "active", templateActive ) ]
+                ]
+                [ lx_ "navbar.fromTemplate" appState
+                ]
+            ]
+        , li [ class "nav-item" ]
+            [ linkTo appState
+                (Routes.ProjectsRoute <| CreateRoute <| CustomCreateRoute Nothing)
+                [ class "nav-link link-with-icon"
+                , classList [ ( "active", not templateActive ) ]
+                ]
+                [ lx_ "navbar.custom" appState
+                ]
             ]
         ]
-
-
-formView : AppState -> Model -> Html Msg
-formView appState model =
-    let
-        cfg =
-            { viewItem = TypeHintItem.packageSuggestion
-            , wrapMsg = PackageTypeHintInputMsg
-            , nothingSelectedItem = text "--"
-            , clearEnabled = True
-            }
-
-        typeHintInput =
-            TypeHintInput.view appState cfg model.packageTypeHintInputModel
-
-        parentInput =
-            case model.selectedPackage of
-                Just package ->
-                    FormGroup.codeView package
-
-                Nothing ->
-                    FormGroup.formGroupCustom typeHintInput appState model.form "packageId"
-    in
-    div []
-        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
-        , parentInput <| lg "knowledgeModel" appState
-        ]
-
-
-tagsView : AppState -> Model -> Html Msg
-tagsView appState model =
-    let
-        tagListConfig =
-            { selected = model.selectedTags
-            , addMsg = AddTag
-            , removeMsg = RemoveTag
-            }
-    in
-    Tag.selection appState tagListConfig model.knowledgeModelPreview
