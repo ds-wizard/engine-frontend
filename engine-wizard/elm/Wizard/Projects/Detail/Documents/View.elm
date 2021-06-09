@@ -96,7 +96,8 @@ listingConfig cfg appState =
         [ ( "name", lg "document.name" appState )
         , ( "createdAt", lg "document.createdAt" appState )
         ]
-    , toRoute = Routes.ProjectsRoute << DetailRoute cfg.questionnaire.uuid << PlanDetailRoute.Documents
+    , filters = []
+    , toRoute = \_ -> Routes.ProjectsRoute << DetailRoute cfg.questionnaire.uuid << PlanDetailRoute.Documents
     , toolbarExtra =
         if cfg.questionnaireEditable && Session.exists appState.session then
             Just <|

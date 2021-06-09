@@ -10,7 +10,7 @@ import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa)
-import Shared.Locale exposing (l, lx)
+import Shared.Locale exposing (l, lgx, lx)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
@@ -146,6 +146,7 @@ viewPlanNavigationTitleRow appState model questionnaire =
     div [ class "DetailNavigation__Row" ]
         [ div [ class "DetailNavigation__Row__Section" ]
             (div [ class "title" ] [ text questionnaire.name ]
+                :: templateBadge appState questionnaire
                 :: visibilityIcons appState questionnaire
                 ++ [ viewPlanNavigationPlanSaving appState model ]
             )
@@ -154,6 +155,16 @@ viewPlanNavigationTitleRow appState model questionnaire =
             , viewPlanNavigationActions appState model questionnaire
             ]
         ]
+
+
+templateBadge : AppState -> QuestionnaireDetail -> Html msg
+templateBadge appState questionnaire =
+    if questionnaire.isTemplate then
+        span [ class "badge badge-info" ]
+            [ lgx "questionnaire.templateBadge" appState ]
+
+    else
+        emptyNode
 
 
 viewPlanNavigationPlanSaving : AppState -> Model -> Html Msg

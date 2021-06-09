@@ -54,6 +54,8 @@ import Uuid exposing (Uuid)
 type alias QuestionnaireDetail =
     { uuid : Uuid
     , name : String
+    , description : Maybe String
+    , isTemplate : Bool
     , package : Package
     , knowledgeModel : KnowledgeModel
     , replies : Dict String Reply
@@ -77,6 +79,8 @@ decoder =
     D.succeed QuestionnaireDetail
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
+        |> D.required "description" (D.maybe D.string)
+        |> D.required "isTemplate" D.bool
         |> D.required "package" Package.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" (D.dict Reply.decoder)
@@ -121,6 +125,8 @@ createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireDetail
 createQuestionnaireDetail package km =
     { uuid = Uuid.nil
     , name = ""
+    , description = Nothing
+    , isTemplate = False
     , visibility = PrivateQuestionnaire
     , sharing = RestrictedQuestionnaire
     , permissions = []

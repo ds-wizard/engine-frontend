@@ -3,6 +3,7 @@ module Wizard.Common.Components.Listing.Update exposing (UpdateConfig, fetchData
 import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
 import Debouncer.Extra as Debouncer
+import Dict
 import Shared.Api exposing (ToMsg)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
@@ -50,6 +51,9 @@ update cfg appState msg model =
 
         SortDropdownMsg state ->
             ( { model | sortDropdownState = state }, Cmd.none )
+
+        FilterDropdownMsg filterId state ->
+            ( { model | filterDropdownStates = Dict.insert filterId state model.filterDropdownStates }, Cmd.none )
 
         Reload ->
             ( { model | pagination = Loading, items = [] }

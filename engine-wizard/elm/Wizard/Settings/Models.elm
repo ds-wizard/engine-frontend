@@ -6,7 +6,7 @@ import Wizard.Settings.KnowledgeModels.Models
 import Wizard.Settings.LookAndFeel.Models
 import Wizard.Settings.Organization.Models
 import Wizard.Settings.PrivacyAndSupport.Models
-import Wizard.Settings.Questionnaires.Models
+import Wizard.Settings.Projects.Models
 import Wizard.Settings.Registry.Models
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Models
@@ -20,7 +20,7 @@ type alias Model =
     , dashboardModel : Wizard.Settings.Dashboard.Models.Model
     , lookAndFeelModel : Wizard.Settings.LookAndFeel.Models.Model
     , registryModel : Wizard.Settings.Registry.Models.Model
-    , questionnairesModel : Wizard.Settings.Questionnaires.Models.Model
+    , questionnairesModel : Wizard.Settings.Projects.Models.Model
     , documentSubmissionModel : Wizard.Settings.Submission.Models.Model
     , templateModel : Wizard.Settings.Template.Models.Model
     , knowledgeModelsModel : Wizard.Settings.KnowledgeModels.Models.Model
@@ -35,7 +35,7 @@ initialModel =
     , dashboardModel = Wizard.Settings.Dashboard.Models.initialModel
     , lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel
     , registryModel = Wizard.Settings.Registry.Models.initialModel
-    , questionnairesModel = Wizard.Settings.Questionnaires.Models.initialModel
+    , questionnairesModel = Wizard.Settings.Projects.Models.initialModel
     , documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel
     , templateModel = Wizard.Settings.Template.Models.initialModel
     , knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel
@@ -63,8 +63,8 @@ initLocalModel route model =
         RegistryRoute ->
             { model | registryModel = Wizard.Settings.Registry.Models.initialModel }
 
-        QuestionnairesRoute ->
-            { model | questionnairesModel = Wizard.Settings.Questionnaires.Models.initialModel }
+        ProjectsRoute ->
+            { model | questionnairesModel = Wizard.Settings.Projects.Models.initialModel }
 
         SubmissionRoute ->
             { model | documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel }

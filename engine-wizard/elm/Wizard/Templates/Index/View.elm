@@ -78,7 +78,8 @@ listingConfig appState =
     , sortOptions =
         [ ( "name", lg "template.name" appState )
         ]
-    , toRoute = Routes.TemplatesRoute << IndexRoute
+    , filters = []
+    , toRoute = \_ -> Routes.TemplatesRoute << IndexRoute
     , toolbarExtra = Just (createButton appState)
     }
 

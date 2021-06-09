@@ -117,7 +117,8 @@ listingConfig appState model mbQuestionnaireFilterView =
         [ ( "name", lg "document.name" appState )
         , ( "createdAt", lg "document.createdAt" appState )
         ]
-    , toRoute = Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
+    , filters = []
+    , toRoute = \_ -> Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
     , toolbarExtra = mbQuestionnaireFilterView
     }
 

@@ -14,7 +14,7 @@ import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.View
 import Wizard.Settings.PrivacyAndSupport.View
-import Wizard.Settings.Questionnaires.View
+import Wizard.Settings.Projects.View
 import Wizard.Settings.Registry.View
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.View
@@ -60,9 +60,9 @@ view route appState model =
                     Html.map RegistryMsg <|
                         Wizard.Settings.Registry.View.view appState model.registryModel
 
-                QuestionnairesRoute ->
+                ProjectsRoute ->
                     Html.map QuestionnairesMsg <|
-                        Wizard.Settings.Questionnaires.View.view appState model.questionnairesModel
+                        Wizard.Settings.Projects.View.view appState model.questionnairesModel
 
                 SubmissionRoute ->
                     Html.map SubmissionMsg <|
@@ -113,7 +113,7 @@ navigationContentLinks : AppState -> List ( Route, String )
 navigationContentLinks appState =
     [ ( RegistryRoute, l_ "navigation.registry" appState )
     , ( KnowledgeModelsRoute, l_ "navigation.knowledgeModels" appState )
-    , ( QuestionnairesRoute, l_ "navigation.questionnaires" appState )
+    , ( ProjectsRoute, l_ "navigation.projects" appState )
     , ( SubmissionRoute, l_ "navigation.submission" appState )
     , ( TemplateRoute, l_ "navigation.template" appState )
     ]

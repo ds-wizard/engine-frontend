@@ -10,6 +10,7 @@ import Shared.Error.ApiError exposing (ApiError)
 type Msg a
     = ItemDropdownMsg Int Dropdown.State
     | SortDropdownMsg Dropdown.State
+    | FilterDropdownMsg String Dropdown.State
     | Reload
     | ReloadBackground
     | GetItemsComplete PaginationQueryString (Result ApiError (Pagination a))

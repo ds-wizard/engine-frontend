@@ -14,6 +14,7 @@ module Shared.Api.Questionnaires exposing
     , getSummaryReport
     , headDocumentPreview
     , postQuestionnaire
+    , postQuestionnaireFromTemplate
     , postRevert
     , postVersion
     , putQuestionnaire
@@ -38,14 +39,27 @@ import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent 
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport as SummaryReport exposing (SummaryReport)
+import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 
 
-getQuestionnaires : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
-getQuestionnaires qs =
+type alias GetQuestionnaireFilters =
+    { isTemplate : Maybe Bool }
+
+
+getQuestionnaires : GetQuestionnaireFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
+getQuestionnaires filters qs =
     let
+        extraParams =
+            case filters.isTemplate of
+                Just isTemplate ->
+                    [ ( "isTemplate", boolToString isTemplate ) ]
+
+                Nothing ->
+                    []
+
         queryString =
-            PaginationQueryString.toApiUrl qs
+            PaginationQueryString.toApiUrlWith extraParams qs
 
         url =
             "/questionnaires" ++ queryString
@@ -68,9 +82,14 @@ postQuestionnaire =
     jwtOrHttpFetch "/questionnaires" Questionnaire.decoder
 
 
+postQuestionnaireFromTemplate : Value -> AbstractAppState a -> ToMsg Questionnaire msg -> Cmd msg
+postQuestionnaireFromTemplate =
+    jwtOrHttpFetch "/questionnaires/from-template" Questionnaire.decoder
+
+
 cloneQuestionnaire : Uuid -> AbstractAppState a -> ToMsg Questionnaire msg -> Cmd msg
 cloneQuestionnaire uuid =
-    jwtFetchEmpty ("/questionnaires?cloneUuid=" ++ Uuid.toString uuid) Questionnaire.decoder
+    jwtFetchEmpty ("/questionnaires/" ++ Uuid.toString uuid ++ "/clone") Questionnaire.decoder
 
 
 fetchQuestionnaireMigration : Uuid -> Value -> AbstractAppState a -> ToMsg QuestionnaireMigration msg -> Cmd msg

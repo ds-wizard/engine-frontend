@@ -11,6 +11,7 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Shared.Data.EditableConfig.EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation exposing (QuestionnaireCreation)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Shared.Form.FormError exposing (FormError)
@@ -23,6 +24,7 @@ type alias EditableQuestionnairesConfigForm =
     , questionnaireSharingEnabled : Bool
     , questionnaireSharingDefaultValue : QuestionnaireSharing
     , questionnaireSharingAnonymousEnabled : Bool
+    , questionnaireCreation : QuestionnaireCreation
     , levels : SimpleFeatureConfig
     , feedbackEnabled : Bool
     , feedbackToken : String
@@ -46,6 +48,7 @@ init config =
             , ( "questionnaireSharingEnabled", Field.bool config.questionnaireSharing.enabled )
             , ( "questionnaireSharingDefaultValue", QuestionnaireSharing.field config.questionnaireSharing.defaultValue )
             , ( "questionnaireSharingAnonymousEnabled", Field.bool config.questionnaireSharing.anonymousEnabled )
+            , ( "questionnaireCreation", QuestionnaireCreation.field config.questionnaireCreation )
             , ( "levels", SimpleFeatureConfig.field config.levels )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
@@ -65,6 +68,7 @@ validation =
         |> V.andMap (V.field "questionnaireSharingEnabled" V.bool)
         |> V.andMap (V.field "questionnaireSharingDefaultValue" QuestionnaireSharing.validation)
         |> V.andMap (V.field "questionnaireSharingAnonymousEnabled" V.bool)
+        |> V.andMap (V.field "questionnaireCreation" QuestionnaireCreation.validation)
         |> V.andMap (V.field "levels" SimpleFeatureConfig.validation)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
@@ -84,6 +88,7 @@ toEditableQuestionnaireConfig form =
         , defaultValue = form.questionnaireSharingDefaultValue
         , anonymousEnabled = form.questionnaireSharingAnonymousEnabled
         }
+    , questionnaireCreation = form.questionnaireCreation
     , levels = form.levels
     , feedback =
         { enabled = form.feedbackEnabled

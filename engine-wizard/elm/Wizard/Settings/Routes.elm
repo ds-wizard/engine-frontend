@@ -11,7 +11,7 @@ type Route
     | DashboardRoute
     | LookAndFeelRoute
     | RegistryRoute
-    | QuestionnairesRoute
+    | ProjectsRoute
     | SubmissionRoute
     | TemplateRoute
     | KnowledgeModelsRoute

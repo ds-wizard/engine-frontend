@@ -5,9 +5,11 @@ import Html exposing (Html, a, div, img, p, text)
 import Html.Attributes exposing (class, href, src)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
@@ -35,6 +37,14 @@ view appState questionnaires =
             questionnaires
                 |> ActionResult.map (List.length >> (==) 0)
                 |> ActionResult.withDefault False
+
+        createRoute =
+            CreateRoute <|
+                if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
+                    TemplateCreateRoute Nothing
+
+                else
+                    CustomCreateRoute Nothing
     in
     if visible then
         div [ class "DMPWorkflowWidget" ]
@@ -64,7 +74,7 @@ view appState questionnaires =
                     ]
                 ]
             , div [ class "DMPWorkflowWidget__Start" ]
-                [ a [ class "btn btn-primary", href <| Routing.toUrl appState <| Routes.ProjectsRoute <| CreateRoute Nothing ]
+                [ a [ class "btn btn-primary", href <| Routing.toUrl appState <| Routes.ProjectsRoute createRoute ]
                     [ lx_ "startPlanning" appState ]
                 ]
             ]

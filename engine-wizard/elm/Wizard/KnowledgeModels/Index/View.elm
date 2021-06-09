@@ -6,6 +6,7 @@ import Shared.Api.Packages as PackagesApi
 import Shared.Auth.Permission as Perm
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackageState as PackageState
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf)
@@ -21,6 +22,7 @@ import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Index.Models exposing (..)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
+import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 
@@ -82,7 +84,8 @@ listingConfig appState =
         [ ( "name", lg "package.name" appState )
         , ( "createdAt", lg "package.createdAt" appState )
         ]
-    , toRoute = Routes.KnowledgeModelsRoute << IndexRoute
+    , filters = []
+    , toRoute = \_ -> Routes.KnowledgeModelsRoute << IndexRoute
     , toolbarExtra = Just (createButton appState)
     }
 
@@ -181,12 +184,16 @@ listingActions appState package =
                 , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute (Just package.id) Nothing)
                 }
 
+        questionnaireActionVisible =
+            QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation
+                && Perm.hasPerm appState.session Perm.questionnaire
+
         questionnaireAction =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmDetail.createQuestionnaire" appState
                 , label = lg "km.action.project" appState
-                , msg = ListingActionLink (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Just package.id)
+                , msg = ListingActionLink (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute <| Just package.id)
                 }
 
         deleteAction =
@@ -200,10 +207,10 @@ listingActions appState package =
     []
         |> listInsertIf viewAction True
         |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
-        |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.knowledgeModel || Perm.hasPerm appState.session Perm.questionnaire)
+        |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.knowledgeModel || questionnaireActionVisible)
         |> listInsertIf createKMEditor (Perm.hasPerm appState.session Perm.knowledgeModel)
         |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
-        |> listInsertIf questionnaireAction (Perm.hasPerm appState.session Perm.questionnaire)
+        |> listInsertIf questionnaireAction questionnaireActionVisible
         |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.packageManagementWrite)
         |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
 
