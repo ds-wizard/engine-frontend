@@ -1,13 +1,15 @@
 module Wizard.Projects.Create.CustomCreate.View exposing (..)
 
+import ActionResult
 import Form exposing (Form)
 import Html exposing (..)
+import Html.Attributes exposing (disabled)
 import Html.Events exposing (onSubmit)
 import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
-import Wizard.Common.View.ActionButton as ActionResult
+import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
@@ -24,13 +26,25 @@ l_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
+    let
+        buttonConfig =
+            { label = l_ "form.save" appState
+            , result = model.savingQuestionnaire
+            , msg = FormMsg Form.Submit
+            , dangerous = False
+            , attrs = [ disabled (ActionResult.isLoading model.knowledgeModelPreview) ]
+            }
+
+        submitButton =
+            ActionButton.buttonWithAttrs appState buttonConfig
+    in
     div [ onSubmit (FormMsg Form.Submit) ]
         [ FormResult.view appState model.savingQuestionnaire
         , formView appState model
         , tagsView appState model
-        , FormActions.view appState
+        , FormActions.viewCustomButton appState
             Routes.projectsIndex
-            (ActionResult.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
+            submitButton
         ]
 
 
