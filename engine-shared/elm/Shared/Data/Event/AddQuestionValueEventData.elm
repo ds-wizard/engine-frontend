@@ -14,7 +14,7 @@ import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueTyp
 type alias AddQuestionValueEventData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhaseUuid : Maybe String
     , tagUuids : List String
     , valueType : QuestionValueType
     }
@@ -25,7 +25,7 @@ decoder =
     D.succeed AddQuestionValueEventData
         |> D.required "title" D.string
         |> D.required "text" (D.nullable D.string)
-        |> D.required "requiredLevel" (D.nullable D.int)
+        |> D.required "requiredPhaseUuid" (D.nullable D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "valueType" QuestionValueType.decoder
 
@@ -35,7 +35,7 @@ encode data =
     [ ( "questionType", E.string "ValueQuestion" )
     , ( "title", E.string data.title )
     , ( "text", E.maybe E.string data.text )
-    , ( "requiredLevel", E.maybe E.int data.requiredLevel )
+    , ( "requiredPhaseUuid", E.maybe E.string data.requiredPhaseUuid )
     , ( "tagUuids", E.list E.string data.tagUuids )
     , ( "valueType", QuestionValueType.encode data.valueType )
     ]

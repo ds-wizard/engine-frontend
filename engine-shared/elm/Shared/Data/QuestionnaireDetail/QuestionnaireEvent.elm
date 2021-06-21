@@ -17,7 +17,7 @@ import Json.Encode as E
 import List.Extra as List
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData as ClearReplyData exposing (ClearReplyData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetLabelsData as SetLabelsData exposing (SetLabelsData)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetLevelData as SetLevelData exposing (SetLevelData)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData as SetPhaseData exposing (SetPhaseData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData exposing (SetReplyData)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
@@ -28,7 +28,7 @@ import Uuid exposing (Uuid)
 type QuestionnaireEvent
     = SetReply SetReplyData
     | ClearReply ClearReplyData
-    | SetLevel SetLevelData
+    | SetPhase SetPhaseData
     | SetLabels SetLabelsData
 
 
@@ -47,8 +47,8 @@ decoderByType actionType =
         "ClearReplyEvent" ->
             D.map ClearReply ClearReplyData.decoder
 
-        "SetLevelEvent" ->
-            D.map SetLevel SetLevelData.decoder
+        "SetPhaseEvent" ->
+            D.map SetPhase SetPhaseData.decoder
 
         "SetLabelsEvent" ->
             D.map SetLabels SetLabelsData.decoder
@@ -62,7 +62,7 @@ encode =
     map
         SetReplyData.encode
         ClearReplyData.encode
-        SetLevelData.encode
+        SetPhaseData.encode
         SetLabelsData.encode
 
 
@@ -137,7 +137,7 @@ getQuestionUuid =
     Maybe.andThen (List.last << String.split ".") << getPath
 
 
-map : (SetReplyData -> a) -> (ClearReplyData -> a) -> (SetLevelData -> a) -> (SetLabelsData -> a) -> QuestionnaireEvent -> a
+map : (SetReplyData -> a) -> (ClearReplyData -> a) -> (SetPhaseData -> a) -> (SetLabelsData -> a) -> QuestionnaireEvent -> a
 map mapSetReply mapClearReply mapSetLevel mapSetLabels event =
     case event of
         SetReply data ->
@@ -146,7 +146,7 @@ map mapSetReply mapClearReply mapSetLevel mapSetLabels event =
         ClearReply data ->
             mapClearReply data
 
-        SetLevel data ->
+        SetPhase data ->
             mapSetLevel data
 
         SetLabels data ->

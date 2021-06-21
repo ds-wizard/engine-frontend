@@ -4,6 +4,8 @@ module Shared.Data.EventTest exposing
     , addChoiceEventTest
     , addExpertEventTest
     , addIntegrationEventTest
+    , addMetricEventTest
+    , addPhaseEventTest
     , addQuestionEventTest
     , addReferenceEventTest
     , addTagEventTest
@@ -12,6 +14,8 @@ module Shared.Data.EventTest exposing
     , deleteChoiceEventTest
     , deleteExpertEventTest
     , deleteIntegrationEventTest
+    , deleteMetricEventTest
+    , deletePhaseEventTest
     , deleteQuestionEventTest
     , deleteReferenceEventTest
     , deleteTagEventTest
@@ -21,6 +25,8 @@ module Shared.Data.EventTest exposing
     , editExpertEventTest
     , editIntegrationEventTest
     , editKnowledgeModelEventTest
+    , editMetricEventTest
+    , editPhaseEventTest
     , editQuestionEventTest
     , editReferenceEventTest
     , editTagEventTest
@@ -63,6 +69,14 @@ editKnowledgeModelEvent =
             { changed = False
             , value = Nothing
             }
+        , metricUuids =
+            { changed = False
+            , value = Nothing
+            }
+        , phaseUuids =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
         , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
@@ -81,28 +95,7 @@ editKnowledgeModelEventTest =
                 Expect.equal "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac" (Event.getUuid editKnowledgeModelEvent)
         , test "get event entity visible name when not changed" <|
             \_ ->
-                let
-                    event =
-                        EditKnowledgeModelEvent
-                            { chapterUuids =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , tagUuids =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , integrationUuids =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
-                            , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-                            , parentUuid = nilUuid
-                            }
-                in
-                Expect.equal Nothing (Event.getEntityVisibleName event)
+                Expect.equal Nothing (Event.getEntityVisibleName editKnowledgeModelEvent)
         , test "get event entity visible name when changed" <|
             \_ ->
                 Expect.equal Nothing (Event.getEntityVisibleName editKnowledgeModelEvent)
@@ -222,6 +215,229 @@ deleteChapterEventTest =
         , test "get entity visible name" <|
             \_ ->
                 Expect.equal Nothing (Event.getEntityVisibleName deleteChapterEvent)
+        ]
+
+
+
+{- metric events -}
+
+
+addMetricEvent : Event
+addMetricEvent =
+    AddMetricEvent
+        { title = "Metric"
+        , abbreviation = Just "M"
+        , description = Nothing
+        }
+        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+        }
+
+
+addMetricEventTest : Test
+addMetricEventTest =
+    describe "AddMetricEvent"
+        [ test "should encode and decode" <|
+            \_ ->
+                expectEventEncodeDecode addMetricEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid addMetricEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Metric") (Event.getEntityVisibleName addMetricEvent)
+        ]
+
+
+editMetricEvent : Event
+editMetricEvent =
+    EditMetricEvent
+        { title =
+            { changed = True
+            , value = Just "Metric"
+            }
+        , abbreviation =
+            { changed = False
+            , value = Nothing
+            }
+        , description =
+            { changed = True
+            , value = Just (Just "This is a metric")
+            }
+        }
+        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+        }
+
+
+editMetricEventTest : Test
+editMetricEventTest =
+    describe "EditMetricEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editMetricEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid editMetricEvent)
+        , test "get event entity visible name when not changed" <|
+            \_ ->
+                let
+                    event =
+                        EditMetricEvent
+                            { title =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , abbreviation =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , description =
+                                { changed = True
+                                , value = Just (Just "This is a metric")
+                                }
+                            }
+                            { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+                            , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+                            }
+                in
+                Expect.equal Nothing (Event.getEntityVisibleName event)
+        , test "get event entity visible name when changed" <|
+            \_ ->
+                Expect.equal (Just "Metric") (Event.getEntityVisibleName editMetricEvent)
+        ]
+
+
+deleteMetricEvent : Event
+deleteMetricEvent =
+    DeleteMetricEvent
+        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+        }
+
+
+deleteMetricEventTest : Test
+deleteMetricEventTest =
+    describe "DeleteMetricEvent"
+        [ test "should encode and decode" <|
+            \_ ->
+                expectEventEncodeDecode deleteMetricEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid deleteMetricEvent)
+        , test "get entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName deleteMetricEvent)
+        ]
+
+
+
+{- phase events -}
+
+
+addPhaseEvent : Event
+addPhaseEvent =
+    AddPhaseEvent
+        { title = "Phase"
+        , description = Nothing
+        }
+        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+        }
+
+
+addPhaseEventTest : Test
+addPhaseEventTest =
+    describe "AddPhaseEvent"
+        [ test "should encode and decode" <|
+            \_ ->
+                expectEventEncodeDecode addPhaseEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid addPhaseEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Phase") (Event.getEntityVisibleName addPhaseEvent)
+        ]
+
+
+editPhaseEvent : Event
+editPhaseEvent =
+    EditPhaseEvent
+        { title =
+            { changed = True
+            , value = Just "Phase"
+            }
+        , description =
+            { changed = True
+            , value = Just (Just "This is an important phase")
+            }
+        }
+        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+        }
+
+
+editPhaseEventTest : Test
+editPhaseEventTest =
+    describe "EditPhaseEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editPhaseEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid editPhaseEvent)
+        , test "get event entity visible name when not changed" <|
+            \_ ->
+                let
+                    event =
+                        EditPhaseEvent
+                            { title =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , description =
+                                { changed = True
+                                , value = Just (Just "This is an important phase")
+                                }
+                            }
+                            { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+                            , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+                            }
+                in
+                Expect.equal Nothing (Event.getEntityVisibleName event)
+        , test "get event entity visible name when changed" <|
+            \_ ->
+                Expect.equal (Just "Phase") (Event.getEntityVisibleName editPhaseEvent)
+        ]
+
+
+deletePhaseEvent : Event
+deletePhaseEvent =
+    DeletePhaseEvent
+        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+        }
+
+
+deletePhaseEventTest : Test
+deletePhaseEventTest =
+    describe "DeletePhaseEvent"
+        [ test "should encode and decode" <|
+            \_ ->
+                expectEventEncodeDecode deletePhaseEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "485bc170-2df3-11e9-b210-d663bd873d93" (Event.getUuid deletePhaseEvent)
+        , test "get entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName deletePhaseEvent)
         ]
 
 
@@ -486,7 +702,7 @@ addOptionsQuestionEvent =
         (AddQuestionOptionsEvent
             { title = "Can you answer this question?"
             , text = Nothing
-            , requiredLevel = Just 2
+            , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
             , tagUuids = []
             }
         )
@@ -502,7 +718,7 @@ addListQuestionEvent =
         (AddQuestionListEvent
             { title = "Can you answer this question?"
             , text = Just "Just answer the question!"
-            , requiredLevel = Just 2
+            , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
             , tagUuids = []
             }
         )
@@ -518,7 +734,7 @@ addValueQuestionEvent =
         (AddQuestionValueEvent
             { title = "Can you answer this question?"
             , text = Nothing
-            , requiredLevel = Nothing
+            , requiredPhaseUuid = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
             , valueType = NumberQuestionValueType
             }
@@ -535,7 +751,7 @@ addIntegrationQuestionEvent =
         (AddQuestionIntegrationEvent
             { title = "Can you answer this question?"
             , text = Nothing
-            , requiredLevel = Nothing
+            , requiredPhaseUuid = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
             , integrationUuid = "1d522339-e93b-44e9-bc2a-1df65fb97dc6"
             , props = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
@@ -577,7 +793,7 @@ editOptionsQuestionEvent =
         (EditQuestionOptionsEvent
             { title = { changed = False, value = Nothing }
             , text = { changed = True, value = Just (Just "Answer this immediately") }
-            , requiredLevel = { changed = True, value = Just (Just 2) }
+            , requiredPhase = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
             , tagUuids = { changed = False, value = Nothing }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = True, value = Just [ "fe1b440e-3046-11e9-b210-d663bd873d93" ] }
@@ -596,7 +812,7 @@ editListQuestionEvent =
         (EditQuestionListEvent
             { title = { changed = True, value = Just "This is a new title" }
             , text = { changed = False, value = Nothing }
-            , requiredLevel = { changed = False, value = Nothing }
+            , requiredPhase = { changed = False, value = Nothing }
             , tagUuids = { changed = False, value = Nothing }
             , referenceUuids = { changed = True, value = Just [ "f749367c-3046-11e9-b210-d663bd873d93" ] }
             , expertUuids = { changed = False, value = Nothing }
@@ -615,7 +831,7 @@ editValueQuestionEvent =
         (EditQuestionValueEvent
             { title = { changed = True, value = Just "What date is today?" }
             , text = { changed = False, value = Nothing }
-            , requiredLevel = { changed = True, value = Just (Just 2) }
+            , requiredPhase = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }
@@ -634,7 +850,7 @@ editIntegrationQuestionEvent =
         (EditQuestionIntegrationEvent
             { title = { changed = True, value = Just "What database will you use?" }
             , text = { changed = False, value = Nothing }
-            , requiredLevel = { changed = True, value = Just (Just 2) }
+            , requiredPhase = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }

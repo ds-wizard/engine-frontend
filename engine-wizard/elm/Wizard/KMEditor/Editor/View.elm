@@ -5,8 +5,8 @@ import Html exposing (..)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
@@ -36,12 +36,11 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (editorView appState model) <|
-        ActionResult.combine3 model.km model.metrics model.levels
+    Page.actionResultView appState (editorView appState model) model.km
 
 
-editorView : AppState -> Model -> ( BranchDetail, List Metric, List Level ) -> Html Msg
-editorView appState model ( _, _, levels ) =
+editorView : AppState -> Model -> BranchDetail -> Html Msg
+editorView appState model _ =
     let
         content _ =
             case model.currentEditor of
@@ -52,7 +51,7 @@ editorView appState model ( _, _, levels ) =
                     tagsEditorView appState model
 
                 PreviewEditor ->
-                    previewView appState model levels
+                    previewView appState model
 
                 HistoryEditor ->
                     historyView
@@ -163,8 +162,8 @@ tagsEditorView appState model =
         |> Maybe.withDefault (Page.error appState <| l_ "tagsEditor.error" appState)
 
 
-previewView : AppState -> Model -> List Level -> Html Msg
-previewView appState model levels =
+previewView : AppState -> Model -> Html Msg
+previewView appState model =
     model.previewEditorModel
         |> Maybe.map (Html.map PreviewEditorMsg << Wizard.KMEditor.Editor.Preview.View.view appState)
         |> Maybe.withDefault (Page.error appState <| l_ "preview.error" appState)

@@ -43,7 +43,7 @@ type alias MetricReport =
 
 type IndicationReport
     = AnsweredIndication AnsweredIndicationData
-    | LevelsAnsweredIndication AnsweredIndicationData
+    | PhasesAnsweredIndication AnsweredIndicationData
 
 
 type alias AnsweredIndicationData =
@@ -55,10 +55,10 @@ type alias AnsweredIndicationData =
 compareIndicationReport : IndicationReport -> IndicationReport -> Order
 compareIndicationReport ir1 ir2 =
     case ( ir1, ir2 ) of
-        ( AnsweredIndication _, LevelsAnsweredIndication _ ) ->
+        ( AnsweredIndication _, PhasesAnsweredIndication _ ) ->
             GT
 
-        ( LevelsAnsweredIndication _, AnsweredIndication _ ) ->
+        ( PhasesAnsweredIndication _, AnsweredIndication _ ) ->
             LT
 
         _ ->
@@ -71,7 +71,7 @@ unwrapIndicationReport report =
         AnsweredIndication data ->
             data
 
-        LevelsAnsweredIndication data ->
+        PhasesAnsweredIndication data ->
             data
 
 
@@ -108,7 +108,7 @@ indicationReportDecoder : Decoder IndicationReport
 indicationReportDecoder =
     Decode.oneOf
         [ when indicationType ((==) "AnsweredIndication") answeredIndicationDecoder
-        , when indicationType ((==) "LevelsAnsweredIndication") levelsAnsweredIndicationDecoder
+        , when indicationType ((==) "PhasesAnsweredIndication") phasesAnsweredIndicationDecoder
         ]
 
 
@@ -122,9 +122,9 @@ answeredIndicationDecoder =
     Decode.map AnsweredIndication answeredIndicationDataDecoder
 
 
-levelsAnsweredIndicationDecoder : Decoder IndicationReport
-levelsAnsweredIndicationDecoder =
-    Decode.map LevelsAnsweredIndication answeredIndicationDataDecoder
+phasesAnsweredIndicationDecoder : Decoder IndicationReport
+phasesAnsweredIndicationDecoder =
+    Decode.map PhasesAnsweredIndication answeredIndicationDataDecoder
 
 
 answeredIndicationDataDecoder : Decoder AnsweredIndicationData

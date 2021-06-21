@@ -88,8 +88,6 @@ formView appState form =
             ++ [ hr [] []
                , FormGroup.richRadioGroup appState (QuestionnaireCreation.richFormOptions appState) form "questionnaireCreation" (l_ "form.questionnaireCreation" appState)
                , hr [] []
-               , FormGroup.toggle form "levels" (l_ "form.phases" appState)
-               , FormExtra.mdAfter (l_ "form.phases.desc" appState)
                , FormGroup.toggle form "summaryReport" (l_ "form.summaryReport" appState)
                , FormExtra.mdAfter (l_ "form.summaryReport.desc" appState)
                , FormGroup.toggle form "feedbackEnabled" (l_ "form.feedback" appState)

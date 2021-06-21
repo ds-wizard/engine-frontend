@@ -5,7 +5,9 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , ExpertForm
     , IntegrationForm
     , KnowledgeModelForm
+    , MetricForm
     , MetricMeasureForm
+    , PhaseForm
     , QuestionForm
     , QuestionFormType(..)
     , ReferenceForm
@@ -16,7 +18,7 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , choiceFormValidation
     , expertFormValidation
     , formChanged
-    , getMetricMesures
+    , getMetricMeasures
     , initAnswerForm
     , initChapterForm
     , initChoiceForm
@@ -24,6 +26,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , initForm
     , initIntegrationForm
     , initKnowledgeModelFrom
+    , initMetricForm
+    , initPhaseForm
     , initQuestionForm
     , initReferenceForm
     , initTagForm
@@ -32,7 +36,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , isMultiChoiceQuestionForm
     , isOptionsQuestionForm
     , knowledgeModelFormValidation
-    , metricMeasureValidation
+    , metricFormValidation
+    , phaseFormValidation
     , questionFormValidation
     , questionTypeOptions
     , questionValueTypeOptions
@@ -45,6 +50,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
     , updateExpertWithForm
     , updateIntegrationWithForm
     , updateKnowledgeModelWithForm
+    , updateMetricWithForm
+    , updatePhaseWithForm
     , updateQuestionWithForm
     , updateReferenceWithForm
     , updateTagWithForm
@@ -65,20 +72,34 @@ import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
+import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError(..))
 import Shared.Form.Validate as Validate
 import Shared.Locale exposing (lg)
-import String exposing (fromFloat, fromInt)
+import String exposing (fromFloat)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 
 
 type alias KnowledgeModelForm =
     {}
+
+
+type alias MetricForm =
+    { title : String
+    , abbreviation : Maybe String
+    , description : Maybe String
+    }
+
+
+type alias PhaseForm =
+    { title : String
+    , description : Maybe String
+    }
 
 
 type alias TagForm =
@@ -124,21 +145,21 @@ type QuestionFormType
 type alias OptionsQuestionFormData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhase : Maybe String
     }
 
 
 type alias ListQuestionFormData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhase : Maybe String
     }
 
 
 type alias ValueQuestionFormData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhase : Maybe String
     , valueType : QuestionValueType
     }
 
@@ -146,7 +167,7 @@ type alias ValueQuestionFormData =
 type alias IntegrationQuestionFormData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhase : Maybe String
     , integrationUuid : String
     , props : Dict String String
     }
@@ -155,7 +176,7 @@ type alias IntegrationQuestionFormData =
 type alias MultiChoiceQuestionFormData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhase : Maybe String
     }
 
 
@@ -172,8 +193,8 @@ type alias ChoiceForm =
 
 
 type alias MetricMeasureForm =
-    { enabled : Bool
-    , metricUuid : String
+    { metricUuid : String
+    , enabled : Bool
     , values : Maybe MetricMeasureValues
     }
 
@@ -237,6 +258,69 @@ knowledgeModelFormInitials _ =
 updateKnowledgeModelWithForm : KnowledgeModel -> KnowledgeModelForm -> KnowledgeModel
 updateKnowledgeModelWithForm knowledgeModel _ =
     knowledgeModel
+
+
+
+{- Metric -}
+
+
+initMetricForm : Metric -> Form FormError MetricForm
+initMetricForm =
+    metricFormInitials >> initForm metricFormValidation
+
+
+metricFormValidation : Validation FormError MetricForm
+metricFormValidation =
+    Validate.map3 MetricForm
+        (Validate.field "title" Validate.string)
+        (Validate.field "abbreviation" Validate.maybeString)
+        (Validate.field "description" Validate.maybeString)
+
+
+metricFormInitials : Metric -> List ( String, Field.Field )
+metricFormInitials metric =
+    [ ( "title", Field.string metric.title )
+    , ( "abbreviation", Field.string (Maybe.withDefault "" metric.abbreviation) )
+    , ( "description", Field.string (Maybe.withDefault "" metric.description) )
+    ]
+
+
+updateMetricWithForm : Metric -> MetricForm -> Metric
+updateMetricWithForm metric metricForm =
+    { metric
+        | title = metricForm.title
+        , abbreviation = metricForm.abbreviation
+        , description = metricForm.description
+    }
+
+
+
+{- Phase -}
+
+
+initPhaseForm : Phase -> Form FormError PhaseForm
+initPhaseForm =
+    phaseFormInitials >> initForm phaseFormValidation
+
+
+phaseFormValidation : Validation FormError PhaseForm
+phaseFormValidation =
+    Validate.map2 PhaseForm
+        (Validate.field "title" Validate.string)
+        (Validate.field "description" Validate.maybeString)
+
+
+phaseFormInitials : Phase -> List ( String, Field.Field )
+phaseFormInitials phase =
+    [ ( "title", Field.string phase.title )
+    ]
+
+
+updatePhaseWithForm : Phase -> PhaseForm -> Phase
+updatePhaseWithForm phase phaseForm =
+    { phase
+        | title = phaseForm.title
+    }
 
 
 
@@ -417,21 +501,21 @@ validateQuestion integrations questionType =
             Validate.map3 OptionsQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
                 |> Validate.map OptionsQuestionForm
 
         "ListQuestion" ->
             Validate.map3 ListQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
                 |> Validate.map ListQuestionForm
 
         "ValueQuestion" ->
             Validate.map4 ValueQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
                 (Validate.field "valueType" validateValueType)
                 |> Validate.map ValueQuestionForm
 
@@ -439,7 +523,7 @@ validateQuestion integrations questionType =
             Validate.map5 IntegrationQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
                 (Validate.field "integrationUuid" Validate.string)
                 (Validate.field "integrationUuid" Validate.string |> Validate.andThen (validateIntegrationProps integrations))
                 |> Validate.map IntegrationQuestionForm
@@ -448,7 +532,7 @@ validateQuestion integrations questionType =
             Validate.map3 MultiChoiceQuestionFormData
                 (Validate.field "title" Validate.string)
                 (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.int))
+                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
                 |> Validate.map MultiChoiceQuestionForm
 
         _ ->
@@ -528,7 +612,7 @@ questionFormInitials question =
     [ ( "questionType", Field.string questionType )
     , ( "title", Field.string <| Question.getTitle question )
     , ( "text", Field.string <| Maybe.withDefault "" <| Question.getText question )
-    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Maybe.map fromInt <| Question.getRequiredLevel question )
+    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Question.getRequiredPhaseUuid question )
     , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| Question.getValueType question )
     , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| Question.getIntegrationUuid question )
     ]
@@ -543,7 +627,7 @@ updateQuestionWithForm question questionForm =
                 { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
-                , requiredLevel = formData.requiredLevel
+                , requiredPhaseUuid = formData.requiredPhase
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
@@ -556,7 +640,7 @@ updateQuestionWithForm question questionForm =
                 { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
-                , requiredLevel = formData.requiredLevel
+                , requiredPhaseUuid = formData.requiredPhase
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
@@ -569,7 +653,7 @@ updateQuestionWithForm question questionForm =
                 { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
-                , requiredLevel = formData.requiredLevel
+                , requiredPhaseUuid = formData.requiredPhase
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
@@ -582,7 +666,7 @@ updateQuestionWithForm question questionForm =
                 { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
-                , requiredLevel = formData.requiredLevel
+                , requiredPhaseUuid = formData.requiredPhase
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
@@ -596,7 +680,7 @@ updateQuestionWithForm question questionForm =
                 { uuid = Question.getUuid question
                 , title = formData.title
                 , text = formData.text
-                , requiredLevel = formData.requiredLevel
+                , requiredPhaseUuid = formData.requiredPhase
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
@@ -693,33 +777,43 @@ isFormType detectForm form =
 {- Answer -}
 
 
-initAnswerForm : EditorContext -> Answer -> Form FormError AnswerForm
-initAnswerForm editorContext =
-    answerFormInitials editorContext >> initForm answerFormValidation
+initAnswerForm : List Metric -> Answer -> Form FormError AnswerForm
+initAnswerForm metrics =
+    answerFormInitials metrics >> initForm (answerFormValidation metrics)
 
 
-answerFormValidation : Validation FormError AnswerForm
-answerFormValidation =
+answerFormValidation : List Metric -> Validation FormError AnswerForm
+answerFormValidation metrics =
     Validate.map3 AnswerForm
         (Validate.field "label" Validate.string)
         (Validate.field "advice" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-        (Validate.field "metricMeasures" (Validate.list metricMeasureValidation))
+        (validateMetricMeasures metrics)
 
 
-metricMeasureValidation : Validation FormError MetricMeasureForm
-metricMeasureValidation =
-    Validate.map3 MetricMeasureForm
-        (Validate.field "enabled" Validate.bool)
-        (Validate.field "metricUuid" Validate.string)
-        (Validate.field "enabled" Validate.bool |> Validate.andThen validateMetricMeasureValues)
+validateMetricMeasures : List Metric -> Validation FormError (List MetricMeasureForm)
+validateMetricMeasures metrics =
+    let
+        fold metric acc =
+            Validate.andThen
+                (\metricMeasureForm -> Validate.map (\list -> list ++ [ metricMeasureForm ]) acc)
+                (metricMeasureValidation metric.uuid ("metricMeasure-" ++ metric.uuid ++ "-"))
+    in
+    List.foldl fold (Validate.succeed []) metrics
 
 
-validateMetricMeasureValues : Bool -> Validation FormError (Maybe MetricMeasureValues)
-validateMetricMeasureValues enabled =
+metricMeasureValidation : String -> String -> Validation FormError MetricMeasureForm
+metricMeasureValidation metricUuid prefix =
+    Validate.map2 (MetricMeasureForm metricUuid)
+        (Validate.field (prefix ++ "enabled") Validate.bool)
+        (Validate.field (prefix ++ "enabled") Validate.bool |> Validate.andThen (validateMetricMeasureValues prefix))
+
+
+validateMetricMeasureValues : String -> Bool -> Validation FormError (Maybe MetricMeasureValues)
+validateMetricMeasureValues prefix enabled =
     if enabled then
         Validate.succeed MetricMeasureValues
-            |> Validate.andMap (Validate.field "weight" validateMeasureValue)
-            |> Validate.andMap (Validate.field "measure" validateMeasureValue)
+            |> Validate.andMap (Validate.field (prefix ++ "weight") validateMeasureValue)
+            |> Validate.andMap (Validate.field (prefix ++ "measure") validateMeasureValue)
             |> map Just
 
     else
@@ -733,32 +827,37 @@ validateMeasureValue =
         |> Validate.andThen (Validate.maxFloat 1)
 
 
-answerFormInitials : EditorContext -> Answer -> List ( String, Field.Field )
-answerFormInitials editorContext answer =
+answerFormInitials : List Metric -> Answer -> List ( String, Field.Field )
+answerFormInitials metrics answer =
+    let
+        metricToFormField metric =
+            metricMeasureFormInitials ("metricMeasure-" ++ metric.uuid ++ "-") answer.metricMeasures metric
+
+        metricMeasureFields =
+            List.foldr (++) [] (List.map metricToFormField metrics)
+    in
     [ ( "label", Field.string answer.label )
     , ( "advice", Field.string (answer.advice |> Maybe.withDefault "") )
-    , ( "metricMeasures", Field.list (List.map (metricMeasureFormInitials answer.metricMeasures) editorContext.metrics) )
     ]
+        ++ metricMeasureFields
 
 
-metricMeasureFormInitials : List MetricMeasure -> Metric -> Field.Field
-metricMeasureFormInitials metricMeasures metric =
+metricMeasureFormInitials : String -> List MetricMeasure -> Metric -> List ( String, Field.Field )
+metricMeasureFormInitials prefix metricMeasures metric =
     case List.find (.metricUuid >> (==) metric.uuid) metricMeasures of
         Just metricMeasure ->
-            Field.group
-                [ ( "enabled", Field.bool True )
-                , ( "metricUuid", Field.string metric.uuid )
-                , ( "weight", Field.string (fromFloat metricMeasure.weight) )
-                , ( "measure", Field.string (fromFloat metricMeasure.measure) )
-                ]
+            [ ( prefix ++ "enabled", Field.bool True )
+            , ( prefix ++ "metricUuid", Field.string metric.uuid )
+            , ( prefix ++ "weight", Field.string (fromFloat metricMeasure.weight) )
+            , ( prefix ++ "measure", Field.string (fromFloat metricMeasure.measure) )
+            ]
 
         Nothing ->
-            Field.group
-                [ ( "enabled", Field.bool False )
-                , ( "metricUuid", Field.string metric.uuid )
-                , ( "weight", Field.string (fromFloat 1) )
-                , ( "measure", Field.string (fromFloat 1) )
-                ]
+            [ ( prefix ++ "enabled", Field.bool False )
+            , ( prefix ++ "metricUuid", Field.string metric.uuid )
+            , ( prefix ++ "weight", Field.string (fromFloat 1) )
+            , ( prefix ++ "measure", Field.string (fromFloat 1) )
+            ]
 
 
 updateAnswerWithForm : Answer -> AnswerForm -> Answer
@@ -766,7 +865,7 @@ updateAnswerWithForm answer answerForm =
     { answer
         | label = answerForm.label
         , advice = answerForm.advice
-        , metricMeasures = getMetricMesures answerForm
+        , metricMeasures = getMetricMeasures answerForm
     }
 
 
@@ -775,8 +874,8 @@ updateChoiceWithForm choice choiceForm =
     { choice | label = choiceForm.label }
 
 
-getMetricMesures : AnswerForm -> List MetricMeasure
-getMetricMesures answerForm =
+getMetricMeasures : AnswerForm -> List MetricMeasure
+getMetricMeasures answerForm =
     answerForm.metricMeasures
         |> List.filter .enabled
         |> List.map metricMeasureFormToMetricMeasure
