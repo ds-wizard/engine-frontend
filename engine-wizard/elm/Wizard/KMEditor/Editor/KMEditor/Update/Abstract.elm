@@ -17,9 +17,8 @@ import Random exposing (Seed)
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Utils exposing (getUuidString)
-import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getEditorContext, insertEditor, setAlert)
+import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, insertEditor, setAlert)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
-import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor, EditorLike, EditorState(..), getNewState)
 import Wizard.Msgs
 
@@ -30,7 +29,7 @@ import Wizard.Msgs
 
 type alias AddEntityConfig entity editorData =
     { newEntity : String -> entity
-    , createEntityEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> entity -> Dict String Editor -> Dict String Editor
+    , createEntityEditor : String -> (String -> EditorState) -> KnowledgeModel -> entity -> Dict String Editor -> Dict String Editor
     , addEntity : entity -> editorData -> Editor
     }
 
@@ -45,7 +44,7 @@ addEntity cfg cmd seed model editorData =
             cfg.newEntity newUuid
 
         editorsWithEntity =
-            cfg.createEntityEditor (getEditorContext model) editorData.uuid (\_ -> Added) model.knowledgeModel entity model.editors
+            cfg.createEntityEditor editorData.uuid (\_ -> Added) model.knowledgeModel entity model.editors
 
         newParentEditor =
             cfg.addEntity entity editorData
@@ -67,7 +66,7 @@ type alias GenerateEventConfig editorData e form =
     , alert : String
     , createAddEvent : form -> editorData -> Seed -> ( Event, Seed )
     , createEditEvent : form -> editorData -> Seed -> ( Event, Seed )
-    , updateEditorData : EditorContext -> EditorState -> form -> editorData -> editorData
+    , updateEditorData : EditorState -> form -> editorData -> editorData
     , updateEditors : Maybe (editorData -> editorData -> Dict String Editor -> Dict String Editor)
     }
 
@@ -90,7 +89,7 @@ withGenerateEvent cfg seed model editorData callback =
                             )
 
                     newEditorData =
-                        cfg.updateEditorData (getEditorContext model) newState form editorData
+                        cfg.updateEditorData newState form editorData
 
                     updatedEditors =
                         case cfg.updateEditors of

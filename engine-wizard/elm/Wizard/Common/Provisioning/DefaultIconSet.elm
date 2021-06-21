@@ -58,6 +58,8 @@ iconSet =
                , ( "km.integration", "fas fa-exchange-alt" )
                , ( "km.itemTemplate", "far fa-file-alt" )
                , ( "km.knowledgeModel", "fas fa-database" )
+               , ( "km.metric", "fas fa-chart-bar" )
+               , ( "km.phase", "far fa-clock" )
                , ( "km.question", "far fa-comment" )
                , ( "km.reference", "far fa-bookmark" )
                , ( "km.tag", "fas fa-tag" )

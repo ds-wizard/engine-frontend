@@ -24,8 +24,8 @@ metricDecoderTest =
                     expected =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , title = "Fairness"
-                        , abbreviation = "F"
-                        , description = "Fairness describe how fair it is"
+                        , abbreviation = Just "F"
+                        , description = Just "Fairness describe how fair it is"
                         }
                 in
                 expectDecoder Metric.decoder raw expected

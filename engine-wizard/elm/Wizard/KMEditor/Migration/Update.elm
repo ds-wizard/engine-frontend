@@ -2,7 +2,6 @@ module Wizard.KMEditor.Migration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Branches as BranchesApi
-import Shared.Api.Metrics as MetricsApi
 import Shared.Data.Event as Event
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Migration exposing (Migration)
@@ -20,10 +19,7 @@ import Wizard.Msgs
 
 fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
-    Cmd.batch
-        [ BranchesApi.getMigration uuid appState GetMigrationCompleted
-        , MetricsApi.getMetrics appState GetMetricsCompleted
-        ]
+    BranchesApi.getMigration uuid appState GetMigrationCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -31,9 +27,6 @@ update msg wrapMsg appState model =
     case msg of
         GetMigrationCompleted result ->
             handleGetMigrationCompleted appState model result
-
-        GetMetricsCompleted result ->
-            handleGetMetricsCompleted appState model result
 
         ApplyEvent ->
             handleApplyEvent wrapMsg appState model
@@ -54,16 +47,6 @@ handleGetMigrationCompleted appState model result =
     applyResult appState
         { setResult = setMigration
         , defaultError = lg "apiError.branches.migrations.getError" appState
-        , model = model
-        , result = result
-        }
-
-
-handleGetMetricsCompleted : AppState -> Model -> Result ApiError (List Metric) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetMetricsCompleted appState model result =
-    applyResult appState
-        { setResult = setMetrics
-        , defaultError = lg "apiError.metrics.getListError" appState
         , model = model
         , result = result
         }

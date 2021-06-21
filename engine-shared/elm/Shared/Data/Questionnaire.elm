@@ -28,7 +28,6 @@ type alias Questionnaire =
     , description : Maybe String
     , isTemplate : Bool
     , package : PackageInfo
-    , level : Int
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
     , permissions : List Permission
@@ -68,7 +67,6 @@ decoder =
         |> D.required "description" (D.maybe D.string)
         |> D.required "isTemplate" D.bool
         |> D.required "package" PackageInfo.decoder
-        |> D.optional "level" D.int 0
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)

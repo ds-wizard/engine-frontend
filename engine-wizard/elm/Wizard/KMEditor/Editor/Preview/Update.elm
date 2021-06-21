@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.Preview.Update exposing (update)
 
 import Random exposing (Seed)
+import Shared.Data.KnowledgeModel as KnowledgeModel
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.KMEditor.Editor.Preview.Models exposing (..)
@@ -34,9 +35,7 @@ handleQuestionnaireMsg msg appState model =
                 QuestionnaireMsg
                 Nothing
                 appState
-                { levels = model.levels
-                , metrics = model.metrics
-                , events = model.events
+                { events = model.events
                 }
                 model.questionnaireModel
     in

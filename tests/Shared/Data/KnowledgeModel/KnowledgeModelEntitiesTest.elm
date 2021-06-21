@@ -24,7 +24,9 @@ knowledgeModelEntitiesDecoderTest =
                             "experts": {},
                             "references": {},
                             "integrations": {},
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -37,6 +39,8 @@ knowledgeModelEntitiesDecoderTest =
                         , references = Dict.empty
                         , integrations = Dict.empty
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -60,7 +64,9 @@ knowledgeModelEntitiesDecoderTest =
                             "experts": {},
                             "references": {},
                             "integrations": {},
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -82,6 +88,8 @@ knowledgeModelEntitiesDecoderTest =
                         , references = Dict.empty
                         , integrations = Dict.empty
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -98,7 +106,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "questionType": "IntegrationQuestion",
                                     "title": "Can you answer this question?",
                                     "text": "Please answer the question",
-                                    "requiredLevel": null,
+                                    "requiredPhaseUuid": null,
                                     "tagUuids": [],
                                     "referenceUuids": [],
                                     "expertUuids": [],
@@ -113,7 +121,9 @@ knowledgeModelEntitiesDecoderTest =
                             "experts": {},
                             "references": {},
                             "integrations": {},
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -126,7 +136,7 @@ knowledgeModelEntitiesDecoderTest =
                                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                                         , title = "Can you answer this question?"
                                         , text = Just "Please answer the question"
-                                        , requiredLevel = Nothing
+                                        , requiredPhaseUuid = Nothing
                                         , tagUuids = []
                                         , referenceUuids = []
                                         , expertUuids = []
@@ -142,6 +152,8 @@ knowledgeModelEntitiesDecoderTest =
                         , references = Dict.empty
                         , integrations = Dict.empty
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -166,7 +178,9 @@ knowledgeModelEntitiesDecoderTest =
                             "experts": {},
                             "references": {},
                             "integrations": {},
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -189,6 +203,8 @@ knowledgeModelEntitiesDecoderTest =
                         , references = Dict.empty
                         , integrations = Dict.empty
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -210,7 +226,9 @@ knowledgeModelEntitiesDecoderTest =
                             "experts": {},
                             "references": {},
                             "integrations": {},
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -230,6 +248,8 @@ knowledgeModelEntitiesDecoderTest =
                         , references = Dict.empty
                         , integrations = Dict.empty
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -252,7 +272,9 @@ knowledgeModelEntitiesDecoderTest =
                             },
                             "references": {},
                             "integrations": {},
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -273,6 +295,8 @@ knowledgeModelEntitiesDecoderTest =
                         , references = Dict.empty
                         , integrations = Dict.empty
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -295,7 +319,9 @@ knowledgeModelEntitiesDecoderTest =
                                 }
                             },
                             "integrations": {},
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -316,6 +342,8 @@ knowledgeModelEntitiesDecoderTest =
                                 ]
                         , integrations = Dict.empty
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -348,7 +376,9 @@ knowledgeModelEntitiesDecoderTest =
                                     "itemUrl": "http://example.com/${id}"
                                 }
                             },
-                            "tags": {}
+                            "tags": {},
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -379,6 +409,8 @@ knowledgeModelEntitiesDecoderTest =
                                   )
                                 ]
                         , tags = Dict.empty
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -402,7 +434,9 @@ knowledgeModelEntitiesDecoderTest =
                                     "description": null,
                                     "color": "#F5A623"
                                 }
-                            }
+                            },
+                            "metrics": {},
+                            "phases": {}
                         }
                         """
 
@@ -424,6 +458,8 @@ knowledgeModelEntitiesDecoderTest =
                                     }
                                   )
                                 ]
+                        , metrics = Dict.empty
+                        , phases = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected

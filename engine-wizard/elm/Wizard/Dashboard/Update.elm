@@ -1,6 +1,5 @@
 module Wizard.Dashboard.Update exposing (fetchData, update)
 
-import Shared.Api.Levels as LevelsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Data.PaginationQueryString as PaginationQueryString
@@ -23,10 +22,7 @@ fetchData appState =
             PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC PaginationQueryString.empty
     in
     if List.any (\w -> w == DMPWorkflowDashboardWidget || w == LevelsQuestionnaireDashboardWidget) widgets then
-        Cmd.batch
-            [ LevelsApi.getLevels appState GetLevelsCompleted
-            , QuestionnairesApi.getQuestionnaires { isTemplate = Just False } pagination appState GetQuestionnairesCompleted
-            ]
+        QuestionnairesApi.getQuestionnaires { isTemplate = Just False } pagination appState GetQuestionnairesCompleted
 
     else
         Cmd.none
@@ -35,14 +31,6 @@ fetchData appState =
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg appState model =
     case msg of
-        GetLevelsCompleted result ->
-            applyResult appState
-                { setResult = setLevels
-                , defaultError = lg "apiError.levels.getListError" appState
-                , model = model
-                , result = result
-                }
-
         GetQuestionnairesCompleted result ->
             applyResultTransform appState
                 { setResult = setQuestionnaires

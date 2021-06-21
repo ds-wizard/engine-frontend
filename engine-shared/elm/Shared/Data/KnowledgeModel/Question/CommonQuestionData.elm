@@ -12,7 +12,7 @@ type alias CommonQuestionData =
     { uuid : String
     , title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhaseUuid : Maybe String
     , tagUuids : List String
     , referenceUuids : List String
     , expertUuids : List String
@@ -25,7 +25,7 @@ decoder =
         |> D.required "uuid" D.string
         |> D.required "title" D.string
         |> D.required "text" (D.nullable D.string)
-        |> D.required "requiredLevel" (D.nullable D.int)
+        |> D.required "requiredPhaseUuid" (D.nullable D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "referenceUuids" (D.list D.string)
         |> D.required "expertUuids" (D.list D.string)
@@ -36,7 +36,7 @@ new uuid =
     { uuid = uuid
     , title = "New question"
     , text = Nothing
-    , requiredLevel = Nothing
+    , requiredPhaseUuid = Nothing
     , tagUuids = []
     , referenceUuids = []
     , expertUuids = []

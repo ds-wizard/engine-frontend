@@ -17,7 +17,7 @@ type alias EditableQuestionnairesConfig =
     { questionnaireVisibility : EditableQuestionnaireVisibilityConfig
     , questionnaireSharing : EditableQuestionnaireSharingConfig
     , questionnaireCreation : QuestionnaireCreation
-    , levels : SimpleFeatureConfig
+    , phases : SimpleFeatureConfig
     , feedback : Feedback
     , summaryReport : SimpleFeatureConfig
     }
@@ -37,7 +37,7 @@ decoder =
         |> D.required "questionnaireVisibility" EditableQuestionnaireVisibilityConfig.decoder
         |> D.required "questionnaireSharing" EditableQuestionnaireSharingConfig.decoder
         |> D.required "questionnaireCreation" QuestionnaireCreation.decoder
-        |> D.required "levels" SimpleFeatureConfig.decoder
+        |> D.required "phases" SimpleFeatureConfig.decoder
         |> D.required "feedback" feedbackDecoder
         |> D.required "summaryReport" SimpleFeatureConfig.decoder
 
@@ -57,7 +57,7 @@ encode config =
         [ ( "questionnaireVisibility", EditableQuestionnaireVisibilityConfig.encode config.questionnaireVisibility )
         , ( "questionnaireSharing", EditableQuestionnaireSharingConfig.encode config.questionnaireSharing )
         , ( "questionnaireCreation", QuestionnaireCreation.encode config.questionnaireCreation )
-        , ( "levels", SimpleFeatureConfig.encode config.levels )
+        , ( "phases", SimpleFeatureConfig.encode config.phases )
         , ( "feedback", encodeFeedback config.feedback )
         , ( "summaryReport", SimpleFeatureConfig.encode config.summaryReport )
         ]

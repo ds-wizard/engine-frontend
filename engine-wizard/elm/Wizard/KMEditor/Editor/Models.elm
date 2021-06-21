@@ -15,8 +15,8 @@ import Form exposing (Form)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
@@ -38,8 +38,6 @@ type alias Model =
     { kmUuid : Uuid
     , km : ActionResult BranchDetail
     , kmForm : Form FormError BranchEditForm
-    , metrics : ActionResult (List Metric)
-    , levels : ActionResult (List Level)
     , preview : ActionResult KnowledgeModel
     , currentEditor : EditorType
     , sessionEvents : List Event
@@ -56,8 +54,6 @@ initialModel kmUuid =
     { kmUuid = kmUuid
     , km = Loading
     , kmForm = BranchEditForm.initEmpty
-    , metrics = Loading
-    , levels = Loading
     , preview = Unset
     , currentEditor = KMEditor
     , sessionEvents = []

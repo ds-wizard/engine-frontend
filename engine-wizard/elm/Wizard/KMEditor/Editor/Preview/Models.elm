@@ -9,8 +9,8 @@ module Wizard.KMEditor.Editor.Preview.Models exposing
 
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.Package as Package
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Common.AppState exposing (AppState)
@@ -22,14 +22,12 @@ type alias Model =
     , knowledgeModel : KnowledgeModel
     , tags : List String
     , packageId : String
-    , metrics : List Metric
-    , levels : List Level
     , events : List Event
     }
 
 
-initialModel : AppState -> KnowledgeModel -> List Metric -> List Level -> List Event -> String -> Model
-initialModel appState km metrics levels events packageId =
+initialModel : AppState -> KnowledgeModel -> List Event -> String -> Model
+initialModel appState km events packageId =
     let
         questionnaire =
             createQuestionnaireDetail packageId km
@@ -38,8 +36,6 @@ initialModel appState km metrics levels events packageId =
     , knowledgeModel = km
     , tags = []
     , packageId = packageId
-    , metrics = metrics
-    , levels = levels
     , events = events
     }
 

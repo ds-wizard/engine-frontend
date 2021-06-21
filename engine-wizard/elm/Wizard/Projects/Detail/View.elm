@@ -1,12 +1,9 @@
 module Wizard.Projects.Detail.View exposing (view)
 
-import ActionResult
 import Html exposing (Html, button, div, li, p, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
 import Html.Events exposing (onClick)
 import Shared.Auth.Session as Session
-import Shared.Data.KnowledgeModel.Level exposing (Level)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa)
@@ -57,14 +54,7 @@ view route appState model =
         viewOffline appState
 
     else
-        let
-            actionResult =
-                ActionResult.combine3
-                    model.questionnaireModel
-                    model.levels
-                    model.metrics
-        in
-        Page.actionResultView appState (viewPlan route appState model) actionResult
+        Page.actionResultView appState (viewProject route appState model) model.questionnaireModel
 
 
 
@@ -96,29 +86,27 @@ viewError appState =
 
 
 
--- PLAN
+-- PROJECT
 
 
-viewPlan : ProjectDetailRoute -> AppState -> Model -> ( Questionnaire.Model, List Level, List Metric ) -> Html Msg
-viewPlan route appState model ( qm, levels, metrics ) =
+viewProject : ProjectDetailRoute -> AppState -> Model -> Questionnaire.Model -> Html Msg
+viewProject route appState model qm =
     let
         navigation =
             if AppState.isFullscreen appState then
                 emptyNode
 
             else
-                viewPlanNavigation appState route model qm
+                viewProjectNavigation appState route model qm
 
         modalConfig =
-            { levels = levels
-            , metrics = metrics
-            , events = qm.questionnaire.events
+            { events = qm.questionnaire.events
             , versions = qm.questionnaire.versions
             }
     in
     div [ class "Projects__Detail" ]
         [ navigation
-        , viewPlanContent appState route model qm levels metrics
+        , viewProjectContent appState route model qm
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
         , Html.map QuestionnaireVersionViewModalMsg <| QuestionnaireVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
         , Html.map RevertModalMsg <| ReverModal.view appState model.revertModalModel
@@ -126,33 +114,33 @@ viewPlan route appState model ( qm, levels, metrics ) =
 
 
 
--- PLAN - NAVIGATION
+-- PROJECT - NAVIGATION
 
 
-viewPlanNavigation : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
-viewPlanNavigation appState route model qm =
+viewProjectNavigation : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
+viewProjectNavigation appState route model qm =
     div [ class "DetailNavigation" ]
-        [ viewPlanNavigationTitleRow appState model qm.questionnaire
-        , viewPlanNavigationNav appState route model qm
+        [ viewProjectNavigationTitleRow appState model qm.questionnaire
+        , viewProjectNavigationNav appState route model qm
         ]
 
 
 
--- PLAN - NAVIGATION - TITLE ROW
+-- PROJECT - NAVIGATION - TITLE ROW
 
 
-viewPlanNavigationTitleRow : AppState -> Model -> QuestionnaireDetail -> Html Msg
-viewPlanNavigationTitleRow appState model questionnaire =
+viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireDetail -> Html Msg
+viewProjectNavigationTitleRow appState model questionnaire =
     div [ class "DetailNavigation__Row" ]
         [ div [ class "DetailNavigation__Row__Section" ]
             (div [ class "title" ] [ text questionnaire.name ]
                 :: templateBadge appState questionnaire
                 :: visibilityIcons appState questionnaire
-                ++ [ viewPlanNavigationPlanSaving appState model ]
+                ++ [ viewProjectNavigationProjectSaving appState model ]
             )
         , div [ class "DetailNavigation__Row__Section" ]
-            [ viewPlanNavigationOnlineUsers appState model
-            , viewPlanNavigationActions appState model questionnaire
+            [ viewProjectNavigationOnlineUsers appState model
+            , viewProjectNavigationActions appState model questionnaire
             ]
         ]
 
@@ -167,14 +155,14 @@ templateBadge appState questionnaire =
         emptyNode
 
 
-viewPlanNavigationPlanSaving : AppState -> Model -> Html Msg
-viewPlanNavigationPlanSaving appState model =
+viewProjectNavigationProjectSaving : AppState -> Model -> Html Msg
+viewProjectNavigationProjectSaving appState model =
     Html.map PlanSavingMsg <|
         PlanSaving.view appState model.planSavingModel
 
 
-viewPlanNavigationOnlineUsers : AppState -> Model -> Html Msg
-viewPlanNavigationOnlineUsers appState model =
+viewProjectNavigationOnlineUsers : AppState -> Model -> Html Msg
+viewProjectNavigationOnlineUsers appState model =
     if List.isEmpty model.onlineUsers then
         emptyNode
 
@@ -197,8 +185,8 @@ viewPlanNavigationOnlineUsers appState model =
             )
 
 
-viewPlanNavigationActions : AppState -> Model -> QuestionnaireDetail -> Html Msg
-viewPlanNavigationActions appState model questionnaire =
+viewProjectNavigationActions : AppState -> Model -> QuestionnaireDetail -> Html Msg
+viewProjectNavigationActions appState model questionnaire =
     if QuestionnaireDetail.isAnonymousProject questionnaire && Session.exists appState.session then
         div [ class "DetailNavigation__Row__Section__Actions" ]
             [ ActionResultView.error model.addingToMyProjects
@@ -230,11 +218,11 @@ viewPlanNavigationActions appState model questionnaire =
 
 
 
--- PLAN - NAVIGATION - NAV ROW
+-- PROJECT - NAVIGATION - NAV ROW
 
 
-viewPlanNavigationNav : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
-viewPlanNavigationNav appState route model qm =
+viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
+viewProjectNavigationNav appState route model qm =
     let
         isOwner =
             QuestionnaireDetail.isOwner appState qm.questionnaire
@@ -314,11 +302,11 @@ viewPlanNavigationNav appState route model qm =
 
 
 
--- PLAN - CONTENT
+-- PROJECT - CONTENT
 
 
-viewPlanContent : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> List Level -> List Metric -> Html Msg
-viewPlanContent appState route model qm levels metrics =
+viewProjectContent : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
+viewProjectContent appState route model qm =
     let
         isEditable =
             QuestionnaireDetail.isEditor appState qm.questionnaire
@@ -338,12 +326,12 @@ viewPlanContent appState route model qm levels metrics =
                     , readonly = not isEditable
                     , toolbarEnabled = True
                     }
-                , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel levels metrics
+                , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
                 , revertQuestionnaireMsg = Just OpenRevertModal
                 }
-                { levels = levels, metrics = metrics, events = [] }
+                { events = [] }
                 qm
 
         ProjectDetailRoute.Preview ->
@@ -352,7 +340,7 @@ viewPlanContent appState route model qm levels metrics =
 
         ProjectDetailRoute.Metrics ->
             Html.map SummaryReportMsg <|
-                SummaryReport.view appState { questionnaire = qm.questionnaire, metrics = metrics } model.summaryReportModel
+                SummaryReport.view appState { questionnaire = qm.questionnaire } model.summaryReportModel
 
         ProjectDetailRoute.Documents _ ->
             Documents.view appState

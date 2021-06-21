@@ -13,7 +13,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
@@ -31,7 +31,6 @@ import Wizard.Projects.Common.QuestionnaireChanges as QuestionnaireChanges expos
 type alias Model =
     { questionnaireUuid : Uuid
     , questionnaireMigration : ActionResult QuestionnaireMigration
-    , levels : ActionResult (List Level)
     , changes : QuestionnaireChanges
     , selectedChange : Maybe QuestionChange
     , questionnaireModel : Maybe Questionnaire.Model
@@ -42,7 +41,6 @@ initialModel : Uuid -> Model
 initialModel questionnaireUuid =
     { questionnaireUuid = questionnaireUuid
     , questionnaireMigration = Loading
-    , levels = Loading
     , changes = QuestionnaireChanges.empty
     , selectedChange = Nothing
     , questionnaireModel = Nothing
@@ -127,7 +125,7 @@ getQuestionChanges appState context chapter question =
                         choiceChanges =
                             getChoiceChanges context question
                     in
-                    if not (List.isEmpty answerChanges) || not (List.isEmpty choiceChanges) || isChanged appState.config.questionnaire.levels.enabled oldQuestion question then
+                    if not (List.isEmpty answerChanges) || not (List.isEmpty choiceChanges) || isChanged appState.config.questionnaire.phases.enabled oldQuestion question then
                         QuestionnaireChanges
                             [ QuestionChange <| QuestionChangeData question oldQuestion chapter ]
                             answerChanges
@@ -195,7 +193,7 @@ isChanged levelsEnabled oldQuestion newQuestion =
 areQuestionDetailsChanged : Bool -> Question -> Question -> Bool
 areQuestionDetailsChanged levelsEnabled oldQuestion newQuestion =
     (Question.getText oldQuestion /= Question.getText newQuestion)
-        || (levelsEnabled && (Question.getRequiredLevel oldQuestion /= Question.getRequiredLevel newQuestion))
+        || (levelsEnabled && (Question.getRequiredPhaseUuid oldQuestion /= Question.getRequiredPhaseUuid newQuestion))
         || (Question.getReferenceUuids oldQuestion /= Question.getReferenceUuids newQuestion)
         || (Question.getExpertUuids oldQuestion /= Question.getExpertUuids newQuestion)
 

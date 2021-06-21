@@ -5,24 +5,6 @@ module Shared.Data.Event exposing
     , getEntityUuid
     , getEntityVisibleName
     , getUuid
-    , isAddAnswer
-    , isAddChapter
-    , isAddExpert
-    , isAddQuestion
-    , isAddReference
-    , isAddTag
-    , isDeleteAnswer
-    , isDeleteChapter
-    , isDeleteExpert
-    , isDeleteQuestion
-    , isDeleteReference
-    , isDeleteTag
-    , isEditAnswer
-    , isEditChapter
-    , isEditExpert
-    , isEditQuestion
-    , isEditReference
-    , isEditTag
     , toUniqueIdentifier
     )
 
@@ -34,6 +16,8 @@ import Shared.Data.Event.AddChoiceEventData as AddChoiceEventData exposing (AddC
 import Shared.Data.Event.AddExpertEventData as AddExpertEventData exposing (AddExpertEventData)
 import Shared.Data.Event.AddIntegrationEventData as AddIntegrationEventData exposing (AddIntegrationEventData)
 import Shared.Data.Event.AddKnowledgeModelEventData as AddKnowledgeModelEventData exposing (AddKnowledgeModelEventData)
+import Shared.Data.Event.AddMetricEventData as AddMetricEventData exposing (AddMetricEventData)
+import Shared.Data.Event.AddPhaseEventData as AddPhaseEventData exposing (AddPhaseEventData)
 import Shared.Data.Event.AddQuestionEventData as AddQuestionEventData exposing (AddQuestionEventData)
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
 import Shared.Data.Event.AddTagEventData as AddTagEventData exposing (AddTagEventData)
@@ -44,19 +28,13 @@ import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData exposing (Ed
 import Shared.Data.Event.EditExpertEventData as EditExpertEventData exposing (EditExpertEventData)
 import Shared.Data.Event.EditIntegrationEventData as EditIntegrationEventData exposing (EditIntegrationEventData)
 import Shared.Data.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
+import Shared.Data.Event.EditMetricEventData as EditMetricEventData exposing (EditMetricEventData)
+import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData exposing (EditPhaseEventData)
 import Shared.Data.Event.EditQuestionEventData as EditQuestionEventData exposing (EditQuestionEventData)
 import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData)
 import Shared.Data.Event.EditTagEventData as EditTagEventData exposing (EditTagEventData)
 import Shared.Data.Event.EventField as EventField
 import Shared.Data.Event.MoveEventData as MoveEventData exposing (MoveEventData)
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Uuid
 
 
 type Event
@@ -65,6 +43,12 @@ type Event
     | AddChapterEvent AddChapterEventData CommonEventData
     | EditChapterEvent EditChapterEventData CommonEventData
     | DeleteChapterEvent CommonEventData
+    | AddMetricEvent AddMetricEventData CommonEventData
+    | EditMetricEvent EditMetricEventData CommonEventData
+    | DeleteMetricEvent CommonEventData
+    | AddPhaseEvent AddPhaseEventData CommonEventData
+    | EditPhaseEvent EditPhaseEventData CommonEventData
+    | DeletePhaseEvent CommonEventData
     | AddTagEvent AddTagEventData CommonEventData
     | EditTagEvent EditTagEventData CommonEventData
     | DeleteTagEvent CommonEventData
@@ -116,6 +100,24 @@ decoderByType eventType =
 
         "DeleteChapterEvent" ->
             D.map DeleteChapterEvent CommonEventData.decoder
+
+        "AddMetricEvent" ->
+            D.map2 AddMetricEvent AddMetricEventData.decoder CommonEventData.decoder
+
+        "EditMetricEvent" ->
+            D.map2 EditMetricEvent EditMetricEventData.decoder CommonEventData.decoder
+
+        "DeleteMetricEvent" ->
+            D.map DeleteMetricEvent CommonEventData.decoder
+
+        "AddPhaseEvent" ->
+            D.map2 AddPhaseEvent AddPhaseEventData.decoder CommonEventData.decoder
+
+        "EditPhaseEvent" ->
+            D.map2 EditPhaseEvent EditPhaseEventData.decoder CommonEventData.decoder
+
+        "DeletePhaseEvent" ->
+            D.map DeletePhaseEvent CommonEventData.decoder
 
         "AddTagEvent" ->
             D.map2 AddTagEvent AddTagEventData.decoder CommonEventData.decoder
@@ -219,6 +221,24 @@ encode event =
                 DeleteChapterEvent commonData ->
                     ( [ ( "eventType", E.string "DeleteChapterEvent" ) ], CommonEventData.encode commonData )
 
+                AddMetricEvent eventData commonData ->
+                    ( AddMetricEventData.encode eventData, CommonEventData.encode commonData )
+
+                EditMetricEvent eventData commonData ->
+                    ( EditMetricEventData.encode eventData, CommonEventData.encode commonData )
+
+                DeleteMetricEvent commonData ->
+                    ( [ ( "eventType", E.string "DeleteMetricEvent" ) ], CommonEventData.encode commonData )
+
+                AddPhaseEvent eventData commonData ->
+                    ( AddPhaseEventData.encode eventData, CommonEventData.encode commonData )
+
+                EditPhaseEvent eventData commonData ->
+                    ( EditPhaseEventData.encode eventData, CommonEventData.encode commonData )
+
+                DeletePhaseEvent commonData ->
+                    ( [ ( "eventType", E.string "DeletePhaseEvent" ) ], CommonEventData.encode commonData )
+
                 AddTagEvent eventData commonData ->
                     ( AddTagEventData.encode eventData, CommonEventData.encode commonData )
 
@@ -318,6 +338,24 @@ toUniqueIdentifier event =
 
             DeleteChapterEvent { entityUuid } ->
                 [ "DeleteChapterEvent", entityUuid ]
+
+            AddMetricEvent _ { entityUuid } ->
+                [ "AddMetricEvent", entityUuid ]
+
+            EditMetricEvent _ { entityUuid } ->
+                [ "EditMetricEvent", entityUuid ]
+
+            DeleteMetricEvent { entityUuid } ->
+                [ "DeleteMetricEvent", entityUuid ]
+
+            AddPhaseEvent _ { entityUuid } ->
+                [ "AddPhaseEvent", entityUuid ]
+
+            EditPhaseEvent _ { entityUuid } ->
+                [ "EditPhaseEvent", entityUuid ]
+
+            DeletePhaseEvent { entityUuid } ->
+                [ "DeletePhaseEvent", entityUuid ]
 
             AddTagEvent _ { entityUuid } ->
                 [ "AddTagEvent", entityUuid ]
@@ -426,6 +464,24 @@ getCommonData event =
         DeleteChapterEvent commonData ->
             commonData
 
+        AddMetricEvent _ commonData ->
+            commonData
+
+        EditMetricEvent _ commonData ->
+            commonData
+
+        DeleteMetricEvent commonData ->
+            commonData
+
+        AddPhaseEvent _ commonData ->
+            commonData
+
+        EditPhaseEvent _ commonData ->
+            commonData
+
+        DeletePhaseEvent commonData ->
+            commonData
+
         AddTagEvent _ commonData ->
             commonData
 
@@ -514,6 +570,18 @@ getEntityVisibleName event =
         EditKnowledgeModelEvent _ _ ->
             Nothing
 
+        AddMetricEvent eventData _ ->
+            Just eventData.title
+
+        EditMetricEvent eventData _ ->
+            EventField.getValue eventData.title
+
+        AddPhaseEvent eventData _ ->
+            Just eventData.title
+
+        EditPhaseEvent eventData _ ->
+            EventField.getValue eventData.title
+
         AddTagEvent eventData _ ->
             Just eventData.name
 
@@ -564,187 +632,3 @@ getEntityVisibleName event =
 
         _ ->
             Nothing
-
-
-
--- Test event types
-
-
-isAddChapter : KnowledgeModel -> Event -> Bool
-isAddChapter km event =
-    case event of
-        AddChapterEvent _ commonData ->
-            commonData.parentUuid == Uuid.toString km.uuid
-
-        _ ->
-            False
-
-
-isAddTag : KnowledgeModel -> Event -> Bool
-isAddTag km event =
-    case event of
-        AddTagEvent _ commonData ->
-            commonData.parentUuid == Uuid.toString km.uuid
-
-        _ ->
-            False
-
-
-isAddQuestion : String -> Event -> Bool
-isAddQuestion parentUuid event =
-    case event of
-        AddQuestionEvent _ commonData ->
-            commonData.parentUuid == parentUuid
-
-        _ ->
-            False
-
-
-isAddAnswer : Question -> Event -> Bool
-isAddAnswer question event =
-    case event of
-        AddAnswerEvent _ commonData ->
-            commonData.parentUuid == Question.getUuid question
-
-        _ ->
-            False
-
-
-isAddExpert : Question -> Event -> Bool
-isAddExpert question event =
-    case event of
-        AddExpertEvent _ commonData ->
-            commonData.parentUuid == Question.getUuid question
-
-        _ ->
-            False
-
-
-isAddReference : Question -> Event -> Bool
-isAddReference question event =
-    case event of
-        AddReferenceEvent _ commonData ->
-            commonData.parentUuid == Question.getUuid question
-
-        _ ->
-            False
-
-
-isEditChapter : Chapter -> Event -> Bool
-isEditChapter chapter event =
-    case event of
-        EditChapterEvent _ commonData ->
-            commonData.entityUuid == chapter.uuid
-
-        _ ->
-            False
-
-
-isEditTag : Tag -> Event -> Bool
-isEditTag tag event =
-    case event of
-        EditTagEvent _ commonData ->
-            commonData.entityUuid == tag.uuid
-
-        _ ->
-            False
-
-
-isEditQuestion : Question -> Event -> Bool
-isEditQuestion question event =
-    case event of
-        EditQuestionEvent _ commonData ->
-            commonData.entityUuid == Question.getUuid question
-
-        _ ->
-            False
-
-
-isEditAnswer : Answer -> Event -> Bool
-isEditAnswer answer event =
-    case event of
-        EditAnswerEvent _ commonData ->
-            commonData.entityUuid == answer.uuid
-
-        _ ->
-            False
-
-
-isEditReference : Reference -> Event -> Bool
-isEditReference reference event =
-    case event of
-        EditReferenceEvent _ commonData ->
-            commonData.entityUuid == Reference.getUuid reference
-
-        _ ->
-            False
-
-
-isEditExpert : Expert -> Event -> Bool
-isEditExpert expert event =
-    case event of
-        EditExpertEvent _ commonData ->
-            commonData.entityUuid == expert.uuid
-
-        _ ->
-            False
-
-
-isDeleteChapter : Chapter -> Event -> Bool
-isDeleteChapter chapter event =
-    case event of
-        DeleteChapterEvent commonData ->
-            commonData.entityUuid == chapter.uuid
-
-        _ ->
-            False
-
-
-isDeleteTag : Tag -> Event -> Bool
-isDeleteTag tag event =
-    case event of
-        DeleteTagEvent commonData ->
-            commonData.entityUuid == tag.uuid
-
-        _ ->
-            False
-
-
-isDeleteQuestion : Question -> Event -> Bool
-isDeleteQuestion question event =
-    case event of
-        DeleteQuestionEvent commonData ->
-            commonData.entityUuid == Question.getUuid question
-
-        _ ->
-            False
-
-
-isDeleteAnswer : Answer -> Event -> Bool
-isDeleteAnswer answer event =
-    case event of
-        DeleteAnswerEvent commonData ->
-            commonData.entityUuid == answer.uuid
-
-        _ ->
-            False
-
-
-isDeleteReference : Reference -> Event -> Bool
-isDeleteReference reference event =
-    case event of
-        DeleteReferenceEvent commonData ->
-            commonData.entityUuid == Reference.getUuid reference
-
-        _ ->
-            False
-
-
-isDeleteExpert : Expert -> Event -> Bool
-isDeleteExpert expert event =
-    case event of
-        DeleteExpertEvent commonData ->
-            commonData.entityUuid == expert.uuid
-
-        _ ->
-            False

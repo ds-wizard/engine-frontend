@@ -9,8 +9,8 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference exposing (Reference(..))
 import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
@@ -32,13 +32,13 @@ lx_ =
     lx "Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer"
 
 
-create : AppState -> KnowledgeModel -> List Level -> List Metric -> QuestionnaireRenderer msg
-create appState km levels metrics =
+create : AppState -> KnowledgeModel -> QuestionnaireRenderer msg
+create appState km =
     { renderQuestionLabel = renderQuestionLabel
-    , renderQuestionDescription = renderQuestionDescription appState levels km
+    , renderQuestionDescription = renderQuestionDescription appState km
     , getQuestionExtraClass = always Nothing
     , renderAnswerLabel = renderAnswerLabel
-    , renderAnswerBadges = renderAnswerBadges metrics
+    , renderAnswerBadges = renderAnswerBadges (KnowledgeModel.getMetrics km)
     , renderAnswerAdvice = renderAnswerAdvice
     , renderChoiceLabel = renderChoiceLabel
     }
@@ -49,16 +49,19 @@ renderQuestionLabel question =
     text <| Question.getTitle question
 
 
-renderQuestionDescription : AppState -> List Level -> KnowledgeModel -> QuestionnaireViewSettings -> Question -> Html msg
-renderQuestionDescription appState levels km qvs question =
+renderQuestionDescription : AppState -> KnowledgeModel -> QuestionnaireViewSettings -> Question -> Html msg
+renderQuestionDescription appState km qvs question =
     let
         description =
             Question.getText question
                 |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ Markdown.toHtml [] t ])
                 |> Maybe.withDefault (text "")
 
+        phases =
+            KnowledgeModel.getPhases km
+
         extraData =
-            viewExtraData appState qvs levels <| createQuestionExtraData km question
+            viewExtraData appState qvs phases <| createQuestionExtraData km question
     in
     div []
         [ description
@@ -122,7 +125,7 @@ type alias FormExtraData =
     { resourcePageReferences : List ResourcePageReferenceData
     , urlReferences : List URLReferenceData
     , experts : List Expert
-    , requiredLevel : Maybe Int
+    , requiredPhaseUuid : Maybe String
     }
 
 
@@ -144,37 +147,37 @@ createQuestionExtraData km question =
             { resourcePageReferences = []
             , urlReferences = []
             , experts = KnowledgeModel.getQuestionExperts (Question.getUuid question) km
-            , requiredLevel = Question.getRequiredLevel question
+            , requiredPhaseUuid = Question.getRequiredPhaseUuid question
             }
     in
     KnowledgeModel.getQuestionReferences (Question.getUuid question) km
         |> List.foldl foldReferences newExtraData
 
 
-viewExtraData : AppState -> QuestionnaireViewSettings -> List Level -> FormExtraData -> Html msg
-viewExtraData appState qvs levels data =
+viewExtraData : AppState -> QuestionnaireViewSettings -> List Phase -> FormExtraData -> Html msg
+viewExtraData appState qvs phases data =
     let
         isEmpty =
             List.isEmpty data.resourcePageReferences
                 && List.isEmpty data.urlReferences
                 && List.isEmpty data.experts
-                && Maybe.isNothing data.requiredLevel
+                && Maybe.isNothing data.requiredPhaseUuid
     in
     if isEmpty then
         emptyNode
 
     else
         p [ class "extra-data" ]
-            [ viewRequiredLevel appState qvs levels data.requiredLevel
+            [ viewRequiredLevel appState qvs phases data.requiredPhaseUuid
             , viewResourcePageReferences appState data.resourcePageReferences
             , viewUrlReferences appState data.urlReferences
             , viewExperts appState data.experts
             ]
 
 
-viewRequiredLevel : AppState -> QuestionnaireViewSettings -> List Level -> Maybe Int -> Html msg
-viewRequiredLevel appState qvs levels questionLevel =
-    case ( qvs.phases, List.find (.level >> (==) (questionLevel |> Maybe.withDefault 0)) levels ) of
+viewRequiredLevel : AppState -> QuestionnaireViewSettings -> List Phase -> Maybe String -> Html msg
+viewRequiredLevel appState qvs phases questionPhaseUuid =
+    case ( qvs.phases, List.find (.uuid >> Just >> (==) questionPhaseUuid) phases ) of
         ( True, Just level ) ->
             span []
                 [ span [ class "caption" ]

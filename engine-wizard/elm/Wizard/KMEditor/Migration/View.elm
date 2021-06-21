@@ -11,6 +11,8 @@ import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
 import Shared.Data.Event.AddChoiceEventData exposing (AddChoiceEventData)
 import Shared.Data.Event.AddExpertEventData exposing (AddExpertEventData)
 import Shared.Data.Event.AddIntegrationEventData exposing (AddIntegrationEventData)
+import Shared.Data.Event.AddMetricEventData exposing (AddMetricEventData)
+import Shared.Data.Event.AddPhaseEventData exposing (AddPhaseEventData)
 import Shared.Data.Event.AddQuestionEventData as AddQuestionEventQuestion exposing (AddQuestionEventData(..))
 import Shared.Data.Event.AddReferenceCrossEventData exposing (AddReferenceCrossEventData)
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
@@ -23,6 +25,8 @@ import Shared.Data.Event.EditChoiceEventData exposing (EditChoiceEventData)
 import Shared.Data.Event.EditExpertEventData exposing (EditExpertEventData)
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData)
 import Shared.Data.Event.EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
+import Shared.Data.Event.EditMetricEventData exposing (EditMetricEventData)
+import Shared.Data.Event.EditPhaseEventData exposing (EditPhaseEventData)
 import Shared.Data.Event.EditQuestionEventData as EditQuestionEventData exposing (EditQuestionEventData(..))
 import Shared.Data.Event.EditReferenceCrossEventData exposing (EditReferenceCrossEventData)
 import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData(..))
@@ -38,6 +42,7 @@ import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
@@ -160,6 +165,38 @@ getEventView appState model migration metrics event =
             migration.currentKnowledgeModel
                 |> viewEditKnowledgeModelDiff appState eventData
                 |> viewEvent appState model (lg "event.editKM" appState)
+
+        AddMetricEvent eventData _ ->
+            viewAddMetricDiff appState eventData
+                |> viewEvent appState model (lg "event.addMetric" appState)
+
+        EditMetricEvent eventData commonData ->
+            KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewEditMetricDiff appState eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editMetric" appState))
+                |> Maybe.withDefault errorMessage
+
+        DeleteMetricEvent commonData ->
+            KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewDeleteMetricDiff appState)
+                |> Maybe.map (viewEvent appState model (lg "event.deleteMetric" appState))
+                |> Maybe.withDefault errorMessage
+
+        AddPhaseEvent eventData _ ->
+            viewAddPhaseDiff appState eventData
+                |> viewEvent appState model (lg "event.addPhase" appState)
+
+        EditPhaseEvent eventData commonData ->
+            KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewEditPhaseDiff appState eventData)
+                |> Maybe.map (viewEvent appState model (lg "event.editPhase" appState))
+                |> Maybe.withDefault errorMessage
+
+        DeletePhaseEvent commonData ->
+            KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewDeletePhaseDiff appState)
+                |> Maybe.map (viewEvent appState model (lg "event.deletePhase" appState))
+                |> Maybe.withDefault errorMessage
 
         AddTagEvent eventData _ ->
             viewAddTagDiff appState eventData
@@ -380,6 +417,108 @@ viewEditKnowledgeModelDiff appState event km =
     in
     div []
         [ chaptersDiff, tagsDiff, integrationsDiff ]
+
+
+viewAddMetricDiff : AppState -> AddMetricEventData -> Html Msg
+viewAddMetricDiff appState event =
+    let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ lg "metric.title" appState
+                , lg "metric.abbreviation" appState
+                , lg "metric.description" appState
+                ]
+                [ event.title
+                , Maybe.withDefault "" event.abbreviation
+                , Maybe.withDefault "" event.description
+                ]
+    in
+    div []
+        (viewAdd fields)
+
+
+viewEditMetricDiff : AppState -> EditMetricEventData -> Metric -> Html Msg
+viewEditMetricDiff appState event metric =
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "metric.title" appState
+                    , lg "metric.abbreviation" appState
+                    , lg "metric.description" appState
+                    ]
+                    [ metric.title
+                    , Maybe.withDefault "" metric.abbreviation
+                    , Maybe.withDefault "" metric.description
+                    ]
+                    [ EventField.getValueWithDefault event.title metric.title
+                    , EventField.getValueWithDefault event.abbreviation metric.abbreviation |> Maybe.withDefault ""
+                    , EventField.getValueWithDefault event.description metric.description |> Maybe.withDefault ""
+                    ]
+    in
+    div [] fieldDiff
+
+
+viewDeleteMetricDiff : AppState -> Metric -> Html Msg
+viewDeleteMetricDiff appState metric =
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "metric.title" appState
+                    , lg "metric.abbreviation" appState
+                    , lg "metric.description" appState
+                    ]
+                    [ metric.title
+                    , Maybe.withDefault "" metric.abbreviation
+                    , Maybe.withDefault "" metric.description
+                    ]
+    in
+    div [] fieldDiff
+
+
+viewAddPhaseDiff : AppState -> AddPhaseEventData -> Html Msg
+viewAddPhaseDiff appState event =
+    let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ lg "phase.title" appState
+                ]
+                [ event.title
+                ]
+    in
+    div []
+        (viewAdd fields)
+
+
+viewEditPhaseDiff : AppState -> EditPhaseEventData -> Phase -> Html Msg
+viewEditPhaseDiff appState event phase =
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "phase.title" appState
+                    ]
+                    [ phase.title
+                    ]
+                    [ EventField.getValueWithDefault event.title phase.title
+                    ]
+    in
+    div [] fieldDiff
+
+
+viewDeletePhaseDiff : AppState -> Phase -> Html Msg
+viewDeletePhaseDiff appState phase =
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "phase.title" appState
+                    ]
+                    [ phase.title
+                    ]
+    in
+    div [] fieldDiff
 
 
 viewAddTagDiff : AppState -> AddTagEventData -> Html Msg

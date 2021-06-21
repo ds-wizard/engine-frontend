@@ -17,12 +17,12 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Level exposing (Level)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent(..))
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetLevelData exposing (SetLevelData)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
@@ -139,7 +139,6 @@ subscriptions model =
 
 type alias ViewConfig msg =
     { questionnaire : QuestionnaireDetail
-    , levels : List Level
     , wrapMsg : Msg -> msg
     , scrollMsg : String -> msg
     , createVersionMsg : Uuid -> msg
@@ -404,7 +403,7 @@ viewEventDetail appState cfg event =
         ( QuestionnaireEvent.ClearReply data, Just question ) ->
             viewEventDetailClearReply appState cfg data question
 
-        ( QuestionnaireEvent.SetLevel data, _ ) ->
+        ( QuestionnaireEvent.SetPhase data, _ ) ->
             viewEventDetailSetLevel appState cfg data
 
         _ ->
@@ -464,11 +463,11 @@ viewEventDetailClearReply appState cfg data question =
         [ em [] [ lx_ "event.cleared" appState, br [] [], linkToQuestion cfg question data.path ] ]
 
 
-viewEventDetailSetLevel : AppState -> ViewConfig msg -> SetLevelData -> Html msg
+viewEventDetailSetLevel : AppState -> ViewConfig msg -> SetPhaseData -> Html msg
 viewEventDetailSetLevel appState cfg data =
     let
         mbLevel =
-            List.find (.level >> (==) data.level) cfg.levels
+            List.find (.uuid >> (==) (Uuid.toString data.uuid)) (KnowledgeModel.getPhases cfg.questionnaire.knowledgeModel)
 
         levelName =
             Maybe.unwrap "" .title mbLevel

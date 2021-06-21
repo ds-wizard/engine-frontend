@@ -8,6 +8,8 @@ import Shared.Data.KnowledgeModel.Chapter as Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice as Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert as Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Metric as Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase as Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Data.KnowledgeModel.Tag as Tag exposing (Tag)
@@ -22,6 +24,8 @@ type alias KnowledgeModelEntities =
     , references : Dict String Reference
     , integrations : Dict String Integration
     , tags : Dict String Tag
+    , metrics : Dict String Metric
+    , phases : Dict String Phase
     }
 
 
@@ -36,6 +40,8 @@ decoder =
         |> D.required "references" (D.dict Reference.decoder)
         |> D.required "integrations" (D.dict Integration.decoder)
         |> D.required "tags" (D.dict Tag.decoder)
+        |> D.required "metrics" (D.dict Metric.decoder)
+        |> D.required "phases" (D.dict Phase.decoder)
 
 
 updateQuestions : Dict String Question -> KnowledgeModelEntities -> KnowledgeModelEntities

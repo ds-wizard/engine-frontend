@@ -8,7 +8,7 @@ module Shared.Data.KnowledgeModel.Question exposing
     , getItemQuestionUuids
     , getProps
     , getReferenceUuids
-    , getRequiredLevel
+    , getRequiredPhaseUuid
     , getTagUuids
     , getText
     , getTitle
@@ -25,6 +25,7 @@ module Shared.Data.KnowledgeModel.Question exposing
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
@@ -147,9 +148,9 @@ getTypeString question =
             "MultiChoice"
 
 
-getRequiredLevel : Question -> Maybe Int
-getRequiredLevel =
-    getCommonQuestionData >> .requiredLevel
+getRequiredPhaseUuid : Question -> Maybe String
+getRequiredPhaseUuid =
+    getCommonQuestionData >> .requiredPhaseUuid
 
 
 getTagUuids : Question -> List String
@@ -261,10 +262,17 @@ isList question =
 -- Utils
 
 
-isDesirable : { a | config : BootstrapConfig } -> Int -> Question -> Bool
-isDesirable appState currentLevel question =
-    if appState.config.questionnaire.levels.enabled then
-        Maybe.unwrap False ((>=) currentLevel) (getRequiredLevel question)
+isDesirable : { a | config : BootstrapConfig } -> List String -> String -> Question -> Bool
+isDesirable appState phases currentPhase question =
+    if appState.config.questionnaire.phases.enabled then
+        let
+            currentPhaseListLength =
+                List.length <| List.takeWhile ((/=) currentPhase) phases
+
+            questionPhaseListLength =
+                List.length <| List.takeWhile ((/=) (Maybe.withDefault "" (getRequiredPhaseUuid question))) phases
+        in
+        currentPhaseListLength >= questionPhaseListLength
 
     else
         True

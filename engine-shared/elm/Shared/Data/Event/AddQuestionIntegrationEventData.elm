@@ -14,7 +14,7 @@ import Json.Encode.Extra as E
 type alias AddQuestionIntegrationEventData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhaseUuid : Maybe String
     , tagUuids : List String
     , integrationUuid : String
     , props : Dict String String
@@ -26,7 +26,7 @@ decoder =
     D.succeed AddQuestionIntegrationEventData
         |> D.required "title" D.string
         |> D.required "text" (D.nullable D.string)
-        |> D.required "requiredLevel" (D.nullable D.int)
+        |> D.required "requiredPhaseUuid" (D.nullable D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "integrationUuid" D.string
         |> D.required "props" (D.dict D.string)
@@ -37,7 +37,7 @@ encode data =
     [ ( "questionType", E.string "IntegrationQuestion" )
     , ( "title", E.string data.title )
     , ( "text", E.maybe E.string data.text )
-    , ( "requiredLevel", E.maybe E.int data.requiredLevel )
+    , ( "requiredPhaseUuid", E.maybe E.string data.requiredPhaseUuid )
     , ( "tagUuids", E.list E.string data.tagUuids )
     , ( "integrationUuid", E.string data.integrationUuid )
     , ( "props", E.dict identity E.string data.props )
