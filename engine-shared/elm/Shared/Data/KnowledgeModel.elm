@@ -14,7 +14,11 @@ module Shared.Data.KnowledgeModel exposing
     , getExpert
     , getIntegration
     , getIntegrations
+    , getMetric
+    , getMetrics
     , getParent
+    , getPhase
+    , getPhases
     , getQuestion
     , getQuestionAnswers
     , getQuestionChoices
@@ -36,6 +40,8 @@ import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.KnowledgeModelEntities as KnowledgeModelEntities exposing (KnowledgeModelEntities)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference exposing (Reference)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
@@ -48,6 +54,8 @@ type alias KnowledgeModel =
     , chapterUuids : List String
     , tagUuids : List String
     , integrationUuids : List String
+    , metricUuids : List String
+    , phaseUuids : List String
     , entities : KnowledgeModelEntities
     }
 
@@ -63,6 +71,8 @@ decoder =
         |> D.required "chapterUuids" (D.list D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "integrationUuids" (D.list D.string)
+        |> D.required "metricUuids" (D.list D.string)
+        |> D.required "phaseUuids" (D.list D.string)
         |> D.required "entities" KnowledgeModelEntities.decoder
 
 
@@ -73,6 +83,16 @@ decoder =
 getChapter : String -> KnowledgeModel -> Maybe Chapter
 getChapter uuid km =
     Dict.get uuid km.entities.chapters
+
+
+getMetric : String -> KnowledgeModel -> Maybe Metric
+getMetric uuid km =
+    Dict.get uuid km.entities.metrics
+
+
+getPhase : String -> KnowledgeModel -> Maybe Phase
+getPhase uuid km =
+    Dict.get uuid km.entities.phases
 
 
 getTag : String -> KnowledgeModel -> Maybe Tag
@@ -127,6 +147,16 @@ getChapters km =
 getIntegrations : KnowledgeModel -> List Integration
 getIntegrations km =
     resolveEntities km.entities.integrations km.integrationUuids
+
+
+getMetrics : KnowledgeModel -> List Metric
+getMetrics km =
+    resolveEntities km.entities.metrics km.metricUuids
+
+
+getPhases : KnowledgeModel -> List Phase
+getPhases km =
+    resolveEntities km.entities.phases km.phaseUuids
 
 
 getTags : KnowledgeModel -> List Tag

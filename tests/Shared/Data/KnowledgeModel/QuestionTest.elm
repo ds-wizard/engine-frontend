@@ -28,7 +28,7 @@ questionDecoderTest =
                             "valueType": "$type",
                             "title": "Can you answer this question?",
                             "text": null,
-                            "requiredLevel": 1,
+                            "requiredPhaseUuid": "6832055b-5416-43ae-9896-1d9135ced2c4",
                             "tagUuids": [],
                             "referenceUuids": [],
                             "expertUuids": []
@@ -41,7 +41,7 @@ questionDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , title = "Can you answer this question?"
                             , text = Nothing
-                            , requiredLevel = Just 1
+                            , requiredPhaseUuid = Just "6832055b-5416-43ae-9896-1d9135ced2c4"
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []
@@ -60,7 +60,7 @@ questionDecoderTest =
                             "questionType": "ValueQuestion",
                             "title": "Can you answer this question?",
                             "text": null,
-                            "requiredLevel": 1,
+                            "requiredPhaseUuid": "6832055b-5416-43ae-9896-1d9135ced2c4",
                             "tagUuids": ["563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93"],
                             "referenceUuids": [],
                             "expertUuids": [],
@@ -73,7 +73,7 @@ questionDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , title = "Can you answer this question?"
                             , text = Nothing
-                            , requiredLevel = Just 1
+                            , requiredPhaseUuid = Just "6832055b-5416-43ae-9896-1d9135ced2c4"
                             , tagUuids = [ "563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93" ]
                             , referenceUuids = []
                             , expertUuids = []
@@ -93,7 +93,7 @@ questionDecoderTest =
                             "valueType": "StringQuestionValueType",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
-                            "requiredLevel": null,
+                            "requiredPhaseUuid": null,
                             "tagUuids": [],
                             "referenceUuids": ["64217c4e-50b3-4230-9224-bf65c4220ab6"],
                             "expertUuids": []
@@ -105,7 +105,7 @@ questionDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , title = "Can you answer this question?"
                             , text = Just "Please answer the question"
-                            , requiredLevel = Nothing
+                            , requiredPhaseUuid = Nothing
                             , tagUuids = []
                             , referenceUuids = [ "64217c4e-50b3-4230-9224-bf65c4220ab6" ]
                             , expertUuids = []
@@ -125,7 +125,7 @@ questionDecoderTest =
                             "valueType": "StringQuestionValueType",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
-                            "requiredLevel": 2,
+                            "requiredPhaseUuid": "0948bd26-d985-4549-b7c8-95e9061d6413",
                             "tagUuids": [],
                             "referenceUuids": [],
                             "expertUuids": ["64217c4e-50b3-4230-9224-bf65c4220ab6"]
@@ -137,7 +137,7 @@ questionDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , title = "Can you answer this question?"
                             , text = Just "Please answer the question"
-                            , requiredLevel = Just 2
+                            , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = [ "64217c4e-50b3-4230-9224-bf65c4220ab6" ]
@@ -156,7 +156,7 @@ questionDecoderTest =
                             "questionType": "OptionsQuestion",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
-                            "requiredLevel": null,
+                            "requiredPhaseUuid": null,
                             "tagUuids": [],
                             "answerUuids": ["64217c4e-50b3-4230-9224-bf65c4220ab6"],
                             "referenceUuids": [],
@@ -169,7 +169,7 @@ questionDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , title = "Can you answer this question?"
                             , text = Just "Please answer the question"
-                            , requiredLevel = Nothing
+                            , requiredPhaseUuid = Nothing
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []
@@ -188,7 +188,7 @@ questionDecoderTest =
                             "questionType": "ListQuestion",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
-                            "requiredLevel": null,
+                            "requiredPhaseUuid": null,
                             "tagUuids": [],
                             "itemTemplateQuestionUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
                             "referenceUuids": [],
@@ -201,7 +201,7 @@ questionDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , title = "Can you answer this question?"
                             , text = Just "Please answer the question"
-                            , requiredLevel = Nothing
+                            , requiredPhaseUuid = Nothing
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []
@@ -220,7 +220,7 @@ questionDecoderTest =
                             "questionType": "IntegrationQuestion",
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
-                            "requiredLevel": null,
+                            "requiredPhaseUuid": null,
                             "tagUuids": [],
                             "referenceUuids": [],
                             "expertUuids": [],
@@ -236,7 +236,7 @@ questionDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , title = "Can you answer this question?"
                             , text = Just "Please answer the question"
-                            , requiredLevel = Nothing
+                            , requiredPhaseUuid = Nothing
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []

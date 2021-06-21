@@ -11,8 +11,8 @@ module Wizard.Projects.Detail.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnaireApi
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
@@ -34,8 +34,6 @@ import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (Pr
 
 type alias Model =
     { uuid : Uuid
-    , levels : ActionResult (List Level)
-    , metrics : ActionResult (List Metric)
     , websocket : WebSocket
     , offline : Bool
     , error : Bool
@@ -58,8 +56,6 @@ type alias Model =
 init : AppState -> Uuid -> Model
 init appState uuid =
     { uuid = uuid
-    , levels = Loading
-    , metrics = Loading
     , websocket = WebSocket.init (QuestionnaireApi.websocket uuid appState)
     , offline = False
     , error = False

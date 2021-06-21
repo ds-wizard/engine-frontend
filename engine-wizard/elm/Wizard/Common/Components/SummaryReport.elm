@@ -15,6 +15,7 @@ import ChartJS exposing (ChartConfig)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Round
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel as KnowledgeModel
@@ -62,7 +63,6 @@ init =
 
 type alias Context =
     { questionnaire : QuestionnaireDetail
-    , metrics : List Metric
     }
 
 
@@ -93,14 +93,17 @@ update msg appState ctx model =
             case result of
                 Ok summaryReport ->
                     let
+                        metrics =
+                            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+
                         chapters =
                             KnowledgeModel.getChapters ctx.questionnaire.knowledgeModel
 
                         chapterChartsConfigs =
-                            List.map (createChapterChartConfig ctx.metrics chapters) summaryReport.chapterReports
+                            List.map (createChapterChartConfig metrics chapters) summaryReport.chapterReports
 
                         totalChartConfig =
-                            createTotalChartConfig ctx.metrics summaryReport.totalReport
+                            createTotalChartConfig metrics summaryReport.totalReport
 
                         cmds =
                             List.map
@@ -140,11 +143,14 @@ viewContent appState ctx summaryReport =
             , hr [] []
             ]
 
+        metrics =
+            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+
         chapters =
             viewChapters appState ctx summaryReport
 
         metricDescriptions =
-            [ viewMetricsDescriptions appState ctx.metrics ]
+            [ viewMetricsDescriptions appState metrics ]
     in
     div [ class "questionnaire__summary-report container" ]
         (List.concat [ title, totalReport, chapters, metricDescriptions ])
@@ -174,17 +180,20 @@ viewChapterReport appState ctx chapterReport =
 viewMetrics : AppState -> Context -> List MetricReport -> String -> Html msg
 viewMetrics appState ctx metricReports canvasId =
     let
+        metrics =
+            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+
         content =
             if List.length metricReports == 0 then
                 []
 
             else if List.length metricReports > 2 then
-                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState ctx.metrics metricReports ]
-                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart ctx.metrics canvasId ]
+                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState metrics metricReports ]
+                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics canvasId ]
                 ]
 
             else
-                [ div [ class "col-12" ] [ viewMetricsTable appState ctx.metrics metricReports ] ]
+                [ div [ class "col-12" ] [ viewMetricsTable appState metrics metricReports ] ]
     in
     div [ class "row" ] content
 
@@ -287,9 +296,13 @@ viewMetricsDescriptions appState metrics =
 
 viewMetricDescription : Metric -> Html msg
 viewMetricDescription metric =
+    let
+        abbreviation =
+            Maybe.unwrap "" (\a -> a ++ " - ") metric.abbreviation
+    in
     div []
-        [ h4 [] [ text <| metric.abbreviation ++ " - " ++ metric.title ]
-        , p [ class "text-justify" ] [ text metric.description ]
+        [ h4 [] [ text <| abbreviation ++ metric.title ]
+        , p [ class "text-justify" ] [ text (Maybe.withDefault "" metric.description) ]
         ]
 
 

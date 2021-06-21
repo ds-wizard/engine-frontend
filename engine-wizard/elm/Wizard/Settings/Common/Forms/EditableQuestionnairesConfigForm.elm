@@ -49,7 +49,7 @@ init config =
             , ( "questionnaireSharingDefaultValue", QuestionnaireSharing.field config.questionnaireSharing.defaultValue )
             , ( "questionnaireSharingAnonymousEnabled", Field.bool config.questionnaireSharing.anonymousEnabled )
             , ( "questionnaireCreation", QuestionnaireCreation.field config.questionnaireCreation )
-            , ( "levels", SimpleFeatureConfig.field config.levels )
+            , ( "levels", SimpleFeatureConfig.field config.phases )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
             , ( "feedbackOwner", Field.string config.feedback.owner )
@@ -89,7 +89,7 @@ toEditableQuestionnaireConfig form =
         , anonymousEnabled = form.questionnaireSharingAnonymousEnabled
         }
     , questionnaireCreation = form.questionnaireCreation
-    , levels = form.levels
+    , phases = form.levels
     , feedback =
         { enabled = form.feedbackEnabled
         , token = form.feedbackToken

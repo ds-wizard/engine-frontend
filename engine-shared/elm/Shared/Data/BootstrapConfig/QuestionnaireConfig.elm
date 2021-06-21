@@ -16,7 +16,7 @@ type alias QuestionnaireConfig =
     { questionnaireVisibility : QuestionnaireVisibilityConfig
     , questionnaireSharing : QuestionnaireSharingConfig
     , questionnaireCreation : QuestionnaireCreation
-    , levels : SimpleFeatureConfig
+    , phases : SimpleFeatureConfig
     , feedback : SimpleFeatureConfig
     , summaryReport : SimpleFeatureConfig
     }
@@ -28,7 +28,7 @@ decoder =
         |> D.required "questionnaireVisibility" QuestionnaireVisibilityConfig.decoder
         |> D.required "questionnaireSharing" QuestionnaireSharingConfig.decoder
         |> D.required "questionnaireCreation" QuestionnaireCreation.decoder
-        |> D.required "levels" SimpleFeatureConfig.decoder
+        |> D.required "phases" SimpleFeatureConfig.decoder
         |> D.required "feedback" SimpleFeatureConfig.decoder
         |> D.required "summaryReport" SimpleFeatureConfig.decoder
 
@@ -38,7 +38,7 @@ default =
     { questionnaireVisibility = QuestionnaireVisibilityConfig.default
     , questionnaireSharing = QuestionnaireSharingConfig.default
     , questionnaireCreation = QuestionnaireCreation.TemplateAndCustomQuestionnaireCreation
-    , levels = SimpleFeatureConfig.init True
+    , phases = SimpleFeatureConfig.init True
     , feedback = SimpleFeatureConfig.init True
     , summaryReport = SimpleFeatureConfig.init True
     }

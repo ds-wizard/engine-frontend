@@ -36,6 +36,12 @@ viewEvent appState kmName km event =
         getChapterTitle commonData =
             Maybe.map .title <| KnowledgeModel.getChapter commonData.entityUuid km
 
+        getMetricTitle commonData =
+            Maybe.map .title <| KnowledgeModel.getMetric commonData.entityUuid km
+
+        getPhaseTitle commonData =
+            Maybe.map .title <| KnowledgeModel.getPhase commonData.entityUuid km
+
         getTagName commonData =
             Maybe.map .name <| KnowledgeModel.getTag commonData.entityUuid km
 
@@ -62,6 +68,12 @@ viewEvent appState kmName km event =
 
         viewChapterNode_ =
             viewChapterNode appState kmName Nothing
+
+        viewMetricNode_ =
+            viewMetricNode appState kmName
+
+        viewPhaseNode_ =
+            viewPhaseNode appState kmName
 
         viewTagNode_ =
             viewTagNode appState kmName
@@ -99,6 +111,24 @@ viewEvent appState kmName km event =
 
         DeleteChapterEvent commonData ->
             viewChapterNode_ stateClass.deleted (getChapterTitle commonData)
+
+        AddMetricEvent _ _ ->
+            viewMetricNode_ stateClass.added eventEntityName
+
+        EditMetricEvent _ commonData ->
+            viewMetricNode_ stateClass.edited (eventEntityNameOrDefault (getMetricTitle commonData))
+
+        DeleteMetricEvent commonData ->
+            viewMetricNode_ stateClass.deleted (getMetricTitle commonData)
+
+        AddPhaseEvent _ _ ->
+            viewPhaseNode_ stateClass.added eventEntityName
+
+        EditPhaseEvent _ commonData ->
+            viewMetricNode_ stateClass.edited (eventEntityNameOrDefault (getPhaseTitle commonData))
+
+        DeletePhaseEvent commonData ->
+            viewPhaseNode_ stateClass.deleted (getPhaseTitle commonData)
 
         AddTagEvent _ _ ->
             viewTagNode_ stateClass.added eventEntityName
@@ -221,6 +251,34 @@ viewChapterNode appState kmName mbChildNode cssClass mbTitle =
             viewNode (faSet "km.chapter" appState) cssClass mbTitle mbChildNode
     in
     viewKnowledgeModelNode appState (Just chapterNode) stateClass.none (Just kmName)
+
+
+viewMetricNode :
+    AppState
+    -> String
+    -> String
+    -> Maybe String
+    -> Html msg
+viewMetricNode appState kmName cssClass mbTitle =
+    let
+        metricNode =
+            viewNode (faSet "km.metric" appState) cssClass mbTitle Nothing
+    in
+    viewKnowledgeModelNode appState (Just metricNode) stateClass.none (Just kmName)
+
+
+viewPhaseNode :
+    AppState
+    -> String
+    -> String
+    -> Maybe String
+    -> Html msg
+viewPhaseNode appState kmName cssClass mbTitle =
+    let
+        phaseNode =
+            viewNode (faSet "km.phase" appState) cssClass mbTitle Nothing
+    in
+    viewKnowledgeModelNode appState (Just phaseNode) stateClass.none (Just kmName)
 
 
 viewTagNode :

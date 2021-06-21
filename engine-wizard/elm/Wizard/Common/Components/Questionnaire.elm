@@ -7,7 +7,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , init
     , setActiveChapterUuid
     , setLabels
-    , setLevel
+    , setPhaseUuid
     , setReply
     , subscriptions
     , update
@@ -35,8 +35,8 @@ import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
@@ -158,9 +158,9 @@ setActiveChapterUuid uuid model =
     { model | activePage = PageChapter uuid }
 
 
-setLevel : Int -> Model -> Model
-setLevel level =
-    updateQuestionnaire <| QuestionnaireDetail.setLevel level
+setPhaseUuid : Uuid -> Model -> Model
+setPhaseUuid phaseUuid =
+    updateQuestionnaire <| QuestionnaireDetail.setPhaseUuid phaseUuid
 
 
 setReply : String -> Reply -> Model -> Model
@@ -212,9 +212,7 @@ type alias QuestionnaireRenderer msg =
 
 
 type alias Context =
-    { levels : List Level
-    , metrics : List Metric
-    , events : List Event
+    { events : List Event
     }
 
 
@@ -239,7 +237,7 @@ type Msg
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
-    | SetLevel String
+    | SetPhase String
     | SetReply String Reply
     | ClearReply String
     | AddItem String (List String)
@@ -302,8 +300,8 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         FeedbackModalMsg feedbackModalMsg ->
             withSeed <| handleFeedbackModalMsg appState model feedbackModalMsg
 
-        SetLevel levelString ->
-            wrap <| setLevel (Maybe.withDefault 1 (String.toInt levelString)) model
+        SetPhase phaseUuid ->
+            wrap <| setPhaseUuid (Uuid.fromUuidString phaseUuid) model
 
         SetReply path replyValue ->
             wrap <| setReply path replyValue model
@@ -562,9 +560,9 @@ view appState cfg ctx model =
     div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ) ] ]
         [ toolbar
         , div [ class "questionnaire__body" ]
-            [ Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg ctx model
+            [ Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model
             , Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model
-            , viewQuestionnaireRightPanel appState cfg ctx model
+            , viewQuestionnaireRightPanel appState cfg model
             ]
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
         ]
@@ -680,10 +678,10 @@ viewQuestionnaireToolbar appState model =
 -- QUESTIONNAIRE - LEFT PANEL
 
 
-viewQuestionnaireLeftPanel : AppState -> Config msg -> Context -> Model -> Html Msg
-viewQuestionnaireLeftPanel appState cfg ctx model =
+viewQuestionnaireLeftPanel : AppState -> Config msg -> Model -> Html Msg
+viewQuestionnaireLeftPanel appState cfg model =
     div [ class "questionnaire__left-panel" ]
-        [ viewQuestionnaireLeftPanelPhaseSelection appState cfg ctx model
+        [ viewQuestionnaireLeftPanelPhaseSelection appState cfg model
         , viewQuestionnaireLeftPanelChapters appState model
         ]
 
@@ -692,31 +690,38 @@ viewQuestionnaireLeftPanel appState cfg ctx model =
 -- QUESTIONNAIRE - LEFT PANEL - PHASE SELECTION
 
 
-viewQuestionnaireLeftPanelPhaseSelection : AppState -> Config msg -> Context -> Model -> Html Msg
-viewQuestionnaireLeftPanelPhaseSelection appState cfg ctx model =
-    if appState.config.questionnaire.levels.enabled then
+viewQuestionnaireLeftPanelPhaseSelection : AppState -> Config msg -> Model -> Html Msg
+viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
+    if appState.config.questionnaire.phases.enabled then
         let
             selectAttrs =
                 if cfg.features.readonly then
                     [ disabled True ]
 
                 else
-                    [ onInput SetLevel ]
+                    [ onInput SetPhase ]
+
+            phases =
+                KnowledgeModel.getPhases model.questionnaire.knowledgeModel
         in
-        div [ class "questionnaire__left-panel__phase" ]
-            [ label [] [ lgx "questionnaire.currentPhase" appState ]
-            , select (class "form-control" :: selectAttrs)
-                (List.map (viewQuestionnaireLeftPanelPhaseSelectionOption model.questionnaire.level) ctx.levels)
-            ]
+        if List.length phases > 0 then
+            div [ class "questionnaire__left-panel__phase" ]
+                [ label [] [ lgx "questionnaire.currentPhase" appState ]
+                , select (class "form-control" :: selectAttrs)
+                    (List.map (viewQuestionnaireLeftPanelPhaseSelectionOption model.questionnaire.phaseUuid) phases)
+                ]
+
+        else
+            emptyNode
 
     else
         emptyNode
 
 
-viewQuestionnaireLeftPanelPhaseSelectionOption : Int -> Level -> Html Msg
-viewQuestionnaireLeftPanelPhaseSelectionOption selectedLevel level =
-    option [ value (fromInt level.level), selected (selectedLevel == level.level) ]
-        [ text level.title ]
+viewQuestionnaireLeftPanelPhaseSelectionOption : Uuid -> Phase -> Html Msg
+viewQuestionnaireLeftPanelPhaseSelectionOption selectedPhaseUuid phase =
+    option [ value phase.uuid, selected (Uuid.toString selectedPhaseUuid == phase.uuid) ]
+        [ text phase.title ]
 
 
 
@@ -760,18 +765,8 @@ viewQuestionnaireLeftPanelChaptersChapter appState model mbActiveChapterUuid ord
 viewQuestionnaireLeftPanelChaptersChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html Msg
 viewQuestionnaireLeftPanelChaptersChapterIndication appState questionnaire chapter =
     let
-        effectiveLevel =
-            if appState.config.questionnaire.levels.enabled then
-                questionnaire.level
-
-            else
-                100
-
         unanswered =
-            QuestionnaireDetail.calculateUnansweredQuestionsForChapter
-                questionnaire
-                effectiveLevel
-                chapter
+            QuestionnaireDetail.calculateUnansweredQuestionsForChapter appState questionnaire chapter
     in
     if unanswered > 0 then
         span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]
@@ -784,8 +779,8 @@ viewQuestionnaireLeftPanelChaptersChapterIndication appState questionnaire chapt
 -- QUESTIONNAIRE - RIGHT PANEL
 
 
-viewQuestionnaireRightPanel : AppState -> Config msg -> Context -> Model -> Html msg
-viewQuestionnaireRightPanel appState cfg ctx model =
+viewQuestionnaireRightPanel : AppState -> Config msg -> Model -> Html msg
+viewQuestionnaireRightPanel appState cfg model =
     let
         wrapPanel content =
             div [ class "questionnaire__right-panel" ]
@@ -803,7 +798,6 @@ viewQuestionnaireRightPanel appState cfg ctx model =
             let
                 historyCfg =
                     { questionnaire = model.questionnaire
-                    , levels = ctx.levels
                     , wrapMsg = cfg.wrapMsg << HistoryMsg
                     , scrollMsg = cfg.wrapMsg << ScrollToPath
                     , createVersionMsg = cfg.wrapMsg << CreateNamedVersion
@@ -992,10 +986,16 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
 viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
 viewQuestionLabel appState cfg ctx model path humanIdentifiers question =
     let
+        isDesirable =
+            Question.isDesirable appState
+                model.questionnaire.knowledgeModel.phaseUuids
+                (Uuid.toString model.questionnaire.phaseUuid)
+                question
+
         questionState =
             case
                 ( QuestionnaireDetail.hasReply (pathToString path) model.questionnaire
-                , Question.isDesirable appState model.questionnaire.level question
+                , isDesirable
                 )
             of
                 ( True, _ ) ->

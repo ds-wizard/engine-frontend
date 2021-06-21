@@ -6,7 +6,9 @@ module Wizard.KMEditor.Editor.KMEditor.Msgs exposing
     , ExpertEditorMsg(..)
     , IntegrationEditorMsg(..)
     , KMEditorMsg(..)
+    , MetricEditorMsg(..)
     , Msg(..)
+    , PhaseEditorMsg(..)
     , QuestionEditorMsg(..)
     , ReferenceEditorMsg(..)
     , TagEditorMsg(..)
@@ -35,6 +37,8 @@ type Msg
 
 type EditorMsg
     = KMEditorMsg KMEditorMsg
+    | MetricEditorMsg MetricEditorMsg
+    | PhaseEditorMsg PhaseEditorMsg
     | TagEditorMsg TagEditorMsg
     | IntegrationEditorMsg IntegrationEditorMsg
     | ChapterEditorMsg ChapterEditorMsg
@@ -49,8 +53,12 @@ type KMEditorMsg
     = KMEditorFormMsg Form.Msg
     | ReorderChapters (List String)
     | AddChapter
+    | ReorderMetrics (List String)
+    | ReorderPhases (List String)
     | ReorderTags (List String)
     | ReorderIntegrations (List String)
+    | AddMetric
+    | AddPhase
     | AddTag
     | AddIntegration
 
@@ -60,6 +68,16 @@ type ChapterEditorMsg
     | DeleteChapter String
     | ReorderQuestions (List String)
     | AddQuestion
+
+
+type MetricEditorMsg
+    = MetricFormMsg Form.Msg
+    | DeleteMetric String
+
+
+type PhaseEditorMsg
+    = PhaseFormMsg Form.Msg
+    | DeletePhase String
 
 
 type TagEditorMsg

@@ -7,8 +7,6 @@ import List.Extra as List
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Common.AppState exposing (AppState)
@@ -22,11 +20,11 @@ import Wizard.Projects.Common.QuestionnaireChanges exposing (QuestionnaireChange
 import Wizard.Projects.Migration.Models exposing (areQuestionDetailsChanged)
 
 
-create : AppState -> QuestionnaireMigration -> QuestionnaireChanges -> KnowledgeModel -> List Level -> List Metric -> Maybe QuestionChange -> QuestionnaireRenderer msg
-create appState migration changes km levels metrics mbSelectedChange =
+create : AppState -> QuestionnaireMigration -> QuestionnaireChanges -> KnowledgeModel -> Maybe QuestionChange -> QuestionnaireRenderer msg
+create appState migration changes km mbSelectedChange =
     let
         defaultRenderer =
-            DefaultQuestionnaireRenderer.create appState km levels metrics
+            DefaultQuestionnaireRenderer.create appState km
 
         getExtraQuestionClass question =
             if Just (Question.getUuid question) == Maybe.map QuestionChange.getQuestionUuid mbSelectedChange then

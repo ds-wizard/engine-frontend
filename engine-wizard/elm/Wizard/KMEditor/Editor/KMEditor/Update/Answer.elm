@@ -12,7 +12,7 @@ import Random exposing (Seed)
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
+import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations, getCurrentMetrics)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, Editor(..), QuestionEditorData, addAnswerFollowUp, createQuestionEditor, isAnswerEditorDirty, updateAnswerEditorData)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (answerFormValidation)
@@ -27,25 +27,28 @@ l_ =
 
 
 updateAnswerForm : Model -> Form.Msg -> AnswerEditorData -> Model
-updateAnswerForm =
+updateAnswerForm model =
     updateForm
-        { formValidation = answerFormValidation
+        { formValidation = answerFormValidation (getCurrentMetrics model)
         , createEditor = AnswerEditor
         }
+        model
 
 
 withGenerateAnswerEditEvent : AppState -> Seed -> Model -> AnswerEditorData -> (Seed -> Model -> AnswerEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )) -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
-withGenerateAnswerEditEvent appState =
+withGenerateAnswerEditEvent appState seed model =
     withGenerateEvent
         { isDirty = isAnswerEditorDirty
-        , formValidation = answerFormValidation
+        , formValidation = answerFormValidation (getCurrentMetrics model)
         , createEditor = AnswerEditor
         , alert = l_ "alert" appState
         , createAddEvent = createAddAnswerEvent
         , createEditEvent = createEditAnswerEvent
-        , updateEditorData = updateAnswerEditorData
+        , updateEditorData = updateAnswerEditorData (getCurrentMetrics model)
         , updateEditors = Nothing
         }
+        seed
+        model
 
 
 deleteAnswer : Seed -> Model -> String -> AnswerEditorData -> ( Seed, Model )
