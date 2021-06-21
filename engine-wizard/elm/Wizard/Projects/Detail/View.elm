@@ -116,7 +116,7 @@ viewPlan route appState model ( qm, levels, metrics ) =
             , versions = qm.questionnaire.versions
             }
     in
-    div [ class "Plans__Detail" ]
+    div [ class "Projects__Detail" ]
         [ navigation
         , viewPlanContent appState route model qm levels metrics
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel

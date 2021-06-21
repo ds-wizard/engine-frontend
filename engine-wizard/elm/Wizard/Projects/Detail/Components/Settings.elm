@@ -212,12 +212,12 @@ type alias ViewConfig =
 
 view : AppState -> ViewConfig -> Model -> Html Msg
 view appState cfg model =
-    div [ class "Plans__Detail__Content Plans__Detail__Content--Settings" ]
+    div [ class "Projects__Detail__Content Projects__Detail__Content--Settings" ]
         [ div [ detailClass "container" ]
             [ formView appState model
-            , hr [] []
+            , hr [ class "separator" ] []
             , knowledgeModel appState cfg
-            , hr [] []
+            , hr [ class "separator" ] []
             , dangerZone appState cfg
             ]
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModalModel
@@ -247,7 +247,8 @@ formView appState model =
 
         isTemplateInput =
             if Permission.hasPerm appState.session Permission.questionnaireTemplate then
-                [ Html.map FormMsg <| FormGroup.toggle model.form "isTemplate" <| lg "questionnaire.isTemplate" appState
+                [ hr [] []
+                , Html.map FormMsg <| FormGroup.toggle model.form "isTemplate" <| lg "questionnaire.isTemplate" appState
                 , FormExtra.mdAfter (lg "questionnaire.isTemplate.desc" appState)
                 ]
 
@@ -259,11 +260,12 @@ formView appState model =
          , FormResult.errorOnlyView appState model.savingQuestionnaire
          , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
          , Html.map FormMsg <| FormGroup.input appState model.form "description" <| lg "questionnaire.description" appState
+         , hr [] []
+         , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
+         , Html.map FormMsg <| formatInput
          ]
             ++ isTemplateInput
-            ++ [ FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
-               , Html.map FormMsg <| formatInput
-               , FormActions.viewActionOnly appState
+            ++ [ FormActions.viewActionOnly appState
                     (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
                ]
         )

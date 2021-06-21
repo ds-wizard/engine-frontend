@@ -123,7 +123,7 @@ update msg appState ctx model =
 
 view : AppState -> Context -> Model -> Html msg
 view appState context model =
-    div [ class "Plans__Detail__Content Plans__Detail__Content--Metrics" ]
+    div [ class "Projects__Detail__Content Projects__Detail__Content--Metrics" ]
         [ Page.actionResultView appState (viewContent appState context) model.summaryReport
         ]
 

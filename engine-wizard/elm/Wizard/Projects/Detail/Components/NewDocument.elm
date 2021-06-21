@@ -223,7 +223,7 @@ view appState questionnaire mbEventUuid model =
 
 viewFormState : AppState -> QuestionnaireDetail -> Maybe String -> Model -> SummaryReport -> Html Msg
 viewFormState appState questionnaire mbEventUuid model summaryReport =
-    div [ class "Plans__Detail__Content Plans__Detail__Content--NewDocument" ]
+    div [ class "Projects__Detail__Content Projects__Detail__Content--NewDocument" ]
         [ div [ detailClass "container" ]
             [ Page.header (l_ "header.title" appState) []
             , div []
