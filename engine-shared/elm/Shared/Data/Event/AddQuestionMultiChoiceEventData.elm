@@ -9,7 +9,7 @@ import Json.Encode.Extra as E
 type alias AddQuestionMultiChoiceEventData =
     { title : String
     , text : Maybe String
-    , requiredLevel : Maybe Int
+    , requiredPhaseUuid : Maybe String
     , tagUuids : List String
     }
 
@@ -19,7 +19,7 @@ decoder =
     D.succeed AddQuestionMultiChoiceEventData
         |> D.required "title" D.string
         |> D.required "text" (D.nullable D.string)
-        |> D.required "requiredLevel" (D.nullable D.int)
+        |> D.required "requiredPhaseUuid" (D.nullable D.string)
         |> D.required "tagUuids" (D.list D.string)
 
 
@@ -28,6 +28,6 @@ encode data =
     [ ( "questionType", E.string "MultiChoiceQuestion" )
     , ( "title", E.string data.title )
     , ( "text", E.maybe E.string data.text )
-    , ( "requiredLevel", E.maybe E.int data.requiredLevel )
+    , ( "requiredPhaseUuid", E.maybe E.string data.requiredPhaseUuid )
     , ( "tagUuids", E.list E.string data.tagUuids )
     ]

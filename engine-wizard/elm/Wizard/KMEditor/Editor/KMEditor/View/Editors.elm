@@ -9,8 +9,8 @@ import Html.Attributes exposing (class, classList, placeholder, title)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Reorderable
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lg, lgx, lx)
@@ -23,7 +23,7 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
-import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, getCurrentIntegrations, getCurrentTags)
+import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, getCurrentIntegrations, getCurrentMetrics, getCurrentPhases, getCurrentTags)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, QuestionForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
@@ -51,6 +51,12 @@ activeEditor appState kmName model =
             case editor of
                 KMEditor data ->
                     kmEditorView appState kmName model data
+
+                MetricEditor data ->
+                    metricEditorView appState model data
+
+                PhaseEditor data ->
+                    phaseEditorView appState model data
 
                 TagEditor data ->
                     tagEditorView appState model data
@@ -118,6 +124,30 @@ kmEditorView appState kmName model editorData =
             , viewMsg = SetActiveEditor
             }
 
+        metricsConfig =
+            { childName = lg "metric" appState
+            , childNamePlural = lg "metrics" appState
+            , reorderableState = model.reorderableState
+            , children = editorData.metrics.list |> List.filter (editorNotDeleted model.editors)
+            , reorderMsg = ReorderMetrics >> KMEditorMsg >> EditorMsg
+            , addMsg = AddMetric |> KMEditorMsg |> EditorMsg
+            , toId = identity
+            , getName = getChildName kmName model.editors
+            , viewMsg = SetActiveEditor
+            }
+
+        phasesConfig =
+            { childName = lg "phase" appState
+            , childNamePlural = lg "phases" appState
+            , reorderableState = model.reorderableState
+            , children = editorData.phases.list |> List.filter (editorNotDeleted model.editors)
+            , reorderMsg = ReorderPhases >> KMEditorMsg >> EditorMsg
+            , addMsg = AddPhase |> KMEditorMsg |> EditorMsg
+            , toId = identity
+            , getName = getChildName kmName model.editors
+            , viewMsg = SetActiveEditor
+            }
+
         tagsConfig =
             { childName = lg "tag" appState
             , childNamePlural = lg "tags" appState
@@ -146,6 +176,8 @@ kmEditorView appState kmName model editorData =
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
         , inputChildren appState chaptersConfig
+        , inputChildren appState metricsConfig
+        , inputChildren appState phasesConfig
         , inputChildren appState tagsConfig
         , inputChildren appState integrationsConfig
         ]
@@ -185,6 +217,55 @@ chapterEditorView appState kmName model editorData =
         [ editorTitle appState editorTitleConfig
         , form |> Html.map (ChapterFormMsg >> ChapterEditorMsg >> EditorMsg)
         , inputChildren appState questionsConfig
+        ]
+    )
+
+
+metricEditorView : AppState -> Model -> MetricEditorData -> ( String, Html Msg )
+metricEditorView appState model editorData =
+    let
+        editorTitleConfig =
+            { title = lg "metric" appState
+            , uuid = editorData.uuid
+            , deleteAction = DeleteMetric editorData.uuid |> MetricEditorMsg |> EditorMsg |> Just
+            , movable = False
+            }
+
+        form =
+            div []
+                [ FormGroup.input appState editorData.form "title" <| lg "metric.title" appState
+                , FormGroup.input appState editorData.form "abbreviation" <| lg "metric.abbreviation" appState
+                , FormGroup.textarea appState editorData.form "description" <| lg "metric.description" appState
+                ]
+    in
+    ( editorData.uuid
+    , div [ class editorClass ]
+        [ editorTitle appState editorTitleConfig
+        , form |> Html.map (MetricFormMsg >> MetricEditorMsg >> EditorMsg)
+        ]
+    )
+
+
+phaseEditorView : AppState -> Model -> PhaseEditorData -> ( String, Html Msg )
+phaseEditorView appState model editorData =
+    let
+        editorTitleConfig =
+            { title = lg "phase" appState
+            , uuid = editorData.uuid
+            , deleteAction = DeletePhase editorData.uuid |> PhaseEditorMsg |> EditorMsg |> Just
+            , movable = False
+            }
+
+        form =
+            div []
+                [ FormGroup.input appState editorData.form "title" <| lg "phase.title" appState
+                , FormGroup.textarea appState editorData.form "description" <| lg "phase.description" appState
+                ]
+    in
+    ( editorData.uuid
+    , div [ class editorClass ]
+        [ editorTitle appState editorTitleConfig
+        , form |> Html.map (PhaseFormMsg >> PhaseEditorMsg >> EditorMsg)
         ]
     )
 
@@ -322,11 +403,7 @@ questionEditorView appState kmName model editorData =
             }
 
         levelSelection =
-            if appState.config.questionnaire.levels.enabled then
-                questionRequiredLevelSelectGroup appState editorData model.levels
-
-            else
-                emptyNode
+            questionRequiredPhaseSelectGroup appState editorData model
 
         formFields =
             [ FormGroup.select appState (questionTypeOptions appState) editorData.form "questionType" <| lg "question.type" appState
@@ -472,20 +549,20 @@ questionTagList appState model editorData =
         ]
 
 
-questionRequiredLevelSelectGroup : AppState -> QuestionEditorData -> List Level -> Html Form.Msg
-questionRequiredLevelSelectGroup appState editorData levels =
+questionRequiredPhaseSelectGroup : AppState -> QuestionEditorData -> Model -> Html Form.Msg
+questionRequiredPhaseSelectGroup appState editorData model =
     let
         options =
-            levels
-                |> List.map createLevelOption
+            getCurrentPhases model
+                |> List.map createPhaseOption
                 |> (::) ( "", l_ "questionEditor.form.requiredLevel.defaultValue" appState )
     in
     FormGroup.select appState options editorData.form "requiredLevel" <| lg "question.requiredLevel" appState
 
 
-createLevelOption : Level -> ( String, String )
-createLevelOption level =
-    ( fromInt level.level, level.title )
+createPhaseOption : Phase -> ( String, String )
+createPhaseOption phase =
+    ( phase.uuid, phase.title )
 
 
 questionEditorAnswersView : AppState -> String -> Model -> QuestionEditorData -> Html Msg
@@ -583,7 +660,16 @@ answerEditorView appState kmName model editorData =
             }
 
         metrics =
-            metricsView appState editorData model.metrics
+            getCurrentMetrics model
+
+        viewMetrics =
+            if List.length metrics > 0 then
+                metricsView appState editorData metrics
+
+            else
+                FormGroup.plainGroup
+                    (Flash.info appState (l_ "answerEditor.noMetrics" appState))
+                    (lg "metrics" appState)
 
         followUpsConfig =
             { childName = lg "followupQuestion" appState
@@ -608,7 +694,7 @@ answerEditorView appState kmName model editorData =
         [ editorTitle appState editorTitleConfig
         , form |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
         , inputChildren appState followUpsConfig
-        , metrics
+        , viewMetrics
         ]
     )
 
@@ -625,16 +711,19 @@ metricsView appState editorData metrics =
 metricView : AppState -> Form FormError AnswerForm -> Int -> Metric -> Html Form.Msg
 metricView appState form i metric =
     let
+        field name =
+            "metricMeasure-" ++ metric.uuid ++ "-" ++ name
+
         enabled =
-            Form.getFieldAsBool ("metricMeasures." ++ fromInt i ++ ".enabled") form
+            Form.getFieldAsBool (field "enabled") form
                 |> .value
                 |> Maybe.withDefault False
     in
     div [ class "metric-view" ]
-        [ FormGroup.toggle form ("metricMeasures." ++ fromInt i ++ ".enabled") metric.title
+        [ FormGroup.toggle form (field "enabled") metric.title
         , div [ class "metric-view-inputs", classList [ ( "metric-view-inputs-enabled", enabled ) ] ]
-            [ FormGroup.input appState form ("metricMeasures." ++ fromInt i ++ ".weight") (lg "metric.weight" appState)
-            , FormGroup.input appState form ("metricMeasures." ++ fromInt i ++ ".measure") (lg "metric.measure" appState)
+            [ FormGroup.input appState form (field "weight") (lg "metric.weight" appState)
+            , FormGroup.input appState form (field "measure") (lg "metric.measure" appState)
             ]
         ]
 

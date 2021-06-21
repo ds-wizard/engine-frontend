@@ -51,6 +51,12 @@ treeNodeEditor appState ctx editorUuid =
         Just (KMEditor data) ->
             treeNodeKM appState ctx data
 
+        Just (MetricEditor data) ->
+            treeNodeMetric appState ctx data
+
+        Just (PhaseEditor data) ->
+            treeNodePhase appState ctx data
+
         Just (TagEditor data) ->
             treeNodeTag appState ctx data
 
@@ -85,6 +91,12 @@ treeNodeKM appState ctx editorData =
         chapters =
             editorData.chapters.list ++ editorData.chapters.deleted
 
+        metrics =
+            editorData.metrics.list ++ editorData.metrics.deleted
+
+        phases =
+            editorData.phases.list ++ editorData.phases.deleted
+
         tags =
             editorData.tags.list ++ editorData.tags.deleted
 
@@ -95,7 +107,33 @@ treeNodeKM appState ctx editorData =
             { editorData = editorData
             , icon = faSet "km.knowledgeModel" appState
             , label = ctx.kmName
-            , children = chapters ++ tags ++ integrations
+            , children = chapters ++ metrics ++ phases ++ tags ++ integrations
+            }
+    in
+    treeNode appState config ctx
+
+
+treeNodeMetric : AppState -> TreeNodeContext -> MetricEditorData -> Html Msg
+treeNodeMetric appState ctx editorData =
+    let
+        config =
+            { editorData = editorData
+            , icon = faSet "km.metric" appState
+            , label = editorData.metric.title
+            , children = []
+            }
+    in
+    treeNode appState config ctx
+
+
+treeNodePhase : AppState -> TreeNodeContext -> PhaseEditorData -> Html Msg
+treeNodePhase appState ctx editorData =
+    let
+        config =
+            { editorData = editorData
+            , icon = faSet "km.phase" appState
+            , label = editorData.phase.title
+            , children = []
             }
     in
     treeNode appState config ctx

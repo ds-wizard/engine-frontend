@@ -1,6 +1,8 @@
 module Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing
     ( addChapter
     , addIntegration
+    , addMetric
+    , addPhase
     , addTag
     , updateKMForm
     , withGenerateKMEditEvent
@@ -10,6 +12,8 @@ import Form
 import Random exposing (Seed)
 import Shared.Data.KnowledgeModel.Chapter as Chapter
 import Shared.Data.KnowledgeModel.Integration as Integration
+import Shared.Data.KnowledgeModel.Metric as Metric
+import Shared.Data.KnowledgeModel.Phase as Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Tag as Tag
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
@@ -58,6 +62,24 @@ addChapter cmd seed model =
         cmd
         seed
         model
+
+
+addMetric : Cmd Wizard.Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+addMetric =
+    addEntity
+        { newEntity = Metric.new
+        , createEntityEditor = createMetricEditor
+        , addEntity = addKMMetric
+        }
+
+
+addPhase : Cmd Wizard.Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+addPhase =
+    addEntity
+        { newEntity = Phase.new
+        , createEntityEditor = createPhaseEditor
+        , addEntity = addKMPhase
+        }
 
 
 addTag : Cmd Wizard.Msgs.Msg -> Seed -> Model -> KMEditorData -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

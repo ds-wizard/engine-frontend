@@ -21,6 +21,8 @@ import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createMoveAnswerE
 import Wizard.KMEditor.Editor.KMEditor.Update.Expert exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Update.Metric exposing (deleteMetric, updateMetricForm, withGenerateMetricEditEvent)
+import Wizard.KMEditor.Editor.KMEditor.Update.Phase exposing (deletePhase, updatePhaseForm, withGeneratePhaseEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Question exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Reference exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Update.Tag exposing (deleteTag, updateTagForm, withGenerateTagEditEvent)
@@ -51,6 +53,14 @@ update msg appState model fetchPreviewCmd =
                         KMEditor data ->
                             setActiveEditor uuid
                                 |> withGenerateKMEditEvent appState appState.seed model data
+
+                        MetricEditor data ->
+                            setActiveEditor uuid
+                                |> withGenerateMetricEditEvent appState appState.seed model data
+
+                        PhaseEditor data ->
+                            setActiveEditor uuid
+                                |> withGeneratePhaseEditEvent appState appState.seed model data
 
                         TagEditor data ->
                             setActiveEditor uuid
@@ -106,6 +116,26 @@ update msg appState model fetchPreviewCmd =
                             addChapter scrollTopCmd
                                 |> withGenerateKMEditEvent appState appState.seed model editorData
 
+                        ReorderMetrics metricList ->
+                            model
+                                |> insertEditor (KMEditor { editorData | metrics = Children.updateList metricList editorData.metrics })
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        AddMetric ->
+                            addMetric scrollTopCmd
+                                |> withGenerateKMEditEvent appState appState.seed model editorData
+
+                        ReorderPhases phaseList ->
+                            model
+                                |> insertEditor (KMEditor { editorData | phases = Children.updateList phaseList editorData.phases })
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        AddPhase ->
+                            addPhase scrollTopCmd
+                                |> withGenerateKMEditEvent appState appState.seed model editorData
+
                         ReorderTags tagList ->
                             model
                                 |> insertEditor (KMEditor { editorData | tags = Children.updateList tagList editorData.tags })
@@ -146,6 +176,28 @@ update msg appState model fetchPreviewCmd =
                         AddQuestion ->
                             addQuestion scrollTopCmd
                                 |> withGenerateChapterEditEvent appState appState.seed model editorData
+
+                ( MetricEditorMsg metricEditorMsg, Just (MetricEditor editorData) ) ->
+                    case metricEditorMsg of
+                        MetricFormMsg formMsg ->
+                            updateMetricForm model formMsg editorData
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        DeleteMetric uuid ->
+                            deleteMetric appState.seed model uuid editorData
+                                |> withNoCmd
+
+                ( PhaseEditorMsg phaseEditorMsg, Just (PhaseEditor editorData) ) ->
+                    case phaseEditorMsg of
+                        PhaseFormMsg formMsg ->
+                            updatePhaseForm model formMsg editorData
+                                |> pair appState.seed
+                                |> withNoCmd
+
+                        DeletePhase uuid ->
+                            deletePhase appState.seed model uuid editorData
+                                |> withNoCmd
 
                 ( TagEditorMsg tagEditorMsg, Just (TagEditor editorData) ) ->
                     case tagEditorMsg of
@@ -387,6 +439,12 @@ generateEvents appState seed model =
             case editor of
                 KMEditor data ->
                     withGenerateKMEditEvent appState seed model data updateModel
+
+                MetricEditor data ->
+                    withGenerateMetricEditEvent appState seed model data updateModel
+
+                PhaseEditor data ->
+                    withGeneratePhaseEditEvent appState seed model data updateModel
 
                 TagEditor data ->
                     withGenerateTagEditEvent appState seed model data updateModel

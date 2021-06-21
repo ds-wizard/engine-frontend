@@ -1,10 +1,8 @@
 module Wizard.Projects.Migration.View exposing (view)
 
-import ActionResult
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.Package exposing (Package)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
@@ -38,11 +36,11 @@ lf_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (contentView appState model) (ActionResult.combine model.questionnaireMigration model.levels)
+    Page.actionResultView appState (contentView appState model) model.questionnaireMigration
 
 
-contentView : AppState -> Model -> ( QuestionnaireMigration, List Level ) -> Html Msg
-contentView appState model ( migration, levels ) =
+contentView : AppState -> Model -> QuestionnaireMigration -> Html Msg
+contentView appState model migration =
     let
         allResolved =
             model.changes.questions
@@ -78,7 +76,7 @@ contentView appState model ( migration, levels ) =
                     , div [ class "right-view" ]
                         [ changeView appState model migration
                         , div [ class "questionnaire-view" ]
-                            [ questionnaireView appState model migration levels ]
+                            [ questionnaireView appState model migration ]
                         ]
                     ]
     in
@@ -152,8 +150,8 @@ changeView appState model migration =
         ]
 
 
-questionnaireView : AppState -> Model -> QuestionnaireMigration -> List Level -> Html Msg
-questionnaireView appState model migration levels =
+questionnaireView : AppState -> Model -> QuestionnaireMigration -> Html Msg
+questionnaireView appState model migration =
     case model.questionnaireModel of
         Just questionnaireModel ->
             Questionnaire.view appState
@@ -163,14 +161,12 @@ questionnaireView appState model migration levels =
                     , readonly = True
                     , toolbarEnabled = False
                     }
-                , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newQuestionnaire.knowledgeModel levels [] model.selectedChange
+                , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newQuestionnaire.knowledgeModel model.selectedChange
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
                 }
-                { levels = levels
-                , metrics = []
-                , events = []
+                { events = []
                 }
                 questionnaireModel
 
