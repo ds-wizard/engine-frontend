@@ -226,7 +226,7 @@ initKnowledgeModelFrom =
 
 knowledgeModelFormValidation : Validation FormError KnowledgeModelForm
 knowledgeModelFormValidation =
-    Validate.map (\_ -> KnowledgeModelForm) Validate.string
+    Validate.succeed KnowledgeModelForm
 
 
 knowledgeModelFormInitials : KnowledgeModel -> List ( String, Field.Field )
