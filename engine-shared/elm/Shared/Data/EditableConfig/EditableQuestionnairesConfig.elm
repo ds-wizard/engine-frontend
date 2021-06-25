@@ -10,11 +10,13 @@ import Json.Encode as E
 import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Shared.Data.EditableConfig.EditableQuestionnaireConfig.EditableQuestionnaireSharingConfig as EditableQuestionnaireSharingConfig exposing (EditableQuestionnaireSharingConfig)
 import Shared.Data.EditableConfig.EditableQuestionnaireConfig.EditableQuestionnaireVisibilityConfig as EditableQuestionnaireVisibilityConfig exposing (EditableQuestionnaireVisibilityConfig)
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation exposing (QuestionnaireCreation)
 
 
 type alias EditableQuestionnairesConfig =
     { questionnaireVisibility : EditableQuestionnaireVisibilityConfig
     , questionnaireSharing : EditableQuestionnaireSharingConfig
+    , questionnaireCreation : QuestionnaireCreation
     , levels : SimpleFeatureConfig
     , feedback : Feedback
     , summaryReport : SimpleFeatureConfig
@@ -34,6 +36,7 @@ decoder =
     D.succeed EditableQuestionnairesConfig
         |> D.required "questionnaireVisibility" EditableQuestionnaireVisibilityConfig.decoder
         |> D.required "questionnaireSharing" EditableQuestionnaireSharingConfig.decoder
+        |> D.required "questionnaireCreation" QuestionnaireCreation.decoder
         |> D.required "levels" SimpleFeatureConfig.decoder
         |> D.required "feedback" feedbackDecoder
         |> D.required "summaryReport" SimpleFeatureConfig.decoder
@@ -53,6 +56,7 @@ encode config =
     E.object
         [ ( "questionnaireVisibility", EditableQuestionnaireVisibilityConfig.encode config.questionnaireVisibility )
         , ( "questionnaireSharing", EditableQuestionnaireSharingConfig.encode config.questionnaireSharing )
+        , ( "questionnaireCreation", QuestionnaireCreation.encode config.questionnaireCreation )
         , ( "levels", SimpleFeatureConfig.encode config.levels )
         , ( "feedback", encodeFeedback config.feedback )
         , ( "summaryReport", SimpleFeatureConfig.encode config.summaryReport )

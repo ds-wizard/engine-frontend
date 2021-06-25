@@ -1,4 +1,4 @@
-module Wizard.Projects.Common.QuestionnaireCreateForm exposing (QuestionnaireCreateForm, encode, init, validation)
+module Wizard.Projects.Common.QuestionnaireCustomCreateForm exposing (QuestionnaireCustomCreateForm, encode, init, validation)
 
 import Form exposing (Form)
 import Form.Field as Field
@@ -12,7 +12,7 @@ import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 
 
-type alias QuestionnaireCreateForm =
+type alias QuestionnaireCustomCreateForm =
     { name : String
     , packageId : String
     , visibilityEnabled : Bool
@@ -22,7 +22,7 @@ type alias QuestionnaireCreateForm =
     }
 
 
-init : AppState -> Maybe String -> Form FormError QuestionnaireCreateForm
+init : AppState -> Maybe String -> Form FormError QuestionnaireCustomCreateForm
 init appState selectedPackage =
     let
         initialPackageId =
@@ -50,9 +50,9 @@ init appState selectedPackage =
     Form.initial initials validation
 
 
-validation : Validation FormError QuestionnaireCreateForm
+validation : Validation FormError QuestionnaireCustomCreateForm
 validation =
-    Validate.map6 QuestionnaireCreateForm
+    Validate.map6 QuestionnaireCustomCreateForm
         (Validate.field "name" Validate.string)
         (Validate.field "packageId" Validate.string)
         (Validate.field "visibilityEnabled" Validate.bool)
@@ -61,7 +61,7 @@ validation =
         (Validate.field "sharingPermission" QuestionnairePermission.validation)
 
 
-encode : List String -> QuestionnaireCreateForm -> E.Value
+encode : List String -> QuestionnaireCustomCreateForm -> E.Value
 encode tagUuids form =
     E.object
         [ ( "name", E.string form.name )

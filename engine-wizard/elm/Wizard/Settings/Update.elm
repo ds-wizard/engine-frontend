@@ -14,7 +14,7 @@ import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.Update
 import Wizard.Settings.PrivacyAndSupport.Update
-import Wizard.Settings.Questionnaires.Update
+import Wizard.Settings.Projects.Update
 import Wizard.Settings.Registry.Update
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Update
@@ -48,7 +48,7 @@ fetchData route appState model =
             Cmd.map RegistryMsg <|
                 Wizard.Settings.Registry.Update.fetchData appState
 
-        QuestionnairesRoute ->
+        ProjectsRoute ->
             genericFetch QuestionnairesMsg
 
         SubmissionRoute ->
@@ -111,7 +111,7 @@ update wrapMsg msg appState model =
         QuestionnairesMsg questionnairesMsg ->
             let
                 ( questionnairesModel, cmd ) =
-                    Wizard.Settings.Questionnaires.Update.update (wrapMsg << QuestionnairesMsg) questionnairesMsg appState model.questionnairesModel
+                    Wizard.Settings.Projects.Update.update (wrapMsg << QuestionnairesMsg) questionnairesMsg appState model.questionnairesModel
             in
             ( { model | questionnairesModel = questionnairesModel }, cmd )
 

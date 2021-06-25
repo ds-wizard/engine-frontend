@@ -14,6 +14,7 @@ module Wizard.Common.View.FormGroup exposing
     , markdownEditor
     , optionalWrapper
     , password
+    , plainGroup
     , resizableTextarea
     , richRadioGroup
     , select

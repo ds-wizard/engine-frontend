@@ -63,7 +63,7 @@ type alias ViewConfig msg =
 
 view : AppState -> ViewConfig msg -> Model -> Html msg
 view appState cfg model =
-    div [ class "Plans__Detail__Content Plans__Detail__Content--Documents" ]
+    div [ class "Projects__Detail__Content Projects__Detail__Content--Documents" ]
         [ div [ class "container" ]
             [ FormResult.successOnlyView appState model.deletingDocument
             , Listing.view appState (listingConfig cfg appState) model.documents
@@ -96,7 +96,8 @@ listingConfig cfg appState =
         [ ( "name", lg "document.name" appState )
         , ( "createdAt", lg "document.createdAt" appState )
         ]
-    , toRoute = Routes.ProjectsRoute << DetailRoute cfg.questionnaire.uuid << PlanDetailRoute.Documents
+    , filters = []
+    , toRoute = \_ -> Routes.ProjectsRoute << DetailRoute cfg.questionnaire.uuid << PlanDetailRoute.Documents
     , toolbarExtra =
         if cfg.questionnaireEditable && Session.exists appState.session then
             Just <|

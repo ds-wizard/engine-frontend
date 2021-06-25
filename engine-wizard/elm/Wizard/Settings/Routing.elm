@@ -24,7 +24,7 @@ parsers appState wrapRoute =
     , map (wrapRoute <| DashboardRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))
     , map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s (lr "settings.lookAndFeel" appState))
     , map (wrapRoute <| RegistryRoute) (s moduleRoot </> s (lr "settings.registry" appState))
-    , map (wrapRoute <| QuestionnairesRoute) (s moduleRoot </> s (lr "settings.questionnaires" appState))
+    , map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s (lr "settings.projects" appState))
     , map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))
     , map (wrapRoute <| TemplateRoute) (s moduleRoot </> s (lr "settings.template" appState))
     , map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s (lr "settings.knowledgeModel" appState))
@@ -56,8 +56,8 @@ toUrl appState route =
         RegistryRoute ->
             [ moduleRoot, lr "settings.registry" appState ]
 
-        QuestionnairesRoute ->
-            [ moduleRoot, lr "settings.questionnaires" appState ]
+        ProjectsRoute ->
+            [ moduleRoot, lr "settings.projects" appState ]
 
         SubmissionRoute ->
             [ moduleRoot, lr "settings.submission" appState ]

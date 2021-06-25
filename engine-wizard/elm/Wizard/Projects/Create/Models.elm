@@ -1,36 +1,35 @@
 module Wizard.Projects.Create.Models exposing
-    ( Model
+    ( CreateModel(..)
+    , Model
+    , empty
     , initialModel
     )
 
-import ActionResult exposing (ActionResult(..))
-import Form exposing (Form)
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.TypeHintInput as TypeHintInput
-import Wizard.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm exposing (QuestionnaireCreateForm)
+import Wizard.Projects.Create.CustomCreate.Models as CustomCreateModels
+import Wizard.Projects.Create.ProjectCreateRoute as ProjectCreateRoute exposing (ProjectCreateRoute)
+import Wizard.Projects.Create.TemplateCreate.Models as TemplateCreateModels
+
+
+type CreateModel
+    = TemplateCreateModel TemplateCreateModels.Model
+    | CustomCreateModel CustomCreateModels.Model
 
 
 type alias Model =
-    { savingQuestionnaire : ActionResult String
-    , form : Form FormError QuestionnaireCreateForm
-    , packageTypeHintInputModel : TypeHintInput.Model PackageSuggestion
-    , selectedPackage : Maybe String
-    , selectedTags : List String
-    , lastFetchedPreview : Maybe String
-    , knowledgeModelPreview : ActionResult KnowledgeModel
-    }
+    { createModel : CreateModel }
 
 
-initialModel : AppState -> Maybe String -> Model
-initialModel appState selectedPackage =
-    { savingQuestionnaire = Unset
-    , form = QuestionnaireCreateForm.init appState selectedPackage
-    , packageTypeHintInputModel = TypeHintInput.init "packageId"
-    , selectedPackage = selectedPackage
-    , selectedTags = []
-    , lastFetchedPreview = selectedPackage
-    , knowledgeModelPreview = Unset
-    }
+empty : Model
+empty =
+    { createModel = TemplateCreateModel (TemplateCreateModels.initialModel Nothing) }
+
+
+initialModel : AppState -> ProjectCreateRoute -> Model
+initialModel appState subroute =
+    case subroute of
+        ProjectCreateRoute.TemplateCreateRoute mbSelected ->
+            { createModel = TemplateCreateModel (TemplateCreateModels.initialModel mbSelected) }
+
+        ProjectCreateRoute.CustomCreateRoute mbSelected ->
+            { createModel = CustomCreateModel (CustomCreateModels.initialModel appState mbSelected) }

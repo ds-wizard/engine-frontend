@@ -1,9 +1,11 @@
 module Wizard.Common.View.ActionButton exposing
     ( ButtonConfig
     , ButtonExtraConfig
+    , ButtonWithAttrsConfig
     , SubmitConfig
     , button
     , buttonExtra
+    , buttonWithAttrs
     , submit
     )
 
@@ -26,15 +28,27 @@ type alias ButtonConfig a msg =
 
 button : AppState -> ButtonConfig a msg -> Html msg
 button appState cfg =
-    let
-        cssClass =
-            if cfg.dangerous then
-                "btn-danger"
+    actionButtonView appState
+        [ onClick cfg.msg, class <| "btn btn-with-loader " ++ buttonClass cfg.dangerous ]
+        [ text cfg.label ]
+        cfg.result
 
-            else
-                "btn-primary"
-    in
-    actionButtonView appState [ onClick cfg.msg, class <| "btn btn-with-loader " ++ cssClass ] [ text cfg.label ] cfg.result
+
+type alias ButtonWithAttrsConfig a msg =
+    { label : String
+    , result : ActionResult a
+    , msg : msg
+    , dangerous : Bool
+    , attrs : List (Attribute msg)
+    }
+
+
+buttonWithAttrs : AppState -> ButtonWithAttrsConfig a msg -> Html msg
+buttonWithAttrs appState cfg =
+    actionButtonView appState
+        ([ onClick cfg.msg, class <| "btn btn-with-loader " ++ buttonClass cfg.dangerous ] ++ cfg.attrs)
+        [ text cfg.label ]
+        cfg.result
 
 
 type alias ButtonExtraConfig a msg =
@@ -47,15 +61,10 @@ type alias ButtonExtraConfig a msg =
 
 buttonExtra : AppState -> ButtonExtraConfig a msg -> Html msg
 buttonExtra appState cfg =
-    let
-        cssClass =
-            if cfg.dangerous then
-                "btn-danger"
-
-            else
-                "btn-primary"
-    in
-    actionButtonView appState [ onClick cfg.msg, class <| "btn btn-with-loader link-with-icon " ++ cssClass ] cfg.content cfg.result
+    actionButtonView appState
+        [ onClick cfg.msg, class <| "btn btn-with-loader link-with-icon " ++ buttonClass cfg.dangerous ]
+        cfg.content
+        cfg.result
 
 
 type alias SubmitConfig a =
@@ -84,3 +93,12 @@ actionButtonView appState attributes content result =
             [ disabled (result == Loading) ] ++ attributes
     in
     Html.button buttonAttributes buttonContent
+
+
+buttonClass : Bool -> String
+buttonClass dangerous =
+    if dangerous then
+        "btn-danger"
+
+    else
+        "btn-primary"

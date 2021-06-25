@@ -17,6 +17,7 @@ import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
+import Shared.Auth.Permission as Permission
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Permission exposing (Permission)
@@ -35,6 +36,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
+import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
@@ -210,12 +212,12 @@ type alias ViewConfig =
 
 view : AppState -> ViewConfig -> Model -> Html Msg
 view appState cfg model =
-    div [ class "Plans__Detail__Content Plans__Detail__Content--Settings" ]
+    div [ class "Projects__Detail__Content Projects__Detail__Content--Settings" ]
         [ div [ detailClass "container" ]
             [ formView appState model
-            , hr [] []
+            , hr [ class "separator" ] []
             , knowledgeModel appState cfg
-            , hr [] []
+            , hr [ class "separator" ] []
             , dangerZone appState cfg
             ]
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModalModel
@@ -242,16 +244,31 @@ formView appState model =
 
                 _ ->
                     emptyNode
+
+        isTemplateInput =
+            if Permission.hasPerm appState.session Permission.questionnaireTemplate then
+                [ hr [] []
+                , Html.map FormMsg <| FormGroup.toggle model.form "isTemplate" <| lg "questionnaire.isTemplate" appState
+                , FormExtra.mdAfter (lg "questionnaire.isTemplate.desc" appState)
+                ]
+
+            else
+                []
     in
     div []
-        [ h2 [] [ lx_ "settings.title" appState ]
-        , FormResult.errorOnlyView appState model.savingQuestionnaire
-        , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
-        , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
-        , Html.map FormMsg <| formatInput
-        , FormActions.viewActionOnly appState
-            (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
-        ]
+        ([ h2 [] [ lx_ "settings.title" appState ]
+         , FormResult.errorOnlyView appState model.savingQuestionnaire
+         , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
+         , Html.map FormMsg <| FormGroup.input appState model.form "description" <| lg "questionnaire.description" appState
+         , hr [] []
+         , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
+         , Html.map FormMsg <| formatInput
+         ]
+            ++ isTemplateInput
+            ++ [ FormActions.viewActionOnly appState
+                    (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
+               ]
+        )
 
 
 knowledgeModel : AppState -> ViewConfig -> Html Msg

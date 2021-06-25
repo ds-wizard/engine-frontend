@@ -8,6 +8,7 @@ module Shared.Auth.Permission exposing
     , packageManagementRead
     , packageManagementWrite
     , questionnaire
+    , questionnaireTemplate
     , settings
     , submission
     , templates
@@ -61,6 +62,11 @@ packageManagementWrite =
 questionnaire : String
 questionnaire =
     "QTN_PERM"
+
+
+questionnaireTemplate : String
+questionnaireTemplate =
+    "QTN_TML_PERM"
 
 
 settings : String

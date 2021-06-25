@@ -133,7 +133,7 @@ viewContent appState model mbContentType =
             QuestionnairesApi.documentPreviewUrl model.questionnaireUuid appState
     in
     if Maybe.unwrap False (isSupportedInBrowser appState) mbContentType then
-        div [ class "Plans__Detail__Content Plans__Detail__Content--Preview" ]
+        div [ class "Projects__Detail__Content Projects__Detail__Content--Preview" ]
             [ iframe [ src documentUrl ] [] ]
 
     else

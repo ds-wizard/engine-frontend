@@ -1,14 +1,17 @@
 module Wizard.Projects.Index.View exposing (view)
 
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Shared.Auth.Permission as Permissions
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Utils exposing (flip, listInsertIf)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
@@ -24,10 +27,11 @@ import Wizard.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModalMsg
 import Wizard.Projects.Common.DeleteProjectModal.View as DeleteProjectModal
 import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Projects.Common.View exposing (visibilityIcons)
+import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute(..))
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId)
 import Wizard.Routes as Routes
 
 
@@ -60,14 +64,39 @@ view appState model =
 
 createButton : AppState -> Html Msg
 createButton appState =
+    let
+        createRoute =
+            CreateRoute <|
+                if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
+                    TemplateCreateRoute Nothing
+
+                else
+                    CustomCreateRoute Nothing
+    in
     linkTo appState
-        (Routes.ProjectsRoute <| CreateRoute Nothing)
+        (Routes.ProjectsRoute createRoute)
         [ class "btn btn-primary" ]
         [ lx_ "header.create" appState ]
 
 
 listingConfig : AppState -> ViewConfig Questionnaire Msg
 listingConfig appState =
+    let
+        listingFilters =
+            if Permissions.hasPerm appState.session Permissions.questionnaireTemplate then
+                [ ( indexRouteIsTemplateFilterId
+                  , { name = l_ "filter.template.name" appState
+                    , options =
+                        [ ( "true", l_ "filter.template.templatesOnly" appState )
+                        , ( "false", l_ "filter.template.projectsOnly" appState )
+                        ]
+                    }
+                  )
+                ]
+
+            else
+                []
+    in
     { title = listingTitle appState
     , description = listingDescription appState
     , dropdownItems = listingActions appState
@@ -85,7 +114,8 @@ listingConfig appState =
         , ( "createdAt", lg "questionnaire.createdAt" appState )
         , ( "updatedAt", lg "questionnaire.updatedAt" appState )
         ]
-    , toRoute = Routes.ProjectsRoute << IndexRoute
+    , filters = listingFilters
+    , toRoute = Routes.projectIndexWithFilters
     , toolbarExtra = Just (createButton appState)
     }
 
@@ -102,6 +132,7 @@ listingTitle appState questionnaire =
     in
     span []
         ([ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ] ]
+            ++ [ templateBadge appState questionnaire ]
             ++ visibilityIcons appState questionnaire
             ++ [ stateBadge appState questionnaire ]
         )
@@ -284,3 +315,13 @@ stateBadge appState questionnaire =
 
         Default ->
             emptyNode
+
+
+templateBadge : AppState -> Questionnaire -> Html msg
+templateBadge appState questionnaire =
+    if questionnaire.isTemplate then
+        span [ class "badge badge-info" ]
+            [ lgx "questionnaire.templateBadge" appState ]
+
+    else
+        emptyNode

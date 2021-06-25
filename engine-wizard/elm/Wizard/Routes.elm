@@ -9,12 +9,14 @@ module Wizard.Routes exposing
     , isUsersIndex
     , kmEditorIndex
     , knowledgeModelsIndex
+    , projectIndexWithFilters
     , projectsIndex
     , templatesIndex
     , usersIndex
     )
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Dict exposing (Dict)
+import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
@@ -58,13 +60,18 @@ isUsersIndex route =
 
 projectsIndex : Route
 projectsIndex =
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty)
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing)
+
+
+projectIndexWithFilters : Dict String String -> PaginationQueryString -> Route
+projectIndexWithFilters filters pagination =
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute pagination (Dict.get Wizard.Projects.Routes.indexRouteIsTemplateFilterId filters))
 
 
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _) ->
+        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _) ->
             True
 
         _ ->

@@ -1,5 +1,7 @@
 module Shared.Utils exposing
     ( boolToInt
+    , boolToString
+    , dictFromMaybeList
     , dispatch
     , flip
     , getContrastColorHex
@@ -11,6 +13,7 @@ module Shared.Utils exposing
     , nilUuid
     , packageIdToComponents
     , pair
+    , stringToBool
     , stringToInt
     , tuplePrepend
     , withNoCmd
@@ -19,6 +22,7 @@ module Shared.Utils exposing
 import Color
 import Color.Accessibility exposing (contrastRatio)
 import Color.Convert exposing (hexToColor)
+import Dict exposing (Dict)
 import List.Extra as List
 import Random exposing (Seed, step)
 import Task
@@ -87,6 +91,20 @@ boolToInt bool =
         0
 
 
+boolToString : Bool -> String
+boolToString bool =
+    if bool then
+        "true"
+
+    else
+        "false"
+
+
+stringToBool : String -> Bool
+stringToBool str =
+    String.toLower str == "true"
+
+
 listFilterJust : List (Maybe a) -> List a
 listFilterJust =
     let
@@ -108,6 +126,20 @@ listInsertIf item shouldBeInserted list =
 
     else
         list
+
+
+dictFromMaybeList : List ( comparable, Maybe a ) -> Dict comparable a
+dictFromMaybeList list =
+    let
+        fold ( key, mbItem ) acc =
+            case mbItem of
+                Just item ->
+                    Dict.insert key item acc
+
+                Nothing ->
+                    acc
+    in
+    List.foldl fold Dict.empty list
 
 
 getContrastColorHex : String -> String
