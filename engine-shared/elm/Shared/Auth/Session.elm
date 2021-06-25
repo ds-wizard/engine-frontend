@@ -23,7 +23,7 @@ type alias Session =
     , user : Maybe UserInfo
     , sidebarCollapsed : Bool
     , fullscreen : Bool
-    , v5 : Bool
+    , v6 : Bool
     }
 
 
@@ -33,7 +33,7 @@ init =
     , user = Nothing
     , sidebarCollapsed = False
     , fullscreen = False
-    , v5 = True
+    , v6 = True
     }
 
 
@@ -64,7 +64,7 @@ decoder =
         |> D.required "user" (D.nullable UserInfo.decoder)
         |> D.optional "sidebarCollapsed" D.bool False
         |> D.optional "fullscreen" D.bool False
-        |> D.required "v5" D.bool
+        |> D.required "v6" D.bool
 
 
 encode : Session -> E.Value
@@ -74,7 +74,7 @@ encode session =
         , ( "user", E.maybe UserInfo.encode session.user )
         , ( "sidebarCollapsed", E.bool session.sidebarCollapsed )
         , ( "fullscreen", E.bool session.fullscreen )
-        , ( "v5", E.bool session.v5 )
+        , ( "v6", E.bool session.v6 )
         ]
 
 
