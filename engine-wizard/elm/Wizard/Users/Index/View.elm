@@ -10,7 +10,7 @@ import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
@@ -46,7 +46,9 @@ createButton : AppState -> Html msg
 createButton appState =
     linkTo appState
         (Routes.UsersRoute CreateRoute)
-        [ class "btn btn-primary" ]
+        [ class "btn btn-primary"
+        , dataCy "users_create-button"
+        ]
         [ lx_ "header.create" appState ]
 
 
@@ -141,6 +143,7 @@ listingActions appState user =
         , icon = faSet "_global.edit" appState
         , label = l_ "action.edit" appState
         , msg = ListingActionLink (detailRoute user)
+        , dataCy = "edit"
         }
     , Listing.dropdownSeparator
     , Listing.dropdownAction
@@ -148,6 +151,7 @@ listingActions appState user =
         , icon = faSet "_global.delete" appState
         , label = l_ "action.delete" appState
         , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
+        , dataCy = "delete"
         }
     ]
 
@@ -183,6 +187,7 @@ deleteModal appState model =
             , actionMsg = DeleteUser
             , cancelMsg = Just <| ShowHideDeleteUser Nothing
             , dangerous = True
+            , dataCy = "users-delete"
             }
     in
     Modal.confirm appState modalConfig

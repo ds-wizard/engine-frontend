@@ -15,6 +15,7 @@ import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Locale exposing (lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.UserIcon as UserIcon
 
@@ -47,7 +48,7 @@ packageSuggestion pkg =
         , div []
             [ div []
                 [ strong [] [ text pkg.name ]
-                , span [ class "badge badge-light" ] [ text <| Version.toString pkg.version ]
+                , span [ class "badge badge-light", dataCy "typehint-item_package_version" ] [ text <| Version.toString pkg.version ]
                 ]
             , div [] [ text pkg.description ]
             ]

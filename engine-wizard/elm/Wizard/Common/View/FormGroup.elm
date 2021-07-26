@@ -44,7 +44,7 @@ import Shared.Utils exposing (getContrastColorHex)
 import String
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (grammarlyAttributes)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 
 
 l_ : String -> AppState -> String
@@ -110,7 +110,7 @@ inputWithTypehints options appState form fieldName labelText =
                 ul [ class "typehints" ]
                     (List.map
                         (\option ->
-                            li [ onMouseDown <| typehintMessage option ] [ text option ]
+                            li [ onMouseDown <| typehintMessage option, dataCy "form-group_typehints_item" ] [ text option ]
                         )
                         filteredOptions
                     )
@@ -219,7 +219,11 @@ htmlRadioGroup appState options =
         radioInput state attrs =
             let
                 buildOption ( k, html ) =
-                    label [ class "form-check", classList [ ( "form-check-selected", state.value == Just k ) ] ]
+                    label
+                        [ class "form-check"
+                        , classList [ ( "form-check-selected", state.value == Just k ) ]
+                        , dataCy ("form-group_html-radio-" ++ k)
+                        ]
                         [ Html.input
                             [ value k
                             , checked (state.value == Just k)
@@ -341,6 +345,7 @@ colorButton appState maybeValue fieldName colorHex =
         , style "color" <| getContrastColorHex colorHex
         , style "border-color" <| getContrastColorHex colorHex
         , classList [ ( "selected", isSelected ) ]
+        , dataCy "form-group_color_color-button"
         ]
         [ check ]
 
@@ -358,7 +363,11 @@ list appState itemView form fieldName labelText =
         [ label [] [ text labelText ]
         , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
         , div [ class "form-list-error" ] [ error ]
-        , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
+        , button
+            [ class "btn btn-secondary"
+            , onClick (Form.Append fieldName)
+            , dataCy "form-group_list_add-button"
+            ]
             [ lx_ "list.add" appState ]
         ]
 
@@ -377,7 +386,11 @@ listWithHeader appState header itemView form fieldName labelText =
         , header
         , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
         , div [ class "form-list-error" ] [ error ]
-        , button [ class "btn btn-secondary", onClick (Form.Append fieldName) ]
+        , button
+            [ class "btn btn-secondary"
+            , onClick (Form.Append fieldName)
+            , dataCy "form-group_list_add-button"
+            ]
             [ lx_ "list.add" appState ]
         ]
 
@@ -519,10 +532,10 @@ formGroupCustom customInput appState form fieldName labelText =
 
 {-| Helper for creating plain group with text value.
 -}
-textView : String -> String -> Html.Html msg
-textView value =
+textView : String -> String -> String -> Html.Html msg
+textView name value =
     plainGroup <|
-        p [ class "form-value" ] [ text value ]
+        p [ class "form-value", dataCy ("form-group_text_" ++ name) ] [ text value ]
 
 
 {-| Helper for creating plain group with code block.

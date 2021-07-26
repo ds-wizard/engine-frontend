@@ -12,7 +12,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (detailClass, wideDetailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, detailClass, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormExtra as FormExtra
@@ -64,6 +64,7 @@ navigation appState model =
             [ class "nav-link"
             , classList [ ( "active", model.currentView == Profile ) ]
             , onClick <| ChangeView Profile
+            , dataCy "user_nav_profile"
             ]
             [ lx_ "navbar.profile" appState
             ]
@@ -71,6 +72,7 @@ navigation appState model =
             [ class "nav-link"
             , classList [ ( "active", model.currentView == Password ) ]
             , onClick <| ChangeView Password
+            , dataCy "user_nav_password"
             ]
             [ lx_ "navbar.password" appState
             ]
@@ -79,26 +81,30 @@ navigation appState model =
 
 userView : AppState -> Model -> User -> Html Msg
 userView appState model user =
-    div [ wideDetailClass "", classList [ ( "hidden", model.currentView /= Profile ) ] ]
-        [ Page.header (l_ "navbar.profile" appState) []
-        , div [ class "row" ]
-            [ Html.form [ onSubmit (EditFormMsg Form.Submit), class "col-8" ]
-                [ FormResult.view appState model.savingUser
-                , userFormView appState user model.userForm (model.uuid == "current") |> Html.map EditFormMsg
-                , div [ class "mt-5" ]
-                    [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "userView.save" appState) model.savingUser) ]
-                ]
-            , div [ class "col-4" ]
-                [ div [ class "col-user-image" ]
-                    [ strong [] [ lx_ "userView.userImage" appState ]
-                    , div []
-                        [ img [ src (User.imageUrl user), class "user-icon user-icon-large" ] []
+    if model.currentView /= Profile then
+        emptyNode
+
+    else
+        div [ wideDetailClass "" ]
+            [ Page.header (l_ "navbar.profile" appState) []
+            , div [ class "row" ]
+                [ Html.form [ onSubmit (EditFormMsg Form.Submit), class "col-8" ]
+                    [ FormResult.view appState model.savingUser
+                    , userFormView appState user model.userForm (model.uuid == "current") |> Html.map EditFormMsg
+                    , div [ class "mt-5" ]
+                        [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "userView.save" appState) model.savingUser) ]
+                    ]
+                , div [ class "col-4" ]
+                    [ div [ class "col-user-image" ]
+                        [ strong [] [ lx_ "userView.userImage" appState ]
+                        , div []
+                            [ img [ src (User.imageUrl user), class "user-icon user-icon-large" ] []
+                            ]
+                        , Markdown.toHtml [ class "text-muted" ] (l_ "userView.userImage.desc" appState)
                         ]
-                    , Markdown.toHtml [ class "text-muted" ] (l_ "userView.userImage.desc" appState)
                     ]
                 ]
             ]
-        ]
 
 
 userFormView : AppState -> User -> Form FormError UserEditForm -> Bool -> Html Form.Msg
@@ -188,13 +194,17 @@ userFormView appState user form current =
 
 passwordView : AppState -> Model -> Html Msg
 passwordView appState model =
-    Html.form [ onSubmit (PasswordFormMsg Form.Submit), detailClass "", classList [ ( "hidden", model.currentView /= Password ) ] ]
-        [ Page.header (l_ "navbar.password" appState) []
-        , FormResult.view appState model.savingPassword
-        , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
-        , div [ class "mt-5" ]
-            [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "passwordView.save" appState) model.savingPassword) ]
-        ]
+    if model.currentView /= Password then
+        emptyNode
+
+    else
+        Html.form [ onSubmit (PasswordFormMsg Form.Submit), detailClass "" ]
+            [ Page.header (l_ "navbar.password" appState) []
+            , FormResult.view appState model.savingPassword
+            , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
+            , div [ class "mt-5" ]
+                [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "passwordView.save" appState) model.savingPassword) ]
+            ]
 
 
 passwordFormView : AppState -> Form FormError UserPasswordForm -> Html Form.Msg

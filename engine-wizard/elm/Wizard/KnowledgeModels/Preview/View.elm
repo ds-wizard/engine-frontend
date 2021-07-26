@@ -10,6 +10,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Preview.Models exposing (Model)
@@ -73,7 +74,7 @@ viewHeader appState model package =
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
-            [ div [ class "top-header-title" ] [ text <| package.name ++ ", " ++ Version.toString package.version ]
+            [ div [ class "top-header-title", dataCy "km-preview_header_title" ] [ text <| package.name ++ ", " ++ Version.toString package.version ]
             , div [ class "top-header-actions" ] actions
             ]
         ]

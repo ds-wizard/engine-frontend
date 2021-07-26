@@ -158,6 +158,7 @@ listingActions appState package =
                 , icon = faSet "_global.view" appState
                 , label = lg "km.action.view" appState
                 , msg = ListingActionLink (detailRoute package)
+                , dataCy = "view"
                 }
 
         exportAction =
@@ -166,6 +167,7 @@ listingActions appState package =
                 , icon = faSet "_global.export" appState
                 , label = lg "km.action.export" appState
                 , msg = ListingActionExternalLink (PackagesApi.exportPackageUrl package.id appState)
+                , dataCy = "export"
                 }
 
         createKMEditor =
@@ -174,6 +176,7 @@ listingActions appState package =
                 , icon = faSet "kmDetail.createKMEditor" appState
                 , label = lg "km.action.kmEditor" appState
                 , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute (Just package.id) (Just True))
+                , dataCy = "create-km-editor"
                 }
 
         forkAction =
@@ -182,6 +185,7 @@ listingActions appState package =
                 , icon = faSet "kmDetail.fork" appState
                 , label = lg "km.action.fork" appState
                 , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute (Just package.id) Nothing)
+                , dataCy = "fork"
                 }
 
         questionnaireActionVisible =
@@ -194,6 +198,7 @@ listingActions appState package =
                 , icon = faSet "kmDetail.createQuestionnaire" appState
                 , label = lg "km.action.project" appState
                 , msg = ListingActionLink (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute <| Just package.id)
+                , dataCy = "create-project"
                 }
 
         deleteAction =
@@ -202,6 +207,7 @@ listingActions appState package =
                 , icon = faSet "_global.delete" appState
                 , label = lg "km.action.delete" appState
                 , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
+                , dataCy = "delete"
                 }
     in
     []
@@ -245,6 +251,7 @@ deleteModal appState model =
             , actionMsg = DeletePackage
             , cancelMsg = Just <| ShowHideDeletePackage Nothing
             , dangerous = True
+            , dataCy = "km-delete"
             }
     in
     Modal.confirm appState modalConfig

@@ -178,4 +178,5 @@ view appState model =
         , actionMsg = FormMsg Form.Submit
         , cancelMsg = Just Close
         , dangerous = False
+        , dataCy = "project-version"
         }

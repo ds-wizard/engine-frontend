@@ -11,7 +11,7 @@ module Reorderable exposing
 
 import Browser.Events exposing (onMouseMove, onMouseUp)
 import Html exposing (Attribute, Html, li, ul)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (attribute, class, style)
 import Html.Events exposing (on)
 import Json.Decode as D exposing (Decoder)
 import List.Extra as List
@@ -178,13 +178,14 @@ viewItem config (State state) list item =
                     []
 
         attrs =
-            [ class itemClass ]
-                ++ [ onDragStart state.mouseOverIgnored (config.toMsg << DragStart id)
-                   , onDragOver
-                        config.updateList
-                        (\() -> updateList config.toId id (Maybe.map .id state.dragging) list)
-                        (state.dragging /= Nothing)
-                   ]
+            [ class itemClass
+            , onDragStart state.mouseOverIgnored (config.toMsg << DragStart id)
+            , onDragOver
+                config.updateList
+                (\() -> updateList config.toId id (Maybe.map .id state.dragging) list)
+                (state.dragging /= Nothing)
+            , attribute "data-cy" "reorderable_item"
+            ]
     in
     li attrs [ itemView ]
         :: draggedItemView

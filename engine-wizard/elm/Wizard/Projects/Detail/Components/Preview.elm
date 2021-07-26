@@ -154,6 +154,7 @@ viewNotSupported appState documentUrl =
                     ]
                 ]
             ]
+        , cy = "format-not-supported"
         }
 
 
@@ -185,6 +186,7 @@ viewTemplateNotSet appState questionnaire =
         { image = "website_builder"
         , heading = l_ "templateNotSet.heading" appState
         , content = content
+        , cy = "template-not-set"
         }
 
 

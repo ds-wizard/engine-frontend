@@ -15,6 +15,7 @@ import Html.Attributes exposing (class, src)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
 l_ : String -> AppState -> String
@@ -55,17 +56,18 @@ error appState msg =
         { image = "cancel"
         , heading = l_ "error.heading" appState
         , lines = [ msg ]
+        , cy = "error"
         }
 
 
 success : AppState -> String -> Html msg
 success appState =
-    message (faSet "_global.success" appState)
+    message (faSet "_global.success" appState) "success"
 
 
-message : Html msg -> String -> Html msg
-message icon msg =
-    div [ class "jumbotron full-page-message" ]
+message : Html msg -> String -> String -> Html msg
+message icon cy msg =
+    div [ class "jumbotron full-page-message", dataCy ("message_" ++ cy) ]
         [ h1 [ class "display-3" ] [ icon ]
         , p [ class "lead" ] [ text msg ]
         ]
@@ -75,26 +77,28 @@ illustratedMessage :
     { image : String
     , heading : String
     , lines : List String
+    , cy : String
     }
     -> Html msg
-illustratedMessage { image, heading, lines } =
+illustratedMessage { image, heading, lines, cy } =
     let
         content =
             lines
                 |> List.map text
                 |> List.intersperse (br [] [])
     in
-    illustratedMessageHtml { image = image, heading = heading, content = [ p [] content ] }
+    illustratedMessageHtml { image = image, heading = heading, content = [ p [] content ], cy = cy }
 
 
 illustratedMessageHtml :
     { image : String
     , heading : String
     , content : List (Html msg)
+    , cy : String
     }
     -> Html msg
-illustratedMessageHtml { image, heading, content } =
-    div [ class "full-page-illustrated-message" ]
+illustratedMessageHtml { image, heading, content, cy } =
+    div [ class "full-page-illustrated-message", dataCy ("illustrated-message_" ++ cy) ]
         [ img [ src <| "/img/illustrations/undraw_" ++ image ++ ".svg" ] []
         , div []
             (h1 [] [ text heading ] :: content)

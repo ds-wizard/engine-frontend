@@ -200,9 +200,9 @@ hasPerm appState questionnaire role =
     List.member role appliedPerms
 
 
-setPhaseUuid : Uuid -> QuestionnaireDetail -> QuestionnaireDetail
+setPhaseUuid : Maybe Uuid -> QuestionnaireDetail -> QuestionnaireDetail
 setPhaseUuid phaseUuid questionnaire =
-    { questionnaire | phaseUuid = Just phaseUuid }
+    { questionnaire | phaseUuid = phaseUuid }
 
 
 setReply : String -> Reply -> QuestionnaireDetail -> QuestionnaireDetail

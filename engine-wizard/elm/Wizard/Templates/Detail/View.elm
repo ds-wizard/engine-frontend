@@ -17,6 +17,7 @@ import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -79,7 +80,7 @@ header appState template =
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
-            [ div [ class "top-header-title" ] [ text template.name ]
+            [ div [ class "top-header-title", dataCy "template_header-title" ] [ text template.name ]
             , div [ class "top-header-actions" ] actions
             ]
         ]
@@ -253,7 +254,7 @@ sidePanelUsableWith appState template =
             li []
                 [ linkTo appState
                     (Routes.KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.DetailRoute <| package.id)
-                    []
+                    [ dataCy "template_km-link" ]
                     [ text package.id ]
                 ]
 
@@ -311,6 +312,7 @@ deleteVersionModal appState model template =
             , actionMsg = DeleteVersion
             , cancelMsg = Just <| ShowDeleteDialog False
             , dangerous = True
+            , dataCy = "template-delete"
             }
     in
     Modal.confirm appState modalConfig

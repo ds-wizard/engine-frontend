@@ -162,12 +162,14 @@ listingActions appState template =
                 , icon = faSet "_global.view" appState
                 , label = l_ "action.viewDetail" appState
                 , msg = ListingActionLink (detailRoute template)
+                , dataCy = "view"
                 }
             , Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.export" appState
                 , label = l_ "action.export" appState
                 , msg = ListingActionExternalLink (TemplatesApi.exportTemplateUrl template.id appState)
+                , dataCy = "export"
                 }
             ]
     in
@@ -179,6 +181,7 @@ listingActions appState template =
                     , icon = faSet "_global.delete" appState
                     , label = l_ "action.delete" appState
                     , msg = ListingActionMsg <| ShowHideDeleteTemplate <| Just template
+                    , dataCy = "delete"
                     }
                ]
 
@@ -216,6 +219,7 @@ deleteModal appState model =
             , actionMsg = DeleteTemplate
             , cancelMsg = Just <| ShowHideDeleteTemplate Nothing
             , dangerous = True
+            , dataCy = "templates-delete"
             }
     in
     Modal.confirm appState modalConfig

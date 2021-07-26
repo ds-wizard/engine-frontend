@@ -11,6 +11,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -112,19 +113,23 @@ serviceFormView appState form i =
                 [ div [ class "col" ]
                     [ FormGroup.input appState form idField (l_ "form.service.id" appState) ]
                 , div [ class "col text-right" ]
-                    [ a [ class "btn btn-danger link-with-icon", onClick (Form.RemoveItem "services" i) ]
+                    [ a
+                        [ class "btn btn-danger link-with-icon"
+                        , onClick (Form.RemoveItem "services" i)
+                        , dataCy "settings_authentication_service_remove-button"
+                        ]
                         [ faSet "_global.delete" appState
                         , lx_ "form.service.remove" appState
                         ]
                     ]
                 ]
-            , FormGroup.textView callbackUrl (l_ "form.service.callbackUrl" appState)
+            , FormGroup.textView "callback-url" callbackUrl (l_ "form.service.callbackUrl" appState)
             , div [ class "row" ]
                 [ div [ class "col" ] [ FormGroup.input appState form clientIdField (l_ "form.service.clientId" appState) ]
                 , div [ class "col" ] [ FormGroup.input appState form clientSecretField (l_ "form.service.clientSecret" appState) ]
                 ]
             , FormGroup.input appState form urlField (l_ "form.service.url" appState)
-            , div [ class "input-table" ]
+            , div [ class "input-table", dataCy "settings_authentication_service_parameters" ]
                 [ label [] [ lx_ "form.service.parameters" appState ]
                 , serviceParametersHeader appState parametersField form
                 , FormGroup.list appState (serviceParameterView appState parametersField) form parametersField ""
@@ -201,11 +206,11 @@ serviceParameterView appState prefix form i =
     in
     div [ class "row mb-2" ]
         [ div [ class "col-5" ]
-            [ Input.textInput nameField [ class <| "form-control " ++ nameErrorClass, attribute "data-cy" "input-name" ]
+            [ Input.textInput nameField [ class <| "form-control " ++ nameErrorClass, attribute "data-cy" "settings_authentication_service_parameter-name" ]
             , nameError
             ]
         , div [ class "col-6" ]
-            [ Input.textInput valueField [ class <| "form-control " ++ valueErrorClass, attribute "data-cy" "input-value" ]
+            [ Input.textInput valueField [ class <| "form-control " ++ valueErrorClass, attribute "data-cy" "settings_authentication_service_parameter-value" ]
             , valueError
             ]
         , div [ class "col-1 text-right" ]

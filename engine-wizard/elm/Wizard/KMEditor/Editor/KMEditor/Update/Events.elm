@@ -292,7 +292,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionOptionsEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredPhase = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -303,7 +303,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionListEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredPhase = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -314,7 +314,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionValueEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredPhase = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -325,7 +325,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionIntegrationEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredPhase = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -337,7 +337,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionMultiChoiceEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredPhase = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty

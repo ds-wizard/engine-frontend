@@ -29,6 +29,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 
 
@@ -135,7 +136,7 @@ view cfg appState model =
     in
     div [ class "QuestionnaireVersionViewModal modal-cover", classList [ ( "visible", visible ) ] ]
         [ div [ class "modal-dialog" ]
-            [ div [ class "modal-content" ]
+            [ div [ class "modal-content", dataCy "modal_project-version" ]
                 [ div [ class "modal-header" ]
                     [ strong [ class "modal-title" ] [ text datetime, versionBadge ]
                     , button [ class "close", onClick Close ]

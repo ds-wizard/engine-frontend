@@ -22,7 +22,7 @@ import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (linkToAttributes)
+import Wizard.Common.Html.Attribute exposing (dataCy, linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))
 import Wizard.Common.View.Modal as Modal
@@ -51,7 +51,7 @@ lx_ =
 viewHelpMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg
 viewHelpMenu appState dropdownState =
     Dropdown.dropdown dropdownState
-        { options = [ Dropdown.dropRight ]
+        { options = [ Dropdown.dropRight, Dropdown.attrs [ dataCy "menu_help" ] ]
         , toggleMsg = Wizard.Msgs.MenuMsg << HelpMenuDropdownMsg
         , toggleButton =
             Dropdown.toggle [ Button.roleLink ]
@@ -60,11 +60,17 @@ viewHelpMenu appState dropdownState =
                     [ span [] [ lx_ "helpMenu.help" appState ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =
-            [ Dropdown.anchorItem [ onLinkClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetAboutOpen True) ]
+            [ Dropdown.anchorItem
+                [ onLinkClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetAboutOpen True)
+                , dataCy "menu_help_about"
+                ]
                 [ faSet "menu.about" appState
                 , lx_ "helpMenu.about" appState
                 ]
-            , Dropdown.anchorItem [ onLinkClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetReportIssueOpen True) ]
+            , Dropdown.anchorItem
+                [ onLinkClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetReportIssueOpen True)
+                , dataCy "menu_help_report"
+                ]
                 [ faSet "menu.reportIssue" appState
                 , lx_ "helpMenu.reportIssue" appState
                 ]
@@ -78,7 +84,7 @@ viewSettingsMenu appState =
         div [ class "btn-group" ]
             [ linkTo appState
                 (Routes.SettingsRoute Wizard.Settings.Routes.defaultRoute)
-                [ class "btn btn-link" ]
+                [ class "btn btn-link", dataCy "menu_settings-link" ]
                 [ faSet "menu.settings" appState
                 , span [ class "sidebar-link" ] [ span [] [ lx_ "settingsMenu.settings" appState ] ]
                 ]
@@ -100,7 +106,7 @@ viewProfileMenu appState dropdownState =
                     ( "", "" )
     in
     Dropdown.dropdown dropdownState
-        { options = [ Dropdown.dropRight ]
+        { options = [ Dropdown.dropRight, Dropdown.attrs [ dataCy "menu_profile" ] ]
         , toggleMsg = Wizard.Msgs.MenuMsg << ProfileMenuDropdownMsg
         , toggleButton =
             Dropdown.toggle [ Button.roleLink ]
@@ -125,7 +131,10 @@ viewReportIssueModal : AppState -> Bool -> Html Wizard.Msgs.Msg
 viewReportIssueModal appState isOpen =
     let
         supportMailLink =
-            a [ href <| "mailto:" ++ PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
+            a
+                [ href <| "mailto:" ++ PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport
+                , dataCy "report-modal_link_support-mail"
+                ]
                 [ text <| PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
 
         modalContent =
@@ -133,6 +142,7 @@ viewReportIssueModal appState isOpen =
             , p []
                 [ a
                     [ class "link-with-icon"
+                    , dataCy "report-modal_link_repository"
                     , href <| PrivacyAndSupportConfig.getSupportRepositoryUrl appState.config.privacyAndSupport
                     , target "_blank"
                     ]
@@ -152,6 +162,7 @@ viewReportIssueModal appState isOpen =
             , actionMsg = Wizard.Msgs.MenuMsg <| SetReportIssueOpen False
             , cancelMsg = Nothing
             , dangerous = False
+            , dataCy = "report-issue"
             }
     in
     Modal.confirm appState modalConfig
@@ -172,6 +183,7 @@ viewAboutModal appState isOpen serverBuildInfoActionResult =
             , actionMsg = Wizard.Msgs.MenuMsg <| SetAboutOpen False
             , cancelMsg = Nothing
             , dangerous = False
+            , dataCy = "about"
             }
     in
     Modal.confirm appState modalConfig

@@ -9,6 +9,7 @@ import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Html exposing (emptyNode, faSet)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
 view : AppState -> String -> KnowledgeModel -> Event -> Html msg
@@ -432,7 +433,7 @@ viewNode icon cssClass mbTitle mbChildNode =
                 |> Maybe.map (List.singleton >> ul [])
                 |> Maybe.withDefault emptyNode
     in
-    li []
+    li [ dataCy ("km-migration_diff-tree-node_" ++ cssClass) ]
         [ span [ class cssClass ]
             [ icon
             , text <| Maybe.withDefault "" mbTitle

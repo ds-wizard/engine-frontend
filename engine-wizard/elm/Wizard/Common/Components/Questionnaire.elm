@@ -158,7 +158,7 @@ setActiveChapterUuid uuid model =
     { model | activePage = PageChapter uuid }
 
 
-setPhaseUuid : Uuid -> Model -> Model
+setPhaseUuid : Maybe Uuid -> Model -> Model
 setPhaseUuid phaseUuid =
     updateQuestionnaire <| QuestionnaireDetail.setPhaseUuid phaseUuid
 
@@ -301,7 +301,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             withSeed <| handleFeedbackModalMsg appState model feedbackModalMsg
 
         SetPhase phaseUuid ->
-            wrap <| setPhaseUuid (Uuid.fromUuidString phaseUuid) model
+            wrap <| setPhaseUuid (Uuid.fromString phaseUuid) model
 
         SetReply path replyValue ->
             wrap <| setReply path replyValue model

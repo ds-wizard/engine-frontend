@@ -9,6 +9,7 @@ import Json.Decode as Decode
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.KnowledgeModels.Import.FileImport.Models exposing (..)
@@ -36,7 +37,7 @@ view appState model =
                 Nothing ->
                     dropzone appState model
     in
-    div [ class "KnowledgeModels__Import__FileImport", id dropzoneId ]
+    div [ class "KnowledgeModels__Import__FileImport", id dropzoneId, dataCy "km_import_file" ]
         [ FormResult.view appState model.importing
         , content
         ]

@@ -11,6 +11,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.EditableKnowledgeModelConfigFrom exposing (EditableKnowledgeModelConfigForm)
@@ -89,7 +90,10 @@ allowedPackageFormView appState form index =
         , viewField "minVersion"
         , viewField "maxVersion"
         , div [ class "input-group-append" ]
-            [ button [ class "btn btn-link text-danger", onClick (Form.RemoveItem "publicPackages" index) ]
+            [ button
+                [ class "btn btn-link text-danger"
+                , onClick (Form.RemoveItem "publicPackages" index)
+                ]
                 [ faSet "_global.delete" appState ]
             ]
         ]

@@ -274,6 +274,7 @@ view appState model =
             , actionMsg = FormMsg Form.Submit
             , cancelMsg = Just Close
             , dangerous = False
+            , dataCy = "project-share"
             }
     in
     Modal.confirm appState modalConfig

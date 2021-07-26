@@ -523,7 +523,7 @@ handleWebsocketMsg websocketMsg appState model =
                                     updateQuestionnaire event data.uuid (Questionnaire.clearReply data.path)
 
                                 QuestionnaireEvent.SetPhase data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.setPhaseUuid data.uuid)
+                                    updateQuestionnaire event data.uuid (Questionnaire.setPhaseUuid data.phaseUuid)
 
                                 QuestionnaireEvent.SetLabels data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.setLabels data.path data.value)

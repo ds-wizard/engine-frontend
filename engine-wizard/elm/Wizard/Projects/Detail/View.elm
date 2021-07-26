@@ -16,6 +16,7 @@ import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDetail
@@ -70,6 +71,7 @@ viewOffline appState =
             [ p [] [ lx_ "offline.text" appState ]
             , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ lx_ "offline.refresh" appState ] ]
             ]
+        , cy = "offline"
         }
 
 
@@ -82,6 +84,7 @@ viewError appState =
             [ p [] [ lx_ "error.text" appState ]
             , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ lx_ "error.refresh" appState ] ]
             ]
+        , cy = "error"
         }
 
 
@@ -206,7 +209,7 @@ viewProjectNavigationActions appState model questionnaire =
             [ button
                 [ class "btn btn-info link-with-icon"
                 , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
-                , attribute "data-cy" "share"
+                , dataCy "project_detail_share-button"
                 ]
                 [ fa "fas fa-user-friends"
                 , lx_ "actions.share" appState

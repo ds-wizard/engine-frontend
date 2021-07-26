@@ -171,6 +171,7 @@ view appState model =
             , actionMsg = actionMsg
             , cancelMsg = cancelMsg
             , dangerous = False
+            , dataCy = "questionnaire-feedback"
             }
     in
     Modal.confirm appState modalConfig

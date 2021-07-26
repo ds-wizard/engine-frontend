@@ -8,7 +8,7 @@ import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Create.CustomCreate.View as CustomCreateView
 import Wizard.Projects.Create.Models exposing (CreateModel(..), Model)
@@ -66,6 +66,7 @@ viewNavbar appState templateActive =
                 (Routes.ProjectsRoute <| CreateRoute <| TemplateCreateRoute Nothing)
                 [ class "nav-link link-with-icon"
                 , classList [ ( "active", templateActive ) ]
+                , dataCy "project_create_nav_template"
                 ]
                 [ lx_ "navbar.fromTemplate" appState
                 ]
@@ -75,6 +76,7 @@ viewNavbar appState templateActive =
                 (Routes.ProjectsRoute <| CreateRoute <| CustomCreateRoute Nothing)
                 [ class "nav-link link-with-icon"
                 , classList [ ( "active", not templateActive ) ]
+                , dataCy "project_create_nav_custom"
                 ]
                 [ lx_ "navbar.custom" appState
                 ]

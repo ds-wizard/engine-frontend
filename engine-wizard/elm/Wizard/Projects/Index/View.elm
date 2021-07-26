@@ -17,7 +17,7 @@ import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Routes
@@ -75,7 +75,7 @@ createButton appState =
     in
     linkTo appState
         (Routes.ProjectsRoute createRoute)
-        [ class "btn btn-primary" ]
+        [ class "btn btn-primary", dataCy "projects_create-button" ]
         [ lx_ "header.create" appState ]
 
 
@@ -221,6 +221,7 @@ listingActions appState questionnaire =
                 , icon = faSet "project.open" appState
                 , label = l_ "action.open" appState
                 , msg = ListingActionLink (detailRoute questionnaire)
+                , dataCy = "open"
                 }
 
         clone =
@@ -234,6 +235,7 @@ listingActions appState questionnaire =
                         |> CloneProjectModalMsg.ShowHideCloneQuestionnaire
                         |> CloneQuestionnaireModalMsg
                         |> ListingActionMsg
+                , dataCy = "clone"
                 }
 
         createMigration =
@@ -242,6 +244,7 @@ listingActions appState questionnaire =
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.createMigration" appState
                 , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
+                , dataCy = "create-migration"
                 }
 
         continueMigration =
@@ -250,6 +253,7 @@ listingActions appState questionnaire =
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = l_ "action.continueMigration" appState
                 , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute questionnaire.uuid)
+                , dataCy = "continue-migration"
                 }
 
         cancelMigration =
@@ -258,6 +262,7 @@ listingActions appState questionnaire =
                 , icon = faSet "_global.cancel" appState
                 , label = l_ "action.cancelMigration" appState
                 , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
+                , dataCy = "cancel-migration"
                 }
 
         delete =
@@ -271,6 +276,7 @@ listingActions appState questionnaire =
                         |> DeleteProjectModalMsg.ShowHideDeleteQuestionnaire
                         |> DeleteQuestionnaireModalMsg
                         |> ListingActionMsg
+                , dataCy = "delete"
                 }
 
         editable =

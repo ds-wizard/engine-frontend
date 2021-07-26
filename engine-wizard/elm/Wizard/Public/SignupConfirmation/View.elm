@@ -6,6 +6,7 @@ import Shared.Html exposing (faSet)
 import Shared.Locale exposing (lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Public.SignupConfirmation.Models exposing (Model)
@@ -31,7 +32,7 @@ view appState model =
 
 successView : AppState -> String -> Html Msg
 successView appState _ =
-    div [ class "jumbotron full-page-error" ]
+    div [ class "jumbotron full-page-message", dataCy "message_success" ]
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "confirmation"

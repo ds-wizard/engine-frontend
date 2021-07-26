@@ -15,6 +15,7 @@ import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), getEditorParentUuid)
 
 
@@ -269,6 +270,7 @@ treeNode appState treeNodeConfig =
             [ ( "disabled", not treeNodeConfig.allowed )
             , ( "active", treeNodeConfig.isSelected )
             ]
+        , dataCy "km-editor_move-modal_item"
         ]
         [ caret
         , link [ treeNodeConfig.icon, span [] [ text treeNodeConfig.title ] ]
@@ -278,7 +280,11 @@ treeNode appState treeNodeConfig =
 
 treeNodeCaret : AppState -> Msg -> Bool -> Html Msg
 treeNodeCaret appState toggleMsg isOpen =
-    a [ onClick toggleMsg, class "caret" ]
+    a
+        [ onClick toggleMsg
+        , class "caret"
+        , dataCy "km-editor_move-modal_item_caret"
+        ]
         [ i
             [ classList
                 [ ( faKeyClass "kmEditor.treeClosed" appState, not isOpen )

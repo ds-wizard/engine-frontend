@@ -10,7 +10,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
@@ -47,11 +47,12 @@ viewForm appState model _ =
             [ FormResult.errorOnlyView appState model.genericModel.savingConfig
             , formView appState model.genericModel.form
             , div [ class "mt-5" ]
-                [ ActionButton.button appState
-                    (ActionButton.ButtonConfig (l_ "save" appState)
+                [ ActionButton.buttonWithAttrs appState
+                    (ActionButton.ButtonWithAttrsConfig (l_ "save" appState)
                         model.genericModel.savingConfig
                         (GenericMsg <| GenericMsgs.FormMsg Form.Submit)
                         False
+                        [ dataCy "form_submit" ]
                     )
                 ]
             ]
@@ -167,6 +168,7 @@ registrySignupModal appState model =
         modalConfig =
             { modalContent = content
             , visible = model.registrySignupOpen
+            , dataCy = "registry-signup"
             }
     in
     Modal.simple modalConfig

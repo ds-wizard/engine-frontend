@@ -7,6 +7,7 @@ import Shared.Api.Auth as AuthApi
 import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Shared.Html exposing (fa, faKey, faSet)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
 defaultBackground : String
@@ -27,7 +28,7 @@ defaultIcon appState =
 view : AppState -> OpenIDServiceConfig -> Html msg
 view appState config =
     render
-        [ href <| AuthApi.authRedirectUrl config appState ]
+        [ href <| AuthApi.authRedirectUrl config appState, dataCy ("login_external_" ++ config.id) ]
         appState
         config.name
         config.style.icon

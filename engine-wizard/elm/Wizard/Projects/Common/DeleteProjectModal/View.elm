@@ -43,6 +43,7 @@ view appState model =
             , actionMsg = DeleteQuestionnaire
             , cancelMsg = Just <| ShowHideDeleteQuestionnaire Nothing
             , dangerous = True
+            , dataCy = "project-delete"
             }
     in
     Modal.confirm appState modalConfig

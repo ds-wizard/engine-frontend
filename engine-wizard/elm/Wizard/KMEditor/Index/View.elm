@@ -17,7 +17,7 @@ import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
@@ -60,7 +60,9 @@ createButton : AppState -> Html Msg
 createButton appState =
     linkTo appState
         (Routes.KMEditorRoute <| CreateRoute Nothing Nothing)
-        [ class "btn btn-primary" ]
+        [ class "btn btn-primary"
+        , dataCy "km-editor_create-button"
+        ]
         [ lx_ "header.create" appState ]
 
 
@@ -139,6 +141,7 @@ listingTitleBadge appState branch =
                 [ title <| l_ "badge.outdated.title" appState
                 , class "badge badge-warning"
                 , onClick (ShowHideUpgradeModal <| Just branch)
+                , dataCy "km-editor_list_outdated-badge"
                 ]
                 [ lx_ "badge.outdated" appState ]
 
@@ -205,6 +208,7 @@ listingActions appState branch =
                 , icon = faSet "kmEditorList.edit" appState
                 , label = l_ "action.openEditor" appState
                 , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute branch.uuid)
+                , dataCy = "open-editor"
                 }
 
         publish =
@@ -213,6 +217,7 @@ listingActions appState branch =
                 , icon = faSet "kmEditorList.publish" appState
                 , label = l_ "action.publish" appState
                 , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute branch.uuid
+                , dataCy = "publish"
                 }
 
         upgrade =
@@ -221,6 +226,7 @@ listingActions appState branch =
                 , icon = faSet "kmEditorList.upgrade" appState
                 , label = l_ "action.upgrade" appState
                 , msg = ListingActionMsg <| ShowHideUpgradeModal <| Just branch
+                , dataCy = "upgrade"
                 }
 
         continueMigration =
@@ -229,6 +235,7 @@ listingActions appState branch =
                 , icon = faSet "kmEditorList.continueMigration" appState
                 , label = l_ "action.continueMigration" appState
                 , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute branch.uuid
+                , dataCy = "continue-migration"
                 }
 
         cancelMigration =
@@ -237,6 +244,7 @@ listingActions appState branch =
                 , icon = faSet "_global.cancel" appState
                 , label = l_ "action.cancelMigration" appState
                 , msg = ListingActionMsg <| DeleteMigration branch.uuid
+                , dataCy = "cancel-migration"
                 }
 
         delete =
@@ -245,6 +253,7 @@ listingActions appState branch =
                 , icon = faSet "_global.delete" appState
                 , label = l_ "action.delete" appState
                 , msg = ListingActionMsg <| ShowHideDeleteBranchModal <| Just branch
+                , dataCy = "delete-migration"
                 }
 
         showOpenEditor =
@@ -324,6 +333,7 @@ deleteModal appState model =
             , actionMsg = DeleteBranch
             , cancelMsg = Just <| ShowHideDeleteBranchModal Nothing
             , dangerous = True
+            , dataCy = "km-editor-delete"
             }
     in
     Modal.confirm appState modalConfig
@@ -375,6 +385,7 @@ upgradeModal appState model =
             , actionMsg = UpgradeFormMsg Form.Submit
             , cancelMsg = Just <| ShowHideUpgradeModal Nothing
             , dangerous = False
+            , dataCy = "km-editor-upgrade"
             }
     in
     Modal.confirm appState modalConfig
