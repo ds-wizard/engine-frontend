@@ -9,6 +9,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Routes as Routes
@@ -43,7 +44,7 @@ view appState model =
                 _ ->
                     viewForm appState model
     in
-    div [ class "KnowledgeModels__Import__RegistryImport" ]
+    div [ class "KnowledgeModels__Import__RegistryImport", dataCy "template_import_registry" ]
         [ content ]
 
 

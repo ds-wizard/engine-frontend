@@ -16,6 +16,7 @@ import Html.Events exposing (onClick)
 import Shared.Html exposing (faSet)
 import String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
 type alias ButtonConfig a msg =
@@ -75,7 +76,13 @@ type alias SubmitConfig a =
 
 submit : AppState -> SubmitConfig a -> Html msg
 submit appState { label, result } =
-    actionButtonView appState [ type_ "submit", class "btn btn-primary btn-with-loader" ] [ text label ] result
+    actionButtonView appState
+        [ type_ "submit"
+        , class "btn btn-primary btn-with-loader"
+        , dataCy "form_submit"
+        ]
+        [ text label ]
+        result
 
 
 actionButtonView : AppState -> List (Attribute msg) -> List (Html msg) -> ActionResult a -> Html msg

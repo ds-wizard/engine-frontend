@@ -16,6 +16,7 @@ import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Modal as Modal
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModalTreeInput as MoveModalTreeInput
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..))
@@ -105,11 +106,13 @@ view appState viewProps model =
                     [ class "btn btn-primary"
                     , onClick Submit
                     , disabled (String.isEmpty <| getSelectedTargetUuid model)
+                    , dataCy "modal_action-button"
                     ]
                     [ lx_ "view.move" appState ]
                 , button
                     [ class "btn btn-secondary"
                     , onClick Close
+                    , dataCy "modal_cancel-button"
                     ]
                     [ lx_ "view.cancel" appState ]
                 ]
@@ -118,6 +121,7 @@ view appState viewProps model =
         modalConfig =
             { modalContent = content
             , visible = model.visible
+            , dataCy = "km-editor-move"
             }
     in
     Modal.simple modalConfig

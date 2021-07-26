@@ -169,6 +169,7 @@ listingActions appState cfg document =
                 , icon = faSet "documents.download" appState
                 , label = l_ "action.download" appState
                 , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState)
+                , dataCy = "download"
                 }
 
         submit =
@@ -177,6 +178,7 @@ listingActions appState cfg document =
                 , icon = faSet "documents.submit" appState
                 , label = l_ "action.submit" appState
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideSubmitDocument <| Just document)
+                , dataCy = "submit"
                 }
 
         ( viewQuestionnaire, viewQuestionnaireEnabled ) =
@@ -187,6 +189,7 @@ listingActions appState cfg document =
                         , icon = faSet "_global.questionnaire" appState
                         , label = l_ "action.viewQuestionnaire" appState
                         , msg = ListingActionMsg (previewQuestionnaireEventMsg questionnaireEventUuid)
+                        , dataCy = "view-questionnaire"
                         }
                     , True
                     )
@@ -200,6 +203,7 @@ listingActions appState cfg document =
                 , icon = faSet "_global.delete" appState
                 , label = l_ "action.delete" appState
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideDeleteDocument <| Just document)
+                , dataCy = "delete"
                 }
 
         submitEnabled =
@@ -264,6 +268,7 @@ deleteModal cfg appState model =
             , actionMsg = cfg.wrapMsg <| DeleteDocument
             , cancelMsg = Just <| cfg.wrapMsg <| ShowHideDeleteDocument Nothing
             , dangerous = True
+            , dataCy = "documents-delete"
             }
     in
     Modal.confirm appState modalConfig
@@ -375,6 +380,7 @@ submitModal cfg appState model =
         modalConfig =
             { modalContent = content
             , visible = visible
+            , dataCy = "document-submit"
             }
     in
     Modal.simple modalConfig

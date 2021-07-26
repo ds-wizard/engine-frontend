@@ -8,7 +8,7 @@ import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
@@ -36,7 +36,13 @@ viewForm props appState model _ =
             [ FormResult.errorOnlyView appState model.savingConfig
             , props.formView appState model.form |> Html.map FormMsg
             , div [ class "mt-5" ]
-                [ ActionButton.button appState (ActionButton.ButtonConfig (props.locSave appState) model.savingConfig (FormMsg Form.Submit) False)
+                [ ActionButton.buttonWithAttrs appState
+                    (ActionButton.ButtonWithAttrsConfig (props.locSave appState)
+                        model.savingConfig
+                        (FormMsg Form.Submit)
+                        False
+                        [ dataCy "form_submit" ]
+                    )
                 ]
             ]
         ]

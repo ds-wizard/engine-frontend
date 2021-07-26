@@ -51,6 +51,7 @@ view appState model =
             , actionMsg = CloneQuestionnaire
             , cancelMsg = Just <| ShowHideCloneQuestionnaire Nothing
             , dangerous = False
+            , dataCy = "clone-project"
             }
     in
     Modal.confirm appState modalConfig

@@ -18,6 +18,7 @@ import Shared.Utils exposing (httpMethodOptions)
 import String exposing (fromInt, toLower)
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
@@ -86,6 +87,7 @@ activeEditor appState kmName model =
             ( "nothing"
             , Page.message
                 (faSet "_global.arrowLeft" appState)
+                "km-editor-empty"
                 (l_ "activeEditor.nothing" appState)
             )
 
@@ -122,6 +124,7 @@ kmEditorView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "chapter"
             }
 
         metricsConfig =
@@ -134,6 +137,7 @@ kmEditorView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "metric"
             }
 
         phasesConfig =
@@ -146,6 +150,7 @@ kmEditorView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "phase"
             }
 
         tagsConfig =
@@ -158,6 +163,7 @@ kmEditorView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "tag"
             }
 
         integrationsConfig =
@@ -170,6 +176,7 @@ kmEditorView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "integration"
             }
     in
     ( editorData.uuid
@@ -204,6 +211,7 @@ chapterEditorView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "question"
             }
 
         form =
@@ -364,11 +372,26 @@ integrationHeaderItemView appState form i =
         ( valueError, valueErrorClass ) =
             FormGroup.getErrors appState valueField <| lg "integration.header.value" appState
     in
-    div [ class "input-group mb-2" ]
-        [ Input.textInput headerField [ class <| "form-control " ++ headerErrorClass, placeholder <| l_ "integrationEditor.form.header.namePlaceholder" appState ]
-        , Input.textInput valueField [ class <| "form-control " ++ valueErrorClass, placeholder <| l_ "integrationEditor.form.header.valuePlaceholder" appState ]
+    div
+        [ class "input-group mb-2"
+        , dataCy "integration_headers_item"
+        ]
+        [ Input.textInput headerField
+            [ class <| "form-control " ++ headerErrorClass
+            , placeholder <| l_ "integrationEditor.form.header.namePlaceholder" appState
+            , dataCy "integration_headers_name"
+            ]
+        , Input.textInput valueField
+            [ class <| "form-control " ++ valueErrorClass
+            , placeholder <| l_ "integrationEditor.form.header.valuePlaceholder" appState
+            , dataCy "integration_headers_value"
+            ]
         , div [ class "input-group-append" ]
-            [ button [ class "btn btn-outline-warning", onClick (Form.RemoveItem "requestHeaders" i) ]
+            [ button
+                [ class "btn btn-outline-warning"
+                , onClick (Form.RemoveItem "requestHeaders" i)
+                , dataCy "integration_headers_remove-button"
+                ]
                 [ faSet "_global.remove" appState ]
             ]
         , headerError
@@ -389,6 +412,7 @@ integrationDeleteConfirm appState editorData =
         , actionMsg = EditorMsg <| IntegrationEditorMsg <| DeleteIntegration editorData.uuid
         , cancelMsg = Just <| EditorMsg <| IntegrationEditorMsg <| ToggleDeleteConfirm False
         , dangerous = True
+        , dataCy = "km-editor-integration-delete"
         }
 
 
@@ -577,6 +601,7 @@ questionEditorAnswersView appState kmName model editorData =
         , toId = identity
         , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
+        , dataCy = "answer"
         }
 
 
@@ -592,6 +617,7 @@ questionEditorChoicesView appState kmName model editorData =
         , toId = identity
         , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
+        , dataCy = "choice"
         }
 
 
@@ -608,6 +634,7 @@ questionEditorItemView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "question"
             }
     in
     div [ class "card card-border-light card-item-template mb-3" ]
@@ -631,6 +658,7 @@ questionEditorReferencesView appState kmName model editorData =
         , toId = identity
         , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
+        , dataCy = "reference"
         }
 
 
@@ -646,6 +674,7 @@ questionEditorExpertsView appState kmName model editorData =
         , toId = identity
         , getName = getChildName kmName model.editors
         , viewMsg = SetActiveEditor
+        , dataCy = "expert"
         }
 
 
@@ -681,6 +710,7 @@ answerEditorView appState kmName model editorData =
             , toId = identity
             , getName = getChildName kmName model.editors
             , viewMsg = SetActiveEditor
+            , dataCy = "question"
             }
 
         form =
@@ -844,6 +874,7 @@ editorTitle appState config =
                 button
                     [ class "btn btn-outline-secondary link-with-icon"
                     , onClick OpenMoveModal
+                    , dataCy "km-editor_move-button"
                     ]
                     [ faSet "kmEditor.move" appState
                     , lx_ "editorTitle.move" appState
@@ -858,6 +889,7 @@ editorTitle appState config =
                     button
                         [ class "btn btn-outline-danger link-with-icon"
                         , onClick msg
+                        , dataCy "km-editor_delete-button"
                         ]
                         [ faSet "_global.delete" appState
                         , lx_ "editorTitle.delete" appState
@@ -886,6 +918,7 @@ type alias InputChildrenConfig a =
     , toId : a -> String
     , getName : a -> String
     , viewMsg : a -> Msg
+    , dataCy : String
     }
 
 
@@ -905,7 +938,11 @@ inputChildren appState config =
             }
             config.reorderableState
             config.children
-        , a [ onClick config.addMsg, class "link-with-icon link-add-child" ]
+        , a
+            [ onClick config.addMsg
+            , class "link-with-icon link-add-child"
+            , dataCy ("km-editor_input-children_" ++ config.dataCy ++ "_add-button")
+            ]
             [ faSet "_global.add" appState
             , text <| lf_ "inputChildren.add" [ toLower config.childName ] appState
             ]

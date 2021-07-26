@@ -65,6 +65,7 @@ contentView appState model migration =
                             [ l_ "noChanges.line1" appState
                             , l_ "noChanges.line2" appState
                             ]
+                        , cy = "no-changes"
                         }
                     ]
 

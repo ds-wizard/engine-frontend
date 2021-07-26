@@ -8,6 +8,7 @@ import Shared.Html exposing (fa)
 import Shared.Locale exposing (l, lg, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormResult as FormResult
@@ -39,7 +40,10 @@ view appState model =
         content =
             case appState.config.lookAndFeel.loginInfo of
                 Just loginInfo ->
-                    [ div [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info" ]
+                    [ div
+                        [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info"
+                        , dataCy "login_side-info"
+                        ]
                         [ Markdown.toHtml [] loginInfo ]
                     , div [ class <| splitScreenClass ++ " justify-content-center col-lg-5 col-md-6 side-login" ]
                         [ form ]
@@ -72,7 +76,7 @@ formView appState model =
 
         externalLogin =
             if List.length appState.config.authentication.external.services > 0 then
-                [ div [ class "external-login-separator" ]
+                [ div [ class "external-login-separator", dataCy "login_external_separator" ]
                     [ lx_ "connectWith" appState ]
                 ]
                     ++ List.map (ExternalLoginButton.view appState) appState.config.authentication.external.services

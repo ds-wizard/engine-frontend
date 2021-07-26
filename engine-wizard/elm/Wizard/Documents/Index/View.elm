@@ -20,7 +20,7 @@ import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
@@ -186,6 +186,7 @@ listingActions appState document =
                 , icon = faSet "documents.download" appState
                 , label = l_ "action.download" appState
                 , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState)
+                , dataCy = "download"
                 }
 
         submit =
@@ -194,6 +195,7 @@ listingActions appState document =
                 , icon = faSet "documents.submit" appState
                 , label = l_ "action.submit" appState
                 , msg = ListingActionMsg (ShowHideSubmitDocument <| Just document)
+                , dataCy = "submit"
                 }
 
         delete =
@@ -202,6 +204,7 @@ listingActions appState document =
                 , icon = faSet "_global.delete" appState
                 , label = l_ "action.delete" appState
                 , msg = ListingActionMsg (ShowHideDeleteDocument <| Just document)
+                , dataCy = "delete"
                 }
 
         submitEnabled =
@@ -220,13 +223,13 @@ stateBadge : AppState -> DocumentState -> Html msg
 stateBadge appState state =
     case state of
         QueuedDocumentState ->
-            span [ class "badge badge-info" ]
+            span [ class "badge badge-info", dataCy "documents_state-badge" ]
                 [ faSet "_global.spinner" appState
                 , lx_ "badge.queued" appState
                 ]
 
         InProgressDocumentState ->
-            span [ class "badge badge-info" ]
+            span [ class "badge badge-info", dataCy "documents_state-badge" ]
                 [ faSet "_global.spinner" appState
                 , lx_ "badge.inProgress" appState
                 ]
@@ -235,7 +238,7 @@ stateBadge appState state =
             emptyNode
 
         ErrorDocumentState ->
-            span [ class "badge badge-danger" ]
+            span [ class "badge badge-danger", dataCy "documents_state-badge" ]
                 [ lx_ "badge.error" appState ]
 
 
@@ -264,6 +267,7 @@ deleteModal appState model =
             , actionMsg = DeleteDocument
             , cancelMsg = Just <| ShowHideDeleteDocument Nothing
             , dangerous = True
+            , dataCy = "document-delete"
             }
     in
     Modal.confirm appState modalConfig
@@ -375,6 +379,7 @@ submitModal appState model =
         modalConfig =
             { modalContent = content
             , visible = visible
+            , dataCy = "document-submit"
             }
     in
     Modal.simple modalConfig

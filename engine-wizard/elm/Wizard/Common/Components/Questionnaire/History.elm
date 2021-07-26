@@ -467,7 +467,7 @@ viewEventDetailSetLevel : AppState -> ViewConfig msg -> SetPhaseData -> Html msg
 viewEventDetailSetLevel appState cfg data =
     let
         mbLevel =
-            List.find (.uuid >> (==) (Uuid.toString data.uuid)) (KnowledgeModel.getPhases cfg.questionnaire.knowledgeModel)
+            List.find (.uuid >> Just >> (==) (Maybe.map Uuid.toString data.phaseUuid)) (KnowledgeModel.getPhases cfg.questionnaire.knowledgeModel)
 
         levelName =
             Maybe.unwrap "" .title mbLevel

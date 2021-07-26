@@ -106,6 +106,7 @@ notFoundView appState =
         { image = "page_not_found"
         , heading = l_ "notFound.title" appState
         , lines = [ l_ "notFound.message" appState ]
+        , cy = "not-found"
         }
 
 
@@ -115,4 +116,5 @@ notAllowedView appState =
         { image = "security"
         , heading = l_ "notAllowed.title" appState
         , lines = [ l_ "notAllowed.message" appState ]
+        , cy = "not-allowed"
         }

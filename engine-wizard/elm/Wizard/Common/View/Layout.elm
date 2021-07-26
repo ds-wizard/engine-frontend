@@ -18,6 +18,7 @@ import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.CookieConsent as CookieConsent
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
 import Wizard.Common.View.Page as Page
@@ -48,6 +49,7 @@ misconfigured appState =
                     [ l_ "misconfigured.appNotConfigured" appState
                     , l_ "misconfigured.contactAdmin" appState
                     ]
+                , cy = "misconfigured"
                 }
     in
     { title = l_ "misconfigured.configurationError" appState
@@ -100,7 +102,7 @@ publicHeader fluid model =
                 li [ class "nav-item" ]
                     [ linkTo model.appState
                         signupRoute
-                        [ class "nav-link" ]
+                        [ class "nav-link", dataCy "public_nav_sign-up" ]
                         [ lx_ "header.signUp" model.appState ]
                     ]
 
@@ -112,7 +114,7 @@ publicHeader fluid model =
                 [ li [ class "nav-item" ]
                     [ linkTo model.appState
                         appRoute
-                        [ class "nav-link" ]
+                        [ class "nav-link", dataCy "public_nav_go-to-app" ]
                         [ lx_ "header.goToApp" model.appState ]
                     ]
                 ]
@@ -121,7 +123,7 @@ publicHeader fluid model =
                 [ li [ class "nav-item" ]
                     [ linkTo model.appState
                         (loginRoute Nothing)
-                        [ class "nav-link" ]
+                        [ class "nav-link", dataCy "public_nav_login" ]
                         [ lx_ "header.logIn" model.appState ]
                     ]
                 , signUpLink
@@ -132,7 +134,7 @@ publicHeader fluid model =
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState
                     homeRoute
-                    [ class "navbar-brand" ]
+                    [ class "navbar-brand", dataCy "nav_app-title" ]
                     [ text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
                     ]
                 ]
@@ -178,14 +180,14 @@ logo : Model -> Html Msg
 logo model =
     let
         logoImg =
-            span [ class "logo-full" ]
+            span [ class "logo-full", dataCy "nav_app-title-short" ]
                 [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ] ]
     in
     linkTo model.appState Routes.DashboardRoute [ class "logo" ] [ logoImg ]
 
 
 type MenuItem msg
-    = MenuItem String (Html msg) Routes.Route (Routes.Route -> Bool) String
+    = MenuItem String (Html msg) Routes.Route (Routes.Route -> Bool) String String
 
 
 createMenu : Model -> List (Html Msg)
@@ -193,7 +195,7 @@ createMenu model =
     let
         defaultMenuItems =
             menuItems model.appState
-                |> List.filter (\(MenuItem _ _ _ _ perm) -> Perm.hasPerm model.appState.session perm)
+                |> List.filter (\(MenuItem _ _ _ _ perm _) -> Perm.hasPerm model.appState.session perm)
                 |> List.map (menuItem model)
 
         customMenuItems =
@@ -210,41 +212,47 @@ menuItems appState =
         Routes.usersIndex
         Routes.isUsersIndex
         Perm.userManagement
+        "users-link"
     , MenuItem
         (l_ "menu.kmEditor" appState)
         (faSet "menu.kmEditor" appState)
         Routes.kmEditorIndex
         Routes.isKmEditorIndex
         Perm.knowledgeModel
+        "km-editor-link"
     , MenuItem
         (l_ "menu.knowledgeModels" appState)
         (faSet "menu.knowledgeModels" appState)
         Routes.knowledgeModelsIndex
         Routes.isKnowledgeModelsIndex
         Perm.packageManagementRead
+        "km-link"
     , MenuItem
         (l_ "menu.projects" appState)
         (faSet "menu.projects" appState)
         Routes.projectsIndex
         Routes.isProjectsIndex
         Perm.questionnaire
+        "projects-link"
     , MenuItem
         (l_ "menu.documents" appState)
         (faSet "menu.documents" appState)
         Routes.documentsIndex
         Routes.isDocumentsIndex
         Perm.documents
+        "documents-link"
     , MenuItem
         (l_ "menu.templates" appState)
         (faSet "menu.templates" appState)
         Routes.templatesIndex
         Routes.isTemplateIndex
         Perm.templates
+        "templates-link"
     ]
 
 
 menuItem : Model -> MenuItem msg -> Html msg
-menuItem model (MenuItem label icon route isActive _) =
+menuItem model (MenuItem label icon route isActive _ cy) =
     let
         activeClass =
             if isActive model.appState.route then
@@ -256,7 +264,7 @@ menuItem model (MenuItem label icon route isActive _) =
     li []
         [ linkTo model.appState
             route
-            [ class activeClass ]
+            [ class activeClass, dataCy ("menu_" ++ cy) ]
             [ icon
             , span [ class "sidebar-link" ] [ text label ]
             ]
@@ -274,7 +282,7 @@ customMenuItem link =
                 []
     in
     li []
-        [ a ([ href link.url ] ++ targetArg)
+        [ a ([ href link.url, dataCy "menu_custom-link" ] ++ targetArg)
             [ fa link.icon
             , span [ class "sidebar-link" ] [ text link.title ]
             ]

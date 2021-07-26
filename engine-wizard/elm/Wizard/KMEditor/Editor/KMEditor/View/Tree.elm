@@ -9,6 +9,7 @@ import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isMultiChoiceQuestionForm, isOptionsQuestionForm)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
@@ -300,7 +301,10 @@ treeNode appState config ctx =
                 a []
 
             else
-                a [ onClick <| SetActiveEditor config.editorData.uuid ]
+                a
+                    [ onClick <| SetActiveEditor config.editorData.uuid
+                    , dataCy "km-editor_tree_link"
+                    ]
     in
     li
         [ classList

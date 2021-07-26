@@ -9,6 +9,7 @@ import Shared.Locale exposing (l, lgx, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Tag as Tag
 import Wizard.KMEditor.Editor.Preview.Models exposing (Model)
 import Wizard.KMEditor.Editor.Preview.Msgs exposing (Msg(..))
@@ -44,7 +45,7 @@ view appState model =
                 }
                 model.questionnaireModel
     in
-    div [ class "col KMEditor__Editor__Preview" ]
+    div [ class "col KMEditor__Editor__Preview", dataCy "km-editor_preview" ]
         [ tagSelection appState model.tags model.knowledgeModel
         , questionnaire
         ]

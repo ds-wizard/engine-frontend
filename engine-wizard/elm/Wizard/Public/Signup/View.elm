@@ -10,6 +10,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
 import Wizard.Public.Common.SignupForm exposing (SignupForm)
@@ -92,11 +93,11 @@ formView appState form =
                 ]
 
         privacyLink privacyUrl =
-            a [ href privacyUrl, target "_blank" ]
+            a [ href privacyUrl, target "_blank", dataCy "signup_link_privacy" ]
                 [ lx_ "form.privacy" appState ]
 
         termsOfServiceLink termsOfServiceUrl =
-            a [ href termsOfServiceUrl, target "_blank" ]
+            a [ href termsOfServiceUrl, target "_blank", dataCy "signup_link_tos" ]
                 [ lx_ "form.termsOfService" appState ]
 
         acceptGroup =

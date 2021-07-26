@@ -793,7 +793,7 @@ editOptionsQuestionEvent =
         (EditQuestionOptionsEvent
             { title = { changed = False, value = Nothing }
             , text = { changed = True, value = Just (Just "Answer this immediately") }
-            , requiredPhase = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
+            , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
             , tagUuids = { changed = False, value = Nothing }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = True, value = Just [ "fe1b440e-3046-11e9-b210-d663bd873d93" ] }
@@ -812,7 +812,7 @@ editListQuestionEvent =
         (EditQuestionListEvent
             { title = { changed = True, value = Just "This is a new title" }
             , text = { changed = False, value = Nothing }
-            , requiredPhase = { changed = False, value = Nothing }
+            , requiredPhaseUuid = { changed = False, value = Nothing }
             , tagUuids = { changed = False, value = Nothing }
             , referenceUuids = { changed = True, value = Just [ "f749367c-3046-11e9-b210-d663bd873d93" ] }
             , expertUuids = { changed = False, value = Nothing }
@@ -831,7 +831,7 @@ editValueQuestionEvent =
         (EditQuestionValueEvent
             { title = { changed = True, value = Just "What date is today?" }
             , text = { changed = False, value = Nothing }
-            , requiredPhase = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
+            , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }
@@ -850,7 +850,7 @@ editIntegrationQuestionEvent =
         (EditQuestionIntegrationEvent
             { title = { changed = True, value = Just "What database will you use?" }
             , text = { changed = False, value = Nothing }
-            , requiredPhase = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
+            , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
             , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }

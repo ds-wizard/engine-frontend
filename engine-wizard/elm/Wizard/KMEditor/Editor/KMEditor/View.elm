@@ -9,6 +9,7 @@ import Shared.Locale exposing (l)
 import SplitPane exposing (ViewConfig, createViewConfig)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Modal as Modal exposing (AlertConfig)
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (..)
@@ -41,7 +42,7 @@ view appState kmName model =
             , movingUuid = Maybe.withDefault "" model.activeEditorUuid
             }
     in
-    div [ class "KMEditor__Editor__KMEditor" ]
+    div [ class "KMEditor__Editor__KMEditor", dataCy "km-editor_km" ]
         [ div [ class "editor-breadcrumbs" ]
             [ breadcrumbsView ]
         , SplitPane.view viewConfig (viewTree appState kmName model) (viewEditor appState kmName model) model.splitPane

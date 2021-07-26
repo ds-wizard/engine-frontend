@@ -5,6 +5,7 @@ import Html exposing (Html, a, li, ol, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor, getEditorParentUuid, getEditorTitle, getEditorUuid)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
 
@@ -56,4 +57,9 @@ breadcrumbNode ( maybeUuid, label ) =
                 Nothing ->
                     ( text label, False )
     in
-    li [ class "breadcrumb-item", classList [ ( "with-link", withLink ) ] ] [ content ]
+    li
+        [ class "breadcrumb-item"
+        , classList [ ( "with-link", withLink ) ]
+        , dataCy "breadcrumb-item"
+        ]
+        [ content ]
