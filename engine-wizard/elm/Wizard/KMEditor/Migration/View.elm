@@ -387,6 +387,36 @@ viewEditKnowledgeModelDiff appState event km =
         chaptersDiff =
             viewDiffChildren (lg "chapters" appState) originalChapters (EventField.getValueWithDefault event.chapterUuids originalChapters) chapterNames
 
+        metrics =
+            KnowledgeModel.getMetrics km
+
+        originalMetrics =
+            List.map .uuid metrics
+
+        metricNames =
+            Dict.fromList <| List.map (\m -> ( m.uuid, m.title )) metrics
+
+        metricsDiff =
+            viewDiffChildren (lg "metrics" appState)
+                originalMetrics
+                (EventField.getValueWithDefault event.metricUuids originalMetrics)
+                metricNames
+
+        phases =
+            KnowledgeModel.getPhases km
+
+        originalPhases =
+            List.map .uuid phases
+
+        phaseNames =
+            Dict.fromList <| List.map (\p -> ( p.uuid, p.title )) phases
+
+        phasesDiff =
+            viewDiffChildren (lg "phases" appState)
+                originalPhases
+                (EventField.getValueWithDefault event.phaseUuids originalPhases)
+                phaseNames
+
         tags =
             KnowledgeModel.getTags km
 
@@ -418,7 +448,7 @@ viewEditKnowledgeModelDiff appState event km =
                 integrationNames
     in
     div []
-        [ chaptersDiff, tagsDiff, integrationsDiff ]
+        [ chaptersDiff, metricsDiff, phasesDiff, tagsDiff, integrationsDiff ]
 
 
 viewAddMetricDiff : AppState -> AddMetricEventData -> Html Msg
@@ -485,8 +515,10 @@ viewAddPhaseDiff appState event =
         fields =
             List.map2 (\a b -> ( a, b ))
                 [ lg "phase.title" appState
+                , lg "phase.description" appState
                 ]
                 [ event.title
+                , Maybe.withDefault "" event.description
                 ]
     in
     div []
@@ -500,10 +532,13 @@ viewEditPhaseDiff appState event phase =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
                     [ lg "phase.title" appState
+                    , lg "phase.description" appState
                     ]
                     [ phase.title
+                    , Maybe.withDefault "" phase.description
                     ]
                     [ EventField.getValueWithDefault event.title phase.title
+                    , EventField.getValueWithDefault event.description phase.description |> Maybe.withDefault ""
                     ]
     in
     div [] fieldDiff
@@ -516,8 +551,10 @@ viewDeletePhaseDiff appState phase =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
                     [ lg "phase.title" appState
+                    , lg "phase.description" appState
                     ]
                     [ phase.title
+                    , Maybe.withDefault "" phase.description
                     ]
     in
     div [] fieldDiff
