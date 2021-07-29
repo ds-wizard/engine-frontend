@@ -84,7 +84,10 @@ publicApp : Model -> Html Msg -> Document Msg
 publicApp model content =
     let
         html =
-            div [ class "public public--app" ]
+            div
+                [ class "public public--app"
+                , classList [ ( "app-fullscreen", AppState.isFullscreen model.appState ) ]
+                ]
                 [ publicHeader True model
                 , div [ class "container-fluid" ] [ content ]
                 ]
@@ -129,7 +132,7 @@ publicHeader fluid model =
                 , signUpLink
                 ]
     in
-    nav [ class "navbar navbar-expand-sm fixed-top" ]
+    nav [ class "navbar navbar-expand-sm fixed-top top-navigation" ]
         [ div [ classList [ ( "container-fluid", fluid ), ( "container", not fluid ) ] ]
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState

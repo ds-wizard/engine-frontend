@@ -421,6 +421,14 @@ code {
         top: $public-header-height;
         left: 0;
     }
+
+    &.app-fullscreen {
+        padding-top: 0;
+
+        .top-navigation {
+            display: none;
+        }
+    }
 }
 
 .side-navigation-collapsed {
