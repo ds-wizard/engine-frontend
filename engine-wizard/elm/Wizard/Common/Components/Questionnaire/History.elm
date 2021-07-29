@@ -15,6 +15,7 @@ import Html.Attributes exposing (class, src, type_)
 import Html.Events exposing (onCheck, onClick)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Auth.Session as Session
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
@@ -285,6 +286,13 @@ viewEventHeader appState cfg model event =
 viewEventHeaderDropdown : AppState -> ViewConfig msg -> Model -> QuestionnaireEvent -> Html msg
 viewEventHeaderDropdown appState cfg model event =
     let
+        divider previousActions =
+            if List.length previousActions > 0 then
+                [ Dropdown.divider ]
+
+            else
+                []
+
         eventUuid =
             QuestionnaireEvent.getUuid event
 
@@ -294,25 +302,32 @@ viewEventHeaderDropdown appState cfg model event =
         mbVersion =
             QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire eventUuid
 
-        versionActions =
-            case mbVersion of
-                Just version ->
-                    [ Dropdown.anchorItem [ onClick (cfg.renameVersionMsg version) ]
-                        [ faSet "_global.edit" appState
-                        , lx_ "action.rename" appState
-                        ]
-                    , Dropdown.anchorItem [ onClick (cfg.deleteVersionMsg version), class "text-danger" ]
-                        [ faSet "_global.delete" appState
-                        , lx_ "action.delete" appState
-                        ]
-                    ]
+        isOwner =
+            QuestionnaireDetail.isOwner appState cfg.questionnaire
 
-                Nothing ->
-                    [ Dropdown.anchorItem [ onClick (cfg.createVersionMsg eventUuid) ]
-                        [ faSet "_global.edit" appState
-                        , lx_ "action.name" appState
+        versionActions =
+            if isOwner then
+                case mbVersion of
+                    Just version ->
+                        [ Dropdown.anchorItem [ onClick (cfg.renameVersionMsg version) ]
+                            [ faSet "_global.edit" appState
+                            , lx_ "action.rename" appState
+                            ]
+                        , Dropdown.anchorItem [ onClick (cfg.deleteVersionMsg version), class "text-danger" ]
+                            [ faSet "_global.delete" appState
+                            , lx_ "action.delete" appState
+                            ]
                         ]
-                    ]
+
+                    Nothing ->
+                        [ Dropdown.anchorItem [ onClick (cfg.createVersionMsg eventUuid) ]
+                            [ faSet "_global.edit" appState
+                            , lx_ "action.name" appState
+                            ]
+                        ]
+
+            else
+                []
 
         previewAction =
             case ( cfg.previewQuestionnaireEventMsg, QuestionnaireDetail.isCurrentVersion cfg.questionnaire eventUuid ) of
@@ -325,30 +340,41 @@ viewEventHeaderDropdown appState cfg model event =
 
                         createDocumentAttributes =
                             linkToAttributes appState newDocumentRoute
+
+                        createDocumentAction =
+                            if Session.exists appState.session then
+                                [ Dropdown.anchorItem createDocumentAttributes
+                                    [ faSet "questionnaire.history.createDocument" appState
+                                    , lx_ "action.createDocument" appState
+                                    ]
+                                ]
+
+                            else
+                                []
                     in
-                    [ Dropdown.divider
-                    , Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
-                        [ faSet "_global.questionnaire" appState
-                        , lx_ "action.viewQuestionnaire" appState
-                        ]
-                    , Dropdown.anchorItem createDocumentAttributes
-                        [ faSet "questionnaire.history.createDocument" appState
-                        , lx_ "action.createDocument" appState
-                        ]
-                    ]
+                    divider versionActions
+                        ++ [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
+                                [ faSet "_global.questionnaire" appState
+                                , lx_ "action.viewQuestionnaire" appState
+                                ]
+                           ]
+                        ++ createDocumentAction
 
                 _ ->
                     []
 
+        revertActionEnabled =
+            not (QuestionnaireDetail.isCurrentVersion cfg.questionnaire eventUuid) && isOwner
+
         revertAction =
-            case ( cfg.revertQuestionnaireMsg, QuestionnaireDetail.isCurrentVersion cfg.questionnaire eventUuid ) of
-                ( Just revertMsg, False ) ->
-                    [ Dropdown.divider
-                    , Dropdown.anchorItem [ onClick (revertMsg event), class "text-danger" ]
-                        [ faSet "questionnaire.history.revert" appState
-                        , lx_ "action.revert" appState
-                        ]
-                    ]
+            case ( cfg.revertQuestionnaireMsg, revertActionEnabled ) of
+                ( Just revertMsg, True ) ->
+                    divider previewAction
+                        ++ [ Dropdown.anchorItem [ onClick (revertMsg event), class "text-danger" ]
+                                [ faSet "questionnaire.history.revert" appState
+                                , lx_ "action.revert" appState
+                                ]
+                           ]
 
                 _ ->
                     []
@@ -356,12 +382,19 @@ viewEventHeaderDropdown appState cfg model event =
         dropdownState =
             Maybe.withDefault Dropdown.initialState <|
                 Dict.get eventUuidString model.dropdownStates
+
+        items =
+            versionActions ++ previewAction ++ revertAction
     in
-    ListingDropdown.dropdown appState
-        { dropdownState = dropdownState
-        , toggleMsg = cfg.wrapMsg << DropdownMsg eventUuidString
-        , items = versionActions ++ previewAction ++ revertAction
-        }
+    if List.length items > 0 then
+        ListingDropdown.dropdown appState
+            { dropdownState = dropdownState
+            , toggleMsg = cfg.wrapMsg << DropdownMsg eventUuidString
+            , items = items
+            }
+
+    else
+        emptyNode
 
 
 viewEventBadges : AppState -> ViewConfig msg -> QuestionnaireEvent -> Html msg

@@ -188,7 +188,7 @@ fetchPreview questionnaireUuid eventUuid =
             E.object
                 [ ( "eventUuid", Uuid.encode eventUuid ) ]
     in
-    jwtFetch ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/revert/preview") QuestionnaireContent.decoder body
+    jwtOrHttpFetch ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/revert/preview") QuestionnaireContent.decoder body
 
 
 postRevert : Uuid -> Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
