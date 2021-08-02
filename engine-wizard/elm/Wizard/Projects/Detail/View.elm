@@ -311,6 +311,9 @@ viewProjectNavigationNav appState route model qm =
 viewProjectContent : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewProjectContent appState route model qm =
     let
+        isOwner =
+            QuestionnaireDetail.isOwner appState qm.questionnaire
+
         isEditable =
             QuestionnaireDetail.isEditor appState qm.questionnaire
 
@@ -355,7 +358,7 @@ viewProjectContent appState route model qm =
                 model.documentsModel
 
         ProjectDetailRoute.NewDocument mbEventUuid ->
-            if isEditable then
+            if isEditable && isAuthenticated then
                 Html.map NewDocumentMsg <|
                     NewDocument.view appState qm.questionnaire mbEventUuid model.newDocumentModel
 
@@ -363,7 +366,7 @@ viewProjectContent appState route model qm =
                 forbiddenPage
 
         ProjectDetailRoute.Settings ->
-            if isEditable && isAuthenticated then
+            if isOwner && isAuthenticated then
                 Html.map SettingsMsg <|
                     Settings.view appState
                         { questionnaire = QuestionnaireDetail.fromQuestionnaireDetail qm.questionnaire, package = qm.questionnaire.package }
