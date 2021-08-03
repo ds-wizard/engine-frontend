@@ -3,8 +3,9 @@ module Wizard.KMEditor.Editor.KMEditor.Models exposing
     , containsChanges
     , getActiveEditor
     , getCurrentIntegrations
+    , getCurrentMetrics
+    , getCurrentPhases
     , getCurrentTags
-    , getEditorContext
     , getKMEditor
     , initialModel
     , insertEditor
@@ -17,22 +18,20 @@ import Reorderable
 import Shared.Data.Event as Event exposing (Event(..))
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Utils exposing (listFilterJust)
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
-import Uuid
+import Uuid exposing (Uuid)
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
-import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
+import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (initKnowledgeModelFrom)
 
 
 type alias Model =
     { kmUuid : String
     , knowledgeModel : KnowledgeModel
-    , metrics : List Metric
-    , levels : List Level
     , activeEditorUuid : Maybe String
     , editors : Dict String Editor
     , reorderableState : Reorderable.State
@@ -43,8 +42,8 @@ type alias Model =
     }
 
 
-initialModel : KnowledgeModel -> Maybe String -> List Metric -> List Level -> List Event -> Model
-initialModel knowledgeModel mbActiveEditorUuid metrics levels =
+initialModel : KnowledgeModel -> Maybe String -> List Event -> Model
+initialModel knowledgeModel mbActiveEditorUuid =
     let
         activeEditorUuid =
             Maybe.or mbActiveEditorUuid (Just (Uuid.toString knowledgeModel.uuid))
@@ -52,8 +51,6 @@ initialModel knowledgeModel mbActiveEditorUuid metrics levels =
     createEditors mbActiveEditorUuid
         { kmUuid = Uuid.toString knowledgeModel.uuid
         , knowledgeModel = knowledgeModel
-        , metrics = metrics
-        , levels = levels
         , activeEditorUuid = activeEditorUuid
         , editors = Dict.fromList []
         , reorderableState = Reorderable.initialState
@@ -69,7 +66,6 @@ createEditors mbActiveEditorUuid model events =
     { model
         | editors =
             createKnowledgeModelEditor
-                (getEditorContext model)
                 mbActiveEditorUuid
                 (getEditorState (createEditorStateDict events))
                 model.knowledgeModel
@@ -120,6 +116,24 @@ eventToEditorState event =
             Edited
 
         DeleteChapterEvent _ ->
+            Deleted
+
+        AddMetricEvent _ _ ->
+            AddedEdited
+
+        EditMetricEvent _ _ ->
+            Edited
+
+        DeleteMetricEvent _ ->
+            Deleted
+
+        AddPhaseEvent _ _ ->
+            AddedEdited
+
+        EditPhaseEvent _ _ ->
+            Edited
+
+        DeletePhaseEvent _ ->
             Deleted
 
         AddTagEvent _ _ ->
@@ -220,6 +234,20 @@ getKMEditor model =
     Dict.get model.kmUuid model.editors
 
 
+getCurrentMetrics : Model -> List Metric
+getCurrentMetrics model =
+    getKMEditor model
+        |> Maybe.map (getMetricEditorsUuids >> getMetrics model)
+        |> Maybe.withDefault []
+
+
+getCurrentPhases : Model -> List Phase
+getCurrentPhases model =
+    getKMEditor model
+        |> Maybe.map (getPhaseEditorsUuids >> getPhases model)
+        |> Maybe.withDefault []
+
+
 getCurrentTags : Model -> List Tag
 getCurrentTags model =
     getKMEditor model
@@ -232,6 +260,26 @@ getCurrentIntegrations model =
     getKMEditor model
         |> Maybe.map (getIntegrationEditorsUuids >> getIntegrations model)
         |> Maybe.withDefault []
+
+
+getMetricEditorsUuids : Editor -> List String
+getMetricEditorsUuids editor =
+    case editor of
+        KMEditor kmEditorData ->
+            kmEditorData.metrics.list
+
+        _ ->
+            []
+
+
+getPhaseEditorsUuids : Editor -> List String
+getPhaseEditorsUuids editor =
+    case editor of
+        KMEditor kmEditorData ->
+            kmEditorData.phases.list
+
+        _ ->
+            []
 
 
 getTagEditorsUuids : Editor -> List String
@@ -254,6 +302,18 @@ getIntegrationEditorsUuids editor =
             []
 
 
+getMetrics : Model -> List String -> List Metric
+getMetrics model uuids =
+    List.map (getMetricByMetricEditorUuid model) uuids
+        |> listFilterJust
+
+
+getPhases : Model -> List String -> List Phase
+getPhases model uuids =
+    List.map (getPhaseByPhaseEditorUuid model) uuids
+        |> listFilterJust
+
+
 getTags : Model -> List String -> List Tag
 getTags model uuids =
     List.map (getTagByTagEditorUuid model) uuids
@@ -264,6 +324,36 @@ getIntegrations : Model -> List String -> List Integration
 getIntegrations model uuids =
     List.map (getIntegrationByIntegrationEditorUuid model) uuids
         |> listFilterJust
+
+
+getMetricByMetricEditorUuid : Model -> String -> Maybe Metric
+getMetricByMetricEditorUuid model uuid =
+    Dict.get uuid model.editors
+        |> Maybe.map
+            (\t ->
+                case t of
+                    MetricEditor metricEditorData ->
+                        Just metricEditorData.metric
+
+                    _ ->
+                        Nothing
+            )
+        |> Maybe.withDefault Nothing
+
+
+getPhaseByPhaseEditorUuid : Model -> String -> Maybe Phase
+getPhaseByPhaseEditorUuid model uuid =
+    Dict.get uuid model.editors
+        |> Maybe.map
+            (\t ->
+                case t of
+                    PhaseEditor phaseEditorData ->
+                        Just phaseEditorData.phase
+
+                    _ ->
+                        Nothing
+            )
+        |> Maybe.withDefault Nothing
 
 
 getTagByTagEditorUuid : Model -> String -> Maybe Tag
@@ -308,13 +398,6 @@ insertEditor editor model =
 setAlert : String -> Model -> Model
 setAlert alert model =
     { model | alert = Just alert }
-
-
-getEditorContext : Model -> EditorContext
-getEditorContext model =
-    { metrics = model.metrics
-    , levels = model.levels
-    }
 
 
 containsChanges : Model -> Bool

@@ -10,6 +10,7 @@ import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 
@@ -62,6 +63,7 @@ tagView config tag =
             [ class "tag-label"
             , style "background" tag.color
             , style "color" <| getContrastColorHex tag.color
+            , dataCy "tag"
             ]
             [ input
                 [ type_ "checkbox"

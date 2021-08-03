@@ -4,19 +4,14 @@ module Wizard.Projects.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Json.Encode as E
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.Levels as LevelsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.KnowledgeModel.Level exposing (Level)
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setLevels)
-import Shared.Utils exposing (getUuid, getUuidString)
+import Shared.Utils exposing (getUuid)
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult)
@@ -35,10 +30,7 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    Cmd.batch
-        [ QuestionnairesApi.getQuestionnaireMigration uuid appState GetQuestionnaireMigrationCompleted
-        , LevelsApi.getLevels appState GetLevelsCompleted
-        ]
+    QuestionnairesApi.getQuestionnaireMigration uuid appState GetQuestionnaireMigrationCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -53,9 +45,6 @@ update wrapMsg msg appState model =
 
         PutQuestionnaireMigrationCompleted result ->
             withSeed <| handlePutQuestionnaireMigrationCompleted appState model result
-
-        GetLevelsCompleted result ->
-            withSeed <| handleGetLevelsCompleted appState model result
 
         SelectChange change ->
             handleSelectChange appState model (Just change)
@@ -110,16 +99,6 @@ handlePutQuestionnaireMigrationCompleted appState model result =
         }
 
 
-handleGetLevelsCompleted : AppState -> Model -> Result ApiError (List Level) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetLevelsCompleted appState model result =
-    applyResult appState
-        { setResult = setLevels
-        , defaultError = lg "apiError.levels.getListError" appState
-        , result = result
-        , model = model
-        }
-
-
 handleSelectChange : AppState -> Model -> Maybe QuestionChange -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleSelectChange appState model mbChange =
     case mbChange of
@@ -144,8 +123,8 @@ handleSelectChange appState model mbChange =
 
 handleQuestionnaireMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Questionnaire.Msg -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
-    case ( model.levels, model.questionnaireModel ) of
-        ( Success levels, Just questionnaireModel ) ->
+    case model.questionnaireModel of
+        Just questionnaireModel ->
             let
                 ( newSeed, newQuestionnaireModel, questionnaireCmd ) =
                     Questionnaire.update
@@ -153,7 +132,7 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                         (wrapMsg << QuestionnaireMsg)
                         (Just Wizard.Msgs.SetFullscreen)
                         appState
-                        { levels = levels, metrics = [], events = [] }
+                        { events = [] }
                         questionnaireModel
 
                 ( newSeed2, saveCmd ) =

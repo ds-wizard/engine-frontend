@@ -12,7 +12,7 @@ import Shared.Locale exposing (l, lh, lx)
 import Shared.Utils exposing (flip)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
@@ -53,9 +53,16 @@ contentView appState model branch =
         , div []
             [ FormResult.view appState model.publishingBranch
             , formView appState model.form branch
-            , FormActions.view appState
+            , FormActions.viewCustomButton appState
                 Routes.kmEditorIndex
-                (ActionButton.ButtonConfig (l_ "action" appState) model.publishingBranch (FormMsg Form.Submit) False)
+                (ActionButton.buttonWithAttrs appState
+                    (ActionButton.ButtonWithAttrsConfig (l_ "action" appState)
+                        model.publishingBranch
+                        (FormMsg Form.Submit)
+                        False
+                        [ dataCy "km-publish_publish-button" ]
+                    )
+                )
             ]
         ]
 
@@ -67,7 +74,7 @@ formView appState form branch =
             BranchUtils.lastVersion appState branch
     in
     div []
-        [ Html.map FormMsg <| FormGroup.textView branch.name <| l_ "form.name" appState
+        [ Html.map FormMsg <| FormGroup.textView "name" branch.name <| l_ "form.name" appState
         , Html.map FormMsg <| FormGroup.codeView branch.kmId <| l_ "form.kmId" appState
         , lastVersion appState mbVersion
         , versionInputGroup appState form mbVersion
@@ -85,7 +92,7 @@ lastVersion appState mbVersion =
     mbVersion
         |> Maybe.map Version.toString
         |> Maybe.withDefault (l_ "form.lastVersion.empty" appState)
-        |> flip FormGroup.textView (l_ "form.lastVersion" appState)
+        |> flip (FormGroup.textView "last-version") (l_ "form.lastVersion" appState)
 
 
 versionInputGroup : AppState -> Form FormError BranchPublishForm -> Maybe Version -> Html Msg
@@ -126,11 +133,11 @@ versionInputGroup appState form mbVersion =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ lx_ "form.newVersion" appState ]
         , div [ class "version-inputs" ]
-            [ Html.map FormMsg <| Input.baseInput "number" String Form.Text majorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
+            [ Html.map FormMsg <| Input.baseInput "number" String Form.Text majorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-major", id "version-major" ]
             , text "."
-            , Html.map FormMsg <| Input.baseInput "number" String Form.Text minorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
+            , Html.map FormMsg <| Input.baseInput "number" String Form.Text minorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-minor", id "version-minor" ]
             , text "."
-            , Html.map FormMsg <| Input.baseInput "number" String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0" ]
+            , Html.map FormMsg <| Input.baseInput "number" String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-patch", id "version-patch" ]
             ]
         , p [ class "form-text text-muted version-suggestions" ]
             [ lx_ "form.newVersion.suggestions" appState

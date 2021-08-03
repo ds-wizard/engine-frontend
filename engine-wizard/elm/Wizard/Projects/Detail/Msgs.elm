@@ -1,7 +1,5 @@
 module Wizard.Projects.Detail.Msgs exposing (Msg(..))
 
-import Shared.Data.KnowledgeModel.Level exposing (Level)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
@@ -24,8 +22,6 @@ import Wizard.Projects.Detail.Documents.Msgs as Documents
 
 type Msg
     = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
-    | GetLevelsComplete (Result ApiError (List Level))
-    | GetMetricsComplete (Result ApiError (List Metric))
     | WebSocketMsg WebSocket.RawMsg
     | WebSocketPing Time.Posix
     | OnlineUserMsg Int OnlineUser.Msg

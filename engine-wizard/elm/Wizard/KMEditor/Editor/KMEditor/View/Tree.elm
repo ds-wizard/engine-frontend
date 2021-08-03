@@ -9,6 +9,7 @@ import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isMultiChoiceQuestionForm, isOptionsQuestionForm)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
@@ -51,6 +52,12 @@ treeNodeEditor appState ctx editorUuid =
         Just (KMEditor data) ->
             treeNodeKM appState ctx data
 
+        Just (MetricEditor data) ->
+            treeNodeMetric appState ctx data
+
+        Just (PhaseEditor data) ->
+            treeNodePhase appState ctx data
+
         Just (TagEditor data) ->
             treeNodeTag appState ctx data
 
@@ -85,6 +92,12 @@ treeNodeKM appState ctx editorData =
         chapters =
             editorData.chapters.list ++ editorData.chapters.deleted
 
+        metrics =
+            editorData.metrics.list ++ editorData.metrics.deleted
+
+        phases =
+            editorData.phases.list ++ editorData.phases.deleted
+
         tags =
             editorData.tags.list ++ editorData.tags.deleted
 
@@ -95,7 +108,33 @@ treeNodeKM appState ctx editorData =
             { editorData = editorData
             , icon = faSet "km.knowledgeModel" appState
             , label = ctx.kmName
-            , children = chapters ++ tags ++ integrations
+            , children = chapters ++ metrics ++ phases ++ tags ++ integrations
+            }
+    in
+    treeNode appState config ctx
+
+
+treeNodeMetric : AppState -> TreeNodeContext -> MetricEditorData -> Html Msg
+treeNodeMetric appState ctx editorData =
+    let
+        config =
+            { editorData = editorData
+            , icon = faSet "km.metric" appState
+            , label = editorData.metric.title
+            , children = []
+            }
+    in
+    treeNode appState config ctx
+
+
+treeNodePhase : AppState -> TreeNodeContext -> PhaseEditorData -> Html Msg
+treeNodePhase appState ctx editorData =
+    let
+        config =
+            { editorData = editorData
+            , icon = faSet "km.phase" appState
+            , label = editorData.phase.title
+            , children = []
             }
     in
     treeNode appState config ctx
@@ -262,7 +301,10 @@ treeNode appState config ctx =
                 a []
 
             else
-                a [ onClick <| SetActiveEditor config.editorData.uuid ]
+                a
+                    [ onClick <| SetActiveEditor config.editorData.uuid
+                    , dataCy "km-editor_tree_link"
+                    ]
     in
     li
         [ classList

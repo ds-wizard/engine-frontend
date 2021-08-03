@@ -14,6 +14,7 @@ import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 
@@ -26,6 +27,7 @@ lx_ =
 type alias SimpleConfig msg =
     { modalContent : List (Html msg)
     , visible : Bool
+    , dataCy : String
     }
 
 
@@ -33,7 +35,7 @@ simple : SimpleConfig msg -> Html msg
 simple cfg =
     div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
         [ div [ class "modal-dialog" ]
-            [ div [ class "modal-content" ]
+            [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
                 cfg.modalContent
             ]
         ]
@@ -48,6 +50,7 @@ type alias ConfirmConfig msg =
     , actionMsg : msg
     , cancelMsg : Maybe msg
     , dangerous : Bool
+    , dataCy : String
     }
 
 
@@ -68,7 +71,12 @@ confirm appState cfg =
         cancelButton =
             case cfg.cancelMsg of
                 Just cancelMsg ->
-                    button [ onClick cancelMsg, disabled cancelDisabled, class "btn btn-secondary" ]
+                    button
+                        [ onClick cancelMsg
+                        , disabled cancelDisabled
+                        , class "btn btn-secondary"
+                        , dataCy "modal_cancel-button"
+                        ]
                         [ lx_ "button.cancel" appState ]
 
                 Nothing ->
@@ -76,14 +84,15 @@ confirm appState cfg =
     in
     div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
         [ div [ class "modal-dialog" ]
-            [ div [ class "modal-content" ]
+            [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
                 [ div [ class "modal-header" ]
                     [ h5 [ class "modal-title" ] [ text cfg.modalTitle ]
                     ]
                 , div [ class "modal-body" ]
                     content
                 , div [ class "modal-footer" ]
-                    [ ActionButton.button appState <| ActionButton.ButtonConfig cfg.actionName cfg.actionResult cfg.actionMsg cfg.dangerous
+                    [ ActionButton.buttonWithAttrs appState <|
+                        ActionButton.ButtonWithAttrsConfig cfg.actionName cfg.actionResult cfg.actionMsg cfg.dangerous [ dataCy "modal_action-button" ]
                     , cancelButton
                     ]
                 ]

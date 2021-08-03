@@ -15,8 +15,8 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.KnowledgeModel.Level exposing (Level)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
@@ -29,6 +29,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 
 
@@ -97,7 +98,7 @@ update msg questionnaire appState model =
                             QuestionnaireMsg
                             Nothing
                             appState
-                            { levels = [], metrics = [], events = [] }
+                            { events = [] }
             in
             ( { model | questionnaireModel = ActionResult.map updateQuestionnaire model.questionnaireModel }
             , Cmd.none
@@ -112,9 +113,7 @@ update msg questionnaire appState model =
 
 
 type alias ViewConfig =
-    { levels : List Level
-    , metrics : List Metric
-    , events : List QuestionnaireEvent
+    { events : List QuestionnaireEvent
     , versions : List QuestionnaireVersion
     }
 
@@ -137,20 +136,20 @@ view cfg appState model =
     in
     div [ class "QuestionnaireVersionViewModal modal-cover", classList [ ( "visible", visible ) ] ]
         [ div [ class "modal-dialog" ]
-            [ div [ class "modal-content" ]
+            [ div [ class "modal-content", dataCy "modal_project-version" ]
                 [ div [ class "modal-header" ]
                     [ strong [ class "modal-title" ] [ text datetime, versionBadge ]
                     , button [ class "close", onClick Close ]
                         [ faSet "_global.close" appState ]
                     ]
-                , Page.actionResultView appState (viewContent cfg appState) model.questionnaireModel
+                , Page.actionResultView appState (viewContent appState) model.questionnaireModel
                 ]
             ]
         ]
 
 
-viewContent : ViewConfig -> AppState -> Questionnaire.Model -> Html Msg
-viewContent cfg appState qm =
+viewContent : AppState -> Questionnaire.Model -> Html Msg
+viewContent appState qm =
     Questionnaire.view appState
         { features =
             { feedbackEnabled = False
@@ -158,10 +157,10 @@ viewContent cfg appState qm =
             , readonly = True
             , toolbarEnabled = False
             }
-        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel cfg.levels cfg.metrics
+        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
         , wrapMsg = QuestionnaireMsg
         , previewQuestionnaireEventMsg = Nothing
         , revertQuestionnaireMsg = Nothing
         }
-        { levels = cfg.levels, metrics = cfg.metrics, events = [] }
+        { events = [] }
         qm

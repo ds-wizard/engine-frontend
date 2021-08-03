@@ -4,11 +4,8 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.Levels as LevelsApi
-import Shared.Api.Metrics as MetricsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
-import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
@@ -57,11 +54,7 @@ fetchData appState uuid model =
             ]
 
     else
-        Cmd.batch
-            [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
-            , LevelsApi.getLevels appState GetLevelsComplete
-            , MetricsApi.getMetrics appState GetMetricsComplete
-            ]
+        QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
 
 
 fetchSubrouteData : AppState -> Model -> Cmd Msg
@@ -94,7 +87,7 @@ fetchSubrouteData appState model =
 
 fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 fetchSubrouteDataFromAfter wrapMsg appState model =
-    case ( ActionResult.combine3 model.questionnaireModel model.metrics model.levels, appState.route ) of
+    case ( model.questionnaireModel, appState.route ) of
         ( Success _, ProjectsRoute (DetailRoute _ route) ) ->
             ( initPageModel route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
 
@@ -126,15 +119,15 @@ update wrapMsg msg appState model =
         QuestionnaireMsg questionnaireMsg ->
             let
                 ( newSeed1, newQuestionnaireModel, questionnaireCmd ) =
-                    case ( model.questionnaireModel, model.levels, model.metrics ) of
-                        ( Success questionnaireModel, Success levels, Success metrics ) ->
+                    case model.questionnaireModel of
+                        Success questionnaireModel ->
                             Triple.mapSnd Success <|
                                 Questionnaire.update
                                     questionnaireMsg
                                     (wrapMsg << QuestionnaireMsg)
                                     (Just Wizard.Msgs.SetFullscreen)
                                     appState
-                                    { levels = levels, metrics = metrics, events = [] }
+                                    { events = [] }
                                     questionnaireModel
 
                         _ ->
@@ -165,12 +158,12 @@ update wrapMsg msg appState model =
 
                 ( newSeed, newModel, newCmd ) =
                     case questionnaireMsg of
-                        Questionnaire.SetLevel levelString ->
+                        Questionnaire.SetPhase phaseUuid ->
                             applyAction <|
                                 \uuid ->
-                                    QuestionnaireEvent.SetLevel
+                                    QuestionnaireEvent.SetPhase
                                         { uuid = uuid
-                                        , level = Maybe.withDefault 1 (String.toInt levelString)
+                                        , phaseUuid = Uuid.fromString phaseUuid
                                         , createdAt = appState.currentTime
                                         , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
                                         }
@@ -226,11 +219,11 @@ update wrapMsg msg appState model =
                 )
 
         SummaryReportMsg summaryReportMsg ->
-            case ( model.questionnaireModel, model.metrics ) of
-                ( Success qm, Success metrics ) ->
+            case model.questionnaireModel of
+                Success qm ->
                     let
                         ( summaryReportModel, summaryReportCmd ) =
-                            SummaryReport.update summaryReportMsg appState { questionnaire = qm.questionnaire, metrics = metrics } model.summaryReportModel
+                            SummaryReport.update summaryReportMsg appState { questionnaire = qm.questionnaire } model.summaryReportModel
                     in
                     withSeed <|
                         ( { model | summaryReportModel = summaryReportModel }
@@ -317,42 +310,6 @@ update wrapMsg msg appState model =
                                 ( { model | questionnaireModel = ApiError.toActionResult appState (lg "apiError.questionnaires.getError" appState) error }
                                 , Cmd.none
                                 )
-
-        GetLevelsComplete result ->
-            let
-                ( newModel1, cmd ) =
-                    applyResult appState
-                        { setResult = setLevels
-                        , defaultError = lg "apiError.levels.getListError" appState
-                        , model = model
-                        , result = result
-                        }
-
-                ( newModel, fetchCmd ) =
-                    fetchSubrouteDataFromAfter wrapMsg appState newModel1
-            in
-            withSeed <|
-                ( newModel
-                , Cmd.batch [ cmd, fetchCmd ]
-                )
-
-        GetMetricsComplete result ->
-            let
-                ( newModel1, cmd ) =
-                    applyResult appState
-                        { setResult = setMetrics
-                        , defaultError = lg "apiError.metrics.getListError" appState
-                        , model = model
-                        , result = result
-                        }
-
-                ( newModel, fetchCmd ) =
-                    fetchSubrouteDataFromAfter wrapMsg appState newModel1
-            in
-            withSeed <|
-                ( newModel
-                , Cmd.batch [ cmd, fetchCmd ]
-                )
 
         WebSocketMsg wsMsg ->
             handleWebsocketMsg wsMsg appState model
@@ -565,8 +522,8 @@ handleWebsocketMsg websocketMsg appState model =
                                 QuestionnaireEvent.ClearReply data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.clearReply data.path)
 
-                                QuestionnaireEvent.SetLevel data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.setLevel data.level)
+                                QuestionnaireEvent.SetPhase data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.setPhaseUuid data.phaseUuid)
 
                                 QuestionnaireEvent.SetLabels data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.setLabels data.path data.value)

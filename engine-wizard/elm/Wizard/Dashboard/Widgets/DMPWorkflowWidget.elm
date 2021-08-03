@@ -9,6 +9,7 @@ import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
@@ -47,7 +48,7 @@ view appState questionnaires =
                     CustomCreateRoute Nothing
     in
     if visible then
-        div [ class "DMPWorkflowWidget" ]
+        div [ class "DMPWorkflowWidget", dataCy "dashboard_dmp-workflow-widget" ]
             [ div [ class "DMPWorkflowWidget__Message" ]
                 [ text <| lf_ "welcome" [ LookAndFeelConfig.getAppTitle appState.config.lookAndFeel ] appState
                 ]

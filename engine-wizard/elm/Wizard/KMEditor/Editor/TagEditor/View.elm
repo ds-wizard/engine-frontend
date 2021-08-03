@@ -12,6 +12,7 @@ import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l)
 import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
 import Wizard.KMEditor.Editor.TagEditor.Models exposing (Model, hasQuestionTag)
 import Wizard.KMEditor.Editor.TagEditor.Msgs exposing (Msg(..))
@@ -36,7 +37,7 @@ view appState model =
             else
                 Flash.info appState <| l_ "noTags" appState
     in
-    div [ class "KMEditor__Editor__TagEditor" ]
+    div [ class "KMEditor__Editor__TagEditor", dataCy "km-editor_tags" ]
         [ content ]
 
 
@@ -68,6 +69,7 @@ thTag model tag =
             [ style "background" tag.color
             , style "color" <| getContrastColorHex tag.color
             , class "tag"
+            , dataCy "km-editor_tag-editor_tag"
             ]
     in
     th [ class "th-tag", classList [ ( "highlighted", model.highlightedTagUuid == Just tag.uuid ) ] ]
@@ -177,7 +179,16 @@ tdQuestionTagCheckbox model question tag =
         , onMouseOver <| Highlight tag.uuid
         , onMouseOut <| CancelHighlight
         ]
-        [ label [] [ input [ type_ "checkbox", checked hasTag, onClick msg ] [] ] ]
+        [ label []
+            [ input
+                [ type_ "checkbox"
+                , checked hasTag
+                , onClick msg
+                , dataCy ("km-editor_tag-editor_row_question-" ++ Question.getUuid question ++ "_" ++ "tag-" ++ tag.uuid)
+                ]
+                []
+            ]
+        ]
 
 
 trChapter : AppState -> Chapter -> List Tag -> Html Msg

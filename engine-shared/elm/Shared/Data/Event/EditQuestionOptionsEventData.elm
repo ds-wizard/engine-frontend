@@ -14,7 +14,7 @@ import Shared.Data.Event.EventField as EventField exposing (EventField)
 type alias EditQuestionOptionsEventData =
     { title : EventField String
     , text : EventField (Maybe String)
-    , requiredLevel : EventField (Maybe Int)
+    , requiredPhaseUuid : EventField (Maybe String)
     , tagUuids : EventField (List String)
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
@@ -27,7 +27,7 @@ decoder =
     D.succeed EditQuestionOptionsEventData
         |> D.required "title" (EventField.decoder D.string)
         |> D.required "text" (EventField.decoder (D.nullable D.string))
-        |> D.required "requiredLevel" (EventField.decoder (D.nullable D.int))
+        |> D.required "requiredPhaseUuid" (EventField.decoder (D.nullable D.string))
         |> D.required "tagUuids" (EventField.decoder (D.list D.string))
         |> D.required "referenceUuids" (EventField.decoder (D.list D.string))
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
@@ -39,7 +39,7 @@ encode data =
     [ ( "questionType", E.string "OptionsQuestion" )
     , ( "title", EventField.encode E.string data.title )
     , ( "text", EventField.encode (E.maybe E.string) data.text )
-    , ( "requiredLevel", EventField.encode (E.maybe E.int) data.requiredLevel )
+    , ( "requiredPhaseUuid", EventField.encode (E.maybe E.string) data.requiredPhaseUuid )
     , ( "tagUuids", EventField.encode (E.list E.string) data.tagUuids )
     , ( "referenceUuids", EventField.encode (E.list E.string) data.referenceUuids )
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )

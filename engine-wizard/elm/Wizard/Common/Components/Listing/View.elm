@@ -31,6 +31,7 @@ import Wizard.Common.Components.Listing.Models exposing (Item, Model)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
 import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
@@ -91,6 +92,7 @@ type alias ListingActionConfig msg =
     , icon : Html msg
     , label : String
     , msg : ListingActionType msg
+    , dataCy : String
     }
 
 
@@ -182,7 +184,7 @@ viewToolbarSort appState cfg model =
             }
         , linkTo appState
             sortDirectionButtonUrl
-            [ class "btn btn-outline-secondary", attribute "data-cy" "sort-direction" ]
+            [ class "btn btn-outline-secondary", dataCy "listing_toolbar_sort-direction" ]
             [ sortDirectionButtonIcon ]
         ]
 
@@ -239,7 +241,7 @@ viewList : AppState -> ViewConfig a msg -> Model a -> Pagination a -> Html msg
 viewList appState cfg model pagination =
     if List.length pagination.items > 0 then
         div []
-            [ div [ class "list-group list-group-flush" ]
+            [ div [ class "list-group list-group-flush", dataCy "listing_list" ]
                 (List.indexedMap (viewItem appState cfg) model.items)
             , viewPagination appState cfg model pagination.page
             ]
@@ -267,7 +269,9 @@ viewPagination appState cfg model page =
 
         viewNavLink number =
             viewPageLink number
-                [ classList [ ( "active", number == currentPage ) ] ]
+                [ classList [ ( "active", number == currentPage ) ]
+                , dataCy "listing_page-link"
+                ]
                 [ text (String.fromInt number) ]
 
         firstLink =
@@ -283,7 +287,10 @@ viewPagination appState cfg model page =
 
         prevLink =
             viewPageLink (currentPage - 1)
-                [ class "icon-left", classList [ ( "disabled", currentPage == 1 ) ] ]
+                [ class "icon-left"
+                , classList [ ( "disabled", currentPage == 1 ) ]
+                , dataCy "listing_page-link_prev"
+                ]
                 [ fa "fas fa-angle-left"
                 , lx_ "pagination.prev" appState
                 ]
@@ -310,7 +317,10 @@ viewPagination appState cfg model page =
 
         nextLink =
             viewPageLink (currentPage + 1)
-                [ class "icon-right", classList [ ( "disabled", currentPage == page.totalPages ) ] ]
+                [ class "icon-right"
+                , classList [ ( "disabled", currentPage == page.totalPages ) ]
+                , dataCy "listing_page-link_next"
+                ]
                 [ lx_ "pagination.next" appState
                 , fa "fas fa-angle-right"
                 ]
@@ -342,6 +352,7 @@ viewEmpty appState config =
         { image = "no_data"
         , heading = l_ "empty.heading" appState
         , lines = [ config.emptyText ]
+        , cy = "listing-empty"
         }
 
 
@@ -367,7 +378,7 @@ viewItem appState config index item =
                 |> Maybe.andMap (Just item.item)
                 |> Maybe.withDefault (ItemIcon.view { text = config.textTitle item.item, image = Nothing })
     in
-    div [ class "list-group-item" ]
+    div [ class "list-group-item", dataCy "listing_item" ]
         [ icon
         , div [ class "content" ]
             [ div [ class "title-row" ]
@@ -420,7 +431,11 @@ viewAction appState dropdownItem =
                             [ onClick msg ]
             in
             Dropdown.anchorItem
-                ([ class <| Maybe.withDefault "" action.extraClass ] ++ attrs)
+                ([ class <| Maybe.withDefault "" action.extraClass
+                 , dataCy ("listing-item_action_" ++ action.dataCy)
+                 ]
+                    ++ attrs
+                )
                 [ action.icon, text action.label ]
 
         ListingDropdownSeparator ->

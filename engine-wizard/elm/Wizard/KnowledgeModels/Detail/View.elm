@@ -17,6 +17,7 @@ import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -65,7 +66,9 @@ header appState package =
         previewAction =
             linkTo appState
                 (Routes.KnowledgeModelsRoute <| PreviewRoute package.id Nothing)
-                [ class "link-with-icon" ]
+                [ class "link-with-icon"
+                , dataCy "km-detail_preview-link"
+                ]
                 [ faSet "kmDetail.preview" appState
                 , lgx "km.action.preview" appState
                 ]
@@ -73,7 +76,9 @@ header appState package =
         createEditorAction =
             linkTo appState
                 (Routes.KMEditorRoute <| CreateRoute (Just package.id) (Just True))
-                [ class "link-with-icon" ]
+                [ class "link-with-icon"
+                , dataCy "km-detail_create-editor-link"
+                ]
                 [ faSet "kmDetail.createKMEditor" appState
                 , lgx "km.action.kmEditor" appState
                 ]
@@ -81,31 +86,44 @@ header appState package =
         forkAction =
             linkTo appState
                 (Routes.KMEditorRoute <| CreateRoute (Just package.id) Nothing)
-                [ class "link-with-icon" ]
+                [ class "link-with-icon"
+                , dataCy "km-detail_fork-link"
+                ]
                 [ faSet "kmDetail.fork" appState
                 , lgx "km.action.fork" appState
                 ]
 
-        questionnaireActionVisible =
+        createProjectActionVisible =
             (QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation || Perm.hasPerm appState.session Perm.questionnaireTemplate)
                 && Perm.hasPerm appState.session Perm.questionnaire
 
-        questionnaireAction =
+        createProjectAction =
             linkTo appState
                 (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute <| Just package.id)
-                [ class "link-with-icon" ]
+                [ class "link-with-icon"
+                , dataCy "km-detail_create-project-link"
+                ]
                 [ faSet "kmDetail.createQuestionnaire" appState
                 , lgx "km.action.project" appState
                 ]
 
         exportAction =
-            a [ class "link-with-icon", href <| PackagesApi.exportPackageUrl package.id appState, target "_blank" ]
+            a
+                [ class "link-with-icon"
+                , href <| PackagesApi.exportPackageUrl package.id appState
+                , target "_blank"
+                , dataCy "km-detail_export-link"
+                ]
                 [ faSet "_global.export" appState
                 , lgx "km.action.export" appState
                 ]
 
         deleteAction =
-            a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
+            a
+                [ onClick <| ShowDeleteDialog True
+                , class "text-danger link-with-icon"
+                , dataCy "km-detail_delete-link"
+                ]
                 [ faSet "_global.delete" appState
                 , lgx "km.action.delete" appState
                 ]
@@ -115,13 +133,13 @@ header appState package =
                 |> listInsertIf previewAction True
                 |> listInsertIf createEditorAction (Perm.hasPerm appState.session Perm.knowledgeModel)
                 |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
-                |> listInsertIf questionnaireAction questionnaireActionVisible
+                |> listInsertIf createProjectAction createProjectActionVisible
                 |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
                 |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
-            [ div [ class "top-header-title" ] [ text package.name ]
+            [ div [ class "top-header-title", dataCy "km-detail_header-title" ] [ text package.name ]
             , div [ class "top-header-actions" ] actions
             ]
         ]
@@ -141,7 +159,7 @@ readme appState package =
             else
                 newVersionInRegistryWarning appState package
     in
-    div [ class "KnowledgeModels__Detail__Readme" ]
+    div [ class "KnowledgeModels__Detail__Readme", dataCy "km-detail_readme" ]
         [ warning
         , Markdown.toHtml [ class "readme" ] package.readme
         ]
@@ -185,20 +203,21 @@ sidePanel appState package =
         [ list 12 12 <| listFilterJust sections ]
 
 
-sidePanelKmInfo : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelKmInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelKmInfo appState package =
     let
         kmInfoList =
-            [ ( lg "package.id" appState, text package.id )
-            , ( lg "package.version" appState, text <| Version.toString package.version )
-            , ( lg "package.metamodel" appState, text <| String.fromInt package.metamodelVersion )
-            , ( lg "package.license" appState, text package.license )
+            [ ( lg "package.id" appState, "id", text package.id )
+            , ( lg "package.version" appState, "version", text <| Version.toString package.version )
+            , ( lg "package.metamodel" appState, "metamodel", text <| String.fromInt package.metamodelVersion )
+            , ( lg "package.license" appState, "license", text package.license )
             ]
 
         parentInfo =
             case package.forkOfPackageId of
                 Just parentPackageId ->
                     [ ( lg "package.forkOf" appState
+                      , "fork-of"
                       , linkTo appState
                             (Routes.KnowledgeModelsRoute <| DetailRoute parentPackageId)
                             []
@@ -209,10 +228,10 @@ sidePanelKmInfo appState package =
                 Nothing ->
                     []
     in
-    Just ( lg "package" appState, list 4 8 <| kmInfoList ++ parentInfo )
+    Just ( lg "package" appState, "package", list 4 8 <| kmInfoList ++ parentInfo )
 
 
-sidePanelOtherVersions : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelOtherVersions : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelOtherVersions appState package =
     let
         versionLink version =
@@ -231,28 +250,29 @@ sidePanelOtherVersions appState package =
                 |> List.map versionLink
     in
     if List.length versionLinks > 0 then
-        Just ( lg "package.otherVersions" appState, ul [] versionLinks )
+        Just ( lg "package.otherVersions" appState, "other-versions", ul [] versionLinks )
 
     else
         Nothing
 
 
-sidePanelOrganizationInfo : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelOrganizationInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelOrganizationInfo appState package =
     case package.organization of
         Just organization ->
-            Just ( lg "package.publishedBy" appState, viewOrganization organization )
+            Just ( lg "package.publishedBy" appState, "published-by", viewOrganization organization )
 
         Nothing ->
             Nothing
 
 
-sidePanelRegistryLink : AppState -> PackageDetail -> Maybe ( String, Html msg )
+sidePanelRegistryLink : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelRegistryLink appState package =
     case package.registryLink of
         Just registryLink ->
             Just
                 ( lg "package.registryLink" appState
+                , "registry-link"
                 , a [ href registryLink, class "link-with-icon", target "_blank" ]
                     [ faSet "kmDetail.registryLink" appState
                     , text package.id
@@ -263,13 +283,13 @@ sidePanelRegistryLink appState package =
             Nothing
 
 
-list : Int -> Int -> List ( String, Html msg ) -> Html msg
+list : Int -> Int -> List ( String, String, Html msg ) -> Html msg
 list colLabel colValue rows =
     let
-        viewRow ( label, value ) =
+        viewRow ( label, cy, value ) =
             [ dt [ class <| "col-" ++ String.fromInt colLabel ]
                 [ text label ]
-            , dd [ class <| "col-" ++ String.fromInt colValue ]
+            , dd [ class <| "col-" ++ String.fromInt colValue, dataCy ("km-detail_metadata_" ++ cy) ]
                 [ value ]
             ]
     in
@@ -305,6 +325,7 @@ deleteVersionModal appState model package =
             , actionMsg = DeleteVersion
             , cancelMsg = Just <| ShowDeleteDialog False
             , dangerous = True
+            , dataCy = "km-delete-version"
             }
     in
     Modal.confirm appState modalConfig

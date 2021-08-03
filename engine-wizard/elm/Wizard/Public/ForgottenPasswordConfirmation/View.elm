@@ -9,6 +9,7 @@ import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Public.Common.PasswordForm exposing (PasswordForm)
@@ -75,11 +76,11 @@ formView appState form =
 
 successView : AppState -> Html Msg
 successView appState =
-    div [ class "jumbotron full-page-error" ]
+    div [ class "jumbotron full-page-message", dataCy "message_success" ]
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "success.message"
-                [ linkTo appState (Routes.PublicRoute (LoginRoute Nothing)) [] [ lx_ "success.logIn" appState ]
+                [ linkTo appState (Routes.PublicRoute (LoginRoute Nothing)) [ dataCy "login-link" ] [ lx_ "success.logIn" appState ]
                 ]
                 appState
             )

@@ -83,16 +83,16 @@ createMigrationView appState model questionnaire =
                     FormGroup.select appState (createOptions package) model.form "packageId"
 
                 Nothing ->
-                    FormGroup.textView <| l_ "form.selectKMFirst" appState
+                    FormGroup.textView "km" <| l_ "form.selectKMFirst" appState
     in
     div [ listClass "Questionnaires__CreateMigration" ]
         [ Page.header (l_ "header.title" appState) []
         , Flash.info appState <| l_ "header.info" appState
         , FormResult.view appState model.savingMigration
-        , FormGroup.textView questionnaire.name <| lg "project" appState
+        , FormGroup.textView "project" questionnaire.name <| lg "project" appState
         , div [ class "form" ]
             [ div []
-                [ FormGroup.textView questionnaire.package.name <| l_ "form.originalKM" appState
+                [ FormGroup.textView "original-km" questionnaire.package.name <| l_ "form.originalKM" appState
                 , FormGroup.codeView (Version.toString questionnaire.package.version) <| l_ "form.originalVersion" appState
                 , originalTagList
                 ]

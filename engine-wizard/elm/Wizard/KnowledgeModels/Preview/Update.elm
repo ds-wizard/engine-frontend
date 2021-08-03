@@ -10,8 +10,6 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Random exposing (Seed)
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
-import Shared.Api.Levels as LevelsApi
-import Shared.Api.Metrics as MetricsApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
@@ -25,7 +23,7 @@ import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Error.ApiError as ApiError
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setKnowledgeModel, setLevels, setMetrics, setPackage)
+import Shared.Setters exposing (setKnowledgeModel, setPackage)
 import Shared.Utils exposing (getUuid, getUuidString)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -45,17 +43,11 @@ fetchData appState packageId =
     Cmd.batch
         [ KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState FetchPreviewComplete
         , PackagesApi.getPackage packageId appState GetPackageComplete
-        , LevelsApi.getLevels appState GetLevelsComplete
-        , MetricsApi.getMetrics appState GetMetricsComplete
         ]
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
-    let
-        withSeed ( m, c ) =
-            ( appState.seed, m, c )
-    in
     case msg of
         FetchPreviewComplete result ->
             initQuestionnaireModel appState <|
@@ -71,24 +63,6 @@ update msg wrapMsg appState model =
                 applyResult appState
                     { setResult = setPackage
                     , defaultError = lg "apiError.packages.getListError" appState
-                    , model = model
-                    , result = result
-                    }
-
-        GetLevelsComplete result ->
-            withSeed <|
-                applyResult appState
-                    { setResult = setLevels
-                    , defaultError = lg "apiError.levels.getListError" appState
-                    , model = model
-                    , result = result
-                    }
-
-        GetMetricsComplete result ->
-            withSeed <|
-                applyResult appState
-                    { setResult = setMetrics
-                    , defaultError = lg "apiError.metrics.getListError" appState
                     , model = model
                     , result = result
                     }
@@ -300,17 +274,15 @@ foldReplies appState km parentMap seed questionUuid replies =
 
 handleQuestionnaireMsg : Questionnaire.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleQuestionnaireMsg msg wrapMsg appState model =
-    case ActionResult.combine3 model.levels model.metrics model.questionnaireModel of
-        Success ( levels, metrics, questionnaireModel ) ->
+    case model.questionnaireModel of
+        Success questionnaireModel ->
             let
                 ( newSeed, qm, qtnCmd ) =
                     Questionnaire.update msg
                         QuestionnaireMsg
                         Nothing
                         appState
-                        { levels = levels
-                        , metrics = metrics
-                        , events = []
+                        { events = []
                         }
                         questionnaireModel
             in

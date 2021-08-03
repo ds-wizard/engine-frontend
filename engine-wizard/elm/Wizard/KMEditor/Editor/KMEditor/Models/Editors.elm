@@ -8,6 +8,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , ExpertEditorData
     , IntegrationEditorData
     , KMEditorData
+    , MetricEditorData
+    , PhaseEditorData
     , QuestionEditorData
     , ReferenceEditorData
     , TagEditorData
@@ -15,6 +17,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , addChapterQuestion
     , addKMChapter
     , addKMIntegration
+    , addKMMetric
+    , addKMPhase
     , addKMTag
     , addQuestionAnswer
     , addQuestionAnswerItemTemplateQuestion
@@ -27,6 +31,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , createExpertEditor
     , createIntegrationEditor
     , createKnowledgeModelEditor
+    , createMetricEditor
+    , createPhaseEditor
     , createQuestionEditor
     , createReferenceEditor
     , createTagEditor
@@ -51,6 +57,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , isExpertEditorDirty
     , isIntegrationEditorDirty
     , isKMEditorDirty
+    , isMetricEditorDirty
+    , isPhaseEditorDirty
     , isQuestionEditorDirty
     , isReferenceEditorDirty
     , isTagEditorDirty
@@ -64,6 +72,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing
     , updateExpertEditorData
     , updateIntegrationEditorData
     , updateKMEditorData
+    , updateMetricEditorData
+    , updatePhaseEditorData
     , updateQuestionEditorData
     , updateReferenceEditorData
     , updateTagEditorData
@@ -77,6 +87,8 @@ import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
@@ -86,7 +98,6 @@ import String.Format exposing (format)
 import Uuid
 import ValueList exposing (ValueList)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
-import Wizard.KMEditor.Editor.KMEditor.Models.EditorContext exposing (EditorContext)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (..)
 
 
@@ -100,6 +111,8 @@ type EditorState
 
 type Editor
     = KMEditor KMEditorData
+    | MetricEditor MetricEditorData
+    | PhaseEditor PhaseEditorData
     | TagEditor TagEditorData
     | IntegrationEditor IntegrationEditorData
     | ChapterEditor ChapterEditorData
@@ -125,8 +138,30 @@ type alias KMEditorData =
     , knowledgeModel : KnowledgeModel
     , form : Form FormError KnowledgeModelForm
     , chapters : Children
+    , metrics : Children
+    , phases : Children
     , tags : Children
     , integrations : Children
+    , treeOpen : Bool
+    , editorState : EditorState
+    , parentUuid : String
+    }
+
+
+type alias MetricEditorData =
+    { uuid : String
+    , metric : Metric
+    , form : Form FormError MetricForm
+    , treeOpen : Bool
+    , editorState : EditorState
+    , parentUuid : String
+    }
+
+
+type alias PhaseEditorData =
+    { uuid : String
+    , phase : Phase
+    , form : Form FormError PhaseForm
     , treeOpen : Bool
     , editorState : EditorState
     , parentUuid : String
@@ -227,11 +262,17 @@ type alias ExpertEditorData =
 {- constructors -}
 
 
-createKnowledgeModelEditor : EditorContext -> Maybe String -> (String -> EditorState) -> KnowledgeModel -> Dict String Editor -> Dict String Editor
-createKnowledgeModelEditor editorContext mbActiveEditorUuid getEditorState km editors =
+createKnowledgeModelEditor : Maybe String -> (String -> EditorState) -> KnowledgeModel -> Dict String Editor -> Dict String Editor
+createKnowledgeModelEditor mbActiveEditorUuid getEditorState km editors =
     let
         chapters =
             KnowledgeModel.getChapters km
+
+        metrics =
+            KnowledgeModel.getMetrics km
+
+        phases =
+            KnowledgeModel.getPhases km
 
         tags =
             KnowledgeModel.getTags km
@@ -245,6 +286,8 @@ createKnowledgeModelEditor editorContext mbActiveEditorUuid getEditorState km ed
                 , knowledgeModel = km
                 , form = initKnowledgeModelFrom km
                 , chapters = Children.init <| List.map .uuid chapters
+                , metrics = Children.init <| List.map .uuid metrics
+                , phases = Children.init <| List.map .uuid phases
                 , tags = Children.init <| List.map .uuid tags
                 , integrations = Children.init <| List.map .uuid integrations
                 , treeOpen = True
@@ -253,13 +296,19 @@ createKnowledgeModelEditor editorContext mbActiveEditorUuid getEditorState km ed
                 }
 
         withChapters =
-            List.foldl (createChapterEditor integrations editorContext (Uuid.toString km.uuid) getEditorState km) editors chapters
+            List.foldl (createChapterEditor integrations (Uuid.toString km.uuid) getEditorState km) editors chapters
+
+        withMetrics =
+            List.foldl (createMetricEditor (Uuid.toString km.uuid) getEditorState km) withChapters metrics
+
+        withPhases =
+            List.foldl (createPhaseEditor (Uuid.toString km.uuid) getEditorState km) withMetrics phases
 
         withTags =
-            List.foldl (createTagEditor editorContext (Uuid.toString km.uuid) getEditorState km) withChapters tags
+            List.foldl (createTagEditor (Uuid.toString km.uuid) getEditorState km) withPhases tags
 
         withIntegrations =
-            List.foldl (createIntegrationEditor editorContext (Uuid.toString km.uuid) getEditorState km) withTags integrations
+            List.foldl (createIntegrationEditor (Uuid.toString km.uuid) getEditorState km) withTags integrations
     in
     openActiveEditorPath mbActiveEditorUuid <| Dict.insert (Uuid.toString km.uuid) editor withIntegrations
 
@@ -276,8 +325,8 @@ openActiveEditorPath activeEditorUuid editors =
             editors
 
 
-createChapterEditor : List Integration -> EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Chapter -> Dict String Editor -> Dict String Editor
-createChapterEditor integrations editorContext parentUuid getEditorState km chapter editors =
+createChapterEditor : List Integration -> String -> (String -> EditorState) -> KnowledgeModel -> Chapter -> Dict String Editor -> Dict String Editor
+createChapterEditor integrations parentUuid getEditorState km chapter editors =
     let
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid km
@@ -294,13 +343,45 @@ createChapterEditor integrations editorContext parentUuid getEditorState km chap
                 }
 
         withQuestions =
-            List.foldl (createQuestionEditor integrations editorContext chapter.uuid getEditorState km) editors questions
+            List.foldl (createQuestionEditor integrations chapter.uuid getEditorState km) editors questions
     in
     Dict.insert chapter.uuid editor withQuestions
 
 
-createTagEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Tag -> Dict String Editor -> Dict String Editor
-createTagEditor editorContext parentUuid getEditorState km tag editors =
+createMetricEditor : String -> (String -> EditorState) -> KnowledgeModel -> Metric -> Dict String Editor -> Dict String Editor
+createMetricEditor parentUuid getEditorState km metric editors =
+    let
+        editor =
+            MetricEditor
+                { uuid = metric.uuid
+                , metric = metric
+                , form = initMetricForm metric
+                , treeOpen = False
+                , editorState = getEditorState metric.uuid
+                , parentUuid = parentUuid
+                }
+    in
+    Dict.insert metric.uuid editor editors
+
+
+createPhaseEditor : String -> (String -> EditorState) -> KnowledgeModel -> Phase -> Dict String Editor -> Dict String Editor
+createPhaseEditor parentUuid getEditorState km phase editors =
+    let
+        editor =
+            PhaseEditor
+                { uuid = phase.uuid
+                , phase = phase
+                , form = initPhaseForm phase
+                , treeOpen = False
+                , editorState = getEditorState phase.uuid
+                , parentUuid = parentUuid
+                }
+    in
+    Dict.insert phase.uuid editor editors
+
+
+createTagEditor : String -> (String -> EditorState) -> KnowledgeModel -> Tag -> Dict String Editor -> Dict String Editor
+createTagEditor parentUuid getEditorState km tag editors =
     let
         editor =
             TagEditor
@@ -315,8 +396,8 @@ createTagEditor editorContext parentUuid getEditorState km tag editors =
     Dict.insert tag.uuid editor editors
 
 
-createIntegrationEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Integration -> Dict String Editor -> Dict String Editor
-createIntegrationEditor editorContext parentUuid getEditorState km integration editors =
+createIntegrationEditor : String -> (String -> EditorState) -> KnowledgeModel -> Integration -> Dict String Editor -> Dict String Editor
+createIntegrationEditor parentUuid getEditorState km integration editors =
     let
         editor =
             IntegrationEditor
@@ -333,8 +414,8 @@ createIntegrationEditor editorContext parentUuid getEditorState km integration e
     Dict.insert integration.uuid editor editors
 
 
-createQuestionEditor : List Integration -> EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Question -> Dict String Editor -> Dict String Editor
-createQuestionEditor integrations editorContext parentUuid getEditorState km question editors =
+createQuestionEditor : List Integration -> String -> (String -> EditorState) -> KnowledgeModel -> Question -> Dict String Editor -> Dict String Editor
+createQuestionEditor integrations parentUuid getEditorState km question editors =
     let
         questionUuid =
             Question.getUuid question
@@ -371,34 +452,37 @@ createQuestionEditor integrations editorContext parentUuid getEditorState km que
                 }
 
         withAnswers =
-            List.foldl (createAnswerEditor integrations editorContext questionUuid getEditorState km) editors answers
+            List.foldl (createAnswerEditor integrations questionUuid getEditorState km) editors answers
 
         withChoices =
-            List.foldl (createChoiceEditor editorContext questionUuid getEditorState km) withAnswers choices
+            List.foldl (createChoiceEditor questionUuid getEditorState km) withAnswers choices
 
         withAnswerItemTemplateQuestions =
-            List.foldl (createQuestionEditor integrations editorContext questionUuid getEditorState km) withChoices itemTemplateQuestions
+            List.foldl (createQuestionEditor integrations questionUuid getEditorState km) withChoices itemTemplateQuestions
 
         withReferences =
-            List.foldl (createReferenceEditor editorContext questionUuid getEditorState km) withAnswerItemTemplateQuestions references
+            List.foldl (createReferenceEditor questionUuid getEditorState km) withAnswerItemTemplateQuestions references
 
         withExperts =
-            List.foldl (createExpertEditor editorContext questionUuid getEditorState km) withReferences experts
+            List.foldl (createExpertEditor questionUuid getEditorState km) withReferences experts
     in
     Dict.insert questionUuid editor withExperts
 
 
-createAnswerEditor : List Integration -> EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Answer -> Dict String Editor -> Dict String Editor
-createAnswerEditor integrations editorContext parentUuid getEditorState km answer editors =
+createAnswerEditor : List Integration -> String -> (String -> EditorState) -> KnowledgeModel -> Answer -> Dict String Editor -> Dict String Editor
+createAnswerEditor integrations parentUuid getEditorState km answer editors =
     let
         followUps =
             KnowledgeModel.getAnswerFollowupQuestions answer.uuid km
+
+        metrics =
+            KnowledgeModel.getMetrics km
 
         editor =
             AnswerEditor
                 { uuid = answer.uuid
                 , answer = answer
-                , form = initAnswerForm editorContext answer
+                , form = initAnswerForm metrics answer
                 , followUps = Children.init <| List.map Question.getUuid followUps
                 , treeOpen = False
                 , editorState = getEditorState answer.uuid
@@ -406,13 +490,13 @@ createAnswerEditor integrations editorContext parentUuid getEditorState km answe
                 }
 
         withFollowUps =
-            List.foldl (createQuestionEditor integrations editorContext answer.uuid getEditorState km) editors followUps
+            List.foldl (createQuestionEditor integrations answer.uuid getEditorState km) editors followUps
     in
     Dict.insert answer.uuid editor withFollowUps
 
 
-createChoiceEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Choice -> Dict String Editor -> Dict String Editor
-createChoiceEditor editorContext parentUuid getEditorState km choice editors =
+createChoiceEditor : String -> (String -> EditorState) -> KnowledgeModel -> Choice -> Dict String Editor -> Dict String Editor
+createChoiceEditor parentUuid getEditorState km choice editors =
     let
         editor =
             ChoiceEditor
@@ -427,8 +511,8 @@ createChoiceEditor editorContext parentUuid getEditorState km choice editors =
     Dict.insert choice.uuid editor editors
 
 
-createReferenceEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Reference -> Dict String Editor -> Dict String Editor
-createReferenceEditor editorContext parentUuid getEditorState km reference editors =
+createReferenceEditor : String -> (String -> EditorState) -> KnowledgeModel -> Reference -> Dict String Editor -> Dict String Editor
+createReferenceEditor parentUuid getEditorState km reference editors =
     let
         referenceUuid =
             Reference.getUuid reference
@@ -446,8 +530,8 @@ createReferenceEditor editorContext parentUuid getEditorState km reference edito
     Dict.insert referenceUuid editor editors
 
 
-createExpertEditor : EditorContext -> String -> (String -> EditorState) -> KnowledgeModel -> Expert -> Dict String Editor -> Dict String Editor
-createExpertEditor editorContext parentUuid getEditorState km expert editors =
+createExpertEditor : String -> (String -> EditorState) -> KnowledgeModel -> Expert -> Dict String Editor -> Dict String Editor
+createExpertEditor parentUuid getEditorState km expert editors =
     let
         editor =
             ExpertEditor
@@ -566,6 +650,12 @@ getEditorTitle kmName editor =
         ChapterEditor data ->
             data.chapter.title
 
+        MetricEditor data ->
+            data.metric.title
+
+        PhaseEditor data ->
+            data.phase.title
+
         TagEditor data ->
             data.tag.name
 
@@ -597,6 +687,12 @@ getEditorUuid editor =
         ChapterEditor data ->
             data.chapter.uuid
 
+        MetricEditor data ->
+            data.metric.uuid
+
+        PhaseEditor data ->
+            data.phase.uuid
+
         TagEditor data ->
             data.tag.uuid
 
@@ -626,6 +722,12 @@ getEditorParentUuid editor =
             data.parentUuid
 
         ChapterEditor data ->
+            data.parentUuid
+
+        MetricEditor data ->
+            data.parentUuid
+
+        PhaseEditor data ->
             data.parentUuid
 
         TagEditor data ->
@@ -686,6 +788,12 @@ updateEditorOpen updateFn editor =
         ChapterEditor data ->
             ChapterEditor { data | treeOpen = updateFn data.treeOpen }
 
+        MetricEditor data ->
+            MetricEditor { data | treeOpen = updateFn data.treeOpen }
+
+        PhaseEditor data ->
+            PhaseEditor { data | treeOpen = updateFn data.treeOpen }
+
         TagEditor data ->
             TagEditor { data | treeOpen = updateFn data.treeOpen }
 
@@ -724,6 +832,12 @@ isEditorDeleted editor =
         ChapterEditor data ->
             data.editorState == Deleted
 
+        MetricEditor data ->
+            data.editorState == Deleted
+
+        PhaseEditor data ->
+            data.editorState == Deleted
+
         TagEditor data ->
             data.editorState == Deleted
 
@@ -755,6 +869,12 @@ isEditorDirty editor =
         ChapterEditor data ->
             isChapterEditorDirty data
 
+        MetricEditor data ->
+            isMetricEditorDirty data
+
+        PhaseEditor data ->
+            isPhaseEditorDirty data
+
         TagEditor data ->
             isTagEditorDirty data
 
@@ -782,6 +902,8 @@ isKMEditorDirty editorData =
     (editorData.editorState == Added)
         || formChanged editorData.form
         || editorData.chapters.dirty
+        || editorData.metrics.dirty
+        || editorData.phases.dirty
         || editorData.tags.dirty
         || editorData.integrations.dirty
 
@@ -791,6 +913,18 @@ isChapterEditorDirty editorData =
     (editorData.editorState == Added)
         || formChanged editorData.form
         || editorData.questions.dirty
+
+
+isMetricEditorDirty : MetricEditorData -> Bool
+isMetricEditorDirty editorData =
+    (editorData.editorState == Added)
+        || formChanged editorData.form
+
+
+isPhaseEditorDirty : PhaseEditorData -> Bool
+isPhaseEditorDirty editorData =
+    (editorData.editorState == Added)
+        || formChanged editorData.form
 
 
 isTagEditorDirty : TagEditorData -> Bool
@@ -865,8 +999,8 @@ isExpertEditorDirty editorData =
         || formChanged editorData.form
 
 
-updateKMEditorData : EditorContext -> EditorState -> KnowledgeModelForm -> KMEditorData -> KMEditorData
-updateKMEditorData editorContext newState form editorData =
+updateKMEditorData : EditorState -> KnowledgeModelForm -> KMEditorData -> KMEditorData
+updateKMEditorData newState form editorData =
     let
         newKM =
             updateKnowledgeModelWithForm editorData.knowledgeModel form
@@ -879,8 +1013,8 @@ updateKMEditorData editorContext newState form editorData =
     }
 
 
-updateChapterEditorData : EditorContext -> EditorState -> ChapterForm -> ChapterEditorData -> ChapterEditorData
-updateChapterEditorData editorContext newState form editorData =
+updateChapterEditorData : EditorState -> ChapterForm -> ChapterEditorData -> ChapterEditorData
+updateChapterEditorData newState form editorData =
     let
         newChapter =
             updateChapterWithForm editorData.chapter form
@@ -893,8 +1027,34 @@ updateChapterEditorData editorContext newState form editorData =
     }
 
 
-updateTagEditorData : EditorContext -> EditorState -> TagForm -> TagEditorData -> TagEditorData
-updateTagEditorData editorContext newState form editorData =
+updateMetricEditorData : EditorState -> MetricForm -> MetricEditorData -> MetricEditorData
+updateMetricEditorData newState form editorData =
+    let
+        newMetric =
+            updateMetricWithForm editorData.metric form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , metric = newMetric
+        , form = initMetricForm newMetric
+    }
+
+
+updatePhaseEditorData : EditorState -> PhaseForm -> PhaseEditorData -> PhaseEditorData
+updatePhaseEditorData newState form editorData =
+    let
+        newPhase =
+            updatePhaseWithForm editorData.phase form
+    in
+    { editorData
+        | editorState = getNewState editorData.editorState newState
+        , phase = newPhase
+        , form = initPhaseForm newPhase
+    }
+
+
+updateTagEditorData : EditorState -> TagForm -> TagEditorData -> TagEditorData
+updateTagEditorData newState form editorData =
     let
         newTag =
             updateTagWithForm editorData.tag form
@@ -906,8 +1066,8 @@ updateTagEditorData editorContext newState form editorData =
     }
 
 
-updateIntegrationEditorData : EditorContext -> EditorState -> IntegrationForm -> IntegrationEditorData -> IntegrationEditorData
-updateIntegrationEditorData editorContext newState form editorData =
+updateIntegrationEditorData : EditorState -> IntegrationForm -> IntegrationEditorData -> IntegrationEditorData
+updateIntegrationEditorData newState form editorData =
     let
         newIntegration =
             updateIntegrationWithForm editorData.integration form
@@ -925,8 +1085,8 @@ updateIntegrationWithProps props integration =
     { integration | props = props.list }
 
 
-updateQuestionEditorData : List Integration -> EditorContext -> EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
-updateQuestionEditorData integrations editorContext newState form editorData =
+updateQuestionEditorData : List Integration -> EditorState -> QuestionForm -> QuestionEditorData -> QuestionEditorData
+updateQuestionEditorData integrations newState form editorData =
     let
         newQuestion =
             updateQuestionWithForm editorData.question form
@@ -971,8 +1131,8 @@ updateEditorsWithQuestion newEditorData oldEditorData editors =
                 |> deleteEditors oldEditorData.answers
 
 
-updateAnswerEditorData : EditorContext -> EditorState -> AnswerForm -> AnswerEditorData -> AnswerEditorData
-updateAnswerEditorData editorContext newState form editorData =
+updateAnswerEditorData : List Metric -> EditorState -> AnswerForm -> AnswerEditorData -> AnswerEditorData
+updateAnswerEditorData metrics newState form editorData =
     let
         newAnswer =
             updateAnswerWithForm editorData.answer form
@@ -981,12 +1141,12 @@ updateAnswerEditorData editorContext newState form editorData =
         | editorState = getNewState editorData.editorState newState
         , answer = newAnswer
         , followUps = Children.cleanDirty editorData.followUps
-        , form = initAnswerForm editorContext newAnswer
+        , form = initAnswerForm metrics newAnswer
     }
 
 
-updateChoiceEditorData : EditorContext -> EditorState -> ChoiceForm -> ChoiceEditorData -> ChoiceEditorData
-updateChoiceEditorData editorContext newState form editorData =
+updateChoiceEditorData : EditorState -> ChoiceForm -> ChoiceEditorData -> ChoiceEditorData
+updateChoiceEditorData newState form editorData =
     let
         newChoice =
             updateChoiceWithForm editorData.choice form
@@ -998,8 +1158,8 @@ updateChoiceEditorData editorContext newState form editorData =
     }
 
 
-updateReferenceEditorData : EditorContext -> EditorState -> ReferenceForm -> ReferenceEditorData -> ReferenceEditorData
-updateReferenceEditorData editorContext newState form editorData =
+updateReferenceEditorData : EditorState -> ReferenceForm -> ReferenceEditorData -> ReferenceEditorData
+updateReferenceEditorData newState form editorData =
     let
         newReference =
             updateReferenceWithForm editorData.reference form
@@ -1011,8 +1171,8 @@ updateReferenceEditorData editorContext newState form editorData =
     }
 
 
-updateExpertEditorData : EditorContext -> EditorState -> ExpertForm -> ExpertEditorData -> ExpertEditorData
-updateExpertEditorData editorContext newState form editorData =
+updateExpertEditorData : EditorState -> ExpertForm -> ExpertEditorData -> ExpertEditorData
+updateExpertEditorData newState form editorData =
     let
         newExpert =
             updateExpertWithForm editorData.expert form
@@ -1029,6 +1189,26 @@ addKMChapter chapter editorData =
     KMEditor
         { editorData
             | chapters = Children.addChild chapter.uuid editorData.chapters
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
+
+
+addKMMetric : Metric -> KMEditorData -> Editor
+addKMMetric metric editorData =
+    KMEditor
+        { editorData
+            | metrics = Children.addChild metric.uuid editorData.metrics
+            , treeOpen = True
+            , editorState = getNewState editorData.editorState Edited
+        }
+
+
+addKMPhase : Phase -> KMEditorData -> Editor
+addKMPhase phase editorData =
+    KMEditor
+        { editorData
+            | phases = Children.addChild phase.uuid editorData.phases
             , treeOpen = True
             , editorState = getNewState editorData.editorState Edited
         }

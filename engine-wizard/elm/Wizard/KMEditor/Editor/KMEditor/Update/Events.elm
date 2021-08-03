@@ -4,6 +4,8 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     , createAddChoiceEvent
     , createAddExpertEvent
     , createAddIntegrationEvent
+    , createAddMetricEvent
+    , createAddPhaseEvent
     , createAddQuestionEvent
     , createAddReferenceEvent
     , createAddTagEvent
@@ -12,6 +14,8 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     , createDeleteChoiceEvent
     , createDeleteExpertEvent
     , createDeleteIntegrationEvent
+    , createDeleteMetricEvent
+    , createDeletePhaseEvent
     , createDeleteQuestionEvent
     , createDeleteReferenceEvent
     , createDeleteTagEvent
@@ -21,6 +25,8 @@ module Wizard.KMEditor.Editor.KMEditor.Update.Events exposing
     , createEditExpertEvent
     , createEditIntegrationEvent
     , createEditKnowledgeModelEvent
+    , createEditMetricEvent
+    , createEditPhaseEvent
     , createEditQuestionEvent
     , createEditReferenceEvent
     , createEditTagEvent
@@ -54,6 +60,8 @@ createEditKnowledgeModelEvent form editorData =
     let
         data =
             { chapterUuids = EventField.create editorData.chapters.list editorData.chapters.dirty
+            , metricUuids = EventField.create editorData.metrics.list editorData.metrics.dirty
+            , phaseUuids = EventField.create editorData.phases.list editorData.phases.dirty
             , tagUuids = EventField.create editorData.tags.list editorData.tags.dirty
             , integrationUuids = EventField.create editorData.integrations.list editorData.integrations.dirty
             }
@@ -87,6 +95,62 @@ createEditChapterEvent form editorData =
 createDeleteChapterEvent : String -> String -> Seed -> ( Event, Seed )
 createDeleteChapterEvent =
     createEvent DeleteChapterEvent
+
+
+createAddMetricEvent : MetricForm -> MetricEditorData -> Seed -> ( Event, Seed )
+createAddMetricEvent form editorData =
+    let
+        data =
+            { title = form.title
+            , abbreviation = form.abbreviation
+            , description = form.description
+            }
+    in
+    createEvent (AddMetricEvent data) editorData.metric.uuid editorData.parentUuid
+
+
+createEditMetricEvent : MetricForm -> MetricEditorData -> Seed -> ( Event, Seed )
+createEditMetricEvent form editorData =
+    let
+        data =
+            { title = EventField.create form.title (editorData.metric.title /= form.title)
+            , abbreviation = EventField.create form.abbreviation (editorData.metric.abbreviation /= form.abbreviation)
+            , description = EventField.create form.description (editorData.metric.description /= form.description)
+            }
+    in
+    createEvent (EditMetricEvent data) editorData.metric.uuid editorData.parentUuid
+
+
+createDeleteMetricEvent : String -> String -> Seed -> ( Event, Seed )
+createDeleteMetricEvent =
+    createEvent DeleteMetricEvent
+
+
+createAddPhaseEvent : PhaseForm -> PhaseEditorData -> Seed -> ( Event, Seed )
+createAddPhaseEvent form editorData =
+    let
+        data =
+            { title = form.title
+            , description = form.description
+            }
+    in
+    createEvent (AddPhaseEvent data) editorData.phase.uuid editorData.parentUuid
+
+
+createEditPhaseEvent : PhaseForm -> PhaseEditorData -> Seed -> ( Event, Seed )
+createEditPhaseEvent form editorData =
+    let
+        data =
+            { title = EventField.create form.title (editorData.phase.title /= form.title)
+            , description = EventField.create form.description (editorData.phase.description /= form.description)
+            }
+    in
+    createEvent (EditPhaseEvent data) editorData.phase.uuid editorData.parentUuid
+
+
+createDeletePhaseEvent : String -> String -> Seed -> ( Event, Seed )
+createDeletePhaseEvent =
+    createEvent DeletePhaseEvent
 
 
 createAddTagEvent : TagForm -> TagEditorData -> Seed -> ( Event, Seed )
@@ -177,7 +241,7 @@ createAddQuestionEvent form editorData =
                     AddQuestionOptionsEvent
                         { title = formData.title
                         , text = formData.text
-                        , requiredLevel = formData.requiredLevel
+                        , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
                         }
 
@@ -185,7 +249,7 @@ createAddQuestionEvent form editorData =
                     AddQuestionListEvent
                         { title = formData.title
                         , text = formData.text
-                        , requiredLevel = formData.requiredLevel
+                        , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
                         }
 
@@ -193,7 +257,7 @@ createAddQuestionEvent form editorData =
                     AddQuestionValueEvent
                         { title = formData.title
                         , text = formData.text
-                        , requiredLevel = formData.requiredLevel
+                        , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
                         , valueType = formData.valueType
                         }
@@ -202,7 +266,7 @@ createAddQuestionEvent form editorData =
                     AddQuestionIntegrationEvent
                         { title = formData.title
                         , text = formData.text
-                        , requiredLevel = formData.requiredLevel
+                        , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
                         , integrationUuid = formData.integrationUuid
                         , props = formData.props
@@ -212,7 +276,7 @@ createAddQuestionEvent form editorData =
                     AddQuestionMultiChoiceEvent
                         { title = formData.title
                         , text = formData.text
-                        , requiredLevel = formData.requiredLevel
+                        , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
                         }
     in
@@ -228,7 +292,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionOptionsEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredLevel = EventField.create formData.requiredLevel (Question.getRequiredLevel editorData.question /= formData.requiredLevel)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -239,7 +303,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionListEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredLevel = EventField.create formData.requiredLevel (Question.getRequiredLevel editorData.question /= formData.requiredLevel)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -250,7 +314,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionValueEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredLevel = EventField.create formData.requiredLevel (Question.getRequiredLevel editorData.question /= formData.requiredLevel)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -261,7 +325,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionIntegrationEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredLevel = EventField.create formData.requiredLevel (Question.getRequiredLevel editorData.question /= formData.requiredLevel)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -273,7 +337,7 @@ createEditQuestionEvent form editorData =
                     EditQuestionMultiChoiceEvent
                         { title = EventField.create formData.title (Question.getTitle editorData.question /= formData.title)
                         , text = EventField.create formData.text (Question.getText editorData.question /= formData.text)
-                        , requiredLevel = EventField.create formData.requiredLevel (Question.getRequiredLevel editorData.question /= formData.requiredLevel)
+                        , requiredPhaseUuid = EventField.create formData.requiredPhase (Question.getRequiredPhaseUuid editorData.question /= formData.requiredPhase)
                         , tagUuids = EventField.create editorData.tagUuids (Question.getTagUuids editorData.question /= editorData.tagUuids)
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
@@ -294,7 +358,7 @@ createAddAnswerEvent form editorData =
         data =
             { label = form.label
             , advice = form.advice
-            , metricMeasures = getMetricMesures form
+            , metricMeasures = getMetricMeasures form
             }
     in
     createEvent (AddAnswerEvent data) editorData.answer.uuid editorData.parentUuid
@@ -304,7 +368,7 @@ createEditAnswerEvent : AnswerForm -> AnswerEditorData -> Seed -> ( Event, Seed 
 createEditAnswerEvent form editorData =
     let
         metricMeasures =
-            getMetricMesures form
+            getMetricMeasures form
 
         data =
             { label = EventField.create form.label (editorData.answer.label /= form.label)

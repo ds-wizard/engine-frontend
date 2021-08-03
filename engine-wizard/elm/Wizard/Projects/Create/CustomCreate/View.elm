@@ -9,6 +9,7 @@ import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
@@ -32,7 +33,7 @@ view appState model =
             , result = model.savingQuestionnaire
             , msg = FormMsg Form.Submit
             , dangerous = False
-            , attrs = [ disabled (ActionResult.isLoading model.knowledgeModelPreview) ]
+            , attrs = [ disabled (ActionResult.isLoading model.knowledgeModelPreview), dataCy "project_save-button" ]
             }
 
         submitButton =

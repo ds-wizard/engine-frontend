@@ -20,6 +20,8 @@ knowledgeModelDecoderTest =
                             "chapterUuids": [],
                             "tagUuids": [],
                             "integrationUuids": [],
+                            "metricUuids": [],
+                            "phaseUuids": [],
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -28,7 +30,9 @@ knowledgeModelDecoderTest =
                                 "experts": {},
                                 "references": {},
                                 "integrations": {},
-                                "tags": {}
+                                "tags": {},
+                                "metrics": {},
+                                "phases": {}
                             }
                         }
                         """
@@ -38,6 +42,8 @@ knowledgeModelDecoderTest =
                         , chapterUuids = []
                         , tagUuids = []
                         , integrationUuids = []
+                        , metricUuids = []
+                        , phaseUuids = []
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -47,6 +53,8 @@ knowledgeModelDecoderTest =
                             , references = Dict.empty
                             , integrations = Dict.empty
                             , tags = Dict.empty
+                            , metrics = Dict.empty
+                            , phases = Dict.empty
                             }
                         }
                 in
@@ -61,6 +69,8 @@ knowledgeModelDecoderTest =
                             "chapterUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
                             "tagUuids": [],
                             "integrationUuids": [],
+                            "metricUuids": [],
+                            "phaseUuids": [],
                             "entities": {
                                 "chapters": {
                                     "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04": {
@@ -76,7 +86,9 @@ knowledgeModelDecoderTest =
                                 "experts": {},
                                 "references": {},
                                 "integrations": {},
-                                "tags": {}
+                                "tags": {},
+                                "metrics": {},
+                                "phases": {}
                             }
                         }
                         """
@@ -86,6 +98,8 @@ knowledgeModelDecoderTest =
                         , chapterUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
                         , tagUuids = []
                         , integrationUuids = []
+                        , metricUuids = []
+                        , phaseUuids = []
                         , entities =
                             { chapters =
                                 Dict.fromList
@@ -104,6 +118,8 @@ knowledgeModelDecoderTest =
                             , references = Dict.empty
                             , integrations = Dict.empty
                             , tags = Dict.empty
+                            , metrics = Dict.empty
+                            , phases = Dict.empty
                             }
                         }
                 in
@@ -118,6 +134,8 @@ knowledgeModelDecoderTest =
                             "chapterUuids": [],
                             "tagUuids": ["b5b6ed23-2afa-11e9-b210-d663bd873d93"],
                             "integrationUuids": [],
+                            "metricUuids": [],
+                            "phaseUuids": [],
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -133,7 +151,9 @@ knowledgeModelDecoderTest =
                                         "description": null,
                                         "color": "#F5A623"
                                     }
-                                }
+                                },
+                                "metrics": {},
+                                "phases": {}
                             }
                         }
                         """
@@ -143,6 +163,8 @@ knowledgeModelDecoderTest =
                         , chapterUuids = []
                         , tagUuids = [ "b5b6ed23-2afa-11e9-b210-d663bd873d93" ]
                         , integrationUuids = []
+                        , metricUuids = []
+                        , phaseUuids = []
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -161,6 +183,8 @@ knowledgeModelDecoderTest =
                                         }
                                       )
                                     ]
+                            , metrics = Dict.empty
+                            , phases = Dict.empty
                             }
                         }
                 in
@@ -175,6 +199,8 @@ knowledgeModelDecoderTest =
                             "chapterUuids": [],
                             "tagUuids": [],
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
+                            "metricUuids": [],
+                            "phaseUuids": [],
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -199,7 +225,9 @@ knowledgeModelDecoderTest =
                                         "itemUrl": "http://example.com/${id}"
                                     }
                                 },
-                                "tags": {}
+                                "tags": {},
+                                "metrics": {},
+                                "phases": {}
                             }
                         }
                         """
@@ -209,6 +237,8 @@ knowledgeModelDecoderTest =
                         , chapterUuids = []
                         , tagUuids = []
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
+                        , metricUuids = []
+                        , phaseUuids = []
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -236,6 +266,136 @@ knowledgeModelDecoderTest =
                                       )
                                     ]
                             , tags = Dict.empty
+                            , metrics = Dict.empty
+                            , phases = Dict.empty
+                            }
+                        }
+                in
+                expectDecoder KnowledgeModel.decoder raw expected
+        , test "should decode knowledge model with metrics" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "chapterUuids": [],
+                            "tagUuids": [],
+                            "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
+                            "metricUuids": [],
+                            "phaseUuids": [],
+                            "entities": {
+                                "chapters": {},
+                                "questions": {},
+                                "answers": {},
+                                "choices": {},
+                                "experts": {},
+                                "references": {},
+                                "integrations": {},
+                                "tags": {},
+                                "metrics": {
+                                    "aae37504-aec6-4be8-b703-5bcb3502f3e6": {
+                                        "uuid": "aae37504-aec6-4be8-b703-5bcb3502f3e6",
+                                        "title": "Metric",
+                                        "abbreviation": "M",
+                                        "description": null
+                                    }
+                                },
+                                "phases": {}
+                            }
+                        }
+                        """
+
+                    expected =
+                        { uuid = Uuid.fromUuidString "8a703cfa-450f-421a-8819-875619ccb54d"
+                        , chapterUuids = []
+                        , tagUuids = []
+                        , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
+                        , metricUuids = []
+                        , phaseUuids = []
+                        , entities =
+                            { chapters = Dict.empty
+                            , questions = Dict.empty
+                            , answers = Dict.empty
+                            , choices = Dict.empty
+                            , experts = Dict.empty
+                            , references = Dict.empty
+                            , integrations = Dict.empty
+                            , tags = Dict.empty
+                            , metrics =
+                                Dict.fromList
+                                    [ ( "aae37504-aec6-4be8-b703-5bcb3502f3e6"
+                                      , { uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
+                                        , title = "Metric"
+                                        , abbreviation = Just "M"
+                                        , description = Nothing
+                                        }
+                                      )
+                                    ]
+                            , phases = Dict.empty
+                            }
+                        }
+                in
+                expectDecoder KnowledgeModel.decoder raw expected
+        , test "should decode knowledge model with phases" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "chapterUuids": [],
+                            "tagUuids": [],
+                            "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
+                            "metricUuids": [],
+                            "phaseUuids": [],
+                            "entities": {
+                                "chapters": {},
+                                "questions": {},
+                                "answers": {},
+                                "choices": {},
+                                "experts": {},
+                                "references": {},
+                                "integrations": {},
+                                "tags": {},
+                                "metrics": {},
+                                "phases": {
+                                    "aae37504-aec6-4be8-b703-5bcb3502f3e6": {
+                                        "uuid": "aae37504-aec6-4be8-b703-5bcb3502f3e6",
+                                        "title": "Phase",
+                                        "description": "This is a phase"
+                                    }
+                                }
+                            }
+                        }
+                        """
+
+                    expected =
+                        { uuid = Uuid.fromUuidString "8a703cfa-450f-421a-8819-875619ccb54d"
+                        , chapterUuids = []
+                        , tagUuids = []
+                        , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
+                        , metricUuids = []
+                        , phaseUuids = []
+                        , entities =
+                            { chapters = Dict.empty
+                            , questions = Dict.empty
+                            , answers = Dict.empty
+                            , choices = Dict.empty
+                            , experts = Dict.empty
+                            , references = Dict.empty
+                            , integrations = Dict.empty
+                            , tags = Dict.empty
+                            , metrics = Dict.empty
+                            , phases =
+                                Dict.fromList
+                                    [ ( "aae37504-aec6-4be8-b703-5bcb3502f3e6"
+                                      , { uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
+                                        , title = "Phase"
+                                        , description = Just "This is a phase"
+                                        }
+                                      )
+                                    ]
                             }
                         }
                 in

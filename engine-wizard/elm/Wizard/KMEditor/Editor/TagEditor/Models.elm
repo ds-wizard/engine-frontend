@@ -142,7 +142,7 @@ generateQuestionEvent model question parentUuid seed =
                         EditQuestionOptionsEvent
                             { title = EventField.empty
                             , text = EventField.empty
-                            , requiredLevel = EventField.empty
+                            , requiredPhaseUuid = EventField.empty
                             , tagUuids = EventField.create newTags True
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
@@ -153,7 +153,7 @@ generateQuestionEvent model question parentUuid seed =
                         EditQuestionListEvent
                             { title = EventField.empty
                             , text = EventField.empty
-                            , requiredLevel = EventField.empty
+                            , requiredPhaseUuid = EventField.empty
                             , tagUuids = EventField.create newTags True
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
@@ -164,7 +164,7 @@ generateQuestionEvent model question parentUuid seed =
                         EditQuestionValueEvent
                             { title = EventField.empty
                             , text = EventField.empty
-                            , requiredLevel = EventField.empty
+                            , requiredPhaseUuid = EventField.empty
                             , tagUuids = EventField.create newTags True
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
@@ -175,7 +175,7 @@ generateQuestionEvent model question parentUuid seed =
                         EditQuestionIntegrationEvent
                             { title = EventField.empty
                             , text = EventField.empty
-                            , requiredLevel = EventField.empty
+                            , requiredPhaseUuid = EventField.empty
                             , tagUuids = EventField.create newTags True
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
@@ -187,7 +187,7 @@ generateQuestionEvent model question parentUuid seed =
                         EditQuestionMultiChoiceEvent
                             { title = EventField.empty
                             , text = EventField.empty
-                            , requiredLevel = EventField.empty
+                            , requiredPhaseUuid = EventField.empty
                             , tagUuids = EventField.create newTags True
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty

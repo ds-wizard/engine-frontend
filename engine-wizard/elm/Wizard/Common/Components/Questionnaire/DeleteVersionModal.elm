@@ -139,4 +139,5 @@ view appState model =
         , actionMsg = Delete
         , cancelMsg = Just Close
         , dangerous = True
+        , dataCy = "project-delete-version"
         }

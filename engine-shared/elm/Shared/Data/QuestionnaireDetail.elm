@@ -15,7 +15,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , isVersion
     , lastVisibleEvent
     , setLabels
-    , setLevel
+    , setPhaseUuid
     , setReply
     , todoUuid
     , todosLength
@@ -26,6 +26,7 @@ import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Json.Encode.Extra as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.AbstractAppState exposing (AbstractAppState)
@@ -49,6 +50,7 @@ import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSu
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
 import Shared.Utils exposing (boolToInt)
 import Uuid exposing (Uuid)
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias QuestionnaireDetail =
@@ -59,7 +61,7 @@ type alias QuestionnaireDetail =
     , package : Package
     , knowledgeModel : KnowledgeModel
     , replies : Dict String Reply
-    , level : Int
+    , phaseUuid : Maybe Uuid
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
     , permissions : List Permission
@@ -84,7 +86,7 @@ decoder =
         |> D.required "package" Package.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" (D.dict Reply.decoder)
-        |> D.required "level" D.int
+        |> D.required "phaseUuid" (D.maybe Uuid.decoder)
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)
@@ -101,7 +103,7 @@ decoder =
 encode : QuestionnaireDetail -> E.Value
 encode questionnaire =
     E.object
-        [ ( "level", E.int questionnaire.level )
+        [ ( "phaseUuid", E.maybe Uuid.encode questionnaire.phaseUuid )
         , ( "labels", E.dict identity (E.list E.string) questionnaire.labels )
         ]
 
@@ -133,7 +135,7 @@ createQuestionnaireDetail package km =
     , package = package
     , knowledgeModel = km
     , replies = Dict.fromList []
-    , level = 1
+    , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
     , selectedTagUuids = []
     , templateId = Nothing
     , template = Nothing
@@ -198,9 +200,9 @@ hasPerm appState questionnaire role =
     List.member role appliedPerms
 
 
-setLevel : Int -> QuestionnaireDetail -> QuestionnaireDetail
-setLevel level questionnaire =
-    { questionnaire | level = level }
+setPhaseUuid : Maybe Uuid -> QuestionnaireDetail -> QuestionnaireDetail
+setPhaseUuid phaseUuid questionnaire =
+    { questionnaire | phaseUuid = phaseUuid }
 
 
 setReply : String -> Reply -> QuestionnaireDetail -> QuestionnaireDetail
@@ -342,21 +344,24 @@ isVersion questionnaire event =
 -- Evaluations
 
 
-calculateUnansweredQuestionsForChapter : QuestionnaireDetail -> Int -> Chapter -> Int
-calculateUnansweredQuestionsForChapter questionnaire currentLevel chapter =
+calculateUnansweredQuestionsForChapter : AppState -> QuestionnaireDetail -> Chapter -> Int
+calculateUnansweredQuestionsForChapter appState questionnaire chapter =
     KnowledgeModel.getChapterQuestions chapter.uuid questionnaire.knowledgeModel
-        |> List.map (evaluateQuestion questionnaire currentLevel [ chapter.uuid ])
+        |> List.map (evaluateQuestion appState questionnaire [ chapter.uuid ])
         |> List.foldl (+) 0
 
 
-evaluateQuestion : QuestionnaireDetail -> Int -> List String -> Question -> Int
-evaluateQuestion questionnaire currentLevel path question =
+evaluateQuestion : AppState -> QuestionnaireDetail -> List String -> Question -> Int
+evaluateQuestion appState questionnaire path question =
     let
         currentPath =
             path ++ [ Question.getUuid question ]
 
+        currentPhase =
+            Maybe.withDefault Uuid.nil questionnaire.phaseUuid
+
         requiredNow =
-            (Question.getRequiredLevel question |> Maybe.withDefault 100) <= currentLevel
+            Question.isDesirable questionnaire.knowledgeModel.phaseUuids (Uuid.toString currentPhase) question
 
         rawValue =
             getReplyValue questionnaire (pathToString currentPath)
@@ -379,7 +384,7 @@ evaluateQuestion questionnaire currentLevel path question =
                 OptionsQuestion _ questionData ->
                     questionData.answerUuids
                         |> List.find ((==) (ReplyValue.getAnswerUuid value))
-                        |> Maybe.map (evaluateFollowups questionnaire currentLevel currentPath)
+                        |> Maybe.map (evaluateFollowups appState questionnaire currentPath)
                         |> Maybe.withDefault 1
 
                 ListQuestion commonData _ ->
@@ -389,7 +394,7 @@ evaluateQuestion questionnaire currentLevel path question =
                     in
                     if not (List.isEmpty itemUuids) then
                         itemUuids
-                            |> List.map (evaluateAnswerItem questionnaire currentLevel currentPath (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid questionnaire.knowledgeModel))
+                            |> List.map (evaluateAnswerItem appState questionnaire currentPath (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid questionnaire.knowledgeModel))
                             |> List.foldl (+) 0
 
                     else
@@ -406,25 +411,25 @@ evaluateQuestion questionnaire currentLevel path question =
             boolToInt requiredNow
 
 
-evaluateFollowups : QuestionnaireDetail -> Int -> List String -> String -> Int
-evaluateFollowups questionnaire currentLevel path answerUuid =
+evaluateFollowups : AppState -> QuestionnaireDetail -> List String -> String -> Int
+evaluateFollowups appState questionnaire path answerUuid =
     let
         currentPath =
             path ++ [ answerUuid ]
     in
     KnowledgeModel.getAnswerFollowupQuestions answerUuid questionnaire.knowledgeModel
-        |> List.map (evaluateQuestion questionnaire currentLevel currentPath)
+        |> List.map (evaluateQuestion appState questionnaire currentPath)
         |> List.foldl (+) 0
 
 
-evaluateAnswerItem : QuestionnaireDetail -> Int -> List String -> List Question -> String -> Int
-evaluateAnswerItem questionnaire currentLevel path questions uuid =
+evaluateAnswerItem : AppState -> QuestionnaireDetail -> List String -> List Question -> String -> Int
+evaluateAnswerItem appState questionnaire path questions uuid =
     let
         currentPath =
             path ++ [ uuid ]
     in
     questions
-        |> List.map (evaluateQuestion questionnaire currentLevel currentPath)
+        |> List.map (evaluateQuestion appState questionnaire currentPath)
         |> List.foldl (+) 0
 
 
@@ -436,7 +441,7 @@ updateContent : QuestionnaireDetail -> QuestionnaireContent -> QuestionnaireDeta
 updateContent detail content =
     { detail
         | replies = content.replies
-        , level = content.level
+        , phaseUuid = content.phaseUuid
         , labels = content.labels
         , events = content.events
         , versions = content.versions

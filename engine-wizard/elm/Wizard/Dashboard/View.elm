@@ -6,6 +6,7 @@ import Markdown
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg)
 import Wizard.Dashboard.Widgets.DMPWorkflowWidget as DMPWorkflowWidget
@@ -32,7 +33,7 @@ viewAlert : String -> Maybe String -> Html Msg
 viewAlert alertClass mbMessage =
     case mbMessage of
         Just message ->
-            div [ class <| "alert alert-" ++ alertClass ]
+            div [ class <| "alert alert-" ++ alertClass, dataCy ("dashboard_alert-" ++ alertClass) ]
                 [ Markdown.toHtml [] message ]
 
         Nothing ->
@@ -46,7 +47,7 @@ viewWidget appState model widget =
             DMPWorkflowWidget.view appState model.questionnaires
 
         LevelsQuestionnaireDashboardWidget ->
-            PhaseQuestionnaireWidget.view appState model.levels model.questionnaires
+            PhaseQuestionnaireWidget.view appState model.questionnaires
 
         WelcomeDashboardWidget ->
             WelcomeWidget.view appState

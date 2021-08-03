@@ -13,6 +13,7 @@ import Html.Attributes exposing (class)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
 l_ : String -> AppState -> String
@@ -63,7 +64,10 @@ actionResult appState result =
 flashView : String -> Html msg -> String -> Html msg
 flashView className icon msg =
     if msg /= "" then
-        div [ class ("alert " ++ className) ]
+        div
+            [ class ("alert " ++ className)
+            , dataCy ("flash_" ++ className)
+            ]
             [ icon
             , text msg
             ]

@@ -11,8 +11,6 @@ import Maybe.Extra exposing (isJust)
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
-import Shared.Api.Levels as LevelsApi
-import Shared.Api.Metrics as MetricsApi
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Event as Event
 import Shared.Error.ApiError as ApiError
@@ -41,11 +39,7 @@ l_ =
 
 fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
-    Cmd.batch
-        [ BranchesApi.getBranch uuid appState GetKnowledgeModelCompleted
-        , MetricsApi.getMetrics appState GetMetricsCompleted
-        , LevelsApi.getLevels appState GetLevelsCompleted
-        ]
+    BranchesApi.getBranch uuid appState GetKnowledgeModelCompleted
 
 
 isGuarded : AppState -> Model -> Maybe String
@@ -81,34 +75,6 @@ update msg wrapMsg appState model =
                     in
                     ( appState.seed, newModel, cmd )
 
-                GetMetricsCompleted result ->
-                    let
-                        ( newModel, cmd ) =
-                            case result of
-                                Ok metrics ->
-                                    fetchPreview wrapMsg appState { model | metrics = Success metrics }
-
-                                Err error ->
-                                    ( { model | metrics = ApiError.toActionResult appState (lg "apiError.metrics.getListError" appState) error }
-                                    , getResultCmd result
-                                    )
-                    in
-                    ( appState.seed, newModel, cmd )
-
-                GetLevelsCompleted result ->
-                    let
-                        ( newModel, cmd ) =
-                            case result of
-                                Ok levels ->
-                                    fetchPreview wrapMsg appState { model | levels = Success levels }
-
-                                Err error ->
-                                    ( { model | levels = ApiError.toActionResult appState (lg "apiError.levels.getListError" appState) error }
-                                    , getResultCmd result
-                                    )
-                    in
-                    ( appState.seed, newModel, cmd )
-
                 GetPreviewCompleted result ->
                     let
                         newModel =
@@ -120,8 +86,6 @@ update msg wrapMsg appState model =
                                             Just <|
                                                 Wizard.KMEditor.Editor.Preview.Models.initialModel appState
                                                     km
-                                                    (ActionResult.withDefault [] model.metrics)
-                                                    (ActionResult.withDefault [] model.levels)
                                                     (getAllEvents model)
                                                     (ActionResult.withDefault "" <| ActionResult.map (Maybe.withDefault "" << .previousPackageId) model.km)
                                         , tagEditorModel = Just <| TagEditorModel.initialModel km
@@ -130,8 +94,6 @@ update msg wrapMsg appState model =
                                                 Wizard.KMEditor.Editor.KMEditor.Models.initialModel
                                                     km
                                                     model.sessionActiveEditor
-                                                    (ActionResult.withDefault [] model.metrics)
-                                                    (ActionResult.withDefault [] model.levels)
                                                     ((ActionResult.withDefault [] <| ActionResult.map .events model.km) ++ model.sessionEvents)
                                     }
 
@@ -271,8 +233,8 @@ openEditorTask wrapMsg =
 
 fetchPreview : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 fetchPreview wrapMsg appState model =
-    case ActionResult.combine3 model.km model.metrics model.levels of
-        Success ( km, _, _ ) ->
+    case model.km of
+        Success km ->
             ( { model | preview = Loading }
             , Cmd.map wrapMsg <|
                 KnowledgeModelsApi.fetchPreview

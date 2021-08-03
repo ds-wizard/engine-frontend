@@ -128,4 +128,5 @@ view appState model =
         , actionMsg = Revert
         , cancelMsg = Just Close
         , dangerous = True
+        , dataCy = "project-revert"
         }

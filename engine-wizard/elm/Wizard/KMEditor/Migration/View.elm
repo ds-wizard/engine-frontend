@@ -5,12 +5,15 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Shared.Data.Event exposing (Event(..))
+import Maybe.Extra as Maybe
+import Shared.Data.Event as Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
 import Shared.Data.Event.AddChoiceEventData exposing (AddChoiceEventData)
 import Shared.Data.Event.AddExpertEventData exposing (AddExpertEventData)
 import Shared.Data.Event.AddIntegrationEventData exposing (AddIntegrationEventData)
+import Shared.Data.Event.AddMetricEventData exposing (AddMetricEventData)
+import Shared.Data.Event.AddPhaseEventData exposing (AddPhaseEventData)
 import Shared.Data.Event.AddQuestionEventData as AddQuestionEventQuestion exposing (AddQuestionEventData(..))
 import Shared.Data.Event.AddReferenceCrossEventData exposing (AddReferenceCrossEventData)
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
@@ -23,6 +26,8 @@ import Shared.Data.Event.EditChoiceEventData exposing (EditChoiceEventData)
 import Shared.Data.Event.EditExpertEventData exposing (EditExpertEventData)
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData)
 import Shared.Data.Event.EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
+import Shared.Data.Event.EditMetricEventData exposing (EditMetricEventData)
+import Shared.Data.Event.EditPhaseEventData exposing (EditPhaseEventData)
 import Shared.Data.Event.EditQuestionEventData as EditQuestionEventData exposing (EditQuestionEventData(..))
 import Shared.Data.Event.EditReferenceCrossEventData exposing (EditReferenceCrossEventData)
 import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData(..))
@@ -38,6 +43,7 @@ import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
@@ -52,6 +58,7 @@ import Shared.Locale exposing (l, lg, lh, lx)
 import String.Format exposing (format)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Migration.Models exposing (Model)
@@ -78,11 +85,11 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (migrationView appState model) (ActionResult.combine model.migration model.metrics)
+    Page.actionResultView appState (migrationView appState model) model.migration
 
 
-migrationView : AppState -> Model -> ( Migration, List Metric ) -> Html Msg
-migrationView appState model ( migration, metrics ) =
+migrationView : AppState -> Model -> Migration -> Html Msg
+migrationView appState model migration =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
@@ -98,7 +105,7 @@ migrationView appState model ( migration, metrics ) =
                     let
                         conflictView =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (getEventView appState model migration metrics)
+                                |> Maybe.map (getEventView appState model migration)
                                 |> Maybe.map (List.singleton >> div [ class "col-8" ])
                                 |> Maybe.withDefault (div [ class "col-12" ] [ errorMessage ])
 
@@ -123,7 +130,7 @@ migrationView appState model ( migration, metrics ) =
                 _ ->
                     errorMessage
     in
-    div [ class "col KMEditor__Migration" ]
+    div [ class "col KMEditor__Migration", dataCy "km-editor_migration" ]
         [ div [] [ Page.header (lg "kmMigration" appState) [] ]
         , FormResult.view appState model.conflict
         , currentView
@@ -144,8 +151,8 @@ migrationSummary appState migration =
         ]
 
 
-getEventView : AppState -> Model -> Migration -> List Metric -> Event -> Html Msg
-getEventView appState model migration metrics event =
+getEventView : AppState -> Model -> Migration -> Event -> Html Msg
+getEventView appState model migration event =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
@@ -159,170 +166,202 @@ getEventView appState model migration metrics event =
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
                 |> viewEditKnowledgeModelDiff appState eventData
-                |> viewEvent appState model (lg "event.editKM" appState)
+                |> viewEvent appState model event (lg "event.editKM" appState)
+
+        AddMetricEvent eventData _ ->
+            viewAddMetricDiff appState eventData
+                |> viewEvent appState model event (lg "event.addMetric" appState)
+
+        EditMetricEvent eventData commonData ->
+            KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewEditMetricDiff appState eventData)
+                |> Maybe.map (viewEvent appState model event (lg "event.editMetric" appState))
+                |> Maybe.withDefault errorMessage
+
+        DeleteMetricEvent commonData ->
+            KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewDeleteMetricDiff appState)
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteMetric" appState))
+                |> Maybe.withDefault errorMessage
+
+        AddPhaseEvent eventData _ ->
+            viewAddPhaseDiff appState eventData
+                |> viewEvent appState model event (lg "event.addPhase" appState)
+
+        EditPhaseEvent eventData commonData ->
+            KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewEditPhaseDiff appState eventData)
+                |> Maybe.map (viewEvent appState model event (lg "event.editPhase" appState))
+                |> Maybe.withDefault errorMessage
+
+        DeletePhaseEvent commonData ->
+            KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewDeletePhaseDiff appState)
+                |> Maybe.map (viewEvent appState model event (lg "event.deletePhase" appState))
+                |> Maybe.withDefault errorMessage
 
         AddTagEvent eventData _ ->
             viewAddTagDiff appState eventData
-                |> viewEvent appState model (lg "event.addTag" appState)
+                |> viewEvent appState model event (lg "event.addTag" appState)
 
         EditTagEvent eventData commonData ->
             KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditTagDiff appState eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editTag" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.editTag" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteTagEvent commonData ->
             KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteTagDiff appState)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteTag" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteTag" appState))
                 |> Maybe.withDefault errorMessage
 
         AddIntegrationEvent eventData _ ->
             viewAddIntegrationDiff appState eventData
-                |> viewEvent appState model (lg "event.addIntegration" appState)
+                |> viewEvent appState model event (lg "event.addIntegration" appState)
 
         EditIntegrationEvent eventData commonData ->
             KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditIntegrationDiff appState eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editIntegration" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.editIntegration" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteIntegrationEvent commonData ->
             KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteIntegrationDiff appState)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteIntegration" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteIntegration" appState))
                 |> Maybe.withDefault errorMessage
 
         AddChapterEvent eventData _ ->
             viewAddChapterDiff appState eventData
-                |> viewEvent appState model (lg "event.addChapter" appState)
+                |> viewEvent appState model event (lg "event.addChapter" appState)
 
         EditChapterEvent eventData commonData ->
             KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditChapterDiff appState migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editChapter" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.editChapter" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteChapterEvent commonData ->
             KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteChapterDiff appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteChapter" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteChapter" appState))
                 |> Maybe.withDefault errorMessage
 
         AddQuestionEvent eventData _ ->
             viewAddQuestionDiff appState migration.currentKnowledgeModel eventData
-                |> viewEvent appState model (lg "event.addQuestion" appState)
+                |> viewEvent appState model event (lg "event.addQuestion" appState)
 
         EditQuestionEvent eventData commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditQuestionDiff appState migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editQuestion" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.editQuestion" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteQuestionEvent commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteQuestionDiff appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteQuestion" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteQuestion" appState))
                 |> Maybe.withDefault errorMessage
 
         AddAnswerEvent eventData _ ->
-            viewAddAnswerDiff appState metrics eventData
-                |> viewEvent appState model (lg "event.addAnswer" appState)
+            viewAddAnswerDiff appState migration.currentKnowledgeModel eventData
+                |> viewEvent appState model event (lg "event.addAnswer" appState)
 
         EditAnswerEvent eventData commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel metrics eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editAnswer" appState))
+                |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel eventData)
+                |> Maybe.map (viewEvent appState model event (lg "event.editAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteAnswerEvent commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel metrics)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteAnswer" appState))
+                |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
         AddChoiceEvent eventData _ ->
             viewAddChoiceDiff appState eventData
-                |> viewEvent appState model (lg "event.addChoice" appState)
+                |> viewEvent appState model event (lg "event.addChoice" appState)
 
         EditChoiceEvent eventData commonData ->
             KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditChoiceDiff appState eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editChoice" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.editChoice" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteChoiceEvent commonData ->
             KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteChoiceDiff appState)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteChoice" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteChoice" appState))
                 |> Maybe.withDefault errorMessage
 
         AddReferenceEvent eventData _ ->
             viewAddReferenceDiff appState eventData
-                |> viewEvent appState model (lg "event.addReference" appState)
+                |> viewEvent appState model event (lg "event.addReference" appState)
 
         EditReferenceEvent eventData commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditReferenceDiff appState eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editReference" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.editReference" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteReferenceEvent commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteReferenceDiff appState)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteReference" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteReference" appState))
                 |> Maybe.withDefault errorMessage
 
         AddExpertEvent eventData _ ->
             viewAddExpertDiff appState eventData
-                |> viewEvent appState model (lg "event.addExpert" appState)
+                |> viewEvent appState model event (lg "event.addExpert" appState)
 
         EditExpertEvent eventData commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditExpertDiff appState eventData)
-                |> Maybe.map (viewEvent appState model (lg "event.editExpert" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.editExpert" appState))
                 |> Maybe.withDefault errorMessage
 
         DeleteExpertEvent commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteExpertDiff appState)
-                |> Maybe.map (viewEvent appState model (lg "event.deleteExpert" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.deleteExpert" appState))
                 |> Maybe.withDefault errorMessage
 
         MoveQuestionEvent _ commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveQuestion appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model (lg "event.moveQuestion" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.moveQuestion" appState))
                 |> Maybe.withDefault errorMessage
 
         MoveAnswerEvent _ commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
-                |> Maybe.map (viewMoveAnswer appState migration.currentKnowledgeModel metrics)
-                |> Maybe.map (viewEvent appState model (lg "event.moveAnswer" appState))
+                |> Maybe.map (viewMoveAnswer appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewEvent appState model event (lg "event.moveAnswer" appState))
                 |> Maybe.withDefault errorMessage
 
         MoveChoiceEvent _ commonData ->
             KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveChoice appState)
-                |> Maybe.map (viewEvent appState model (lg "event.moveChoice" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.moveChoice" appState))
                 |> Maybe.withDefault errorMessage
 
         MoveReferenceEvent _ commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveReference appState)
-                |> Maybe.map (viewEvent appState model (lg "event.moveReference" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.moveReference" appState))
                 |> Maybe.withDefault errorMessage
 
         MoveExpertEvent _ commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveExpert appState)
-                |> Maybe.map (viewEvent appState model (lg "event.moveExpert" appState))
+                |> Maybe.map (viewEvent appState model event (lg "event.moveExpert" appState))
                 |> Maybe.withDefault errorMessage
 
 
-viewEvent : AppState -> Model -> String -> Html Msg -> Html Msg
-viewEvent appState model name diffView =
-    div []
+viewEvent : AppState -> Model -> Event -> String -> Html Msg -> Html Msg
+viewEvent appState model event name diffView =
+    div [ dataCy ("km-migration_event_" ++ Event.getUuid event) ]
         [ h3 [] [ text name ]
         , div [ class "card bg-light" ]
             [ div [ class "card-body" ]
@@ -347,6 +386,36 @@ viewEditKnowledgeModelDiff appState event km =
 
         chaptersDiff =
             viewDiffChildren (lg "chapters" appState) originalChapters (EventField.getValueWithDefault event.chapterUuids originalChapters) chapterNames
+
+        metrics =
+            KnowledgeModel.getMetrics km
+
+        originalMetrics =
+            List.map .uuid metrics
+
+        metricNames =
+            Dict.fromList <| List.map (\m -> ( m.uuid, m.title )) metrics
+
+        metricsDiff =
+            viewDiffChildren (lg "metrics" appState)
+                originalMetrics
+                (EventField.getValueWithDefault event.metricUuids originalMetrics)
+                metricNames
+
+        phases =
+            KnowledgeModel.getPhases km
+
+        originalPhases =
+            List.map .uuid phases
+
+        phaseNames =
+            Dict.fromList <| List.map (\p -> ( p.uuid, p.title )) phases
+
+        phasesDiff =
+            viewDiffChildren (lg "phases" appState)
+                originalPhases
+                (EventField.getValueWithDefault event.phaseUuids originalPhases)
+                phaseNames
 
         tags =
             KnowledgeModel.getTags km
@@ -379,7 +448,116 @@ viewEditKnowledgeModelDiff appState event km =
                 integrationNames
     in
     div []
-        [ chaptersDiff, tagsDiff, integrationsDiff ]
+        [ chaptersDiff, metricsDiff, phasesDiff, tagsDiff, integrationsDiff ]
+
+
+viewAddMetricDiff : AppState -> AddMetricEventData -> Html Msg
+viewAddMetricDiff appState event =
+    let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ lg "metric.title" appState
+                , lg "metric.abbreviation" appState
+                , lg "metric.description" appState
+                ]
+                [ event.title
+                , Maybe.withDefault "" event.abbreviation
+                , Maybe.withDefault "" event.description
+                ]
+    in
+    div []
+        (viewAdd fields)
+
+
+viewEditMetricDiff : AppState -> EditMetricEventData -> Metric -> Html Msg
+viewEditMetricDiff appState event metric =
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "metric.title" appState
+                    , lg "metric.abbreviation" appState
+                    , lg "metric.description" appState
+                    ]
+                    [ metric.title
+                    , Maybe.withDefault "" metric.abbreviation
+                    , Maybe.withDefault "" metric.description
+                    ]
+                    [ EventField.getValueWithDefault event.title metric.title
+                    , EventField.getValueWithDefault event.abbreviation metric.abbreviation |> Maybe.withDefault ""
+                    , EventField.getValueWithDefault event.description metric.description |> Maybe.withDefault ""
+                    ]
+    in
+    div [] fieldDiff
+
+
+viewDeleteMetricDiff : AppState -> Metric -> Html Msg
+viewDeleteMetricDiff appState metric =
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "metric.title" appState
+                    , lg "metric.abbreviation" appState
+                    , lg "metric.description" appState
+                    ]
+                    [ metric.title
+                    , Maybe.withDefault "" metric.abbreviation
+                    , Maybe.withDefault "" metric.description
+                    ]
+    in
+    div [] fieldDiff
+
+
+viewAddPhaseDiff : AppState -> AddPhaseEventData -> Html Msg
+viewAddPhaseDiff appState event =
+    let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ lg "phase.title" appState
+                , lg "phase.description" appState
+                ]
+                [ event.title
+                , Maybe.withDefault "" event.description
+                ]
+    in
+    div []
+        (viewAdd fields)
+
+
+viewEditPhaseDiff : AppState -> EditPhaseEventData -> Phase -> Html Msg
+viewEditPhaseDiff appState event phase =
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "phase.title" appState
+                    , lg "phase.description" appState
+                    ]
+                    [ phase.title
+                    , Maybe.withDefault "" phase.description
+                    ]
+                    [ EventField.getValueWithDefault event.title phase.title
+                    , EventField.getValueWithDefault event.description phase.description |> Maybe.withDefault ""
+                    ]
+    in
+    div [] fieldDiff
+
+
+viewDeletePhaseDiff : AppState -> Phase -> Html Msg
+viewDeletePhaseDiff appState phase =
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "phase.title" appState
+                    , lg "phase.description" appState
+                    ]
+                    [ phase.title
+                    , Maybe.withDefault "" phase.description
+                    ]
+    in
+    div [] fieldDiff
 
 
 viewAddTagDiff : AppState -> AddTagEventData -> Html Msg
@@ -1080,9 +1258,12 @@ getIntegrationName km integrationUuid =
         |> Maybe.withDefault ""
 
 
-viewAddAnswerDiff : AppState -> List Metric -> AddAnswerEventData -> Html Msg
-viewAddAnswerDiff appState metrics event =
+viewAddAnswerDiff : AppState -> KnowledgeModel -> AddAnswerEventData -> Html Msg
+viewAddAnswerDiff appState km event =
     let
+        metrics =
+            KnowledgeModel.getMetrics km
+
         fieldsDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
@@ -1100,9 +1281,12 @@ viewAddAnswerDiff appState metrics event =
     div [] (fieldsDiff ++ [ metricsDiff ])
 
 
-viewEditAnswerDiff : AppState -> KnowledgeModel -> List Metric -> EditAnswerEventData -> Answer -> Html Msg
-viewEditAnswerDiff appState km metrics event answer =
+viewEditAnswerDiff : AppState -> KnowledgeModel -> EditAnswerEventData -> Answer -> Html Msg
+viewEditAnswerDiff appState km event answer =
     let
+        metrics =
+            KnowledgeModel.getMetrics km
+
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
@@ -1145,9 +1329,12 @@ viewEditAnswerDiff appState km metrics event answer =
         (fieldDiff ++ [ questionsDiff, metricsPropsDiff ])
 
 
-viewDeleteAnswerDiff : AppState -> KnowledgeModel -> List Metric -> Answer -> Html Msg
-viewDeleteAnswerDiff appState km metrics answer =
+viewDeleteAnswerDiff : AppState -> KnowledgeModel -> Answer -> Html Msg
+viewDeleteAnswerDiff appState km answer =
     let
+        metrics =
+            KnowledgeModel.getMetrics km
+
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
@@ -1177,9 +1364,12 @@ viewDeleteAnswerDiff appState km metrics answer =
         (fieldDiff ++ [ questionsDiff, metricsDiff ])
 
 
-viewMoveAnswer : AppState -> KnowledgeModel -> List Metric -> Answer -> Html Msg
-viewMoveAnswer appState km metrics answer =
+viewMoveAnswer : AppState -> KnowledgeModel -> Answer -> Html Msg
+viewMoveAnswer appState km answer =
     let
+        metrics =
+            KnowledgeModel.getMetrics km
+
         fieldDiff =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
@@ -1782,9 +1972,9 @@ formActions appState model =
                     False
     in
     div [ class "form-actions" ]
-        [ button [ class "btn btn-warning", onClick RejectEvent, disabled actionsDisabled ]
+        [ button [ class "btn btn-warning", onClick RejectEvent, disabled actionsDisabled, dataCy "km-migration_reject-button" ]
             [ lx_ "action.reject" appState ]
-        , button [ class "btn btn-success", onClick ApplyEvent, disabled actionsDisabled ]
+        , button [ class "btn btn-success", onClick ApplyEvent, disabled actionsDisabled, dataCy "km-migration_apply-button" ]
             [ lx_ "action.apply" appState ]
         ]
 
@@ -1792,7 +1982,7 @@ formActions appState model =
 viewCompletedMigration : AppState -> Model -> Html Msg
 viewCompletedMigration appState model =
     div [ class "col-xs-12" ]
-        [ div [ class "jumbotron full-page-error" ]
+        [ div [ class "jumbotron full-page-error", dataCy "km-migration_completed" ]
             [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
             , p []
                 [ lx_ "completed.msg1" appState
@@ -1802,7 +1992,9 @@ viewCompletedMigration appState model =
             , div [ class "text-right" ]
                 [ linkTo appState
                     (Routes.KMEditorRoute <| PublishRoute model.branchUuid)
-                    [ class "btn btn-primary" ]
+                    [ class "btn btn-primary"
+                    , dataCy "km-migration_publish-button"
+                    ]
                     [ lx_ "completed.publish" appState
                     , faSet "_global.arrowRight" appState
                     ]

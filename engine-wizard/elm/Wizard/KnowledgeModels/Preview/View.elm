@@ -1,10 +1,7 @@
 module Wizard.KnowledgeModels.Preview.View exposing (..)
 
-import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Shared.Data.KnowledgeModel.Level exposing (Level)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.QuestionnaireDetail
 import Shared.Locale exposing (l)
@@ -13,6 +10,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Preview.Models exposing (Model)
@@ -26,15 +24,11 @@ l_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    let
-        actionResult =
-            ActionResult.combine3 model.levels model.metrics model.questionnaireModel
-    in
-    Page.actionResultView appState (viewProject appState model) actionResult
+    Page.actionResultView appState (viewProject appState model) model.questionnaireModel
 
 
-viewProject : AppState -> Model -> ( List Level, List Metric, Questionnaire.Model ) -> Html Msg
-viewProject appState model ( levels, metrics, questionnaireModel ) =
+viewProject : AppState -> Model -> Questionnaire.Model -> Html Msg
+viewProject appState model questionnaireModel =
     let
         questionnaire =
             Questionnaire.view appState
@@ -44,12 +38,12 @@ viewProject appState model ( levels, metrics, questionnaireModel ) =
                     , readonly = True
                     , toolbarEnabled = False
                     }
-                , renderer = DefaultQuestionnaireRenderer.create appState questionnaireModel.questionnaire.knowledgeModel levels metrics
+                , renderer = DefaultQuestionnaireRenderer.create appState questionnaireModel.questionnaire.knowledgeModel
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
                 }
-                { levels = levels, metrics = metrics, events = [] }
+                { events = [] }
                 questionnaireModel
     in
     div [ class "KnowledgeModels__Preview" ]
@@ -80,7 +74,7 @@ viewHeader appState model package =
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
-            [ div [ class "top-header-title" ] [ text <| package.name ++ ", " ++ Version.toString package.version ]
+            [ div [ class "top-header-title", dataCy "km-preview_header_title" ] [ text <| package.name ++ ", " ++ Version.toString package.version ]
             , div [ class "top-header-actions" ] actions
             ]
         ]

@@ -183,6 +183,7 @@ viewEmpty appState config =
         { image = "no_data"
         , heading = l_ "empty.heading" appState
         , lines = [ config.emptyText ]
+        , cy = "listing-empty"
         }
 
 

@@ -25,7 +25,6 @@ type alias EditableQuestionnairesConfigForm =
     , questionnaireSharingDefaultValue : QuestionnaireSharing
     , questionnaireSharingAnonymousEnabled : Bool
     , questionnaireCreation : QuestionnaireCreation
-    , levels : SimpleFeatureConfig
     , feedbackEnabled : Bool
     , feedbackToken : String
     , feedbackOwner : String
@@ -49,7 +48,6 @@ init config =
             , ( "questionnaireSharingDefaultValue", QuestionnaireSharing.field config.questionnaireSharing.defaultValue )
             , ( "questionnaireSharingAnonymousEnabled", Field.bool config.questionnaireSharing.anonymousEnabled )
             , ( "questionnaireCreation", QuestionnaireCreation.field config.questionnaireCreation )
-            , ( "levels", SimpleFeatureConfig.field config.levels )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
             , ( "feedbackOwner", Field.string config.feedback.owner )
@@ -69,7 +67,6 @@ validation =
         |> V.andMap (V.field "questionnaireSharingDefaultValue" QuestionnaireSharing.validation)
         |> V.andMap (V.field "questionnaireSharingAnonymousEnabled" V.bool)
         |> V.andMap (V.field "questionnaireCreation" QuestionnaireCreation.validation)
-        |> V.andMap (V.field "levels" SimpleFeatureConfig.validation)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackOwner" V.string V.optionalString)
@@ -89,7 +86,6 @@ toEditableQuestionnaireConfig form =
         , anonymousEnabled = form.questionnaireSharingAnonymousEnabled
         }
     , questionnaireCreation = form.questionnaireCreation
-    , levels = form.levels
     , feedback =
         { enabled = form.feedbackEnabled
         , token = form.feedbackToken

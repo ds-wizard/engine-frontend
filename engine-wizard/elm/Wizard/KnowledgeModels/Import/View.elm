@@ -7,7 +7,7 @@ import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Import.FileImport.View as FileImportView
 import Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model)
@@ -65,6 +65,7 @@ viewNavbar appState registryActive =
                 [ onClick ShowRegistryImport
                 , class "nav-link link-with-icon"
                 , classList [ ( "active", registryActive ) ]
+                , dataCy "km_import_nav_registry"
                 ]
                 [ faSet "kmImport.fromRegistry" appState
                 , lx_ "navbar.fromRegistry" appState
@@ -75,6 +76,7 @@ viewNavbar appState registryActive =
                 [ onClick ShowFileImport
                 , class "nav-link link-with-icon"
                 , classList [ ( "active", not registryActive ) ]
+                , dataCy "km_import_nav_file"
                 ]
                 [ faSet "kmImport.fromFile" appState
                 , lx_ "navbar.fromFile" appState
