@@ -150,7 +150,11 @@ viewContent appState ctx summaryReport =
             viewChapters appState ctx summaryReport
 
         metricDescriptions =
-            [ viewMetricsDescriptions appState metrics ]
+            if List.length metrics > 0 then
+                [ viewMetricsDescriptions appState metrics ]
+
+            else
+                []
     in
     div [ class "questionnaire__summary-report container" ]
         (List.concat [ title, totalReport, chapters, metricDescriptions ])
