@@ -2,9 +2,11 @@ module Shared.Data.PaginationQueryString exposing
     ( PaginationQueryString
     , SortDirection(..)
     , empty
+    , filterParams
     , fromQ
     , parser
     , parser1
+    , parser2
     , toApiUrl
     , toApiUrlWith
     , toUrl
@@ -13,6 +15,7 @@ module Shared.Data.PaginationQueryString exposing
     , withSort
     , wrapRoute
     , wrapRoute1
+    , wrapRoute2
     )
 
 import List.Extra as List
@@ -78,6 +81,15 @@ wrapRoute1 route defaultSortBy page q sort =
     route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
 
 
+wrapRoute2 : (PaginationQueryString -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (c -> b -> a)
+wrapRoute2 route defaultSortBy page q sort =
+    let
+        ( sortBy, sortDirection ) =
+            parseSort defaultSortBy sort
+    in
+    route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
+
+
 parser : Parser a (Maybe Int -> Maybe String -> Maybe String -> b) -> Parser a b
 parser p =
     p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort"
@@ -86,6 +98,11 @@ parser p =
 parser1 : Parser a (Maybe Int -> Maybe String -> Maybe String -> c -> b) -> Query.Parser c -> Parser a b
 parser1 p qs =
     p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs
+
+
+parser2 : Parser a (Maybe Int -> Maybe String -> Maybe String -> d -> c -> b) -> Query.Parser d -> Query.Parser c -> Parser a b
+parser2 p qs1 qs2 =
+    p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs1 <?> qs2
 
 
 toUrl : PaginationQueryString -> String
@@ -129,6 +146,20 @@ toApiUrlWith extraParams qs =
                 ++ extraParams
     in
     toQueryString params
+
+
+filterParams : List ( String, Maybe String ) -> List ( String, String )
+filterParams params =
+    let
+        fold ( param, mbValue ) acc =
+            case mbValue of
+                Just value ->
+                    acc ++ [ ( param, value ) ]
+
+                Nothing ->
+                    acc
+    in
+    List.foldl fold [] params
 
 
 toQueryString : List ( String, String ) -> String

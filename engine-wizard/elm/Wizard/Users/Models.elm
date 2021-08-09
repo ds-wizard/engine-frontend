@@ -19,7 +19,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Users.Create.Models.initialModel appState
     , editModel = Wizard.Users.Edit.Models.initialModel ""
-    , indexModel = Wizard.Users.Index.Models.initialModel PaginationQueryString.empty
+    , indexModel = Wizard.Users.Index.Models.initialModel PaginationQueryString.empty Nothing
     }
 
 
@@ -32,5 +32,5 @@ initLocalModel appState route model =
         EditRoute uuid ->
             { model | editModel = Wizard.Users.Edit.Models.initialModel uuid }
 
-        IndexRoute paginationQueryString ->
-            { model | indexModel = Wizard.Users.Index.Models.initialModel paginationQueryString }
+        IndexRoute paginationQueryString mbRoute ->
+            { model | indexModel = Wizard.Users.Index.Models.initialModel paginationQueryString mbRoute }

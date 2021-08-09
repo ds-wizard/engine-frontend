@@ -1,6 +1,7 @@
 module Wizard.KnowledgeModels.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.Package exposing (Package)
 import Shared.Error.ApiError as ApiError exposing (ApiError)

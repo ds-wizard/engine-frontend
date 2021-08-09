@@ -1,4 +1,8 @@
-module Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId)
+module Wizard.Projects.Routes exposing
+    ( Route(..)
+    , indexRouteIsTemplateFilterId
+    , indexRouteUsersFilterId
+    )
 
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
@@ -10,8 +14,13 @@ type Route
     = CreateRoute ProjectCreateRoute
     | CreateMigrationRoute Uuid
     | DetailRoute Uuid ProjectDetailRoute
-    | IndexRoute PaginationQueryString (Maybe String)
+    | IndexRoute PaginationQueryString (Maybe String) (Maybe String)
     | MigrationRoute Uuid
+
+
+indexRouteUsersFilterId : String
+indexRouteUsersFilterId =
+    "userUuids"
 
 
 indexRouteIsTemplateFilterId : String

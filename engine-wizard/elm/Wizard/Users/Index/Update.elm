@@ -1,6 +1,7 @@
 module Wizard.Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import Shared.Api.Users as UsersApi
 import Shared.Data.User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -14,7 +15,7 @@ import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Users.Index.Models exposing (Model)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
-import Wizard.Users.Routes exposing (Route(..))
+import Wizard.Users.Routes exposing (Route(..), indexRouteRoleFilterId)
 
 
 fetchData : Cmd Msg
@@ -57,7 +58,7 @@ deleteUserCompleted wrapMsg appState model result =
         Ok _ ->
             let
                 ( users, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.users
+                    Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.users
             in
             ( { model
                 | deletingUser = Success <| lg "apiSuccess.users.delete" appState
@@ -77,17 +78,21 @@ handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg User 
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( users, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.users
+            Listing.update (listingUpdateConfig wrapMsg appState model) appState listingMsg model.users
     in
     ( { model | users = users }
     , cmd
     )
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig User
-listingUpdateConfig wrapMsg appState =
-    { getRequest = UsersApi.getUsers
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig User
+listingUpdateConfig wrapMsg appState model =
+    let
+        role =
+            Dict.get indexRouteRoleFilterId model.users.filters
+    in
+    { getRequest = UsersApi.getUsers { role = role }
     , getError = lg "apiError.users.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.UsersRoute << IndexRoute
+    , toRoute = Routes.usersIndexWithFilters model.users.filters
     }

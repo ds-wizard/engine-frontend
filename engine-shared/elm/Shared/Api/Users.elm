@@ -22,11 +22,18 @@ import Shared.Data.User as User exposing (User)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
-getUsers : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination User) msg -> Cmd msg
-getUsers qs =
+type alias GetUsersFilters =
+    { role : Maybe String }
+
+
+getUsers : GetUsersFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination User) msg -> Cmd msg
+getUsers filters qs =
     let
+        extraParams =
+            PaginationQueryString.filterParams [ ( "role", filters.role ) ]
+
         queryString =
-            PaginationQueryString.toApiUrl qs
+            PaginationQueryString.toApiUrlWith extraParams qs
 
         url =
             "/users" ++ queryString

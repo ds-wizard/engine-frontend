@@ -19,7 +19,7 @@ import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Routes as Routes
 import Wizard.Users.Index.Models exposing (..)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
-import Wizard.Users.Routes exposing (Route(..))
+import Wizard.Users.Routes exposing (Route(..), indexRouteRoleFilterId)
 
 
 l_ : String -> AppState -> String
@@ -62,14 +62,21 @@ listingConfig appState =
     , updated = Nothing
     , wrapMsg = ListingMsg
     , iconView = Just UserIcon.view
+    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "firstName", lg "user.firstName" appState )
         , ( "lastName", lg "user.lastName" appState )
         , ( "email", lg "user.email" appState )
-        , ( "role", lg "user.role" appState )
+        , ( "createdAt", lg "user.createdAt" appState )
+        , ( "lastVisitedAt", lg "user.lastVisitedAt" appState )
         ]
-    , filters = []
-    , toRoute = \_ -> Routes.UsersRoute << IndexRoute
+    , filters =
+        [ Listing.SimpleFilter indexRouteRoleFilterId
+            { name = "Role"
+            , options = Role.options appState
+            }
+        ]
+    , toRoute = Routes.usersIndexWithFilters
     , toolbarExtra = Just (createButton appState)
     }
 

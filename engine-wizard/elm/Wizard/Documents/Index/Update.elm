@@ -1,6 +1,7 @@
 module Wizard.Documents.Index.Update exposing (..)
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Api.Submissions as SubmissionsApi

@@ -13,6 +13,7 @@ module Wizard.Routes exposing
     , projectsIndex
     , templatesIndex
     , usersIndex
+    , usersIndexWithFilters
     )
 
 import Dict exposing (Dict)
@@ -45,13 +46,18 @@ type Route
 
 usersIndex : Route
 usersIndex =
-    UsersRoute (Wizard.Users.Routes.IndexRoute PaginationQueryString.empty)
+    UsersRoute (Wizard.Users.Routes.IndexRoute PaginationQueryString.empty Nothing)
+
+
+usersIndexWithFilters : Dict String String -> PaginationQueryString -> Route
+usersIndexWithFilters filters pagination =
+    UsersRoute (Wizard.Users.Routes.IndexRoute pagination (Dict.get Wizard.Users.Routes.indexRouteRoleFilterId filters))
 
 
 isUsersIndex : Route -> Bool
 isUsersIndex route =
     case route of
-        UsersRoute (Wizard.Users.Routes.IndexRoute _) ->
+        UsersRoute (Wizard.Users.Routes.IndexRoute _ _) ->
             True
 
         _ ->
@@ -60,18 +66,22 @@ isUsersIndex route =
 
 projectsIndex : Route
 projectsIndex =
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing)
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing)
 
 
 projectIndexWithFilters : Dict String String -> PaginationQueryString -> Route
 projectIndexWithFilters filters pagination =
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute pagination (Dict.get Wizard.Projects.Routes.indexRouteIsTemplateFilterId filters))
+    ProjectsRoute
+        (Wizard.Projects.Routes.IndexRoute pagination
+            (Dict.get Wizard.Projects.Routes.indexRouteIsTemplateFilterId filters)
+            (Dict.get Wizard.Projects.Routes.indexRouteUsersFilterId filters)
+        )
 
 
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _) ->
+        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _) ->
             True
 
         _ ->
