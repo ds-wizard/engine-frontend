@@ -75,6 +75,7 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "name", lg "template.name" appState )
         ]

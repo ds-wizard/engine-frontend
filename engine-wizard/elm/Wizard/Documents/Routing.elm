@@ -24,7 +24,7 @@ parsers appState wrapRoute =
 
 indexRoute : (Route -> a) -> Maybe Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
 indexRoute wrapRoute documentUuid =
-    PaginationQueryString.wrapRoute (wrapRoute << IndexRoute documentUuid) (Just "name")
+    PaginationQueryString.wrapRoute (wrapRoute << IndexRoute documentUuid) (Just "createdAt,desc")
 
 
 toUrl : AppState -> Route -> List String

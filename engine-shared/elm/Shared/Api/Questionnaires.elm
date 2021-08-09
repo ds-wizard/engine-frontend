@@ -43,20 +43,20 @@ import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 
 
-type alias GetQuestionnaireFilters =
-    { isTemplate : Maybe Bool }
+type alias GetQuestionnairesFilters =
+    { isTemplate : Maybe Bool
+    , userUuids : Maybe String
+    }
 
 
-getQuestionnaires : GetQuestionnaireFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
+getQuestionnaires : GetQuestionnairesFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
 getQuestionnaires filters qs =
     let
         extraParams =
-            case filters.isTemplate of
-                Just isTemplate ->
-                    [ ( "isTemplate", boolToString isTemplate ) ]
-
-                Nothing ->
-                    []
+            PaginationQueryString.filterParams <|
+                [ ( "isTemplate", Maybe.map boolToString filters.isTemplate )
+                , ( "userUuids", filters.userUuids )
+                ]
 
         queryString =
             PaginationQueryString.toApiUrlWith extraParams qs

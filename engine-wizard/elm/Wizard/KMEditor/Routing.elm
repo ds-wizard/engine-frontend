@@ -28,7 +28,7 @@ parsers appState wrapRoute =
     in
     [ map (createRoute wrapRoute) (s moduleRoot </> s (lr "kmEditor.create" appState) <?> Query.string (lr "kmEditor.create.selected" appState) <?> editQuery)
     , map (wrapRoute << EditorRoute) (s moduleRoot </> s (lr "kmEditor.edit" appState) </> uuid)
-    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
+    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "updatedAt,desc")) (PaginationQueryString.parser (s moduleRoot))
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "kmEditor.migration" appState) </> uuid)
     , map (wrapRoute << PublishRoute) (s moduleRoot </> s (lr "kmEditor.publish" appState) </> uuid)
     ]

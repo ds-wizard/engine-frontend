@@ -113,6 +113,7 @@ listingConfig appState model mbQuestionnaireFilterView =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "name", lg "document.name" appState )
         , ( "createdAt", lg "document.createdAt" appState )

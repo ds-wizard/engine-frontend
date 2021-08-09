@@ -1,6 +1,7 @@
 module Wizard.Templates.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError as ApiError exposing (ApiError)

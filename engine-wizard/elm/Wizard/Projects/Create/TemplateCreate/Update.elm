@@ -95,7 +95,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
 
         cfg =
             { wrapMsg = wrapMsg << QuestionnaireTypeHintInputMsg
-            , getTypeHints = QuestionnairesApi.getQuestionnaires { isTemplate = Just True }
+            , getTypeHints = QuestionnairesApi.getQuestionnaires { isTemplate = Just True, userUuids = Nothing }
             , getError = lg "apiError.packages.getListError" appState
             , setReply = formMsg << Uuid.toString << .uuid
             , clearReply = Just <| formMsg ""

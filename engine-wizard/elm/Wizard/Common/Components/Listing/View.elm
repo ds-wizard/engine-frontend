@@ -1,5 +1,6 @@
 module Wizard.Common.Components.Listing.View exposing
-    ( ListingActionConfig
+    ( Filter(..)
+    , ListingActionConfig
     , ListingActionType(..)
     , ListingDropdownItem
     , UpdatedTimeConfig
@@ -13,8 +14,8 @@ module Wizard.Common.Components.Listing.View exposing
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Dict exposing (Dict)
-import Html exposing (Html, a, div, input, li, nav, span, text, ul)
-import Html.Attributes exposing (attribute, class, classList, href, id, placeholder, target, title, type_, value)
+import Html exposing (Html, a, div, hr, input, li, nav, span, text, ul)
+import Html.Attributes exposing (class, classList, href, id, placeholder, target, title, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -62,8 +63,9 @@ type alias ViewConfig a msg =
     , emptyText : String
     , updated : Maybe (UpdatedTimeConfig a)
     , iconView : Maybe (a -> Html msg)
+    , searchPlaceholderText : Maybe String
     , sortOptions : List ( String, String )
-    , filters : List ( String, Filter )
+    , filters : List Filter
     , wrapMsg : Msg a -> msg
     , toRoute : Dict String String -> PaginationQueryString -> Route
     , toolbarExtra : Maybe (Html msg)
@@ -76,7 +78,11 @@ type alias UpdatedTimeConfig a =
     }
 
 
-type alias Filter =
+type Filter
+    = SimpleFilter String SimpleFilterConfig
+
+
+type alias SimpleFilterConfig =
     { name : String
     , options : List ( String, String )
     }
@@ -133,9 +139,13 @@ viewToolbar appState cfg model =
 
 viewToolbarSearch : AppState -> ViewConfig a msg -> Model a -> Html msg
 viewToolbarSearch appState cfg model =
+    let
+        placeholderText =
+            Maybe.withDefault (l_ "toolbarFilter.placeholder" appState) cfg.searchPlaceholderText
+    in
     input
         [ type_ "text"
-        , placeholder (l_ "toolbarFilter.placeholder" appState)
+        , placeholder placeholderText
         , onInput (cfg.wrapMsg << QueryInput)
         , value model.qInput
         , class "form-control"
@@ -194,8 +204,15 @@ viewToolbarFilters appState cfg model =
     List.map (viewToolbarFilter appState cfg model) cfg.filters
 
 
-viewToolbarFilter : AppState -> ViewConfig a msg -> Model a -> ( String, Filter ) -> Html msg
-viewToolbarFilter appState cfg model ( filterId, filterCfg ) =
+viewToolbarFilter : AppState -> ViewConfig a msg -> Model a -> Filter -> Html msg
+viewToolbarFilter appState cfg model filter =
+    case filter of
+        SimpleFilter filterId filterCfg ->
+            viewToolbarSimpleFilter appState cfg model filterId filterCfg
+
+
+viewToolbarSimpleFilter : AppState -> ViewConfig a msg -> Model a -> String -> SimpleFilterConfig -> Html msg
+viewToolbarSimpleFilter appState cfg model filterId filterCfg =
     let
         state =
             Maybe.withDefault Dropdown.initialState (Dict.get filterId model.filterDropdownStates)

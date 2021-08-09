@@ -92,6 +92,7 @@ listingConfig cfg appState =
             }
     , wrapMsg = cfg.wrapMsg << ListingMsg
     , iconView = Nothing
+    , searchPlaceholderText = Nothing
     , sortOptions =
         [ ( "name", lg "document.name" appState )
         , ( "createdAt", lg "document.createdAt" appState )
