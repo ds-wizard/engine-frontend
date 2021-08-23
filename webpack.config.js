@@ -1,12 +1,19 @@
 const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const TerserPlugin = require("terser-webpack-plugin")
 
 const component = `engine-${process.env.COMPONENT}`
+const ports = {
+    'wizard': 8080,
+    'registry': 8081
+}
 
 module.exports = {
+    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+
     entry: [
         `./${component}/index.js`,
         `./${component}/scss/main.scss`
@@ -22,7 +29,8 @@ module.exports = {
         rules: [
             {
                 test: /\.(scss|css)$/,
-                use: [{loader: MiniCssExtractPlugin.loader},
+                use: [
+                    MiniCssExtractPlugin.loader,
                     'css-loader',
                     'sass-loader'
                 ]
@@ -30,24 +38,51 @@ module.exports = {
             {
                 test: /\.html$/,
                 exclude: /node_modules/,
-                loader: 'file-loader?name=[name].[ext]'
+                loader: 'file-loader',
+                options: {
+                    name: '[name].[ext]'
+                }
             },
             {
                 test: /\.elm$/,
                 exclude: [/elm-stuff/, /node_modules/],
-                loader: process.env.NODE_ENV === 'production' ? 'elm-webpack-loader?verbose=true&optimize=true&pathToElm=node_modules/.bin/elm' : 'elm-webpack-loader?verbose=true'
+                loader: 'elm-webpack-loader',
+                options: process.env.NODE_ENV === 'production' ? {
+                    verbose: true,
+                    optimize: true,
+                    pathToElm: 'node_modules/.bin/elm'
+                } : {
+                    verbose: true
+                }
             },
             {
-                test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader: 'url-loader?limit=10000&mimetype=application/font-woff&name=[name].[ext]'
+                test: /\.(svg|eot|woff|woff2|ttf)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: '[name][ext]'
+                }
             },
-            {
-                test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader: 'file-loader?name=[name].[ext]'
-            }
         ],
 
         noParse: /\.elm$/
+    },
+
+    optimization: {
+        minimize: process.env.NODE_ENV === 'production',
+        minimizer: [
+            new CssMinimizerPlugin({
+                minimizerOptions: {
+                    preset: [
+                        'default',
+                        {discardComments: {removeAll: true}}
+                    ]
+                }
+            }),
+            new TerserPlugin({
+                extractComments: false
+            }),
+            '...'
+        ]
     },
 
     plugins: [
@@ -55,23 +90,21 @@ module.exports = {
             template: `${component}/index.ejs`
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[chunkhash].css',
-            allChunks: true
+            filename: '[name].[chunkhash].css'
         }),
-        new OptimizeCssAssetsPlugin({
-            cssProcessorPluginOptions: {
-                preset: ['default', {discardComments: {removeAll: true}}]
-            }
-        }),
-        new CopyWebpackPlugin([
-            {from: `${component}/img`, to: 'img'},
-            {from: `${component}/favicon.ico`, to: 'favicon.ico'}
-        ])
+        new CopyWebpackPlugin({
+            patterns: [
+                {from: `${component}/img`, to: 'img'},
+                {from: `${component}/favicon.ico`, to: 'favicon.ico'}
+            ]
+        })
     ],
 
     devServer: {
-        inline: true,
-        stats: {colors: true},
-        historyApiFallback: {disableDotRule: true}
+        historyApiFallback: {disableDotRule: true},
+        port: ports[component],
+        static: {
+            directory: __dirname
+        }
     }
 }
