@@ -17,6 +17,7 @@ type ServerError
     = UserSimpleError Message
     | UserFormError UserFormErrorData
     | ForbiddenError
+    | SystemLogError SystemLogErrorData
 
 
 type alias Message =
@@ -28,6 +29,12 @@ type alias Message =
 type alias UserFormErrorData =
     { formErrors : List Message
     , fieldErrors : Dict String (List Message)
+    }
+
+
+type alias SystemLogErrorData =
+    { defaultMessage : String
+    , params : List String
     }
 
 
@@ -45,6 +52,9 @@ decoderByType errorType =
 
         "UserFormError" ->
             userFormErrorDecoder
+
+        "SystemLogError" ->
+            systemErrorDecoder
 
         _ ->
             D.fail <| "Unknown error type " ++ errorType
@@ -64,10 +74,23 @@ userFormErrorDecoder =
         |> D.map UserFormError
 
 
+systemErrorDecoder : Decoder ServerError
+systemErrorDecoder =
+    D.succeed SystemLogError
+        |> D.required "error" systemLogErrorDataDecoder
+
+
 messageDecoder : Decoder Message
 messageDecoder =
     D.succeed Message
         |> D.required "code" D.string
+        |> D.required "params" (D.list D.string)
+
+
+systemLogErrorDataDecoder : Decoder SystemLogErrorData
+systemLogErrorDataDecoder =
+    D.succeed SystemLogErrorData
+        |> D.required "defaultMessage" D.string
         |> D.required "params" (D.list D.string)
 
 
