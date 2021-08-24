@@ -44,8 +44,17 @@ view appState model =
                     , Html.map CustomCreateMsg <| CustomCreateView.view appState customCreateModel
                     )
 
+        isTemplateAndCustom =
+            appState.config.questionnaire.questionnaireCreation == QuestionnaireCreation.TemplateAndCustomQuestionnaireCreation
+
+        canCreateTemplates =
+            Permission.hasPerm appState.session Permission.questionnaireTemplate
+
+        notCustomOnly =
+            appState.config.questionnaire.questionnaireCreation /= QuestionnaireCreation.CustomQuestionnaireCreation
+
         navbar =
-            if appState.config.questionnaire.questionnaireCreation == QuestionnaireCreation.TemplateAndCustomQuestionnaireCreation || Permission.hasPerm appState.session Permission.questionnaireTemplate then
+            if isTemplateAndCustom || (canCreateTemplates && notCustomOnly) then
                 viewNavbar appState templateActive
 
             else
