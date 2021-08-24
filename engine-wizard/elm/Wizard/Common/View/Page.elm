@@ -1,5 +1,6 @@
 module Wizard.Common.View.Page exposing
     ( actionResultView
+    , actionResultViewWithError
     , error
     , header
     , illustratedMessage
@@ -106,7 +107,12 @@ illustratedMessageHtml { image, heading, content, cy } =
 
 
 actionResultView : AppState -> (a -> Html msg) -> ActionResult a -> Html msg
-actionResultView appState viewContent actionResult =
+actionResultView appState viewContent =
+    actionResultViewWithError appState viewContent (error appState)
+
+
+actionResultViewWithError : AppState -> (a -> Html msg) -> (String -> Html msg) -> ActionResult a -> Html msg
+actionResultViewWithError appState viewContent viewError actionResult =
     case actionResult of
         Unset ->
             emptyNode
@@ -115,7 +121,7 @@ actionResultView appState viewContent actionResult =
             loader appState
 
         Error err ->
-            error appState err
+            viewError err
 
         Success result ->
             viewContent result
