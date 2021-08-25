@@ -243,7 +243,7 @@ metricEditorView appState model editorData =
             div []
                 [ FormGroup.input appState editorData.form "title" <| lg "metric.title" appState
                 , FormGroup.input appState editorData.form "abbreviation" <| lg "metric.abbreviation" appState
-                , FormGroup.textarea appState editorData.form "description" <| lg "metric.description" appState
+                , FormGroup.markdownEditor appState editorData.form "description" <| lg "metric.description" appState
                 ]
     in
     ( editorData.uuid
@@ -267,7 +267,7 @@ phaseEditorView appState model editorData =
         form =
             div []
                 [ FormGroup.input appState editorData.form "title" <| lg "phase.title" appState
-                , FormGroup.textarea appState editorData.form "description" <| lg "phase.description" appState
+                , FormGroup.markdownEditor appState editorData.form "description" <| lg "phase.description" appState
                 ]
     in
     ( editorData.uuid
