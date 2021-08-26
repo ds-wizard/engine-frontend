@@ -5,13 +5,14 @@ import Html exposing (Html, div, label, option, text)
 import Html.Attributes exposing (class, selected, value)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.Package exposing (Package)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
+import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
+import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
@@ -68,7 +69,7 @@ createMigrationView appState model questionnaire =
                 ]
 
         cfg =
-            { viewItem = \pkg -> text pkg.name
+            { viewItem = TypeHintItem.packageSuggestion
             , wrapMsg = PackageTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = False
@@ -92,7 +93,9 @@ createMigrationView appState model questionnaire =
         , FormGroup.textView "project" questionnaire.name <| lg "project" appState
         , div [ class "form" ]
             [ div []
-                [ FormGroup.textView "original-km" questionnaire.package.name <| l_ "form.originalKM" appState
+                [ FormGroup.plainGroup
+                    (TypeHintItem.packageSuggestion (PackageSuggestion.fromPackage questionnaire.package))
+                    (l_ "form.originalKM" appState)
                 , FormGroup.codeView (Version.toString questionnaire.package.version) <| l_ "form.originalVersion" appState
                 , originalTagList
                 ]
