@@ -30,7 +30,7 @@ import Roman
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Event exposing (Event)
-import Shared.Data.KnowledgeModel as KnowledgeModel
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
@@ -1057,7 +1057,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
                 mbSelectedAnswer
     in
     ( div []
-        (List.indexedMap (viewAnswer appState cfg path selectedAnswerUuid) answers
+        (List.indexedMap (viewAnswer appState cfg model.questionnaire.knowledgeModel path selectedAnswerUuid) answers
             ++ [ clearReplyButton ]
         )
     , [ advice, followUps ]
@@ -1368,8 +1368,8 @@ viewChoice appState cfg path selectedChoicesUuids order choice =
         ]
 
 
-viewAnswer : AppState -> Config msg -> List String -> Maybe String -> Int -> Answer -> Html Msg
-viewAnswer appState cfg path selectedAnswerUuid order answer =
+viewAnswer : AppState -> Config msg -> KnowledgeModel -> List String -> Maybe String -> Int -> Answer -> Html Msg
+viewAnswer appState cfg km path selectedAnswerUuid order answer =
     let
         radioName =
             pathToString (path ++ [ answer.uuid ])
@@ -1385,7 +1385,7 @@ viewAnswer appState cfg path selectedAnswerUuid order answer =
                 [ onClick (SetReply (pathToString path) (createReply appState (AnswerReply answer.uuid))) ]
 
         followUpsIndicator =
-            if List.isEmpty answer.followUpUuids then
+            if List.isEmpty (KnowledgeModel.getAnswerFollowupQuestions answer.uuid km) then
                 emptyNode
 
             else
