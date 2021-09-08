@@ -7,12 +7,12 @@ module Shared.Api.Questionnaires exposing
     , documentPreviewUrl
     , fetchPreview
     , fetchQuestionnaireMigration
+    , getDocumentPreview
     , getDocuments
     , getQuestionnaire
     , getQuestionnaireMigration
     , getQuestionnaires
     , getSummaryReport
-    , headDocumentPreview
     , postQuestionnaire
     , postQuestionnaireFromTemplate
     , postRevert
@@ -28,7 +28,7 @@ import Http
 import Json.Decode as D
 import Json.Encode as E exposing (Value)
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizedUrl, jwtDelete, jwtFetch, jwtFetchEmpty, jwtFetchPut, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpHead, jwtOrHttpPut, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
+import Shared.Api exposing (ToMsg, authorizationHeaders, authorizedUrl, expectMetadata, jwtDelete, jwtFetch, jwtFetchEmpty, jwtFetchPut, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpHead, jwtOrHttpPut, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -43,20 +43,20 @@ import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 
 
-type alias GetQuestionnaireFilters =
-    { isTemplate : Maybe Bool }
+type alias GetQuestionnairesFilters =
+    { isTemplate : Maybe Bool
+    , userUuids : Maybe String
+    }
 
 
-getQuestionnaires : GetQuestionnaireFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
+getQuestionnaires : GetQuestionnairesFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
 getQuestionnaires filters qs =
     let
         extraParams =
-            case filters.isTemplate of
-                Just isTemplate ->
-                    [ ( "isTemplate", boolToString isTemplate ) ]
-
-                Nothing ->
-                    []
+            PaginationQueryString.filterParams <|
+                [ ( "isTemplate", Maybe.map boolToString filters.isTemplate )
+                , ( "userUuids", filters.userUuids )
+                ]
 
         queryString =
             PaginationQueryString.toApiUrlWith extraParams qs
@@ -142,9 +142,17 @@ websocket questionnaireUuid =
     wsUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/websocket")
 
 
-headDocumentPreview : Uuid -> AbstractAppState a -> ToMsg Http.Metadata msg -> Cmd msg
-headDocumentPreview questionnaireUuid =
-    jwtOrHttpHead ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents/preview")
+getDocumentPreview : Uuid -> AbstractAppState a -> ToMsg Http.Metadata msg -> Cmd msg
+getDocumentPreview questionnaireUuid appState toMsg =
+    Http.request
+        { method = "GET"
+        , headers = authorizationHeaders appState
+        , url = appState.apiUrl ++ "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents/preview"
+        , body = Http.emptyBody
+        , expect = expectMetadata toMsg
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 documentPreviewUrl : Uuid -> AbstractAppState a -> String

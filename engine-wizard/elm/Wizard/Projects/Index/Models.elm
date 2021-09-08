@@ -11,7 +11,7 @@ import Shared.Utils exposing (dictFromMaybeList)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Projects.Common.CloneProjectModal.Models as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Models as DeleteProjectModal
-import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId)
+import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRouteUsersFilterId)
 
 
 type alias Model =
@@ -22,11 +22,11 @@ type alias Model =
     }
 
 
-initialModel : PaginationQueryString -> Maybe String -> Model
-initialModel paginationQueryString mbIsTemplate =
+initialModel : PaginationQueryString -> Maybe String -> Maybe String -> Model
+initialModel paginationQueryString mbIsTemplate mbUser =
     let
         filters =
-            dictFromMaybeList [ ( indexRouteIsTemplateFilterId, mbIsTemplate ) ]
+            dictFromMaybeList [ ( indexRouteIsTemplateFilterId, mbIsTemplate ), ( indexRouteUsersFilterId, mbUser ) ]
     in
     { questionnaires = Listing.initialModelWithFilters paginationQueryString filters
     , deletingMigration = Unset

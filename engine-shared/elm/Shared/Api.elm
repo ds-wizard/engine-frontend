@@ -1,6 +1,8 @@
 module Shared.Api exposing
     ( ToMsg
+    , authorizationHeaders
     , authorizedUrl
+    , expectMetadata
     , httpFetch
     , httpGet
     , httpPost
@@ -53,17 +55,9 @@ jwtOrHttpFetch url decoder body appState =
 
 jwtOrHttpHead : String -> AbstractAppState b -> ToMsg Http.Metadata msg -> Cmd msg
 jwtOrHttpHead url appState toMsg =
-    let
-        headers =
-            if not <| String.isEmpty appState.session.token.token then
-                [ Http.header "Authorization" ("Bearer " ++ appState.session.token.token) ]
-
-            else
-                []
-    in
     Http.request
         { method = "HEAD"
-        , headers = headers
+        , headers = authorizationHeaders appState
         , url = appState.apiUrl ++ url
         , body = Http.emptyBody
         , expect = expectMetadata toMsg
@@ -202,6 +196,15 @@ httpPut url body appState toMsg =
 wsUrl : String -> AbstractAppState b -> String
 wsUrl url appState =
     String.replace "http" "ws" <| authorizedUrl url appState
+
+
+authorizationHeaders : AbstractAppState b -> List Http.Header
+authorizationHeaders appState =
+    if not <| String.isEmpty appState.session.token.token then
+        [ Http.header "Authorization" ("Bearer " ++ appState.session.token.token) ]
+
+    else
+        []
 
 
 authorizedUrl : String -> AbstractAppState b -> String

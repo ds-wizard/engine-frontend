@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         component: [registry, wizard]
-        node-version: [8.16.2]
+        node-version: [14.14.0]
     
     env:
       COMPONENT: ${{ matrix.component }}

@@ -6,7 +6,11 @@ module Wizard.Projects.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Dict
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Api.Users as UsersApi
+import Shared.Data.Pagination as Pagination
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.User as User
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch, flip, stringToBool)
@@ -21,7 +25,7 @@ import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId)
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -123,8 +127,11 @@ listingUpdateConfig wrapMsg appState model =
         isTemplate =
             Maybe.map stringToBool <|
                 Dict.get indexRouteIsTemplateFilterId model.questionnaires.filters
+
+        users =
+            Dict.get indexRouteUsersFilterId model.questionnaires.filters
     in
-    { getRequest = QuestionnairesApi.getQuestionnaires { isTemplate = isTemplate }
+    { getRequest = QuestionnairesApi.getQuestionnaires { isTemplate = isTemplate, userUuids = users }
     , getError = lg "apiError.questionnaires.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectIndexWithFilters model.questionnaires.filters

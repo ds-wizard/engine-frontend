@@ -15,6 +15,7 @@ import ChartJS exposing (ChartConfig)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import List.Extra as List
+import Markdown
 import Maybe.Extra as Maybe
 import Round
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -150,7 +151,11 @@ viewContent appState ctx summaryReport =
             viewChapters appState ctx summaryReport
 
         metricDescriptions =
-            [ viewMetricsDescriptions appState metrics ]
+            if List.length metrics > 0 then
+                [ viewMetricsDescriptions appState metrics ]
+
+            else
+                []
     in
     div [ class "questionnaire__summary-report container" ]
         (List.concat [ title, totalReport, chapters, metricDescriptions ])
@@ -302,7 +307,7 @@ viewMetricDescription metric =
     in
     div []
         [ h4 [] [ text <| abbreviation ++ metric.title ]
-        , p [ class "text-justify" ] [ text (Maybe.withDefault "" metric.description) ]
+        , Markdown.toHtml [] (Maybe.withDefault "" metric.description)
         ]
 
 

@@ -72,7 +72,7 @@ listingConfig appState =
     , description = listingDescription appState
     , dropdownItems = listingActions appState
     , textTitle = .name
-    , emptyText = l_ "content.empty" appState
+    , emptyText = l_ "listing.empty" appState
     , updated =
         Just
             { getTime = .updatedAt
@@ -80,6 +80,7 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "name", lg "branch.name" appState )
         , ( "createdAt", lg "branch.createdAt" appState )

@@ -10,7 +10,7 @@ module Wizard.Projects.Detail.Components.Preview exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict
-import Html exposing (Html, a, div, iframe, p)
+import Html exposing (Html, a, div, h1, iframe, p, pre, text)
 import Html.Attributes exposing (class, href, src, target)
 import Http
 import Maybe.Extra as Maybe
@@ -18,13 +18,16 @@ import Process
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Error.ServerError as ServerError
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)
+import String.Format as String
 import Task
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes as ProjectRoutes
@@ -68,14 +71,14 @@ init uuid previewState =
 
 
 type Msg
-    = HeadDocumentPreviewComplete (Result ApiError Http.Metadata)
+    = GetDocumentPreviewComplete (Result ApiError Http.Metadata)
     | HeadRequest
 
 
 fetchData : AppState -> Uuid -> Bool -> Cmd Msg
 fetchData appState questionnaireUuid hasTemplate =
     if hasTemplate then
-        QuestionnairesApi.headDocumentPreview questionnaireUuid appState HeadDocumentPreviewComplete
+        QuestionnairesApi.getDocumentPreview questionnaireUuid appState GetDocumentPreviewComplete
 
     else
         Cmd.none
@@ -84,7 +87,7 @@ fetchData appState questionnaireUuid hasTemplate =
 update : Msg -> AppState -> Model -> ( Model, Cmd Msg )
 update msg appState model =
     case msg of
-        HeadDocumentPreviewComplete result ->
+        GetDocumentPreviewComplete result ->
             handleHeadDocumentPreviewComplete appState model result
 
         HeadRequest ->
@@ -104,8 +107,17 @@ handleHeadDocumentPreviewComplete appState model result =
             else
                 ( { model | previewState = Preview (Success (Dict.get "content-type" metadata.headers)) }, Cmd.none )
 
-        Err _ ->
-            ( { model | previewState = Preview (Error (lg "apiError.questionnaires.headDocumentPreview" appState)) }, Cmd.none )
+        Err apiError ->
+            let
+                error =
+                    case ApiError.toServerError apiError of
+                        Just (ServerError.SystemLogError data) ->
+                            String.format data.defaultMessage data.params
+
+                        _ ->
+                            lg "apiError.questionnaires.headDocumentPreview" appState
+            in
+            ( { model | previewState = Preview (Error error) }, Cmd.none )
 
 
 
@@ -118,7 +130,7 @@ view appState questionnaire model =
         content =
             case model.previewState of
                 Preview preview ->
-                    Page.actionResultView appState (viewContent appState model) preview
+                    Page.actionResultViewWithError appState (viewContent appState model) viewError preview
 
                 TemplateNotSet ->
                     viewTemplateNotSet appState questionnaire
@@ -138,6 +150,13 @@ viewContent appState model mbContentType =
 
     else
         viewNotSupported appState documentUrl
+
+
+viewError : String -> Html Msg
+viewError msg =
+    div [ class "Projects__Detail__Content Projects__Detail__Content--PreviewError", dataCy "project_preview_error" ]
+        [ pre [] [ text msg ]
+        ]
 
 
 viewNotSupported : AppState -> String -> Html msg

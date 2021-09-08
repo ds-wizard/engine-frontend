@@ -80,6 +80,7 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "name", lg "package.name" appState )
         , ( "createdAt", lg "package.createdAt" appState )

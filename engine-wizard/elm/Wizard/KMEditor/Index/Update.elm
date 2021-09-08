@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import Form
 import Maybe.Extra as Maybe
 import Shared.Api.Branches as BranchesApi

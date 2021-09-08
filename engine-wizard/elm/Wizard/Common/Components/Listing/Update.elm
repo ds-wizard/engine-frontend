@@ -3,7 +3,7 @@ module Wizard.Common.Components.Listing.Update exposing (UpdateConfig, fetchData
 import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
 import Debouncer.Extra as Debouncer
-import Dict
+import Dict exposing (Dict)
 import Shared.Api exposing (ToMsg)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)

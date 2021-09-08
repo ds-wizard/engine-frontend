@@ -1,13 +1,11 @@
 module Wizard.Projects.Index.View exposing (view)
 
-import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Shared.Auth.Permission as Permissions
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
@@ -31,7 +29,7 @@ import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute(..))
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId)
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 
 
@@ -84,14 +82,13 @@ listingConfig appState =
     let
         listingFilters =
             if Permissions.hasPerm appState.session Permissions.questionnaireTemplate then
-                [ ( indexRouteIsTemplateFilterId
-                  , { name = l_ "filter.template.name" appState
+                [ Listing.SimpleFilter indexRouteIsTemplateFilterId
+                    { name = l_ "filter.template.name" appState
                     , options =
                         [ ( "true", l_ "filter.template.templatesOnly" appState )
                         , ( "false", l_ "filter.template.projectsOnly" appState )
                         ]
                     }
-                  )
                 ]
 
             else
@@ -109,6 +106,7 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
+    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "name", lg "questionnaire.name" appState )
         , ( "createdAt", lg "questionnaire.createdAt" appState )

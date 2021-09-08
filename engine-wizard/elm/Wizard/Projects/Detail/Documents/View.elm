@@ -92,6 +92,7 @@ listingConfig cfg appState =
             }
     , wrapMsg = cfg.wrapMsg << ListingMsg
     , iconView = Nothing
+    , searchPlaceholderText = Nothing
     , sortOptions =
         [ ( "name", lg "document.name" appState )
         , ( "createdAt", lg "document.createdAt" appState )
@@ -172,6 +173,12 @@ listingActions appState cfg document =
                 , dataCy = "download"
                 }
 
+        submitEnabled =
+            (document.state == DoneDocumentState)
+                && appState.config.submission.enabled
+                && Perm.hasPerm appState.session Perm.submission
+                && cfg.questionnaireEditable
+
         submit =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -197,6 +204,9 @@ listingActions appState cfg document =
                 _ ->
                     ( Listing.dropdownSeparator, False )
 
+        deleteEnabled =
+            cfg.questionnaireEditable && Session.exists appState.session
+
         delete =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
@@ -205,19 +215,14 @@ listingActions appState cfg document =
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
                 }
-
-        submitEnabled =
-            (document.state == DoneDocumentState)
-                && appState.config.submission.enabled
-                && Perm.hasPerm appState.session Perm.submission
     in
     []
         |> listInsertIf download (document.state == DoneDocumentState)
         |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator (cfg.questionnaireEditable && document.state == DoneDocumentState)
-        |> listInsertIf viewQuestionnaire viewQuestionnaireEnabled
         |> listInsertIf Listing.dropdownSeparator viewQuestionnaireEnabled
-        |> listInsertIf delete cfg.questionnaireEditable
+        |> listInsertIf viewQuestionnaire viewQuestionnaireEnabled
+        |> listInsertIf Listing.dropdownSeparator deleteEnabled
+        |> listInsertIf delete deleteEnabled
 
 
 stateBadge : AppState -> DocumentState -> Html msg
