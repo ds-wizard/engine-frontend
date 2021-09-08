@@ -28,18 +28,11 @@ type alias Document =
     }
 
 
-isEditable : AbstractAppState a -> Document -> Bool
-isEditable appState document =
-    let
-        isAdmin =
-            UserInfo.isAdmin appState.session.user
-
-        isOwner =
-            appState.session.user
-                |> Maybe.map (.uuid >> Just >> (==) document.creatorUuid)
-                |> Maybe.withDefault False
-    in
-    isAdmin || isOwner
+isOwner : AbstractAppState a -> Document -> Bool
+isOwner appState document =
+    appState.session.user
+        |> Maybe.map (.uuid >> Just >> (==) document.creatorUuid)
+        |> Maybe.withDefault False
 
 
 decoder : Decoder Document

@@ -12,6 +12,8 @@ import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Utils exposing (dictFromMaybeList)
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
+import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Users.Routes exposing (Route(..), indexRouteRoleFilterId)
 
 
@@ -49,15 +51,14 @@ toUrl route =
             [ moduleRoot ++ PaginationQueryString.toUrlWith params paginationQueryString ]
 
 
-isAllowed : Route -> Session -> Bool
-isAllowed route session =
+isAllowed : Route -> AppState -> Bool
+isAllowed route appState =
     case route of
+        CreateRoute ->
+            Feature.usersCreate appState
+
         EditRoute uuid ->
-            if uuid == "current" then
-                True
+            Feature.userEdit appState uuid
 
-            else
-                Perm.hasPerm session Perm.userManagement
-
-        _ ->
-            Perm.hasPerm session Perm.userManagement
+        IndexRoute _ _ ->
+            Feature.usersView appState

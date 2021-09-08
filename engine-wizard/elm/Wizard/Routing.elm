@@ -51,47 +51,47 @@ matchers appState =
     oneOf parsers
 
 
-routeIfAllowed : Session -> Routes.Route -> Routes.Route
-routeIfAllowed session route =
-    if isAllowed route session then
+routeIfAllowed : AppState -> Routes.Route -> Routes.Route
+routeIfAllowed appState route =
+    if isAllowed route appState then
         route
 
     else
         Routes.NotAllowedRoute
 
 
-isAllowed : Routes.Route -> Session -> Bool
-isAllowed route session =
+isAllowed : Routes.Route -> AppState -> Bool
+isAllowed route appState =
     case route of
         Routes.DashboardRoute ->
             True
 
         Routes.DocumentsRoute documentsRoute ->
-            Wizard.Documents.Routing.isAllowed documentsRoute session
+            Wizard.Documents.Routing.isAllowed documentsRoute appState
 
         Routes.KMEditorRoute kmEditorRoute ->
-            Wizard.KMEditor.Routing.isAllowed kmEditorRoute session
+            Wizard.KMEditor.Routing.isAllowed kmEditorRoute appState
 
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
-            Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute session
+            Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute appState
 
         Routes.ProjectsRoute plansRoute ->
-            Wizard.Projects.Routing.isAllowed plansRoute session
+            Wizard.Projects.Routing.isAllowed plansRoute appState
 
         Routes.PublicRoute _ ->
             True
 
         Routes.RegistryRoute registryRoute ->
-            Wizard.Registry.Routing.isAllowed registryRoute session
+            Wizard.Registry.Routing.isAllowed registryRoute appState
 
         Routes.SettingsRoute settingsRoute ->
-            Wizard.Settings.Routing.isAllowed settingsRoute session
+            Wizard.Settings.Routing.isAllowed settingsRoute appState
 
         Routes.TemplatesRoute templatesRoute ->
-            Wizard.Templates.Routing.isAllowed templatesRoute session
+            Wizard.Templates.Routing.isAllowed templatesRoute appState
 
         Routes.UsersRoute usersRoute ->
-            Wizard.Users.Routing.isAllowed usersRoute session
+            Wizard.Users.Routing.isAllowed usersRoute appState
 
         Routes.NotFoundRoute ->
             True

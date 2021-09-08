@@ -14,6 +14,7 @@ import Shared.Utils exposing (flip, listInsertIf)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Feature as Features
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.FormResult as FormResult
@@ -81,7 +82,7 @@ listingConfig : AppState -> ViewConfig Questionnaire Msg
 listingConfig appState =
     let
         listingFilters =
-            if Permissions.hasPerm appState.session Permissions.questionnaireTemplate then
+            if Features.projectTemplatesCreate appState then
                 [ Listing.SimpleFilter indexRouteIsTemplateFilterId
                     { name = l_ "filter.template.name" appState
                     , options =
@@ -222,6 +223,9 @@ listingActions appState questionnaire =
                 , dataCy = "open"
                 }
 
+        openProjectVisible =
+            Features.projectOpen appState questionnaire
+
         clone =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -236,6 +240,9 @@ listingActions appState questionnaire =
                 , dataCy = "clone"
                 }
 
+        cloneVisible =
+            Features.projectClone appState questionnaire
+
         createMigration =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -244,6 +251,9 @@ listingActions appState questionnaire =
                 , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
                 , dataCy = "create-migration"
                 }
+
+        createMigrationVisible =
+            Features.projectCreateMigration appState questionnaire
 
         continueMigration =
             Listing.dropdownAction
@@ -254,6 +264,9 @@ listingActions appState questionnaire =
                 , dataCy = "continue-migration"
                 }
 
+        continueMigrationVisible =
+            Features.projectContinueMigration appState questionnaire
+
         cancelMigration =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
@@ -262,6 +275,9 @@ listingActions appState questionnaire =
                 , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
                 , dataCy = "cancel-migration"
                 }
+
+        cancelMigrationVisible =
+            Features.projectCancelMigration appState questionnaire
 
         delete =
             Listing.dropdownAction
@@ -277,21 +293,18 @@ listingActions appState questionnaire =
                 , dataCy = "delete"
                 }
 
-        editable =
-            Questionnaire.isEditable appState questionnaire
-
-        migrating =
-            questionnaire.state == Migrating
+        deleteVisible =
+            Features.projectDelete appState questionnaire
     in
     []
-        |> listInsertIf openProject (not migrating)
-        |> listInsertIf Listing.dropdownSeparator (not migrating)
-        |> listInsertIf clone (not migrating)
-        |> listInsertIf continueMigration (editable && migrating)
-        |> listInsertIf cancelMigration (editable && migrating)
-        |> listInsertIf createMigration (editable && not migrating)
-        |> listInsertIf Listing.dropdownSeparator editable
-        |> listInsertIf delete editable
+        |> listInsertIf openProject openProjectVisible
+        |> listInsertIf Listing.dropdownSeparator (cloneVisible || continueMigrationVisible || cancelMigrationVisible || createMigrationVisible)
+        |> listInsertIf clone cloneVisible
+        |> listInsertIf continueMigration continueMigrationVisible
+        |> listInsertIf cancelMigration cancelMigrationVisible
+        |> listInsertIf createMigration createMigrationVisible
+        |> listInsertIf Listing.dropdownSeparator deleteVisible
+        |> listInsertIf delete deleteVisible
 
 
 detailRoute : Questionnaire -> Routes.Route

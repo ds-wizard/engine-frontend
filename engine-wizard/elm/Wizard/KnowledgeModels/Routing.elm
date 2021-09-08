@@ -12,6 +12,7 @@ import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 
 
@@ -68,8 +69,8 @@ toUrl appState route =
                     [ moduleRoot, packageId, lr "knowledgeModels.preview" appState ]
 
 
-isAllowed : Route -> Session -> Bool
-isAllowed route session =
+isAllowed : Route -> AppState -> Bool
+isAllowed route appState =
     case route of
         DetailRoute _ ->
             True
@@ -78,7 +79,7 @@ isAllowed route session =
             True
 
         ImportRoute _ ->
-            Perm.hasPerm session Perm.packageManagementWrite
+            Feature.knowledgeModelsImport appState
 
         _ ->
-            Perm.hasPerm session Perm.packageManagementRead
+            Feature.knowledgeModelsView appState

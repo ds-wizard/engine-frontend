@@ -12,6 +12,7 @@ import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Templates.Routes exposing (Route(..))
 
 
@@ -54,6 +55,11 @@ toUrl appState route =
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
 
-isAllowed : Route -> Session -> Bool
-isAllowed route session =
-    Perm.hasPerm session Perm.templates
+isAllowed : Route -> AppState -> Bool
+isAllowed route appState =
+    case route of
+        ImportRoute _ ->
+            Feature.templatesImport appState
+
+        _ ->
+            Feature.templatesView appState

@@ -16,6 +16,7 @@ import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Projects.Create.ProjectCreateRoute as ProjectCreateRoute
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteUsersFilterId)
@@ -45,14 +46,14 @@ parsers appState wrapRoute =
             lr "projects.create.selected" appState
 
         createFromTemplateRoute =
-            if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation || Perm.hasPerm appState.session Perm.questionnaireTemplate then
+            if Feature.projectsCreateFromTemplate appState then
                 [ map (wrapRoute << CreateRoute << ProjectCreateRoute.TemplateCreateRoute) (s moduleRoot </> s createSegment </> s fromTemplateSegment <?> Query.string selectedParam) ]
 
             else
                 []
 
         createCustomRoute =
-            if QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation || Perm.hasPerm appState.session Perm.questionnaireTemplate then
+            if Feature.projectsCreateCustom appState then
                 [ map (wrapRoute << CreateRoute << ProjectCreateRoute.CustomCreateRoute) (s moduleRoot </> s createSegment </> s customSegment <?> Query.string selectedParam) ]
 
             else
@@ -149,11 +150,11 @@ toUrl appState route =
             [ moduleRoot, lr "projects.migration" appState, Uuid.toString uuid ]
 
 
-isAllowed : Route -> Session -> Bool
-isAllowed route session =
+isAllowed : Route -> AppState -> Bool
+isAllowed route appState =
     case route of
         DetailRoute _ _ ->
             True
 
         _ ->
-            Perm.hasPerm session Perm.questionnaire
+            Perm.hasPerm appState.session Perm.questionnaire

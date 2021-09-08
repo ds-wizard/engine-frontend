@@ -16,6 +16,7 @@ import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
@@ -73,6 +74,9 @@ header appState package =
                 , lgx "km.action.preview" appState
                 ]
 
+        previewActionVisible =
+            Feature.knowledgeModelsPreview appState
+
         createEditorAction =
             linkTo appState
                 (Routes.KMEditorRoute <| CreateRoute (Just package.id) (Just True))
@@ -82,6 +86,9 @@ header appState package =
                 [ faSet "kmDetail.createKMEditor" appState
                 , lgx "km.action.kmEditor" appState
                 ]
+
+        createEditorActionVisible =
+            Feature.knowledgeModelEditorsCreate appState
 
         forkAction =
             linkTo appState
@@ -93,9 +100,8 @@ header appState package =
                 , lgx "km.action.fork" appState
                 ]
 
-        createProjectActionVisible =
-            (QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation || Perm.hasPerm appState.session Perm.questionnaireTemplate)
-                && Perm.hasPerm appState.session Perm.questionnaire
+        forkActionVisible =
+            Feature.knowledgeModelEditorsCreate appState
 
         createProjectAction =
             linkTo appState
@@ -106,6 +112,9 @@ header appState package =
                 [ faSet "kmDetail.createQuestionnaire" appState
                 , lgx "km.action.project" appState
                 ]
+
+        createProjectActionVisible =
+            Feature.projectsCreateCustom appState
 
         exportAction =
             a
@@ -118,6 +127,9 @@ header appState package =
                 , lgx "km.action.export" appState
                 ]
 
+        exportActionVisible =
+            Feature.knowledgeModelsExport appState
+
         deleteAction =
             a
                 [ onClick <| ShowDeleteDialog True
@@ -128,14 +140,17 @@ header appState package =
                 , lgx "km.action.delete" appState
                 ]
 
+        deleteActionVisible =
+            Feature.knowledgeModelsDelete appState
+
         actions =
             []
-                |> listInsertIf previewAction True
-                |> listInsertIf createEditorAction (Perm.hasPerm appState.session Perm.knowledgeModel)
-                |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
+                |> listInsertIf previewAction previewActionVisible
+                |> listInsertIf createEditorAction createEditorActionVisible
+                |> listInsertIf forkAction forkActionVisible
                 |> listInsertIf createProjectAction createProjectActionVisible
-                |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
-                |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
+                |> listInsertIf exportAction exportActionVisible
+                |> listInsertIf deleteAction deleteActionVisible
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]

@@ -19,6 +19,7 @@ import Shared.Utils exposing (listInsertIf)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -207,17 +208,12 @@ listingActions appState document =
                 , msg = ListingActionMsg (ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
                 }
-
-        submitEnabled =
-            (document.state == DoneDocumentState)
-                && appState.config.submission.enabled
-                && Perm.hasPerm appState.session Perm.submission
     in
     []
-        |> listInsertIf download (document.state == DoneDocumentState)
-        |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator (document.state == DoneDocumentState)
-        |> listInsertIf delete (Document.isEditable appState document)
+        |> listInsertIf download (Feature.documentDownload appState document)
+        |> listInsertIf submit (Feature.documentSubmit appState document)
+        |> listInsertIf Listing.dropdownSeparator (Feature.documentDelete appState document)
+        |> listInsertIf delete (Feature.documentDelete appState document)
 
 
 stateBadge : AppState -> DocumentState -> Html msg

@@ -17,7 +17,6 @@ import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
-import Shared.Auth.Permission as Permission
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Permission exposing (Permission)
@@ -32,6 +31,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -246,7 +246,7 @@ formView appState model =
                     emptyNode
 
         isTemplateInput =
-            if Permission.hasPerm appState.session Permission.questionnaireTemplate then
+            if Feature.projectTemplatesCreate appState then
                 [ hr [] []
                 , Html.map FormMsg <| FormGroup.toggle model.form "isTemplate" <| lg "questionnaire.isTemplate" appState
                 , FormExtra.mdAfter (lg "questionnaire.isTemplate.desc" appState)

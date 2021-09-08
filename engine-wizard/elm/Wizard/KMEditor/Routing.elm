@@ -14,6 +14,7 @@ import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.KMEditor.Routes exposing (Route(..))
 
 
@@ -84,20 +85,20 @@ toUrl appState route =
             [ moduleRoot, lr "kmEditor.publish" appState, Uuid.toString uuid ]
 
 
-isAllowed : Route -> Session -> Bool
-isAllowed route session =
+isAllowed : Route -> AppState -> Bool
+isAllowed route appState =
     case route of
         CreateRoute _ _ ->
-            Perm.hasPerm session Perm.knowledgeModel
+            Feature.knowledgeModelEditorsCreate appState
 
         EditorRoute _ ->
-            Perm.hasPerm session Perm.knowledgeModel
+            Feature.knowledgeModelEditorsEdit appState
 
         IndexRoute _ ->
-            Perm.hasPerm session Perm.knowledgeModel
+            Feature.knowledgeModelEditorsView appState
 
         MigrationRoute _ ->
-            Perm.hasPerm session Perm.knowledgeModelUpgrade
+            Feature.knowledgeModelEditorsUpgrade appState
 
         PublishRoute _ ->
-            Perm.hasPerm session Perm.knowledgeModelPublish
+            Feature.knowledgeModelEditorsPublish appState

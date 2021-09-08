@@ -27,7 +27,7 @@ init flags location key =
             Routing.parseLocation appState location
 
         route =
-            routeIfAllowed appState.session originalRoute
+            routeIfAllowed appState originalRoute
 
         appState =
             AppState.init flags key
