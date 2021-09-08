@@ -16,6 +16,7 @@ import Shared.Utils exposing (listInsertIf, packageIdToComponents)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.FormGroup as FormGroup
@@ -105,14 +106,14 @@ linkToKM : AppState -> Branch -> List (Attribute Msg) -> List (Html Msg) -> Html
 linkToKM appState branch =
     case branch.state of
         BranchState.Migrating ->
-            if continueMigrationActionVisible appState.session branch then
+            if Feature.knowledgeModelEditorContinueMigration appState branch then
                 linkTo appState (Routes.KMEditorRoute <| MigrationRoute <| branch.uuid)
 
             else
                 span
 
         BranchState.Migrated ->
-            if publishActionVisible appState.session branch then
+            if Feature.knowledgeModelEditorPublish appState branch then
                 linkTo appState (Routes.KMEditorRoute <| PublishRoute <| branch.uuid)
 
             else
@@ -258,19 +259,22 @@ listingActions appState branch =
                 }
 
         showOpenEditor =
-            openEditorActionVisible branch
+            Feature.knowledgeModelEditorOpen appState branch
 
         showPublish =
-            publishActionVisible appState.session branch
+            Feature.knowledgeModelEditorPublish appState branch
 
         showUpgrade =
-            upgradeActionVisible appState.session branch
+            Feature.knowledgeModelEditorUpgrade appState branch
 
         showContinueMigration =
-            continueMigrationActionVisible appState.session branch
+            Feature.knowledgeModelEditorContinueMigration appState branch
 
         showCancelMigration =
-            tableActionCancelMigrationVisible appState.session branch
+            Feature.knowledgeModelEditorCancelMigration appState branch
+
+        showDelete =
+            Feature.knowledgeModelEditorDelete appState branch
     in
     []
         |> listInsertIf openEditor showOpenEditor
@@ -280,33 +284,8 @@ listingActions appState branch =
         |> listInsertIf upgrade showUpgrade
         |> listInsertIf continueMigration showContinueMigration
         |> listInsertIf cancelMigration showCancelMigration
-        |> listInsertIf Listing.dropdownSeparator True
-        |> listInsertIf delete True
-
-
-openEditorActionVisible : Branch -> Bool
-openEditorActionVisible =
-    Branch.matchState [ BranchState.Default, BranchState.Edited, BranchState.Outdated ]
-
-
-publishActionVisible : Session -> Branch -> Bool
-publishActionVisible session branch =
-    Perm.hasPerm session Perm.knowledgeModelPublish && Branch.matchState [ BranchState.Edited, BranchState.Migrated ] branch
-
-
-upgradeActionVisible : Session -> Branch -> Bool
-upgradeActionVisible session km =
-    Perm.hasPerm session Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Outdated ] km
-
-
-continueMigrationActionVisible : Session -> Branch -> Bool
-continueMigrationActionVisible session km =
-    Perm.hasPerm session Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Migrating ] km
-
-
-tableActionCancelMigrationVisible : Session -> Branch -> Bool
-tableActionCancelMigrationVisible session km =
-    Perm.hasPerm session Perm.knowledgeModelUpgrade && Branch.matchState [ BranchState.Migrating, BranchState.Migrated ] km
+        |> listInsertIf Listing.dropdownSeparator showDelete
+        |> listInsertIf delete showDelete
 
 
 deleteModal : AppState -> Model -> Html Msg

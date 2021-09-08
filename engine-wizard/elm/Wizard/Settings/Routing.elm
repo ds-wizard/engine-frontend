@@ -4,11 +4,10 @@ module Wizard.Settings.Routing exposing
     , toUrl
     )
 
-import Shared.Auth.Permission as Perm
-import Shared.Auth.Session exposing (Session)
 import Shared.Locale exposing (lr)
 import Url.Parser exposing (..)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Settings.Routes exposing (Route(..))
 
 
@@ -69,6 +68,6 @@ toUrl appState route =
             [ moduleRoot, lr "settings.knowledgeModel" appState ]
 
 
-isAllowed : Route -> Session -> Bool
-isAllowed _ session =
-    Perm.hasPerm session Perm.settings
+isAllowed : Route -> AppState -> Bool
+isAllowed _ appState =
+    Feature.settings appState

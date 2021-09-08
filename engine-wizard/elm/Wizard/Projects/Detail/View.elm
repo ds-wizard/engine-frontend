@@ -15,6 +15,7 @@ import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.Components.SummaryReport as SummaryReport
+import Wizard.Common.Feature as Features
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -227,8 +228,8 @@ viewProjectNavigationActions appState model questionnaire =
 viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewProjectNavigationNav appState route model qm =
     let
-        isOwner =
-            QuestionnaireDetail.isOwner appState qm.questionnaire
+        questionnaire =
+            qm.questionnaire
 
         isDocumentRoute r =
             case r of
@@ -261,6 +262,9 @@ viewProjectNavigationNav appState route model qm =
                     ]
                 ]
 
+        metricsLinkVisible =
+            Features.projectMetrics appState questionnaire
+
         previewLink =
             li [ class "nav-item" ]
                 [ linkTo appState
@@ -270,6 +274,9 @@ viewProjectNavigationNav appState route model qm =
                     , span [ attribute "data-content" (l_ "nav.preview" appState) ] [ lx_ "nav.preview" appState ]
                     ]
                 ]
+
+        previewLinkVisible =
+            Features.projectPreview appState questionnaire
 
         documentsLink =
             li [ class "nav-item" ]
@@ -281,6 +288,9 @@ viewProjectNavigationNav appState route model qm =
                     ]
                 ]
 
+        documentsLinkVisible =
+            Features.projectDocumentsView appState questionnaire
+
         settingsLink =
             li [ class "nav-item" ]
                 [ linkTo appState
@@ -291,13 +301,16 @@ viewProjectNavigationNav appState route model qm =
                     ]
                 ]
 
+        settingsLinkVisible =
+            Features.projectSettings appState questionnaire
+
         links =
             []
                 |> listInsertIf questionnaireLink True
-                |> listInsertIf metricsLink appState.config.questionnaire.summaryReport.enabled
-                |> listInsertIf previewLink True
-                |> listInsertIf documentsLink True
-                |> listInsertIf settingsLink isOwner
+                |> listInsertIf metricsLink metricsLinkVisible
+                |> listInsertIf previewLink previewLinkVisible
+                |> listInsertIf documentsLink documentsLinkVisible
+                |> listInsertIf settingsLink settingsLinkVisible
     in
     div [ class "DetailNavigation__Row" ]
         [ ul [ class "nav nav-underline-tabs" ] links

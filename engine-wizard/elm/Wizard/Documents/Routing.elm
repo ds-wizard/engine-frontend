@@ -9,6 +9,7 @@ import Url.Parser exposing (..)
 import Url.Parser.Query.Extra as Query
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Documents.Routes exposing (Route(..))
 
 
@@ -49,6 +50,6 @@ toUrl appState route =
                 [ moduleRoot, queryString ]
 
 
-isAllowed : Route -> Session -> Bool
-isAllowed _ session =
-    Perm.hasPerm session Perm.dataManagementPlan
+isAllowed : Route -> AppState -> Bool
+isAllowed _ appState =
+    Feature.documentsView appState

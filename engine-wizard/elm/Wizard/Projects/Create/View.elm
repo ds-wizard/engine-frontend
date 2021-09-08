@@ -7,6 +7,7 @@ import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
@@ -44,17 +45,14 @@ view appState model =
                     , Html.map CustomCreateMsg <| CustomCreateView.view appState customCreateModel
                     )
 
-        isTemplateAndCustom =
-            appState.config.questionnaire.questionnaireCreation == QuestionnaireCreation.TemplateAndCustomQuestionnaireCreation
+        createFromTemplateAvailable =
+            Feature.projectsCreateFromTemplate appState
 
-        canCreateTemplates =
-            Permission.hasPerm appState.session Permission.questionnaireTemplate
-
-        notCustomOnly =
-            appState.config.questionnaire.questionnaireCreation /= QuestionnaireCreation.CustomQuestionnaireCreation
+        createCustomAvailable =
+            Feature.projectsCreateCustom appState
 
         navbar =
-            if isTemplateAndCustom || (canCreateTemplates && notCustomOnly) then
+            if createFromTemplateAvailable && createCustomAvailable then
                 viewNavbar appState templateActive
 
             else

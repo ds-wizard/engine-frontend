@@ -20,6 +20,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
@@ -174,10 +175,7 @@ listingActions appState cfg document =
                 }
 
         submitEnabled =
-            (document.state == DoneDocumentState)
-                && appState.config.submission.enabled
-                && Perm.hasPerm appState.session Perm.submission
-                && cfg.questionnaireEditable
+            Feature.documentSubmit appState document && cfg.questionnaireEditable
 
         submit =
             Listing.dropdownAction

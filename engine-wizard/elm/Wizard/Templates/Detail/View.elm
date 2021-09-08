@@ -16,6 +16,7 @@ import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
@@ -67,16 +68,22 @@ header appState template =
                 , lx_ "header.export" appState
                 ]
 
+        exportActionVisible =
+            Feature.templatesExport appState
+
         deleteAction =
             a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
                 [ faSet "_global.delete" appState
                 , lx_ "header.delete" appState
                 ]
 
+        deleteActionVisible =
+            Feature.templatesDelete appState
+
         actions =
             []
-                |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.templates)
-                |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.templates)
+                |> listInsertIf exportAction exportActionVisible
+                |> listInsertIf deleteAction deleteActionVisible
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]

@@ -21,6 +21,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
@@ -80,7 +81,7 @@ viewHelpMenu appState dropdownState =
 
 viewSettingsMenu : AppState -> Html Wizard.Msgs.Msg
 viewSettingsMenu appState =
-    if Perm.hasPerm appState.session Perm.settings then
+    if Feature.settings appState then
         div [ class "btn-group" ]
             [ linkTo appState
                 (Routes.SettingsRoute Wizard.Settings.Routes.defaultRoute)
