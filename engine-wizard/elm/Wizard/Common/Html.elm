@@ -1,6 +1,6 @@
 module Wizard.Common.Html exposing (illustratedMessage, linkTo)
 
-import Html exposing (..)
+import Html exposing (Attribute, Html, a, div, img, p, text)
 import Html.Attributes exposing (class, src)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)

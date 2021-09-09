@@ -1,4 +1,4 @@
-module Shared.Api.Submissions exposing (..)
+module Shared.Api.Submissions exposing (postSubmission)
 
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)

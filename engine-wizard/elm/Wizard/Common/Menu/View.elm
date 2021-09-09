@@ -11,9 +11,8 @@ module Wizard.Common.Menu.View exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Html exposing (..)
+import Html exposing (Html, a, code, div, em, img, p, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, colspan, href, src, target)
-import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Shared.Data.User as User

@@ -6,7 +6,7 @@ module Wizard.Common.Components.Questionnaire.VersionForm exposing
     , validation
     )
 
-import Form exposing (Form)
+import Form
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E

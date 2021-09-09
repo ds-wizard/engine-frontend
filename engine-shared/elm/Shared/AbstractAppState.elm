@@ -1,4 +1,4 @@
-module Shared.AbstractAppState exposing (..)
+module Shared.AbstractAppState exposing (AbstractAppState)
 
 import Shared.Auth.Session exposing (Session)
 

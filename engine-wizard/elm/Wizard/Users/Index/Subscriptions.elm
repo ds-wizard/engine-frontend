@@ -1,4 +1,4 @@
-module Wizard.Users.Index.Subscriptions exposing (..)
+module Wizard.Users.Index.Subscriptions exposing (subscriptions)
 
 import Wizard.Common.Components.Listing.Subscriptions as Listing
 import Wizard.Users.Index.Models exposing (Model)

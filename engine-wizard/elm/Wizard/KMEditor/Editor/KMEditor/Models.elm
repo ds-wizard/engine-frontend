@@ -23,10 +23,9 @@ import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Utils exposing (listFilterJust)
 import SplitPane exposing (Orientation(..), configureSplitter, percentage)
-import Uuid exposing (Uuid)
+import Uuid
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), KMEditorData, createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
-import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (initKnowledgeModelFrom)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), EditorState(..), createKnowledgeModelEditor, getEditorUuid, getNewState, isEditorDirty)
 
 
 type alias Model =
@@ -221,12 +220,7 @@ eventToEditorState event =
 
 getActiveEditor : Model -> Maybe Editor
 getActiveEditor model =
-    case model.activeEditorUuid of
-        Just uuid ->
-            Dict.get uuid model.editors
-
-        Nothing ->
-            Nothing
+    Maybe.andThen (\uuid -> Dict.get uuid model.editors) model.activeEditorUuid
 
 
 getKMEditor : Model -> Maybe Editor

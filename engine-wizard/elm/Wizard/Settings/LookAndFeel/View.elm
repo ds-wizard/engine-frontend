@@ -2,7 +2,7 @@ module Wizard.Settings.LookAndFeel.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, a, button, div, img, label)
+import Html exposing (Html, a, div, img, label)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick)
 import Markdown

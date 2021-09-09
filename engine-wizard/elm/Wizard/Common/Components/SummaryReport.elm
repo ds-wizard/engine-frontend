@@ -12,8 +12,8 @@ module Wizard.Common.Components.SummaryReport exposing
 
 import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (ChartConfig)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, canvas, div, h2, h3, h4, hr, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, colspan, id, style)
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
@@ -25,17 +25,12 @@ import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lf, lg, lgx, lx)
+import Shared.Locale exposing (lf, lg, lgx, lx)
 import String exposing (fromFloat, fromInt)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.Ports as Ports
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.SummaryReport"
 
 
 lf_ : String -> List String -> AppState -> String
@@ -109,7 +104,7 @@ update msg appState ctx model =
                         cmds =
                             List.map
                                 (Ports.drawMetricsChart << ChartJS.encodeChartConfig)
-                                ([ totalChartConfig ] ++ chapterChartsConfigs)
+                                (totalChartConfig :: chapterChartsConfigs)
                     in
                     ( { model | summaryReport = Success summaryReport }
                     , Cmd.batch cmds
@@ -294,8 +289,8 @@ getTitleByUuid items uuid =
 viewMetricsDescriptions : AppState -> List Metric -> Html msg
 viewMetricsDescriptions appState metrics =
     div []
-        ([ h3 [] [ lx_ "metricsDescriptions.metricsExplanation" appState ] ]
-            ++ List.map viewMetricDescription metrics
+        (h3 [] [ lx_ "metricsDescriptions.metricsExplanation" appState ]
+            :: List.map viewMetricDescription metrics
         )
 
 

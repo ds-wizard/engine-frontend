@@ -7,18 +7,13 @@ import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lf, lx)
+import Shared.Locale exposing (lf, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Dashboard.Widgets.DMPWorkflowWidget"
 
 
 lf_ : String -> List String -> AppState -> String

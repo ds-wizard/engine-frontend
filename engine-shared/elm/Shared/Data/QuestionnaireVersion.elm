@@ -1,4 +1,7 @@
-module Shared.Data.QuestionnaireVersion exposing (..)
+module Shared.Data.QuestionnaireVersion exposing
+    ( QuestionnaireVersion
+    , decoder
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D

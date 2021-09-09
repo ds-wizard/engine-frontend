@@ -1,10 +1,9 @@
 module Wizard.KMEditor.Editor.Preview.Update exposing (update)
 
 import Random exposing (Seed)
-import Shared.Data.KnowledgeModel as KnowledgeModel
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
-import Wizard.KMEditor.Editor.Preview.Models exposing (..)
+import Wizard.KMEditor.Editor.Preview.Models exposing (Model, addTag, removeTag, selectAllTags, selectNoneTags)
 import Wizard.KMEditor.Editor.Preview.Msgs exposing (Msg(..))
 
 

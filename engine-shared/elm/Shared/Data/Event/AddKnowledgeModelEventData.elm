@@ -18,6 +18,6 @@ decoder =
 
 
 encode : AddKnowledgeModelEventData -> List ( String, E.Value )
-encode data =
+encode _ =
     [ ( "eventType", E.string "AddKnowledgeModelEvent" )
     ]

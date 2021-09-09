@@ -12,7 +12,7 @@ module Wizard.Projects.Detail.Components.NewDocument exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
-import Html exposing (..)
+import Html exposing (Html, br, div, p, strong, text)
 import Html.Attributes exposing (class)
 import List.Extra as List
 import Shared.Api.Documents as DocumentsApi

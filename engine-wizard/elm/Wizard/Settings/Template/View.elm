@@ -1,12 +1,11 @@
-module Wizard.Settings.Template.View exposing (..)
+module Wizard.Settings.Template.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (Html, div)
 import Shared.Data.BootstrapConfig.TemplateConfig exposing (TemplateConfig)
 import Shared.Data.Template exposing (Template)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lx)
-import Uuid
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
@@ -18,11 +17,6 @@ import Wizard.Settings.Template.Msgs exposing (Msg(..))
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Settings.Template.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.Template.View"
 
 
 view : AppState -> Model -> Html Msg

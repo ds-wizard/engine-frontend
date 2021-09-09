@@ -1,4 +1,7 @@
-module Wizard.Common.View.UserIcon exposing (..)
+module Wizard.Common.View.UserIcon exposing
+    ( view
+    , viewSmall
+    )
 
 import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)

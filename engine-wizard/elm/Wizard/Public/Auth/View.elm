@@ -1,6 +1,6 @@
-module Wizard.Public.Auth.View exposing (..)
+module Wizard.Public.Auth.View exposing (view)
 
-import Html exposing (Html, div)
+import Html exposing (Html)
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page

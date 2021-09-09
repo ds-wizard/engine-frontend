@@ -1,7 +1,7 @@
 module Wizard.KMEditor.Editor.TagEditor.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Attribute, Html, div, input, label, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (checked, class, classList, style, type_)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -51,10 +51,8 @@ tagEditorTable appState model =
         [ table []
             [ thead []
                 [ tr []
-                    ([ th [ class "top-left" ]
-                        [ div [] [] ]
-                     ]
-                        ++ (List.map (thTag model) <| List.sortBy .name tags)
+                    (th [ class "top-left" ] [ div [] [] ]
+                        :: (List.map (thTag model) <| List.sortBy .name tags)
                     )
                 ]
             , tbody [] (foldKMRows appState model)
@@ -149,14 +147,13 @@ foldAnswer appState model indent tags answer =
 trQuestion : AppState -> Model -> Int -> List Tag -> Question -> Html Msg
 trQuestion appState model indent tags question =
     tr []
-        ([ th [ onClick <| CopyUuid <| Question.getUuid question ]
+        (th [ onClick <| CopyUuid <| Question.getUuid question ]
             [ div [ indentClass indent ]
                 [ faSet "km.question" appState
                 , text (Question.getTitle question)
                 ]
             ]
-         ]
-            ++ (List.map (tdQuestionTagCheckbox model question) <| List.sortBy .name tags)
+            :: (List.map (tdQuestionTagCheckbox model question) <| List.sortBy .name tags)
         )
 
 
@@ -218,14 +215,13 @@ trSeparator mbUuid title icon extraClass indent tags =
                     []
     in
     tr [ class <| "separator " ++ extraClass ]
-        ([ th thAttributes
+        (th thAttributes
             [ div [ indentClass indent ]
                 [ icon
                 , text title
                 ]
             ]
-         ]
-            ++ (List.map tdTag <| List.sortBy .name tags)
+            :: (List.map tdTag <| List.sortBy .name tags)
         )
 
 

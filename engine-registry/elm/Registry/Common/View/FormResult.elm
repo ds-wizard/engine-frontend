@@ -4,10 +4,9 @@ module Registry.Common.View.FormResult exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (..)
+import Html exposing (Html)
 import Registry.Common.View.Flash as Flash
 import Shared.Html exposing (emptyNode)
-import String
 
 
 view : ActionResult String -> Html msg

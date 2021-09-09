@@ -13,7 +13,7 @@ import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations, getCurrentMetrics)
-import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
+import Wizard.KMEditor.Editor.KMEditor.Models.Children exposing (Children)
 import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, Editor(..), QuestionEditorData, addAnswerFollowUp, createQuestionEditor, isAnswerEditorDirty, updateAnswerEditorData)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (answerFormValidation)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (addEntity, deleteEntity, updateForm, withGenerateEvent)

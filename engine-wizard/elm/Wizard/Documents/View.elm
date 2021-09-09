@@ -1,4 +1,4 @@
-module Wizard.Documents.View exposing (..)
+module Wizard.Documents.View exposing (view)
 
 import Html exposing (Html)
 import Wizard.Common.AppState exposing (AppState)

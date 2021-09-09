@@ -1,7 +1,12 @@
-module Wizard.Common.View.FormActions exposing (view, viewActionOnly, viewCustomButton, viewSubmit)
+module Wizard.Common.View.FormActions exposing
+    ( view
+    , viewActionOnly
+    , viewCustomButton
+    , viewSubmit
+    )
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div)
+import Html.Attributes exposing (class)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)

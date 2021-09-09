@@ -1,4 +1,7 @@
-module Shared.Form exposing (..)
+module Shared.Form exposing
+    ( errorToString
+    , setFormErrors
+    )
 
 import Dict
 import Form exposing (Form)

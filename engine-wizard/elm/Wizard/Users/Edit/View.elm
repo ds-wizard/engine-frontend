@@ -2,8 +2,8 @@ module Wizard.Users.Edit.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, div, h4, img, p, strong, text)
+import Html.Attributes exposing (class, classList, src)
 import Html.Events exposing (onClick, onSubmit)
 import Markdown
 import Shared.Auth.Role as Role
@@ -21,7 +21,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Users.Common.UserEditForm exposing (UserEditForm)
 import Wizard.Users.Common.UserPasswordForm exposing (UserPasswordForm)
-import Wizard.Users.Edit.Models exposing (..)
+import Wizard.Users.Edit.Models exposing (Model, View(..))
 import Wizard.Users.Edit.Msgs exposing (Msg(..))
 
 
@@ -130,8 +130,8 @@ userFormView appState user form current =
         submissionSettings =
             if current && appState.config.submission.enabled && List.length submissionPropsIndexes > 0 then
                 div [ class "mt-5" ]
-                    ([ h4 [] [ lx_ "submissionSettings.title" appState ] ]
-                        ++ List.map submissionSettingsSection submissionPropsIndexes
+                    (h4 [] [ lx_ "submissionSettings.title" appState ]
+                        :: List.map submissionSettingsSection submissionPropsIndexes
                     )
 
             else

@@ -6,11 +6,9 @@ module Wizard.Users.Routing exposing
     )
 
 import Dict
-import Shared.Auth.Permission as Perm
-import Shared.Auth.Session exposing (Session)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Utils exposing (dictFromMaybeList)
-import Url.Parser exposing (..)
+import Url.Parser exposing ((</>), Parser, map, s, string)
 import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature

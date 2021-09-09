@@ -1,7 +1,7 @@
 module Wizard.Users.Create.View exposing (view)
 
 import Form exposing (Form)
-import Html exposing (..)
+import Html exposing (Html, div)
 import Html.Events exposing (onSubmit)
 import Shared.Auth.Role as Role
 import Shared.Form.FormError exposing (FormError)
@@ -15,7 +15,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
 import Wizard.Users.Common.UserCreateForm exposing (UserCreateForm)
-import Wizard.Users.Create.Models exposing (..)
+import Wizard.Users.Create.Models exposing (Model)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
 
 

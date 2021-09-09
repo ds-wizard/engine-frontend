@@ -1,4 +1,7 @@
-module Shared.Data.QuestionnaireDetail.Reply exposing (..)
+module Shared.Data.QuestionnaireDetail.Reply exposing
+    ( Reply
+    , decoder
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D

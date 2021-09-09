@@ -1,11 +1,10 @@
 module Wizard.Templates.Detail.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, br, dd, div, dl, dt, li, p, strong, text, ul)
+import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Markdown
 import Shared.Api.Templates as TemplatesApi
-import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Template.TemplatePackage as TemplatePackage
@@ -24,8 +23,8 @@ import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Routes
 import Wizard.Routes as Routes
-import Wizard.Templates.Detail.Models exposing (..)
-import Wizard.Templates.Detail.Msgs exposing (..)
+import Wizard.Templates.Detail.Models exposing (Model)
+import Wizard.Templates.Detail.Msgs exposing (Msg(..))
 import Wizard.Templates.Routes exposing (Route(..))
 
 
@@ -125,8 +124,8 @@ newVersionInRegistryWarning appState template =
                     template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
             in
             div [ class "alert alert-warning" ]
-                ([ faSet "_global.warning" appState ]
-                    ++ lh_ "registryVersion.warning"
+                (faSet "_global.warning" appState
+                    :: lh_ "registryVersion.warning"
                         [ text (Version.toString remoteLatestVersion)
                         , linkTo appState
                             (Routes.TemplatesRoute <| ImportRoute <| Just <| latestPackageId)
@@ -230,28 +229,21 @@ sidePanelOtherVersions appState template =
 
 sidePanelOrganizationInfo : AppState -> TemplateDetail -> Maybe ( String, Html msg )
 sidePanelOrganizationInfo appState template =
-    case template.organization of
-        Just organization ->
-            Just ( lg "template.publishedBy" appState, viewOrganization organization )
-
-        Nothing ->
-            Nothing
+    Maybe.map (\organization -> ( lg "template.publishedBy" appState, viewOrganization organization )) template.organization
 
 
 sidePanelRegistryLink : AppState -> TemplateDetail -> Maybe ( String, Html msg )
 sidePanelRegistryLink appState template =
-    case template.registryLink of
-        Just registryLink ->
-            Just
-                ( lg "template.registryLink" appState
-                , a [ href registryLink, class "link-with-icon", target "_blank" ]
-                    [ faSet "kmDetail.registryLink" appState
-                    , text template.id
-                    ]
-                )
-
-        Nothing ->
-            Nothing
+    let
+        toRegistryLink registryLink =
+            ( lg "template.registryLink" appState
+            , a [ href registryLink, class "link-with-icon", target "_blank" ]
+                [ faSet "kmDetail.registryLink" appState
+                , text template.id
+                ]
+            )
+    in
+    Maybe.map toRegistryLink template.registryLink
 
 
 sidePanelUsableWith : AppState -> TemplateDetail -> Maybe ( String, Html msg )

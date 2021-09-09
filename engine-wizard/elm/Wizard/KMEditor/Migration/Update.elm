@@ -1,14 +1,16 @@
-module Wizard.KMEditor.Migration.Update exposing (fetchData, update)
+module Wizard.KMEditor.Migration.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Event as Event
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Migration exposing (Migration)
 import Shared.Data.MigrationResolution as MigrationResolution exposing (MigrationResolution)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setMetrics, setMigration)
+import Shared.Setters exposing (setMigration)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)

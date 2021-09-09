@@ -1,12 +1,17 @@
-module Wizard.Common.View.FormExtra exposing (blockAfter, inlineSelect, mdAfter, text, textAfter)
+module Wizard.Common.View.FormExtra exposing
+    ( blockAfter
+    , inlineSelect
+    , mdAfter
+    , text
+    , textAfter
+    )
 
 import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (Html, p)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (class, id)
 import Markdown
 import Shared.Form.FormError exposing (FormError)
-import String
 
 
 text : String -> Html msg

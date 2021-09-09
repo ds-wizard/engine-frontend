@@ -6,12 +6,10 @@ module Wizard.Projects.Routing exposing
 
 import Dict
 import Shared.Auth.Permission as Perm
-import Shared.Auth.Session exposing (Session)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Locale exposing (lr)
 import Shared.Utils exposing (dictFromMaybeList, flip)
-import Url.Parser exposing (..)
+import Url.Parser exposing ((</>), (<?>), Parser, map, s)
 import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
 import Uuid exposing (Uuid)

@@ -2,9 +2,9 @@ module Wizard.Templates.Import.FileImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import File
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Html exposing (Attribute, Html, button, div, input, label, p, text)
+import Html.Attributes exposing (class, disabled, id, type_)
+import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lx)
@@ -12,7 +12,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Templates.Import.FileImport.Models exposing (..)
+import Wizard.Templates.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.Templates.Import.FileImport.Msgs exposing (Msg(..))
 
 

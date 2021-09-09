@@ -39,22 +39,11 @@ import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lf, lx)
+import Shared.Locale exposing (lx)
 import Shared.Utils exposing (getContrastColorHex)
-import String
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.View.FormGroup"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.View.FormGroup"
 
 
 lx_ : String -> AppState -> Html msg
@@ -164,7 +153,7 @@ selectWithDisabled appState options =
 richRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 richRadioGroup appState options =
     let
-        radioInput state attrs =
+        radioInput state _ =
             let
                 buildOption ( k, v, d ) =
                     div [ class "form-check", classList [ ( "form-check-selected", state.value == Just k ) ] ]
@@ -191,7 +180,7 @@ richRadioGroup appState options =
 formatRadioGroup : AppState -> List TemplateFormat -> Form FormError o -> String -> String -> Html Form.Msg
 formatRadioGroup appState options =
     let
-        radioInput state attrs =
+        radioInput state _ =
             let
                 buildOption : TemplateFormat -> Html Form.Msg
                 buildOption format =
@@ -216,7 +205,7 @@ formatRadioGroup appState options =
 htmlRadioGroup : AppState -> List ( String, Html Form.Msg ) -> Form FormError o -> String -> String -> Html Form.Msg
 htmlRadioGroup appState options =
     let
-        radioInput state attrs =
+        radioInput state _ =
             let
                 buildOption ( k, html ) =
                     label

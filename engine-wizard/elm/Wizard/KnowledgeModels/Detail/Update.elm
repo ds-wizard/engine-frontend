@@ -1,4 +1,7 @@
-module Wizard.KnowledgeModels.Detail.Update exposing (fetchData, update)
+module Wizard.KnowledgeModels.Detail.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Packages as PackagesApi
@@ -7,9 +10,8 @@ import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPackage)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KnowledgeModels.Detail.Models exposing (..)
+import Wizard.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)

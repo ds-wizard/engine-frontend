@@ -1,4 +1,4 @@
-module Wizard.Documents.Index.Msgs exposing (..)
+module Wizard.Documents.Index.Msgs exposing (Msg(..))
 
 import Shared.Data.Document exposing (Document)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)

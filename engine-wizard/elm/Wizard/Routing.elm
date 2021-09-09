@@ -12,11 +12,10 @@ module Wizard.Routing exposing
     , toUrl
     )
 
-import Browser.Navigation exposing (Key, pushUrl)
-import Shared.Auth.Session exposing (Session)
+import Browser.Navigation exposing (pushUrl)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
-import Url.Parser exposing (..)
+import Url.Parser exposing (Parser, map, oneOf, s)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing

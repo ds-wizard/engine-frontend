@@ -1,11 +1,11 @@
 module Wizard.Public.Signup.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Form exposing (label)
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (..)
+import Html exposing (Html, a, div, p, text)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
-import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg, lh, lx)
@@ -86,8 +86,8 @@ formView appState form =
         viewAcceptGroup privacyText privacyError =
             div [ class "form-group form-group-accept", classList [ ( "has-error", hasError ) ] ]
                 [ label [ for "accept" ]
-                    ([ Input.checkboxInput acceptField [ id "accept", name "accept" ] ]
-                        ++ privacyText
+                    (Input.checkboxInput acceptField [ id "accept", name "accept" ]
+                        :: privacyText
                     )
                 , p [ class "invalid-feedback" ] [ privacyError ]
                 ]

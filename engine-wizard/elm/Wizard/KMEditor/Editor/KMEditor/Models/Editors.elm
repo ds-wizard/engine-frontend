@@ -98,7 +98,7 @@ import String.Format exposing (format)
 import Uuid
 import ValueList exposing (ValueList)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
-import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, ChapterForm, ChoiceForm, ExpertForm, IntegrationForm, KnowledgeModelForm, MetricForm, PhaseForm, QuestionForm, ReferenceForm, TagForm, formChanged, initAnswerForm, initChapterForm, initChoiceForm, initExpertForm, initIntegrationForm, initKnowledgeModelFrom, initMetricForm, initPhaseForm, initQuestionForm, initReferenceForm, initTagForm, updateAnswerWithForm, updateChapterWithForm, updateChoiceWithForm, updateExpertWithForm, updateIntegrationWithForm, updateKnowledgeModelWithForm, updateMetricWithForm, updatePhaseWithForm, updateQuestionWithForm, updateReferenceWithForm, updateTagWithForm)
 
 
 type EditorState
@@ -349,7 +349,7 @@ createChapterEditor integrations parentUuid getEditorState km chapter editors =
 
 
 createMetricEditor : String -> (String -> EditorState) -> KnowledgeModel -> Metric -> Dict String Editor -> Dict String Editor
-createMetricEditor parentUuid getEditorState km metric editors =
+createMetricEditor parentUuid getEditorState _ metric editors =
     let
         editor =
             MetricEditor
@@ -365,7 +365,7 @@ createMetricEditor parentUuid getEditorState km metric editors =
 
 
 createPhaseEditor : String -> (String -> EditorState) -> KnowledgeModel -> Phase -> Dict String Editor -> Dict String Editor
-createPhaseEditor parentUuid getEditorState km phase editors =
+createPhaseEditor parentUuid getEditorState _ phase editors =
     let
         editor =
             PhaseEditor
@@ -381,7 +381,7 @@ createPhaseEditor parentUuid getEditorState km phase editors =
 
 
 createTagEditor : String -> (String -> EditorState) -> KnowledgeModel -> Tag -> Dict String Editor -> Dict String Editor
-createTagEditor parentUuid getEditorState km tag editors =
+createTagEditor parentUuid getEditorState _ tag editors =
     let
         editor =
             TagEditor
@@ -397,7 +397,7 @@ createTagEditor parentUuid getEditorState km tag editors =
 
 
 createIntegrationEditor : String -> (String -> EditorState) -> KnowledgeModel -> Integration -> Dict String Editor -> Dict String Editor
-createIntegrationEditor parentUuid getEditorState km integration editors =
+createIntegrationEditor parentUuid getEditorState _ integration editors =
     let
         editor =
             IntegrationEditor
@@ -496,7 +496,7 @@ createAnswerEditor integrations parentUuid getEditorState km answer editors =
 
 
 createChoiceEditor : String -> (String -> EditorState) -> KnowledgeModel -> Choice -> Dict String Editor -> Dict String Editor
-createChoiceEditor parentUuid getEditorState km choice editors =
+createChoiceEditor parentUuid getEditorState _ choice editors =
     let
         editor =
             ChoiceEditor
@@ -512,7 +512,7 @@ createChoiceEditor parentUuid getEditorState km choice editors =
 
 
 createReferenceEditor : String -> (String -> EditorState) -> KnowledgeModel -> Reference -> Dict String Editor -> Dict String Editor
-createReferenceEditor parentUuid getEditorState km reference editors =
+createReferenceEditor parentUuid getEditorState _ reference editors =
     let
         referenceUuid =
             Reference.getUuid reference
@@ -531,7 +531,7 @@ createReferenceEditor parentUuid getEditorState km reference editors =
 
 
 createExpertEditor : String -> (String -> EditorState) -> KnowledgeModel -> Expert -> Dict String Editor -> Dict String Editor
-createExpertEditor parentUuid getEditorState km expert editors =
+createExpertEditor parentUuid getEditorState _ expert editors =
     let
         editor =
             ExpertEditor

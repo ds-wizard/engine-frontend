@@ -50,7 +50,7 @@ encode data =
                 EditReferenceCrossEventData.encode
                 data
     in
-    [ ( "eventType", E.string "EditReferenceEvent" ) ] ++ eventData
+    ( "eventType", E.string "EditReferenceEvent" ) :: eventData
 
 
 getEntityVisibleName : EditReferenceEventData -> Maybe String

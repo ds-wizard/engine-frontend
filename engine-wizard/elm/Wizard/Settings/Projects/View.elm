@@ -8,7 +8,7 @@ import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lx)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -21,11 +21,6 @@ import Wizard.Settings.Projects.Models exposing (Model)
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Settings.Projects.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.Projects.View"
 
 
 view : AppState -> Model -> Html Msg

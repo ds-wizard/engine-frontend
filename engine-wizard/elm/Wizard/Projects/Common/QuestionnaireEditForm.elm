@@ -13,14 +13,13 @@ import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
-import Shared.Data.Permission exposing (Permission)
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
 import Shared.Data.User as User
 import Shared.Form.FormError exposing (FormError)
-import Uuid exposing (Uuid)
+import Uuid
 import Wizard.Projects.Common.QuestionnaireEditFormPermission as QuestionnaireEditFormPermission exposing (QuestionnaireEditFormPermission)
 
 

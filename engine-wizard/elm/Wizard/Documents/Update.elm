@@ -1,4 +1,7 @@
-module Wizard.Documents.Update exposing (..)
+module Wizard.Documents.Update exposing
+    ( fetchData
+    , update
+    )
 
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Index.Update

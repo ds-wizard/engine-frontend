@@ -12,7 +12,7 @@ module Shared.Form.Validate exposing
     )
 
 import Dict exposing (Dict)
-import Form.Error as Error exposing (Error, ErrorValue(..))
+import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Regex exposing (Regex)
 import Shared.Form.FormError exposing (FormError(..))

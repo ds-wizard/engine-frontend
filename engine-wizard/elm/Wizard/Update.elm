@@ -1,9 +1,12 @@
-module Wizard.Update exposing (fetchData, update)
+module Wizard.Update exposing
+    ( fetchData
+    , update
+    )
 
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
 import Shared.Auth.Session as Session
-import Url exposing (Url)
+import Url
 import Wizard.Auth.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Menu.Update

@@ -79,7 +79,7 @@ handlePutConfigCompleted :
     -> Model form
     -> Result ApiError ()
     -> ( Model form, Cmd Wizard.Msgs.Msg )
-handlePutConfigCompleted props appState model result =
+handlePutConfigCompleted _ appState model result =
     let
         ( newResult, cmd ) =
             case result of

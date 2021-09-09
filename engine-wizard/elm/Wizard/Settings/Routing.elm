@@ -5,7 +5,7 @@ module Wizard.Settings.Routing exposing
     )
 
 import Shared.Locale exposing (lr)
-import Url.Parser exposing (..)
+import Url.Parser exposing ((</>), Parser, map, s)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Settings.Routes exposing (Route(..))

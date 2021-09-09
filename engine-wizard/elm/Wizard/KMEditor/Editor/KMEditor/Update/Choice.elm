@@ -1,4 +1,10 @@
-module Wizard.KMEditor.Editor.KMEditor.Update.Choice exposing (deleteChoice, removeChoice, updateChoiceForm, updateIfQuestion, withGenerateChoiceEditEvent)
+module Wizard.KMEditor.Editor.KMEditor.Update.Choice exposing
+    ( deleteChoice
+    , removeChoice
+    , updateChoiceForm
+    , updateIfQuestion
+    , withGenerateChoiceEditEvent
+    )
 
 import Form
 import Random exposing (Seed)
@@ -6,7 +12,7 @@ import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children exposing (Children)
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (ChoiceEditorData, Editor(..), ExpertEditorData, QuestionEditorData, isChoiceEditorDirty, updateChoiceEditorData)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (ChoiceEditorData, Editor(..), QuestionEditorData, isChoiceEditorDirty, updateChoiceEditorData)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (choiceFormValidation)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (deleteEntity, updateForm, withGenerateEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createAddChoiceEvent, createDeleteChoiceEvent, createEditChoiceEvent)

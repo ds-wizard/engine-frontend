@@ -1,9 +1,8 @@
 module Wizard.Templates.Index.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, code, div, img, p, span, strong, text)
+import Html.Attributes exposing (class, src, title)
 import Shared.Api.Templates as TemplatesApi
-import Shared.Auth.Permission as Perm
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Html exposing (emptyNode, faSet)
@@ -11,7 +10,7 @@ import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
@@ -19,7 +18,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Templates.Index.Models exposing (..)
+import Wizard.Templates.Index.Models exposing (Model)
 import Wizard.Templates.Index.Msgs exposing (Msg(..))
 import Wizard.Templates.Routes exposing (Route(..))
 

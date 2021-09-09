@@ -18,9 +18,9 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Debounce exposing (Debounce)
-import Dict exposing (Dict)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Dict
+import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, textarea, ul)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, selected, src, target, title, type_, value)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
 import List.Extra as List
 import Markdown
@@ -35,11 +35,9 @@ import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
@@ -51,7 +49,7 @@ import Shared.Data.User as User
 import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
-import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
+import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust)
 import String exposing (fromInt)
 import Time.Distance as Time
@@ -73,11 +71,6 @@ import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Common.Components.Questionnaire"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.Components.Questionnaire"
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
@@ -983,7 +976,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
 
 
 viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
-viewQuestionLabel appState cfg ctx model path humanIdentifiers question =
+viewQuestionLabel appState cfg _ model path humanIdentifiers question =
     let
         isDesirable =
             Question.isDesirable

@@ -22,7 +22,7 @@ import Wizard.Settings.Template.Update
 
 
 fetchData : Route -> AppState -> Model -> Cmd Msg
-fetchData route appState model =
+fetchData route appState _ =
     let
         genericFetch wrapMsg =
             Cmd.map wrapMsg <|

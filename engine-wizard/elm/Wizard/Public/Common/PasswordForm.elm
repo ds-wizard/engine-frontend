@@ -1,8 +1,13 @@
-module Wizard.Public.Common.PasswordForm exposing (PasswordForm, encode, initEmpty, validation)
+module Wizard.Public.Common.PasswordForm exposing
+    ( PasswordForm
+    , encode
+    , initEmpty
+    , validation
+    )
 
 import Form exposing (Form)
 import Form.Validate as V exposing (Validation)
-import Json.Encode as E exposing (..)
+import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 

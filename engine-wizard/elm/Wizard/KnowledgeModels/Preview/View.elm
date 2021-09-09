@@ -1,9 +1,8 @@
-module Wizard.KnowledgeModels.Preview.View exposing (..)
+module Wizard.KnowledgeModels.Preview.View exposing (view)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Shared.Data.Package exposing (Package)
-import Shared.Data.QuestionnaireDetail
 import Shared.Locale exposing (l)
 import Version
 import Wizard.Common.AppState exposing (AppState)

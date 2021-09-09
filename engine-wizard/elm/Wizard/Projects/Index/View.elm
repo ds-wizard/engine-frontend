@@ -1,19 +1,18 @@
 module Wizard.Projects.Index.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Shared.Auth.Permission as Permissions
-import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
+import Html exposing (Html, code, div, img, span, text)
+import Html.Attributes exposing (class, classList, src, title)
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Locale exposing (l, lg, lgx, lx)
 import Shared.Utils exposing (flip, listInsertIf)
-import Version exposing (Version)
+import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Feature as Features
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
@@ -30,7 +29,7 @@ import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute(..))
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId)
 import Wizard.Routes as Routes
 
 
@@ -42,11 +41,6 @@ l_ =
 lx_ : String -> AppState -> Html msg
 lx_ =
     lx "Wizard.Projects.Index.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Projects.Index.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -130,9 +124,9 @@ listingTitle appState questionnaire =
                 detailRoute
     in
     span []
-        ([ linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ] ]
-            ++ [ templateBadge appState questionnaire ]
-            ++ visibilityIcons appState questionnaire
+        (linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ]
+            :: templateBadge appState questionnaire
+            :: visibilityIcons appState questionnaire
             ++ [ stateBadge appState questionnaire ]
         )
 

@@ -1,14 +1,12 @@
 module Wizard.Projects.Detail.Documents.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (..)
+import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, text)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)
-import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
-import Shared.Auth.Permission as Perm
 import Shared.Auth.Session as Session
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
@@ -135,7 +133,7 @@ listingTitle appState document =
 
 
 listingDescription : ViewConfig msg -> AppState -> Document -> Html msg
-listingDescription cfg appState document =
+listingDescription cfg _ document =
     let
         ( icon, formatName ) =
             case Document.getFormat document of

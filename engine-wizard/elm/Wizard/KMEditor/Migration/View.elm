@@ -2,10 +2,9 @@ module Wizard.KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, br, button, code, del, div, h1, h3, ins, label, li, p, span, strong, text, ul)
+import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
-import Maybe.Extra as Maybe
 import Shared.Data.Event as Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
@@ -54,7 +53,7 @@ import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Migration exposing (Migration)
 import Shared.Data.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Locale exposing (lg, lh, lx)
 import String.Format exposing (format)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -66,11 +65,6 @@ import Wizard.KMEditor.Migration.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Migration.View.DiffTree as DiffTree
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Migration.View"
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)

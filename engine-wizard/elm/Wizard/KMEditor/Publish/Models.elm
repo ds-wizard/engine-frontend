@@ -7,7 +7,6 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)
-import String
 import Wizard.KMEditor.Common.BranchPublishForm as BranchPublishForm exposing (BranchPublishForm)
 
 

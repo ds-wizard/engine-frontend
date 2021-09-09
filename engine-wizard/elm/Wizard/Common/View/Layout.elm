@@ -7,10 +7,8 @@ module Wizard.Common.View.Layout exposing
     )
 
 import Browser exposing (Document)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import Shared.Auth.Permission as Perm
+import Html exposing (Html, a, div, li, nav, span, text, ul)
+import Html.Attributes exposing (class, classList, href, target)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
 import Shared.Html exposing (emptyNode, fa, faSet)

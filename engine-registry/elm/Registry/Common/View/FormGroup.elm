@@ -11,7 +11,6 @@ module Registry.Common.View.FormGroup exposing
     )
 
 import Form exposing (Form, InputType(..), Msg(..))
-import Form.Error exposing (ErrorValue(..))
 import Form.Input as Input
 import Html exposing (Html, code, div, label, p, span, text)
 import Html.Attributes exposing (class, for, id, name)
@@ -19,17 +18,6 @@ import Registry.Common.AppState exposing (AppState)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lf)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Common.View.FormGroup"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Registry.Common.View.FormGroup"
 
 
 {-| Helper for creating form group with text input field.

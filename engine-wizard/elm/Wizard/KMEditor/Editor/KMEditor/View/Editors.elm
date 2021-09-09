@@ -4,7 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (..)
+import Html exposing (Html, a, button, div, h3, label, p, small, text)
 import Html.Attributes exposing (class, classList, placeholder, title)
 import Html.Events exposing (onClick)
 import List.Extra as List
@@ -15,7 +15,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lg, lgx, lx)
 import Shared.Utils exposing (httpMethodOptions)
-import String exposing (fromInt, toLower)
+import String exposing (toLower)
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -25,9 +25,9 @@ import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, getCurrentIntegrations, getCurrentMetrics, getCurrentPhases, getCurrentTags)
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, QuestionForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
-import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, ChapterEditorData, ChoiceEditorData, Editor(..), ExpertEditorData, IntegrationEditorData, KMEditorData, MetricEditorData, PhaseEditorData, QuestionEditorData, ReferenceEditorData, TagEditorData, editorNotDeleted, getEditorTitle)
+import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, IntegrationForm, questionTypeOptions, questionValueTypeOptions, referenceTypeOptions)
+import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (AnswerEditorMsg(..), ChapterEditorMsg(..), ChoiceEditorMsg(..), EditorMsg(..), ExpertEditorMsg(..), IntegrationEditorMsg(..), KMEditorMsg(..), MetricEditorMsg(..), Msg(..), PhaseEditorMsg(..), QuestionEditorMsg(..), ReferenceEditorMsg(..), TagEditorMsg(..))
 
 
 l_ : String -> AppState -> String
@@ -230,7 +230,7 @@ chapterEditorView appState kmName model editorData =
 
 
 metricEditorView : AppState -> Model -> MetricEditorData -> ( String, Html Msg )
-metricEditorView appState model editorData =
+metricEditorView appState _ editorData =
     let
         editorTitleConfig =
             { title = lg "metric" appState
@@ -255,7 +255,7 @@ metricEditorView appState model editorData =
 
 
 phaseEditorView : AppState -> Model -> PhaseEditorData -> ( String, Html Msg )
-phaseEditorView appState model editorData =
+phaseEditorView appState _ editorData =
     let
         editorTitleConfig =
             { title = lg "phase" appState
@@ -279,7 +279,7 @@ phaseEditorView appState model editorData =
 
 
 tagEditorView : AppState -> Model -> TagEditorData -> ( String, Html Msg )
-tagEditorView appState model editorData =
+tagEditorView appState _ editorData =
     let
         editorTitleConfig =
             { title = lg "tag" appState
@@ -304,7 +304,7 @@ tagEditorView appState model editorData =
 
 
 integrationEditorView : AppState -> Model -> IntegrationEditorData -> ( String, Html Msg )
-integrationEditorView appState model editorData =
+integrationEditorView appState _ editorData =
     let
         formMsg =
             IntegrationFormMsg >> IntegrationEditorMsg >> EditorMsg
@@ -739,7 +739,7 @@ metricsView appState editorData metrics =
 
 
 metricView : AppState -> Form FormError AnswerForm -> Int -> Metric -> Html Form.Msg
-metricView appState form i metric =
+metricView appState form _ metric =
     let
         field name =
             "metricMeasure-" ++ metric.uuid ++ "-" ++ name
@@ -812,8 +812,8 @@ referenceEditorView appState editorData =
 
         form =
             div []
-                ([ FormGroup.select appState (referenceTypeOptions appState) editorData.form "referenceType" <| lg "referenceType" appState ]
-                    ++ formFields
+                ((FormGroup.select appState (referenceTypeOptions appState) editorData.form "referenceType" <| lg "referenceType" appState)
+                    :: formFields
                 )
     in
     ( editorData.uuid

@@ -8,8 +8,8 @@ module Wizard.Common.View.Modal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, button, div, h5, p, text)
+import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (lx)

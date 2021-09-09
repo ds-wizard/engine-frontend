@@ -18,7 +18,6 @@ import Maybe.Extra as Maybe
 import Shared.Auth.Session as Session
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent(..))
@@ -341,6 +340,13 @@ viewEventHeaderDropdown appState cfg model event =
                         createDocumentAttributes =
                             linkToAttributes appState newDocumentRoute
 
+                        viewQuestionnaireAction =
+                            [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
+                                [ faSet "_global.questionnaire" appState
+                                , lx_ "action.viewQuestionnaire" appState
+                                ]
+                            ]
+
                         createDocumentAction =
                             if Session.exists appState.session then
                                 [ Dropdown.anchorItem createDocumentAttributes
@@ -352,13 +358,7 @@ viewEventHeaderDropdown appState cfg model event =
                             else
                                 []
                     in
-                    divider versionActions
-                        ++ [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
-                                [ faSet "_global.questionnaire" appState
-                                , lx_ "action.viewQuestionnaire" appState
-                                ]
-                           ]
-                        ++ createDocumentAction
+                    divider versionActions ++ viewQuestionnaireAction ++ createDocumentAction
 
                 _ ->
                     []

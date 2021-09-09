@@ -4,7 +4,6 @@ module Wizard.Projects.Index.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Dict
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Utils exposing (dictFromMaybeList)

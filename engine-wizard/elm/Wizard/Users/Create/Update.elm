@@ -1,7 +1,7 @@
 module Wizard.Users.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
-import Form exposing (Form)
+import Form
 import Random exposing (Seed, step)
 import Shared.Api.Users as UsersApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -14,7 +14,7 @@ import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Users.Common.UserCreateForm as UserCreateForm
-import Wizard.Users.Create.Models exposing (..)
+import Wizard.Users.Create.Models exposing (Model)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
 
 

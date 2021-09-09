@@ -5,12 +5,11 @@ module Shared.Data.Questionnaire exposing
     , isEditable
     )
 
-import Json.Decode as D exposing (..)
+import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
-import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.PackageInfo as PackageInfo exposing (PackageInfo)
 import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport exposing (QuestionnaireReport)

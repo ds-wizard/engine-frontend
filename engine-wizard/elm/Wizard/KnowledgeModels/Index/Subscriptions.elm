@@ -1,4 +1,4 @@
-module Wizard.KnowledgeModels.Index.Subscriptions exposing (..)
+module Wizard.KnowledgeModels.Index.Subscriptions exposing (subscriptions)
 
 import Wizard.Common.Components.Listing.Subscriptions as Listing
 import Wizard.KnowledgeModels.Index.Models exposing (Model)

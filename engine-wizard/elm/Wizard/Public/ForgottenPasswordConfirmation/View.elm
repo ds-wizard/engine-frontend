@@ -2,7 +2,7 @@ module Wizard.Public.ForgottenPasswordConfirmation.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Html exposing (..)
+import Html exposing (Html, div, h1, p)
 import Html.Attributes exposing (class)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (faSet)
@@ -14,7 +14,7 @@ import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Public.Common.PasswordForm exposing (PasswordForm)
 import Wizard.Public.Common.View exposing (publicForm)
-import Wizard.Public.ForgottenPasswordConfirmation.Models exposing (..)
+import Wizard.Public.ForgottenPasswordConfirmation.Models exposing (Model)
 import Wizard.Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
 import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Routes as Routes

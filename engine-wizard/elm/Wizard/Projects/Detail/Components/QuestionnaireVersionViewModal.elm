@@ -15,8 +15,6 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)

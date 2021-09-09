@@ -3,8 +3,6 @@ module Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Form
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Error.ApiError exposing (ApiError)
 import Wizard.KMEditor.Editor.KMEditor.Msgs
 import Wizard.KMEditor.Editor.Models exposing (EditorType)

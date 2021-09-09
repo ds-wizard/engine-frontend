@@ -2,8 +2,7 @@ module Wizard.Templates.Import.FileImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import File
-import Json.Decode exposing (decodeString, decodeValue)
-import Shared.Api.Packages as PackagesApi
+import Json.Decode exposing (decodeValue)
 import Shared.Api.Templates as TemplatesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
@@ -15,7 +14,6 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Templates.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.Templates.Import.FileImport.Msgs exposing (Msg(..))
-import Wizard.Templates.Routes exposing (Route(..))
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -35,7 +33,7 @@ update msg wrapMsg appState model =
                 Ok fileData ->
                     ( { model | file = Just fileData }, Cmd.none )
 
-                Err err ->
+                Err _ ->
                     ( model, Cmd.none )
 
         Submit ->
