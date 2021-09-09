@@ -1,8 +1,8 @@
-module Wizard.Projects.Create.TemplateCreate.View exposing (..)
+module Wizard.Projects.Create.TemplateCreate.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Form exposing (Form)
-import Html exposing (..)
+import Form
+import Html exposing (Html, div, text)
 import Html.Events exposing (onSubmit)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Locale exposing (l, lg)

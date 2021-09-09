@@ -1,9 +1,7 @@
 module Wizard.Projects.Create.View exposing (view)
 
-import Html exposing (..)
+import Html exposing (Html, div, li, ul)
 import Html.Attributes exposing (class, classList)
-import Shared.Auth.Permission as Permission
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)

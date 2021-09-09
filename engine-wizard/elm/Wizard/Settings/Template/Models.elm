@@ -1,4 +1,7 @@
-module Wizard.Settings.Template.Models exposing (..)
+module Wizard.Settings.Template.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig exposing (TemplateConfig)
@@ -12,6 +15,7 @@ type alias Model =
     }
 
 
+initialModel : Model
 initialModel =
     { genericModel = GenericModel.initialModel TemplateConfig.initEmptyForm
     , templates = Loading

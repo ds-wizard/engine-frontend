@@ -4,7 +4,6 @@ module Wizard.Projects.Detail.Documents.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Dict
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Submissions as SubmissionsApi

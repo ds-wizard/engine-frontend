@@ -1,4 +1,7 @@
-module Wizard.Settings.Dashboard.Models exposing (..)
+module Wizard.Settings.Dashboard.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import Wizard.Settings.Common.Forms.DashboardConfigForm as DashboardConfigForm exposing (DashboardConfigForm)
 import Wizard.Settings.Generic.Model as GenericModel

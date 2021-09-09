@@ -1,7 +1,7 @@
 module Wizard.KnowledgeModels.Index.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, code, div, img, p, span, strong, text)
+import Html.Attributes exposing (class, src, title)
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackageState as PackageState
@@ -10,7 +10,7 @@ import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
@@ -18,7 +18,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Routes
-import Wizard.KnowledgeModels.Index.Models exposing (..)
+import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Projects.Create.ProjectCreateRoute

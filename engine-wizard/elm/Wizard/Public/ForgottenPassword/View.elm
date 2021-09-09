@@ -2,7 +2,7 @@ module Wizard.Public.ForgottenPassword.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Html exposing (..)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lg)

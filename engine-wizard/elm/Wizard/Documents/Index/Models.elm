@@ -1,4 +1,4 @@
-module Wizard.Documents.Index.Models exposing (..)
+module Wizard.Documents.Index.Models exposing (Model, anyDocumentInProgress, initialModel)
 
 import ActionResult exposing (ActionResult(..))
 import List.Extra as List
@@ -37,30 +37,6 @@ initialModel questionnaireUuid paginationQueryString =
     , submissionServices = Unset
     , selectedSubmissionServiceId = Nothing
     }
-
-
-updateStates : Model -> List Document -> Model
-updateStates model documents =
-    let
-        setNewState item =
-            let
-                newState =
-                    documents
-                        |> List.find (\d -> d.uuid == item.uuid)
-                        |> Maybe.map .state
-                        |> Maybe.withDefault item.state
-            in
-            { item | state = newState }
-
-        transformItems listingModel =
-            let
-                newItems =
-                    listingModel.items
-                        |> List.map (\item -> { item | item = setNewState item.item })
-            in
-            { listingModel | items = newItems }
-    in
-    { model | documents = transformItems model.documents }
 
 
 anyDocumentInProgress : Model -> Bool

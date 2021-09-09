@@ -1,4 +1,7 @@
-module Wizard.KMEditor.Create.Update exposing (fetchData, update)
+module Wizard.KMEditor.Create.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
@@ -18,7 +21,7 @@ import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
-import Wizard.KMEditor.Create.Models exposing (..)
+import Wizard.KMEditor.Create.Models exposing (Model)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Msgs

@@ -47,7 +47,7 @@ import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
-import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
+import Shared.Data.UserInfo as UserInfo
 import Shared.Utils exposing (boolToInt)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)

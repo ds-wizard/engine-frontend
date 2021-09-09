@@ -61,7 +61,7 @@ import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field
-import Form.Validate as Validate exposing (..)
+import Form.Validate as Validate exposing (Validation)
 import List.Extra as List
 import Set
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
@@ -392,7 +392,7 @@ validateIntegrationId integrations uuid =
     in
     Validate.string
         |> Validate.andThen
-            (\s v ->
+            (\s _ ->
                 if List.member s existingUuids then
                     Err <| Error.value (CustomError IntegrationIdAlreadyUsed)
 
@@ -815,7 +815,7 @@ validateMetricMeasureValues prefix enabled =
         Validate.succeed MetricMeasureValues
             |> Validate.andMap (Validate.field (prefix ++ "weight") validateMeasureValue)
             |> Validate.andMap (Validate.field (prefix ++ "measure") validateMeasureValue)
-            |> map Just
+            |> Validate.map Just
 
     else
         Validate.succeed Nothing

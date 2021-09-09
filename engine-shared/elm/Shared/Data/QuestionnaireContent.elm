@@ -1,4 +1,7 @@
-module Shared.Data.QuestionnaireContent exposing (..)
+module Shared.Data.QuestionnaireContent exposing
+    ( QuestionnaireContent
+    , decoder
+    )
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)

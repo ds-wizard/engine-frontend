@@ -1,13 +1,11 @@
 module Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
-import Html exposing (Html, code, div, h3, span, strong, text)
+import Html exposing (Html, code, div, h3, span, text)
 import Html.Attributes exposing (class, title)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
-import Time
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing as Listing exposing (ListingConfig)

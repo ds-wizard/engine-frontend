@@ -1,4 +1,4 @@
-module Shared.Common.Provisioning.DefaultLocale exposing (..)
+module Shared.Common.Provisioning.DefaultLocale exposing (locale)
 
 
 locale : List ( String, String )

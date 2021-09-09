@@ -1,4 +1,4 @@
-module Wizard.KMEditor.Create.Subscriptions exposing (..)
+module Wizard.KMEditor.Create.Subscriptions exposing (subscriptions)
 
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.KMEditor.Create.Models exposing (Model)

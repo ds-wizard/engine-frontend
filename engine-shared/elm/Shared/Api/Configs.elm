@@ -1,4 +1,7 @@
-module Shared.Api.Configs exposing (..)
+module Shared.Api.Configs exposing
+    ( getAppConfig
+    , putAppConfig
+    )
 
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)

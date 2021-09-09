@@ -8,7 +8,7 @@ import Url exposing (Url)
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Time as Time
 import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
-import Wizard.Models exposing (..)
+import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
 import Wizard.Projects.Routes as PlansRoutes exposing (Route(..))

@@ -178,8 +178,8 @@ formView appState model =
         acceptGroup =
             div [ class "form-group form-group-accept", classList [ ( "has-error", hasError ) ] ]
                 [ label [ for "accept" ]
-                    ([ Input.checkboxInput acceptField [ id "accept", name "accept" ] ]
-                        ++ lh_ "formView.privacyRead"
+                    (Input.checkboxInput acceptField [ id "accept", name "accept" ]
+                        :: lh_ "formView.privacyRead"
                             [ a [ href "https://ds-wizard.org/privacy.html", target "_blank" ]
                                 [ lx_ "formView.privacy" appState ]
                             , a [ href "https://ds-wizard.org/terms.html", target "_blank" ]

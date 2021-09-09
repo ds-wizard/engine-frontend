@@ -8,7 +8,6 @@ module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
 import Html exposing (Html, div, span, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)

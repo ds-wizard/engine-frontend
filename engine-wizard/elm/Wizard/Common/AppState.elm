@@ -10,7 +10,7 @@ module Wizard.Common.AppState exposing
 
 import Browser.Navigation as Navigation exposing (Key)
 import Dict
-import Json.Decode as D exposing (Decoder, Error(..))
+import Json.Decode as D exposing (Error(..))
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Common.Navigator exposing (Navigator)

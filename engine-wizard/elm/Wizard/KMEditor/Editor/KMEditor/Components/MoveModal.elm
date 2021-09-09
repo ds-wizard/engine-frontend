@@ -11,7 +11,7 @@ module Wizard.KMEditor.Editor.KMEditor.Components.MoveModal exposing
     )
 
 import Dict exposing (Dict)
-import Html exposing (..)
+import Html exposing (Html, button, div, h5, label)
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import Shared.Locale exposing (lx)

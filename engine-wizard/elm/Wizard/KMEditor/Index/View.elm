@@ -2,20 +2,18 @@ module Wizard.KMEditor.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Form
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Attribute, Html, a, code, div, i, p, span, strong, text)
+import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
-import Shared.Auth.Permission as Perm
-import Shared.Auth.Session exposing (Session)
-import Shared.Data.Branch as Branch exposing (Branch)
+import Shared.Data.Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
-import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
+import Shared.Data.PackageDetail as PackageDetail
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf, packageIdToComponents)
-import Version exposing (Version)
+import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
@@ -24,7 +22,7 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.BranchUtils as BranchUtils
-import Wizard.KMEditor.Index.Models exposing (..)
+import Wizard.KMEditor.Index.Models exposing (Model)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.KnowledgeModels.Routes

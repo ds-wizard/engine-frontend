@@ -49,7 +49,7 @@ encode data =
                 AddReferenceCrossEventData.encode
                 data
     in
-    [ ( "eventType", E.string "AddReferenceEvent" ) ] ++ eventData
+    ( "eventType", E.string "AddReferenceEvent" ) :: eventData
 
 
 getEntityVisibleName : AddReferenceEventData -> Maybe String

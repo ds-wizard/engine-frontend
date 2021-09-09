@@ -7,7 +7,7 @@ import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
@@ -15,12 +15,10 @@ import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAc
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setLevels, setMetrics)
 import Shared.Utils exposing (getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire

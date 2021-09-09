@@ -285,7 +285,7 @@ applyCurrentEditorChanges appState seed model =
             in
             ( newSeed, addSessionEvents newEvents model )
 
-        ( KMEditor, Success km ) ->
+        ( KMEditor, Success _ ) ->
             let
                 map ( mapSeed, editorModel, _ ) =
                     ( mapSeed, editorModel.events, Just editorModel )

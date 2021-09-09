@@ -1,4 +1,4 @@
-module Wizard.Projects.Create.TemplateCreate.Subscriptions exposing (..)
+module Wizard.Projects.Create.TemplateCreate.Subscriptions exposing (subscriptions)
 
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Projects.Create.TemplateCreate.Models exposing (Model)

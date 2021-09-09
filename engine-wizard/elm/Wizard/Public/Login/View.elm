@@ -1,8 +1,8 @@
 module Wizard.Public.Login.View exposing (view)
 
-import Html exposing (..)
+import Html exposing (Html, div, form, input, span)
 import Html.Attributes exposing (class, id, placeholder, type_)
-import Html.Events exposing (..)
+import Html.Events exposing (onInput, onSubmit)
 import Markdown
 import Shared.Html exposing (fa)
 import Shared.Locale exposing (l, lg, lx)
@@ -76,10 +76,9 @@ formView appState model =
 
         externalLogin =
             if List.length appState.config.authentication.external.services > 0 then
-                [ div [ class "external-login-separator", dataCy "login_external_separator" ]
+                div [ class "external-login-separator", dataCy "login_external_separator" ]
                     [ lx_ "connectWith" appState ]
-                ]
-                    ++ List.map (ExternalLoginButton.view appState) appState.config.authentication.external.services
+                    :: List.map (ExternalLoginButton.view appState) appState.config.authentication.external.services
 
             else
                 []
@@ -88,8 +87,8 @@ formView appState model =
         [ form [ onSubmit DoLogin, class "card bg-light" ]
             [ div [ class "card-header" ] [ lx_ "form.title" appState ]
             , div [ class "card-body" ]
-                ([ FormResult.view appState model.loggingIn ]
-                    ++ loginForm
+                (FormResult.view appState model.loggingIn
+                    :: loginForm
                     ++ externalLogin
                 )
             ]

@@ -5,7 +5,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lgx, lx)
+import Shared.Locale exposing (lgx, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
@@ -13,11 +13,6 @@ import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Tag as Tag
 import Wizard.KMEditor.Editor.Preview.Models exposing (Model)
 import Wizard.KMEditor.Editor.Preview.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Editor.Preview.View"
 
 
 lx_ : String -> AppState -> Html msg

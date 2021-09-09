@@ -1,6 +1,16 @@
-module Shared.Locale exposing (..)
+module Shared.Locale exposing
+    ( l
+    , lf
+    , lg
+    , lgf
+    , lgh
+    , lgx
+    , lh
+    , lr
+    , lx
+    )
 
-import Dict exposing (Dict)
+import Dict
 import Html exposing (Html, text)
 import Shared.Provisioning exposing (Provisioning)
 import String.Format as String

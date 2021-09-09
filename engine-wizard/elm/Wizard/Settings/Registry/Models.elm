@@ -1,4 +1,7 @@
-module Wizard.Settings.Registry.Models exposing (..)
+module Wizard.Settings.Registry.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)

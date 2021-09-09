@@ -1,20 +1,16 @@
 module Wizard.KMEditor.Editor.View exposing (view)
 
 import ActionResult
-import Html exposing (..)
+import Html exposing (Html, a, button, div, li, span, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
-import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
-import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Editor.KMEditor.View
 import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model, containsChanges, getSavingError, hasSavingError)
@@ -22,7 +18,6 @@ import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Editor.Preview.View
 import Wizard.KMEditor.Editor.Settings.View
 import Wizard.KMEditor.Editor.TagEditor.View
-import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 

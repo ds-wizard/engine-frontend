@@ -1,7 +1,6 @@
 module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Dict
 import Form
 import Maybe.Extra as Maybe
 import Shared.Api.Branches as BranchesApi
@@ -9,7 +8,7 @@ import Shared.Api.Packages as PackagesApi
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lg)
+import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPackage)
 import Shared.Utils exposing (withNoCmd)
 import Uuid exposing (Uuid)
@@ -24,11 +23,6 @@ import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Index.Update"
 
 
 fetchData : Cmd Msg

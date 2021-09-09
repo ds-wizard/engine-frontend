@@ -3,7 +3,7 @@ module Wizard.Settings.Organization.View exposing (view)
 import Form exposing (Form)
 import Html exposing (Html, div)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lx)
+import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -16,11 +16,6 @@ import Wizard.Settings.Organization.Models exposing (Model)
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Settings.Organization.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.Organization.View"
 
 
 view : AppState -> Model -> Html Msg

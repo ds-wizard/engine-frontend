@@ -10,11 +10,10 @@ module Wizard.Common.View.ActionButton exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Attribute, Html, text)
+import Html.Attributes exposing (class, disabled, type_)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (faSet)
-import String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 
@@ -97,7 +96,7 @@ actionButtonView appState attributes content result =
                     content
 
         buttonAttributes =
-            [ disabled (result == Loading) ] ++ attributes
+            disabled (result == Loading) :: attributes
     in
     Html.button buttonAttributes buttonContent
 

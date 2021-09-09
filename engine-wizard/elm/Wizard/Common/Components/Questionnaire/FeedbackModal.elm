@@ -8,8 +8,8 @@ module Wizard.Common.Components.Questionnaire.FeedbackModal exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, div, li, p, text, ul)
+import Html.Attributes exposing (class, href, target)
 import Maybe.Extra as Maybe
 import Shared.Api.Feedbacks as FeedbacksApi
 import Shared.Data.Feedback exposing (Feedback)

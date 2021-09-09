@@ -10,7 +10,9 @@ import Uuid exposing (Uuid)
 
 
 type alias QuestionnaireDescriptor =
-    { name : String, uuid : Uuid }
+    { name : String
+    , uuid : Uuid
+    }
 
 
 fromQuestionnaire : Questionnaire -> QuestionnaireDescriptor

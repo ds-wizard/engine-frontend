@@ -2,16 +2,13 @@ module Wizard.Settings.KnowledgeModels.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, button, div, hr, span, text)
+import Html exposing (Html, button, div, span)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.EditableKnowledgeModelConfigFrom exposing (EditableKnowledgeModelConfigForm)
@@ -73,6 +70,7 @@ formView appState form =
         ]
 
 
+allowedPackageFormView : AppState -> Form FormError EditableKnowledgeModelConfigForm -> Int -> Html Form.Msg
 allowedPackageFormView appState form index =
     let
         fieldName name =

@@ -9,7 +9,7 @@ import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Common.SignupForm as SignupForm
-import Wizard.Public.Signup.Models exposing (..)
+import Wizard.Public.Signup.Models exposing (Model)
 import Wizard.Public.Signup.Msgs exposing (Msg(..))
 
 

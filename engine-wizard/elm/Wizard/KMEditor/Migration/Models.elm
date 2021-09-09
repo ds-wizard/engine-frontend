@@ -1,7 +1,9 @@
-module Wizard.KMEditor.Migration.Models exposing (Model, initialModel)
+module Wizard.KMEditor.Migration.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.Migration exposing (Migration)
 import Uuid exposing (Uuid)
 

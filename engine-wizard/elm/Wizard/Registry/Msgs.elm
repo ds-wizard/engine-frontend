@@ -1,4 +1,4 @@
-module Wizard.Registry.Msgs exposing (..)
+module Wizard.Registry.Msgs exposing (Msg(..))
 
 import Wizard.Registry.RegistrySignupConfirmation.Msgs
 

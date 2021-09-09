@@ -15,7 +15,7 @@ import Bootstrap.Dropdown as Dropdown
 import Browser.Dom as Dom
 import Browser.Events
 import Debounce exposing (Debounce)
-import Html exposing (Attribute, Html, a, div, input, li, text, ul)
+import Html exposing (Html, a, div, input, li, text, ul)
 import Html.Attributes exposing (class, classList, id, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseDown, stopPropagationOn)
 import Json.Decode as D exposing (Decoder)

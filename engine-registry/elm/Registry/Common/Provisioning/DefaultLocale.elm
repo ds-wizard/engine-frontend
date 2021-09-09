@@ -1,4 +1,4 @@
-module Registry.Common.Provisioning.DefaultLocale exposing (..)
+module Registry.Common.Provisioning.DefaultLocale exposing (locale)
 
 import Dict exposing (Dict)
 import Shared.Common.Provisioning.DefaultLocale as SharedLocale

@@ -20,7 +20,6 @@ module Shared.Utils exposing
     )
 
 import Color
-import Color.Accessibility exposing (contrastRatio)
 import Color.Convert exposing (hexToColor)
 import Dict exposing (Dict)
 import List.Extra as List

@@ -1,4 +1,7 @@
-module Wizard.Settings.Submission.Models exposing (..)
+module Wizard.Settings.Submission.Models exposing
+    ( Model
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)

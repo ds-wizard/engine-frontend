@@ -1,4 +1,4 @@
-module Wizard.KMEditor.Editor.Settings.View exposing (..)
+module Wizard.KMEditor.Editor.Settings.View exposing (view)
 
 import Form exposing (Form)
 import Html exposing (Html, div)

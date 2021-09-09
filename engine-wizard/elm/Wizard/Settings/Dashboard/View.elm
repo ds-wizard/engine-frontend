@@ -1,7 +1,7 @@
 module Wizard.Settings.Dashboard.View exposing (view)
 
 import Form exposing (Form)
-import Html exposing (Html, div, img, label, p, strong, text)
+import Html exposing (Html, div, img, label, p, strong)
 import Html.Attributes exposing (class, src)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)

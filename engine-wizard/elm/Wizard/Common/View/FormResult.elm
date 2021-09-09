@@ -5,9 +5,8 @@ module Wizard.Common.View.FormResult exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (..)
-import Shared.Html exposing (..)
-import String
+import Html exposing (Html)
+import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash
 

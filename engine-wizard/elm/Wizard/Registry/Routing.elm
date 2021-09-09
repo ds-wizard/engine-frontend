@@ -1,7 +1,11 @@
-module Wizard.Registry.Routing exposing (isAllowed, parsers, toUrl)
+module Wizard.Registry.Routing exposing
+    ( isAllowed
+    , parsers
+    , toUrl
+    )
 
 import Shared.Locale exposing (lr)
-import Url.Parser exposing (..)
+import Url.Parser exposing ((</>), Parser, map, s, string)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Registry.Routes exposing (Route(..))

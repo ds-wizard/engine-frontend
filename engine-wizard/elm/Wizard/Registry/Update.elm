@@ -1,4 +1,4 @@
-module Wizard.Registry.Update exposing (..)
+module Wizard.Registry.Update exposing (fetchData, update)
 
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -17,7 +17,7 @@ fetchData route appState =
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update msg wrapMsg appState model =
+update msg _ appState model =
     case msg of
         RegistrySignupConfirmationMsg rMsg ->
             let

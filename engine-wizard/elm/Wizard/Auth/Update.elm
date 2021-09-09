@@ -7,7 +7,6 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs as AuthMsgs
-import Wizard.Common.AppState exposing (AppState)
 import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports

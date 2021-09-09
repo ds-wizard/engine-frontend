@@ -11,8 +11,6 @@ module Wizard.Projects.Detail.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnaireApi
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.WebSocket as WebSocket exposing (WebSocket)

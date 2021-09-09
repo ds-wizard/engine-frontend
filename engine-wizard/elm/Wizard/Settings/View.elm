@@ -84,12 +84,22 @@ view route appState model =
 
 navigation : AppState -> Route -> Html Msg
 navigation appState currentRoute =
+    let
+        systemTitle =
+            [ strong [] [ lx_ "navigation.title.system" appState ] ]
+
+        userInterfaceTitle =
+            [ strong [] [ lx_ "navigation.title.userInterface" appState ] ]
+
+        contentTitle =
+            [ strong [] [ lx_ "navigation.title.content" appState ] ]
+    in
     div [ class "nav nav-pills flex-column" ]
-        ([ strong [] [ lx_ "navigation.title.system" appState ] ]
+        (systemTitle
             ++ List.map (navigationLink appState currentRoute) (navigationSystemLinks appState)
-            ++ [ strong [] [ lx_ "navigation.title.userInterface" appState ] ]
+            ++ userInterfaceTitle
             ++ List.map (navigationLink appState currentRoute) (navigationUserInterfaceLinks appState)
-            ++ [ strong [] [ lx_ "navigation.title.content" appState ] ]
+            ++ contentTitle
             ++ List.map (navigationLink appState currentRoute) (navigationContentLinks appState)
         )
 

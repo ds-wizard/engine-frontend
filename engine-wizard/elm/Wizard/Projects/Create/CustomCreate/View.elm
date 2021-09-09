@@ -1,8 +1,8 @@
-module Wizard.Projects.Create.CustomCreate.View exposing (..)
+module Wizard.Projects.Create.CustomCreate.View exposing (view)
 
 import ActionResult
-import Form exposing (Form)
-import Html exposing (..)
+import Form
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (disabled)
 import Html.Events exposing (onSubmit)
 import Shared.Locale exposing (l, lg)

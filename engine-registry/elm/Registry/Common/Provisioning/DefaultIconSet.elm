@@ -1,4 +1,4 @@
-module Registry.Common.Provisioning.DefaultIconSet exposing (..)
+module Registry.Common.Provisioning.DefaultIconSet exposing (iconSet)
 
 import Dict exposing (Dict)
 

@@ -1,4 +1,7 @@
-module Wizard.KMEditor.Publish.Update exposing (fetchData, update)
+module Wizard.KMEditor.Publish.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Form
@@ -16,7 +19,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Common.BranchPublishForm as BranchPublishForm
 import Wizard.KMEditor.Publish.Models exposing (Model)
 import Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Routes
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)

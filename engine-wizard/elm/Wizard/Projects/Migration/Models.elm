@@ -13,7 +13,6 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)

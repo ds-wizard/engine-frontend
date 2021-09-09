@@ -6,8 +6,8 @@ module Wizard.KMEditor.Common.BranchUpgradeForm exposing
     )
 
 import Form exposing (Form)
-import Form.Validate as Validate exposing (..)
-import Json.Encode as E exposing (..)
+import Form.Validate as Validate exposing (Validation)
+import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
 
 

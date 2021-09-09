@@ -1,16 +1,14 @@
 module Wizard.KnowledgeModels.Detail.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, br, dd, div, dl, dt, li, p, strong, text, ul)
+import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Markdown
 import Shared.Api.Packages as PackagesApi
-import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
@@ -23,8 +21,8 @@ import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Detail.Models exposing (..)
-import Wizard.KnowledgeModels.Detail.Msgs exposing (..)
+import Wizard.KnowledgeModels.Detail.Models exposing (Model)
+import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Routes
@@ -189,8 +187,8 @@ newVersionInRegistryWarning appState package =
                     package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
             in
             div [ class "alert alert-warning" ]
-                ([ faSet "_global.warning" appState ]
-                    ++ lh_ "registryVersion.warning"
+                (faSet "_global.warning" appState
+                    :: lh_ "registryVersion.warning"
                         [ text (Version.toString remoteLatestVersion)
                         , linkTo appState
                             (Routes.KnowledgeModelsRoute <| ImportRoute <| Just <| latestPackageId)
@@ -273,29 +271,26 @@ sidePanelOtherVersions appState package =
 
 sidePanelOrganizationInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelOrganizationInfo appState package =
-    case package.organization of
-        Just organization ->
-            Just ( lg "package.publishedBy" appState, "published-by", viewOrganization organization )
-
-        Nothing ->
-            Nothing
+    let
+        toOrganizationInfo organization =
+            ( lg "package.publishedBy" appState, "published-by", viewOrganization organization )
+    in
+    Maybe.map toOrganizationInfo package.organization
 
 
 sidePanelRegistryLink : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelRegistryLink appState package =
-    case package.registryLink of
-        Just registryLink ->
-            Just
-                ( lg "package.registryLink" appState
-                , "registry-link"
-                , a [ href registryLink, class "link-with-icon", target "_blank" ]
-                    [ faSet "kmDetail.registryLink" appState
-                    , text package.id
-                    ]
-                )
-
-        Nothing ->
-            Nothing
+    let
+        toRegistryLinkInfo registryLink =
+            ( lg "package.registryLink" appState
+            , "registry-link"
+            , a [ href registryLink, class "link-with-icon", target "_blank" ]
+                [ faSet "kmDetail.registryLink" appState
+                , text package.id
+                ]
+            )
+    in
+    Maybe.map toRegistryLinkInfo package.registryLink
 
 
 list : Int -> Int -> List ( String, String, Html msg ) -> Html msg

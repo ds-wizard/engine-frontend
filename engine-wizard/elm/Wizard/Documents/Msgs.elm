@@ -1,4 +1,4 @@
-module Wizard.Documents.Msgs exposing (..)
+module Wizard.Documents.Msgs exposing (Msg(..))
 
 import Wizard.Documents.Index.Msgs
 

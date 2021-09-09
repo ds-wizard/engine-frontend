@@ -9,7 +9,7 @@ import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Common.PasswordForm as PasswordForm
-import Wizard.Public.ForgottenPasswordConfirmation.Models exposing (..)
+import Wizard.Public.ForgottenPasswordConfirmation.Models exposing (Model)
 import Wizard.Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
 
 

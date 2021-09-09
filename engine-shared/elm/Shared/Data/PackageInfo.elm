@@ -1,6 +1,9 @@
-module Shared.Data.PackageInfo exposing (..)
+module Shared.Data.PackageInfo exposing
+    ( PackageInfo
+    , decoder
+    )
 
-import Json.Decode as D exposing (..)
+import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Version exposing (Version)
 

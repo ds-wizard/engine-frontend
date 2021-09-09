@@ -2,7 +2,7 @@ module Wizard.KnowledgeModels.Import.RegistryImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Packages as PackagesApi
-import Shared.Locale exposing (l, lg)
+import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPulling)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)

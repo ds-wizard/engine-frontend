@@ -25,10 +25,9 @@ module Shared.Api.Questionnaires exposing
     )
 
 import Http
-import Json.Decode as D
 import Json.Encode as E exposing (Value)
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizationHeaders, authorizedUrl, expectMetadata, jwtDelete, jwtFetch, jwtFetchEmpty, jwtFetchPut, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpHead, jwtOrHttpPut, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
+import Shared.Api exposing (ToMsg, authorizationHeaders, authorizedUrl, expectMetadata, jwtDelete, jwtFetch, jwtFetchEmpty, jwtFetchPut, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpPut, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -167,11 +166,6 @@ getDocuments questionnaireUuid qs =
             "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents" ++ PaginationQueryString.toApiUrl qs
     in
     jwtOrHttpGet url (Pagination.decoder "documents" Document.decoder)
-
-
-getVersions : Uuid -> AbstractAppState a -> ToMsg (List QuestionnaireVersion) msg -> Cmd msg
-getVersions questionnaireUuid =
-    jwtGet ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/versions") (D.list QuestionnaireVersion.decoder)
 
 
 postVersion : Uuid -> Value -> AbstractAppState a -> ToMsg QuestionnaireVersion msg -> Cmd msg

@@ -76,7 +76,7 @@ receive messageDecoder value ws =
                             Ok action ->
                                 Message action
 
-                            Err err ->
+                            Err _ ->
                                 Ignore
 
                     "close" ->
@@ -88,7 +88,7 @@ receive messageDecoder value ws =
             else
                 Ignore
 
-        Err err ->
+        Err _ ->
             Ignore
 
 

@@ -1,7 +1,10 @@
-module Wizard.KMEditor.Editor.KMEditor.View.Tree exposing (TreeNodeContext, treeView)
+module Wizard.KMEditor.Editor.KMEditor.View.Tree exposing
+    ( TreeNodeContext
+    , treeView
+    )
 
 import Dict exposing (Dict)
-import Html exposing (..)
+import Html exposing (Html, a, div, i, li, span, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel.Question as Question
@@ -10,7 +13,7 @@ import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, ChapterEditorData, ChoiceEditorData, Editor(..), EditorLike, EditorState(..), ExpertEditorData, IntegrationEditorData, KMEditorData, MetricEditorData, PhaseEditorData, QuestionEditorData, ReferenceEditorData, TagEditorData)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (isListQuestionForm, isMultiChoiceQuestionForm, isOptionsQuestionForm)
 import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (Msg(..))
 

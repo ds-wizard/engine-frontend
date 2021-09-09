@@ -1,4 +1,4 @@
-module Wizard.Registry.Routes exposing (..)
+module Wizard.Registry.Routes exposing (Route(..))
 
 
 type Route

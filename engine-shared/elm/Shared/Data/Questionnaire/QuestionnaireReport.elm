@@ -3,7 +3,7 @@ module Shared.Data.Questionnaire.QuestionnaireReport exposing
     , decoder
     )
 
-import Json.Decode as D exposing (..)
+import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.SummaryReport exposing (IndicationReport, indicationReportDecoder)
 

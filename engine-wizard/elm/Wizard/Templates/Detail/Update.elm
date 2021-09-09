@@ -1,4 +1,7 @@
-module Wizard.Templates.Detail.Update exposing (fetchData, update)
+module Wizard.Templates.Detail.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Templates as TemplatesApi
@@ -10,9 +13,8 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
-import Wizard.Templates.Detail.Models exposing (..)
+import Wizard.Templates.Detail.Models exposing (Model)
 import Wizard.Templates.Detail.Msgs exposing (Msg(..))
-import Wizard.Templates.Routes exposing (Route(..))
 
 
 fetchData : String -> AppState -> Cmd Msg

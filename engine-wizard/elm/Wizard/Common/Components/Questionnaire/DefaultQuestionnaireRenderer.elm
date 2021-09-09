@@ -1,6 +1,6 @@
 module Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer exposing (create)
 
-import Html exposing (..)
+import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
 import List.Extra as List
 import Markdown

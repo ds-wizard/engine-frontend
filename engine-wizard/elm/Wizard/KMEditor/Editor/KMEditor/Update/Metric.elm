@@ -1,4 +1,8 @@
-module Wizard.KMEditor.Editor.KMEditor.Update.Metric exposing (..)
+module Wizard.KMEditor.Editor.KMEditor.Update.Metric exposing
+    ( deleteMetric
+    , updateMetricForm
+    , withGenerateMetricEditEvent
+    )
 
 import Form
 import Random exposing (Seed)
@@ -6,10 +10,10 @@ import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children exposing (Children)
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), KMEditorData, MetricEditorData, QuestionEditorData, TagEditorData, isMetricEditorDirty, isTagEditorDirty, updateMetricEditorData, updateTagEditorData)
-import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (metricFormValidation, tagFormValidation)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), KMEditorData, MetricEditorData, isMetricEditorDirty, updateMetricEditorData)
+import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (metricFormValidation)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (deleteEntity, updateForm, withGenerateEvent)
-import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createAddMetricEvent, createAddTagEvent, createDeleteMetricEvent, createDeleteTagEvent, createEditMetricEvent, createEditTagEvent)
+import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createAddMetricEvent, createDeleteMetricEvent, createEditMetricEvent)
 import Wizard.Msgs
 
 

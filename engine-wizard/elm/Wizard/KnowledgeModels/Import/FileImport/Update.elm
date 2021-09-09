@@ -10,7 +10,6 @@ import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Ports exposing (createDropzone, fileSelected)
 import Wizard.Routes as Routes
@@ -34,7 +33,7 @@ update msg wrapMsg appState model =
                 Ok fileData ->
                     ( { model | file = Just fileData }, Cmd.none )
 
-                Err err ->
+                Err _ ->
                     ( model, Cmd.none )
 
         Submit ->
