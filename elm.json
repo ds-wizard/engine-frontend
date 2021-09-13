@@ -35,7 +35,7 @@
             "myrho/elm-round": "1.0.4",
             "noahzgordon/elm-color-extra": "1.0.2",
             "rundis/elm-bootstrap": "5.1.0",
-            "simonh1000/elm-jwt": "7.0.0",
+            "simonh1000/elm-jwt": "7.1.1",
             "truqu/elm-md5": "1.1.0"
         },
         "indirect": {
