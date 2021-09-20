@@ -14,6 +14,7 @@ import Shared.Provisioning exposing (Provisioning)
 
 type QuestionnairePermission
     = View
+    | Comment
     | Edit
 
 
@@ -25,6 +26,9 @@ validation =
                 case value of
                     "view" ->
                         V.succeed View
+
+                    "comment" ->
+                        V.succeed Comment
 
                     "edit" ->
                         V.succeed Edit
@@ -40,6 +44,9 @@ toString questionnaireEditability =
         View ->
             "view"
 
+        Comment ->
+            "comment"
+
         Edit ->
             "edit"
 
@@ -52,5 +59,6 @@ field =
 formOptions : { a | provisioning : Provisioning } -> List ( String, String )
 formOptions appState =
     [ ( "view", lg "questionnairePermission.view" appState )
+    , ( "comment", lg "questionnairePermission.comment" appState )
     , ( "edit", lg "questionnairePermission.edit" appState )
     ]

@@ -19,6 +19,7 @@ import Wizard.Common.AppState exposing (AppState)
 
 type QuestionnaireEditFormMemberPerms
     = Viewer
+    | Commenter
     | Editor
     | Owner
 
@@ -32,6 +33,9 @@ initFromPerms perms =
         else if List.member QuestionnairePerm.edit perms then
             toString Editor
 
+        else if List.member QuestionnairePerm.comment perms then
+            toString Commenter
+
         else
             toString Viewer
 
@@ -41,6 +45,9 @@ toString perms =
     case perms of
         Viewer ->
             "Viewer"
+
+        Commenter ->
+            "Commenter"
 
         Editor ->
             "Editor"
@@ -52,6 +59,7 @@ toString perms =
 formOptions : AppState -> List ( String, String )
 formOptions appState =
     [ ( toString Viewer, lg "project.role.viewer" appState )
+    , ( toString Commenter, lg "project.role.commenter" appState )
     , ( toString Editor, lg "project.role.editor" appState )
     , ( toString Owner, lg "project.role.owner" appState )
     ]
@@ -65,6 +73,9 @@ validation =
                 case formPerms of
                     "Viewer" ->
                         V.succeed Viewer
+
+                    "Commenter" ->
+                        V.succeed Commenter
 
                     "Editor" ->
                         V.succeed Editor
@@ -82,10 +93,13 @@ encode perms =
     E.list E.string <|
         case perms of
             Owner ->
-                [ QuestionnairePerm.view, QuestionnairePerm.edit, QuestionnairePerm.admin ]
+                [ QuestionnairePerm.view, QuestionnairePerm.comment, QuestionnairePerm.edit, QuestionnairePerm.admin ]
 
             Editor ->
-                [ QuestionnairePerm.view, QuestionnairePerm.edit ]
+                [ QuestionnairePerm.view, QuestionnairePerm.comment, QuestionnairePerm.edit ]
+
+            Commenter ->
+                [ QuestionnairePerm.view, QuestionnairePerm.comment ]
 
             Viewer ->
                 [ QuestionnairePerm.view ]
