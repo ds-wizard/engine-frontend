@@ -28,7 +28,7 @@
             "elm-community/maybe-extra": "5.0.0",
             "elm-explorations/markdown": "1.0.0",
             "etaque/elm-form": "4.0.0",
-            "gingko/time-distance": "2.1.1",
+            "gingko/time-distance": "2.3.0",
             "jinjor/elm-debounce": "3.0.0",
             "jinjor/elm-diff": "1.0.6",
             "kuon/elm-string-normalize": "1.0.2",
