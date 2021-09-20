@@ -30,7 +30,7 @@ import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lh, lx)
+import Shared.Locale exposing (lg, lh, lx)
 import Shared.Utils exposing (flip)
 import Time
 import Uuid exposing (Uuid)
@@ -41,11 +41,6 @@ import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes as ProjectRoute
 import Wizard.Routes as Route
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.Questionnaire.History"
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
@@ -160,8 +155,9 @@ view appState cfg model =
                 identity
 
         filterEvents event =
-            not (QuestionnaireEvent.isSetLabels event) && not (QuestionnaireEvent.isSetReplyList event)
+            not (QuestionnaireEvent.isInvisible event)
 
+        --not (QuestionnaireEvent.isSetLabels event) && not (QuestionnaireEvent.isSetReplyList event)
         eventGroups =
             cfg.questionnaire.events
                 |> List.filter filterEvents
@@ -518,7 +514,7 @@ viewEventUser appState mbUser =
                     ( User.imageUrlOrGravatar user, User.fullName user )
 
                 Nothing ->
-                    ( User.defaultGravatar, l_ "user.anonymous" appState )
+                    ( User.defaultGravatar, lg "user.anonymous" appState )
     in
     div [ class "user" ]
         [ img [ src imageUrl, class "user-icon user-icon-small" ] []

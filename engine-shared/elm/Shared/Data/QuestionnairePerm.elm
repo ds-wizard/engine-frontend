@@ -1,6 +1,7 @@
 module Shared.Data.QuestionnairePerm exposing
     ( admin
     , all
+    , comment
     , edit
     , view
     )
@@ -9,6 +10,11 @@ module Shared.Data.QuestionnairePerm exposing
 view : String
 view =
     "VIEW"
+
+
+comment : String
+comment =
+    "COMMENT"
 
 
 edit : String
@@ -23,4 +29,4 @@ admin =
 
 all : List String
 all =
-    [ view, edit, admin ]
+    [ view, comment, edit, admin ]

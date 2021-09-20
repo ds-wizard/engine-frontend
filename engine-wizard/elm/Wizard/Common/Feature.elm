@@ -21,6 +21,13 @@ module Wizard.Common.Feature exposing
     , knowledgeModelsView
     , projectCancelMigration
     , projectClone
+    , projectCommentAdd
+    , projectCommentDelete
+    , projectCommentEdit
+    , projectCommentPrivate
+    , projectCommentThreadDelete
+    , projectCommentThreadReopen
+    , projectCommentThreadResolve
     , projectContinueMigration
     , projectCreateMigration
     , projectDelete
@@ -30,6 +37,8 @@ module Wizard.Common.Feature exposing
     , projectPreview
     , projectSettings
     , projectTemplatesCreate
+    , projectTodos
+    , projectVersionHitory
     , projectsCreateCustom
     , projectsCreateFromTemplate
     , projectsView
@@ -52,6 +61,8 @@ import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
+import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.UserInfo as UserInfo
 import Wizard.Common.AppState exposing (AppState)
 
@@ -256,9 +267,54 @@ projectDocumentsView _ _ =
     True
 
 
+projectTodos : AppState -> QuestionnaireDetail -> Bool
+projectTodos =
+    QuestionnaireDetail.isEditor
+
+
+projectVersionHitory : AppState -> QuestionnaireDetail -> Bool
+projectVersionHitory =
+    QuestionnaireDetail.isEditor
+
+
 projectSettings : AppState -> QuestionnaireDetail -> Bool
 projectSettings appState questionnaire =
     QuestionnaireDetail.isOwner appState questionnaire
+
+
+projectCommentAdd : AppState -> QuestionnaireDetail -> Bool
+projectCommentAdd appState questionnaire =
+    QuestionnaireDetail.canComment appState questionnaire
+
+
+projectCommentEdit : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
+projectCommentEdit appState questionnaire commentThread comment =
+    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.session.user comment
+
+
+projectCommentDelete : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
+projectCommentDelete appState questionnaire commentThread comment =
+    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.session.user comment
+
+
+projectCommentThreadResolve : AppState -> QuestionnaireDetail -> CommentThread -> Bool
+projectCommentThreadResolve appState questionnaire commentThread =
+    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved
+
+
+projectCommentThreadReopen : AppState -> QuestionnaireDetail -> CommentThread -> Bool
+projectCommentThreadReopen appState questionnaire commentThread =
+    QuestionnaireDetail.canComment appState questionnaire && commentThread.resolved
+
+
+projectCommentThreadDelete : AppState -> QuestionnaireDetail -> CommentThread -> Bool
+projectCommentThreadDelete appState questionnaire commentThread =
+    QuestionnaireDetail.canComment appState questionnaire && CommentThread.isAuthor appState.session.user commentThread
+
+
+projectCommentPrivate : AppState -> QuestionnaireDetail -> Bool
+projectCommentPrivate appState questionnaire =
+    QuestionnaireDetail.isEditor appState questionnaire
 
 
 
@@ -266,8 +322,8 @@ projectSettings appState questionnaire =
 
 
 documentsView : AppState -> Bool
-documentsView appState =
-    adminOr Perm.dataManagementPlan appState
+documentsView =
+    isAdmin
 
 
 documentDelete : AppState -> Document -> Bool

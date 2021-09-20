@@ -25,6 +25,7 @@ import Shared.Provisioning exposing (Provisioning)
 type QuestionnaireVisibility
     = PrivateQuestionnaire
     | VisibleViewQuestionnaire
+    | VisibleCommentQuestionnaire
     | VisibleEditQuestionnaire
 
 
@@ -36,6 +37,9 @@ toString questionnaireVisibility =
 
         VisibleViewQuestionnaire ->
             "VisibleViewQuestionnaire"
+
+        VisibleCommentQuestionnaire ->
+            "VisibleCommentQuestionnaire"
 
         VisibleEditQuestionnaire ->
             "VisibleEditQuestionnaire"
@@ -49,6 +53,9 @@ fromString str =
 
         "VisibleViewQuestionnaire" ->
             Just VisibleViewQuestionnaire
+
+        "VisibleCommentQuestionnaire" ->
+            Just VisibleCommentQuestionnaire
 
         "VisibleEditQuestionnaire" ->
             Just VisibleEditQuestionnaire
@@ -85,6 +92,9 @@ toFormValues sharing =
         VisibleViewQuestionnaire ->
             ( True, QuestionnairePermission.View )
 
+        VisibleCommentQuestionnaire ->
+            ( True, QuestionnairePermission.Comment )
+
         VisibleEditQuestionnaire ->
             ( True, QuestionnairePermission.Edit )
 
@@ -94,6 +104,9 @@ fromFormValues enabled perm sharingEnabled sharingPerm =
     if enabled then
         if perm == QuestionnairePermission.Edit || (sharingEnabled && sharingPerm == QuestionnairePermission.Edit) then
             VisibleEditQuestionnaire
+
+        else if perm == QuestionnairePermission.Comment || (sharingEnabled && sharingPerm == QuestionnairePermission.Comment) then
+            VisibleCommentQuestionnaire
 
         else
             VisibleViewQuestionnaire
@@ -119,6 +132,9 @@ validation =
                     "VisibleViewQuestionnaire" ->
                         Validate.succeed VisibleViewQuestionnaire
 
+                    "VisibleCommentQuestionnaire" ->
+                        Validate.succeed VisibleCommentQuestionnaire
+
                     "VisibleEditQuestionnaire" ->
                         Validate.succeed VisibleEditQuestionnaire
 
@@ -137,6 +153,10 @@ richFormOptions appState =
       , lg "questionnaireVisibility.publicReadOnly" appState
       , lg "questionnaireVisibility.publicReadOnly.description" appState
       )
+    , ( toString VisibleCommentQuestionnaire
+      , lg "questionnaireVisibility.publicComment" appState
+      , lg "questionnaireVisibility.publicComment.description" appState
+      )
     , ( toString VisibleEditQuestionnaire
       , lg "questionnaireVisibility.public" appState
       , lg "questionnaireVisibility.public.description" appState
@@ -151,6 +171,9 @@ formOptions appState =
       )
     , ( toString VisibleViewQuestionnaire
       , lg "questionnaireVisibility.publicReadOnly" appState
+      )
+    , ( toString VisibleCommentQuestionnaire
+      , lg "questionnaireVisibility.publicComment" appState
       )
     , ( toString VisibleEditQuestionnaire
       , lg "questionnaireVisibility.public" appState

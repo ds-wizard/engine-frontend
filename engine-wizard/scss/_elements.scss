@@ -195,6 +195,7 @@ ins, .ins {
         .nav-link {
             color: $body-color;
             text-align: center;
+            text-decoration: none !important;
             line-height: 31px;
             padding: 0 1rem;
             display: flex;
@@ -213,6 +214,7 @@ ins, .ins {
             }
 
             &:hover {
+                color: $body-color;
                 border-bottom-color: $gray-500;
             }
 

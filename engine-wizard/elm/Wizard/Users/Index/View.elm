@@ -61,7 +61,7 @@ listingConfig appState =
     , emptyText = l_ "listing.empty" appState
     , updated = Nothing
     , wrapMsg = ListingMsg
-    , iconView = Just UserIcon.view
+    , iconView = Just UserIcon.viewUser
     , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "firstName", lg "user.firstName" appState )
