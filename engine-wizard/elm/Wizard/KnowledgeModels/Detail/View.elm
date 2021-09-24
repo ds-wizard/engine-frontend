@@ -231,10 +231,7 @@ sidePanelKmInfo appState package =
                 Just parentPackageId ->
                     [ ( lg "package.forkOf" appState
                       , "fork-of"
-                      , linkTo appState
-                            (Routes.KnowledgeModelsRoute <| DetailRoute parentPackageId)
-                            []
-                            [ text parentPackageId ]
+                      , text parentPackageId
                       )
                     ]
 
