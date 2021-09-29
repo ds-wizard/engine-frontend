@@ -1115,11 +1115,11 @@ viewQuestionnaireRightPanelComments appState model path =
             else
                 emptyNode
 
-        privateNoteExplanation =
+        editorNoteExplanation =
             if model.commentsViewPrivate then
-                div [ class "alert alert-private-notes" ]
+                div [ class "alert alert-editor-notes" ]
                     [ i [ class "fa fas fa-lock" ] []
-                    , span [] [ lx_ "comments.privateNotes.description" appState ]
+                    , span [] [ lx_ "comments.editorNotes.description" appState ]
                     ]
 
             else
@@ -1164,7 +1164,7 @@ viewQuestionnaireRightPanelComments appState model path =
         , navigationView
         , resolvedThreadsView
         , commentThreadsView
-        , privateNoteExplanation
+        , editorNoteExplanation
         , newThreadForm
         ]
 
@@ -1206,13 +1206,13 @@ viewCommentsNavigation appState model commentThreads =
             ]
         , li [ class "nav-item" ]
             [ a
-                [ class "nav-link nav-link-private-notes"
+                [ class "nav-link nav-link-editor-notes"
                 , classList [ ( "active", model.commentsViewPrivate ) ]
                 , onClick (CommentsViewPrivate True)
                 , dataCy "comments_nav_private-notes"
                 ]
-                [ span [ attribute "data-content" (l_ "comments.nav.privateNotes" appState) ]
-                    [ lx_ "comments.nav.privateNotes" appState ]
+                [ span [ attribute "data-content" (l_ "comments.nav.editorNotes" appState) ]
+                    [ lx_ "comments.nav.editorNotes" appState ]
                 , toBadge privateThreadsCount
                 ]
             ]

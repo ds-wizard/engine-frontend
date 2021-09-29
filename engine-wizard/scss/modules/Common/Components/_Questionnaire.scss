@@ -368,12 +368,12 @@ $toolbar-height: 40px;
                     width: 0;
                 }
 
-                .nav-link-private-notes.active {
+                .nav-link-editor-notes.active {
                     border-bottom-color: $comments-private-primary;
                 }
             }
 
-            .alert-private-notes {
+            .alert-editor-notes {
                 color: $comments-private-color;
                 background-color: $comments-private-bg;
                 border-color: $comments-private-border;
