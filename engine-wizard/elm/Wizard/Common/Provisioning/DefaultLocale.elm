@@ -408,6 +408,7 @@ locale =
                , ( "Wizard.Common.Components.Questionnaire.comments.reply.placeholder", "Reply..." )
                , ( "Wizard.Common.Components.Questionnaire.comments.reply.submit", "Reply" )
                , ( "Wizard.Common.Components.Questionnaire.comments.viewResolved", "View resolved comments" )
+               , ( "Wizard.Common.Components.Questionnaire.commentsOverview.empty", "Click the %s icon to add new comments to a question." )
                , ( "Wizard.Common.Components.Questionnaire.list.add", "Add" )
                , ( "Wizard.Common.Components.Questionnaire.list.noAnswers", "There are no answers yet." )
                , ( "Wizard.Common.Components.Questionnaire.question.answeredBy", "Answered %s by %s." )

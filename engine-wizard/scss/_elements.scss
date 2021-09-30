@@ -51,8 +51,12 @@ label {
 .alert {
     word-break: break-word;
 
-    .fa {
+    &>.fa:first-child {
         margin-right: 10px;
+    }
+
+    p:last-child {
+        margin-bottom: 0;
     }
 }
 

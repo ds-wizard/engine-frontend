@@ -830,7 +830,7 @@ viewQuestionnaireToolbar appState model =
                 emptyNode
 
         commentsOverviewButtonVisible =
-            commentsLength > 0 && Feature.projectCommentAdd appState model.questionnaire
+            Feature.projectCommentAdd appState model.questionnaire
 
         commentsOverviewButton =
             div [ class "item-group" ]
@@ -992,7 +992,7 @@ viewQuestionnaireRightPanel appState cfg model =
 
         RightPanelCommentsOverview ->
             wrapPanel <|
-                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelCommentsOverview model ]
+                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelCommentsOverview appState model ]
 
         RightPanelComments path ->
             wrapPanel <|
@@ -1053,8 +1053,8 @@ viewQuestionnaireRightPanelTodos appState model =
 -- QUESTIONNAIRE - RIGHT PANEL - COMMENTS OVERVIEW
 
 
-viewQuestionnaireRightPanelCommentsOverview : Model -> Html Msg
-viewQuestionnaireRightPanelCommentsOverview model =
+viewQuestionnaireRightPanelCommentsOverview : AppState -> Model -> Html Msg
+viewQuestionnaireRightPanelCommentsOverview appState model =
     let
         viewChapterComments group =
             div []
@@ -1093,8 +1093,20 @@ viewQuestionnaireRightPanelCommentsOverview model =
                         acc ++ [ { chapter = comment.chapter, todos = [ comment ] } ]
             in
             List.foldl fold [] comments
+
+        content =
+            if List.isEmpty questionnaireComments then
+                [ div [ class "alert alert-info" ]
+                    [ p
+                        []
+                        (lh_ "commentsOverview.empty" [ faSet "questionnaire.comments" appState ] appState)
+                    ]
+                ]
+
+            else
+                questionnaireComments
     in
-    div [ class "comments-overview" ] questionnaireComments
+    div [ class "comments-overview" ] content
 
 
 
