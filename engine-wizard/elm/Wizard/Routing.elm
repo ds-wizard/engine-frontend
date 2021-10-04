@@ -16,6 +16,7 @@ import Browser.Navigation exposing (pushUrl)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing (Parser, map, oneOf, s)
+import Wizard.Admin.Routing
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
@@ -35,6 +36,7 @@ matchers appState =
     let
         parsers =
             []
+                ++ Wizard.Admin.Routing.parsers appState Routes.AdminRoute
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
@@ -62,6 +64,9 @@ routeIfAllowed appState route =
 isAllowed : Routes.Route -> AppState -> Bool
 isAllowed route appState =
     case route of
+        Routes.AdminRoute adminRoute ->
+            Wizard.Admin.Routing.isAllowed adminRoute appState
+
         Routes.DashboardRoute ->
             True
 
@@ -104,6 +109,9 @@ toUrl appState route =
     let
         parts =
             case route of
+                Routes.AdminRoute adminRoute ->
+                    Wizard.Admin.Routing.toUrl appState adminRoute
+
                 Routes.DashboardRoute ->
                     [ lr "dashboard" appState ]
 

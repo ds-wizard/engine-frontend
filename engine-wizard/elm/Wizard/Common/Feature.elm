@@ -1,5 +1,6 @@
 module Wizard.Common.Feature exposing
-    ( documentDelete
+    ( adminOperations
+    , documentDelete
     , documentDownload
     , documentSubmit
     , documentsView
@@ -369,6 +370,15 @@ usersCreate =
 userEdit : AppState -> String -> Bool
 userEdit appState uuid =
     (uuid == "current") || adminOr Perm.userManagement appState
+
+
+
+-- Admin
+
+
+adminOperations : AppState -> Bool
+adminOperations =
+    isAdmin
 
 
 

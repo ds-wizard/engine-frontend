@@ -10,6 +10,7 @@ module Wizard.Models exposing
 
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
+import Wizard.Admin.Models
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Menu.Models
 import Wizard.Dashboard.Models
@@ -28,6 +29,7 @@ import Wizard.Users.Models
 type alias Model =
     { appState : AppState
     , menuModel : Wizard.Common.Menu.Models.Model
+    , adminModel : Wizard.Admin.Models.Model
     , dashboardModel : Wizard.Dashboard.Models.Model
     , documentsModel : Wizard.Documents.Models.Model
     , kmEditorModel : Wizard.KMEditor.Models.Model
@@ -45,6 +47,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { appState = appState
     , menuModel = Wizard.Common.Menu.Models.initialModel
+    , adminModel = Wizard.Admin.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel
     , documentsModel = Wizard.Documents.Models.initialModel
     , kmEditorModel = Wizard.KMEditor.Models.initialModel
@@ -97,6 +100,9 @@ setSeed seed model =
 initLocalModel : Model -> Model
 initLocalModel model =
     case model.appState.route of
+        Routes.AdminRoute route ->
+            { model | adminModel = Wizard.Admin.Models.initLocalModel route model.adminModel }
+
         Routes.DocumentsRoute route ->
             { model | documentsModel = Wizard.Documents.Models.initLocalModel route model.documentsModel }
 

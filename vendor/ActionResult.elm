@@ -8,6 +8,7 @@ module ActionResult exposing
     , isSuccess
     , isUnset
     , map
+    , toMaybe
     , unwrap
     , withDefault
     )
@@ -89,6 +90,11 @@ withDefault default result =
 unwrap : b -> (a -> b) -> ActionResult a -> b
 unwrap default fn actionResult =
     withDefault default (map fn actionResult)
+
+
+toMaybe : ActionResult a -> Maybe a
+toMaybe =
+    unwrap Nothing Just
 
 
 combine : ActionResult a -> ActionResult b -> ActionResult ( a, b )
