@@ -3,6 +3,7 @@ module Wizard.View exposing (view)
 import Browser exposing (Document)
 import Html exposing (Html)
 import Shared.Locale exposing (l)
+import Wizard.Admin.View
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Layout as Layout
 import Wizard.Common.View.Page as Page
@@ -33,6 +34,11 @@ view model =
 
     else
         case model.appState.route of
+            Routes.AdminRoute route ->
+                Wizard.Admin.View.view route model.appState model.adminModel
+                    |> Html.map AdminMsg
+                    |> Layout.app model
+
             Routes.DashboardRoute ->
                 Wizard.Dashboard.View.view model.appState model.dashboardModel
                     |> Html.map DashboardMsg
