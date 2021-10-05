@@ -7,16 +7,15 @@ module Wizard.Common.View.Layout exposing
     )
 
 import Browser exposing (Document)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
-import Shared.Auth.Permission as Perm
+import Html exposing (Html, a, div, li, nav, span, text, ul)
+import Html.Attributes exposing (class, classList, href, target)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.CookieConsent as CookieConsent
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.Html.Events exposing (onLinkClick)
@@ -190,7 +189,7 @@ logo model =
 
 
 type MenuItem msg
-    = MenuItem String (Html msg) Routes.Route (Routes.Route -> Bool) String String
+    = MenuItem String (Html msg) Routes.Route (Routes.Route -> Bool) (AppState -> Bool) String
 
 
 createMenu : Model -> List (Html Msg)
@@ -198,7 +197,7 @@ createMenu model =
     let
         defaultMenuItems =
             menuItems model.appState
-                |> List.filter (\(MenuItem _ _ _ _ perm _) -> Perm.hasPerm model.appState.session perm)
+                |> List.filter (\(MenuItem _ _ _ _ featureEnabled _) -> featureEnabled model.appState)
                 |> List.map (menuItem model)
 
         customMenuItems =
@@ -214,42 +213,42 @@ menuItems appState =
         (faSet "menu.users" appState)
         Routes.usersIndex
         Routes.isUsersIndex
-        Perm.userManagement
+        Feature.usersView
         "users-link"
     , MenuItem
         (l_ "menu.kmEditor" appState)
         (faSet "menu.kmEditor" appState)
         Routes.kmEditorIndex
         Routes.isKmEditorIndex
-        Perm.knowledgeModel
+        Feature.knowledgeModelEditorsView
         "km-editor-link"
     , MenuItem
         (l_ "menu.knowledgeModels" appState)
         (faSet "menu.knowledgeModels" appState)
         Routes.knowledgeModelsIndex
         Routes.isKnowledgeModelsIndex
-        Perm.packageManagementRead
+        Feature.knowledgeModelsView
         "km-link"
     , MenuItem
         (l_ "menu.projects" appState)
         (faSet "menu.projects" appState)
         Routes.projectsIndex
         Routes.isProjectsIndex
-        Perm.questionnaire
+        Feature.projectsView
         "projects-link"
     , MenuItem
         (l_ "menu.documents" appState)
         (faSet "menu.documents" appState)
         Routes.documentsIndex
         Routes.isDocumentsIndex
-        Perm.documents
+        Feature.documentsView
         "documents-link"
     , MenuItem
         (l_ "menu.templates" appState)
         (faSet "menu.templates" appState)
         Routes.templatesIndex
         Routes.isTemplateIndex
-        Perm.templates
+        Feature.templatesView
         "templates-link"
     ]
 

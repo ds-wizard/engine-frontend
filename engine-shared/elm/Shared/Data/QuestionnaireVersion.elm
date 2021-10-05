@@ -1,4 +1,7 @@
-module Shared.Data.QuestionnaireVersion exposing (..)
+module Shared.Data.QuestionnaireVersion exposing
+    ( QuestionnaireVersion
+    , decoder
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -14,7 +17,7 @@ type alias QuestionnaireVersion =
     , description : Maybe String
     , eventUuid : Uuid
     , createdAt : Time.Posix
-    , createdBy : UserSuggestion
+    , createdBy : Maybe UserSuggestion
     }
 
 
@@ -26,4 +29,4 @@ decoder =
         |> D.required "description" (D.maybe D.string)
         |> D.required "eventUuid" Uuid.decoder
         |> D.required "createdAt" D.datetime
-        |> D.required "createdBy" UserSuggestion.decoder
+        |> D.required "createdBy" (D.maybe UserSuggestion.decoder)

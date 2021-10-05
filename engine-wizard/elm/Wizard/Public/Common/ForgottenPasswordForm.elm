@@ -1,8 +1,13 @@
-module Wizard.Public.Common.ForgottenPasswordForm exposing (ForgottenPasswordForm, encode, initEmpty, validation)
+module Wizard.Public.Common.ForgottenPasswordForm exposing
+    ( ForgottenPasswordForm
+    , encode
+    , initEmpty
+    , validation
+    )
 
 import Form exposing (Form)
-import Form.Validate as Validate exposing (..)
-import Json.Encode as E exposing (..)
+import Form.Validate as Validate exposing (Validation)
+import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
 
 

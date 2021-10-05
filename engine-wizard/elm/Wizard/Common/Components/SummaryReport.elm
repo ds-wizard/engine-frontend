@@ -12,8 +12,9 @@ module Wizard.Common.Components.SummaryReport exposing
 
 import ActionResult exposing (ActionResult(..))
 import ChartJS exposing (ChartConfig)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, canvas, div, h2, h3, h4, hr, table, tbody, td, text, th, thead, tr)
+import Html.Attributes exposing (class, colspan, id, style)
+import Html.Events exposing (onClick)
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
@@ -25,17 +26,12 @@ import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lf, lg, lgx, lx)
+import Shared.Locale exposing (lf, lg, lgx, lx)
 import String exposing (fromFloat, fromInt)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.Ports as Ports
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.SummaryReport"
 
 
 lf_ : String -> List String -> AppState -> String
@@ -73,6 +69,7 @@ type alias Context =
 
 type Msg
     = GetSummaryReportComplete (Result ApiError SummaryReport)
+    | ScrollToMetric String
 
 
 fetchData : AppState -> Uuid -> Model -> ( Model, Cmd Msg )
@@ -109,7 +106,7 @@ update msg appState ctx model =
                         cmds =
                             List.map
                                 (Ports.drawMetricsChart << ChartJS.encodeChartConfig)
-                                ([ totalChartConfig ] ++ chapterChartsConfigs)
+                                (totalChartConfig :: chapterChartsConfigs)
                     in
                     ( { model | summaryReport = Success summaryReport }
                     , Cmd.batch cmds
@@ -120,19 +117,22 @@ update msg appState ctx model =
                     , Cmd.none
                     )
 
+        ScrollToMetric metric ->
+            ( model, Ports.scrollIntoView ("#" ++ metricId metric) )
+
 
 
 -- View
 
 
-view : AppState -> Context -> Model -> Html msg
+view : AppState -> Context -> Model -> Html Msg
 view appState context model =
     div [ class "Projects__Detail__Content Projects__Detail__Content--Metrics" ]
         [ Page.actionResultView appState (viewContent appState context) model.summaryReport
         ]
 
 
-viewContent : AppState -> Context -> SummaryReport -> Html msg
+viewContent : AppState -> Context -> SummaryReport -> Html Msg
 viewContent appState ctx summaryReport =
     let
         title =
@@ -161,12 +161,12 @@ viewContent appState ctx summaryReport =
         (List.concat [ title, totalReport, chapters, metricDescriptions ])
 
 
-viewChapters : AppState -> Context -> SummaryReport -> List (Html msg)
+viewChapters : AppState -> Context -> SummaryReport -> List (Html Msg)
 viewChapters appState ctx summaryReport =
     List.map (viewChapterReport appState ctx) summaryReport.chapterReports
 
 
-viewChapterReport : AppState -> Context -> ChapterReport -> Html msg
+viewChapterReport : AppState -> Context -> ChapterReport -> Html Msg
 viewChapterReport appState ctx chapterReport =
     let
         chapterTitle =
@@ -182,7 +182,7 @@ viewChapterReport appState ctx chapterReport =
         ]
 
 
-viewMetrics : AppState -> Context -> List MetricReport -> String -> Html msg
+viewMetrics : AppState -> Context -> List MetricReport -> String -> Html Msg
 viewMetrics appState ctx metricReports canvasId =
     let
         metrics =
@@ -236,7 +236,7 @@ viewAnsweredIndication appState title data =
         ]
 
 
-viewMetricsTable : AppState -> List Metric -> List MetricReport -> Html msg
+viewMetricsTable : AppState -> List Metric -> List MetricReport -> Html Msg
 viewMetricsTable appState metrics metricReports =
     table [ class "table table-metrics-report" ]
         [ thead []
@@ -250,10 +250,14 @@ viewMetricsTable appState metrics metricReports =
         ]
 
 
-viewMetricReportRow : List Metric -> MetricReport -> Html msg
+viewMetricReportRow : List Metric -> MetricReport -> Html Msg
 viewMetricReportRow metrics metricReport =
     tr []
-        [ td [] [ text <| getTitleByUuid metrics metricReport.metricUuid ]
+        [ td []
+            [ a [ onClick (ScrollToMetric metricReport.metricUuid) ]
+                [ text <| getTitleByUuid metrics metricReport.metricUuid
+                ]
+            ]
         , td [] [ text <| Round.round 2 metricReport.measure ]
         , td [] [ viewProgressBarWithColors metricReport.measure ]
         ]
@@ -294,21 +298,22 @@ getTitleByUuid items uuid =
 viewMetricsDescriptions : AppState -> List Metric -> Html msg
 viewMetricsDescriptions appState metrics =
     div []
-        ([ h3 [] [ lx_ "metricsDescriptions.metricsExplanation" appState ] ]
-            ++ List.map viewMetricDescription metrics
+        (h3 [] [ lx_ "metricsDescriptions.metricsExplanation" appState ]
+            :: List.map viewMetricDescription metrics
         )
 
 
 viewMetricDescription : Metric -> Html msg
 viewMetricDescription metric =
-    let
-        abbreviation =
-            Maybe.unwrap "" (\a -> a ++ " - ") metric.abbreviation
-    in
     div []
-        [ h4 [] [ text <| abbreviation ++ metric.title ]
+        [ h4 [ id (metricId metric.uuid) ] [ text <| metric.title ]
         , Markdown.toHtml [] (Maybe.withDefault "" metric.description)
         ]
+
+
+metricId : String -> String
+metricId metricUuid =
+    "metric-" ++ metricUuid
 
 
 

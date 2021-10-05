@@ -66,3 +66,11 @@ $color-value-0: $red !default;
 
 // form engine
 $highlighted-bg-level: -11;
+
+
+// project private comments
+$comments-private-primary: $purple !default;
+$comments-private-color: color-level($purple, $alert-color-level) !default;
+$comments-private-color-lighter: color-level($purple, -1) !default;
+$comments-private-bg: color-level($purple, -12) !default;
+$comments-private-border: color-level($purple, $alert-border-level) !default;

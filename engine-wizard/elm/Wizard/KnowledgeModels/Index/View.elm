@@ -1,25 +1,24 @@
 module Wizard.KnowledgeModels.Index.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, code, div, img, p, span, strong, text)
+import Html.Attributes exposing (class, src, title)
 import Shared.Api.Packages as PackagesApi
-import Shared.Auth.Permission as Perm
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackageState as PackageState
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Routes
-import Wizard.KnowledgeModels.Index.Models exposing (..)
+import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Projects.Create.ProjectCreateRoute
@@ -52,9 +51,9 @@ view appState model =
         ]
 
 
-createButton : AppState -> Html Msg
-createButton appState =
-    if Perm.hasPerm appState.session Perm.packageManagementWrite then
+importButton : AppState -> Html Msg
+importButton appState =
+    if Feature.knowledgeModelsImport appState then
         linkTo appState
             (Routes.KnowledgeModelsRoute <| ImportRoute Nothing)
             [ class "btn btn-primary link-with-icon" ]
@@ -87,7 +86,7 @@ listingConfig appState =
         ]
     , filters = []
     , toRoute = \_ -> Routes.KnowledgeModelsRoute << IndexRoute
-    , toolbarExtra = Just (createButton appState)
+    , toolbarExtra = Just (importButton appState)
     }
 
 
@@ -162,6 +161,9 @@ listingActions appState package =
                 , dataCy = "view"
                 }
 
+        viewActionVisible =
+            Feature.knowledgeModelsView appState
+
         exportAction =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -170,6 +172,9 @@ listingActions appState package =
                 , msg = ListingActionExternalLink (PackagesApi.exportPackageUrl package.id appState)
                 , dataCy = "export"
                 }
+
+        exportActionVisible =
+            Feature.knowledgeModelsExport appState
 
         createKMEditor =
             Listing.dropdownAction
@@ -180,6 +185,9 @@ listingActions appState package =
                 , dataCy = "create-km-editor"
                 }
 
+        createKMEditorVisible =
+            Feature.knowledgeModelEditorsCreate appState
+
         forkAction =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -189,9 +197,8 @@ listingActions appState package =
                 , dataCy = "fork"
                 }
 
-        questionnaireActionVisible =
-            (QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation || Perm.hasPerm appState.session Perm.questionnaireTemplate)
-                && Perm.hasPerm appState.session Perm.questionnaire
+        forkActionVisible =
+            Feature.knowledgeModelEditorsCreate appState
 
         questionnaireAction =
             Listing.dropdownAction
@@ -202,6 +209,9 @@ listingActions appState package =
                 , dataCy = "create-project"
                 }
 
+        questionnaireActionVisible =
+            Feature.projectsCreateCustom appState
+
         deleteAction =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
@@ -210,16 +220,19 @@ listingActions appState package =
                 , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
                 , dataCy = "delete"
                 }
+
+        deleteActionVisible =
+            Feature.knowledgeModelsDelete appState
     in
     []
-        |> listInsertIf viewAction True
-        |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
-        |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.knowledgeModel || questionnaireActionVisible)
-        |> listInsertIf createKMEditor (Perm.hasPerm appState.session Perm.knowledgeModel)
-        |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
+        |> listInsertIf viewAction viewActionVisible
+        |> listInsertIf exportAction exportActionVisible
+        |> listInsertIf Listing.dropdownSeparator (createKMEditorVisible || forkActionVisible || questionnaireActionVisible)
+        |> listInsertIf createKMEditor createKMEditorVisible
+        |> listInsertIf forkAction forkActionVisible
         |> listInsertIf questionnaireAction questionnaireActionVisible
-        |> listInsertIf Listing.dropdownSeparator (Perm.hasPerm appState.session Perm.packageManagementWrite)
-        |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
+        |> listInsertIf Listing.dropdownSeparator deleteActionVisible
+        |> listInsertIf deleteAction deleteActionVisible
 
 
 detailRoute : Package -> Routes.Route

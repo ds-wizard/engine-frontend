@@ -1,4 +1,4 @@
-module Wizard.Settings.Template.Msgs exposing (..)
+module Wizard.Settings.Template.Msgs exposing (Msg(..))
 
 import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError exposing (ApiError)

@@ -1,4 +1,10 @@
-module Shared.Provisioning exposing (..)
+module Shared.Provisioning exposing
+    ( Provisioning
+    , decoder
+    , default
+    , foldl
+    , merge
+    )
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)

@@ -26,8 +26,6 @@ import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import List.Extra as List
-import Maybe.Extra as Maybe
-import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
 import Shared.Data.KnowledgeModel.Question.IntegrationQuestionData as IntegrationQuestionData exposing (IntegrationQuestionData)
 import Shared.Data.KnowledgeModel.Question.ListQuestionData as ListQuestionData exposing (ListQuestionData)

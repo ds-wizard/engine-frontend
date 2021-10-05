@@ -1,9 +1,8 @@
 module Registry.Common.View.ActionButton exposing (submit)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import String
+import Html exposing (Attribute, Html, span, text)
+import Html.Attributes exposing (class, disabled, type_)
 
 
 submit : ( String, ActionResult a ) -> Html msg

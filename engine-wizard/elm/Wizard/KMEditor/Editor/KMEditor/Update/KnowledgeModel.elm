@@ -13,12 +13,12 @@ import Random exposing (Seed)
 import Shared.Data.KnowledgeModel.Chapter as Chapter
 import Shared.Data.KnowledgeModel.Integration as Integration
 import Shared.Data.KnowledgeModel.Metric as Metric
-import Shared.Data.KnowledgeModel.Phase as Phase exposing (Phase)
+import Shared.Data.KnowledgeModel.Phase as Phase
 import Shared.Data.KnowledgeModel.Tag as Tag
 import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getCurrentIntegrations)
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), KMEditorData, addKMChapter, addKMIntegration, addKMMetric, addKMPhase, addKMTag, createChapterEditor, createIntegrationEditor, createMetricEditor, createPhaseEditor, createTagEditor, isKMEditorDirty, updateKMEditorData)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (knowledgeModelFormValidation)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (addEntity, updateForm, withGenerateEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createEditKnowledgeModelEvent)

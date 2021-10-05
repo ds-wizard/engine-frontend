@@ -1,11 +1,13 @@
-module Wizard.Templates.Index.Update exposing (fetchData, update)
+module Wizard.Templates.Index.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Dict
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lg)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
@@ -15,11 +17,6 @@ import Wizard.Routes as Routes
 import Wizard.Templates.Index.Models exposing (Model)
 import Wizard.Templates.Index.Msgs exposing (Msg(..))
 import Wizard.Templates.Routes exposing (Route(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Templates.Index.Update"
 
 
 fetchData : Cmd Msg

@@ -11,7 +11,7 @@ module Shared.Data.SummaryReport exposing
     , unwrapIndicationReport
     )
 
-import Json.Decode as Decode exposing (..)
+import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
 

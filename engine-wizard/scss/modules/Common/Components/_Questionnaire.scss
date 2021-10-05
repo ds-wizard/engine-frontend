@@ -320,6 +320,225 @@ $toolbar-height: 40px;
                 }
             }
         }
+
+        .comments-overview {
+            ul {
+                padding-left: 1.5rem;
+
+                li {
+                    a {
+                        display: flex;
+                        align-items: baseline;
+                        text-decoration: none !important;
+
+                        .question {
+                            flex-grow: 1;
+                        }
+
+                        &:hover {
+                            .question {
+                                text-decoration: underline;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .Comments {
+            .form-check {
+                background: $gray-100;
+                margin: -1rem -1rem 0 -1rem;
+                padding: 1rem;
+                border-bottom: 1px solid $gray-400;
+                margin-bottom: 1rem;
+
+                label {
+                    font-weight: 600;
+                }
+            }
+
+            .nav-underline-tabs {
+                border-bottom: 1px solid $gray-400;
+                margin: 0 -1rem 0 -1rem;
+                max-width: none;
+
+                .nav-item {
+                    flex: 1 1 0;
+                    width: 0;
+                }
+
+                .nav-link-editor-notes.active {
+                    border-bottom-color: $comments-private-primary;
+                }
+            }
+
+            .alert-editor-notes {
+                color: $comments-private-color;
+                background-color: $comments-private-bg;
+                border-color: $comments-private-border;
+                padding: 0.75rem;
+                display: flex;
+                align-items: baseline;
+                margin-top: 1rem;
+            }
+
+            & > .CommentReplyForm {
+                margin-top: 1rem;
+                padding-bottom: 2rem;
+            }
+
+            .btn-sm {
+                padding: 0.25rem 1rem;
+            }
+
+            .CommentDeleteOverlay {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.8);
+                color: $white;
+                display: flex;
+                justify-content: center;
+
+                &--Thread {
+                    padding-top: 2rem;
+
+                }
+
+                &--Comment {
+                    margin-top: -1rem;
+                    margin-left: -1rem;
+                    margin-right: -1rem;
+                    align-items: center;
+                }
+            }
+
+            .CommentThread {
+                background: $gray-100;
+                margin-left: -1rem;
+                margin-right: -1rem;
+                margin-bottom: 2rem;
+                padding: 1rem;
+                border-top: 1px solid $gray-400;
+                border-bottom: 1px solid $gray-400;
+                position: relative;
+
+                &--Private {
+                    color: $comments-private-color;
+                    background: $comments-private-bg;
+                    border-color: $comments-private-border;
+
+                    .Comment {
+                        border-bottom-color: $comments-private-border !important;
+                    }
+
+                    .Comment__Header__User__Time {
+                        color: $comments-private-color-lighter !important;
+                    }
+                }
+
+                &--Resolved {
+                    color: $gray-500;
+
+                    .Comment__Header__User__Time {
+                        color: $gray-500 !important;
+                    }
+
+                    .ItemIcon {
+                        opacity: 0.7;
+                    }
+                }
+
+                .Comment {
+                    border-bottom: 1px solid $gray-400;
+                    padding-bottom: 1rem;
+                    margin-bottom: 1rem;
+                    position: relative;
+
+
+                    &__Header {
+                        display: flex;
+                        align-items: center;
+                        margin-bottom: .5rem;
+                        max-width: 100%;
+
+                        .ItemIcon {
+                            margin-right: .5rem;
+                        }
+
+                        &__User {
+                            min-width: 0;
+                            flex-basis: 0;
+                            flex-grow: 1;
+
+                            &__Name {
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                display: block;
+                            }
+
+                            &__Time {
+                                display: block;
+                                font-size: 80%;
+                                color: $gray-600;
+                            }
+                        }
+
+                        .dropdown-toggle {
+                            padding: 0.5rem;
+                            margin-right: -0.5rem;
+                            color: $gray-600;
+                            outline: none;
+                            box-shadow: none;
+
+                            &:hover {
+                                color: $body-color;
+                            }
+
+                            &::after {
+                                display: none;
+                            }
+                        }
+                    }
+
+                    &_MD {
+                        & > *:last-child {
+                            margin-bottom: 0;
+                        }
+
+                        h1, h2, h3, h4, h5, h6 {
+                            font-size: $font-size-base;
+                            font-weight: bold;
+                        }
+                    }
+
+
+                }
+            }
+
+            .CommentReplyForm {
+                textarea {
+                    margin-bottom: 0.5rem;
+                }
+
+                &--Private {
+                    textarea {
+                        &:focus {
+                            border-color: $comments-private-primary;
+                            box-shadow: 0 0 0 $input-btn-focus-width rgba($comments-private-primary, 0.25);
+                        }
+                    }
+
+                    .btn-primary {
+                        @include button-variant($comments-private-primary, $comments-private-primary);
+                    }
+                }
+            }
+        }
     }
 
     &__todos {
@@ -554,7 +773,7 @@ $toolbar-height: 40px;
             display: flex;
 
             .action {
-                color: $gray-500;
+                color: $gray-600;
                 margin-left: 0.5rem;
                 max-width: 1.25rem;
                 min-width: 1.25rem;
@@ -577,8 +796,6 @@ $toolbar-height: 40px;
 
 
                 &-add-todo {
-                    //transition: all 0.25s ease-in-out;
-
                     & > span {
                         color: $gray-700;
                         overflow: hidden;
@@ -604,15 +821,35 @@ $toolbar-height: 40px;
                 &-todo {
                     max-width: 10rem;
                     background: $warning;
-                    color: $white;
+                    color: $gray-700;
+
+                    &:hover {
+                        color: $gray-900;
+                    }
 
                     a {
                         margin-left: 0.25rem;
-                        color: $white;
                     }
 
-                    &:hover {
-                        color: $white;
+                }
+
+                &-comments {
+                    max-width: 10rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+
+                    &-open {
+                        background: $warning;
+                        color: $gray-700;
+
+                        &:hover {
+                            color: $gray-900;
+                        }
+                    }
+
+
+                    .fa {
+                        margin-right: 0.25rem;
                     }
                 }
             }

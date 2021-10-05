@@ -1,4 +1,4 @@
-module Wizard.Projects.Detail.Documents.Msgs exposing (..)
+module Wizard.Projects.Detail.Documents.Msgs exposing (Msg(..))
 
 import Shared.Data.Document exposing (Document)
 import Shared.Data.Submission exposing (Submission)

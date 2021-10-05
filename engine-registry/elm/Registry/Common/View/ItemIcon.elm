@@ -52,5 +52,5 @@ view config =
                     , text <| String.fromChar letter
                     )
     in
-    div ([ class "ItemIcon" ] ++ backgroundColorStyle)
+    div (class "ItemIcon" :: backgroundColorStyle)
         [ content ]

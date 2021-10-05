@@ -1,7 +1,7 @@
 module Wizard.Projects.Migration.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, button, code, div, h5, p, small, span, strong, text)
+import Html.Attributes exposing (class, classList, style)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.Package exposing (Package)

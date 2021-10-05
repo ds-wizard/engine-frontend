@@ -16,7 +16,7 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lh, lx)
+import Shared.Locale exposing (l)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.VersionForm as VersionForm exposing (VersionForm)

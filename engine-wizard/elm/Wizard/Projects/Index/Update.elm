@@ -6,11 +6,7 @@ module Wizard.Projects.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Dict
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Api.Users as UsersApi
-import Shared.Data.Pagination as Pagination
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Data.User as User
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch, flip, stringToBool)

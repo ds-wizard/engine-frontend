@@ -4,7 +4,7 @@ module Registry.Common.AppState exposing
     , setCredentials
     )
 
-import Json.Decode as D exposing (Decoder)
+import Json.Decode as D
 import Registry.Common.Credentials exposing (Credentials)
 import Registry.Common.Flags as Flags
 import Registry.Common.Provisioning.DefaultIconSet as DefaultIconSet

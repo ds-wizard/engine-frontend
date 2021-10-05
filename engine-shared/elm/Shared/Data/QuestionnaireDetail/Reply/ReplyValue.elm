@@ -158,7 +158,7 @@ getStringReply replyValue =
                 PlainType value ->
                     value
 
-                IntegrationType id value ->
+                IntegrationType _ value ->
                     value
 
         _ ->

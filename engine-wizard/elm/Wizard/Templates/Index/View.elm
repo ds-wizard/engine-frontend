@@ -1,23 +1,24 @@
 module Wizard.Templates.Index.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, code, div, img, p, span, strong, text)
+import Html.Attributes exposing (class, src, title)
 import Shared.Api.Templates as TemplatesApi
-import Shared.Auth.Permission as Perm
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Utils exposing (listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionConfig, ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-import Wizard.Templates.Index.Models exposing (..)
+import Wizard.Templates.Index.Models exposing (Model)
 import Wizard.Templates.Index.Msgs exposing (Msg(..))
 import Wizard.Templates.Routes exposing (Route(..))
 
@@ -47,9 +48,9 @@ view appState model =
         ]
 
 
-createButton : AppState -> Html Msg
-createButton appState =
-    if Perm.hasPerm appState.session Perm.packageManagementWrite then
+importButton : AppState -> Html Msg
+importButton appState =
+    if Feature.templatesImport appState then
         linkTo appState
             (Routes.TemplatesRoute <| ImportRoute Nothing)
             [ class "btn btn-primary link-with-icon" ]
@@ -81,7 +82,7 @@ listingConfig appState =
         ]
     , filters = []
     , toRoute = \_ -> Routes.TemplatesRoute << IndexRoute
-    , toolbarExtra = Just (createButton appState)
+    , toolbarExtra = Just (importButton appState)
     }
 
 
@@ -157,37 +158,47 @@ listingDescription appState template =
 listingActions : AppState -> Template -> List (ListingDropdownItem Msg)
 listingActions appState template =
     let
-        actions =
-            [ Listing.dropdownAction
+        viewAction =
+            Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.view" appState
                 , label = l_ "action.viewDetail" appState
                 , msg = ListingActionLink (detailRoute template)
                 , dataCy = "view"
                 }
-            , Listing.dropdownAction
+
+        viewActionVisible =
+            Feature.templatesView appState
+
+        exportAction =
+            Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.export" appState
                 , label = l_ "action.export" appState
                 , msg = ListingActionExternalLink (TemplatesApi.exportTemplateUrl template.id appState)
                 , dataCy = "export"
                 }
-            ]
-    in
-    if Perm.hasPerm appState.session Perm.packageManagementWrite then
-        actions
-            ++ [ Listing.dropdownSeparator
-               , Listing.dropdownAction
-                    { extraClass = Just "text-danger"
-                    , icon = faSet "_global.delete" appState
-                    , label = l_ "action.delete" appState
-                    , msg = ListingActionMsg <| ShowHideDeleteTemplate <| Just template
-                    , dataCy = "delete"
-                    }
-               ]
 
-    else
-        actions
+        exportActionVisible =
+            Feature.templatesExport appState
+
+        deleteAction =
+            Listing.dropdownAction
+                { extraClass = Just "text-danger"
+                , icon = faSet "_global.delete" appState
+                , label = l_ "action.delete" appState
+                , msg = ListingActionMsg <| ShowHideDeleteTemplate <| Just template
+                , dataCy = "delete"
+                }
+
+        deleteActionVisible =
+            Feature.templatesDelete appState
+    in
+    []
+        |> listInsertIf viewAction viewActionVisible
+        |> listInsertIf exportAction exportActionVisible
+        |> listInsertIf Listing.dropdownSeparator deleteActionVisible
+        |> listInsertIf deleteAction deleteActionVisible
 
 
 detailRoute : Template -> Routes.Route

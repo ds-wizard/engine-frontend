@@ -1,4 +1,4 @@
-module Wizard.Projects.Common.CloneProjectModal.Msgs exposing (..)
+module Wizard.Projects.Common.CloneProjectModal.Msgs exposing (Msg(..))
 
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError exposing (ApiError)

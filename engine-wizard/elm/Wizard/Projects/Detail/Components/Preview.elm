@@ -10,7 +10,7 @@ module Wizard.Projects.Detail.Components.Preview exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict
-import Html exposing (Html, a, div, h1, iframe, p, pre, text)
+import Html exposing (Html, a, div, iframe, p, pre, text)
 import Html.Attributes exposing (class, href, src, target)
 import Http
 import Maybe.Extra as Maybe
@@ -27,7 +27,7 @@ import Task
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes as ProjectRoutes

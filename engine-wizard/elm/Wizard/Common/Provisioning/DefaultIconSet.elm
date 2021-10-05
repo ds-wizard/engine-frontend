@@ -107,6 +107,8 @@ iconSet =
                , ( "project.open", "far fa-folder-open" )
                , ( "questionnaire.answeredIndication", "fas fa-check" )
                , ( "questionnaire.clearAnswer", "fas fa-undo-alt" )
+               , ( "questionnaire.comments", "fas fa-comments" )
+               , ( "questionnaire.commentsResolve", "fas fa-check" )
                , ( "questionnaire.desirable", "far fa-check-square" )
                , ( "questionnaire.expand", "fas fa-expand" )
                , ( "questionnaire.expand", "fas fa-expand" )

@@ -1,29 +1,28 @@
 module Wizard.KnowledgeModels.Detail.View exposing (view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, br, dd, div, dl, dt, li, p, strong, text, ul)
+import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Markdown
 import Shared.Api.Packages as PackagesApi
-import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Detail.Models exposing (..)
-import Wizard.KnowledgeModels.Detail.Msgs exposing (..)
+import Wizard.KnowledgeModels.Detail.Models exposing (Model)
+import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Routes
@@ -73,6 +72,9 @@ header appState package =
                 , lgx "km.action.preview" appState
                 ]
 
+        previewActionVisible =
+            Feature.knowledgeModelsPreview appState
+
         createEditorAction =
             linkTo appState
                 (Routes.KMEditorRoute <| CreateRoute (Just package.id) (Just True))
@@ -82,6 +84,9 @@ header appState package =
                 [ faSet "kmDetail.createKMEditor" appState
                 , lgx "km.action.kmEditor" appState
                 ]
+
+        createEditorActionVisible =
+            Feature.knowledgeModelEditorsCreate appState
 
         forkAction =
             linkTo appState
@@ -93,9 +98,8 @@ header appState package =
                 , lgx "km.action.fork" appState
                 ]
 
-        createProjectActionVisible =
-            (QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation || Perm.hasPerm appState.session Perm.questionnaireTemplate)
-                && Perm.hasPerm appState.session Perm.questionnaire
+        forkActionVisible =
+            Feature.knowledgeModelEditorsCreate appState
 
         createProjectAction =
             linkTo appState
@@ -106,6 +110,9 @@ header appState package =
                 [ faSet "kmDetail.createQuestionnaire" appState
                 , lgx "km.action.project" appState
                 ]
+
+        createProjectActionVisible =
+            Feature.projectsCreateCustom appState
 
         exportAction =
             a
@@ -118,6 +125,9 @@ header appState package =
                 , lgx "km.action.export" appState
                 ]
 
+        exportActionVisible =
+            Feature.knowledgeModelsExport appState
+
         deleteAction =
             a
                 [ onClick <| ShowDeleteDialog True
@@ -128,14 +138,17 @@ header appState package =
                 , lgx "km.action.delete" appState
                 ]
 
+        deleteActionVisible =
+            Feature.knowledgeModelsDelete appState
+
         actions =
             []
-                |> listInsertIf previewAction True
-                |> listInsertIf createEditorAction (Perm.hasPerm appState.session Perm.knowledgeModel)
-                |> listInsertIf forkAction (Perm.hasPerm appState.session Perm.knowledgeModel)
+                |> listInsertIf previewAction previewActionVisible
+                |> listInsertIf createEditorAction createEditorActionVisible
+                |> listInsertIf forkAction forkActionVisible
                 |> listInsertIf createProjectAction createProjectActionVisible
-                |> listInsertIf exportAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
-                |> listInsertIf deleteAction (Perm.hasPerm appState.session Perm.packageManagementWrite)
+                |> listInsertIf exportAction exportActionVisible
+                |> listInsertIf deleteAction deleteActionVisible
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
@@ -174,8 +187,8 @@ newVersionInRegistryWarning appState package =
                     package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
             in
             div [ class "alert alert-warning" ]
-                ([ faSet "_global.warning" appState ]
-                    ++ lh_ "registryVersion.warning"
+                (faSet "_global.warning" appState
+                    :: lh_ "registryVersion.warning"
                         [ text (Version.toString remoteLatestVersion)
                         , linkTo appState
                             (Routes.KnowledgeModelsRoute <| ImportRoute <| Just <| latestPackageId)
@@ -218,10 +231,7 @@ sidePanelKmInfo appState package =
                 Just parentPackageId ->
                     [ ( lg "package.forkOf" appState
                       , "fork-of"
-                      , linkTo appState
-                            (Routes.KnowledgeModelsRoute <| DetailRoute parentPackageId)
-                            []
-                            [ text parentPackageId ]
+                      , text parentPackageId
                       )
                     ]
 
@@ -258,29 +268,26 @@ sidePanelOtherVersions appState package =
 
 sidePanelOrganizationInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelOrganizationInfo appState package =
-    case package.organization of
-        Just organization ->
-            Just ( lg "package.publishedBy" appState, "published-by", viewOrganization organization )
-
-        Nothing ->
-            Nothing
+    let
+        toOrganizationInfo organization =
+            ( lg "package.publishedBy" appState, "published-by", viewOrganization organization )
+    in
+    Maybe.map toOrganizationInfo package.organization
 
 
 sidePanelRegistryLink : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
 sidePanelRegistryLink appState package =
-    case package.registryLink of
-        Just registryLink ->
-            Just
-                ( lg "package.registryLink" appState
-                , "registry-link"
-                , a [ href registryLink, class "link-with-icon", target "_blank" ]
-                    [ faSet "kmDetail.registryLink" appState
-                    , text package.id
-                    ]
-                )
-
-        Nothing ->
-            Nothing
+    let
+        toRegistryLinkInfo registryLink =
+            ( lg "package.registryLink" appState
+            , "registry-link"
+            , a [ href registryLink, class "link-with-icon", target "_blank" ]
+                [ faSet "kmDetail.registryLink" appState
+                , text package.id
+                ]
+            )
+    in
+    Maybe.map toRegistryLinkInfo package.registryLink
 
 
 list : Int -> Int -> List ( String, String, Html msg ) -> Html msg

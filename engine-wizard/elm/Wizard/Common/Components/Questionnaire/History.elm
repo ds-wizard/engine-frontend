@@ -18,7 +18,6 @@ import Maybe.Extra as Maybe
 import Shared.Auth.Session as Session
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent(..))
@@ -31,7 +30,7 @@ import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lh, lx)
+import Shared.Locale exposing (lg, lh, lx)
 import Shared.Utils exposing (flip)
 import Time
 import Uuid exposing (Uuid)
@@ -42,11 +41,6 @@ import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes as ProjectRoute
 import Wizard.Routes as Route
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.Questionnaire.History"
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
@@ -161,8 +155,9 @@ view appState cfg model =
                 identity
 
         filterEvents event =
-            not (QuestionnaireEvent.isSetLabels event) && not (QuestionnaireEvent.isSetReplyList event)
+            not (QuestionnaireEvent.isInvisible event)
 
+        --not (QuestionnaireEvent.isSetLabels event) && not (QuestionnaireEvent.isSetReplyList event)
         eventGroups =
             cfg.questionnaire.events
                 |> List.filter filterEvents
@@ -341,6 +336,13 @@ viewEventHeaderDropdown appState cfg model event =
                         createDocumentAttributes =
                             linkToAttributes appState newDocumentRoute
 
+                        viewQuestionnaireAction =
+                            [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
+                                [ faSet "_global.questionnaire" appState
+                                , lx_ "action.viewQuestionnaire" appState
+                                ]
+                            ]
+
                         createDocumentAction =
                             if Session.exists appState.session then
                                 [ Dropdown.anchorItem createDocumentAttributes
@@ -352,13 +354,7 @@ viewEventHeaderDropdown appState cfg model event =
                             else
                                 []
                     in
-                    divider versionActions
-                        ++ [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
-                                [ faSet "_global.questionnaire" appState
-                                , lx_ "action.viewQuestionnaire" appState
-                                ]
-                           ]
-                        ++ createDocumentAction
+                    divider versionActions ++ viewQuestionnaireAction ++ createDocumentAction
 
                 _ ->
                     []
@@ -518,7 +514,7 @@ viewEventUser appState mbUser =
                     ( User.imageUrlOrGravatar user, User.fullName user )
 
                 Nothing ->
-                    ( User.defaultGravatar, l_ "user.anonymous" appState )
+                    ( User.defaultGravatar, lg "user.anonymous" appState )
     in
     div [ class "user" ]
         [ img [ src imageUrl, class "user-icon user-icon-small" ] []

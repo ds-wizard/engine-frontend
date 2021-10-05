@@ -7,14 +7,14 @@ module Wizard.Common.Html.Attribute exposing
     , wideDetailClass
     )
 
-import Html exposing (..)
+import Html
 import Html.Attributes exposing (attribute, class, href)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
 
-linkToAttributes : AppState -> Routes.Route -> List (Attribute msg)
+linkToAttributes : AppState -> Routes.Route -> List (Html.Attribute msg)
 linkToAttributes appState route =
     [ href <| Routing.toUrl appState route
     ]
@@ -35,7 +35,7 @@ listClass otherClass =
     class <| "col col-list " ++ otherClass
 
 
-grammarlyAttributes : List (Attribute msg)
+grammarlyAttributes : List (Html.Attribute msg)
 grammarlyAttributes =
     [ attribute "data-gramm" "false" ]
 

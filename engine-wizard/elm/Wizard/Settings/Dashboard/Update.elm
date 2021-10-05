@@ -1,4 +1,4 @@
-module Wizard.Settings.Dashboard.Update exposing (..)
+module Wizard.Settings.Dashboard.Update exposing (update)
 
 import Shared.Data.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)

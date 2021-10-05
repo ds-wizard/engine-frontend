@@ -1,4 +1,4 @@
-module Wizard.Common.Components.Listing.Subscriptions exposing (..)
+module Wizard.Common.Components.Listing.Subscriptions exposing (subscriptions)
 
 import Bootstrap.Dropdown as Dropdown
 import Dict

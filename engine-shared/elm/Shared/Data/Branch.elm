@@ -5,7 +5,7 @@ module Shared.Data.Branch exposing
     , matchState
     )
 
-import Json.Decode as D exposing (..)
+import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Shared.Data.Branch.BranchState as BranchState exposing (BranchState)

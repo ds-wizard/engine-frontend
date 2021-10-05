@@ -6,7 +6,6 @@ module Shared.Data.Document.DocumentTemplate exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
-import Uuid exposing (Uuid)
 
 
 type alias DocumentTemplate =

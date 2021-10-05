@@ -14,7 +14,7 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lh, lx)
+import Shared.Locale exposing (l, lh)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash

@@ -1,4 +1,4 @@
-module Wizard.Projects.CreateMigration.Subscriptions exposing (..)
+module Wizard.Projects.CreateMigration.Subscriptions exposing (subscriptions)
 
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Projects.CreateMigration.Models exposing (Model)

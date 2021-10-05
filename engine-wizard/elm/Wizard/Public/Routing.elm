@@ -5,7 +5,7 @@ module Wizard.Public.Routing exposing
 
 import Shared.Locale exposing (lr)
 import Url exposing (percentEncode)
-import Url.Parser exposing (..)
+import Url.Parser exposing ((</>), (<?>), Parser, map, s, string, top)
 import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Public.Routes exposing (Route(..))

@@ -1,4 +1,8 @@
-module Wizard.KMEditor.Editor.KMEditor.Update.Phase exposing (..)
+module Wizard.KMEditor.Editor.KMEditor.Update.Phase exposing
+    ( deletePhase
+    , updatePhaseForm
+    , withGeneratePhaseEditEvent
+    )
 
 import Form
 import Random exposing (Seed)
@@ -6,7 +10,7 @@ import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model)
 import Wizard.KMEditor.Editor.KMEditor.Models.Children exposing (Children)
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), KMEditorData, MetricEditorData, PhaseEditorData, QuestionEditorData, TagEditorData, isPhaseEditorDirty, updatePhaseEditorData)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), KMEditorData, PhaseEditorData, isPhaseEditorDirty, updatePhaseEditorData)
 import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (phaseFormValidation)
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (deleteEntity, updateForm, withGenerateEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createAddPhaseEvent, createDeletePhaseEvent, createEditPhaseEvent)

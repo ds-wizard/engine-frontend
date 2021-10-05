@@ -9,8 +9,6 @@ module Wizard.KMEditor.Editor.Preview.Models exposing
 
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.Package as Package
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Wizard.Common.AppState exposing (AppState)

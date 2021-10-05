@@ -11,7 +11,7 @@ module Shared.Data.User exposing
 
 import Dict exposing (Dict)
 import Gravatar
-import Json.Decode as D exposing (..)
+import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.UserInfo exposing (UserInfo)
 import Uuid exposing (Uuid)

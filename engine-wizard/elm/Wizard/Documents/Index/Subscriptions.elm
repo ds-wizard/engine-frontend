@@ -1,4 +1,4 @@
-module Wizard.Documents.Index.Subscriptions exposing (..)
+module Wizard.Documents.Index.Subscriptions exposing (subscriptions)
 
 import Time
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs

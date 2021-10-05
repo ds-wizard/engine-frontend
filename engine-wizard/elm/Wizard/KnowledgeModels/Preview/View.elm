@@ -1,15 +1,15 @@
-module Wizard.KnowledgeModels.Preview.View exposing (..)
+module Wizard.KnowledgeModels.Preview.View exposing (view)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Shared.Data.Package exposing (Package)
-import Shared.Data.QuestionnaireDetail
 import Shared.Locale exposing (l)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Common.Feature as Features
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
@@ -56,7 +56,7 @@ viewHeader : AppState -> Model -> Package -> Html Msg
 viewHeader appState model package =
     let
         actions =
-            if appState.config.questionnaire.questionnaireSharing.anonymousEnabled then
+            if Features.projectsCreateCustom appState then
                 let
                     cfg =
                         { label = l_ "createProject" appState

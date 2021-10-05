@@ -1,10 +1,10 @@
 module Wizard.KMEditor.Publish.View exposing (view)
 
 import Form exposing (Form)
-import Form.Field exposing (Field, FieldValue(..))
+import Form.Field exposing (FieldValue(..))
 import Form.Input as Input
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, div, label, p, text)
+import Html.Attributes exposing (class, href, id, name, target)
 import Html.Events exposing (onClick)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)

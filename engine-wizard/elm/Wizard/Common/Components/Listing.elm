@@ -120,10 +120,12 @@ modelFromList list =
 -- UTILS
 
 
+dropdownAction : ListingActionConfig msg -> ListingDropdownItem msg
 dropdownAction =
     ListingDropdownAction
 
 
+dropdownSeparator : ListingDropdownItem msg
 dropdownSeparator =
     ListingDropdownSeparator
 
@@ -255,7 +257,7 @@ viewAction appState dropdownItem =
                             [ onClick msg ]
             in
             Dropdown.anchorItem
-                ([ class <| Maybe.withDefault "" action.extraClass ] ++ attrs)
+                (class (Maybe.withDefault "" action.extraClass) :: attrs)
                 [ action.icon, text action.label ]
 
         ListingDropdownSeparator ->

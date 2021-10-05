@@ -4,7 +4,6 @@ import ActionResult exposing (ActionResult(..))
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Projects.Common.DeleteProjectModal.Models exposing (Model)

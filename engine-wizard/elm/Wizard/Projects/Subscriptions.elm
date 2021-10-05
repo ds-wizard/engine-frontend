@@ -1,4 +1,4 @@
-module Wizard.Projects.Subscriptions exposing (..)
+module Wizard.Projects.Subscriptions exposing (subscriptions)
 
 import Wizard.Projects.Create.Subscriptions
 import Wizard.Projects.CreateMigration.Subscriptions

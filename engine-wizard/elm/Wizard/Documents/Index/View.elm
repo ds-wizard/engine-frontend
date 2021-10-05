@@ -1,17 +1,15 @@
-module Wizard.Documents.Index.View exposing (..)
+module Wizard.Documents.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (..)
+import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, text)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)
 import Markdown
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
-import Shared.Auth.Permission as Perm
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lg, lh, lx)
@@ -19,6 +17,7 @@ import Shared.Utils exposing (listInsertIf)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -72,23 +71,20 @@ view appState model =
 viewDocuments : AppState -> Model -> Maybe QuestionnaireDetail -> Html Msg
 viewDocuments appState model mbQuestionnaire =
     let
-        mbQuestionnaireFilterView =
-            case mbQuestionnaire of
-                Just questionnaire ->
-                    Just <|
-                        div [ class "listing-toolbar-extra questionnaire-filter" ]
-                            [ linkTo appState
-                                (Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire))
-                                [ class "questionnaire-name" ]
-                                [ text questionnaire.name ]
-                            , linkTo appState
-                                (Routes.DocumentsRoute (IndexRoute Nothing PaginationQueryString.empty))
-                                [ class "text-danger" ]
-                                [ faSet "_global.remove" appState ]
-                            ]
+        questionnaireFilterView questionnaire =
+            div [ class "listing-toolbar-extra questionnaire-filter" ]
+                [ linkTo appState
+                    (Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire))
+                    [ class "questionnaire-name" ]
+                    [ text questionnaire.name ]
+                , linkTo appState
+                    (Routes.DocumentsRoute (IndexRoute Nothing PaginationQueryString.empty))
+                    [ class "text-danger" ]
+                    [ faSet "_global.remove" appState ]
+                ]
 
-                Nothing ->
-                    Nothing
+        mbQuestionnaireFilterView =
+            Maybe.map questionnaireFilterView mbQuestionnaire
     in
     div [ listClass "Documents__Index" ]
         [ Page.header (l_ "header.title" appState) []
@@ -207,17 +203,12 @@ listingActions appState document =
                 , msg = ListingActionMsg (ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
                 }
-
-        submitEnabled =
-            (document.state == DoneDocumentState)
-                && appState.config.submission.enabled
-                && Perm.hasPerm appState.session Perm.submission
     in
     []
-        |> listInsertIf download (document.state == DoneDocumentState)
-        |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator (document.state == DoneDocumentState)
-        |> listInsertIf delete (Document.isEditable appState document)
+        |> listInsertIf download (Feature.documentDownload appState document)
+        |> listInsertIf submit (Feature.documentSubmit appState document)
+        |> listInsertIf Listing.dropdownSeparator (Feature.documentDelete appState document)
+        |> listInsertIf delete (Feature.documentDelete appState document)
 
 
 stateBadge : AppState -> DocumentState -> Html msg

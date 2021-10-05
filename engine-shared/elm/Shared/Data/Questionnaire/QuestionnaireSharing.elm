@@ -24,6 +24,7 @@ import Shared.Provisioning exposing (Provisioning)
 type QuestionnaireSharing
     = RestrictedQuestionnaire
     | AnyoneWithLinkViewQuestionnaire
+    | AnyoneWithLinkCommentQuestionnaire
     | AnyoneWithLinkEditQuestionnaire
 
 
@@ -35,6 +36,9 @@ toString questionnaireSharing =
 
         AnyoneWithLinkViewQuestionnaire ->
             "AnyoneWithLinkViewQuestionnaire"
+
+        AnyoneWithLinkCommentQuestionnaire ->
+            "AnyoneWithLinkCommentQuestionnaire"
 
         AnyoneWithLinkEditQuestionnaire ->
             "AnyoneWithLinkEditQuestionnaire"
@@ -57,6 +61,9 @@ decoder =
                     "AnyoneWithLinkViewQuestionnaire" ->
                         D.succeed AnyoneWithLinkViewQuestionnaire
 
+                    "AnyoneWithLinkCommentQuestionnaire" ->
+                        D.succeed AnyoneWithLinkCommentQuestionnaire
+
                     "AnyoneWithLinkEditQuestionnaire" ->
                         D.succeed AnyoneWithLinkEditQuestionnaire
 
@@ -74,6 +81,9 @@ toFormValues sharing =
         AnyoneWithLinkViewQuestionnaire ->
             ( True, QuestionnairePermission.View )
 
+        AnyoneWithLinkCommentQuestionnaire ->
+            ( True, QuestionnairePermission.Comment )
+
         AnyoneWithLinkEditQuestionnaire ->
             ( True, QuestionnairePermission.Edit )
 
@@ -83,6 +93,9 @@ fromFormValues enabled perm =
     if enabled then
         if perm == QuestionnairePermission.Edit then
             AnyoneWithLinkEditQuestionnaire
+
+        else if perm == QuestionnairePermission.Comment then
+            AnyoneWithLinkCommentQuestionnaire
 
         else
             AnyoneWithLinkViewQuestionnaire
@@ -108,6 +121,9 @@ validation =
                     "AnyoneWithLinkViewQuestionnaire" ->
                         Validate.succeed AnyoneWithLinkViewQuestionnaire
 
+                    "AnyoneWithLinkCommentQuestionnaire" ->
+                        Validate.succeed AnyoneWithLinkCommentQuestionnaire
+
                     "AnyoneWithLinkEditQuestionnaire" ->
                         Validate.succeed AnyoneWithLinkEditQuestionnaire
 
@@ -126,6 +142,10 @@ richFormOptions appState =
       , lg "questionnaireSharing.anyoneWithLinkView" appState
       , lg "questionnaireSharing.anyoneWithLinkView.description" appState
       )
+    , ( toString AnyoneWithLinkCommentQuestionnaire
+      , lg "questionnaireSharing.anyoneWithLinkComment" appState
+      , lg "questionnaireSharing.anyoneWithLinkComment.description" appState
+      )
     , ( toString AnyoneWithLinkEditQuestionnaire
       , lg "questionnaireSharing.anyoneWithLinkEdit" appState
       , lg "questionnaireSharing.anyoneWithLinkEdit.description" appState
@@ -140,6 +160,9 @@ formOptions appState =
       )
     , ( toString AnyoneWithLinkViewQuestionnaire
       , lg "questionnaireSharing.anyoneWithLinkView" appState
+      )
+    , ( toString AnyoneWithLinkCommentQuestionnaire
+      , lg "questionnaireSharing.anyoneWithLinkComment" appState
       )
     , ( toString AnyoneWithLinkEditQuestionnaire
       , lg "questionnaireSharing.anyoneWithLinkEdit" appState

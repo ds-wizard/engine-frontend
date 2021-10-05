@@ -1,6 +1,6 @@
 module Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer exposing (create)
 
-import Diff exposing (Change)
+import Diff
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import List.Extra as List

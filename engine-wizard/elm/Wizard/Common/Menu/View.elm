@@ -11,9 +11,8 @@ module Wizard.Common.Menu.View exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Html exposing (..)
+import Html exposing (Html, a, code, div, em, img, p, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, colspan, href, src, target)
-import Shared.Auth.Permission as Perm
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Shared.Data.User as User
@@ -21,6 +20,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lh, lx)
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, linkToAttributes)
 import Wizard.Common.Html.Events exposing (onLinkClick)
@@ -80,7 +80,7 @@ viewHelpMenu appState dropdownState =
 
 viewSettingsMenu : AppState -> Html Wizard.Msgs.Msg
 viewSettingsMenu appState =
-    if Perm.hasPerm appState.session Perm.settings then
+    if Feature.settings appState then
         div [ class "btn-group" ]
             [ linkTo appState
                 (Routes.SettingsRoute Wizard.Settings.Routes.defaultRoute)

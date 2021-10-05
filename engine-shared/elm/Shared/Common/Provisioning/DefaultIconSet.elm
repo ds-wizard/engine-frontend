@@ -1,4 +1,4 @@
-module Shared.Common.Provisioning.DefaultIconSet exposing (..)
+module Shared.Common.Provisioning.DefaultIconSet exposing (iconSet)
 
 
 iconSet : List ( String, String )

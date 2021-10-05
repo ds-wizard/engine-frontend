@@ -1,4 +1,7 @@
-module Wizard.KMEditor.Editor.KMEditor.Update exposing (generateEvents, update)
+module Wizard.KMEditor.Editor.KMEditor.Update exposing
+    ( generateEvents
+    , update
+    )
 
 import Dict
 import Random exposing (Seed)
@@ -9,22 +12,22 @@ import SplitPane
 import ValueList
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.KMEditor.Components.MoveModal as MoveModal
-import Wizard.KMEditor.Editor.KMEditor.Models exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children exposing (Children)
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Models exposing (Model, getActiveEditor, insertEditor)
+import Wizard.KMEditor.Editor.KMEditor.Models.Children as Children
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (Editor(..), setEditorClosed, setEditorOpen, toggleEditorOpen)
+import Wizard.KMEditor.Editor.KMEditor.Msgs exposing (AnswerEditorMsg(..), ChapterEditorMsg(..), ChoiceEditorMsg(..), EditorMsg(..), ExpertEditorMsg(..), IntegrationEditorMsg(..), KMEditorMsg(..), MetricEditorMsg(..), Msg(..), PhaseEditorMsg(..), QuestionEditorMsg(..), ReferenceEditorMsg(..), TagEditorMsg(..))
 import Wizard.KMEditor.Editor.KMEditor.Update.Abstract exposing (updateEditor)
-import Wizard.KMEditor.Editor.KMEditor.Update.Answer exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Update.Chapter exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Update.Answer exposing (addFollowUp, deleteAnswer, updateAnswerForm, withGenerateAnswerEditEvent)
+import Wizard.KMEditor.Editor.KMEditor.Update.Chapter exposing (addQuestion, deleteChapter, updateChapterForm, withGenerateChapterEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Choice exposing (deleteChoice, updateChoiceForm, withGenerateChoiceEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Events exposing (createMoveAnswerEvent, createMoveChoiceEvent, createMoveExpertEvent, createMoveQuestionEvent, createMoveReferenceEvent)
-import Wizard.KMEditor.Editor.KMEditor.Update.Expert exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Update.Expert exposing (deleteExpert, updateExpertForm, withGenerateExpertEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Integration exposing (deleteIntegration, updateIntegrationForm, withGenerateIntegrationEditEvent)
-import Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Update.KnowledgeModel exposing (addChapter, addIntegration, addMetric, addPhase, addTag, updateKMForm, withGenerateKMEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Metric exposing (deleteMetric, updateMetricForm, withGenerateMetricEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Phase exposing (deletePhase, updatePhaseForm, withGeneratePhaseEditEvent)
-import Wizard.KMEditor.Editor.KMEditor.Update.Question exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Update.Reference exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Update.Question exposing (addAnswer, addAnswerItemTemplateQuestion, addChoice, addExpert, addQuestionTag, addReference, deleteQuestion, removeQuestionTag, updateQuestionForm, withGenerateQuestionEditEvent)
+import Wizard.KMEditor.Editor.KMEditor.Update.Reference exposing (deleteReference, updateReferenceForm, withGenerateReferenceEditEvent)
 import Wizard.KMEditor.Editor.KMEditor.Update.Tag exposing (deleteTag, updateTagForm, withGenerateTagEditEvent)
 import Wizard.Msgs
 import Wizard.Ports as Ports
@@ -431,7 +434,7 @@ update msg appState model fetchPreviewCmd =
 generateEvents : AppState -> Seed -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 generateEvents appState seed model =
     let
-        updateModel newSeed newModel a =
+        updateModel newSeed newModel _ =
             ( newSeed, newModel, Cmd.none )
     in
     case getActiveEditor model of

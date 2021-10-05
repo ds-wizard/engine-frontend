@@ -1,13 +1,10 @@
 module Wizard.KMEditor.Create.View exposing (view)
 
 import ActionResult
-import Form exposing (Form)
-import Html exposing (..)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onBlur, onSubmit)
-import Shared.Data.Package as Package exposing (Package)
+import Form
+import Html exposing (Html, div, text)
+import Html.Events exposing (onSubmit)
 import Shared.Locale exposing (l, lg)
-import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -17,9 +14,8 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Create.Models exposing (..)
+import Wizard.KMEditor.Create.Models exposing (Model)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 

@@ -1,11 +1,10 @@
 module Wizard.Projects.CreateMigration.View exposing (view)
 
 import Form
-import Html exposing (Html, div, label, option, text)
-import Html.Attributes exposing (class, selected, value)
+import Html exposing (Html, div, label, text)
+import Html.Attributes exposing (class)
 import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.Package exposing (Package)
-import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
+import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)

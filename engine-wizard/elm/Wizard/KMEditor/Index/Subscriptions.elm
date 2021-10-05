@@ -1,4 +1,4 @@
-module Wizard.KMEditor.Index.Subscriptions exposing (..)
+module Wizard.KMEditor.Index.Subscriptions exposing (subscriptions)
 
 import Wizard.Common.Components.Listing.Subscriptions as Listing
 import Wizard.KMEditor.Index.Models exposing (Model)

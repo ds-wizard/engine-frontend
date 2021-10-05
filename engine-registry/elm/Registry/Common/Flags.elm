@@ -1,4 +1,7 @@
-module Registry.Common.Flags exposing (..)
+module Registry.Common.Flags exposing
+    ( Flags
+    , decoder
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D

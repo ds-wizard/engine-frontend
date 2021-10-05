@@ -15,7 +15,6 @@ module Shared.Api.Users exposing
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, httpPost, httpPut, jwtDelete, jwtGet, jwtPost, jwtPut)
-import Shared.Data.Member as Member exposing (Member)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.User as User exposing (User)

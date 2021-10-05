@@ -15,7 +15,7 @@ port module Wizard.Ports exposing
     , storeSession
     )
 
-import Json.Encode as E exposing (Value)
+import Json.Encode as E
 
 
 

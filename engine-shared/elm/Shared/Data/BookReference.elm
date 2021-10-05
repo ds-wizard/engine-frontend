@@ -1,6 +1,9 @@
-module Shared.Data.BookReference exposing (..)
+module Shared.Data.BookReference exposing
+    ( BookReference
+    , decoder
+    )
 
-import Json.Decode as D exposing (..)
+import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 
 

@@ -1,7 +1,13 @@
-module Shared.Html exposing (emptyNode, fa, faKey, faKeyClass, faSet)
+module Shared.Html exposing
+    ( emptyNode
+    , fa
+    , faKey
+    , faKeyClass
+    , faSet
+    )
 
 import Dict
-import Html exposing (..)
+import Html exposing (Html, i, text)
 import Html.Attributes exposing (class)
 import Shared.Provisioning exposing (Provisioning)
 

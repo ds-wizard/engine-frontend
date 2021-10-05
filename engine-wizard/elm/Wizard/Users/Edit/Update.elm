@@ -1,7 +1,7 @@
 module Wizard.Users.Edit.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Form exposing (Form)
+import Form
 import Result exposing (Result)
 import Shared.Api.Users as UsersApi
 import Shared.Data.User exposing (User)
@@ -14,7 +14,7 @@ import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Users.Common.UserEditForm as UserEditForm
 import Wizard.Users.Common.UserPasswordForm as UserPasswordForm
-import Wizard.Users.Edit.Models exposing (..)
+import Wizard.Users.Edit.Models exposing (Model)
 import Wizard.Users.Edit.Msgs exposing (Msg(..))
 
 

@@ -1,4 +1,4 @@
-module Wizard.Settings.Generic.Msgs exposing (..)
+module Wizard.Settings.Generic.Msgs exposing (Msg(..))
 
 import Form
 import Shared.Data.EditableConfig exposing (EditableConfig)

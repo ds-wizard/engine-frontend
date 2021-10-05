@@ -1,11 +1,13 @@
-module Wizard.KnowledgeModels.Index.Update exposing (fetchData, update)
+module Wizard.KnowledgeModels.Index.Update exposing
+    ( fetchData
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Dict
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.Package exposing (Package)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lg)
+import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
@@ -15,11 +17,6 @@ import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KnowledgeModels.Index.Update"
 
 
 fetchData : Cmd Msg

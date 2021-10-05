@@ -7,8 +7,8 @@ module Wizard.KMEditor.Editor.KMEditor.Components.MoveModalTreeInput exposing
     )
 
 import Dict exposing (Dict)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, div, i, li, span, text, ul)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Set exposing (Set)
 import Shared.Data.KnowledgeModel.Question as Question

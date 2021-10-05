@@ -14,7 +14,7 @@ import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Settings.Common.Forms.RegistrySignupForm as RegistrySignupForm exposing (RegistrySignupForm)
+import Wizard.Settings.Common.Forms.RegistrySignupForm as RegistrySignupForm
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.Update as GenericUpdate
 import Wizard.Settings.Registry.Models exposing (Model)

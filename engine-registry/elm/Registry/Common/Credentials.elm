@@ -1,4 +1,8 @@
-module Registry.Common.Credentials exposing (..)
+module Registry.Common.Credentials exposing
+    ( Credentials
+    , decoder
+    , encode
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D

@@ -3,8 +3,14 @@ module Wizard.Common.Components.Questionnaire exposing
     , Model
     , Msg(..)
     , QuestionnaireRenderer
+    , addComment
     , clearReply
+    , deleteComment
+    , deleteCommentThread
+    , editComment
     , init
+    , reopenCommentThread
+    , resolveCommentThread
     , setActiveChapterUuid
     , setLabels
     , setPhaseUuid
@@ -17,11 +23,13 @@ module Wizard.Common.Components.Questionnaire exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown)
+import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, textarea, ul)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, title, type_, value)
+import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
+import Json.Decode as D
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
@@ -30,17 +38,17 @@ import Roman
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Event exposing (Event)
-import Shared.Data.KnowledgeModel as KnowledgeModel
+import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.Comment exposing (Comment)
+import Shared.Data.QuestionnaireDetail.CommentThread exposing (CommentThread)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
@@ -51,9 +59,10 @@ import Shared.Data.User as User
 import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
-import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
-import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust)
+import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import String exposing (fromInt)
+import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState as AppState exposing (AppState)
@@ -62,10 +71,12 @@ import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Common.Components.Questionnaire.History as History
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
-import Wizard.Common.Html exposing (illustratedMessage)
-import Wizard.Common.Html.Attribute exposing (grammarlyAttributes)
+import Wizard.Common.Feature as Feature
+import Wizard.Common.Html exposing (illustratedMessage, resizableTextarea)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Tag as Tag
+import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
 
@@ -73,11 +84,6 @@ import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Common.Components.Questionnaire"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.Components.Questionnaire"
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
@@ -107,6 +113,13 @@ type alias Model =
     , historyModel : History.Model
     , versionModalModel : VersionModal.Model
     , deleteVersionModalModel : DeleteVersionModal.Model
+    , commentInputs : Dict String String
+    , commentEditInputs : Dict String String
+    , commentDeleting : Maybe Uuid
+    , commentDeletingListenClicks : Bool
+    , commentsViewResolved : Bool
+    , commentsViewPrivate : Bool
+    , commentDropdownStates : Dict String Dropdown.State
     }
 
 
@@ -125,6 +138,8 @@ type RightPanel
     = RightPanelNone
     | RightPanelTODOs
     | RightPanelHistory
+    | RightPanelCommentsOverview
+    | RightPanelComments String
 
 
 init : AppState -> QuestionnaireDetail -> Model
@@ -150,6 +165,13 @@ init appState questionnaire =
     , historyModel = History.init appState
     , versionModalModel = VersionModal.init
     , deleteVersionModalModel = DeleteVersionModal.init
+    , commentInputs = Dict.empty
+    , commentEditInputs = Dict.empty
+    , commentDeleting = Nothing
+    , commentDeletingListenClicks = False
+    , commentsViewResolved = False
+    , commentsViewPrivate = False
+    , commentDropdownStates = Dict.empty
     }
 
 
@@ -176,6 +198,36 @@ clearReply path =
 setLabels : String -> List String -> Model -> Model
 setLabels path value =
     updateQuestionnaire <| QuestionnaireDetail.setLabels path value
+
+
+resolveCommentThread : String -> Uuid -> Model -> Model
+resolveCommentThread path threadUuid =
+    updateQuestionnaire <| QuestionnaireDetail.resolveCommentThread path threadUuid
+
+
+reopenCommentThread : String -> Uuid -> Model -> Model
+reopenCommentThread path threadUuid =
+    updateQuestionnaire <| QuestionnaireDetail.reopenCommentThread path threadUuid
+
+
+deleteCommentThread : String -> Uuid -> Model -> Model
+deleteCommentThread path threadUuid =
+    updateQuestionnaire <| QuestionnaireDetail.deleteCommentThread path threadUuid
+
+
+addComment : String -> Uuid -> Bool -> Comment -> Model -> Model
+addComment path threadUuid private comment =
+    updateQuestionnaire <| QuestionnaireDetail.addComment path threadUuid private comment
+
+
+editComment : String -> Uuid -> Uuid -> Time.Posix -> String -> Model -> Model
+editComment path threadUuid commentUuid updatedAt newText =
+    updateQuestionnaire <| QuestionnaireDetail.editComment path threadUuid commentUuid updatedAt newText
+
+
+deleteComment : String -> Uuid -> Uuid -> Model -> Model
+deleteComment path threadUuid commentUuid =
+    updateQuestionnaire <| QuestionnaireDetail.deleteComment path threadUuid commentUuid
 
 
 updateQuestionnaire : (QuestionnaireDetail -> QuestionnaireDetail) -> Model -> Model
@@ -253,6 +305,21 @@ type Msg
     | AddQuestionnaireVersion QuestionnaireVersion
     | UpdateQuestionnaireVersion QuestionnaireVersion
     | DeleteQuestionnaireVersion QuestionnaireVersion
+    | OpenComments String
+    | CommentInput String (Maybe Uuid) String
+    | CommentSubmit String (Maybe Uuid) String Bool
+    | CommentDelete (Maybe Uuid)
+    | CommentDeleteListenClicks
+    | CommentDeleteSubmit String Uuid Uuid Bool
+    | CommentEditInput Uuid String
+    | CommentEditCancel Uuid
+    | CommentEditSubmit String Uuid Uuid String Bool
+    | CommentThreadDelete String Uuid Bool
+    | CommentThreadResolve String Uuid Bool
+    | CommentThreadReopen String Uuid Bool
+    | CommentsViewResolved Bool
+    | CommentsViewPrivate Bool
+    | CommentDropdownMsg String Dropdown.State
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -400,6 +467,68 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         }
                 }
 
+        OpenComments path ->
+            withSeed <| handleScrollToPath { model | rightPanel = RightPanelComments path } path
+
+        CommentInput path mbThreadUuid value ->
+            let
+                key =
+                    path ++ "-" ++ Maybe.unwrap "0" Uuid.toString mbThreadUuid
+
+                commentInputs =
+                    Dict.insert key value model.commentInputs
+            in
+            wrap { model | commentInputs = commentInputs }
+
+        CommentSubmit path mbThreadUuid _ _ ->
+            let
+                key =
+                    path ++ "-" ++ Maybe.unwrap "0" Uuid.toString mbThreadUuid
+
+                commentInputs =
+                    Dict.remove key model.commentInputs
+            in
+            wrap { model | commentInputs = commentInputs }
+
+        CommentEditInput commentUuid value ->
+            let
+                commentEditInputs =
+                    Dict.insert (Uuid.toString commentUuid) value model.commentEditInputs
+            in
+            wrap { model | commentEditInputs = commentEditInputs }
+
+        CommentEditCancel commentUuid ->
+            let
+                commentEditInputs =
+                    Dict.remove (Uuid.toString commentUuid) model.commentEditInputs
+            in
+            wrap { model | commentEditInputs = commentEditInputs }
+
+        CommentEditSubmit _ _ commentUuid _ _ ->
+            let
+                commentEditInputs =
+                    Dict.remove (Uuid.toString commentUuid) model.commentEditInputs
+            in
+            wrap { model | commentEditInputs = commentEditInputs }
+
+        CommentDelete mbCommentUuid ->
+            wrap { model | commentDeleting = mbCommentUuid, commentDeletingListenClicks = False }
+
+        CommentDeleteListenClicks ->
+            wrap { model | commentDeletingListenClicks = True }
+
+        CommentsViewResolved value ->
+            wrap { model | commentsViewResolved = value }
+
+        CommentsViewPrivate value ->
+            wrap { model | commentsViewPrivate = value }
+
+        CommentDropdownMsg commentUuid state ->
+            wrap { model | commentDropdownStates = Dict.insert commentUuid state model.commentDropdownStates }
+
+        _ ->
+            wrap model
+
 
 handleScrollToPath : Model -> String -> ( Model, Cmd Msg )
 handleScrollToPath model path =
@@ -444,7 +573,7 @@ handleTypeHintsInput model path reply =
 
         dispatchCmd =
             dispatch <|
-                SetReply (String.join "." path) reply
+                SetReply (pathToString path) reply
     in
     ( { model | typeHintsDebounce = debounce }
     , Cmd.batch [ debounceCmd, dispatchCmd ]
@@ -537,10 +666,29 @@ loadTypeHints appState ctx model path questionUuid value =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
+    let
+        commentDeleteSub =
+            case ( model.commentDeleting, model.commentDeletingListenClicks ) of
+                ( Just _, False ) ->
+                    Browser.Events.onAnimationFrame (\_ -> CommentDeleteListenClicks)
+
+                ( Just _, True ) ->
+                    Browser.Events.onClick (D.succeed (CommentDelete Nothing))
+
+                _ ->
+                    Sub.none
+
+        commentDropdownSubs =
+            Dict.toList model.commentDropdownStates
+                |> List.map (\( uuid, state ) -> Dropdown.subscriptions state (CommentDropdownMsg uuid))
+    in
     Sub.batch
-        [ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
-        , Sub.map HistoryMsg <| History.subscriptions model.historyModel
-        ]
+        ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
+         , Sub.map HistoryMsg <| History.subscriptions model.historyModel
+         , commentDeleteSub
+         ]
+            ++ commentDropdownSubs
+        )
 
 
 
@@ -551,7 +699,7 @@ view : AppState -> Config msg -> Context -> Model -> Html msg
 view appState cfg ctx model =
     let
         ( toolbar, toolbarEnabled ) =
-            if cfg.features.toolbarEnabled && not cfg.features.readonly then
+            if cfg.features.toolbarEnabled then
                 ( Html.map cfg.wrapMsg <| viewQuestionnaireToolbar appState model, True )
 
             else
@@ -575,39 +723,6 @@ view appState cfg ctx model =
 viewQuestionnaireToolbar : AppState -> Model -> Html Msg
 viewQuestionnaireToolbar appState model =
     let
-        ( todosPanel, todosOpen ) =
-            case model.rightPanel of
-                RightPanelTODOs ->
-                    ( RightPanelNone, True )
-
-                _ ->
-                    ( RightPanelTODOs, False )
-
-        ( versionsPanel, versionsOpen ) =
-            case model.rightPanel of
-                RightPanelHistory ->
-                    ( RightPanelNone, True )
-
-                _ ->
-                    ( RightPanelHistory, False )
-
-        todosLength =
-            QuestionnaireDetail.todosLength model.questionnaire
-
-        todosBadge =
-            if todosLength > 0 then
-                span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt todosLength) ]
-
-            else
-                emptyNode
-
-        ( expandIcon, expandMsg ) =
-            if AppState.isFullscreen appState then
-                ( faSet "questionnaire.shrink" appState, SetFullscreen False )
-
-            else
-                ( faSet "questionnaire.expand" appState, SetFullscreen True )
-
         dropdown =
             let
                 viewSettings =
@@ -651,22 +766,104 @@ viewQuestionnaireToolbar appState model =
                         ]
                     }
                 ]
+
+        navButton buttonElement visibleCondition =
+            if visibleCondition then
+                buttonElement
+
+            else
+                emptyNode
+
+        ( todosPanel, todosOpen ) =
+            case model.rightPanel of
+                RightPanelTODOs ->
+                    ( RightPanelNone, True )
+
+                _ ->
+                    ( RightPanelTODOs, False )
+
+        ( commentsOverviewPanel, commentsOverviewOpen ) =
+            case model.rightPanel of
+                RightPanelCommentsOverview ->
+                    ( RightPanelNone, True )
+
+                _ ->
+                    ( RightPanelCommentsOverview, False )
+
+        ( versionsPanel, versionsOpen ) =
+            case model.rightPanel of
+                RightPanelHistory ->
+                    ( RightPanelNone, True )
+
+                _ ->
+                    ( RightPanelHistory, False )
+
+        todosLength =
+            QuestionnaireDetail.todosLength model.questionnaire
+
+        todosBadge =
+            if todosLength > 0 then
+                span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt todosLength) ]
+
+            else
+                emptyNode
+
+        todosButtonVisible =
+            Feature.projectTodos appState model.questionnaire
+
+        todosButton =
+            div [ class "item-group" ]
+                [ a [ class "item", classList [ ( "selected", todosOpen ) ], onClick (SetRightPanel todosPanel) ]
+                    [ lx_ "toolbar.todos" appState
+                    , todosBadge
+                    ]
+                ]
+
+        commentsLength =
+            QuestionnaireDetail.commentsLength model.questionnaire
+
+        commentsBadge =
+            if commentsLength > 0 then
+                span [ class "badge badge-pill badge-secondary", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
+
+            else
+                emptyNode
+
+        commentsOverviewButtonVisible =
+            Feature.projectCommentAdd appState model.questionnaire
+
+        commentsOverviewButton =
+            div [ class "item-group" ]
+                [ a [ class "item", classList [ ( "selected", commentsOverviewOpen ) ], onClick (SetRightPanel commentsOverviewPanel) ]
+                    [ lx_ "toolbar.comments" appState
+                    , commentsBadge
+                    ]
+                ]
+
+        versionHistoryButtonVisible =
+            Feature.projectVersionHitory appState model.questionnaire
+
+        versionHistoryButton =
+            div [ class "item-group" ]
+                [ a [ class "item", classList [ ( "selected", versionsOpen ) ], onClick (SetRightPanel versionsPanel) ]
+                    [ lx_ "toolbar.versionHistory" appState ]
+                ]
+
+        ( expandIcon, expandMsg ) =
+            if AppState.isFullscreen appState then
+                ( faSet "questionnaire.shrink" appState, SetFullscreen False )
+
+            else
+                ( faSet "questionnaire.expand" appState, SetFullscreen True )
     in
     div [ class "questionnaire__toolbar" ]
         [ div [ class "questionnaire__toolbar__left" ]
             [ dropdown
             ]
         , div [ class "questionnaire__toolbar__right" ]
-            [ div [ class "item-group" ]
-                [ a [ class "item", classList [ ( "selected", todosOpen ) ], onClick (SetRightPanel todosPanel) ]
-                    [ lx_ "toolbar.todos" appState
-                    , todosBadge
-                    ]
-                ]
-            , div [ class "item-group" ]
-                [ a [ class "item", classList [ ( "selected", versionsOpen ) ], onClick (SetRightPanel versionsPanel) ]
-                    [ lx_ "toolbar.versionHistory" appState ]
-                ]
+            [ navButton commentsOverviewButton commentsOverviewButtonVisible
+            , navButton todosButton todosButtonVisible
+            , navButton versionHistoryButton versionHistoryButtonVisible
             , div [ class "item-group" ]
                 [ a [ class "item", onClick expandMsg ] [ expandIcon ]
                 ]
@@ -793,6 +990,14 @@ viewQuestionnaireRightPanel appState cfg model =
             wrapPanel <|
                 [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelTodos appState model ]
 
+        RightPanelCommentsOverview ->
+            wrapPanel <|
+                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelCommentsOverview appState model ]
+
+        RightPanelComments path ->
+            wrapPanel <|
+                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelComments appState model path ]
+
         RightPanelHistory ->
             let
                 historyCfg =
@@ -842,6 +1047,467 @@ viewQuestionnaireRightPanelTodos appState model =
     else
         div [ class "todos" ] <|
             List.map viewTodoGroup (QuestionnaireTodoGroup.groupTodos todos)
+
+
+
+-- QUESTIONNAIRE - RIGHT PANEL - COMMENTS OVERVIEW
+
+
+viewQuestionnaireRightPanelCommentsOverview : AppState -> Model -> Html Msg
+viewQuestionnaireRightPanelCommentsOverview appState model =
+    let
+        viewChapterComments group =
+            div []
+                [ strong [] [ text group.chapter.title ]
+                , ul [] (List.map viewQuestionComments group.todos)
+                ]
+
+        viewQuestionComments comment =
+            li []
+                [ a [ onClick (OpenComments comment.path) ]
+                    [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
+                    , span [ class "badge badge-pill badge-light" ] [ text (String.fromInt comment.comments) ]
+                    ]
+                ]
+
+        questionnaireComments =
+            QuestionnaireDetail.getComments model.questionnaire
+                |> groupComments
+                |> List.map viewChapterComments
+
+        groupComments comments =
+            let
+                fold comment acc =
+                    if List.any (\group -> group.chapter.uuid == comment.chapter.uuid) acc then
+                        List.map
+                            (\group ->
+                                if group.chapter.uuid == comment.chapter.uuid then
+                                    { group | todos = group.todos ++ [ comment ] }
+
+                                else
+                                    group
+                            )
+                            acc
+
+                    else
+                        acc ++ [ { chapter = comment.chapter, todos = [ comment ] } ]
+            in
+            List.foldl fold [] comments
+
+        content =
+            if List.isEmpty questionnaireComments then
+                [ div [ class "alert alert-info" ]
+                    [ p
+                        []
+                        (lh_ "commentsOverview.empty" [ faSet "questionnaire.comments" appState ] appState)
+                    ]
+                ]
+
+            else
+                questionnaireComments
+    in
+    div [ class "comments-overview" ] content
+
+
+
+-- QUESTIONNAIRE - RIGHT PANEL - COMMENTS
+
+
+viewQuestionnaireRightPanelComments : AppState -> Model -> String -> Html Msg
+viewQuestionnaireRightPanelComments appState model path =
+    let
+        commentThreads =
+            Dict.get path model.questionnaire.commentThreadsMap
+                |> Maybe.withDefault []
+
+        navigationView =
+            if Feature.projectCommentPrivate appState model.questionnaire then
+                viewCommentsNavigation appState model commentThreads
+
+            else
+                emptyNode
+
+        editorNoteExplanation =
+            if model.commentsViewPrivate then
+                div [ class "alert alert-editor-notes" ]
+                    [ i [ class "fa fas fa-lock" ] []
+                    , span [] [ lx_ "comments.editorNotes.description" appState ]
+                    ]
+
+            else
+                emptyNode
+
+        viewFilteredCommentThreads condition =
+            commentThreads
+                |> List.filter (\thread -> thread.private == model.commentsViewPrivate)
+                |> List.filter condition
+                |> List.map (viewCommentThread appState model path)
+
+        resolvedSelect =
+            div [ class "form-check" ]
+                [ label [ class "form-check-label form-check-toggle" ]
+                    [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved ] []
+                    , span [] [ lx_ "comments.viewResolved" appState ]
+                    ]
+                ]
+
+        resolvedThreadsView =
+            if model.commentsViewResolved then
+                div [] (viewFilteredCommentThreads (\thread -> thread.resolved))
+
+            else
+                emptyNode
+
+        commentThreadsView =
+            div [] (viewFilteredCommentThreads (\thread -> not thread.resolved))
+
+        newThreadForm =
+            viewCommentReplyForm appState
+                { submitText = l_ "comments.newThread.submit" appState
+                , placeholderText = l_ "comments.newThread.placeholder" appState
+                , model = model
+                , path = path
+                , mbThreadUuid = Nothing
+                , private = model.commentsViewPrivate
+                }
+    in
+    div [ class "Comments" ]
+        [ resolvedSelect
+        , navigationView
+        , resolvedThreadsView
+        , commentThreadsView
+        , editorNoteExplanation
+        , newThreadForm
+        ]
+
+
+viewCommentsNavigation : AppState -> Model -> List CommentThread -> Html Msg
+viewCommentsNavigation appState model commentThreads =
+    let
+        threadCount predicate =
+            List.filter predicate commentThreads
+                |> List.filter (not << .resolved)
+                |> List.map (.comments >> List.length)
+                |> List.sum
+
+        publicThreadsCount =
+            threadCount (not << .private)
+
+        privateThreadsCount =
+            threadCount .private
+
+        toBadge count =
+            if count == 0 then
+                emptyNode
+
+            else
+                span [ class "badge badge-pill badge-light" ] [ text (String.fromInt count) ]
+    in
+    ul [ class "nav nav-underline-tabs" ]
+        [ li [ class "nav-item" ]
+            [ a
+                [ class "nav-link"
+                , classList [ ( "active", not model.commentsViewPrivate ) ]
+                , onClick (CommentsViewPrivate False)
+                , dataCy "comments_nav_comments"
+                ]
+                [ span [ attribute "data-content" (l_ "comments.nav.comments" appState) ]
+                    [ lx_ "comments.nav.comments" appState ]
+                , toBadge publicThreadsCount
+                ]
+            ]
+        , li [ class "nav-item" ]
+            [ a
+                [ class "nav-link nav-link-editor-notes"
+                , classList [ ( "active", model.commentsViewPrivate ) ]
+                , onClick (CommentsViewPrivate True)
+                , dataCy "comments_nav_private-notes"
+                ]
+                [ span [ attribute "data-content" (l_ "comments.nav.editorNotes" appState) ]
+                    [ lx_ "comments.nav.editorNotes" appState ]
+                , toBadge privateThreadsCount
+                ]
+            ]
+        ]
+
+
+viewCommentThread : AppState -> Model -> String -> CommentThread -> Html Msg
+viewCommentThread appState model path commentThread =
+    let
+        deleteOverlay =
+            if model.commentDeleting == Maybe.map .uuid (List.head commentThread.comments) then
+                viewCommentDeleteOverlay appState
+                    { deleteMsg = CommentThreadDelete path commentThread.uuid commentThread.private
+                    , deleteText = l_ "comments.commentThread.delete" appState
+                    , extraClass = "CommentDeleteOverlay--Thread"
+                    }
+
+            else
+                emptyNode
+
+        replyForm =
+            if commentThread.resolved then
+                emptyNode
+
+            else
+                viewCommentReplyForm appState
+                    { submitText = l_ "comments.reply.submit" appState
+                    , placeholderText = l_ "comments.reply.placeholder" appState
+                    , model = model
+                    , path = path
+                    , mbThreadUuid = Just commentThread.uuid
+                    , private = commentThread.private
+                    }
+    in
+    div
+        [ class "CommentThread"
+        , classList
+            [ ( "CommentThread--Resolved", commentThread.resolved )
+            , ( "CommentThread--Private", commentThread.private )
+            ]
+        ]
+        (List.indexedMap (viewComment appState model path commentThread) commentThread.comments
+            ++ [ replyForm, deleteOverlay ]
+        )
+
+
+viewComment : AppState -> Model -> String -> CommentThread -> Int -> Comment -> Html Msg
+viewComment appState model path commentThread index comment =
+    let
+        commentHeader =
+            viewCommentHeader appState model path commentThread index comment
+
+        mbEditValue =
+            Dict.get (Uuid.toString comment.uuid) model.commentEditInputs
+
+        content =
+            case mbEditValue of
+                Just editValue ->
+                    div []
+                        [ resizableTextarea 2
+                            editValue
+                            [ class "form-control mb-1", onInput (CommentEditInput comment.uuid) ]
+                            []
+                        , div []
+                            [ button
+                                [ class "btn btn-primary btn-sm mr-1"
+                                , disabled (String.isEmpty editValue)
+                                , onClick (CommentEditSubmit path commentThread.uuid comment.uuid editValue commentThread.private)
+                                ]
+                                [ lx_ "comments.edit.submit" appState ]
+                            , button
+                                [ class "btn btn-outline-secondary btn-sm"
+                                , onClick (CommentEditCancel comment.uuid)
+                                ]
+                                [ lx_ "comments.form.cancel" appState ]
+                            ]
+                        ]
+
+                Nothing ->
+                    div [] [ Markdown.toHtml [ class "Comment_MD" ] comment.text ]
+
+        deleteOverlay =
+            if index /= 0 && model.commentDeleting == Just comment.uuid then
+                viewCommentDeleteOverlay appState
+                    { deleteMsg = CommentDeleteSubmit path commentThread.uuid comment.uuid commentThread.private
+                    , deleteText = l_ "comments.comment.delete" appState
+                    , extraClass = "CommentDeleteOverlay--Comment"
+                    }
+
+            else
+                emptyNode
+    in
+    div [ class "Comment" ]
+        [ commentHeader
+        , content
+        , deleteOverlay
+        ]
+
+
+viewCommentHeader : AppState -> Model -> String -> CommentThread -> Int -> Comment -> Html Msg
+viewCommentHeader appState model path commentThread index comment =
+    let
+        resolveAction =
+            if index == 0 && Feature.projectCommentThreadResolve appState model.questionnaire commentThread then
+                a
+                    [ class "ml-1"
+                    , onClick (CommentThreadResolve path commentThread.uuid commentThread.private)
+                    , title (l_ "comments.comment.action.resolveTitle" appState)
+                    , dataCy "comments_comment_resolve"
+                    ]
+                    [ faSet "questionnaire.commentsResolve" appState ]
+
+            else
+                emptyNode
+
+        reopenAction =
+            Dropdown.anchorItem
+                [ onClick (CommentThreadReopen path commentThread.uuid commentThread.private) ]
+                [ lx_ "comments.comment.action.reopen" appState ]
+
+        reopenActionVisible =
+            index == 0 && Feature.projectCommentThreadReopen appState model.questionnaire commentThread
+
+        editAction =
+            Dropdown.anchorItem
+                [ onClick (CommentEditInput comment.uuid comment.text) ]
+                [ lx_ "comments.comment.action.edit" appState ]
+
+        editActionVisible =
+            Feature.projectCommentEdit appState model.questionnaire commentThread comment
+
+        deleteAction =
+            Dropdown.anchorItem
+                [ onClick (CommentDelete (Just comment.uuid))
+                , dataCy "comments_comment_menu_delete"
+                ]
+                [ lx_ "comments.comment.action.delete" appState ]
+
+        deleteActionVisible =
+            (index == 0 && Feature.projectCommentThreadDelete appState model.questionnaire commentThread)
+                || (index /= 0 && Feature.projectCommentDelete appState model.questionnaire commentThread comment)
+
+        actions =
+            []
+                |> listInsertIf reopenAction reopenActionVisible
+                |> listInsertIf editAction editActionVisible
+                |> listInsertIf deleteAction deleteActionVisible
+
+        dropdownState =
+            Dict.get (Uuid.toString comment.uuid) model.commentDropdownStates
+                |> Maybe.withDefault Dropdown.initialState
+
+        dropdown =
+            if List.isEmpty actions then
+                emptyNode
+
+            else
+                Dropdown.dropdown dropdownState
+                    { options = [ Dropdown.attrs [ class "ListingDropdown", dataCy "comments_comment_menu" ], Dropdown.alignMenuRight ]
+                    , toggleMsg = CommentDropdownMsg (Uuid.toString comment.uuid)
+                    , toggleButton =
+                        Dropdown.toggle [ Button.roleLink ]
+                            [ faSet "listing.actions" appState ]
+                    , items = actions
+                    }
+
+        createdLabel =
+            TimeUtils.toReadableDateTime appState.timeZone comment.createdAt
+
+        editedLabel =
+            if comment.createdAt /= comment.updatedAt then
+                span [ title (TimeUtils.toReadableDateTime appState.timeZone comment.updatedAt) ]
+                    [ text <| " (" ++ l_ "comments.comment.editedLabel" appState ++ ")" ]
+
+            else
+                emptyNode
+
+        userForIcon =
+            case comment.createdBy of
+                Just createdBy ->
+                    { gravatarHash = createdBy.gravatarHash
+                    , imageUrl = createdBy.imageUrl
+                    }
+
+                Nothing ->
+                    { gravatarHash = ""
+                    , imageUrl = Nothing
+                    }
+    in
+    div [ class "Comment__Header" ]
+        [ UserIcon.view userForIcon
+        , div [ class "Comment__Header__User" ]
+            [ strong [ class "Comment__Header__User__Name" ]
+                [ text (Maybe.unwrap (lg "user.anonymous" appState) User.fullName comment.createdBy)
+                ]
+            , span [ class "Comment__Header__User__Time" ] [ text createdLabel, editedLabel ]
+            ]
+        , resolveAction
+        , dropdown
+        ]
+
+
+viewCommentReplyForm :
+    AppState
+    ->
+        { submitText : String
+        , placeholderText : String
+        , model : Model
+        , path : String
+        , mbThreadUuid : Maybe Uuid
+        , private : Bool
+        }
+    -> Html Msg
+viewCommentReplyForm appState { submitText, placeholderText, model, path, mbThreadUuid, private } =
+    let
+        commentValue =
+            model.commentInputs
+                |> Dict.get (path ++ "-" ++ Maybe.unwrap "0" Uuid.toString mbThreadUuid)
+                |> Maybe.withDefault ""
+
+        cyFormType base =
+            let
+                privateType =
+                    if private then
+                        "private"
+
+                    else
+                        "public"
+            in
+            case mbThreadUuid of
+                Just _ ->
+                    base ++ "_reply_" ++ privateType
+
+                Nothing ->
+                    base ++ "_new_" ++ privateType
+
+        newThreadFormSubmit =
+            if String.isEmpty commentValue then
+                emptyNode
+
+            else
+                div []
+                    [ button
+                        [ class "btn btn-primary btn-sm mr-1"
+                        , onClick (CommentSubmit path mbThreadUuid commentValue private)
+                        , dataCy (cyFormType "comments_reply-form_submit")
+                        ]
+                        [ text submitText ]
+                    , button
+                        [ class "btn btn-outline-secondary btn-sm"
+                        , onClick (CommentInput path mbThreadUuid "")
+                        , dataCy (cyFormType "comments_reply-form_cancel")
+                        ]
+                        [ lx_ "comments.form.cancel" appState ]
+                    ]
+    in
+    div [ class "CommentReplyForm", classList [ ( "CommentReplyForm--Private", private ) ] ]
+        [ resizableTextarea 2
+            commentValue
+            [ class "form-control"
+            , placeholder placeholderText
+            , onInput (CommentInput path mbThreadUuid)
+            , dataCy (cyFormType "comments_reply-form_input")
+            ]
+            []
+        , newThreadFormSubmit
+        ]
+
+
+viewCommentDeleteOverlay : AppState -> { deleteMsg : Msg, deleteText : String, extraClass : String } -> Html Msg
+viewCommentDeleteOverlay appState { deleteMsg, deleteText, extraClass } =
+    div [ class "CommentDeleteOverlay", class extraClass ]
+        [ div [ class "text-center" ]
+            [ div [ class "mb-2" ] [ text deleteText ]
+            , button
+                [ class "btn btn-danger btn-sm mr-2"
+                , onClick deleteMsg
+                , dataCy "comments_delete-modal_delete"
+                ]
+                [ lx_ "comments.deleteOverlay.delete" appState ]
+            , button [ class "btn btn-secondary btn-sm", onClick (CommentDelete Nothing) ] [ lx_ "comments.form.cancel" appState ]
+            ]
+        ]
 
 
 
@@ -983,7 +1649,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
 
 
 viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
-viewQuestionLabel appState cfg ctx model path humanIdentifiers question =
+viewQuestionLabel appState cfg _ model path humanIdentifiers question =
     let
         isDesirable =
             Question.isDesirable
@@ -1027,6 +1693,7 @@ viewQuestionLabel appState cfg ctx model path humanIdentifiers question =
             ]
         , span [ class "custom-actions" ]
             [ viewTodoAction appState cfg model path
+            , viewCommentAction appState cfg model path
             , viewFeedbackAction appState cfg model question
             ]
         ]
@@ -1057,7 +1724,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
                 mbSelectedAnswer
     in
     ( div []
-        (List.indexedMap (viewAnswer appState cfg path selectedAnswerUuid) answers
+        (List.indexedMap (viewAnswer appState cfg model.questionnaire.knowledgeModel path selectedAnswerUuid) answers
             ++ [ clearReplyButton ]
         )
     , [ advice, followUps ]
@@ -1368,8 +2035,8 @@ viewChoice appState cfg path selectedChoicesUuids order choice =
         ]
 
 
-viewAnswer : AppState -> Config msg -> List String -> Maybe String -> Int -> Answer -> Html Msg
-viewAnswer appState cfg path selectedAnswerUuid order answer =
+viewAnswer : AppState -> Config msg -> KnowledgeModel -> List String -> Maybe String -> Int -> Answer -> Html Msg
+viewAnswer appState cfg km path selectedAnswerUuid order answer =
     let
         radioName =
             pathToString (path ++ [ answer.uuid ])
@@ -1385,7 +2052,7 @@ viewAnswer appState cfg path selectedAnswerUuid order answer =
                 [ onClick (SetReply (pathToString path) (createReply appState (AnswerReply answer.uuid))) ]
 
         followUpsIndicator =
-            if List.isEmpty answer.followUpUuids then
+            if List.isEmpty (KnowledgeModel.getAnswerFollowupQuestions answer.uuid km) then
                 emptyNode
 
             else
@@ -1410,6 +2077,61 @@ viewAnswer appState cfg path selectedAnswerUuid order answer =
             , cfg.renderer.renderAnswerBadges answer
             ]
         ]
+
+
+viewCommentAction : AppState -> Config msg -> Model -> List String -> Html Msg
+viewCommentAction appState _ model path =
+    let
+        pathString =
+            pathToString path
+
+        msg =
+            if isOpen then
+                SetRightPanel RightPanelNone
+
+            else
+                SetRightPanel (RightPanelComments pathString)
+
+        commentCount =
+            QuestionnaireDetail.getCommentCount pathString model.questionnaire
+
+        commentButton =
+            a
+                [ class "action"
+                , classList [ ( "action-comments-open", isOpen ) ]
+                , onClick msg
+                , dataCy "questionnaire_question-action_comment"
+                ]
+                [ faSet "questionnaire.comments" appState ]
+
+        isOpen =
+            case model.rightPanel of
+                RightPanelComments rightPanelPath ->
+                    rightPanelPath == pathString
+
+                _ ->
+                    False
+
+        commentButtonWithComments =
+            a
+                [ class "action action-comments"
+                , classList [ ( "action-comments-open", isOpen ) ]
+                , onClick msg
+                , dataCy "questionnaire_question-action_comment"
+                ]
+                [ faSet "questionnaire.comments" appState
+                , text <| String.fromInt commentCount ++ " comments"
+                ]
+    in
+    if Feature.projectCommentAdd appState model.questionnaire then
+        if commentCount > 0 then
+            commentButtonWithComments
+
+        else
+            commentButton
+
+    else
+        emptyNode
 
 
 viewTodoAction : AppState -> Config msg -> Model -> List String -> Html Msg

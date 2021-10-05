@@ -7,7 +7,8 @@ import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
@@ -15,12 +16,10 @@ import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAc
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setLevels, setMetrics)
 import Shared.Utils exposing (getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
@@ -118,7 +117,7 @@ update wrapMsg msg appState model =
     case msg of
         QuestionnaireMsg questionnaireMsg ->
             let
-                ( newSeed1, newQuestionnaireModel, questionnaireCmd ) =
+                ( questionnaireSeed, newQuestionnaireModel, questionnaireCmd ) =
                     case model.questionnaireModel of
                         Success questionnaireModel ->
                             Triple.mapSnd Success <|
@@ -136,17 +135,23 @@ update wrapMsg msg appState model =
                 newModel1 =
                     { model | questionnaireModel = newQuestionnaireModel }
 
-                applyAction buildEvent =
+                applyAction seed updateQuestionnaire buildEvent =
                     let
-                        ( uuid, newSeed2 ) =
-                            Random.step Uuid.uuidGenerator newSeed1
+                        ( uuid, applyActionSeed ) =
+                            Random.step Uuid.uuidGenerator seed
 
                         event =
                             buildEvent uuid
 
-                        newModel2 =
+                        applyActionModel =
                             addQuestionnaireEvent event <|
                                 addSavingActionUuid uuid newModel1
+
+                        updatedQuestionnaireModel =
+                            ActionResult.map updateQuestionnaire applyActionModel.questionnaireModel
+
+                        updatedModel =
+                            { applyActionModel | questionnaireModel = updatedQuestionnaireModel }
 
                         cmd =
                             event
@@ -154,50 +159,174 @@ update wrapMsg msg appState model =
                                 |> ClientQuestionnaireAction.encode
                                 |> WebSocket.send model.websocket
                     in
-                    ( newSeed2, newModel2, cmd )
+                    ( applyActionSeed, updatedModel, cmd )
+
+                createdAt =
+                    appState.currentTime
+
+                createdBy =
+                    Maybe.map UserInfo.toUserSuggestion appState.session.user
 
                 ( newSeed, newModel, newCmd ) =
                     case questionnaireMsg of
                         Questionnaire.SetPhase phaseUuid ->
-                            applyAction <|
+                            applyAction questionnaireSeed identity <|
                                 \uuid ->
                                     QuestionnaireEvent.SetPhase
                                         { uuid = uuid
                                         , phaseUuid = Uuid.fromString phaseUuid
-                                        , createdAt = appState.currentTime
-                                        , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
                                         }
 
                         Questionnaire.SetReply path reply ->
-                            applyAction <|
+                            applyAction questionnaireSeed identity <|
                                 \uuid ->
                                     QuestionnaireEvent.SetReply
                                         { uuid = uuid
                                         , path = path
                                         , value = reply.value
-                                        , createdAt = appState.currentTime
-                                        , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
                                         }
 
                         Questionnaire.ClearReply path ->
-                            applyAction <|
+                            applyAction questionnaireSeed identity <|
                                 \uuid ->
                                     QuestionnaireEvent.ClearReply
                                         { uuid = uuid
                                         , path = path
-                                        , createdAt = appState.currentTime
-                                        , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
                                         }
 
                         Questionnaire.SetLabels path value ->
-                            applyAction <|
+                            applyAction questionnaireSeed identity <|
                                 \uuid ->
                                     QuestionnaireEvent.SetLabels
                                         { uuid = uuid
                                         , path = path
                                         , value = value
-                                        , createdAt = appState.currentTime
-                                        , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
+                                        }
+
+                        Questionnaire.CommentSubmit path mbThreadUuid text private ->
+                            let
+                                ( newThreadUuid, threadSeed ) =
+                                    Random.step Uuid.uuidGenerator questionnaireSeed
+
+                                ( commentUuid, commentSeed ) =
+                                    Random.step Uuid.uuidGenerator threadSeed
+
+                                threadUuid =
+                                    Maybe.withDefault newThreadUuid mbThreadUuid
+
+                                comment =
+                                    { uuid = commentUuid
+                                    , text = text
+                                    , createdBy = createdBy
+                                    , createdAt = createdAt
+                                    , updatedAt = createdAt
+                                    }
+
+                                addComment questionnaire =
+                                    Questionnaire.addComment path threadUuid private comment questionnaire
+                            in
+                            applyAction commentSeed addComment <|
+                                \uuid ->
+                                    QuestionnaireEvent.AddComment
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = threadUuid
+                                        , commentUuid = commentUuid
+                                        , text = text
+                                        , private = private
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
+                                        }
+
+                        Questionnaire.CommentDeleteSubmit path threadUuid commentUuid private ->
+                            let
+                                deleteComment questionnaire =
+                                    Questionnaire.deleteComment path threadUuid commentUuid questionnaire
+                            in
+                            applyAction questionnaireSeed deleteComment <|
+                                \uuid ->
+                                    QuestionnaireEvent.DeleteComment
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = threadUuid
+                                        , commentUuid = commentUuid
+                                        , private = private
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
+                                        }
+
+                        Questionnaire.CommentEditSubmit path threadUuid commentUuid text private ->
+                            let
+                                editComment questionnaire =
+                                    Questionnaire.editComment path threadUuid commentUuid appState.currentTime text questionnaire
+                            in
+                            applyAction questionnaireSeed editComment <|
+                                \uuid ->
+                                    QuestionnaireEvent.EditComment
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = threadUuid
+                                        , commentUuid = commentUuid
+                                        , text = text
+                                        , private = private
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
+                                        }
+
+                        Questionnaire.CommentThreadDelete path threadUuid private ->
+                            let
+                                deleteCommentThread questionnaire =
+                                    Questionnaire.deleteCommentThread path threadUuid questionnaire
+                            in
+                            applyAction questionnaireSeed deleteCommentThread <|
+                                \uuid ->
+                                    QuestionnaireEvent.DeleteCommentThread
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = threadUuid
+                                        , private = private
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
+                                        }
+
+                        Questionnaire.CommentThreadResolve path threadUuid private ->
+                            let
+                                resolveCommentThread questionnaire =
+                                    Questionnaire.resolveCommentThread path threadUuid questionnaire
+                            in
+                            applyAction questionnaireSeed resolveCommentThread <|
+                                \uuid ->
+                                    QuestionnaireEvent.ResolveCommentThread
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = threadUuid
+                                        , private = private
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
+                                        }
+
+                        Questionnaire.CommentThreadReopen path threadUuid private ->
+                            let
+                                reopenCommentThread questionnaire =
+                                    Questionnaire.reopenCommentThread path threadUuid questionnaire
+                            in
+                            applyAction questionnaireSeed reopenCommentThread <|
+                                \uuid ->
+                                    QuestionnaireEvent.ReopenCommentThread
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = threadUuid
+                                        , private = private
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
                                         }
 
                         _ ->
@@ -527,6 +656,24 @@ handleWebsocketMsg websocketMsg appState model =
 
                                 QuestionnaireEvent.SetLabels data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.setLabels data.path data.value)
+
+                                QuestionnaireEvent.ResolveCommentThread data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.resolveCommentThread data.path data.threadUuid)
+
+                                QuestionnaireEvent.ReopenCommentThread data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.reopenCommentThread data.path data.threadUuid)
+
+                                QuestionnaireEvent.DeleteCommentThread data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.deleteCommentThread data.path data.threadUuid)
+
+                                QuestionnaireEvent.AddComment data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.addComment data.path data.threadUuid data.private (AddCommentData.toComment data))
+
+                                QuestionnaireEvent.EditComment data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.editComment data.path data.threadUuid data.commentUuid data.createdAt data.text)
+
+                                QuestionnaireEvent.DeleteComment data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.deleteComment data.path data.threadUuid data.commentUuid)
 
                 WebSocketServerAction.Error ->
                     ( appState.seed, { model | error = True }, Cmd.none )

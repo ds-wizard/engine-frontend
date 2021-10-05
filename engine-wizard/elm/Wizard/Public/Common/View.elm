@@ -1,7 +1,10 @@
-module Wizard.Public.Common.View exposing (FormConfig, publicForm)
+module Wizard.Public.Common.View exposing
+    ( FormConfig
+    , publicForm
+    )
 
 import ActionResult exposing (ActionResult)
-import Html exposing (..)
+import Html exposing (Html, div, form, span, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Wizard.Common.AppState exposing (AppState)

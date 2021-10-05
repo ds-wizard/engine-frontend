@@ -1,4 +1,4 @@
-module Wizard.Public.Auth.Update exposing (..)
+module Wizard.Public.Auth.Update exposing (fetchData, update)
 
 import Shared.Api.Auth as AuthApi
 import Shared.Error.ApiError as ApiError

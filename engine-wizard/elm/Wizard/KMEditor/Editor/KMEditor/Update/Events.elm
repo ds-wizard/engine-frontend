@@ -51,12 +51,12 @@ import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
 import Shared.Utils exposing (getUuidString)
 import Uuid
-import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (..)
-import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (..)
+import Wizard.KMEditor.Editor.KMEditor.Models.Editors exposing (AnswerEditorData, ChapterEditorData, ChoiceEditorData, ExpertEditorData, IntegrationEditorData, KMEditorData, MetricEditorData, PhaseEditorData, QuestionEditorData, ReferenceEditorData, TagEditorData)
+import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, ChapterForm, ChoiceForm, ExpertForm, IntegrationForm, KnowledgeModelForm, MetricForm, PhaseForm, QuestionForm, QuestionFormType(..), ReferenceForm, ReferenceFormType(..), TagForm, getMetricMeasures)
 
 
 createEditKnowledgeModelEvent : KnowledgeModelForm -> KMEditorData -> Seed -> ( Event, Seed )
-createEditKnowledgeModelEvent form editorData =
+createEditKnowledgeModelEvent _ editorData =
     let
         data =
             { chapterUuids = EventField.create editorData.chapters.list editorData.chapters.dirty

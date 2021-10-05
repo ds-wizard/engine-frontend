@@ -1,11 +1,14 @@
-module Wizard.Dashboard.Update exposing (fetchData, update)
+module Wizard.Dashboard.Update exposing
+    ( fetchData
+    , update
+    )
 
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setLevels, setQuestionnaires)
-import Wizard.Common.Api exposing (applyResult, applyResultTransform)
+import Shared.Setters exposing (setQuestionnaires)
+import Wizard.Common.Api exposing (applyResultTransform)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Dashboard.Models exposing (Model)
 import Wizard.Dashboard.Msgs exposing (Msg(..))

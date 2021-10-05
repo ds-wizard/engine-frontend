@@ -62,7 +62,7 @@ encode data =
                 AddQuestionMultiChoiceEventData.encode
                 data
     in
-    [ ( "eventType", E.string "AddQuestionEvent" ) ] ++ eventData
+    ( "eventType", E.string "AddQuestionEvent" ) :: eventData
 
 
 getTypeString : AddQuestionEventData -> String
