@@ -1,31 +1,38 @@
 module Wizard.Documents.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, text)
+import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)
 import Markdown
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.Submission as Submission exposing (Submission)
+import Shared.Data.Submission.SubmissionState as SubmissionState
+import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lf, lg, lh, lx)
+import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
 import Shared.Utils exposing (listInsertIf)
+import Time.Distance as TimeDistance
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
+import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
@@ -92,14 +99,30 @@ viewDocuments appState model mbQuestionnaire =
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
+        , submissionErrorModal appState model
         ]
 
 
 listingConfig : AppState -> Model -> Maybe (Html Msg) -> Listing.ViewConfig Document Msg
 listingConfig appState model mbQuestionnaireFilterView =
+    let
+        itemAdditionalData document =
+            if List.isEmpty document.submissions then
+                Nothing
+
+            else
+                Just <|
+                    [ strong [] [ lx_ "submissions.title" appState ]
+                    , table [ class "table table-sm" ]
+                        [ tbody []
+                            (List.map (viewSubmission appState) document.submissions)
+                        ]
+                    ]
+    in
     { title = listingTitle appState
     , description = listingDescription appState
     , dropdownItems = listingActions appState
+    , itemAdditionalData = itemAdditionalData
     , textTitle = .name
     , emptyText = l_ "listing.empty" appState
     , updated =
@@ -234,6 +257,60 @@ stateBadge appState state =
                 [ lx_ "badge.error" appState ]
 
 
+viewSubmission : AppState -> Submission -> Html Msg
+viewSubmission appState submission =
+    let
+        viewSubmissionState submissionState =
+            case submissionState of
+                SubmissionState.InProgress ->
+                    span [ class "badge badge-info badge-with-icon" ]
+                        [ faSet "_global.spinner" appState
+                        , lgx "submissionState.inProgress" appState
+                        ]
+
+                SubmissionState.Done ->
+                    span [ class "badge badge-success" ]
+                        [ lgx "submissionState.done" appState ]
+
+                SubmissionState.Error ->
+                    span [ class "badge badge-danger" ]
+                        [ lgx "submissionState.error" appState ]
+
+        readableTime =
+            TimeUtils.toReadableDateTime appState.timeZone submission.updatedAt
+
+        updatedText =
+            TimeDistance.inWordsWithConfig { withAffix = True } (TimeDistance.locale appState) submission.updatedAt appState.currentTime
+
+        link =
+            case ( submission.state, submission.location, submission.returnedData ) of
+                ( SubmissionState.Done, Just location, _ ) ->
+                    a [ href location, class "link-with-icon-after", target "_blank" ]
+                        [ lx_ "submissions.viewLink" appState
+                        , faSet "_global.externalLink" appState
+                        ]
+
+                ( SubmissionState.Error, _, Just errorText ) ->
+                    a [ onClick (SetSubmissionErrorModal (Just errorText)) ]
+                        [ lx_ "submissions.errorLink" appState ]
+
+                _ ->
+                    emptyNode
+    in
+    tr []
+        [ td [] [ text (Submission.visibleName submission) ]
+        , td [] [ viewSubmissionState submission.state ]
+        , td []
+            [ span [ class "fragment-user" ]
+                [ UserIcon.viewSmall { gravatarHash = submission.createdBy.gravatarHash, imageUrl = submission.createdBy.imageUrl }
+                , text (User.fullName submission.createdBy)
+                ]
+            ]
+        , td [] [ link ]
+        , td [] [ span [ class "timestamp", title readableTime ] [ text updatedText ] ]
+        ]
+
+
 deleteModal : AppState -> Model -> Html Msg
 deleteModal appState model =
     let
@@ -329,24 +406,35 @@ submitModal appState model =
                 ]
 
         resultBody submission =
-            let
-                link =
-                    case submission.location of
-                        Just location ->
-                            div [ class "mt-2" ]
-                                [ lx_ "submitModal.success.link" appState
-                                , a [ href location, target "_blank" ]
-                                    [ text location ]
-                                ]
+            case submission.state of
+                SubmissionState.Done ->
+                    let
+                        link =
+                            case submission.location of
+                                Just location ->
+                                    div [ class "mt-2" ]
+                                        [ lx_ "submitModal.success.link" appState
+                                        , a [ href location, target "_blank" ]
+                                            [ text location ]
+                                        ]
 
-                        Nothing ->
-                            emptyNode
-            in
-            div [ class "alert alert-success" ]
-                [ faSet "_global.success" appState
-                , lx_ "submitModal.success.message" appState
-                , link
-                ]
+                                Nothing ->
+                                    emptyNode
+                    in
+                    div [ class "alert alert-success" ]
+                        [ faSet "_global.success" appState
+                        , lx_ "submitModal.success.message" appState
+                        , link
+                        ]
+
+                SubmissionState.Error ->
+                    div [ class "alert alert-danger" ]
+                        [ faSet "_global.error" appState
+                        , lx_ "submitModal.error.message" appState
+                        ]
+
+                _ ->
+                    emptyNode
 
         body =
             if ActionResult.isSuccess model.submittingDocument then
@@ -372,6 +460,41 @@ submitModal appState model =
             { modalContent = content
             , visible = visible
             , dataCy = "document-submit"
+            }
+    in
+    Modal.simple modalConfig
+
+
+submissionErrorModal : AppState -> Model -> Html Msg
+submissionErrorModal appState model =
+    let
+        ( visible, message ) =
+            case model.submissionErrorModal of
+                Just error ->
+                    ( True, error )
+
+                Nothing ->
+                    ( False, "" )
+
+        modalContent =
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ lx_ "submissionErrorModal.title" appState ] ]
+            , div [ class "modal-body" ]
+                [ div [ class "alert alert-danger" ] [ text message ]
+                ]
+            , div [ class "modal-footer" ]
+                [ button
+                    [ onClick (SetSubmissionErrorModal Nothing)
+                    , class "btn btn-primary"
+                    ]
+                    [ lx_ "submissionErrorModal.button" appState ]
+                ]
+            ]
+
+        modalConfig =
+            { modalContent = modalContent
+            , visible = visible
+            , dataCy = "submission-error"
             }
     in
     Modal.simple modalConfig

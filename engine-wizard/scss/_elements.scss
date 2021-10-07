@@ -271,6 +271,12 @@ code {
 }
 
 .badge {
+    &-with-icon {
+        .fa {
+            margin-right: 0.25rem;
+        }
+    }
+
     &-external-service {
         .fa {
             margin-right: 5px;

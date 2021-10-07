@@ -19,3 +19,4 @@ type Msg
     | SelectSubmissionService String
     | SubmitDocument
     | SubmitDocumentCompleted (Result ApiError Submission)
+    | SetSubmissionErrorModal (Maybe String)

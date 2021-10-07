@@ -66,6 +66,7 @@ listingConfig : AppState -> ViewConfig Template Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
+    , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = .name
     , emptyText = l_ "listing.empty" appState

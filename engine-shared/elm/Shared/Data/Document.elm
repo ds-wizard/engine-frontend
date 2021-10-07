@@ -13,6 +13,7 @@ import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Data.Document.DocumentState as DocumentState exposing (DocumentState)
 import Shared.Data.Document.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.QuestionnaireInfo as QuestionnaireInfo exposing (QuestionnaireInfo)
+import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Time
 import Uuid exposing (Uuid)
@@ -27,6 +28,7 @@ type alias Document =
     , template : DocumentTemplate
     , formatUuid : Uuid
     , state : DocumentState
+    , submissions : List Submission
     , creatorUuid : Maybe Uuid
     }
 
@@ -49,6 +51,7 @@ decoder =
         |> D.required "template" DocumentTemplate.decoder
         |> D.required "formatUuid" Uuid.decoder
         |> D.required "state" DocumentState.decoder
+        |> D.required "submissions" (D.list Submission.decoder)
         |> D.required "creatorUuid" (D.maybe Uuid.decoder)
 
 

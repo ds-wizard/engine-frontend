@@ -58,6 +58,7 @@ lf_ =
 type alias ViewConfig a msg =
     { title : a -> Html msg
     , description : a -> Html msg
+    , itemAdditionalData : a -> Maybe (List (Html msg))
     , dropdownItems : a -> List (ListingDropdownItem msg)
     , textTitle : a -> String
     , emptyText : String
@@ -396,6 +397,9 @@ viewItem appState config index item =
             config.iconView
                 |> Maybe.andMap (Just item.item)
                 |> Maybe.withDefault (ItemIcon.view { text = config.textTitle item.item, image = Nothing })
+
+        additionalData =
+            Maybe.unwrap emptyNode (div [ class "additional-data" ]) (config.itemAdditionalData item.item)
     in
     div [ class "list-group-item", dataCy "listing_item" ]
         [ icon
@@ -412,6 +416,7 @@ viewItem appState config index item =
             [ viewUpdated appState config item.item ]
         , div [ class "actions" ]
             [ dropdown ]
+        , additionalData
         ]
 
 

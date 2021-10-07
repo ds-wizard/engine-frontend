@@ -4,6 +4,7 @@ module Wizard.Common.Components.Listing.Models exposing
     , initialModel
     , initialModelWithFilters
     , setPagination
+    , updateItems
     )
 
 import ActionResult exposing (ActionResult(..))
@@ -57,6 +58,11 @@ initialModelWithFilters paginationQueryString filters =
     , filters = filters
     , filterDropdownStates = Dict.empty
     }
+
+
+updateItems : (a -> a) -> Model a -> Model a
+updateItems updateItem model =
+    { model | items = List.map (\item -> { item | item = updateItem item.item }) model.items }
 
 
 setPagination : Pagination a -> Model a -> Model a

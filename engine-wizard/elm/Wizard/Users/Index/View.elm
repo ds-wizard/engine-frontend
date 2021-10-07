@@ -56,6 +56,7 @@ listingConfig : AppState -> ViewConfig User Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
+    , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = User.fullName
     , emptyText = l_ "listing.empty" appState
