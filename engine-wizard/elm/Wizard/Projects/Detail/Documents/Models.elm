@@ -1,5 +1,6 @@
 module Wizard.Projects.Detail.Documents.Models exposing
     ( Model
+    , addDocumentSubmission
     , anyDocumentInProgress
     , initialModel
     )
@@ -21,6 +22,7 @@ type alias Model =
     , submittingDocument : ActionResult Submission
     , submissionServices : ActionResult (List SubmissionService)
     , selectedSubmissionServiceId : Maybe String
+    , submissionErrorModal : Maybe String
     }
 
 
@@ -33,6 +35,7 @@ initialModel paginationQueryString =
     , submittingDocument = Unset
     , submissionServices = Unset
     , selectedSubmissionServiceId = Nothing
+    , submissionErrorModal = Nothing
     }
 
 
@@ -46,3 +49,16 @@ anyDocumentInProgress model =
         |> ActionResult.map .items
         |> ActionResult.withDefault []
         |> List.any isInProgress
+
+
+addDocumentSubmission : Submission -> Model -> Model
+addDocumentSubmission submission model =
+    let
+        updateItem document =
+            if submission.documentUuid == document.uuid then
+                { document | submissions = submission :: document.submissions }
+
+            else
+                document
+    in
+    { model | documents = Listing.updateItems updateItem model.documents }

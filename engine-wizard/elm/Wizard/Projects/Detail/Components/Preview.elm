@@ -155,7 +155,7 @@ viewContent appState model mbContentType =
 viewError : String -> Html Msg
 viewError msg =
     div [ class "Projects__Detail__Content Projects__Detail__Content--PreviewError", dataCy "project_preview_error" ]
-        [ pre [] [ text msg ]
+        [ pre [ class "pre-error" ] [ text msg ]
         ]
 
 

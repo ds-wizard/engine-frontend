@@ -18,6 +18,7 @@ iconSet =
                , ( "_global.edit", "fas fa-edit" )
                , ( "_global.error", "fas fa-exclamation-circle" )
                , ( "_global.export", "fas fa-download" )
+               , ( "_global.externalLink", "fas fa-external-link-alt" )
                , ( "_global.info", "fas fa-info-circle" )
                , ( "_global.questionnaire", "far fa-list-alt" )
                , ( "_global.remove", "fas fa-times" )
