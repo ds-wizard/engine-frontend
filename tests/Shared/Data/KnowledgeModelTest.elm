@@ -22,6 +22,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": [],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "annotations": {},
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -44,6 +45,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = []
                         , metricUuids = []
                         , phaseUuids = []
+                        , annotations = Dict.empty
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -71,13 +73,15 @@ knowledgeModelDecoderTest =
                             "integrationUuids": [],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "annotations": {},
                             "entities": {
                                 "chapters": {
                                     "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04": {
                                         "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
                                         "title": "Chapter 1",
                                         "text": "This chapter is empty",
-                                        "questionUuids": []
+                                        "questionUuids": [],
+                                        "annotations": {}
                                     }
                                 },
                                 "questions": {},
@@ -100,6 +104,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = []
                         , metricUuids = []
                         , phaseUuids = []
+                        , annotations = Dict.empty
                         , entities =
                             { chapters =
                                 Dict.fromList
@@ -108,6 +113,7 @@ knowledgeModelDecoderTest =
                                         , title = "Chapter 1"
                                         , text = Just "This chapter is empty"
                                         , questionUuids = []
+                                        , annotations = Dict.empty
                                         }
                                       )
                                     ]
@@ -136,6 +142,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": [],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "annotations": {},
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -149,7 +156,8 @@ knowledgeModelDecoderTest =
                                         "uuid": "b5b6ed23-2afa-11e9-b210-d663bd873d93",
                                         "name": "Science",
                                         "description": null,
-                                        "color": "#F5A623"
+                                        "color": "#F5A623",
+                                        "annotations": {}
                                     }
                                 },
                                 "metrics": {},
@@ -165,6 +173,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = []
                         , metricUuids = []
                         , phaseUuids = []
+                        , annotations = Dict.empty
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -180,6 +189,7 @@ knowledgeModelDecoderTest =
                                         , name = "Science"
                                         , description = Nothing
                                         , color = "#F5A623"
+                                        , annotations = Dict.empty
                                         }
                                       )
                                     ]
@@ -201,6 +211,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "annotations": {},
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -222,7 +233,8 @@ knowledgeModelDecoderTest =
                                         "responseListField": "items",
                                         "responseIdField": "id",
                                         "responseNameField": "title",
-                                        "itemUrl": "http://example.com/${id}"
+                                        "itemUrl": "http://example.com/${id}",
+                                        "annotations": {}
                                     }
                                 },
                                 "tags": {},
@@ -239,6 +251,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
                         , metricUuids = []
                         , phaseUuids = []
+                        , annotations = Dict.empty
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -262,6 +275,7 @@ knowledgeModelDecoderTest =
                                         , responseIdField = "id"
                                         , responseNameField = "title"
                                         , itemUrl = "http://example.com/${id}"
+                                        , annotations = Dict.empty
                                         }
                                       )
                                     ]
@@ -284,6 +298,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "annotations": {},
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -298,7 +313,8 @@ knowledgeModelDecoderTest =
                                         "uuid": "aae37504-aec6-4be8-b703-5bcb3502f3e6",
                                         "title": "Metric",
                                         "abbreviation": "M",
-                                        "description": null
+                                        "description": null,
+                                        "annotations": {}
                                     }
                                 },
                                 "phases": {}
@@ -313,6 +329,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
                         , metricUuids = []
                         , phaseUuids = []
+                        , annotations = Dict.empty
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -329,6 +346,7 @@ knowledgeModelDecoderTest =
                                         , title = "Metric"
                                         , abbreviation = Just "M"
                                         , description = Nothing
+                                        , annotations = Dict.empty
                                         }
                                       )
                                     ]
@@ -349,6 +367,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "annotations": {},
                             "entities": {
                                 "chapters": {},
                                 "questions": {},
@@ -363,7 +382,8 @@ knowledgeModelDecoderTest =
                                     "aae37504-aec6-4be8-b703-5bcb3502f3e6": {
                                         "uuid": "aae37504-aec6-4be8-b703-5bcb3502f3e6",
                                         "title": "Phase",
-                                        "description": "This is a phase"
+                                        "description": "This is a phase",
+                                        "annotations": {}
                                     }
                                 }
                             }
@@ -377,6 +397,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
                         , metricUuids = []
                         , phaseUuids = []
+                        , annotations = Dict.empty
                         , entities =
                             { chapters = Dict.empty
                             , questions = Dict.empty
@@ -393,6 +414,7 @@ knowledgeModelDecoderTest =
                                       , { uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
                                         , title = "Phase"
                                         , description = Just "This is a phase"
+                                        , annotations = Dict.empty
                                         }
                                       )
                                     ]

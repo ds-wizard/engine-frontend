@@ -193,4 +193,33 @@ $breadcrumbs-height: 40px;
             margin-top: -30px;
         }
     }
+
+    .annotations-editor-item {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+
+        &-inputs {
+            flex-grow: 1;
+
+            textarea {
+                min-height: auto;
+            }
+
+            .form-control:first-child {
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+            .form-control:last-child {
+                border-top: 0;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
+            }
+        }
+
+        &-controls {
+            margin-left: 0.5rem;
+        }
+    }
 }

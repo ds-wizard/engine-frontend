@@ -147,6 +147,7 @@ generateQuestionEvent model question parentUuid seed =
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
                             , answerUuids = EventField.empty
+                            , annotations = EventField.empty
                             }
 
                     ListQuestion _ _ ->
@@ -158,6 +159,7 @@ generateQuestionEvent model question parentUuid seed =
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
                             , itemTemplateQuestionUuids = EventField.empty
+                            , annotations = EventField.empty
                             }
 
                     ValueQuestion _ _ ->
@@ -169,6 +171,7 @@ generateQuestionEvent model question parentUuid seed =
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
                             , valueType = EventField.empty
+                            , annotations = EventField.empty
                             }
 
                     IntegrationQuestion _ _ ->
@@ -181,6 +184,7 @@ generateQuestionEvent model question parentUuid seed =
                             , expertUuids = EventField.empty
                             , integrationUuid = EventField.empty
                             , props = EventField.empty
+                            , annotations = EventField.empty
                             }
 
                     MultiChoiceQuestion _ _ ->
@@ -192,6 +196,7 @@ generateQuestionEvent model question parentUuid seed =
                             , referenceUuids = EventField.empty
                             , expertUuids = EventField.empty
                             , choiceUuids = EventField.empty
+                            , annotations = EventField.empty
                             }
 
             event =

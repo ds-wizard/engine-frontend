@@ -1,6 +1,7 @@
 module Shared.Data.KnowledgeModel.Question exposing
     ( Question(..)
     , decoder
+    , getAnnotations
     , getAnswerUuids
     , getChoiceUuids
     , getExpertUuids
@@ -164,6 +165,11 @@ getExpertUuids =
 getReferenceUuids : Question -> List String
 getReferenceUuids =
     getCommonQuestionData >> .referenceUuids
+
+
+getAnnotations : Question -> Dict String String
+getAnnotations =
+    getCommonQuestionData >> .annotations
 
 
 getAnswerUuids : Question -> List String

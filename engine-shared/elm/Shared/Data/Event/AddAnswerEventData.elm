@@ -4,6 +4,7 @@ module Shared.Data.Event.AddAnswerEventData exposing
     , encode
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
@@ -15,6 +16,7 @@ type alias AddAnswerEventData =
     { label : String
     , advice : Maybe String
     , metricMeasures : List MetricMeasure
+    , annotations : Dict String String
     }
 
 
@@ -24,6 +26,7 @@ decoder =
         |> D.required "label" D.string
         |> D.required "advice" (D.nullable D.string)
         |> D.required "metricMeasures" (D.list MetricMeasure.decoder)
+        |> D.required "annotations" (D.dict D.string)
 
 
 encode : AddAnswerEventData -> List ( String, E.Value )
@@ -32,4 +35,5 @@ encode data =
     , ( "label", E.string data.label )
     , ( "advice", E.maybe E.string data.advice )
     , ( "metricMeasures", E.list MetricMeasure.encode data.metricMeasures )
+    , ( "annotations", E.dict identity E.string data.annotations )
     ]

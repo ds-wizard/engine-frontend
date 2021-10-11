@@ -1,5 +1,6 @@
 module Shared.Data.KnowledgeModel.ReferenceTest exposing (referenceDecoderTest)
 
+import Dict
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
 import Test exposing (..)
 import TestUtils exposing (expectDecoder)
@@ -16,7 +17,8 @@ referenceDecoderTest =
                         {
                             "referenceType": "ResourcePageReference",
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                            "shortUuid": "atq"
+                            "shortUuid": "atq",
+                            "annotations": {}
                         }
                         """
 
@@ -24,6 +26,7 @@ referenceDecoderTest =
                         ResourcePageReference
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , shortUuid = "atq"
+                            , annotations = Dict.empty
                             }
                 in
                 expectDecoder Reference.decoder raw expected
@@ -36,7 +39,8 @@ referenceDecoderTest =
                             "referenceType": "URLReference",
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "url": "http://example.com",
-                            "label": "See also"
+                            "label": "See also",
+                            "annotations": {}
                         }
                         """
 
@@ -45,6 +49,7 @@ referenceDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , url = "http://example.com"
                             , label = "See also"
+                            , annotations = Dict.empty
                             }
                 in
                 expectDecoder Reference.decoder raw expected
@@ -57,7 +62,8 @@ referenceDecoderTest =
                             "referenceType": "CrossReference",
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "targetUuid": "64217c4e-50b3-4230-9224-bf65c4220ab6",
-                            "description": "See also"
+                            "description": "See also",
+                            "annotations": {}
                         }
                         """
 
@@ -66,6 +72,7 @@ referenceDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , targetUuid = "64217c4e-50b3-4230-9224-bf65c4220ab6"
                             , description = "See also"
+                            , annotations = Dict.empty
                             }
                 in
                 expectDecoder Reference.decoder raw expected

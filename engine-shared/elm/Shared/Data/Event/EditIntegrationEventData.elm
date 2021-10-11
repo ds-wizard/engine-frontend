@@ -24,6 +24,7 @@ type alias EditIntegrationEventData =
     , responseIdField : EventField String
     , responseNameField : EventField String
     , itemUrl : EventField String
+    , annotations : EventField (Dict String String)
     }
 
 
@@ -42,6 +43,7 @@ decoder =
         |> D.required "responseIdField" (EventField.decoder D.string)
         |> D.required "responseNameField" (EventField.decoder D.string)
         |> D.required "itemUrl" (EventField.decoder D.string)
+        |> D.required "annotations" (EventField.decoder (D.dict D.string))
 
 
 encode : EditIntegrationEventData -> List ( String, E.Value )
@@ -59,4 +61,5 @@ encode data =
     , ( "responseIdField", EventField.encode E.string data.responseIdField )
     , ( "responseNameField", EventField.encode E.string data.responseNameField )
     , ( "itemUrl", EventField.encode E.string data.itemUrl )
+    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
     ]

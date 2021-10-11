@@ -4,6 +4,7 @@ module Shared.Data.KnowledgeModel.Question.CommonQuestionData exposing
     , new
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 
@@ -16,6 +17,20 @@ type alias CommonQuestionData =
     , tagUuids : List String
     , referenceUuids : List String
     , expertUuids : List String
+    , annotations : Dict String String
+    }
+
+
+new : String -> CommonQuestionData
+new uuid =
+    { uuid = uuid
+    , title = "New question"
+    , text = Nothing
+    , requiredPhaseUuid = Nothing
+    , tagUuids = []
+    , referenceUuids = []
+    , expertUuids = []
+    , annotations = Dict.empty
     }
 
 
@@ -29,15 +44,4 @@ decoder =
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "referenceUuids" (D.list D.string)
         |> D.required "expertUuids" (D.list D.string)
-
-
-new : String -> CommonQuestionData
-new uuid =
-    { uuid = uuid
-    , title = "New question"
-    , text = Nothing
-    , requiredPhaseUuid = Nothing
-    , tagUuids = []
-    , referenceUuids = []
-    , expertUuids = []
-    }
+        |> D.required "annotations" (D.dict D.string)

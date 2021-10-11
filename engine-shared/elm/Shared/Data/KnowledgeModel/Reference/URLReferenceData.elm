@@ -4,6 +4,7 @@ module Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing
     , new
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 
@@ -12,6 +13,16 @@ type alias URLReferenceData =
     { uuid : String
     , url : String
     , label : String
+    , annotations : Dict String String
+    }
+
+
+new : String -> URLReferenceData
+new uuid =
+    { uuid = uuid
+    , url = "http://example.com"
+    , label = "See also"
+    , annotations = Dict.empty
     }
 
 
@@ -21,11 +32,4 @@ decoder =
         |> D.required "uuid" D.string
         |> D.required "url" D.string
         |> D.required "label" D.string
-
-
-new : String -> URLReferenceData
-new uuid =
-    { uuid = uuid
-    , url = "http://example.com"
-    , label = "See also"
-    }
+        |> D.required "annotations" (D.dict D.string)
