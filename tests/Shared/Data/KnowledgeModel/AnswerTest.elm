@@ -1,5 +1,6 @@
 module Shared.Data.KnowledgeModel.AnswerTest exposing (answerDecoderTest)
 
+import Dict
 import Shared.Data.KnowledgeModel.Answer as Answer
 import Test exposing (..)
 import TestUtils exposing (expectDecoder)
@@ -18,7 +19,8 @@ answerDecoderTest =
                             "label": "Yes",
                             "advice": null,
                             "metricMeasures": [],
-                            "followUpUuids": []
+                            "followUpUuids": [],
+                            "annotations": {}
                         }
                         """
 
@@ -28,6 +30,7 @@ answerDecoderTest =
                         , advice = Nothing
                         , metricMeasures = []
                         , followUpUuids = []
+                        , annotations = Dict.empty
                         }
                 in
                 expectDecoder Answer.decoder raw expected
@@ -41,7 +44,8 @@ answerDecoderTest =
                             "label": "Yes",
                             "advice": "Are you sure this is the correct answer?",
                             "metricMeasures": [],
-                            "followUpUuids": []
+                            "followUpUuids": [],
+                            "annotations": {}
                         }
                         """
 
@@ -51,10 +55,11 @@ answerDecoderTest =
                         , advice = Just "Are you sure this is the correct answer?"
                         , metricMeasures = []
                         , followUpUuids = []
+                        , annotations = Dict.empty
                         }
                 in
                 expectDecoder Answer.decoder raw expected
-        , test "should decode answer with metric mesures" <|
+        , test "should decode answer with metric measures" <|
             \_ ->
                 let
                     raw =
@@ -68,7 +73,8 @@ answerDecoderTest =
                                 "measure": 0.3,
                                 "weight": 0.8
                             }],
-                            "followUpUuids": []
+                            "followUpUuids": [],
+                            "annotations": {}
                         }
                         """
 
@@ -83,6 +89,7 @@ answerDecoderTest =
                               }
                             ]
                         , followUpUuids = []
+                        , annotations = Dict.empty
                         }
                 in
                 expectDecoder Answer.decoder raw expected
@@ -96,7 +103,8 @@ answerDecoderTest =
                             "label": "Yes",
                             "advice": null,
                             "metricMeasures": [],
-                            "followUpUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"]
+                            "followUpUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
+                            "annotations": {}
                         }
                         """
 
@@ -106,6 +114,7 @@ answerDecoderTest =
                         , advice = Nothing
                         , metricMeasures = []
                         , followUpUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
+                        , annotations = Dict.empty
                         }
                 in
                 expectDecoder Answer.decoder raw expected

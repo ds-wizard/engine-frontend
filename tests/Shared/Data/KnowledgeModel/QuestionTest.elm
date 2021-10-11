@@ -31,7 +31,8 @@ questionDecoderTest =
                             "requiredPhaseUuid": "6832055b-5416-43ae-9896-1d9135ced2c4",
                             "tagUuids": [],
                             "referenceUuids": [],
-                            "expertUuids": []
+                            "expertUuids": [],
+                            "annotations": {}
                         }
                         """
                             |> String.replace "$type" jsonType
@@ -45,6 +46,7 @@ questionDecoderTest =
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []
+                            , annotations = Dict.empty
                             }
                             { valueType = parsedType
                             }
@@ -64,7 +66,8 @@ questionDecoderTest =
                             "tagUuids": ["563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93"],
                             "referenceUuids": [],
                             "expertUuids": [],
-                            "valueType": "StringQuestionValueType"
+                            "valueType": "StringQuestionValueType",
+                            "annotations": {}
                         }
                         """
 
@@ -77,6 +80,7 @@ questionDecoderTest =
                             , tagUuids = [ "563f4528-2ba0-11e9-b210-d663bd873d93", "563f47bc-2ba0-11e9-b210-d663bd873d93" ]
                             , referenceUuids = []
                             , expertUuids = []
+                            , annotations = Dict.empty
                             }
                             { valueType = StringQuestionValueType
                             }
@@ -96,7 +100,8 @@ questionDecoderTest =
                             "requiredPhaseUuid": null,
                             "tagUuids": [],
                             "referenceUuids": ["64217c4e-50b3-4230-9224-bf65c4220ab6"],
-                            "expertUuids": []
+                            "expertUuids": [],
+                            "annotations": {}
                         }
                         """
 
@@ -109,6 +114,7 @@ questionDecoderTest =
                             , tagUuids = []
                             , referenceUuids = [ "64217c4e-50b3-4230-9224-bf65c4220ab6" ]
                             , expertUuids = []
+                            , annotations = Dict.empty
                             }
                             { valueType = StringQuestionValueType
                             }
@@ -128,7 +134,8 @@ questionDecoderTest =
                             "requiredPhaseUuid": "0948bd26-d985-4549-b7c8-95e9061d6413",
                             "tagUuids": [],
                             "referenceUuids": [],
-                            "expertUuids": ["64217c4e-50b3-4230-9224-bf65c4220ab6"]
+                            "expertUuids": ["64217c4e-50b3-4230-9224-bf65c4220ab6"],
+                            "annotations": {}
                         }
                         """
 
@@ -141,6 +148,7 @@ questionDecoderTest =
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = [ "64217c4e-50b3-4230-9224-bf65c4220ab6" ]
+                            , annotations = Dict.empty
                             }
                             { valueType = StringQuestionValueType
                             }
@@ -160,7 +168,8 @@ questionDecoderTest =
                             "tagUuids": [],
                             "answerUuids": ["64217c4e-50b3-4230-9224-bf65c4220ab6"],
                             "referenceUuids": [],
-                            "expertUuids": []
+                            "expertUuids": [],
+                            "annotations": {}
                         }
                         """
 
@@ -173,6 +182,7 @@ questionDecoderTest =
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []
+                            , annotations = Dict.empty
                             }
                             { answerUuids = [ "64217c4e-50b3-4230-9224-bf65c4220ab6" ]
                             }
@@ -192,7 +202,8 @@ questionDecoderTest =
                             "tagUuids": [],
                             "itemTemplateQuestionUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
                             "referenceUuids": [],
-                            "expertUuids": []
+                            "expertUuids": [],
+                            "annotations": {}
                         }
                         """
 
@@ -205,6 +216,7 @@ questionDecoderTest =
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []
+                            , annotations = Dict.empty
                             }
                             { itemTemplateQuestionUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
                             }
@@ -227,7 +239,8 @@ questionDecoderTest =
                             "integrationUuid": "b50bf5ce-2fc3-4779-9756-5f176c233374",
                             "props": {
                                 "prop": "value"
-                            }
+                            },
+                            "annotations": {}
                         }
                         """
 
@@ -240,6 +253,7 @@ questionDecoderTest =
                             , tagUuids = []
                             , referenceUuids = []
                             , expertUuids = []
+                            , annotations = Dict.empty
                             }
                             { integrationUuid = "b50bf5ce-2fc3-4779-9756-5f176c233374"
                             , props = Dict.fromList [ ( "prop", "value" ) ]

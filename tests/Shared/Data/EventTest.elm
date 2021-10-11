@@ -77,6 +77,10 @@ editKnowledgeModelEvent =
             { changed = False
             , value = Nothing
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
         , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
@@ -111,6 +115,7 @@ addChapterEvent =
     AddChapterEvent
         { title = "Design of Experiment"
         , text = Just "This is a chapter about the designing of the experiment"
+        , annotations = Dict.empty
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
@@ -148,6 +153,10 @@ editChapterEvent =
             { changed = True
             , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
@@ -180,6 +189,10 @@ editChapterEventTest =
                             , questionUuids =
                                 { changed = True
                                 , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
                                 }
                             }
                             { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
@@ -228,6 +241,7 @@ addMetricEvent =
         { title = "Metric"
         , abbreviation = Just "M"
         , description = Nothing
+        , annotations = Dict.empty
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
@@ -265,6 +279,10 @@ editMetricEvent =
             { changed = True
             , value = Just (Just "This is a metric")
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
@@ -296,6 +314,10 @@ editMetricEventTest =
                             , description =
                                 { changed = True
                                 , value = Just (Just "This is a metric")
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
                                 }
                             }
                             { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
@@ -343,6 +365,7 @@ addPhaseEvent =
     AddPhaseEvent
         { title = "Phase"
         , description = Nothing
+        , annotations = Dict.empty
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
@@ -376,6 +399,10 @@ editPhaseEvent =
             { changed = True
             , value = Just (Just "This is an important phase")
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
@@ -403,6 +430,10 @@ editPhaseEventTest =
                             , description =
                                 { changed = True
                                 , value = Just (Just "This is an important phase")
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
                                 }
                             }
                             { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
@@ -451,6 +482,7 @@ addTagEvent =
         { name = "Astronomy"
         , description = Just "Questions connected to astronomy"
         , color = "#F5A623"
+        , annotations = Dict.empty
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
@@ -488,6 +520,10 @@ editTagEvent =
             { changed = True
             , value = Just "#F5A623"
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
         , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
@@ -519,6 +555,10 @@ editTagEventTest =
                             , color =
                                 { changed = True
                                 , value = Just "#F5A623"
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
                                 }
                             }
                             { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
@@ -576,6 +616,7 @@ addIntegrationEvent =
         , responseIdField = "uuid"
         , responseNameField = "title"
         , itemUrl = "http://example.com/${id}"
+        , annotations = Dict.empty
         }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
         , entityUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
@@ -648,6 +689,10 @@ editIntegrationEvent =
             { changed = True
             , value = Just "http://example.com/${id}"
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
         , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
@@ -704,6 +749,7 @@ addOptionsQuestionEvent =
             , text = Nothing
             , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
             , tagUuids = []
+            , annotations = Dict.empty
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -720,6 +766,7 @@ addListQuestionEvent =
             , text = Just "Just answer the question!"
             , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
             , tagUuids = []
+            , annotations = Dict.empty
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -737,6 +784,7 @@ addValueQuestionEvent =
             , requiredPhaseUuid = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
             , valueType = NumberQuestionValueType
+            , annotations = Dict.empty
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -755,6 +803,7 @@ addIntegrationQuestionEvent =
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
             , integrationUuid = "1d522339-e93b-44e9-bc2a-1df65fb97dc6"
             , props = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
+            , annotations = Dict.empty
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -798,6 +847,7 @@ editOptionsQuestionEvent =
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = True, value = Just [ "fe1b440e-3046-11e9-b210-d663bd873d93" ] }
             , answerUuids = { changed = True, value = Just [ "5cb0bedc-3046-11e9-b210-d663bd873d93", "5cb0c15c-3046-11e9-b210-d663bd873d93" ] }
+            , annotations = { changed = False, value = Nothing }
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -817,6 +867,7 @@ editListQuestionEvent =
             , referenceUuids = { changed = True, value = Just [ "f749367c-3046-11e9-b210-d663bd873d93" ] }
             , expertUuids = { changed = False, value = Nothing }
             , itemTemplateQuestionUuids = { changed = True, value = Just [ "b2c867fc-3046-11e9-b210-d663bd873d93" ] }
+            , annotations = { changed = False, value = Nothing }
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -836,6 +887,7 @@ editValueQuestionEvent =
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }
             , valueType = { changed = True, value = Just DateQuestionValueType }
+            , annotations = { changed = False, value = Nothing }
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -856,6 +908,7 @@ editIntegrationQuestionEvent =
             , expertUuids = { changed = False, value = Nothing }
             , integrationUuid = { changed = True, value = Just "1d522339-e93b-44e9-bc2a-1df65fb97dc6" }
             , props = { changed = True, value = Just <| Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ] }
+            , annotations = { changed = False, value = Nothing }
             }
         )
         { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
@@ -955,6 +1008,7 @@ addAnswerEvent =
               , weight = 1
               }
             ]
+        , annotations = Dict.empty
         }
         { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
         , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
@@ -1001,6 +1055,10 @@ editAnswerEvent =
                     , "734b005a-2e00-11e9-b210-d663bd873d93"
                     ]
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
         , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
@@ -1042,6 +1100,10 @@ editAnswerEventTest =
                                         , "734afd12-2e00-11e9-b210-d663bd873d93"
                                         , "734b005a-2e00-11e9-b210-d663bd873d93"
                                         ]
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
                                 }
                             }
                             { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
@@ -1112,6 +1174,7 @@ addChoiceEvent : Event
 addChoiceEvent =
     AddChoiceEvent
         { label = "Choice"
+        , annotations = Dict.empty
         }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
         , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
@@ -1140,6 +1203,10 @@ editChoiceEvent =
             { changed = True
             , value = Just "New Choice"
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
         , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
@@ -1161,6 +1228,10 @@ editChoiceEventTest =
                     event =
                         EditChoiceEvent
                             { label =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , annotations =
                                 { changed = False
                                 , value = Nothing
                                 }
@@ -1234,6 +1305,7 @@ addResourcePageReferenceEvent =
     AddReferenceEvent
         (AddReferenceResourcePageEvent
             { shortUuid = "atq"
+            , annotations = Dict.empty
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
@@ -1248,6 +1320,7 @@ addURLReferenceEvent =
         (AddReferenceURLEvent
             { url = "http://example.com"
             , label = "Example"
+            , annotations = Dict.empty
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
@@ -1262,6 +1335,7 @@ addCrossReferenceEvent =
         (AddReferenceCrossEvent
             { targetUuid = "072af95a-2dfd-11e9-b210-d663bd873d93"
             , description = "Related"
+            , annotations = Dict.empty
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
@@ -1305,6 +1379,10 @@ editResourcePageReferenceEvent =
                 { changed = True
                 , value = Just "atq"
                 }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
@@ -1325,6 +1403,10 @@ editURLReferenceEvent =
                 { changed = True
                 , value = Just "Example"
                 }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
         )
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
@@ -1344,6 +1426,10 @@ editCrossReferenceEvent =
             , description =
                 { changed = True
                 , value = Just "See also"
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
                 }
             }
         )
@@ -1437,6 +1523,7 @@ addExpertEvent =
     AddExpertEvent
         { name = "Albert Einstein"
         , email = "albert.einstein@example.com"
+        , annotations = Dict.empty
         }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
         , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
@@ -1469,6 +1556,10 @@ editExpertEvent =
             { changed = False
             , value = Nothing
             }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
         }
         { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
         , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
@@ -1496,6 +1587,10 @@ editExpertEventTest =
                             , email =
                                 { changed = True
                                 , value = Just "nikola.tesla@example.com"
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
                                 }
                             }
                             { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"

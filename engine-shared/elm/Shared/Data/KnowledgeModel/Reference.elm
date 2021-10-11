@@ -1,12 +1,14 @@
 module Shared.Data.KnowledgeModel.Reference exposing
     ( Reference(..)
     , decoder
+    , getAnnotations
     , getUuid
     , getVisibleName
     , map
     , new
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Shared.Data.KnowledgeModel.Reference.CrossReferenceData as CrossReferenceData exposing (CrossReferenceData)
@@ -79,3 +81,8 @@ getUuid =
 getVisibleName : Reference -> String
 getVisibleName =
     map .shortUuid .label .targetUuid
+
+
+getAnnotations : Reference -> Dict String String
+getAnnotations =
+    map .annotations .annotations .annotations

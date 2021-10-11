@@ -4,6 +4,7 @@ module Shared.Data.Event.EditQuestionListEventData exposing
     , encode
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
@@ -19,6 +20,7 @@ type alias EditQuestionListEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , itemTemplateQuestionUuids : EventField (List String)
+    , annotations : EventField (Dict String String)
     }
 
 
@@ -32,6 +34,7 @@ decoder =
         |> D.required "referenceUuids" (EventField.decoder (D.list D.string))
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
         |> D.required "itemTemplateQuestionUuids" (EventField.decoder (D.list D.string))
+        |> D.required "annotations" (EventField.decoder (D.dict D.string))
 
 
 encode : EditQuestionListEventData -> List ( String, E.Value )
@@ -44,4 +47,5 @@ encode data =
     , ( "referenceUuids", EventField.encode (E.list E.string) data.referenceUuids )
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )
     , ( "itemTemplateQuestionUuids", EventField.encode (E.list E.string) data.itemTemplateQuestionUuids )
+    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
     ]

@@ -126,6 +126,9 @@ locale =
                , ( "_global.apiSuccess.users.delete", "User was successfully deleted." )
 
                -- KM Entities
+               , ( "_global.annotations", "Annotations" )
+               , ( "_global.annotations.key", "Key" )
+               , ( "_global.annotations.value", "Value" )
                , ( "_global.answer", "Answer" )
                , ( "_global.answer.advice", "Advice" )
                , ( "_global.answer.label", "Label" )

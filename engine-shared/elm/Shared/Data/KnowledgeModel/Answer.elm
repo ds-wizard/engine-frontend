@@ -4,6 +4,7 @@ module Shared.Data.KnowledgeModel.Answer exposing
     , new
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
@@ -15,6 +16,7 @@ type alias Answer =
     , advice : Maybe String
     , metricMeasures : List MetricMeasure
     , followUpUuids : List String
+    , annotations : Dict String String
     }
 
 
@@ -25,6 +27,7 @@ new uuid =
     , advice = Nothing
     , followUpUuids = []
     , metricMeasures = []
+    , annotations = Dict.empty
     }
 
 
@@ -36,3 +39,4 @@ decoder =
         |> D.required "advice" (D.nullable D.string)
         |> D.required "metricMeasures" (D.list MetricMeasure.decoder)
         |> D.required "followUpUuids" (D.list D.string)
+        |> D.required "annotations" (D.dict D.string)

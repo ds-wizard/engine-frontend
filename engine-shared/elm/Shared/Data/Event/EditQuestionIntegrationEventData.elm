@@ -21,6 +21,7 @@ type alias EditQuestionIntegrationEventData =
     , expertUuids : EventField (List String)
     , integrationUuid : EventField String
     , props : EventField (Dict String String)
+    , annotations : EventField (Dict String String)
     }
 
 
@@ -35,6 +36,7 @@ decoder =
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
         |> D.required "integrationUuid" (EventField.decoder D.string)
         |> D.required "props" (EventField.decoder (D.dict D.string))
+        |> D.required "annotations" (EventField.decoder (D.dict D.string))
 
 
 encode : EditQuestionIntegrationEventData -> List ( String, E.Value )
@@ -48,4 +50,5 @@ encode data =
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )
     , ( "integrationUuid", EventField.encode E.string data.integrationUuid )
     , ( "props", EventField.encode (E.dict identity E.string) data.props )
+    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
     ]

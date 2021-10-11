@@ -5,7 +5,7 @@ import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (Html, a, button, div, h3, label, p, small, text)
-import Html.Attributes exposing (class, classList, placeholder, title)
+import Html.Attributes exposing (class, classList, placeholder, rows, title)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Reorderable
@@ -107,6 +107,9 @@ editorClass =
 kmEditorView : AppState -> String -> Model -> KMEditorData -> ( String, Html Msg )
 kmEditorView appState kmName model editorData =
     let
+        formMsg =
+            KMEditorFormMsg >> KMEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "knowledgeModel" appState
             , uuid = editorData.uuid
@@ -187,6 +190,7 @@ kmEditorView appState kmName model editorData =
         , inputChildren appState phasesConfig
         , inputChildren appState tagsConfig
         , inputChildren appState integrationsConfig
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -194,6 +198,9 @@ kmEditorView appState kmName model editorData =
 chapterEditorView : AppState -> String -> Model -> ChapterEditorData -> ( String, Html Msg )
 chapterEditorView appState kmName model editorData =
     let
+        formMsg =
+            ChapterFormMsg >> ChapterEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "chapter" appState
             , uuid = editorData.uuid
@@ -223,8 +230,9 @@ chapterEditorView appState kmName model editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (ChapterFormMsg >> ChapterEditorMsg >> EditorMsg)
+        , Html.map formMsg form
         , inputChildren appState questionsConfig
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -232,6 +240,9 @@ chapterEditorView appState kmName model editorData =
 metricEditorView : AppState -> Model -> MetricEditorData -> ( String, Html Msg )
 metricEditorView appState _ editorData =
     let
+        formMsg =
+            MetricFormMsg >> MetricEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "metric" appState
             , uuid = editorData.uuid
@@ -249,7 +260,8 @@ metricEditorView appState _ editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (MetricFormMsg >> MetricEditorMsg >> EditorMsg)
+        , Html.map formMsg form
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -257,6 +269,9 @@ metricEditorView appState _ editorData =
 phaseEditorView : AppState -> Model -> PhaseEditorData -> ( String, Html Msg )
 phaseEditorView appState _ editorData =
     let
+        formMsg =
+            PhaseFormMsg >> PhaseEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "phase" appState
             , uuid = editorData.uuid
@@ -273,7 +288,8 @@ phaseEditorView appState _ editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (PhaseFormMsg >> PhaseEditorMsg >> EditorMsg)
+        , Html.map formMsg form
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -281,6 +297,9 @@ phaseEditorView appState _ editorData =
 tagEditorView : AppState -> Model -> TagEditorData -> ( String, Html Msg )
 tagEditorView appState _ editorData =
     let
+        formMsg =
+            TagFormMsg >> TagEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "tag" appState
             , uuid = editorData.uuid
@@ -298,7 +317,8 @@ tagEditorView appState _ editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (TagFormMsg >> TagEditorMsg >> EditorMsg)
+        , Html.map formMsg form
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -352,6 +372,7 @@ integrationEditorView appState _ editorData =
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
         , form
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         , integrationDeleteConfirm appState editorData
         ]
     )
@@ -419,6 +440,9 @@ integrationDeleteConfirm appState editorData =
 questionEditorView : AppState -> String -> Model -> QuestionEditorData -> ( String, Html Msg )
 questionEditorView appState kmName model editorData =
     let
+        formMsg =
+            QuestionFormMsg >> QuestionEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "question" appState
             , uuid = editorData.uuid
@@ -544,12 +568,13 @@ questionEditorView appState kmName model editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         ([ editorTitle appState editorTitleConfig
-         , form |> Html.map (QuestionFormMsg >> QuestionEditorMsg >> EditorMsg)
+         , Html.map formMsg form
          , questionTagList appState model editorData
          ]
             ++ extra
             ++ [ questionEditorReferencesView appState kmName model editorData
                , questionEditorExpertsView appState kmName model editorData
+               , Html.map formMsg <| annotationsFormGroup appState editorData.form
                ]
         )
     )
@@ -681,6 +706,9 @@ questionEditorExpertsView appState kmName model editorData =
 answerEditorView : AppState -> String -> Model -> AnswerEditorData -> ( String, Html Msg )
 answerEditorView appState kmName model editorData =
     let
+        formMsg =
+            AnswerFormMsg >> AnswerEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "answer" appState
             , uuid = editorData.uuid
@@ -722,9 +750,10 @@ answerEditorView appState kmName model editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (AnswerFormMsg >> AnswerEditorMsg >> EditorMsg)
+        , Html.map formMsg form
         , inputChildren appState followUpsConfig
         , viewMetrics
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -761,6 +790,9 @@ metricView appState form _ metric =
 choiceEditorView : AppState -> ChoiceEditorData -> ( String, Html Msg )
 choiceEditorView appState editorData =
     let
+        formMsg =
+            ChoiceFormMsg >> ChoiceEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "choice" appState
             , uuid = editorData.uuid
@@ -776,7 +808,8 @@ choiceEditorView appState editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (ChoiceFormMsg >> ChoiceEditorMsg >> EditorMsg)
+        , Html.map formMsg form
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -784,6 +817,9 @@ choiceEditorView appState editorData =
 referenceEditorView : AppState -> ReferenceEditorData -> ( String, Html Msg )
 referenceEditorView appState editorData =
     let
+        formMsg =
+            ReferenceFormMsg >> ReferenceEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "reference" appState
             , uuid = editorData.uuid
@@ -819,7 +855,8 @@ referenceEditorView appState editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (ReferenceFormMsg >> ReferenceEditorMsg >> EditorMsg)
+        , Html.map formMsg form
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -827,6 +864,9 @@ referenceEditorView appState editorData =
 expertEditorView : AppState -> ExpertEditorData -> ( String, Html Msg )
 expertEditorView appState editorData =
     let
+        formMsg =
+            ExpertFormMsg >> ExpertEditorMsg >> EditorMsg
+
         editorTitleConfig =
             { title = lg "expert" appState
             , uuid = editorData.uuid
@@ -843,7 +883,8 @@ expertEditorView appState editorData =
     ( editorData.uuid
     , div [ class editorClass ]
         [ editorTitle appState editorTitleConfig
-        , form |> Html.map (ExpertFormMsg >> ExpertEditorMsg >> EditorMsg)
+        , Html.map formMsg form
+        , Html.map formMsg <| annotationsFormGroup appState editorData.form
         ]
     )
 
@@ -961,3 +1002,58 @@ inputChild getName viewMsg ignoreDrag item =
 placeholderView : Html msg
 placeholderView =
     div [] [ text "-" ]
+
+
+annotationsFormGroup : AppState -> Form FormError a -> Html Form.Msg
+annotationsFormGroup appState form =
+    FormGroup.list appState (annotationItemView appState) form "annotations" (lg "annotations" appState)
+
+
+annotationItemView : AppState -> Form FormError a -> Int -> Html Form.Msg
+annotationItemView appState form i =
+    let
+        keyField =
+            Form.getFieldAsString ("annotations." ++ String.fromInt i ++ ".key") form
+
+        valueField =
+            Form.getFieldAsString ("annotations." ++ String.fromInt i ++ ".value") form
+
+        ( headerError, headerErrorClass ) =
+            FormGroup.getErrors appState keyField <| lg "annotations.key" appState
+
+        ( valueError, valueErrorClass ) =
+            FormGroup.getErrors appState valueField <| lg "annotations.value" appState
+
+        lines =
+            valueField.value
+                |> Maybe.map (max 2 << List.length << String.split "\n")
+                |> Maybe.withDefault 2
+    in
+    div
+        [ class "annotations-editor-item"
+        , dataCy "integration_headers_item"
+        ]
+        [ div [ class "annotations-editor-item-inputs" ]
+            [ Input.textInput keyField
+                [ class <| "form-control " ++ headerErrorClass
+                , placeholder <| lg "annotations.key" appState
+                , dataCy "annotation_key"
+                ]
+            , Input.textArea valueField
+                [ class <| "form-control " ++ valueErrorClass
+                , rows lines
+                , placeholder <| lg "annotations.value" appState
+                , dataCy "annotation_value"
+                ]
+            ]
+        , div [ class "annotations-editor-item-controls" ]
+            [ button
+                [ class "btn btn-outline-warning"
+                , onClick (Form.RemoveItem "annotations" i)
+                , dataCy "annotation_remove-button"
+                ]
+                [ faSet "_global.remove" appState ]
+            ]
+        , headerError
+        , valueError
+        ]

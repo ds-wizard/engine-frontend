@@ -18,6 +18,7 @@ type alias AddQuestionIntegrationEventData =
     , tagUuids : List String
     , integrationUuid : String
     , props : Dict String String
+    , annotations : Dict String String
     }
 
 
@@ -30,6 +31,7 @@ decoder =
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "integrationUuid" D.string
         |> D.required "props" (D.dict D.string)
+        |> D.required "annotations" (D.dict D.string)
 
 
 encode : AddQuestionIntegrationEventData -> List ( String, E.Value )
@@ -41,4 +43,5 @@ encode data =
     , ( "tagUuids", E.list E.string data.tagUuids )
     , ( "integrationUuid", E.string data.integrationUuid )
     , ( "props", E.dict identity E.string data.props )
+    , ( "annotations", E.dict identity E.string data.annotations )
     ]

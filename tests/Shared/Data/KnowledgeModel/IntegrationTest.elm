@@ -27,7 +27,8 @@ integrationDecoderTest =
                             "responseListField": "",
                             "responseIdField": "id",
                             "responseNameField": "title",
-                            "itemUrl": "http://example.com/${id}"
+                            "itemUrl": "http://example.com/${id}",
+                            "annotations": {}
                         }
                         """
 
@@ -45,6 +46,7 @@ integrationDecoderTest =
                         , responseIdField = "id"
                         , responseNameField = "title"
                         , itemUrl = "http://example.com/${id}"
+                        , annotations = Dict.empty
                         }
                 in
                 expectDecoder Integration.decoder raw expected

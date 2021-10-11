@@ -23,6 +23,7 @@ type alias AddIntegrationEventData =
     , responseIdField : String
     , responseNameField : String
     , itemUrl : String
+    , annotations : Dict String String
     }
 
 
@@ -41,6 +42,7 @@ decoder =
         |> D.required "responseIdField" D.string
         |> D.required "responseNameField" D.string
         |> D.required "itemUrl" D.string
+        |> D.required "annotations" (D.dict D.string)
 
 
 encode : AddIntegrationEventData -> List ( String, E.Value )
@@ -58,4 +60,5 @@ encode data =
     , ( "responseIdField", E.string data.responseIdField )
     , ( "responseNameField", E.string data.responseNameField )
     , ( "itemUrl", E.string data.itemUrl )
+    , ( "annotations", E.dict identity E.string data.annotations )
     ]
