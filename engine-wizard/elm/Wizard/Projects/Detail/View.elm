@@ -342,6 +342,7 @@ viewProjectContent appState route model qm =
                 { features =
                     { feedbackEnabled = True
                     , todosEnabled = isEditable
+                    , commentsEnabled = True
                     , readonly = not isEditable
                     , toolbarEnabled = True
                     }

@@ -159,6 +159,7 @@ questionnaireView appState model migration =
                 { features =
                     { feedbackEnabled = False
                     , todosEnabled = True
+                    , commentsEnabled = False
                     , readonly = True
                     , toolbarEnabled = False
                     }

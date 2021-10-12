@@ -28,6 +28,7 @@ view appState model =
                 { features =
                     { feedbackEnabled = False
                     , todosEnabled = False
+                    , commentsEnabled = False
                     , readonly = False
                     , toolbarEnabled = False
                     }

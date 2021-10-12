@@ -247,6 +247,7 @@ type alias Config msg =
 type alias FeaturesConfig =
     { feedbackEnabled : Bool
     , todosEnabled : Bool
+    , commentsEnabled : Bool
     , readonly : Bool
     , toolbarEnabled : Bool
     }
@@ -2080,7 +2081,7 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
 
 
 viewCommentAction : AppState -> Config msg -> Model -> List String -> Html Msg
-viewCommentAction appState _ model path =
+viewCommentAction appState cfg model path =
     let
         pathString =
             pathToString path
@@ -2123,7 +2124,7 @@ viewCommentAction appState _ model path =
                 , text <| String.fromInt commentCount ++ " comments"
                 ]
     in
-    if Feature.projectCommentAdd appState model.questionnaire then
+    if cfg.features.commentsEnabled && Feature.projectCommentAdd appState model.questionnaire then
         if commentCount > 0 then
             commentButtonWithComments
 

@@ -152,6 +152,7 @@ viewContent appState qm =
         { features =
             { feedbackEnabled = False
             , todosEnabled = False
+            , commentsEnabled = False
             , readonly = True
             , toolbarEnabled = False
             }
