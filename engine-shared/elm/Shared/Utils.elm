@@ -5,6 +5,7 @@ module Shared.Utils exposing
     , dispatch
     , flip
     , getContrastColorHex
+    , getOrganizationAndItemId
     , getUuid
     , getUuidString
     , httpMethodOptions
@@ -176,6 +177,16 @@ packageIdToComponents packageId =
 
         _ ->
             Nothing
+
+
+getOrganizationAndItemId : String -> String
+getOrganizationAndItemId fullId =
+    case String.split ":" fullId of
+        organizationId :: itemId :: _ ->
+            organizationId ++ ":" ++ itemId
+
+        _ ->
+            ""
 
 
 withNoCmd : model -> ( model, Cmd msg )

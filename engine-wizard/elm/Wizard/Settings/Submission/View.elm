@@ -8,12 +8,13 @@ import Html.Events exposing (onClick)
 import List.Extra as List
 import Markdown
 import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
-import Shared.Data.Template exposing (Template)
+import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
-import Shared.Utils exposing (httpMethodOptions)
+import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
 import Uuid
+import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -38,13 +39,13 @@ view appState model =
     Page.actionResultView appState (viewConfig appState model) model.templates
 
 
-viewConfig : AppState -> Model -> List Template -> Html Msg
+viewConfig : AppState -> Model -> List TemplateSuggestion -> Html Msg
 viewConfig appState model templates =
     Html.map GenericMsg <|
         GenericView.view (viewProps templates) appState model.genericModel
 
 
-viewProps : List Template -> GenericView.ViewProps EditableSubmissionConfig
+viewProps : List TemplateSuggestion -> GenericView.ViewProps EditableSubmissionConfig
 viewProps templates =
     { locTitle = l_ "title"
     , locSave = l_ "save"
@@ -52,7 +53,7 @@ viewProps templates =
     }
 
 
-formView : List Template -> AppState -> Form FormError EditableSubmissionConfig -> Html Form.Msg
+formView : List TemplateSuggestion -> AppState -> Form FormError EditableSubmissionConfig -> Html Form.Msg
 formView templates appState form =
     let
         enabled =
@@ -72,7 +73,7 @@ formView templates appState form =
         ]
 
 
-serviceFormView : AppState -> List Template -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
+serviceFormView : AppState -> List TemplateSuggestion -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 serviceFormView appState templates form i =
     let
         field name =
@@ -125,11 +126,14 @@ serviceFormView appState templates form i =
         ]
 
 
-supportedFormatFormView : AppState -> List Template -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
+supportedFormatFormView : AppState -> List TemplateSuggestion -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 supportedFormatFormView appState templates prefix form index =
     let
         field name =
             prefix ++ "." ++ String.fromInt index ++ "." ++ name
+
+        templateField =
+            Form.getFieldAsString (field "template") form
 
         templateIdField =
             Form.getFieldAsString (field "templateId") form
@@ -147,7 +151,23 @@ supportedFormatFormView appState templates prefix form index =
             ( "", "--" )
 
         templateOptions =
-            defaultOption :: List.map (\t -> ( t.id, t.name )) templates
+            templates
+                |> List.uniqueBy (.id >> getOrganizationAndItemId)
+                |> List.sortBy .name
+                |> List.map (\t -> ( getOrganizationAndItemId t.id, t.name ))
+                |> (::) defaultOption
+
+        templateToTemplateVersionOptions template =
+            templates
+                |> List.filter (.id >> getOrganizationAndItemId >> (==) template)
+                |> List.sortWith (\a b -> Version.compare b.version a.version)
+                |> List.map (\t -> ( t.id, Version.toString t.version ))
+                |> (::) defaultOption
+
+        templateVersionOptions =
+            templateField.value
+                |> Maybe.map templateToTemplateVersionOptions
+                |> Maybe.withDefault []
 
         formatOptions =
             templateIdField.value
@@ -156,7 +176,8 @@ supportedFormatFormView appState templates prefix form index =
                 |> Maybe.withDefault []
     in
     div [ class "input-group mb-2" ]
-        [ Input.selectInput templateOptions templateIdField [ class "form-control", class templateIdErrorClass ]
+        [ Input.selectInput templateOptions templateField [ class "form-control", class templateIdErrorClass ]
+        , Input.selectInput templateVersionOptions templateIdField [ class "form-control", class templateIdErrorClass ]
         , Input.selectInput formatOptions formatUuidField [ class "form-control", class formatUuidErrorClass ]
         , div [ class "input-group-append" ]
             [ button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]

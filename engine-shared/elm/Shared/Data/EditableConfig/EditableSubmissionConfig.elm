@@ -17,6 +17,7 @@ import Json.Encode as E
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Shared.Utils exposing (getOrganizationAndItemId)
 
 
 type alias EditableSubmissionConfig =
@@ -232,7 +233,8 @@ initService definition =
 
 initSupportedFormat : SupportedFormat -> List ( String, Field )
 initSupportedFormat supportedFormat =
-    [ ( "templateId", Field.string supportedFormat.templateId )
+    [ ( "template", Field.string (getOrganizationAndItemId supportedFormat.templateId) )
+    , ( "templateId", Field.string supportedFormat.templateId )
     , ( "formatUuid", Field.string supportedFormat.formatUuid )
     ]
 
