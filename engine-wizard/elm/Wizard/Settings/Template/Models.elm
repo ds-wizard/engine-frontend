@@ -5,13 +5,13 @@ module Wizard.Settings.Template.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig exposing (TemplateConfig)
-import Shared.Data.Template exposing (Template)
+import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Wizard.Settings.Generic.Model as GenericModel
 
 
 type alias Model =
     { genericModel : GenericModel.Model TemplateConfig
-    , templates : ActionResult (List Template)
+    , templates : ActionResult (List TemplateSuggestion)
     }
 
 

@@ -33,9 +33,9 @@ getTemplates qs =
     jwtGet url (Pagination.decoder "templates" Template.decoder)
 
 
-getTemplatesAll : AbstractAppState a -> ToMsg (List Template) msg -> Cmd msg
+getTemplatesAll : AbstractAppState a -> ToMsg (List TemplateSuggestion) msg -> Cmd msg
 getTemplatesAll =
-    jwtGet "/templates/all" (D.list Template.decoder)
+    jwtGet "/templates/all" (D.list TemplateSuggestion.decoder)
 
 
 getTemplate : String -> AbstractAppState a -> ToMsg TemplateDetail msg -> Cmd msg

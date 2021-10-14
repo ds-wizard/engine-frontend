@@ -17,6 +17,7 @@ import Json.Encode.Extra as E
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Shared.Utils exposing (getOrganizationAndItemId)
 
 
 type alias TemplateConfig =
@@ -64,6 +65,8 @@ initForm : TemplateConfig -> Form FormError TemplateConfig
 initForm config =
     let
         fields =
-            [ ( "recommendedTemplateId", Field.maybeString config.recommendedTemplateId ) ]
+            [ ( "recommendedTemplate", Field.maybeString (Maybe.map getOrganizationAndItemId config.recommendedTemplateId) )
+            , ( "recommendedTemplateId", Field.maybeString config.recommendedTemplateId )
+            ]
     in
     Form.initial fields validation
