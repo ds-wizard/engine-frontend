@@ -13,6 +13,7 @@ import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.CookieConsent as CookieConsent
 import Wizard.Common.Feature as Feature
@@ -42,7 +43,7 @@ misconfigured appState =
     let
         html =
             Page.illustratedMessage
-                { image = "bug_fixing"
+                { image = Undraw.bugFixing
                 , heading = l_ "misconfigured.configurationError" appState
                 , lines =
                     [ l_ "misconfigured.appNotConfigured" appState

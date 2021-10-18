@@ -8,6 +8,7 @@ import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (l, lgx, lx)
+import Shared.Undraw as Undraw
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
@@ -66,7 +67,7 @@ view route appState model =
 viewOffline : AppState -> Html Msg
 viewOffline appState =
     Page.illustratedMessageHtml
-        { image = "warning"
+        { image = Undraw.warning
         , heading = l_ "offline.heading" appState
         , content =
             [ p [] [ lx_ "offline.text" appState ]
@@ -79,7 +80,7 @@ viewOffline appState =
 viewError : AppState -> Html Msg
 viewError appState =
     Page.illustratedMessageHtml
-        { image = "warning"
+        { image = Undraw.warning
         , heading = l_ "error.heading" appState
         , content =
             [ p [] [ lx_ "error.text" appState ]

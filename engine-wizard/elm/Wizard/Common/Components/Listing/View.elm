@@ -25,6 +25,7 @@ import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lx)
+import Shared.Undraw as Undraw
 import Time exposing (Month(..))
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
@@ -369,7 +370,7 @@ viewPagination appState cfg model page =
 viewEmpty : AppState -> ViewConfig a msg -> Html msg
 viewEmpty appState config =
     Page.illustratedMessage
-        { image = "no_data"
+        { image = Undraw.noData
         , heading = l_ "empty.heading" appState
         , lines = [ config.emptyText ]
         , cy = "listing-empty"

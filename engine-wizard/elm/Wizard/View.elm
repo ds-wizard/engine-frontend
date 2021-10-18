@@ -3,6 +3,7 @@ module Wizard.View exposing (view)
 import Browser exposing (Document)
 import Html exposing (Html)
 import Shared.Locale exposing (l)
+import Shared.Undraw as Undraw
 import Wizard.Admin.View
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Layout as Layout
@@ -109,7 +110,7 @@ view model =
 notFoundView : AppState -> Html msg
 notFoundView appState =
     Page.illustratedMessage
-        { image = "page_not_found"
+        { image = Undraw.pageNotFound
         , heading = l_ "notFound.title" appState
         , lines = [ l_ "notFound.message" appState ]
         , cy = "not-found"
@@ -119,7 +120,7 @@ notFoundView appState =
 notAllowedView : AppState -> Html msg
 notAllowedView appState =
     Page.illustratedMessage
-        { image = "security"
+        { image = Undraw.security
         , heading = l_ "notAllowed.title" appState
         , lines = [ l_ "notAllowed.message" appState ]
         , cy = "not-allowed"

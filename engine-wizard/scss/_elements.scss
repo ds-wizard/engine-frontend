@@ -20,6 +20,12 @@ a {
     }
 }
 
+svg.undraw {
+    color: $illustrations-color;
+    height: auto;
+    max-width: 100%;
+}
+
 label {
     font-weight: bold;
 }

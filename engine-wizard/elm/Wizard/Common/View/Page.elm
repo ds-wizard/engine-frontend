@@ -11,10 +11,11 @@ module Wizard.Common.View.Page exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, br, div, h1, h2, img, p, text)
-import Html.Attributes exposing (class, src)
+import Html exposing (Html, br, div, h1, h2, p, text)
+import Html.Attributes exposing (class)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Undraw as Undraw
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 
@@ -54,7 +55,7 @@ loader appState =
 error : AppState -> String -> Html msg
 error appState msg =
     illustratedMessage
-        { image = "cancel"
+        { image = Undraw.cancel
         , heading = l_ "error.heading" appState
         , lines = [ msg ]
         , cy = "error"
@@ -75,7 +76,7 @@ message icon cy msg =
 
 
 illustratedMessage :
-    { image : String
+    { image : Html msg
     , heading : String
     , lines : List String
     , cy : String
@@ -92,7 +93,7 @@ illustratedMessage { image, heading, lines, cy } =
 
 
 illustratedMessageHtml :
-    { image : String
+    { image : Html msg
     , heading : String
     , content : List (Html msg)
     , cy : String
@@ -100,7 +101,7 @@ illustratedMessageHtml :
     -> Html msg
 illustratedMessageHtml { image, heading, content, cy } =
     div [ class "full-page-illustrated-message", dataCy ("illustrated-message_" ++ cy) ]
-        [ img [ src <| "/img/illustrations/undraw_" ++ image ++ ".svg" ] []
+        [ image
         , div []
             (h1 [] [ text heading ] :: content)
         ]

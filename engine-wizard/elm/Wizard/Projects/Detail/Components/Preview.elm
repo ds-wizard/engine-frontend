@@ -22,6 +22,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (l, lg, lx)
+import Shared.Undraw as Undraw
 import String.Format as String
 import Task
 import Uuid exposing (Uuid)
@@ -162,7 +163,7 @@ viewError msg =
 viewNotSupported : AppState -> String -> Html msg
 viewNotSupported appState documentUrl =
     Page.illustratedMessageHtml
-        { image = "download_files"
+        { image = Undraw.downloadFiles
         , heading = l_ "notSupported.title" appState
         , content =
             [ p [] [ lx_ "notSupported.text" appState ]
@@ -202,7 +203,7 @@ viewTemplateNotSet appState questionnaire =
                 ]
     in
     Page.illustratedMessageHtml
-        { image = "website_builder"
+        { image = Undraw.websiteBuilder
         , heading = l_ "templateNotSet.heading" appState
         , content = content
         , cy = "template-not-set"

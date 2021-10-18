@@ -7,8 +7,10 @@ $primary: #0033aa !default;
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
 
+
 // public layout
 $public-header-height: 50px !default;
+
 
 // side navigation
 $side-navigation-logo-url: url(../img/logo.svg) !default;
@@ -29,8 +31,11 @@ $side-navigation-collapse-hover: darken($side-navigation-bg, 5%) !default;
 $top-header-height: 50px !default;
 
 
-// special text colors
+// illustrations
+$illustrations-color: #4285f4 !default;
 
+
+// special text colors
 @function color-level($color, $level: 0) {
     $color-base: if($level > 0, $black, $white);
     $level: abs($level);

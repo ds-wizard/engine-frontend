@@ -8,6 +8,7 @@ import Shared.Data.Package exposing (Package)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lf, lgx, lx)
+import Shared.Undraw as Undraw
 import Shared.Utils exposing (boolToInt, flip)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -59,7 +60,7 @@ contentView appState model migration =
             if List.length model.changes.questions == 0 then
                 div [ class "content" ]
                     [ Page.illustratedMessage
-                        { image = "happy_feeling"
+                        { image = Undraw.happyFeeling
                         , heading = l_ "noChanges.heading" appState
                         , lines =
                             [ l_ "noChanges.line1" appState

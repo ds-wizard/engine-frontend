@@ -1,8 +1,9 @@
 module Registry.Common.View.Page exposing (actionResultView, illustratedMessage)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, div, h1, img, p, text)
-import Html.Attributes exposing (class, src)
+import Html exposing (Html, div, h1, p, text)
+import Html.Attributes exposing (class)
+import Shared.Undraw as Undraw
 
 
 actionResultView : (a -> Html msg) -> ActionResult a -> Html msg
@@ -27,21 +28,21 @@ loader =
 error : String -> Html msg
 error err =
     illustratedMessage
-        { image = "cancel"
+        { image = Undraw.cancel
         , heading = "Error"
         , msg = err
         }
 
 
 illustratedMessage :
-    { image : String
+    { image : Html msg
     , heading : String
     , msg : String
     }
     -> Html msg
 illustratedMessage { image, heading, msg } =
     div [ class "full-page-illustrated-message" ]
-        [ img [ src <| "/img/illustrations/undraw_" ++ image ++ ".svg" ] []
+        [ image
         , div []
             [ h1 [] [ text heading ]
             , p [] [ text msg ]

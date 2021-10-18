@@ -27,6 +27,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lh, lx)
+import Shared.Undraw as Undraw
 
 
 l_ : String -> AppState -> String
@@ -155,7 +156,7 @@ view appState model =
 successView : AppState -> Html Msg
 successView appState =
     Page.illustratedMessage
-        { image = "confirmation"
+        { image = Undraw.confirmation
         , heading = l_ "success.heading" appState
         , msg = l_ "success.msg" appState
         }

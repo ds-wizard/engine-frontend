@@ -60,6 +60,7 @@ import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import String exposing (fromInt)
 import Time
@@ -1043,7 +1044,7 @@ viewQuestionnaireRightPanelTodos appState model =
     in
     if List.isEmpty todos then
         div [ class "todos todos-empty" ] <|
-            [ illustratedMessage "feeling_happy" (l_ "todos.completed" appState) ]
+            [ illustratedMessage Undraw.feelingHappy (l_ "todos.completed" appState) ]
 
     else
         div [ class "todos" ] <|
