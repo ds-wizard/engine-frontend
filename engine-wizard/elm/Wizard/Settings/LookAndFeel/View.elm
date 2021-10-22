@@ -2,7 +2,7 @@ module Wizard.Settings.LookAndFeel.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, a, div, img, label)
+import Html exposing (Html, a, div, hr, img, label)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick)
 import Markdown
@@ -41,9 +41,44 @@ viewProps =
     }
 
 
+
+--colorOptionsDarker : List String
+--colorOptionsDarker =
+--    [ "#16A085"
+--    , "#27AE60"
+--    , "#2980B9"
+--    , "#8E44AD"
+--    , "#F39C12"
+--    , "#D35400"
+--    , "#C0392B"
+--    ]
+--
+--
+--colorOptionsLighter : List String
+--colorOptionsLighter =
+--    [ "#1ABC9C"
+--    , "#2ECC71"
+--    , "#3498DB"
+--    , "#9B59B6"
+--    , "#F1C40F"
+--    , "#E67E22"
+--    , "#E74C3C"
+--    ]
+
+
 formView : AppState -> Form FormError LookAndFeelConfig -> Html Form.Msg
 formView appState form =
-    div []
+    --let
+    --    inputMsg field color =
+    --        Form.Input field Form.Text (Field.String color)
+    --
+    --    colorButtonView field color =
+    --        div [ class "color", style "background" color, onClick (inputMsg field color) ] []
+    --
+    --    colorPicker colorOptions field =
+    --        div [ class "color-picker" ] (List.map (colorButtonView field) colorOptions)
+    --in
+    div [ class "LookAndFeel" ]
         [ div [ class "row" ]
             [ div [ class "col-8" ]
                 [ FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitle ] appState form "appTitle" (l_ "form.appTitle" appState)
@@ -63,6 +98,23 @@ formView appState form =
                 [ img [ class "settings-img", src "/img/settings/app-title-short.png" ] []
                 ]
             ]
+
+        --, div [ class "row mt-5" ]
+        --    [ div [ class "col-6" ]
+        --        [ FormGroup.input appState form "stylePrimaryColor" "Primary Color"
+        --        , colorPicker colorOptionsDarker "stylePrimaryColor"
+        --        ]
+        --    , div [ class "col-6" ]
+        --        [ FormGroup.input appState form "styleIllustrationsColor" "Illustrations Color"
+        --        , colorPicker colorOptionsLighter "styleIllustrationsColor"
+        --        ]
+        --    ]
+        --, div [ class "row mt-5" ]
+        --    [ div [ class "col-12" ]
+        --        [ viewAppPreview form
+        --        ]
+        --    ]
+        , hr [] []
         , div [ class "input-table mt-5" ]
             [ div [ class "row" ]
                 [ div [ class "col-8" ]
@@ -79,6 +131,7 @@ formView appState form =
                     ]
                 ]
             ]
+        , hr [] []
         , div [ class "row mt-5" ]
             [ div [ class "col-12" ]
                 [ label [] [ lx_ "form.loginInfo" appState ] ]
@@ -91,6 +144,56 @@ formView appState form =
                 ]
             ]
         ]
+
+
+
+--viewAppPreview : Form FormError LookAndFeelConfig -> Html Form.Msg
+--viewAppPreview form =
+--    let
+--        toBackgroundColorStyle color =
+--            "background-color: " ++ color
+--
+--        toBackgroundAndBorderColorStyle color =
+--            "background-color: " ++ color ++ "; border-color: " ++ color
+--
+--        toColorStyle color =
+--            "color: " ++ color
+--
+--        appTitleValue =
+--            (Form.getFieldAsString "appTitleShort" form).value
+--                |> Maybe.andThen String.toMaybe
+--                |> Maybe.withDefault LookAndFeelConfig.defaultAppTitleShort
+--
+--        stylePrimaryColorValue =
+--            (Form.getFieldAsString "stylePrimaryColor" form).value
+--                |> Maybe.andThen String.toMaybe
+--
+--        primaryColorBackgroundStyle =
+--            stylePrimaryColorValue
+--                |> Maybe.unwrap "" toBackgroundColorStyle
+--                |> attribute "style"
+--
+--        primaryColorBackgroundAndBorderStyle =
+--            stylePrimaryColorValue
+--                |> Maybe.unwrap "" toBackgroundAndBorderColorStyle
+--                |> attribute "style"
+--
+--        illustrationsColorStyle =
+--            (Form.getFieldAsString "styleIllustrationsColor" form).value
+--                |> Maybe.andThen String.toMaybe
+--                |> Maybe.unwrap "" toColorStyle
+--                |> attribute "style"
+--    in
+--    div [ class "AppPreview" ]
+--        [ div [ class "AppPreview__Panel", primaryColorBackgroundStyle ]
+--            [ a [ class "logo" ] [ span [ class "logo-full" ] [ text appTitleValue ] ]
+--            ]
+--        , div [ class "AppPreview__Content" ]
+--            [ Undraw.teachingWithAttrs [ illustrationsColorStyle ]
+--            , button [ class "btn btn-primary btn-with-loader mt-4", primaryColorBackgroundAndBorderStyle ] [ text "Button" ]
+--            ]
+--        , div [ class "AppPreview__Overlay" ] []
+--        ]
 
 
 customMenuLinksHeader : AppState -> Form FormError LookAndFeelConfig -> Html msg

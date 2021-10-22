@@ -59,10 +59,9 @@ body {
         align-items: center;
         background: $side-navigation-logo-url;
         background-repeat: no-repeat;
-        background-size: 35px;
+        background-size: $side-navigation-logo-width $side-navigation-logo-height;
         background-position: 15px center;
-        padding-left: 50px;
-
+        padding-left: 15px + $side-navigation-logo-width;
 
         .logo-full {
             width: 100%;
