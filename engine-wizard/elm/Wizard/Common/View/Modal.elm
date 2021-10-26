@@ -61,12 +61,7 @@ confirm appState cfg =
             FormResult.view appState cfg.actionResult :: cfg.modalContent
 
         cancelDisabled =
-            case cfg.actionResult of
-                Loading ->
-                    True
-
-                _ ->
-                    False
+            ActionResult.isLoading cfg.actionResult
 
         cancelButton =
             case cfg.cancelMsg of

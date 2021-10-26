@@ -1,3 +1,4 @@
+@import "../mixins";
 @import "../variables";
 
 .Settings {
@@ -203,6 +204,54 @@
                 top: 0;
                 right: 0;
                 bottom: 0;
+            }
+        }
+
+        .LogoPreview {
+            @include border-radius(.25rem);
+            background-color: $primary;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: $side-navigation-title-color;
+            font-size: 18px;
+            height: 50px;
+
+            &__Logo {
+                display: block;
+                background-size: $side-navigation-logo-width $side-navigation-logo-height;
+                background-position: center;
+                background-repeat: no-repeat;
+                width: $side-navigation-logo-width;
+                height: $side-navigation-logo-height;
+                margin-right: 10px;
+
+                &--Original {
+                    background-image: $side-navigation-logo-url;
+                }
+            }
+        }
+
+        .logo-upload {
+            .dropzone {
+                margin: auto;
+                border: 10px dashed $gray-200;
+                @include transition(border-color 0.1s ease-in);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                padding: 2rem;
+
+                &.active {
+                    border: 10px dashed $primary;
+                }
+
+                p {
+                    margin: 1rem 0 0 0;
+                    font-size: 16px;
+                    color: $secondary;
+                }
             }
         }
     }
