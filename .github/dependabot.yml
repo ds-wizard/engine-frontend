@@ -20,6 +20,16 @@ updates:
     labels:
       - "dependencies"
 
+  - package-ecosystem: "npm"
+    directory: "/style-builder"
+    schedule:
+      interval: "weekly"
+    target-branch: "develop"
+    assignees:
+      - "janslifka"
+    labels:
+      - "dependencies"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

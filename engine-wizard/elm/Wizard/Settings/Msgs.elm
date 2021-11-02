@@ -1,6 +1,7 @@
 module Wizard.Settings.Msgs exposing (Msg(..))
 
 import Wizard.Settings.Generic.Msgs
+import Wizard.Settings.LookAndFeel.Msgs
 import Wizard.Settings.Registry.Msgs
 import Wizard.Settings.Submission.Msgs
 import Wizard.Settings.Template.Msgs
@@ -11,7 +12,7 @@ type Msg
     | OrganizationMsg Wizard.Settings.Generic.Msgs.Msg
     | PrivacyAndSupportMsg Wizard.Settings.Generic.Msgs.Msg
     | DashboardMsg Wizard.Settings.Generic.Msgs.Msg
-    | LookAndFeelMsg Wizard.Settings.Generic.Msgs.Msg
+    | LookAndFeelMsg Wizard.Settings.LookAndFeel.Msgs.Msg
     | RegistryMsg Wizard.Settings.Registry.Msgs.Msg
     | QuestionnairesMsg Wizard.Settings.Generic.Msgs.Msg
     | SubmissionMsg Wizard.Settings.Submission.Msgs.Msg

@@ -4,6 +4,7 @@ module Shared.Data.Event.EditKnowledgeModelEventData exposing
     , encode
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
@@ -16,6 +17,7 @@ type alias EditKnowledgeModelEventData =
     , phaseUuids : EventField (List String)
     , tagUuids : EventField (List String)
     , integrationUuids : EventField (List String)
+    , annotations : EventField (Dict String String)
     }
 
 
@@ -27,6 +29,7 @@ decoder =
         |> D.required "phaseUuids" (EventField.decoder (D.list D.string))
         |> D.required "tagUuids" (EventField.decoder (D.list D.string))
         |> D.required "integrationUuids" (EventField.decoder (D.list D.string))
+        |> D.required "annotations" (EventField.decoder (D.dict D.string))
 
 
 encode : EditKnowledgeModelEventData -> List ( String, E.Value )
@@ -37,4 +40,5 @@ encode data =
     , ( "phaseUuids", EventField.encode (E.list E.string) data.phaseUuids )
     , ( "tagUuids", EventField.encode (E.list E.string) data.tagUuids )
     , ( "integrationUuids", EventField.encode (E.list E.string) data.integrationUuids )
+    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
     ]

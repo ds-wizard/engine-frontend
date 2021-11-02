@@ -28,6 +28,8 @@ import Shared.Form.Validate as V
 type alias LookAndFeelConfig =
     { appTitle : Maybe String
     , appTitleShort : Maybe String
+    , stylePrimaryColor : Maybe String
+    , styleIllustrationsColor : Maybe String
     , customMenuLinks : List CustomMenuLink
     , loginInfo : Maybe String
     }
@@ -37,6 +39,8 @@ default : LookAndFeelConfig
 default =
     { appTitle = Nothing
     , appTitleShort = Nothing
+    , stylePrimaryColor = Nothing
+    , styleIllustrationsColor = Nothing
     , customMenuLinks = []
     , loginInfo = Nothing
     }
@@ -71,6 +75,8 @@ decoder =
     D.succeed LookAndFeelConfig
         |> D.required "appTitle" (D.maybe D.string)
         |> D.required "appTitleShort" (D.maybe D.string)
+        |> D.optional "stylePrimaryColor" (D.maybe D.string) Nothing
+        |> D.optional "styleIllustrationsColor" (D.maybe D.string) Nothing
         |> D.required "customMenuLinks" (D.list CustomMenuLink.decoder)
         |> D.required "loginInfo" (D.maybe D.string)
 
@@ -94,6 +100,8 @@ validation =
     V.succeed LookAndFeelConfig
         |> V.andMap (V.field "appTitle" V.maybeString)
         |> V.andMap (V.field "appTitleShort" V.maybeString)
+        |> V.andMap (V.field "stylePrimaryColor" V.maybeString)
+        |> V.andMap (V.field "styleIllustrationsColor" V.maybeString)
         |> V.andMap (V.field "customMenuLinks" (V.list CustomMenuLink.validation))
         |> V.andMap (V.field "loginInfo" V.maybeString)
 
@@ -121,6 +129,8 @@ initForm config =
         fields =
             [ ( "appTitle", Field.maybeString config.appTitle )
             , ( "appTitleShort", Field.maybeString config.appTitleShort )
+            , ( "stylePrimaryColor", Field.maybeString config.stylePrimaryColor )
+            , ( "styleIllustrationsColor", Field.maybeString config.styleIllustrationsColor )
             , ( "customMenuLinks", Field.list customMenuLinks )
             , ( "loginInfo", Field.maybeString config.loginInfo )
             ]

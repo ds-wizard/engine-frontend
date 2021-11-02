@@ -6,7 +6,6 @@ module Wizard.Projects.Detail.Documents.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Api.Submissions as SubmissionsApi
 import Shared.Data.Document exposing (Document)
 import Shared.Data.Submission exposing (Submission)
 import Shared.Data.SubmissionService exposing (SubmissionService)
@@ -18,7 +17,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
-import Wizard.Projects.Detail.Documents.Models exposing (Model)
+import Wizard.Projects.Detail.Documents.Models exposing (Model, addDocumentSubmission)
 import Wizard.Projects.Detail.Documents.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
@@ -59,6 +58,9 @@ update wrapMsg msg appState questionnaireUuid model =
 
         SubmitDocumentCompleted result ->
             handleSubmitDocumentCompleted appState model result
+
+        SetSubmissionErrorModal mbError ->
+            ( { model | submissionErrorModal = mbError }, Cmd.none )
 
 
 handleShowHideDeleteDocument : Model -> Maybe Document -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -175,7 +177,7 @@ handleSubmitDocument wrapMsg appState model =
         ( Just document, Just serviceId ) ->
             ( { model | submittingDocument = Loading }
             , Cmd.map wrapMsg <|
-                SubmissionsApi.postSubmission serviceId (Uuid.toString document.uuid) appState SubmitDocumentCompleted
+                DocumentsApi.postSubmission serviceId (Uuid.toString document.uuid) appState SubmitDocumentCompleted
             )
 
         _ ->
@@ -184,8 +186,17 @@ handleSubmitDocument wrapMsg appState model =
 
 handleSubmitDocumentCompleted : AppState -> Model -> Result ApiError Submission -> ( Model, Cmd Wizard.Msgs.Msg )
 handleSubmitDocumentCompleted appState model result =
+    let
+        updateSubmissions m =
+            case result of
+                Ok submission ->
+                    addDocumentSubmission submission m
+
+                _ ->
+                    m
+    in
     applyResult appState
-        { setResult = \value record -> { record | submittingDocument = value }
+        { setResult = \value record -> updateSubmissions { record | submittingDocument = value }
         , defaultError = lg "apiError.submissions.postError" appState
         , model = model
         , result = result

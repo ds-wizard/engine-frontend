@@ -1,13 +1,17 @@
 module Wizard.Settings.Template.View exposing (view)
 
 import Form exposing (Form)
-import Html exposing (Html, div)
+import Form.Input as Input
+import Html exposing (Html, div, label, text)
+import Html.Attributes exposing (class)
+import List.Extra as List
 import Shared.Data.BootstrapConfig.TemplateConfig exposing (TemplateConfig)
-import Shared.Data.Template exposing (Template)
+import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l)
+import Shared.Utils exposing (getOrganizationAndItemId)
+import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Template.Models exposing (Model)
@@ -24,13 +28,13 @@ view appState model =
     Page.actionResultView appState (viewContent appState model) model.templates
 
 
-viewContent : AppState -> Model -> List Template -> Html Msg
+viewContent : AppState -> Model -> List TemplateSuggestion -> Html Msg
 viewContent appState model templates =
     Html.map GenericMsg <|
         GenericView.view (viewProps templates) appState model.genericModel
 
 
-viewProps : List Template -> GenericView.ViewProps TemplateConfig
+viewProps : List TemplateSuggestion -> GenericView.ViewProps TemplateConfig
 viewProps templates =
     { locTitle = l_ "title"
     , locSave = l_ "save"
@@ -38,14 +42,38 @@ viewProps templates =
     }
 
 
-formView : List Template -> AppState -> Form FormError TemplateConfig -> Html Form.Msg
+formView : List TemplateSuggestion -> AppState -> Form FormError TemplateConfig -> Html Form.Msg
 formView templates appState form =
     let
-        toFormOption { id, name } =
-            ( id, name )
+        recommendedTemplateField =
+            Form.getFieldAsString "recommendedTemplate" form
 
-        options =
-            ( "", "- none -" ) :: List.map toFormOption templates
+        recommendedTemplateIdField =
+            Form.getFieldAsString "recommendedTemplateId" form
+
+        templateOptions =
+            templates
+                |> List.uniqueBy (.id >> getOrganizationAndItemId)
+                |> List.sortBy .name
+                |> List.map (\t -> ( getOrganizationAndItemId t.id, t.name ))
+                |> (::) ( "", "- none -" )
+
+        templateToTemplateVersionOptions template =
+            templates
+                |> List.filter (.id >> getOrganizationAndItemId >> (==) template)
+                |> List.sortWith (\a b -> Version.compare b.version a.version)
+                |> List.map (\t -> ( t.id, Version.toString t.version ))
+                |> (::) ( "", "--" )
+
+        templateVersionOptions =
+            recommendedTemplateField.value
+                |> Maybe.map templateToTemplateVersionOptions
+                |> Maybe.withDefault []
     in
-    div []
-        [ FormGroup.select appState options form "recommendedTemplateId" (l_ "form.recommendedTemplateId" appState) ]
+    div [ class "form-group" ]
+        [ label [] [ text (l_ "form.recommendedTemplateId" appState) ]
+        , div [ class "input-group" ]
+            [ Input.selectInput templateOptions recommendedTemplateField [ class "form-control" ]
+            , Input.selectInput templateVersionOptions recommendedTemplateIdField [ class "form-control" ]
+            ]
+        ]

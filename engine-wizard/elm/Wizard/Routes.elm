@@ -18,6 +18,7 @@ module Wizard.Routes exposing
 
 import Dict exposing (Dict)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Wizard.Admin.Routes
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
@@ -30,7 +31,8 @@ import Wizard.Users.Routes
 
 
 type Route
-    = DashboardRoute
+    = AdminRoute Wizard.Admin.Routes.Route
+    | DashboardRoute
     | DocumentsRoute Wizard.Documents.Routes.Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route

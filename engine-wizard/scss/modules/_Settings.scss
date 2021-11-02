@@ -1,3 +1,4 @@
+@import "../mixins";
 @import "../variables";
 
 .Settings {
@@ -119,6 +120,137 @@
                     .settings-img {
                         opacity: 0.8;
                     }
+                }
+            }
+        }
+    }
+
+    .LookAndFeel {
+        .color-picker {
+            display: flex;
+            width: 100%;
+            margin-top: -0.5rem;
+
+            .color {
+                cursor: pointer;
+                flex-grow: 1;
+                margin: 0.25rem;
+                height: 1.5rem;
+                border-radius: 0.25rem;
+
+                &:hover {
+                    opacity: 0.9;
+                }
+
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+
+        .AppPreview {
+            display: flex;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border-radius: 0.25rem;
+            overflow: hidden;
+            position: relative;
+
+            &__Panel {
+                flex: 0 0 $side-navigation-width;
+                background-color: $side-navigation-bg;
+
+                .logo {
+                    color: $side-navigation-title-color;
+                    font-size: 18px;
+                    display: flex;
+                    width: 100%;
+                    text-decoration: none;
+                    height: 50px;
+                    justify-content: center;
+                    align-items: center;
+                    background: $side-navigation-logo-url;
+                    background-repeat: no-repeat;
+                    background-size: $side-navigation-logo-width $side-navigation-logo-height;
+                    background-position: 15px center;
+                    padding-left: 15px + $side-navigation-logo-width;
+
+                    .logo-full {
+                        width: 100%;
+                        padding: 0 10px;
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                }
+            }
+
+            &__Content {
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                .undraw {
+                    width: 70%;
+                }
+            }
+
+            &__Overlay {
+                position: absolute;
+                left: 0;
+                top: 0;
+                right: 0;
+                bottom: 0;
+            }
+        }
+
+        .LogoPreview {
+            @include border-radius(.25rem);
+            background-color: $primary;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: $side-navigation-title-color;
+            font-size: 18px;
+            height: 50px;
+
+            &__Logo {
+                display: block;
+                background-size: $side-navigation-logo-width $side-navigation-logo-height;
+                background-position: center;
+                background-repeat: no-repeat;
+                width: $side-navigation-logo-width;
+                height: $side-navigation-logo-height;
+                margin-right: 10px;
+
+                &--Original {
+                    background-image: $side-navigation-logo-url;
+                }
+            }
+        }
+
+        .logo-upload {
+            .dropzone {
+                margin: auto;
+                border: 10px dashed $gray-200;
+                @include transition(border-color 0.1s ease-in);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                padding: 2rem;
+
+                &.active {
+                    border: 10px dashed $primary;
+                }
+
+                p {
+                    margin: 1rem 0 0 0;
+                    font-size: 16px;
+                    color: $secondary;
                 }
             }
         }

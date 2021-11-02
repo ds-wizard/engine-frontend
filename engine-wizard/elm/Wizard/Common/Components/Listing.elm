@@ -22,6 +22,7 @@ import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l)
+import Shared.Undraw as Undraw
 import Time
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
@@ -182,7 +183,7 @@ view appState config model =
 viewEmpty : AppState -> ListingConfig a msg -> Html msg
 viewEmpty appState config =
     Page.illustratedMessage
-        { image = "no_data"
+        { image = Undraw.noData
         , heading = l_ "empty.heading" appState
         , lines = [ config.emptyText ]
         , cy = "listing-empty"

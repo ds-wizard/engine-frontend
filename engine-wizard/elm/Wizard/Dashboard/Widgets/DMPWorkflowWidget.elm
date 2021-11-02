@@ -1,13 +1,14 @@
 module Wizard.Dashboard.Widgets.DMPWorkflowWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
-import Html exposing (Html, a, div, img, p, text)
-import Html.Attributes exposing (class, href, src)
+import Html exposing (Html, a, div, p, text)
+import Html.Attributes exposing (class, href)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (lf, lx)
+import Shared.Undraw as Undraw
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
@@ -49,13 +50,13 @@ view appState questionnaires =
                 ]
             , div [ class "DMPWorkflowWidget__Workflow DMPWorkflowWidget__Workflow--Images" ]
                 [ div [ class "step" ]
-                    [ img [ src "/img/illustrations/undraw_choice.svg" ] []
+                    [ Undraw.choice
                     ]
                 , div [ class "step" ]
-                    [ img [ src "/img/illustrations/undraw_setup_wizard.svg" ] []
+                    [ Undraw.setupWizard
                     ]
                 , div [ class "step" ]
-                    [ img [ src "/img/illustrations/undraw_upload.svg" ] []
+                    [ Undraw.upload
                     ]
                 ]
             , div [ class "DMPWorkflowWidget__Workflow DMPWorkflowWidget__Workflow--Texts" ]

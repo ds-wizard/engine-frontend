@@ -55,7 +55,8 @@ knowledgeModelEntitiesDecoderTest =
                                     "uuid": "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04",
                                     "title": "Chapter 1",
                                     "text": "This chapter is empty",
-                                    "questionUuids": []
+                                    "questionUuids": [],
+                                    "annotations": {}
                                 }
                             },
                             "questions": {},
@@ -78,6 +79,7 @@ knowledgeModelEntitiesDecoderTest =
                                     , title = "Chapter 1"
                                     , text = Just "This chapter is empty"
                                     , questionUuids = []
+                                    , annotations = Dict.empty
                                     }
                                   )
                                 ]
@@ -113,7 +115,8 @@ knowledgeModelEntitiesDecoderTest =
                                     "integrationUuid": "b50bf5ce-2fc3-4779-9756-5f176c233374",
                                     "props": {
                                         "prop": "value"
-                                    }
+                                    },
+                                    "annotations": {}
                                 }
                             },
                             "answers": {},
@@ -140,6 +143,7 @@ knowledgeModelEntitiesDecoderTest =
                                         , tagUuids = []
                                         , referenceUuids = []
                                         , expertUuids = []
+                                        , annotations = Dict.empty
                                         }
                                         { integrationUuid = "b50bf5ce-2fc3-4779-9756-5f176c233374"
                                         , props = Dict.fromList [ ( "prop", "value" ) ]
@@ -171,7 +175,8 @@ knowledgeModelEntitiesDecoderTest =
                                     "label": "Yes",
                                     "advice": null,
                                     "metricMeasures": [],
-                                    "followUpUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"]
+                                    "followUpUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
+                                    "annotations": {}
                                 }
                             },
                             "choices": {},
@@ -195,6 +200,7 @@ knowledgeModelEntitiesDecoderTest =
                                     , advice = Nothing
                                     , metricMeasures = []
                                     , followUpUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
+                                    , annotations = Dict.empty
                                     }
                                   )
                                 ]
@@ -220,7 +226,8 @@ knowledgeModelEntitiesDecoderTest =
                             "choices": {
                                 "8a703cfa-450f-421a-8819-875619ccb54d": {
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                                    "label": "Choice"
+                                    "label": "Choice",
+                                    "annotations": {}
                                 }
                             },
                             "experts": {},
@@ -241,6 +248,7 @@ knowledgeModelEntitiesDecoderTest =
                                 [ ( "8a703cfa-450f-421a-8819-875619ccb54d"
                                   , { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                                     , label = "Choice"
+                                    , annotations = Dict.empty
                                     }
                                   )
                                 ]
@@ -267,7 +275,8 @@ knowledgeModelEntitiesDecoderTest =
                                 "8a703cfa-450f-421a-8819-875619ccb54d": {
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                                     "name": "John Example",
-                                    "email": "expert@example.com"
+                                    "email": "expert@example.com",
+                                    "annotations": {}
                                 }
                             },
                             "references": {},
@@ -289,6 +298,7 @@ knowledgeModelEntitiesDecoderTest =
                                   , { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                                     , name = "John Example"
                                     , email = "expert@example.com"
+                                    , annotations = Dict.empty
                                     }
                                   )
                                 ]
@@ -315,7 +325,8 @@ knowledgeModelEntitiesDecoderTest =
                                 "8a703cfa-450f-421a-8819-875619ccb54d": {
                                     "referenceType": "ResourcePageReference",
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                                    "shortUuid": "atq"
+                                    "shortUuid": "atq",
+                                    "annotations": {}
                                 }
                             },
                             "integrations": {},
@@ -337,6 +348,7 @@ knowledgeModelEntitiesDecoderTest =
                                   , ResourcePageReference
                                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                                         , shortUuid = "atq"
+                                        , annotations = Dict.empty
                                         }
                                   )
                                 ]
@@ -373,7 +385,8 @@ knowledgeModelEntitiesDecoderTest =
                                     "responseListField": "",
                                     "responseIdField": "id",
                                     "responseNameField": "title",
-                                    "itemUrl": "http://example.com/${id}"
+                                    "itemUrl": "http://example.com/${id}",
+                                    "annotations": {}
                                 }
                             },
                             "tags": {},
@@ -405,6 +418,7 @@ knowledgeModelEntitiesDecoderTest =
                                     , responseIdField = "id"
                                     , responseNameField = "title"
                                     , itemUrl = "http://example.com/${id}"
+                                    , annotations = Dict.empty
                                     }
                                   )
                                 ]
@@ -432,7 +446,8 @@ knowledgeModelEntitiesDecoderTest =
                                     "uuid": "b5b6ed23-2afa-11e9-b210-d663bd873d93",
                                     "name": "Science",
                                     "description": null,
-                                    "color": "#F5A623"
+                                    "color": "#F5A623",
+                                    "annotations": {}
                                 }
                             },
                             "metrics": {},
@@ -455,6 +470,7 @@ knowledgeModelEntitiesDecoderTest =
                                     , name = "Science"
                                     , description = Nothing
                                     , color = "#F5A623"
+                                    , annotations = Dict.empty
                                     }
                                   )
                                 ]

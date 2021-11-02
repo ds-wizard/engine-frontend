@@ -57,6 +57,7 @@ type alias KnowledgeModel =
     , metricUuids : List String
     , phaseUuids : List String
     , entities : KnowledgeModelEntities
+    , annotations : Dict String String
     }
 
 
@@ -74,6 +75,7 @@ decoder =
         |> D.required "metricUuids" (D.list D.string)
         |> D.required "phaseUuids" (D.list D.string)
         |> D.required "entities" KnowledgeModelEntities.decoder
+        |> D.required "annotations" (D.dict D.string)
 
 
 

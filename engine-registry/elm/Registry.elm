@@ -24,6 +24,7 @@ import Registry.Ports as Ports
 import Registry.Routing as Routing
 import Registry.Utils exposing (dispatch)
 import Shared.Locale exposing (l, lx)
+import Shared.Undraw as Undraw
 import Url
 
 
@@ -331,7 +332,7 @@ view model =
         content =
             if not model.appState.valid then
                 Page.illustratedMessage
-                    { image = "bug_fixing"
+                    { image = Undraw.bugFixing
                     , heading = l_ "view.invalid.heading" model.appState
                     , msg = l_ "view.invalid.msg" model.appState
                     }
@@ -370,7 +371,7 @@ view model =
 
                     NotFoundModel ->
                         Page.illustratedMessage
-                            { image = "page_not_found"
+                            { image = Undraw.pageNotFound
                             , heading = l_ "view.notFound.heading" model.appState
                             , msg = l_ "view.notFound.msg" model.appState
                             }

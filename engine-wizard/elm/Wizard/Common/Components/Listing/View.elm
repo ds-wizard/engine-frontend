@@ -25,6 +25,7 @@ import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lx)
+import Shared.Undraw as Undraw
 import Time exposing (Month(..))
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
@@ -58,6 +59,7 @@ lf_ =
 type alias ViewConfig a msg =
     { title : a -> Html msg
     , description : a -> Html msg
+    , itemAdditionalData : a -> Maybe (List (Html msg))
     , dropdownItems : a -> List (ListingDropdownItem msg)
     , textTitle : a -> String
     , emptyText : String
@@ -368,7 +370,7 @@ viewPagination appState cfg model page =
 viewEmpty : AppState -> ViewConfig a msg -> Html msg
 viewEmpty appState config =
     Page.illustratedMessage
-        { image = "no_data"
+        { image = Undraw.noData
         , heading = l_ "empty.heading" appState
         , lines = [ config.emptyText ]
         , cy = "listing-empty"
@@ -396,6 +398,9 @@ viewItem appState config index item =
             config.iconView
                 |> Maybe.andMap (Just item.item)
                 |> Maybe.withDefault (ItemIcon.view { text = config.textTitle item.item, image = Nothing })
+
+        additionalData =
+            Maybe.unwrap emptyNode (div [ class "additional-data" ]) (config.itemAdditionalData item.item)
     in
     div [ class "list-group-item", dataCy "listing_item" ]
         [ icon
@@ -412,6 +417,7 @@ viewItem appState config index item =
             [ viewUpdated appState config item.item ]
         , div [ class "actions" ]
             [ dropdown ]
+        , additionalData
         ]
 
 

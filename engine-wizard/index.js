@@ -26,7 +26,10 @@ axiosRetry(axios, {
 function getPdfSupport() {
     function hasAcrobatInstalled() {
         function getActiveXObject(name) {
-            try { return new ActiveXObject(name); } catch(e) {}
+            try {
+                return new ActiveXObject(name)
+            } catch (e) {
+            }
         }
 
         return getActiveXObject('AcroPDF.PDF') || getActiveXObject('PDF.PdfCtrl')
@@ -67,7 +70,16 @@ function clientUrl() {
     return window.location.protocol + '//' + window.location.host
 }
 
+function updateStyles(config) {
+    if (config.customization && config.customization.styleUrl) {
+        var style = document.querySelector('[rel="stylesheet"]')
+        style.setAttribute('href', config.customization.styleUrl)
+    }
+}
+
 function loadApp(config, provisioning) {
+    updateStyles(config)
+
     var app = program.Elm.Wizard.init({
         node: document.body,
         flags: {

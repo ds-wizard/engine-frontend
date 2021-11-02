@@ -4,8 +4,8 @@ module Wizard.Common.Html exposing
     , resizableTextarea
     )
 
-import Html exposing (Attribute, Html, a, div, img, p, text, textarea)
-import Html.Attributes exposing (class, rows, src, value)
+import Html exposing (Attribute, Html, a, div, p, text, textarea)
+import Html.Attributes exposing (class, rows, value)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (grammarlyAttributes, linkToAttributes)
 import Wizard.Routes as Routes
@@ -16,10 +16,10 @@ linkTo appState route attributes children =
     a (attributes ++ linkToAttributes appState route) children
 
 
-illustratedMessage : String -> String -> Html msg
+illustratedMessage : Html msg -> String -> Html msg
 illustratedMessage image message =
     div [ class "illustrated-message" ]
-        [ img [ src <| "/img/illustrations/undraw_" ++ image ++ ".svg" ] []
+        [ image
         , p [] [ text message ]
         ]
 

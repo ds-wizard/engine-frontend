@@ -13,6 +13,7 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (withNoCmd)
+import String.Extra as String
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -170,15 +171,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
 
 getSelectedPackageId : Model -> Maybe String
 getSelectedPackageId model =
-    let
-        emptyStringToNothing str =
-            if String.isEmpty str then
-                Nothing
-
-            else
-                Just str
-    in
-    Maybe.andThen emptyStringToNothing (Form.getFieldAsString "packageId" model.form).value
+    Maybe.andThen String.toMaybe (Form.getFieldAsString "packageId" model.form).value
 
 
 needFetchKnowledgeModelPreview : Model -> String -> Bool

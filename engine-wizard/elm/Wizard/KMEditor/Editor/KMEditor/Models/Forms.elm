@@ -60,8 +60,8 @@ module Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Error as Error exposing (ErrorValue(..))
-import Form.Field as Field
-import Form.Validate as Validate exposing (Validation)
+import Form.Field as Field exposing (Field)
+import Form.Validate as V exposing (Validation)
 import List.Extra as List
 import Set
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
@@ -79,26 +79,28 @@ import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError(..))
-import Shared.Form.Validate as Validate
+import Shared.Form.Validate as V
 import Shared.Locale exposing (lg)
 import String exposing (fromFloat)
 import Wizard.Common.AppState exposing (AppState)
 
 
 type alias KnowledgeModelForm =
-    {}
+    { annotations : List ( String, String ) }
 
 
 type alias MetricForm =
     { title : String
     , abbreviation : Maybe String
     , description : Maybe String
+    , annotations : List ( String, String )
     }
 
 
 type alias PhaseForm =
     { title : String
     , description : Maybe String
+    , annotations : List ( String, String )
     }
 
 
@@ -106,6 +108,7 @@ type alias TagForm =
     { name : String
     , description : Maybe String
     , color : String
+    , annotations : List ( String, String )
     }
 
 
@@ -121,12 +124,14 @@ type alias IntegrationForm =
     , responseIdField : String
     , responseNameField : String
     , itemUrl : String
+    , annotations : List ( String, String )
     }
 
 
 type alias ChapterForm =
     { title : String
     , text : Maybe String
+    , annotations : List ( String, String )
     }
 
 
@@ -146,6 +151,7 @@ type alias OptionsQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredPhase : Maybe String
+    , annotations : List ( String, String )
     }
 
 
@@ -153,6 +159,7 @@ type alias ListQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredPhase : Maybe String
+    , annotations : List ( String, String )
     }
 
 
@@ -161,6 +168,7 @@ type alias ValueQuestionFormData =
     , text : Maybe String
     , requiredPhase : Maybe String
     , valueType : QuestionValueType
+    , annotations : List ( String, String )
     }
 
 
@@ -170,6 +178,7 @@ type alias IntegrationQuestionFormData =
     , requiredPhase : Maybe String
     , integrationUuid : String
     , props : Dict String String
+    , annotations : List ( String, String )
     }
 
 
@@ -177,6 +186,7 @@ type alias MultiChoiceQuestionFormData =
     { title : String
     , text : Maybe String
     , requiredPhase : Maybe String
+    , annotations : List ( String, String )
     }
 
 
@@ -184,11 +194,13 @@ type alias AnswerForm =
     { label : String
     , advice : Maybe String
     , metricMeasures : List MetricMeasureForm
+    , annotations : List ( String, String )
     }
 
 
 type alias ChoiceForm =
     { label : String
+    , annotations : List ( String, String )
     }
 
 
@@ -206,9 +218,9 @@ type alias MetricMeasureValues =
 
 
 type ReferenceFormType
-    = ResourcePageReferenceFormType String
-    | URLReferenceFormType String String
-    | CrossReferenceFormType String String
+    = ResourcePageReferenceFormType String (List ( String, String ))
+    | URLReferenceFormType String String (List ( String, String ))
+    | CrossReferenceFormType String String (List ( String, String ))
 
 
 type alias ReferenceForm =
@@ -219,6 +231,7 @@ type alias ReferenceForm =
 type alias ExpertForm =
     { name : String
     , email : String
+    , annotations : List ( String, String )
     }
 
 
@@ -247,17 +260,18 @@ initKnowledgeModelFrom =
 
 knowledgeModelFormValidation : Validation FormError KnowledgeModelForm
 knowledgeModelFormValidation =
-    Validate.succeed KnowledgeModelForm
+    V.succeed KnowledgeModelForm
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 knowledgeModelFormInitials : KnowledgeModel -> List ( String, Field.Field )
-knowledgeModelFormInitials _ =
-    []
+knowledgeModelFormInitials knowledgeModel =
+    [ ( "annotations", annotationsField knowledgeModel.annotations ) ]
 
 
 updateKnowledgeModelWithForm : KnowledgeModel -> KnowledgeModelForm -> KnowledgeModel
-updateKnowledgeModelWithForm knowledgeModel _ =
-    knowledgeModel
+updateKnowledgeModelWithForm knowledgeModel knowledgeModelForm =
+    { knowledgeModel | annotations = Dict.fromList knowledgeModelForm.annotations }
 
 
 
@@ -271,17 +285,19 @@ initMetricForm =
 
 metricFormValidation : Validation FormError MetricForm
 metricFormValidation =
-    Validate.map3 MetricForm
-        (Validate.field "title" Validate.string)
-        (Validate.field "abbreviation" Validate.maybeString)
-        (Validate.field "description" Validate.maybeString)
+    V.succeed MetricForm
+        |> V.andMap (V.field "title" V.string)
+        |> V.andMap (V.field "abbreviation" V.maybeString)
+        |> V.andMap (V.field "description" V.maybeString)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 metricFormInitials : Metric -> List ( String, Field.Field )
 metricFormInitials metric =
     [ ( "title", Field.string metric.title )
-    , ( "abbreviation", Field.string (Maybe.withDefault "" metric.abbreviation) )
-    , ( "description", Field.string (Maybe.withDefault "" metric.description) )
+    , ( "abbreviation", Field.maybeString metric.abbreviation )
+    , ( "description", Field.maybeString metric.description )
+    , ( "annotations", annotationsField metric.annotations )
     ]
 
 
@@ -291,6 +307,7 @@ updateMetricWithForm metric metricForm =
         | title = metricForm.title
         , abbreviation = metricForm.abbreviation
         , description = metricForm.description
+        , annotations = Dict.fromList metricForm.annotations
     }
 
 
@@ -305,15 +322,17 @@ initPhaseForm =
 
 phaseFormValidation : Validation FormError PhaseForm
 phaseFormValidation =
-    Validate.map2 PhaseForm
-        (Validate.field "title" Validate.string)
-        (Validate.field "description" Validate.maybeString)
+    V.succeed PhaseForm
+        |> V.andMap (V.field "title" V.string)
+        |> V.andMap (V.field "description" V.maybeString)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 phaseFormInitials : Phase -> List ( String, Field.Field )
 phaseFormInitials phase =
     [ ( "title", Field.string phase.title )
-    , ( "description", Field.string (Maybe.withDefault "" phase.description) )
+    , ( "description", Field.maybeString phase.description )
+    , ( "annotations", annotationsField phase.annotations )
     ]
 
 
@@ -321,6 +340,7 @@ updatePhaseWithForm : Phase -> PhaseForm -> Phase
 updatePhaseWithForm phase phaseForm =
     { phase
         | title = phaseForm.title
+        , annotations = Dict.fromList phaseForm.annotations
     }
 
 
@@ -335,17 +355,19 @@ initTagForm =
 
 tagFormValidation : Validation FormError TagForm
 tagFormValidation =
-    Validate.map3 TagForm
-        (Validate.field "name" Validate.string)
-        (Validate.field "description" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-        (Validate.field "color" Validate.string)
+    V.succeed TagForm
+        |> V.andMap (V.field "name" V.string)
+        |> V.andMap (V.field "description" V.maybeString)
+        |> V.andMap (V.field "color" V.string)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 tagFormInitials : Tag -> List ( String, Field.Field )
 tagFormInitials tag =
     [ ( "name", Field.string tag.name )
-    , ( "description", Field.string (tag.description |> Maybe.withDefault "") )
+    , ( "description", Field.maybeString tag.description )
     , ( "color", Field.string tag.color )
+    , ( "annotations", annotationsField tag.annotations )
     ]
 
 
@@ -355,6 +377,7 @@ updateTagWithForm tag tagForm =
         | name = tagForm.name
         , description = tagForm.description
         , color = tagForm.color
+        , annotations = Dict.fromList tagForm.annotations
     }
 
 
@@ -369,18 +392,19 @@ initIntegrationForm integrations uuid =
 
 integrationFormValidation : List Integration -> String -> Validation FormError IntegrationForm
 integrationFormValidation integrations uuid =
-    Validate.map8 IntegrationForm
-        (Validate.field "id" (validateIntegrationId integrations uuid))
-        (Validate.field "name" Validate.string)
-        (Validate.field "logo" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
-        (Validate.field "requestMethod" Validate.string)
-        (Validate.field "requestUrl" Validate.string)
-        (Validate.field "requestHeaders" (Validate.list requestHeaderValidation))
-        (Validate.field "requestBody" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
-        (Validate.field "responseListField" (Validate.oneOf [ Validate.emptyString, Validate.string ]))
-        |> Validate.andMap (Validate.field "responseIdField" Validate.string)
-        |> Validate.andMap (Validate.field "responseNameField" Validate.string)
-        |> Validate.andMap (Validate.field "itemUrl" (Validate.oneOf [ Validate.string, Validate.emptyString ]))
+    V.succeed IntegrationForm
+        |> V.andMap (V.field "id" (validateIntegrationId integrations uuid))
+        |> V.andMap (V.field "name" V.string)
+        |> V.andMap (V.field "logo" V.optionalString)
+        |> V.andMap (V.field "requestMethod" V.string)
+        |> V.andMap (V.field "requestUrl" V.string)
+        |> V.andMap (V.field "requestHeaders" (V.list requestHeaderValidation))
+        |> V.andMap (V.field "requestBody" V.optionalString)
+        |> V.andMap (V.field "responseListField" V.optionalString)
+        |> V.andMap (V.field "responseIdField" V.string)
+        |> V.andMap (V.field "responseNameField" V.string)
+        |> V.andMap (V.field "itemUrl" V.optionalString)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 validateIntegrationId : List Integration -> String -> Validation FormError String
@@ -390,8 +414,8 @@ validateIntegrationId integrations uuid =
             List.filter (.uuid >> (/=) uuid) integrations
                 |> List.map .id
     in
-    Validate.string
-        |> Validate.andThen
+    V.string
+        |> V.andThen
             (\s _ ->
                 if List.member s existingUuids then
                     Err <| Error.value (CustomError IntegrationIdAlreadyUsed)
@@ -403,9 +427,9 @@ validateIntegrationId integrations uuid =
 
 requestHeaderValidation : Validation FormError ( String, String )
 requestHeaderValidation =
-    Validate.map2 Tuple.pair
-        (Validate.field "header" Validate.string)
-        (Validate.field "value" Validate.string)
+    V.map2 Tuple.pair
+        (V.field "header" V.string)
+        (V.field "value" V.string)
 
 
 integrationFormInitials : Integration -> List ( String, Field.Field )
@@ -432,6 +456,7 @@ integrationFormInitials integration =
     , ( "responseIdField", Field.string integration.responseIdField )
     , ( "responseNameField", Field.string integration.responseNameField )
     , ( "itemUrl", Field.string integration.itemUrl )
+    , ( "annotations", annotationsField integration.annotations )
     ]
 
 
@@ -449,6 +474,7 @@ updateIntegrationWithForm integration integrationForm =
         , responseIdField = integrationForm.responseIdField
         , responseNameField = integrationForm.responseNameField
         , itemUrl = integrationForm.itemUrl
+        , annotations = Dict.fromList integrationForm.annotations
     }
 
 
@@ -463,21 +489,27 @@ initChapterForm =
 
 chapterFormValidation : Validation FormError ChapterForm
 chapterFormValidation =
-    Validate.map2 ChapterForm
-        (Validate.field "title" Validate.string)
-        (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
+    V.succeed ChapterForm
+        |> V.andMap (V.field "title" V.string)
+        |> V.andMap (V.field "text" V.maybeString)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 chapterFormInitials : Chapter -> List ( String, Field.Field )
 chapterFormInitials chapter =
     [ ( "title", Field.string chapter.title )
-    , ( "text", Field.string <| Maybe.withDefault "" chapter.text )
+    , ( "text", Field.maybeString chapter.text )
+    , ( "annotations", annotationsField chapter.annotations )
     ]
 
 
 updateChapterWithForm : Chapter -> ChapterForm -> Chapter
 updateChapterWithForm chapter chapterForm =
-    { chapter | title = chapterForm.title, text = chapterForm.text }
+    { chapter
+        | title = chapterForm.title
+        , text = chapterForm.text
+        , annotations = Dict.fromList chapterForm.annotations
+    }
 
 
 
@@ -491,53 +523,58 @@ initQuestionForm integrations =
 
 questionFormValidation : List Integration -> Validation FormError QuestionForm
 questionFormValidation integrations =
-    Validate.succeed QuestionForm
-        |> Validate.andMap (Validate.field "questionType" Validate.string |> Validate.andThen (validateQuestion integrations))
+    V.succeed QuestionForm
+        |> V.andMap (V.field "questionType" V.string |> V.andThen (validateQuestion integrations))
 
 
 validateQuestion : List Integration -> String -> Validation FormError QuestionFormType
 validateQuestion integrations questionType =
     case questionType of
         "OptionsQuestion" ->
-            Validate.map3 OptionsQuestionFormData
-                (Validate.field "title" Validate.string)
-                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
-                |> Validate.map OptionsQuestionForm
+            V.succeed OptionsQuestionFormData
+                |> V.andMap (V.field "title" V.string)
+                |> V.andMap (V.field "text" V.maybeString)
+                |> V.andMap (V.field "requiredLevel" V.maybeString)
+                |> V.andMap (V.field "annotations" validateAnnotations)
+                |> V.map OptionsQuestionForm
 
         "ListQuestion" ->
-            Validate.map3 ListQuestionFormData
-                (Validate.field "title" Validate.string)
-                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
-                |> Validate.map ListQuestionForm
+            V.succeed ListQuestionFormData
+                |> V.andMap (V.field "title" V.string)
+                |> V.andMap (V.field "text" V.maybeString)
+                |> V.andMap (V.field "requiredLevel" V.maybeString)
+                |> V.andMap (V.field "annotations" validateAnnotations)
+                |> V.map ListQuestionForm
 
         "ValueQuestion" ->
-            Validate.map4 ValueQuestionFormData
-                (Validate.field "title" Validate.string)
-                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
-                (Validate.field "valueType" validateValueType)
-                |> Validate.map ValueQuestionForm
+            V.succeed ValueQuestionFormData
+                |> V.andMap (V.field "title" V.string)
+                |> V.andMap (V.field "text" V.maybeString)
+                |> V.andMap (V.field "requiredLevel" V.maybeString)
+                |> V.andMap (V.field "valueType" validateValueType)
+                |> V.andMap (V.field "annotations" validateAnnotations)
+                |> V.map ValueQuestionForm
 
         "IntegrationQuestion" ->
-            Validate.map5 IntegrationQuestionFormData
-                (Validate.field "title" Validate.string)
-                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
-                (Validate.field "integrationUuid" Validate.string)
-                (Validate.field "integrationUuid" Validate.string |> Validate.andThen (validateIntegrationProps integrations))
-                |> Validate.map IntegrationQuestionForm
+            V.succeed IntegrationQuestionFormData
+                |> V.andMap (V.field "title" V.string)
+                |> V.andMap (V.field "text" V.maybeString)
+                |> V.andMap (V.field "requiredLevel" V.maybeString)
+                |> V.andMap (V.field "integrationUuid" V.string)
+                |> V.andMap (V.field "integrationUuid" V.string |> V.andThen (validateIntegrationProps integrations))
+                |> V.andMap (V.field "annotations" validateAnnotations)
+                |> V.map IntegrationQuestionForm
 
         "MultiChoiceQuestion" ->
-            Validate.map3 MultiChoiceQuestionFormData
-                (Validate.field "title" Validate.string)
-                (Validate.field "text" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-                (Validate.field "requiredLevel" (Validate.maybe Validate.string))
-                |> Validate.map MultiChoiceQuestionForm
+            V.succeed MultiChoiceQuestionFormData
+                |> V.andMap (V.field "title" V.string)
+                |> V.andMap (V.field "text" V.maybeString)
+                |> V.andMap (V.field "requiredLevel" V.maybeString)
+                |> V.andMap (V.field "annotations" validateAnnotations)
+                |> V.map MultiChoiceQuestionForm
 
         _ ->
-            Validate.fail <| Error.value InvalidString
+            V.fail <| Error.value InvalidString
 
 
 validateIntegrationProps : List Integration -> String -> Validation FormError (Dict String String)
@@ -549,35 +586,35 @@ validateIntegrationProps integrations integration =
                 |> Maybe.withDefault []
 
         fold prop acc =
-            Validate.andThen
+            V.andThen
                 (\value ->
-                    Validate.map (\dict -> Dict.insert prop value dict) acc
+                    V.map (\dict -> Dict.insert prop value dict) acc
                 )
-                (Validate.field ("props-" ++ prop) (Validate.oneOf [ Validate.string, Validate.emptyString ]))
+                (V.field ("props-" ++ prop) V.optionalString)
     in
-    List.foldl fold (Validate.succeed Dict.empty) props
+    List.foldl fold (V.succeed Dict.empty) props
 
 
 validateValueType : Validation FormError QuestionValueType
 validateValueType =
-    Validate.string
-        |> Validate.andThen
+    V.string
+        |> V.andThen
             (\valueType ->
                 case valueType of
                     "StringValue" ->
-                        Validate.succeed StringQuestionValueType
+                        V.succeed StringQuestionValueType
 
                     "DateValue" ->
-                        Validate.succeed DateQuestionValueType
+                        V.succeed DateQuestionValueType
 
                     "NumberValue" ->
-                        Validate.succeed NumberQuestionValueType
+                        V.succeed NumberQuestionValueType
 
                     "TextValue" ->
-                        Validate.succeed TextQuestionValueType
+                        V.succeed TextQuestionValueType
 
                     _ ->
-                        Validate.fail <| Error.value InvalidString
+                        V.fail <| Error.value InvalidString
             )
 
 
@@ -612,10 +649,11 @@ questionFormInitials question =
     in
     [ ( "questionType", Field.string questionType )
     , ( "title", Field.string <| Question.getTitle question )
-    , ( "text", Field.string <| Maybe.withDefault "" <| Question.getText question )
-    , ( "requiredLevel", Field.string <| Maybe.withDefault "" <| Question.getRequiredPhaseUuid question )
+    , ( "text", Field.maybeString <| Question.getText question )
+    , ( "requiredLevel", Field.maybeString <| Question.getRequiredPhaseUuid question )
     , ( "valueType", Field.string <| valueTypeToString <| Maybe.withDefault StringQuestionValueType <| Question.getValueType question )
-    , ( "integrationUuid", Field.string <| Maybe.withDefault "" <| Question.getIntegrationUuid question )
+    , ( "integrationUuid", Field.maybeString <| Question.getIntegrationUuid question )
+    , ( "annotations", annotationsField <| Question.getAnnotations question )
     ]
         ++ props
 
@@ -632,6 +670,7 @@ updateQuestionWithForm question questionForm =
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
+                , annotations = Dict.fromList formData.annotations
                 }
                 { answerUuids = Question.getAnswerUuids question
                 }
@@ -645,6 +684,7 @@ updateQuestionWithForm question questionForm =
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
+                , annotations = Dict.fromList formData.annotations
                 }
                 { itemTemplateQuestionUuids = Question.getItemQuestionUuids question
                 }
@@ -658,6 +698,7 @@ updateQuestionWithForm question questionForm =
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
+                , annotations = Dict.fromList formData.annotations
                 }
                 { valueType = formData.valueType
                 }
@@ -671,6 +712,7 @@ updateQuestionWithForm question questionForm =
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
+                , annotations = Dict.fromList formData.annotations
                 }
                 { integrationUuid = formData.integrationUuid
                 , props = formData.props
@@ -685,6 +727,7 @@ updateQuestionWithForm question questionForm =
                 , tagUuids = Question.getTagUuids question
                 , referenceUuids = Question.getReferenceUuids question
                 , expertUuids = Question.getExpertUuids question
+                , annotations = Dict.fromList formData.annotations
                 }
                 { choiceUuids = Question.getChoiceUuids question
                 }
@@ -785,47 +828,48 @@ initAnswerForm metrics =
 
 answerFormValidation : List Metric -> Validation FormError AnswerForm
 answerFormValidation metrics =
-    Validate.map3 AnswerForm
-        (Validate.field "label" Validate.string)
-        (Validate.field "advice" (Validate.oneOf [ Validate.emptyString |> Validate.map (\_ -> Nothing), Validate.string |> Validate.map Just ]))
-        (validateMetricMeasures metrics)
+    V.succeed AnswerForm
+        |> V.andMap (V.field "label" V.string)
+        |> V.andMap (V.field "advice" V.maybeString)
+        |> V.andMap (validateMetricMeasures metrics)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 validateMetricMeasures : List Metric -> Validation FormError (List MetricMeasureForm)
 validateMetricMeasures metrics =
     let
         fold metric acc =
-            Validate.andThen
-                (\metricMeasureForm -> Validate.map (\list -> list ++ [ metricMeasureForm ]) acc)
+            V.andThen
+                (\metricMeasureForm -> V.map (\list -> list ++ [ metricMeasureForm ]) acc)
                 (metricMeasureValidation metric.uuid ("metricMeasure-" ++ metric.uuid ++ "-"))
     in
-    List.foldl fold (Validate.succeed []) metrics
+    List.foldl fold (V.succeed []) metrics
 
 
 metricMeasureValidation : String -> String -> Validation FormError MetricMeasureForm
 metricMeasureValidation metricUuid prefix =
-    Validate.map2 (MetricMeasureForm metricUuid)
-        (Validate.field (prefix ++ "enabled") Validate.bool)
-        (Validate.field (prefix ++ "enabled") Validate.bool |> Validate.andThen (validateMetricMeasureValues prefix))
+    V.succeed (MetricMeasureForm metricUuid)
+        |> V.andMap (V.field (prefix ++ "enabled") V.bool)
+        |> V.andMap (V.field (prefix ++ "enabled") V.bool |> V.andThen (validateMetricMeasureValues prefix))
 
 
 validateMetricMeasureValues : String -> Bool -> Validation FormError (Maybe MetricMeasureValues)
 validateMetricMeasureValues prefix enabled =
     if enabled then
-        Validate.succeed MetricMeasureValues
-            |> Validate.andMap (Validate.field (prefix ++ "weight") validateMeasureValue)
-            |> Validate.andMap (Validate.field (prefix ++ "measure") validateMeasureValue)
-            |> Validate.map Just
+        V.succeed MetricMeasureValues
+            |> V.andMap (V.field (prefix ++ "weight") validateMeasureValue)
+            |> V.andMap (V.field (prefix ++ "measure") validateMeasureValue)
+            |> V.map Just
 
     else
-        Validate.succeed Nothing
+        V.succeed Nothing
 
 
 validateMeasureValue : Validation e Float
 validateMeasureValue =
-    Validate.float
-        |> Validate.andThen (Validate.minFloat 0)
-        |> Validate.andThen (Validate.maxFloat 1)
+    V.float
+        |> V.andThen (V.minFloat 0)
+        |> V.andThen (V.maxFloat 1)
 
 
 answerFormInitials : List Metric -> Answer -> List ( String, Field.Field )
@@ -838,7 +882,8 @@ answerFormInitials metrics answer =
             List.foldr (++) [] (List.map metricToFormField metrics)
     in
     [ ( "label", Field.string answer.label )
-    , ( "advice", Field.string (answer.advice |> Maybe.withDefault "") )
+    , ( "advice", Field.maybeString answer.advice )
+    , ( "annotations", annotationsField answer.annotations )
     ]
         ++ metricMeasureFields
 
@@ -867,12 +912,8 @@ updateAnswerWithForm answer answerForm =
         | label = answerForm.label
         , advice = answerForm.advice
         , metricMeasures = getMetricMeasures answerForm
+        , annotations = Dict.fromList answerForm.annotations
     }
-
-
-updateChoiceWithForm : Choice -> ChoiceForm -> Choice
-updateChoiceWithForm choice choiceForm =
-    { choice | label = choiceForm.label }
 
 
 getMetricMeasures : AnswerForm -> List MetricMeasure
@@ -901,14 +942,24 @@ initChoiceForm =
 
 choiceFormValidation : Validation FormError ChoiceForm
 choiceFormValidation =
-    Validate.map ChoiceForm
-        (Validate.field "label" Validate.string)
+    V.succeed ChoiceForm
+        |> V.andMap (V.field "label" V.string)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 choiceFormInitials : Choice -> List ( String, Field.Field )
 choiceFormInitials choice =
     [ ( "label", Field.string choice.label )
+    , ( "annotations", annotationsField choice.annotations )
     ]
+
+
+updateChoiceWithForm : Choice -> ChoiceForm -> Choice
+updateChoiceWithForm choice choiceForm =
+    { choice
+        | label = choiceForm.label
+        , annotations = Dict.fromList choiceForm.annotations
+    }
 
 
 
@@ -922,29 +973,32 @@ initReferenceForm =
 
 referenceFormValidation : Validation FormError ReferenceForm
 referenceFormValidation =
-    Validate.succeed ReferenceForm
-        |> Validate.andMap (Validate.field "referenceType" Validate.string |> Validate.andThen validateReference)
+    V.succeed ReferenceForm
+        |> V.andMap (V.field "referenceType" V.string |> V.andThen validateReference)
 
 
 validateReference : String -> Validation FormError ReferenceFormType
 validateReference referenceType =
     case referenceType of
         "ResourcePageReference" ->
-            Validate.succeed ResourcePageReferenceFormType
-                |> Validate.andMap (Validate.field "shortUuid" Validate.string)
+            V.succeed ResourcePageReferenceFormType
+                |> V.andMap (V.field "shortUuid" V.string)
+                |> V.andMap (V.field "annotations" validateAnnotations)
 
         "URLReference" ->
-            Validate.succeed URLReferenceFormType
-                |> Validate.andMap (Validate.field "url" Validate.string)
-                |> Validate.andMap (Validate.field "label" Validate.string)
+            V.succeed URLReferenceFormType
+                |> V.andMap (V.field "url" V.string)
+                |> V.andMap (V.field "label" V.string)
+                |> V.andMap (V.field "annotations" validateAnnotations)
 
         "CrossReference" ->
-            Validate.succeed CrossReferenceFormType
-                |> Validate.andMap (Validate.field "targetUuid" Validate.uuidString)
-                |> Validate.andMap (Validate.field "description" Validate.string)
+            V.succeed CrossReferenceFormType
+                |> V.andMap (V.field "targetUuid" V.uuidString)
+                |> V.andMap (V.field "description" V.string)
+                |> V.andMap (V.field "annotations" validateAnnotations)
 
         _ ->
-            Validate.fail <| Error.value InvalidString
+            V.fail <| Error.value InvalidString
 
 
 referenceFormInitials : Reference -> List ( String, Field.Field )
@@ -953,42 +1007,48 @@ referenceFormInitials reference =
         ResourcePageReference data ->
             [ ( "referenceType", Field.string "ResourcePageReference" )
             , ( "shortUuid", Field.string data.shortUuid )
+            , ( "annotations", annotationsField data.annotations )
             ]
 
         URLReference data ->
             [ ( "referenceType", Field.string "URLReference" )
             , ( "url", Field.string data.url )
             , ( "label", Field.string data.label )
+            , ( "annotations", annotationsField data.annotations )
             ]
 
         CrossReference data ->
             [ ( "referenceType", Field.string "CrossReference" )
             , ( "targetUuid", Field.string data.targetUuid )
             , ( "description", Field.string data.description )
+            , ( "annotations", annotationsField data.annotations )
             ]
 
 
 updateReferenceWithForm : Reference -> ReferenceForm -> Reference
 updateReferenceWithForm reference referenceForm =
     case referenceForm.reference of
-        ResourcePageReferenceFormType shortUuid ->
+        ResourcePageReferenceFormType shortUuid annotations ->
             ResourcePageReference
                 { uuid = Reference.getUuid reference
                 , shortUuid = shortUuid
+                , annotations = Dict.fromList annotations
                 }
 
-        URLReferenceFormType url label ->
+        URLReferenceFormType url label annotations ->
             URLReference
                 { uuid = Reference.getUuid reference
                 , url = url
                 , label = label
+                , annotations = Dict.fromList annotations
                 }
 
-        CrossReferenceFormType targetUuid description ->
+        CrossReferenceFormType targetUuid description annotations ->
             CrossReference
                 { uuid = Reference.getUuid reference
                 , targetUuid = targetUuid
                 , description = description
+                , annotations = Dict.fromList annotations
                 }
 
 
@@ -1010,18 +1070,50 @@ initExpertForm =
 
 expertFormValidation : Validation FormError ExpertForm
 expertFormValidation =
-    Validate.map2 ExpertForm
-        (Validate.field "name" Validate.string)
-        (Validate.field "email" Validate.email)
+    V.succeed ExpertForm
+        |> V.andMap (V.field "name" V.string)
+        |> V.andMap (V.field "email" V.email)
+        |> V.andMap (V.field "annotations" validateAnnotations)
 
 
 expertFormInitials : Expert -> List ( String, Field.Field )
 expertFormInitials expert =
     [ ( "name", Field.string expert.name )
     , ( "email", Field.string expert.email )
+    , ( "annotations", annotationsField expert.annotations )
     ]
 
 
 updateExpertWithForm : Expert -> ExpertForm -> Expert
 updateExpertWithForm expert expertForm =
-    { expert | name = expertForm.name, email = expertForm.email }
+    { expert
+        | name = expertForm.name
+        , email = expertForm.email
+        , annotations = Dict.fromList expertForm.annotations
+    }
+
+
+
+{- Common -}
+
+
+validateAnnotations : Validation FormError (List ( String, String ))
+validateAnnotations =
+    V.list <|
+        V.map2 Tuple.pair
+            (V.field "key" V.string)
+            (V.field "value" V.string)
+
+
+annotationsField : Dict String String -> Field
+annotationsField annotations =
+    Field.list
+        (List.map
+            (\h ->
+                Field.group
+                    [ ( "key", Field.string <| Tuple.first h )
+                    , ( "value", Field.string <| Tuple.second h )
+                    ]
+            )
+            (Dict.toList annotations)
+        )

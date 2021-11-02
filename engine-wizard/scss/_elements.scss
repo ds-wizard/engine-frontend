@@ -20,6 +20,12 @@ a {
     }
 }
 
+svg.undraw {
+    color: $illustrations-color;
+    height: auto;
+    max-width: 100%;
+}
+
 label {
     font-weight: bold;
 }
@@ -58,6 +64,13 @@ label {
     p:last-child {
         margin-bottom: 0;
     }
+}
+
+.pre-error {
+    padding: 1.5rem;
+    color: theme-color-level("danger", $alert-color-level);
+    background: theme-color-level("danger", $alert-bg-level);
+    border-left: 5px solid theme-color-level("danger", $alert-border-level);
 }
 
 .btn {
@@ -271,6 +284,12 @@ code {
 }
 
 .badge {
+    &-with-icon {
+        .fa {
+            margin-right: 0.25rem;
+        }
+    }
+
     &-external-service {
         .fa {
             margin-right: 5px;

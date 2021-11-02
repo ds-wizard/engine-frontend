@@ -4,6 +4,7 @@ module Shared.Data.Event.EditAnswerEventData exposing
     , encode
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
@@ -17,6 +18,7 @@ type alias EditAnswerEventData =
     , advice : EventField (Maybe String)
     , metricMeasures : EventField (List MetricMeasure)
     , followUpUuids : EventField (List String)
+    , annotations : EventField (Dict String String)
     }
 
 
@@ -27,6 +29,7 @@ decoder =
         |> D.required "advice" (EventField.decoder (D.nullable D.string))
         |> D.required "metricMeasures" (EventField.decoder (D.list MetricMeasure.decoder))
         |> D.required "followUpUuids" (EventField.decoder (D.list D.string))
+        |> D.required "annotations" (EventField.decoder (D.dict D.string))
 
 
 encode : EditAnswerEventData -> List ( String, E.Value )
@@ -36,4 +39,5 @@ encode data =
     , ( "advice", EventField.encode (E.maybe E.string) data.advice )
     , ( "metricMeasures", EventField.encode (E.list MetricMeasure.encode) data.metricMeasures )
     , ( "followUpUuids", EventField.encode (E.list E.string) data.followUpUuids )
+    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
     ]

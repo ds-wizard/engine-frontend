@@ -5,12 +5,12 @@ module Wizard.Settings.Submission.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
-import Shared.Data.Template exposing (Template)
+import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Wizard.Settings.Generic.Model as GenericModel
 
 
 type alias Model =
-    { templates : ActionResult (List Template)
+    { templates : ActionResult (List TemplateSuggestion)
     , genericModel : GenericModel.Model EditableSubmissionConfig
     }
 

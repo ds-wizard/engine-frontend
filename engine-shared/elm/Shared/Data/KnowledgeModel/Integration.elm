@@ -23,6 +23,26 @@ type alias Integration =
     , responseIdField : String
     , responseNameField : String
     , itemUrl : String
+    , annotations : Dict String String
+    }
+
+
+new : String -> Integration
+new uuid =
+    { uuid = uuid
+    , id = ""
+    , name = "New Integration"
+    , props = []
+    , logo = ""
+    , requestMethod = "GET"
+    , requestUrl = "/"
+    , requestHeaders = Dict.empty
+    , requestBody = ""
+    , responseListField = ""
+    , responseIdField = "id"
+    , responseNameField = "name"
+    , itemUrl = ""
+    , annotations = Dict.empty
     }
 
 
@@ -42,21 +62,4 @@ decoder =
         |> D.required "responseIdField" D.string
         |> D.required "responseNameField" D.string
         |> D.required "itemUrl" D.string
-
-
-new : String -> Integration
-new uuid =
-    { uuid = uuid
-    , id = ""
-    , name = "New Integration"
-    , props = []
-    , logo = ""
-    , requestMethod = "GET"
-    , requestUrl = "/"
-    , requestHeaders = Dict.empty
-    , requestBody = ""
-    , responseListField = ""
-    , responseIdField = "id"
-    , responseNameField = "name"
-    , itemUrl = ""
-    }
+        |> D.required "annotations" (D.dict D.string)

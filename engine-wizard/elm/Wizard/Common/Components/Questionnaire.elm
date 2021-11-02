@@ -60,6 +60,7 @@ import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import String exposing (fromInt)
 import Time
@@ -247,6 +248,7 @@ type alias Config msg =
 type alias FeaturesConfig =
     { feedbackEnabled : Bool
     , todosEnabled : Bool
+    , commentsEnabled : Bool
     , readonly : Bool
     , toolbarEnabled : Bool
     }
@@ -1042,7 +1044,7 @@ viewQuestionnaireRightPanelTodos appState model =
     in
     if List.isEmpty todos then
         div [ class "todos todos-empty" ] <|
-            [ illustratedMessage "feeling_happy" (l_ "todos.completed" appState) ]
+            [ illustratedMessage Undraw.feelingHappy (l_ "todos.completed" appState) ]
 
     else
         div [ class "todos" ] <|
@@ -2080,7 +2082,7 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
 
 
 viewCommentAction : AppState -> Config msg -> Model -> List String -> Html Msg
-viewCommentAction appState _ model path =
+viewCommentAction appState cfg model path =
     let
         pathString =
             pathToString path
@@ -2123,7 +2125,7 @@ viewCommentAction appState _ model path =
                 , text <| String.fromInt commentCount ++ " comments"
                 ]
     in
-    if Feature.projectCommentAdd appState model.questionnaire then
+    if cfg.features.commentsEnabled && Feature.projectCommentAdd appState model.questionnaire then
         if commentCount > 0 then
             commentButtonWithComments
 

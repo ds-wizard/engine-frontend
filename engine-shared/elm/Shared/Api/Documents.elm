@@ -1,4 +1,11 @@
-module Shared.Api.Documents exposing (deleteDocument, downloadDocumentUrl, getDocuments, getSubmissionServices, postDocument)
+module Shared.Api.Documents exposing
+    ( deleteDocument
+    , downloadDocumentUrl
+    , getDocuments
+    , getSubmissionServices
+    , postDocument
+    , postSubmission
+    )
 
 import Json.Decode as D
 import Json.Encode as E
@@ -8,6 +15,7 @@ import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet)
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.SubmissionService as SubmissionService exposing (SubmissionService)
 import Uuid exposing (Uuid)
 
@@ -44,3 +52,14 @@ getSubmissionServices documentId =
 downloadDocumentUrl : String -> AbstractAppState a -> String
 downloadDocumentUrl uuid appState =
     appState.apiUrl ++ "/documents/" ++ uuid ++ "/download"
+
+
+postSubmission : String -> String -> AbstractAppState a -> ToMsg Submission msg -> Cmd msg
+postSubmission serviceId documentUuid =
+    let
+        body =
+            E.object
+                [ ( "serviceId", E.string serviceId )
+                ]
+    in
+    jwtFetch ("/documents/" ++ documentUuid ++ "/submissions") Submission.decoder body

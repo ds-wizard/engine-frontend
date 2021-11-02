@@ -56,7 +56,7 @@ import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (AnswerForm, Chapte
 
 
 createEditKnowledgeModelEvent : KnowledgeModelForm -> KMEditorData -> Seed -> ( Event, Seed )
-createEditKnowledgeModelEvent _ editorData =
+createEditKnowledgeModelEvent form editorData =
     let
         data =
             { chapterUuids = EventField.create editorData.chapters.list editorData.chapters.dirty
@@ -64,6 +64,7 @@ createEditKnowledgeModelEvent _ editorData =
             , phaseUuids = EventField.create editorData.phases.list editorData.phases.dirty
             , tagUuids = EventField.create editorData.tags.list editorData.tags.dirty
             , integrationUuids = EventField.create editorData.integrations.list editorData.integrations.dirty
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.knowledgeModel.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditKnowledgeModelEvent data) (Uuid.toString editorData.knowledgeModel.uuid) editorData.parentUuid
@@ -75,6 +76,7 @@ createAddChapterEvent form editorData =
         data =
             { title = form.title
             , text = form.text
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddChapterEvent data) editorData.chapter.uuid editorData.parentUuid
@@ -87,6 +89,7 @@ createEditChapterEvent form editorData =
             { title = EventField.create form.title (editorData.chapter.title /= form.title)
             , text = EventField.create form.text (editorData.chapter.text /= form.text)
             , questionUuids = EventField.create editorData.questions.list editorData.questions.dirty
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.chapter.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditChapterEvent data) editorData.chapter.uuid editorData.parentUuid
@@ -104,6 +107,7 @@ createAddMetricEvent form editorData =
             { title = form.title
             , abbreviation = form.abbreviation
             , description = form.description
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddMetricEvent data) editorData.metric.uuid editorData.parentUuid
@@ -116,6 +120,7 @@ createEditMetricEvent form editorData =
             { title = EventField.create form.title (editorData.metric.title /= form.title)
             , abbreviation = EventField.create form.abbreviation (editorData.metric.abbreviation /= form.abbreviation)
             , description = EventField.create form.description (editorData.metric.description /= form.description)
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.metric.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditMetricEvent data) editorData.metric.uuid editorData.parentUuid
@@ -132,6 +137,7 @@ createAddPhaseEvent form editorData =
         data =
             { title = form.title
             , description = form.description
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddPhaseEvent data) editorData.phase.uuid editorData.parentUuid
@@ -143,6 +149,7 @@ createEditPhaseEvent form editorData =
         data =
             { title = EventField.create form.title (editorData.phase.title /= form.title)
             , description = EventField.create form.description (editorData.phase.description /= form.description)
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.phase.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditPhaseEvent data) editorData.phase.uuid editorData.parentUuid
@@ -160,6 +167,7 @@ createAddTagEvent form editorData =
             { name = form.name
             , description = form.description
             , color = form.color
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddTagEvent data) editorData.tag.uuid editorData.parentUuid
@@ -172,6 +180,7 @@ createEditTagEvent form editorData =
             { name = EventField.create form.name (editorData.tag.name /= form.name)
             , description = EventField.create form.description (editorData.tag.description /= form.description)
             , color = EventField.create form.color (editorData.tag.color /= form.color)
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.tag.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditTagEvent data) editorData.tag.uuid editorData.parentUuid
@@ -198,6 +207,7 @@ createAddIntegrationEvent form editorData =
             , responseIdField = form.responseIdField
             , responseNameField = form.responseNameField
             , itemUrl = form.itemUrl
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddIntegrationEvent data) editorData.integration.uuid editorData.parentUuid
@@ -222,6 +232,7 @@ createEditIntegrationEvent form editorData =
             , responseIdField = EventField.create form.responseIdField (editorData.integration.responseIdField /= form.responseIdField)
             , responseNameField = EventField.create form.responseNameField (editorData.integration.responseNameField /= form.responseNameField)
             , itemUrl = EventField.create form.itemUrl (editorData.integration.itemUrl /= form.itemUrl)
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.integration.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditIntegrationEvent data) editorData.integration.uuid editorData.parentUuid
@@ -243,6 +254,7 @@ createAddQuestionEvent form editorData =
                         , text = formData.text
                         , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
+                        , annotations = Dict.fromList formData.annotations
                         }
 
                 ListQuestionForm formData ->
@@ -251,6 +263,7 @@ createAddQuestionEvent form editorData =
                         , text = formData.text
                         , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
+                        , annotations = Dict.fromList formData.annotations
                         }
 
                 ValueQuestionForm formData ->
@@ -260,6 +273,7 @@ createAddQuestionEvent form editorData =
                         , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
                         , valueType = formData.valueType
+                        , annotations = Dict.fromList formData.annotations
                         }
 
                 IntegrationQuestionForm formData ->
@@ -270,6 +284,7 @@ createAddQuestionEvent form editorData =
                         , tagUuids = editorData.tagUuids
                         , integrationUuid = formData.integrationUuid
                         , props = formData.props
+                        , annotations = Dict.fromList formData.annotations
                         }
 
                 MultiChoiceQuestionForm formData ->
@@ -278,6 +293,7 @@ createAddQuestionEvent form editorData =
                         , text = formData.text
                         , requiredPhaseUuid = formData.requiredPhase
                         , tagUuids = editorData.tagUuids
+                        , annotations = Dict.fromList formData.annotations
                         }
     in
     createEvent (AddQuestionEvent data) (Question.getUuid editorData.question) editorData.parentUuid
@@ -297,6 +313,7 @@ createEditQuestionEvent form editorData =
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
                         , answerUuids = EventField.create editorData.answers.list editorData.answers.dirty
+                        , annotations = EventField.create (Dict.fromList formData.annotations) (Question.getAnnotations editorData.question /= Dict.fromList formData.annotations)
                         }
 
                 ListQuestionForm formData ->
@@ -308,6 +325,7 @@ createEditQuestionEvent form editorData =
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
                         , itemTemplateQuestionUuids = EventField.create editorData.itemTemplateQuestions.list editorData.itemTemplateQuestions.dirty
+                        , annotations = EventField.create (Dict.fromList formData.annotations) (Question.getAnnotations editorData.question /= Dict.fromList formData.annotations)
                         }
 
                 ValueQuestionForm formData ->
@@ -319,6 +337,7 @@ createEditQuestionEvent form editorData =
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
                         , valueType = EventField.create formData.valueType (Question.getValueType editorData.question /= Just formData.valueType)
+                        , annotations = EventField.create (Dict.fromList formData.annotations) (Question.getAnnotations editorData.question /= Dict.fromList formData.annotations)
                         }
 
                 IntegrationQuestionForm formData ->
@@ -331,6 +350,7 @@ createEditQuestionEvent form editorData =
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
                         , integrationUuid = EventField.create formData.integrationUuid (Question.getIntegrationUuid editorData.question /= Just formData.integrationUuid)
                         , props = EventField.create formData.props (Question.getProps editorData.question /= Just formData.props)
+                        , annotations = EventField.create (Dict.fromList formData.annotations) (Question.getAnnotations editorData.question /= Dict.fromList formData.annotations)
                         }
 
                 MultiChoiceQuestionForm formData ->
@@ -342,6 +362,7 @@ createEditQuestionEvent form editorData =
                         , referenceUuids = EventField.create editorData.references.list editorData.references.dirty
                         , expertUuids = EventField.create editorData.experts.list editorData.experts.dirty
                         , choiceUuids = EventField.create editorData.choices.list editorData.choices.dirty
+                        , annotations = EventField.create (Dict.fromList formData.annotations) (Question.getAnnotations editorData.question /= Dict.fromList formData.annotations)
                         }
     in
     createEvent (EditQuestionEvent data) (Question.getUuid editorData.question) editorData.parentUuid
@@ -359,6 +380,7 @@ createAddAnswerEvent form editorData =
             { label = form.label
             , advice = form.advice
             , metricMeasures = getMetricMeasures form
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddAnswerEvent data) editorData.answer.uuid editorData.parentUuid
@@ -375,6 +397,7 @@ createEditAnswerEvent form editorData =
             , advice = EventField.create form.advice (editorData.answer.advice /= form.advice)
             , metricMeasures = EventField.create metricMeasures (editorData.answer.metricMeasures /= metricMeasures)
             , followUpUuids = EventField.create editorData.followUps.list editorData.followUps.dirty
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.answer.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditAnswerEvent data) editorData.answer.uuid editorData.parentUuid
@@ -390,6 +413,7 @@ createAddChoiceEvent form editorData =
     let
         data =
             { label = form.label
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddChoiceEvent data) editorData.choice.uuid editorData.parentUuid
@@ -400,6 +424,7 @@ createEditChoiceEvent form editorData =
     let
         data =
             { label = EventField.create form.label (editorData.choice.label /= form.label)
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.choice.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditChoiceEvent data) editorData.choice.uuid editorData.parentUuid
@@ -415,21 +440,24 @@ createAddReferenceEvent form editorData =
     let
         data =
             case form.reference of
-                ResourcePageReferenceFormType shortUuid ->
+                ResourcePageReferenceFormType shortUuid annotations ->
                     AddReferenceResourcePageEvent
                         { shortUuid = shortUuid
+                        , annotations = Dict.fromList annotations
                         }
 
-                URLReferenceFormType url label ->
+                URLReferenceFormType url label annotations ->
                     AddReferenceURLEvent
                         { url = url
                         , label = label
+                        , annotations = Dict.fromList annotations
                         }
 
-                CrossReferenceFormType targetUuid description ->
+                CrossReferenceFormType targetUuid description annotations ->
                     AddReferenceCrossEvent
                         { targetUuid = targetUuid
                         , description = description
+                        , annotations = Dict.fromList annotations
                         }
     in
     createEvent (AddReferenceEvent data) (Reference.getUuid editorData.reference) editorData.parentUuid
@@ -476,21 +504,24 @@ createEditReferenceEvent form editorData =
 
         data =
             case form.reference of
-                ResourcePageReferenceFormType shortUuid ->
+                ResourcePageReferenceFormType shortUuid annotations ->
                     EditReferenceResourcePageEvent
                         { shortUuid = resourcePageEventField .shortUuid shortUuid
+                        , annotations = EventField.create (Dict.fromList annotations) (Reference.getAnnotations editorData.reference /= Dict.fromList annotations)
                         }
 
-                URLReferenceFormType url label ->
+                URLReferenceFormType url label annotations ->
                     EditReferenceURLEvent
                         { url = urlEventField .url url
                         , label = urlEventField .label label
+                        , annotations = EventField.create (Dict.fromList annotations) (Reference.getAnnotations editorData.reference /= Dict.fromList annotations)
                         }
 
-                CrossReferenceFormType targetUuid description ->
+                CrossReferenceFormType targetUuid description annotations ->
                     EditReferenceCrossEvent
                         { targetUuid = crossEventField .targetUuid targetUuid
                         , description = crossEventField .description description
+                        , annotations = EventField.create (Dict.fromList annotations) (Reference.getAnnotations editorData.reference /= Dict.fromList annotations)
                         }
     in
     createEvent (EditReferenceEvent data) (Reference.getUuid editorData.reference) editorData.parentUuid
@@ -507,6 +538,7 @@ createAddExpertEvent form editorData =
         data =
             { name = form.name
             , email = form.email
+            , annotations = Dict.fromList form.annotations
             }
     in
     createEvent (AddExpertEvent data) editorData.expert.uuid editorData.parentUuid
@@ -518,6 +550,7 @@ createEditExpertEvent form editorData =
         data =
             { name = EventField.create form.name (editorData.expert.name /= form.name)
             , email = EventField.create form.email (editorData.expert.email /= form.email)
+            , annotations = EventField.create (Dict.fromList form.annotations) (editorData.expert.annotations /= Dict.fromList form.annotations)
             }
     in
     createEvent (EditExpertEvent data) editorData.expert.uuid editorData.parentUuid

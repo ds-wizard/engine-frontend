@@ -30,6 +30,33 @@
     .list-group-item {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
+
+        .additional-data {
+            flex-basis: 100%;
+            padding-left: 3.5rem;
+            margin-top: 1rem;
+
+            .timestamp {
+                color: $gray-500;
+                font-style: italic;
+            }
+
+            .fragment-user {
+                display: flex;
+                align-items: center;
+
+                .ItemIcon {
+                    margin-right: 0.5rem;
+                }
+            }
+
+            .external-link {
+                .fa {
+                    margin-left: 0.25rem;
+                }
+            }
+        }
 
         &:hover {
             background: $gray-200;

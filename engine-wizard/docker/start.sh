@@ -33,16 +33,6 @@ if [[ $(find /src/scss/customizations -name "*.scss" | xargs cat | wc -l) -gt 0 
   # regenerate styles
   echo '$fa-font-path: "";' >> /src/scss/customizations/_variables-app.scss
   find /usr/share/nginx/html -name "*.css" -exec sassc -I /src -t compressed /src/scss/main.scss {} \;
-
-  # replace primary color in illustrations if defined
-  appIllustrationsColor=$(sed -ne "s/\\\$illustrations-color: *#\([0-9a-fA-F]*\);/\1/p" /src/scss/customizations/_variables-app.scss)
-  customIllustrationsColor=$(sed -ne "s/\\\$illustrations-color: *#\([0-9a-fA-F]*\);/\1/p" /src/scss/customizations/_variables.scss)
-  illustrationsColor=${customIllustrationsColor:=$appIllustrationsColor}
-
-  if [[ ! -z "$illustrationsColor" ]]; then
-    defaultIllustrationsColor="4285f4"
-    find /usr/share/nginx/html/img/illustrations -name "*.svg" | xargs sed -i -e 's/'"$defaultIllustrationsColor"'/'"$illustrationsColor"'/g'
-  fi
 fi
 
 

@@ -2,7 +2,7 @@ module Wizard.Settings.LookAndFeel.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, a, div, img, label)
+import Html exposing (Html, a, div, hr, img, label)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick)
 import Markdown
@@ -11,11 +11,16 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
+import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
-import Wizard.Settings.Generic.Msgs exposing (Msg)
-import Wizard.Settings.Generic.View as GenericView
+import Wizard.Common.View.FormResult as FormResult
+import Wizard.Common.View.Page as Page
+import Wizard.Settings.Generic.Msgs as GenericMsgs
+import Wizard.Settings.LookAndFeel.LogoUploadModal as LogoUploadModal
 import Wizard.Settings.LookAndFeel.Models exposing (Model)
+import Wizard.Settings.LookAndFeel.Msgs exposing (Msg(..))
 
 
 l_ : String -> AppState -> String
@@ -29,24 +34,90 @@ lx_ =
 
 
 view : AppState -> Model -> Html Msg
-view =
-    GenericView.view viewProps
+view appState model =
+    Page.actionResultView appState (viewForm appState model) model.genericModel.config
 
 
-viewProps : GenericView.ViewProps LookAndFeelConfig
-viewProps =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
-    , formView = formView
-    }
+viewForm : AppState -> Model -> config -> Html Msg
+viewForm appState model _ =
+    div [ wideDetailClass "LookAndFeel" ]
+        [ Page.header (l_ "title" appState) []
+        , div []
+            [ FormResult.errorOnlyView appState model.genericModel.savingConfig
+            , formView appState model.genericModel.form
+            , div [ class "mt-5" ]
+                [ ActionButton.buttonWithAttrs appState
+                    (ActionButton.ButtonWithAttrsConfig (l_ "save" appState)
+                        model.genericModel.savingConfig
+                        (GenericMsg <| GenericMsgs.FormMsg Form.Submit)
+                        False
+                        [ dataCy "form_submit" ]
+                    )
+                ]
+            ]
+        , Html.map LogoUploadModalMsg <| LogoUploadModal.view appState model.logoUploadModalModel
+        ]
 
 
-formView : AppState -> Form FormError LookAndFeelConfig -> Html Form.Msg
+
+--colorOptionsDarker : List String
+--colorOptionsDarker =
+--    [ "#16A085"
+--    , "#27AE60"
+--    , "#2980B9"
+--    , "#8E44AD"
+--    , "#F39C12"
+--    , "#D35400"
+--    , "#C0392B"
+--    ]
+--
+--
+--colorOptionsLighter : List String
+--colorOptionsLighter =
+--    [ "#1ABC9C"
+--    , "#2ECC71"
+--    , "#3498DB"
+--    , "#9B59B6"
+--    , "#F1C40F"
+--    , "#E67E22"
+--    , "#E74C3C"
+--    ]
+
+
+formView : AppState -> Form FormError LookAndFeelConfig -> Html Msg
 formView appState form =
+    let
+        formWrap =
+            Html.map (GenericMsg << GenericMsgs.FormMsg)
+
+        --    inputMsg field color =
+        --        Form.Input field Form.Text (Field.String color)
+        --
+        --    colorButtonView field color =
+        --        div [ class "color", style "background" color, onClick (inputMsg field color) ] []
+        --
+        --    colorPicker colorOptions field =
+        --        div [ class "color-picker" ] (List.map (colorButtonView field) colorOptions)
+        --logoPreview =
+        --    div []
+        --        [ div
+        --            [ class "LogoPreview" ]
+        --            [ span [ class "LogoPreview__Logo LogoPreview__Logo--Original" ] []
+        --            , text (LookAndFeelConfig.getAppTitleShort appState.config.lookAndFeel)
+        --            ]
+        --        , div [ class "mt-2" ]
+        --            [ button
+        --                [ class "btn btn-secondary"
+        --                , onClick (LogoUploadModalMsg (LogoUploadModal.SetOpen True))
+        --                ]
+        --                [ text "Change" ]
+        --            ]
+        --        ]
+    in
     div []
         [ div [ class "row" ]
             [ div [ class "col-8" ]
-                [ FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitle ] appState form "appTitle" (l_ "form.appTitle" appState)
+                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitle ] appState form "appTitle" (l_ "form.appTitle" appState)
                 , FormExtra.mdAfter (l_ "form.appTitle.desc" appState)
                 ]
             , div
@@ -56,13 +127,39 @@ formView appState form =
             ]
         , div [ class "row mt-5" ]
             [ div [ class "col-8" ]
-                [ FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitleShort ] appState form "appTitleShort" (l_ "form.appTitleShort" appState)
+                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitleShort ] appState form "appTitleShort" (l_ "form.appTitleShort" appState)
                 , FormExtra.mdAfter (l_ "form.appTitleShort.desc" appState)
                 ]
             , div [ class "col-4" ]
                 [ img [ class "settings-img", src "/img/settings/app-title-short.png" ] []
                 ]
             ]
+
+        --, div [ class "row mt-5" ]
+        --    [ div [ class "col-8" ]
+        --        [ FormGroup.plainGroup logoPreview "Logo"
+        --        , FormExtra.mdAfter "Logo is used next to the application name in the menu. It is recommended to use a square image."
+        --        ]
+        --    , div [ class "col-4" ]
+        --        [ img [ class "settings-img", src "/img/settings/logo.png" ] []
+        --        ]
+        --    ]
+        --, div [ class "row mt-5" ]
+        --    [ div [ class "col-6" ]
+        --        [ formWrap <| FormGroup.input appState form "stylePrimaryColor" "Primary Color"
+        --        , colorPicker colorOptionsDarker "stylePrimaryColor"
+        --        ]
+        --    , div [ class "col-6" ]
+        --        [ formWrap <| FormGroup.input appState form "styleIllustrationsColor" "Illustrations Color"
+        --        , colorPicker colorOptionsLighter "styleIllustrationsColor"
+        --        ]
+        --    ]
+        --, div [ class "row mt-5" ]
+        --    [ div [ class "col-12" ]
+        --        [ viewAppPreview form
+        --        ]
+        --    ]
+        , hr [] []
         , div [ class "input-table mt-5" ]
             [ div [ class "row" ]
                 [ div [ class "col-8" ]
@@ -75,15 +172,16 @@ formView appState form =
             , div [ class "row mt-3" ]
                 [ div [ class "col" ]
                     [ customMenuLinksHeader appState form
-                    , FormGroup.list appState (customMenuLinkItemView appState) form "customMenuLinks" ""
+                    , formWrap <| FormGroup.list appState (customMenuLinkItemView appState) form "customMenuLinks" ""
                     ]
                 ]
             ]
+        , hr [] []
         , div [ class "row mt-5" ]
             [ div [ class "col-12" ]
                 [ label [] [ lx_ "form.loginInfo" appState ] ]
             , div [ class "col-8" ]
-                [ FormGroup.markdownEditor appState form "loginInfo" ""
+                [ formWrap <| FormGroup.markdownEditor appState form "loginInfo" ""
                 , FormExtra.mdAfter (l_ "form.loginInfo.desc" appState)
                 ]
             , div [ class "col-4" ]
@@ -91,6 +189,56 @@ formView appState form =
                 ]
             ]
         ]
+
+
+
+--viewAppPreview : Form FormError LookAndFeelConfig -> Html Form.Msg
+--viewAppPreview form =
+--    let
+--        toBackgroundColorStyle color =
+--            "background-color: " ++ color
+--
+--        toBackgroundAndBorderColorStyle color =
+--            "background-color: " ++ color ++ "; border-color: " ++ color
+--
+--        toColorStyle color =
+--            "color: " ++ color
+--
+--        appTitleValue =
+--            (Form.getFieldAsString "appTitleShort" form).value
+--                |> Maybe.andThen String.toMaybe
+--                |> Maybe.withDefault LookAndFeelConfig.defaultAppTitleShort
+--
+--        stylePrimaryColorValue =
+--            (Form.getFieldAsString "stylePrimaryColor" form).value
+--                |> Maybe.andThen String.toMaybe
+--
+--        primaryColorBackgroundStyle =
+--            stylePrimaryColorValue
+--                |> Maybe.unwrap "" toBackgroundColorStyle
+--                |> attribute "style"
+--
+--        primaryColorBackgroundAndBorderStyle =
+--            stylePrimaryColorValue
+--                |> Maybe.unwrap "" toBackgroundAndBorderColorStyle
+--                |> attribute "style"
+--
+--        illustrationsColorStyle =
+--            (Form.getFieldAsString "styleIllustrationsColor" form).value
+--                |> Maybe.andThen String.toMaybe
+--                |> Maybe.unwrap "" toColorStyle
+--                |> attribute "style"
+--    in
+--    div [ class "AppPreview" ]
+--        [ div [ class "AppPreview__Panel", primaryColorBackgroundStyle ]
+--            [ a [ class "logo" ] [ span [ class "logo-full" ] [ text appTitleValue ] ]
+--            ]
+--        , div [ class "AppPreview__Content" ]
+--            [ Undraw.teachingWithAttrs [ illustrationsColorStyle ]
+--            , button [ class "btn btn-primary btn-with-loader mt-4", primaryColorBackgroundAndBorderStyle ] [ text "Button" ]
+--            ]
+--        , div [ class "AppPreview__Overlay" ] []
+--        ]
 
 
 customMenuLinksHeader : AppState -> Form FormError LookAndFeelConfig -> Html msg
