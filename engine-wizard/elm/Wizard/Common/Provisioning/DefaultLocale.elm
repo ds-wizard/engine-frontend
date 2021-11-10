@@ -418,6 +418,8 @@ locale =
                , ( "Wizard.Common.Components.Questionnaire.commentsOverview.empty", "Click the %s icon to add new comments to a question." )
                , ( "Wizard.Common.Components.Questionnaire.list.add", "Add" )
                , ( "Wizard.Common.Components.Questionnaire.list.noAnswers", "There are no answers yet." )
+               , ( "Wizard.Common.Components.Questionnaire.integrationWidget.select", "Select" )
+               , ( "Wizard.Common.Components.Questionnaire.integrationWidget.edit", "Edit" )
                , ( "Wizard.Common.Components.Questionnaire.question.answeredBy", "Answered %s by %s." )
                , ( "Wizard.Common.Components.Questionnaire.question.answeredBy.anonymous", "anonymous user" )
                , ( "Wizard.Common.Components.Questionnaire.todoAction.add", "Add TODO" )
