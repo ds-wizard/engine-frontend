@@ -14,6 +14,7 @@ var registerScrollPorts = require('./ports/scroll')
 var registerSessionPorts = require('./ports/session')
 var registerCopyPorts = require('../engine-shared/ports/copy')
 var registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
+var registerIntegrationWidgetPorts = require('./ports/integrationWidget')
 
 
 axiosRetry(axios, {
@@ -106,6 +107,7 @@ function loadApp(config, provisioning) {
     registerScrollPorts(app)
     registerSessionPorts(app)
     registerWebsocketPorts(app)
+    registerIntegrationWidgetPorts(app)
     cookies.registerCookiePorts(app)
 
     cookies.init()

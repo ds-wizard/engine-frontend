@@ -27,9 +27,10 @@ import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, textarea, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, title, type_, value)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, readonly, selected, src, target, title, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
 import Json.Decode as D
+import Json.Encode as E
 import List.Extra as List
 import Markdown
 import Maybe.Extra as Maybe
@@ -75,6 +76,7 @@ import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
+import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Tag as Tag
 import Wizard.Common.View.UserIcon as UserIcon
@@ -295,6 +297,8 @@ type Msg
     | SetReply String Reply
     | ClearReply String
     | AddItem String (List String)
+    | OpenIntegrationWidget String String
+    | GotIntegrationWidgetValue E.Value
     | SetLabels String (List String)
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
@@ -380,6 +384,28 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         AddItem path originalItems ->
             handleAddItem appState wrapMsg model path originalItems
+
+        OpenIntegrationWidget path requestUrl ->
+            let
+                data =
+                    E.object [ ( "path", E.string path ), ( "requestUrl", E.string requestUrl ) ]
+            in
+            withSeed ( model, Ports.openIntegrationWidget data )
+
+        GotIntegrationWidgetValue data ->
+            case D.decodeValue IntegrationWidgetValue.decoder data of
+                Ok value ->
+                    let
+                        setReplyMsg =
+                            SetReply value.path <|
+                                createReply appState <|
+                                    IntegrationReply <|
+                                        IntegrationType value.id value.value
+                    in
+                    withSeed ( model, dispatch setReplyMsg )
+
+                Err _ ->
+                    wrap model
 
         SetLabels path value ->
             wrap <| setLabels path value model
@@ -688,6 +714,7 @@ subscriptions model =
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
+         , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
          ]
             ++ commentDropdownSubs
         )
@@ -1580,8 +1607,17 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 ValueQuestion _ _ ->
                     ( viewQuestionValue appState cfg model newPath question, [] )
 
-                IntegrationQuestion _ _ ->
-                    ( viewQuestionIntegration appState cfg model newPath question, [] )
+                IntegrationQuestion _ data ->
+                    let
+                        integrationId =
+                            Maybe.unwrap "" .id <|
+                                KnowledgeModel.getIntegration data.integrationUuid model.questionnaire.knowledgeModel
+                    in
+                    if String.startsWith "_widget." integrationId then
+                        ( viewQuestionIntegrationWidget appState cfg model newPath question, [] )
+
+                    else
+                        ( viewQuestionIntegration appState cfg model newPath question, [] )
 
                 MultiChoiceQuestion _ _ ->
                     ( viewQuestionMultiChoice appState cfg model newPath question, [] )
@@ -1733,7 +1769,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
     )
 
 
-viewQuestionOptionsClearButton : AppState -> Config msg -> List String -> Maybe Answer -> Html Msg
+viewQuestionOptionsClearButton : AppState -> Config msg -> List String -> Maybe a -> Html Msg
 viewQuestionOptionsClearButton appState cfg path mbSelectedAnswer =
     if cfg.features.readonly || Maybe.isNothing mbSelectedAnswer then
         emptyNode
@@ -1889,6 +1925,59 @@ viewQuestionValue appState cfg model path question =
                     input (type_ "text" :: defaultAttrs ++ extraAttrs) []
     in
     div [] [ inputView ]
+
+
+viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
+viewQuestionIntegrationWidget appState cfg model path question =
+    let
+        integrationUuid =
+            Maybe.withDefault "" <| Question.getIntegrationUuid question
+
+        mbIntegration =
+            KnowledgeModel.getIntegration integrationUuid model.questionnaire.knowledgeModel
+
+        mbReplyValue =
+            Maybe.map .value <|
+                Dict.get (pathToString path) model.questionnaire.replies
+
+        responseView =
+            mbReplyValue
+                |> Maybe.map (ReplyValue.getStringReply >> valueToHtml)
+                |> Maybe.withDefault emptyNode
+
+        valueToHtml v =
+            input [ class "form-control mr-1", type_ "text", readonly True, value v ] []
+    in
+    div [ class "question-integration-answer" ]
+        [ div [ class "d-flex" ]
+            [ responseView
+            , viewQuestionIntegrationWidgetSelectButton appState cfg path mbIntegration mbReplyValue
+            ]
+        , viewQuestionIntegrationReplyExtra mbIntegration mbReplyValue
+        , viewQuestionOptionsClearButton appState cfg path mbReplyValue
+        ]
+
+
+viewQuestionIntegrationWidgetSelectButton : AppState -> Config msg -> List String -> Maybe Integration -> Maybe ReplyValue -> Html Msg
+viewQuestionIntegrationWidgetSelectButton appState cfg path mbIntegration mbReplyValue =
+    let
+        buttonText =
+            if Maybe.isJust mbReplyValue then
+                l_ "integrationWidget.edit" appState
+
+            else
+                l_ "integrationWidget.select" appState
+    in
+    case ( cfg.features.readonly, mbIntegration ) of
+        ( False, Just integration ) ->
+            button
+                [ onClick (OpenIntegrationWidget (pathToString path) integration.requestUrl)
+                , class "btn btn-secondary"
+                ]
+                [ text buttonText ]
+
+        _ ->
+            emptyNode
 
 
 viewQuestionIntegration : AppState -> Config msg -> Model -> List String -> Question -> Html Msg

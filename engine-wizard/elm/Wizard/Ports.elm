@@ -8,6 +8,8 @@ port module Wizard.Ports exposing
     , drawMetricsChart
     , fileContentRead
     , fileSelected
+    , gotIntegrationWidgetValue
+    , openIntegrationWidget
     , refresh
     , scrollIntoView
     , scrollToTop
@@ -86,3 +88,13 @@ port drawMetricsChart : E.Value -> Cmd msg
 
 
 port acceptCookies : () -> Cmd msg
+
+
+
+-- Integration Widget
+
+
+port openIntegrationWidget : E.Value -> Cmd msg
+
+
+port gotIntegrationWidgetValue : (E.Value -> msg) -> Sub msg
