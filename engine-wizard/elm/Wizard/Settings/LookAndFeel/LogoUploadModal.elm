@@ -9,7 +9,7 @@ module Wizard.Settings.LookAndFeel.LogoUploadModal exposing
 import ActionResult exposing (ActionResult(..))
 import File exposing (File)
 import File.Select as Select
-import Html exposing (Html, button, div, h5, p, span, text)
+import Html exposing (Html, a, button, div, h5, hr, p, span, text)
 import Html.Attributes exposing (class, classList, disabled, style)
 import Html.Events exposing (onClick, preventDefaultOn)
 import Json.Decode as D
@@ -41,7 +41,8 @@ type alias Model =
     , preview : Maybe String
     , file : Maybe File
     , open : Bool
-    , uploading : ActionResult ()
+    , submitting : ActionResult ()
+    , defaultLogo : Bool
     }
 
 
@@ -51,7 +52,8 @@ initialModel =
     , preview = Nothing
     , file = Nothing
     , open = False
-    , uploading = Unset
+    , submitting = Unset
+    , defaultLogo = False
     }
 
 
@@ -63,7 +65,9 @@ type Msg
     | GotPreview String
     | SetOpen Bool
     | Upload
-    | UploadComplete (Result ApiError ())
+    | Delete
+    | UseDefault
+    | SubmitComplete (Result ApiError ())
 
 
 update : (Msg -> msg) -> Cmd msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
@@ -101,36 +105,57 @@ update wrapMsg reloadCmd msg appState model =
                     let
                         cmd =
                             Cmd.map wrapMsg <|
-                                ConfigsApi.uploadLogo file appState UploadComplete
+                                ConfigsApi.uploadLogo file appState SubmitComplete
                     in
-                    ( { model | uploading = Loading }, cmd )
+                    ( { model | submitting = Loading }, cmd )
 
                 Nothing ->
                     ( model, Cmd.none )
 
-        UploadComplete result ->
+        UseDefault ->
+            ( { model | defaultLogo = True }, Cmd.none )
+
+        Delete ->
+            let
+                cmd =
+                    Cmd.map wrapMsg <|
+                        ConfigsApi.deleteLogo appState SubmitComplete
+            in
+            ( { model | submitting = Loading }, cmd )
+
+        SubmitComplete result ->
             case result of
                 Ok _ ->
                     ( model, reloadCmd )
 
                 Err error ->
-                    ( { model | uploading = ApiError.toActionResult appState (lg "apiError.config.app.uploadLogoError" appState) error }, Cmd.none )
+                    ( { model | submitting = ApiError.toActionResult appState (lg "apiError.config.app.uploadLogoError" appState) error }, Cmd.none )
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
     let
+        submitButtonMsg =
+            if model.defaultLogo then
+                Delete
+
+            else
+                Upload
+
+        submitButtonDisabled =
+            not model.defaultLogo && Maybe.isNothing model.preview
+
         submitButton =
             ActionButton.buttonWithAttrs appState
                 { label = l_ "save" appState
-                , result = model.uploading
-                , msg = Upload
+                , result = model.submitting
+                , msg = submitButtonMsg
                 , dangerous = False
-                , attrs = [ disabled (Maybe.isNothing model.preview) ]
+                , attrs = [ disabled submitButtonDisabled ]
                 }
 
         cancelButton =
-            button [ class "btn btn-secondary", onClick (SetOpen False), disabled (ActionResult.isLoading model.uploading) ]
+            button [ class "btn btn-secondary", onClick (SetOpen False), disabled (ActionResult.isLoading model.submitting) ]
                 [ lx_ "cancel" appState ]
 
         viewPreview url =
@@ -140,11 +165,18 @@ view appState model =
                 , text (LookAndFeelConfig.getAppTitleShort appState.config.lookAndFeel)
                 ]
 
+        preview =
+            if model.defaultLogo then
+                viewPreview "/img/logo.svg"
+
+            else
+                Maybe.unwrap emptyNode viewPreview model.preview
+
         content =
             [ div [ class "modal-header" ]
                 [ h5 [ class "modal-title" ] [ lx_ "title" appState ] ]
             , div [ class "modal-body logo-upload" ]
-                [ FormResult.errorOnlyView appState model.uploading
+                [ FormResult.errorOnlyView appState model.submitting
                 , div
                     [ class "dropzone"
                     , classList [ ( "active", model.hover ) ]
@@ -156,7 +188,11 @@ view appState model =
                     [ button [ onClick Pick, class "btn btn-secondary" ] [ lx_ "chooseLogo" appState ]
                     , p [] [ lx_ "dropHere" appState ]
                     ]
-                , Maybe.unwrap emptyNode viewPreview model.preview
+                , hr [] []
+                , p [ class "text-center" ]
+                    [ a [ onClick UseDefault ] [ lx_ "useDefault" appState ]
+                    ]
+                , preview
                 ]
             , div [ class "modal-footer" ]
                 [ submitButton

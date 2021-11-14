@@ -21,7 +21,7 @@ updates:
       - "dependencies"
 
   - package-ecosystem: "npm"
-    directory: "/style-builder"
+    directory: "/wizard-style-builder"
     schedule:
       interval: "weekly"
     target-branch: "develop"
