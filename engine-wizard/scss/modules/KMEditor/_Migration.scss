@@ -13,6 +13,29 @@
         margin-top: 50px;
     }
 
+    dl {
+        dt, dd {
+            border-left: 5px solid $gray-400;
+            background: $gray-200;
+            padding-left: .5rem;
+
+            &.ins {
+                border-color: $text-inserted-color;
+                background: $text-inserted-bg;
+            }
+
+            &.del {
+                border-color: $text-deleted-color;
+                background: $text-delete-bg;
+            }
+
+            &.edited {
+                border-color: $text-edited-color;
+                background: $text-edited-bg;
+            }
+        }
+    }
+
     .diff-tree {
         border-left: 1px solid $gray-400;
 
