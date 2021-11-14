@@ -14,8 +14,8 @@ jobs:
         node-version: [14.14.0]
 
     env:
-      PUBLIC_IMAGE: datastewardshipwizard/dsw-style-builder
-      PRIVATE_IMAGE: ${{ secrets.PRIVATE_REGISTRY_URL }}/dsw-style-builder
+      PUBLIC_IMAGE: datastewardshipwizard/style-builder
+      PRIVATE_IMAGE: ${{ secrets.PRIVATE_REGISTRY_URL }}/style-builder
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       PRIVATE_REGISTRY_URL: ${{ secrets.PRIVATE_REGISTRY_URL }}
       TAG_DEVELOP: develop
