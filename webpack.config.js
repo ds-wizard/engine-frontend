@@ -87,7 +87,11 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({
-            template: `${component}/index.ejs`
+            template: `${component}/index.ejs`,
+            scriptLoading: 'blocking',
+            minimizeOptions: {
+                minifyCss: true
+            }
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[chunkhash].css'

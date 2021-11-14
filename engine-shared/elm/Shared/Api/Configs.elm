@@ -1,5 +1,6 @@
 module Shared.Api.Configs exposing
-    ( getAppConfig
+    ( deleteLogo
+    , getAppConfig
     , putAppConfig
     , uploadLogo
     )
@@ -7,7 +8,7 @@ module Shared.Api.Configs exposing
 import File exposing (File)
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtGet, jwtPostFile, jwtPut)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostFile, jwtPut)
 import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
 
 
@@ -24,3 +25,8 @@ putAppConfig =
 uploadLogo : File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 uploadLogo =
     jwtPostFile "/configs/app/logo"
+
+
+deleteLogo : AbstractAppState a -> ToMsg () msg -> Cmd msg
+deleteLogo =
+    jwtDelete "/configs/app/logo"

@@ -18,6 +18,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use(compression())
 }
 
+const replaceAll = (string, searchValue, replaceValue) => string.split(searchValue).join(replaceValue)
 
 const createTempDir = () => fs.promises.mkdtemp(path.join(os.tmpdir(), 'src-'))
 
@@ -68,15 +69,26 @@ const renderSass = (folder) => new Promise((resolve, reject) => {
         if (err) {
             reject(err)
         } else {
-            const css = result.css.toString().replace(/\/\*[^*]*\*+([^\/][^*]*\*+)*\//, '')
+            const stripComment = (string) => string.replace(/\/\*[^*]*\*+([^\/][^*]*\*+)*\//, '')
+            const css = stripComment(stripComment(result.css.toString()))
             resolve(css)
         }
     })
 })
 
+const postProcessCss = (options) => (css) => new Promise((resolve) => {
+    if (options.clientUrl) {
+        const clientUrl = options.clientUrl.replace(/\/$/, '')
+        const cssWithFonts = replaceAll(css, 'url("~@fortawesome/fontawesome-free/webfonts/', `url("${clientUrl}/`)
+        const cssWitLogoUrl = replaceAll(cssWithFonts, 'url(../img/logo.svg', `url(${clientUrl}/img/logo.svg`)
+        resolve(cssWitLogoUrl)
+    } else {
+        resolve(css)
+    }
+})
+
 const cleanTempDir = (folder) => {
-    fs.rmdir(folder, {recursive: true}, () => {
-    })
+    fs.rmdir(folder, {recursive: true}, () => {})
 }
 
 
@@ -89,6 +101,7 @@ app.post('/simple', (req, res) => {
         .then(copySourceFiles)
         .then(createVariables(req.body))
         .then(renderSass)
+        .then(postProcessCss(req.body))
         .then((result) => {
             res.setHeader('content-type', 'text/css')
             res.send(result)

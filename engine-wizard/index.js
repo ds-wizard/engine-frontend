@@ -16,6 +16,7 @@ var registerCopyPorts = require('../engine-shared/ports/copy')
 var registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
 var registerIntegrationWidgetPorts = require('./ports/integrationWidget')
 
+var defaultStyleUrl
 
 axiosRetry(axios, {
     retries: 3,
@@ -71,49 +72,57 @@ function clientUrl() {
     return window.location.protocol + '//' + window.location.host
 }
 
-function updateStyles(config) {
-    if (config.customization && config.customization.styleUrl) {
-        var style = document.querySelector('[rel="stylesheet"]')
-        style.setAttribute('href', config.customization.styleUrl)
-    }
+function setStyles(config, cb) {
+    var styleUrl = config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
+    var link = document.createElement('link')
+    link.setAttribute("rel", "stylesheet")
+    link.setAttribute("type", "text/css")
+    link.onload = cb
+    link.setAttribute("href", styleUrl)
+    document.getElementsByTagName("head")[0].appendChild(link)
 }
 
 function loadApp(config, provisioning) {
-    updateStyles(config)
+    setStyles(config, function () {
 
-    var app = program.Elm.Wizard.init({
-        node: document.body,
-        flags: {
-            seed: Math.floor(Math.random() * 0xFFFFFFFF),
-            session: JSON.parse(localStorage.session || null),
-            apiUrl: apiUrl(),
-            clientUrl: clientUrl(),
-            config: config,
-            provisioning: provisioning,
-            localProvisioning: localProvisioning(),
-            navigator: {
-                pdf: getPdfSupport()
-            },
-            gaEnabled: cookies.getGaEnabled(),
-            cookieConsent: cookies.getCookieConsent()
-        }
+        var app = program.Elm.Wizard.init({
+            node: document.body,
+            flags: {
+                seed: Math.floor(Math.random() * 0xFFFFFFFF),
+                session: JSON.parse(localStorage.session || null),
+                apiUrl: apiUrl(),
+                clientUrl: clientUrl(),
+                config: config,
+                provisioning: provisioning,
+                localProvisioning: localProvisioning(),
+                navigator: {
+                    pdf: getPdfSupport()
+                },
+                gaEnabled: cookies.getGaEnabled(),
+                cookieConsent: cookies.getCookieConsent()
+            }
+        })
+
+        registerChartPorts(app)
+        registerCopyPorts(app)
+        registerImportPorts(app)
+        registerPageUnloadPorts(app)
+        registerRefreshPorts(app)
+        registerScrollPorts(app)
+        registerSessionPorts(app)
+        registerWebsocketPorts(app)
+        registerIntegrationWidgetPorts(app)
+        cookies.registerCookiePorts(app)
+
+        cookies.init()
     })
-
-    registerChartPorts(app)
-    registerCopyPorts(app)
-    registerImportPorts(app)
-    registerPageUnloadPorts(app)
-    registerRefreshPorts(app)
-    registerScrollPorts(app)
-    registerSessionPorts(app)
-    registerWebsocketPorts(app)
-    registerIntegrationWidgetPorts(app)
-    cookies.registerCookiePorts(app)
-
-    cookies.init()
 }
 
 window.onload = function () {
+    var style = document.querySelector('[rel="stylesheet"]')
+    defaultStyleUrl = style.getAttribute('href')
+    style.remove()
+
     var promises = [axios.get(configUrl())]
     var hasProvisioning = !!provisioningUrl()
     if (hasProvisioning) {
@@ -127,6 +136,8 @@ window.onload = function () {
             loadApp(config, provisioning)
         })
         .catch(function (err) {
-            document.body.innerHTML = bootstrapErrorHTML()
+            setStyles({}, function () {
+                document.body.innerHTML = bootstrapErrorHTML()
+            })
         })
 }

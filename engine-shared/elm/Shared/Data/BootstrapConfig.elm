@@ -8,6 +8,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Shared.Data.BootstrapConfig.DashboardConfig as DashboardConfig exposing (DashboardConfig)
+import Shared.Data.BootstrapConfig.FeatureConfig as FeatureConfig exposing (FeatureConfig)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
@@ -27,6 +28,7 @@ type alias BootstrapConfig =
     , questionnaire : QuestionnaireConfig
     , submission : SubmissionConfig
     , template : TemplateConfig
+    , feature : FeatureConfig
     }
 
 
@@ -41,6 +43,7 @@ default =
     , questionnaire = QuestionnaireConfig.default
     , submission = SubmissionConfig.default
     , template = TemplateConfig.default
+    , feature = FeatureConfig.default
     }
 
 
@@ -56,3 +59,4 @@ decoder =
         |> D.required "questionnaire" QuestionnaireConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder
         |> D.required "template" TemplateConfig.decoder
+        |> D.required "feature" FeatureConfig.decoder
