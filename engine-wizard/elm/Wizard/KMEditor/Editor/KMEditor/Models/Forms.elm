@@ -121,9 +121,9 @@ type alias IntegrationForm =
     , requestHeaders : List ( String, String )
     , requestBody : String
     , responseListField : String
-    , responseIdField : String
-    , responseNameField : String
-    , itemUrl : String
+    , responseItemId : String
+    , responseItemTemplate : String
+    , responseItemUrl : String
     , annotations : List ( String, String )
     }
 
@@ -401,9 +401,9 @@ integrationFormValidation integrations uuid =
         |> V.andMap (V.field "requestHeaders" (V.list requestHeaderValidation))
         |> V.andMap (V.field "requestBody" V.optionalString)
         |> V.andMap (V.field "responseListField" V.optionalString)
-        |> V.andMap (V.field "responseIdField" V.string)
-        |> V.andMap (V.field "responseNameField" V.string)
-        |> V.andMap (V.field "itemUrl" V.optionalString)
+        |> V.andMap (V.field "responseItemId" V.string)
+        |> V.andMap (V.field "responseItemTemplate" V.string)
+        |> V.andMap (V.field "responseItemUrl" V.string)
         |> V.andMap (V.field "annotations" validateAnnotations)
 
 
@@ -453,9 +453,9 @@ integrationFormInitials integration =
       )
     , ( "requestBody", Field.string integration.requestBody )
     , ( "responseListField", Field.string integration.responseListField )
-    , ( "responseIdField", Field.string integration.responseIdField )
-    , ( "responseNameField", Field.string integration.responseNameField )
-    , ( "itemUrl", Field.string integration.itemUrl )
+    , ( "responseItemId", Field.string integration.responseItemId )
+    , ( "responseItemTemplate", Field.string integration.responseItemTemplate )
+    , ( "responseItemUrl", Field.string integration.responseItemUrl )
     , ( "annotations", annotationsField integration.annotations )
     ]
 
@@ -471,9 +471,9 @@ updateIntegrationWithForm integration integrationForm =
         , requestHeaders = Dict.fromList integrationForm.requestHeaders
         , requestBody = integrationForm.requestBody
         , responseListField = integrationForm.responseListField
-        , responseIdField = integrationForm.responseIdField
-        , responseNameField = integrationForm.responseNameField
-        , itemUrl = integrationForm.itemUrl
+        , responseItemId = integrationForm.responseItemId
+        , responseItemTemplate = integrationForm.responseItemTemplate
+        , responseItemUrl = integrationForm.responseItemUrl
         , annotations = Dict.fromList integrationForm.annotations
     }
 

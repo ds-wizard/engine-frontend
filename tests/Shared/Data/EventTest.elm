@@ -613,9 +613,9 @@ addIntegrationEvent =
         , requestHeaders = Dict.fromList [ ( "X_SEARCH", "full" ), ( "X_USER", "user" ) ]
         , requestBody = "{}"
         , responseListField = "items"
-        , responseIdField = "uuid"
-        , responseNameField = "title"
-        , itemUrl = "http://example.com/${id}"
+        , responseItemId = "uuid"
+        , responseItemTemplate = "title"
+        , responseItemUrl = "http://example.com/${id}"
         , annotations = Dict.empty
         }
         { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
@@ -677,15 +677,15 @@ editIntegrationEvent =
             { changed = False
             , value = Nothing
             }
-        , responseIdField =
+        , responseItemId =
             { changed = False
             , value = Nothing
             }
-        , responseNameField =
+        , responseItemTemplate =
             { changed = True
             , value = Just "title"
             }
-        , itemUrl =
+        , responseItemUrl =
             { changed = True
             , value = Just "http://example.com/${id}"
             }

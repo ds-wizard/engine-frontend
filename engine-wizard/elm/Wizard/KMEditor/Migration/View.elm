@@ -652,26 +652,26 @@ viewAddIntegrationDiff appState event =
                     [ lg "integration.id" appState
                     , lg "integration.name" appState
                     , lg "integration.props" appState
-                    , lg "integration.itemUrl" appState
+                    , lg "integration.response.itemUrl" appState
                     , lg "integration.request.method" appState
                     , lg "integration.request.url" appState
                     , lg "integration.request.headers" appState
                     , lg "integration.request.body" appState
                     , lg "integration.response.listField" appState
                     , lg "integration.response.idField" appState
-                    , lg "integration.response.nameField" appState
+                    , lg "integration.response.itemTemplate" appState
                     ]
                     [ event.id
                     , event.name
                     , String.join ", " event.props
-                    , event.itemUrl
+                    , event.responseItemUrl
                     , event.requestMethod
                     , event.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList event.requestHeaders
                     , event.requestBody
                     , event.responseListField
-                    , event.responseIdField
-                    , event.responseNameField
+                    , event.responseItemId
+                    , event.responseItemTemplate
                     ]
 
         annotationsDiff =
@@ -689,38 +689,38 @@ viewEditIntegrationDiff appState event integration =
                     [ lg "integration.id" appState
                     , lg "integration.name" appState
                     , lg "integration.props" appState
-                    , lg "integration.itemUrl" appState
+                    , lg "integration.response.itemUrl" appState
                     , lg "integration.request.method" appState
                     , lg "integration.request.url" appState
                     , lg "integration.request.headers" appState
                     , lg "integration.request.body" appState
                     , lg "integration.response.listField" appState
                     , lg "integration.response.idField" appState
-                    , lg "integration.response.nameField" appState
+                    , lg "integration.response.itemTemplate" appState
                     ]
                     [ integration.id
                     , integration.name
                     , String.join ", " integration.props
-                    , integration.itemUrl
+                    , integration.responseItemUrl
                     , integration.requestMethod
                     , integration.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
                     , integration.requestBody
                     , integration.responseListField
-                    , integration.responseIdField
-                    , integration.responseNameField
+                    , integration.responseItemId
+                    , integration.responseItemTemplate
                     ]
                     [ EventField.getValueWithDefault event.id integration.id
                     , EventField.getValueWithDefault event.name integration.name
                     , String.join ", " <| EventField.getValueWithDefault event.props integration.props
-                    , EventField.getValueWithDefault event.itemUrl integration.itemUrl
+                    , EventField.getValueWithDefault event.responseItemUrl integration.responseItemUrl
                     , EventField.getValueWithDefault event.requestMethod integration.requestMethod
                     , EventField.getValueWithDefault event.requestUrl integration.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList <| EventField.getValueWithDefault event.requestHeaders integration.requestHeaders
                     , EventField.getValueWithDefault event.requestBody integration.requestBody
                     , EventField.getValueWithDefault event.responseListField integration.responseListField
-                    , EventField.getValueWithDefault event.responseIdField integration.responseIdField
-                    , EventField.getValueWithDefault event.responseNameField integration.responseNameField
+                    , EventField.getValueWithDefault event.responseItemId integration.responseItemId
+                    , EventField.getValueWithDefault event.responseItemTemplate integration.responseItemTemplate
                     ]
 
         annotationsDiff =
@@ -738,26 +738,26 @@ viewDeleteIntegrationDiff appState integration =
                     [ lg "integration.id" appState
                     , lg "integration.name" appState
                     , lg "integration.props" appState
-                    , lg "integration.itemUrl" appState
+                    , lg "integration.response.itemUrl" appState
                     , lg "integration.request.method" appState
                     , lg "integration.request.url" appState
                     , lg "integration.request.headers" appState
                     , lg "integration.request.body" appState
                     , lg "integration.response.listField" appState
                     , lg "integration.response.idField" appState
-                    , lg "integration.response.nameField" appState
+                    , lg "integration.response.itemTemplate" appState
                     ]
                     [ integration.id
                     , integration.name
                     , String.join ", " integration.props
-                    , integration.itemUrl
+                    , integration.responseItemUrl
                     , integration.requestMethod
                     , integration.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
                     , integration.requestBody
                     , integration.responseListField
-                    , integration.responseIdField
-                    , integration.responseNameField
+                    , integration.responseItemId
+                    , integration.responseItemTemplate
                     ]
 
         annotationsDiff =

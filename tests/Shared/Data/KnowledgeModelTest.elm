@@ -231,9 +231,9 @@ knowledgeModelDecoderTest =
                                         "requestHeaders": {"X_USER": "user"},
                                         "requestBody": "{}",
                                         "responseListField": "items",
-                                        "responseIdField": "id",
-                                        "responseNameField": "title",
-                                        "itemUrl": "http://example.com/${id}",
+                                        "responseItemId": "{{id}}",
+                                        "responseItemTemplate": "{{title}}",
+                                        "responseItemUrl": "http://example.com/${id}",
                                         "annotations": {}
                                     }
                                 },
@@ -272,9 +272,9 @@ knowledgeModelDecoderTest =
                                         , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
                                         , requestBody = "{}"
                                         , responseListField = "items"
-                                        , responseIdField = "id"
-                                        , responseNameField = "title"
-                                        , itemUrl = "http://example.com/${id}"
+                                        , responseItemId = "{{id}}"
+                                        , responseItemTemplate = "{{title}}"
+                                        , responseItemUrl = "http://example.com/${id}"
                                         , annotations = Dict.empty
                                         }
                                       )

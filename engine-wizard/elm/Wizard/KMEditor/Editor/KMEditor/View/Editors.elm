@@ -8,6 +8,7 @@ import Html exposing (Html, a, button, div, h3, label, p, small, text)
 import Html.Attributes exposing (class, classList, placeholder, rows, title)
 import Html.Events exposing (onClick)
 import List.Extra as List
+import Markdown
 import Reorderable
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
@@ -20,6 +21,7 @@ import ValueList
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
+import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -342,18 +344,23 @@ integrationEditorView appState _ editorData =
         form =
             div []
                 [ FormGroup.input appState editorData.form "id" (lg "integration.id" appState) |> Html.map formMsg
+                , FormExtra.mdAfter (l_ "integrationEditor.form.id.description" appState)
                 , FormGroup.input appState editorData.form "name" (lg "integration.name" appState) |> Html.map formMsg
+                , FormExtra.mdAfter (l_ "integrationEditor.form.name.description" appState)
                 , FormGroup.input appState editorData.form "logo" (lg "integration.logo" appState) |> Html.map formMsg
-                , div [ class "form-group" ]
-                    [ label [] [ lgx "integration.props" appState ]
-                    , ValueList.view editorData.props |> Html.map propsListMsg
-                    ]
-                , FormGroup.input appState editorData.form "itemUrl" (lg "integration.itemUrl" appState) |> Html.map formMsg
+                , FormExtra.mdAfter (l_ "integrationEditor.form.logo.description" appState)
                 , div [ class "card card-border-light mb-5" ]
                     [ div [ class "card-header" ] [ lgx "integration.request" appState ]
                     , div [ class "card-body" ]
-                        [ FormGroup.select appState httpMethodOptions editorData.form "requestMethod" (lg "integration.request.method" appState) |> Html.map formMsg
+                        [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integrationEditor.section.request.description" appState)
                         , FormGroup.input appState editorData.form "requestUrl" (lg "integration.request.url" appState) |> Html.map formMsg
+                        , FormExtra.mdAfter (l_ "integrationEditor.form.requestUrl.description" appState)
+                        , div [ class "form-group" ]
+                            [ label [] [ lgx "integration.props" appState ]
+                            , ValueList.view editorData.props |> Html.map propsListMsg
+                            ]
+                        , FormExtra.mdAfter (l_ "integrationEditor.form.props.description" appState)
+                        , FormGroup.select appState httpMethodOptions editorData.form "requestMethod" (lg "integration.request.method" appState) |> Html.map formMsg
                         , FormGroup.list appState (integrationHeaderItemView appState) editorData.form "requestHeaders" (lg "integration.request.headers" appState) |> Html.map formMsg
                         , FormGroup.textarea appState editorData.form "requestBody" (lg "integration.request.body" appState) |> Html.map formMsg
                         ]
@@ -361,9 +368,15 @@ integrationEditorView appState _ editorData =
                 , div [ class "card card-border-light mb-5" ]
                     [ div [ class "card-header" ] [ lgx "integration.response" appState ]
                     , div [ class "card-body" ]
-                        [ FormGroup.input appState editorData.form "responseListField" (lg "integration.response.listField" appState) |> Html.map formMsg
-                        , FormGroup.input appState editorData.form "responseIdField" (lg "integration.response.idField" appState) |> Html.map formMsg
-                        , FormGroup.input appState editorData.form "responseNameField" (lg "integration.response.nameField" appState) |> Html.map formMsg
+                        [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integrationEditor.section.response.description" appState)
+                        , FormGroup.input appState editorData.form "responseListField" (lg "integration.response.listField" appState) |> Html.map formMsg
+                        , FormExtra.mdAfter (l_ "integrationEditor.form.responseListField.description" appState)
+                        , FormGroup.input appState editorData.form "responseItemId" (lg "integration.response.idField" appState) |> Html.map formMsg
+                        , FormExtra.mdAfter (l_ "integrationEditor.form.responseItemId.description" appState)
+                        , FormGroup.textarea appState editorData.form "responseItemTemplate" (lg "integration.response.itemTemplate" appState) |> Html.map formMsg
+                        , FormExtra.mdAfter (l_ "integrationEditor.form.responseItemTemplate.description" appState)
+                        , FormGroup.input appState editorData.form "responseItemUrl" (lg "integration.response.itemUrl" appState) |> Html.map formMsg
+                        , FormExtra.mdAfter (l_ "integrationEditor.form.responseItemUrl.description" appState)
                         ]
                     ]
                 ]
