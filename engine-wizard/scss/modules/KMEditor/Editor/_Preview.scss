@@ -27,6 +27,12 @@ $tag-selection-height: 80px;
     }
 
     .questionnaire {
-        height:  calc(100vh - #{$editor-header-height} - #{$tag-selection-height});
+        height:  calc(100vh - #{$editor-header-height});
+    }
+
+    &--WithTags {
+        .questionnaire {
+            height:  calc(100vh - #{$editor-header-height} - #{$tag-selection-height});
+        }
     }
 }

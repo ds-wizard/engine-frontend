@@ -25,9 +25,9 @@ integrationDecoderTest =
                             "requestHeaders": {"X_USER": "user"},
                             "requestBody": "{}",
                             "responseListField": "",
-                            "responseIdField": "id",
-                            "responseNameField": "title",
-                            "itemUrl": "http://example.com/${id}",
+                            "responseItemId": "{{id}}",
+                            "responseItemTemplate": "{{title}}",
+                            "responseItemUrl": "http://example.com/${id}",
                             "annotations": {}
                         }
                         """
@@ -43,9 +43,9 @@ integrationDecoderTest =
                         , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
                         , requestBody = "{}"
                         , responseListField = ""
-                        , responseIdField = "id"
-                        , responseNameField = "title"
-                        , itemUrl = "http://example.com/${id}"
+                        , responseItemId = "{{id}}"
+                        , responseItemTemplate = "{{title}}"
+                        , responseItemUrl = "http://example.com/${id}"
                         , annotations = Dict.empty
                         }
                 in

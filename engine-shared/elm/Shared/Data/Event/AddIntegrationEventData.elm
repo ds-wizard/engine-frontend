@@ -20,9 +20,9 @@ type alias AddIntegrationEventData =
     , requestHeaders : Dict String String
     , requestBody : String
     , responseListField : String
-    , responseIdField : String
-    , responseNameField : String
-    , itemUrl : String
+    , responseItemId : String
+    , responseItemTemplate : String
+    , responseItemUrl : String
     , annotations : Dict String String
     }
 
@@ -39,9 +39,9 @@ decoder =
         |> D.required "requestHeaders" (D.dict D.string)
         |> D.required "requestBody" D.string
         |> D.required "responseListField" D.string
-        |> D.required "responseIdField" D.string
-        |> D.required "responseNameField" D.string
-        |> D.required "itemUrl" D.string
+        |> D.required "responseItemId" D.string
+        |> D.required "responseItemTemplate" D.string
+        |> D.required "responseItemUrl" D.string
         |> D.required "annotations" (D.dict D.string)
 
 
@@ -57,8 +57,8 @@ encode data =
     , ( "requestHeaders", E.dict identity E.string data.requestHeaders )
     , ( "requestBody", E.string data.requestBody )
     , ( "responseListField", E.string data.responseListField )
-    , ( "responseIdField", E.string data.responseIdField )
-    , ( "responseNameField", E.string data.responseNameField )
-    , ( "itemUrl", E.string data.itemUrl )
+    , ( "responseItemId", E.string data.responseItemId )
+    , ( "responseItemTemplate", E.string data.responseItemTemplate )
+    , ( "responseItemUrl", E.string data.responseItemUrl )
     , ( "annotations", E.dict identity E.string data.annotations )
     ]

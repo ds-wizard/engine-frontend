@@ -204,9 +204,9 @@ createAddIntegrationEvent form editorData =
             , requestHeaders = Dict.fromList form.requestHeaders
             , requestBody = form.requestBody
             , responseListField = form.responseListField
-            , responseIdField = form.responseIdField
-            , responseNameField = form.responseNameField
-            , itemUrl = form.itemUrl
+            , responseItemId = form.responseItemId
+            , responseItemTemplate = form.responseItemTemplate
+            , responseItemUrl = form.responseItemUrl
             , annotations = Dict.fromList form.annotations
             }
     in
@@ -229,9 +229,9 @@ createEditIntegrationEvent form editorData =
             , requestHeaders = EventField.create requestHeaders (editorData.integration.requestHeaders /= requestHeaders)
             , requestBody = EventField.create form.requestBody (editorData.integration.requestBody /= form.requestBody)
             , responseListField = EventField.create form.responseListField (editorData.integration.responseListField /= form.responseListField)
-            , responseIdField = EventField.create form.responseIdField (editorData.integration.responseIdField /= form.responseIdField)
-            , responseNameField = EventField.create form.responseNameField (editorData.integration.responseNameField /= form.responseNameField)
-            , itemUrl = EventField.create form.itemUrl (editorData.integration.itemUrl /= form.itemUrl)
+            , responseItemId = EventField.create form.responseItemId (editorData.integration.responseItemId /= form.responseItemId)
+            , responseItemTemplate = EventField.create form.responseItemTemplate (editorData.integration.responseItemTemplate /= form.responseItemTemplate)
+            , responseItemUrl = EventField.create form.responseItemUrl (editorData.integration.responseItemUrl /= form.responseItemUrl)
             , annotations = EventField.create (Dict.fromList form.annotations) (editorData.integration.annotations /= Dict.fromList form.annotations)
             }
     in
