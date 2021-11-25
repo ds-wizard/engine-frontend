@@ -1,6 +1,3 @@
-var Chart = require('chart.js')
-
-
 module.exports = function (app) {
     app.ports.drawMetricsChart.subscribe(drawMetricsChart)
 
@@ -16,14 +13,21 @@ module.exports = function (app) {
                 type: 'radar',
                 data: data.data,
                 options: {
-                    legend: { display: false },
-                    scale: {
-                        ticks: {
+                    aspectRatio: 2,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                    },
+                    scales: {
+                        r : {
                             min: 0,
                             max: 1,
-                            maxTicksLimit: 5,
-                            display: false
-                        }
+                            ticks: {
+                                stepSize: .25,
+                                display: false
+                            }
+                        },
                     }
                 }
             })

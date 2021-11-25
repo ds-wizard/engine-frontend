@@ -5,8 +5,9 @@ module ChartJS exposing
     , encodeChartConfig
     )
 
-import Json.Encode as Encode exposing (Value)
-import Json.Encode.Extra exposing (maybe)
+import Json.Encode as E exposing (Value)
+import Json.Encode.Extra as E
+import Round
 
 
 type alias ChartConfig =
@@ -33,27 +34,27 @@ type alias DataSet =
 
 encodeChartConfig : ChartConfig -> Value
 encodeChartConfig config =
-    Encode.object
-        [ ( "targetId", Encode.string config.targetId )
+    E.object
+        [ ( "targetId", E.string config.targetId )
         , ( "data", encodeData config.data )
         ]
 
 
 encodeData : Data -> Value
 encodeData data =
-    Encode.object
-        [ ( "labels", Encode.list Encode.string data.labels )
-        , ( "datasets", Encode.list encodeDataSet data.datasets )
+    E.object
+        [ ( "labels", E.list E.string data.labels )
+        , ( "datasets", E.list encodeDataSet data.datasets )
         ]
 
 
 encodeDataSet : DataSet -> Value
 encodeDataSet dataSet =
-    Encode.object
-        [ ( "label", Encode.string dataSet.label )
-        , ( "borderColor", Encode.string dataSet.borderColor )
-        , ( "backgroundColor", Encode.string dataSet.backgroundColor )
-        , ( "pointBackgroundColor", Encode.string dataSet.pointBackgroundColor )
-        , ( "data", Encode.list Encode.float dataSet.data )
-        , ( "stack", maybe Encode.string dataSet.stack )
+    E.object
+        [ ( "label", E.string dataSet.label )
+        , ( "borderColor", E.string dataSet.borderColor )
+        , ( "backgroundColor", E.string dataSet.backgroundColor )
+        , ( "pointBackgroundColor", E.string dataSet.pointBackgroundColor )
+        , ( "data", E.list (E.float << Round.roundNum 2) dataSet.data )
+        , ( "stack", E.maybe E.string dataSet.stack )
         ]
