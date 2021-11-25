@@ -51,7 +51,7 @@ function apiUrl() {
 }
 
 function configUrl() {
-    return apiUrl() + '/configs/bootstrap'
+    return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(window.location.origin)
 }
 
 function provisioningUrl() {
@@ -82,6 +82,13 @@ function setStyles(config, cb) {
     document.getElementsByTagName("head")[0].appendChild(link)
 }
 
+function getApiUrl(config) {
+    if (config.cloud && config.cloud.enabled && config.cloud.serverUrl) {
+        return config.cloud.serverUrl
+    }
+    return apiUrl()
+}
+
 function loadApp(config, provisioning) {
     setStyles(config, function () {
 
@@ -90,7 +97,7 @@ function loadApp(config, provisioning) {
             flags: {
                 seed: Math.floor(Math.random() * 0xFFFFFFFF),
                 session: JSON.parse(localStorage.session || null),
-                apiUrl: apiUrl(),
+                apiUrl: getApiUrl(config),
                 clientUrl: clientUrl(),
                 config: config,
                 provisioning: provisioning,
