@@ -1,5 +1,13 @@
-var Chart = require('chart.js')
+var chartjs = require('chart.js')
 
+chartjs.Chart.register(
+    chartjs.RadarController,
+    chartjs.RadialLinearScale,
+    chartjs.PointElement,
+    chartjs.LineElement,
+    chartjs.Filler,
+    chartjs.Tooltip,
+)
 
 module.exports = function (app) {
     app.ports.drawMetricsChart.subscribe(drawMetricsChart)
@@ -12,18 +20,20 @@ module.exports = function (app) {
             }
 
             var ctx = canvas.getContext('2d')
-            var chart = new Chart(ctx, {
+            var chart = new chartjs.Chart(ctx, {
                 type: 'radar',
                 data: data.data,
                 options: {
-                    legend: { display: false },
-                    scale: {
-                        ticks: {
+                    aspectRatio: 2,
+                    scales: {
+                        r : {
                             min: 0,
                             max: 1,
-                            maxTicksLimit: 5,
-                            display: false
-                        }
+                            ticks: {
+                                stepSize: .25,
+                                display: false,
+                            }
+                        },
                     }
                 }
             })
