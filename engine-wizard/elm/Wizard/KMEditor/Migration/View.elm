@@ -2,7 +2,7 @@ module Wizard.KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
-import Html exposing (Html, br, button, code, del, div, h1, h3, ins, label, li, p, span, strong, text, ul)
+import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import Shared.Data.Event as Event exposing (Event(..))
@@ -440,27 +440,33 @@ viewEditKnowledgeModelDiff appState event km =
                 originalIntegrations
                 (EventField.getValueWithDefault event.integrationUuids originalIntegrations)
                 integrationNames
+
+        annotationsDiff =
+            viewAnnotationsDiff appState km.annotations (EventField.getValueWithDefault event.annotations km.annotations)
     in
     div []
-        [ chaptersDiff, metricsDiff, phasesDiff, tagsDiff, integrationsDiff ]
+        [ chaptersDiff, metricsDiff, phasesDiff, tagsDiff, integrationsDiff, annotationsDiff ]
 
 
 viewAddMetricDiff : AppState -> AddMetricEventData -> Html Msg
 viewAddMetricDiff appState event =
     let
-        fields =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "metric.title" appState
-                , lg "metric.abbreviation" appState
-                , lg "metric.description" appState
-                ]
-                [ event.title
-                , Maybe.withDefault "" event.abbreviation
-                , Maybe.withDefault "" event.description
-                ]
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "metric.title" appState
+                    , lg "metric.abbreviation" appState
+                    , lg "metric.description" appState
+                    ]
+                    [ event.title
+                    , Maybe.withDefault "" event.abbreviation
+                    , Maybe.withDefault "" event.description
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
     in
-    div []
-        (viewAdd fields)
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditMetricDiff : AppState -> EditMetricEventData -> Metric -> Html Msg
@@ -481,8 +487,11 @@ viewEditMetricDiff appState event metric =
                     , EventField.getValueWithDefault event.abbreviation metric.abbreviation |> Maybe.withDefault ""
                     , EventField.getValueWithDefault event.description metric.description |> Maybe.withDefault ""
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState metric.annotations (EventField.getValueWithDefault event.annotations metric.annotations)
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteMetricDiff : AppState -> Metric -> Html Msg
@@ -499,24 +508,30 @@ viewDeleteMetricDiff appState metric =
                     , Maybe.withDefault "" metric.abbreviation
                     , Maybe.withDefault "" metric.description
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState metric.annotations Dict.empty
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddPhaseDiff : AppState -> AddPhaseEventData -> Html Msg
 viewAddPhaseDiff appState event =
     let
-        fields =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "phase.title" appState
-                , lg "phase.description" appState
-                ]
-                [ event.title
-                , Maybe.withDefault "" event.description
-                ]
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "phase.title" appState
+                    , lg "phase.description" appState
+                    ]
+                    [ event.title
+                    , Maybe.withDefault "" event.description
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
     in
-    div []
-        (viewAdd fields)
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditPhaseDiff : AppState -> EditPhaseEventData -> Phase -> Html Msg
@@ -534,8 +549,11 @@ viewEditPhaseDiff appState event phase =
                     [ EventField.getValueWithDefault event.title phase.title
                     , EventField.getValueWithDefault event.description phase.description |> Maybe.withDefault ""
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState phase.annotations (EventField.getValueWithDefault event.annotations phase.annotations)
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeletePhaseDiff : AppState -> Phase -> Html Msg
@@ -550,26 +568,33 @@ viewDeletePhaseDiff appState phase =
                     [ phase.title
                     , Maybe.withDefault "" phase.description
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState phase.annotations Dict.empty
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddTagDiff : AppState -> AddTagEventData -> Html Msg
 viewAddTagDiff appState event =
     let
-        fields =
-            List.map2 (\a b -> ( a, b ))
-                [ lg "tag.name" appState
-                , lg "tag.description" appState
-                , lg "tag.color" appState
-                ]
-                [ event.name
-                , event.description |> Maybe.withDefault ""
-                , event.color
-                ]
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "tag.name" appState
+                    , lg "tag.description" appState
+                    , lg "tag.color" appState
+                    ]
+                    [ event.name
+                    , event.description |> Maybe.withDefault ""
+                    , event.color
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
     in
     div []
-        (viewAdd fields)
+        (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditTagDiff : AppState -> EditTagEventData -> Tag -> Html Msg
@@ -590,8 +615,11 @@ viewEditTagDiff appState event tag =
                     , EventField.getValueWithDefault event.description tag.description |> Maybe.withDefault ""
                     , EventField.getValueWithDefault event.color tag.color
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState tag.annotations (EventField.getValueWithDefault event.annotations tag.annotations)
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteTagDiff : AppState -> Tag -> Html Msg
@@ -608,8 +636,11 @@ viewDeleteTagDiff appState tag =
                     , tag.description |> Maybe.withDefault ""
                     , tag.color
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState tag.annotations Dict.empty
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddIntegrationDiff : AppState -> AddIntegrationEventData -> Html Msg
@@ -621,29 +652,32 @@ viewAddIntegrationDiff appState event =
                     [ lg "integration.id" appState
                     , lg "integration.name" appState
                     , lg "integration.props" appState
-                    , lg "integration.itemUrl" appState
+                    , lg "integration.response.itemUrl" appState
                     , lg "integration.request.method" appState
                     , lg "integration.request.url" appState
                     , lg "integration.request.headers" appState
                     , lg "integration.request.body" appState
                     , lg "integration.response.listField" appState
                     , lg "integration.response.idField" appState
-                    , lg "integration.response.nameField" appState
+                    , lg "integration.response.itemTemplate" appState
                     ]
                     [ event.id
                     , event.name
                     , String.join ", " event.props
-                    , event.itemUrl
+                    , event.responseItemUrl
                     , event.requestMethod
                     , event.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList event.requestHeaders
                     , event.requestBody
                     , event.responseListField
-                    , event.responseIdField
-                    , event.responseNameField
+                    , event.responseItemId
+                    , event.responseItemTemplate
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditIntegrationDiff : AppState -> EditIntegrationEventData -> Integration -> Html Msg
@@ -655,41 +689,44 @@ viewEditIntegrationDiff appState event integration =
                     [ lg "integration.id" appState
                     , lg "integration.name" appState
                     , lg "integration.props" appState
-                    , lg "integration.itemUrl" appState
+                    , lg "integration.response.itemUrl" appState
                     , lg "integration.request.method" appState
                     , lg "integration.request.url" appState
                     , lg "integration.request.headers" appState
                     , lg "integration.request.body" appState
                     , lg "integration.response.listField" appState
                     , lg "integration.response.idField" appState
-                    , lg "integration.response.nameField" appState
+                    , lg "integration.response.itemTemplate" appState
                     ]
                     [ integration.id
                     , integration.name
                     , String.join ", " integration.props
-                    , integration.itemUrl
+                    , integration.responseItemUrl
                     , integration.requestMethod
                     , integration.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
                     , integration.requestBody
                     , integration.responseListField
-                    , integration.responseIdField
-                    , integration.responseNameField
+                    , integration.responseItemId
+                    , integration.responseItemTemplate
                     ]
                     [ EventField.getValueWithDefault event.id integration.id
                     , EventField.getValueWithDefault event.name integration.name
                     , String.join ", " <| EventField.getValueWithDefault event.props integration.props
-                    , EventField.getValueWithDefault event.itemUrl integration.itemUrl
+                    , EventField.getValueWithDefault event.responseItemUrl integration.responseItemUrl
                     , EventField.getValueWithDefault event.requestMethod integration.requestMethod
                     , EventField.getValueWithDefault event.requestUrl integration.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList <| EventField.getValueWithDefault event.requestHeaders integration.requestHeaders
                     , EventField.getValueWithDefault event.requestBody integration.requestBody
                     , EventField.getValueWithDefault event.responseListField integration.responseListField
-                    , EventField.getValueWithDefault event.responseIdField integration.responseIdField
-                    , EventField.getValueWithDefault event.responseNameField integration.responseNameField
+                    , EventField.getValueWithDefault event.responseItemId integration.responseItemId
+                    , EventField.getValueWithDefault event.responseItemTemplate integration.responseItemTemplate
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState integration.annotations (EventField.getValueWithDefault event.annotations integration.annotations)
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteIntegrationDiff : AppState -> Integration -> Html Msg
@@ -701,29 +738,32 @@ viewDeleteIntegrationDiff appState integration =
                     [ lg "integration.id" appState
                     , lg "integration.name" appState
                     , lg "integration.props" appState
-                    , lg "integration.itemUrl" appState
+                    , lg "integration.response.itemUrl" appState
                     , lg "integration.request.method" appState
                     , lg "integration.request.url" appState
                     , lg "integration.request.headers" appState
                     , lg "integration.request.body" appState
                     , lg "integration.response.listField" appState
                     , lg "integration.response.idField" appState
-                    , lg "integration.response.nameField" appState
+                    , lg "integration.response.itemTemplate" appState
                     ]
                     [ integration.id
                     , integration.name
                     , String.join ", " integration.props
-                    , integration.itemUrl
+                    , integration.responseItemUrl
                     , integration.requestMethod
                     , integration.requestUrl
                     , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
                     , integration.requestBody
                     , integration.responseListField
-                    , integration.responseIdField
-                    , integration.responseNameField
+                    , integration.responseItemId
+                    , integration.responseItemTemplate
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState integration.annotations Dict.empty
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddChapterDiff : AppState -> AddChapterEventData -> Html Msg
@@ -738,8 +778,11 @@ viewAddChapterDiff appState event =
                     [ event.title
                     , Maybe.withDefault "" event.text
                     ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
     in
-    div [] fieldDiff
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditChapterDiff : AppState -> KnowledgeModel -> EditChapterEventData -> Chapter -> Html Msg
@@ -772,9 +815,11 @@ viewEditChapterDiff appState km event chapter =
                 originalQuestions
                 (EventField.getValueWithDefault event.questionUuids originalQuestions)
                 questionNames
+
+        annotationsDiff =
+            viewAnnotationsDiff appState chapter.annotations (EventField.getValueWithDefault event.annotations chapter.annotations)
     in
-    div []
-        (fieldDiff ++ [ questionsDiff ])
+    div [] (fieldDiff ++ [ questionsDiff, annotationsDiff ])
 
 
 viewDeleteChapterDiff : AppState -> KnowledgeModel -> Chapter -> Html Msg
@@ -798,9 +843,11 @@ viewDeleteChapterDiff appState km chapter =
 
         questionsDiff =
             viewDeletedChildren (lg "questions" appState) questionNames
+
+        annotationsDiff =
+            viewAnnotationsDiff appState chapter.annotations Dict.empty
     in
-    div []
-        (fieldDiff ++ [ questionsDiff ])
+    div [] (fieldDiff ++ [ questionsDiff, annotationsDiff ])
 
 
 viewAddQuestionDiff : AppState -> KnowledgeModel -> AddQuestionEventData -> Html Msg
@@ -857,9 +904,15 @@ viewAddQuestionDiff appState km event =
 
         tagsDiff =
             viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
+
+        annotations =
+            AddQuestionEventQuestion.map .annotations .annotations .annotations .annotations .annotations event
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty annotations
     in
     div []
-        (fieldsDiff ++ [ integrationPropsDiff, tagsDiff ])
+        (fieldsDiff ++ [ integrationPropsDiff, tagsDiff, annotationsDiff ])
 
 
 viewEditQuestionDiff : AppState -> KnowledgeModel -> EditQuestionEventData -> Question -> Html Msg
@@ -1054,9 +1107,21 @@ viewEditQuestionDiff appState km event question =
                 originalExperts
                 (EventField.getValueWithDefault (EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids event) originalExperts)
                 expertNames
+
+        -- Annotations
+        originalAnnotations =
+            Question.getAnnotations question
+
+        annotations =
+            EventField.getValueWithDefault
+                (EditQuestionEventData.map .annotations .annotations .annotations .annotations .annotations event)
+                originalAnnotations
+
+        annotationsDiff =
+            viewAnnotationsDiff appState originalAnnotations annotations
     in
     div []
-        (fieldDiff ++ [ integrationPropsDiff, tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ integrationPropsDiff, tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff, annotationsDiff ])
 
 
 viewDeleteQuestionDiff : AppState -> KnowledgeModel -> Question -> Html Msg
@@ -1147,9 +1212,13 @@ viewDeleteQuestionDiff appState km question =
 
         expertsDiff =
             viewDeletedChildren (lg "experts" appState) <| List.map .name experts
+
+        -- Annotations
+        annotationsDiff =
+            viewAnnotationsDiff appState (Question.getAnnotations question) Dict.empty
     in
     div []
-        (fieldDiff ++ [ tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff, annotationsDiff ])
 
 
 viewMoveQuestion : AppState -> KnowledgeModel -> Question -> Html Msg
@@ -1240,9 +1309,16 @@ viewMoveQuestion appState km question =
 
         expertsDiff =
             viewPlainChildren (lg "experts" appState) <| List.map .name experts
+
+        -- Annotations
+        annotations =
+            Question.getAnnotations question
+
+        annotationsDiff =
+            viewAnnotationsDiff appState annotations annotations
     in
     div []
-        (fieldDiff ++ [ tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff ])
+        (fieldDiff ++ [ tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff, annotationsDiff ])
 
 
 getIntegrationName : KnowledgeModel -> String -> String
@@ -1271,8 +1347,11 @@ viewAddAnswerDiff appState km event =
         metricsDiff =
             viewAddedChildren (lg "metrics" appState) <|
                 List.map (metricMeasureToString metrics) event.metricMeasures
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
     in
-    div [] (fieldsDiff ++ [ metricsDiff ])
+    div [] (fieldsDiff ++ [ metricsDiff, annotationsDiff ])
 
 
 viewEditAnswerDiff : AppState -> KnowledgeModel -> EditAnswerEventData -> Answer -> Html Msg
@@ -1318,9 +1397,12 @@ viewEditAnswerDiff appState km event answer =
 
         metricsPropsDiff =
             viewAddedAndDeletedChildren (lg "metrics" appState) originalMetrics newMetrics
+
+        annotationsDiff =
+            viewAnnotationsDiff appState answer.annotations (EventField.getValueWithDefault event.annotations answer.annotations)
     in
     div []
-        (fieldDiff ++ [ questionsDiff, metricsPropsDiff ])
+        (fieldDiff ++ [ questionsDiff, metricsPropsDiff, annotationsDiff ])
 
 
 viewDeleteAnswerDiff : AppState -> KnowledgeModel -> Answer -> Html Msg
@@ -1353,9 +1435,12 @@ viewDeleteAnswerDiff appState km answer =
 
         metricsDiff =
             viewDeletedChildren (lg "metrics" appState) originalMetrics
+
+        annotationsDiff =
+            viewAnnotationsDiff appState answer.annotations Dict.empty
     in
     div []
-        (fieldDiff ++ [ questionsDiff, metricsDiff ])
+        (fieldDiff ++ [ questionsDiff, metricsDiff, annotationsDiff ])
 
 
 viewMoveAnswer : AppState -> KnowledgeModel -> Answer -> Html Msg
@@ -1388,9 +1473,12 @@ viewMoveAnswer appState km answer =
 
         metricsDiff =
             viewPlainChildren (lg "metrics" appState) originalMetrics
+
+        annotationsDiff =
+            viewAnnotationsDiff appState answer.annotations answer.annotations
     in
     div []
-        (fieldDiff ++ [ questionsDiff, metricsDiff ])
+        (fieldDiff ++ [ questionsDiff, metricsDiff, annotationsDiff ])
 
 
 metricMeasureToString : List Metric -> MetricMeasure -> String
@@ -1411,48 +1499,72 @@ metricMeasureToString metrics metricMeasure =
 
 viewAddChoiceDiff : AppState -> AddChoiceEventData -> Html Msg
 viewAddChoiceDiff appState event =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "choice.label" appState
-                ]
-                [ event.label
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "choice.label" appState
+                    ]
+                    [ event.label
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditChoiceDiff : AppState -> EditChoiceEventData -> Choice -> Html Msg
 viewEditChoiceDiff appState event choice =
-    div [] <|
-        viewDiff <|
-            List.map3 (\a b c -> ( a, b, c ))
-                [ lg "choice.label" appState
-                ]
-                [ choice.label
-                ]
-                [ EventField.getValueWithDefault event.label choice.label
-                ]
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "choice.label" appState
+                    ]
+                    [ choice.label
+                    ]
+                    [ EventField.getValueWithDefault event.label choice.label
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState choice.annotations (EventField.getValueWithDefault event.annotations choice.annotations)
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteChoiceDiff : AppState -> Choice -> Html Msg
 viewDeleteChoiceDiff appState choice =
-    div [] <|
-        viewDelete <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "choice.label" appState
-                ]
-                [ choice.label
-                ]
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "choice.label" appState
+                    ]
+                    [ choice.label
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState choice.annotations Dict.empty
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewMoveChoice : AppState -> Choice -> Html Msg
 viewMoveChoice appState choice =
-    div [] <|
-        viewPlain <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "choice.label" appState
-                ]
-                [ choice.label
-                ]
+    let
+        fieldDiff =
+            viewPlain <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "choice.label" appState
+                    ]
+                    [ choice.label
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState choice.annotations choice.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddReferenceDiff : AppState -> AddReferenceEventData -> Html Msg
@@ -1465,100 +1577,133 @@ viewAddReferenceDiff appState =
 
 viewAddResourcePageReferenceDiff : AppState -> AddReferenceResourcePageEventData -> Html Msg
 viewAddResourcePageReferenceDiff appState data =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.shortUuid" appState
-                ]
-                [ lg "referenceType.resourcePage" appState
-                , data.shortUuid
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.shortUuid" appState
+                    ]
+                    [ lg "referenceType.resourcePage" appState
+                    , data.shortUuid
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty data.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddURLReferenceDiff : AppState -> AddReferenceURLEventData -> Html Msg
 viewAddURLReferenceDiff appState data =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.url" appState
-                , lg "reference.label" appState
-                ]
-                [ lg "referenceType.url" appState
-                , data.url
-                , data.label
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.url" appState
+                    , lg "reference.label" appState
+                    ]
+                    [ lg "referenceType.url" appState
+                    , data.url
+                    , data.label
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty data.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddCrossReferenceDiff : AppState -> AddReferenceCrossEventData -> Html Msg
 viewAddCrossReferenceDiff appState data =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.targetUuid" appState
-                , lg "reference.description" appState
-                ]
-                [ lg "referenceType.cross" appState
-                , data.targetUuid
-                , data.description
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.targetUuid" appState
+                    , lg "reference.description" appState
+                    ]
+                    [ lg "referenceType.cross" appState
+                    , data.targetUuid
+                    , data.description
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty data.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditReferenceDiff : AppState -> EditReferenceEventData -> Reference -> Html Msg
 viewEditReferenceDiff appState event reference =
     case ( event, reference ) of
         ( EditReferenceResourcePageEvent eventData, ResourcePageReference referenceData ) ->
-            div []
-                (viewDiff <|
-                    List.map3 (\a b c -> ( a, b, c ))
-                        [ lg "referenceType" appState
-                        , lg "reference.shortUuid" appState
-                        ]
-                        [ lg "referenceType.resourcePage" appState
-                        , referenceData.shortUuid
-                        ]
-                        [ lg "referenceType.resourcePage" appState
-                        , EventField.getValueWithDefault eventData.shortUuid referenceData.shortUuid
-                        ]
-                )
+            let
+                fieldDiff =
+                    viewDiff <|
+                        List.map3 (\a b c -> ( a, b, c ))
+                            [ lg "referenceType" appState
+                            , lg "reference.shortUuid" appState
+                            ]
+                            [ lg "referenceType.resourcePage" appState
+                            , referenceData.shortUuid
+                            ]
+                            [ lg "referenceType.resourcePage" appState
+                            , EventField.getValueWithDefault eventData.shortUuid referenceData.shortUuid
+                            ]
+
+                annotationsDiff =
+                    viewAnnotationsDiff appState referenceData.annotations (EventField.getValueWithDefault eventData.annotations referenceData.annotations)
+            in
+            div [] (fieldDiff ++ [ annotationsDiff ])
 
         ( EditReferenceURLEvent eventData, URLReference referenceData ) ->
-            div []
-                (viewDiff <|
-                    List.map3 (\a b c -> ( a, b, c ))
-                        [ lg "referenceType" appState
-                        , lg "reference.url" appState
-                        , lg "reference.label" appState
-                        ]
-                        [ lg "referenceType.url" appState
-                        , referenceData.url
-                        , referenceData.label
-                        ]
-                        [ lg "referenceType.url" appState
-                        , EventField.getValueWithDefault eventData.url referenceData.url
-                        , EventField.getValueWithDefault eventData.label referenceData.label
-                        ]
-                )
+            let
+                fieldDiff =
+                    viewDiff <|
+                        List.map3 (\a b c -> ( a, b, c ))
+                            [ lg "referenceType" appState
+                            , lg "reference.url" appState
+                            , lg "reference.label" appState
+                            ]
+                            [ lg "referenceType.url" appState
+                            , referenceData.url
+                            , referenceData.label
+                            ]
+                            [ lg "referenceType.url" appState
+                            , EventField.getValueWithDefault eventData.url referenceData.url
+                            , EventField.getValueWithDefault eventData.label referenceData.label
+                            ]
+
+                annotationsDiff =
+                    viewAnnotationsDiff appState referenceData.annotations (EventField.getValueWithDefault eventData.annotations referenceData.annotations)
+            in
+            div [] (fieldDiff ++ [ annotationsDiff ])
 
         ( EditReferenceCrossEvent eventData, CrossReference referenceData ) ->
-            div []
-                (viewDiff <|
-                    List.map3 (\a b c -> ( a, b, c ))
-                        [ lg "referenceType" appState
-                        , lg "reference.targetUuid" appState
-                        , lg "reference.description" appState
-                        ]
-                        [ lg "referenceType.cross" appState
-                        , referenceData.targetUuid
-                        , referenceData.description
-                        ]
-                        [ lg "referenceType.cross" appState
-                        , EventField.getValueWithDefault eventData.targetUuid referenceData.targetUuid
-                        , EventField.getValueWithDefault eventData.description referenceData.description
-                        ]
-                )
+            let
+                fieldDiff =
+                    viewDiff <|
+                        List.map3 (\a b c -> ( a, b, c ))
+                            [ lg "referenceType" appState
+                            , lg "reference.targetUuid" appState
+                            , lg "reference.description" appState
+                            ]
+                            [ lg "referenceType.cross" appState
+                            , referenceData.targetUuid
+                            , referenceData.description
+                            ]
+                            [ lg "referenceType.cross" appState
+                            , EventField.getValueWithDefault eventData.targetUuid referenceData.targetUuid
+                            , EventField.getValueWithDefault eventData.description referenceData.description
+                            ]
+
+                annotationsDiff =
+                    viewAnnotationsDiff appState referenceData.annotations (EventField.getValueWithDefault eventData.annotations referenceData.annotations)
+            in
+            div [] (fieldDiff ++ [ annotationsDiff ])
 
         ( otherEvent, otherReference ) ->
             let
@@ -1577,45 +1722,63 @@ viewEditReferenceDiff appState event reference =
 
 viewEditResourcePageReferenceDiff : AppState -> EditReferenceResourcePageEventData -> Html Msg
 viewEditResourcePageReferenceDiff appState data =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.shortUuid" appState
-                ]
-                [ lg "referenceType.resourcePage" appState
-                , EventField.getValueWithDefault data.shortUuid ""
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.shortUuid" appState
+                    ]
+                    [ lg "referenceType.resourcePage" appState
+                    , EventField.getValueWithDefault data.shortUuid ""
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty (EventField.getValueWithDefault data.annotations Dict.empty)
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditURLReferenceDiff : AppState -> EditReferenceURLEventData -> Html Msg
 viewEditURLReferenceDiff appState data =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.url" appState
-                , lg "reference.label" appState
-                ]
-                [ lg "referenceType.url" appState
-                , EventField.getValueWithDefault data.url ""
-                , EventField.getValueWithDefault data.label ""
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.url" appState
+                    , lg "reference.label" appState
+                    ]
+                    [ lg "referenceType.url" appState
+                    , EventField.getValueWithDefault data.url ""
+                    , EventField.getValueWithDefault data.label ""
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty (EventField.getValueWithDefault data.annotations Dict.empty)
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditCrossReferenceDiff : AppState -> EditReferenceCrossEventData -> Html Msg
 viewEditCrossReferenceDiff appState data =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.targetUuid" appState
-                , lg "reference.description" appState
-                ]
-                [ lg "referenceType.cross" appState
-                , EventField.getValueWithDefault data.targetUuid ""
-                , EventField.getValueWithDefault data.description ""
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.targetUuid" appState
+                    , lg "reference.description" appState
+                    ]
+                    [ lg "referenceType.cross" appState
+                    , EventField.getValueWithDefault data.targetUuid ""
+                    , EventField.getValueWithDefault data.description ""
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty (EventField.getValueWithDefault data.annotations Dict.empty)
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteReferenceDiff : AppState -> Reference -> Html Msg
@@ -1628,45 +1791,63 @@ viewDeleteReferenceDiff appState =
 
 viewDeleteResourcePageReferenceDiff : AppState -> ResourcePageReferenceData -> Html Msg
 viewDeleteResourcePageReferenceDiff appState data =
-    div [] <|
-        viewDelete <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.shortUuid" appState
-                ]
-                [ lg "referenceType.resourcePage" appState
-                , data.shortUuid
-                ]
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.shortUuid" appState
+                    ]
+                    [ lg "referenceType.resourcePage" appState
+                    , data.shortUuid
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState data.annotations Dict.empty
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteURLReferenceDiff : AppState -> URLReferenceData -> Html Msg
 viewDeleteURLReferenceDiff appState data =
-    div [] <|
-        viewDelete <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.url" appState
-                , lg "reference.label" appState
-                ]
-                [ lg "referenceType.url" appState
-                , data.url
-                , data.label
-                ]
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.url" appState
+                    , lg "reference.label" appState
+                    ]
+                    [ lg "referenceType.url" appState
+                    , data.url
+                    , data.label
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState data.annotations Dict.empty
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteCrossReferenceDiff : AppState -> CrossReferenceData -> Html Msg
 viewDeleteCrossReferenceDiff appState data =
-    div [] <|
-        viewDelete <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.targetUuid" appState
-                , lg "reference.description" appState
-                ]
-                [ lg "referenceType.cross" appState
-                , data.targetUuid
-                , data.description
-                ]
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.targetUuid" appState
+                    , lg "reference.description" appState
+                    ]
+                    [ lg "referenceType.cross" appState
+                    , data.targetUuid
+                    , data.description
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState data.annotations Dict.empty
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewMoveReference : AppState -> Reference -> Html Msg
@@ -1679,100 +1860,142 @@ viewMoveReference appState =
 
 viewMoveResourcePageReference : AppState -> ResourcePageReferenceData -> Html Msg
 viewMoveResourcePageReference appState data =
-    div [] <|
-        viewPlain <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.shortUuid" appState
-                ]
-                [ lg "referenceType.resourcePage" appState
-                , data.shortUuid
-                ]
+    let
+        fieldDiff =
+            viewPlain <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.shortUuid" appState
+                    ]
+                    [ lg "referenceType.resourcePage" appState
+                    , data.shortUuid
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState data.annotations data.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewMoveURLReference : AppState -> URLReferenceData -> Html Msg
 viewMoveURLReference appState data =
-    div [] <|
-        viewPlain <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.url" appState
-                , lg "reference.label" appState
-                ]
-                [ lg "referenceType.url" appState
-                , data.url
-                , data.label
-                ]
+    let
+        fieldDiff =
+            viewPlain <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.url" appState
+                    , lg "reference.label" appState
+                    ]
+                    [ lg "referenceType.url" appState
+                    , data.url
+                    , data.label
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState data.annotations data.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewMoveCrossReference : AppState -> CrossReferenceData -> Html Msg
 viewMoveCrossReference appState data =
-    div [] <|
-        viewPlain <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "referenceType" appState
-                , lg "reference.targetUuid" appState
-                , lg "reference.description" appState
-                ]
-                [ lg "referenceType.cross" appState
-                , data.targetUuid
-                , data.description
-                ]
+    let
+        fieldDiff =
+            viewPlain <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "referenceType" appState
+                    , lg "reference.targetUuid" appState
+                    , lg "reference.description" appState
+                    ]
+                    [ lg "referenceType.cross" appState
+                    , data.targetUuid
+                    , data.description
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState data.annotations data.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewAddExpertDiff : AppState -> AddExpertEventData -> Html Msg
 viewAddExpertDiff appState event =
-    div [] <|
-        viewAdd <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "expert.name" appState
-                , lg "expert.email" appState
-                ]
-                [ event.name
-                , event.email
-                ]
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "expert.name" appState
+                    , lg "expert.email" appState
+                    ]
+                    [ event.name
+                    , event.email
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState Dict.empty event.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewEditExpertDiff : AppState -> EditExpertEventData -> Expert -> Html Msg
 viewEditExpertDiff appState event expert =
-    div [] <|
-        viewDiff <|
-            List.map3 (\a b c -> ( a, b, c ))
-                [ lg "expert.name" appState
-                , lg "expert.email" appState
-                ]
-                [ expert.name
-                , expert.email
-                ]
-                [ EventField.getValueWithDefault event.name expert.name
-                , EventField.getValueWithDefault event.email expert.email
-                ]
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ lg "expert.name" appState
+                    , lg "expert.email" appState
+                    ]
+                    [ expert.name
+                    , expert.email
+                    ]
+                    [ EventField.getValueWithDefault event.name expert.name
+                    , EventField.getValueWithDefault event.email expert.email
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState expert.annotations (EventField.getValueWithDefault event.annotations expert.annotations)
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDeleteExpertDiff : AppState -> Expert -> Html Msg
 viewDeleteExpertDiff appState expert =
-    div [] <|
-        viewDelete <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "expert.name" appState
-                , lg "expert.email" appState
-                ]
-                [ expert.name
-                , expert.email
-                ]
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "expert.name" appState
+                    , lg "expert.email" appState
+                    ]
+                    [ expert.name
+                    , expert.email
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState expert.annotations Dict.empty
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewMoveExpert : AppState -> Expert -> Html Msg
 viewMoveExpert appState expert =
-    div [] <|
-        viewPlain <|
-            List.map2 (\a b -> ( a, b ))
-                [ lg "expert.name" appState
-                , lg "expert.email" appState
-                ]
-                [ expert.name
-                , expert.email
-                ]
+    let
+        fieldDiff =
+            viewPlain <|
+                List.map2 (\a b -> ( a, b ))
+                    [ lg "expert.name" appState
+                    , lg "expert.email" appState
+                    ]
+                    [ expert.name
+                    , expert.email
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState expert.annotations expert.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
 
 
 viewDiff : List ( String, String, String ) -> List (Html Msg)
@@ -1951,6 +2174,68 @@ childrenView fieldName diffView =
             [ text fieldName ]
         , div [ class "form-value" ]
             [ diffView ]
+        ]
+
+
+viewAnnotationsDiff : AppState -> Dict String String -> Dict String String -> Html msg
+viewAnnotationsDiff appState originalAnnotations currentAnnotations =
+    let
+        isDeletedAnnotation key _ =
+            not <| Dict.member key currentAnnotations
+
+        isAddedAnnotation key _ =
+            not <| Dict.member key originalAnnotations
+
+        isEditedAnnotation key value =
+            case Dict.get key originalAnnotations of
+                Just originalValue ->
+                    originalValue /= value
+
+                Nothing ->
+                    False
+
+        cssClass key value =
+            if isDeletedAnnotation key value then
+                "del"
+
+            else if isAddedAnnotation key value then
+                "ins"
+
+            else if isEditedAnnotation key value then
+                "edited"
+
+            else
+                ""
+
+        viewAnnotation ( key, value ) =
+            [ dt [ class (cssClass key value) ] [ text key ]
+            , dd [ class (cssClass key value) ] [ text value ]
+            ]
+
+        deletedAnnotationsView =
+            Dict.filter isDeletedAnnotation originalAnnotations
+                |> Dict.toList
+                |> List.concatMap viewAnnotation
+
+        currentAnnotationsView =
+            Dict.toList currentAnnotations
+                |> List.concatMap viewAnnotation
+
+        allAnnotationsView =
+            deletedAnnotationsView ++ currentAnnotationsView
+
+        valueView =
+            if List.isEmpty allAnnotationsView then
+                text "-"
+
+            else
+                dl [] allAnnotationsView
+    in
+    div [ class "form-group" ]
+        [ label [ class "control-label" ]
+            [ text (lg "annotations" appState) ]
+        , div [ class "form-value" ]
+            [ valueView ]
         ]
 
 

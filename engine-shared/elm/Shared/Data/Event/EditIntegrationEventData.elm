@@ -21,9 +21,9 @@ type alias EditIntegrationEventData =
     , requestHeaders : EventField (Dict String String)
     , requestBody : EventField String
     , responseListField : EventField String
-    , responseIdField : EventField String
-    , responseNameField : EventField String
-    , itemUrl : EventField String
+    , responseItemId : EventField String
+    , responseItemTemplate : EventField String
+    , responseItemUrl : EventField String
     , annotations : EventField (Dict String String)
     }
 
@@ -40,9 +40,9 @@ decoder =
         |> D.required "requestHeaders" (EventField.decoder (D.dict D.string))
         |> D.required "requestBody" (EventField.decoder D.string)
         |> D.required "responseListField" (EventField.decoder D.string)
-        |> D.required "responseIdField" (EventField.decoder D.string)
-        |> D.required "responseNameField" (EventField.decoder D.string)
-        |> D.required "itemUrl" (EventField.decoder D.string)
+        |> D.required "responseItemId" (EventField.decoder D.string)
+        |> D.required "responseItemTemplate" (EventField.decoder D.string)
+        |> D.required "responseItemUrl" (EventField.decoder D.string)
         |> D.required "annotations" (EventField.decoder (D.dict D.string))
 
 
@@ -58,8 +58,8 @@ encode data =
     , ( "requestHeaders", EventField.encode (E.dict identity E.string) data.requestHeaders )
     , ( "requestBody", EventField.encode E.string data.requestBody )
     , ( "responseListField", EventField.encode E.string data.responseListField )
-    , ( "responseIdField", EventField.encode E.string data.responseIdField )
-    , ( "responseNameField", EventField.encode E.string data.responseNameField )
-    , ( "itemUrl", EventField.encode E.string data.itemUrl )
+    , ( "responseItemId", EventField.encode E.string data.responseItemId )
+    , ( "responseItemTemplate", EventField.encode E.string data.responseItemTemplate )
+    , ( "responseItemUrl", EventField.encode E.string data.responseItemUrl )
     , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
     ]

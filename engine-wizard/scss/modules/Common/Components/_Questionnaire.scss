@@ -869,6 +869,43 @@ $toolbar-height: 40px;
             }
         }
 
+        .question-integration-answer {
+            .clear-answer {
+                padding: 5px 0;
+            }
+
+            .card {
+                .card-body, .card-footer {
+                    padding: .5rem 1rem;
+                }
+
+                .card-footer {
+                    display: flex;
+                    align-items: flex-end;
+
+                    img {
+                        height: 1.5rem;
+                        margin-right: 0.5rem;
+                    }
+                }
+            }
+
+            .item-md {
+                h1, h2, h3, h4, h5, h6 {
+                    font-size: $font-size-base;
+                    font-weight: bold;
+                }
+
+                p {
+                    margin-bottom: 0.25rem;
+                }
+
+                p:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+
         .answered {
             margin-top: 0.5rem;
         }
@@ -878,17 +915,6 @@ $toolbar-height: 40px;
             margin-bottom: 0.25rem;
             margin-right: 0.5rem;
             padding: .25em 0.8em;
-        }
-
-        .integration-extra {
-            margin-top: 0.5rem;
-            display: flex;
-            align-items: flex-end;
-
-            img {
-                height: 1.5rem;
-                margin-right: 0.25rem;
-            }
         }
 
         .typehints {
@@ -928,21 +954,19 @@ $toolbar-height: 40px;
                 margin: 0;
 
                 li {
-                    a {
-                        color: $gray-700;
-                        padding: 10px 14px;
-                        display: flex;
 
-                        &:hover {
-                            color: $white;
-                            background: $primary;
-                            text-decoration: none;
-                        }
+                    color: $gray-700;
+                    padding: 10px 14px;
+                    display: flex;
 
-                        img {
-                            height: 25px;
-                            margin-right: 20px;
-                        }
+                    &:hover {
+                        color: $white;
+                        background: $primary;
+                        text-decoration: none;
+                    }
+
+                    &:not(:last-child) {
+                        border-bottom: 1px solid $gray-300;
                     }
                 }
             }

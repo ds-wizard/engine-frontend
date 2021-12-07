@@ -1,7 +1,7 @@
 module Wizard.KMEditor.Editor.Preview.View exposing (view)
 
 import Html exposing (Html, a, div, strong)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Html exposing (emptyNode)
@@ -41,15 +41,24 @@ view appState model =
                 }
                 model.questionnaireModel
     in
-    div [ class "col KMEditor__Editor__Preview", dataCy "km-editor_preview" ]
+    div
+        [ class "col KMEditor__Editor__Preview"
+        , classList [ ( "KMEditor__Editor__Preview--WithTags", tagSelectionVisible model.knowledgeModel ) ]
+        , dataCy "km-editor_preview"
+        ]
         [ tagSelection appState model.tags model.knowledgeModel
         , questionnaire
         ]
 
 
+tagSelectionVisible : KnowledgeModel -> Bool
+tagSelectionVisible km =
+    List.length km.tagUuids > 0
+
+
 tagSelection : AppState -> List String -> KnowledgeModel -> Html Msg
 tagSelection appState selected knowledgeModel =
-    if List.length knowledgeModel.tagUuids > 0 then
+    if tagSelectionVisible knowledgeModel then
         let
             tags =
                 KnowledgeModel.getTags knowledgeModel

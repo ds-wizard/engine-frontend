@@ -90,16 +90,18 @@ $breadcrumbs-height: 40px;
     }
 
     .form-text {
-        margin-top: -35px;
-        margin-bottom: 40px;
+        margin-top: -50px;
+        margin-bottom: 0;
+        padding-bottom: 40px;
 
         .fa {
             margin-right: 4px;
         }
     }
 
-    .card .form-group:last-child {
+    .card .form-group:last-child, .card .form-text:last-child {
         margin-bottom: 0;
+        padding-bottom: 0;
     }
 
     textarea {

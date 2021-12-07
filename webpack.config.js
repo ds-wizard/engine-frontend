@@ -6,18 +6,28 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require("terser-webpack-plugin")
 
 const component = `engine-${process.env.COMPONENT}`
-const ports = {
-    'wizard': 8080,
-    'registry': 8081
+
+const components = {
+    'engine-wizard': {
+        port: 8080,
+        extraEntries: [
+            './node_modules/chart.js/dist/chart.js'
+        ]
+    },
+    'engine-registry': {
+        port: 8081,
+        extraEntries: []
+    }
 }
+
 
 module.exports = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
 
     entry: [
         `./${component}/index.js`,
-        `./${component}/scss/main.scss`
-    ],
+        `./${component}/scss/main.scss`,
+    ].concat(components[component].extraEntries),
 
     output: {
         path: path.resolve(`${__dirname}/dist/${component}/`),
@@ -68,6 +78,9 @@ module.exports = {
     },
 
     optimization: {
+        splitChunks: {
+            chunks: 'all'
+        },
         minimize: process.env.NODE_ENV === 'production',
         minimizer: [
             new CssMinimizerPlugin({
@@ -87,7 +100,11 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({
-            template: `${component}/index.ejs`
+            template: `${component}/index.ejs`,
+            scriptLoading: 'blocking',
+            minimizeOptions: {
+                minifyCss: true
+            }
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[chunkhash].css'
@@ -102,7 +119,7 @@ module.exports = {
 
     devServer: {
         historyApiFallback: {disableDotRule: true},
-        port: ports[component],
+        port: components[component].port,
         static: {
             directory: __dirname
         }

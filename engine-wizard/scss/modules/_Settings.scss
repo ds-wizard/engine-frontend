@@ -162,6 +162,8 @@
             &__Panel {
                 flex: 0 0 $side-navigation-width;
                 background-color: $side-navigation-bg;
+                overflow: hidden;
+                white-space: nowrap;
 
                 .logo {
                     color: $side-navigation-title-color;

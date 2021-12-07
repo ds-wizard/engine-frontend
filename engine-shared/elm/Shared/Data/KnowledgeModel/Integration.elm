@@ -20,9 +20,9 @@ type alias Integration =
     , requestHeaders : Dict String String
     , requestBody : String
     , responseListField : String
-    , responseIdField : String
-    , responseNameField : String
-    , itemUrl : String
+    , responseItemId : String
+    , responseItemTemplate : String
+    , responseItemUrl : String
     , annotations : Dict String String
     }
 
@@ -39,9 +39,9 @@ new uuid =
     , requestHeaders = Dict.empty
     , requestBody = ""
     , responseListField = ""
-    , responseIdField = "id"
-    , responseNameField = "name"
-    , itemUrl = ""
+    , responseItemId = "{{item.id}}"
+    , responseItemTemplate = "{{item.name}}"
+    , responseItemUrl = ""
     , annotations = Dict.empty
     }
 
@@ -59,7 +59,7 @@ decoder =
         |> D.required "requestHeaders" (D.dict D.string)
         |> D.required "requestBody" D.string
         |> D.required "responseListField" D.string
-        |> D.required "responseIdField" D.string
-        |> D.required "responseNameField" D.string
-        |> D.required "itemUrl" D.string
+        |> D.required "responseItemId" D.string
+        |> D.required "responseItemTemplate" D.string
+        |> D.required "responseItemUrl" D.string
         |> D.required "annotations" (D.dict D.string)

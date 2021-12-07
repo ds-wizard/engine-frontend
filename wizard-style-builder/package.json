@@ -1,6 +1,6 @@
 {
-  "name": "dsw-style-builder",
-  "version": "3.5.0",
+  "name": "wizard-style-builder",
+  "version": "3.6.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,6 +18,6 @@
     "node-sass": "^6.0.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.14"
+    "nodemon": "^2.0.15"
   }
 }

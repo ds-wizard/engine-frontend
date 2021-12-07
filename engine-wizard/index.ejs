@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <script src="/config.js"></script>
+    <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes fa-spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.Loading__Loader{height:100vh;padding-top:40vh;text-align:center;color:#adb5bd;opacity:0;animation:fadeIn ease-in 1;animation-duration:1s;animation-delay:.4s;animation-fill-mode:forwards}.Loading__Loader__Spinner{animation:fa-spin 2s infinite linear;width:60px}</style>
 </head>
 <body>
-    <div class="full-page-loader full-page-loader-empty"><i class="fa fa-spinner fa-spin"></i></div>
+<div class="Loading__Loader">
+    <svg class="Loading__Loader__Spinner" aria-hidden="true" focusable="false" role="img" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <path d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z" fill="currentColor"/>
+    </svg>
+</div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 module Wizard.Settings.LookAndFeel.Update exposing (fetchData, update)
 
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Shared.Data.EditableConfig as EditableConfig
+import Shared.Data.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Ports as Ports
@@ -34,9 +34,9 @@ update wrapMsg msg appState model =
             ( { model | logoUploadModalModel = logoUploadModalModel }, cmd )
 
 
-updateProps : GenericUpdate.UpdateProps LookAndFeelConfig
+updateProps : GenericUpdate.UpdateProps EditableLookAndFeelConfig
 updateProps =
-    { initForm = .lookAndFeel >> LookAndFeelConfig.initForm
+    { initForm = .lookAndFeel >> EditableLookAndFeelConfig.initForm
     , formToConfig = EditableConfig.updateLookAndFeel
-    , formValidation = LookAndFeelConfig.validation
+    , formValidation = EditableLookAndFeelConfig.validation
     }

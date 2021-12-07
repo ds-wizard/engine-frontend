@@ -14,8 +14,8 @@ jobs:
         node-version: [14.14.0]
 
     env:
-      PUBLIC_IMAGE: datastewardshipwizard/dsw-style-builder
-      PRIVATE_IMAGE: ${{ secrets.PRIVATE_REGISTRY_URL }}/dsw-style-builder
+      PUBLIC_IMAGE: datastewardshipwizard/wizard-style-builder
+      PRIVATE_IMAGE: ${{ secrets.PRIVATE_REGISTRY_URL }}/wizard-style-builder
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       PRIVATE_REGISTRY_URL: ${{ secrets.PRIVATE_REGISTRY_URL }}
       TAG_DEVELOP: develop
@@ -36,7 +36,7 @@ jobs:
       # (2) -> Build app and Docker image
       - name: Build
         run: |
-          cd style-builder
+          cd wizard-style-builder
           npm run init
           docker build -t ${PRIVATE_IMAGE#/}:$GITHUB_SHA -f ./docker/Dockerfile .
 
