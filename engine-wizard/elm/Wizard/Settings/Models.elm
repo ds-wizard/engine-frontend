@@ -1,5 +1,6 @@
 module Wizard.Settings.Models exposing (Model, initLocalModel, initialModel)
 
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Settings.Authentication.Models
 import Wizard.Settings.Dashboard.Models
 import Wizard.Settings.KnowledgeModels.Models
@@ -27,23 +28,23 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : AppState -> Model
+initialModel appState =
     { organizationModel = Wizard.Settings.Organization.Models.initialModel
     , authenticationModel = Wizard.Settings.Authentication.Models.initialModel
     , privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel
     , dashboardModel = Wizard.Settings.Dashboard.Models.initialModel
     , lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel
     , registryModel = Wizard.Settings.Registry.Models.initialModel
-    , questionnairesModel = Wizard.Settings.Projects.Models.initialModel
+    , questionnairesModel = Wizard.Settings.Projects.Models.initialModel appState
     , documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel
     , templateModel = Wizard.Settings.Template.Models.initialModel
     , knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel
     }
 
 
-initLocalModel : Route -> Model -> Model
-initLocalModel route model =
+initLocalModel : AppState -> Route -> Model -> Model
+initLocalModel appState route model =
     case route of
         OrganizationRoute ->
             { model | organizationModel = Wizard.Settings.Organization.Models.initialModel }
@@ -64,7 +65,7 @@ initLocalModel route model =
             { model | registryModel = Wizard.Settings.Registry.Models.initialModel }
 
         ProjectsRoute ->
-            { model | questionnairesModel = Wizard.Settings.Projects.Models.initialModel }
+            { model | questionnairesModel = Wizard.Settings.Projects.Models.initialModel appState }
 
         SubmissionRoute ->
             { model | documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel }

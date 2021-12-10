@@ -73,7 +73,8 @@ function clientUrl() {
 }
 
 function setStyles(config, cb) {
-    var styleUrl = config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
+    var customizationEnabled = config.feature && config.feature.clientCustomizationEnabled
+    var styleUrl = customizationEnabled && config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
     var link = document.createElement('link')
     link.setAttribute("rel", "stylesheet")
     link.setAttribute("type", "text/css")

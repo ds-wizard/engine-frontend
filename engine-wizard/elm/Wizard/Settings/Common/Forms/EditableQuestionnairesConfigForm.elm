@@ -16,6 +16,7 @@ import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing ex
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias EditableQuestionnairesConfigForm =
@@ -30,16 +31,18 @@ type alias EditableQuestionnairesConfigForm =
     , feedbackOwner : String
     , feedbackRepo : String
     , summaryReport : SimpleFeatureConfig
+    , projectTaggingEnabled : Bool
+    , projectTaggingTags : Maybe String
     }
 
 
-initEmpty : Form FormError EditableQuestionnairesConfigForm
-initEmpty =
-    Form.initial [] validation
+initEmpty : AppState -> Form FormError EditableQuestionnairesConfigForm
+initEmpty appState =
+    Form.initial [] (validation appState)
 
 
-init : EditableQuestionnairesConfig -> Form FormError EditableQuestionnairesConfigForm
-init config =
+init : AppState -> EditableQuestionnairesConfig -> Form FormError EditableQuestionnairesConfigForm
+init appState config =
     let
         fields =
             [ ( "questionnaireVisibilityEnabled", Field.bool config.questionnaireVisibility.enabled )
@@ -53,13 +56,15 @@ init config =
             , ( "feedbackOwner", Field.string config.feedback.owner )
             , ( "feedbackRepo", Field.string config.feedback.repo )
             , ( "summaryReport", SimpleFeatureConfig.field config.summaryReport )
+            , ( "projectTaggingEnabled", Field.bool config.projectTagging.enabled )
+            , ( "projectTaggingTags", Field.string <| String.join "\n" config.projectTagging.tags )
             ]
     in
-    Form.initial fields validation
+    Form.initial fields (validation appState)
 
 
-validation : Validation FormError EditableQuestionnairesConfigForm
-validation =
+validation : AppState -> Validation FormError EditableQuestionnairesConfigForm
+validation appState =
     V.succeed EditableQuestionnairesConfigForm
         |> V.andMap (V.field "questionnaireVisibilityEnabled" V.bool)
         |> V.andMap (V.field "questionnaireVisibilityDefaultValue" QuestionnaireVisibility.validation)
@@ -72,10 +77,24 @@ validation =
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackOwner" V.string V.optionalString)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackRepo" V.string V.optionalString)
         |> V.andMap (V.field "summaryReport" SimpleFeatureConfig.validation)
+        |> V.andMap (V.field "projectTaggingEnabled" V.bool)
+        |> V.andMap (V.field "projectTaggingTags" (V.projectTags appState))
 
 
 toEditableQuestionnaireConfig : EditableQuestionnairesConfigForm -> EditableQuestionnairesConfig
 toEditableQuestionnaireConfig form =
+    let
+        tags =
+            case form.projectTaggingTags of
+                Just formTags ->
+                    formTags
+                        |> String.split "\n"
+                        |> List.map String.trim
+                        |> List.filter (not << String.isEmpty)
+
+                Nothing ->
+                    []
+    in
     { questionnaireVisibility =
         { enabled = form.questionnaireVisibilityEnabled
         , defaultValue = form.questionnaireVisibilityDefaultValue
@@ -93,4 +112,8 @@ toEditableQuestionnaireConfig form =
         , repo = form.feedbackRepo
         }
     , summaryReport = form.summaryReport
+    , projectTagging =
+        { enabled = form.projectTaggingEnabled
+        , tags = tags
+        }
     }

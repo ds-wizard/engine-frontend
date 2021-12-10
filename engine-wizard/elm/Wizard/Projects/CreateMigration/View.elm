@@ -64,7 +64,7 @@ createMigrationView appState model questionnaire =
         originalTagList =
             div [ class "form-group form-group-tags" ]
                 [ label [] [ lx_ "form.originalTags" appState ]
-                , div [] [ Tag.readOnlyList appState questionnaire.selectedTagUuids tags ]
+                , div [] [ Tag.readOnlyList appState questionnaire.selectedQuestionTagUuids tags ]
                 ]
 
         cfg =

@@ -179,3 +179,17 @@ select {
 .action-result-error {
     margin: 0 1rem;
 }
+
+
+.dropdown-item {
+    &-icon {
+        padding-left: 3rem;
+        position: relative;
+
+        .fa {
+            position: absolute;
+            left: 1.5rem;
+            top: 0.5rem;
+        }
+    }
+}

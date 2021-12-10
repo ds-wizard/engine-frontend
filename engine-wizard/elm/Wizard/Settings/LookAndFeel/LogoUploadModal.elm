@@ -11,7 +11,7 @@ import File exposing (File)
 import File.Select as Select
 import Html exposing (Html, a, button, div, h5, hr, p, span, text)
 import Html.Attributes exposing (class, classList, disabled, style)
-import Html.Events exposing (onClick, preventDefaultOn)
+import Html.Events exposing (onClick)
 import Json.Decode as D
 import Maybe.Extra as Maybe
 import Shared.Api.Configs as ConfigsApi
@@ -21,6 +21,7 @@ import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg, lx)
 import Task
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Events exposing (alwaysPreventDefaultOn)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
@@ -180,10 +181,10 @@ view appState model =
                 , div
                     [ class "dropzone"
                     , classList [ ( "active", model.hover ) ]
-                    , hijackOn "dragenter" (D.succeed DragEnter)
-                    , hijackOn "dragover" (D.succeed DragEnter)
-                    , hijackOn "dragleave" (D.succeed DragLeave)
-                    , hijackOn "drop" dropDecoder
+                    , alwaysPreventDefaultOn "dragenter" (D.succeed DragEnter)
+                    , alwaysPreventDefaultOn "dragover" (D.succeed DragEnter)
+                    , alwaysPreventDefaultOn "dragleave" (D.succeed DragLeave)
+                    , alwaysPreventDefaultOn "drop" dropDecoder
                     ]
                     [ button [ onClick Pick, class "btn btn-secondary" ] [ lx_ "chooseLogo" appState ]
                     , p [] [ lx_ "dropHere" appState ]
@@ -212,13 +213,3 @@ view appState model =
 dropDecoder : D.Decoder Msg
 dropDecoder =
     D.at [ "dataTransfer", "files", "0" ] (D.map GotFile File.decoder)
-
-
-hijackOn : String -> D.Decoder msg -> Html.Attribute msg
-hijackOn event decoder =
-    preventDefaultOn event (D.map hijack decoder)
-
-
-hijack : msg -> ( msg, Bool )
-hijack msg =
-    ( msg, True )

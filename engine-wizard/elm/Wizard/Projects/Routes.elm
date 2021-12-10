@@ -1,6 +1,7 @@
 module Wizard.Projects.Routes exposing
     ( Route(..)
     , indexRouteIsTemplateFilterId
+    , indexRouteProjectTagsFilterId
     , indexRouteUsersFilterId
     )
 
@@ -14,7 +15,7 @@ type Route
     = CreateRoute ProjectCreateRoute
     | CreateMigrationRoute Uuid
     | DetailRoute Uuid ProjectDetailRoute
-    | IndexRoute PaginationQueryString (Maybe String) (Maybe String)
+    | IndexRoute PaginationQueryString (Maybe String) (Maybe String) (Maybe String)
     | MigrationRoute Uuid
 
 
@@ -26,3 +27,8 @@ indexRouteUsersFilterId =
 indexRouteIsTemplateFilterId : String
 indexRouteIsTemplateFilterId =
     "isTemplate"
+
+
+indexRouteProjectTagsFilterId : String
+indexRouteProjectTagsFilterId =
+    "projectTags"

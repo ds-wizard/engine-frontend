@@ -60,21 +60,21 @@ init appState uuid =
     , onlineUsers = []
     , savingActionUuids = []
     , planSavingModel = PlanSaving.init
-    , shareModalModel = ShareModal.init
+    , shareModalModel = ShareModal.init appState
     , previewModel = Preview.init uuid Preview.TemplateNotSet
     , questionnaireModel = Loading
     , summaryReportModel = SummaryReport.init
     , documentsModel = Documents.initialModel PaginationQueryString.empty
     , newDocumentModel = NewDocument.initEmpty
-    , settingsModel = Settings.init Nothing
+    , settingsModel = Settings.init appState Nothing
     , questionnaireVersionViewModalModel = QuestionnaireVersionViewModal.initEmpty
     , revertModalModel = RevertModal.init
     , addingToMyProjects = Unset
     }
 
 
-initPageModel : ProjectDetailRoute -> Model -> Model
-initPageModel route model =
+initPageModel : AppState -> ProjectDetailRoute -> Model -> Model
+initPageModel appState route model =
     case route of
         PlanDetailRoute.Preview ->
             let
@@ -105,7 +105,7 @@ initPageModel route model =
             }
 
         PlanDetailRoute.Settings ->
-            { model | settingsModel = Settings.init (ActionResult.unwrap Nothing (.questionnaire >> Just) model.questionnaireModel) }
+            { model | settingsModel = Settings.init appState (ActionResult.unwrap Nothing (.questionnaire >> Just) model.questionnaireModel) }
 
         _ ->
             model

@@ -9,31 +9,38 @@ module Wizard.Projects.Detail.Components.Settings exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Form exposing (Form)
 import Form.Field as Field
-import Html exposing (Html, br, button, div, h2, hr, p, strong, text)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Form.Input as Input
+import Html exposing (Html, a, br, button, div, h2, hr, label, li, p, strong, text, ul)
+import Html.Attributes exposing (class, classList, disabled, id, name, style)
+import Html.Events exposing (onClick, onMouseDown)
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageSuggestion as PackageSuggestion
+import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lx)
+import Shared.Html exposing (emptyNode, faSet)
+import Shared.Locale exposing (l, lg, lgx, lx)
 import Shared.Setters exposing (setSelected)
+import Shared.Utils exposing (dispatch, listFilterJust)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
@@ -67,19 +74,23 @@ type alias Model =
     , templateTypeHintInputModel : TypeHintInput.Model TemplateSuggestion
     , savingQuestionnaire : ActionResult String
     , deleteModalModel : DeleteModal.Model
+    , projectTagsDebouncer : Debouncer Msg
+    , projectTagsSuggestions : ActionResult (Pagination String)
     }
 
 
-init : Maybe QuestionnaireDetail -> Model
-init mbQuestionnaire =
+init : AppState -> Maybe QuestionnaireDetail -> Model
+init appState mbQuestionnaire =
     let
         setSelectedTemplate =
             setSelected (Maybe.andThen .template mbQuestionnaire)
     in
-    { form = Maybe.unwrap QuestionnaireEditForm.initEmpty QuestionnaireEditForm.init mbQuestionnaire
+    { form = Maybe.unwrap (QuestionnaireEditForm.initEmpty appState) (QuestionnaireEditForm.init appState) mbQuestionnaire
     , templateTypeHintInputModel = setSelectedTemplate <| TypeHintInput.init "templateId"
     , savingQuestionnaire = Unset
     , deleteModalModel = DeleteModal.initialModel
+    , projectTagsDebouncer = Debouncer.toDebouncer <| Debouncer.debounce 500
+    , projectTagsSuggestions = ActionResult.Unset
     }
 
 
@@ -92,6 +103,9 @@ type Msg
     | PutQuestionnaireComplete (Result ApiError ())
     | DeleteModalMsg DeleteModal.Msg
     | TemplateTypeHintInputMsg (TypeHintInput.Msg TemplateSuggestion)
+    | ProjectTagsSearch String
+    | ProjectTagsSearchComplete (Result ApiError (Pagination String))
+    | DebouncerMsg (Debouncer.Msg Msg)
 
 
 type alias UpdateConfig msg =
@@ -118,6 +132,15 @@ update cfg msg appState model =
         TemplateTypeHintInputMsg typeHintInputMsg ->
             handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model
 
+        ProjectTagsSearch value ->
+            handleProjectTagsSearch cfg appState model value
+
+        ProjectTagsSearchComplete result ->
+            handleProjectTagsSearchComplete appState model result
+
+        DebouncerMsg debounceMsg ->
+            handleDebouncerMsg cfg appState model debounceMsg
+
 
 handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Model -> ( Model, Cmd msg )
 handleFormMsg cfg formMsg appState model =
@@ -136,8 +159,27 @@ handleFormMsg cfg formMsg appState model =
             )
 
         _ ->
-            ( { model | form = Form.update QuestionnaireEditForm.validation formMsg model.form }
-            , Cmd.none
+            let
+                searchValue fieldName value =
+                    if fieldName == lastProjectTagFieldName model.form then
+                        dispatch (cfg.wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsSearch value)
+
+                    else
+                        Cmd.none
+
+                cmd =
+                    case formMsg of
+                        Form.Focus fieldName ->
+                            searchValue fieldName ""
+
+                        Form.Input fieldName Form.Text (Field.String value) ->
+                            searchValue fieldName value
+
+                        _ ->
+                            Cmd.none
+            in
+            ( { model | form = Form.update (QuestionnaireEditForm.validation appState) formMsg model.form }
+            , cmd
             )
 
 
@@ -188,6 +230,57 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.templateTypeHintInputModel
     in
     ( { model | templateTypeHintInputModel = templateTypeHintInputModel }, cmd )
+
+
+handleProjectTagsSearch : UpdateConfig msg -> AppState -> Model -> String -> ( Model, Cmd msg )
+handleProjectTagsSearch cfg appState model value =
+    let
+        queryString =
+            PaginationQueryString.fromQ value
+                |> PaginationQueryString.withSize (Just 10)
+
+        selectedTags =
+            Form.getListIndexes "projectTags" model.form
+                |> List.unconsLast
+                |> Maybe.unwrap [] Tuple.second
+                |> List.map (\i -> (Form.getFieldAsString ("projectTags." ++ String.fromInt i) model.form).value)
+                |> listFilterJust
+                |> List.filter (not << String.isEmpty)
+
+        cmd =
+            Cmd.map cfg.wrapMsg <|
+                QuestionnairesApi.getProjectTagsSuggestions queryString selectedTags appState ProjectTagsSearchComplete
+    in
+    ( model, cmd )
+
+
+handleProjectTagsSearchComplete : AppState -> Model -> Result ApiError (Pagination String) -> ( Model, Cmd msg )
+handleProjectTagsSearchComplete appState model result =
+    case result of
+        Ok data ->
+            ( { model | projectTagsSuggestions = Success data }
+            , Cmd.none
+            )
+
+        Err error ->
+            ( { model | projectTagsSuggestions = ApiError.toActionResult appState (lg "apiError.questionnaires.getProjectTagsSuggestionsError" appState) error }
+            , Cmd.none
+            )
+
+
+handleDebouncerMsg : UpdateConfig msg -> AppState -> Model -> Debouncer.Msg Msg -> ( Model, Cmd msg )
+handleDebouncerMsg cfg appState model debounceMsg =
+    let
+        updateConfig =
+            { mapMsg = cfg.wrapMsg << DebouncerMsg
+            , getDebouncer = .projectTagsDebouncer
+            , setDebouncer = \d m -> { m | projectTagsDebouncer = d }
+            }
+
+        update_ updateMsg updateModel =
+            update cfg updateMsg appState updateModel
+    in
+    Debouncer.update update_ updateConfig debounceMsg model
 
 
 
@@ -254,12 +347,20 @@ formView appState model =
 
             else
                 []
+
+        projectTagsInput =
+            if Feature.projectTagging appState then
+                projectTagsFormGroup appState model
+
+            else
+                emptyNode
     in
     div []
         ([ h2 [] [ lx_ "settings.title" appState ]
          , FormResult.errorOnlyView appState model.savingQuestionnaire
          , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
          , Html.map FormMsg <| FormGroup.input appState model.form "description" <| lg "questionnaire.description" appState
+         , Html.map FormMsg <| projectTagsInput
          , hr [] []
          , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
          , Html.map FormMsg <| formatInput
@@ -269,6 +370,98 @@ formView appState model =
                     (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
                ]
         )
+
+
+projectTagsFormGroup : AppState -> Model -> Html Form.Msg
+projectTagsFormGroup appState model =
+    let
+        tags =
+            Form.getListIndexes "projectTags" model.form
+                |> List.unconsLast
+                |> Maybe.unwrap [] Tuple.second
+    in
+    div [ class "form-group form-group-project-tags" ]
+        [ label [] [ lgx "projectTags" appState ]
+        , div []
+            (List.map (projectTagView appState model.form) tags ++ projectTagInput appState model)
+        ]
+
+
+projectTagView : AppState -> Form FormError QuestionnaireEditForm -> Int -> Html Form.Msg
+projectTagView appState form i =
+    let
+        value =
+            Maybe.withDefault "" <| (Form.getFieldAsString ("projectTags." ++ String.fromInt i) form).value
+    in
+    div [ class "project-tag", dataCy "project_settings_tag" ]
+        [ text value
+        , a
+            [ class "text-danger ml-2"
+            , onClick (Form.RemoveItem "projectTags" i)
+            , dataCy "project_settings_tag-remove"
+            ]
+            [ faSet "_global.remove" appState ]
+        ]
+
+
+projectTagInput : AppState -> Model -> List (Html Form.Msg)
+projectTagInput appState model =
+    let
+        field =
+            Form.getFieldAsString (lastProjectTagFieldName model.form) model.form
+
+        isEmpty =
+            Maybe.unwrap True String.isEmpty field.value
+
+        ( hasError, errorView ) =
+            case field.error of
+                Just err ->
+                    ( True
+                    , p [ class "invalid-feedback", style "display" "block" ]
+                        [ text (Form.errorToString appState "" err) ]
+                    )
+
+                Nothing ->
+                    ( False, emptyNode )
+
+        typehints =
+            ActionResult.unwrap [] .items model.projectTagsSuggestions
+
+        typehintMessage =
+            Form.Input (lastProjectTagFieldName model.form) Form.Text << Field.String
+
+        typehintView tagName =
+            li [ onMouseDown <| typehintMessage tagName, dataCy "project_settings_tag-suggestion" ]
+                [ text tagName ]
+
+        typehintsView hasFocus =
+            if List.isEmpty typehints || not hasFocus || hasError then
+                emptyNode
+
+            else
+                ul [ class "typehints" ]
+                    (List.map typehintView typehints)
+    in
+    [ div [ class "input-group" ]
+        [ Input.textInput field
+            [ class "form-control"
+            , classList [ ( "is-invalid", hasError ) ]
+            , id "projectTag"
+            , name "projectTag"
+            ]
+        , div [ class "input-group-append" ]
+            [ button
+                [ class "btn btn-secondary"
+                , disabled (isEmpty || hasError)
+                , onClick (Form.Append "projectTags")
+                , dataCy "project_settings_add-tag-button"
+                ]
+                [ lx_ "form.addProjectTag" appState ]
+            ]
+        ]
+    , errorView
+    , typehintsView field.hasFocus
+    ]
 
 
 knowledgeModel : AppState -> ViewConfig -> Html Msg
@@ -307,3 +500,16 @@ dangerZone appState cfg =
                 ]
             ]
         ]
+
+
+
+-- UTILS
+
+
+lastProjectTagFieldName : Form FormError QuestionnaireEditForm -> String
+lastProjectTagFieldName form =
+    Form.getListIndexes "projectTags" form
+        |> List.last
+        |> Maybe.withDefault 0
+        |> String.fromInt
+        |> (++) "projectTags."

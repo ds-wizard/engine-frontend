@@ -57,7 +57,7 @@ label {
 .alert {
     word-break: break-word;
 
-    &>.fa:first-child {
+    & > .fa:first-child {
         margin-right: 10px;
     }
 
@@ -205,6 +205,7 @@ ins, .ins {
     &::-webkit-scrollbar {
         display: none;
     }
+
     -ms-overflow-style: none;
     scrollbar-width: none;
 
