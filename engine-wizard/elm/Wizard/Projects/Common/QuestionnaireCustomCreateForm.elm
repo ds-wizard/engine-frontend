@@ -62,12 +62,12 @@ validation =
 
 
 encode : List String -> QuestionnaireCustomCreateForm -> E.Value
-encode tagUuids form =
+encode questionTagUuids form =
     E.object
         [ ( "name", E.string form.name )
         , ( "packageId", E.string form.packageId )
         , ( "visibility", QuestionnaireVisibility.encode (QuestionnaireVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission) )
         , ( "sharing", QuestionnaireSharing.encode (QuestionnaireSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
-        , ( "tagUuids", E.list E.string tagUuids )
+        , ( "questionTagUuids", E.list E.string questionTagUuids )
         , ( "templateId", E.maybe E.string Nothing )
         ]

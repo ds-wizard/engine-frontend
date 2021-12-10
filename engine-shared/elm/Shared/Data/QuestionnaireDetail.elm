@@ -70,6 +70,7 @@ type alias QuestionnaireDetail =
     { uuid : Uuid
     , name : String
     , description : Maybe String
+    , projectTags : List String
     , isTemplate : Bool
     , package : Package
     , knowledgeModel : KnowledgeModel
@@ -79,7 +80,7 @@ type alias QuestionnaireDetail =
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
     , permissions : List Permission
-    , selectedTagUuids : List String
+    , selectedQuestionTagUuids : List String
     , templateId : Maybe String
     , template : Maybe TemplateSuggestion
     , formatUuid : Maybe Uuid
@@ -96,6 +97,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" (D.maybe D.string)
+        |> D.required "projectTags" (D.list D.string)
         |> D.required "isTemplate" D.bool
         |> D.required "package" Package.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
@@ -105,7 +107,7 @@ decoder =
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)
-        |> D.required "selectedTagUuids" (D.list D.string)
+        |> D.required "selectedQuestionTagUuids" (D.list D.string)
         |> D.required "templateId" (D.maybe D.string)
         |> D.required "template" (D.maybe TemplateSuggestion.decoder)
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
@@ -148,6 +150,7 @@ createQuestionnaireDetail package km =
     { uuid = Uuid.nil
     , name = ""
     , description = Nothing
+    , projectTags = []
     , isTemplate = False
     , visibility = PrivateQuestionnaire
     , sharing = RestrictedQuestionnaire
@@ -157,7 +160,7 @@ createQuestionnaireDetail package km =
     , replies = Dict.empty
     , commentThreadsMap = Dict.empty
     , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
-    , selectedTagUuids = []
+    , selectedQuestionTagUuids = []
     , templateId = Nothing
     , template = Nothing
     , formatUuid = Nothing

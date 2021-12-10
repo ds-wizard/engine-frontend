@@ -4,14 +4,17 @@ module Wizard.Projects.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Debouncer.Extra as Debouncer
 import Dict
+import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch, flip, stringToBool)
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -21,14 +24,17 @@ import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : Cmd Msg
 fetchData =
-    Cmd.map ListingMsg Listing.fetchData
+    Cmd.batch
+        [ Cmd.map ListingMsg Listing.fetchData
+        , dispatch (ProjectTagsFilterSearch "")
+        ]
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -72,6 +78,49 @@ update wrapMsg msg appState model =
             ( { model | cloneModalModel = deleteModalModel }
             , cmd
             )
+
+        ProjectTagsFilterInput value ->
+            ( { model | projectTagsFilterSearchValue = value }
+            , dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsFilterSearch value)
+            )
+
+        ProjectTagsFilterSearch value ->
+            let
+                queryString =
+                    PaginationQueryString.fromQ value
+                        |> PaginationQueryString.withSize (Just 10)
+
+                selectedTags =
+                    model.questionnaires.filters
+                        |> Dict.get indexRouteProjectTagsFilterId
+                        |> Maybe.unwrap [] (String.split ",")
+
+                cmd =
+                    Cmd.map wrapMsg <|
+                        QuestionnairesApi.getProjectTagsSuggestions queryString selectedTags appState ProjectTagsFilterSearchComplete
+            in
+            ( model, cmd )
+
+        ProjectTagsFilterSearchComplete result ->
+            applyResult appState
+                { setResult = \r m -> { m | projectTagsFilterTags = r }
+                , defaultError = lg "apiError.questionnaires.getProjectTagsSuggestionsError" appState
+                , model = model
+                , result = result
+                }
+
+        DebouncerMsg debounceMsg ->
+            let
+                updateConfig =
+                    { mapMsg = wrapMsg << DebouncerMsg
+                    , getDebouncer = .projectTagsFilterDebouncer
+                    , setDebouncer = \d m -> { m | projectTagsFilterDebouncer = d }
+                    }
+
+                update_ updateMsg updateModel =
+                    update wrapMsg updateMsg appState updateModel
+            in
+            Debouncer.update update_ updateConfig debounceMsg model
 
 
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -126,8 +175,11 @@ listingUpdateConfig wrapMsg appState model =
 
         users =
             Dict.get indexRouteUsersFilterId model.questionnaires.filters
+
+        projectTags =
+            Dict.get indexRouteProjectTagsFilterId model.questionnaires.filters
     in
-    { getRequest = QuestionnairesApi.getQuestionnaires { isTemplate = isTemplate, userUuids = users }
+    { getRequest = QuestionnairesApi.getQuestionnaires { isTemplate = isTemplate, userUuids = users, projectTags = projectTags }
     , getError = lg "apiError.questionnaires.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectIndexWithFilters model.questionnaires.filters

@@ -10,13 +10,13 @@ import Wizard.Settings.Projects.Models exposing (Model)
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update =
-    GenericUpdate.update updateProps
+update wrapMsg msg appState =
+    GenericUpdate.update (updateProps appState) wrapMsg msg appState
 
 
-updateProps : GenericUpdate.UpdateProps EditableQuestionnairesConfigForm
-updateProps =
-    { initForm = .questionnaires >> EditableQuestionnairesConfigForm.init
+updateProps : AppState -> GenericUpdate.UpdateProps EditableQuestionnairesConfigForm
+updateProps appState =
+    { initForm = .questionnaires >> EditableQuestionnairesConfigForm.init appState
     , formToConfig = EditableQuestionnairesConfigForm.toEditableQuestionnaireConfig >> EditableConfig.updateQuestionnaires
-    , formValidation = EditableQuestionnairesConfigForm.validation
+    , formValidation = EditableQuestionnairesConfigForm.validation appState
     }

@@ -86,17 +86,6 @@ $toolbar-height: 40px;
             &:active {
                 background-color: $gray-100 !important;
             }
-
-            &-icon {
-                padding-left: 3rem;
-                position: relative;
-
-                .fa {
-                    position: absolute;
-                    left: 1.5rem;
-                    top: 0.5rem;
-                }
-            }
         }
     }
 

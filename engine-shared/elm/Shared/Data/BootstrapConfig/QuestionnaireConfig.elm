@@ -18,6 +18,7 @@ type alias QuestionnaireConfig =
     , questionnaireCreation : QuestionnaireCreation
     , feedback : SimpleFeatureConfig
     , summaryReport : SimpleFeatureConfig
+    , projectTagging : SimpleFeatureConfig
     }
 
 
@@ -29,6 +30,7 @@ decoder =
         |> D.required "questionnaireCreation" QuestionnaireCreation.decoder
         |> D.required "feedback" SimpleFeatureConfig.decoder
         |> D.required "summaryReport" SimpleFeatureConfig.decoder
+        |> D.required "projectTagging" SimpleFeatureConfig.decoder
 
 
 default : QuestionnaireConfig
@@ -38,4 +40,5 @@ default =
     , questionnaireCreation = QuestionnaireCreation.TemplateAndCustomQuestionnaireCreation
     , feedback = SimpleFeatureConfig.init True
     , summaryReport = SimpleFeatureConfig.init True
+    , projectTagging = SimpleFeatureConfig.init True
     }

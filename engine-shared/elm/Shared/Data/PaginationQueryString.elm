@@ -7,6 +7,7 @@ module Shared.Data.PaginationQueryString exposing
     , parser
     , parser1
     , parser2
+    , parser3
     , toApiUrl
     , toApiUrlWith
     , toUrl
@@ -16,6 +17,7 @@ module Shared.Data.PaginationQueryString exposing
     , wrapRoute
     , wrapRoute1
     , wrapRoute2
+    , wrapRoute3
     )
 
 import List.Extra as List
@@ -90,6 +92,15 @@ wrapRoute2 route defaultSortBy page q sort =
     route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
 
 
+wrapRoute3 : (PaginationQueryString -> d -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (d -> c -> b -> a)
+wrapRoute3 route defaultSortBy page q sort =
+    let
+        ( sortBy, sortDirection ) =
+            parseSort defaultSortBy sort
+    in
+    route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
+
+
 parser : Parser a (Maybe Int -> Maybe String -> Maybe String -> b) -> Parser a b
 parser p =
     p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort"
@@ -103,6 +114,11 @@ parser1 p qs =
 parser2 : Parser a (Maybe Int -> Maybe String -> Maybe String -> d -> c -> b) -> Query.Parser d -> Query.Parser c -> Parser a b
 parser2 p qs1 qs2 =
     p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs1 <?> qs2
+
+
+parser3 : Parser a (Maybe Int -> Maybe String -> Maybe String -> e -> d -> c -> b) -> Query.Parser e -> Query.Parser d -> Query.Parser c -> Parser a b
+parser3 p qs1 qs2 qs3 =
+    p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs1 <?> qs2 <?> qs3
 
 
 toUrl : PaginationQueryString -> String

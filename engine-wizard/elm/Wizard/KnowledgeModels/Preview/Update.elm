@@ -80,7 +80,7 @@ update msg wrapMsg appState model =
                                 , ( "packageId", E.string questionnaireModel.questionnaire.package.id )
                                 , ( "visibility", QuestionnaireVisibility.encode appState.config.questionnaire.questionnaireVisibility.defaultValue )
                                 , ( "sharing", QuestionnaireSharing.encode QuestionnaireSharing.AnyoneWithLinkEditQuestionnaire )
-                                , ( "tagUuids", E.list E.string [] )
+                                , ( "questionTagUuids", E.list E.string [] )
                                 , ( "templateId", E.maybe E.string Nothing )
                                 ]
 

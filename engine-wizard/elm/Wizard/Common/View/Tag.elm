@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lx)
+import Shared.Locale exposing (l, lg, lx)
 import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -81,7 +81,7 @@ selection appState tagListConfig knowledgeModelResult =
     let
         viewContent content =
             div [ class "form-group form-group-tags" ]
-                [ label [] [ text "Tags" ]
+                [ label [] [ text (lg "tags" appState) ]
                 , div []
                     [ content ]
                 ]

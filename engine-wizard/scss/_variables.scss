@@ -37,6 +37,10 @@ $top-header-height: 50px !default;
 $illustrations-color: #4285f4 !default;
 
 
+// listings
+$listing-filter-dropdown-width: 300px;
+
+
 // special text colors
 @function color-level($color, $level: 0) {
     $color-base: if($level > 0, $black, $white);

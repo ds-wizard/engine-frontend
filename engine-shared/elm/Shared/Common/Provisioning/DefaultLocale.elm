@@ -80,4 +80,5 @@ locale =
     , ( "Shared.Form.error.invalidString", "%s cannot be empty." )
     , ( "Shared.Form.error.invalidUuid", "This is not a valid UUID." )
     , ( "Shared.Form.error.smallerFloatThan", "This should not be less than %s." )
+    , ( "Shared.Form.Validate.projectTagError", "Comma (,) is not allowed in project tags" )
     ]

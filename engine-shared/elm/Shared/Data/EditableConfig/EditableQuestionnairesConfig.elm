@@ -19,6 +19,7 @@ type alias EditableQuestionnairesConfig =
     , questionnaireCreation : QuestionnaireCreation
     , feedback : Feedback
     , summaryReport : SimpleFeatureConfig
+    , projectTagging : ProjectTagging
     }
 
 
@@ -30,6 +31,12 @@ type alias Feedback =
     }
 
 
+type alias ProjectTagging =
+    { enabled : Bool
+    , tags : List String
+    }
+
+
 decoder : Decoder EditableQuestionnairesConfig
 decoder =
     D.succeed EditableQuestionnairesConfig
@@ -38,6 +45,7 @@ decoder =
         |> D.required "questionnaireCreation" QuestionnaireCreation.decoder
         |> D.required "feedback" feedbackDecoder
         |> D.required "summaryReport" SimpleFeatureConfig.decoder
+        |> D.required "projectTagging" projectTaggingDecoder
 
 
 feedbackDecoder : Decoder Feedback
@@ -49,6 +57,13 @@ feedbackDecoder =
         |> D.required "repo" D.string
 
 
+projectTaggingDecoder : Decoder ProjectTagging
+projectTaggingDecoder =
+    D.succeed ProjectTagging
+        |> D.required "enabled" D.bool
+        |> D.required "tags" (D.list D.string)
+
+
 encode : EditableQuestionnairesConfig -> E.Value
 encode config =
     E.object
@@ -57,6 +72,7 @@ encode config =
         , ( "questionnaireCreation", QuestionnaireCreation.encode config.questionnaireCreation )
         , ( "feedback", encodeFeedback config.feedback )
         , ( "summaryReport", SimpleFeatureConfig.encode config.summaryReport )
+        , ( "projectTagging", encodeProjectTagging config.projectTagging )
         ]
 
 
@@ -67,4 +83,12 @@ encodeFeedback feedback =
         , ( "token", E.string feedback.token )
         , ( "owner", E.string feedback.owner )
         , ( "repo", E.string feedback.repo )
+        ]
+
+
+encodeProjectTagging : ProjectTagging -> E.Value
+encodeProjectTagging projectTagging =
+    E.object
+        [ ( "enabled", E.bool projectTagging.enabled )
+        , ( "tags", E.list E.string projectTagging.tags )
         ]

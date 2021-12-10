@@ -11,6 +11,10 @@
         .filter-sort {
             & > .btn, & > .btn-group {
                 margin-left: 1rem;
+
+                .badge {
+                    margin-left: .25rem;
+                }
             }
 
             & > .btn-group > .btn {
@@ -24,6 +28,43 @@
 
         .btn-primary {
             min-width: 100px;
+        }
+
+        .dropdown-toggle {
+            max-width: $listing-filter-dropdown-width;
+            display: flex;
+            align-items: baseline;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+
+            &::after {
+                padding-bottom: 0.15rem;
+            }
+
+            .filter-text-label {
+                flex-grow: 1;
+                overflow-x: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .dropdown-menu {
+            width: $listing-filter-dropdown-width;
+            overflow-x: hidden;
+
+            .dropdown-item {
+                overflow-x: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .dropdown-item-search {
+                input {
+                    width: 100%;
+                    border: none;
+                    outline: none;
+                    box-shadow: none;
+                }
+            }
         }
     }
 

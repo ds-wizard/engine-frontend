@@ -71,21 +71,21 @@ type alias Model =
     }
 
 
-init : Model
-init =
+init : AppState -> Model
+init appState =
     { visible = False
     , savingSharing = Unset
-    , questionnaireEditForm = QuestionnaireEditForm.initEmpty
+    , questionnaireEditForm = QuestionnaireEditForm.initEmpty appState
     , questionnaireUuid = Uuid.nil
     , userTypeHintInputModel = TypeHintInput.init "memberId"
     , users = []
     }
 
 
-setQuestionnaire : QuestionnaireDetail -> Model -> Model
-setQuestionnaire questionnaire model =
+setQuestionnaire : AppState -> QuestionnaireDetail -> Model -> Model
+setQuestionnaire appState questionnaire model =
     { model
-        | questionnaireEditForm = QuestionnaireEditForm.init questionnaire
+        | questionnaireEditForm = QuestionnaireEditForm.init appState questionnaire
         , questionnaireUuid = questionnaire.uuid
         , users = List.map (.member >> Member.toUserSuggestion) questionnaire.permissions
     }
@@ -125,7 +125,7 @@ update cfg msg appState model =
     in
     case msg of
         Open questionnaire ->
-            withSeed ( setQuestionnaire questionnaire { model | visible = True }, Cmd.none )
+            withSeed ( setQuestionnaire appState questionnaire { model | visible = True }, Cmd.none )
 
         Close ->
             withSeed ( { model | visible = False }, Cmd.none )
@@ -134,7 +134,7 @@ update cfg msg appState model =
             withSeed <| handleUserTypeHintInputMsg cfg typeHintInputMsg appState model
 
         AddUser user ->
-            handleAddUser appState.seed model user
+            handleAddUser appState model user
 
         FormMsg formMsg ->
             withSeed <| handleFormMsg cfg formMsg appState model
@@ -170,8 +170,8 @@ handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
     ( { model | userTypeHintInputModel = userTypeHintInputModel }, cmd )
 
 
-handleAddUser : Seed -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
-handleAddUser seed model user =
+handleAddUser : AppState -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
+handleAddUser appState model user =
     let
         userTypeHintInputModel =
             TypeHintInput.clear model.userTypeHintInputModel
@@ -180,13 +180,13 @@ handleAddUser seed model user =
             List.length <| Form.getListIndexes "permissions" model.questionnaireEditForm
 
         formUpdate =
-            Form.update QuestionnaireEditForm.validation
+            Form.update (QuestionnaireEditForm.validation appState)
 
         createInputMessage field value =
             Form.Input field Form.Text (Field.String value)
 
         ( newUuid, newSeed ) =
-            getUuid seed
+            getUuid appState.seed
 
         msgs =
             [ Form.Append "permissions"
@@ -226,7 +226,7 @@ handleFormMsg cfg formMsg appState model =
             )
 
         _ ->
-            ( { model | questionnaireEditForm = Form.update QuestionnaireEditForm.validation formMsg model.questionnaireEditForm }
+            ( { model | questionnaireEditForm = Form.update (QuestionnaireEditForm.validation appState) formMsg model.questionnaireEditForm }
             , Cmd.none
             )
 

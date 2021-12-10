@@ -68,7 +68,7 @@ isUsersIndex route =
 
 projectsIndex : Route
 projectsIndex =
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing)
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing Nothing)
 
 
 projectIndexWithFilters : Dict String String -> PaginationQueryString -> Route
@@ -77,13 +77,14 @@ projectIndexWithFilters filters pagination =
         (Wizard.Projects.Routes.IndexRoute pagination
             (Dict.get Wizard.Projects.Routes.indexRouteIsTemplateFilterId filters)
             (Dict.get Wizard.Projects.Routes.indexRouteUsersFilterId filters)
+            (Dict.get Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
         )
 
 
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _) ->
+        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _ _) ->
             True
 
         _ ->

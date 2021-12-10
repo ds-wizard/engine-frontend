@@ -37,6 +37,7 @@ module Wizard.Common.Feature exposing
     , projectOpen
     , projectPreview
     , projectSettings
+    , projectTagging
     , projectTemplatesCreate
     , projectTodos
     , projectVersionHitory
@@ -251,6 +252,11 @@ projectCancelMigration appState questionnaire =
 projectDelete : AppState -> Questionnaire -> Bool
 projectDelete appState questionnaire =
     Questionnaire.isEditable appState questionnaire
+
+
+projectTagging : AppState -> Bool
+projectTagging appState =
+    appState.config.questionnaire.projectTagging.enabled
 
 
 projectMetrics : AppState -> QuestionnaireDetail -> Bool
