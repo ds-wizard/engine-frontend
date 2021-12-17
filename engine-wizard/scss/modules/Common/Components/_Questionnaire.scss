@@ -906,7 +906,7 @@ $toolbar-height: 40px;
             padding: .25em 0.8em;
         }
 
-        .typehints {
+        .integration-typehints {
             background: #fff;
             position: absolute;
             width: 100%;
@@ -937,20 +937,19 @@ $toolbar-height: 40px;
                 color: $danger;
             }
 
-            ul {
+            &-list {
                 list-style: none;
                 padding: 0;
                 margin: 0;
 
-                li {
-
+                &-item {
                     color: $gray-700;
                     padding: 10px 14px;
                     display: flex;
+                    cursor: pointer;
 
                     &:hover {
-                        color: $white;
-                        background: $primary;
+                        background: $gray-200;
                         text-decoration: none;
                     }
 
