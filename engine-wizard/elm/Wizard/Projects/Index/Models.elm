@@ -8,6 +8,7 @@ import Debouncer.Extra as Debounce exposing (Debouncer)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Utils exposing (dictFromMaybeList)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Projects.Common.CloneProjectModal.Models as CloneProjectModal
@@ -21,9 +22,12 @@ type alias Model =
     , deletingMigration : ActionResult String
     , deleteModalModel : DeleteProjectModal.Model
     , cloneModalModel : CloneProjectModal.Model
+    , debouncer : Debouncer Msg
     , projectTagsFilterSearchValue : String
-    , projectTagsFilterDebouncer : Debouncer Msg
     , projectTagsFilterTags : ActionResult (Pagination String)
+    , userFilterSearchValue : String
+    , userFilterSelectedUsers : ActionResult (Pagination UserSuggestion)
+    , userFilterUsers : ActionResult (Pagination UserSuggestion)
     }
 
 
@@ -41,7 +45,10 @@ initialModel paginationQueryString mbIsTemplate mbUser mbProjectTags =
     , deletingMigration = Unset
     , deleteModalModel = DeleteProjectModal.initialModel
     , cloneModalModel = CloneProjectModal.initialModel
+    , debouncer = Debounce.toDebouncer <| Debounce.debounce 500
     , projectTagsFilterSearchValue = ""
-    , projectTagsFilterDebouncer = Debounce.toDebouncer <| Debounce.debounce 500
-    , projectTagsFilterTags = ActionResult.Unset
+    , projectTagsFilterTags = ActionResult.Loading
+    , userFilterSearchValue = ""
+    , userFilterSelectedUsers = ActionResult.Loading
+    , userFilterUsers = ActionResult.Loading
     }

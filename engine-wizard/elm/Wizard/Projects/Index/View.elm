@@ -9,6 +9,7 @@ import Html.Events exposing (onInput)
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Data.Pagination as Pagination
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
@@ -16,7 +17,8 @@ import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicati
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lx)
-import Shared.Utils exposing (flip, listInsertIf)
+import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
+import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
@@ -26,6 +28,7 @@ import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.Html.Events exposing (alwaysStopPropagationOn)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
+import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.KnowledgeModels.Routes
 import Wizard.Projects.Common.CloneProjectModal.Msgs as CloneProjectModalMsg
 import Wizard.Projects.Common.CloneProjectModal.View as CloneProjectModal
@@ -37,7 +40,7 @@ import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute(..))
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId)
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
@@ -54,14 +57,28 @@ lx_ =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ listClass "Questionnaires__Index" ]
-        [ Page.header (l_ "header.title" appState) []
-        , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
-        , FormResult.view appState model.deletingMigration
-        , Listing.view appState (listingConfig appState model) model.questionnaires
-        , Html.map DeleteQuestionnaireModalMsg <| DeleteProjectModal.view appState model.deleteModalModel
-        , Html.map CloneQuestionnaireModalMsg <| CloneProjectModal.view appState model.cloneModalModel
-        ]
+    let
+        userFilterSelectedUsersActionResult =
+            if Dict.member indexRouteUsersFilterId model.questionnaires.filters then
+                model.userFilterSelectedUsers
+
+            else
+                ActionResult.Success Pagination.empty
+
+        actionResult =
+            ActionResult.combine3 model.projectTagsFilterTags model.userFilterUsers userFilterSelectedUsersActionResult
+
+        content _ =
+            div [ listClass "Questionnaires__Index" ]
+                [ Page.header (l_ "header.title" appState) []
+                , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
+                , FormResult.view appState model.deletingMigration
+                , Listing.view appState (listingConfig appState model) model.questionnaires
+                , Html.map DeleteQuestionnaireModalMsg <| DeleteProjectModal.view appState model.deleteModalModel
+                , Html.map CloneQuestionnaireModalMsg <| CloneProjectModal.view appState model.cloneModalModel
+                ]
+    in
+    Page.actionResultView appState content actionResult
 
 
 createButton : AppState -> Html Msg
@@ -100,10 +117,14 @@ listingConfig appState model =
             Dict.member indexRouteProjectTagsFilterId model.questionnaires.filters
                 || ActionResult.unwrap False (not << List.isEmpty << .items) model.projectTagsFilterTags
 
+        usersFilter =
+            listingUsersFilter appState model
+
         listingFilters =
             []
                 |> listInsertIf templateFilter (Features.projectTemplatesCreate appState)
                 |> listInsertIf tagsFilter (Features.projectTagging appState && tagsFilterVisible)
+                |> listInsertIf usersFilter True
     in
     { title = listingTitle appState
     , description = listingDescription appState
@@ -140,20 +161,21 @@ listingProjectTagsFilter appState model =
                     model.questionnaires.paginationQueryString
 
         removeTagLink tag =
-            toRoute <| List.filter (\t -> t /= tag) selectedTags
+            toRoute <| List.filter ((/=) tag) selectedTags
 
         addTagLink tag =
             toRoute <| tag :: selectedTags
 
-        selectedTagItem tag =
+        viewTagItem link icon tag =
             Dropdown.anchorItem
-                [ href (removeTagLink tag), class "dropdown-item-icon", dataCy "project_filter_tags_option" ]
-                [ faSet "listing.filter.multi.selected" appState, text tag ]
+                [ href (link tag), class "dropdown-item-icon", dataCy "project_filter_tags_option" ]
+                [ icon, text tag ]
 
-        addTagItem tag =
-            Dropdown.anchorItem
-                [ href (addTagLink tag), class "dropdown-item-icon", dataCy "project_filter_tags_option" ]
-                [ faSet "listing.filter.multi.notSelected" appState, text tag ]
+        selectedTagItem =
+            viewTagItem removeTagLink (faSet "listing.filter.multi.selected" appState)
+
+        addTagItem =
+            viewTagItem addTagLink (faSet "listing.filter.multi.notSelected" appState)
 
         sortTags =
             List.sortBy String.toUpper
@@ -168,15 +190,7 @@ listingProjectTagsFilter appState model =
                 |> ActionResult.unwrap [] (sortTags << .items)
 
         badge =
-            case List.length selectedTags of
-                0 ->
-                    emptyNode
-
-                1 ->
-                    emptyNode
-
-                n ->
-                    span [ class "badge badge-pill badge-dark" ] [ text ("+" ++ String.fromInt (n - 1)) ]
+            filterBadge selectedTags
 
         searchInputItem =
             [ Dropdown.customItem <|
@@ -212,6 +226,106 @@ listingProjectTagsFilter appState model =
         { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
         , items = searchInputItem ++ selectedTagsItems ++ foundTagsItems
         }
+
+
+listingUsersFilter : AppState -> Model -> Listing.Filter Msg
+listingUsersFilter appState model =
+    let
+        toRoute userUuids =
+            Routing.toUrl appState <|
+                Routes.projectIndexWithFilters
+                    (Dict.insert indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
+                    model.questionnaires.paginationQueryString
+
+        removeUserLink userUuid =
+            toRoute <| List.filter ((/=) (Uuid.toString userUuid)) selectedUserUuidss
+
+        addUserLink userUuid =
+            toRoute <| Uuid.toString userUuid :: selectedUserUuidss
+
+        viewUserItem link icon user =
+            Dropdown.anchorItem
+                [ href (link user.uuid), class "dropdown-item-icon", dataCy "project_filter_users_option" ]
+                [ icon
+                , UserIcon.viewSmall user
+                , text (User.fullName user)
+                ]
+
+        selectedUserItem =
+            viewUserItem removeUserLink (faSet "listing.filter.multi.selected" appState)
+
+        addUserItem =
+            viewUserItem addUserLink (faSet "listing.filter.multi.notSelected" appState)
+
+        foundSelectedUsers =
+            ActionResult.unwrap [] .items model.userFilterSelectedUsers
+                |> List.sortWith User.compare
+
+        selectedUserUuidss =
+            model.questionnaires.filters
+                |> Dict.get indexRouteUsersFilterId
+                |> Maybe.unwrap [] (String.split ",")
+
+        selectedUsers =
+            selectedUserUuidss
+                |> List.map (\a -> List.find (\u -> Uuid.toString u.uuid == a) foundSelectedUsers)
+                |> listFilterJust
+                |> List.sortWith User.compare
+
+        foundUsers =
+            model.userFilterUsers
+                |> ActionResult.unwrap [] (List.sortWith User.compare << .items)
+
+        badge =
+            filterBadge selectedUsers
+
+        searchInputItem =
+            [ Dropdown.customItem <|
+                div [ class "dropdown-item-search" ]
+                    [ input
+                        [ type_ "text"
+                        , class "form-control"
+                        , placeholder (l_ "filter.users.searchPlaceholder" appState)
+                        , alwaysStopPropagationOn "click" (D.succeed (UsersFilterInput model.userFilterSearchValue))
+                        , onInput UsersFilterInput
+                        , value model.userFilterSearchValue
+                        ]
+                        []
+                    ]
+            , Dropdown.divider
+            ]
+
+        selectedUsersItems =
+            List.map selectedUserItem selectedUsers
+
+        foundUsersItems =
+            List.map addUserItem foundUsers
+
+        label =
+            case List.head selectedUsers of
+                Just selectedUser ->
+                    User.fullName selectedUser
+
+                Nothing ->
+                    l_ "filter.users.title" appState
+    in
+    Listing.CustomFilter indexRouteUsersFilterId
+        { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
+        , items = searchInputItem ++ selectedUsersItems ++ foundUsersItems
+        }
+
+
+filterBadge : List a -> Html msg
+filterBadge items =
+    case List.length items of
+        0 ->
+            emptyNode
+
+        1 ->
+            emptyNode
+
+        n ->
+            span [ class "badge badge-pill badge-dark" ] [ text ("+" ++ String.fromInt (n - 1)) ]
 
 
 listingTitle : AppState -> Questionnaire -> Html Msg

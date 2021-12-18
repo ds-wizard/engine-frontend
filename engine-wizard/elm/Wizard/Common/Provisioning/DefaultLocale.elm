@@ -807,6 +807,8 @@ locale =
                , ( "Wizard.Projects.Index.View.filter.template.name", "Template" )
                , ( "Wizard.Projects.Index.View.filter.template.projectsOnly", "Projects only" )
                , ( "Wizard.Projects.Index.View.filter.template.templatesOnly", "Templates only" )
+               , ( "Wizard.Projects.Index.View.filter.users.searchPlaceholder", "Search users..." )
+               , ( "Wizard.Projects.Index.View.filter.users.title", "Users" )
                , ( "Wizard.Projects.Index.View.header.title", "Projects" )
                , ( "Wizard.Projects.Index.View.header.create", "Create" )
                , ( "Wizard.Projects.Index.View.listing.empty", "Click \"Create\" button to add a new Questionnaire." )

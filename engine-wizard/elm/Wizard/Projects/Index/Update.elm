@@ -8,6 +8,7 @@ import Debouncer.Extra as Debouncer
 import Dict
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Api.Users as UsersApi
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -29,11 +30,27 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : Cmd Msg
-fetchData =
+fetchData : AppState -> Model -> Cmd Msg
+fetchData appState model =
+    let
+        selectedUsersCmd =
+            case Dict.get indexRouteUsersFilterId model.questionnaires.filters of
+                Just userUuids ->
+                    UsersApi.getUsersSuggestionsWithOptions
+                        model.questionnaires.paginationQueryString
+                        (String.split "," userUuids)
+                        []
+                        appState
+                        UsersFilterGetValuesComplete
+
+                Nothing ->
+                    Cmd.none
+    in
     Cmd.batch
         [ Cmd.map ListingMsg Listing.fetchData
         , dispatch (ProjectTagsFilterSearch "")
+        , dispatch (UsersFilterSearch "")
+        , selectedUsersCmd
         ]
 
 
@@ -109,12 +126,50 @@ update wrapMsg msg appState model =
                 , result = result
                 }
 
+        UsersFilterGetValuesComplete result ->
+            applyResult appState
+                { setResult = \r m -> { m | userFilterSelectedUsers = r }
+                , defaultError = lg "apiError.users.getListError" appState
+                , model = model
+                , result = result
+                }
+
+        UsersFilterInput value ->
+            ( { model | userFilterSearchValue = value }
+            , dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| UsersFilterSearch value)
+            )
+
+        UsersFilterSearch value ->
+            let
+                queryString =
+                    PaginationQueryString.fromQ value
+                        |> PaginationQueryString.withSize (Just 10)
+
+                selectedUsers =
+                    model.questionnaires.filters
+                        |> Dict.get indexRouteUsersFilterId
+                        |> Maybe.unwrap [] (String.split ",")
+
+                cmd =
+                    Cmd.map wrapMsg <|
+                        UsersApi.getUsersSuggestionsWithOptions queryString [] selectedUsers appState UsersFilterSearchComplete
+            in
+            ( model, cmd )
+
+        UsersFilterSearchComplete result ->
+            applyResult appState
+                { setResult = \r m -> { m | userFilterUsers = r }
+                , defaultError = lg "apiError.users.getListError" appState
+                , model = model
+                , result = result
+                }
+
         DebouncerMsg debounceMsg ->
             let
                 updateConfig =
                     { mapMsg = wrapMsg << DebouncerMsg
-                    , getDebouncer = .projectTagsFilterDebouncer
-                    , setDebouncer = \d m -> { m | projectTagsFilterDebouncer = d }
+                    , getDebouncer = .debouncer
+                    , setDebouncer = \d m -> { m | debouncer = d }
                     }
 
                 update_ updateMsg updateModel =
