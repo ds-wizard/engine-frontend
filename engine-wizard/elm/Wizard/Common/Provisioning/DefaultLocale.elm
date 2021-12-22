@@ -269,6 +269,8 @@ locale =
                , ( "_global.km.action.project", "Create project" )
                , ( "_global.km.action.delete", "Delete" )
                , ( "_global.kmMigration", "Migration" )
+               , ( "_global.listingOp.and", "AND" )
+               , ( "_global.listingOp.or", "OR" )
                , ( "_global.loading", "Loading..." )
                , ( "_global.package", "Knowledge Model" )
                , ( "_global.package.createdAt", "Created" )

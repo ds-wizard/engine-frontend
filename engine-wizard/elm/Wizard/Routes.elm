@@ -16,7 +16,7 @@ module Wizard.Routes exposing
     , usersIndexWithFilters
     )
 
-import Dict exposing (Dict)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Admin.Routes
 import Wizard.Documents.Routes
@@ -51,9 +51,12 @@ usersIndex =
     UsersRoute (Wizard.Users.Routes.IndexRoute PaginationQueryString.empty Nothing)
 
 
-usersIndexWithFilters : Dict String String -> PaginationQueryString -> Route
+usersIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 usersIndexWithFilters filters pagination =
-    UsersRoute (Wizard.Users.Routes.IndexRoute pagination (Dict.get Wizard.Users.Routes.indexRouteRoleFilterId filters))
+    UsersRoute
+        (Wizard.Users.Routes.IndexRoute pagination
+            (PaginationQueryFilters.getValue Wizard.Users.Routes.indexRouteRoleFilterId filters)
+        )
 
 
 isUsersIndex : Route -> Bool
@@ -68,23 +71,25 @@ isUsersIndex route =
 
 projectsIndex : Route
 projectsIndex =
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing Nothing)
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing)
 
 
-projectIndexWithFilters : Dict String String -> PaginationQueryString -> Route
+projectIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 projectIndexWithFilters filters pagination =
     ProjectsRoute
         (Wizard.Projects.Routes.IndexRoute pagination
-            (Dict.get Wizard.Projects.Routes.indexRouteIsTemplateFilterId filters)
-            (Dict.get Wizard.Projects.Routes.indexRouteUsersFilterId filters)
-            (Dict.get Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRouteIsTemplateFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRouteUsersFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRouteUsersFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
         )
 
 
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _ _) ->
+        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _ _ _ _) ->
             True
 
         _ ->

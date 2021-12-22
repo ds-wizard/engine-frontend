@@ -13,7 +13,7 @@ module Wizard.Common.Components.Listing.View exposing
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Dict exposing (Dict)
+import Dict
 import Html exposing (Html, a, div, input, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id, placeholder, target, title, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -22,6 +22,7 @@ import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
@@ -64,7 +65,7 @@ type alias ViewConfig a msg =
     , sortOptions : List ( String, String )
     , filters : List (Filter msg)
     , wrapMsg : Msg a -> msg
-    , toRoute : Dict String String -> PaginationQueryString -> Route
+    , toRoute : PaginationQueryFilters -> PaginationQueryString -> Route
     , toolbarExtra : Maybe (Html msg)
     }
 
@@ -226,7 +227,7 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
         item ( value, visibleName ) =
             let
                 route =
-                    cfg.toRoute (Dict.insert filterId value model.filters) model.paginationQueryString
+                    cfg.toRoute (PaginationQueryFilters.insertValue filterId value model.filters) model.paginationQueryString
 
                 icon =
                     if Maybe.unwrap False ((==) value << Tuple.first) maybeFilterValue then
@@ -239,7 +240,7 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
                 [ icon, text visibleName ]
 
         maybeFilterValue =
-            Dict.get filterId model.filters
+            PaginationQueryFilters.getValue filterId model.filters
                 |> Maybe.andThen (\value -> List.find (Tuple.first >> (==) value) filterCfg.options)
 
         filterLabel =
@@ -268,7 +269,7 @@ viewFilter appState cfg model filterId label items =
             Maybe.withDefault Dropdown.initialState (Dict.get filterId model.filterDropdownStates)
 
         filterActive =
-            Dict.member filterId model.filters
+            PaginationQueryFilters.isFilterActive filterId model.filters
 
         buttonClass =
             if filterActive then
@@ -279,7 +280,7 @@ viewFilter appState cfg model filterId label items =
 
         clearAllRoute =
             Routing.toUrl appState <|
-                cfg.toRoute (Dict.remove filterId model.filters) model.paginationQueryString
+                cfg.toRoute (PaginationQueryFilters.removeFilter filterId model.filters) model.paginationQueryString
 
         clearAllItem =
             Dropdown.anchorItem [ href clearAllRoute ]

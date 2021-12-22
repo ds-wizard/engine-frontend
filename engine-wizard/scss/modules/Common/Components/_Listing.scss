@@ -71,6 +71,30 @@
                     box-shadow: none;
                 }
             }
+
+            .dropdown-item-operator {
+                display: flex;
+                margin: -0.5rem 0;
+                gap: 1px;
+                background: $gray-200;
+
+                a {
+                    flex: 1 1 0;
+                    width: 0;
+                    padding: 0.15rem;
+                    text-align: center;
+                    text-decoration: none;
+                    font-variant: small-caps;
+                    text-transform: lowercase;
+                    background: $gray-200;
+                    color: $gray-500;
+
+                    &:hover, &.active {
+                        color: $gray-700;
+                        background: $white;
+                    }
+                }
+            }
         }
     }
 

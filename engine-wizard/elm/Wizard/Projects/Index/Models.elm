@@ -6,10 +6,11 @@ module Wizard.Projects.Index.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Debouncer.Extra as Debounce exposing (Debouncer)
 import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
+import Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
-import Shared.Utils exposing (dictFromMaybeList)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Projects.Common.CloneProjectModal.Models as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Models as DeleteProjectModal
@@ -31,17 +32,31 @@ type alias Model =
     }
 
 
-initialModel : PaginationQueryString -> Maybe String -> Maybe String -> Maybe String -> Model
-initialModel paginationQueryString mbIsTemplate mbUser mbProjectTags =
+initialModel :
+    PaginationQueryString
+    -> Maybe String
+    -> Maybe String
+    -> Maybe FilterOperator
+    -> Maybe String
+    -> Maybe FilterOperator
+    -> Model
+initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp =
     let
-        filters =
-            dictFromMaybeList
-                [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
-                , ( indexRouteUsersFilterId, mbUser )
-                , ( indexRouteProjectTagsFilterId, mbProjectTags )
-                ]
+        values =
+            [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
+            , ( indexRouteUsersFilterId, mbUser )
+            , ( indexRouteProjectTagsFilterId, mbProjectTags )
+            ]
+
+        operators =
+            [ ( indexRouteUsersFilterId, mbUserOp )
+            , ( indexRouteProjectTagsFilterId, mbProjectTagsOp )
+            ]
+
+        paginationQueryFilters =
+            PaginationQueryFilters.create values operators
     in
-    { questionnaires = Listing.initialModelWithFilters paginationQueryString filters
+    { questionnaires = Listing.initialModelWithFilters paginationQueryString paginationQueryFilters
     , deletingMigration = Unset
     , deleteModalModel = DeleteProjectModal.initialModel
     , cloneModalModel = CloneProjectModal.initialModel

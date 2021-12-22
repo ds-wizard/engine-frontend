@@ -2,14 +2,15 @@ module Wizard.Projects.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Dict
-import Html exposing (Html, code, div, img, input, span, text)
+import Html exposing (Html, a, code, div, img, input, span, text)
 import Html.Attributes exposing (class, classList, href, placeholder, src, title, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.Pagination as Pagination
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
+import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
@@ -59,7 +60,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         userFilterSelectedUsersActionResult =
-            if Dict.member indexRouteUsersFilterId model.questionnaires.filters then
+            if PaginationQueryFilter.isFilterActive indexRouteUsersFilterId model.questionnaires.filters then
                 model.userFilterSelectedUsers
 
             else
@@ -114,7 +115,7 @@ listingConfig appState model =
             listingProjectTagsFilter appState model
 
         tagsFilterVisible =
-            Dict.member indexRouteProjectTagsFilterId model.questionnaires.filters
+            PaginationQueryFilter.isFilterActive indexRouteUsersFilterId model.questionnaires.filters
                 || ActionResult.unwrap False (not << List.isEmpty << .items) model.projectTagsFilterTags
 
         usersFilter =
@@ -154,17 +155,23 @@ listingConfig appState model =
 listingProjectTagsFilter : AppState -> Model -> Listing.Filter Msg
 listingProjectTagsFilter appState model =
     let
-        toRoute tags =
+        linkWithTags tags =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
-                    (Dict.insert indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
+                    (PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
+                    model.questionnaires.paginationQueryString
+
+        linkWithOp op =
+            Routing.toUrl appState <|
+                Routes.projectIndexWithFilters
+                    (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
                     model.questionnaires.paginationQueryString
 
         removeTagLink tag =
-            toRoute <| List.filter ((/=) tag) selectedTags
+            linkWithTags <| List.filter ((/=) tag) selectedTags
 
         addTagLink tag =
-            toRoute <| tag :: selectedTags
+            linkWithTags <| tag :: selectedTags
 
         viewTagItem link icon tag =
             Dropdown.anchorItem
@@ -182,7 +189,7 @@ listingProjectTagsFilter appState model =
 
         selectedTags =
             model.questionnaires.filters
-                |> Dict.get indexRouteProjectTagsFilterId
+                |> PaginationQueryFilter.getValue indexRouteProjectTagsFilterId
                 |> Maybe.unwrap [] (sortTags << String.split ",")
 
         foundTags =
@@ -191,6 +198,9 @@ listingProjectTagsFilter appState model =
 
         badge =
             filterBadge selectedTags
+
+        filterOperator =
+            Maybe.withDefault FilterOperator.OR <| PaginationQueryFilter.getOp indexRouteProjectTagsFilterId model.questionnaires.filters
 
         searchInputItem =
             [ Dropdown.customItem <|
@@ -204,6 +214,22 @@ listingProjectTagsFilter appState model =
                         , value model.projectTagsFilterSearchValue
                         ]
                         []
+                    ]
+            , Dropdown.divider
+            , Dropdown.customItem <|
+                div [ class "dropdown-item-operator" ]
+                    [ a
+                        [ href (linkWithOp FilterOperator.OR)
+                        , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
+                        , dataCy "filter_projectTags_operator_OR"
+                        ]
+                        [ lgx "listingOp.or" appState ]
+                    , a
+                        [ href (linkWithOp FilterOperator.AND)
+                        , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
+                        , dataCy "filter_projectTags_operator_AND"
+                        ]
+                        [ lgx "listingOp.and" appState ]
                     ]
             , Dropdown.divider
             ]
@@ -231,17 +257,23 @@ listingProjectTagsFilter appState model =
 listingUsersFilter : AppState -> Model -> Listing.Filter Msg
 listingUsersFilter appState model =
     let
-        toRoute userUuids =
+        linkWithUuids userUuids =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
-                    (Dict.insert indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
+                    (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
+                    model.questionnaires.paginationQueryString
+
+        linkWithOp op =
+            Routing.toUrl appState <|
+                Routes.projectIndexWithFilters
+                    (PaginationQueryFilter.insertOp indexRouteUsersFilterId op model.questionnaires.filters)
                     model.questionnaires.paginationQueryString
 
         removeUserLink userUuid =
-            toRoute <| List.filter ((/=) (Uuid.toString userUuid)) selectedUserUuidss
+            linkWithUuids <| List.filter ((/=) (Uuid.toString userUuid)) selectedUserUuids
 
         addUserLink userUuid =
-            toRoute <| Uuid.toString userUuid :: selectedUserUuidss
+            linkWithUuids <| Uuid.toString userUuid :: selectedUserUuids
 
         viewUserItem link icon user =
             Dropdown.anchorItem
@@ -261,13 +293,13 @@ listingUsersFilter appState model =
             ActionResult.unwrap [] .items model.userFilterSelectedUsers
                 |> List.sortWith User.compare
 
-        selectedUserUuidss =
+        selectedUserUuids =
             model.questionnaires.filters
-                |> Dict.get indexRouteUsersFilterId
+                |> PaginationQueryFilter.getValue indexRouteUsersFilterId
                 |> Maybe.unwrap [] (String.split ",")
 
         selectedUsers =
-            selectedUserUuidss
+            selectedUserUuids
                 |> List.map (\a -> List.find (\u -> Uuid.toString u.uuid == a) foundSelectedUsers)
                 |> listFilterJust
                 |> List.sortWith User.compare
@@ -278,6 +310,9 @@ listingUsersFilter appState model =
 
         badge =
             filterBadge selectedUsers
+
+        filterOperator =
+            Maybe.withDefault FilterOperator.OR <| PaginationQueryFilter.getOp indexRouteUsersFilterId model.questionnaires.filters
 
         searchInputItem =
             [ Dropdown.customItem <|
@@ -291,6 +326,22 @@ listingUsersFilter appState model =
                         , value model.userFilterSearchValue
                         ]
                         []
+                    ]
+            , Dropdown.divider
+            , Dropdown.customItem <|
+                div [ class "dropdown-item-operator" ]
+                    [ a
+                        [ href (linkWithOp FilterOperator.OR)
+                        , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
+                        , dataCy "filter_users_operator_OR"
+                        ]
+                        [ lgx "listingOp.or" appState ]
+                    , a
+                        [ href (linkWithOp FilterOperator.AND)
+                        , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
+                        , dataCy "filter_users_operator_AND"
+                        ]
+                        [ lgx "listingOp.and" appState ]
                     ]
             , Dropdown.divider
             ]
