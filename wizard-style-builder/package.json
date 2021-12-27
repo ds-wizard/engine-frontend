@@ -15,7 +15,7 @@
     "fs-extra": "^10.0.0",
     "helmet": "^4.6.0",
     "morgan": "^1.10.0",
-    "node-sass": "^6.0.1"
+    "node-sass": "^7.0.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
