@@ -24,6 +24,7 @@ type alias Model =
     , deleteModalModel : DeleteProjectModal.Model
     , cloneModalModel : CloneProjectModal.Model
     , debouncer : Debouncer Msg
+    , projectTagsExist : ActionResult Bool
     , projectTagsFilterSearchValue : String
     , projectTagsFilterTags : ActionResult (Pagination String)
     , userFilterSearchValue : String
@@ -61,6 +62,7 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
     , deleteModalModel = DeleteProjectModal.initialModel
     , cloneModalModel = CloneProjectModal.initialModel
     , debouncer = Debounce.toDebouncer <| Debounce.debounce 500
+    , projectTagsExist = ActionResult.Loading
     , projectTagsFilterSearchValue = ""
     , projectTagsFilterTags = ActionResult.Loading
     , userFilterSearchValue = ""

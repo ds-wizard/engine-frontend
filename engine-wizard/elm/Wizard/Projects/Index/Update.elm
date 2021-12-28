@@ -115,17 +115,37 @@ update wrapMsg msg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        QuestionnairesApi.getProjectTagsSuggestions queryString selectedTags appState ProjectTagsFilterSearchComplete
+                        QuestionnairesApi.getProjectTagsSuggestions queryString selectedTags appState (ProjectTagsFilterSearchComplete value)
             in
             ( model, cmd )
 
-        ProjectTagsFilterSearchComplete result ->
-            applyResult appState
-                { setResult = \r m -> { m | projectTagsFilterTags = r }
-                , defaultError = lg "apiError.questionnaires.getProjectTagsSuggestionsError" appState
-                , model = model
-                , result = result
-                }
+        ProjectTagsFilterSearchComplete search result ->
+            case result of
+                Ok data ->
+                    let
+                        model_ =
+                            if String.isEmpty search then
+                                { model | projectTagsExist = Success (not <| List.isEmpty data.items) }
+
+                            else
+                                model
+                    in
+                    ( { model_ | projectTagsFilterTags = Success data }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    let
+                        model_ =
+                            if String.isEmpty search then
+                                { model | projectTagsExist = Error "" }
+
+                            else
+                                model
+                    in
+                    ( { model_ | projectTagsFilterTags = ApiError.toActionResult appState (lg "apiError.questionnaires.getProjectTagsSuggestionsError" appState) err }
+                    , getResultCmd result
+                    )
 
         UsersFilterGetValuesComplete result ->
             applyResult appState

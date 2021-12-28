@@ -19,7 +19,7 @@ type Msg
     | CloneQuestionnaireModalMsg CloneProjectModal.Msg
     | ProjectTagsFilterInput String
     | ProjectTagsFilterSearch String
-    | ProjectTagsFilterSearchComplete (Result ApiError (Pagination String))
+    | ProjectTagsFilterSearchComplete String (Result ApiError (Pagination String))
     | UsersFilterGetValuesComplete (Result ApiError (Pagination UserSuggestion))
     | UsersFilterInput String
     | UsersFilterSearch String
