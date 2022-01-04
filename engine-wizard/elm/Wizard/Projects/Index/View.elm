@@ -115,7 +115,7 @@ listingConfig appState model =
             listingProjectTagsFilter appState model
 
         tagsFilterVisible =
-            PaginationQueryFilter.isFilterActive indexRouteUsersFilterId model.questionnaires.filters
+            PaginationQueryFilter.isFilterActive indexRouteProjectTagsFilterId model.questionnaires.filters
                 || ActionResult.withDefault False model.projectTagsExist
 
         usersFilter =
@@ -238,14 +238,17 @@ listingProjectTagsFilter appState model =
             List.map selectedTagItem selectedTags
 
         foundTagsItems =
-            if List.isEmpty foundTags then
+            if not (List.isEmpty foundTags) then
+                List.map addTagItem foundTags
+
+            else if not (String.isEmpty model.projectTagsFilterSearchValue) then
                 [ Dropdown.customItem <|
                     div [ class "dropdown-item-empty" ]
                         [ lx_ "filter.projectTags.empty" appState ]
                 ]
 
             else
-                List.map addTagItem foundTags
+                []
 
         label =
             case List.head selectedTags of
@@ -357,14 +360,17 @@ listingUsersFilter appState model =
             List.map selectedUserItem selectedUsers
 
         foundUsersItems =
-            if List.isEmpty foundUsers then
+            if not (List.isEmpty foundUsers) then
+                List.map addUserItem foundUsers
+
+            else if not (String.isEmpty model.userFilterSearchValue) then
                 [ Dropdown.customItem <|
                     div [ class "dropdown-item-empty" ]
                         [ lx_ "filter.users.empty" appState ]
                 ]
 
             else
-                List.map addUserItem foundUsers
+                []
 
         label =
             case List.head selectedUsers of
