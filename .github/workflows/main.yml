@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         component: [registry, wizard]
-        node-version: [14.14.0]
+        node-version: [17.3.0]
     
     env:
       COMPONENT: ${{ matrix.component }}
@@ -28,7 +28,7 @@ jobs:
 
 # (1) -> Preparations
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2.4.1
+      uses: actions/setup-node@v2.5.1
       with:
         node-version: ${{ matrix.node-version }}
         
