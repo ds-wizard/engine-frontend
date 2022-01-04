@@ -44,7 +44,7 @@
     "mini-css-extract-plugin": "^2.4.5",
     "node-sass": "^6.0.1",
     "sass-loader": "^12.3.0",
-    "terser-webpack-plugin": "^5.2.5",
+    "terser-webpack-plugin": "^5.3.0",
     "uglify-js": "^3.14.5",
     "webpack": "^5.64.3",
     "webpack-cli": "^4.9.1",
