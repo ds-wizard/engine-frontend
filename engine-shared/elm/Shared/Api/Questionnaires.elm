@@ -9,6 +9,7 @@ module Shared.Api.Questionnaires exposing
     , fetchQuestionnaireMigration
     , getDocumentPreview
     , getDocuments
+    , getProjectTagsSuggestions
     , getQuestionnaire
     , getQuestionnaireMigration
     , getQuestionnaires
@@ -25,11 +26,13 @@ module Shared.Api.Questionnaires exposing
     )
 
 import Http
+import Json.Decode as D
 import Json.Encode as E exposing (Value)
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, authorizationHeaders, authorizedUrl, expectMetadata, jwtDelete, jwtFetch, jwtFetchEmpty, jwtFetchPut, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpPut, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator exposing (FilterOperator)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.QuestionnaireContent as QuestionnaireContent exposing (QuestionnaireContent)
@@ -45,6 +48,9 @@ import Uuid exposing (Uuid)
 type alias GetQuestionnairesFilters =
     { isTemplate : Maybe Bool
     , userUuids : Maybe String
+    , userUuidsOp : Maybe FilterOperator
+    , projectTags : Maybe String
+    , projectTagsOp : Maybe FilterOperator
     }
 
 
@@ -55,6 +61,9 @@ getQuestionnaires filters qs =
             PaginationQueryString.filterParams <|
                 [ ( "isTemplate", Maybe.map boolToString filters.isTemplate )
                 , ( "userUuids", filters.userUuids )
+                , ( "userUuidsOp", Maybe.map FilterOperator.toString filters.userUuidsOp )
+                , ( "projectTags", filters.projectTags )
+                , ( "projectTagsOp", Maybe.map FilterOperator.toString filters.projectTagsOp )
                 ]
 
         queryString =
@@ -201,3 +210,16 @@ postRevert questionnaireUuid eventUuid =
                 [ ( "eventUuid", Uuid.encode eventUuid ) ]
     in
     jwtPost ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/revert") body
+
+
+getProjectTagsSuggestions : PaginationQueryString -> List String -> AbstractAppState a -> ToMsg (Pagination String) msg -> Cmd msg
+getProjectTagsSuggestions qs exclude =
+    let
+        queryString =
+            PaginationQueryString.withSort (Just "projectTag") PaginationQueryString.SortASC qs
+                |> PaginationQueryString.toApiUrlWith [ ( "exclude", String.join "," exclude ) ]
+
+        url =
+            "/questionnaires/project-tags/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "projectTags" D.string)

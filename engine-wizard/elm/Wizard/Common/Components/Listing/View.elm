@@ -13,7 +13,7 @@ module Wizard.Common.Components.Listing.View exposing
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
-import Dict exposing (Dict)
+import Dict
 import Html exposing (Html, a, div, input, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id, placeholder, target, title, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -22,9 +22,10 @@ import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lf, lx)
+import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
 import Time exposing (Month(..))
 import Time.Distance exposing (inWordsWithConfig)
@@ -51,11 +52,6 @@ lx_ =
     lx "Wizard.Common.Components.Listing.View"
 
 
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.Components.Listing.View"
-
-
 type alias ViewConfig a msg =
     { title : a -> Html msg
     , description : a -> Html msg
@@ -67,9 +63,9 @@ type alias ViewConfig a msg =
     , iconView : Maybe (a -> Html msg)
     , searchPlaceholderText : Maybe String
     , sortOptions : List ( String, String )
-    , filters : List Filter
+    , filters : List (Filter msg)
     , wrapMsg : Msg a -> msg
-    , toRoute : Dict String String -> PaginationQueryString -> Route
+    , toRoute : PaginationQueryFilters -> PaginationQueryString -> Route
     , toolbarExtra : Maybe (Html msg)
     }
 
@@ -80,13 +76,20 @@ type alias UpdatedTimeConfig a =
     }
 
 
-type Filter
+type Filter msg
     = SimpleFilter String SimpleFilterConfig
+    | CustomFilter String (CustomFilterConfig msg)
 
 
 type alias SimpleFilterConfig =
     { name : String
     , options : List ( String, String )
+    }
+
+
+type alias CustomFilterConfig msg =
+    { label : List (Html msg)
+    , items : List (Dropdown.DropdownItem msg)
     }
 
 
@@ -208,52 +211,97 @@ viewToolbarFilters appState cfg model =
     List.map (viewToolbarFilter appState cfg model) cfg.filters
 
 
-viewToolbarFilter : AppState -> ViewConfig a msg -> Model a -> Filter -> Html msg
+viewToolbarFilter : AppState -> ViewConfig a msg -> Model a -> Filter msg -> Html msg
 viewToolbarFilter appState cfg model filter =
     case filter of
         SimpleFilter filterId filterCfg ->
             viewToolbarSimpleFilter appState cfg model filterId filterCfg
 
+        CustomFilter filterId filterCfg ->
+            viewToolbarCustomFilter appState cfg model filterId filterCfg
+
 
 viewToolbarSimpleFilter : AppState -> ViewConfig a msg -> Model a -> String -> SimpleFilterConfig -> Html msg
 viewToolbarSimpleFilter appState cfg model filterId filterCfg =
     let
-        state =
-            Maybe.withDefault Dropdown.initialState (Dict.get filterId model.filterDropdownStates)
-
-        itemAll =
-            let
-                route =
-                    cfg.toRoute (Dict.remove filterId model.filters) model.paginationQueryString
-            in
-            Dropdown.anchorItem [ href <| Routing.toUrl appState route ]
-                [ lx_ "filter.viewAll" appState ]
-
         item ( value, visibleName ) =
             let
                 route =
-                    cfg.toRoute (Dict.insert filterId value model.filters) model.paginationQueryString
+                    cfg.toRoute (PaginationQueryFilters.insertValue filterId value model.filters) model.paginationQueryString
+
+                icon =
+                    if Maybe.unwrap False ((==) value << Tuple.first) maybeFilterValue then
+                        faSet "listing.filter.single.selected" appState
+
+                    else
+                        faSet "listing.filter.single.notSelected" appState
             in
-            Dropdown.anchorItem [ href <| Routing.toUrl appState route ]
-                [ text visibleName ]
+            Dropdown.anchorItem [ href <| Routing.toUrl appState route, class "dropdown-item-icon" ]
+                [ icon, text visibleName ]
+
+        maybeFilterValue =
+            PaginationQueryFilters.getValue filterId model.filters
+                |> Maybe.andThen (\value -> List.find (Tuple.first >> (==) value) filterCfg.options)
 
         filterLabel =
-            Dict.get filterId model.filters
-                |> Maybe.andThen (\value -> List.find (Tuple.first >> (==) value) filterCfg.options)
+            maybeFilterValue
                 |> Maybe.map Tuple.second
                 |> Maybe.withDefault filterCfg.name
+
+        label =
+            [ span [ class "filter-text-label" ] [ text filterLabel ] ]
+
+        items =
+            List.map item filterCfg.options
+    in
+    viewFilter appState cfg model filterId label items
+
+
+viewToolbarCustomFilter : AppState -> ViewConfig a msg -> Model a -> String -> CustomFilterConfig msg -> Html msg
+viewToolbarCustomFilter appState cfg model filterId filterCfg =
+    viewFilter appState cfg model filterId filterCfg.label filterCfg.items
+
+
+viewFilter : AppState -> ViewConfig a msg -> Model a -> String -> List (Html msg) -> List (Dropdown.DropdownItem msg) -> Html msg
+viewFilter appState cfg model filterId label items =
+    let
+        state =
+            Maybe.withDefault Dropdown.initialState (Dict.get filterId model.filterDropdownStates)
+
+        filterActive =
+            PaginationQueryFilters.isFilterActive filterId model.filters
+
+        buttonClass =
+            if filterActive then
+                Button.secondary
+
+            else
+                Button.outlineSecondary
+
+        clearAllRoute =
+            Routing.toUrl appState <|
+                cfg.toRoute (PaginationQueryFilters.removeFilter filterId model.filters) model.paginationQueryString
+
+        clearAllItem =
+            Dropdown.anchorItem [ href clearAllRoute ]
+                [ lx_ "filter.clearSelection" appState ]
+
+        clearSelection =
+            if filterActive then
+                [ Dropdown.divider
+                , clearAllItem
+                ]
+
+            else
+                []
     in
     div [ class "btn-group" ]
         [ Dropdown.dropdown state
-            { options = []
+            { options = [ Dropdown.attrs [ id ("filter-" ++ filterId) ] ]
             , toggleMsg = cfg.wrapMsg << FilterDropdownMsg filterId
             , toggleButton =
-                Dropdown.toggle [ Button.outlineSecondary ] [ text filterLabel ]
-            , items =
-                Dropdown.header [ text <| lf_ "filter.filterBy" [ filterCfg.name ] appState ]
-                    :: itemAll
-                    :: Dropdown.divider
-                    :: List.map item filterCfg.options
+                Dropdown.toggle [ buttonClass ] label
+            , items = items ++ clearSelection
             }
         ]
 

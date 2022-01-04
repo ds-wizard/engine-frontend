@@ -116,6 +116,33 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
         }
 
         &--Settings {
+            .form-group-project-tags {
+                .project-tag {
+                    background: $gray-200;
+                    padding: .25rem .75rem;
+                    border-radius: .25rem;
+                    margin-bottom: .5rem;
+                    display: flex;
+                    justify-content: space-between;
+
+                    &:hover {
+                        background: $gray-300;
+                    }
+                }
+
+                .project-tags-suggestions {
+                    background: #fff;
+                    position: absolute;
+                    width: 100%;
+                    border: 1px solid $gray-400;
+                    border-radius: 0.25rem;
+                    z-index: 10;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    max-height: 200px;
+                    overflow: auto;
+                }
+            }
+
             .container {
                 margin: 2rem auto;
             }

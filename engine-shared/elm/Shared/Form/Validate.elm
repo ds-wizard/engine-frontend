@@ -3,9 +3,12 @@ module Shared.Form.Validate exposing
     , dict
     , ifElse
     , kmId
+    , maybeRegex
     , maybeString
     , optionalString
     , organizationId
+    , projectTag
+    , projectTags
     , regex
     , uuid
     , uuidString
@@ -15,8 +18,15 @@ import Dict exposing (Dict)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Regex exposing (Regex)
-import Shared.Form.FormError exposing (FormError(..))
+import Shared.Form.FormError as FormError exposing (FormError(..))
+import Shared.Locale exposing (l)
+import Shared.Provisioning exposing (Provisioning)
 import Uuid exposing (Uuid)
+
+
+l_ : String -> { a | provisioning : Provisioning } -> String
+l_ =
+    l "Shared.Form.Validate"
 
 
 confirmation : String -> Validation FormError String -> Validation FormError String
@@ -73,6 +83,14 @@ regex r =
             (\s -> V.format (createRegex r) s |> V.mapError (\_ -> Error.value InvalidFormat))
 
 
+maybeRegex : String -> String -> Validation FormError (Maybe String)
+maybeRegex r error =
+    V.oneOf
+        [ V.map (\_ -> Nothing) <| V.emptyString
+        , V.map Just <| validateRegexWithCustomError (createRegex r) (FormError.Error error)
+        ]
+
+
 uuidString : Validation FormError String
 uuidString =
     validateRegexWithCustomError uuidPattern InvalidUuid
@@ -92,6 +110,16 @@ organizationId =
 kmId : Validation e String
 kmId =
     regex "^^(?![-])(?!.*[-]$)[a-zA-Z0-9-]+$"
+
+
+projectTag : { a | provisioning : Provisioning } -> Validation FormError String
+projectTag appState =
+    validateRegexWithCustomError (createRegex "^[^,]+$") (FormError.Error (l_ "projectTagError" appState))
+
+
+projectTags : { a | provisioning : Provisioning } -> Validation FormError (Maybe String)
+projectTags appState =
+    maybeRegex "^[^,]+$" (l_ "projectTagError" appState)
 
 
 validateRegexWithCustomError : Regex -> e -> Validation e String

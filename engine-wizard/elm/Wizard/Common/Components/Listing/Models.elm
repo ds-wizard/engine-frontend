@@ -12,6 +12,7 @@ import Bootstrap.Dropdown as Dropdown
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Dict exposing (Dict)
 import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg)
 
@@ -23,7 +24,7 @@ type alias Model a =
     , qInput : String
     , qDebouncer : Debouncer (Msg a)
     , sortDropdownState : Dropdown.State
-    , filters : Dict String String
+    , filters : PaginationQueryFilters
     , filterDropdownStates : Dict String Dropdown.State
     }
 
@@ -42,12 +43,12 @@ initialModel paginationQueryString =
     , qInput = Maybe.withDefault "" paginationQueryString.q
     , qDebouncer = Debouncer.toDebouncer <| Debouncer.debounce 500
     , sortDropdownState = Dropdown.initialState
-    , filters = Dict.empty
+    , filters = PaginationQueryFilters.empty
     , filterDropdownStates = Dict.empty
     }
 
 
-initialModelWithFilters : PaginationQueryString -> Dict String String -> Model a
+initialModelWithFilters : PaginationQueryString -> PaginationQueryFilters -> Model a
 initialModelWithFilters paginationQueryString filters =
     { pagination = Loading
     , paginationQueryString = paginationQueryString

@@ -55,7 +55,7 @@ initialModel appState =
     , plansModel = Wizard.Projects.Models.initialModel appState
     , publicModel = Wizard.Public.Models.initialModel appState
     , registryModel = Wizard.Registry.Models.initialModel
-    , settingsModel = Wizard.Settings.Models.initialModel
+    , settingsModel = Wizard.Settings.Models.initialModel appState
     , templatesModel = Wizard.Templates.Models.initialModel appState
     , users = Wizard.Users.Models.initialModel appState
     }
@@ -122,7 +122,7 @@ initLocalModel model =
             { model | registryModel = Wizard.Registry.Models.initLocalModel route model.registryModel }
 
         Routes.SettingsRoute route ->
-            { model | settingsModel = Wizard.Settings.Models.initLocalModel route model.settingsModel }
+            { model | settingsModel = Wizard.Settings.Models.initLocalModel model.appState route model.settingsModel }
 
         Routes.TemplatesRoute route ->
             { model | templatesModel = Wizard.Templates.Models.initLocalModel route model.appState model.templatesModel }

@@ -6,6 +6,7 @@ module Wizard.Projects.Routing exposing
 
 import Dict
 import Shared.Auth.Permission as Perm
+import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Shared.Utils exposing (dictFromMaybeList, flip)
@@ -17,7 +18,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Projects.Create.ProjectCreateRoute as ProjectCreateRoute
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 
 
 parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
@@ -58,8 +59,16 @@ parsers appState wrapRoute =
                 []
 
         -- Project index
-        wrappedIndexRoute pqs mbTemplate mbUser =
-            wrapRoute <| IndexRoute pqs mbTemplate mbUser
+        wrappedIndexRoute pqs mbTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp =
+            wrapRoute <| IndexRoute pqs mbTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp
+
+        indexRouteParser =
+            PaginationQueryString.parser5 (s moduleRoot)
+                (Query.string indexRouteIsTemplateFilterId)
+                (Query.string indexRouteUsersFilterId)
+                (FilterOperator.queryParser indexRouteUsersFilterId)
+                (Query.string indexRouteProjectTagsFilterId)
+                (FilterOperator.queryParser indexRouteProjectTagsFilterId)
     in
     createFromTemplateRoute
         ++ createCustomRoute
@@ -70,7 +79,7 @@ parsers appState wrapRoute =
            , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
            , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.string "eventUuid")
            , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
-           , map (PaginationQueryString.wrapRoute2 wrappedIndexRoute (Just "updatedAt,desc")) (PaginationQueryString.parser2 (s moduleRoot) (Query.string indexRouteIsTemplateFilterId) (Query.string indexRouteUsersFilterId))
+           , map (PaginationQueryString.wrapRoute5 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
            , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "projects.migration" appState) </> uuid)
            ]
 
@@ -133,13 +142,16 @@ toUrl appState route =
                 ProjectDetailRoute.Settings ->
                     [ moduleRoot, Uuid.toString uuid, "settings" ]
 
-        IndexRoute paginationQueryString mbIsTemplate mbUserUuid ->
+        IndexRoute paginationQueryString mbIsTemplate mbUserUuid mbUserOp mbProjectTags mbProjectTagsOp ->
             let
                 params =
                     Dict.toList <|
                         dictFromMaybeList
                             [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
                             , ( indexRouteUsersFilterId, mbUserUuid )
+                            , FilterOperator.toUrlParam indexRouteUsersFilterId mbUserOp
+                            , ( indexRouteProjectTagsFilterId, mbProjectTags )
+                            , FilterOperator.toUrlParam indexRouteProjectTagsFilterId mbProjectTagsOp
                             ]
             in
             [ moduleRoot ++ PaginationQueryString.toUrlWith params paginationQueryString ]

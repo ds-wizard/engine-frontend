@@ -25,7 +25,7 @@ fetchData appState =
             PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC PaginationQueryString.empty
     in
     if List.any (\w -> w == DMPWorkflowDashboardWidget || w == LevelsQuestionnaireDashboardWidget) widgets then
-        QuestionnairesApi.getQuestionnaires { isTemplate = Just False, userUuids = Nothing } pagination appState GetQuestionnairesCompleted
+        QuestionnairesApi.getQuestionnaires { isTemplate = Just False, userUuids = Nothing, userUuidsOp = Nothing, projectTags = Nothing, projectTagsOp = Nothing } pagination appState GetQuestionnairesCompleted
 
     else
         Cmd.none

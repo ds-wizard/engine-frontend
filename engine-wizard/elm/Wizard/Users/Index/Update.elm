@@ -89,7 +89,7 @@ listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.U
 listingUpdateConfig wrapMsg appState model =
     let
         role =
-            Dict.get indexRouteRoleFilterId model.users.filters
+            Dict.get indexRouteRoleFilterId model.users.filters.values
     in
     { getRequest = UsersApi.getUsers { role = role }
     , getError = lg "apiError.users.getListError" appState

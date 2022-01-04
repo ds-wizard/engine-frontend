@@ -2033,7 +2033,7 @@ viewQuestionIntegrationTypeHints appState cfg model path =
         content =
             case Maybe.unwrap Unset .hints model.typeHints of
                 Success hints ->
-                    ul [] (List.map (viewQuestionIntegrationTypeHint appState cfg path) hints)
+                    ul [ class "integration-typehints-list" ] (List.map (viewQuestionIntegrationTypeHint appState cfg path) hints)
 
                 Loading ->
                     div [ class "loading" ]
@@ -2050,7 +2050,7 @@ viewQuestionIntegrationTypeHints appState cfg model path =
                 Unset ->
                     emptyNode
     in
-    div [ class "typehints" ] [ content ]
+    div [ class "integration-typehints" ] [ content ]
 
 
 viewQuestionIntegrationTypeHint : AppState -> Config msg -> List String -> TypeHint -> Html Msg
@@ -2060,7 +2060,9 @@ viewQuestionIntegrationTypeHint appState cfg path typeHint =
 
     else
         li
-            [ onMouseDown <| SetReply (pathToString path) <| createReply appState <| IntegrationReply <| IntegrationType typeHint.id typeHint.name ]
+            [ class "integration-typehints-list-item"
+            , onMouseDown <| SetReply (pathToString path) <| createReply appState <| IntegrationReply <| IntegrationType typeHint.id typeHint.name
+            ]
             [ Markdown.toHtml [ class "item-md" ] typeHint.name
             ]
 

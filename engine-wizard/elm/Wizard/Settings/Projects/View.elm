@@ -39,14 +39,23 @@ viewProps =
 formView : AppState -> Form FormError EditableQuestionnairesConfigForm -> Html Form.Msg
 formView appState form =
     let
-        enabled =
-            Maybe.withDefault False (Form.getFieldAsBool "feedbackEnabled" form).value
-
         sharingEnabled =
             Maybe.withDefault False (Form.getFieldAsBool "questionnaireSharingEnabled" form).value
 
+        anonymousProjectEnabledInput =
+            if sharingEnabled then
+                [ FormGroup.toggle form "questionnaireSharingAnonymousEnabled" (l_ "form.questionnaireSharingAnonymous" appState)
+                , FormExtra.mdAfter (l_ "form.questionnaireSharingAnonymous.desc" appState)
+                ]
+
+            else
+                []
+
+        feedbackEnabled =
+            Maybe.withDefault False (Form.getFieldAsBool "feedbackEnabled" form).value
+
         feedbackInput =
-            if enabled then
+            if feedbackEnabled then
                 div [ class "nested-group" ]
                     [ FormGroup.input appState form "feedbackOwner" (l_ "form.feedbackOwner" appState)
                     , FormExtra.mdAfter (l_ "form.feedbackOwner.desc" appState)
@@ -59,14 +68,18 @@ formView appState form =
             else
                 emptyNode
 
-        anonymousProjectEnabledInput =
-            if sharingEnabled then
-                [ FormGroup.toggle form "questionnaireSharingAnonymousEnabled" (l_ "form.questionnaireSharingAnonymous" appState)
-                , FormExtra.mdAfter (l_ "form.questionnaireSharingAnonymous.desc" appState)
-                ]
+        projectTaggingEnabled =
+            Maybe.withDefault False (Form.getFieldAsBool "projectTaggingEnabled" form).value
+
+        projectTaggingInput =
+            if projectTaggingEnabled then
+                div [ class "nested-group" ]
+                    [ FormGroup.resizableTextarea appState form "projectTaggingTags" (l_ "form.projectTaggingTags" appState)
+                    , FormExtra.mdAfter (l_ "form.projectTaggingTags.desc" appState)
+                    ]
 
             else
-                []
+                emptyNode
     in
     div []
         ([ FormGroup.toggle form "questionnaireVisibilityEnabled" (l_ "form.questionnaireVisibility" appState)
@@ -88,5 +101,8 @@ formView appState form =
                , FormGroup.toggle form "feedbackEnabled" (l_ "form.feedback" appState)
                , FormExtra.mdAfter (l_ "form.feedback.desc" appState)
                , feedbackInput
+               , FormGroup.toggle form "projectTaggingEnabled" (l_ "form.projectTaggingEnabled" appState)
+               , FormExtra.mdAfter (l_ "form.projectTaggingEnabled.desc" appState)
+               , projectTaggingInput
                ]
         )

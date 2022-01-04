@@ -4,6 +4,7 @@ module Shared.Api.Users exposing
     , getUser
     , getUsers
     , getUsersSuggestions
+    , getUsersSuggestionsWithOptions
     , postUser
     , postUserPublic
     , putUser
@@ -45,6 +46,22 @@ getUsersSuggestions qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs
+
+        url =
+            "/users/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "users" UserSuggestion.decoder)
+
+
+getUsersSuggestionsWithOptions : PaginationQueryString -> List String -> List String -> AbstractAppState a -> ToMsg (Pagination UserSuggestion) msg -> Cmd msg
+getUsersSuggestionsWithOptions qs select exclude =
+    let
+        queryString =
+            PaginationQueryString.toApiUrlWith
+                [ ( "select", String.join "," select )
+                , ( "exclude", String.join "," exclude )
+                ]
+                qs
 
         url =
             "/users/suggestions" ++ queryString

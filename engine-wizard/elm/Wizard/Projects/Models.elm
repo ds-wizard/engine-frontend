@@ -25,7 +25,7 @@ initialModel appState =
     { createModel = Wizard.Projects.Create.Models.empty
     , createMigrationModel = Wizard.Projects.CreateMigration.Models.initialModel Uuid.nil
     , detailModel = Detail.init appState Uuid.nil
-    , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing
+    , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing
     , migrationModel = Wizard.Projects.Migration.Models.initialModel Uuid.nil
     }
 
@@ -41,13 +41,13 @@ initLocalModel appState route model =
 
         DetailRoute uuid subroute ->
             if uuid == model.detailModel.uuid then
-                { model | detailModel = Detail.initPageModel subroute model.detailModel }
+                { model | detailModel = Detail.initPageModel appState subroute model.detailModel }
 
             else
-                { model | detailModel = Detail.initPageModel subroute <| Detail.init appState uuid }
+                { model | detailModel = Detail.initPageModel appState subroute <| Detail.init appState uuid }
 
-        IndexRoute paginationQueryString mbIsTemplate mbUser ->
-            { model | indexModel = Wizard.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate mbUser }
+        IndexRoute paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp ->
+            { model | indexModel = Wizard.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp }
 
         MigrationRoute uuid ->
             { model | migrationModel = Wizard.Projects.Migration.Models.initialModel uuid }

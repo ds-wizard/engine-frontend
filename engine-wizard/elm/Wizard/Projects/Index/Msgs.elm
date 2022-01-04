@@ -1,6 +1,9 @@
 module Wizard.Projects.Index.Msgs exposing (Msg(..))
 
+import Debouncer.Extra as Debouncer
+import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Error.ApiError exposing (ApiError)
 import Uuid exposing (Uuid)
 import Wizard.Common.Components.Listing.Msgs as Listing
@@ -14,3 +17,11 @@ type Msg
     | ListingMsg (Listing.Msg Questionnaire)
     | DeleteQuestionnaireModalMsg DeleteProjectModal.Msg
     | CloneQuestionnaireModalMsg CloneProjectModal.Msg
+    | ProjectTagsFilterInput String
+    | ProjectTagsFilterSearch String
+    | ProjectTagsFilterSearchComplete String (Result ApiError (Pagination String))
+    | UsersFilterGetValuesComplete (Result ApiError (Pagination UserSuggestion))
+    | UsersFilterInput String
+    | UsersFilterSearch String
+    | UsersFilterSearchComplete (Result ApiError (Pagination UserSuggestion))
+    | DebouncerMsg (Debouncer.Msg Msg)

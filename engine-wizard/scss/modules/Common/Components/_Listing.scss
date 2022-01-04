@@ -11,6 +11,10 @@
         .filter-sort {
             & > .btn, & > .btn-group {
                 margin-left: 1rem;
+
+                .badge {
+                    margin-left: .25rem;
+                }
             }
 
             & > .btn-group > .btn {
@@ -24,6 +28,79 @@
 
         .btn-primary {
             min-width: 100px;
+        }
+
+        .dropdown-toggle {
+            max-width: $listing-filter-dropdown-width;
+            display: flex;
+            align-items: baseline;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+
+            &::after {
+                padding-bottom: 0.15rem;
+            }
+
+            .filter-text-label {
+                flex-grow: 1;
+                overflow-x: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .dropdown-menu {
+            width: $listing-filter-dropdown-width;
+            overflow-x: hidden;
+
+            .dropdown-item {
+                overflow-x: hidden;
+                text-overflow: ellipsis;
+
+                .ItemIcon {
+                    display: inline-flex;
+                    margin-right: 0.25rem;
+                    vertical-align: bottom;
+                }
+            }
+
+            .dropdown-item-search {
+                input {
+                    width: 100%;
+                    border: none;
+                    outline: none;
+                    box-shadow: none;
+                }
+            }
+
+            .dropdown-item-empty {
+                padding: 0.5rem 1.5rem;
+                font-style: italic;
+                color: $text-muted;
+            }
+
+            .dropdown-item-operator {
+                display: flex;
+                margin: -0.5rem 0;
+                gap: 1px;
+                background: $gray-200;
+
+                a {
+                    flex: 1 1 0;
+                    width: 0;
+                    padding: 0.15rem;
+                    text-align: center;
+                    text-decoration: none;
+                    font-variant: small-caps;
+                    text-transform: lowercase;
+                    background: $gray-200;
+                    color: $gray-500;
+
+                    &:hover, &.active {
+                        color: $gray-700;
+                        background: $white;
+                    }
+                }
+            }
         }
     }
 
