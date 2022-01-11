@@ -7,6 +7,7 @@ module Wizard.Routes exposing
     , isProjectsIndex
     , isTemplateIndex
     , isUsersIndex
+    , kmEditorEditor
     , kmEditorIndex
     , knowledgeModelsIndex
     , projectIndexWithFilters
@@ -18,8 +19,10 @@ module Wizard.Routes exposing
 
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Uuid exposing (Uuid)
 import Wizard.Admin.Routes
 import Wizard.Documents.Routes
+import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Projects.Routes
@@ -124,6 +127,11 @@ isKmEditorIndex route =
 
         _ ->
             False
+
+
+kmEditorEditor : Uuid -> Maybe Uuid -> Route
+kmEditorEditor branchUuid mbEntityUuid =
+    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid (Wizard.KMEditor.Editor.KMEditorRoute.Edit mbEntityUuid))
 
 
 knowledgeModelsIndex : Route

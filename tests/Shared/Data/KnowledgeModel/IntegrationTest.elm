@@ -22,13 +22,13 @@ integrationDecoderTest =
                             "logo": "data:image/png;base64,...",
                             "requestMethod": "GET",
                             "requestUrl": "/",
-                            "requestHeaders": {"X_USER": "user"},
+                            "requestHeaders": [{"key": "X_USER", "value": "user"}],
                             "requestBody": "{}",
                             "responseListField": "",
                             "responseItemId": "{{id}}",
                             "responseItemTemplate": "{{title}}",
                             "responseItemUrl": "http://example.com/${id}",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -40,13 +40,13 @@ integrationDecoderTest =
                         , logo = "data:image/png;base64,..."
                         , requestMethod = "GET"
                         , requestUrl = "/"
-                        , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
+                        , requestHeaders = [ { key = "X_USER", value = "user" } ]
                         , requestBody = "{}"
                         , responseListField = ""
                         , responseItemId = "{{id}}"
                         , responseItemTemplate = "{{title}}"
                         , responseItemUrl = "http://example.com/${id}"
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Integration.decoder raw expected

@@ -18,7 +18,7 @@ expertDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "name": "John Example",
                             "email": "expert@example.com",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -26,7 +26,7 @@ expertDecoderTest =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , name = "John Example"
                         , email = "expert@example.com"
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Expert.decoder raw expected

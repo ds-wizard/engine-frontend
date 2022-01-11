@@ -50,7 +50,7 @@ initialModel appState =
     , adminModel = Wizard.Admin.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel
     , documentsModel = Wizard.Documents.Models.initialModel
-    , kmEditorModel = Wizard.KMEditor.Models.initialModel
+    , kmEditorModel = Wizard.KMEditor.Models.initialModel appState
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
     , plansModel = Wizard.Projects.Models.initialModel appState
     , publicModel = Wizard.Public.Models.initialModel appState
@@ -107,7 +107,7 @@ initLocalModel model =
             { model | documentsModel = Wizard.Documents.Models.initLocalModel route model.documentsModel }
 
         Routes.KMEditorRoute route ->
-            { model | kmEditorModel = Wizard.KMEditor.Models.initLocalModel route model.kmEditorModel }
+            { model | kmEditorModel = Wizard.KMEditor.Models.initLocalModel model.appState route model.kmEditorModel }
 
         Routes.KnowledgeModelsRoute route ->
             { model | kmPackagesModel = Wizard.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }

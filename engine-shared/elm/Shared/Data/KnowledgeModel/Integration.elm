@@ -1,12 +1,12 @@
 module Shared.Data.KnowledgeModel.Integration exposing
     ( Integration
     , decoder
-    , new
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
 
 
 type alias Integration =
@@ -17,32 +17,13 @@ type alias Integration =
     , logo : String
     , requestMethod : String
     , requestUrl : String
-    , requestHeaders : Dict String String
+    , requestHeaders : List RequestHeader
     , requestBody : String
     , responseListField : String
     , responseItemId : String
     , responseItemTemplate : String
     , responseItemUrl : String
-    , annotations : Dict String String
-    }
-
-
-new : String -> Integration
-new uuid =
-    { uuid = uuid
-    , id = ""
-    , name = "New Integration"
-    , props = []
-    , logo = ""
-    , requestMethod = "GET"
-    , requestUrl = "/"
-    , requestHeaders = Dict.empty
-    , requestBody = ""
-    , responseListField = ""
-    , responseItemId = "{{item.id}}"
-    , responseItemTemplate = "{{item.name}}"
-    , responseItemUrl = ""
-    , annotations = Dict.empty
+    , annotations : List Annotation
     }
 
 
@@ -56,10 +37,10 @@ decoder =
         |> D.required "logo" D.string
         |> D.required "requestMethod" D.string
         |> D.required "requestUrl" D.string
-        |> D.required "requestHeaders" (D.dict D.string)
+        |> D.required "requestHeaders" (D.list RequestHeader.decoder)
         |> D.required "requestBody" D.string
         |> D.required "responseListField" D.string
         |> D.required "responseItemId" D.string
         |> D.required "responseItemTemplate" D.string
         |> D.required "responseItemUrl" D.string
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)

@@ -4,7 +4,9 @@ module Shared.Data.Event.AddQuestionEventData exposing
     , encode
     , getEntityVisibleName
     , getTypeString
+    , init
     , map
+    , toQuestion
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -14,6 +16,7 @@ import Shared.Data.Event.AddQuestionListEventData as AddQuestionListEventData ex
 import Shared.Data.Event.AddQuestionMultiChoiceEventData as AddQuestionMultiChoiceEventData exposing (AddQuestionMultiChoiceEventData)
 import Shared.Data.Event.AddQuestionOptionsEventData as AddQuestionOptionsEventData exposing (AddQuestionOptionsEventData)
 import Shared.Data.Event.AddQuestionValueEventData as AddQuestionValueEventData exposing (AddQuestionValueEventData)
+import Shared.Data.KnowledgeModel.Question exposing (Question)
 
 
 type AddQuestionEventData
@@ -63,6 +66,30 @@ encode data =
                 data
     in
     ( "eventType", E.string "AddQuestionEvent" ) :: eventData
+
+
+init : AddQuestionEventData
+init =
+    AddQuestionOptionsEvent AddQuestionOptionsEventData.init
+
+
+toQuestion : String -> AddQuestionEventData -> Question
+toQuestion questionUuid data =
+    case data of
+        AddQuestionOptionsEvent eventData ->
+            AddQuestionOptionsEventData.toQuestion questionUuid eventData
+
+        AddQuestionListEvent eventData ->
+            AddQuestionListEventData.toQuestion questionUuid eventData
+
+        AddQuestionValueEvent eventData ->
+            AddQuestionValueEventData.toQuestion questionUuid eventData
+
+        AddQuestionIntegrationEvent eventData ->
+            AddQuestionIntegrationEventData.toQuestion questionUuid eventData
+
+        AddQuestionMultiChoiceEvent eventData ->
+            AddQuestionMultiChoiceEventData.toQuestion questionUuid eventData
 
 
 getTypeString : AddQuestionEventData -> String

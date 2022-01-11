@@ -1,8 +1,8 @@
-module Shared.Data.KnowledgeModel.Phase exposing (Phase, decoder, new)
+module Shared.Data.KnowledgeModel.Phase exposing (Phase, decoder)
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Uuid
 
 
@@ -10,16 +10,7 @@ type alias Phase =
     { uuid : String
     , title : String
     , description : Maybe String
-    , annotations : Dict String String
-    }
-
-
-new : String -> Phase
-new uuid =
-    { uuid = uuid
-    , title = "New Phase"
-    , description = Nothing
-    , annotations = Dict.empty
+    , annotations : List Annotation
     }
 
 
@@ -29,4 +20,4 @@ decoder =
         |> D.optional "uuid" D.string (Uuid.toString Uuid.nil)
         |> D.required "title" D.string
         |> D.required "description" (D.maybe D.string)
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)

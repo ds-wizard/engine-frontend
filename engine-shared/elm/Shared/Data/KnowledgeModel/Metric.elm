@@ -1,8 +1,8 @@
-module Shared.Data.KnowledgeModel.Metric exposing (Metric, decoder, new)
+module Shared.Data.KnowledgeModel.Metric exposing (Metric, decoder)
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias Metric =
@@ -10,17 +10,7 @@ type alias Metric =
     , title : String
     , abbreviation : Maybe String
     , description : Maybe String
-    , annotations : Dict String String
-    }
-
-
-new : String -> Metric
-new uuid =
-    { uuid = uuid
-    , title = "New Metric"
-    , abbreviation = Nothing
-    , description = Nothing
-    , annotations = Dict.empty
+    , annotations : List Annotation
     }
 
 
@@ -31,4 +21,4 @@ decoder =
         |> D.required "title" D.string
         |> D.required "abbreviation" (D.maybe D.string)
         |> D.required "description" (D.maybe D.string)
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)

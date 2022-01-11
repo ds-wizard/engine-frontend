@@ -1,6 +1,5 @@
 module Wizard.Common.View.FormGroup exposing
     ( codeView
-    , color
     , formGroup
     , formGroupCustom
     , formatRadioGroup
@@ -30,7 +29,7 @@ import Form exposing (Form, InputType(..), Msg(..))
 import Form.Field as Field
 import Form.Input as Input
 import Html exposing (Html, a, button, code, div, label, li, option, p, span, text, ul)
-import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, selected, style, type_, value)
+import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, selected, type_, value)
 import Html.Events exposing (on, onBlur, onCheck, onClick, onFocus, onMouseDown, targetValue)
 import Json.Decode as Json
 import Markdown
@@ -38,9 +37,8 @@ import Maybe.Extra as Maybe
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError(..))
-import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (lx)
-import Shared.Utils exposing (getContrastColorHex)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
@@ -270,73 +268,6 @@ toggle form fieldName labelText =
             , span [] [ text labelText ]
             ]
         ]
-
-
-{-| Helper for creating form group with color input field
--}
-color : AppState -> Form FormError o -> String -> String -> Html Form.Msg
-color appState form fieldName labelText =
-    let
-        field =
-            Form.getFieldAsString fieldName form
-
-        colorButtons =
-            List.map (colorButton appState field.value fieldName) colorOptions
-    in
-    div [ class "form-group form-group-color-picker" ]
-        [ label [] [ text labelText ]
-        , Input.textInput field []
-        , div [ class "color-buttons" ] colorButtons
-        ]
-
-
-colorOptions : List String
-colorOptions =
-    [ "#1ABC9C"
-    , "#2ECC71"
-    , "#3498DB"
-    , "#9B59B6"
-    , "#34495E"
-    , "#16A085"
-    , "#27AE60"
-    , "#2980B9"
-    , "#8E44AD"
-    , "#2C3E50"
-    , "#F1C40F"
-    , "#E67E22"
-    , "#E74C3C"
-    , "#ECF0F1"
-    , "#95A5A6"
-    , "#F39C12"
-    , "#D35400"
-    , "#C0392B"
-    , "#BDC3C7"
-    , "#7F8C8D"
-    ]
-
-
-colorButton : AppState -> Maybe String -> String -> String -> Html Form.Msg
-colorButton appState maybeValue fieldName colorHex =
-    let
-        isSelected =
-            maybeValue == Just colorHex
-
-        check =
-            if isSelected then
-                faSet "colorButton.check" appState
-
-            else
-                emptyNode
-    in
-    a
-        [ onClick (Input fieldName Text (Field.String colorHex))
-        , style "background" colorHex
-        , style "color" <| getContrastColorHex colorHex
-        , style "border-color" <| getContrastColorHex colorHex
-        , classList [ ( "selected", isSelected ) ]
-        , dataCy "form-group_color_color-button"
-        ]
-        [ check ]
 
 
 list : AppState -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> Html Form.Msg

@@ -1,15 +1,12 @@
 module Wizard.KMEditor.Index.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
-import Form
-import Html exposing (Attribute, Html, a, code, div, i, p, span, strong, text)
+import Html exposing (Attribute, Html, a, code, div, i, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
-import Shared.Data.PackageDetail as PackageDetail
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Locale exposing (l, lg, lx)
 import Shared.Utils exposing (listInsertIf, packageIdToComponents)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -17,11 +14,12 @@ import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionT
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
-import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.BranchUtils as BranchUtils
+import Wizard.KMEditor.Common.DeleteModal as DeleteModal
+import Wizard.KMEditor.Common.UpgradeModal as UpgradeModal
+import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute
 import Wizard.KMEditor.Index.Models exposing (Model)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
@@ -32,11 +30,6 @@ import Wizard.Routes as Routes
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.KMEditor.Index.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.KMEditor.Index.View"
 
 
 lx_ : String -> AppState -> Html msg
@@ -50,8 +43,8 @@ view appState model =
         [ Page.header (l_ "header.title" appState) []
         , FormResult.view appState model.deletingMigration
         , Listing.view appState (listingConfig appState) model.branches
-        , deleteModal appState model
-        , upgradeModal appState model
+        , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModal
+        , Html.map UpgradeModalMsg <| UpgradeModal.view appState model.upgradeModal
         ]
 
 
@@ -106,20 +99,20 @@ linkToKM appState branch =
     case branch.state of
         BranchState.Migrating ->
             if Feature.knowledgeModelEditorContinueMigration appState branch then
-                linkTo appState (Routes.KMEditorRoute <| MigrationRoute <| branch.uuid)
+                linkTo appState (Routes.KMEditorRoute <| MigrationRoute branch.uuid)
 
             else
                 span
 
         BranchState.Migrated ->
             if Feature.knowledgeModelEditorPublish appState branch then
-                linkTo appState (Routes.KMEditorRoute <| PublishRoute <| branch.uuid)
+                linkTo appState (Routes.KMEditorRoute <| PublishRoute branch.uuid)
 
             else
                 span
 
         _ ->
-            linkTo appState (Routes.KMEditorRoute <| EditorRoute <| branch.uuid)
+            linkTo appState (Routes.KMEditorRoute <| EditorRoute branch.uuid (KMEditorRoute.Edit Nothing))
 
 
 listingTitleLastPublishedVersionBadge : AppState -> Branch -> Html msg
@@ -141,7 +134,7 @@ listingTitleBadge appState branch =
             a
                 [ title <| l_ "badge.outdated.title" appState
                 , class "badge badge-warning"
-                , onClick (ShowHideUpgradeModal <| Just branch)
+                , onClick (UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId)))
                 , dataCy "km-editor_list_outdated-badge"
                 ]
                 [ lx_ "badge.outdated" appState ]
@@ -208,7 +201,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.edit" appState
                 , label = l_ "action.openEditor" appState
-                , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute branch.uuid)
+                , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute branch.uuid (KMEditorRoute.Edit Nothing))
                 , dataCy = "open-editor"
                 }
 
@@ -226,7 +219,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.upgrade" appState
                 , label = l_ "action.upgrade" appState
-                , msg = ListingActionMsg <| ShowHideUpgradeModal <| Just branch
+                , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId))
                 , dataCy = "upgrade"
                 }
 
@@ -253,7 +246,7 @@ listingActions appState branch =
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
                 , label = l_ "action.delete" appState
-                , msg = ListingActionMsg <| ShowHideDeleteBranchModal <| Just branch
+                , msg = ListingActionMsg <| DeleteModalMsg (DeleteModal.open branch.uuid branch.name)
                 , dataCy = "delete-migration"
                 }
 
@@ -285,86 +278,3 @@ listingActions appState branch =
         |> listInsertIf cancelMigration showCancelMigration
         |> listInsertIf Listing.dropdownSeparator showDelete
         |> listInsertIf delete showDelete
-
-
-deleteModal : AppState -> Model -> Html Msg
-deleteModal appState model =
-    let
-        ( visible, name ) =
-            case model.branchToBeDeleted of
-                Just branch ->
-                    ( True, branch.name )
-
-                Nothing ->
-                    ( False, "" )
-
-        modalContent =
-            [ p []
-                (lh_ "deleteModal.text" [ strong [] [ text name ] ] appState)
-            ]
-
-        modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingKnowledgeModel
-            , actionName = l_ "deleteModal.action" appState
-            , actionMsg = DeleteBranch
-            , cancelMsg = Just <| ShowHideDeleteBranchModal Nothing
-            , dangerous = True
-            , dataCy = "km-editor-delete"
-            }
-    in
-    Modal.confirm appState modalConfig
-
-
-upgradeModal : AppState -> Model -> Html Msg
-upgradeModal appState model =
-    let
-        ( visible, name ) =
-            case model.branchToBeUpgraded of
-                Just branch ->
-                    ( True, branch.name )
-
-                Nothing ->
-                    ( False, "" )
-
-        options =
-            case model.package of
-                Success package ->
-                    ( "", l_ "upgradeModal.form.defaultOption" appState ) :: PackageDetail.createFormOptions package
-
-                _ ->
-                    []
-
-        modalContent =
-            case model.package of
-                Unset ->
-                    [ emptyNode ]
-
-                Loading ->
-                    [ Page.loader appState ]
-
-                Error error ->
-                    [ p [ class "alert alert-danger" ] [ text error ] ]
-
-                Success _ ->
-                    [ p [ class "alert alert-info" ]
-                        (lh_ "upgradeModal.text" [ strong [] [ text name ] ] appState)
-                    , FormGroup.select appState options model.branchUpgradeForm "targetPackageId" (l_ "upgradeModal.form.targetPackageId" appState)
-                        |> Html.map UpgradeFormMsg
-                    ]
-
-        modalConfig =
-            { modalTitle = l_ "upgradeModal.title" appState
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.creatingMigration
-            , actionName = l_ "upgradeModal.action" appState
-            , actionMsg = UpgradeFormMsg Form.Submit
-            , cancelMsg = Just <| ShowHideUpgradeModal Nothing
-            , dangerous = False
-            , dataCy = "km-editor-upgrade"
-            }
-    in
-    Modal.confirm appState modalConfig

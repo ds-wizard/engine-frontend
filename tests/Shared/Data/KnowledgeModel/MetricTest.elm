@@ -19,7 +19,7 @@ metricDecoderTest =
                             "title": "Fairness",
                             "abbreviation": "F",
                             "description": "Fairness describe how fair it is",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -28,7 +28,7 @@ metricDecoderTest =
                         , title = "Fairness"
                         , abbreviation = Just "F"
                         , description = Just "Fairness describe how fair it is"
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Metric.decoder raw expected

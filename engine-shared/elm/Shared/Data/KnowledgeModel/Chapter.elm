@@ -1,12 +1,13 @@
 module Shared.Data.KnowledgeModel.Chapter exposing
     ( Chapter
+    , addQuestionUuid
     , decoder
-    , new
+    , removeQuestionUuid
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias Chapter =
@@ -14,17 +15,7 @@ type alias Chapter =
     , title : String
     , text : Maybe String
     , questionUuids : List String
-    , annotations : Dict String String
-    }
-
-
-new : String -> Chapter
-new uuid =
-    { uuid = uuid
-    , title = "New chapter"
-    , text = Just "Chapter text"
-    , questionUuids = []
-    , annotations = Dict.empty
+    , annotations : List Annotation
     }
 
 
@@ -35,4 +26,14 @@ decoder =
         |> D.required "title" D.string
         |> D.required "text" (D.nullable D.string)
         |> D.required "questionUuids" (D.list D.string)
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)
+
+
+addQuestionUuid : String -> Chapter -> Chapter
+addQuestionUuid questionUuid chapter =
+    { chapter | questionUuids = chapter.questionUuids ++ [ questionUuid ] }
+
+
+removeQuestionUuid : String -> Chapter -> Chapter
+removeQuestionUuid questionUuid chapter =
+    { chapter | questionUuids = List.filter ((/=) questionUuid) chapter.questionUuids }
