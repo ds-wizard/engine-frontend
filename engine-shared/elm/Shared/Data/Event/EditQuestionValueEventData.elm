@@ -2,14 +2,15 @@ module Shared.Data.Event.EditQuestionValueEventData exposing
     ( EditQuestionValueEventData
     , decoder
     , encode
+    , init
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Data.Event.EventField as EventField exposing (EventField)
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
 
 
@@ -21,7 +22,7 @@ type alias EditQuestionValueEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , valueType : EventField QuestionValueType
-    , annotations : EventField (Dict String String)
+    , annotations : EventField (List Annotation)
     }
 
 
@@ -35,7 +36,7 @@ decoder =
         |> D.required "referenceUuids" (EventField.decoder (D.list D.string))
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
         |> D.required "valueType" (EventField.decoder QuestionValueType.decoder)
-        |> D.required "annotations" (EventField.decoder (D.dict D.string))
+        |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
 encode : EditQuestionValueEventData -> List ( String, E.Value )
@@ -48,5 +49,18 @@ encode data =
     , ( "referenceUuids", EventField.encode (E.list E.string) data.referenceUuids )
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )
     , ( "valueType", EventField.encode QuestionValueType.encode data.valueType )
-    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
+    , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
+
+
+init : EditQuestionValueEventData
+init =
+    { title = EventField.empty
+    , text = EventField.empty
+    , requiredPhaseUuid = EventField.empty
+    , tagUuids = EventField.empty
+    , referenceUuids = EventField.empty
+    , expertUuids = EventField.empty
+    , valueType = EventField.empty
+    , annotations = EventField.empty
+    }

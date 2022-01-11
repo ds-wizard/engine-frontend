@@ -2,14 +2,15 @@ module Shared.Data.Event.EditQuestionOptionsEventData exposing
     ( EditQuestionOptionsEventData
     , decoder
     , encode
+    , init
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Data.Event.EventField as EventField exposing (EventField)
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias EditQuestionOptionsEventData =
@@ -20,7 +21,7 @@ type alias EditQuestionOptionsEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , answerUuids : EventField (List String)
-    , annotations : EventField (Dict String String)
+    , annotations : EventField (List Annotation)
     }
 
 
@@ -34,7 +35,7 @@ decoder =
         |> D.required "referenceUuids" (EventField.decoder (D.list D.string))
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
         |> D.required "answerUuids" (EventField.decoder (D.list D.string))
-        |> D.required "annotations" (EventField.decoder (D.dict D.string))
+        |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
 encode : EditQuestionOptionsEventData -> List ( String, E.Value )
@@ -47,5 +48,18 @@ encode data =
     , ( "referenceUuids", EventField.encode (E.list E.string) data.referenceUuids )
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )
     , ( "answerUuids", EventField.encode (E.list E.string) data.answerUuids )
-    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
+    , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
+
+
+init : EditQuestionOptionsEventData
+init =
+    { title = EventField.empty
+    , text = EventField.empty
+    , requiredPhaseUuid = EventField.empty
+    , tagUuids = EventField.empty
+    , referenceUuids = EventField.empty
+    , expertUuids = EventField.empty
+    , answerUuids = EventField.empty
+    , annotations = EventField.empty
+    }

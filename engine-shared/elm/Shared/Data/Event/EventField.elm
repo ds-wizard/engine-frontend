@@ -23,7 +23,7 @@ decoder : Decoder a -> Decoder (EventField a)
 decoder valueDecoder =
     D.succeed EventField
         |> D.required "changed" D.bool
-        |> D.optional "value" (D.nullable valueDecoder) Nothing
+        |> D.optional "value" (D.maybe valueDecoder) Nothing
 
 
 encode : (a -> E.Value) -> EventField a -> E.Value

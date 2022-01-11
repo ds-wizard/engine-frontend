@@ -2,20 +2,23 @@ module Shared.Data.Event.AddTagEventData exposing
     ( AddTagEventData
     , decoder
     , encode
+    , init
+    , toTag
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 
 
 type alias AddTagEventData =
     { name : String
     , description : Maybe String
     , color : String
-    , annotations : Dict String String
+    , annotations : List Annotation
     }
 
 
@@ -25,7 +28,7 @@ decoder =
         |> D.required "name" D.string
         |> D.required "description" (D.nullable D.string)
         |> D.required "color" D.string
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)
 
 
 encode : AddTagEventData -> List ( String, E.Value )
@@ -34,5 +37,24 @@ encode data =
     , ( "name", E.string data.name )
     , ( "description", E.maybe E.string data.description )
     , ( "color", E.string data.color )
-    , ( "annotations", E.dict identity E.string data.annotations )
+    , ( "annotations", E.list Annotation.encode data.annotations )
     ]
+
+
+init : AddTagEventData
+init =
+    { name = ""
+    , description = Nothing
+    , color = ""
+    , annotations = []
+    }
+
+
+toTag : String -> AddTagEventData -> Tag
+toTag uuid data =
+    { uuid = uuid
+    , name = data.name
+    , description = data.description
+    , color = data.color
+    , annotations = data.annotations
+    }

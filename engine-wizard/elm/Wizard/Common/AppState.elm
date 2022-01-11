@@ -21,6 +21,8 @@ import Time
 import Wizard.Common.Flags as Flags
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
+import Wizard.KMEditor.Editor.KMEditorRoute
+import Wizard.KMEditor.Routes
 import Wizard.Projects.Detail.ProjectDetailRoute
 import Wizard.Projects.Routes
 import Wizard.Routes as Routes
@@ -125,6 +127,9 @@ isFullscreen appState =
     let
         allowedFullscreenRoute =
             case appState.route of
+                Routes.KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute _ (Wizard.KMEditor.Editor.KMEditorRoute.Edit _)) ->
+                    True
+
                 Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute _ Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire) ->
                     True
 

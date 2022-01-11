@@ -3,37 +3,74 @@ module Shared.Data.KnowledgeModel exposing
     , ParentMap
     , createParentMap
     , decoder
+    , empty
     , filterWithTags
     , getAllQuestions
     , getAnswer
     , getAnswerFollowupQuestions
+    , getAnswerName
     , getChapter
+    , getChapterName
     , getChapterQuestions
     , getChapters
     , getChoice
+    , getChoiceName
     , getExpert
+    , getExpertName
     , getIntegration
+    , getIntegrationName
     , getIntegrations
     , getMetric
+    , getMetricName
     , getMetrics
     , getParent
     , getPhase
+    , getPhaseName
     , getPhases
     , getQuestion
     , getQuestionAnswers
     , getQuestionChoices
     , getQuestionExperts
     , getQuestionItemTemplateQuestions
+    , getQuestionName
     , getQuestionReferences
     , getReference
+    , getReferenceName
     , getTag
+    , getTagName
     , getTags
+    , insertAnswer
+    , insertChapter
+    , insertChoice
+    , insertExpert
+    , insertIntegration
+    , insertMetric
+    , insertPhase
+    , insertQuestion
+    , insertReference
+    , insertTag
+    , moveAnswer
+    , moveChoice
+    , moveExpert
+    , moveQuestion
+    , moveReference
+    , updateAnswer
+    , updateChapter
+    , updateChoice
+    , updateExpert
+    , updateIntegration
+    , updateMetric
+    , updatePhase
+    , updateQuestion
+    , updateReference
+    , updateTag
     )
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
@@ -43,7 +80,7 @@ import Shared.Data.KnowledgeModel.KnowledgeModelEntities as KnowledgeModelEntiti
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.KnowledgeModel.Reference exposing (Reference)
+import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Utils exposing (nilUuid)
 import Uuid exposing (Uuid)
@@ -57,7 +94,7 @@ type alias KnowledgeModel =
     , metricUuids : List String
     , phaseUuids : List String
     , entities : KnowledgeModelEntities
-    , annotations : Dict String String
+    , annotations : List Annotation
     }
 
 
@@ -75,7 +112,172 @@ decoder =
         |> D.required "metricUuids" (D.list D.string)
         |> D.required "phaseUuids" (D.list D.string)
         |> D.required "entities" KnowledgeModelEntities.decoder
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)
+
+
+empty : KnowledgeModel
+empty =
+    { uuid = Uuid.nil
+    , chapterUuids = []
+    , tagUuids = []
+    , integrationUuids = []
+    , metricUuids = []
+    , phaseUuids = []
+    , entities = KnowledgeModelEntities.empty
+    , annotations = []
+    }
+
+
+
+-- Insert entities
+
+
+insertAnswer : Answer -> String -> KnowledgeModel -> KnowledgeModel
+insertAnswer answer parentUuid km =
+    { km | entities = KnowledgeModelEntities.insertAnswer answer parentUuid km.entities }
+
+
+insertChapter : Chapter -> String -> KnowledgeModel -> KnowledgeModel
+insertChapter chapter _ km =
+    { km
+        | chapterUuids = km.chapterUuids ++ [ chapter.uuid ]
+        , entities = KnowledgeModelEntities.insertChapter chapter km.entities
+    }
+
+
+insertChoice : Choice -> String -> KnowledgeModel -> KnowledgeModel
+insertChoice choice parentUuid km =
+    { km | entities = KnowledgeModelEntities.insertChoice choice parentUuid km.entities }
+
+
+insertExpert : Expert -> String -> KnowledgeModel -> KnowledgeModel
+insertExpert expert parentUuid km =
+    { km | entities = KnowledgeModelEntities.insertExpert expert parentUuid km.entities }
+
+
+insertIntegration : Integration -> String -> KnowledgeModel -> KnowledgeModel
+insertIntegration integration _ km =
+    { km
+        | integrationUuids = km.integrationUuids ++ [ integration.uuid ]
+        , entities = KnowledgeModelEntities.insertIntegration integration km.entities
+    }
+
+
+insertMetric : Metric -> String -> KnowledgeModel -> KnowledgeModel
+insertMetric metric _ km =
+    { km
+        | metricUuids = km.metricUuids ++ [ metric.uuid ]
+        , entities = KnowledgeModelEntities.insertMetric metric km.entities
+    }
+
+
+insertPhase : Phase -> String -> KnowledgeModel -> KnowledgeModel
+insertPhase phase _ km =
+    { km
+        | phaseUuids = km.phaseUuids ++ [ phase.uuid ]
+        , entities = KnowledgeModelEntities.insertPhase phase km.entities
+    }
+
+
+insertQuestion : Question -> String -> KnowledgeModel -> KnowledgeModel
+insertQuestion question parentUuid km =
+    { km | entities = KnowledgeModelEntities.insertQuestion question parentUuid km.entities }
+
+
+insertReference : Reference -> String -> KnowledgeModel -> KnowledgeModel
+insertReference reference parentUuid km =
+    { km | entities = KnowledgeModelEntities.insertReference reference parentUuid km.entities }
+
+
+insertTag : Tag -> String -> KnowledgeModel -> KnowledgeModel
+insertTag tag _ km =
+    { km
+        | tagUuids = km.tagUuids ++ [ tag.uuid ]
+        , entities = KnowledgeModelEntities.insertTag tag km.entities
+    }
+
+
+
+-- Update entities
+
+
+updateAnswer : Answer -> KnowledgeModel -> KnowledgeModel
+updateAnswer answer km =
+    { km | entities = KnowledgeModelEntities.updateAnswer answer km.entities }
+
+
+updateChapter : Chapter -> KnowledgeModel -> KnowledgeModel
+updateChapter chapter km =
+    { km | entities = KnowledgeModelEntities.insertChapter chapter km.entities }
+
+
+updateChoice : Choice -> KnowledgeModel -> KnowledgeModel
+updateChoice choice km =
+    { km | entities = KnowledgeModelEntities.updateChoice choice km.entities }
+
+
+updateExpert : Expert -> KnowledgeModel -> KnowledgeModel
+updateExpert expert km =
+    { km | entities = KnowledgeModelEntities.updateExpert expert km.entities }
+
+
+updateIntegration : Integration -> KnowledgeModel -> KnowledgeModel
+updateIntegration integration km =
+    { km | entities = KnowledgeModelEntities.insertIntegration integration km.entities }
+
+
+updateMetric : Metric -> KnowledgeModel -> KnowledgeModel
+updateMetric metric km =
+    { km | entities = KnowledgeModelEntities.insertMetric metric km.entities }
+
+
+updatePhase : Phase -> KnowledgeModel -> KnowledgeModel
+updatePhase phase km =
+    { km | entities = KnowledgeModelEntities.insertPhase phase km.entities }
+
+
+updateQuestion : Question -> KnowledgeModel -> KnowledgeModel
+updateQuestion question km =
+    { km | entities = KnowledgeModelEntities.updateQuestion question km.entities }
+
+
+updateReference : Reference -> KnowledgeModel -> KnowledgeModel
+updateReference reference km =
+    { km | entities = KnowledgeModelEntities.updateReference reference km.entities }
+
+
+updateTag : Tag -> KnowledgeModel -> KnowledgeModel
+updateTag tag km =
+    { km | entities = KnowledgeModelEntities.insertTag tag km.entities }
+
+
+
+-- Move entities
+
+
+moveAnswer : Answer -> String -> String -> KnowledgeModel -> KnowledgeModel
+moveAnswer answer oldParent newParent km =
+    { km | entities = KnowledgeModelEntities.moveAnswer answer oldParent newParent km.entities }
+
+
+moveChoice : Choice -> String -> String -> KnowledgeModel -> KnowledgeModel
+moveChoice choice oldParent newParent km =
+    { km | entities = KnowledgeModelEntities.moveChoice choice oldParent newParent km.entities }
+
+
+moveExpert : Expert -> String -> String -> KnowledgeModel -> KnowledgeModel
+moveExpert expert oldParent newParent km =
+    { km | entities = KnowledgeModelEntities.moveExpert expert oldParent newParent km.entities }
+
+
+moveQuestion : Question -> String -> String -> KnowledgeModel -> KnowledgeModel
+moveQuestion question oldParent newParent km =
+    { km | entities = KnowledgeModelEntities.moveQuestion question oldParent newParent km.entities }
+
+
+moveReference : Reference -> String -> String -> KnowledgeModel -> KnowledgeModel
+moveReference reference oldParent newParent km =
+    { km | entities = KnowledgeModelEntities.moveReference reference oldParent newParent km.entities }
 
 
 
@@ -138,6 +340,60 @@ getExpert uuid km =
 
 
 
+-- Entity name getters
+
+
+getChapterName : KnowledgeModel -> String -> String
+getChapterName km uuid =
+    Maybe.unwrap "" .title <| getChapter uuid km
+
+
+getMetricName : KnowledgeModel -> String -> String
+getMetricName km uuid =
+    Maybe.unwrap "" .title <| getMetric uuid km
+
+
+getPhaseName : KnowledgeModel -> String -> String
+getPhaseName km uuid =
+    Maybe.unwrap "" .title <| getPhase uuid km
+
+
+getTagName : KnowledgeModel -> String -> String
+getTagName km uuid =
+    Maybe.unwrap "" .name <| getTag uuid km
+
+
+getIntegrationName : KnowledgeModel -> String -> String
+getIntegrationName km uuid =
+    Maybe.unwrap "" .name <| getIntegration uuid km
+
+
+getQuestionName : KnowledgeModel -> String -> String
+getQuestionName km uuid =
+    Maybe.unwrap "" Question.getTitle <| getQuestion uuid km
+
+
+getAnswerName : KnowledgeModel -> String -> String
+getAnswerName km uuid =
+    Maybe.unwrap "" .label <| getAnswer uuid km
+
+
+getExpertName : KnowledgeModel -> String -> String
+getExpertName km uuid =
+    Maybe.unwrap "" .name <| getExpert uuid km
+
+
+getReferenceName : KnowledgeModel -> String -> String
+getReferenceName km uuid =
+    Maybe.unwrap "" Reference.getVisibleName <| getReference uuid km
+
+
+getChoiceName : KnowledgeModel -> String -> String
+getChoiceName km uuid =
+    Maybe.unwrap "" .label <| getChoice uuid km
+
+
+
 -- Nested entities helpers
 
 
@@ -193,7 +449,7 @@ getQuestionExperts =
 
 getQuestionItemTemplateQuestions : String -> KnowledgeModel -> List Question
 getQuestionItemTemplateQuestions =
-    getEntities .questions Question.getItemQuestionUuids .questions
+    getEntities .questions Question.getItemTemplateQuestionUuids .questions
 
 
 getAnswerFollowupQuestions : String -> KnowledgeModel -> List Question
@@ -237,6 +493,8 @@ createParentMap km =
             in
             dict
                 |> insert_ .chapterUuids
+                |> insert_ .metricUuids
+                |> insert_ .phaseUuids
                 |> insert_ .tagUuids
                 |> insert_ .integrationUuids
 
@@ -257,7 +515,8 @@ createParentMap km =
                 |> insert_ Question.getReferenceUuids
                 |> insert_ Question.getExpertUuids
                 |> insert_ Question.getAnswerUuids
-                |> insert_ Question.getItemQuestionUuids
+                |> insert_ Question.getItemTemplateQuestionUuids
+                |> insert_ Question.getChoiceUuids
 
         processAnswer answer dict =
             let

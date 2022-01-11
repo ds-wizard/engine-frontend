@@ -2,6 +2,7 @@ module Shared.Data.Event.EditQuestionIntegrationEventData exposing
     ( EditQuestionIntegrationEventData
     , decoder
     , encode
+    , init
     )
 
 import Dict exposing (Dict)
@@ -10,6 +11,7 @@ import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Data.Event.EventField as EventField exposing (EventField)
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias EditQuestionIntegrationEventData =
@@ -21,7 +23,7 @@ type alias EditQuestionIntegrationEventData =
     , expertUuids : EventField (List String)
     , integrationUuid : EventField String
     , props : EventField (Dict String String)
-    , annotations : EventField (Dict String String)
+    , annotations : EventField (List Annotation)
     }
 
 
@@ -36,7 +38,7 @@ decoder =
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
         |> D.required "integrationUuid" (EventField.decoder D.string)
         |> D.required "props" (EventField.decoder (D.dict D.string))
-        |> D.required "annotations" (EventField.decoder (D.dict D.string))
+        |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
 encode : EditQuestionIntegrationEventData -> List ( String, E.Value )
@@ -50,5 +52,19 @@ encode data =
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )
     , ( "integrationUuid", EventField.encode E.string data.integrationUuid )
     , ( "props", EventField.encode (E.dict identity E.string) data.props )
-    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
+    , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
+
+
+init : EditQuestionIntegrationEventData
+init =
+    { title = EventField.empty
+    , text = EventField.empty
+    , requiredPhaseUuid = EventField.empty
+    , tagUuids = EventField.empty
+    , referenceUuids = EventField.empty
+    , expertUuids = EventField.empty
+    , integrationUuid = EventField.empty
+    , props = EventField.empty
+    , annotations = EventField.empty
+    }

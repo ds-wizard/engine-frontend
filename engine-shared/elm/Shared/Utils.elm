@@ -1,6 +1,7 @@
 module Shared.Utils exposing
     ( boolToInt
     , boolToString
+    , compose2
     , dictFromMaybeList
     , dispatch
     , flip
@@ -32,6 +33,11 @@ import Uuid exposing (Uuid)
 flip : (a -> b -> c) -> b -> a -> c
 flip f a b =
     f b a
+
+
+compose2 : (c -> d) -> (a -> b -> c) -> a -> b -> d
+compose2 g f x y =
+    g (f x y)
 
 
 pair : a -> b -> ( a, b )

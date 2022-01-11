@@ -8,6 +8,7 @@ port module Shared.WebSocket exposing
     , open
     , ping
     , receive
+    , schedulePing
     , send
     )
 
@@ -15,6 +16,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction exposing (WebSocketServerAction)
+import Time
 
 
 type alias WebSocket =
@@ -105,6 +107,11 @@ ping { url } =
 listen : (E.Value -> msg) -> Sub msg
 listen =
     wsMessage
+
+
+schedulePing : (Time.Posix -> msg) -> Sub msg
+schedulePing =
+    Time.every (30 * 1000)
 
 
 port wsOpen : String -> Cmd msg

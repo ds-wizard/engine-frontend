@@ -2,15 +2,20 @@ module Shared.Data.KnowledgeModel.Reference exposing
     ( Reference(..)
     , decoder
     , getAnnotations
+    , getDescription
+    , getLabel
+    , getShortUuid
+    , getTargetUuid
+    , getTypeString
+    , getUrl
     , getUuid
     , getVisibleName
     , map
-    , new
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
+import Shared.Data.KnowledgeModel.Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Reference.CrossReferenceData as CrossReferenceData exposing (CrossReferenceData)
 import Shared.Data.KnowledgeModel.Reference.ReferenceType as ReferenceType exposing (ReferenceType(..))
 import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData as ResourcePageReferenceData exposing (ResourcePageReferenceData)
@@ -21,11 +26,6 @@ type Reference
     = ResourcePageReference ResourcePageReferenceData
     | URLReference URLReferenceData
     | CrossReference CrossReferenceData
-
-
-new : String -> Reference
-new =
-    URLReference << URLReferenceData.new
 
 
 
@@ -73,6 +73,11 @@ map resourcePageReference urlReference crossReference reference =
             crossReference data
 
 
+getTypeString : Reference -> String
+getTypeString =
+    map (always "ResourcePage") (always "URL") (always "Cross")
+
+
 getUuid : Reference -> String
 getUuid =
     map .uuid .uuid .uuid
@@ -83,6 +88,31 @@ getVisibleName =
     map .shortUuid .label .targetUuid
 
 
-getAnnotations : Reference -> Dict String String
+getAnnotations : Reference -> List Annotation
 getAnnotations =
     map .annotations .annotations .annotations
+
+
+getShortUuid : Reference -> Maybe String
+getShortUuid =
+    map (Just << .shortUuid) (always Nothing) (always Nothing)
+
+
+getUrl : Reference -> Maybe String
+getUrl =
+    map (always Nothing) (Just << .url) (always Nothing)
+
+
+getLabel : Reference -> Maybe String
+getLabel =
+    map (always Nothing) (Just << .label) (always Nothing)
+
+
+getTargetUuid : Reference -> Maybe String
+getTargetUuid =
+    map (always Nothing) (always Nothing) (Just << .targetUuid)
+
+
+getDescription : Reference -> Maybe String
+getDescription =
+    map (always Nothing) (always Nothing) (Just << .description)

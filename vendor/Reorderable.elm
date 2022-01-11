@@ -11,7 +11,7 @@ module Reorderable exposing
 
 import Browser.Events exposing (onMouseMove, onMouseUp)
 import Html exposing (Attribute, Html, li, ul)
-import Html.Attributes exposing (attribute, class, style)
+import Html.Attributes exposing (attribute, class, classList, style)
 import Html.Events exposing (on)
 import Json.Decode as D exposing (Decoder)
 import List.Extra as List
@@ -200,6 +200,7 @@ viewDraggedItem config draggedItem item =
         , style "top" <| px draggedItem.position.y
         , style "pointer-events" "none"
         , style "display" "block"
+        , style "z-index" "10"
         ]
         [ config.itemView (ignoreDrag config.toMsg) item ]
 

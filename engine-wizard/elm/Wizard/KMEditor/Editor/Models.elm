@@ -1,112 +1,111 @@
 module Wizard.KMEditor.Editor.Models exposing
-    ( EditorType(..)
-    , Model
-    , addSessionEvents
-    , containsChanges
-    , getAllEvents
-    , getCurrentActiveEditorUuid
-    , getSavingError
-    , hasSavingError
-    , initialModel
+    ( Model
+    , addSavingActionUuid
+    , init
+    , initPageModel
+    , removeSavingActionUuid
     )
 
-import ActionResult exposing (ActionResult(..))
-import Form exposing (Form)
-import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.Event exposing (Event)
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Form.FormError exposing (FormError)
+import ActionResult exposing (ActionResult)
+import Shared.Api.Branches as BranchesApi
+import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
-import Wizard.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
-import Wizard.KMEditor.Editor.KMEditor.Models as KMEditorModel
-import Wizard.KMEditor.Editor.KMEditor.Models.Forms exposing (formChanged)
-import Wizard.KMEditor.Editor.Preview.Models
-import Wizard.KMEditor.Editor.TagEditor.Models as TagEditorModel
-
-
-type EditorType
-    = KMEditor
-    | TagsEditor
-    | PreviewEditor
-    | HistoryEditor
-    | SettingsEditor
+import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.OnlineUser as OnlineUser
+import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.Components.Settings as Settings
+import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
+import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute)
+import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 
 
 type alias Model =
-    { kmUuid : Uuid
-    , km : ActionResult BranchDetail
-    , kmForm : Form FormError BranchEditForm
-    , preview : ActionResult KnowledgeModel
-    , currentEditor : EditorType
-    , sessionEvents : List Event
-    , sessionActiveEditor : Maybe String
-    , previewEditorModel : Maybe Wizard.KMEditor.Editor.Preview.Models.Model
-    , tagEditorModel : Maybe TagEditorModel.Model
-    , editorModel : Maybe KMEditorModel.Model
-    , saving : ActionResult String
+    { uuid : Uuid
+    , mbEditorUuid : Maybe Uuid
+    , websocket : WebSocket
+    , offline : Bool
+    , error : Bool
+    , onlineUsers : List OnlineUser.Model
+    , savingActionUuids : List Uuid
+    , savingModel : PlanSaving.Model
+    , branchModel : ActionResult EditorBranch
+    , kmEditorModel : KMEditor.Model
+    , tagEditorModel : TagEditor.Model
+    , previewModel : Preview.Model
+    , settingsModel : Settings.Model
     }
 
 
-initialModel : Uuid -> Model
-initialModel kmUuid =
-    { kmUuid = kmUuid
-    , km = Loading
-    , kmForm = BranchEditForm.initEmpty
-    , preview = Unset
-    , currentEditor = KMEditor
-    , sessionEvents = []
-    , sessionActiveEditor = Nothing
-    , previewEditorModel = Nothing
-    , tagEditorModel = Nothing
-    , editorModel = Nothing
-    , saving = Unset
+init : AppState -> Uuid -> Maybe Uuid -> Model
+init appState uuid mbEditorUuid =
+    { uuid = uuid
+    , mbEditorUuid = mbEditorUuid
+    , websocket = WebSocket.init (BranchesApi.websocket uuid appState)
+    , offline = False
+    , error = False
+    , onlineUsers = []
+    , savingActionUuids = []
+    , savingModel = PlanSaving.init
+    , branchModel = ActionResult.Loading
+    , kmEditorModel = KMEditor.initialModel
+    , tagEditorModel = TagEditor.initialModel
+    , previewModel = Preview.initialModel appState ""
+    , settingsModel = Settings.initialModel
     }
 
 
-containsChanges : Model -> Bool
-containsChanges model =
-    let
-        tagEditorDirty =
-            model.tagEditorModel
-                |> Maybe.map TagEditorModel.containsChanges
-                |> Maybe.withDefault False
+initPageModel : KMEditorRoute -> Model -> Model
+initPageModel route model =
+    case route of
+        KMEditorRoute.Edit mbEditorUuid ->
+            { model | branchModel = ActionResult.map (EditorBranch.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.branchModel }
 
-        kmEditorDirty =
-            model.editorModel
-                |> Maybe.map KMEditorModel.containsChanges
-                |> Maybe.withDefault False
+        KMEditorRoute.Preview ->
+            let
+                firstChapterUuid =
+                    model.branchModel
+                        |> ActionResult.unwrap Nothing (.branch >> .knowledgeModel >> .chapterUuids >> List.head)
+                        |> Maybe.withDefault ""
 
-        kmFormDirty =
-            formChanged model.kmForm
-    in
-    List.length model.sessionEvents > 0 || tagEditorDirty || kmEditorDirty || kmFormDirty
+                defaultPhaseUuid =
+                    model.branchModel
+                        |> ActionResult.unwrap Nothing (.branch >> .knowledgeModel >> .phaseUuids >> List.head)
+                        |> Maybe.andThen Uuid.fromString
 
-
-addSessionEvents : List Event -> Model -> Model
-addSessionEvents events model =
-    { model | sessionEvents = model.sessionEvents ++ events }
-
-
-hasSavingError : Model -> Bool
-hasSavingError =
-    .saving >> ActionResult.isError
-
-
-getSavingError : Model -> String
-getSavingError model =
-    case model.saving of
-        Error err ->
-            err
+                previewModel =
+                    model.previewModel
+                        |> Preview.setActiveChapterIfNot firstChapterUuid
+                        |> Preview.setPhase defaultPhaseUuid
+            in
+            { model | previewModel = previewModel }
 
         _ ->
-            ""
+            model
 
 
-getAllEvents : Model -> List Event
-getAllEvents model =
-    ActionResult.unwrap [] .events model.km ++ model.sessionEvents
+addSavingActionUuid : Uuid -> Model -> Model
+addSavingActionUuid uuid model =
+    { model
+        | savingActionUuids = uuid :: model.savingActionUuids
+        , savingModel = PlanSaving.setSaving model.savingModel
+    }
 
 
-getCurrentActiveEditorUuid : Model -> Maybe String
-getCurrentActiveEditorUuid =
-    .editorModel >> Maybe.andThen .activeEditorUuid
+removeSavingActionUuid : Uuid -> Model -> ( Model, Bool )
+removeSavingActionUuid uuid model =
+    let
+        newSavingActionUuids =
+            List.filter ((/=) uuid) model.savingActionUuids
+
+        newSavingModel =
+            if not (List.isEmpty model.savingActionUuids) && List.isEmpty newSavingActionUuids then
+                PlanSaving.setSaved model.savingModel
+
+            else
+                model.savingModel
+    in
+    ( { model | savingActionUuids = newSavingActionUuids, savingModel = newSavingModel }
+    , List.length model.savingActionUuids /= List.length newSavingActionUuids
+    )

@@ -1,15 +1,18 @@
 module Shared.Data.Event.EditAnswerEventData exposing
     ( EditAnswerEventData
+    , apply
     , decoder
     , encode
+    , init
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Data.Event.EventField as EventField exposing (EventField)
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
 
 
@@ -18,7 +21,7 @@ type alias EditAnswerEventData =
     , advice : EventField (Maybe String)
     , metricMeasures : EventField (List MetricMeasure)
     , followUpUuids : EventField (List String)
-    , annotations : EventField (Dict String String)
+    , annotations : EventField (List Annotation)
     }
 
 
@@ -29,7 +32,7 @@ decoder =
         |> D.required "advice" (EventField.decoder (D.nullable D.string))
         |> D.required "metricMeasures" (EventField.decoder (D.list MetricMeasure.decoder))
         |> D.required "followUpUuids" (EventField.decoder (D.list D.string))
-        |> D.required "annotations" (EventField.decoder (D.dict D.string))
+        |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
 encode : EditAnswerEventData -> List ( String, E.Value )
@@ -39,5 +42,26 @@ encode data =
     , ( "advice", EventField.encode (E.maybe E.string) data.advice )
     , ( "metricMeasures", EventField.encode (E.list MetricMeasure.encode) data.metricMeasures )
     , ( "followUpUuids", EventField.encode (E.list E.string) data.followUpUuids )
-    , ( "annotations", EventField.encode (E.dict identity E.string) data.annotations )
+    , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
+
+
+init : EditAnswerEventData
+init =
+    { label = EventField.empty
+    , advice = EventField.empty
+    , metricMeasures = EventField.empty
+    , followUpUuids = EventField.empty
+    , annotations = EventField.empty
+    }
+
+
+apply : EditAnswerEventData -> Answer -> Answer
+apply eventData answer =
+    { answer
+        | label = EventField.getValueWithDefault eventData.label answer.label
+        , advice = EventField.getValueWithDefault eventData.advice answer.advice
+        , metricMeasures = EventField.getValueWithDefault eventData.metricMeasures answer.metricMeasures
+        , followUpUuids = EventField.getValueWithDefault eventData.followUpUuids answer.followUpUuids
+        , annotations = EventField.getValueWithDefault eventData.annotations answer.annotations
+    }

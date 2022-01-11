@@ -1,5 +1,6 @@
 module Shared.Data.Event.EditQuestionEventData exposing
     ( EditQuestionEventData(..)
+    , apply
     , decoder
     , encode
     , getEntityVisibleName
@@ -7,6 +8,7 @@ module Shared.Data.Event.EditQuestionEventData exposing
     , map
     )
 
+import Dict
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData exposing (EditQuestionIntegrationEventData)
@@ -15,6 +17,8 @@ import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiCh
 import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData exposing (EditQuestionOptionsEventData)
 import Shared.Data.Event.EditQuestionValueEventData as EditQuestionValueEventData exposing (EditQuestionValueEventData)
 import Shared.Data.Event.EventField as EventField
+import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType(..))
 
 
 type EditQuestionEventData
@@ -64,6 +68,53 @@ encode data =
                 data
     in
     ( "eventType", E.string "EditQuestionEvent" ) :: eventData
+
+
+apply : EditQuestionEventData -> Question -> Question
+apply event question =
+    let
+        applyCommonData data =
+            { uuid = Question.getUuid question
+            , title = EventField.getValueWithDefault data.title (Question.getTitle question)
+            , text = EventField.getValueWithDefault data.text (Question.getText question)
+            , requiredPhaseUuid = EventField.getValueWithDefault data.requiredPhaseUuid (Question.getRequiredPhaseUuid question)
+            , tagUuids = EventField.getValueWithDefault data.tagUuids (Question.getTagUuids question)
+            , referenceUuids = EventField.getValueWithDefault data.referenceUuids (Question.getReferenceUuids question)
+            , expertUuids = EventField.getValueWithDefault data.expertUuids (Question.getExpertUuids question)
+            , annotations = EventField.getValueWithDefault data.annotations (Question.getAnnotations question)
+            }
+    in
+    case event of
+        EditQuestionOptionsEvent eventData ->
+            OptionsQuestion
+                (applyCommonData eventData)
+                { answerUuids = EventField.getValueWithDefault eventData.answerUuids (Question.getAnswerUuids question)
+                }
+
+        EditQuestionListEvent eventData ->
+            ListQuestion
+                (applyCommonData eventData)
+                { itemTemplateQuestionUuids = EventField.getValueWithDefault eventData.itemTemplateQuestionUuids (Question.getItemTemplateQuestionUuids question)
+                }
+
+        EditQuestionValueEvent eventData ->
+            ValueQuestion
+                (applyCommonData eventData)
+                { valueType = EventField.getValueWithDefault eventData.valueType (Maybe.withDefault QuestionValueType.default (Question.getValueType question))
+                }
+
+        EditQuestionIntegrationEvent eventData ->
+            IntegrationQuestion
+                (applyCommonData eventData)
+                { integrationUuid = EventField.getValueWithDefault eventData.integrationUuid (Maybe.withDefault "" (Question.getIntegrationUuid question))
+                , props = EventField.getValueWithDefault eventData.props (Maybe.withDefault Dict.empty (Question.getProps question))
+                }
+
+        EditQuestionMultiChoiceEvent eventData ->
+            MultiChoiceQuestion
+                (applyCommonData eventData)
+                { choiceUuids = EventField.getValueWithDefault eventData.choiceUuids (Question.getChoiceUuids question)
+                }
 
 
 getTypeString : EditQuestionEventData -> String

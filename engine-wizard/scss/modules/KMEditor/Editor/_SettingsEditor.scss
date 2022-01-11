@@ -1,4 +1,5 @@
 @import "variables";
+@import "../../../variables";
 
 .KMEditor__Editor__SettingsEditor {
     height: calc(100vh - #{$editor-header-height});
@@ -8,5 +9,34 @@
 
     .header {
         margin-top: 1rem;
+    }
+
+    .package-link {
+        color: $body-color;
+        text-decoration: none;
+        display: block;
+        margin-top: 1rem;
+
+        .TypeHintInput__TypeHints__ComplexItem {
+            border: 1px solid $gray-400;
+            border-radius: .25rem;
+            padding: .375rem .75rem;
+        }
+
+        &:hover {
+            .TypeHintInput__TypeHints__ComplexItem {
+                background: $gray-200;
+            }
+        }
+    }
+
+    .alert {
+        .btn {
+            white-space: nowrap;
+        }
+    }
+
+    .separator {
+        margin: 3rem 0;
     }
 }

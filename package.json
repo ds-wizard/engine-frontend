@@ -4,6 +4,7 @@
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
+    "analyse": "elm-analyse",
     "build": "npm run build:registry && npm run build:wizard",
     "build:registry": "COMPONENT=registry ./scripts/build.sh",
     "build:wizard": "COMPONENT=wizard ./scripts/build.sh",

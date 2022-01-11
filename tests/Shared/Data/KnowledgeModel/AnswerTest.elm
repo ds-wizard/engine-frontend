@@ -20,7 +20,7 @@ answerDecoderTest =
                             "advice": null,
                             "metricMeasures": [],
                             "followUpUuids": [],
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -30,7 +30,7 @@ answerDecoderTest =
                         , advice = Nothing
                         , metricMeasures = []
                         , followUpUuids = []
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Answer.decoder raw expected
@@ -45,7 +45,7 @@ answerDecoderTest =
                             "advice": "Are you sure this is the correct answer?",
                             "metricMeasures": [],
                             "followUpUuids": [],
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -55,7 +55,7 @@ answerDecoderTest =
                         , advice = Just "Are you sure this is the correct answer?"
                         , metricMeasures = []
                         , followUpUuids = []
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Answer.decoder raw expected
@@ -74,7 +74,7 @@ answerDecoderTest =
                                 "weight": 0.8
                             }],
                             "followUpUuids": [],
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -89,7 +89,7 @@ answerDecoderTest =
                               }
                             ]
                         , followUpUuids = []
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Answer.decoder raw expected
@@ -104,7 +104,7 @@ answerDecoderTest =
                             "advice": null,
                             "metricMeasures": [],
                             "followUpUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -114,7 +114,7 @@ answerDecoderTest =
                         , advice = Nothing
                         , metricMeasures = []
                         , followUpUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Answer.decoder raw expected

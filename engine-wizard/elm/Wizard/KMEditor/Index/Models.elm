@@ -11,6 +11,8 @@ import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm exposing (BranchUpgradeForm)
+import Wizard.KMEditor.Common.DeleteModal as DeleteModal
+import Wizard.KMEditor.Common.UpgradeModal as UpgradeModal
 
 
 type alias Model =
@@ -22,6 +24,8 @@ type alias Model =
     , package : ActionResult PackageDetail
     , branchUpgradeForm : Form FormError BranchUpgradeForm
     , deletingMigration : ActionResult String
+    , deleteModal : DeleteModal.Model
+    , upgradeModal : UpgradeModal.Model
     }
 
 
@@ -35,4 +39,6 @@ initialModel paginationQueryString =
     , package = Unset
     , branchUpgradeForm = BranchUpgradeForm.init
     , deletingMigration = Unset
+    , deleteModal = DeleteModal.initialModel
+    , upgradeModal = UpgradeModal.initialModel
     }

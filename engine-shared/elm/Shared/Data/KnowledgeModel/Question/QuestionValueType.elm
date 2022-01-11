@@ -1,7 +1,9 @@
 module Shared.Data.KnowledgeModel.Question.QuestionValueType exposing
     ( QuestionValueType(..)
     , decoder
+    , default
     , encode
+    , forceFromString
     , toString
     )
 
@@ -40,33 +42,42 @@ decoder =
 
 
 encode : QuestionValueType -> E.Value
-encode valueType =
-    E.string <|
-        case valueType of
-            StringQuestionValueType ->
-                "StringQuestionValueType"
+encode =
+    E.string << toString
 
-            DateQuestionValueType ->
-                "DateQuestionValueType"
 
-            NumberQuestionValueType ->
-                "NumberQuestionValueType"
-
-            TextQuestionValueType ->
-                "TextQuestionValueType"
+default : QuestionValueType
+default =
+    StringQuestionValueType
 
 
 toString : QuestionValueType -> String
 toString questionValueType =
     case questionValueType of
         StringQuestionValueType ->
-            "String"
+            "StringQuestionValueType"
 
         DateQuestionValueType ->
-            "Date"
+            "DateQuestionValueType"
 
         NumberQuestionValueType ->
-            "Number"
+            "NumberQuestionValueType"
 
         TextQuestionValueType ->
-            "Text"
+            "TextQuestionValueType"
+
+
+forceFromString : String -> QuestionValueType
+forceFromString valueString =
+    case valueString of
+        "DateQuestionValueType" ->
+            DateQuestionValueType
+
+        "NumberQuestionValueType" ->
+            NumberQuestionValueType
+
+        "TextQuestionValueType" ->
+            TextQuestionValueType
+
+        _ ->
+            StringQuestionValueType

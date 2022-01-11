@@ -1,21 +1,33 @@
 module Wizard.KMEditor.Editor.Subscriptions exposing (subscriptions)
 
-import Wizard.KMEditor.Editor.KMEditor.Subscriptions
-import Wizard.KMEditor.Editor.Models exposing (EditorType(..), Model)
+import Shared.WebSocket as WebSocket
+import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute)
+import Wizard.KMEditor.Editor.Models exposing (Model)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
-import Wizard.KMEditor.Editor.Preview.Subscriptions
-import Wizard.Msgs
+import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 
 
-subscriptions : (Msg -> Wizard.Msgs.Msg) -> Model -> Sub Wizard.Msgs.Msg
-subscriptions wrapMsg model =
-    case ( model.currentEditor, model.editorModel, model.previewEditorModel ) of
-        ( KMEditor, Just editorModel, _ ) ->
-            Wizard.KMEditor.Editor.KMEditor.Subscriptions.subscriptions (wrapMsg << KMEditorMsg) editorModel
+subscriptions : KMEditorRoute -> Model -> Sub Msg
+subscriptions route model =
+    let
+        pageSubscriptions =
+            case route of
+                KMEditorRoute.Edit _ ->
+                    Sub.map KMEditorMsg <|
+                        KMEditor.subscriptions model.kmEditorModel
 
-        ( PreviewEditor, _, Just previewEditorModel ) ->
-            Sub.map (wrapMsg << PreviewEditorMsg) <|
-                Wizard.KMEditor.Editor.Preview.Subscriptions.subscriptions previewEditorModel
+                KMEditorRoute.Preview ->
+                    Sub.map PreviewMsg <|
+                        Preview.subscriptions model.previewModel
 
-        _ ->
-            Sub.none
+                _ ->
+                    Sub.none
+    in
+    Sub.batch
+        [ WebSocket.listen WebSocketMsg
+        , WebSocket.schedulePing WebSocketPing
+        , Sub.map SavingMsg <| PlanSaving.subscriptions model.savingModel
+        , pageSubscriptions
+        ]

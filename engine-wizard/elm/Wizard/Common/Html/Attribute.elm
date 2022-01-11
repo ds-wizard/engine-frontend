@@ -1,6 +1,7 @@
 module Wizard.Common.Html.Attribute exposing
     ( dataCy
     , detailClass
+    , grammarlyAttribute
     , grammarlyAttributes
     , linkToAttributes
     , listClass
@@ -38,6 +39,11 @@ listClass otherClass =
 grammarlyAttributes : List (Html.Attribute msg)
 grammarlyAttributes =
     [ attribute "data-gramm" "false" ]
+
+
+grammarlyAttribute : Html.Attribute msg
+grammarlyAttribute =
+    attribute "data-gramm" "false"
 
 
 dataCy : String -> Html.Attribute msg
