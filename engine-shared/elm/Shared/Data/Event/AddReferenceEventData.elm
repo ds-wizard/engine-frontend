@@ -3,7 +3,9 @@ module Shared.Data.Event.AddReferenceEventData exposing
     , decoder
     , encode
     , getEntityVisibleName
+    , init
     , map
+    , toReference
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -11,6 +13,7 @@ import Json.Encode as E
 import Shared.Data.Event.AddReferenceCrossEventData as AddReferenceCrossEventData exposing (AddReferenceCrossEventData)
 import Shared.Data.Event.AddReferenceResourcePageEventData as AddReferenceResourcePageEventData exposing (AddReferenceResourcePageEventData)
 import Shared.Data.Event.AddReferenceURLEventData as AddReferenceURLEventData exposing (AddReferenceURLEventData)
+import Shared.Data.KnowledgeModel.Reference exposing (Reference)
 
 
 type AddReferenceEventData
@@ -50,6 +53,24 @@ encode data =
                 data
     in
     ( "eventType", E.string "AddReferenceEvent" ) :: eventData
+
+
+init : AddReferenceEventData
+init =
+    AddReferenceURLEvent AddReferenceURLEventData.init
+
+
+toReference : String -> AddReferenceEventData -> Reference
+toReference referenceUuid data =
+    case data of
+        AddReferenceResourcePageEvent eventData ->
+            AddReferenceResourcePageEventData.toReference referenceUuid eventData
+
+        AddReferenceURLEvent eventData ->
+            AddReferenceURLEventData.toReference referenceUuid eventData
+
+        AddReferenceCrossEvent eventData ->
+            AddReferenceCrossEventData.toReference referenceUuid eventData
 
 
 getEntityVisibleName : AddReferenceEventData -> Maybe String

@@ -1,12 +1,18 @@
 module Shared.Data.KnowledgeModel.Question exposing
     ( Question(..)
+    , addAnswerUuid
+    , addChoiceUuid
+    , addExpertUuid
+    , addItemTemplateQuestionUuids
+    , addReferenceUuid
     , decoder
     , getAnnotations
     , getAnswerUuids
     , getChoiceUuids
     , getExpertUuids
     , getIntegrationUuid
-    , getItemQuestionUuids
+    , getItemTemplateQuestionUuids
+    , getPropValue
     , getProps
     , getReferenceUuids
     , getRequiredPhaseUuid
@@ -20,13 +26,18 @@ module Shared.Data.KnowledgeModel.Question exposing
     , isList
     , isMultiChoice
     , isOptions
-    , new
+    , removeAnswerUuid
+    , removeChoiceUuid
+    , removeExpertUuid
+    , removeItemTemplateQuestionUuids
+    , removeReferenceUuid
     )
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import List.Extra as List
+import Shared.Data.KnowledgeModel.Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
 import Shared.Data.KnowledgeModel.Question.IntegrationQuestionData as IntegrationQuestionData exposing (IntegrationQuestionData)
 import Shared.Data.KnowledgeModel.Question.ListQuestionData as ListQuestionData exposing (ListQuestionData)
@@ -43,11 +54,6 @@ type Question
     | ValueQuestion CommonQuestionData ValueQuestionData
     | IntegrationQuestion CommonQuestionData IntegrationQuestionData
     | MultiChoiceQuestion CommonQuestionData MultiChoiceQuestionData
-
-
-new : String -> Question
-new uuid =
-    OptionsQuestion (CommonQuestionData.new uuid) OptionsQuestionData.new
 
 
 
@@ -92,6 +98,111 @@ multiChoiceQuestionDecoder =
 
 
 -- Helpers
+
+
+addReferenceUuid : String -> Question -> Question
+addReferenceUuid referenceUuid =
+    mapCommonQuestionData (\c -> { c | referenceUuids = c.referenceUuids ++ [ referenceUuid ] })
+
+
+removeReferenceUuid : String -> Question -> Question
+removeReferenceUuid referenceUuid =
+    mapCommonQuestionData (\c -> { c | referenceUuids = List.filter ((/=) referenceUuid) c.referenceUuids })
+
+
+addExpertUuid : String -> Question -> Question
+addExpertUuid expertUuid =
+    mapCommonQuestionData (\c -> { c | expertUuids = c.expertUuids ++ [ expertUuid ] })
+
+
+removeExpertUuid : String -> Question -> Question
+removeExpertUuid expertUuid =
+    mapCommonQuestionData (\c -> { c | expertUuids = List.filter ((/=) expertUuid) c.expertUuids })
+
+
+addAnswerUuid : String -> Question -> Question
+addAnswerUuid answerUuid question =
+    case question of
+        OptionsQuestion commonData questionData ->
+            OptionsQuestion commonData
+                { questionData | answerUuids = questionData.answerUuids ++ [ answerUuid ] }
+
+        _ ->
+            question
+
+
+removeAnswerUuid : String -> Question -> Question
+removeAnswerUuid answerUuid question =
+    case question of
+        OptionsQuestion commonData questionData ->
+            OptionsQuestion commonData
+                { questionData | answerUuids = List.filter ((/=) answerUuid) questionData.answerUuids }
+
+        _ ->
+            question
+
+
+addItemTemplateQuestionUuids : String -> Question -> Question
+addItemTemplateQuestionUuids questionUuid question =
+    case question of
+        ListQuestion commonData questionData ->
+            ListQuestion commonData
+                { questionData | itemTemplateQuestionUuids = questionData.itemTemplateQuestionUuids ++ [ questionUuid ] }
+
+        _ ->
+            question
+
+
+removeItemTemplateQuestionUuids : String -> Question -> Question
+removeItemTemplateQuestionUuids questionUuid question =
+    case question of
+        ListQuestion commonData questionData ->
+            ListQuestion commonData
+                { questionData | itemTemplateQuestionUuids = List.filter ((/=) questionUuid) questionData.itemTemplateQuestionUuids }
+
+        _ ->
+            question
+
+
+addChoiceUuid : String -> Question -> Question
+addChoiceUuid choiceUuid question =
+    case question of
+        MultiChoiceQuestion commonData questionData ->
+            MultiChoiceQuestion commonData
+                { questionData | choiceUuids = questionData.choiceUuids ++ [ choiceUuid ] }
+
+        _ ->
+            question
+
+
+removeChoiceUuid : String -> Question -> Question
+removeChoiceUuid choiceUuid question =
+    case question of
+        MultiChoiceQuestion commonData questionData ->
+            MultiChoiceQuestion commonData
+                { questionData | choiceUuids = List.filter ((/=) choiceUuid) questionData.choiceUuids }
+
+        _ ->
+            question
+
+
+mapCommonQuestionData : (CommonQuestionData -> CommonQuestionData) -> Question -> Question
+mapCommonQuestionData map question =
+    case question of
+        OptionsQuestion commonData questionData ->
+            OptionsQuestion (map commonData) questionData
+
+        ListQuestion commonData questionData ->
+            ListQuestion (map commonData) questionData
+
+        ValueQuestion commonData questionData ->
+            ValueQuestion (map commonData) questionData
+
+        IntegrationQuestion commonData questionData ->
+            IntegrationQuestion (map commonData) questionData
+
+        MultiChoiceQuestion commonData questionData ->
+            MultiChoiceQuestion (map commonData) questionData
 
 
 getCommonQuestionData : Question -> CommonQuestionData
@@ -167,7 +278,7 @@ getReferenceUuids =
     getCommonQuestionData >> .referenceUuids
 
 
-getAnnotations : Question -> Dict String String
+getAnnotations : Question -> List Annotation
 getAnnotations =
     getCommonQuestionData >> .annotations
 
@@ -192,8 +303,8 @@ getChoiceUuids question =
             []
 
 
-getItemQuestionUuids : Question -> List String
-getItemQuestionUuids question =
+getItemTemplateQuestionUuids : Question -> List String
+getItemTemplateQuestionUuids question =
     case question of
         ListQuestion _ data ->
             data.itemTemplateQuestionUuids
@@ -227,6 +338,16 @@ getProps question =
     case question of
         IntegrationQuestion _ data ->
             Just data.props
+
+        _ ->
+            Nothing
+
+
+getPropValue : String -> Question -> Maybe String
+getPropValue prop question =
+    case question of
+        IntegrationQuestion _ data ->
+            Dict.get prop data.props
 
         _ ->
             Nothing

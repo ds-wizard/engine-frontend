@@ -19,7 +19,7 @@ chapterDecoderTest =
                             "title": "Chapter 1",
                             "text": "This chapter is empty",
                             "questionUuids": [],
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -28,7 +28,7 @@ chapterDecoderTest =
                         , title = "Chapter 1"
                         , text = Just "This chapter is empty"
                         , questionUuids = []
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Chapter.decoder raw expected
@@ -42,7 +42,7 @@ chapterDecoderTest =
                             "title": "Chapter 1",
                             "text": null,
                             "questionUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -51,7 +51,7 @@ chapterDecoderTest =
                         , title = "Chapter 1"
                         , text = Nothing
                         , questionUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Chapter.decoder raw expected

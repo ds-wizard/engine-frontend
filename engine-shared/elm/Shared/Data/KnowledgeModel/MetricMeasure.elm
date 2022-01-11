@@ -2,6 +2,9 @@ module Shared.Data.KnowledgeModel.MetricMeasure exposing
     ( MetricMeasure
     , decoder
     , encode
+    , init
+    , setMeasure
+    , setWeight
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -31,3 +34,21 @@ encode metricMeasure =
         , ( "measure", E.float metricMeasure.measure )
         , ( "weight", E.float metricMeasure.weight )
         ]
+
+
+init : String -> MetricMeasure
+init metricUuid =
+    { metricUuid = metricUuid
+    , measure = 1
+    , weight = 1
+    }
+
+
+setMeasure : Float -> MetricMeasure -> MetricMeasure
+setMeasure measure metricMeasure =
+    { metricMeasure | measure = measure }
+
+
+setWeight : Float -> MetricMeasure -> MetricMeasure
+setWeight weight metricMeasure =
+    { metricMeasure | weight = weight }

@@ -1,23 +1,28 @@
 module Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 
-import Form
 import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.Event exposing (Event)
+import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Error.ApiError exposing (ApiError)
-import Wizard.KMEditor.Editor.KMEditor.Msgs
-import Wizard.KMEditor.Editor.Models exposing (EditorType)
-import Wizard.KMEditor.Editor.Preview.Msgs
-import Wizard.KMEditor.Editor.TagEditor.Msgs
+import Shared.WebSocket as WebSocket
+import Time
+import Wizard.Common.Components.OnlineUser as OnlineUser
+import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.Components.Settings as Settings
+import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
+import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 
 
 type Msg
-    = GetKnowledgeModelCompleted (Result ApiError BranchDetail)
-    | GetPreviewCompleted (Result ApiError KnowledgeModel)
-    | OpenEditor EditorType
-    | KMEditorMsg Wizard.KMEditor.Editor.KMEditor.Msgs.Msg
-    | TagEditorMsg Wizard.KMEditor.Editor.TagEditor.Msgs.Msg
-    | PreviewEditorMsg Wizard.KMEditor.Editor.Preview.Msgs.Msg
-    | SettingsFormMsg Form.Msg
-    | Discard
-    | Save
-    | SaveCompleted (Result ApiError ())
+    = GetBranchComplete (Result ApiError BranchDetail)
+    | WebSocketMsg WebSocket.RawMsg
+    | WebSocketPing Time.Posix
+    | OnlineUserMsg Int OnlineUser.Msg
+    | SavingMsg PlanSaving.Msg
+    | Refresh
+    | KMEditorMsg KMEditor.Msg
+    | TagEditorMsg TagEditor.Msg
+    | PreviewMsg Preview.Msg
+    | SettingsMsg Settings.Msg
+    | EventMsg String (Maybe String) (CommonEventData -> Event)

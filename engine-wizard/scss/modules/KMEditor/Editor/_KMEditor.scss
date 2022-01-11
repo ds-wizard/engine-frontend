@@ -8,16 +8,30 @@ $breadcrumbs-height: 40px;
     .editor-breadcrumbs {
         width: 100%;
         height: 40px;
-        background: $gray-200;
+        background: $gray-100;
         border-bottom: 1px solid $gray-400;
         display: flex;
         justify-content: flex-start;
         align-items: center;
+        padding: 0 1rem;
 
         .breadcrumb {
             margin: 0;
             background: none;
             width: 100%;
+            padding-left: 0;
+        }
+
+        .breadcrumb-button {
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+            padding: 8px;
+            border-radius: .25rem;
+            color: $gray-900 !important;
+            text-decoration: none !important;
+
+            &:hover {
+                background: $gray-200;
+            }
         }
 
         .breadcrumb-item {
@@ -39,7 +53,7 @@ $breadcrumbs-height: 40px;
     }
 
     .tree-col {
-        background: $gray-200;
+        background: $gray-100;
         overflow: auto;
         padding: 0;
         border-right: 1px solid $gray-400;
@@ -53,6 +67,13 @@ $breadcrumbs-height: 40px;
         width: 100%;
         display: flex;
         justify-content: center;
+
+        .editor-content {
+            opacity: 0;
+            @include animation(fadeIn, ease-in, 1);
+            @include animation-duration(0.1s);
+            @include animation-fill-mode(forwards);
+        }
     }
 
     .editor-title {
@@ -83,6 +104,10 @@ $breadcrumbs-height: 40px;
 
     .pane-container {
         height: calc(100vh - #{$editor-header-height + $breadcrumbs-height}) !important;
+
+        .app-fullscreen & {
+            height: calc(100vh - #{$breadcrumbs-height}) !important;
+        }
     }
 
     .form-group {
@@ -124,6 +149,10 @@ $breadcrumbs-height: 40px;
         width: 100%;
         cursor: move;
         @include not-selectable();
+
+        .untitled {
+            font-style: italic;
+        }
 
         a {
             text-decoration: underline;
@@ -218,10 +247,6 @@ $breadcrumbs-height: 40px;
                 border-top-left-radius: 0;
                 border-top-right-radius: 0;
             }
-        }
-
-        &-controls {
-            margin-left: 0.5rem;
         }
     }
 }

@@ -18,7 +18,7 @@ referenceDecoderTest =
                             "referenceType": "ResourcePageReference",
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "shortUuid": "atq",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -26,7 +26,7 @@ referenceDecoderTest =
                         ResourcePageReference
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , shortUuid = "atq"
-                            , annotations = Dict.empty
+                            , annotations = []
                             }
                 in
                 expectDecoder Reference.decoder raw expected
@@ -40,7 +40,7 @@ referenceDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "url": "http://example.com",
                             "label": "See also",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -49,7 +49,7 @@ referenceDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , url = "http://example.com"
                             , label = "See also"
-                            , annotations = Dict.empty
+                            , annotations = []
                             }
                 in
                 expectDecoder Reference.decoder raw expected
@@ -63,7 +63,7 @@ referenceDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "targetUuid": "64217c4e-50b3-4230-9224-bf65c4220ab6",
                             "description": "See also",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -72,7 +72,7 @@ referenceDecoderTest =
                             { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                             , targetUuid = "64217c4e-50b3-4230-9224-bf65c4220ab6"
                             , description = "See also"
-                            , annotations = Dict.empty
+                            , annotations = []
                             }
                 in
                 expectDecoder Reference.decoder raw expected

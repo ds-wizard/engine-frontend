@@ -1,3 +1,5 @@
+@import "../../variables";
+
 .tag-list {
     &-view {
         .tag {
@@ -18,6 +20,12 @@
             font-weight: normal;
             cursor: pointer;
             margin: 0;
+            background: $tag-default-background;
+            color: $tag-default-color;
+
+            &.untitled {
+                font-style: italic;
+            }
 
             input {
                 margin-right: 0.5rem;

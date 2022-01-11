@@ -17,14 +17,14 @@ choiceDecoderTest =
                         {
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "label": "Choice",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
                     expected =
                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                         , label = "Choice"
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Choice.decoder raw expected

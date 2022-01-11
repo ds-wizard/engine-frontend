@@ -1,5 +1,6 @@
 module Shared.Data.Event.EditReferenceEventData exposing
     ( EditReferenceEventData(..)
+    , apply
     , decoder
     , encode
     , getEntityVisibleName
@@ -12,6 +13,7 @@ import Shared.Data.Event.EditReferenceCrossEventData as EditReferenceCrossEventD
 import Shared.Data.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData exposing (EditReferenceResourcePageEventData)
 import Shared.Data.Event.EditReferenceURLEventData as EditReferenceURLEventData exposing (EditReferenceURLEventData)
 import Shared.Data.Event.EventField as EventField
+import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
 
 
 type EditReferenceEventData
@@ -51,6 +53,33 @@ encode data =
                 data
     in
     ( "eventType", E.string "EditReferenceEvent" ) :: eventData
+
+
+apply : EditReferenceEventData -> Reference -> Reference
+apply event reference =
+    case event of
+        EditReferenceResourcePageEvent eventData ->
+            ResourcePageReference
+                { uuid = Reference.getUuid reference
+                , shortUuid = EventField.getValueWithDefault eventData.shortUuid (Maybe.withDefault "" (Reference.getShortUuid reference))
+                , annotations = EventField.getValueWithDefault eventData.annotations (Reference.getAnnotations reference)
+                }
+
+        EditReferenceURLEvent eventData ->
+            URLReference
+                { uuid = Reference.getUuid reference
+                , url = EventField.getValueWithDefault eventData.url (Maybe.withDefault "" (Reference.getUrl reference))
+                , label = EventField.getValueWithDefault eventData.label (Maybe.withDefault "" (Reference.getLabel reference))
+                , annotations = EventField.getValueWithDefault eventData.annotations (Reference.getAnnotations reference)
+                }
+
+        EditReferenceCrossEvent eventData ->
+            CrossReference
+                { uuid = Reference.getUuid reference
+                , targetUuid = EventField.getValueWithDefault eventData.targetUuid (Maybe.withDefault "" (Reference.getTargetUuid reference))
+                , description = EventField.getValueWithDefault eventData.description (Maybe.withDefault "" (Reference.getDescription reference))
+                , annotations = EventField.getValueWithDefault eventData.annotations (Reference.getAnnotations reference)
+                }
 
 
 getEntityVisibleName : EditReferenceEventData -> Maybe String

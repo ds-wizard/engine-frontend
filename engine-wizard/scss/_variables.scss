@@ -85,3 +85,8 @@ $comments-private-color: color-level($purple, $alert-color-level) !default;
 $comments-private-color-lighter: color-level($purple, -1) !default;
 $comments-private-bg: color-level($purple, -12) !default;
 $comments-private-border: color-level($purple, $alert-border-level) !default;
+
+
+// tags
+$tag-default-background: $gray-400 !default;
+$tag-default-color: $body-color !default;

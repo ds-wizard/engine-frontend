@@ -19,7 +19,7 @@ tagDecoderTest =
                             "name": "Science",
                             "description": null,
                             "color": "#F5A623",
-                            "annotations": {}
+                            "annotations": []
                         }
                         """
 
@@ -28,7 +28,7 @@ tagDecoderTest =
                         , name = "Science"
                         , description = Nothing
                         , color = "#F5A623"
-                        , annotations = Dict.empty
+                        , annotations = []
                         }
                 in
                 expectDecoder Tag.decoder raw expected

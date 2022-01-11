@@ -19,9 +19,9 @@ view route appState model =
             Html.map CreateMsg <|
                 Wizard.KMEditor.Create.View.view appState model.createModel
 
-        EditorRoute _ ->
+        EditorRoute _ subroute ->
             Html.map EditorMsg <|
-                Wizard.KMEditor.Editor.View.view appState model.editorModel
+                Wizard.KMEditor.Editor.View.view subroute appState model.editorModel
 
         IndexRoute _ ->
             Html.map IndexMsg <|

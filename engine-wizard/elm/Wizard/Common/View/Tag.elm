@@ -2,7 +2,7 @@ module Wizard.Common.View.Tag exposing (TagListConfig, list, readOnlyList, selec
 
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, div, i, input, label, text)
-import Html.Attributes exposing (checked, class, disabled, style, type_)
+import Html.Attributes exposing (checked, class, classList, disabled, style, type_)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
@@ -37,7 +37,7 @@ list appState config tags =
     let
         content =
             if List.length tags > 0 then
-                List.map (tagView config) (List.sortBy .name tags)
+                List.map (tagView appState config) (List.sortBy .name tags)
 
             else
                 [ Flash.info appState <| l_ "list.empty" appState ]
@@ -45,8 +45,8 @@ list appState config tags =
     div [ class "tag-list" ] content
 
 
-tagView : TagListConfig msg -> Tag -> Html msg
-tagView config tag =
+tagView : AppState -> TagListConfig msg -> Tag -> Html msg
+tagView appState config tag =
     let
         selected =
             List.member tag.uuid config.selected
@@ -57,6 +57,13 @@ tagView config tag =
 
             else
                 config.addMsg tag.uuid
+
+        ( untitled, tagName ) =
+            if String.isEmpty tag.name then
+                ( True, lg "tag.untitled" appState )
+
+            else
+                ( False, tag.name )
     in
     div [ class "tag" ]
         [ label
@@ -64,6 +71,7 @@ tagView config tag =
             , style "background" tag.color
             , style "color" <| getContrastColorHex tag.color
             , dataCy "tag"
+            , classList [ ( "untitled", untitled ) ]
             ]
             [ input
                 [ type_ "checkbox"
@@ -71,7 +79,7 @@ tagView config tag =
                 , onClick msg
                 ]
                 []
-            , text tag.name
+            , text tagName
             ]
         ]
 

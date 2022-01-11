@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
+import List.Extra as List
 import Shared.Data.Event as Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
@@ -35,6 +36,7 @@ import Shared.Data.Event.EditReferenceURLEventData exposing (EditReferenceURLEve
 import Shared.Data.Event.EditTagEventData exposing (EditTagEventData)
 import Shared.Data.Event.EventField as EventField
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
@@ -464,7 +466,7 @@ viewAddMetricDiff appState event =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -510,7 +512,7 @@ viewDeleteMetricDiff appState metric =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState metric.annotations Dict.empty
+            viewAnnotationsDiff appState metric.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -529,7 +531,7 @@ viewAddPhaseDiff appState event =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -570,7 +572,7 @@ viewDeletePhaseDiff appState phase =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState phase.annotations Dict.empty
+            viewAnnotationsDiff appState phase.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -591,7 +593,7 @@ viewAddTagDiff appState event =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div []
         (fieldDiff ++ [ annotationsDiff ])
@@ -638,7 +640,7 @@ viewDeleteTagDiff appState tag =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState tag.annotations Dict.empty
+            viewAnnotationsDiff appState tag.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -667,7 +669,7 @@ viewAddIntegrationDiff appState event =
                     , event.responseItemUrl
                     , event.requestMethod
                     , event.requestUrl
-                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList event.requestHeaders
+                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) event.requestHeaders
                     , event.requestBody
                     , event.responseListField
                     , event.responseItemId
@@ -675,7 +677,7 @@ viewAddIntegrationDiff appState event =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -704,7 +706,7 @@ viewEditIntegrationDiff appState event integration =
                     , integration.responseItemUrl
                     , integration.requestMethod
                     , integration.requestUrl
-                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
+                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) integration.requestHeaders
                     , integration.requestBody
                     , integration.responseListField
                     , integration.responseItemId
@@ -716,7 +718,7 @@ viewEditIntegrationDiff appState event integration =
                     , EventField.getValueWithDefault event.responseItemUrl integration.responseItemUrl
                     , EventField.getValueWithDefault event.requestMethod integration.requestMethod
                     , EventField.getValueWithDefault event.requestUrl integration.requestUrl
-                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList <| EventField.getValueWithDefault event.requestHeaders integration.requestHeaders
+                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| EventField.getValueWithDefault event.requestHeaders integration.requestHeaders
                     , EventField.getValueWithDefault event.requestBody integration.requestBody
                     , EventField.getValueWithDefault event.responseListField integration.responseListField
                     , EventField.getValueWithDefault event.responseItemId integration.responseItemId
@@ -753,7 +755,7 @@ viewDeleteIntegrationDiff appState integration =
                     , integration.responseItemUrl
                     , integration.requestMethod
                     , integration.requestUrl
-                    , String.join ", " <| List.map (\( h, v ) -> h ++ ": " ++ v) <| Dict.toList integration.requestHeaders
+                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) integration.requestHeaders
                     , integration.requestBody
                     , integration.responseListField
                     , integration.responseItemId
@@ -761,7 +763,7 @@ viewDeleteIntegrationDiff appState integration =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState integration.annotations Dict.empty
+            viewAnnotationsDiff appState integration.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -780,7 +782,7 @@ viewAddChapterDiff appState event =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -845,7 +847,7 @@ viewDeleteChapterDiff appState km chapter =
             viewDeletedChildren (lg "questions" appState) questionNames
 
         annotationsDiff =
-            viewAnnotationsDiff appState chapter.annotations Dict.empty
+            viewAnnotationsDiff appState chapter.annotations []
     in
     div [] (fieldDiff ++ [ questionsDiff, annotationsDiff ])
 
@@ -909,7 +911,7 @@ viewAddQuestionDiff appState km event =
             AddQuestionEventQuestion.map .annotations .annotations .annotations .annotations .annotations event
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty annotations
+            viewAnnotationsDiff appState [] annotations
     in
     div []
         (fieldsDiff ++ [ integrationPropsDiff, tagsDiff, annotationsDiff ])
@@ -1215,7 +1217,7 @@ viewDeleteQuestionDiff appState km question =
 
         -- Annotations
         annotationsDiff =
-            viewAnnotationsDiff appState (Question.getAnnotations question) Dict.empty
+            viewAnnotationsDiff appState (Question.getAnnotations question) []
     in
     div []
         (fieldDiff ++ [ tagsDiff, answersDiff, choicesDiff, itemTemplateQuestionsDiff, referencesDiff, expertsDiff, annotationsDiff ])
@@ -1349,7 +1351,7 @@ viewAddAnswerDiff appState km event =
                 List.map (metricMeasureToString metrics) event.metricMeasures
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div [] (fieldsDiff ++ [ metricsDiff, annotationsDiff ])
 
@@ -1437,7 +1439,7 @@ viewDeleteAnswerDiff appState km answer =
             viewDeletedChildren (lg "metrics" appState) originalMetrics
 
         annotationsDiff =
-            viewAnnotationsDiff appState answer.annotations Dict.empty
+            viewAnnotationsDiff appState answer.annotations []
     in
     div []
         (fieldDiff ++ [ questionsDiff, metricsDiff, annotationsDiff ])
@@ -1509,7 +1511,7 @@ viewAddChoiceDiff appState event =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1545,7 +1547,7 @@ viewDeleteChoiceDiff appState choice =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState choice.annotations Dict.empty
+            viewAnnotationsDiff appState choice.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1589,7 +1591,7 @@ viewAddResourcePageReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty data.annotations
+            viewAnnotationsDiff appState [] data.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1610,7 +1612,7 @@ viewAddURLReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty data.annotations
+            viewAnnotationsDiff appState [] data.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1631,7 +1633,7 @@ viewAddCrossReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty data.annotations
+            viewAnnotationsDiff appState [] data.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1734,7 +1736,7 @@ viewEditResourcePageReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty (EventField.getValueWithDefault data.annotations Dict.empty)
+            viewAnnotationsDiff appState [] (EventField.getValueWithDefault data.annotations [])
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1755,7 +1757,7 @@ viewEditURLReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty (EventField.getValueWithDefault data.annotations Dict.empty)
+            viewAnnotationsDiff appState [] (EventField.getValueWithDefault data.annotations [])
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1776,7 +1778,7 @@ viewEditCrossReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty (EventField.getValueWithDefault data.annotations Dict.empty)
+            viewAnnotationsDiff appState [] (EventField.getValueWithDefault data.annotations [])
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1803,7 +1805,7 @@ viewDeleteResourcePageReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState data.annotations Dict.empty
+            viewAnnotationsDiff appState data.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1824,7 +1826,7 @@ viewDeleteURLReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState data.annotations Dict.empty
+            viewAnnotationsDiff appState data.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1845,7 +1847,7 @@ viewDeleteCrossReferenceDiff appState data =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState data.annotations Dict.empty
+            viewAnnotationsDiff appState data.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1933,7 +1935,7 @@ viewAddExpertDiff appState event =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState Dict.empty event.annotations
+            viewAnnotationsDiff appState [] event.annotations
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -1974,7 +1976,7 @@ viewDeleteExpertDiff appState expert =
                     ]
 
         annotationsDiff =
-            viewAnnotationsDiff appState expert.annotations Dict.empty
+            viewAnnotationsDiff appState expert.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -2177,49 +2179,47 @@ childrenView fieldName diffView =
         ]
 
 
-viewAnnotationsDiff : AppState -> Dict String String -> Dict String String -> Html msg
+viewAnnotationsDiff : AppState -> List Annotation -> List Annotation -> Html msg
 viewAnnotationsDiff appState originalAnnotations currentAnnotations =
     let
-        isDeletedAnnotation key _ =
-            not <| Dict.member key currentAnnotations
+        isDeletedAnnotation annotation =
+            not <| List.any (.key >> (==) annotation.key) currentAnnotations
 
-        isAddedAnnotation key _ =
-            not <| Dict.member key originalAnnotations
+        isAddedAnnotation annotation =
+            not <| List.any (.key >> (==) annotation.key) originalAnnotations
 
-        isEditedAnnotation key value =
-            case Dict.get key originalAnnotations of
-                Just originalValue ->
-                    originalValue /= value
+        isEditedAnnotation annotation =
+            case List.find (.key >> (==) annotation.key) originalAnnotations of
+                Just originalAnnotation ->
+                    originalAnnotation.value /= annotation.value
 
                 Nothing ->
                     False
 
-        cssClass key value =
-            if isDeletedAnnotation key value then
+        cssClass annotation =
+            if isDeletedAnnotation annotation then
                 "del"
 
-            else if isAddedAnnotation key value then
+            else if isAddedAnnotation annotation then
                 "ins"
 
-            else if isEditedAnnotation key value then
+            else if isEditedAnnotation annotation then
                 "edited"
 
             else
                 ""
 
-        viewAnnotation ( key, value ) =
-            [ dt [ class (cssClass key value) ] [ text key ]
-            , dd [ class (cssClass key value) ] [ text value ]
+        viewAnnotation annotation =
+            [ dt [ class (cssClass annotation) ] [ text annotation.key ]
+            , dd [ class (cssClass annotation) ] [ text annotation.value ]
             ]
 
         deletedAnnotationsView =
-            Dict.filter isDeletedAnnotation originalAnnotations
-                |> Dict.toList
+            List.filter isDeletedAnnotation originalAnnotations
                 |> List.concatMap viewAnnotation
 
         currentAnnotationsView =
-            Dict.toList currentAnnotations
-                |> List.concatMap viewAnnotation
+            List.concatMap viewAnnotation currentAnnotations
 
         allAnnotationsView =
             deletedAnnotationsView ++ currentAnnotationsView

@@ -2,13 +2,15 @@ module Shared.Data.Event.AddQuestionValueEventData exposing
     ( AddQuestionValueEventData
     , decoder
     , encode
+    , toQuestion
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Shared.Data.KnowledgeModel.Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
 
 
@@ -18,7 +20,7 @@ type alias AddQuestionValueEventData =
     , requiredPhaseUuid : Maybe String
     , tagUuids : List String
     , valueType : QuestionValueType
-    , annotations : Dict String String
+    , annotations : List Annotation
     }
 
 
@@ -30,7 +32,7 @@ decoder =
         |> D.required "requiredPhaseUuid" (D.nullable D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "valueType" QuestionValueType.decoder
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)
 
 
 encode : AddQuestionValueEventData -> List ( String, E.Value )
@@ -41,5 +43,21 @@ encode data =
     , ( "requiredPhaseUuid", E.maybe E.string data.requiredPhaseUuid )
     , ( "tagUuids", E.list E.string data.tagUuids )
     , ( "valueType", QuestionValueType.encode data.valueType )
-    , ( "annotations", E.dict identity E.string data.annotations )
+    , ( "annotations", E.list Annotation.encode data.annotations )
     ]
+
+
+toQuestion : String -> AddQuestionValueEventData -> Question
+toQuestion uuid data =
+    ValueQuestion
+        { uuid = uuid
+        , title = data.title
+        , text = data.text
+        , requiredPhaseUuid = data.requiredPhaseUuid
+        , tagUuids = data.tagUuids
+        , referenceUuids = []
+        , expertUuids = []
+        , annotations = data.annotations
+        }
+        { valueType = QuestionValueType.StringQuestionValueType
+        }
