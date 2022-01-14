@@ -22,6 +22,17 @@
             }
         }
 
+        .btn-group-filter {
+            & > div {
+                position: unset !important;
+
+                .dropdown-menu {
+                    transform: none !important;
+                    top: 35px !important;
+                }
+            }
+        }
+
         .listing-toolbar-extra {
             margin-right: 1rem;
         }

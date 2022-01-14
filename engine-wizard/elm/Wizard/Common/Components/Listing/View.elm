@@ -295,15 +295,13 @@ viewFilter appState cfg model filterId label items =
             else
                 []
     in
-    div [ class "btn-group" ]
-        [ Dropdown.dropdown state
-            { options = [ Dropdown.attrs [ id ("filter-" ++ filterId) ] ]
-            , toggleMsg = cfg.wrapMsg << FilterDropdownMsg filterId
-            , toggleButton =
-                Dropdown.toggle [ buttonClass ] label
-            , items = items ++ clearSelection
-            }
-        ]
+    Dropdown.dropdown state
+        { options = [ Dropdown.attrs [ class "btn-group-filter", id ("filter-" ++ filterId) ] ]
+        , toggleMsg = cfg.wrapMsg << FilterDropdownMsg filterId
+        , toggleButton =
+            Dropdown.toggle [ buttonClass ] label
+        , items = items ++ clearSelection
+        }
 
 
 viewList : AppState -> ViewConfig a msg -> Model a -> Pagination a -> Html msg

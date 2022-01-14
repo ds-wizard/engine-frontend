@@ -40,8 +40,9 @@ initialModel :
     -> Maybe FilterOperator
     -> Maybe String
     -> Maybe FilterOperator
+    -> Maybe Model
     -> Model
-initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp =
+initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbOldModel =
     let
         values =
             [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
@@ -57,7 +58,7 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
         paginationQueryFilters =
             PaginationQueryFilters.create values operators
     in
-    { questionnaires = Listing.initialModelWithFilters paginationQueryString paginationQueryFilters
+    { questionnaires = Listing.initialModelWithFiltersAndStates paginationQueryString paginationQueryFilters (Maybe.map .questionnaires mbOldModel)
     , deletingMigration = Unset
     , deleteModalModel = DeleteProjectModal.initialModel
     , cloneModalModel = CloneProjectModal.initialModel
