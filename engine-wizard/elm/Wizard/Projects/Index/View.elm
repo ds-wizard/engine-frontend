@@ -175,7 +175,11 @@ listingProjectTagsFilter appState model =
 
         viewTagItem link icon tag =
             Dropdown.anchorItem
-                [ href (link tag), class "dropdown-item-icon", dataCy "project_filter_tags_option" ]
+                [ href (link tag)
+                , class "dropdown-item-icon"
+                , dataCy "project_filter_tags_option"
+                , alwaysStopPropagationOn "click" (D.succeed NoOp)
+                ]
                 [ icon, text tag ]
 
         selectedTagItem =
@@ -222,12 +226,14 @@ listingProjectTagsFilter appState model =
                         [ href (linkWithOp FilterOperator.OR)
                         , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
                         , dataCy "filter_projectTags_operator_OR"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.or" appState ]
                     , a
                         [ href (linkWithOp FilterOperator.AND)
                         , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_projectTags_operator_AND"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.and" appState ]
                     ]
@@ -287,7 +293,11 @@ listingUsersFilter appState model =
 
         viewUserItem link icon user =
             Dropdown.anchorItem
-                [ href (link user.uuid), class "dropdown-item-icon", dataCy "project_filter_users_option" ]
+                [ href (link user.uuid)
+                , class "dropdown-item-icon"
+                , dataCy "project_filter_users_option"
+                , alwaysStopPropagationOn "click" (D.succeed NoOp)
+                ]
                 [ icon
                 , UserIcon.viewSmall user
                 , text (User.fullName user)
@@ -344,12 +354,14 @@ listingUsersFilter appState model =
                         [ href (linkWithOp FilterOperator.OR)
                         , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
                         , dataCy "filter_users_operator_OR"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.or" appState ]
                     , a
                         [ href (linkWithOp FilterOperator.AND)
                         , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_users_operator_AND"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.and" appState ]
                     ]

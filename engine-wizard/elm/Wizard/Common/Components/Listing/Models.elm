@@ -3,6 +3,7 @@ module Wizard.Common.Components.Listing.Models exposing
     , Model
     , initialModel
     , initialModelWithFilters
+    , initialModelWithFiltersAndStates
     , setPagination
     , updateItems
     )
@@ -11,6 +12,7 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Dict exposing (Dict)
+import Maybe.Extra as Maybe
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
@@ -58,6 +60,19 @@ initialModelWithFilters paginationQueryString filters =
     , sortDropdownState = Dropdown.initialState
     , filters = filters
     , filterDropdownStates = Dict.empty
+    }
+
+
+initialModelWithFiltersAndStates : PaginationQueryString -> PaginationQueryFilters -> Maybe (Model a) -> Model a
+initialModelWithFiltersAndStates paginationQueryString filters oldModel =
+    { pagination = Loading
+    , paginationQueryString = paginationQueryString
+    , items = []
+    , qInput = Maybe.withDefault "" paginationQueryString.q
+    , qDebouncer = Debouncer.toDebouncer <| Debouncer.debounce 500
+    , sortDropdownState = Dropdown.initialState
+    , filters = filters
+    , filterDropdownStates = Maybe.unwrap Dict.empty .filterDropdownStates oldModel
     }
 
 
