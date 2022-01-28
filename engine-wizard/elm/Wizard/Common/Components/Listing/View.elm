@@ -23,7 +23,7 @@ import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
+import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
@@ -227,7 +227,9 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
         item ( value, visibleName ) =
             let
                 route =
-                    cfg.toRoute (PaginationQueryFilters.insertValue filterId value model.filters) model.paginationQueryString
+                    cfg.toRoute
+                        (PaginationQueryFilters.insertValue filterId value model.filters)
+                        (PaginationQueryString.resetPage model.paginationQueryString)
 
                 icon =
                     if Maybe.unwrap False ((==) value << Tuple.first) maybeFilterValue then
@@ -280,7 +282,9 @@ viewFilter appState cfg model filterId label items =
 
         clearAllRoute =
             Routing.toUrl appState <|
-                cfg.toRoute (PaginationQueryFilters.removeFilter filterId model.filters) model.paginationQueryString
+                cfg.toRoute
+                    (PaginationQueryFilters.removeFilter filterId model.filters)
+                    (PaginationQueryString.resetPage model.paginationQueryString)
 
         clearAllItem =
             Dropdown.anchorItem [ href clearAllRoute ]
