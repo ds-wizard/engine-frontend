@@ -11,6 +11,7 @@ import Maybe.Extra as Maybe
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
@@ -159,13 +160,13 @@ listingProjectTagsFilter appState model =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         linkWithOp op =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         removeTagLink tag =
             linkWithTags <| List.filter ((/=) tag) selectedTags
@@ -277,13 +278,13 @@ listingUsersFilter appState model =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         linkWithOp op =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertOp indexRouteUsersFilterId op model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         removeUserLink userUuid =
             linkWithUuids <| List.filter ((/=) (Uuid.toString userUuid)) selectedUserUuids
