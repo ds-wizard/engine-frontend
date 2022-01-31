@@ -47,11 +47,7 @@ initLocalModel appState route model =
                         _ ->
                             Nothing
             in
-            if uuid == model.editorModel.uuid then
-                { model | editorModel = Editor.initPageModel subroute model.editorModel }
-
-            else
-                { model | editorModel = Editor.initPageModel subroute <| Editor.init appState uuid mbEditorUuid }
+            { model | editorModel = Editor.initPageModel subroute <| Editor.init appState uuid mbEditorUuid }
 
         IndexRoute paginationQueryString ->
             { model | indexModel = Wizard.KMEditor.Index.Models.initialModel paginationQueryString }
