@@ -1,22 +1,19 @@
 module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Form
-import Maybe.Extra as Maybe
 import Shared.Api.Branches as BranchesApi
-import Shared.Api.Packages as PackagesApi
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPackage)
-import Shared.Utils exposing (withNoCmd)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
-import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm
+import Wizard.KMEditor.Common.DeleteModal as DeleteModal
+import Wizard.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.KMEditor.Index.Models exposing (Model)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
@@ -33,24 +30,6 @@ fetchData =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        ShowHideDeleteBranchModal branch ->
-            handleShowHideDeleteBranchModal model branch
-
-        DeleteBranch ->
-            handleDeleteBranch wrapMsg appState model
-
-        DeleteBranchCompleted result ->
-            handleDeleteBranchCompleted appState model result
-
-        PostMigrationCompleted result ->
-            handlePostMigrationCompleted appState model result
-
-        ShowHideUpgradeModal mbBranch ->
-            handleShowHideUpgradeModal wrapMsg appState model mbBranch
-
-        UpgradeFormMsg formMsg ->
-            handleUpgradeFormMsg formMsg wrapMsg appState model
-
         GetPackageCompleted result ->
             handleGetPackageCompleted appState model result
 
@@ -63,96 +42,15 @@ update msg wrapMsg appState model =
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
+        DeleteModalMsg deleteModalMsg ->
+            handleDeleteModalMsg wrapMsg appState deleteModalMsg model
+
+        UpgradeModalMsg upgradeModalMsg ->
+            handleUpgradeModalMsg wrapMsg appState upgradeModalMsg model
+
 
 
 -- Handlers
-
-
-handleShowHideDeleteBranchModal : Model -> Maybe Branch -> ( Model, Cmd Wizard.Msgs.Msg )
-handleShowHideDeleteBranchModal model mbBranch =
-    withNoCmd <|
-        { model
-            | branchToBeDeleted = mbBranch
-            , deletingKnowledgeModel = Unset
-        }
-
-
-handleDeleteBranch : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteBranch wrapMsg appState model =
-    case model.branchToBeDeleted of
-        Just branch ->
-            ( { model | deletingKnowledgeModel = Loading }
-            , Cmd.map wrapMsg <| BranchesApi.deleteBranch branch.uuid appState DeleteBranchCompleted
-            )
-
-        _ ->
-            withNoCmd model
-
-
-handleDeleteBranchCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteBranchCompleted appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState Routes.kmEditorIndex )
-
-        Err error ->
-            ( { model | deletingKnowledgeModel = ApiError.toActionResult appState (lg "apiError.branches.deleteError" appState) error }
-            , getResultCmd result
-            )
-
-
-handlePostMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePostMigrationCompleted appState model result =
-    case result of
-        Ok _ ->
-            let
-                kmUuid =
-                    Maybe.unwrap Uuid.nil .uuid model.branchToBeUpgraded
-            in
-            ( model, cmdNavigate appState <| Routes.KMEditorRoute <| MigrationRoute kmUuid )
-
-        Err error ->
-            ( { model | creatingMigration = ApiError.toActionResult appState (lg "apiError.branches.migrations.postError" appState) error }
-            , getResultCmd result
-            )
-
-
-handleShowHideUpgradeModal : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Maybe Branch -> ( Model, Cmd Wizard.Msgs.Msg )
-handleShowHideUpgradeModal wrapMsg appState model mbBranch =
-    let
-        getPackages lastAppliedParentPackageId =
-            let
-                cmd =
-                    Cmd.map wrapMsg <|
-                        PackagesApi.getPackage lastAppliedParentPackageId appState GetPackageCompleted
-            in
-            Just ( { model | branchToBeUpgraded = mbBranch, package = Loading }, cmd )
-    in
-    mbBranch
-        |> Maybe.andThen .forkOfPackageId
-        |> Maybe.andThen getPackages
-        |> Maybe.withDefault ( { model | branchToBeUpgraded = Nothing, package = Unset }, Cmd.none )
-
-
-handleUpgradeFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleUpgradeFormMsg formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.branchUpgradeForm, model.branchToBeUpgraded ) of
-        ( Form.Submit, Just branchUpgradeForm, Just branch ) ->
-            let
-                body =
-                    BranchUpgradeForm.encode branchUpgradeForm
-
-                cmd =
-                    Cmd.map wrapMsg <|
-                        BranchesApi.postMigration branch.uuid body appState PostMigrationCompleted
-            in
-            ( { model | creatingMigration = Loading }
-            , cmd
-            )
-
-        _ ->
-            withNoCmd <|
-                { model | branchUpgradeForm = Form.update BranchUpgradeForm.validation formMsg model.branchUpgradeForm }
 
 
 handleGetPackageCompleted : AppState -> Model -> Result ApiError PackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -168,7 +66,7 @@ handleGetPackageCompleted appState model result =
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
-    , Cmd.map wrapMsg <| BranchesApi.deleteMigration uuid appState DeleteBranchCompleted
+    , Cmd.map wrapMsg <| BranchesApi.deleteMigration uuid appState DeleteMigrationCompleted
     )
 
 
@@ -202,6 +100,34 @@ handleListingMsg wrapMsg appState listingMsg model =
     ( { model | branches = branches }
     , cmd
     )
+
+
+handleDeleteModalMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> DeleteModal.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteModalMsg wrapMsg appState deleteModalMsg model =
+    let
+        updateConfig =
+            { cmdDeleted = cmdNavigate appState Routes.kmEditorIndex
+            , wrapMsg = wrapMsg << DeleteModalMsg
+            }
+
+        ( deleteModal, cmd ) =
+            DeleteModal.update updateConfig appState deleteModalMsg model.deleteModal
+    in
+    ( { model | deleteModal = deleteModal }, cmd )
+
+
+handleUpgradeModalMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> UpgradeModal.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleUpgradeModalMsg wrapMsg appState upgradeModalMsg model =
+    let
+        updateConfig =
+            { cmdUpgraded = cmdNavigate appState << Routes.KMEditorRoute << MigrationRoute
+            , wrapMsg = wrapMsg << UpgradeModalMsg
+            }
+
+        ( upgradeModal, cmd ) =
+            UpgradeModal.update updateConfig appState upgradeModalMsg model.upgradeModal
+    in
+    ( { model | upgradeModal = upgradeModal }, cmd )
 
 
 

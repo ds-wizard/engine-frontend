@@ -198,6 +198,9 @@ update wrapMsg msg appState model =
             in
             Debouncer.update update_ updateConfig debounceMsg model
 
+        NoOp ->
+            ( model, Cmd.none )
+
 
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =

@@ -25,8 +25,8 @@
             "elm/url": "1.0.0",
             "elm-community/dict-extra": "2.4.0",
             "elm-community/json-extra": "4.3.0",
-            "elm-community/list-extra": "8.5.1",
-            "elm-community/maybe-extra": "5.2.1",
+            "elm-community/list-extra": "8.5.2",
+            "elm-community/maybe-extra": "5.3.0",
             "elm-explorations/markdown": "1.0.0",
             "etaque/elm-form": "4.0.0",
             "gingko/time-distance": "2.3.0",
@@ -35,6 +35,7 @@
             "kuon/elm-string-normalize": "1.0.2",
             "myrho/elm-round": "1.0.4",
             "noahzgordon/elm-color-extra": "1.0.2",
+            "rtfeldman/elm-iso8601-date-strings": "1.1.2",
             "rundis/elm-bootstrap": "5.2.0",
             "simonh1000/elm-jwt": "7.1.1",
             "truqu/elm-md5": "1.1.0"
@@ -46,7 +47,6 @@
             "elm/virtual-dom": "1.0.2",
             "elm-explorations/test": "1.2.2",
             "fredcy/elm-parseint": "2.0.1",
-            "rtfeldman/elm-iso8601-date-strings": "1.1.2",
             "zwilias/elm-utf-tools": "2.0.1"
         }
     },

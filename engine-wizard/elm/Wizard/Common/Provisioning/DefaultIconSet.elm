@@ -9,7 +9,6 @@ iconSet =
     Dict.fromList
         (SharedIconSet.iconSet
             ++ [ ( "_global.add", "fas fa-plus" )
-               , ( "_global.arrowLeft", "fas fa-long-arrow-alt-left" )
                , ( "_global.arrowRight", "fas fa-long-arrow-alt-right" )
                , ( "_global.cancel", "fas fa-ban" )
                , ( "_global.close", "fas fa-times" )
@@ -48,7 +47,6 @@ iconSet =
                , ( "avatar.17", "fas fa-snowman" )
                , ( "avatar.18", "fas fa-tree" )
                , ( "avatar.19", "fas fa-hat-cowboy" )
-               , ( "colorButton.check", "fas fa-check" )
                , ( "documents.download", "fas fa-download" )
                , ( "documents.submit", "fas fa-paper-plane" )
                , ( "km.answer", "far fa-dot-circle" )

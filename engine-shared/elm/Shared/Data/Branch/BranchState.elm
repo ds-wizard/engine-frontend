@@ -1,4 +1,8 @@
-module Shared.Data.Branch.BranchState exposing (BranchState(..), decoder)
+module Shared.Data.Branch.BranchState exposing
+    ( BranchState(..)
+    , decoder
+    , isEditable
+    )
 
 import Json.Decode as D exposing (Decoder)
 
@@ -35,3 +39,8 @@ decoder =
                     unknownState ->
                         D.fail <| "Unknown knowledge model appState " ++ unknownState
             )
+
+
+isEditable : BranchState -> Bool
+isEditable branchState =
+    not (branchState == Migrating || branchState == Migrated)

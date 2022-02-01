@@ -2,13 +2,16 @@ module Shared.Data.Event.AddAnswerEventData exposing
     ( AddAnswerEventData
     , decoder
     , encode
+    , init
+    , toAnswer
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
 
 
@@ -16,7 +19,7 @@ type alias AddAnswerEventData =
     { label : String
     , advice : Maybe String
     , metricMeasures : List MetricMeasure
-    , annotations : Dict String String
+    , annotations : List Annotation
     }
 
 
@@ -26,7 +29,7 @@ decoder =
         |> D.required "label" D.string
         |> D.required "advice" (D.nullable D.string)
         |> D.required "metricMeasures" (D.list MetricMeasure.decoder)
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)
 
 
 encode : AddAnswerEventData -> List ( String, E.Value )
@@ -35,5 +38,25 @@ encode data =
     , ( "label", E.string data.label )
     , ( "advice", E.maybe E.string data.advice )
     , ( "metricMeasures", E.list MetricMeasure.encode data.metricMeasures )
-    , ( "annotations", E.dict identity E.string data.annotations )
+    , ( "annotations", E.list Annotation.encode data.annotations )
     ]
+
+
+init : AddAnswerEventData
+init =
+    { label = ""
+    , advice = Nothing
+    , metricMeasures = []
+    , annotations = []
+    }
+
+
+toAnswer : String -> AddAnswerEventData -> Answer
+toAnswer uuid data =
+    { uuid = uuid
+    , label = data.label
+    , advice = data.advice
+    , metricMeasures = data.metricMeasures
+    , followUpUuids = []
+    , annotations = data.annotations
+    }

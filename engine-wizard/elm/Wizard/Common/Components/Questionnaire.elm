@@ -1,5 +1,6 @@
 module Wizard.Common.Components.Questionnaire exposing
-    ( Context
+    ( ActivePage(..)
+    , Context
     , Model
     , Msg(..)
     , QuestionnaireRenderer

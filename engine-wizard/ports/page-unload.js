@@ -1,7 +1,15 @@
 module.exports = function (app) {
-    app.ports.setUnloadMessage.subscribe(setUnloadMessage);
-    app.ports.clearUnloadMessage.subscribe(clearUnloadMessage);
-    app.ports.alert.subscribe(alert);
+    if (app.ports.setUnloadMessage) {
+        app.ports.setUnloadMessage.subscribe(setUnloadMessage);
+    }
+
+    if (app.ports.clearUnloadmessage) {
+        app.ports.clearUnloadMessage.subscribe(clearUnloadMessage);
+    }
+
+    if (app.ports.alert) {
+        app.ports.alert.subscribe(alert);
+    }
 
 
     function setUnloadMessage(msg) {

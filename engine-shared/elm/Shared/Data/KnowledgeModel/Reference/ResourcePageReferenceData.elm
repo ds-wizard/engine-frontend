@@ -3,15 +3,15 @@ module Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing
     , decoder
     )
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias ResourcePageReferenceData =
     { uuid : String
     , shortUuid : String
-    , annotations : Dict String String
+    , annotations : List Annotation
     }
 
 
@@ -20,4 +20,4 @@ decoder =
     D.succeed ResourcePageReferenceData
         |> D.required "uuid" D.string
         |> D.required "shortUuid" D.string
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)

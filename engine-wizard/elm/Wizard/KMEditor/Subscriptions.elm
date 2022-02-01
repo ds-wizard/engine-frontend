@@ -16,8 +16,11 @@ subscriptions wrapMsg route model =
             Sub.map (wrapMsg << CreateMsg) <|
                 Wizard.KMEditor.Create.Subscriptions.subscriptions model.createModel
 
-        EditorRoute _ ->
-            Wizard.KMEditor.Editor.Subscriptions.subscriptions (wrapMsg << EditorMsg) model.editorModel
+        --EditorRoute _ ->
+        --    Wizard.KMEditor.Editor.Subscriptions.subscriptions (wrapMsg << EditorMsg) model.editorModel
+        EditorRoute _ subroute ->
+            Sub.map (wrapMsg << EditorMsg) <|
+                Wizard.KMEditor.Editor.Subscriptions.subscriptions subroute model.editorModel
 
         IndexRoute _ ->
             Sub.map (wrapMsg << IndexMsg) <|

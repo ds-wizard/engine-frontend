@@ -1,8 +1,8 @@
-module Shared.Data.KnowledgeModel.Tag exposing (Tag, decoder, new)
+module Shared.Data.KnowledgeModel.Tag exposing (Tag, decoder)
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias Tag =
@@ -10,17 +10,7 @@ type alias Tag =
     , name : String
     , description : Maybe String
     , color : String
-    , annotations : Dict String String
-    }
-
-
-new : String -> Tag
-new uuid =
-    { uuid = uuid
-    , name = "New Tag"
-    , description = Nothing
-    , color = "#3498DB"
-    , annotations = Dict.empty
+    , annotations : List Annotation
     }
 
 
@@ -31,4 +21,4 @@ decoder =
         |> D.required "name" D.string
         |> D.required "description" (D.nullable D.string)
         |> D.required "color" D.string
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)

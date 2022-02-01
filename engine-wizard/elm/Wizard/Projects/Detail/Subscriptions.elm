@@ -2,7 +2,6 @@ module Wizard.Projects.Detail.Subscriptions exposing (subscriptions)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.WebSocket as WebSocket
-import Time
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Settings as Settings
@@ -40,7 +39,7 @@ subscriptions route model =
     in
     Sub.batch
         [ WebSocket.listen WebSocketMsg
-        , Time.every (30 * 1000) WebSocketPing
+        , WebSocket.schedulePing WebSocketPing
         , Sub.map PlanSavingMsg <| PlanSaving.subscriptions model.planSavingModel
         , Sub.map ShareModalMsg <| ShareModal.subscriptions model.shareModalModel
         , pageSubscriptions

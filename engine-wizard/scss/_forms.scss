@@ -89,8 +89,22 @@ textarea {
     }
 
     &-color-picker {
-        input {
-            display: none;
+        .input-wrapper {
+            position: relative;
+
+            .color-preview {
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                width: 28px;
+                bottom: 5px;
+                background: $tag-default-background;
+                @include border-radius(.25rem);
+            }
+
+            input {
+                padding-left: 2.5rem;
+            }
         }
 
         .color-buttons {
@@ -98,22 +112,12 @@ textarea {
             grid-template-columns: 20% 20% 20% 20% 20%;
             grid-row-gap: 5px;
             grid-column-gap: 5px;
+            width: calc(100% - 20px);
+            margin-top: .5rem;
 
             a {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
                 height: 50px;
                 border-radius: 5px;
-
-                &.selected {
-                    border: 2px solid;
-                }
-
-                &:hover {
-                    text-decoration: none;
-                }
             }
         }
     }

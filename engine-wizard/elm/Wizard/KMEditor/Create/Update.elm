@@ -23,6 +23,7 @@ import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
 import Wizard.KMEditor.Create.Models exposing (Model)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
+import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
@@ -109,7 +110,7 @@ handlePostBranchCompleted appState model result =
     case result of
         Ok km ->
             ( model
-            , cmdNavigate appState (Routes.KMEditorRoute <| EditorRoute km.uuid)
+            , cmdNavigate appState (Routes.KMEditorRoute <| EditorRoute km.uuid (KMEditorRoute.Edit Nothing))
             )
 
         Err error ->

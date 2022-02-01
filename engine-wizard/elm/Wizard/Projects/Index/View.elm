@@ -11,6 +11,7 @@ import Maybe.Extra as Maybe
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
@@ -159,13 +160,13 @@ listingProjectTagsFilter appState model =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         linkWithOp op =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         removeTagLink tag =
             linkWithTags <| List.filter ((/=) tag) selectedTags
@@ -175,7 +176,11 @@ listingProjectTagsFilter appState model =
 
         viewTagItem link icon tag =
             Dropdown.anchorItem
-                [ href (link tag), class "dropdown-item-icon", dataCy "project_filter_tags_option" ]
+                [ href (link tag)
+                , class "dropdown-item-icon"
+                , dataCy "project_filter_tags_option"
+                , alwaysStopPropagationOn "click" (D.succeed NoOp)
+                ]
                 [ icon, text tag ]
 
         selectedTagItem =
@@ -222,12 +227,14 @@ listingProjectTagsFilter appState model =
                         [ href (linkWithOp FilterOperator.OR)
                         , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
                         , dataCy "filter_projectTags_operator_OR"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.or" appState ]
                     , a
                         [ href (linkWithOp FilterOperator.AND)
                         , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_projectTags_operator_AND"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.and" appState ]
                     ]
@@ -271,13 +278,13 @@ listingUsersFilter appState model =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         linkWithOp op =
             Routing.toUrl appState <|
                 Routes.projectIndexWithFilters
                     (PaginationQueryFilter.insertOp indexRouteUsersFilterId op model.questionnaires.filters)
-                    model.questionnaires.paginationQueryString
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         removeUserLink userUuid =
             linkWithUuids <| List.filter ((/=) (Uuid.toString userUuid)) selectedUserUuids
@@ -287,7 +294,11 @@ listingUsersFilter appState model =
 
         viewUserItem link icon user =
             Dropdown.anchorItem
-                [ href (link user.uuid), class "dropdown-item-icon", dataCy "project_filter_users_option" ]
+                [ href (link user.uuid)
+                , class "dropdown-item-icon"
+                , dataCy "project_filter_users_option"
+                , alwaysStopPropagationOn "click" (D.succeed NoOp)
+                ]
                 [ icon
                 , UserIcon.viewSmall user
                 , text (User.fullName user)
@@ -344,12 +355,14 @@ listingUsersFilter appState model =
                         [ href (linkWithOp FilterOperator.OR)
                         , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
                         , dataCy "filter_users_operator_OR"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.or" appState ]
                     , a
                         [ href (linkWithOp FilterOperator.AND)
                         , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_users_operator_AND"
+                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ lgx "listingOp.and" appState ]
                     ]

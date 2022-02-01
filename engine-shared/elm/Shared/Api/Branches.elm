@@ -9,14 +9,14 @@ module Shared.Api.Branches exposing
     , postMigrationConflict
     , putBranch
     , putVersion
+    , websocket
     )
 
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtPost, jwtPut)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtPost, jwtPut, wsUrl)
 import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.BranchDetail as BranchDetail exposing (BranchDetail)
-import Shared.Data.Event as Event exposing (Event)
 import Shared.Data.Migration as Migration exposing (Migration)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -45,14 +45,13 @@ postBranch =
     jwtFetch "/branches" Branch.decoder
 
 
-putBranch : Uuid -> String -> String -> List Event -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-putBranch uuid name kmId events =
+putBranch : Uuid -> String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putBranch uuid name kmId =
     let
         body =
             E.object
                 [ ( "name", E.string name )
                 , ( "kmId", E.string kmId )
-                , ( "events", E.list Event.encode events )
                 ]
     in
     jwtPut ("/branches/" ++ Uuid.toString uuid) body
@@ -61,6 +60,11 @@ putBranch uuid name kmId events =
 deleteBranch : Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 deleteBranch uuid =
     jwtDelete ("/branches/" ++ Uuid.toString uuid)
+
+
+websocket : Uuid -> AbstractAppState a -> String
+websocket uuid =
+    wsUrl ("/branches/" ++ Uuid.toString uuid ++ "/websocket")
 
 
 putVersion : Uuid -> String -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg

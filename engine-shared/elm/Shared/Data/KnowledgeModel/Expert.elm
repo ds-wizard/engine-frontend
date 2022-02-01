@@ -1,24 +1,15 @@
-module Shared.Data.KnowledgeModel.Expert exposing (Expert, decoder, new)
+module Shared.Data.KnowledgeModel.Expert exposing (Expert, decoder)
 
-import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias Expert =
     { uuid : String
     , name : String
     , email : String
-    , annotations : Dict String String
-    }
-
-
-new : String -> Expert
-new uuid =
-    { uuid = uuid
-    , name = "New expert"
-    , email = "expert@example.com"
-    , annotations = Dict.empty
+    , annotations : List Annotation
     }
 
 
@@ -28,4 +19,4 @@ decoder =
         |> D.required "uuid" D.string
         |> D.required "name" D.string
         |> D.required "email" D.string
-        |> D.required "annotations" (D.dict D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)

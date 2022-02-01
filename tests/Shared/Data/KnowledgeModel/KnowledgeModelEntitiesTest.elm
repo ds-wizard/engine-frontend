@@ -56,7 +56,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "title": "Chapter 1",
                                     "text": "This chapter is empty",
                                     "questionUuids": [],
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "questions": {},
@@ -79,7 +79,7 @@ knowledgeModelEntitiesDecoderTest =
                                     , title = "Chapter 1"
                                     , text = Just "This chapter is empty"
                                     , questionUuids = []
-                                    , annotations = Dict.empty
+                                    , annotations = []
                                     }
                                   )
                                 ]
@@ -116,7 +116,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "props": {
                                         "prop": "value"
                                     },
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "answers": {},
@@ -143,7 +143,7 @@ knowledgeModelEntitiesDecoderTest =
                                         , tagUuids = []
                                         , referenceUuids = []
                                         , expertUuids = []
-                                        , annotations = Dict.empty
+                                        , annotations = []
                                         }
                                         { integrationUuid = "b50bf5ce-2fc3-4779-9756-5f176c233374"
                                         , props = Dict.fromList [ ( "prop", "value" ) ]
@@ -176,7 +176,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "advice": null,
                                     "metricMeasures": [],
                                     "followUpUuids": ["2e4307b9-93b8-4617-b8d1-ba0fa9f15e04"],
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "choices": {},
@@ -200,7 +200,7 @@ knowledgeModelEntitiesDecoderTest =
                                     , advice = Nothing
                                     , metricMeasures = []
                                     , followUpUuids = [ "2e4307b9-93b8-4617-b8d1-ba0fa9f15e04" ]
-                                    , annotations = Dict.empty
+                                    , annotations = []
                                     }
                                   )
                                 ]
@@ -227,7 +227,7 @@ knowledgeModelEntitiesDecoderTest =
                                 "8a703cfa-450f-421a-8819-875619ccb54d": {
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                                     "label": "Choice",
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "experts": {},
@@ -248,7 +248,7 @@ knowledgeModelEntitiesDecoderTest =
                                 [ ( "8a703cfa-450f-421a-8819-875619ccb54d"
                                   , { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                                     , label = "Choice"
-                                    , annotations = Dict.empty
+                                    , annotations = []
                                     }
                                   )
                                 ]
@@ -276,7 +276,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                                     "name": "John Example",
                                     "email": "expert@example.com",
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "references": {},
@@ -298,7 +298,7 @@ knowledgeModelEntitiesDecoderTest =
                                   , { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                                     , name = "John Example"
                                     , email = "expert@example.com"
-                                    , annotations = Dict.empty
+                                    , annotations = []
                                     }
                                   )
                                 ]
@@ -326,7 +326,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "referenceType": "ResourcePageReference",
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                                     "shortUuid": "atq",
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "integrations": {},
@@ -348,7 +348,7 @@ knowledgeModelEntitiesDecoderTest =
                                   , ResourcePageReference
                                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
                                         , shortUuid = "atq"
-                                        , annotations = Dict.empty
+                                        , annotations = []
                                         }
                                   )
                                 ]
@@ -380,13 +380,13 @@ knowledgeModelEntitiesDecoderTest =
                                     "logo": "data:image/png;base64,...",
                                     "requestMethod": "GET",
                                     "requestUrl": "/",
-                                    "requestHeaders": {"X_USER": "user"},
+                                    "requestHeaders": [{"key": "X_USER", "value": "user"}],
                                     "requestBody": "{}",
                                     "responseListField": "",
                                     "responseItemId": "{{id}}",
                                     "responseItemTemplate": "{{title}}",
                                     "responseItemUrl": "http://example.com/${id}",
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "tags": {},
@@ -412,13 +412,13 @@ knowledgeModelEntitiesDecoderTest =
                                     , logo = "data:image/png;base64,..."
                                     , requestMethod = "GET"
                                     , requestUrl = "/"
-                                    , requestHeaders = Dict.fromList [ ( "X_USER", "user" ) ]
+                                    , requestHeaders = [ { key = "X_USER", value = "user" } ]
                                     , requestBody = "{}"
                                     , responseListField = ""
                                     , responseItemId = "{{id}}"
                                     , responseItemTemplate = "{{title}}"
                                     , responseItemUrl = "http://example.com/${id}"
-                                    , annotations = Dict.empty
+                                    , annotations = []
                                     }
                                   )
                                 ]
@@ -447,7 +447,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "name": "Science",
                                     "description": null,
                                     "color": "#F5A623",
-                                    "annotations": {}
+                                    "annotations": []
                                 }
                             },
                             "metrics": {},
@@ -470,7 +470,7 @@ knowledgeModelEntitiesDecoderTest =
                                     , name = "Science"
                                     , description = Nothing
                                     , color = "#F5A623"
-                                    , annotations = Dict.empty
+                                    , annotations = []
                                     }
                                   )
                                 ]

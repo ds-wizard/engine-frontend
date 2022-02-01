@@ -1,5 +1,6 @@
 module Shared.Data.Event.EventField exposing
     ( EventField
+    , applyChildren
     , create
     , decoder
     , empty
@@ -11,6 +12,7 @@ module Shared.Data.Event.EventField exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Shared.Utils exposing (flip)
 
 
 type alias EventField a =
@@ -23,7 +25,7 @@ decoder : Decoder a -> Decoder (EventField a)
 decoder valueDecoder =
     D.succeed EventField
         |> D.required "changed" D.bool
-        |> D.optional "value" (D.nullable valueDecoder) Nothing
+        |> D.optional "value" (D.maybe valueDecoder) Nothing
 
 
 encode : (a -> E.Value) -> EventField a -> E.Value
@@ -81,3 +83,17 @@ getValue eventField =
 getValueWithDefault : EventField a -> a -> a
 getValueWithDefault eventField default =
     getValue eventField |> Maybe.withDefault default
+
+
+applyChildren : EventField (List a) -> List a -> List a
+applyChildren eventField currentValues =
+    case getValue eventField of
+        Just newValues ->
+            let
+                deletedValues =
+                    List.filter (not << flip List.member newValues) currentValues
+            in
+            newValues ++ deletedValues
+
+        Nothing ->
+            currentValues

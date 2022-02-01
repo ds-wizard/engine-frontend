@@ -1,7 +1,7 @@
 module Wizard.Projects.Detail.View exposing (view)
 
-import Html exposing (Html, button, div, li, p, span, text, ul)
-import Html.Attributes exposing (attribute, class, classList)
+import Html exposing (Html, button, div, p, span, text)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Auth.Session as Session
 import Shared.Data.PaginationQueryString as PaginationQueryString
@@ -9,15 +9,13 @@ import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (Question
 import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (l, lgx, lx)
 import Shared.Undraw as Undraw
-import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
-import Wizard.Common.Components.OnlineUser as OnlineUser
+import Wizard.Common.Components.DetailNavigation as DetailNavigation
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.Feature as Features
-import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
@@ -124,7 +122,7 @@ viewProject route appState model qm =
 
 viewProjectNavigation : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewProjectNavigation appState route model qm =
-    div [ class "DetailNavigation" ]
+    DetailNavigation.container
         [ viewProjectNavigationTitleRow appState model qm.questionnaire
         , viewProjectNavigationNav appState route model qm
         ]
@@ -136,15 +134,15 @@ viewProjectNavigation appState route model qm =
 
 viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireDetail -> Html Msg
 viewProjectNavigationTitleRow appState model questionnaire =
-    div [ class "DetailNavigation__Row" ]
-        [ div [ class "DetailNavigation__Row__Section" ]
+    DetailNavigation.row
+        [ DetailNavigation.section
             (div [ class "title" ] [ text questionnaire.name ]
                 :: templateBadge appState questionnaire
                 :: visibilityIcons appState questionnaire
                 ++ [ viewProjectNavigationProjectSaving appState model ]
             )
-        , div [ class "DetailNavigation__Row__Section" ]
-            [ viewProjectNavigationOnlineUsers appState model
+        , DetailNavigation.section
+            [ DetailNavigation.onlineUsers OnlineUserMsg appState model.onlineUsers
             , viewProjectNavigationActions appState model questionnaire
             ]
         ]
@@ -166,34 +164,10 @@ viewProjectNavigationProjectSaving appState model =
         PlanSaving.view appState model.planSavingModel
 
 
-viewProjectNavigationOnlineUsers : AppState -> Model -> Html Msg
-viewProjectNavigationOnlineUsers appState model =
-    if List.isEmpty model.onlineUsers then
-        emptyNode
-
-    else
-        let
-            extraUsers =
-                if List.length model.onlineUsers > 10 then
-                    div [ class "extra-users-count" ]
-                        [ text ("+" ++ String.fromInt (List.length model.onlineUsers - 10)) ]
-
-                else
-                    emptyNode
-        in
-        div
-            [ class "DetailNavigation__Row__Section__Online-Users"
-            , classList [ ( "DetailNavigation__Row__Section__Online-Users--Stacked", List.length model.onlineUsers > 5 ) ]
-            ]
-            (List.indexedMap (\i u -> Html.map (OnlineUserMsg i) (OnlineUser.view appState u)) (List.take 10 model.onlineUsers)
-                ++ [ extraUsers ]
-            )
-
-
 viewProjectNavigationActions : AppState -> Model -> QuestionnaireDetail -> Html Msg
 viewProjectNavigationActions appState model questionnaire =
     if QuestionnaireDetail.isAnonymousProject questionnaire && Session.exists appState.session then
-        div [ class "DetailNavigation__Row__Section__Actions" ]
+        DetailNavigation.sectionActions
             [ ActionResultView.error model.addingToMyProjects
             , ActionButton.buttonExtra appState
                 { content =
@@ -207,7 +181,7 @@ viewProjectNavigationActions appState model questionnaire =
             ]
 
     else if QuestionnaireDetail.isOwner appState questionnaire then
-        div [ class "DetailNavigation__Row__Section__Actions" ]
+        DetailNavigation.sectionActions
             [ button
                 [ class "btn btn-info link-with-icon"
                 , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
@@ -229,11 +203,14 @@ viewProjectNavigationActions appState model questionnaire =
 viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewProjectNavigationNav appState route model qm =
     let
+        projectRoute subroute =
+            Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid subroute)
+
         questionnaire =
             qm.questionnaire
 
-        isDocumentRoute r =
-            case r of
+        isDocumentRoute =
+            case route of
                 ProjectDetailRoute.Documents _ ->
                     True
 
@@ -244,78 +221,59 @@ viewProjectNavigationNav appState route model qm =
                     False
 
         questionnaireLink =
-            li [ class "nav-item" ]
-                [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Questionnaire))
-                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Questionnaire ) ] ]
-                    [ fa "fa far fa-list-alt"
-                    , span [ attribute "data-content" (l_ "nav.questionnaire" appState) ] [ lx_ "nav.questionnaire" appState ]
-                    ]
-                ]
+            { route = projectRoute ProjectDetailRoute.Questionnaire
+            , label = l_ "nav.questionnaire" appState
+            , icon = fa "fa far fa-list-alt"
+            , isActive = route == ProjectDetailRoute.Questionnaire
+            , isVisible = True
+            , dataCy = "project_nav_questionnaire"
+            }
 
         metricsLink =
-            li [ class "nav-item" ]
-                [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Metrics))
-                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Metrics ) ] ]
-                    [ fa "fa far fa-chart-bar"
-                    , span [ attribute "data-content" (l_ "nav.metrics" appState) ] [ lx_ "nav.metrics" appState ]
-                    ]
-                ]
-
-        metricsLinkVisible =
-            Features.projectMetrics appState questionnaire
+            { route = projectRoute ProjectDetailRoute.Metrics
+            , label = l_ "nav.metrics" appState
+            , icon = fa "fa far fa-chart-bar"
+            , isActive = route == ProjectDetailRoute.Metrics
+            , isVisible = Features.projectMetrics appState questionnaire
+            , dataCy = "project_nav_metrics"
+            }
 
         previewLink =
-            li [ class "nav-item" ]
-                [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Preview))
-                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Preview ) ] ]
-                    [ fa "fa far fa-eye"
-                    , span [ attribute "data-content" (l_ "nav.preview" appState) ] [ lx_ "nav.preview" appState ]
-                    ]
-                ]
-
-        previewLinkVisible =
-            Features.projectPreview appState questionnaire
+            { route = projectRoute ProjectDetailRoute.Preview
+            , label = l_ "nav.preview" appState
+            , icon = fa "fa far fa-eye"
+            , isActive = route == ProjectDetailRoute.Preview
+            , isVisible = Features.projectMetrics appState questionnaire
+            , dataCy = "project_nav_preview"
+            }
 
         documentsLink =
-            li [ class "nav-item" ]
-                [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid (ProjectDetailRoute.Documents PaginationQueryString.empty)))
-                    [ class "nav-link", classList [ ( "active", isDocumentRoute route ) ] ]
-                    [ fa "fa far fa-copy"
-                    , span [ attribute "data-content" (l_ "nav.documents" appState) ] [ lx_ "nav.documents" appState ]
-                    ]
-                ]
-
-        documentsLinkVisible =
-            Features.projectDocumentsView appState questionnaire
+            { route = projectRoute (ProjectDetailRoute.Documents PaginationQueryString.empty)
+            , label = l_ "nav.documents" appState
+            , icon = fa "fa far fa-copy"
+            , isActive = isDocumentRoute
+            , isVisible = Features.projectDocumentsView appState questionnaire
+            , dataCy = "project_nav_documents"
+            }
 
         settingsLink =
-            li [ class "nav-item" ]
-                [ linkTo appState
-                    (Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid ProjectDetailRoute.Settings))
-                    [ class "nav-link", classList [ ( "active", route == ProjectDetailRoute.Settings ) ] ]
-                    [ fa "fa fas fa-cogs"
-                    , span [ attribute "data-content" (l_ "nav.settings" appState) ] [ lx_ "nav.settings" appState ]
-                    ]
-                ]
-
-        settingsLinkVisible =
-            Features.projectSettings appState questionnaire
+            { route = projectRoute ProjectDetailRoute.Settings
+            , label = l_ "nav.settings" appState
+            , icon = fa "fa fas fa-cogs"
+            , isActive = route == ProjectDetailRoute.Settings
+            , isVisible = Features.projectSettings appState questionnaire
+            , dataCy = "project_nav_settings"
+            }
 
         links =
-            []
-                |> listInsertIf questionnaireLink True
-                |> listInsertIf metricsLink metricsLinkVisible
-                |> listInsertIf previewLink previewLinkVisible
-                |> listInsertIf documentsLink documentsLinkVisible
-                |> listInsertIf settingsLink settingsLinkVisible
+            [ questionnaireLink
+            , metricsLink
+            , previewLink
+            , documentsLink
+            , settingsLink
+            ]
     in
-    div [ class "DetailNavigation__Row" ]
-        [ ul [ class "nav nav-underline-tabs" ] links
-        ]
+    DetailNavigation.navigation appState links
 
 
 

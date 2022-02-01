@@ -1,4 +1,30 @@
-module Shared.Data.KnowledgeModel.KnowledgeModelEntities exposing (KnowledgeModelEntities, decoder, updateQuestions, updateTags)
+module Shared.Data.KnowledgeModel.KnowledgeModelEntities exposing
+    ( KnowledgeModelEntities
+    , decoder
+    , empty
+    , insertAnswer
+    , insertChapter
+    , insertChoice
+    , insertExpert
+    , insertIntegration
+    , insertMetric
+    , insertPhase
+    , insertQuestion
+    , insertReference
+    , insertTag
+    , moveAnswer
+    , moveChoice
+    , moveExpert
+    , moveQuestion
+    , moveReference
+    , updateAnswer
+    , updateChoice
+    , updateExpert
+    , updateQuestion
+    , updateQuestions
+    , updateReference
+    , updateTags
+    )
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
@@ -42,6 +68,298 @@ decoder =
         |> D.required "tags" (D.dict Tag.decoder)
         |> D.required "metrics" (D.dict Metric.decoder)
         |> D.required "phases" (D.dict Phase.decoder)
+
+
+empty : KnowledgeModelEntities
+empty =
+    { chapters = Dict.empty
+    , questions = Dict.empty
+    , answers = Dict.empty
+    , choices = Dict.empty
+    , experts = Dict.empty
+    , references = Dict.empty
+    , integrations = Dict.empty
+    , tags = Dict.empty
+    , metrics = Dict.empty
+    , phases = Dict.empty
+    }
+
+
+insertAnswer : Answer -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertAnswer answer questionUuid entities =
+    case Dict.get questionUuid entities.questions of
+        Just question ->
+            { entities
+                | answers = Dict.insert answer.uuid answer entities.answers
+                , questions = Dict.insert questionUuid (Question.addAnswerUuid answer.uuid question) entities.questions
+            }
+
+        Nothing ->
+            entities
+
+
+insertChapter : Chapter -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertChapter chapter entities =
+    { entities | chapters = Dict.insert chapter.uuid chapter entities.chapters }
+
+
+insertChoice : Choice -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertChoice choice questionUuid entities =
+    case Dict.get questionUuid entities.questions of
+        Just question ->
+            { entities
+                | choices = Dict.insert choice.uuid choice entities.choices
+                , questions = Dict.insert questionUuid (Question.addChoiceUuid choice.uuid question) entities.questions
+            }
+
+        Nothing ->
+            entities
+
+
+insertExpert : Expert -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertExpert expert questionUuid entities =
+    case Dict.get questionUuid entities.questions of
+        Just question ->
+            { entities
+                | experts = Dict.insert expert.uuid expert entities.experts
+                , questions = Dict.insert questionUuid (Question.addExpertUuid expert.uuid question) entities.questions
+            }
+
+        Nothing ->
+            entities
+
+
+insertIntegration : Integration -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertIntegration integration entities =
+    { entities | integrations = Dict.insert integration.uuid integration entities.integrations }
+
+
+insertMetric : Metric -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertMetric metric entities =
+    { entities | metrics = Dict.insert metric.uuid metric entities.metrics }
+
+
+insertPhase : Phase -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertPhase phase entities =
+    { entities | phases = Dict.insert phase.uuid phase entities.phases }
+
+
+insertQuestion : Question -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertQuestion question parentUuid entities =
+    let
+        questionUuid =
+            Question.getUuid question
+    in
+    case Dict.get parentUuid entities.chapters of
+        Just chapter ->
+            { entities
+                | questions = Dict.insert questionUuid question entities.questions
+                , chapters = Dict.insert chapter.uuid (Chapter.addQuestionUuid questionUuid chapter) entities.chapters
+            }
+
+        Nothing ->
+            case Dict.get parentUuid entities.questions of
+                Just parentQuestion ->
+                    { entities
+                        | questions =
+                            entities.questions
+                                |> Dict.insert questionUuid question
+                                |> Dict.insert (Question.getUuid parentQuestion) (Question.addItemTemplateQuestionUuids questionUuid parentQuestion)
+                    }
+
+                Nothing ->
+                    case Dict.get parentUuid entities.answers of
+                        Just answer ->
+                            { entities
+                                | questions = Dict.insert questionUuid question entities.questions
+                                , answers = Dict.insert answer.uuid (Answer.addFollowUpUuid questionUuid answer) entities.answers
+                            }
+
+                        Nothing ->
+                            entities
+
+
+insertReference : Reference -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertReference reference questionUuid entities =
+    case Dict.get questionUuid entities.questions of
+        Just question ->
+            { entities
+                | references = Dict.insert (Reference.getUuid reference) reference entities.references
+                , questions = Dict.insert questionUuid (Question.addReferenceUuid (Reference.getUuid reference) question) entities.questions
+            }
+
+        Nothing ->
+            entities
+
+
+insertTag : Tag -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertTag tag entities =
+    { entities | tags = Dict.insert tag.uuid tag entities.tags }
+
+
+moveAnswer : Answer -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+moveAnswer answer oldParentUuid newParentUuid entities =
+    let
+        entitiesRemoved =
+            case Dict.get oldParentUuid entities.questions of
+                Just question ->
+                    { entities | questions = Dict.insert (Question.getUuid question) (Question.removeAnswerUuid answer.uuid question) entities.questions }
+
+                Nothing ->
+                    entities
+
+        entitiesAdded =
+            case Dict.get newParentUuid entities.questions of
+                Just question ->
+                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addAnswerUuid answer.uuid question) entitiesRemoved.questions }
+
+                Nothing ->
+                    entitiesRemoved
+    in
+    entitiesAdded
+
+
+moveChoice : Choice -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+moveChoice choice oldParentUuid newParentUuid entities =
+    let
+        entitiesRemoved =
+            case Dict.get oldParentUuid entities.questions of
+                Just question ->
+                    { entities | questions = Dict.insert (Question.getUuid question) (Question.removeChoiceUuid choice.uuid question) entities.questions }
+
+                Nothing ->
+                    entities
+
+        entitiesAdded =
+            case Dict.get newParentUuid entities.questions of
+                Just question ->
+                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addChoiceUuid choice.uuid question) entitiesRemoved.questions }
+
+                Nothing ->
+                    entitiesRemoved
+    in
+    entitiesAdded
+
+
+moveExpert : Expert -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+moveExpert expert oldParentUuid newParentUuid entities =
+    let
+        entitiesRemoved =
+            case Dict.get oldParentUuid entities.questions of
+                Just question ->
+                    { entities | questions = Dict.insert (Question.getUuid question) (Question.removeExpertUuid expert.uuid question) entities.questions }
+
+                Nothing ->
+                    entities
+
+        entitiesAdded =
+            case Dict.get newParentUuid entities.questions of
+                Just question ->
+                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addExpertUuid expert.uuid question) entitiesRemoved.questions }
+
+                Nothing ->
+                    entitiesRemoved
+    in
+    entitiesAdded
+
+
+moveQuestion : Question -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+moveQuestion question oldParentUuid newParentUuid entities =
+    let
+        questionUuid =
+            Question.getUuid question
+
+        entitiesRemoved =
+            case Dict.get oldParentUuid entities.chapters of
+                Just chapter ->
+                    { entities | chapters = Dict.insert chapter.uuid (Chapter.removeQuestionUuid questionUuid chapter) entities.chapters }
+
+                Nothing ->
+                    case Dict.get oldParentUuid entities.questions of
+                        Just parentQuestion ->
+                            { entities | questions = Dict.insert (Question.getUuid parentQuestion) (Question.removeItemTemplateQuestionUuids questionUuid parentQuestion) entities.questions }
+
+                        Nothing ->
+                            case Dict.get oldParentUuid entities.answers of
+                                Just answer ->
+                                    { entities | answers = Dict.insert answer.uuid (Answer.removeFollowUpUuid questionUuid answer) entities.answers }
+
+                                Nothing ->
+                                    entities
+
+        entitiesAdded =
+            case Dict.get newParentUuid entities.chapters of
+                Just chapter ->
+                    { entitiesRemoved | chapters = Dict.insert chapter.uuid (Chapter.addQuestionUuid questionUuid chapter) entitiesRemoved.chapters }
+
+                Nothing ->
+                    case Dict.get newParentUuid entities.questions of
+                        Just parentQuestion ->
+                            { entitiesRemoved | questions = Dict.insert (Question.getUuid parentQuestion) (Question.addItemTemplateQuestionUuids questionUuid parentQuestion) entitiesRemoved.questions }
+
+                        Nothing ->
+                            case Dict.get newParentUuid entities.answers of
+                                Just answer ->
+                                    { entitiesRemoved | answers = Dict.insert answer.uuid (Answer.addFollowUpUuid questionUuid answer) entitiesRemoved.answers }
+
+                                Nothing ->
+                                    entitiesRemoved
+    in
+    entitiesAdded
+
+
+moveReference : Reference -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+moveReference reference oldParentUuid newParentUuid entities =
+    let
+        referenceUuid =
+            Reference.getUuid reference
+
+        entitiesRemoved =
+            case Dict.get oldParentUuid entities.questions of
+                Just question ->
+                    { entities | questions = Dict.insert (Question.getUuid question) (Question.removeReferenceUuid referenceUuid question) entities.questions }
+
+                Nothing ->
+                    entities
+
+        entitiesAdded =
+            case Dict.get newParentUuid entities.questions of
+                Just question ->
+                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addReferenceUuid referenceUuid question) entitiesRemoved.questions }
+
+                Nothing ->
+                    entitiesRemoved
+    in
+    entitiesAdded
+
+
+updateAnswer : Answer -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateAnswer answer entities =
+    { entities | answers = Dict.insert answer.uuid answer entities.answers }
+
+
+updateChoice : Choice -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateChoice choice entities =
+    { entities | choices = Dict.insert choice.uuid choice entities.choices }
+
+
+updateExpert : Expert -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateExpert expert entities =
+    { entities | experts = Dict.insert expert.uuid expert entities.experts }
+
+
+updateQuestion : Question -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateQuestion question entities =
+    { entities | questions = Dict.insert (Question.getUuid question) question entities.questions }
+
+
+updateReference : Reference -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateReference reference entities =
+    { entities | references = Dict.insert (Reference.getUuid reference) reference entities.references }
+
+
+
+--
 
 
 updateQuestions : Dict String Question -> KnowledgeModelEntities -> KnowledgeModelEntities

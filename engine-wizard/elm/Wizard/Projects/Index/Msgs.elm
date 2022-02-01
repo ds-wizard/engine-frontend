@@ -25,3 +25,4 @@ type Msg
     | UsersFilterSearch String
     | UsersFilterSearchComplete (Result ApiError (Pagination UserSuggestion))
     | DebouncerMsg (Debouncer.Msg Msg)
+    | NoOp
