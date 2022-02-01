@@ -93,7 +93,8 @@ onUnload : Routes.Route -> Model -> Cmd Msg
 onUnload newRoute model =
     case model.appState.route of
         Routes.KMEditorRoute route ->
-            Wizard.KMEditor.Update.onUnload route newRoute model.kmEditorModel
+            Cmd.map KMEditorMsg <|
+                Wizard.KMEditor.Update.onUnload route newRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
             Wizard.Projects.Update.onUnload route newRoute model.plansModel

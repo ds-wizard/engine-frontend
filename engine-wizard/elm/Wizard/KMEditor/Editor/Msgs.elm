@@ -26,3 +26,4 @@ type Msg
     | PreviewMsg Preview.Msg
     | SettingsMsg Settings.Msg
     | EventMsg String (Maybe String) (CommonEventData -> Event)
+    | ResetModel

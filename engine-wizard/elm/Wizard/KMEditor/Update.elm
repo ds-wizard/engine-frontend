@@ -38,11 +38,12 @@ fetchData route model appState =
                 Wizard.KMEditor.Publish.Update.fetchData uuid appState
 
 
-onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Wizard.Msgs.Msg
+onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Msg
 onUnload route newRoute model =
     case route of
         EditorRoute _ _ ->
-            Wizard.KMEditor.Editor.Update.onUnload newRoute model.editorModel
+            Cmd.map EditorMsg <|
+                Wizard.KMEditor.Editor.Update.onUnload newRoute model.editorModel
 
         _ ->
             Cmd.none
