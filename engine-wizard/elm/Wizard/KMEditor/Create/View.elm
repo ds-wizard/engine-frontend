@@ -57,7 +57,7 @@ formView : AppState -> Model -> Html Msg
 formView appState model =
     let
         cfg =
-            { viewItem = TypeHintItem.packageSuggestion
+            { viewItem = TypeHintItem.packageSuggestionWithVersion
             , wrapMsg = PackageTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = True

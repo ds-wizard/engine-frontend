@@ -1,6 +1,7 @@
 module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
     ( memberSuggestion
     , packageSuggestion
+    , packageSuggestionWithVersion
     , questionnaireSuggestion
     , templateSuggestion
     )
@@ -11,6 +12,7 @@ import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -40,14 +42,27 @@ questionnaireSuggestion questionnaire =
         ]
 
 
-packageSuggestion : PackageSuggestion -> Html msg
-packageSuggestion pkg =
+packageSuggestionWithVersion : PackageSuggestion -> Html msg
+packageSuggestionWithVersion =
+    packageSuggestion True
+
+
+packageSuggestion : Bool -> PackageSuggestion -> Html msg
+packageSuggestion withVersion pkg =
+    let
+        version =
+            if withVersion then
+                span [ class "badge badge-light", dataCy "typehint-item_package_version" ] [ text <| Version.toString pkg.version ]
+
+            else
+                emptyNode
+    in
     complexItem
         [ div [] [ ItemIcon.view { text = pkg.name, image = Nothing } ]
         , div []
             [ div []
                 [ strong [] [ text pkg.name ]
-                , span [ class "badge badge-light", dataCy "typehint-item_package_version" ] [ text <| Version.toString pkg.version ]
+                , version
                 ]
             , div [] [ text pkg.description ]
             ]
