@@ -729,7 +729,8 @@ $toolbar-height: 40px;
             label {
                 padding: 10px 15px;
                 margin: 0;
-                display: block;
+                display: flex;
+                align-items: baseline;
                 cursor: pointer;
 
                 .badges {
