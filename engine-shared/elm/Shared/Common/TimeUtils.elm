@@ -1,4 +1,9 @@
-module Shared.Common.TimeUtils exposing (monthToInt, monthToString, toReadableDateTime, toReadableTime)
+module Shared.Common.TimeUtils exposing
+    ( monthToInt
+    , monthToString
+    , toReadableDateTime
+    , toReadableTime
+    )
 
 import Shared.Locale exposing (lg)
 import Shared.Provisioning exposing (Provisioning)
@@ -23,7 +28,7 @@ toReadableDateTime timeZone time =
         year =
             String.fromInt <| Time.toYear timeZone time
     in
-    day ++ ". " ++ month ++ ". " ++ year ++ ", " ++ hour ++ ":" ++ min ++ ""
+    day ++ ". " ++ month ++ ". " ++ year ++ ", " ++ hour ++ ":" ++ min
 
 
 toReadableTime : Time.Zone -> Time.Posix -> String
@@ -35,7 +40,7 @@ toReadableTime timeZone time =
         min =
             String.padLeft 2 '0' <| String.fromInt <| Time.toMinute timeZone time
     in
-    hour ++ ":" ++ min ++ ""
+    hour ++ ":" ++ min
 
 
 monthToInt : Month -> Int
