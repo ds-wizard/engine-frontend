@@ -68,7 +68,7 @@ createMigrationView appState model questionnaire =
                 ]
 
         cfg =
-            { viewItem = TypeHintItem.packageSuggestion
+            { viewItem = TypeHintItem.packageSuggestion False
             , wrapMsg = PackageTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = False
@@ -93,7 +93,7 @@ createMigrationView appState model questionnaire =
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintItem.packageSuggestion (PackageSuggestion.fromPackage questionnaire.package))
+                    (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package))
                     (l_ "form.originalKM" appState)
                 , FormGroup.codeView (Version.toString questionnaire.package.version) <| l_ "form.originalVersion" appState
                 , originalTagList

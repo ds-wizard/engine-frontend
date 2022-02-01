@@ -195,7 +195,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
         , linkTo appState
             (Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute forkOfPackage.id))
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestion forkOfPackage ]
+            [ TypeHintItem.packageSuggestionWithVersion forkOfPackage ]
         , outdatedWarning
         ]
 
