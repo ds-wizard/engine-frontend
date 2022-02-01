@@ -35,6 +35,13 @@ jobs:
     - name: Install
       run: npm ci
 
+# (1.5) -> Temporary Elm build fix
+    - name: Prepare Elm
+      run: |
+        wget https://s3.ds-wizard.org/elm/elm.zip
+        unzip elm.zip -d ~
+        mv ~/elm ~/.elm
+
 # (2) -> Test
     - name: Test
       run: |
