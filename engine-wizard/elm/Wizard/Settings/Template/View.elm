@@ -6,7 +6,7 @@ import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
 import List.Extra as List
 import Shared.Data.BootstrapConfig.TemplateConfig exposing (TemplateConfig)
-import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
+import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l)
 import Shared.Utils exposing (getOrganizationAndItemId)
@@ -52,11 +52,7 @@ formView templates appState form =
             Form.getFieldAsString "recommendedTemplateId" form
 
         templateOptions =
-            templates
-                |> List.uniqueBy (.id >> getOrganizationAndItemId)
-                |> List.sortBy .name
-                |> List.map (\t -> ( getOrganizationAndItemId t.id, t.name ))
-                |> (::) ( "", "- none -" )
+            TemplateSuggestion.createOptions templates
 
         templateToTemplateVersionOptions template =
             templates
