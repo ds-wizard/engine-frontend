@@ -117,15 +117,12 @@ locale =
                , ( "_global.apiSuccess.documents.delete", "Document was successfully deleted." )
                , ( "_global.apiSuccess.feedbacks.post", "Your feedback has been sent." )
                , ( "_global.apiSuccess.migration.delete", "Migration was successfully canceled." )
-               , ( "_global.apiSuccess.packages.delete", "Knowledge Model and all its versions were successfully deleted." )
                , ( "_global.apiSuccess.questionnaires.clone", "%s has been created." )
                , ( "_global.apiSuccess.questionnaires.delete", "Questionnaire was successfully deleted." )
                , ( "_global.apiSuccess.questionnaires.migration.delete", "Questionnaire migration was successfully canceled." )
                , ( "_global.apiSuccess.registry.signup", "You have signed up for the Registry, you should receive a confirmation email soon." )
-               , ( "_global.apiSuccess.templates.delete", "Template and all its versions were successfully deleted." )
                , ( "_global.apiSuccess.users.put", "Profile was successfully updated." )
                , ( "_global.apiSuccess.users.password.put", "Password was successfully changed." )
-               , ( "_global.apiSuccess.users.delete", "User was successfully deleted." )
 
                -- KM Entities
                , ( "_global.annotations", "Annotations" )

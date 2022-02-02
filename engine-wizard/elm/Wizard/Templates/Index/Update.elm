@@ -10,10 +10,12 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
 import Wizard.Routes as Routes
+import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Templates.Index.Models exposing (Model)
 import Wizard.Templates.Index.Msgs exposing (Msg(..))
 import Wizard.Templates.Routes exposing (Route(..))
@@ -34,7 +36,7 @@ update msg wrapMsg appState model =
             handleDeletePackage wrapMsg appState model
 
         DeleteTemplateCompleted result ->
-            deletePackageCompleted wrapMsg appState model result
+            deletePackageCompleted appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -53,20 +55,12 @@ handleDeletePackage wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deletePackageCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deletePackageCompleted wrapMsg appState model result =
+deletePackageCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deletePackageCompleted appState model result =
     case result of
         Ok _ ->
-            let
-                ( templates, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.templates
-            in
-            ( { model
-                | deletingTemplate = Success <| lg "apiSuccess.templates.delete" appState
-                , templates = templates
-                , templateToBeDeleted = Nothing
-              }
-            , cmd
+            ( model
+            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.templatesIndexWithFilters model.templates)
             )
 
         Err error ->

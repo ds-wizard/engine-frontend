@@ -5,6 +5,7 @@ module Wizard.Common.Components.Listing.Models exposing
     , initialModelWithFilters
     , initialModelWithFiltersAndStates
     , setPagination
+    , toRouteAfterDelete
     , updateItems
     )
 
@@ -15,7 +16,7 @@ import Dict exposing (Dict)
 import Maybe.Extra as Maybe
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg)
 
 
@@ -93,3 +94,28 @@ setPagination pagination model =
         | pagination = Success pagination
         , items = List.map wrap pagination.items
     }
+
+
+toRouteAfterDelete : (PaginationQueryFilters -> PaginationQueryString -> b) -> Model a -> b
+toRouteAfterDelete toRoute model =
+    let
+        paginationQueryString =
+            case model.pagination of
+                Success pagination ->
+                    let
+                        isLastPage =
+                            pagination.page.number == (pagination.page.totalPages - 1)
+
+                        isLastElement =
+                            modBy pagination.page.size pagination.page.totalElements == 1
+                    in
+                    if isLastPage && isLastElement then
+                        PaginationQueryString.setPage model.paginationQueryString pagination.page.number
+
+                    else
+                        model.paginationQueryString
+
+                _ ->
+                    model.paginationQueryString
+    in
+    toRoute model.filters paginationQueryString

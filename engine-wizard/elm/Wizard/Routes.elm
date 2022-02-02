@@ -1,6 +1,7 @@
 module Wizard.Routes exposing
     ( Route(..)
     , documentsIndex
+    , documentsIndexWithFilters
     , isDocumentsIndex
     , isKmEditorIndex
     , isKnowledgeModelsIndex
@@ -9,11 +10,14 @@ module Wizard.Routes exposing
     , isUsersIndex
     , kmEditorEditor
     , kmEditorIndex
+    , kmEditorIndexWithFilters
     , kmEditorMigration
     , knowledgeModelsIndex
+    , knowledgeModelsIndexWithFilters
     , projectIndexWithFilters
     , projectsIndex
     , templatesIndex
+    , templatesIndexWithFilters
     , usersIndex
     , usersIndexWithFilters
     )
@@ -105,6 +109,11 @@ documentsIndex =
     DocumentsRoute (Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
 
 
+documentsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+documentsIndexWithFilters _ pagination =
+    DocumentsRoute (Wizard.Documents.Routes.IndexRoute Nothing pagination)
+
+
 isDocumentsIndex : Route -> Bool
 isDocumentsIndex route =
     case route of
@@ -118,6 +127,11 @@ isDocumentsIndex route =
 kmEditorIndex : Route
 kmEditorIndex =
     KMEditorRoute (Wizard.KMEditor.Routes.IndexRoute PaginationQueryString.empty)
+
+
+kmEditorIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+kmEditorIndexWithFilters _ pagination =
+    KMEditorRoute (Wizard.KMEditor.Routes.IndexRoute pagination)
 
 
 isKmEditorIndex : Route -> Bool
@@ -145,6 +159,11 @@ knowledgeModelsIndex =
     KnowledgeModelsRoute (Wizard.KnowledgeModels.Routes.IndexRoute PaginationQueryString.empty)
 
 
+knowledgeModelsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+knowledgeModelsIndexWithFilters _ pagination =
+    KnowledgeModelsRoute (Wizard.KnowledgeModels.Routes.IndexRoute pagination)
+
+
 isKnowledgeModelsIndex : Route -> Bool
 isKnowledgeModelsIndex route =
     case route of
@@ -158,6 +177,11 @@ isKnowledgeModelsIndex route =
 templatesIndex : Route
 templatesIndex =
     TemplatesRoute (Wizard.Templates.Routes.IndexRoute PaginationQueryString.empty)
+
+
+templatesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+templatesIndexWithFilters _ pagination =
+    TemplatesRoute (Wizard.Templates.Routes.IndexRoute pagination)
 
 
 isTemplateIndex : Route -> Bool
