@@ -459,6 +459,7 @@ locale =
                , ( "Wizard.Common.Menu.View.about.builtAt", "Built at" )
                , ( "Wizard.Common.Menu.View.about.client", "Client" )
                , ( "Wizard.Common.Menu.View.about.server", "Server" )
+               , ( "Wizard.Common.Menu.View.about.styleVersion", "Style Version" )
                , ( "Wizard.Common.Menu.View.about.title", "About" )
                , ( "Wizard.Common.Menu.View.about.version", "Version" )
                , ( "Wizard.Common.Menu.View.helpMenu.about", "About" )

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "init": "./scripts/init.sh",
-    "start": "NODE_ENV=production node index.js"
+    "start": "NODE_ENV=production node index.js",
+    "clean": "rm -rf ./src"
   },
   "license": "Apache-2.0",
   "dependencies": {
