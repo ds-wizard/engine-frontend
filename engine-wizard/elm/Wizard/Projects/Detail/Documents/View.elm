@@ -300,8 +300,8 @@ viewSubmission cfg appState submission =
                         , faSet "_global.externalLink" appState
                         ]
 
-                ( SubmissionState.Error, _, Just errorText ) ->
-                    a [ onClick (cfg.wrapMsg <| SetSubmissionErrorModal (Just errorText)) ]
+                ( SubmissionState.Error, _, Just _ ) ->
+                    a [ onClick (cfg.wrapMsg <| SetSubmissionErrorModal (Just (Submission.getReturnedData submission))) ]
                         [ lx_ "submissions.errorLink" appState ]
 
                 _ ->
@@ -507,4 +507,4 @@ submissionErrorModal cfg appState model =
             , dataCy = "submission-error"
             }
     in
-    Modal.simple modalConfig
+    Modal.simpleWithAttrs [ class "modal-submission-error" ] modalConfig

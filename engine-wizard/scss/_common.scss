@@ -125,11 +125,19 @@
     max-height: 0;
     overflow: hidden;
 
+
     .modal-dialog {
         opacity: 1;
         margin-top: -20px;
         min-width: 500px;
         @include transition(margin-top 0.2s ease-in);
+    }
+
+
+    &.modal-submission-error {
+        .modal-dialog {
+            min-width: 700px;
+        }
     }
 
     &.visible {
@@ -166,6 +174,8 @@
             padding: 0 2rem;
         }
     }
+
+
 }
 
 .hidden {

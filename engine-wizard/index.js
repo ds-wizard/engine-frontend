@@ -51,7 +51,8 @@ function apiUrl() {
 }
 
 function configUrl() {
-    return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(window.location.origin)
+    var clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
+    return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
 function provisioningUrl() {
