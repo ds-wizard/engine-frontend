@@ -9,10 +9,12 @@ import Shared.Locale exposing (lg)
 import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
 import Wizard.Routes as Routes
+import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Users.Index.Models exposing (Model)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
 import Wizard.Users.Routes exposing (Route(..), indexRouteRoleFilterId)
@@ -33,7 +35,7 @@ update msg wrapMsg appState model =
             handleDeleteUser wrapMsg appState model
 
         DeleteUserCompleted result ->
-            deleteUserCompleted wrapMsg appState model result
+            deleteUserCompleted appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -52,20 +54,12 @@ handleDeleteUser wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deleteUserCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deleteUserCompleted wrapMsg appState model result =
+deleteUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deleteUserCompleted appState model result =
     case result of
         Ok _ ->
-            let
-                ( users, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.users
-            in
-            ( { model
-                | deletingUser = Success <| lg "apiSuccess.users.delete" appState
-                , users = users
-                , userToBeDeleted = Nothing
-              }
-            , cmd
+            ( model
+            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.usersIndexWithFilters model.users)
             )
 
         Err error ->

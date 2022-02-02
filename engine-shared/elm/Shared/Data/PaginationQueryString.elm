@@ -10,6 +10,7 @@ module Shared.Data.PaginationQueryString exposing
     , parser3
     , parser5
     , resetPage
+    , setPage
     , toApiUrl
     , toApiUrlWith
     , toUrl
@@ -61,6 +62,11 @@ withSize size qs =
 withSort : Maybe String -> SortDirection -> PaginationQueryString -> PaginationQueryString
 withSort sortBy sortDirection qs =
     { qs | sortBy = sortBy, sortDirection = sortDirection }
+
+
+setPage : PaginationQueryString -> Int -> PaginationQueryString
+setPage qs page =
+    { qs | page = Just page }
 
 
 resetPage : PaginationQueryString -> PaginationQueryString

@@ -16,6 +16,7 @@ import Shared.Setters exposing (setQuestionnaire)
 import Uuid
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Documents.Index.Models exposing (Model, addDocumentSubmission)
@@ -23,6 +24,7 @@ import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
+import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Model -> Cmd Msg
@@ -55,7 +57,7 @@ update wrapMsg msg appState model =
             handleDeleteDocument wrapMsg appState model
 
         DeleteDocumentCompleted result ->
-            handleDeleteDocumentCompleted wrapMsg appState model result
+            handleDeleteDocumentCompleted appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -114,20 +116,12 @@ handleDeleteDocument wrapMsg appState model =
             ( model, Cmd.none )
 
 
-handleDeleteDocumentCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteDocumentCompleted wrapMsg appState model result =
+handleDeleteDocumentCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteDocumentCompleted appState model result =
     case result of
         Ok _ ->
-            let
-                ( documents, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.documents
-            in
-            ( { model
-                | deletingDocument = Success <| lg "apiSuccess.documents.delete" appState
-                , documents = documents
-                , documentToBeDeleted = Nothing
-              }
-            , cmd
+            ( model
+            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.documentsIndexWithFilters model.documents)
             )
 
         Err error ->

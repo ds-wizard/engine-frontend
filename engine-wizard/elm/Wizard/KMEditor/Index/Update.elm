@@ -10,6 +10,7 @@ import Shared.Setters exposing (setPackage)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.KMEditor.Common.DeleteModal as DeleteModal
@@ -106,7 +107,7 @@ handleDeleteModalMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> DeleteModal.Msg -
 handleDeleteModalMsg wrapMsg appState deleteModalMsg model =
     let
         updateConfig =
-            { cmdDeleted = cmdNavigate appState Routes.kmEditorIndex
+            { cmdDeleted = cmdNavigate appState (Listing.toRouteAfterDelete Routes.kmEditorIndexWithFilters model.branches)
             , wrapMsg = wrapMsg << DeleteModalMsg
             }
 
