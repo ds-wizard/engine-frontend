@@ -9,7 +9,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
     )
 
 import Dict exposing (Dict)
-import Html exposing (Html, a, button, div, h3, h5, label, small, text)
+import Html exposing (Html, a, button, div, h3, h5, i, label, li, small, text, ul)
 import Html.Attributes exposing (class, disabled, id, title)
 import Html.Events exposing (onClick)
 import Html.Keyed
@@ -68,9 +68,11 @@ import SplitPane
 import String.Extra as String
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
+import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor.Breadcrumbs as Breadcrumbs
@@ -1304,6 +1306,28 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, editorBranch } integration 
                 { annotations = integration.annotations
                 , onEdit = createEditEvent setAnnotations
                 }
+
+        viewQuestionLink question =
+            li []
+                [ linkTo appState
+                    (editorRoute editorBranch (Question.getUuid question))
+                    []
+                    [ text (Question.getTitle question) ]
+                ]
+
+        wrapQuestionsWithIntegration questions =
+            if List.isEmpty questions then
+                div [] [ i [] [ lx_ "integration.questions.noQuestions" appState ] ]
+
+            else
+                ul [] questions
+
+        questionsWithIntegration =
+            KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
+                |> List.filter ((==) (Just integration.uuid) << Question.getIntegrationUuid)
+                |> List.sortBy Question.getTitle
+                |> List.map viewQuestionLink
+                |> wrapQuestionsWithIntegration
     in
     editor ("integration-" ++ integration.uuid)
         [ integrationEditorTitle
@@ -1340,6 +1364,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, editorBranch } integration 
                 ]
             ]
         , annotationsInput
+        , FormGroup.plainGroup questionsWithIntegration (l_ "integration.questions.label" appState)
         ]
 
 

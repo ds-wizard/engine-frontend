@@ -597,6 +597,8 @@ locale =
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.id.description", "A string that identifies the integration. It has to be unique for each integration." )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.name.description", "A name visible everywhere else in the KM Editor, such as when choosing the integration for a question." )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.logo.description", "Logo is displayed next to the link to the selected item in questionnaires. It can be either URL or base64 image." )
+               , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.questions.label", "Questions using this integration" )
+               , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.questions.noQuestions", "No questions" )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.request.description", "Use this section to configure the search request. The service you want to integrate has to provide a search HTTP API where you send a search string and it returns a JSON with found items." )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.requestUrl.description", "A URL of the integrated service API that supports the search. Use `${q}` for the actual string that will be filled when users search for items, such as *ht&#8203;tps://example.com/search?q=${q}*." )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.response.description", "Use this section to configure how to process the response returned from the search API." )
