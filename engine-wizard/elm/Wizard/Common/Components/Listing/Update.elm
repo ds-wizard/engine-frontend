@@ -4,10 +4,12 @@ import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
 import Debouncer.Extra as Debouncer
 import Dict
+import List.Extra as List
 import Shared.Api exposing (ToMsg)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Error.ApiError as ApiError
+import Shared.Setters exposing (setDropdownState)
 import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -36,18 +38,7 @@ update : UpdateConfig a -> AppState -> Msg a -> Model a -> ( Model a, Cmd Wizard
 update cfg appState msg model =
     case msg of
         ItemDropdownMsg index state ->
-            let
-                updateItem i item =
-                    if i == index then
-                        { item | dropdownState = state }
-
-                    else
-                        item
-
-                newItems =
-                    List.indexedMap updateItem model.items
-            in
-            ( { model | items = newItems }, Cmd.none )
+            ( { model | items = List.updateAt index (setDropdownState state) model.items }, Cmd.none )
 
         SortDropdownMsg state ->
             ( { model | sortDropdownState = state }, Cmd.none )

@@ -2,6 +2,7 @@ module Wizard.Projects.Detail.Update exposing (fetchData, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -687,12 +688,4 @@ handleWebsocketMsg websocketMsg appState model =
 
 handleOnlineUserMsg : Int -> OnlineUser.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleOnlineUserMsg index msg model =
-    let
-        updateUser i user =
-            if i == index then
-                OnlineUser.update msg user
-
-            else
-                user
-    in
-    ( { model | onlineUsers = List.indexedMap updateUser model.onlineUsers }, Cmd.none )
+    ( { model | onlineUsers = List.updateAt index (OnlineUser.update msg) model.onlineUsers }, Cmd.none )
