@@ -7,6 +7,7 @@ module Shared.Form.Validate exposing
     , maybeString
     , optionalString
     , organizationId
+    , password
     , projectTag
     , projectTags
     , regex
@@ -18,6 +19,7 @@ import Dict exposing (Dict)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Regex exposing (Regex)
+import Rumkin
 import Shared.Form.FormError as FormError exposing (FormError(..))
 import Shared.Locale exposing (l)
 import Shared.Provisioning exposing (Provisioning)
@@ -46,6 +48,23 @@ confirmation confirmationField =
                 )
     in
     V.andThen validate
+
+
+password : { a | provisioning : Provisioning } -> Validation FormError String
+password appState =
+    V.string
+        |> V.andThen
+            (\value ->
+                case (Rumkin.getStats value).strength of
+                    Rumkin.VeryWeak ->
+                        V.fail (V.customError (FormError.Error (l_ "passwordVeryWeak" appState)))
+
+                    Rumkin.Weak ->
+                        V.fail (V.customError (FormError.Error (l_ "passwordWeak" appState)))
+
+                    _ ->
+                        V.succeed value
+            )
 
 
 ifElse :

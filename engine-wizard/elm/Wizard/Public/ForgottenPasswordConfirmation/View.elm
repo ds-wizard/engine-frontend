@@ -69,7 +69,7 @@ formView : AppState -> Form FormError PasswordForm -> Html Form.Msg
 formView appState form =
     div []
         [ FormExtra.text <| l_ "form.text" appState
-        , FormGroup.password appState form "password" <| l_ "form.password" appState
+        , FormGroup.passwordWithStrength appState form "password" <| l_ "form.password" appState
         , FormGroup.password appState form "passwordConfirmation" <| l_ "form.passwordConfirmation" appState
         ]
 

@@ -140,7 +140,7 @@ formView appState form =
         , FormGroup.optionalWrapper appState <|
             FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <|
                 lg "user.affiliation" appState
-        , FormGroup.password appState form "password" <| lg "user.password" appState
+        , FormGroup.passwordWithStrength appState form "password" <| lg "user.password" appState
         , FormGroup.password appState form "passwordConfirmation" <| lg "user.passwordConfirmation" appState
         , acceptGroup
         , acceptFakeGroup

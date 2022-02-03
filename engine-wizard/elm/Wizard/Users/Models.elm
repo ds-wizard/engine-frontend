@@ -18,7 +18,7 @@ type alias Model =
 initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Users.Create.Models.initialModel appState
-    , editModel = Wizard.Users.Edit.Models.initialModel ""
+    , editModel = Wizard.Users.Edit.Models.initialModel appState ""
     , indexModel = Wizard.Users.Index.Models.initialModel PaginationQueryString.empty Nothing
     }
 
@@ -30,7 +30,7 @@ initLocalModel appState route model =
             { model | createModel = Wizard.Users.Create.Models.initialModel appState }
 
         EditRoute uuid ->
-            { model | editModel = Wizard.Users.Edit.Models.initialModel uuid }
+            { model | editModel = Wizard.Users.Edit.Models.initialModel appState uuid }
 
         IndexRoute paginationQueryString mbRoute ->
             { model | indexModel = Wizard.Users.Index.Models.initialModel paginationQueryString mbRoute }
