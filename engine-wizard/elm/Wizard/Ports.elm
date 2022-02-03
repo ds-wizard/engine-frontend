@@ -4,6 +4,7 @@ port module Wizard.Ports exposing
     , clearSession
     , clearSessionAndReload
     , clearUnloadMessage
+    , consoleError
     , createDropzone
     , drawMetricsChart
     , fileContentRead
@@ -18,6 +19,13 @@ port module Wizard.Ports exposing
     )
 
 import Json.Encode as E
+
+
+
+-- Console
+
+
+port consoleError : String -> Cmd msg
 
 
 

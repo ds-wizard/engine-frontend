@@ -29,7 +29,7 @@ init flags location key =
         route =
             routeIfAllowed appState originalRoute
 
-        appState =
+        ( appState, appStateCmd ) =
             AppState.init flags key
 
         appStateWithRoute =
@@ -49,7 +49,7 @@ init flags location key =
                     , Time.getTimeZone
                     ]
     in
-    ( model, cmd )
+    ( model, Cmd.batch [ cmd, appStateCmd ] )
 
 
 decideInitialRoute : Model -> Url -> Routes.Route -> Routes.Route -> Cmd Msg

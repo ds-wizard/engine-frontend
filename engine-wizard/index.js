@@ -7,6 +7,7 @@ var program = require('./elm/Wizard.elm')
 
 var cookies = require('./ports/cookies')
 var registerChartPorts = require('./ports/chart')
+var registerConsolePorts = require('./ports/console')
 var registerImportPorts = require('./ports/import')
 var registerPageUnloadPorts = require('./ports/page-unload')
 var registerRefreshPorts = require('./ports/refresh')
@@ -65,8 +66,9 @@ function localProvisioning() {
     return null
 }
 
-function bootstrapErrorHTML() {
-    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>Bootstrap Error</h1><p>Application cannot load configuration.<br>Please, contact the administrator.</p></div></div>'
+function bootstrapErrorHTML(errorCode) {
+    const message = errorCode ? 'Server responded with an error code ' + errorCode + '.' : 'Configuration cannot be loaded due to server unavailable.'
+    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>Bootstrap Error</h1><p>' + message + '<br>Please, contact the administrator.</p></div></div>'
 }
 
 function clientUrl() {
@@ -113,6 +115,7 @@ function loadApp(config, provisioning) {
         })
 
         registerChartPorts(app)
+        registerConsolePorts(app)
         registerCopyPorts(app)
         registerImportPorts(app)
         registerPageUnloadPorts(app)
@@ -145,8 +148,10 @@ window.onload = function () {
             loadApp(config, provisioning)
         })
         .catch(function (err) {
+            var errorCode = err.response ? err.response.status : null
+
             setStyles({}, function () {
-                document.body.innerHTML = bootstrapErrorHTML()
+                document.body.innerHTML = bootstrapErrorHTML(errorCode)
             })
         })
 }
