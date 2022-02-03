@@ -45,17 +45,17 @@ initEmpty appState =
             else
                 []
     in
-    Form.initial initials validation
+    Form.initial initials (validation appState)
 
 
-validation : Validation FormError SignupForm
-validation =
+validation : AppState -> Validation FormError SignupForm
+validation appState =
     V.succeed SignupForm
         |> V.andMap (V.field "email" V.email)
         |> V.andMap (V.field "firstName" V.string)
         |> V.andMap (V.field "lastName" V.string)
         |> V.andMap (V.field "affiliation" V.maybeString)
-        |> V.andMap (V.field "password" V.string)
+        |> V.andMap (V.field "password" (V.password appState))
         |> V.andMap (V.field "password" V.string |> V.confirmation "passwordConfirmation")
         |> V.andMap (V.field "accept" validateAcceptField)
         |> V.andMap (V.field "acceptFake" V.bool)

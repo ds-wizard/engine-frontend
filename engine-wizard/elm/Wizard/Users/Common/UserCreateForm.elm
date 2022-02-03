@@ -31,18 +31,18 @@ init appState =
         fields =
             [ ( "role", Field.string appState.config.authentication.defaultRole ) ]
     in
-    Form.initial fields validation
+    Form.initial fields (validation appState)
 
 
-validation : Validation FormError UserCreateForm
-validation =
+validation : AppState -> Validation FormError UserCreateForm
+validation appState =
     V.succeed UserCreateForm
         |> V.andMap (V.field "email" V.email)
         |> V.andMap (V.field "firstName" V.string)
         |> V.andMap (V.field "lastName" V.string)
         |> V.andMap (V.field "affiliation" V.maybeString)
         |> V.andMap (V.field "role" V.string)
-        |> V.andMap (V.field "password" V.string)
+        |> V.andMap (V.field "password" (V.password appState))
 
 
 encode : String -> UserCreateForm -> E.Value

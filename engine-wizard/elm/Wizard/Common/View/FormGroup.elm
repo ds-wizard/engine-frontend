@@ -13,6 +13,7 @@ module Wizard.Common.View.FormGroup exposing
     , markdownEditor
     , optionalWrapper
     , password
+    , passwordWithStrength
     , plainGroup
     , resizableTextarea
     , richRadioGroup
@@ -41,6 +42,7 @@ import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (lx)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.PasswordBar as PasswordBar
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 
 
@@ -118,6 +120,23 @@ inputWithTypehints options appState form fieldName labelText =
 password : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 password =
     formGroup Input.passwordInput []
+
+
+passwordWithStrength : AppState -> Form FormError o -> String -> String -> Html Form.Msg
+passwordWithStrength appState form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, errorClass ) =
+            getErrors appState field labelText
+    in
+    div [ class "form-group" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , Input.passwordInput field [ class ("form-control " ++ errorClass), id fieldName, name fieldName ]
+        , PasswordBar.view (Maybe.withDefault "" field.value)
+        , error
+        ]
 
 
 {-| Helper for creating form group with select field.

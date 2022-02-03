@@ -5,6 +5,7 @@ import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias UserPasswordForm =
@@ -13,15 +14,15 @@ type alias UserPasswordForm =
     }
 
 
-init : Form FormError UserPasswordForm
-init =
-    Form.initial [] validation
+init : AppState -> Form FormError UserPasswordForm
+init appState =
+    Form.initial [] (validation appState)
 
 
-validation : Validation FormError UserPasswordForm
-validation =
+validation : AppState -> Validation FormError UserPasswordForm
+validation appState =
     V.map2 UserPasswordForm
-        (V.field "password" V.string)
+        (V.field "password" (V.password appState))
         (V.field "password" V.string |> V.confirmation "passwordConfirmation")
 
 

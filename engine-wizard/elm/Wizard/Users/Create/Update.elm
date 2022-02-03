@@ -48,7 +48,7 @@ handleForm formMsg wrapMsg seed appState model =
         _ ->
             let
                 newModel =
-                    { model | form = Form.update UserCreateForm.validation formMsg model.form }
+                    { model | form = Form.update (UserCreateForm.validation appState) formMsg model.form }
             in
             ( seed, newModel, Cmd.none )
 

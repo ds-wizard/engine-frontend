@@ -8,6 +8,7 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Shared.Data.User exposing (User)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Users.Common.UserEditForm as UserEditForm exposing (UserEditForm)
 import Wizard.Users.Common.UserPasswordForm as UserPasswordForm exposing (UserPasswordForm)
 
@@ -28,13 +29,13 @@ type alias Model =
     }
 
 
-initialModel : String -> Model
-initialModel uuid =
+initialModel : AppState -> String -> Model
+initialModel appState uuid =
     { uuid = uuid
     , currentView = Profile
     , user = Loading
     , savingUser = Unset
     , savingPassword = Unset
     , userForm = UserEditForm.initEmpty
-    , passwordForm = UserPasswordForm.init
+    , passwordForm = UserPasswordForm.init appState
     }

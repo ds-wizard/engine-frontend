@@ -27,7 +27,7 @@ initialModel appState =
     { authModel = Wizard.Public.Auth.Models.initialModel
     , bookReferenceModel = Wizard.Public.BookReference.Models.initialModel
     , forgottenPasswordModel = Wizard.Public.ForgottenPassword.Models.initialModel
-    , forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel "" ""
+    , forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel appState "" ""
     , loginModel = Wizard.Public.Login.Models.initialModel Nothing
     , signupModel = Wizard.Public.Signup.Models.initialModel appState
     , signupConfirmationModel = Wizard.Public.SignupConfirmation.Models.initialModel
@@ -47,7 +47,7 @@ initLocalModel appState route model =
             { model | forgottenPasswordModel = Wizard.Public.ForgottenPassword.Models.initialModel }
 
         ForgottenPasswordConfirmationRoute userId hash ->
-            { model | forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel userId hash }
+            { model | forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel appState userId hash }
 
         LoginRoute mbOriginalUrl ->
             { model | loginModel = Wizard.Public.Login.Models.initialModel mbOriginalUrl }
