@@ -303,6 +303,13 @@ annotations appState config =
             List.removeAt index config.annotations
 
         viewAnnotation i annotation =
+            let
+                lines =
+                    annotation.value
+                        |> String.split "\n"
+                        |> List.length
+                        |> max 2
+            in
             ( "annotation." ++ String.fromInt i
             , div
                 [ class "annotations-editor-item"
@@ -325,6 +332,7 @@ annotations appState config =
                         , placeholder (lg "annotations.value" appState)
                         , dataCy "annotation_value"
                         , grammarlyAttribute
+                        , rows lines
                         ]
                         []
                     ]
