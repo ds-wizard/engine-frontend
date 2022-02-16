@@ -6,12 +6,14 @@ import Html.Events exposing (onClick)
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Import.FileImport.View as FileImportView
-import Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model)
+import Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model, isFileImportModel, isOwlImportModel, isRegistryImportModel)
 import Wizard.KnowledgeModels.Import.Msgs exposing (Msg(..))
+import Wizard.KnowledgeModels.Import.OwlImport.View as OwlImportView
 import Wizard.KnowledgeModels.Import.RegistryImport.View as RegistryImportView
 
 
@@ -28,27 +30,64 @@ lx_ =
 view : AppState -> Model -> Html Msg
 view appState model =
     let
-        ( registryActive, content ) =
-            case model.importModel of
-                FileImportModel fileImportModel ->
-                    ( False
-                    , Html.map FileImportMsg <|
-                        FileImportView.view appState fileImportModel
-                    )
+        owlNavItem =
+            viewNavbarItem
+                (lx_ "navbar.fromOwl" appState)
+                (faSet "kmImport.fromOwl" appState)
+                (isOwlImportModel model)
+                ShowOwlImport
+                "km_import_nav_owl"
 
-                RegistryImportModel registryImportModel ->
-                    ( True
-                    , Html.map RegistryImportMsg <|
-                        RegistryImportView.view appState registryImportModel
-                    )
+        registryNavItem =
+            viewNavbarItem
+                (lx_ "navbar.fromRegistry" appState)
+                (faSet "kmImport.fromRegistry" appState)
+                (isRegistryImportModel model)
+                ShowRegistryImport
+                "km_import_nav_registry"
 
-        navbar =
+        fileNavItem =
+            viewNavbarItem
+                (lx_ "navbar.fromFile" appState)
+                (faSet "kmImport.fromFile" appState)
+                (isFileImportModel model)
+                ShowFileImport
+                "km_import_nav_file"
+
+        registryEnabled =
             case appState.config.registry of
                 RegistryEnabled _ ->
-                    viewNavbar appState registryActive
+                    True
 
                 _ ->
-                    emptyNode
+                    False
+
+        navItems =
+            []
+                |> listInsertIf owlNavItem appState.config.experimental.owl.enabled
+                |> listInsertIf registryNavItem registryEnabled
+                |> listInsertIf fileNavItem True
+
+        content =
+            case model.importModel of
+                FileImportModel fileImportModel ->
+                    Html.map FileImportMsg <|
+                        FileImportView.view appState fileImportModel
+
+                RegistryImportModel registryImportModel ->
+                    Html.map RegistryImportMsg <|
+                        RegistryImportView.view appState registryImportModel
+
+                OwlImportModel owlImportModel ->
+                    Html.map OwlImportMsg <|
+                        OwlImportView.view appState owlImportModel
+
+        navbar =
+            if List.length navItems > 1 then
+                viewNavbar navItems
+
+            else
+                emptyNode
     in
     div [ detailClass "KnowledgeModels__Import" ]
         [ Page.header (l_ "header" appState) []
@@ -57,29 +96,21 @@ view appState model =
         ]
 
 
-viewNavbar : AppState -> Bool -> Html Msg
-viewNavbar appState registryActive =
-    ul [ class "nav nav-tabs" ]
-        [ li [ class "nav-item" ]
-            [ a
-                [ onClick ShowRegistryImport
-                , class "nav-link link-with-icon"
-                , classList [ ( "active", registryActive ) ]
-                , dataCy "km_import_nav_registry"
-                ]
-                [ faSet "kmImport.fromRegistry" appState
-                , lx_ "navbar.fromRegistry" appState
-                ]
+viewNavbarItem : Html msg -> Html msg -> Bool -> msg -> String -> Html msg
+viewNavbarItem title icon isActive msg dataCyValue =
+    li [ class "nav-item" ]
+        [ a
+            [ onClick msg
+            , class "nav-link link-with-icon"
+            , classList [ ( "active", isActive ) ]
+            , dataCy dataCyValue
             ]
-        , li [ class "nav-item" ]
-            [ a
-                [ onClick ShowFileImport
-                , class "nav-link link-with-icon"
-                , classList [ ( "active", not registryActive ) ]
-                , dataCy "km_import_nav_file"
-                ]
-                [ faSet "kmImport.fromFile" appState
-                , lx_ "navbar.fromFile" appState
-                ]
+            [ icon
+            , title
             ]
         ]
+
+
+viewNavbar : List (Html Msg) -> Html Msg
+viewNavbar items =
+    ul [ class "nav nav-tabs" ] items

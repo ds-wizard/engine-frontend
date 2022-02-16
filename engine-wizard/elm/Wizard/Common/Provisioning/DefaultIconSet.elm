@@ -84,6 +84,7 @@ iconSet =
                , ( "kmDetail.registryLink", "fas fa-external-link-alt" )
                , ( "kmImport.file", "fas fa-file" )
                , ( "kmImport.fromFile", "fas fa-upload" )
+               , ( "kmImport.fromOwl", "fas fa-project-diagram" )
                , ( "kmImport.fromRegistry", "fas fa-cloud-download-alt" )
                , ( "kms.upload", "fas fa-upload" )
                , ( "listing.actions", "fas fa-ellipsis-v" )
