@@ -18,6 +18,7 @@ module Shared.Setters exposing
     , setTemplate
     , setTemplates
     , setToken
+    , setUsage
     , setUser
     , setUsers
     )
@@ -116,6 +117,11 @@ setTemplates value record =
 setToken : a -> { b | token : a } -> { b | token : a }
 setToken value record =
     { record | token = value }
+
+
+setUsage : a -> { b | usage : a } -> { b | usage : a }
+setUsage value record =
+    { record | usage = value }
 
 
 setUser : a -> { b | user : a } -> { b | user : a }
