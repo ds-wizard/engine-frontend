@@ -15,6 +15,7 @@ type Route
     | SubmissionRoute
     | TemplateRoute
     | KnowledgeModelsRoute
+    | UsageRoute
 
 
 defaultRoute : Route

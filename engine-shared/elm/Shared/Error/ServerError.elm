@@ -159,6 +159,9 @@ messageToReadable appState message =
         "error.validation.tml_unsupported_version" ->
             Just <| lg "apiError.validation.tml_unsupported_version" appState
 
+        "error.service.app.limit_exceeded" ->
+            Just <| lgf "apiError.service.app.limit_exceeded" message.params appState
+
         "error.service.pkg.pkg_cant_be_deleted_because_it_is_used_by_some_other_entity" ->
             Just <| lg "apiError.service.pkg.pkg_cant_be_deleted_because_it_is_used_by_some_other_entity" appState
 

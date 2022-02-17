@@ -19,6 +19,7 @@ import Wizard.Settings.Registry.View
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.View
 import Wizard.Settings.Template.View
+import Wizard.Settings.Usage.View
 
 
 l_ : String -> AppState -> String
@@ -75,6 +76,10 @@ view route appState model =
                 KnowledgeModelsRoute ->
                     Html.map KnowledgeModelsMsg <|
                         Wizard.Settings.KnowledgeModels.View.view appState model.knowledgeModelsModel
+
+                UsageRoute ->
+                    Html.map UsageMsg <|
+                        Wizard.Settings.Usage.View.view appState model.usageModel
     in
     div [ class "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
@@ -93,6 +98,9 @@ navigation appState currentRoute =
 
         contentTitle =
             [ strong [] [ lx_ "navigation.title.content" appState ] ]
+
+        statisticsTitle =
+            [ strong [] [ lx_ "navigation.title.statistics" appState ] ]
     in
     div [ class "nav nav-pills flex-column" ]
         (systemTitle
@@ -101,6 +109,8 @@ navigation appState currentRoute =
             ++ List.map (navigationLink appState currentRoute) (navigationUserInterfaceLinks appState)
             ++ contentTitle
             ++ List.map (navigationLink appState currentRoute) (navigationContentLinks appState)
+            ++ statisticsTitle
+            ++ List.map (navigationLink appState currentRoute) (navigationStatisticsLinks appState)
         )
 
 
@@ -127,6 +137,11 @@ navigationContentLinks appState =
     , ( SubmissionRoute, l_ "navigation.submission" appState )
     , ( TemplateRoute, l_ "navigation.template" appState )
     ]
+
+
+navigationStatisticsLinks : AppState -> List ( Route, String )
+navigationStatisticsLinks appState =
+    [ ( UsageRoute, l_ "navigation.usage" appState ) ]
 
 
 navigationLink : AppState -> Route -> ( Route, String ) -> Html Msg

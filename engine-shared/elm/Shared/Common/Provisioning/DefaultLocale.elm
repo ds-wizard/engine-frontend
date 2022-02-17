@@ -4,6 +4,7 @@ module Shared.Common.Provisioning.DefaultLocale exposing (locale)
 locale : List ( String, String )
 locale =
     [ ( "_global.apiError.forbidden", "You do not have permission to view this page." )
+    , ( "_global.apiError.service.app.limit_exceeded", "Limit of %s reached (current: %s, limit: %s)." )
     , ( "_global.apiError.service.organization.required_hash_in_query_params", "A hash query param has to be provided." )
     , ( "_global.apiError.service.pb.pull_non_existing_pkg", "The Knowledge Model was not found in the Registry." )
     , ( "_global.apiError.service.pkg.highest_number_in_new_version", "New version has to be higher than the previous one." )

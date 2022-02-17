@@ -19,6 +19,7 @@ import Wizard.Settings.Registry.Update
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Update
 import Wizard.Settings.Template.Update
+import Wizard.Settings.Usage.Update
 
 
 fetchData : Route -> AppState -> Model -> Cmd Msg
@@ -62,6 +63,10 @@ fetchData route appState _ =
 
         KnowledgeModelsRoute ->
             genericFetch KnowledgeModelsMsg
+
+        UsageRoute ->
+            Cmd.map UsageMsg <|
+                Wizard.Settings.Usage.Update.fetchData appState
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -136,3 +141,10 @@ update wrapMsg msg appState model =
                     Wizard.Settings.KnowledgeModels.Update.update (wrapMsg << KnowledgeModelsMsg) knowledgeModelsMsg appState model.knowledgeModelsModel
             in
             ( { model | knowledgeModelsModel = knowledgeModelsModel }, cmd )
+
+        UsageMsg usageMsg ->
+            let
+                ( usageModel, cmd ) =
+                    Wizard.Settings.Usage.Update.update usageMsg appState model.usageModel
+            in
+            ( { model | usageModel = usageModel }, cmd )

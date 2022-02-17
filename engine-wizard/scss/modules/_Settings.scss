@@ -259,4 +259,18 @@
             }
         }
     }
+
+    .Usage {
+        .usage-table {
+            td {
+                vertical-align: middle;
+                white-space: nowrap;
+
+                .progress {
+                    width: 100%;
+                    min-width: 5rem;
+                }
+            }
+        }
+    }
 }
