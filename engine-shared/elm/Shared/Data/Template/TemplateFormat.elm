@@ -14,6 +14,7 @@ type alias TemplateFormat =
     , shortName : String
     , color : String
     , icon : String
+    , isPdf : Bool
     }
 
 
@@ -25,3 +26,4 @@ decoder =
         |> D.required "shortName" D.string
         |> D.required "color" D.string
         |> D.required "icon" D.string
+        |> D.required "isPdf" D.bool

@@ -9,15 +9,20 @@ import Json.Decode.Pipeline as D
 
 
 type alias FeatureConfig =
-    { clientCustomizationEnabled : Bool }
+    { clientCustomizationEnabled : Bool
+    , pdfOnlyEnabled : Bool
+    }
 
 
 default : FeatureConfig
 default =
-    { clientCustomizationEnabled = False }
+    { clientCustomizationEnabled = False
+    , pdfOnlyEnabled = False
+    }
 
 
 decoder : Decoder FeatureConfig
 decoder =
     D.succeed FeatureConfig
         |> D.required "clientCustomizationEnabled" D.bool
+        |> D.required "pdfOnlyEnabled" D.bool
