@@ -10,7 +10,7 @@ import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Template.TemplatePackage as TemplatePackage
 import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
@@ -179,6 +179,7 @@ sidePanel appState template =
     let
         sections =
             [ sidePanelKmInfo appState template
+            , sidePanelFormats appState template
             , sidePanelOtherVersions appState template
             , sidePanelOrganizationInfo appState template
             , sidePanelRegistryLink appState template
@@ -200,6 +201,24 @@ sidePanelKmInfo appState template =
             ]
     in
     Just ( lg "template" appState, list 4 8 <| templateInfoList )
+
+
+sidePanelFormats : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelFormats appState template =
+    let
+        formatView format =
+            li [] [ fa format.icon, text format.name ]
+
+        formats =
+            template.formats
+                |> List.sortBy .name
+                |> List.map formatView
+    in
+    if List.length formats > 0 then
+        Just ( lg "template.formats" appState, ul [ class "format-list" ] formats )
+
+    else
+        Nothing
 
 
 sidePanelOtherVersions : AppState -> TemplateDetail -> Maybe ( String, Html msg )

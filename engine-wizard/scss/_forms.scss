@@ -204,6 +204,13 @@ textarea {
             color: $primary;
             border-color: $primary;
         }
+
+        &.disabled {
+            cursor: default;
+            color: $gray-500;
+            background: $gray-100;
+            border-color: $gray-200;
+        }
     }
 
     .typehints {
