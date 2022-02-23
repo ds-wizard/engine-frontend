@@ -17,7 +17,7 @@ import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAc
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
 import Shared.Locale exposing (lg)
-import Shared.Utils exposing (getUuid)
+import Shared.Utils exposing (dispatch, getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
@@ -95,18 +95,25 @@ fetchSubrouteDataFromAfter wrapMsg appState model =
             ( model, Cmd.none )
 
 
-onUnload : Routes.Route -> Model -> Cmd msg
+onUnload : Routes.Route -> Model -> Cmd Msg
 onUnload newRoute model =
+    let
+        leaveCmd =
+            Cmd.batch
+                [ WebSocket.close model.websocket
+                , dispatch ResetModel
+                ]
+    in
     case newRoute of
         ProjectsRoute (DetailRoute uuid _) ->
             if uuid == model.uuid then
                 Cmd.none
 
             else
-                WebSocket.close model.websocket
+                leaveCmd
 
         _ ->
-            WebSocket.close model.websocket
+            leaveCmd
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -116,6 +123,9 @@ update wrapMsg msg appState model =
             ( appState.seed, m, c )
     in
     case msg of
+        ResetModel ->
+            withSeed ( { model | uuid = Uuid.nil }, Cmd.none )
+
         QuestionnaireMsg questionnaireMsg ->
             let
                 ( questionnaireSeed, newQuestionnaireModel, questionnaireCmd ) =

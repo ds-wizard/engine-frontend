@@ -55,7 +55,7 @@ fetchData model =
                         Wizard.KnowledgeModels.Update.fetchData route model.appState
 
                 Routes.ProjectsRoute route ->
-                    Cmd.map Wizard.Msgs.PlansMsg <|
+                    Cmd.map Wizard.Msgs.ProjectsMsg <|
                         Wizard.Projects.Update.fetchData route model.appState model.plansModel
 
                 Routes.PublicRoute route ->
@@ -97,7 +97,8 @@ onUnload newRoute model =
                 Wizard.KMEditor.Update.onUnload route newRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
-            Wizard.Projects.Update.onUnload route newRoute model.plansModel
+            Cmd.map ProjectsMsg <|
+                Wizard.Projects.Update.onUnload route newRoute model.plansModel
 
         _ ->
             Cmd.none
@@ -218,10 +219,10 @@ update msg model =
                 in
                 ( setSeed seed { model | kmPackagesModel = kmPackagesModel }, cmd )
 
-            Wizard.Msgs.PlansMsg plansMsg ->
+            Wizard.Msgs.ProjectsMsg plansMsg ->
                 let
                     ( seed, plansModel, cmd ) =
-                        Wizard.Projects.Update.update Wizard.Msgs.PlansMsg plansMsg model.appState model.plansModel
+                        Wizard.Projects.Update.update Wizard.Msgs.ProjectsMsg plansMsg model.appState model.plansModel
                 in
                 ( setSeed seed { model | plansModel = plansModel }, cmd )
 

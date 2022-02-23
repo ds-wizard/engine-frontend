@@ -275,13 +275,13 @@ projectDocumentsView _ _ =
 
 
 projectTodos : AppState -> QuestionnaireDetail -> Bool
-projectTodos =
-    QuestionnaireDetail.isEditor
+projectTodos appState questionnaire =
+    QuestionnaireDetail.isEditor appState questionnaire && not (QuestionnaireDetail.isMigrating questionnaire)
 
 
 projectVersionHitory : AppState -> QuestionnaireDetail -> Bool
-projectVersionHitory =
-    QuestionnaireDetail.isEditor
+projectVersionHitory appState questionnaire =
+    QuestionnaireDetail.isEditor appState questionnaire && not (QuestionnaireDetail.isMigrating questionnaire)
 
 
 projectSettings : AppState -> QuestionnaireDetail -> Bool

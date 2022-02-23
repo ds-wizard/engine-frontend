@@ -42,11 +42,12 @@ fetchData route appState model =
                 Wizard.Projects.Migration.Update.fetchData appState uuid
 
 
-onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Wizard.Msgs.Msg
+onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Msg
 onUnload route newRoute model =
     case route of
         DetailRoute _ _ ->
-            Wizard.Projects.Detail.Update.onUnload newRoute model.detailModel
+            Cmd.map DetailMsg <|
+                Wizard.Projects.Detail.Update.onUnload newRoute model.detailModel
 
         _ ->
             Cmd.none

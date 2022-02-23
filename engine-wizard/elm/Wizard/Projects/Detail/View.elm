@@ -289,6 +289,9 @@ viewProjectContent appState route model qm =
         isEditable =
             QuestionnaireDetail.isEditor appState qm.questionnaire
 
+        isMigrating =
+            QuestionnaireDetail.isMigrating qm.questionnaire
+
         isAuthenticated =
             Session.exists appState.session
 
@@ -302,7 +305,7 @@ viewProjectContent appState route model qm =
                     { feedbackEnabled = True
                     , todosEnabled = isEditable
                     , commentsEnabled = True
-                    , readonly = not isEditable
+                    , readonly = not isEditable || isMigrating
                     , toolbarEnabled = True
                     }
                 , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel

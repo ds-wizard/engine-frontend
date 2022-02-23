@@ -66,7 +66,7 @@ view model =
             Routes.ProjectsRoute route ->
                 model.plansModel
                     |> Wizard.Projects.View.view route model.appState
-                    |> Html.map PlansMsg
+                    |> Html.map ProjectsMsg
                     |> Layout.mixedApp model
 
             Routes.PublicRoute route ->
