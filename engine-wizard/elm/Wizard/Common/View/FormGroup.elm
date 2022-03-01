@@ -13,6 +13,7 @@ module Wizard.Common.View.FormGroup exposing
     , markdownEditor
     , optionalWrapper
     , password
+    , passwordWithStrength
     , plainGroup
     , resizableTextarea
     , richRadioGroup
@@ -38,10 +39,17 @@ import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError(..))
 import Shared.Html exposing (emptyNode, fa)
-import Shared.Locale exposing (lx)
+import Shared.Locale exposing (l, lx)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.PasswordBar as PasswordBar
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
+import Wizard.Common.View.Flash as Flash
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.Common.View.FormGroup"
 
 
 lx_ : String -> AppState -> Html msg
@@ -120,6 +128,23 @@ password =
     formGroup Input.passwordInput []
 
 
+passwordWithStrength : AppState -> Form FormError o -> String -> String -> Html Form.Msg
+passwordWithStrength appState form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, errorClass ) =
+            getErrors appState field labelText
+    in
+    div [ class "form-group" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , Input.passwordInput field [ class ("form-control " ++ errorClass), id fieldName, name fieldName ]
+        , PasswordBar.view (Maybe.withDefault "" field.value)
+        , error
+        ]
+
+
 {-| Helper for creating form group with select field.
 -}
 select : AppState -> List ( String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
@@ -182,20 +207,41 @@ formatRadioGroup appState options =
             let
                 buildOption : TemplateFormat -> Html Form.Msg
                 buildOption format =
-                    label [ class "export-link", classList [ ( "export-link-selected", state.value == Just (Uuid.toString format.uuid) ) ] ]
+                    let
+                        isDisabled =
+                            appState.config.feature.pdfOnlyEnabled && not format.isPdf
+                    in
+                    label
+                        [ class "export-link"
+                        , classList
+                            [ ( "export-link-selected", state.value == Just (Uuid.toString format.uuid) )
+                            , ( "disabled", isDisabled )
+                            ]
+                        ]
                         [ Html.input
                             [ value (Uuid.toString format.uuid)
                             , checked (state.value == Just (Uuid.toString format.uuid))
                             , type_ "radio"
                             , name "format"
                             , onCheck (\_ -> Input state.path Form.Text <| Field.String <| Uuid.toString format.uuid)
+                            , disabled isDisabled
                             ]
                             []
                         , fa format.icon
                         , text format.name
                         ]
+
+                pdfOnlyInfo =
+                    if appState.config.feature.pdfOnlyEnabled then
+                        Flash.info appState (l_ "formatRadioGroup.pdfOnly" appState)
+
+                    else
+                        emptyNode
             in
-            div [ class "export-formats" ] (List.map buildOption options)
+            div []
+                [ pdfOnlyInfo
+                , div [ class "export-formats" ] (List.map buildOption options)
+                ]
     in
     formGroup radioInput [] appState
 

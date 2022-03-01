@@ -7,6 +7,7 @@ import Html.Events exposing (onCheck, onClick)
 import Markdown
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
@@ -183,6 +184,14 @@ listingDescription appState document =
                 Nothing ->
                     emptyNode
 
+        fileSizeFragment =
+            case document.fileSize of
+                Just fileSize ->
+                    span [ class "fragment" ] [ text (ByteUnits.toReadable fileSize) ]
+
+                Nothing ->
+                    emptyNode
+
         ( icon, formatName ) =
             case Document.getFormat document of
                 Just format ->
@@ -193,6 +202,7 @@ listingDescription appState document =
     in
     span []
         [ span [ class "fragment" ] [ icon, text formatName ]
+        , fileSizeFragment
         , questionnaireLink
         ]
 
@@ -290,8 +300,8 @@ viewSubmission appState submission =
                         , faSet "_global.externalLink" appState
                         ]
 
-                ( SubmissionState.Error, _, Just errorText ) ->
-                    a [ onClick (SetSubmissionErrorModal (Just errorText)) ]
+                ( SubmissionState.Error, _, Just _ ) ->
+                    a [ onClick (SetSubmissionErrorModal (Just (Submission.getReturnedData submission))) ]
                         [ lx_ "submissions.errorLink" appState ]
 
                 _ ->
@@ -497,4 +507,4 @@ submissionErrorModal appState model =
             , dataCy = "submission-error"
             }
     in
-    Modal.simple modalConfig
+    Modal.simpleWithAttrs [ class "modal-submission-error" ] modalConfig

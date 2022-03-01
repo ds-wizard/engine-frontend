@@ -5,10 +5,11 @@ module Wizard.Common.View.Modal exposing
     , alert
     , confirm
     , simple
+    , simpleWithAttrs
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, button, div, h5, p, text)
+import Html exposing (Attribute, Html, button, div, h5, p, text)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
@@ -32,8 +33,13 @@ type alias SimpleConfig msg =
 
 
 simple : SimpleConfig msg -> Html msg
-simple cfg =
-    div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
+simple =
+    simpleWithAttrs []
+
+
+simpleWithAttrs : List (Attribute msg) -> SimpleConfig msg -> Html msg
+simpleWithAttrs attributes cfg =
+    div ([ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ] ++ attributes)
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
                 cfg.modalContent

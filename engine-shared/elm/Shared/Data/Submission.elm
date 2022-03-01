@@ -1,4 +1,4 @@
-module Shared.Data.Submission exposing (Submission, compare, decoder, visibleName)
+module Shared.Data.Submission exposing (Submission, compare, decoder, getReturnedData, visibleName)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -46,3 +46,14 @@ visibleName submission =
 compare : Submission -> Submission -> Order
 compare a b =
     Basics.compare (Time.posixToMillis b.updatedAt) (Time.posixToMillis a.updatedAt)
+
+
+getReturnedData : Submission -> String
+getReturnedData =
+    .returnedData
+        >> Maybe.withDefault ""
+        >> String.replace "Response Body: \"" "Response Body:\n\n"
+        >> String.slice 0 -1
+        >> String.replace "\\\\" "\\"
+        >> String.replace "\\n" "\n"
+        >> String.replace "\\\"" "\""

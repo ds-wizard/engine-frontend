@@ -210,6 +210,6 @@ passwordView appState model =
 passwordFormView : AppState -> Form FormError UserPasswordForm -> Html Form.Msg
 passwordFormView appState form =
     div []
-        [ FormGroup.password appState form "password" <| l_ "passwordForm.password" appState
+        [ FormGroup.passwordWithStrength appState form "password" <| l_ "passwordForm.password" appState
         , FormGroup.password appState form "passwordConfirmation" <| l_ "passwordForm.passwordConfirmation" appState
         ]

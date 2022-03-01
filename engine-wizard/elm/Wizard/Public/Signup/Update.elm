@@ -44,7 +44,7 @@ handleForm formMsg wrapMsg appState model =
         _ ->
             let
                 newModel =
-                    { model | form = Form.update SignupForm.validation formMsg model.form }
+                    { model | form = Form.update (SignupForm.validation appState) formMsg model.form }
             in
             ( newModel, Cmd.none )
 

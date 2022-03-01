@@ -10,6 +10,18 @@ $toolbar-height: 40px;
         }
     }
 
+    &.warning-enabled {
+        .questionnaire__body {
+            padding-top: 45px;
+        }
+    }
+
+    &__warning {
+        position: absolute;
+        width: 100%;
+        z-index: 10;
+    }
+
     &__body {
         display: flex;
         width: 100%;
@@ -729,7 +741,8 @@ $toolbar-height: 40px;
             label {
                 padding: 10px 15px;
                 margin: 0;
-                display: block;
+                display: flex;
+                align-items: baseline;
                 cursor: pointer;
 
                 .badges {

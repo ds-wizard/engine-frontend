@@ -18,6 +18,7 @@ import Shared.Utils exposing (dispatch, flip, stringToBool)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
@@ -71,8 +72,7 @@ update wrapMsg msg appState model =
             let
                 updateConfig =
                     { wrapMsg = wrapMsg << DeleteQuestionnaireModalMsg
-                    , deleteCompleteCmd =
-                        dispatch (wrapMsg <| ListingMsg ListingMsgs.Reload)
+                    , deleteCompleteCmd = cmdNavigate appState (Listing.toRouteAfterDelete Routes.projectIndexWithFilters model.questionnaires)
                     }
 
                 ( deleteModalModel, cmd ) =

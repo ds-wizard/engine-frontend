@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.Update exposing (fetchData, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
+import List.Extra as List
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch.BranchState as BranchState
@@ -132,15 +133,7 @@ update wrapMsg msg appState model =
             withSeed ( model, WebSocket.ping model.websocket )
 
         OnlineUserMsg index onlineUserMsg ->
-            let
-                updateUser i user =
-                    if i == index then
-                        OnlineUser.update onlineUserMsg user
-
-                    else
-                        user
-            in
-            withSeed ( { model | onlineUsers = List.indexedMap updateUser model.onlineUsers }, Cmd.none )
+            withSeed ( { model | onlineUsers = List.updateAt index (OnlineUser.update onlineUserMsg) model.onlineUsers }, Cmd.none )
 
         SavingMsg savingMsg ->
             withSeed ( { model | savingModel = PlanSaving.update savingMsg model.savingModel }, Cmd.none )

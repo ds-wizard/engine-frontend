@@ -1,6 +1,6 @@
 {
   "name": "engine-frontend",
-  "version": "3.8.1",
+  "version": "3.9.0",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
@@ -32,8 +32,8 @@
     "apply-locale:wizard": "COMPONENT=wizard node scripts/apply-locale.js"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "^10.2.1",
-    "css-loader": "^6.5.1",
+    "copy-webpack-plugin": "^10.2.4",
+    "css-loader": "^6.6.0",
     "css-minimizer-webpack-plugin": "^3.4.1",
     "elm": "^0.19.1-5",
     "elm-analyse": "^0.16.5",
@@ -44,18 +44,18 @@
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.5.3",
     "node-sass": "^7.0.1",
-    "sass-loader": "^12.4.0",
-    "terser-webpack-plugin": "^5.3.0",
-    "uglify-js": "^3.15.0",
-    "webpack": "^5.67.0",
+    "sass-loader": "^12.6.0",
+    "terser-webpack-plugin": "^5.3.1",
+    "uglify-js": "^3.15.1",
+    "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.7.3"
+    "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "axios": "^0.25.0",
+    "axios": "^0.26.0",
     "axios-retry": "^3.2.4",
     "bootstrap": "^4.6.0",
-    "chart.js": "^3.7.0"
+    "chart.js": "^3.7.1"
   }
 }

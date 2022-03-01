@@ -105,7 +105,7 @@ handlePasswordForm formMsg wrapMsg appState model =
         _ ->
             let
                 passwordForm =
-                    Form.update UserPasswordForm.validation formMsg model.passwordForm
+                    Form.update (UserPasswordForm.validation appState) formMsg model.passwordForm
             in
             ( { model | passwordForm = passwordForm }, Cmd.none )
 

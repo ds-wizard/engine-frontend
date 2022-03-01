@@ -8,6 +8,7 @@ import Markdown
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
 import Shared.Auth.Session as Session
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
@@ -171,6 +172,14 @@ listingDescription cfg _ document =
                 [ QuestionnaireVersionTag.version version
                 ]
 
+        fileSizeFragment =
+            case document.fileSize of
+                Just fileSize ->
+                    span [ class "fragment" ] [ text (ByteUnits.toReadable fileSize) ]
+
+                Nothing ->
+                    emptyNode
+
         versionFragment =
             document.questionnaireEventUuid
                 |> Maybe.andThen (QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire)
@@ -178,6 +187,7 @@ listingDescription cfg _ document =
     in
     span []
         [ span [ class "fragment" ] [ icon, text formatName ]
+        , fileSizeFragment
         , span [ class "fragment" ] [ text document.template.name ]
         , versionFragment
         ]
@@ -300,8 +310,8 @@ viewSubmission cfg appState submission =
                         , faSet "_global.externalLink" appState
                         ]
 
-                ( SubmissionState.Error, _, Just errorText ) ->
-                    a [ onClick (cfg.wrapMsg <| SetSubmissionErrorModal (Just errorText)) ]
+                ( SubmissionState.Error, _, Just _ ) ->
+                    a [ onClick (cfg.wrapMsg <| SetSubmissionErrorModal (Just (Submission.getReturnedData submission))) ]
                         [ lx_ "submissions.errorLink" appState ]
 
                 _ ->
@@ -507,4 +517,4 @@ submissionErrorModal cfg appState model =
             , dataCy = "submission-error"
             }
     in
-    Modal.simple modalConfig
+    Modal.simpleWithAttrs [ class "modal-submission-error" ] modalConfig

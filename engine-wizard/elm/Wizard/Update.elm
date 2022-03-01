@@ -55,7 +55,7 @@ fetchData model =
                         Wizard.KnowledgeModels.Update.fetchData route model.appState
 
                 Routes.ProjectsRoute route ->
-                    Cmd.map Wizard.Msgs.PlansMsg <|
+                    Cmd.map Wizard.Msgs.ProjectsMsg <|
                         Wizard.Projects.Update.fetchData route model.appState model.plansModel
 
                 Routes.PublicRoute route ->
@@ -81,7 +81,7 @@ fetchData model =
                 _ ->
                     Cmd.none
     in
-    Cmd.batch [ fetchCmd, Time.getTime ]
+    fetchCmd
 
 
 isGuarded : Model -> Maybe String
@@ -97,7 +97,8 @@ onUnload newRoute model =
                 Wizard.KMEditor.Update.onUnload route newRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
-            Wizard.Projects.Update.onUnload route newRoute model.plansModel
+            Cmd.map ProjectsMsg <|
+                Wizard.Projects.Update.onUnload route newRoute model.plansModel
 
         _ ->
             Cmd.none
@@ -105,147 +106,157 @@ onUnload newRoute model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Wizard.Msgs.OnUrlChange location ->
-            let
-                newRoute =
-                    parseLocation model.appState location
+    let
+        wrapGetTime ( m, cmd ) =
+            case msg of
+                Wizard.Msgs.OnTime _ ->
+                    ( m, cmd )
 
-                newModel =
-                    setRoute newRoute model
-                        |> initLocalModel
-            in
-            ( newModel, Cmd.batch [ onUnload newRoute model, fetchData newModel ] )
+                _ ->
+                    ( m, Cmd.batch [ Time.getTime, cmd ] )
+    in
+    wrapGetTime <|
+        case msg of
+            Wizard.Msgs.OnUrlChange location ->
+                let
+                    newRoute =
+                        parseLocation model.appState location
 
-        Wizard.Msgs.OnUrlRequest urlRequest ->
-            case urlRequest of
-                Browser.Internal url ->
-                    case isGuarded model of
-                        Just guardMsg ->
-                            ( model, Ports.alert guardMsg )
+                    newModel =
+                        setRoute newRoute model
+                            |> initLocalModel
+                in
+                ( newModel, Cmd.batch [ onUnload newRoute model, fetchData newModel ] )
 
-                        Nothing ->
-                            ( model, pushUrl model.appState.key (Url.toString url) )
+            Wizard.Msgs.OnUrlRequest urlRequest ->
+                case urlRequest of
+                    Browser.Internal url ->
+                        case isGuarded model of
+                            Just guardMsg ->
+                                ( model, Ports.alert guardMsg )
 
-                Browser.External url ->
-                    if url == "" then
-                        ( model, Cmd.none )
+                            Nothing ->
+                                ( model, pushUrl model.appState.key (Url.toString url) )
 
-                    else
-                        ( model, load url )
+                    Browser.External url ->
+                        if url == "" then
+                            ( model, Cmd.none )
 
-        Wizard.Msgs.OnTime time ->
-            ( { model | appState = AppState.setCurrentTime model.appState time }, Cmd.none )
+                        else
+                            ( model, load url )
 
-        Wizard.Msgs.OnTimeZone timeZone ->
-            ( { model | appState = AppState.setTimeZone model.appState timeZone }, Cmd.none )
+            Wizard.Msgs.OnTime time ->
+                ( { model | appState = AppState.setCurrentTime model.appState time }, Cmd.none )
 
-        Wizard.Msgs.AcceptCookies ->
-            ( { model | appState = AppState.acceptCookies model.appState }, Ports.acceptCookies () )
+            Wizard.Msgs.OnTimeZone timeZone ->
+                ( { model | appState = AppState.setTimeZone model.appState timeZone }, Cmd.none )
 
-        Wizard.Msgs.AuthMsg authMsg ->
-            Wizard.Auth.Update.update authMsg model
+            Wizard.Msgs.AcceptCookies ->
+                ( { model | appState = AppState.acceptCookies model.appState }, Ports.acceptCookies () )
 
-        Wizard.Msgs.SetSidebarCollapsed collapsed ->
-            let
-                newSession =
-                    Session.setSidebarCollapsed model.appState.session collapsed
+            Wizard.Msgs.AuthMsg authMsg ->
+                Wizard.Auth.Update.update authMsg model
 
-                newModel =
-                    setSession newSession model
-            in
-            ( newModel, Ports.storeSession <| Session.encode newSession )
+            Wizard.Msgs.SetSidebarCollapsed collapsed ->
+                let
+                    newSession =
+                        Session.setSidebarCollapsed model.appState.session collapsed
 
-        Wizard.Msgs.SetFullscreen fullscreen ->
-            let
-                newSession =
-                    Session.setFullscreen model.appState.session fullscreen
+                    newModel =
+                        setSession newSession model
+                in
+                ( newModel, Ports.storeSession <| Session.encode newSession )
 
-                newModel =
-                    setSession newSession model
-            in
-            ( newModel, Ports.storeSession <| Session.encode newSession )
+            Wizard.Msgs.SetFullscreen fullscreen ->
+                let
+                    newSession =
+                        Session.setFullscreen model.appState.session fullscreen
 
-        Wizard.Msgs.MenuMsg menuMsg ->
-            let
-                ( menuModel, cmd ) =
-                    Wizard.Common.Menu.Update.update Wizard.Msgs.MenuMsg menuMsg model.appState model.menuModel
-            in
-            ( { model | menuModel = menuModel }, cmd )
+                    newModel =
+                        setSession newSession model
+                in
+                ( newModel, Ports.storeSession <| Session.encode newSession )
 
-        Wizard.Msgs.AdminMsg adminMsg ->
-            let
-                ( adminModel, cmd ) =
-                    Wizard.Admin.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
-            in
-            ( { model | adminModel = adminModel }, cmd )
+            Wizard.Msgs.MenuMsg menuMsg ->
+                let
+                    ( menuModel, cmd ) =
+                        Wizard.Common.Menu.Update.update Wizard.Msgs.MenuMsg menuMsg model.appState model.menuModel
+                in
+                ( { model | menuModel = menuModel }, cmd )
 
-        Wizard.Msgs.DashboardMsg dashboardMsg ->
-            let
-                ( dashboardModel, cmd ) =
-                    Wizard.Dashboard.Update.update dashboardMsg model.appState model.dashboardModel
-            in
-            ( { model | dashboardModel = dashboardModel }, cmd )
+            Wizard.Msgs.AdminMsg adminMsg ->
+                let
+                    ( adminModel, cmd ) =
+                        Wizard.Admin.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
+                in
+                ( { model | adminModel = adminModel }, cmd )
 
-        Wizard.Msgs.DocumentsMsg documentsMsg ->
-            let
-                ( documentsModel, cmd ) =
-                    Wizard.Documents.Update.update Wizard.Msgs.DocumentsMsg documentsMsg model.appState model.documentsModel
-            in
-            ( { model | documentsModel = documentsModel }, cmd )
+            Wizard.Msgs.DashboardMsg dashboardMsg ->
+                let
+                    ( dashboardModel, cmd ) =
+                        Wizard.Dashboard.Update.update dashboardMsg model.appState model.dashboardModel
+                in
+                ( { model | dashboardModel = dashboardModel }, cmd )
 
-        Wizard.Msgs.KMEditorMsg kmEditorMsg ->
-            let
-                ( seed, kmEditorModel, cmd ) =
-                    Wizard.KMEditor.Update.update kmEditorMsg Wizard.Msgs.KMEditorMsg model.appState model.kmEditorModel
-            in
-            ( setSeed seed { model | kmEditorModel = kmEditorModel }, cmd )
+            Wizard.Msgs.DocumentsMsg documentsMsg ->
+                let
+                    ( documentsModel, cmd ) =
+                        Wizard.Documents.Update.update Wizard.Msgs.DocumentsMsg documentsMsg model.appState model.documentsModel
+                in
+                ( { model | documentsModel = documentsModel }, cmd )
 
-        Wizard.Msgs.KnowledgeModelsMsg kmPackagesMsg ->
-            let
-                ( seed, kmPackagesModel, cmd ) =
-                    Wizard.KnowledgeModels.Update.update kmPackagesMsg Wizard.Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
-            in
-            ( setSeed seed { model | kmPackagesModel = kmPackagesModel }, cmd )
+            Wizard.Msgs.KMEditorMsg kmEditorMsg ->
+                let
+                    ( seed, kmEditorModel, cmd ) =
+                        Wizard.KMEditor.Update.update kmEditorMsg Wizard.Msgs.KMEditorMsg model.appState model.kmEditorModel
+                in
+                ( setSeed seed { model | kmEditorModel = kmEditorModel }, cmd )
 
-        Wizard.Msgs.PlansMsg plansMsg ->
-            let
-                ( seed, plansModel, cmd ) =
-                    Wizard.Projects.Update.update Wizard.Msgs.PlansMsg plansMsg model.appState model.plansModel
-            in
-            ( setSeed seed { model | plansModel = plansModel }, cmd )
+            Wizard.Msgs.KnowledgeModelsMsg kmPackagesMsg ->
+                let
+                    ( seed, kmPackagesModel, cmd ) =
+                        Wizard.KnowledgeModels.Update.update kmPackagesMsg Wizard.Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
+                in
+                ( setSeed seed { model | kmPackagesModel = kmPackagesModel }, cmd )
 
-        Wizard.Msgs.PublicMsg publicMsg ->
-            let
-                ( publicModel, cmd ) =
-                    Wizard.Public.Update.update publicMsg Wizard.Msgs.PublicMsg model.appState model.publicModel
-            in
-            ( { model | publicModel = publicModel }, cmd )
+            Wizard.Msgs.ProjectsMsg plansMsg ->
+                let
+                    ( seed, plansModel, cmd ) =
+                        Wizard.Projects.Update.update Wizard.Msgs.ProjectsMsg plansMsg model.appState model.plansModel
+                in
+                ( setSeed seed { model | plansModel = plansModel }, cmd )
 
-        Wizard.Msgs.RegistryMsg registryMsg ->
-            let
-                ( registryModel, cmd ) =
-                    Wizard.Registry.Update.update registryMsg Wizard.Msgs.RegistryMsg model.appState model.registryModel
-            in
-            ( { model | registryModel = registryModel }, cmd )
+            Wizard.Msgs.PublicMsg publicMsg ->
+                let
+                    ( publicModel, cmd ) =
+                        Wizard.Public.Update.update publicMsg Wizard.Msgs.PublicMsg model.appState model.publicModel
+                in
+                ( { model | publicModel = publicModel }, cmd )
 
-        Wizard.Msgs.SettingsMsg settingsMsg ->
-            let
-                ( settingsModel, cmd ) =
-                    Wizard.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
-            in
-            ( { model | settingsModel = settingsModel }, cmd )
+            Wizard.Msgs.RegistryMsg registryMsg ->
+                let
+                    ( registryModel, cmd ) =
+                        Wizard.Registry.Update.update registryMsg Wizard.Msgs.RegistryMsg model.appState model.registryModel
+                in
+                ( { model | registryModel = registryModel }, cmd )
 
-        Wizard.Msgs.TemplatesMsg templatesMsg ->
-            let
-                ( templatesModel, cmd ) =
-                    Wizard.Templates.Update.update templatesMsg Wizard.Msgs.TemplatesMsg model.appState model.templatesModel
-            in
-            ( { model | templatesModel = templatesModel }, cmd )
+            Wizard.Msgs.SettingsMsg settingsMsg ->
+                let
+                    ( settingsModel, cmd ) =
+                        Wizard.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
+                in
+                ( { model | settingsModel = settingsModel }, cmd )
 
-        Wizard.Msgs.UsersMsg usersMsg ->
-            let
-                ( seed, users, cmd ) =
-                    Wizard.Users.Update.update usersMsg Wizard.Msgs.UsersMsg model.appState model.users
-            in
-            ( setSeed seed { model | users = users }, cmd )
+            Wizard.Msgs.TemplatesMsg templatesMsg ->
+                let
+                    ( templatesModel, cmd ) =
+                        Wizard.Templates.Update.update templatesMsg Wizard.Msgs.TemplatesMsg model.appState model.templatesModel
+                in
+                ( { model | templatesModel = templatesModel }, cmd )
+
+            Wizard.Msgs.UsersMsg usersMsg ->
+                let
+                    ( seed, users, cmd ) =
+                        Wizard.Users.Update.update usersMsg Wizard.Msgs.UsersMsg model.appState model.users
+                in
+                ( setSeed seed { model | users = users }, cmd )

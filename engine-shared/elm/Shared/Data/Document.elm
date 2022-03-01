@@ -30,6 +30,7 @@ type alias Document =
     , state : DocumentState
     , submissions : List Submission
     , creatorUuid : Maybe Uuid
+    , fileSize : Maybe Int
     }
 
 
@@ -53,6 +54,7 @@ decoder =
         |> D.required "state" DocumentState.decoder
         |> D.required "submissions" (D.list Submission.decoder)
         |> D.required "creatorUuid" (D.maybe Uuid.decoder)
+        |> D.required "fileSize" (D.maybe D.int)
 
 
 getFormat : Document -> Maybe TemplateFormat

@@ -2,6 +2,7 @@ module Wizard.Projects.Detail.Update exposing (fetchData, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -16,7 +17,7 @@ import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAc
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
 import Shared.Locale exposing (lg)
-import Shared.Utils exposing (getUuid)
+import Shared.Utils exposing (dispatch, getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
@@ -94,18 +95,25 @@ fetchSubrouteDataFromAfter wrapMsg appState model =
             ( model, Cmd.none )
 
 
-onUnload : Routes.Route -> Model -> Cmd msg
+onUnload : Routes.Route -> Model -> Cmd Msg
 onUnload newRoute model =
+    let
+        leaveCmd =
+            Cmd.batch
+                [ WebSocket.close model.websocket
+                , dispatch ResetModel
+                ]
+    in
     case newRoute of
         ProjectsRoute (DetailRoute uuid _) ->
             if uuid == model.uuid then
                 Cmd.none
 
             else
-                WebSocket.close model.websocket
+                leaveCmd
 
         _ ->
-            WebSocket.close model.websocket
+            leaveCmd
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -115,6 +123,9 @@ update wrapMsg msg appState model =
             ( appState.seed, m, c )
     in
     case msg of
+        ResetModel ->
+            withSeed ( { model | uuid = Uuid.nil }, Cmd.none )
+
         QuestionnaireMsg questionnaireMsg ->
             let
                 ( questionnaireSeed, newQuestionnaireModel, questionnaireCmd ) =
@@ -687,12 +698,4 @@ handleWebsocketMsg websocketMsg appState model =
 
 handleOnlineUserMsg : Int -> OnlineUser.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleOnlineUserMsg index msg model =
-    let
-        updateUser i user =
-            if i == index then
-                OnlineUser.update msg user
-
-            else
-                user
-    in
-    ( { model | onlineUsers = List.indexedMap updateUser model.onlineUsers }, Cmd.none )
+    ( { model | onlineUsers = List.updateAt index (OnlineUser.update msg) model.onlineUsers }, Cmd.none )

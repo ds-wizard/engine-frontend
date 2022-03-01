@@ -12,6 +12,7 @@ import Wizard.Settings.Registry.Models
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Models
 import Wizard.Settings.Template.Models
+import Wizard.Settings.Usage.Models
 
 
 type alias Model =
@@ -25,6 +26,7 @@ type alias Model =
     , documentSubmissionModel : Wizard.Settings.Submission.Models.Model
     , templateModel : Wizard.Settings.Template.Models.Model
     , knowledgeModelsModel : Wizard.Settings.KnowledgeModels.Models.Model
+    , usageModel : Wizard.Settings.Usage.Models.Model
     }
 
 
@@ -40,6 +42,7 @@ initialModel appState =
     , documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel
     , templateModel = Wizard.Settings.Template.Models.initialModel
     , knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel
+    , usageModel = Wizard.Settings.Usage.Models.initialModel
     }
 
 
@@ -75,3 +78,6 @@ initLocalModel appState route model =
 
         KnowledgeModelsRoute ->
             { model | knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel }
+
+        UsageRoute ->
+            { model | usageModel = Wizard.Settings.Usage.Models.initialModel }

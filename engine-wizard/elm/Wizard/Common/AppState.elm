@@ -23,6 +23,7 @@ import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
 import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
+import Wizard.Ports as Ports
 import Wizard.Projects.Detail.ProjectDetailRoute
 import Wizard.Projects.Routes
 import Wizard.Routes as Routes
@@ -47,11 +48,19 @@ type alias AppState =
     }
 
 
-init : D.Value -> Navigation.Key -> AppState
+init : D.Value -> Navigation.Key -> ( AppState, Cmd msg )
 init flagsValue key =
     let
         flagsResult =
             D.decodeValue Flags.decoder flagsValue
+
+        flagsCmd =
+            case flagsResult of
+                Ok _ ->
+                    Cmd.none
+
+                Err err ->
+                    Ports.consoleError (D.errorToString err)
 
         invalidSession =
             case flagsResult of
@@ -76,22 +85,24 @@ init flagsValue key =
                 , flags.provisioning
                 ]
     in
-    { route = Routes.NotFoundRoute
-    , seed = Random.initialSeed flags.seed
-    , session = Maybe.withDefault Session.init flags.session
-    , invalidSession = invalidSession
-    , key = key
-    , apiUrl = flags.apiUrl
-    , clientUrl = flags.clientUrl
-    , config = flags.config
-    , provisioning = provisioning
-    , valid = flags.success
-    , currentTime = Time.millisToPosix 0
-    , timeZone = Time.utc
-    , navigator = flags.navigator
-    , gaEnabled = flags.gaEnabled
-    , cookieConsent = flags.cookieConsent
-    }
+    ( { route = Routes.NotFoundRoute
+      , seed = Random.initialSeed flags.seed
+      , session = Maybe.withDefault Session.init flags.session
+      , invalidSession = invalidSession
+      , key = key
+      , apiUrl = flags.apiUrl
+      , clientUrl = flags.clientUrl
+      , config = flags.config
+      , provisioning = provisioning
+      , valid = flags.success
+      , currentTime = Time.millisToPosix 0
+      , timeZone = Time.utc
+      , navigator = flags.navigator
+      , gaEnabled = flags.gaEnabled
+      , cookieConsent = flags.cookieConsent
+      }
+    , flagsCmd
+    )
 
 
 setCurrentTime : AppState -> Time.Posix -> AppState

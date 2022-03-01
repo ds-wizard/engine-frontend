@@ -11,6 +11,7 @@
         "direct": {
             "Gizra/elm-debouncer": "2.0.0",
             "NoRedInk/elm-json-decode-pipeline": "1.0.1",
+            "SiriusStarr/elm-password-strength": "1.0.2",
             "avh4/elm-color": "1.0.0",
             "elm/browser": "1.0.2",
             "elm/core": "1.0.5",
@@ -35,7 +36,7 @@
             "kuon/elm-string-normalize": "1.0.2",
             "myrho/elm-round": "1.0.4",
             "noahzgordon/elm-color-extra": "1.0.2",
-            "rtfeldman/elm-iso8601-date-strings": "1.1.2",
+            "rtfeldman/elm-iso8601-date-strings": "1.1.4",
             "rundis/elm-bootstrap": "5.2.0",
             "simonh1000/elm-jwt": "7.1.1",
             "truqu/elm-md5": "1.1.0"

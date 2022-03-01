@@ -33,7 +33,7 @@ type Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
-    | PlansMsg Wizard.Projects.Msgs.Msg
+    | ProjectsMsg Wizard.Projects.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg
     | RegistryMsg Wizard.Registry.Msgs.Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg

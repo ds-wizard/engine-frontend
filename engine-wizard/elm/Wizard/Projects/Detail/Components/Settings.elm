@@ -471,7 +471,7 @@ knowledgeModel appState cfg =
         , linkTo appState
             (Wizard.Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute cfg.package.id))
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestion (PackageSuggestion.fromPackage cfg.package) ]
+            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package) ]
         , div [ class "text-right mt-3" ]
             [ linkTo appState
                 (Wizard.Routes.ProjectsRoute (ProjectsRoutes.CreateMigrationRoute cfg.questionnaire.uuid))

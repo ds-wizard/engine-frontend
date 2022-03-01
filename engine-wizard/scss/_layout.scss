@@ -46,6 +46,8 @@ body {
     left: 0;
     height: 100%;
     z-index: 20;
+    display: flex;
+    flex-direction: column;
 
     .logo {
         color: $side-navigation-title-color;
@@ -54,7 +56,6 @@ body {
         width: 100%;
         text-decoration: none;
         border-bottom: 1px solid $side-navigation-border-color;
-        height: 50px;
         justify-content: center;
         align-items: center;
         background: $side-navigation-logo-url;
@@ -62,6 +63,7 @@ body {
         background-size: $side-navigation-logo-width $side-navigation-logo-height;
         background-position: 15px center;
         padding-left: 15px + $side-navigation-logo-width;
+        flex: 0 0 50px;
 
         .logo-full {
             width: 100%;
@@ -72,14 +74,18 @@ body {
     }
 
     .menu {
-        padding: 0;
-        margin: 15px 0 0 0;
+        padding: 15px 0 5px 0;
+        margin: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex-grow: 1;
 
         li {
             padding: 1px 3px;
 
             a {
-                display: inline-block;
+                display: flex;
+                align-items: baseline;
                 width: 100%;
                 padding: 10px;
                 color: $side-navigation-link-color;
@@ -99,18 +105,14 @@ body {
 
                 .fa {
                     display: inline-block;
-                    width: 40px;
-                    text-align: center
+                    text-align: center;
+                    flex: 0 0 40px;
                 }
             }
         }
     }
 
     .profile-info {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
         border-top: 1px solid $side-navigation-border-color;
         padding-top: 5px;
 

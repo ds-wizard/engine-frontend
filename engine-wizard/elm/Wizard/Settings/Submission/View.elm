@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import List.Extra as List
 import Markdown
 import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
-import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
+import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
@@ -151,11 +151,7 @@ supportedFormatFormView appState templates prefix form index =
             ( "", "--" )
 
         templateOptions =
-            templates
-                |> List.uniqueBy (.id >> getOrganizationAndItemId)
-                |> List.sortBy .name
-                |> List.map (\t -> ( getOrganizationAndItemId t.id, t.name ))
-                |> (::) defaultOption
+            TemplateSuggestion.createOptions templates
 
         templateToTemplateVersionOptions template =
             templates

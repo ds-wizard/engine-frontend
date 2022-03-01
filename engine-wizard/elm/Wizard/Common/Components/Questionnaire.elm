@@ -75,7 +75,7 @@ import Wizard.Common.Components.Questionnaire.History as History
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Feature as Feature
-import Wizard.Common.Html exposing (illustratedMessage, resizableTextarea)
+import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
@@ -83,6 +83,8 @@ import Wizard.Common.View.Tag as Tag
 import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
+import Wizard.Projects.Routes exposing (Route(..))
+import Wizard.Routes as Routes
 
 
 l_ : String -> AppState -> String
@@ -734,9 +736,29 @@ view appState cfg ctx model =
 
             else
                 ( emptyNode, False )
+
+        migrationRoute =
+            Routes.ProjectsRoute << MigrationRoute
+
+        ( migrationWarning, migrationWarningEnabled ) =
+            case model.questionnaire.migrationUuid of
+                Just migrationUuid ->
+                    ( div [ class "questionnaire__warning" ]
+                        [ div [ class "alert alert-warning" ]
+                            (lh_ "migrationWarning"
+                                [ linkTo appState (migrationRoute migrationUuid) [] [ lx_ "migrationWarning.migration" appState ] ]
+                                appState
+                            )
+                        ]
+                    , True
+                    )
+
+                Nothing ->
+                    ( emptyNode, False )
     in
-    div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ) ] ]
+    div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ), ( "warning-enabled", migrationWarningEnabled ) ] ]
         [ toolbar
+        , migrationWarning
         , div [ class "questionnaire__body" ]
             [ Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model
             , Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model

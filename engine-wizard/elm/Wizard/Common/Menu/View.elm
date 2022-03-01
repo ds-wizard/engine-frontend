@@ -12,7 +12,7 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, a, code, div, em, img, p, span, table, tbody, td, text, th, thead, tr)
-import Html.Attributes exposing (class, colspan, href, src, target)
+import Html.Attributes exposing (class, colspan, href, id, src, target)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Shared.Data.User as User
@@ -195,13 +195,17 @@ viewAboutModalContent appState serverBuildInfo =
         swaggerUrl =
             appState.apiUrl ++ "/swagger-ui/"
 
+        extraClientInfo =
+            [ ( l_ "about.styleVersion" appState, code [ id "client-style-version" ] [] )
+            ]
+
         extraServerInfo =
             [ ( l_ "about.apiUrl" appState, a [ href appState.apiUrl, target "_blank" ] [ text appState.apiUrl ] )
             , ( l_ "about.apiDocs" appState, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
             ]
     in
     div []
-        [ viewBuildInfo appState (l_ "about.client" appState) BuildInfo.client []
+        [ viewBuildInfo appState (l_ "about.client" appState) BuildInfo.client extraClientInfo
         , viewBuildInfo appState (l_ "about.server" appState) serverBuildInfo extraServerInfo
         ]
 

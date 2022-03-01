@@ -235,7 +235,16 @@ handleFinalizeMigrationCompleted : AppState -> Model -> Result ApiError () -> ( 
 handleFinalizeMigrationCompleted appState model result =
     case result of
         Ok _ ->
-            ( model, cmdNavigate appState <| Routes.ProjectsRoute <| DetailRoute model.questionnaireUuid PlanDetailRoute.Questionnaire )
+            let
+                route =
+                    case model.questionnaireMigration of
+                        Success questionnaireMigration ->
+                            Routes.ProjectsRoute <| DetailRoute questionnaireMigration.oldQuestionnaire.uuid PlanDetailRoute.Questionnaire
+
+                        _ ->
+                            Routes.projectsIndex
+            in
+            ( model, cmdNavigate appState route )
 
         _ ->
             ( model, Cmd.none )

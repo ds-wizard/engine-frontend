@@ -287,30 +287,29 @@ annotations appState config =
     let
         updateKeyAt index newKey =
             let
-                update_ i annotation =
-                    if i == index then
-                        { key = newKey, value = annotation.value }
-
-                    else
-                        annotation
+                update_ annotation =
+                    { key = newKey, value = annotation.value }
             in
-            List.indexedMap update_ config.annotations
+            List.updateAt index update_ config.annotations
 
         updateValAt index newVal =
             let
-                update_ i annotation =
-                    if i == index then
-                        { key = annotation.key, value = newVal }
-
-                    else
-                        annotation
+                update_ annotation =
+                    { key = annotation.key, value = newVal }
             in
-            List.indexedMap update_ config.annotations
+            List.updateAt index update_ config.annotations
 
         removeAt index =
             List.removeAt index config.annotations
 
         viewAnnotation i annotation =
+            let
+                lines =
+                    annotation.value
+                        |> String.split "\n"
+                        |> List.length
+                        |> max 2
+            in
             ( "annotation." ++ String.fromInt i
             , div
                 [ class "annotations-editor-item"
@@ -333,6 +332,7 @@ annotations appState config =
                         , placeholder (lg "annotations.value" appState)
                         , dataCy "annotation_value"
                         , grammarlyAttribute
+                        , rows lines
                         ]
                         []
                     ]
@@ -567,15 +567,7 @@ props : AppState -> PropsInputConfig msg -> Html msg
 props appState config =
     let
         updateAt index newValue =
-            let
-                update_ i oldValue =
-                    if i == index then
-                        newValue
-
-                    else
-                        oldValue
-            in
-            List.indexedMap update_ config.values
+            List.updateAt index (always newValue) config.values
 
         removeAt index =
             List.removeAt index config.values
@@ -634,25 +626,17 @@ headers appState config =
     let
         updateKeyAt index newKey =
             let
-                update_ i header =
-                    if i == index then
-                        { key = newKey, value = header.value }
-
-                    else
-                        header
+                update_ header =
+                    { key = newKey, value = header.value }
             in
-            List.indexedMap update_ config.headers
+            List.updateAt index update_ config.headers
 
         updateValAt index newVal =
             let
-                update_ i annotation =
-                    if i == index then
-                        { key = annotation.key, value = newVal }
-
-                    else
-                        annotation
+                update_ annotation =
+                    { key = annotation.key, value = newVal }
             in
-            List.indexedMap update_ config.headers
+            List.updateAt index update_ config.headers
 
         removeAt index =
             List.removeAt index config.headers

@@ -41,3 +41,4 @@ type Msg
     | OpenRevertModal QuestionnaireEvent
     | AddToMyProjects
     | PutQuestionnaireComplete (Result ApiError ())
+    | ResetModel

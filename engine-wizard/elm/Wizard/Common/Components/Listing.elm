@@ -19,9 +19,11 @@ import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l)
+import Shared.Setters exposing (setDropdownState)
 import Shared.Undraw as Undraw
 import Time
 import Time.Distance exposing (inWordsWithConfig)
@@ -139,18 +141,7 @@ update : Msg -> Model a -> Model a
 update msg model =
     case msg of
         DropdownMsg index state ->
-            let
-                updateItem i item =
-                    if i == index then
-                        { item | dropdownState = state }
-
-                    else
-                        item
-
-                newItems =
-                    List.indexedMap updateItem model.items
-            in
-            { model | items = newItems }
+            { model | items = List.updateAt index (setDropdownState state) model.items }
 
 
 

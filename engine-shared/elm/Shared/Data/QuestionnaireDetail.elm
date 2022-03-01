@@ -19,6 +19,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , isAnonymousProject
     , isCurrentVersion
     , isEditor
+    , isMigrating
     , isOwner
     , isVersion
     , lastVisibleEvent
@@ -88,6 +89,7 @@ type alias QuestionnaireDetail =
     , labels : Dict String (List String)
     , events : List QuestionnaireEvent
     , versions : List QuestionnaireVersion
+    , migrationUuid : Maybe Uuid
     }
 
 
@@ -115,6 +117,7 @@ decoder =
         |> D.required "labels" (D.dict (D.list D.string))
         |> D.required "events" (D.list QuestionnaireEvent.decoder)
         |> D.required "versions" (D.list QuestionnaireVersion.decoder)
+        |> D.required "migrationUuid" (D.maybe Uuid.decoder)
 
 
 encode : QuestionnaireDetail -> E.Value
@@ -140,9 +143,14 @@ isAnonymousProject questionnaire =
     List.isEmpty questionnaire.permissions
 
 
+isMigrating : QuestionnaireDetail -> Bool
+isMigrating =
+    Maybe.isJust << .migrationUuid
+
+
 canComment : AbstractAppState a -> QuestionnaireDetail -> Bool
 canComment appState questionnaire =
-    hasPerm appState questionnaire QuestionnairePerm.comment
+    hasPerm appState questionnaire QuestionnairePerm.comment && not (isMigrating questionnaire)
 
 
 createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireDetail
@@ -168,6 +176,7 @@ createQuestionnaireDetail package km =
     , labels = Dict.empty
     , events = []
     , versions = []
+    , migrationUuid = Nothing
     }
 
 

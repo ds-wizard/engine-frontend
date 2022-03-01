@@ -51,6 +51,7 @@ jobs:
     - name: Build
       run: |
         ./scripts/build.sh
+        ./scripts/replace_version.sh
         docker build -t ${PRIVATE_IMAGE#/}:$GITHUB_SHA -f engine-$COMPONENT/docker/Dockerfile .
 
 # (4) -> Docker image tagging

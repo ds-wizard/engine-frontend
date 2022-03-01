@@ -5,6 +5,7 @@ import Wizard.Settings.LookAndFeel.Msgs
 import Wizard.Settings.Registry.Msgs
 import Wizard.Settings.Submission.Msgs
 import Wizard.Settings.Template.Msgs
+import Wizard.Settings.Usage.Msgs
 
 
 type Msg
@@ -18,3 +19,4 @@ type Msg
     | SubmissionMsg Wizard.Settings.Submission.Msgs.Msg
     | TemplateMsg Wizard.Settings.Template.Msgs.Msg
     | KnowledgeModelsMsg Wizard.Settings.Generic.Msgs.Msg
+    | UsageMsg Wizard.Settings.Usage.Msgs.Msg

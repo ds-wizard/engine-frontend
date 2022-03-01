@@ -56,27 +56,29 @@
                 &.checkbox-label {
                     display: inline-block;
                     width: 100%;
-
-                    input {
-                        outline: none;
-                        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-                        margin-top: 0.5rem;
-                    }
+                    margin-top: 7px;
                 }
             }
 
             .row {
-                margin-bottom: 0.25rem;
+                padding: 0.25rem 0;
+                @include border-radius(0.25rem);
+
+                &:hover {
+                    background-color: $gray-200;
+                }
             }
         }
 
         .input-table-header {
             margin-bottom: 0.25rem;
+            font-weight: bold;
         }
 
         .btn-secondary {
             margin-top: 0.5rem;
         }
+
     }
 
     .settings-img {
@@ -253,6 +255,20 @@
                     margin: 1rem 0 0 0;
                     font-size: 16px;
                     color: $secondary;
+                }
+            }
+        }
+    }
+
+    .Usage {
+        .usage-table {
+            td {
+                vertical-align: middle;
+                white-space: nowrap;
+
+                .progress {
+                    width: 100%;
+                    min-width: 5rem;
                 }
             }
         }

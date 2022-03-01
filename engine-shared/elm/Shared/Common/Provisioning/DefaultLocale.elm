@@ -4,6 +4,7 @@ module Shared.Common.Provisioning.DefaultLocale exposing (locale)
 locale : List ( String, String )
 locale =
     [ ( "_global.apiError.forbidden", "You do not have permission to view this page." )
+    , ( "_global.apiError.service.app.limit_exceeded", "Limit of %s reached (current: %s, limit: %s)." )
     , ( "_global.apiError.service.organization.required_hash_in_query_params", "A hash query param has to be provided." )
     , ( "_global.apiError.service.pb.pull_non_existing_pkg", "The Knowledge Model was not found in the Registry." )
     , ( "_global.apiError.service.pkg.highest_number_in_new_version", "New version has to be higher than the previous one." )
@@ -80,5 +81,7 @@ locale =
     , ( "Shared.Form.error.invalidString", "%s cannot be empty." )
     , ( "Shared.Form.error.invalidUuid", "This is not a valid UUID." )
     , ( "Shared.Form.error.smallerFloatThan", "This should not be less than %s." )
-    , ( "Shared.Form.Validate.projectTagError", "Comma (,) is not allowed in project tags" )
+    , ( "Shared.Form.Validate.projectTagError", "Comma (,) is not allowed in project tags." )
+    , ( "Shared.Form.Validate.passwordVeryWeak", "This is a very weak password." )
+    , ( "Shared.Form.Validate.passwordWeak", "This is a weak password." )
     ]

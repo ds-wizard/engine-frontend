@@ -2,6 +2,7 @@ module Shared.Setters exposing
     ( setBookReference
     , setBranches
     , setDocuments
+    , setDropdownState
     , setKnowledgeModel
     , setLevels
     , setMetrics
@@ -17,6 +18,7 @@ module Shared.Setters exposing
     , setTemplate
     , setTemplates
     , setToken
+    , setUsage
     , setUser
     , setUsers
     )
@@ -35,6 +37,11 @@ setBranches value record =
 setDocuments : a -> { b | documents : a } -> { b | documents : a }
 setDocuments value record =
     { record | documents = value }
+
+
+setDropdownState : a -> { b | dropdownState : a } -> { b | dropdownState : a }
+setDropdownState value record =
+    { record | dropdownState = value }
 
 
 setKnowledgeModel : a -> { b | knowledgeModel : a } -> { b | knowledgeModel : a }
@@ -110,6 +117,11 @@ setTemplates value record =
 setToken : a -> { b | token : a } -> { b | token : a }
 setToken value record =
     { record | token = value }
+
+
+setUsage : a -> { b | usage : a } -> { b | usage : a }
+setUsage value record =
+    { record | usage = value }
 
 
 setUser : a -> { b | user : a } -> { b | user : a }

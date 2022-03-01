@@ -6,6 +6,7 @@ module Wizard.Public.ForgottenPasswordConfirmation.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Public.Common.PasswordForm as PasswordForm exposing (PasswordForm)
 
 
@@ -17,9 +18,9 @@ type alias Model =
     }
 
 
-initialModel : String -> String -> Model
-initialModel userId hash =
-    { form = PasswordForm.initEmpty
+initialModel : AppState -> String -> String -> Model
+initialModel appState userId hash =
+    { form = PasswordForm.initEmpty appState
     , submitting = Unset
     , userId = userId
     , hash = hash
