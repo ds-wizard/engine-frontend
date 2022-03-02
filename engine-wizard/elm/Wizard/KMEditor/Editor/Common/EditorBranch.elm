@@ -50,6 +50,7 @@ import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData
 import Shared.Data.Event.EditTagEventData as EditTagEventData
 import Shared.Data.Event.MoveEventData exposing (MoveEventData)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Integration as Integration
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Locale exposing (lg)
@@ -233,7 +234,7 @@ getEditorName appState uuid editorBranch =
             getEditorName_ (String.withDefault (lg "tag.untitled" appState) << .name) KnowledgeModel.getTag
 
         getIntegrationName =
-            getEditorName_ (String.withDefault (lg "integration.untitled" appState) << .name) KnowledgeModel.getIntegration
+            getEditorName_ (String.withDefault (lg "integration.untitled" appState) << Integration.getName) KnowledgeModel.getIntegration
 
         getAnswerName =
             getEditorName_ (String.withDefault (lg "answer.untitled" appState) << .label) KnowledgeModel.getAnswer

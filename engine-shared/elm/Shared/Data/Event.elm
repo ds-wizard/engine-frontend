@@ -589,10 +589,10 @@ getEntityVisibleName event =
             EventField.getValue eventData.name
 
         AddIntegrationEvent eventData _ ->
-            Just eventData.name
+            AddIntegrationEventData.getEntityVisibleName eventData
 
         EditIntegrationEvent eventData _ ->
-            EventField.getValue eventData.name
+            EditIntegrationEventData.getEntityVisibleName eventData
 
         AddChapterEvent eventData _ ->
             Just eventData.title

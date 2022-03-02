@@ -37,6 +37,8 @@ textarea {
 
 .form-text-after {
     margin-top: -0.75rem;
+    position: relative;
+    z-index: 2;
 }
 
 .form-list-header {

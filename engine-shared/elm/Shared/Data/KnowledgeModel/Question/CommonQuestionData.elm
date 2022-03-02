@@ -1,7 +1,6 @@
 module Shared.Data.KnowledgeModel.Question.CommonQuestionData exposing
     ( CommonQuestionData
     , decoder
-    , new
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -18,19 +17,6 @@ type alias CommonQuestionData =
     , referenceUuids : List String
     , expertUuids : List String
     , annotations : List Annotation
-    }
-
-
-new : String -> CommonQuestionData
-new uuid =
-    { uuid = uuid
-    , title = "New question"
-    , text = Nothing
-    , requiredPhaseUuid = Nothing
-    , tagUuids = []
-    , referenceUuids = []
-    , expertUuids = []
-    , annotations = []
     }
 
 

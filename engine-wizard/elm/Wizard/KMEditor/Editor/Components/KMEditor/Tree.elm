@@ -11,7 +11,7 @@ import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
@@ -91,7 +91,7 @@ treeNodeKM props appState editorBranch =
 
         integrations =
             KnowledgeModel.getIntegrations knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+                |> EditorBranch.sortDeleted Integration.getUuid editorBranch
                 |> List.map (treeNodeIntegration props appState editorBranch)
 
         config =
@@ -170,9 +170,9 @@ treeNodeIntegration : ViewProps msg -> AppState -> EditorBranch -> Integration -
 treeNodeIntegration props appState editorBranch integration =
     let
         config =
-            { uuid = integration.uuid
+            { uuid = Integration.getUuid integration
             , icon = faSet "km.integration" appState
-            , label = integration.name
+            , label = Integration.getName integration
             , children = []
             , untitledLabel = lg "integration.untitled" appState
             }
