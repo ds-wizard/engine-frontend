@@ -75,7 +75,7 @@ import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.KnowledgeModelEntities as KnowledgeModelEntities exposing (KnowledgeModelEntities)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
@@ -158,7 +158,7 @@ insertExpert expert parentUuid km =
 insertIntegration : Integration -> String -> KnowledgeModel -> KnowledgeModel
 insertIntegration integration _ km =
     { km
-        | integrationUuids = km.integrationUuids ++ [ integration.uuid ]
+        | integrationUuids = km.integrationUuids ++ [ Integration.getUuid integration ]
         , entities = KnowledgeModelEntities.insertIntegration integration km.entities
     }
 
@@ -365,7 +365,7 @@ getTagName km uuid =
 
 getIntegrationName : KnowledgeModel -> String -> String
 getIntegrationName km uuid =
-    Maybe.unwrap "" .name <| getIntegration uuid km
+    Maybe.unwrap "" Integration.getName <| getIntegration uuid km
 
 
 getQuestionName : KnowledgeModel -> String -> String

@@ -1,106 +1,110 @@
 module Shared.Data.Event.EditIntegrationEventData exposing
-    ( EditIntegrationEventData
+    ( EditIntegrationEventData(..)
     , apply
     , decoder
     , encode
-    , init
+    , getEntityVisibleName
+    , getTypeString
+    , map
     )
 
 import Json.Decode as D exposing (Decoder)
-import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Data.Event.EventField as EventField exposing (EventField)
-import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
-import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
+import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData exposing (EditIntegrationApiEventData)
+import Shared.Data.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData exposing (EditIntegrationWidgetEventData)
+import Shared.Data.Event.EventField as EventField
+import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration(..))
 
 
-type alias EditIntegrationEventData =
-    { id : EventField String
-    , name : EventField String
-    , props : EventField (List String)
-    , logo : EventField String
-    , requestMethod : EventField String
-    , requestUrl : EventField String
-    , requestHeaders : EventField (List RequestHeader)
-    , requestBody : EventField String
-    , responseListField : EventField String
-    , responseItemId : EventField String
-    , responseItemTemplate : EventField String
-    , responseItemUrl : EventField String
-    , annotations : EventField (List Annotation)
-    }
+type EditIntegrationEventData
+    = EditIntegrationApiEvent EditIntegrationApiEventData
+    | EditIntegrationWidgetEvent EditIntegrationWidgetEventData
 
 
 decoder : Decoder EditIntegrationEventData
 decoder =
-    D.succeed EditIntegrationEventData
-        |> D.required "id" (EventField.decoder D.string)
-        |> D.required "name" (EventField.decoder D.string)
-        |> D.required "props" (EventField.decoder (D.list D.string))
-        |> D.required "logo" (EventField.decoder D.string)
-        |> D.required "requestMethod" (EventField.decoder D.string)
-        |> D.required "requestUrl" (EventField.decoder D.string)
-        |> D.required "requestHeaders" (EventField.decoder (D.list RequestHeader.decoder))
-        |> D.required "requestBody" (EventField.decoder D.string)
-        |> D.required "responseListField" (EventField.decoder D.string)
-        |> D.required "responseItemId" (EventField.decoder D.string)
-        |> D.required "responseItemTemplate" (EventField.decoder D.string)
-        |> D.required "responseItemUrl" (EventField.decoder D.string)
-        |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
+    D.field "integrationType" D.string
+        |> D.andThen
+            (\integrationType ->
+                case integrationType of
+                    "ApiIntegration" ->
+                        D.map EditIntegrationApiEvent EditIntegrationApiEventData.decoder
+
+                    "WidgetIntegration" ->
+                        D.map EditIntegrationWidgetEvent EditIntegrationWidgetEventData.decoder
+
+                    _ ->
+                        D.fail <| "Unknown integration type: " ++ integrationType
+            )
 
 
 encode : EditIntegrationEventData -> List ( String, E.Value )
 encode data =
-    [ ( "eventType", E.string "EditIntegrationEvent" )
-    , ( "id", EventField.encode E.string data.id )
-    , ( "name", EventField.encode E.string data.name )
-    , ( "props", EventField.encode (E.list E.string) data.props )
-    , ( "logo", EventField.encode E.string data.logo )
-    , ( "requestMethod", EventField.encode E.string data.requestMethod )
-    , ( "requestUrl", EventField.encode E.string data.requestUrl )
-    , ( "requestHeaders", EventField.encode (E.list RequestHeader.encode) data.requestHeaders )
-    , ( "requestBody", EventField.encode E.string data.requestBody )
-    , ( "responseListField", EventField.encode E.string data.responseListField )
-    , ( "responseItemId", EventField.encode E.string data.responseItemId )
-    , ( "responseItemTemplate", EventField.encode E.string data.responseItemTemplate )
-    , ( "responseItemUrl", EventField.encode E.string data.responseItemUrl )
-    , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
-    ]
-
-
-init : EditIntegrationEventData
-init =
-    { id = EventField.empty
-    , name = EventField.empty
-    , props = EventField.empty
-    , logo = EventField.empty
-    , requestMethod = EventField.empty
-    , requestUrl = EventField.empty
-    , requestHeaders = EventField.empty
-    , requestBody = EventField.empty
-    , responseListField = EventField.empty
-    , responseItemId = EventField.empty
-    , responseItemTemplate = EventField.empty
-    , responseItemUrl = EventField.empty
-    , annotations = EventField.empty
-    }
+    let
+        eventData =
+            map
+                EditIntegrationApiEventData.encode
+                EditIntegrationWidgetEventData.encode
+                data
+    in
+    ( "eventType", E.string "EditIntegrationEvent" ) :: eventData
 
 
 apply : EditIntegrationEventData -> Integration -> Integration
-apply eventData integration =
-    { integration
-        | id = EventField.getValueWithDefault eventData.id integration.id
-        , name = EventField.getValueWithDefault eventData.name integration.name
-        , props = EventField.getValueWithDefault eventData.props integration.props
-        , logo = EventField.getValueWithDefault eventData.logo integration.logo
-        , requestMethod = EventField.getValueWithDefault eventData.requestMethod integration.requestMethod
-        , requestUrl = EventField.getValueWithDefault eventData.requestUrl integration.requestUrl
-        , requestHeaders = EventField.getValueWithDefault eventData.requestHeaders integration.requestHeaders
-        , requestBody = EventField.getValueWithDefault eventData.requestBody integration.requestBody
-        , responseListField = EventField.getValueWithDefault eventData.responseListField integration.responseListField
-        , responseItemId = EventField.getValueWithDefault eventData.responseItemId integration.responseItemId
-        , responseItemTemplate = EventField.getValueWithDefault eventData.responseItemTemplate integration.responseItemTemplate
-        , responseItemUrl = EventField.getValueWithDefault eventData.responseItemUrl integration.responseItemUrl
-        , annotations = EventField.getValueWithDefault eventData.annotations integration.annotations
-    }
+apply event integration =
+    let
+        applyCommonData data =
+            { uuid = Integration.getUuid integration
+            , id = EventField.getValueWithDefault data.id (Integration.getId integration)
+            , name = EventField.getValueWithDefault data.name (Integration.getName integration)
+            , props = EventField.getValueWithDefault data.props (Integration.getProps integration)
+            , logo = EventField.getValueWithDefault data.logo (Integration.getLogo integration)
+            , itemUrl = EventField.getValueWithDefault data.itemUrl (Integration.getItemUrl integration)
+            , annotations = EventField.getValueWithDefault data.annotations (Integration.getAnnotations integration)
+            }
+    in
+    case event of
+        EditIntegrationApiEvent eventData ->
+            ApiIntegration
+                (applyCommonData eventData)
+                { requestMethod = EventField.getValueWithDefault eventData.requestMethod (Maybe.withDefault "" (Integration.getRequestMethod integration))
+                , requestUrl = EventField.getValueWithDefault eventData.requestUrl (Maybe.withDefault "" (Integration.getRequestUrl integration))
+                , requestHeaders = EventField.getValueWithDefault eventData.requestHeaders (Maybe.withDefault [] (Integration.getRequestHeaders integration))
+                , requestBody = EventField.getValueWithDefault eventData.requestBody (Maybe.withDefault "" (Integration.getRequestBody integration))
+                , requestEmptySearch = EventField.getValueWithDefault eventData.requestEmptySearch (Maybe.withDefault True (Integration.getRequestEmptySearch integration))
+                , responseListField = EventField.getValueWithDefault eventData.responseListField (Maybe.withDefault "" (Integration.getResponseListField integration))
+                , responseItemId = EventField.getValueWithDefault eventData.responseItemId (Maybe.withDefault "" (Integration.getResponseItemId integration))
+                , responseItemTemplate = EventField.getValueWithDefault eventData.responseItemTemplate (Maybe.withDefault "" (Integration.getResponseItemTemplate integration))
+                }
+
+        EditIntegrationWidgetEvent eventData ->
+            WidgetIntegration
+                (applyCommonData eventData)
+                { widgetUrl = EventField.getValueWithDefault eventData.widgetUrl (Maybe.withDefault "" (Integration.getWidgetUrl integration))
+                }
+
+
+getTypeString : EditIntegrationEventData -> String
+getTypeString =
+    map
+        (\_ -> "Api")
+        (\_ -> "Widget")
+
+
+getEntityVisibleName : EditIntegrationEventData -> Maybe String
+getEntityVisibleName =
+    EventField.getValue << map .name .name
+
+
+map :
+    (EditIntegrationApiEventData -> a)
+    -> (EditIntegrationWidgetEventData -> a)
+    -> EditIntegrationEventData
+    -> a
+map apiIntegration widgetIntegration integration =
+    case integration of
+        EditIntegrationApiEvent data ->
+            apiIntegration data
+
+        EditIntegrationWidgetEvent data ->
+            widgetIntegration data

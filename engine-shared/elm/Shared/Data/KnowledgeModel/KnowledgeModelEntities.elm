@@ -131,7 +131,7 @@ insertExpert expert questionUuid entities =
 
 insertIntegration : Integration -> KnowledgeModelEntities -> KnowledgeModelEntities
 insertIntegration integration entities =
-    { entities | integrations = Dict.insert integration.uuid integration entities.integrations }
+    { entities | integrations = Dict.insert (Integration.getUuid integration) integration entities.integrations }
 
 
 insertMetric : Metric -> KnowledgeModelEntities -> KnowledgeModelEntities

@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     ( AnnotationsInputConfig
+    , CheckboxInputConfig
     , InputConfig
     , MarkdownInputConfig
     , MetricsInputConfig
@@ -7,6 +8,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , SelectInputConfig
     , TagsInputConfig
     , annotations
+    , checkbox
     , color
     , headers
     , markdown
@@ -87,6 +89,38 @@ textarea config =
             , rows <| List.length <| String.split "\n" config.value
             ]
             []
+        ]
+
+
+
+-- Checkbox Input
+
+
+type alias CheckboxInputConfig msg =
+    { name : String
+    , label : String
+    , value : Bool
+    , onInput : Bool -> msg
+    }
+
+
+checkbox : CheckboxInputConfig msg -> Html msg
+checkbox config =
+    div [ class "form-group" ]
+        [ div [ class "form-check" ]
+            [ label [ class "form-check-label form-check-toggle" ]
+                [ input
+                    [ type_ "checkbox"
+                    , class "form-check-input"
+                    , name config.name
+                    , id config.name
+                    , checked config.value
+                    , onCheck config.onInput
+                    ]
+                    []
+                , span [] [ text config.label ]
+                ]
+            ]
         ]
 
 

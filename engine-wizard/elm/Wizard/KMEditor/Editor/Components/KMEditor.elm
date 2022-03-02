@@ -33,9 +33,11 @@ import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
 import Shared.Data.Event.EditChapterEventData as EditChapterEventData
 import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setDescription, setEmail, setExpertUuids, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setLabel, setLogo, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResponseItemId, setResponseItemTemplate, setResponseItemUrl, setResponseListField, setShortUuid, setTagUuids, setText, setTitle, setUrl, setValueType)
+import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setDescription, setEmail, setExpertUuids, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setLogo, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResponseItemId, setResponseItemTemplate, setResponseListField, setShortUuid, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
 import Shared.Data.Event.EditExpertEventData as EditExpertEventData
-import Shared.Data.Event.EditIntegrationEventData as EditIntegrationEventData
+import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
+import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
+import Shared.Data.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData
 import Shared.Data.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
 import Shared.Data.Event.EditMetricEventData as EditMetricEventData
 import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData
@@ -54,7 +56,7 @@ import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration(..))
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
@@ -907,14 +909,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
                         integrationUuidOptions =
                             KnowledgeModel.getIntegrations editorBranch.branch.knowledgeModel
-                                |> EditorBranch.filterDeletedWith .uuid editorBranch
-                                |> List.map (\integration -> ( integration.uuid, String.withDefault (lg "integration.untitled" appState) integration.name ))
+                                |> EditorBranch.filterDeletedWith Integration.getUuid editorBranch
+                                |> List.map (\integration -> ( Integration.getUuid integration, String.withDefault (lg "integration.untitled" appState) (Integration.getName integration) ))
                                 |> (::) ( Uuid.toString Uuid.nil, l_ "question.integration.select" appState )
 
                         selectedIntegrationProps =
                             Question.getIntegrationUuid question
                                 |> Maybe.andThen (flip KnowledgeModel.getIntegration editorBranch.branch.knowledgeModel)
-                                |> Maybe.map .props
+                                |> Maybe.unwrap [] Integration.getProps
 
                         onPropInput prop value =
                             let
@@ -925,27 +927,26 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             createTypeEditEvent setProps props
 
                         propsInput =
-                            case selectedIntegrationProps of
-                                Just props ->
-                                    let
-                                        propInput prop =
-                                            Input.string
-                                                { name = "props-" ++ prop
-                                                , label = prop
-                                                , value = String.fromMaybe <| Question.getPropValue prop question
-                                                , onInput = onPropInput prop
-                                                }
-                                    in
-                                    div [ class "form-group" ]
-                                        [ div [ class "card card-border-light" ]
-                                            [ div [ class "card-header" ] [ lx_ "question.integration.configuration" appState ]
-                                            , div [ class "card-body" ]
-                                                (List.map propInput props)
-                                            ]
+                            if List.length selectedIntegrationProps > 0 then
+                                let
+                                    propInput prop =
+                                        Input.string
+                                            { name = "props-" ++ prop
+                                            , label = prop
+                                            , value = String.fromMaybe <| Question.getPropValue prop question
+                                            , onInput = onPropInput prop
+                                            }
+                                in
+                                div [ class "form-group" ]
+                                    [ div [ class "card card-border-light" ]
+                                        [ div [ class "card-header" ] [ lx_ "question.integration.configuration" appState ]
+                                        , div [ class "card-body" ]
+                                            (List.map propInput selectedIntegrationProps)
                                         ]
+                                    ]
 
-                                Nothing ->
-                                    emptyNode
+                            else
+                                emptyNode
 
                         integrationUuidInput =
                             Input.select
@@ -1188,124 +1189,231 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
 viewIntegrationEditor : EditorConfig msg -> Integration -> Html msg
 viewIntegrationEditor { appState, wrapMsg, eventMsg, editorBranch } integration =
     let
-        parentUuid =
-            EditorBranch.getParentUuid integration.uuid editorBranch
+        integrationUuid =
+            Integration.getUuid integration
 
-        createEditEvent map value =
-            EditIntegrationEventData.init
-                |> map value
-                |> EditIntegrationEvent
-                |> eventMsg parentUuid (Just integration.uuid)
+        parentUuid =
+            EditorBranch.getParentUuid integrationUuid editorBranch
+
+        createEditEvent setApi setWidget value =
+            eventMsg parentUuid (Just integrationUuid) <|
+                EditIntegrationEvent <|
+                    case integration of
+                        ApiIntegration _ _ ->
+                            EditIntegrationApiEventData.init
+                                |> setApi value
+                                |> EditIntegrationApiEvent
+
+                        WidgetIntegration _ _ ->
+                            EditIntegrationWidgetEventData.init
+                                |> setWidget value
+                                |> EditIntegrationWidgetEvent
+
+        onTypeChange value =
+            eventMsg parentUuid (Just integrationUuid) <|
+                case value of
+                    "Widget" ->
+                        EditIntegrationWidgetEventData.init
+                            |> EditIntegrationWidgetEvent
+                            |> EditIntegrationEvent
+
+                    _ ->
+                        EditIntegrationApiEventData.init
+                            |> EditIntegrationApiEvent
+                            |> EditIntegrationEvent
+
+        integrationTypeOptions =
+            [ ( "Api", lg "integrationType.api" appState )
+            , ( "Widget", lg "integrationType.widget" appState )
+            ]
 
         integrationEditorTitle =
             editorTitle appState
                 { title = lg "integration" appState
-                , uuid = integration.uuid
+                , uuid = integrationUuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just IntegrationState
                 , mbMovingEntity = Nothing
+                }
+
+        typeInput =
+            Input.select
+                { name = "type"
+                , label = lg "integration.type" appState
+                , value = Integration.getTypeString integration
+                , options = integrationTypeOptions
+                , onChange = onTypeChange
                 }
 
         idInput =
             Input.string
                 { name = "id"
                 , label = lg "integration.id" appState
-                , value = integration.id
-                , onInput = createEditEvent setId
+                , value = Integration.getId integration
+                , onInput = createEditEvent setId setId
                 }
 
         nameInput =
             Input.string
                 { name = "name"
                 , label = lg "integration.name" appState
-                , value = integration.name
-                , onInput = createEditEvent setName
+                , value = Integration.getName integration
+                , onInput = createEditEvent setName setName
                 }
 
         logoUrlInput =
             Input.string
                 { name = "logo"
                 , label = lg "integration.logo" appState
-                , value = integration.logo
-                , onInput = createEditEvent setLogo
-                }
-
-        requestUrlInput =
-            Input.string
-                { name = "requestUrl"
-                , label = lg "integration.request.url" appState
-                , value = integration.requestUrl
-                , onInput = createEditEvent setRequestUrl
+                , value = Integration.getLogo integration
+                , onInput = createEditEvent setLogo setLogo
                 }
 
         propsInput =
             Input.props appState
                 { label = lg "integration.props" appState
-                , values = integration.props
-                , onChange = createEditEvent setProps
+                , values = Integration.getProps integration
+                , onChange = createEditEvent setProps setProps
                 }
 
-        requestMethodInput =
-            Input.select
-                { name = "requestMethod"
-                , label = lg "integration.request.method" appState
-                , value = integration.requestMethod
-                , options = httpMethodOptions
-                , onChange = createEditEvent setRequestMethod
-                }
-
-        requestHeadersInput =
-            Input.headers appState
-                { label = lg "integration.request.headers" appState
-                , headers = integration.requestHeaders
-                , onEdit = createEditEvent setRequestHeaders
-                }
-
-        requestBodyInput =
-            Input.textarea
-                { name = "requestBody"
-                , label = lg "integration.request.body" appState
-                , value = integration.requestBody
-                , onInput = createEditEvent setRequestBody
-                }
-
-        responseItemId =
+        itemUrl =
             Input.string
-                { name = "responseItemId"
-                , label = lg "integration.response.idField" appState
-                , value = integration.responseItemId
-                , onInput = createEditEvent setResponseItemId
-                }
-
-        responseListFieldInput =
-            Input.string
-                { name = "responseListField"
-                , label = lg "integration.response.listField" appState
-                , value = integration.responseListField
-                , onInput = createEditEvent setResponseListField
-                }
-
-        responseItemTemplate =
-            Input.textarea
-                { name = "responseItemTemplate"
-                , label = lg "integration.response.itemTemplate" appState
-                , value = integration.responseItemTemplate
-                , onInput = createEditEvent setResponseItemTemplate
-                }
-
-        responseItemUrl =
-            Input.string
-                { name = "responseItemUrl"
-                , label = lg "integration.response.itemUrl" appState
-                , value = integration.responseItemUrl
-                , onInput = createEditEvent setResponseItemUrl
+                { name = "itemUrl"
+                , label = lg "integration.itemUrl" appState
+                , value = Integration.getItemUrl integration
+                , onInput = createEditEvent setItemUrl setItemUrl
                 }
 
         annotationsInput =
             Input.annotations appState
-                { annotations = integration.annotations
-                , onEdit = createEditEvent setAnnotations
+                { annotations = Integration.getAnnotations integration
+                , onEdit = createEditEvent setAnnotations setAnnotations
                 }
+
+        integrationTypeInputs =
+            case integration of
+                ApiIntegration _ data ->
+                    let
+                        createTypeEditEvent map value =
+                            EditIntegrationApiEventData.init
+                                |> map value
+                                |> (EditIntegrationEvent << EditIntegrationApiEvent)
+                                |> eventMsg parentUuid (Just integrationUuid)
+
+                        requestUrlInput =
+                            Input.string
+                                { name = "requestUrl"
+                                , label = lg "integration.request.url" appState
+                                , value = data.requestUrl
+                                , onInput = createTypeEditEvent setRequestUrl
+                                }
+
+                        requestMethodInput =
+                            Input.select
+                                { name = "requestMethod"
+                                , label = lg "integration.request.method" appState
+                                , value = data.requestMethod
+                                , options = httpMethodOptions
+                                , onChange = createTypeEditEvent setRequestMethod
+                                }
+
+                        requestHeadersInput =
+                            Input.headers appState
+                                { label = lg "integration.request.headers" appState
+                                , headers = data.requestHeaders
+                                , onEdit = createTypeEditEvent setRequestHeaders
+                                }
+
+                        requestBodyInput =
+                            Input.textarea
+                                { name = "requestBody"
+                                , label = lg "integration.request.body" appState
+                                , value = data.requestBody
+                                , onInput = createTypeEditEvent setRequestBody
+                                }
+
+                        requestEmptySearchInput =
+                            Input.checkbox
+                                { name = "requestEmptySearch"
+                                , label = lg "integration.request.emptySearch" appState
+                                , value = data.requestEmptySearch
+                                , onInput = createTypeEditEvent setRequestEmptySearch
+                                }
+
+                        responseItemId =
+                            Input.string
+                                { name = "responseItemId"
+                                , label = lg "integration.response.idField" appState
+                                , value = data.responseItemId
+                                , onInput = createTypeEditEvent setResponseItemId
+                                }
+
+                        responseListFieldInput =
+                            Input.string
+                                { name = "responseListField"
+                                , label = lg "integration.response.listField" appState
+                                , value = data.responseListField
+                                , onInput = createTypeEditEvent setResponseListField
+                                }
+
+                        responseItemTemplate =
+                            Input.textarea
+                                { name = "responseItemTemplate"
+                                , label = lg "integration.response.itemTemplate" appState
+                                , value = data.responseItemTemplate
+                                , onInput = createTypeEditEvent setResponseItemTemplate
+                                }
+                    in
+                    [ div [ class "card card-border-light mb-5" ]
+                        [ div [ class "card-header" ] [ lgx "integration.request" appState ]
+                        , div [ class "card-body" ]
+                            [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integration.request.description" appState)
+                            , requestUrlInput
+                            , FormExtra.mdAfter (l_ "integration.requestUrl.description" appState)
+                            , requestMethodInput
+                            , requestHeadersInput
+                            , requestBodyInput
+                            , requestEmptySearchInput
+                            , FormExtra.mdAfter (l_ "integration.requestEmptySearch.description" appState)
+                            ]
+                        ]
+                    , div [ class "card card-border-light mb-5" ]
+                        [ div [ class "card-header" ] [ lgx "integration.response" appState ]
+                        , div [ class "card-body" ]
+                            [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integration.response.description" appState)
+                            , responseListFieldInput
+                            , FormExtra.mdAfter (l_ "integration.responseListField.description" appState)
+                            , responseItemId
+                            , FormExtra.mdAfter (l_ "integration.responseItemId.description" appState)
+                            , responseItemTemplate
+                            , FormExtra.mdAfter (l_ "integration.responseItemTemplate.description" appState)
+                            ]
+                        ]
+                    , itemUrl
+                    , FormExtra.mdAfter (l_ "integration.itemUrl.api.description" appState)
+                    ]
+
+                WidgetIntegration _ data ->
+                    let
+                        createTypeEditEvent map value =
+                            EditIntegrationWidgetEventData.init
+                                |> map value
+                                |> (EditIntegrationEvent << EditIntegrationWidgetEvent)
+                                |> eventMsg parentUuid (Just integrationUuid)
+
+                        widgetUrlInput =
+                            Input.string
+                                { name = "widgetUrl"
+                                , label = lg "integration.widgetUrl" appState
+                                , value = data.widgetUrl
+                                , onInput = createTypeEditEvent setWidgetUrl
+                                }
+                    in
+                    [ widgetUrlInput
+                    , FormExtra.mdAfter (l_ "integration.widgetUrl.description" appState)
+                    , itemUrl
+                    , FormExtra.mdAfter (l_ "integration.itemUrl.widget.description" appState)
+                    ]
 
         viewQuestionLink question =
             li []
@@ -1324,48 +1432,28 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, editorBranch } integration 
 
         questionsWithIntegration =
             KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
-                |> List.filter ((==) (Just integration.uuid) << Question.getIntegrationUuid)
+                |> List.filter ((==) (Just integrationUuid) << Question.getIntegrationUuid)
                 |> List.sortBy Question.getTitle
                 |> List.map viewQuestionLink
                 |> wrapQuestionsWithIntegration
     in
-    editor ("integration-" ++ integration.uuid)
-        [ integrationEditorTitle
-        , idInput
-        , FormExtra.mdAfter (l_ "integration.id.description" appState)
-        , nameInput
-        , FormExtra.mdAfter (l_ "integration.name.description" appState)
-        , logoUrlInput
-        , FormExtra.mdAfter (l_ "integration.logo.description" appState)
-        , div [ class "card card-border-light mb-5" ]
-            [ div [ class "card-header" ] [ lgx "integration.request" appState ]
-            , div [ class "card-body" ]
-                [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integration.request.description" appState)
-                , requestUrlInput
-                , FormExtra.mdAfter (l_ "integration.requestUrl.description" appState)
-                , propsInput
-                , requestMethodInput
-                , requestHeadersInput
-                , requestBodyInput
-                ]
-            ]
-        , div [ class "card card-border-light mb-5" ]
-            [ div [ class "card-header" ] [ lgx "integration.response" appState ]
-            , div [ class "card-body" ]
-                [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integration.response.description" appState)
-                , responseListFieldInput
-                , FormExtra.mdAfter (l_ "integration.responseListField.description" appState)
-                , responseItemId
-                , FormExtra.mdAfter (l_ "integration.responseItemId.description" appState)
-                , responseItemTemplate
-                , FormExtra.mdAfter (l_ "integration.responseItemTemplate.description" appState)
-                , responseItemUrl
-                , FormExtra.mdAfter (l_ "integration.responseItemUrl.description" appState)
-                ]
-            ]
-        , annotationsInput
-        , FormGroup.plainGroup questionsWithIntegration (l_ "integration.questions.label" appState)
-        ]
+    editor ("integration-" ++ integrationUuid)
+        ([ integrationEditorTitle
+         , typeInput
+         , idInput
+         , FormExtra.mdAfter (l_ "integration.id.description" appState)
+         , nameInput
+         , FormExtra.mdAfter (l_ "integration.name.description" appState)
+         , logoUrlInput
+         , FormExtra.mdAfter (l_ "integration.logo.description" appState)
+         , propsInput
+         , FormExtra.mdAfter (l_ "integration.props.description" appState)
+         ]
+            ++ integrationTypeInputs
+            ++ [ annotationsInput
+               , FormGroup.plainGroup questionsWithIntegration (l_ "integration.questions.label" appState)
+               ]
+        )
 
 
 viewAnswerEditor : EditorConfig msg -> Answer -> Html msg

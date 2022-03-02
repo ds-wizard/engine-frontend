@@ -2,6 +2,7 @@ module Shared.Data.KnowledgeModelTest exposing (knowledgeModelDecoderTest)
 
 import Dict
 import Shared.Data.KnowledgeModel as KnowledgeModel
+import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
 import Test exposing (..)
 import TestUtils exposing (expectDecoder)
 import Uuid
@@ -221,19 +222,21 @@ knowledgeModelDecoderTest =
                                 "references": {},
                                 "integrations": {
                                     "aae37504-aec6-4be8-b703-5bcb3502f3e6": {
+                                        "integrationType": "ApiIntegration",
                                         "uuid": "aae37504-aec6-4be8-b703-5bcb3502f3e6",
                                         "id": "service",
                                         "name": "Service",
                                         "props": ["kind", "category"],
                                         "logo": "data:image/png;base64,...",
+                                        "itemUrl": "http://example.com/${id}",
                                         "requestMethod": "GET",
                                         "requestUrl": "/",
                                         "requestHeaders": [{"key": "X_USER", "value": "user"}],
                                         "requestBody": "{}",
+                                        "requestEmptySearch": true,
                                         "responseListField": "items",
                                         "responseItemId": "{{id}}",
                                         "responseItemTemplate": "{{title}}",
-                                        "responseItemUrl": "http://example.com/${id}",
                                         "annotations": []
                                     }
                                 },
@@ -262,21 +265,24 @@ knowledgeModelDecoderTest =
                             , integrations =
                                 Dict.fromList
                                     [ ( "aae37504-aec6-4be8-b703-5bcb3502f3e6"
-                                      , { uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
-                                        , id = "service"
-                                        , name = "Service"
-                                        , props = [ "kind", "category" ]
-                                        , logo = "data:image/png;base64,..."
-                                        , requestMethod = "GET"
-                                        , requestUrl = "/"
-                                        , requestHeaders = [ { key = "X_USER", value = "user" } ]
-                                        , requestBody = "{}"
-                                        , responseListField = "items"
-                                        , responseItemId = "{{id}}"
-                                        , responseItemTemplate = "{{title}}"
-                                        , responseItemUrl = "http://example.com/${id}"
-                                        , annotations = []
-                                        }
+                                      , ApiIntegration
+                                            { uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
+                                            , id = "service"
+                                            , name = "Service"
+                                            , props = [ "kind", "category" ]
+                                            , logo = "data:image/png;base64,..."
+                                            , itemUrl = "http://example.com/${id}"
+                                            , annotations = []
+                                            }
+                                            { requestMethod = "GET"
+                                            , requestUrl = "/"
+                                            , requestHeaders = [ { key = "X_USER", value = "user" } ]
+                                            , requestBody = "{}"
+                                            , requestEmptySearch = True
+                                            , responseListField = "items"
+                                            , responseItemId = "{{id}}"
+                                            , responseItemTemplate = "{{title}}"
+                                            }
                                       )
                                     ]
                             , tags = Dict.empty

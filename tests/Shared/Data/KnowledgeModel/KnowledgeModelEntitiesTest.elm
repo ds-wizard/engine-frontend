@@ -1,6 +1,7 @@
 module Shared.Data.KnowledgeModel.KnowledgeModelEntitiesTest exposing (knowledgeModelEntitiesDecoderTest)
 
 import Dict
+import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
 import Shared.Data.KnowledgeModel.KnowledgeModelEntities as KnowledgeModelEntities
 import Shared.Data.KnowledgeModel.Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Reference exposing (Reference(..))
@@ -373,19 +374,21 @@ knowledgeModelEntitiesDecoderTest =
                             "references": {},
                             "integrations": {
                                 "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9": {
+                                    "integrationType": "ApiIntegration",
                                     "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
                                     "id": "service",
                                     "name": "Service",
                                     "props": ["kind", "category"],
                                     "logo": "data:image/png;base64,...",
+                                    "itemUrl": "http://example.com/${id}",
                                     "requestMethod": "GET",
                                     "requestUrl": "/",
                                     "requestHeaders": [{"key": "X_USER", "value": "user"}],
                                     "requestBody": "{}",
+                                    "requestEmptySearch": true,
                                     "responseListField": "",
                                     "responseItemId": "{{id}}",
                                     "responseItemTemplate": "{{title}}",
-                                    "responseItemUrl": "http://example.com/${id}",
                                     "annotations": []
                                 }
                             },
@@ -405,21 +408,24 @@ knowledgeModelEntitiesDecoderTest =
                         , integrations =
                             Dict.fromList
                                 [ ( "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
-                                  , { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
-                                    , id = "service"
-                                    , name = "Service"
-                                    , props = [ "kind", "category" ]
-                                    , logo = "data:image/png;base64,..."
-                                    , requestMethod = "GET"
-                                    , requestUrl = "/"
-                                    , requestHeaders = [ { key = "X_USER", value = "user" } ]
-                                    , requestBody = "{}"
-                                    , responseListField = ""
-                                    , responseItemId = "{{id}}"
-                                    , responseItemTemplate = "{{title}}"
-                                    , responseItemUrl = "http://example.com/${id}"
-                                    , annotations = []
-                                    }
+                                  , ApiIntegration
+                                        { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
+                                        , id = "service"
+                                        , name = "Service"
+                                        , props = [ "kind", "category" ]
+                                        , logo = "data:image/png;base64,..."
+                                        , itemUrl = "http://example.com/${id}"
+                                        , annotations = []
+                                        }
+                                        { requestMethod = "GET"
+                                        , requestUrl = "/"
+                                        , requestHeaders = [ { key = "X_USER", value = "user" } ]
+                                        , requestBody = "{}"
+                                        , requestEmptySearch = True
+                                        , responseListField = ""
+                                        , responseItemId = "{{id}}"
+                                        , responseItemTemplate = "{{title}}"
+                                        }
                                   )
                                 ]
                         , tags = Dict.empty
