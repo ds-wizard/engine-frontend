@@ -22,7 +22,7 @@ jobs:
       TAG_LATEST: latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # (1) -> Preparations
       - name: Setup Node.js ${{ matrix.node-version }}
