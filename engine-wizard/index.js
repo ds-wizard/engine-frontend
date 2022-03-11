@@ -67,7 +67,7 @@ function localProvisioning() {
 }
 
 function bootstrapErrorHTML(errorCode) {
-    const message = errorCode ? 'Server responded with an error code ' + errorCode + '.' : 'Configuration cannot be loaded due to server unavailable.'
+    const message = errorCode ? (errorCode === 423 ? 'The application is not active.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
     return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>Bootstrap Error</h1><p>' + message + '<br>Please, contact the administrator.</p></div></div>'
 }
 
