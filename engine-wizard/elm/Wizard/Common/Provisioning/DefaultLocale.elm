@@ -611,6 +611,7 @@ locale =
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.name.description", "A name visible everywhere else in the KM Editor, such as when choosing the integration for a question." )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.logo.description", "Logo is displayed next to the link to the selected item in questionnaires. It can be either URL or base64 image." )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.props.description", "Props can be used to parametrize the integration for each question. Use this to define the props whose value can be filled on the questions using this integration. The props can then be used in the URL configuration. For example, if you define prop named *type*, you can use it as `${type}`, such as *ht&#8203;tps://example.com/${type}*." )
+               , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.quickSetup", "Quick setup" )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.questions.label", "Questions using this integration" )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.questions.noQuestions", "No questions" )
                , ( "Wizard.KMEditor.Editor.Components.KMEditor.integration.request.description", "Use this section to configure the search request. The service you want to integrate has to provide a search HTTP API where you send a search string and it returns a JSON with found items." )

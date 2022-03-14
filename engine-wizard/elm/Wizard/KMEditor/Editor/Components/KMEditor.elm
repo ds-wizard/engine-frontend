@@ -9,8 +9,8 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
     )
 
 import Dict exposing (Dict)
-import Html exposing (Html, a, button, div, h3, h5, i, label, li, small, text, ul)
-import Html.Attributes exposing (class, disabled, id, title)
+import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, span, strong, text, ul)
+import Html.Attributes exposing (class, disabled, id, src, title)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Maybe.Extra as Maybe
@@ -50,6 +50,7 @@ import Shared.Data.Event.EditReferenceEventData exposing (EditReferenceEventData
 import Shared.Data.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData
 import Shared.Data.Event.EditReferenceURLEventData as EditReferenceURLEventData
 import Shared.Data.Event.EditTagEventData as EditTagEventData
+import Shared.Data.Event.EventField as EventField
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
@@ -268,8 +269,8 @@ type alias EventMsg msg =
     String -> Maybe String -> (CommonEventData -> Event) -> msg
 
 
-view : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> EditorBranch -> Html msg
-view appState wrapMsg eventMsg model editorBranch =
+view : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> List Integration -> EditorBranch -> Html msg
+view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
     let
         ( expandIcon, expandMsg ) =
             if AppState.isFullscreen appState then
@@ -297,7 +298,7 @@ view appState wrapMsg eventMsg model editorBranch =
             ]
         , SplitPane.view splitPaneConfig
             (Tree.view treeViewProps appState editorBranch)
-            (viewEditor appState wrapMsg eventMsg model editorBranch)
+            (viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch)
             model.splitPane
         , deleteModal appState wrapMsg eventMsg editorBranch model.deleteModalState
         , moveModal appState wrapMsg eventMsg editorBranch model.moveModalState
@@ -310,11 +311,12 @@ type alias EditorConfig msg =
     , eventMsg : EventMsg msg
     , model : Model
     , editorBranch : EditorBranch
+    , integrationPrefabs : List Integration
     }
 
 
-viewEditor : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> EditorBranch -> Html msg
-viewEditor appState wrapMsg eventMsg model editorBranch =
+viewEditor : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> List Integration -> EditorBranch -> Html msg
+viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch =
     let
         km =
             editorBranch.branch.knowledgeModel
@@ -328,6 +330,7 @@ viewEditor appState wrapMsg eventMsg model editorBranch =
             , eventMsg = eventMsg
             , model = model
             , editorBranch = editorBranch
+            , integrationPrefabs = integrationPrefabs
             }
 
         kmEditor =
@@ -1187,7 +1190,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
 
 
 viewIntegrationEditor : EditorConfig msg -> Integration -> Html msg
-viewIntegrationEditor { appState, wrapMsg, eventMsg, editorBranch } integration =
+viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorBranch } integration =
     let
         integrationUuid =
             Integration.getUuid integration
@@ -1208,6 +1211,39 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, editorBranch } integration 
                             EditIntegrationWidgetEventData.init
                                 |> setWidget value
                                 |> EditIntegrationWidgetEvent
+
+        createEditEventFromPrefab integrationPrefab =
+            eventMsg parentUuid (Just integrationUuid) <|
+                EditIntegrationEvent <|
+                    case integrationPrefab of
+                        ApiIntegration commonData apiData ->
+                            EditIntegrationApiEvent
+                                { id = EventField.create commonData.id True
+                                , name = EventField.create commonData.name True
+                                , props = EventField.create commonData.props True
+                                , logo = EventField.create commonData.logo True
+                                , itemUrl = EventField.create commonData.itemUrl True
+                                , annotations = EventField.create commonData.annotations True
+                                , requestMethod = EventField.create apiData.requestMethod True
+                                , requestUrl = EventField.create apiData.requestUrl True
+                                , requestHeaders = EventField.create apiData.requestHeaders True
+                                , requestBody = EventField.create apiData.requestBody True
+                                , requestEmptySearch = EventField.create apiData.requestEmptySearch True
+                                , responseListField = EventField.create apiData.responseListField True
+                                , responseItemId = EventField.create apiData.responseItemId True
+                                , responseItemTemplate = EventField.create apiData.responseItemTemplate True
+                                }
+
+                        WidgetIntegration commonData widgetData ->
+                            EditIntegrationWidgetEvent
+                                { id = EventField.create commonData.id True
+                                , name = EventField.create commonData.name True
+                                , props = EventField.create commonData.props True
+                                , logo = EventField.create commonData.logo True
+                                , itemUrl = EventField.create commonData.itemUrl True
+                                , annotations = EventField.create commonData.annotations True
+                                , widgetUrl = EventField.create widgetData.widgetUrl True
+                                }
 
         onTypeChange value =
             eventMsg parentUuid (Just integrationUuid) <|
@@ -1436,9 +1472,40 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, editorBranch } integration 
                 |> List.sortBy Question.getTitle
                 |> List.map viewQuestionLink
                 |> wrapQuestionsWithIntegration
+
+        prefabsView =
+            if (not << List.isEmpty) integrationPrefabs && EditorBranch.isEmptyIntegrationEditorUuid integrationUuid editorBranch then
+                let
+                    viewLogo i =
+                        let
+                            logo =
+                                Integration.getLogo i
+                        in
+                        if String.isEmpty logo then
+                            faSet "km.integration" appState
+
+                        else
+                            img [ src logo ] []
+
+                    viewIntegrationButton i =
+                        li []
+                            [ a [ onClick (createEditEventFromPrefab i) ]
+                                [ viewLogo i
+                                , span [] [ text (Integration.getName i) ]
+                                ]
+                            ]
+                in
+                div [ class "prefab-selection" ]
+                    [ strong [] [ lx_ "integration.quickSetup" appState ]
+                    , ul [] (List.map viewIntegrationButton <| List.sortBy Integration.getName integrationPrefabs)
+                    ]
+
+            else
+                emptyNode
     in
     editor ("integration-" ++ integrationUuid)
         ([ integrationEditorTitle
+         , prefabsView
          , typeInput
          , idInput
          , FormExtra.mdAfter (l_ "integration.id.description" appState)

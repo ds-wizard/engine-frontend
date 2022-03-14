@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.View exposing (view)
 
+import ActionResult
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -225,7 +226,7 @@ viewKMEditorContent : AppState -> KMEditorRoute -> Model -> EditorBranch -> Html
 viewKMEditorContent appState route model editorBranch =
     case route of
         KMEditorRoute.Edit _ ->
-            KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel editorBranch
+            KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) editorBranch
 
         KMEditorRoute.QuestionTags ->
             TagEditor.view appState TagEditorMsg EventMsg editorBranch model.tagEditorModel

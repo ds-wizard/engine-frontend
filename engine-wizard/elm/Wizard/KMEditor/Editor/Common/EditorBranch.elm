@@ -13,6 +13,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     , isAdded
     , isDeleted
     , isEdited
+    , isEmptyIntegrationEditorUuid
     , setActiveEditor
     , sortDeleted
     , treeCollapseAll
@@ -24,6 +25,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
 import Dict
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Set exposing (Set)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData
@@ -68,6 +70,7 @@ type alias EditorBranch =
     , addedUuids : List String
     , editedUuids : List String
     , deletedUuids : List String
+    , emptyIntegrationEditorUuids : Set String
     }
 
 
@@ -85,6 +88,7 @@ init branch mbEditorUuid =
             , addedUuids = []
             , editedUuids = []
             , deletedUuids = []
+            , emptyIntegrationEditorUuids = Set.empty
             }
     in
     setActiveEditor (Maybe.map Uuid.toString mbEditorUuid) <|
@@ -422,6 +426,21 @@ isAdded uuid editorBranch =
     List.member uuid editorBranch.addedUuids && not (isDeleted uuid editorBranch)
 
 
+addEmptyIntegrationEditorUuid : String -> EditorBranch -> EditorBranch
+addEmptyIntegrationEditorUuid uuid editorBranch =
+    { editorBranch | emptyIntegrationEditorUuids = Set.insert uuid editorBranch.emptyIntegrationEditorUuids }
+
+
+removeEmptyIntegrationEditorUuid : String -> EditorBranch -> EditorBranch
+removeEmptyIntegrationEditorUuid uuid editorBranch =
+    { editorBranch | emptyIntegrationEditorUuids = Set.remove uuid editorBranch.emptyIntegrationEditorUuids }
+
+
+isEmptyIntegrationEditorUuid : String -> EditorBranch -> Bool
+isEmptyIntegrationEditorUuid uuid editorBranch =
+    Set.member uuid editorBranch.emptyIntegrationEditorUuids
+
+
 applyEvent : Bool -> Event -> EditorBranch -> EditorBranch
 applyEvent local event originalEditorBranch =
     let
@@ -470,8 +489,11 @@ applyEvent local event originalEditorBranch =
             let
                 integration =
                     AddIntegrationEventData.toIntegration commonData.entityUuid eventData
+
+                updatedEditorBranch =
+                    addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorBranch
             in
-            applyAdd local KnowledgeModel.insertIntegration integration commonData editorBranch
+            applyAdd local KnowledgeModel.insertIntegration integration commonData updatedEditorBranch
 
         AddMetricEvent eventData commonData ->
             let
@@ -545,8 +567,11 @@ applyEvent local event originalEditorBranch =
                 mbIntegration =
                     KnowledgeModel.getIntegration commonData.entityUuid knowledgeModel
                         |> Maybe.map (EditIntegrationEvent.apply eventData)
+
+                updatedEditorBranch =
+                    removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorBranch
             in
-            applyEdit KnowledgeModel.updateIntegration mbIntegration commonData editorBranch
+            applyEdit KnowledgeModel.updateIntegration mbIntegration commonData updatedEditorBranch
 
         EditKnowledgeModelEvent eventData _ ->
             let
