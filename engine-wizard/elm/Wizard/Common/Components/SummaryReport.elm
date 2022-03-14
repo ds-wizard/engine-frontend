@@ -16,7 +16,6 @@ import Html exposing (Html, a, canvas, div, h2, h3, h4, hr, table, tbody, td, te
 import Html.Attributes exposing (class, colspan, id, style)
 import Html.Events exposing (onClick)
 import List.Extra as List
-import Markdown
 import Maybe.Extra as Maybe
 import Round
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -27,6 +26,7 @@ import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lf, lg, lgx, lx)
+import Shared.Markdown as Markdown
 import String exposing (fromFloat, fromInt)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)

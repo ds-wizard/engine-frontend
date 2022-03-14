@@ -2,9 +2,9 @@ module Wizard.Dashboard.View exposing (view)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Markdown
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Html exposing (emptyNode)
+import Shared.Markdown as Markdown
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Dashboard.Models exposing (Model)

@@ -6,13 +6,13 @@ import Form.Input as Input
 import Html exposing (Html, a, button, div, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src, style)
 import Html.Events exposing (onClick)
-import Markdown
 import Maybe.Extra as Maybe
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
