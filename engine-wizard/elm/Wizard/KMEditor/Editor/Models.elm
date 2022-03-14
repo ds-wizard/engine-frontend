@@ -8,6 +8,7 @@ module Wizard.KMEditor.Editor.Models exposing
 
 import ActionResult exposing (ActionResult)
 import Shared.Api.Branches as BranchesApi
+import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -35,6 +36,7 @@ type alias Model =
     , tagEditorModel : TagEditor.Model
     , previewModel : Preview.Model
     , settingsModel : Settings.Model
+    , integrationPrefabs : ActionResult (List Integration)
     }
 
 
@@ -53,6 +55,7 @@ init appState uuid mbEditorUuid =
     , tagEditorModel = TagEditor.initialModel
     , previewModel = Preview.initialModel appState ""
     , settingsModel = Settings.initialModel
+    , integrationPrefabs = ActionResult.Loading
     }
 
 
