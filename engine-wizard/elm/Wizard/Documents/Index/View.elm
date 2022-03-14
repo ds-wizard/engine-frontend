@@ -4,7 +4,6 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, a, button, div, h5, input, label, p, pre, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)
-import Markdown
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
 import Shared.Common.ByteUnits as ByteUnits
@@ -18,6 +17,7 @@ import Shared.Data.Submission.SubmissionState as SubmissionState
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (listInsertIf)
 import Time.Distance as TimeDistance
 import Uuid

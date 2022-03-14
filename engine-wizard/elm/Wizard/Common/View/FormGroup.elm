@@ -33,13 +33,13 @@ import Html exposing (Html, a, button, code, div, label, li, option, p, span, te
 import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, selected, type_, value)
 import Html.Events exposing (on, onBlur, onCheck, onClick, onFocus, onMouseDown, targetValue)
 import Json.Decode as Json
-import Markdown
 import Maybe.Extra as Maybe
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError(..))
 import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (l, lx)
+import Shared.Markdown as Markdown
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.PasswordBar as PasswordBar

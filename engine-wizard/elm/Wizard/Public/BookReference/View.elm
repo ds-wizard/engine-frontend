@@ -2,9 +2,9 @@ module Wizard.Public.BookReference.View exposing (view)
 
 import Html exposing (Html, a, div, img, text)
 import Html.Attributes exposing (alt, class, href, src, target)
-import Markdown
 import Shared.Data.BookReference exposing (BookReference)
 import Shared.Locale exposing (l, lx)
+import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.Public.BookReference.Models exposing (Model)

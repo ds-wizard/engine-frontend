@@ -3,7 +3,6 @@ module Wizard.KnowledgeModels.Detail.View exposing (view)
 import Html exposing (Html, a, br, dd, div, dl, dt, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
-import Markdown
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
@@ -11,6 +10,7 @@ import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)

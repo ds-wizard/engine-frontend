@@ -13,7 +13,6 @@ import Html exposing (Html, a, button, div, h3, h5, i, label, li, small, text, u
 import Html.Attributes exposing (class, disabled, id, title)
 import Html.Events exposing (onClick)
 import Html.Keyed
-import Markdown
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
@@ -65,6 +64,7 @@ import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lx)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (compose2, dispatch, flip, httpMethodOptions, nilUuid)
 import SplitPane
 import String.Extra as String

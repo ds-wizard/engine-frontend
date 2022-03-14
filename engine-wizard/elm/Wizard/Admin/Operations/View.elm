@@ -6,13 +6,13 @@ import Html exposing (Html, a, button, div, h2, h3, input, label, span, strong, 
 import Html.Attributes exposing (class, classList, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List
-import Markdown
 import Maybe.Extra as Maybe
 import Shared.Data.AdminOperation exposing (AdminOperation)
 import Shared.Data.AdminOperation.AdminOperationParameter exposing (AdminOperationParameter)
 import Shared.Data.AdminOperation.AdminOperationParameterType as AdminOperationParameterType
 import Shared.Data.AdminOperationSection exposing (AdminOperationSection)
 import Shared.Html exposing (emptyNode)
+import Shared.Markdown as Markdown
 import Wizard.Admin.Operations.Models exposing (Model, fieldPath, operationPath)
 import Wizard.Admin.Operations.Msgs exposing (Msg(..))
 import Wizard.Common.AppState exposing (AppState)

@@ -3,7 +3,6 @@ module Wizard.Templates.Detail.View exposing (view)
 import Html exposing (Html, a, br, dd, div, dl, dt, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
-import Markdown
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
@@ -12,6 +11,7 @@ import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)

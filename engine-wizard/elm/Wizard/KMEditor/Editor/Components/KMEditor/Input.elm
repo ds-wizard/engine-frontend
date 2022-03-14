@@ -26,7 +26,6 @@ import Html.Attributes exposing (attribute, checked, class, classList, for, id, 
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Keyed
 import List.Extra as List
-import Markdown
 import Maybe.Extra as Maybe
 import Reorderable
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
@@ -36,6 +35,7 @@ import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (Metri
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (lg, lgx, lx)
+import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute)

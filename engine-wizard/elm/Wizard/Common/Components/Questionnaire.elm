@@ -33,7 +33,6 @@ import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouse
 import Json.Decode as D
 import Json.Encode as E
 import List.Extra as List
-import Markdown
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Roman
@@ -65,6 +64,7 @@ import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import String exposing (fromInt)

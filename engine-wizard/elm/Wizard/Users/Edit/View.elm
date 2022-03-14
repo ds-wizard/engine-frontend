@@ -5,12 +5,12 @@ import Form.Input as Input
 import Html exposing (Html, a, div, h4, img, p, strong, text)
 import Html.Attributes exposing (class, classList, src)
 import Html.Events exposing (onClick, onSubmit)
-import Markdown
 import Shared.Auth.Role as Role
 import Shared.Data.User as User exposing (User)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lf, lg, lx)
+import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton

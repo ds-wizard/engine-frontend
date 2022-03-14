@@ -3,7 +3,6 @@ module Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer expos
 import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
 import List.Extra as List
-import Markdown
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -17,6 +16,7 @@ import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (
 import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
+import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)

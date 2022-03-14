@@ -6,12 +6,12 @@ import Html exposing (Html, a, button, div, label, p, strong)
 import Html.Attributes exposing (class, placeholder)
 import Html.Events exposing (onClick)
 import List.Extra as List
-import Markdown
 import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
 import Uuid
 import Version
