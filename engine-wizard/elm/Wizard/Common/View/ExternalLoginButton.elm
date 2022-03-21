@@ -1,4 +1,4 @@
-module Wizard.Common.View.ExternalLoginButton exposing (badgeWrapper, defaultBackground, defaultColor, defaultIcon, preview, view, viewAsBadge)
+module Wizard.Common.View.ExternalLoginButton exposing (badgeWrapper, defaultBackground, defaultColor, defaultIcon, render, view, viewAsBadge)
 
 import Html exposing (Attribute, Html, a, span, text)
 import Html.Attributes exposing (class, href, style)
@@ -34,11 +34,6 @@ view appState config =
         config.style.icon
         config.style.color
         config.style.background
-
-
-preview : AppState -> String -> Maybe String -> Maybe String -> Maybe String -> Html msg
-preview =
-    render []
 
 
 badgeWrapper : AppState -> String -> Html msg

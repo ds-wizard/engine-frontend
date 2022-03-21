@@ -2,10 +2,11 @@ module Wizard.Settings.Authentication.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, a, div, h3, hr, label)
+import Html exposing (Html, a, div, h3, hr, label, strong, text)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
 import Shared.Auth.Role as Role
+import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
@@ -15,9 +16,11 @@ import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
+import Wizard.Common.View.Page as Page
 import Wizard.Settings.Authentication.Models exposing (Model)
-import Wizard.Settings.Common.Forms.AuthenticationConfigForm exposing (AuthenticationConfigForm)
-import Wizard.Settings.Generic.Msgs exposing (Msg)
+import Wizard.Settings.Authentication.Msgs exposing (Msg(..))
+import Wizard.Settings.Common.Forms.AuthenticationConfigForm as AuthenticationConfigForm exposing (AuthenticationConfigForm)
+import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.View as GenericView
 
 
@@ -32,33 +35,39 @@ lx_ =
 
 
 view : AppState -> Model -> Html Msg
-view =
-    GenericView.view viewProps
+view appState model =
+    Page.actionResultView appState (viewContent appState model) model.openIDPrefabs
 
 
-viewProps : GenericView.ViewProps AuthenticationConfigForm
-viewProps =
+viewContent : AppState -> Model -> List EditableOpenIDServiceConfig -> Html Msg
+viewContent appState model openIDPrefabs =
+    GenericView.view (viewProps openIDPrefabs) appState model.genericModel
+
+
+viewProps : List EditableOpenIDServiceConfig -> GenericView.ViewProps AuthenticationConfigForm Msg
+viewProps openIDPrefabs =
     { locTitle = l_ "title"
     , locSave = l_ "save"
-    , formView = formView
+    , formView = formView openIDPrefabs
+    , wrapMsg = formMsg
     }
 
 
-formView : AppState -> Form FormError AuthenticationConfigForm -> Html Form.Msg
-formView appState form =
-    div []
-        [ FormGroup.select appState (Role.options appState) form "defaultRole" (l_ "form.defaultRole" appState)
+formView : List EditableOpenIDServiceConfig -> AppState -> Form FormError AuthenticationConfigForm -> Html Msg
+formView openIDPrefabs appState form =
+    div [ class "Authentication" ]
+        [ mapFormMsg <| FormGroup.select appState (Role.options appState) form "defaultRole" (l_ "form.defaultRole" appState)
         , FormExtra.mdAfter (l_ "form.defaultRole.desc" appState)
         , h3 [] [ lx_ "section.internal" appState ]
-        , FormGroup.toggle form "registrationEnabled" (l_ "form.registration" appState)
+        , mapFormMsg <| FormGroup.toggle form "registrationEnabled" (l_ "form.registration" appState)
         , FormExtra.mdAfter (l_ "form.registration.desc" appState)
         , h3 [] [ lx_ "section.external" appState ]
-        , FormGroup.list appState (serviceFormView appState) form "services" (l_ "form.services" appState)
+        , FormGroup.listWithCustomMsg appState formMsg (serviceFormView appState openIDPrefabs) form "services" (l_ "form.services" appState)
         ]
 
 
-serviceFormView : AppState -> Form FormError AuthenticationConfigForm -> Int -> Html Form.Msg
-serviceFormView appState form i =
+serviceFormView : AppState -> List EditableOpenIDServiceConfig -> Form FormError AuthenticationConfigForm -> Int -> Html Msg
+serviceFormView appState openIDPrefabs form i =
     let
         idField =
             "services." ++ String.fromInt i ++ ".id"
@@ -106,51 +115,72 @@ serviceFormView appState form i =
         buttonBackground =
             (Form.getFieldAsString styleBackgroundField form).value
                 |> Maybe.andThen String.toMaybe
+
+        prefabsView =
+            if (not << List.isEmpty) openIDPrefabs && AuthenticationConfigForm.isOpenIDServiceEmpty i form then
+                let
+                    viewPrefabButton openID =
+                        ExternalLoginButton.render [ onClick (FillOpenIDServiceConfig i openID) ]
+                            appState
+                            openID.name
+                            openID.style.icon
+                            openID.style.color
+                            openID.style.background
+                in
+                div [ class "prefab-selection" ]
+                    [ strong [] [ text "Quick setup" ]
+                    , div [] (List.map viewPrefabButton <| List.sortBy .name openIDPrefabs)
+                    ]
+
+            else
+                emptyNode
     in
     div [ class "card bg-light mb-4" ]
         [ div [ class "card-body" ]
-            [ div [ class "row" ]
+            [ prefabsView
+            , div [ class "row" ]
                 [ div [ class "col" ]
-                    [ FormGroup.input appState form idField (l_ "form.service.id" appState) ]
+                    [ mapFormMsg <| FormGroup.input appState form idField (l_ "form.service.id" appState) ]
                 , div [ class "col text-right" ]
-                    [ a
-                        [ class "btn btn-danger link-with-icon"
-                        , onClick (Form.RemoveItem "services" i)
-                        , dataCy "settings_authentication_service_remove-button"
-                        ]
-                        [ faSet "_global.delete" appState
-                        , lx_ "form.service.remove" appState
-                        ]
+                    [ mapFormMsg <|
+                        a
+                            [ class "btn btn-danger link-with-icon"
+                            , onClick (Form.RemoveItem "services" i)
+                            , dataCy "settings_authentication_service_remove-button"
+                            ]
+                            [ faSet "_global.delete" appState
+                            , lx_ "form.service.remove" appState
+                            ]
                     ]
                 ]
             , FormGroup.textView "callback-url" callbackUrl (l_ "form.service.callbackUrl" appState)
             , div [ class "row" ]
-                [ div [ class "col" ] [ FormGroup.input appState form clientIdField (l_ "form.service.clientId" appState) ]
-                , div [ class "col" ] [ FormGroup.input appState form clientSecretField (l_ "form.service.clientSecret" appState) ]
+                [ div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientIdField (l_ "form.service.clientId" appState) ]
+                , div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientSecretField (l_ "form.service.clientSecret" appState) ]
                 ]
-            , FormGroup.input appState form urlField (l_ "form.service.url" appState)
+            , mapFormMsg <| FormGroup.input appState form urlField (l_ "form.service.url" appState)
             , div [ class "input-table", dataCy "settings_authentication_service_parameters" ]
                 [ label [] [ lx_ "form.service.parameters" appState ]
                 , serviceParametersHeader appState parametersField form
-                , FormGroup.list appState (serviceParameterView appState parametersField) form parametersField ""
+                , mapFormMsg <| FormGroup.list appState (serviceParameterView appState parametersField) form parametersField ""
                 ]
             , hr [] []
             , div [ class "row" ]
                 [ div [ class "col-7" ]
                     [ div [ class "row" ]
                         [ div [ class "col" ]
-                            [ FormGroup.inputAttrs [ placeholder <| ExternalLoginButton.defaultIcon appState ] appState form styleIconField (l_ "form.service.icon" appState)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder <| ExternalLoginButton.defaultIcon appState ] appState form styleIconField (l_ "form.service.icon" appState)
                             ]
                         , div [ class "col" ]
-                            [ FormGroup.input appState form nameField (l_ "form.service.name" appState)
+                            [ mapFormMsg <| FormGroup.input appState form nameField (l_ "form.service.name" appState)
                             ]
                         ]
                     , div [ class "row" ]
                         [ div [ class "col" ]
-                            [ FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultBackground ] appState form styleBackgroundField (l_ "form.service.background" appState)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultBackground ] appState form styleBackgroundField (l_ "form.service.background" appState)
                             ]
                         , div [ class "col" ]
-                            [ FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultColor ] appState form styleColorField (l_ "form.service.color" appState)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultColor ] appState form styleColorField (l_ "form.service.color" appState)
                             ]
                         ]
                     ]
@@ -158,7 +188,7 @@ serviceFormView appState form i =
                     [ div [ class "form-group" ]
                         [ label [] [ lx_ "form.service.buttonPreview" appState ]
                         , div [ class "mt-4" ]
-                            [ ExternalLoginButton.preview appState buttonName buttonIcon buttonColor buttonBackground
+                            [ ExternalLoginButton.render [] appState buttonName buttonIcon buttonColor buttonBackground
                             ]
                         ]
                     ]
@@ -216,3 +246,13 @@ serviceParameterView appState prefix form i =
         , div [ class "col-1 text-right" ]
             [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix i) ] [ faSet "_global.delete" appState ] ]
         ]
+
+
+mapFormMsg : Html Form.Msg -> Html Msg
+mapFormMsg =
+    Html.map formMsg
+
+
+formMsg : Form.Msg -> Msg
+formMsg =
+    GenericMsg << GenericMsgs.FormMsg
