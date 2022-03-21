@@ -6,10 +6,11 @@ import Html.Attributes exposing (placeholder)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
+import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
-import Wizard.Settings.Generic.Msgs exposing (Msg)
+import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.PrivacyAndSupport.Models exposing (Model)
 
@@ -29,11 +30,12 @@ view =
     GenericView.view viewProps
 
 
-viewProps : GenericView.ViewProps PrivacyAndSupportConfig
+viewProps : GenericView.ViewProps PrivacyAndSupportConfig Msg
 viewProps =
     { locTitle = l_ "title"
     , locSave = l_ "save"
-    , formView = formView
+    , formView = compose2 (Html.map FormMsg) formView
+    , wrapMsg = FormMsg
     }
 
 

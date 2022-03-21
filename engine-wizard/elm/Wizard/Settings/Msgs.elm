@@ -1,5 +1,6 @@
 module Wizard.Settings.Msgs exposing (Msg(..))
 
+import Wizard.Settings.Authentication.Msgs
 import Wizard.Settings.Generic.Msgs
 import Wizard.Settings.LookAndFeel.Msgs
 import Wizard.Settings.Registry.Msgs
@@ -9,7 +10,7 @@ import Wizard.Settings.Usage.Msgs
 
 
 type Msg
-    = AuthenticationMsg Wizard.Settings.Generic.Msgs.Msg
+    = AuthenticationMsg Wizard.Settings.Authentication.Msgs.Msg
     | OrganizationMsg Wizard.Settings.Generic.Msgs.Msg
     | PrivacyAndSupportMsg Wizard.Settings.Generic.Msgs.Msg
     | DashboardMsg Wizard.Settings.Generic.Msgs.Msg

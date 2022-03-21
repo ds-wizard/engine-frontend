@@ -34,7 +34,8 @@ fetchData route appState _ =
             genericFetch OrganizationMsg
 
         AuthenticationRoute ->
-            genericFetch AuthenticationMsg
+            Cmd.map AuthenticationMsg <|
+                Wizard.Settings.Authentication.Update.fetchData appState
 
         PrivacyAndSupportRoute ->
             genericFetch PrivacyAndSupportMsg

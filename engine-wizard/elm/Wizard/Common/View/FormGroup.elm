@@ -9,6 +9,7 @@ module Wizard.Common.View.FormGroup exposing
     , inputAttrs
     , inputWithTypehints
     , list
+    , listWithCustomMsg
     , listWithHeader
     , markdownEditor
     , optionalWrapper
@@ -332,6 +333,28 @@ list appState itemView form fieldName labelText =
         , button
             [ class "btn btn-secondary"
             , onClick (Form.Append fieldName)
+            , dataCy "form-group_list_add-button"
+            ]
+            [ lx_ "list.add" appState ]
+        ]
+
+
+listWithCustomMsg : AppState -> (Form.Msg -> msg) -> (Form FormError o -> Int -> Html msg) -> Form FormError o -> String -> String -> Html msg
+listWithCustomMsg appState wrapMsg itemView form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, _ ) =
+            getErrors appState field labelText
+    in
+    div [ class "form-group" ]
+        [ label [] [ text labelText ]
+        , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , div [ class "form-list-error" ] [ error ]
+        , button
+            [ class "btn btn-secondary"
+            , onClick (wrapMsg <| Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
             [ lx_ "list.add" appState ]
