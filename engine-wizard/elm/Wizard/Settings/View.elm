@@ -13,6 +13,7 @@ import Wizard.Settings.LookAndFeel.View
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.View
+import Wizard.Settings.Plans.View
 import Wizard.Settings.PrivacyAndSupport.View
 import Wizard.Settings.Projects.View
 import Wizard.Settings.Registry.View
@@ -80,6 +81,10 @@ view route appState model =
                 UsageRoute ->
                     Html.map UsageMsg <|
                         Wizard.Settings.Usage.View.view appState model.usageModel
+
+                PlansRoute ->
+                    Html.map PlansMsg <|
+                        Wizard.Settings.Plans.View.view appState model.plansModel
     in
     div [ class "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
@@ -100,7 +105,7 @@ navigation appState currentRoute =
             [ strong [] [ lx_ "navigation.title.content" appState ] ]
 
         statisticsTitle =
-            [ strong [] [ lx_ "navigation.title.statistics" appState ] ]
+            [ strong [] [ lx_ "navigation.title.info" appState ] ]
     in
     div [ class "nav nav-pills flex-column" ]
         (systemTitle
@@ -141,7 +146,16 @@ navigationContentLinks appState =
 
 navigationStatisticsLinks : AppState -> List ( Route, String )
 navigationStatisticsLinks appState =
-    [ ( UsageRoute, l_ "navigation.usage" appState ) ]
+    let
+        items =
+            [ ( UsageRoute, l_ "navigation.usage" appState )
+            ]
+    in
+    if appState.config.cloud.enabled then
+        ( PlansRoute, l_ "navigation.plans" appState ) :: items
+
+    else
+        items
 
 
 navigationLink : AppState -> Route -> ( Route, String ) -> Html Msg

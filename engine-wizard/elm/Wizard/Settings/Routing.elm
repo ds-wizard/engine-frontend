@@ -28,6 +28,7 @@ parsers appState wrapRoute =
     , map (wrapRoute <| TemplateRoute) (s moduleRoot </> s (lr "settings.template" appState))
     , map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s (lr "settings.knowledgeModel" appState))
     , map (wrapRoute <| UsageRoute) (s moduleRoot </> s (lr "settings.usage" appState))
+    , map (wrapRoute <| PlansRoute) (s moduleRoot </> s (lr "settings.plans" appState))
     ]
 
 
@@ -70,6 +71,9 @@ toUrl appState route =
 
         UsageRoute ->
             [ moduleRoot, lr "settings.usage" appState ]
+
+        PlansRoute ->
+            [ moduleRoot, lr "settings.plans" appState ]
 
 
 isAllowed : Route -> AppState -> Bool
