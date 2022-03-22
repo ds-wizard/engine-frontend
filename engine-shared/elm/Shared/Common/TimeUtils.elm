@@ -1,6 +1,8 @@
 module Shared.Common.TimeUtils exposing
-    ( monthToInt
+    ( isBetween
+    , monthToInt
     , monthToString
+    , toReadableDate
     , toReadableDateTime
     , toReadableTime
     )
@@ -29,6 +31,21 @@ toReadableDateTime timeZone time =
             String.fromInt <| Time.toYear timeZone time
     in
     day ++ ". " ++ month ++ ". " ++ year ++ ", " ++ hour ++ ":" ++ min
+
+
+toReadableDate : Time.Zone -> Time.Posix -> String
+toReadableDate timeZone time =
+    let
+        day =
+            String.fromInt <| Time.toDay timeZone time
+
+        month =
+            String.fromInt <| monthToInt <| Time.toMonth timeZone time
+
+        year =
+            String.fromInt <| Time.toYear timeZone time
+    in
+    day ++ ". " ++ month ++ ". " ++ year
 
 
 toReadableTime : Time.Zone -> Time.Posix -> String
@@ -121,3 +138,18 @@ monthToString appState month =
 
         Dec ->
             lg "month.december" appState
+
+
+isBetween : Time.Posix -> Time.Posix -> Time.Posix -> Bool
+isBetween start end time =
+    let
+        startMillis =
+            Time.posixToMillis start
+
+        endMillis =
+            Time.posixToMillis end
+
+        timeMillis =
+            Time.posixToMillis time
+    in
+    startMillis < timeMillis && endMillis > timeMillis

@@ -16,6 +16,7 @@ type Route
     | TemplateRoute
     | KnowledgeModelsRoute
     | UsageRoute
+    | PlansRoute
 
 
 defaultRoute : Route

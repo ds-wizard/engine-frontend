@@ -9,6 +9,7 @@ module Shared.Setters exposing
     , setMigration
     , setPackage
     , setPackages
+    , setPlans
     , setPulling
     , setQuestionnaire
     , setQuestionnaireDetail
@@ -72,6 +73,11 @@ setPackage value record =
 setPackages : a -> { b | packages : a } -> { b | packages : a }
 setPackages value record =
     { record | packages = value }
+
+
+setPlans : a -> { b | plans : a } -> { b | plans : a }
+setPlans value record =
+    { record | plans = value }
 
 
 setPulling : a -> { b | pulling : a } -> { b | pulling : a }

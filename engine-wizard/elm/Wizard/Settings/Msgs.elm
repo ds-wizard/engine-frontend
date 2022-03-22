@@ -3,6 +3,7 @@ module Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Authentication.Msgs
 import Wizard.Settings.Generic.Msgs
 import Wizard.Settings.LookAndFeel.Msgs
+import Wizard.Settings.Plans.Msgs
 import Wizard.Settings.Registry.Msgs
 import Wizard.Settings.Submission.Msgs
 import Wizard.Settings.Template.Msgs
@@ -21,3 +22,4 @@ type Msg
     | TemplateMsg Wizard.Settings.Template.Msgs.Msg
     | KnowledgeModelsMsg Wizard.Settings.Generic.Msgs.Msg
     | UsageMsg Wizard.Settings.Usage.Msgs.Msg
+    | PlansMsg Wizard.Settings.Plans.Msgs.Msg
