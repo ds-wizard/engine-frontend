@@ -26,12 +26,12 @@ init : AppState -> Form FormError OwlImportForm
 init appState =
     let
         initialData =
-            [ ( "name", Field.maybeString appState.config.experimental.owl.name )
-            , ( "organizationId", Field.maybeString appState.config.experimental.owl.organizationId )
-            , ( "kmId", Field.maybeString appState.config.experimental.owl.kmId )
-            , ( "version", Field.maybeString appState.config.experimental.owl.version )
-            , ( "previousPackageId", Field.maybeString appState.config.experimental.owl.previousPackageId )
-            , ( "rootElement", Field.maybeString appState.config.experimental.owl.rootElement )
+            [ ( "name", Field.maybeString appState.config.owl.name )
+            , ( "organizationId", Field.maybeString appState.config.owl.organizationId )
+            , ( "kmId", Field.maybeString appState.config.owl.kmId )
+            , ( "version", Field.maybeString appState.config.owl.version )
+            , ( "previousPackageId", Field.maybeString appState.config.owl.previousPackageId )
+            , ( "rootElement", Field.maybeString appState.config.owl.rootElement )
             ]
     in
     Form.initial initialData validation

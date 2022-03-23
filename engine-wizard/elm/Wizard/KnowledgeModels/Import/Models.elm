@@ -19,7 +19,7 @@ type alias Model =
 
 initialModel : AppState -> Maybe String -> Model
 initialModel appState packageId =
-    if appState.config.experimental.owl.enabled then
+    if appState.config.owl.enabled then
         { importModel = OwlImportModel <| OwlImportModels.initialModel appState }
 
     else

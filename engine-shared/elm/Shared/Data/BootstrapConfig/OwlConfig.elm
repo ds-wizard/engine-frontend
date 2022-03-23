@@ -1,4 +1,4 @@
-module Shared.Data.BootstrapConfig.ExperimentalConfig.OwlConfig exposing (OwlConfig, decoder, default)
+module Shared.Data.BootstrapConfig.OwlConfig exposing (OwlConfig, decoder, default)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D

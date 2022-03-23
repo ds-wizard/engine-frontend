@@ -64,7 +64,7 @@ view appState model =
 
         navItems =
             []
-                |> listInsertIf owlNavItem appState.config.experimental.owl.enabled
+                |> listInsertIf owlNavItem appState.config.owl.enabled
                 |> listInsertIf registryNavItem registryEnabled
                 |> listInsertIf fileNavItem True
 
