@@ -1,5 +1,7 @@
 module Shared.Common.TimeUtils exposing
-    ( isBetween
+    ( fromYMD
+    , intToMonth
+    , isBetween
     , monthToInt
     , monthToString
     , toReadableDate
@@ -10,6 +12,7 @@ module Shared.Common.TimeUtils exposing
 import Shared.Locale exposing (lg)
 import Shared.Provisioning exposing (Provisioning)
 import Time exposing (Month(..))
+import Time.Extra as Time
 
 
 toReadableDateTime : Time.Zone -> Time.Posix -> String
@@ -60,6 +63,12 @@ toReadableTime timeZone time =
     hour ++ ":" ++ min
 
 
+fromYMD : Time.Zone -> Int -> Int -> Int -> Time.Posix
+fromYMD timeZone year month day =
+    Time.partsToPosix timeZone <|
+        Time.Parts year (intToMonth month) day 0 0 0 0
+
+
 monthToInt : Month -> Int
 monthToInt month =
     case month of
@@ -98,6 +107,46 @@ monthToInt month =
 
         Dec ->
             12
+
+
+intToMonth : Int -> Month
+intToMonth month =
+    case month of
+        1 ->
+            Jan
+
+        2 ->
+            Feb
+
+        3 ->
+            Mar
+
+        4 ->
+            Apr
+
+        5 ->
+            May
+
+        6 ->
+            Jun
+
+        7 ->
+            Jul
+
+        8 ->
+            Aug
+
+        9 ->
+            Sep
+
+        10 ->
+            Oct
+
+        11 ->
+            Nov
+
+        _ ->
+            Dec
 
 
 monthToString : { a | provisioning : Provisioning } -> Month -> String

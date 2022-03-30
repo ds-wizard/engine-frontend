@@ -210,6 +210,13 @@ createMenu model =
 menuItems : AppState -> List (MenuItem msg)
 menuItems appState =
     [ MenuItem
+        (l_ "menu.apps" appState)
+        (faSet "menu.apps" appState)
+        Routes.appsIndex
+        Routes.isAppIndex
+        Feature.apps
+        "apps-link"
+    , MenuItem
         (l_ "menu.users" appState)
         (faSet "menu.users" appState)
         Routes.usersIndex

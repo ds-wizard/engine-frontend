@@ -93,6 +93,7 @@ iconSet =
                , ( "listing.filter.single.selected", "fas fa-check-circle" )
                , ( "listing.filter.single.notSelected", "far fa-circle" )
                , ( "login.externalService", "fab fa-openid" )
+               , ( "menu.apps", "fas fa-th" )
                , ( "menu.about", "fas fa-info" )
                , ( "menu.collapse", "fas fa-angle-double-left" )
                , ( "menu.documents", "fas fa-layer-group" )

@@ -4,6 +4,7 @@ import Browser exposing (UrlRequest)
 import Time
 import Url exposing (Url)
 import Wizard.Admin.Msgs
+import Wizard.Apps.Msgs
 import Wizard.Auth.Msgs
 import Wizard.Common.Menu.Msgs
 import Wizard.Dashboard.Msgs
@@ -29,6 +30,7 @@ type Msg
     | SetFullscreen Bool
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
     | AdminMsg Wizard.Admin.Msgs.Msg
+    | AppsMsg Wizard.Apps.Msgs.Msg
     | DashboardMsg Wizard.Dashboard.Msgs.Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg

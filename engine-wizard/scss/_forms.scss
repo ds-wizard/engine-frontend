@@ -175,6 +175,14 @@ textarea {
         }
     }
 
+    &-simple-date {
+        .date-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 3fr;
+            grid-column-gap: .5rem;
+        }
+    }
+
     .export-formats {
         display: grid;
         grid-template-columns: 49.5% 49.5%;

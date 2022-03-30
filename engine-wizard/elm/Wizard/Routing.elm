@@ -17,6 +17,7 @@ import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing (Parser, map, oneOf, s)
 import Wizard.Admin.Routing
+import Wizard.Apps.Routing
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
@@ -37,6 +38,7 @@ matchers appState =
         parsers =
             []
                 ++ Wizard.Admin.Routing.parsers appState Routes.AdminRoute
+                ++ Wizard.Apps.Routing.parsers Routes.AppsRoute
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
@@ -45,7 +47,7 @@ matchers appState =
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
                 ++ Wizard.Templates.Routing.parsers appState Routes.TemplatesRoute
-                ++ Wizard.Users.Routing.parses Routes.UsersRoute
+                ++ Wizard.Users.Routing.parsers Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    ]
     in
@@ -66,6 +68,9 @@ isAllowed route appState =
     case route of
         Routes.AdminRoute adminRoute ->
             Wizard.Admin.Routing.isAllowed adminRoute appState
+
+        Routes.AppsRoute appsRoute ->
+            Wizard.Apps.Routing.isAllowed appsRoute appState
 
         Routes.DashboardRoute ->
             True
@@ -111,6 +116,9 @@ toUrl appState route =
             case route of
                 Routes.AdminRoute adminRoute ->
                     Wizard.Admin.Routing.toUrl appState adminRoute
+
+                Routes.AppsRoute appsRoute ->
+                    Wizard.Apps.Routing.toUrl appsRoute
 
                 Routes.DashboardRoute ->
                     [ lr "dashboard" appState ]

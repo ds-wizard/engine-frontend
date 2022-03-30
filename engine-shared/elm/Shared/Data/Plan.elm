@@ -4,10 +4,12 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Time
+import Uuid exposing (Uuid)
 
 
 type alias Plan =
-    { name : String
+    { uuid : Uuid
+    , name : String
     , until : Time.Posix
     , since : Time.Posix
     , test : Bool
@@ -18,6 +20,7 @@ type alias Plan =
 decoder : Decoder Plan
 decoder =
     D.succeed Plan
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "until" D.datetime
         |> D.required "since" D.datetime

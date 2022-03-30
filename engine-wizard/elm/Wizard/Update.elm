@@ -8,6 +8,7 @@ import Browser.Navigation exposing (load, pushUrl)
 import Shared.Auth.Session as Session
 import Url
 import Wizard.Admin.Update
+import Wizard.Apps.Update
 import Wizard.Auth.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Menu.Update
@@ -37,6 +38,10 @@ fetchData model =
                 Routes.AdminRoute route ->
                     Cmd.map AdminMsg <|
                         Wizard.Admin.Update.fetchData route model.appState
+
+                Routes.AppsRoute route ->
+                    Cmd.map AppsMsg <|
+                        Wizard.Apps.Update.fetchData route model.appState
 
                 Routes.DashboardRoute ->
                     Cmd.map DashboardMsg <|
@@ -190,6 +195,13 @@ update msg model =
                         Wizard.Admin.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
                 in
                 ( { model | adminModel = adminModel }, cmd )
+
+            Wizard.Msgs.AppsMsg appsMsg ->
+                let
+                    ( appsModel, cmd ) =
+                        Wizard.Apps.Update.update appsMsg Wizard.Msgs.AppsMsg model.appState model.appsModel
+                in
+                ( { model | appsModel = appsModel }, cmd )
 
             Wizard.Msgs.DashboardMsg dashboardMsg ->
                 let

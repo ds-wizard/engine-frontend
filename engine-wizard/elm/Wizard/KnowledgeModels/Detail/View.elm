@@ -1,6 +1,6 @@
 module Wizard.KnowledgeModels.Detail.View exposing (view)
 
-import Html exposing (Html, a, br, dd, div, dl, dt, li, p, strong, text, ul)
+import Html exposing (Html, a, div, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Shared.Api.Packages as PackagesApi
@@ -14,6 +14,7 @@ import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -51,7 +52,7 @@ view appState model =
 
 viewPackage : AppState -> Model -> PackageDetail -> Html Msg
 viewPackage appState model package =
-    div [ class "KnowledgeModels__Detail" ]
+    DetailPage.container
         [ header appState package
         , readme appState package
         , sidePanel appState package
@@ -150,12 +151,7 @@ header appState package =
                 |> listInsertIf exportAction exportActionVisible
                 |> listInsertIf deleteAction deleteActionVisible
     in
-    div [ class "top-header" ]
-        [ div [ class "top-header-content" ]
-            [ div [ class "top-header-title", dataCy "km-detail_header-title" ] [ text package.name ]
-            , div [ class "top-header-actions" ] actions
-            ]
-        ]
+    DetailPage.header (text package.name) actions
 
 
 readme : AppState -> PackageDetail -> Html msg
@@ -172,9 +168,9 @@ readme appState package =
             else
                 newVersionInRegistryWarning appState package
     in
-    div [ class "KnowledgeModels__Detail__Readme", dataCy "km-detail_readme" ]
+    DetailPage.content
         [ warning
-        , Markdown.toHtml [ class "readme" ] package.readme
+        , Markdown.toHtml [ DetailPage.contentInnerClass ] package.readme
         ]
 
 
@@ -212,8 +208,8 @@ sidePanel appState package =
             , sidePanelRegistryLink appState package
             ]
     in
-    div [ class "KnowledgeModels__Detail__SidePanel" ]
-        [ list 12 12 <| listFilterJust sections ]
+    DetailPage.sidePanel
+        [ DetailPage.sidePanelList 12 12 <| listFilterJust sections ]
 
 
 sidePanelKmInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
@@ -238,7 +234,7 @@ sidePanelKmInfo appState package =
                 Nothing ->
                     []
     in
-    Just ( lg "package" appState, "package", list 4 8 <| kmInfoList ++ parentInfo )
+    Just ( lg "package" appState, "package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
 
 
 sidePanelOtherVersions : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
@@ -290,29 +286,11 @@ sidePanelRegistryLink appState package =
     Maybe.map toRegistryLinkInfo package.registryLink
 
 
-list : Int -> Int -> List ( String, String, Html msg ) -> Html msg
-list colLabel colValue rows =
-    let
-        viewRow ( label, cy, value ) =
-            [ dt [ class <| "col-" ++ String.fromInt colLabel ]
-                [ text label ]
-            , dd [ class <| "col-" ++ String.fromInt colValue, dataCy ("km-detail_metadata_" ++ cy) ]
-                [ value ]
-            ]
-    in
-    dl [ class "row" ] (List.concatMap viewRow rows)
-
-
 viewOrganization : OrganizationInfo -> Html msg
 viewOrganization organization =
-    div [ class "organization" ]
-        [ ItemIcon.view { text = organization.name, image = organization.logo }
-        , div [ class "content" ]
-            [ strong [] [ text organization.name ]
-            , br [] []
-            , text organization.organizationId
-            ]
-        ]
+    DetailPage.sidePanelItemWithIcon organization.name
+        (text organization.organizationId)
+        (ItemIcon.view { text = organization.name, image = organization.logo })
 
 
 deleteVersionModal : AppState -> Model -> PackageDetail -> Html Msg

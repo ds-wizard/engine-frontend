@@ -1,5 +1,6 @@
 module Wizard.Subscriptions exposing (subscriptions)
 
+import Wizard.Apps.Subscriptions
 import Wizard.Common.Menu.Subscriptions
 import Wizard.Documents.Subscriptions
 import Wizard.KMEditor.Subscriptions
@@ -17,6 +18,9 @@ subscriptions model =
     let
         currentViewSubscriptions =
             case model.appState.route of
+                Routes.AppsRoute route ->
+                    Sub.map AppsMsg <| Wizard.Apps.Subscriptions.subscriptions route model.appsModel
+
                 Routes.DocumentsRoute route ->
                     Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions route model.documentsModel
 
