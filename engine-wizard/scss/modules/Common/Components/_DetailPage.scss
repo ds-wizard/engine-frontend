@@ -1,6 +1,6 @@
-@import "../../variables";
+@import "../../../variables";
 
-.KnowledgeModels__Detail {
+.DetailPage {
     margin: -20px 0;
     width: 100%;
     height: 100vh;
@@ -19,7 +19,7 @@
         }
     }
 
-    &__Readme {
+    &__Content {
         flex-grow: 1;
         height: calc(100vh - #{$top-header-height});
         margin-top: $top-header-height;
@@ -29,7 +29,7 @@
             margin-top: -1rem;
         }
 
-        .readme {
+        &__Inner {
             max-width: 50rem;
             margin: 20px auto;
             padding: 0 1.25rem;
@@ -67,7 +67,9 @@
             }
         }
 
-        .organization {
+        &__ItemIcon {
+            margin-top: .25rem;
+            margin-bottom: .5rem;
             display: flex;
 
             .ItemIcon {
@@ -91,11 +93,11 @@
 }
 
 .public--app {
-    .KnowledgeModels__Detail {
+    .DetailPage {
         margin-top: 0;
         height: calc(100vh - #{$public-header-height});
 
-        &__Readme, &__SidePanel {
+        &__Content, &__SidePanel {
             height: calc(100vh - #{$top-header-height} - #{$public-header-height});
         }
     }

@@ -5,6 +5,7 @@ import Html exposing (Html)
 import Shared.Locale exposing (l)
 import Shared.Undraw as Undraw
 import Wizard.Admin.View
+import Wizard.Apps.View
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Layout as Layout
 import Wizard.Common.View.Page as Page
@@ -38,6 +39,11 @@ view model =
             Routes.AdminRoute route ->
                 Wizard.Admin.View.view route model.appState model.adminModel
                     |> Html.map AdminMsg
+                    |> Layout.app model
+
+            Routes.AppsRoute route ->
+                Wizard.Apps.View.view route model.appState model.appsModel
+                    |> Html.map AppsMsg
                     |> Layout.app model
 
             Routes.DashboardRoute ->

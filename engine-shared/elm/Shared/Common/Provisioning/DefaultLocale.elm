@@ -18,6 +18,7 @@ locale =
     , ( "_global.apiError.service.token.account_is_not_activated", "The account is not activated." )
     , ( "_global.apiError.service.user.required_admin_role_or_hash_in_query_params", "A hash query param has to be provided." )
     , ( "_global.apiError.service.user.required_hash_in_query_params", "A hash query param has to be provided." )
+    , ( "_global.apiError.validation.app_id_uniqueness", "App ID is already used." )
     , ( "_global.apiError.validation.email_uniqueness", "Email is already used." )
     , ( "_global.apiError.validation.hash_absence", "Link is not valid." )
     , ( "_global.apiError.validation.km_id_uniqueness", "Knowledge Model ID is already used." )

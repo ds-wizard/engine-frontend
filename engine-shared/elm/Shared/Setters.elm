@@ -1,5 +1,6 @@
 module Shared.Setters exposing
-    ( setBookReference
+    ( setApp
+    , setBookReference
     , setBranches
     , setDocuments
     , setDropdownState
@@ -23,6 +24,11 @@ module Shared.Setters exposing
     , setUser
     , setUsers
     )
+
+
+setApp : a -> { b | app : a } -> { b | app : a }
+setApp value record =
+    { record | app = value }
 
 
 setBookReference : a -> { b | bookReference : a } -> { b | bookReference : a }

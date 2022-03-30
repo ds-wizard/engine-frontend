@@ -20,6 +20,7 @@ module Wizard.Common.View.FormGroup exposing
     , richRadioGroup
     , select
     , selectWithDisabled
+    , simpleDate
     , textView
     , textarea
     , textareaAttrs
@@ -485,6 +486,44 @@ markdownEditor appState form fieldName labelText =
         ]
 
 
+simpleDate : AppState -> Form FormError o -> String -> String -> String -> String -> Html.Html Form.Msg
+simpleDate appState form yearFieldName monthFieldName dayFieldName labelText =
+    let
+        yearField =
+            Form.getFieldAsString yearFieldName form
+
+        ( yearFieldError, yearFieldErrorClass ) =
+            getErrors appState yearField labelText
+
+        monthField =
+            Form.getFieldAsString monthFieldName form
+
+        ( monthFieldError, monthFieldErrorClass ) =
+            getErrors appState monthField labelText
+
+        dayField =
+            Form.getFieldAsString dayFieldName form
+
+        ( dayFieldError, dayFieldErrorClass ) =
+            getErrors appState dayField labelText
+
+        error =
+            [ yearFieldError, monthFieldError, dayFieldError ]
+                |> List.filter ((/=) emptyNode)
+                |> List.head
+                |> Maybe.withDefault emptyNode
+    in
+    div [ class "form-group form-group-simple-date" ]
+        [ label [] [ text labelText ]
+        , div [ class "date-inputs" ]
+            [ Input.textInput dayField [ class <| "form-control " ++ dayFieldErrorClass, id dayFieldName, name dayFieldName ]
+            , Input.textInput monthField [ class <| "form-control " ++ monthFieldErrorClass, id monthFieldName, name monthFieldName ]
+            , Input.textInput yearField [ class <| "form-control " ++ yearFieldErrorClass, id yearFieldName, name yearFieldName ]
+            ]
+        , error
+        ]
+
+
 {-| Create Html for a form field using the given input field.
 -}
 formGroup : Input.Input FormError String -> List (Html.Attribute Form.Msg) -> AppState -> Form FormError o -> String -> String -> Html.Html Form.Msg
@@ -556,4 +595,4 @@ getErrors appState field labelText =
             ( p [ class "invalid-feedback" ] [ text (errorToString appState labelText error) ], "is-invalid" )
 
         Nothing ->
-            ( text "", "" )
+            ( emptyNode, "" )

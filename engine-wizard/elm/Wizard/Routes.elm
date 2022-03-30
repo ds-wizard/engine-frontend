@@ -1,7 +1,11 @@
 module Wizard.Routes exposing
     ( Route(..)
+    , appsDetail
+    , appsIndex
+    , appsIndexWithFilters
     , documentsIndex
     , documentsIndexWithFilters
+    , isAppIndex
     , isDocumentsIndex
     , isKmEditorIndex
     , isKnowledgeModelsIndex
@@ -26,6 +30,7 @@ import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (Pa
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Admin.Routes
+import Wizard.Apps.Routes
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
@@ -40,6 +45,7 @@ import Wizard.Users.Routes
 
 type Route
     = AdminRoute Wizard.Admin.Routes.Route
+    | AppsRoute Wizard.Apps.Routes.Route
     | DashboardRoute
     | DocumentsRoute Wizard.Documents.Routes.Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
@@ -52,6 +58,34 @@ type Route
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute
+
+
+appsIndex : Route
+appsIndex =
+    AppsRoute (Wizard.Apps.Routes.IndexRoute PaginationQueryString.empty Nothing)
+
+
+appsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+appsIndexWithFilters filters pagination =
+    AppsRoute
+        (Wizard.Apps.Routes.IndexRoute pagination
+            (PaginationQueryFilters.getValue Wizard.Apps.Routes.indexRouteEnabledFilterId filters)
+        )
+
+
+appsDetail : Uuid -> Route
+appsDetail =
+    AppsRoute << Wizard.Apps.Routes.DetailRoute
+
+
+isAppIndex : Route -> Bool
+isAppIndex route =
+    case route of
+        AppsRoute (Wizard.Apps.Routes.IndexRoute _ _) ->
+            True
+
+        _ ->
+            False
 
 
 usersIndex : Route

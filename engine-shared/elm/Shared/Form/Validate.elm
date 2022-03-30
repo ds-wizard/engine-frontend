@@ -3,6 +3,7 @@ module Shared.Form.Validate exposing
     , dict
     , ifElse
     , kmId
+    , maybeInt
     , maybeRegex
     , maybeString
     , optionalString
@@ -88,6 +89,11 @@ ifElse dependentField trueValidation falseValidation =
 maybeString : Validation e (Maybe String)
 maybeString =
     V.oneOf [ V.emptyString |> V.map (\_ -> Nothing), V.string |> V.map Just ]
+
+
+maybeInt : Validation e (Maybe Int)
+maybeInt =
+    V.oneOf [ V.emptyString |> V.map (\_ -> Nothing), V.int |> V.map Just ]
 
 
 optionalString : Validation e String
