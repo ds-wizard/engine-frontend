@@ -8,6 +8,7 @@ import Shared.Data.Plan exposing (Plan)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lgx, lx)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
 
 
@@ -56,10 +57,10 @@ view appState cfg plans =
                             emptyNode
             in
             tr []
-                [ td [] [ text plan.name, viewTrialBadge plan, viewActiveBadge plan ]
-                , td [] [ text (Maybe.unwrap "-" String.fromInt plan.users) ]
-                , td [] [ text (viewPlanTime plan.since) ]
-                , td [] [ text (viewPlanTime plan.until) ]
+                [ td [ dataCy "plans-list_name" ] [ text plan.name, viewTrialBadge plan, viewActiveBadge plan ]
+                , td [ dataCy "plans-list_users" ] [ text (Maybe.unwrap "-" String.fromInt plan.users) ]
+                , td [ dataCy "plans-list_from" ] [ text (viewPlanTime plan.since) ]
+                , td [ dataCy "plans-list_to" ] [ text (viewPlanTime plan.until) ]
                 , planActions
                 ]
 

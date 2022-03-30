@@ -18,6 +18,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Components.PlansList as PlansList
 import Wizard.Common.Components.UsageTable as UsageTable
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -61,7 +62,7 @@ header : AppState -> AppDetail -> Html Msg
 header appState app =
     let
         editAction =
-            a [ class "link-with-icon", onClick EditModalOpen ]
+            a [ class "link-with-icon", onClick EditModalOpen, dataCy "app-detail_edit" ]
                 [ faSet "_global.edit" appState
                 , lx_ "actions.edit" appState
                 ]
@@ -73,8 +74,8 @@ content : AppState -> AppDetail -> Html Msg
 content appState appDetail =
     let
         planActions plan =
-            [ a [ onClick (EditPlanModalOpen plan) ] [ faSet "_global.edit" appState ]
-            , a [ onClick (DeletePlanModalOpen plan), class "text-danger ml-3" ] [ faSet "_global.delete" appState ]
+            [ a [ onClick (EditPlanModalOpen plan), dataCy "app-detail_plan_edit" ] [ faSet "_global.edit" appState ]
+            , a [ onClick (DeletePlanModalOpen plan), class "text-danger ml-3", dataCy "app-detail_plan_delete" ] [ faSet "_global.delete" appState ]
             ]
     in
     DetailPage.content
@@ -84,7 +85,7 @@ content appState appDetail =
             , hr [ class "my-5" ] []
             , h3 [] [ lx_ "content.title.plans" appState ]
             , PlansList.view appState { actions = Just planActions } appDetail.plans
-            , a [ class "link-with-icon", onClick AddPlanModalOpen ]
+            , a [ class "link-with-icon", onClick AddPlanModalOpen, dataCy "app-detail_add-plan" ]
                 [ faSet "_global.add" appState, lx_ "content.plans.add" appState ]
             ]
         ]
