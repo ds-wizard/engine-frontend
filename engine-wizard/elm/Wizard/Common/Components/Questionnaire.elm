@@ -293,9 +293,9 @@ type Msg
     | SetRightPanel RightPanel
     | SetFullscreen Bool
     | ScrollToPath String
-    | ShowTypeHints (List String) String String
+    | ShowTypeHints (List String) Bool String String
     | HideTypeHints
-    | TypeHintInput (List String) Reply
+    | TypeHintInput (List String) Bool Reply
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
@@ -361,14 +361,14 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         ScrollToPath path ->
             withSeed <| handleScrollToPath model path
 
-        ShowTypeHints path questionUuid value ->
-            withSeed <| handleShowTypeHints appState ctx model path questionUuid value
+        ShowTypeHints path emptySearch questionUuid value ->
+            withSeed <| handleShowTypeHints appState ctx model path emptySearch questionUuid value
 
         HideTypeHints ->
             wrap { model | typeHints = Nothing }
 
-        TypeHintInput path value ->
-            withSeed <| handleTypeHintsInput model path value
+        TypeHintInput path emptySearch value ->
+            withSeed <| handleTypeHintsInput model path emptySearch value
 
         TypeHintDebounceMsg debounceMsg ->
             withSeed <| handleTypeHintDebounceMsg appState ctx model debounceMsg
@@ -578,38 +578,60 @@ handleScrollToPath model path =
     ( { model | activePage = PageChapter chapterUuid }, Ports.scrollIntoView selector )
 
 
-handleShowTypeHints : AppState -> Context -> Model -> List String -> String -> String -> ( Model, Cmd Msg )
-handleShowTypeHints appState ctx model path questionUuid value =
-    let
-        typeHints =
-            Just
-                { path = path
-                , hints = Loading
-                }
+handleShowTypeHints : AppState -> Context -> Model -> List String -> Bool -> String -> String -> ( Model, Cmd Msg )
+handleShowTypeHints appState ctx model path emptySearch questionUuid value =
+    if not emptySearch && String.isEmpty value then
+        ( model, Cmd.none )
 
-        cmd =
-            loadTypeHints appState ctx model path questionUuid value
-    in
-    ( { model | typeHints = typeHints }, cmd )
+    else
+        let
+            typeHints =
+                Just
+                    { path = path
+                    , hints = Loading
+                    }
+
+            cmd =
+                loadTypeHints appState ctx model path questionUuid value
+        in
+        ( { model | typeHints = typeHints }, cmd )
 
 
-handleTypeHintsInput : Model -> List String -> Reply -> ( Model, Cmd Msg )
-handleTypeHintsInput model path reply =
+handleTypeHintsInput : Model -> List String -> Bool -> Reply -> ( Model, Cmd Msg )
+handleTypeHintsInput model path emptySearch reply =
     let
         questionUuid =
             Maybe.withDefault "" (List.last path)
 
-        ( debounce, debounceCmd ) =
-            Debounce.push
-                debounceConfig
-                ( path, questionUuid, ReplyValue.getStringReply reply.value )
-                model.typeHintsDebounce
+        updatedTypeHints =
+            case model.typeHints of
+                Just typehints ->
+                    Just typehints
+
+                Nothing ->
+                    Just
+                        { path = path
+                        , hints = Loading
+                        }
+
+        ( ( debounce, debounceCmd ), newTypeHints ) =
+            case ( emptySearch, reply.value ) of
+                ( False, IntegrationReply (PlainType "") ) ->
+                    ( ( model.typeHintsDebounce, Cmd.none ), Nothing )
+
+                _ ->
+                    ( Debounce.push
+                        debounceConfig
+                        ( path, questionUuid, ReplyValue.getStringReply reply.value )
+                        model.typeHintsDebounce
+                    , updatedTypeHints
+                    )
 
         dispatchCmd =
             dispatch <|
                 SetReply (pathToString path) reply
     in
-    ( { model | typeHintsDebounce = debounce }
+    ( { model | typeHintsDebounce = debounce, typeHints = newTypeHints }
     , Cmd.batch [ debounceCmd, dispatchCmd ]
     )
 
@@ -1998,18 +2020,14 @@ viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiInte
             Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
 
         onFocusHandler =
-            if apiIntegrationData.requestEmptySearch || not (String.isEmpty questionValue) then
-                [ onFocus (ShowTypeHints path (Question.getUuid question) questionValue) ]
-
-            else
-                []
+            [ onFocus (ShowTypeHints path apiIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
 
         extraArgs =
             if cfg.features.readonly then
                 [ disabled True ]
 
             else
-                [ onInput (TypeHintInput path << createReply appState << IntegrationReply << PlainType)
+                [ onInput (TypeHintInput path apiIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
                 , onBlur HideTypeHints
                 ]
                     ++ onFocusHandler
