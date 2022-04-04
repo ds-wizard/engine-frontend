@@ -87,7 +87,7 @@ validateSubmissionProps =
     V.succeed SubmissionProps
         |> V.andMap (V.field "id" V.string)
         |> V.andMap (V.field "name" V.string)
-        |> V.andMap (V.field "values" (V.dict V.string))
+        |> V.andMap (V.field "values" (V.dict V.optionalString))
 
 
 encode : String -> UserEditForm -> E.Value
