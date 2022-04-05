@@ -1,7 +1,7 @@
 module Wizard.Users.Routing exposing
     ( isAllowed
     , moduleRoot
-    , parses
+    , parsers
     , toUrl
     )
 
@@ -20,8 +20,8 @@ moduleRoot =
     "users"
 
 
-parses : (Route -> a) -> List (Parser (a -> c) c)
-parses wrapRoute =
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
     let
         wrappedIndexRoute pqs q =
             wrapRoute <| IndexRoute pqs q

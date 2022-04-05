@@ -14,6 +14,7 @@ module Shared.Data.Event.EditEventSetters exposing
     , setIntegrationUuid
     , setIntegrationUuids
     , setItemTemplateQuestionUuids
+    , setItemUrl
     , setLabel
     , setLogo
     , setMetricMeasures
@@ -24,13 +25,13 @@ module Shared.Data.Event.EditEventSetters exposing
     , setQuestionUuids
     , setReferenceUuids
     , setRequestBody
+    , setRequestEmptySearch
     , setRequestHeaders
     , setRequestMethod
     , setRequestUrl
     , setRequiredPhaseUuid
     , setResponseItemId
     , setResponseItemTemplate
-    , setResponseItemUrl
     , setResponseListField
     , setShortUuid
     , setTagUuids
@@ -38,6 +39,7 @@ module Shared.Data.Event.EditEventSetters exposing
     , setTitle
     , setUrl
     , setValueType
+    , setWidgetUrl
     )
 
 import Shared.Data.Event.EventField as EventField exposing (EventField)
@@ -118,6 +120,11 @@ setItemTemplateQuestionUuids value data =
     { data | itemTemplateQuestionUuids = EventField.create value True }
 
 
+setItemUrl : a -> { b | itemUrl : EventField a } -> { b | itemUrl : EventField a }
+setItemUrl value data =
+    { data | itemUrl = EventField.create value True }
+
+
 setLabel : a -> { b | label : EventField a } -> { b | label : EventField a }
 setLabel value data =
     { data | label = EventField.create value True }
@@ -168,6 +175,11 @@ setRequestBody value data =
     { data | requestBody = EventField.create value True }
 
 
+setRequestEmptySearch : a -> { b | requestEmptySearch : EventField a } -> { b | requestEmptySearch : EventField a }
+setRequestEmptySearch value data =
+    { data | requestEmptySearch = EventField.create value True }
+
+
 setRequestHeaders : a -> { b | requestHeaders : EventField a } -> { b | requestHeaders : EventField a }
 setRequestHeaders value data =
     { data | requestHeaders = EventField.create value True }
@@ -196,11 +208,6 @@ setResponseItemId value data =
 setResponseItemTemplate : a -> { b | responseItemTemplate : EventField a } -> { b | responseItemTemplate : EventField a }
 setResponseItemTemplate value data =
     { data | responseItemTemplate = EventField.create value True }
-
-
-setResponseItemUrl : a -> { b | responseItemUrl : EventField a } -> { b | responseItemUrl : EventField a }
-setResponseItemUrl value data =
-    { data | responseItemUrl = EventField.create value True }
 
 
 setResponseListField : a -> { b | responseListField : EventField a } -> { b | responseListField : EventField a }
@@ -236,3 +243,8 @@ setUrl value data =
 setValueType : a -> { b | valueType : EventField a } -> { b | valueType : EventField a }
 setValueType value data =
     { data | valueType = EventField.create value True }
+
+
+setWidgetUrl : a -> { b | widgetUrl : EventField a } -> { b | widgetUrl : EventField a }
+setWidgetUrl value data =
+    { data | widgetUrl = EventField.create value True }

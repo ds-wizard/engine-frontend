@@ -1,5 +1,6 @@
 module Shared.Setters exposing
-    ( setBookReference
+    ( setApp
+    , setBookReference
     , setBranches
     , setDocuments
     , setDropdownState
@@ -9,6 +10,7 @@ module Shared.Setters exposing
     , setMigration
     , setPackage
     , setPackages
+    , setPlans
     , setPulling
     , setQuestionnaire
     , setQuestionnaireDetail
@@ -22,6 +24,11 @@ module Shared.Setters exposing
     , setUser
     , setUsers
     )
+
+
+setApp : a -> { b | app : a } -> { b | app : a }
+setApp value record =
+    { record | app = value }
 
 
 setBookReference : a -> { b | bookReference : a } -> { b | bookReference : a }
@@ -72,6 +79,11 @@ setPackage value record =
 setPackages : a -> { b | packages : a } -> { b | packages : a }
 setPackages value record =
     { record | packages = value }
+
+
+setPlans : a -> { b | plans : a } -> { b | plans : a }
+setPlans value record =
+    { record | plans = value }
 
 
 setPulling : a -> { b | pulling : a } -> { b | pulling : a }

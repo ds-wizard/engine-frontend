@@ -147,6 +147,9 @@ messageToReadable appState message =
             Just <| lg "apiError.service.organization.required_hash_in_query_params" appState
 
         -- Wizard
+        "error.validation.app_id_uniqueness" ->
+            Just <| lg "apiError.validation.app_id_uniqueness" appState
+
         "error.validation.openid_code_absence" ->
             Just <| lg "apiError.validation.openid_code_absence" appState
 

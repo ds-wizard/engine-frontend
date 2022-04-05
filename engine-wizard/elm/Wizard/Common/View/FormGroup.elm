@@ -9,6 +9,7 @@ module Wizard.Common.View.FormGroup exposing
     , inputAttrs
     , inputWithTypehints
     , list
+    , listWithCustomMsg
     , listWithHeader
     , markdownEditor
     , optionalWrapper
@@ -19,6 +20,7 @@ module Wizard.Common.View.FormGroup exposing
     , richRadioGroup
     , select
     , selectWithDisabled
+    , simpleDate
     , textView
     , textarea
     , textareaAttrs
@@ -33,13 +35,13 @@ import Html exposing (Html, a, button, code, div, label, li, option, p, span, te
 import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, selected, type_, value)
 import Html.Events exposing (on, onBlur, onCheck, onClick, onFocus, onMouseDown, targetValue)
 import Json.Decode as Json
-import Markdown
 import Maybe.Extra as Maybe
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError(..))
 import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (l, lx)
+import Shared.Markdown as Markdown
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.PasswordBar as PasswordBar
@@ -338,6 +340,28 @@ list appState itemView form fieldName labelText =
         ]
 
 
+listWithCustomMsg : AppState -> (Form.Msg -> msg) -> (Form FormError o -> Int -> Html msg) -> Form FormError o -> String -> String -> Html msg
+listWithCustomMsg appState wrapMsg itemView form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, _ ) =
+            getErrors appState field labelText
+    in
+    div [ class "form-group" ]
+        [ label [] [ text labelText ]
+        , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
+        , div [ class "form-list-error" ] [ error ]
+        , button
+            [ class "btn btn-secondary"
+            , onClick (wrapMsg <| Form.Append fieldName)
+            , dataCy "form-group_list_add-button"
+            ]
+            [ lx_ "list.add" appState ]
+        ]
+
+
 listWithHeader : AppState -> Html Form.Msg -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> Html Form.Msg
 listWithHeader appState header itemView form fieldName labelText =
     let
@@ -462,6 +486,44 @@ markdownEditor appState form fieldName labelText =
         ]
 
 
+simpleDate : AppState -> Form FormError o -> String -> String -> String -> String -> Html.Html Form.Msg
+simpleDate appState form yearFieldName monthFieldName dayFieldName labelText =
+    let
+        yearField =
+            Form.getFieldAsString yearFieldName form
+
+        ( yearFieldError, yearFieldErrorClass ) =
+            getErrors appState yearField labelText
+
+        monthField =
+            Form.getFieldAsString monthFieldName form
+
+        ( monthFieldError, monthFieldErrorClass ) =
+            getErrors appState monthField labelText
+
+        dayField =
+            Form.getFieldAsString dayFieldName form
+
+        ( dayFieldError, dayFieldErrorClass ) =
+            getErrors appState dayField labelText
+
+        error =
+            [ yearFieldError, monthFieldError, dayFieldError ]
+                |> List.filter ((/=) emptyNode)
+                |> List.head
+                |> Maybe.withDefault emptyNode
+    in
+    div [ class "form-group form-group-simple-date" ]
+        [ label [] [ text labelText ]
+        , div [ class "date-inputs" ]
+            [ Input.textInput dayField [ class <| "form-control " ++ dayFieldErrorClass, id dayFieldName, name dayFieldName ]
+            , Input.textInput monthField [ class <| "form-control " ++ monthFieldErrorClass, id monthFieldName, name monthFieldName ]
+            , Input.textInput yearField [ class <| "form-control " ++ yearFieldErrorClass, id yearFieldName, name yearFieldName ]
+            ]
+        , error
+        ]
+
+
 {-| Create Html for a form field using the given input field.
 -}
 formGroup : Input.Input FormError String -> List (Html.Attribute Form.Msg) -> AppState -> Form FormError o -> String -> String -> Html.Html Form.Msg
@@ -533,4 +595,4 @@ getErrors appState field labelText =
             ( p [ class "invalid-feedback" ] [ text (errorToString appState labelText error) ], "is-invalid" )
 
         Nothing ->
-            ( text "", "" )
+            ( emptyNode, "" )

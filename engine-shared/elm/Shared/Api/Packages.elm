@@ -5,13 +5,15 @@ module Shared.Api.Packages exposing
     , getPackage
     , getPackages
     , getPackagesSuggestions
+    , importFromOwl
     , importPackage
     , pullPackage
     )
 
 import File exposing (File)
+import Http
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
@@ -66,6 +68,15 @@ pullPackage packageId =
 importPackage : File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 importPackage =
     jwtPostFile "/packages/bundle"
+
+
+importFromOwl : List ( String, String ) -> File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+importFromOwl params =
+    let
+        httpParams =
+            List.map (\( k, v ) -> Http.stringPart k v) params
+    in
+    jwtPostFileWithData "/packages/bundle" httpParams
 
 
 exportPackageUrl : String -> AbstractAppState a -> String

@@ -6,6 +6,7 @@ import Wizard.Settings.Dashboard.Models
 import Wizard.Settings.KnowledgeModels.Models
 import Wizard.Settings.LookAndFeel.Models
 import Wizard.Settings.Organization.Models
+import Wizard.Settings.Plans.Models
 import Wizard.Settings.PrivacyAndSupport.Models
 import Wizard.Settings.Projects.Models
 import Wizard.Settings.Registry.Models
@@ -27,6 +28,7 @@ type alias Model =
     , templateModel : Wizard.Settings.Template.Models.Model
     , knowledgeModelsModel : Wizard.Settings.KnowledgeModels.Models.Model
     , usageModel : Wizard.Settings.Usage.Models.Model
+    , plansModel : Wizard.Settings.Plans.Models.Model
     }
 
 
@@ -43,6 +45,7 @@ initialModel appState =
     , templateModel = Wizard.Settings.Template.Models.initialModel
     , knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel
     , usageModel = Wizard.Settings.Usage.Models.initialModel
+    , plansModel = Wizard.Settings.Plans.Models.initialModel
     }
 
 
@@ -81,3 +84,6 @@ initLocalModel appState route model =
 
         UsageRoute ->
             { model | usageModel = Wizard.Settings.Usage.Models.initialModel }
+
+        PlansRoute ->
+            { model | plansModel = Wizard.Settings.Plans.Models.initialModel }

@@ -16,30 +16,31 @@ import Wizard.Settings.Generic.Model exposing (Model)
 import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 
 
-type alias ViewProps form =
+type alias ViewProps form msg =
     { locTitle : AppState -> String
     , locSave : AppState -> String
-    , formView : AppState -> Form FormError form -> Html Form.Msg
+    , formView : AppState -> Form FormError form -> Html msg
+    , wrapMsg : Form.Msg -> msg
     }
 
 
-view : ViewProps form -> AppState -> Model form -> Html Msg
+view : ViewProps form msg -> AppState -> Model form -> Html msg
 view props appState model =
     Page.actionResultView appState (viewForm props appState model) model.config
 
 
-viewForm : ViewProps form -> AppState -> Model form -> config -> Html Msg
+viewForm : ViewProps form msg -> AppState -> Model form -> config -> Html msg
 viewForm props appState model _ =
     div [ wideDetailClass "" ]
         [ Page.header (props.locTitle appState) []
         , div []
             [ FormResult.errorOnlyView appState model.savingConfig
-            , props.formView appState model.form |> Html.map FormMsg
+            , props.formView appState model.form
             , div [ class "mt-5" ]
                 [ ActionButton.buttonWithAttrs appState
                     (ActionButton.ButtonWithAttrsConfig (props.locSave appState)
                         model.savingConfig
-                        (FormMsg Form.Submit)
+                        (props.wrapMsg Form.Submit)
                         False
                         [ dataCy "form_submit" ]
                     )

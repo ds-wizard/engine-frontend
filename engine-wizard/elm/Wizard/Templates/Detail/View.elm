@@ -1,9 +1,8 @@
 module Wizard.Templates.Detail.View exposing (view)
 
-import Html exposing (Html, a, br, dd, div, dl, dt, li, p, strong, text, ul)
+import Html exposing (Html, a, div, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
-import Markdown
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
@@ -12,9 +11,11 @@ import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lg, lh, lx)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -50,7 +51,7 @@ view appState model =
 
 viewPackage : AppState -> Model -> TemplateDetail -> Html Msg
 viewPackage appState model template =
-    div [ class "KnowledgeModels__Detail" ]
+    DetailPage.container
         [ header appState template
         , readme appState template
         , sidePanel appState template
@@ -84,12 +85,7 @@ header appState template =
                 |> listInsertIf exportAction exportActionVisible
                 |> listInsertIf deleteAction deleteActionVisible
     in
-    div [ class "top-header" ]
-        [ div [ class "top-header-content" ]
-            [ div [ class "top-header-title", dataCy "template_header-title" ] [ text template.name ]
-            , div [ class "top-header-actions" ] actions
-            ]
-        ]
+    DetailPage.header (text template.name) actions
 
 
 readme : AppState -> TemplateDetail -> Html msg
@@ -108,10 +104,10 @@ readme appState template =
             else
                 newVersionInRegistryWarning appState template
     in
-    div [ class "KnowledgeModels__Detail__Readme" ]
+    DetailPage.content
         [ warning
         , unsupportedMetamodelVersionWarning appState template
-        , Markdown.toHtml [ class "readme" ] template.readme
+        , Markdown.toHtml [ DetailPage.contentInnerClass ] template.readme
         ]
 
 
@@ -186,24 +182,24 @@ sidePanel appState template =
             , sidePanelUsableWith appState template
             ]
     in
-    div [ class "KnowledgeModels__Detail__SidePanel" ]
-        [ list 12 12 <| listFilterJust sections ]
+    DetailPage.sidePanel
+        [ DetailPage.sidePanelList 12 12 <| listFilterJust sections ]
 
 
-sidePanelKmInfo : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelKmInfo : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelKmInfo appState template =
     let
         templateInfoList =
-            [ ( lg "template.id" appState, text template.id )
-            , ( lg "template.version" appState, text <| Version.toString template.version )
-            , ( lg "template.metamodel" appState, text <| String.fromInt template.metamodelVersion )
-            , ( lg "template.license" appState, text template.license )
+            [ ( lg "template.id" appState, "id", text template.id )
+            , ( lg "template.version" appState, "version", text <| Version.toString template.version )
+            , ( lg "template.metamodel" appState, "metamodel", text <| String.fromInt template.metamodelVersion )
+            , ( lg "template.license" appState, "license", text template.license )
             ]
     in
-    Just ( lg "template" appState, list 4 8 <| templateInfoList )
+    Just ( lg "template" appState, "template", DetailPage.sidePanelList 4 8 templateInfoList )
 
 
-sidePanelFormats : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelFormats : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelFormats appState template =
     let
         formatView format =
@@ -215,13 +211,13 @@ sidePanelFormats appState template =
                 |> List.map formatView
     in
     if List.length formats > 0 then
-        Just ( lg "template.formats" appState, ul [ class "format-list" ] formats )
+        Just ( lg "template.formats" appState, "formats", ul [ class "format-list" ] formats )
 
     else
         Nothing
 
 
-sidePanelOtherVersions : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelOtherVersions : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelOtherVersions appState template =
     let
         versionLink version =
@@ -240,22 +236,23 @@ sidePanelOtherVersions appState template =
                 |> List.map versionLink
     in
     if List.length versionLinks > 0 then
-        Just ( lg "template.otherVersions" appState, ul [] versionLinks )
+        Just ( lg "template.otherVersions" appState, "other-versions", ul [] versionLinks )
 
     else
         Nothing
 
 
-sidePanelOrganizationInfo : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelOrganizationInfo : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelOrganizationInfo appState template =
-    Maybe.map (\organization -> ( lg "template.publishedBy" appState, viewOrganization organization )) template.organization
+    Maybe.map (\organization -> ( lg "template.publishedBy" appState, "published-by", viewOrganization organization )) template.organization
 
 
-sidePanelRegistryLink : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelRegistryLink : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelRegistryLink appState template =
     let
         toRegistryLink registryLink =
             ( lg "template.registryLink" appState
+            , "registry-link"
             , a [ href registryLink, class "link-with-icon", target "_blank" ]
                 [ faSet "kmDetail.registryLink" appState
                 , text template.id
@@ -265,7 +262,7 @@ sidePanelRegistryLink appState template =
     Maybe.map toRegistryLink template.registryLink
 
 
-sidePanelUsableWith : AppState -> TemplateDetail -> Maybe ( String, Html msg )
+sidePanelUsableWith : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelUsableWith appState template =
     let
         packageLink package =
@@ -282,35 +279,17 @@ sidePanelUsableWith appState template =
                 |> List.map packageLink
     in
     if List.length packageLinks > 0 then
-        Just ( lg "template.usableWith" appState, ul [] packageLinks )
+        Just ( lg "template.usableWith" appState, "usable-with", ul [] packageLinks )
 
     else
         Nothing
 
 
-list : Int -> Int -> List ( String, Html msg ) -> Html msg
-list colLabel colValue rows =
-    let
-        viewRow ( label, value ) =
-            [ dt [ class <| "col-" ++ String.fromInt colLabel ]
-                [ text label ]
-            , dd [ class <| "col-" ++ String.fromInt colValue ]
-                [ value ]
-            ]
-    in
-    dl [ class "row" ] (List.concatMap viewRow rows)
-
-
 viewOrganization : OrganizationInfo -> Html msg
 viewOrganization organization =
-    div [ class "organization" ]
-        [ ItemIcon.view { text = organization.name, image = organization.logo }
-        , div [ class "content" ]
-            [ strong [] [ text organization.name ]
-            , br [] []
-            , text organization.organizationId
-            ]
-        ]
+    DetailPage.sidePanelItemWithIcon organization.name
+        (text organization.organizationId)
+        (ItemIcon.view { text = organization.name, image = organization.logo })
 
 
 deleteVersionModal : AppState -> Model -> { a | id : String } -> Html Msg

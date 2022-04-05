@@ -5,12 +5,13 @@ import Html exposing (Html, div, img, label, p, strong)
 import Html.Attributes exposing (class, src)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l, lx)
+import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.DashboardConfigForm as DashboardConfigForm exposing (DashboardConfigForm)
 import Wizard.Settings.Dashboard.Models exposing (Model)
-import Wizard.Settings.Generic.Msgs exposing (Msg)
+import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 import Wizard.Settings.Generic.View as GenericView
 
 
@@ -29,11 +30,12 @@ view =
     GenericView.view viewProps
 
 
-viewProps : GenericView.ViewProps DashboardConfigForm
+viewProps : GenericView.ViewProps DashboardConfigForm Msg
 viewProps =
     { locTitle = l_ "title"
     , locSave = l_ "save"
-    , formView = formView
+    , formView = compose2 (Html.map FormMsg) formView
+    , wrapMsg = FormMsg
     }
 
 

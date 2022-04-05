@@ -4,11 +4,12 @@ import Form exposing (Form)
 import Html exposing (Html, div)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Locale exposing (l)
+import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.OrganizationConfigForm exposing (OrganizationConfigForm)
-import Wizard.Settings.Generic.Msgs exposing (Msg)
+import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Organization.Models exposing (Model)
 
@@ -23,11 +24,12 @@ view =
     GenericView.view viewProps
 
 
-viewProps : GenericView.ViewProps OrganizationConfigForm
+viewProps : GenericView.ViewProps OrganizationConfigForm Msg
 viewProps =
     { locTitle = l_ "title"
     , locSave = l_ "save"
-    , formView = formView
+    , formView = compose2 (Html.map FormMsg) formView
+    , wrapMsg = FormMsg
     }
 
 

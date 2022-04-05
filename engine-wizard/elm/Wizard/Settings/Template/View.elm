@@ -4,7 +4,6 @@ import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
-import List.Extra as List
 import Shared.Data.BootstrapConfig.TemplateConfig exposing (TemplateConfig)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
@@ -13,6 +12,7 @@ import Shared.Utils exposing (getOrganizationAndItemId)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
+import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Template.Models exposing (Model)
 import Wizard.Settings.Template.Msgs exposing (Msg(..))
@@ -30,19 +30,19 @@ view appState model =
 
 viewContent : AppState -> Model -> List TemplateSuggestion -> Html Msg
 viewContent appState model templates =
-    Html.map GenericMsg <|
-        GenericView.view (viewProps templates) appState model.genericModel
+    GenericView.view (viewProps templates) appState model.genericModel
 
 
-viewProps : List TemplateSuggestion -> GenericView.ViewProps TemplateConfig
+viewProps : List TemplateSuggestion -> GenericView.ViewProps TemplateConfig Msg
 viewProps templates =
     { locTitle = l_ "title"
     , locSave = l_ "save"
     , formView = formView templates
+    , wrapMsg = GenericMsg << GenericMsgs.FormMsg
     }
 
 
-formView : List TemplateSuggestion -> AppState -> Form FormError TemplateConfig -> Html Form.Msg
+formView : List TemplateSuggestion -> AppState -> Form FormError TemplateConfig -> Html Msg
 formView templates appState form =
     let
         recommendedTemplateField =
@@ -66,10 +66,11 @@ formView templates appState form =
                 |> Maybe.map templateToTemplateVersionOptions
                 |> Maybe.withDefault []
     in
-    div [ class "form-group" ]
-        [ label [] [ text (l_ "form.recommendedTemplateId" appState) ]
-        , div [ class "input-group" ]
-            [ Input.selectInput templateOptions recommendedTemplateField [ class "form-control" ]
-            , Input.selectInput templateVersionOptions recommendedTemplateIdField [ class "form-control" ]
+    Html.map (GenericMsg << GenericMsgs.FormMsg) <|
+        div [ class "form-group" ]
+            [ label [] [ text (l_ "form.recommendedTemplateId" appState) ]
+            , div [ class "input-group" ]
+                [ Input.selectInput templateOptions recommendedTemplateField [ class "form-control" ]
+                , Input.selectInput templateVersionOptions recommendedTemplateIdField [ class "form-control" ]
+                ]
             ]
-        ]

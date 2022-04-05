@@ -1,6 +1,10 @@
 module Shared.Common.TimeUtils exposing
-    ( monthToInt
+    ( fromYMD
+    , intToMonth
+    , isBetween
+    , monthToInt
     , monthToString
+    , toReadableDate
     , toReadableDateTime
     , toReadableTime
     )
@@ -8,6 +12,7 @@ module Shared.Common.TimeUtils exposing
 import Shared.Locale exposing (lg)
 import Shared.Provisioning exposing (Provisioning)
 import Time exposing (Month(..))
+import Time.Extra as Time
 
 
 toReadableDateTime : Time.Zone -> Time.Posix -> String
@@ -31,6 +36,21 @@ toReadableDateTime timeZone time =
     day ++ ". " ++ month ++ ". " ++ year ++ ", " ++ hour ++ ":" ++ min
 
 
+toReadableDate : Time.Zone -> Time.Posix -> String
+toReadableDate timeZone time =
+    let
+        day =
+            String.fromInt <| Time.toDay timeZone time
+
+        month =
+            String.fromInt <| monthToInt <| Time.toMonth timeZone time
+
+        year =
+            String.fromInt <| Time.toYear timeZone time
+    in
+    day ++ ". " ++ month ++ ". " ++ year
+
+
 toReadableTime : Time.Zone -> Time.Posix -> String
 toReadableTime timeZone time =
     let
@@ -41,6 +61,12 @@ toReadableTime timeZone time =
             String.padLeft 2 '0' <| String.fromInt <| Time.toMinute timeZone time
     in
     hour ++ ":" ++ min
+
+
+fromYMD : Time.Zone -> Int -> Int -> Int -> Time.Posix
+fromYMD timeZone year month day =
+    Time.partsToPosix timeZone <|
+        Time.Parts year (intToMonth month) day 0 0 0 0
 
 
 monthToInt : Month -> Int
@@ -83,6 +109,46 @@ monthToInt month =
             12
 
 
+intToMonth : Int -> Month
+intToMonth month =
+    case month of
+        1 ->
+            Jan
+
+        2 ->
+            Feb
+
+        3 ->
+            Mar
+
+        4 ->
+            Apr
+
+        5 ->
+            May
+
+        6 ->
+            Jun
+
+        7 ->
+            Jul
+
+        8 ->
+            Aug
+
+        9 ->
+            Sep
+
+        10 ->
+            Oct
+
+        11 ->
+            Nov
+
+        _ ->
+            Dec
+
+
 monthToString : { a | provisioning : Provisioning } -> Month -> String
 monthToString appState month =
     case month of
@@ -121,3 +187,18 @@ monthToString appState month =
 
         Dec ->
             lg "month.december" appState
+
+
+isBetween : Time.Posix -> Time.Posix -> Time.Posix -> Bool
+isBetween start end time =
+    let
+        startMillis =
+            Time.posixToMillis start
+
+        endMillis =
+            Time.posixToMillis end
+
+        timeMillis =
+            Time.posixToMillis time
+    in
+    startMillis < timeMillis && endMillis > timeMillis

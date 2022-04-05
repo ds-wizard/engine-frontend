@@ -7,10 +7,12 @@ module Shared.Data.BootstrapConfig exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
+import Shared.Data.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Shared.Data.BootstrapConfig.DashboardConfig as DashboardConfig exposing (DashboardConfig)
 import Shared.Data.BootstrapConfig.FeatureConfig as FeatureConfig exposing (FeatureConfig)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
+import Shared.Data.BootstrapConfig.OwlConfig as OwlConfig exposing (OwlConfig)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Data.BootstrapConfig.QuestionnaireConfig as QuestionnaireConfig exposing (QuestionnaireConfig)
 import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig exposing (RegistryConfig)
@@ -29,6 +31,8 @@ type alias BootstrapConfig =
     , submission : SubmissionConfig
     , template : TemplateConfig
     , feature : FeatureConfig
+    , cloud : CloudConfig
+    , owl : OwlConfig
     }
 
 
@@ -44,6 +48,8 @@ default =
     , submission = SubmissionConfig.default
     , template = TemplateConfig.default
     , feature = FeatureConfig.default
+    , cloud = CloudConfig.default
+    , owl = OwlConfig.default
     }
 
 
@@ -60,3 +66,5 @@ decoder =
         |> D.required "submission" SubmissionConfig.decoder
         |> D.required "template" TemplateConfig.decoder
         |> D.required "feature" FeatureConfig.decoder
+        |> D.required "cloud" CloudConfig.decoder
+        |> D.required "owl" OwlConfig.decoder

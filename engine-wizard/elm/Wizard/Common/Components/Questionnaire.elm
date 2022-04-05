@@ -33,7 +33,6 @@ import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouse
 import Json.Decode as D
 import Json.Encode as E
 import List.Extra as List
-import Markdown
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Roman
@@ -44,7 +43,10 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
+import Shared.Data.KnowledgeModel.Integration.ApiIntegrationData exposing (ApiIntegrationData)
+import Shared.Data.KnowledgeModel.Integration.CommonIntegrationData exposing (CommonIntegrationData)
+import Shared.Data.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
@@ -62,6 +64,7 @@ import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import String exposing (fromInt)
@@ -290,9 +293,9 @@ type Msg
     | SetRightPanel RightPanel
     | SetFullscreen Bool
     | ScrollToPath String
-    | ShowTypeHints (List String) String String
+    | ShowTypeHints (List String) Bool String String
     | HideTypeHints
-    | TypeHintInput (List String) Reply
+    | TypeHintInput (List String) Bool Reply
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
@@ -358,14 +361,14 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         ScrollToPath path ->
             withSeed <| handleScrollToPath model path
 
-        ShowTypeHints path questionUuid value ->
-            withSeed <| handleShowTypeHints appState ctx model path questionUuid value
+        ShowTypeHints path emptySearch questionUuid value ->
+            withSeed <| handleShowTypeHints appState ctx model path emptySearch questionUuid value
 
         HideTypeHints ->
             wrap { model | typeHints = Nothing }
 
-        TypeHintInput path value ->
-            withSeed <| handleTypeHintsInput model path value
+        TypeHintInput path emptySearch value ->
+            withSeed <| handleTypeHintsInput model path emptySearch value
 
         TypeHintDebounceMsg debounceMsg ->
             withSeed <| handleTypeHintDebounceMsg appState ctx model debounceMsg
@@ -575,38 +578,60 @@ handleScrollToPath model path =
     ( { model | activePage = PageChapter chapterUuid }, Ports.scrollIntoView selector )
 
 
-handleShowTypeHints : AppState -> Context -> Model -> List String -> String -> String -> ( Model, Cmd Msg )
-handleShowTypeHints appState ctx model path questionUuid value =
-    let
-        typeHints =
-            Just
-                { path = path
-                , hints = Loading
-                }
+handleShowTypeHints : AppState -> Context -> Model -> List String -> Bool -> String -> String -> ( Model, Cmd Msg )
+handleShowTypeHints appState ctx model path emptySearch questionUuid value =
+    if not emptySearch && String.isEmpty value then
+        ( model, Cmd.none )
 
-        cmd =
-            loadTypeHints appState ctx model path questionUuid value
-    in
-    ( { model | typeHints = typeHints }, cmd )
+    else
+        let
+            typeHints =
+                Just
+                    { path = path
+                    , hints = Loading
+                    }
+
+            cmd =
+                loadTypeHints appState ctx model path questionUuid value
+        in
+        ( { model | typeHints = typeHints }, cmd )
 
 
-handleTypeHintsInput : Model -> List String -> Reply -> ( Model, Cmd Msg )
-handleTypeHintsInput model path reply =
+handleTypeHintsInput : Model -> List String -> Bool -> Reply -> ( Model, Cmd Msg )
+handleTypeHintsInput model path emptySearch reply =
     let
         questionUuid =
             Maybe.withDefault "" (List.last path)
 
-        ( debounce, debounceCmd ) =
-            Debounce.push
-                debounceConfig
-                ( path, questionUuid, ReplyValue.getStringReply reply.value )
-                model.typeHintsDebounce
+        updatedTypeHints =
+            case model.typeHints of
+                Just typehints ->
+                    Just typehints
+
+                Nothing ->
+                    Just
+                        { path = path
+                        , hints = Loading
+                        }
+
+        ( ( debounce, debounceCmd ), newTypeHints ) =
+            case ( emptySearch, reply.value ) of
+                ( False, IntegrationReply (PlainType "") ) ->
+                    ( ( model.typeHintsDebounce, Cmd.none ), Nothing )
+
+                _ ->
+                    ( Debounce.push
+                        debounceConfig
+                        ( path, questionUuid, ReplyValue.getStringReply reply.value )
+                        model.typeHintsDebounce
+                    , updatedTypeHints
+                    )
 
         dispatchCmd =
             dispatch <|
                 SetReply (pathToString path) reply
     in
-    ( { model | typeHintsDebounce = debounce }
+    ( { model | typeHintsDebounce = debounce, typeHints = newTypeHints }
     , Cmd.batch [ debounceCmd, dispatchCmd ]
     )
 
@@ -1632,15 +1657,18 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
 
                 IntegrationQuestion _ data ->
                     let
-                        integrationId =
-                            Maybe.unwrap "" .id <|
-                                KnowledgeModel.getIntegration data.integrationUuid model.questionnaire.knowledgeModel
+                        mbIntegration =
+                            KnowledgeModel.getIntegration data.integrationUuid model.questionnaire.knowledgeModel
                     in
-                    if String.startsWith "_widget." integrationId then
-                        ( viewQuestionIntegrationWidget appState cfg model newPath question, [] )
+                    case mbIntegration of
+                        Just (ApiIntegration commonIntegrationData apiIntegrationData) ->
+                            ( viewQuestionIntegrationApi appState cfg model newPath commonIntegrationData apiIntegrationData question, [] )
 
-                    else
-                        ( viewQuestionIntegration appState cfg model newPath question, [] )
+                        Just (WidgetIntegration commonIntegrationData widgetIntegrationData) ->
+                            ( viewQuestionIntegrationWidget appState cfg model newPath commonIntegrationData widgetIntegrationData, [] )
+
+                        _ ->
+                            ( emptyNode, [] )
 
                 MultiChoiceQuestion _ _ ->
                     ( viewQuestionMultiChoice appState cfg model newPath question, [] )
@@ -1950,26 +1978,20 @@ viewQuestionValue appState cfg model path question =
     div [] [ inputView ]
 
 
-viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
-viewQuestionIntegrationWidget appState cfg model path question =
+viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg
+viewQuestionIntegrationWidget appState cfg model path commonIntegrationData widgetIntegrationData =
     let
-        integrationUuid =
-            Maybe.withDefault "" <| Question.getIntegrationUuid question
-
-        mbIntegration =
-            KnowledgeModel.getIntegration integrationUuid model.questionnaire.knowledgeModel
-
         mbReplyValue =
             Maybe.map .value <|
                 Dict.get (pathToString path) model.questionnaire.replies
 
         questionInput =
-            case ( mbIntegration, mbReplyValue ) of
-                ( Just integration, Just (IntegrationReply (IntegrationType id integrationValue)) ) ->
-                    viewQuestionIntegrationIntegrationReply integration id integrationValue
+            case mbReplyValue of
+                Just (IntegrationReply (IntegrationType id integrationValue)) ->
+                    viewQuestionIntegrationIntegrationReply commonIntegrationData id integrationValue
 
                 _ ->
-                    viewQuestionIntegrationWidgetSelectButton appState cfg path mbIntegration mbReplyValue
+                    viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationData mbReplyValue
     in
     div [ class "question-integration-answer" ]
         [ questionInput
@@ -1977,12 +1999,12 @@ viewQuestionIntegrationWidget appState cfg model path question =
         ]
 
 
-viewQuestionIntegrationWidgetSelectButton : AppState -> Config msg -> List String -> Maybe Integration -> Maybe ReplyValue -> Html Msg
-viewQuestionIntegrationWidgetSelectButton appState cfg path mbIntegration mbReplyValue =
-    case ( cfg.features.readonly, Maybe.isJust mbReplyValue, mbIntegration ) of
-        ( False, False, Just integration ) ->
+viewQuestionIntegrationWidgetSelectButton : AppState -> Config msg -> List String -> WidgetIntegrationData -> Maybe ReplyValue -> Html Msg
+viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationData mbReplyValue =
+    case ( cfg.features.readonly, Maybe.isJust mbReplyValue ) of
+        ( False, False ) ->
             button
-                [ onClick (OpenIntegrationWidget (pathToString path) integration.requestUrl)
+                [ onClick (OpenIntegrationWidget (pathToString path) widgetIntegrationData.widgetUrl)
                 , class "btn btn-secondary"
                 ]
                 [ lx_ "integrationWidget.select" appState ]
@@ -1991,27 +2013,24 @@ viewQuestionIntegrationWidgetSelectButton appState cfg path mbIntegration mbRepl
             emptyNode
 
 
-viewQuestionIntegration : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
-viewQuestionIntegration appState cfg model path question =
+viewQuestionIntegrationApi : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiIntegrationData -> Question -> Html Msg
+viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiIntegrationData question =
     let
         questionValue =
             Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
+
+        onFocusHandler =
+            [ onFocus (ShowTypeHints path apiIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
 
         extraArgs =
             if cfg.features.readonly then
                 [ disabled True ]
 
             else
-                [ onInput (TypeHintInput path << createReply appState << IntegrationReply << PlainType)
-                , onFocus (ShowTypeHints path (Question.getUuid question) questionValue)
+                [ onInput (TypeHintInput path apiIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
                 , onBlur HideTypeHints
                 ]
-
-        integrationUuid =
-            Maybe.withDefault "" <| Question.getIntegrationUuid question
-
-        mbIntegration =
-            KnowledgeModel.getIntegration integrationUuid model.questionnaire.knowledgeModel
+                    ++ onFocusHandler
 
         mbReplyValue =
             Maybe.map .value <|
@@ -2021,14 +2040,14 @@ viewQuestionIntegration appState cfg model path question =
             input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
 
         questionInput =
-            case ( mbIntegration, mbReplyValue ) of
-                ( Just integration, Just (IntegrationReply integrationReply) ) ->
+            case mbReplyValue of
+                Just (IntegrationReply integrationReply) ->
                     case integrationReply of
                         PlainType plainValue ->
                             viewInput plainValue
 
                         IntegrationType id integrationValue ->
-                            viewQuestionIntegrationIntegrationReply integration id integrationValue
+                            viewQuestionIntegrationIntegrationReply commonIntegrationData id integrationValue
 
                 _ ->
                     viewInput ""
@@ -2090,7 +2109,7 @@ viewQuestionIntegrationTypeHint appState cfg path typeHint =
             ]
 
 
-viewQuestionIntegrationIntegrationReply : Integration -> String -> String -> Html Msg
+viewQuestionIntegrationIntegrationReply : CommonIntegrationData -> String -> String -> Html Msg
 viewQuestionIntegrationIntegrationReply integration id value =
     div [ class "card" ]
         [ Markdown.toHtml [ class "card-body item-md" ] value
@@ -2098,11 +2117,11 @@ viewQuestionIntegrationIntegrationReply integration id value =
         ]
 
 
-viewQuestionIntegrationLink : Integration -> String -> Html Msg
+viewQuestionIntegrationLink : CommonIntegrationData -> String -> Html Msg
 viewQuestionIntegrationLink integration id =
     let
         url =
-            String.replace "${id}" id integration.responseItemUrl
+            String.replace "${id}" id integration.itemUrl
 
         logo =
             if String.isEmpty integration.logo then

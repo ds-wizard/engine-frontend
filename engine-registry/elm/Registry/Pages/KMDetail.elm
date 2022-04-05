@@ -10,7 +10,6 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, a, br, code, div, h5, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target, title)
 import Html.Events exposing (onClick)
-import Markdown
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Entities.OrganizationInfo exposing (OrganizationInfo)
 import Registry.Common.Entities.PackageDetail exposing (PackageDetail)
@@ -22,6 +21,7 @@ import Shared.Copy as Copy
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
+import Shared.Markdown as Markdown
 import Version
 
 

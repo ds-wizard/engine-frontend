@@ -5,6 +5,8 @@ import Wizard.KnowledgeModels.Import.FileImport.Models as FileImportModels
 import Wizard.KnowledgeModels.Import.FileImport.Update as FileImportUpdate
 import Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model)
 import Wizard.KnowledgeModels.Import.Msgs exposing (Msg(..))
+import Wizard.KnowledgeModels.Import.OwlImport.Models as OwlImportModels
+import Wizard.KnowledgeModels.Import.OwlImport.Update as OwlImportUpdate
 import Wizard.KnowledgeModels.Import.RegistryImport.Models as RegistryImportModels
 import Wizard.KnowledgeModels.Import.RegistryImport.Update as RegistryImportUpdate
 import Wizard.Msgs
@@ -31,13 +33,27 @@ update msg wrapMsg appState model =
             , registryImportCmd
             )
 
+        ( OwlImportMsg owlImportMsg, OwlImportModel owlImoprtModel ) ->
+            let
+                ( newOwlImportModel, owlImportCmd ) =
+                    OwlImportUpdate.update owlImportMsg (wrapMsg << OwlImportMsg) appState owlImoprtModel
+            in
+            ( { model | importModel = OwlImportModel newOwlImportModel }
+            , owlImportCmd
+            )
+
         ( ShowRegistryImport, _ ) ->
-            ( { model | importModel = RegistryImportModel <| RegistryImportModels.initialModel "" }
+            ( { model | importModel = RegistryImportModel (RegistryImportModels.initialModel "") }
             , Cmd.none
             )
 
         ( ShowFileImport, _ ) ->
             ( { model | importModel = FileImportModel FileImportModels.initialModel }
+            , Cmd.none
+            )
+
+        ( ShowOwlImport, _ ) ->
+            ( { model | importModel = OwlImportModel (OwlImportModels.initialModel appState) }
             , Cmd.none
             )
 

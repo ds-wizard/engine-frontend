@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import List.Extra as List
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
+import Shared.Api.Prefabs as PrefabsApi
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Data.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction
 import Shared.Data.WebSockets.ClientBranchAction as ClientBranchAction
@@ -42,7 +43,10 @@ fetchData appState uuid model =
             ]
 
     else
-        BranchesApi.getBranch uuid appState GetBranchComplete
+        Cmd.batch
+            [ BranchesApi.getBranch uuid appState GetBranchComplete
+            , PrefabsApi.getIntegrationPrefabs appState GetIntegrationPrefabsComplete
+            ]
 
 
 fetchSubrouteData : AppState -> model -> Cmd Msg
@@ -125,6 +129,14 @@ update wrapMsg msg appState model =
                         ( { model | branchModel = ApiError.toActionResult appState (lg "apiError.branches.getError" appState) error }
                         , getResultCmd result
                         )
+
+        GetIntegrationPrefabsComplete result ->
+            case result of
+                Ok integrationPrefabs ->
+                    withSeed ( { model | integrationPrefabs = Success <| List.map .content integrationPrefabs }, Cmd.none )
+
+                Err _ ->
+                    withSeed ( { model | integrationPrefabs = Error "" }, Cmd.none )
 
         WebSocketMsg wsMsg ->
             handleWebSocketMsg wsMsg appState model

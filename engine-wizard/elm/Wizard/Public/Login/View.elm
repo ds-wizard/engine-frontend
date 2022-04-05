@@ -3,9 +3,9 @@ module Wizard.Public.Login.View exposing (view)
 import Html exposing (Html, div, form, input, span)
 import Html.Attributes exposing (class, id, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
-import Markdown
 import Shared.Html exposing (fa)
 import Shared.Locale exposing (l, lg, lx)
+import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)

@@ -13,6 +13,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     , isAdded
     , isDeleted
     , isEdited
+    , isEmptyIntegrationEditorUuid
     , setActiveEditor
     , sortDeleted
     , treeCollapseAll
@@ -24,6 +25,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
 import Dict
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Set exposing (Set)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData
@@ -50,6 +52,7 @@ import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData
 import Shared.Data.Event.EditTagEventData as EditTagEventData
 import Shared.Data.Event.MoveEventData exposing (MoveEventData)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Integration as Integration
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Locale exposing (lg)
@@ -67,6 +70,7 @@ type alias EditorBranch =
     , addedUuids : List String
     , editedUuids : List String
     , deletedUuids : List String
+    , emptyIntegrationEditorUuids : Set String
     }
 
 
@@ -84,6 +88,7 @@ init branch mbEditorUuid =
             , addedUuids = []
             , editedUuids = []
             , deletedUuids = []
+            , emptyIntegrationEditorUuids = Set.empty
             }
     in
     setActiveEditor (Maybe.map Uuid.toString mbEditorUuid) <|
@@ -233,7 +238,7 @@ getEditorName appState uuid editorBranch =
             getEditorName_ (String.withDefault (lg "tag.untitled" appState) << .name) KnowledgeModel.getTag
 
         getIntegrationName =
-            getEditorName_ (String.withDefault (lg "integration.untitled" appState) << .name) KnowledgeModel.getIntegration
+            getEditorName_ (String.withDefault (lg "integration.untitled" appState) << Integration.getName) KnowledgeModel.getIntegration
 
         getAnswerName =
             getEditorName_ (String.withDefault (lg "answer.untitled" appState) << .label) KnowledgeModel.getAnswer
@@ -421,6 +426,21 @@ isAdded uuid editorBranch =
     List.member uuid editorBranch.addedUuids && not (isDeleted uuid editorBranch)
 
 
+addEmptyIntegrationEditorUuid : String -> EditorBranch -> EditorBranch
+addEmptyIntegrationEditorUuid uuid editorBranch =
+    { editorBranch | emptyIntegrationEditorUuids = Set.insert uuid editorBranch.emptyIntegrationEditorUuids }
+
+
+removeEmptyIntegrationEditorUuid : String -> EditorBranch -> EditorBranch
+removeEmptyIntegrationEditorUuid uuid editorBranch =
+    { editorBranch | emptyIntegrationEditorUuids = Set.remove uuid editorBranch.emptyIntegrationEditorUuids }
+
+
+isEmptyIntegrationEditorUuid : String -> EditorBranch -> Bool
+isEmptyIntegrationEditorUuid uuid editorBranch =
+    Set.member uuid editorBranch.emptyIntegrationEditorUuids
+
+
 applyEvent : Bool -> Event -> EditorBranch -> EditorBranch
 applyEvent local event originalEditorBranch =
     let
@@ -469,8 +489,11 @@ applyEvent local event originalEditorBranch =
             let
                 integration =
                     AddIntegrationEventData.toIntegration commonData.entityUuid eventData
+
+                updatedEditorBranch =
+                    addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorBranch
             in
-            applyAdd local KnowledgeModel.insertIntegration integration commonData editorBranch
+            applyAdd local KnowledgeModel.insertIntegration integration commonData updatedEditorBranch
 
         AddMetricEvent eventData commonData ->
             let
@@ -544,8 +567,11 @@ applyEvent local event originalEditorBranch =
                 mbIntegration =
                     KnowledgeModel.getIntegration commonData.entityUuid knowledgeModel
                         |> Maybe.map (EditIntegrationEvent.apply eventData)
+
+                updatedEditorBranch =
+                    removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorBranch
             in
-            applyEdit KnowledgeModel.updateIntegration mbIntegration commonData editorBranch
+            applyEdit KnowledgeModel.updateIntegration mbIntegration commonData updatedEditorBranch
 
         EditKnowledgeModelEvent eventData _ ->
             let

@@ -6,12 +6,12 @@ import Html exposing (Html, a, button, div, label, p, strong)
 import Html.Attributes exposing (class, placeholder)
 import Html.Events exposing (onClick)
 import List.Extra as List
-import Markdown
 import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lx)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
 import Uuid
 import Version
@@ -19,6 +19,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
+import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Submission.Models exposing (Model)
 import Wizard.Settings.Submission.Msgs exposing (Msg(..))
@@ -41,19 +42,19 @@ view appState model =
 
 viewConfig : AppState -> Model -> List TemplateSuggestion -> Html Msg
 viewConfig appState model templates =
-    Html.map GenericMsg <|
-        GenericView.view (viewProps templates) appState model.genericModel
+    GenericView.view (viewProps templates) appState model.genericModel
 
 
-viewProps : List TemplateSuggestion -> GenericView.ViewProps EditableSubmissionConfig
+viewProps : List TemplateSuggestion -> GenericView.ViewProps EditableSubmissionConfig Msg
 viewProps templates =
     { locTitle = l_ "title"
     , locSave = l_ "save"
     , formView = formView templates
+    , wrapMsg = GenericMsg << GenericMsgs.FormMsg
     }
 
 
-formView : List TemplateSuggestion -> AppState -> Form FormError EditableSubmissionConfig -> Html Form.Msg
+formView : List TemplateSuggestion -> AppState -> Form FormError EditableSubmissionConfig -> Html Msg
 formView templates appState form =
     let
         enabled =
@@ -66,11 +67,12 @@ formView templates appState form =
             else
                 emptyNode
     in
-    div []
-        [ FormGroup.toggle form "enabled" (l_ "form.enabled" appState)
-        , FormExtra.mdAfter (l_ "form.enabled.desc" appState)
-        , servicesInput
-        ]
+    Html.map (GenericMsg << GenericMsgs.FormMsg) <|
+        div []
+            [ FormGroup.toggle form "enabled" (l_ "form.enabled" appState)
+            , FormExtra.mdAfter (l_ "form.enabled.desc" appState)
+            , servicesInput
+            ]
 
 
 serviceFormView : AppState -> List TemplateSuggestion -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg

@@ -9,11 +9,12 @@ import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibil
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l)
+import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
-import Wizard.Settings.Generic.Msgs exposing (Msg)
+import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Projects.Models exposing (Model)
 
@@ -28,11 +29,12 @@ view =
     GenericView.view viewProps
 
 
-viewProps : GenericView.ViewProps EditableQuestionnairesConfigForm
+viewProps : GenericView.ViewProps EditableQuestionnairesConfigForm Msg
 viewProps =
     { locTitle = l_ "title"
     , locSave = l_ "save"
-    , formView = formView
+    , formView = compose2 (Html.map FormMsg) formView
+    , wrapMsg = FormMsg
     }
 
 

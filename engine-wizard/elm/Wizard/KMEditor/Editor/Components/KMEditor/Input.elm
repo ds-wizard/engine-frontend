@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     ( AnnotationsInputConfig
+    , CheckboxInputConfig
     , InputConfig
     , MarkdownInputConfig
     , MetricsInputConfig
@@ -7,6 +8,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , SelectInputConfig
     , TagsInputConfig
     , annotations
+    , checkbox
     , color
     , headers
     , markdown
@@ -24,7 +26,6 @@ import Html.Attributes exposing (attribute, checked, class, classList, for, id, 
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Keyed
 import List.Extra as List
-import Markdown
 import Maybe.Extra as Maybe
 import Reorderable
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
@@ -34,6 +35,7 @@ import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (Metri
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (faSet)
 import Shared.Locale exposing (lg, lgx, lx)
+import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute)
@@ -87,6 +89,38 @@ textarea config =
             , rows <| List.length <| String.split "\n" config.value
             ]
             []
+        ]
+
+
+
+-- Checkbox Input
+
+
+type alias CheckboxInputConfig msg =
+    { name : String
+    , label : String
+    , value : Bool
+    , onInput : Bool -> msg
+    }
+
+
+checkbox : CheckboxInputConfig msg -> Html msg
+checkbox config =
+    div [ class "form-group" ]
+        [ div [ class "form-check" ]
+            [ label [ class "form-check-label form-check-toggle" ]
+                [ input
+                    [ type_ "checkbox"
+                    , class "form-check-input"
+                    , name config.name
+                    , id config.name
+                    , checked config.value
+                    , onCheck config.onInput
+                    ]
+                    []
+                , span [] [ text config.label ]
+                ]
+            ]
         ]
 
 

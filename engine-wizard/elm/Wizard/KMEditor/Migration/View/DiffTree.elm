@@ -5,6 +5,7 @@ import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
 import Shared.Data.Event as Event exposing (Event(..))
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.KnowledgeModel.Integration as Integration
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Html exposing (emptyNode, faSet)
@@ -47,7 +48,7 @@ viewEvent appState kmName km event =
             Maybe.map .name <| KnowledgeModel.getTag commonData.entityUuid km
 
         getIntegrationName commonData =
-            Maybe.map .name <| KnowledgeModel.getIntegration commonData.entityUuid km
+            Maybe.map Integration.getName <| KnowledgeModel.getIntegration commonData.entityUuid km
 
         getQuestionTitle commonData =
             Maybe.map Question.getTitle <| KnowledgeModel.getQuestion commonData.entityUuid km

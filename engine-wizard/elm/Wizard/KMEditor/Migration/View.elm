@@ -11,10 +11,10 @@ import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
 import Shared.Data.Event.AddChoiceEventData exposing (AddChoiceEventData)
 import Shared.Data.Event.AddExpertEventData exposing (AddExpertEventData)
-import Shared.Data.Event.AddIntegrationEventData exposing (AddIntegrationEventData)
+import Shared.Data.Event.AddIntegrationEventData as AddIntegrationEventData exposing (AddIntegrationEventData(..))
 import Shared.Data.Event.AddMetricEventData exposing (AddMetricEventData)
 import Shared.Data.Event.AddPhaseEventData exposing (AddPhaseEventData)
-import Shared.Data.Event.AddQuestionEventData as AddQuestionEventQuestion exposing (AddQuestionEventData(..))
+import Shared.Data.Event.AddQuestionEventData as AddQuestionEventQuestionData exposing (AddQuestionEventData(..))
 import Shared.Data.Event.AddReferenceCrossEventData exposing (AddReferenceCrossEventData)
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
 import Shared.Data.Event.AddReferenceResourcePageEventData exposing (AddReferenceResourcePageEventData)
@@ -24,7 +24,7 @@ import Shared.Data.Event.EditAnswerEventData exposing (EditAnswerEventData)
 import Shared.Data.Event.EditChapterEventData exposing (EditChapterEventData)
 import Shared.Data.Event.EditChoiceEventData exposing (EditChoiceEventData)
 import Shared.Data.Event.EditExpertEventData exposing (EditExpertEventData)
-import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData)
+import Shared.Data.Event.EditIntegrationEventData as EditIntegrationEventData exposing (EditIntegrationEventData(..))
 import Shared.Data.Event.EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
 import Shared.Data.Event.EditMetricEventData exposing (EditMetricEventData)
 import Shared.Data.Event.EditPhaseEventData exposing (EditPhaseEventData)
@@ -41,7 +41,7 @@ import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
 import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration(..))
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
@@ -432,10 +432,10 @@ viewEditKnowledgeModelDiff appState event km =
             KnowledgeModel.getIntegrations km
 
         originalIntegrations =
-            List.map .uuid integrations
+            List.map Integration.getUuid integrations
 
         integrationNames =
-            Dict.fromList <| List.map (\i -> ( i.uuid, i.name )) integrations
+            Dict.fromList <| List.map (\i -> ( Integration.getUuid i, Integration.getName i )) integrations
 
         integrationsDiff =
             viewDiffChildren (lg "integrations" appState)
@@ -648,36 +648,54 @@ viewDeleteTagDiff appState tag =
 viewAddIntegrationDiff : AppState -> AddIntegrationEventData -> Html Msg
 viewAddIntegrationDiff appState event =
     let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ lg "integration.type" appState
+                , lg "integration.id" appState
+                , lg "integration.name" appState
+                , lg "integration.props" appState
+                , lg "integration.itemUrl" appState
+                ]
+                [ AddIntegrationEventData.getTypeString event
+                , AddIntegrationEventData.map .id .id event
+                , AddIntegrationEventData.map .name .name event
+                , String.join ", " <| AddIntegrationEventData.map .props .props event
+                , AddIntegrationEventData.map .itemUrl .itemUrl event
+                ]
+
+        extraFields =
+            case event of
+                AddIntegrationApiEvent data ->
+                    List.map2 (\a b -> ( a, b ))
+                        [ lg "integration.request.method" appState
+                        , lg "integration.request.url" appState
+                        , lg "integration.request.headers" appState
+                        , lg "integration.request.body" appState
+                        , lg "integration.response.listField" appState
+                        , lg "integration.response.idField" appState
+                        , lg "integration.response.itemTemplate" appState
+                        ]
+                        [ data.requestMethod
+                        , data.requestUrl
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
+                        , data.requestBody
+                        , data.responseListField
+                        , data.responseItemId
+                        , data.responseItemTemplate
+                        ]
+
+                AddIntegrationWidgetEvent data ->
+                    List.map2 (\a b -> ( a, b ))
+                        [ lg "integration.widgetUrl" appState
+                        ]
+                        [ data.widgetUrl
+                        ]
+
         fieldDiff =
-            viewAdd <|
-                List.map2 (\a b -> ( a, b ))
-                    [ lg "integration.id" appState
-                    , lg "integration.name" appState
-                    , lg "integration.props" appState
-                    , lg "integration.response.itemUrl" appState
-                    , lg "integration.request.method" appState
-                    , lg "integration.request.url" appState
-                    , lg "integration.request.headers" appState
-                    , lg "integration.request.body" appState
-                    , lg "integration.response.listField" appState
-                    , lg "integration.response.idField" appState
-                    , lg "integration.response.itemTemplate" appState
-                    ]
-                    [ event.id
-                    , event.name
-                    , String.join ", " event.props
-                    , event.responseItemUrl
-                    , event.requestMethod
-                    , event.requestUrl
-                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) event.requestHeaders
-                    , event.requestBody
-                    , event.responseListField
-                    , event.responseItemId
-                    , event.responseItemTemplate
-                    ]
+            viewAdd (fields ++ extraFields)
 
         annotationsDiff =
-            viewAnnotationsDiff appState [] event.annotations
+            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations event)
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -685,48 +703,72 @@ viewAddIntegrationDiff appState event =
 viewEditIntegrationDiff : AppState -> EditIntegrationEventData -> Integration -> Html Msg
 viewEditIntegrationDiff appState event integration =
     let
+        fields =
+            List.map3 (\a b c -> ( a, b, c ))
+                [ lg "integration.type" appState
+                , lg "integration.id" appState
+                , lg "integration.name" appState
+                , lg "integration.props" appState
+                , lg "integration.itemUrl" appState
+                ]
+                [ Integration.getTypeString integration
+                , Integration.getId integration
+                , Integration.getName integration
+                , String.join ", " <| Integration.getProps integration
+                , Integration.getItemUrl integration
+                ]
+                [ EditIntegrationEventData.getTypeString event
+                , EventField.getValueWithDefault (EditIntegrationEventData.map .id .id event) (Integration.getId integration)
+                , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name event) (Integration.getName integration)
+                , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map .props .props event) (Integration.getProps integration)
+                , EventField.getValueWithDefault (EditIntegrationEventData.map .itemUrl .itemUrl event) (Integration.getItemUrl integration)
+                ]
+
+        extraFields =
+            case event of
+                EditIntegrationApiEvent data ->
+                    List.map3 (\a b c -> ( a, b, c ))
+                        [ lg "integration.request.method" appState
+                        , lg "integration.request.url" appState
+                        , lg "integration.request.headers" appState
+                        , lg "integration.request.body" appState
+                        , lg "integration.response.listField" appState
+                        , lg "integration.response.idField" appState
+                        , lg "integration.response.itemTemplate" appState
+                        ]
+                        [ Maybe.withDefault "" <| Integration.getRequestMethod integration
+                        , Maybe.withDefault "" <| Integration.getRequestUrl integration
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| Maybe.withDefault [] <| Integration.getRequestHeaders integration
+                        , Maybe.withDefault "" <| Integration.getRequestBody integration
+                        , Maybe.withDefault "" <| Integration.getResponseListField integration
+                        , Maybe.withDefault "" <| Integration.getResponseItemId integration
+                        , Maybe.withDefault "" <| Integration.getResponseItemId integration
+                        ]
+                        [ EventField.getValueWithDefault data.requestMethod (Maybe.withDefault "" <| Integration.getRequestMethod integration)
+                        , EventField.getValueWithDefault data.requestUrl (Maybe.withDefault "" <| Integration.getRequestUrl integration)
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| EventField.getValueWithDefault data.requestHeaders (Maybe.withDefault [] <| Integration.getRequestHeaders integration)
+                        , EventField.getValueWithDefault data.requestBody (Maybe.withDefault "" <| Integration.getRequestBody integration)
+                        , EventField.getValueWithDefault data.responseListField (Maybe.withDefault "" <| Integration.getResponseListField integration)
+                        , EventField.getValueWithDefault data.responseItemId (Maybe.withDefault "" <| Integration.getResponseItemId integration)
+                        , EventField.getValueWithDefault data.responseItemTemplate (Maybe.withDefault "" <| Integration.getResponseItemTemplate integration)
+                        ]
+
+                EditIntegrationWidgetEvent data ->
+                    List.map3 (\a b c -> ( a, b, c ))
+                        [ lg "integration.widgetUrl" appState
+                        ]
+                        [ Maybe.withDefault "" <| Integration.getWidgetUrl integration
+                        ]
+                        [ EventField.getValueWithDefault data.widgetUrl (Maybe.withDefault "" <| Integration.getWidgetUrl integration)
+                        ]
+
         fieldDiff =
-            viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "integration.id" appState
-                    , lg "integration.name" appState
-                    , lg "integration.props" appState
-                    , lg "integration.response.itemUrl" appState
-                    , lg "integration.request.method" appState
-                    , lg "integration.request.url" appState
-                    , lg "integration.request.headers" appState
-                    , lg "integration.request.body" appState
-                    , lg "integration.response.listField" appState
-                    , lg "integration.response.idField" appState
-                    , lg "integration.response.itemTemplate" appState
-                    ]
-                    [ integration.id
-                    , integration.name
-                    , String.join ", " integration.props
-                    , integration.responseItemUrl
-                    , integration.requestMethod
-                    , integration.requestUrl
-                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) integration.requestHeaders
-                    , integration.requestBody
-                    , integration.responseListField
-                    , integration.responseItemId
-                    , integration.responseItemTemplate
-                    ]
-                    [ EventField.getValueWithDefault event.id integration.id
-                    , EventField.getValueWithDefault event.name integration.name
-                    , String.join ", " <| EventField.getValueWithDefault event.props integration.props
-                    , EventField.getValueWithDefault event.responseItemUrl integration.responseItemUrl
-                    , EventField.getValueWithDefault event.requestMethod integration.requestMethod
-                    , EventField.getValueWithDefault event.requestUrl integration.requestUrl
-                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| EventField.getValueWithDefault event.requestHeaders integration.requestHeaders
-                    , EventField.getValueWithDefault event.requestBody integration.requestBody
-                    , EventField.getValueWithDefault event.responseListField integration.responseListField
-                    , EventField.getValueWithDefault event.responseItemId integration.responseItemId
-                    , EventField.getValueWithDefault event.responseItemTemplate integration.responseItemTemplate
-                    ]
+            viewDiff (fields ++ extraFields)
 
         annotationsDiff =
-            viewAnnotationsDiff appState integration.annotations (EventField.getValueWithDefault event.annotations integration.annotations)
+            viewAnnotationsDiff appState
+                (Integration.getAnnotations integration)
+                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations event) (Integration.getAnnotations integration))
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -734,36 +776,54 @@ viewEditIntegrationDiff appState event integration =
 viewDeleteIntegrationDiff : AppState -> Integration -> Html Msg
 viewDeleteIntegrationDiff appState integration =
     let
+        fields =
+            List.map2 (\a b -> ( a, b ))
+                [ lg "integration.type" appState
+                , lg "integration.id" appState
+                , lg "integration.name" appState
+                , lg "integration.props" appState
+                , lg "integration.itemUrl" appState
+                ]
+                [ Integration.getTypeString integration
+                , Integration.getId integration
+                , Integration.getName integration
+                , String.join ", " <| Integration.getProps integration
+                , Integration.getItemUrl integration
+                ]
+
+        extraFields =
+            case integration of
+                ApiIntegration _ data ->
+                    List.map2 (\a b -> ( a, b ))
+                        [ lg "integration.request.method" appState
+                        , lg "integration.request.url" appState
+                        , lg "integration.request.headers" appState
+                        , lg "integration.request.body" appState
+                        , lg "integration.response.listField" appState
+                        , lg "integration.response.idField" appState
+                        , lg "integration.response.itemTemplate" appState
+                        ]
+                        [ data.requestMethod
+                        , data.requestUrl
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
+                        , data.requestBody
+                        , data.responseListField
+                        , data.responseItemId
+                        , data.responseItemTemplate
+                        ]
+
+                WidgetIntegration _ data ->
+                    List.map2 (\a b -> ( a, b ))
+                        [ lg "integration.widgetUrl" appState
+                        ]
+                        [ data.widgetUrl
+                        ]
+
         fieldDiff =
-            viewDelete <|
-                List.map2 (\a b -> ( a, b ))
-                    [ lg "integration.id" appState
-                    , lg "integration.name" appState
-                    , lg "integration.props" appState
-                    , lg "integration.response.itemUrl" appState
-                    , lg "integration.request.method" appState
-                    , lg "integration.request.url" appState
-                    , lg "integration.request.headers" appState
-                    , lg "integration.request.body" appState
-                    , lg "integration.response.listField" appState
-                    , lg "integration.response.idField" appState
-                    , lg "integration.response.itemTemplate" appState
-                    ]
-                    [ integration.id
-                    , integration.name
-                    , String.join ", " integration.props
-                    , integration.responseItemUrl
-                    , integration.requestMethod
-                    , integration.requestUrl
-                    , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) integration.requestHeaders
-                    , integration.requestBody
-                    , integration.responseListField
-                    , integration.responseItemId
-                    , integration.responseItemTemplate
-                    ]
+            viewDelete (fields ++ extraFields)
 
         annotationsDiff =
-            viewAnnotationsDiff appState integration.annotations []
+            viewAnnotationsDiff appState (Integration.getAnnotations integration) []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -861,9 +921,9 @@ viewAddQuestionDiff appState km event =
                 , lg "question.title" appState
                 , lg "question.text" appState
                 ]
-                [ AddQuestionEventQuestion.getTypeString event
-                , AddQuestionEventQuestion.map .title .title .title .title .title event
-                , AddQuestionEventQuestion.map .text .text .text .text .text event |> Maybe.withDefault ""
+                [ AddQuestionEventQuestionData.getTypeString event
+                , AddQuestionEventQuestionData.map .title .title .title .title .title event
+                , AddQuestionEventQuestionData.map .text .text .text .text .text event |> Maybe.withDefault ""
                 ]
 
         extraFields =
@@ -896,7 +956,7 @@ viewAddQuestionDiff appState km event =
             KnowledgeModel.getTags km
 
         tagUuids =
-            AddQuestionEventQuestion.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event
+            AddQuestionEventQuestionData.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
@@ -908,7 +968,7 @@ viewAddQuestionDiff appState km event =
             viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
 
         annotations =
-            AddQuestionEventQuestion.map .annotations .annotations .annotations .annotations .annotations event
+            AddQuestionEventQuestionData.map .annotations .annotations .annotations .annotations .annotations event
 
         annotationsDiff =
             viewAnnotationsDiff appState [] annotations
@@ -1326,7 +1386,7 @@ viewMoveQuestion appState km question =
 getIntegrationName : KnowledgeModel -> String -> String
 getIntegrationName km integrationUuid =
     KnowledgeModel.getIntegration integrationUuid km
-        |> Maybe.map .name
+        |> Maybe.map Integration.getName
         |> Maybe.withDefault ""
 
 
