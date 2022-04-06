@@ -5,6 +5,37 @@ on:
   pull_request:
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [17.3.0]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # (1) -> Preparations
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # (2) -> Install and initialize
+      - name: Install
+        run: |
+          npm install
+          cd wizard-style-builder
+          npm install
+          npm run init
+
+      # (3) -> Run tests
+      - name: Test
+        run: |
+          cd wizard-style-builder
+          npm run test
+
   btp:
     name: Build-Tag-Push
     runs-on: ubuntu-latest
@@ -30,17 +61,20 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      # (2) -> Install dependencies
       - name: Install
-        run: npm ci
+        run: |
+          cd wizard-style-builder
+          npm ci
 
-      # (2) -> Build app and Docker image
+      # (3) -> Build app and Docker image
       - name: Build
         run: |
           cd wizard-style-builder
           npm run init
           docker build -t ${PRIVATE_IMAGE#/}:$GITHUB_SHA -f ./docker/Dockerfile .
 
-      # (3) -> Docker image tagging
+      # (4) -> Docker image tagging
       - name: Docker login (private)
         if: github.event_name == 'push' && env.PRIVATE_REGISTRY_URL != ''
         run: |
