@@ -210,6 +210,9 @@ listingDescription appState document =
 listingActions : AppState -> Document -> List (ListingDropdownItem Msg)
 listingActions appState document =
     let
+        downloadEnabled =
+            Feature.documentDownload appState document
+
         download =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -219,6 +222,9 @@ listingActions appState document =
                 , dataCy = "download"
                 }
 
+        submitEnabled =
+            Feature.documentSubmit appState document
+
         submit =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -227,6 +233,9 @@ listingActions appState document =
                 , msg = ListingActionMsg (ShowHideSubmitDocument <| Just document)
                 , dataCy = "submit"
                 }
+
+        deleteEnabled =
+            Feature.documentDelete appState document
 
         delete =
             Listing.dropdownAction
@@ -238,10 +247,10 @@ listingActions appState document =
                 }
     in
     []
-        |> listInsertIf download (Feature.documentDownload appState document)
-        |> listInsertIf submit (Feature.documentSubmit appState document)
-        |> listInsertIf Listing.dropdownSeparator (Feature.documentDelete appState document)
-        |> listInsertIf delete (Feature.documentDelete appState document)
+        |> listInsertIf download downloadEnabled
+        |> listInsertIf submit submitEnabled
+        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled) && deleteEnabled)
+        |> listInsertIf delete deleteEnabled
 
 
 stateBadge : AppState -> DocumentState -> Html msg

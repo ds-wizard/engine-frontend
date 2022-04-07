@@ -196,6 +196,9 @@ listingDescription cfg _ document =
 listingActions : AppState -> ViewConfig msg -> Document -> List (ListingDropdownItem msg)
 listingActions appState cfg document =
     let
+        downloadEnabled =
+            document.state == DoneDocumentState
+
         download =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -246,9 +249,9 @@ listingActions appState cfg document =
                 }
     in
     []
-        |> listInsertIf download (document.state == DoneDocumentState)
+        |> listInsertIf download downloadEnabled
         |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator viewQuestionnaireEnabled
+        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled) && viewQuestionnaireEnabled)
         |> listInsertIf viewQuestionnaire viewQuestionnaireEnabled
         |> listInsertIf Listing.dropdownSeparator deleteEnabled
         |> listInsertIf delete deleteEnabled
