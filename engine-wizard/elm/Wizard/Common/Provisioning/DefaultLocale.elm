@@ -60,6 +60,7 @@ locale =
                , ( "_global.apiError.apps.deletePlanError", "Plan could not be deleted." )
                , ( "_global.apiError.apps.getError", "Unable to get app." )
                , ( "_global.apiError.apps.getListError", "Unable to get apps." )
+               , ( "_global.apiError.apps.getPlansError", "Unable to get plans." )
                , ( "_global.apiError.apps.postError", "App could not be created." )
                , ( "_global.apiError.apps.postPlanError", "Plan could not be created." )
                , ( "_global.apiError.apps.putError", "App could not be saved." )
