@@ -30,7 +30,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Settings.Routes
-import Wizard.Users.Routes
 
 
 l_ : String -> AppState -> String
@@ -115,7 +114,7 @@ viewProfileMenu appState dropdownState =
                 , span [ class "sidebar-link" ] [ span [] [ text name ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =
-            [ Dropdown.anchorItem (linkToAttributes appState (Routes.UsersRoute <| Wizard.Users.Routes.EditRoute "current"))
+            [ Dropdown.anchorItem (linkToAttributes appState Routes.usersEditCurrent)
                 [ faSet "menu.profile" appState
                 , lx_ "profileMenu.edit" appState
                 ]

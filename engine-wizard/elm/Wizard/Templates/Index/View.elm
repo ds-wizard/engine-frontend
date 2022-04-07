@@ -52,7 +52,7 @@ importButton : AppState -> Html Msg
 importButton appState =
     if Feature.templatesImport appState then
         linkTo appState
-            (Routes.TemplatesRoute <| ImportRoute Nothing)
+            (Routes.templatesImport Nothing)
             [ class "btn btn-primary link-with-icon" ]
             [ faSet "kms.upload" appState
             , lx_ "header.import" appState
@@ -90,7 +90,7 @@ listingConfig appState =
 listingTitle : AppState -> Template -> Html Msg
 listingTitle appState template =
     span []
-        [ linkTo appState (detailRoute template) [] [ text template.name ]
+        [ linkTo appState (Routes.templatesDetail template.id) [] [ text template.name ]
         , span
             [ class "badge badge-light"
             , title <| lg "package.latestVersion" appState
@@ -109,7 +109,7 @@ listingTitleOutdatedBadge appState template =
                 Maybe.map ((++) (template.organizationId ++ ":" ++ template.templateId ++ ":")) template.remoteLatestVersion
         in
         linkTo appState
-            (Routes.TemplatesRoute <| ImportRoute templateId)
+            (Routes.templatesImport templateId)
             [ class "badge badge-warning" ]
             [ lx_ "badge.outdated" appState ]
 
@@ -164,7 +164,7 @@ listingActions appState template =
                 { extraClass = Nothing
                 , icon = faSet "_global.view" appState
                 , label = l_ "action.viewDetail" appState
-                , msg = ListingActionLink (detailRoute template)
+                , msg = ListingActionLink (Routes.templatesDetail template.id)
                 , dataCy = "view"
                 }
 
@@ -200,11 +200,6 @@ listingActions appState template =
         |> listInsertIf exportAction exportActionVisible
         |> listInsertIf Listing.dropdownSeparator deleteActionVisible
         |> listInsertIf deleteAction deleteActionVisible
-
-
-detailRoute : Template -> Routes.Route
-detailRoute template =
-    Routes.TemplatesRoute <| DetailRoute template.id
 
 
 deleteModal : AppState -> Model -> Html Msg

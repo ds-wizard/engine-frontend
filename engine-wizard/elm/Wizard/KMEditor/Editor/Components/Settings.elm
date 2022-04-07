@@ -33,8 +33,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
 import Wizard.KMEditor.Common.DeleteModal as DeleteModal
 import Wizard.KMEditor.Common.UpgradeModal as UpgradeModal
-import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 
@@ -128,7 +126,7 @@ update cfg appState msg model =
         UpgradeModalMsg upgradeModalMsg ->
             let
                 updateConfig =
-                    { cmdUpgraded = cfg.cmdNavigate appState << Routes.KMEditorRoute << MigrationRoute
+                    { cmdUpgraded = cfg.cmdNavigate appState << Routes.kmEditorMigration
                     , wrapMsg = cfg.wrapMsg << UpgradeModalMsg
                     }
 
@@ -193,7 +191,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
     div []
         [ h2 [] [ lx_ "parent.title" appState ]
         , linkTo appState
-            (Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute forkOfPackage.id))
+            (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
             [ TypeHintItem.packageSuggestionWithVersion forkOfPackage ]
         , outdatedWarning

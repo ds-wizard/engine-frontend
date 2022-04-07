@@ -22,8 +22,8 @@ import Wizard.Common.View.Page as Page
 import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDetail
 import Wizard.Projects.Common.View exposing (visibilityIcons)
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Preview as Preview
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
 import Wizard.Projects.Detail.Components.RevertModal as ReverModal
 import Wizard.Projects.Detail.Components.Settings as Settings
@@ -160,8 +160,8 @@ templateBadge appState questionnaire =
 
 viewProjectNavigationProjectSaving : AppState -> Model -> Html Msg
 viewProjectNavigationProjectSaving appState model =
-    Html.map PlanSavingMsg <|
-        PlanSaving.view appState model.planSavingModel
+    Html.map ProjectSavingMsg <|
+        ProjectSaving.view appState model.projectSavingModel
 
 
 viewProjectNavigationActions : AppState -> Model -> QuestionnaireDetail -> Html Msg

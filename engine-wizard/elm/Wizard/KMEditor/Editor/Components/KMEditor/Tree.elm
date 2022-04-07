@@ -24,7 +24,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
-import Wizard.Routes
+import Wizard.Routes as Routes
 
 
 lx_ : String -> AppState -> Html msg
@@ -315,7 +315,7 @@ treeNode props appState editorBranch config =
 
             else
                 linkTo appState
-                    (Wizard.Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid config.uuid editorBranch))
+                    (Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid config.uuid editorBranch))
                     [ dataCy "km-editor_tree_link"
                     ]
 

@@ -11,8 +11,8 @@ import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Preview as Preview
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
 import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
@@ -25,7 +25,7 @@ type Msg
     | WebSocketMsg WebSocket.RawMsg
     | WebSocketPing Time.Posix
     | OnlineUserMsg Int OnlineUser.Msg
-    | PlanSavingMsg PlanSaving.Msg
+    | ProjectSavingMsg ProjectSaving.Msg
     | PreviewMsg Preview.Msg
     | QuestionnaireMsg Questionnaire.Msg
     | SummaryReportMsg SummaryReport.Msg

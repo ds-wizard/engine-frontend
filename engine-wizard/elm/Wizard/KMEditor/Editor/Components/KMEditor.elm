@@ -82,7 +82,7 @@ import Wizard.KMEditor.Editor.Components.KMEditor.Breadcrumbs as Breadcrumbs
 import Wizard.KMEditor.Editor.Components.KMEditor.Input as Input
 import Wizard.KMEditor.Editor.Components.KMEditor.Tree as Tree
 import Wizard.KMEditor.Editor.Components.KMEditor.TreeInput as TreeInput
-import Wizard.Routes
+import Wizard.Routes as Routes
 
 
 l_ : String -> AppState -> String
@@ -1828,9 +1828,9 @@ editor editorId =
     div [ id editorId, class "editor-content col-xl-10 col-lg-12" ]
 
 
-editorRoute : EditorBranch -> String -> Wizard.Routes.Route
+editorRoute : EditorBranch -> String -> Routes.Route
 editorRoute editorBranch entityUuidString =
-    Wizard.Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid entityUuidString editorBranch)
+    Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid entityUuidString editorBranch)
 
 
 type alias EditorTitleConfig msg =

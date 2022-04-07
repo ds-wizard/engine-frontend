@@ -117,7 +117,7 @@ packageInfo : AppState -> Package -> Html Msg
 packageInfo appState package =
     code []
         [ linkTo appState
-            (Routes.knowledgeModelDetail package.id)
+            (Routes.knowledgeModelsDetail package.id)
             [ target "_blank" ]
             [ text package.id ]
         ]

@@ -61,7 +61,7 @@ fetchData model =
 
                 Routes.ProjectsRoute route ->
                     Cmd.map Wizard.Msgs.ProjectsMsg <|
-                        Wizard.Projects.Update.fetchData route model.appState model.plansModel
+                        Wizard.Projects.Update.fetchData route model.appState model.projectsModel
 
                 Routes.PublicRoute route ->
                     Cmd.map Wizard.Msgs.PublicMsg <|
@@ -103,7 +103,7 @@ onUnload newRoute model =
 
         Routes.ProjectsRoute route ->
             Cmd.map ProjectsMsg <|
-                Wizard.Projects.Update.onUnload route newRoute model.plansModel
+                Wizard.Projects.Update.onUnload route newRoute model.projectsModel
 
         _ ->
             Cmd.none
@@ -234,9 +234,9 @@ update msg model =
             Wizard.Msgs.ProjectsMsg plansMsg ->
                 let
                     ( seed, plansModel, cmd ) =
-                        Wizard.Projects.Update.update Wizard.Msgs.ProjectsMsg plansMsg model.appState model.plansModel
+                        Wizard.Projects.Update.update Wizard.Msgs.ProjectsMsg plansMsg model.appState model.projectsModel
                 in
-                ( setSeed seed { model | plansModel = plansModel }, cmd )
+                ( setSeed seed { model | projectsModel = plansModel }, cmd )
 
             Wizard.Msgs.PublicMsg publicMsg ->
                 let

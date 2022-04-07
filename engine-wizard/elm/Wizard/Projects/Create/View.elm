@@ -68,7 +68,7 @@ viewNavbar appState templateActive =
     ul [ class "nav nav-tabs" ]
         [ li [ class "nav-item" ]
             [ linkTo appState
-                (Routes.ProjectsRoute <| CreateRoute <| TemplateCreateRoute Nothing)
+                (Routes.projectsCreateTemplate Nothing)
                 [ class "nav-link link-with-icon"
                 , classList [ ( "active", templateActive ) ]
                 , dataCy "project_create_nav_template"
@@ -78,7 +78,7 @@ viewNavbar appState templateActive =
             ]
         , li [ class "nav-item" ]
             [ linkTo appState
-                (Routes.ProjectsRoute <| CreateRoute <| CustomCreateRoute Nothing)
+                (Routes.projectsCreateCustom Nothing)
                 [ class "nav-link link-with-icon"
                 , classList [ ( "active", not templateActive ) ]
                 , dataCy "project_create_nav_custom"

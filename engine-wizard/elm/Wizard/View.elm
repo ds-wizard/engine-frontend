@@ -70,7 +70,7 @@ view model =
                     |> Layout.mixedApp model
 
             Routes.ProjectsRoute route ->
-                model.plansModel
+                model.projectsModel
                     |> Wizard.Projects.View.view route model.appState
                     |> Html.map ProjectsMsg
                     |> Layout.mixedApp model

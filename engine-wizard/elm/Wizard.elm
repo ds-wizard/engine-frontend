@@ -14,7 +14,7 @@ import Wizard.Ports as Ports
 import Wizard.Projects.Routes as PlansRoutes exposing (Route(..))
 import Wizard.Public.Routes
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing exposing (cmdNavigate, loginRoute, routeIfAllowed, toUrl)
+import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
 import Wizard.Update exposing (update)
 import Wizard.View exposing (view)
@@ -84,7 +84,7 @@ decideInitialRoute model location route originalRoute =
                 dispatchUrlChange
 
             else
-                cmdNavigate model.appState (loginRoute <| Just <| toUrl model.appState originalRoute)
+                cmdNavigate model.appState (Routes.publicLogin <| Just <| toUrl model.appState originalRoute)
 
 
 main : Program Value Model Msg

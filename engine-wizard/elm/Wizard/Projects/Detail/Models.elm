@@ -20,8 +20,8 @@ import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Preview as Preview exposing (PreviewState(..))
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
 import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
@@ -37,7 +37,7 @@ type alias Model =
     , error : Bool
     , onlineUsers : List OnlineUser.Model
     , savingActionUuids : List Uuid
-    , planSavingModel : PlanSaving.Model
+    , projectSavingModel : ProjectSaving.Model
     , shareModalModel : ShareModal.Model
     , previewModel : Preview.Model
     , questionnaireModel : ActionResult Questionnaire.Model
@@ -59,7 +59,7 @@ init appState uuid =
     , error = False
     , onlineUsers = []
     , savingActionUuids = []
-    , planSavingModel = PlanSaving.init
+    , projectSavingModel = ProjectSaving.init
     , shareModalModel = ShareModal.init appState
     , previewModel = Preview.init uuid Preview.TemplateNotSet
     , questionnaireModel = Loading
@@ -121,7 +121,7 @@ addSavingActionUuid : Uuid -> Model -> Model
 addSavingActionUuid uuid model =
     { model
         | savingActionUuids = model.savingActionUuids ++ [ uuid ]
-        , planSavingModel = PlanSaving.setSaving model.planSavingModel
+        , projectSavingModel = ProjectSaving.setSaving model.projectSavingModel
     }
 
 
@@ -148,14 +148,14 @@ removeSavingActionUuid uuid model =
 
         newQuestionnaireSavingModel =
             if not (List.isEmpty model.savingActionUuids) && List.isEmpty newSavingActionUuids then
-                PlanSaving.setSaved model.planSavingModel
+                ProjectSaving.setSaved model.projectSavingModel
 
             else
-                model.planSavingModel
+                model.projectSavingModel
     in
     ( { model
         | savingActionUuids = newSavingActionUuids
-        , planSavingModel = newQuestionnaireSavingModel
+        , projectSavingModel = newQuestionnaireSavingModel
       }
     , List.length model.savingActionUuids /= List.length newSavingActionUuids
     )

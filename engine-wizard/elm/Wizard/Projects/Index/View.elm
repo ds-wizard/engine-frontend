@@ -19,7 +19,7 @@ import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicati
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lx)
-import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
+import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -38,8 +38,6 @@ import Wizard.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModalMsg
 import Wizard.Projects.Common.DeleteProjectModal.View as DeleteProjectModal
 import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Projects.Common.View exposing (visibilityIcons)
-import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute(..))
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
 import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
@@ -87,15 +85,14 @@ createButton : AppState -> Html Msg
 createButton appState =
     let
         createRoute =
-            CreateRoute <|
-                if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
-                    TemplateCreateRoute Nothing
+            if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
+                Routes.projectsCreateTemplate Nothing
 
-                else
-                    CustomCreateRoute Nothing
+            else
+                Routes.projectsCreateCustom Nothing
     in
     linkTo appState
-        (Routes.ProjectsRoute createRoute)
+        createRoute
         [ class "btn btn-primary", dataCy "projects_create-button" ]
         [ lx_ "header.create" appState ]
 
@@ -148,7 +145,7 @@ listingConfig appState model =
         , ( "updatedAt", lg "questionnaire.updatedAt" appState )
         ]
     , filters = listingFilters
-    , toRoute = Routes.projectIndexWithFilters
+    , toRoute = Routes.projectsIndexWithFilters
     , toolbarExtra = Just (createButton appState)
     }
 
@@ -158,13 +155,13 @@ listingProjectTagsFilter appState model =
     let
         linkWithTags tags =
             Routing.toUrl appState <|
-                Routes.projectIndexWithFilters
+                Routes.projectsIndexWithFilters
                     (PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
                     (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         linkWithOp op =
             Routing.toUrl appState <|
-                Routes.projectIndexWithFilters
+                Routes.projectsIndexWithFilters
                     (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
                     (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
@@ -276,13 +273,13 @@ listingUsersFilter appState model =
     let
         linkWithUuids userUuids =
             Routing.toUrl appState <|
-                Routes.projectIndexWithFilters
+                Routes.projectsIndexWithFilters
                     (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
                     (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
         linkWithOp op =
             Routing.toUrl appState <|
-                Routes.projectIndexWithFilters
+                Routes.projectsIndexWithFilters
                     (PaginationQueryFilter.insertOp indexRouteUsersFilterId op model.questionnaires.filters)
                     (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
@@ -417,13 +414,13 @@ listingTitle appState questionnaire =
     let
         linkRoute =
             if questionnaire.state == Migrating then
-                migrationRoute
+                Routes.projectsMigration
 
             else
-                detailRoute
+                Routes.projectsDetailQuestionnaire
     in
     span []
-        (linkTo appState (linkRoute questionnaire) [] [ text questionnaire.name ]
+        (linkTo appState (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
             :: templateBadge appState questionnaire
             :: visibilityIcons appState questionnaire
             ++ [ stateBadge appState questionnaire ]
@@ -512,7 +509,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "project.open" appState
                 , label = l_ "action.open" appState
-                , msg = ListingActionLink (detailRoute questionnaire)
+                , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid)
                 , dataCy = "open"
                 }
 
@@ -600,16 +597,6 @@ listingActions appState questionnaire =
         |> listInsertIf delete deleteVisible
 
 
-detailRoute : Questionnaire -> Routes.Route
-detailRoute =
-    Routes.ProjectsRoute << flip Wizard.Projects.Routes.DetailRoute PlanDetailRoute.Questionnaire << .uuid
-
-
-migrationRoute : Questionnaire -> Routes.Route
-migrationRoute =
-    Routes.ProjectsRoute << MigrationRoute << .uuid
-
-
 stateBadge : AppState -> Questionnaire -> Html msg
 stateBadge appState questionnaire =
     case questionnaire.state of
@@ -619,7 +606,7 @@ stateBadge appState questionnaire =
 
         Outdated ->
             linkTo appState
-                (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
+                (Routes.projectsCreateMigration questionnaire.uuid)
                 [ class "badge badge-warning" ]
                 [ lx_ "badge.outdated" appState ]
 

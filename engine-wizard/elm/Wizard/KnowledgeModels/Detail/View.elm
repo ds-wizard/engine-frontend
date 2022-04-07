@@ -21,12 +21,8 @@ import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Routes exposing (Route(..))
-import Wizard.Projects.Create.ProjectCreateRoute
-import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 
 
@@ -65,7 +61,7 @@ header appState package =
     let
         previewAction =
             linkTo appState
-                (Routes.KnowledgeModelsRoute <| PreviewRoute package.id Nothing)
+                (Routes.knowledgeModelsPreview package.id Nothing)
                 [ class "link-with-icon"
                 , dataCy "km-detail_preview-link"
                 ]
@@ -78,7 +74,7 @@ header appState package =
 
         createEditorAction =
             linkTo appState
-                (Routes.KMEditorRoute <| CreateRoute (Just package.id) (Just True))
+                (Routes.kmEditorCreate (Just package.id) (Just True))
                 [ class "link-with-icon"
                 , dataCy "km-detail_create-editor-link"
                 ]
@@ -91,7 +87,7 @@ header appState package =
 
         forkAction =
             linkTo appState
-                (Routes.KMEditorRoute <| CreateRoute (Just package.id) Nothing)
+                (Routes.kmEditorCreate (Just package.id) Nothing)
                 [ class "link-with-icon"
                 , dataCy "km-detail_fork-link"
                 ]
@@ -104,7 +100,7 @@ header appState package =
 
         createProjectAction =
             linkTo appState
-                (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute <| Just package.id)
+                (Routes.projectsCreateCustom (Just package.id))
                 [ class "link-with-icon"
                 , dataCy "km-detail_create-project-link"
                 ]
@@ -187,7 +183,7 @@ newVersionInRegistryWarning appState package =
                     :: lh_ "registryVersion.warning"
                         [ text (Version.toString remoteLatestVersion)
                         , linkTo appState
-                            (Routes.KnowledgeModelsRoute <| ImportRoute <| Just <| latestPackageId)
+                            (Routes.knowledgeModelsImport (Just latestPackageId))
                             []
                             [ lx_ "registryVersion.warning.import" appState ]
                         ]
@@ -243,7 +239,7 @@ sidePanelOtherVersions appState package =
         versionLink version =
             li []
                 [ linkTo appState
-                    (Routes.KnowledgeModelsRoute <| DetailRoute <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
+                    (Routes.knowledgeModelsDetail <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
                     []
                     [ text <| Version.toString version ]
                 ]

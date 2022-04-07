@@ -10,7 +10,6 @@ import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.Submission.SubmissionState as SubmissionState
@@ -37,8 +36,6 @@ import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
-import Wizard.Projects.Routes
 import Wizard.Routes as Routes exposing (Route(..))
 
 
@@ -82,11 +79,11 @@ viewDocuments appState model mbQuestionnaire =
         questionnaireFilterView questionnaire =
             div [ class "listing-toolbar-extra questionnaire-filter" ]
                 [ linkTo appState
-                    (Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire))
+                    (Routes.projectsDetailQuestionnaire questionnaire.uuid)
                     [ class "questionnaire-name" ]
                     [ text questionnaire.name ]
                 , linkTo appState
-                    (Routes.DocumentsRoute (IndexRoute Nothing PaginationQueryString.empty))
+                    Routes.documentsIndex
                     [ class "text-danger" ]
                     [ faSet "_global.remove" appState ]
                 ]
@@ -171,13 +168,8 @@ listingDescription appState document =
         questionnaireLink =
             case document.questionnaire of
                 Just questionnaire ->
-                    let
-                        questionnaireRoute =
-                            Routes.ProjectsRoute <|
-                                Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire
-                    in
                     linkTo appState
-                        questionnaireRoute
+                        (Routes.projectsDetailQuestionnaire questionnaire.uuid)
                         [ class "fragment" ]
                         [ text questionnaire.name ]
 

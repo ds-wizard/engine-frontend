@@ -13,7 +13,7 @@ import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 
 
 type Msg
@@ -22,7 +22,7 @@ type Msg
     | WebSocketMsg WebSocket.RawMsg
     | WebSocketPing Time.Posix
     | OnlineUserMsg Int OnlineUser.Msg
-    | SavingMsg PlanSaving.Msg
+    | SavingMsg ProjectSaving.Msg
     | Refresh
     | KMEditorMsg KMEditor.Msg
     | TagEditorMsg TagEditor.Msg

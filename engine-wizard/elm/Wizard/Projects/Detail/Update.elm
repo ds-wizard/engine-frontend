@@ -7,7 +7,6 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
@@ -29,8 +28,8 @@ import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
 import Wizard.Projects.Detail.Components.Preview as Preview
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
 import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
@@ -40,7 +39,6 @@ import Wizard.Projects.Detail.Models exposing (Model, addQuestionnaireEvent, add
 import Wizard.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
-import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -397,7 +395,7 @@ update wrapMsg msg appState model =
                                 { wrapMsg = wrapMsg << NewDocumentMsg
                                 , questionnaireUuid = qm.questionnaire.uuid
                                 , packageId = qm.questionnaire.package.id
-                                , documentsNavigateCmd = cmdNavigate appState <| ProjectsRoute <| DetailRoute qm.questionnaire.uuid <| PlanDetailRoute.Documents PaginationQueryString.empty
+                                , documentsNavigateCmd = cmdNavigate appState <| Routes.projectsDetailDocuments qm.questionnaire.uuid
                                 }
                                 newDocumentMsg
                                 appState
@@ -436,11 +434,10 @@ update wrapMsg msg appState model =
                         ( BadStatus 403 _, False ) ->
                             let
                                 questionnaireRoute =
-                                    Routing.toUrl appState
-                                        (ProjectsRoute (DetailRoute model.uuid PlanDetailRoute.Questionnaire))
+                                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid)
 
                                 loginRoute =
-                                    PublicRoute (LoginRoute (Just questionnaireRoute))
+                                    Routes.publicLogin (Just questionnaireRoute)
                             in
                             withSeed <|
                                 ( model, cmdNavigate appState loginRoute )
@@ -472,7 +469,7 @@ update wrapMsg msg appState model =
                         | questionnaireModel = Success newQuestionnaireModel
                       }
                     , Cmd.batch
-                        [ cmdNavigate appState (ProjectsRoute (DetailRoute model.uuid PlanDetailRoute.Questionnaire))
+                        [ cmdNavigate appState (Routes.projectsDetailQuestionnaire model.uuid)
                         , Ports.scrollIntoView selector
                         ]
                     )
@@ -483,8 +480,8 @@ update wrapMsg msg appState model =
         OnlineUserMsg index ouMsg ->
             withSeed <| handleOnlineUserMsg index ouMsg model
 
-        PlanSavingMsg qsMsg ->
-            withSeed ( { model | planSavingModel = PlanSaving.update qsMsg model.planSavingModel }, Cmd.none )
+        ProjectSavingMsg qsMsg ->
+            withSeed ( { model | projectSavingModel = ProjectSaving.update qsMsg model.projectSavingModel }, Cmd.none )
 
         ShareModalMsg shareModalMsg ->
             let

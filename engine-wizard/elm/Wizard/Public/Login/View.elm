@@ -69,7 +69,7 @@ formView appState model =
                 , input [ onInput Password, id "password", type_ "password", class "form-control", placeholder <| lg "user.password" appState ] []
                 ]
             , div [ class "form-group d-flex align-items-baseline justify-content-between" ]
-                [ linkTo appState (Routes.PublicRoute ForgottenPasswordRoute) [] [ lx_ "form.link" appState ]
+                [ linkTo appState Routes.publicForgottenPassword [] [ lx_ "form.link" appState ]
                 , ActionButton.submit appState <| ActionButton.SubmitConfig (l_ "form.submit" appState) model.loggingIn
                 ]
             ]

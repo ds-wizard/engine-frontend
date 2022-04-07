@@ -25,7 +25,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (appRoute, homeRoute, loginRoute, signupRoute)
 
 
 l_ : String -> AppState -> String
@@ -104,7 +103,7 @@ publicHeader fluid model =
             if model.appState.config.authentication.internal.registration.enabled then
                 li [ class "nav-item" ]
                     [ linkTo model.appState
-                        signupRoute
+                        Routes.publicSignup
                         [ class "nav-link", dataCy "public_nav_sign-up" ]
                         [ lx_ "header.signUp" model.appState ]
                     ]
@@ -116,7 +115,7 @@ publicHeader fluid model =
             if userLoggedIn model then
                 [ li [ class "nav-item" ]
                     [ linkTo model.appState
-                        appRoute
+                        Routes.app
                         [ class "nav-link", dataCy "public_nav_go-to-app" ]
                         [ lx_ "header.goToApp" model.appState ]
                     ]
@@ -125,7 +124,7 @@ publicHeader fluid model =
             else
                 [ li [ class "nav-item" ]
                     [ linkTo model.appState
-                        (loginRoute Nothing)
+                        (Routes.publicLogin Nothing)
                         [ class "nav-link", dataCy "public_nav_login" ]
                         [ lx_ "header.logIn" model.appState ]
                     ]
@@ -136,7 +135,7 @@ publicHeader fluid model =
         [ div [ classList [ ( "container-fluid", fluid ), ( "container", not fluid ) ] ]
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState
-                    homeRoute
+                    Routes.home
                     [ class "navbar-brand", dataCy "nav_app-title" ]
                     [ text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
                     ]
@@ -186,7 +185,7 @@ logo model =
             span [ class "logo-full", dataCy "nav_app-title-short" ]
                 [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ] ]
     in
-    linkTo model.appState Routes.DashboardRoute [ class "logo" ] [ logoImg ]
+    linkTo model.appState Routes.home [ class "logo" ] [ logoImg ]
 
 
 type MenuItem msg

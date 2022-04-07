@@ -45,7 +45,7 @@ view appState model =
 createButton : AppState -> Html msg
 createButton appState =
     linkTo appState
-        (Routes.UsersRoute CreateRoute)
+        Routes.usersCreate
         [ class "btn btn-primary"
         , dataCy "users_create-button"
         ]
@@ -85,7 +85,7 @@ listingConfig appState =
 listingTitle : AppState -> User -> Html Msg
 listingTitle appState user =
     span []
-        [ linkTo appState (detailRoute user) [] [ text <| User.fullName user ]
+        [ linkTo appState (Routes.usersEdit (Uuid.toString user.uuid)) [] [ text <| User.fullName user ]
         , listingTitleBadge appState user
         ]
 
@@ -150,7 +150,7 @@ listingActions appState user =
         { extraClass = Nothing
         , icon = faSet "_global.edit" appState
         , label = l_ "action.edit" appState
-        , msg = ListingActionLink (detailRoute user)
+        , msg = ListingActionLink (Routes.usersEdit (Uuid.toString user.uuid))
         , dataCy = "edit"
         }
     , Listing.dropdownSeparator
@@ -162,11 +162,6 @@ listingActions appState user =
         , dataCy = "delete"
         }
     ]
-
-
-detailRoute : User -> Routes.Route
-detailRoute =
-    Routes.UsersRoute << EditRoute << Uuid.toString << .uuid
 
 
 deleteModal : AppState -> Model -> Html Msg

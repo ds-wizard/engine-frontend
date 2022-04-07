@@ -15,8 +15,6 @@ import Wizard.Msgs
 import Wizard.Projects.Common.QuestionnaireFromTemplateCreateForm as QuestionnaireFromTemplateCreateForm
 import Wizard.Projects.Create.TemplateCreate.Models exposing (Model)
 import Wizard.Projects.Create.TemplateCreate.Msgs exposing (Msg(..))
-import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -78,7 +76,7 @@ handlePostQuestionnaireCompleted appState model result =
     case result of
         Ok questionnaire ->
             ( model
-            , cmdNavigate appState <| Routes.ProjectsRoute <| DetailRoute questionnaire.uuid ProjectDetailRoute.Questionnaire
+            , cmdNavigate appState <| Routes.projectsDetailQuestionnaire questionnaire.uuid
             )
 
         Err error ->

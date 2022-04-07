@@ -35,7 +35,7 @@ successView appState _ =
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "confirmation"
-                [ linkTo appState (Routes.SettingsRoute RegistryRoute) [] [ lx_ "settings" appState ]
+                [ linkTo appState Routes.settingsRegistry [] [ lx_ "settings" appState ]
                 ]
                 appState
             )

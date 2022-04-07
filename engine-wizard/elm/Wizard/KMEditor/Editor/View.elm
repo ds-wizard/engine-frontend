@@ -21,9 +21,8 @@ import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute(..))
 import Wizard.KMEditor.Editor.Models exposing (Model)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
-import Wizard.KMEditor.Routes as KMEditorRoutes exposing (Route(..))
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
-import Wizard.Routes
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
+import Wizard.Routes as Routes
 
 
 l_ : String -> AppState -> String
@@ -116,10 +115,6 @@ viewKMEditorNavigation appState route model branch =
 
 viewKMEditorNavigationTitleRow : AppState -> Model -> EditorBranch -> Html Msg
 viewKMEditorNavigationTitleRow appState model branch =
-    let
-        publishRoute =
-            Wizard.Routes.KMEditorRoute <| PublishRoute branch.branch.uuid
-    in
     DetailNavigation.row
         [ DetailNavigation.section
             [ div [ class "title" ] [ text branch.branch.name ]
@@ -129,7 +124,7 @@ viewKMEditorNavigationTitleRow appState model branch =
             [ DetailNavigation.onlineUsers OnlineUserMsg appState model.onlineUsers
             , DetailNavigation.sectionActions
                 [ linkTo appState
-                    publishRoute
+                    (Routes.kmEditorPublish branch.branch.uuid)
                     [ class "btn btn-primary link-with-icon"
                     , dataCy "km-editor_publish-button"
                     ]
@@ -144,7 +139,7 @@ viewKMEditorNavigationTitleRow appState model branch =
 viewKMEditorNavigationSaving : AppState -> Model -> Html Msg
 viewKMEditorNavigationSaving appState model =
     Html.map SavingMsg <|
-        PlanSaving.view appState model.savingModel
+        ProjectSaving.view appState model.savingModel
 
 
 
@@ -154,9 +149,11 @@ viewKMEditorNavigationSaving appState model =
 viewKMEditorNavigationNav : AppState -> KMEditorRoute -> EditorBranch -> Html Msg
 viewKMEditorNavigationNav appState route editorBranch =
     let
-        editorRoute subroute =
-            Wizard.Routes.KMEditorRoute (KMEditorRoutes.EditorRoute editorBranch.branch.uuid subroute)
+        branchUuid =
+            editorBranch.branch.uuid
 
+        --editorRoute subroute =
+        --    Wizard.Routes.KMEditorRoute (KMEditorRoutes.EditorRoute editorBranch.branch.uuid subroute)
         isEditorRoute =
             case route of
                 Edit _ ->
@@ -173,7 +170,7 @@ viewKMEditorNavigationNav appState route editorBranch =
                 Just (Uuid.fromUuidString editorBranch.activeUuid)
 
         editorLink =
-            { route = editorRoute (KMEditorRoute.Edit editUuid)
+            { route = Routes.kmEditorEditor branchUuid editUuid
             , label = l_ "nav.knowledgeModel" appState
             , icon = faSet "kmEditor.knowledgeModel" appState
             , isActive = isEditorRoute
@@ -182,7 +179,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             }
 
         questionTagsLink =
-            { route = editorRoute KMEditorRoute.QuestionTags
+            { route = Routes.kmEditorEditorQuestionTags branchUuid
             , label = l_ "nav.tags" appState
             , icon = faSet "kmEditor.tags" appState
             , isActive = route == KMEditorRoute.QuestionTags
@@ -191,7 +188,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             }
 
         previewLink =
-            { route = editorRoute KMEditorRoute.Preview
+            { route = Routes.kmEditorEditorPreview branchUuid
             , label = l_ "nav.preview" appState
             , icon = faSet "kmEditor.preview" appState
             , isActive = route == KMEditorRoute.Preview
@@ -200,7 +197,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             }
 
         settingsLink =
-            { route = editorRoute KMEditorRoute.Settings
+            { route = Routes.kmEditorEditorSettings branchUuid
             , label = l_ "nav.settings" appState
             , icon = faSet "kmEditor.settings" appState
             , isActive = route == KMEditorRoute.Settings

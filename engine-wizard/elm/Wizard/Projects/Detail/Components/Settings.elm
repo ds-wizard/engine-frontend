@@ -46,13 +46,11 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
-import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
 import Wizard.Projects.Detail.Components.Settings.DeleteModal as DeleteModal
-import Wizard.Projects.Routes as ProjectsRoutes
-import Wizard.Routes
+import Wizard.Routes as Routes
 
 
 l_ : String -> AppState -> String
@@ -469,12 +467,12 @@ knowledgeModel appState cfg =
     div []
         [ h2 [] [ lx_ "knowledgeModel.title" appState ]
         , linkTo appState
-            (Wizard.Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute cfg.package.id))
+            (Routes.knowledgeModelsDetail cfg.package.id)
             [ class "package-link" ]
             [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package) ]
         , div [ class "text-right mt-3" ]
             [ linkTo appState
-                (Wizard.Routes.ProjectsRoute (ProjectsRoutes.CreateMigrationRoute cfg.questionnaire.uuid))
+                (Routes.projectsCreateMigration cfg.questionnaire.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]
                 [ lx_ "knowledgeModel.createMigration" appState ]
             ]

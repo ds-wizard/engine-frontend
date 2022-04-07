@@ -104,7 +104,7 @@ listingDescription app =
 createButton : AppState -> Html Msg
 createButton appState =
     linkTo appState
-        (Routes.AppsRoute <| CreateRoute)
+        Routes.appsCreate
         [ class "btn btn-primary"
         ]
         [ lx_ "header.create" appState ]

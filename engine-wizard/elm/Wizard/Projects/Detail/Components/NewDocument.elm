@@ -274,7 +274,7 @@ formView appState questionnaire mbEventUuid model summaryReport =
 
                         currentLink =
                             linkTo appState
-                                (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid <| ProjectDetailRoute.NewDocument Nothing)
+                                (Routes.projectsDetailDocumentsNew questionnaire.uuid Nothing)
                                 []
                                 [ lx_ "oldVersionInfo.link" appState ]
                     in

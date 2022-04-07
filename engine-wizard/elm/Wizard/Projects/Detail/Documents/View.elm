@@ -126,7 +126,7 @@ listingConfig cfg appState =
         if cfg.questionnaireEditable && Session.exists appState.session then
             Just <|
                 linkTo appState
-                    (Routes.ProjectsRoute <| DetailRoute cfg.questionnaire.uuid <| PlanDetailRoute.NewDocument Nothing)
+                    (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid Nothing)
                     [ class "btn btn-primary" ]
                     [ lx_ "newDocument" appState ]
 

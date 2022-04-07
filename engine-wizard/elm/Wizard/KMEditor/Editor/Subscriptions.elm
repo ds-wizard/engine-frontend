@@ -6,7 +6,7 @@ import Wizard.KMEditor.Editor.Components.Preview as Preview
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute)
 import Wizard.KMEditor.Editor.Models exposing (Model)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 
 
 subscriptions : KMEditorRoute -> Model -> Sub Msg
@@ -28,6 +28,6 @@ subscriptions route model =
     Sub.batch
         [ WebSocket.listen WebSocketMsg
         , WebSocket.schedulePing WebSocketPing
-        , Sub.map SavingMsg <| PlanSaving.subscriptions model.savingModel
+        , Sub.map SavingMsg <| ProjectSaving.subscriptions model.savingModel
         , pageSubscriptions
         ]

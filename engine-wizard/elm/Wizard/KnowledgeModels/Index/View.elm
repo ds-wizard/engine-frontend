@@ -17,12 +17,9 @@ import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
-import Wizard.Projects.Create.ProjectCreateRoute
-import Wizard.Projects.Routes
 import Wizard.Routes as Routes
 
 
@@ -55,7 +52,7 @@ importButton : AppState -> Html Msg
 importButton appState =
     if Feature.knowledgeModelsImport appState then
         linkTo appState
-            (Routes.KnowledgeModelsRoute <| ImportRoute Nothing)
+            (Routes.knowledgeModelsImport Nothing)
             [ class "btn btn-primary link-with-icon" ]
             [ faSet "kms.upload" appState
             , lx_ "header.import" appState
@@ -94,7 +91,7 @@ listingConfig appState =
 listingTitle : AppState -> Package -> Html Msg
 listingTitle appState package =
     span []
-        [ linkTo appState (detailRoute package) [] [ text package.name ]
+        [ linkTo appState (Routes.knowledgeModelsDetail package.id) [] [ text package.name ]
         , span
             [ class "badge badge-light"
             , title <| lg "package.latestVersion" appState
@@ -112,7 +109,7 @@ listingTitleOutdatedBadge appState package =
                 Maybe.map ((++) (package.organizationId ++ ":" ++ package.kmId ++ ":")) package.remoteLatestVersion
         in
         linkTo appState
-            (Routes.KnowledgeModelsRoute <| ImportRoute packageId)
+            (Routes.knowledgeModelsImport packageId)
             [ class "badge badge-warning" ]
             [ lx_ "badge.outdated" appState ]
 
@@ -158,7 +155,7 @@ listingActions appState package =
                 { extraClass = Nothing
                 , icon = faSet "_global.view" appState
                 , label = lg "km.action.view" appState
-                , msg = ListingActionLink (detailRoute package)
+                , msg = ListingActionLink (Routes.knowledgeModelsDetail package.id)
                 , dataCy = "view"
                 }
 
@@ -182,7 +179,7 @@ listingActions appState package =
                 { extraClass = Nothing
                 , icon = faSet "kmDetail.createKMEditor" appState
                 , label = lg "km.action.kmEditor" appState
-                , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute (Just package.id) (Just True))
+                , msg = ListingActionLink (Routes.kmEditorCreate (Just package.id) (Just True))
                 , dataCy = "create-km-editor"
                 }
 
@@ -194,7 +191,7 @@ listingActions appState package =
                 { extraClass = Nothing
                 , icon = faSet "kmDetail.fork" appState
                 , label = lg "km.action.fork" appState
-                , msg = ListingActionLink (Routes.KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute (Just package.id) Nothing)
+                , msg = ListingActionLink (Routes.kmEditorCreate (Just package.id) Nothing)
                 , dataCy = "fork"
                 }
 
@@ -206,7 +203,7 @@ listingActions appState package =
                 { extraClass = Nothing
                 , icon = faSet "kmDetail.createQuestionnaire" appState
                 , label = lg "km.action.project" appState
-                , msg = ListingActionLink (Routes.ProjectsRoute <| Wizard.Projects.Routes.CreateRoute <| Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute <| Just package.id)
+                , msg = ListingActionLink (Routes.projectsCreateCustom <| Just package.id)
                 , dataCy = "create-project"
                 }
 
@@ -234,11 +231,6 @@ listingActions appState package =
         |> listInsertIf questionnaireAction questionnaireActionVisible
         |> listInsertIf Listing.dropdownSeparator deleteActionVisible
         |> listInsertIf deleteAction deleteActionVisible
-
-
-detailRoute : Package -> Routes.Route
-detailRoute package =
-    Routes.KnowledgeModelsRoute <| DetailRoute package.id
 
 
 deleteModal : AppState -> Model -> Html Msg

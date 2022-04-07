@@ -1,14 +1,10 @@
 module Wizard.Routing exposing
-    ( appRoute
-    , cmdNavigate
+    ( cmdNavigate
     , cmdNavigateRaw
-    , homeRoute
     , isAllowed
-    , loginRoute
     , matchers
     , parseLocation
     , routeIfAllowed
-    , signupRoute
     , toUrl
     )
 
@@ -23,7 +19,6 @@ import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
 import Wizard.Projects.Routing
-import Wizard.Public.Routes
 import Wizard.Public.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
@@ -177,23 +172,3 @@ cmdNavigate appState =
 cmdNavigateRaw : AppState -> String -> Cmd msg
 cmdNavigateRaw appState =
     pushUrl appState.key
-
-
-homeRoute : Routes.Route
-homeRoute =
-    Routes.PublicRoute <| Wizard.Public.Routes.LoginRoute Nothing
-
-
-loginRoute : Maybe String -> Routes.Route
-loginRoute originalUrl =
-    Routes.PublicRoute <| Wizard.Public.Routes.LoginRoute originalUrl
-
-
-signupRoute : Routes.Route
-signupRoute =
-    Routes.PublicRoute Wizard.Public.Routes.SignupRoute
-
-
-appRoute : Routes.Route
-appRoute =
-    Routes.DashboardRoute

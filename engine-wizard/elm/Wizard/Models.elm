@@ -36,7 +36,7 @@ type alias Model =
     , documentsModel : Wizard.Documents.Models.Model
     , kmEditorModel : Wizard.KMEditor.Models.Model
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
-    , plansModel : Wizard.Projects.Models.Model
+    , projectsModel : Wizard.Projects.Models.Model
     , publicModel : Wizard.Public.Models.Model
     , registryModel : Wizard.Registry.Models.Model
     , settingsModel : Wizard.Settings.Models.Model
@@ -55,7 +55,7 @@ initialModel appState =
     , documentsModel = Wizard.Documents.Models.initialModel
     , kmEditorModel = Wizard.KMEditor.Models.initialModel appState
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
-    , plansModel = Wizard.Projects.Models.initialModel appState
+    , projectsModel = Wizard.Projects.Models.initialModel appState
     , publicModel = Wizard.Public.Models.initialModel appState
     , registryModel = Wizard.Registry.Models.initialModel
     , settingsModel = Wizard.Settings.Models.initialModel appState
@@ -119,7 +119,7 @@ initLocalModel model =
             { model | kmPackagesModel = Wizard.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
 
         Routes.ProjectsRoute route ->
-            { model | plansModel = Wizard.Projects.Models.initLocalModel model.appState route model.plansModel }
+            { model | projectsModel = Wizard.Projects.Models.initLocalModel model.appState route model.projectsModel }
 
         Routes.PublicRoute route ->
             { model | publicModel = Wizard.Public.Models.initLocalModel model.appState route model.publicModel }

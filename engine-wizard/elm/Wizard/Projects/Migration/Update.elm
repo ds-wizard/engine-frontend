@@ -20,10 +20,8 @@ import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionChange)
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Migration.Models exposing (Model, initializeChangeList)
 import Wizard.Projects.Migration.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -239,7 +237,7 @@ handleFinalizeMigrationCompleted appState model result =
                 route =
                     case model.questionnaireMigration of
                         Success questionnaireMigration ->
-                            Routes.ProjectsRoute <| DetailRoute questionnaireMigration.oldQuestionnaire.uuid PlanDetailRoute.Questionnaire
+                            Routes.projectsDetailQuestionnaire questionnaireMigration.oldQuestionnaire.uuid
 
                         _ ->
                             Routes.projectsIndex

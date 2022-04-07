@@ -15,7 +15,6 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Routes as Routes
 import Wizard.Templates.Import.RegistryImport.Models exposing (Model)
 import Wizard.Templates.Import.RegistryImport.Msgs exposing (Msg(..))
-import Wizard.Templates.Routes
 
 
 l_ : String -> AppState -> String
@@ -98,7 +97,7 @@ viewImported appState packageId =
             (lh_ "imported.message" [ code [] [ text packageId ] ] appState)
         , p [ class "lead" ]
             [ linkTo appState
-                (Routes.TemplatesRoute <| Wizard.Templates.Routes.DetailRoute packageId)
+                (Routes.templatesDetail packageId)
                 [ class "btn btn-primary" ]
                 [ lx_ "imported.action" appState ]
             ]

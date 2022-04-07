@@ -762,16 +762,13 @@ view appState cfg ctx model =
             else
                 ( emptyNode, False )
 
-        migrationRoute =
-            Routes.ProjectsRoute << MigrationRoute
-
         ( migrationWarning, migrationWarningEnabled ) =
             case model.questionnaire.migrationUuid of
                 Just migrationUuid ->
                     ( div [ class "questionnaire__warning" ]
                         [ div [ class "alert alert-warning" ]
                             (lh_ "migrationWarning"
-                                [ linkTo appState (migrationRoute migrationUuid) [] [ lx_ "migrationWarning.migration" appState ] ]
+                                [ linkTo appState (Routes.projectsMigration migrationUuid) [] [ lx_ "migrationWarning.migration" appState ] ]
                                 appState
                             )
                         ]

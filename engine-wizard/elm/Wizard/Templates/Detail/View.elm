@@ -22,11 +22,9 @@ import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
-import Wizard.KnowledgeModels.Routes
 import Wizard.Routes as Routes
 import Wizard.Templates.Detail.Models exposing (Model)
 import Wizard.Templates.Detail.Msgs exposing (Msg(..))
-import Wizard.Templates.Routes exposing (Route(..))
 
 
 l_ : String -> AppState -> String
@@ -124,7 +122,7 @@ newVersionInRegistryWarning appState template =
                     :: lh_ "registryVersion.warning"
                         [ text (Version.toString remoteLatestVersion)
                         , linkTo appState
-                            (Routes.TemplatesRoute <| ImportRoute <| Just <| latestPackageId)
+                            (Routes.templatesImport (Just latestPackageId))
                             []
                             [ lx_ "registryVersion.warning.import" appState ]
                         ]
@@ -150,7 +148,7 @@ unsupportedMetamodelVersionWarning appState template =
                             :: lh_ "registryVersion.warning"
                                 [ text (Version.toString remoteLatestVersion)
                                 , linkTo appState
-                                    (Routes.TemplatesRoute <| ImportRoute <| Just <| latestPackageId)
+                                    (Routes.templatesImport (Just latestPackageId))
                                     []
                                     [ lx_ "registryVersion.warning.import" appState ]
                                 ]
@@ -223,7 +221,7 @@ sidePanelOtherVersions appState template =
         versionLink version =
             li []
                 [ linkTo appState
-                    (Routes.TemplatesRoute <| DetailRoute <| template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString version)
+                    (Routes.templatesDetail <| template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString version)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -268,7 +266,7 @@ sidePanelUsableWith appState template =
         packageLink package =
             li []
                 [ linkTo appState
-                    (Routes.KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.DetailRoute <| package.id)
+                    (Routes.knowledgeModelsDetail package.id)
                     [ dataCy "template_km-link" ]
                     [ text package.id ]
                 ]

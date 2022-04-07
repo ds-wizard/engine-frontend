@@ -30,9 +30,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
-import Wizard.Projects.Routes as ProjectRoutes
-import Wizard.Routes
+import Wizard.Routes as Routes
 
 
 l_ : String -> AppState -> String
@@ -190,7 +188,7 @@ viewTemplateNotSet appState questionnaire =
                 [ p [] [ lx_ "templateNotSet.textOwner" appState ]
                 , p []
                     [ linkTo appState
-                        (Wizard.Routes.ProjectsRoute (ProjectRoutes.DetailRoute questionnaire.uuid PlanDetailRoute.Settings))
+                        (Routes.projectsDetailSettings questionnaire.uuid)
                         [ class "btn btn-primary btn-lg link-with-icon-after" ]
                         [ lx_ "templateNotSet.link" appState
                         , faSet "_global.arrowRight" appState

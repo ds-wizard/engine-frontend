@@ -22,7 +22,6 @@ import Wizard.Msgs
 import Wizard.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
 import Wizard.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -149,7 +148,7 @@ handlePostMigrationCompleted : AppState -> Model -> Result ApiError Questionnair
 handlePostMigrationCompleted appState model result =
     case result of
         Ok migration ->
-            ( model, cmdNavigate appState <| Routes.ProjectsRoute <| MigrationRoute migration.newQuestionnaire.uuid )
+            ( model, cmdNavigate appState <| Routes.projectsMigration migration.newQuestionnaire.uuid )
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult appState (lg "apiError.questionnaires.migrations.postError" appState) error }
