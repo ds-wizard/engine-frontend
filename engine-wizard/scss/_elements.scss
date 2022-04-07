@@ -268,6 +268,10 @@ ins, .ins {
 
 code {
     background-color: $code-block-bg;
+
+    a {
+        color: $code-color;
+    }
 }
 
 .dropdown-menu-right {

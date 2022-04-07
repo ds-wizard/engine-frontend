@@ -16,6 +16,7 @@ module Wizard.Routes exposing
     , kmEditorIndex
     , kmEditorIndexWithFilters
     , kmEditorMigration
+    , knowledgeModelDetail
     , knowledgeModelsIndex
     , knowledgeModelsIndexWithFilters
     , projectIndexWithFilters
@@ -206,6 +207,11 @@ isKnowledgeModelsIndex route =
 
         _ ->
             False
+
+
+knowledgeModelDetail : String -> Route
+knowledgeModelDetail =
+    KnowledgeModelsRoute << Wizard.KnowledgeModels.Routes.DetailRoute
 
 
 templatesIndex : Route
