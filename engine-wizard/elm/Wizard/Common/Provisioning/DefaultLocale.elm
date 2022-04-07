@@ -592,6 +592,7 @@ locale =
                , ( "Wizard.Common.View.Tag.list.empty", "There are no question tags configured for the Knowledge Model." )
                , ( "Wizard.Common.View.Tag.readOnlyList.noTags", "No question tags" )
                , ( "Wizard.Common.View.Tag.selection.info", "You can filter questions in the questionnaire by question tags. If no question tags are selected, all questions will be used." )
+               , ( "Wizard.Common.View.Tag.selection.empty", "There are no question tags for this knowledge model." )
                , ( "Wizard.Dashboard.Widgets.DMPWorkflowWidget.welcome", "Welcome to the %s!" )
                , ( "Wizard.Dashboard.Widgets.DMPWorkflowWidget.startPlanning", "Start planning" )
                , ( "Wizard.Dashboard.Widgets.DMPWorkflowWidget.steps.chooseKM", "Choose a Knowledge Model suitable for your Project." )
