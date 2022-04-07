@@ -99,7 +99,8 @@ selection appState tagListConfig knowledgeModelResult =
             emptyNode
 
         Loading ->
-            emptyNode
+            viewContent <|
+                Flash.loader appState
 
         Error err ->
             viewContent <|
@@ -118,7 +119,9 @@ selection appState tagListConfig knowledgeModelResult =
                         ]
 
             else
-                emptyNode
+                viewContent <|
+                    Flash.info appState <|
+                        l_ "selection.empty" appState
 
 
 readOnlyList : AppState -> List String -> List Tag -> Html msg
