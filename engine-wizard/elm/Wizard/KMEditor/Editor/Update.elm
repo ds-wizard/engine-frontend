@@ -63,7 +63,7 @@ fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( 
 fetchSubrouteDataFromAfter wrapMsg appState model =
     case ( model.branchModel, appState.route ) of
         ( Success _, KMEditorRoute (EditorRoute _ route) ) ->
-            ( initPageModel route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
+            ( initPageModel appState route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
 
         _ ->
             ( model, Cmd.none )

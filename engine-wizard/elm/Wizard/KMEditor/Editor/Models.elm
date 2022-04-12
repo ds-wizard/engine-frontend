@@ -59,14 +59,20 @@ init appState uuid mbEditorUuid =
     }
 
 
-initPageModel : KMEditorRoute -> Model -> Model
-initPageModel route model =
+initPageModel : AppState -> KMEditorRoute -> Model -> Model
+initPageModel appState route model =
     case route of
         KMEditorRoute.Edit mbEditorUuid ->
             { model | branchModel = ActionResult.map (EditorBranch.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.branchModel }
 
         KMEditorRoute.Preview ->
             let
+                packageId =
+                    ActionResult.map .branch model.branchModel
+                        |> ActionResult.toMaybe
+                        |> Maybe.andThen .previousPackageId
+                        |> Maybe.withDefault ""
+
                 firstChapterUuid =
                     model.branchModel
                         |> ActionResult.unwrap Nothing (.branch >> .knowledgeModel >> .chapterUuids >> List.head)
@@ -79,6 +85,7 @@ initPageModel route model =
 
                 previewModel =
                     model.previewModel
+                        |> Preview.setPackageId appState packageId
                         |> Preview.setActiveChapterIfNot firstChapterUuid
                         |> Preview.setPhase defaultPhaseUuid
             in
