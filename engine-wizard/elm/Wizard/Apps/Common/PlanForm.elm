@@ -18,12 +18,12 @@ import Wizard.Common.AppState exposing (AppState)
 type alias PlanForm =
     { name : String
     , users : Maybe Int
-    , sinceDay : Int
-    , sinceMonth : Int
-    , sinceYear : Int
-    , untilDay : Int
-    , untilMonth : Int
-    , untilYear : Int
+    , sinceDay : Maybe Int
+    , sinceMonth : Maybe Int
+    , sinceYear : Maybe Int
+    , untilDay : Maybe Int
+    , untilMonth : Maybe Int
+    , untilYear : Maybe Int
     , test : Bool
     }
 
@@ -37,20 +37,20 @@ init : AppState -> Plan -> Form FormError PlanForm
 init appState plan =
     let
         since =
-            Time.posixToParts appState.timeZone plan.since
+            Maybe.map (Time.posixToParts appState.timeZone) plan.since
 
         until =
-            Time.posixToParts appState.timeZone plan.until
+            Maybe.map (Time.posixToParts appState.timeZone) plan.until
 
         fields =
             [ ( "name", Field.string plan.name )
             , ( "users", Field.string (Maybe.unwrap "" String.fromInt plan.users) )
-            , ( "sinceDay", Field.string (String.fromInt since.day) )
-            , ( "sinceMonth", Field.string (String.fromInt (TimeUtils.monthToInt since.month)) )
-            , ( "sinceYear", Field.string (String.fromInt since.year) )
-            , ( "untilDay", Field.string (String.fromInt until.day) )
-            , ( "untilMonth", Field.string (String.fromInt (TimeUtils.monthToInt until.month)) )
-            , ( "untilYear", Field.string (String.fromInt until.year) )
+            , ( "sinceDay", Field.string (Maybe.unwrap "" (String.fromInt << .day) since) )
+            , ( "sinceMonth", Field.string (Maybe.unwrap "" (String.fromInt << TimeUtils.monthToInt << .month) since) )
+            , ( "sinceYear", Field.string (Maybe.unwrap "" (String.fromInt << .year) since) )
+            , ( "untilDay", Field.string (Maybe.unwrap "" (String.fromInt << .day) until) )
+            , ( "untilMonth", Field.string (Maybe.unwrap "" (String.fromInt << TimeUtils.monthToInt << .month) until) )
+            , ( "untilYear", Field.string (Maybe.unwrap "" (String.fromInt << .year) until) )
             , ( "test", Field.bool plan.test )
             ]
     in
@@ -62,12 +62,12 @@ validation =
     V.succeed PlanForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "users" V.maybeInt)
-        |> V.andMap (V.field "sinceDay" V.int)
-        |> V.andMap (V.field "sinceMonth" V.int)
-        |> V.andMap (V.field "sinceYear" V.int)
-        |> V.andMap (V.field "untilDay" V.int)
-        |> V.andMap (V.field "untilMonth" V.int)
-        |> V.andMap (V.field "untilYear" V.int)
+        |> V.andMap (V.field "sinceDay" V.maybeInt)
+        |> V.andMap (V.field "sinceMonth" V.maybeInt)
+        |> V.andMap (V.field "sinceYear" V.maybeInt)
+        |> V.andMap (V.field "untilDay" V.maybeInt)
+        |> V.andMap (V.field "untilMonth" V.maybeInt)
+        |> V.andMap (V.field "untilYear" V.maybeInt)
         |> V.andMap (V.field "test" V.bool)
 
 
@@ -75,15 +75,25 @@ encode : AppState -> PlanForm -> E.Value
 encode appState form =
     let
         since =
-            TimeUtils.fromYMD appState.timeZone form.sinceYear form.sinceMonth form.sinceDay
+            case ( form.sinceYear, form.sinceMonth, form.sinceDay ) of
+                ( Just sinceYear, Just sinceMonth, Just sinceDay ) ->
+                    Just <| TimeUtils.fromYMD appState.timeZone sinceYear sinceMonth sinceDay
+
+                _ ->
+                    Nothing
 
         until =
-            TimeUtils.fromYMD appState.timeZone form.untilYear form.untilMonth form.untilDay
+            case ( form.untilYear, form.untilMonth, form.untilDay ) of
+                ( Just untilYear, Just untilMonth, Just untilDay ) ->
+                    Just <| TimeUtils.fromYMD appState.timeZone untilYear untilMonth untilDay
+
+                _ ->
+                    Nothing
     in
     E.object
         [ ( "name", E.string form.name )
         , ( "users", E.maybe E.int form.users )
-        , ( "since", Iso8601.encode since )
-        , ( "until", Iso8601.encode until )
+        , ( "since", E.maybe Iso8601.encode since )
+        , ( "until", E.maybe Iso8601.encode until )
         , ( "test", E.bool form.test )
         ]
