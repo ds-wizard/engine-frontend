@@ -37,14 +37,34 @@ view appState cfg plans =
                 emptyNode
 
         viewActiveBadge plan =
-            if TimeUtils.isBetween plan.since plan.until appState.currentTime then
+            let
+                active =
+                    case ( plan.since, plan.until ) of
+                        ( Just since, Just until ) ->
+                            TimeUtils.isBetween since until appState.currentTime
+
+                        ( Just since, Nothing ) ->
+                            TimeUtils.isAfter since appState.currentTime
+
+                        ( Nothing, Just until ) ->
+                            TimeUtils.isBefore until appState.currentTime
+
+                        ( Nothing, Nothing ) ->
+                            True
+            in
+            if active then
                 span [ class "badge badge-success ml-2" ] [ lx_ "badge.active" appState ]
 
             else
                 emptyNode
 
-        viewPlanTime time =
-            TimeUtils.toReadableDate appState.timeZone time
+        viewPlanTime mbTime =
+            case mbTime of
+                Just time ->
+                    TimeUtils.toReadableDate appState.timeZone time
+
+                Nothing ->
+                    "-"
 
         viewPlan plan =
             let
