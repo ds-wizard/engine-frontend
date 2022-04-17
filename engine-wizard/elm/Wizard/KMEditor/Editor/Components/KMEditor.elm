@@ -1585,12 +1585,20 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 , addChildDataCy = "question"
                 }
 
+        metrics =
+            EditorBranch.filterDeletedWith .uuid editorBranch <|
+                KnowledgeModel.getMetrics editorBranch.branch.knowledgeModel
+
         metricsInput =
-            Input.metrics appState
-                { metrics = EditorBranch.filterDeletedWith .uuid editorBranch <| KnowledgeModel.getMetrics editorBranch.branch.knowledgeModel
-                , metricMeasures = answer.metricMeasures
-                , onChange = createEditEvent setMetricMeasures
-                }
+            if List.isEmpty metrics then
+                emptyNode
+
+            else
+                Input.metrics appState
+                    { metrics = metrics
+                    , metricMeasures = answer.metricMeasures
+                    , onChange = createEditEvent setMetricMeasures
+                    }
 
         annotationsInput =
             Input.annotations appState
