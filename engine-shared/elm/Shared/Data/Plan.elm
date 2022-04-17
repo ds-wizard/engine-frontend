@@ -10,8 +10,8 @@ import Uuid exposing (Uuid)
 type alias Plan =
     { uuid : Uuid
     , name : String
-    , until : Time.Posix
-    , since : Time.Posix
+    , until : Maybe Time.Posix
+    , since : Maybe Time.Posix
     , test : Bool
     , users : Maybe Int
     }
@@ -22,7 +22,7 @@ decoder =
     D.succeed Plan
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
-        |> D.required "until" D.datetime
-        |> D.required "since" D.datetime
+        |> D.required "until" (D.maybe D.datetime)
+        |> D.required "since" (D.maybe D.datetime)
         |> D.required "test" D.bool
         |> D.required "users" (D.maybe D.int)

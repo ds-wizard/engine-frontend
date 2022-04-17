@@ -1,6 +1,8 @@
 module Shared.Common.TimeUtils exposing
     ( fromYMD
     , intToMonth
+    , isAfter
+    , isBefore
     , isBetween
     , monthToInt
     , monthToString
@@ -202,3 +204,27 @@ isBetween start end time =
             Time.posixToMillis time
     in
     startMillis < timeMillis && endMillis > timeMillis
+
+
+isBefore : Time.Posix -> Time.Posix -> Bool
+isBefore expected time =
+    let
+        expectedMillis =
+            Time.posixToMillis expected
+
+        timeMillis =
+            Time.posixToMillis time
+    in
+    timeMillis < expectedMillis
+
+
+isAfter : Time.Posix -> Time.Posix -> Bool
+isAfter expected time =
+    let
+        expectedMillis =
+            Time.posixToMillis expected
+
+        timeMillis =
+            Time.posixToMillis time
+    in
+    timeMillis < expectedMillis
