@@ -752,6 +752,7 @@ locale =
                , ( "Wizard.KMEditor.Index.View.header.title", "Knowledge Model Editor" )
                , ( "Wizard.KMEditor.Index.View.header.create", "Create" )
                , ( "Wizard.KMEditor.Migration.View.action.apply", "Apply" )
+               , ( "Wizard.KMEditor.Migration.View.action.applyAll", "Apply all" )
                , ( "Wizard.KMEditor.Migration.View.action.reject", "Reject" )
                , ( "Wizard.KMEditor.Migration.View.completed.msg1", "Migration successfully completed." )
                , ( "Wizard.KMEditor.Migration.View.completed.msg2", "You can publish the new version now." )

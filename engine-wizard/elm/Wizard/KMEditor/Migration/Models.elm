@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Migration.Models exposing
-    ( Model
+    ( ButtonClicked(..)
+    , Model
     , initialModel
     )
 
@@ -12,7 +13,14 @@ type alias Model =
     { branchUuid : Uuid
     , migration : ActionResult Migration
     , conflict : ActionResult String
+    , buttonClicked : Maybe ButtonClicked
     }
+
+
+type ButtonClicked
+    = RejectButtonClicked
+    | ApplyButtonClicked
+    | ApplyAllButtonClicked
 
 
 initialModel : Uuid -> Model
@@ -20,4 +28,5 @@ initialModel branchUuid =
     { branchUuid = branchUuid
     , migration = Loading
     , conflict = Unset
+    , buttonClicked = Nothing
     }

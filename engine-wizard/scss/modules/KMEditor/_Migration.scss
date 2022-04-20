@@ -2,7 +2,13 @@
 
 .KMEditor__Migration {
     .form-actions {
-        margin-bottom: 0;
+        margin-top: 0;
+
+        div {
+            .btn {
+                margin-left: .5rem;
+            }
+        }
     }
 
     .col-xs-8 {
