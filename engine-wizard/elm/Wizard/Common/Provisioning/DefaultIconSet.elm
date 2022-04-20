@@ -48,6 +48,7 @@ iconSet =
                , ( "avatar.18", "fas fa-tree" )
                , ( "avatar.19", "fas fa-hat-cowboy" )
                , ( "documents.download", "fas fa-download" )
+               , ( "documents.viewError", "fas fa-exclamation-circle" )
                , ( "documents.submit", "fas fa-paper-plane" )
                , ( "km.answer", "far fa-dot-circle" )
                , ( "km.choice", "far fa-check-square" )

@@ -1,7 +1,7 @@
 module Wizard.Projects.Detail.Documents.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, a, button, div, h5, input, label, p, pre, span, strong, table, tbody, td, text, tr)
+import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)
 import Maybe.Extra as Maybe
@@ -76,6 +76,7 @@ view appState cfg model =
             , Listing.view appState (listingConfig cfg appState) model.documents
             , deleteModal cfg appState model
             , submitModal cfg appState model
+            , documentErrorModal cfg appState model
             , submissionErrorModal cfg appState model
             ]
         ]
@@ -236,6 +237,18 @@ listingActions appState cfg document =
                 _ ->
                     ( Listing.dropdownSeparator, False )
 
+        viewErrorEnabled =
+            Maybe.isJust document.workerLog && document.state == ErrorDocumentState
+
+        viewError =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "documents.viewError" appState
+                , label = "View error"
+                , msg = ListingActionMsg (cfg.wrapMsg <| SetDocumentErrorModal document.workerLog)
+                , dataCy = "view-error"
+                }
+
         deleteEnabled =
             cfg.questionnaireEditable && Session.exists appState.session
 
@@ -251,7 +264,8 @@ listingActions appState cfg document =
     []
         |> listInsertIf download downloadEnabled
         |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled) && viewQuestionnaireEnabled)
+        |> listInsertIf viewError viewErrorEnabled
+        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled || viewErrorEnabled) && viewQuestionnaireEnabled)
         |> listInsertIf viewQuestionnaire viewQuestionnaireEnabled
         |> listInsertIf Listing.dropdownSeparator deleteEnabled
         |> listInsertIf delete deleteEnabled
@@ -488,6 +502,28 @@ submitModal cfg appState model =
     Modal.simple modalConfig
 
 
+documentErrorModal : ViewConfig msg -> AppState -> Model -> Html msg
+documentErrorModal cfg appState model =
+    let
+        ( visible, message ) =
+            case model.documentErrorModal of
+                Just error ->
+                    ( True, error )
+
+                Nothing ->
+                    ( False, "" )
+
+        modalConfig =
+            { title = l_ "documentErrorModal.title" appState
+            , message = message
+            , visible = visible
+            , actionMsg = cfg.wrapMsg (SetDocumentErrorModal Nothing)
+            , dataCy = "document-error"
+            }
+    in
+    Modal.error appState modalConfig
+
+
 submissionErrorModal : ViewConfig msg -> AppState -> Model -> Html msg
 submissionErrorModal cfg appState model =
     let
@@ -499,25 +535,12 @@ submissionErrorModal cfg appState model =
                 Nothing ->
                     ( False, "" )
 
-        modalContent =
-            [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ lx_ "submissionErrorModal.title" appState ] ]
-            , div [ class "modal-body" ]
-                [ pre [ class "pre-error" ] [ text message ]
-                ]
-            , div [ class "modal-footer" ]
-                [ button
-                    [ onClick (cfg.wrapMsg (SetSubmissionErrorModal Nothing))
-                    , class "btn btn-primary"
-                    ]
-                    [ lx_ "submissionErrorModal.button" appState ]
-                ]
-            ]
-
         modalConfig =
-            { modalContent = modalContent
+            { title = l_ "submissionErrorModal.title" appState
+            , message = message
             , visible = visible
+            , actionMsg = cfg.wrapMsg (SetSubmissionErrorModal Nothing)
             , dataCy = "submission-error"
             }
     in
-    Modal.simpleWithAttrs [ class "modal-submission-error" ] modalConfig
+    Modal.error appState modalConfig

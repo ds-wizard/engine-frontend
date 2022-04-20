@@ -77,6 +77,9 @@ update wrapMsg msg appState model =
         SubmitDocumentCompleted result ->
             handleSubmitDocumentCompleted appState model result
 
+        SetDocumentErrorModal mbError ->
+            ( { model | documentErrorModal = mbError }, Cmd.none )
+
         SetSubmissionErrorModal mbError ->
             ( { model | submissionErrorModal = mbError }, Cmd.none )
 

@@ -22,6 +22,7 @@ type alias Model =
     , submittingDocument : ActionResult Submission
     , submissionServices : ActionResult (List SubmissionService)
     , selectedSubmissionServiceId : Maybe String
+    , documentErrorModal : Maybe String
     , submissionErrorModal : Maybe String
     }
 
@@ -35,6 +36,7 @@ initialModel paginationQueryString =
     , submittingDocument = Unset
     , submissionServices = Unset
     , selectedSubmissionServiceId = Nothing
+    , documentErrorModal = Nothing
     , submissionErrorModal = Nothing
     }
 
