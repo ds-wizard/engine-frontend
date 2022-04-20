@@ -7,6 +7,7 @@ module Shared.Api.Branches exposing
     , postBranch
     , postMigration
     , postMigrationConflict
+    , postMigrationConflictApplyAll
     , putBranch
     , putVersion
     , websocket
@@ -14,7 +15,7 @@ module Shared.Api.Branches exposing
 
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtPost, jwtPut, wsUrl)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
 import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.BranchDetail as BranchDetail exposing (BranchDetail)
 import Shared.Data.Migration as Migration exposing (Migration)
@@ -85,6 +86,11 @@ postMigration uuid =
 postMigrationConflict : Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 postMigrationConflict uuid =
     jwtPost ("/branches/" ++ Uuid.toString uuid ++ "/migrations/current/conflict")
+
+
+postMigrationConflictApplyAll : Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+postMigrationConflictApplyAll uuid =
+    jwtPostEmpty ("/branches/" ++ Uuid.toString uuid ++ "/migrations/current/conflict/all")
 
 
 deleteMigration : Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg

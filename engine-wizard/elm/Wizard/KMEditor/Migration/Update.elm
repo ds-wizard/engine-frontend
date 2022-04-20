@@ -14,7 +14,7 @@ import Shared.Setters exposing (setMigration)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KMEditor.Migration.Models exposing (Model)
+import Wizard.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
 import Wizard.KMEditor.Migration.Msgs exposing (Msg(..))
 import Wizard.Msgs
 
@@ -29,6 +29,9 @@ update msg wrapMsg appState model =
     case msg of
         GetMigrationCompleted result ->
             handleGetMigrationCompleted appState model result
+
+        ApplyAll ->
+            handleApplyAll wrapMsg appState model
 
         ApplyEvent ->
             handleApplyEvent wrapMsg appState model
@@ -54,14 +57,24 @@ handleGetMigrationCompleted appState model result =
         }
 
 
+handleApplyAll : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleApplyAll wrapMsg appState model =
+    let
+        cmd =
+            Cmd.map wrapMsg <|
+                BranchesApi.postMigrationConflictApplyAll model.branchUuid appState PostMigrationConflictCompleted
+    in
+    ( { model | conflict = Loading, buttonClicked = Just ApplyAllButtonClicked }, cmd )
+
+
 handleApplyEvent : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleApplyEvent =
-    resolveChange MigrationResolution.apply
+    resolveChange MigrationResolution.apply ApplyButtonClicked
 
 
 handleRejectEvent : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleRejectEvent =
-    resolveChange MigrationResolution.reject
+    resolveChange MigrationResolution.reject RejectButtonClicked
 
 
 handlePostMigrationConflictCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -84,8 +97,8 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
 -- Helpers
 
 
-resolveChange : (String -> MigrationResolution) -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-resolveChange createMigrationResolution wrapMsg appState model =
+resolveChange : (String -> MigrationResolution) -> ButtonClicked -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+resolveChange createMigrationResolution buttonClicked wrapMsg appState model =
     let
         cmd =
             case model.migration of
@@ -99,7 +112,7 @@ resolveChange createMigrationResolution wrapMsg appState model =
                 _ ->
                     Cmd.none
     in
-    ( { model | conflict = Loading }, cmd )
+    ( { model | conflict = Loading, buttonClicked = Just buttonClicked }, cmd )
 
 
 postMigrationConflictCmd : (Msg -> Wizard.Msgs.Msg) -> Uuid -> AppState -> MigrationResolution -> Cmd Wizard.Msgs.Msg

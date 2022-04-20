@@ -6,6 +6,7 @@ module Wizard.Common.View.ActionButton exposing
     , button
     , buttonExtra
     , buttonWithAttrs
+    , loader
     , submit
     )
 
@@ -90,7 +91,7 @@ actionButtonView appState attributes content result =
         buttonContent =
             case result of
                 Loading ->
-                    [ faSet "_global.spinner" appState ]
+                    [ loader appState ]
 
                 _ ->
                     content
@@ -99,6 +100,11 @@ actionButtonView appState attributes content result =
             disabled (result == Loading) :: attributes
     in
     Html.button buttonAttributes buttonContent
+
+
+loader : AppState -> Html msg
+loader appState =
+    faSet "_global.spinner" appState
 
 
 buttonClass : Bool -> String
