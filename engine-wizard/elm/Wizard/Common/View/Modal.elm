@@ -1,15 +1,17 @@
 module Wizard.Common.View.Modal exposing
     ( AlertConfig
     , ConfirmConfig
+    , ErrorConfig
     , SimpleConfig
     , alert
     , confirm
+    , error
     , simple
     , simpleWithAttrs
     )
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Attribute, Html, button, div, h5, p, text)
+import Html exposing (Attribute, Html, button, div, h5, p, pre, text)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
@@ -121,3 +123,39 @@ alert cfg =
                 ]
             ]
         ]
+
+
+type alias ErrorConfig msg =
+    { title : String
+    , message : String
+    , visible : Bool
+    , actionMsg : msg
+    , dataCy : String
+    }
+
+
+error : AppState -> ErrorConfig msg -> Html msg
+error appState cfg =
+    let
+        modalContent =
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ text cfg.title ] ]
+            , div [ class "modal-body" ]
+                [ pre [ class "pre-error" ] [ text cfg.message ]
+                ]
+            , div [ class "modal-footer" ]
+                [ button
+                    [ onClick cfg.actionMsg
+                    , class "btn btn-primary"
+                    ]
+                    [ lx_ "button.ok" appState ]
+                ]
+            ]
+
+        modalConfig =
+            { modalContent = modalContent
+            , visible = cfg.visible
+            , dataCy = cfg.dataCy
+            }
+    in
+    simpleWithAttrs [ class "modal-error" ] modalConfig

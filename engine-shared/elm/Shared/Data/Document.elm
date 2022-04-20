@@ -31,6 +31,7 @@ type alias Document =
     , submissions : List Submission
     , creatorUuid : Maybe Uuid
     , fileSize : Maybe Int
+    , workerLog : Maybe String
     }
 
 
@@ -55,6 +56,7 @@ decoder =
         |> D.required "submissions" (D.list Submission.decoder)
         |> D.required "creatorUuid" (D.maybe Uuid.decoder)
         |> D.required "fileSize" (D.maybe D.int)
+        |> D.required "workerLog" (D.maybe D.string)
 
 
 getFormat : Document -> Maybe TemplateFormat

@@ -1,7 +1,7 @@
 module Wizard.Documents.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, a, button, div, h5, input, label, p, pre, span, strong, table, tbody, td, text, tr)
+import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)
 import Maybe.Extra as Maybe
@@ -97,6 +97,7 @@ viewDocuments appState model mbQuestionnaire =
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
+        , documentErrorModal appState model
         , submissionErrorModal appState model
         ]
 
@@ -226,6 +227,18 @@ listingActions appState document =
                 , dataCy = "submit"
                 }
 
+        viewErrorEnabled =
+            Maybe.isJust document.workerLog && document.state == ErrorDocumentState
+
+        viewError =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "documents.viewError" appState
+                , label = "View error"
+                , msg = ListingActionMsg (SetDocumentErrorModal document.workerLog)
+                , dataCy = "view-error"
+                }
+
         deleteEnabled =
             Feature.documentDelete appState document
 
@@ -241,7 +254,8 @@ listingActions appState document =
     []
         |> listInsertIf download downloadEnabled
         |> listInsertIf submit submitEnabled
-        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled) && deleteEnabled)
+        |> listInsertIf viewError viewErrorEnabled
+        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled || viewErrorEnabled) && deleteEnabled)
         |> listInsertIf delete deleteEnabled
 
 
@@ -476,6 +490,28 @@ submitModal appState model =
     Modal.simple modalConfig
 
 
+documentErrorModal : AppState -> Model -> Html Msg
+documentErrorModal appState model =
+    let
+        ( visible, message ) =
+            case model.documentErrorModal of
+                Just error ->
+                    ( True, error )
+
+                Nothing ->
+                    ( False, "" )
+
+        modalConfig =
+            { title = l_ "documentErrorModal.title" appState
+            , message = message
+            , visible = visible
+            , actionMsg = SetDocumentErrorModal Nothing
+            , dataCy = "document-error"
+            }
+    in
+    Modal.error appState modalConfig
+
+
 submissionErrorModal : AppState -> Model -> Html Msg
 submissionErrorModal appState model =
     let
@@ -487,25 +523,12 @@ submissionErrorModal appState model =
                 Nothing ->
                     ( False, "" )
 
-        modalContent =
-            [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ lx_ "submissionErrorModal.title" appState ] ]
-            , div [ class "modal-body" ]
-                [ pre [ class "pre-error" ] [ text message ]
-                ]
-            , div [ class "modal-footer" ]
-                [ button
-                    [ onClick (SetSubmissionErrorModal Nothing)
-                    , class "btn btn-primary"
-                    ]
-                    [ lx_ "submissionErrorModal.button" appState ]
-                ]
-            ]
-
         modalConfig =
-            { modalContent = modalContent
+            { title = l_ "submissionErrorModal.title" appState
+            , message = message
             , visible = visible
+            , actionMsg = SetSubmissionErrorModal Nothing
             , dataCy = "submission-error"
             }
     in
-    Modal.simpleWithAttrs [ class "modal-submission-error" ] modalConfig
+    Modal.error appState modalConfig
