@@ -18,6 +18,7 @@ import Shared.Form.Validate as V
 type alias EditableKnowledgeModelConfigForm =
     { publicEnabled : Bool
     , publicPackages : List AllowedPackage
+    , integrationConfig : String
     }
 
 
@@ -40,6 +41,7 @@ init config =
         fields =
             [ ( "publicEnabled", Field.bool config.public.enabled )
             , ( "publicPackages", Field.list (List.map packageToFields config.public.packages) )
+            , ( "integrationConfig", Field.string config.integrationConfig )
             ]
     in
     Form.initial fields validation
@@ -58,11 +60,13 @@ validation =
     V.succeed EditableKnowledgeModelConfigForm
         |> V.andMap (V.field "publicEnabled" V.bool)
         |> V.andMap (V.field "publicPackages" (V.list validatePackage))
+        |> V.andMap (V.field "integrationConfig" V.optionalString)
 
 
 toEditableKnowledgeModelConfig : EditableKnowledgeModelConfigForm -> EditableKnowledgeModelConfig
 toEditableKnowledgeModelConfig form =
-    { public =
+    { integrationConfig = form.integrationConfig
+    , public =
         { enabled = form.publicEnabled
         , packages = form.publicPackages
         }

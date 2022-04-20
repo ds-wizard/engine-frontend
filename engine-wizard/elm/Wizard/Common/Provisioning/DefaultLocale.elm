@@ -1041,6 +1041,7 @@ locale =
                , ( "Wizard.Settings.KnowledgeModels.View.form.allowedPackages.kmId", "Knowledge Model ID" )
                , ( "Wizard.Settings.KnowledgeModels.View.form.allowedPackages.minVersion", "Min Version" )
                , ( "Wizard.Settings.KnowledgeModels.View.form.allowedPackages.maxVersion", "Max Version" )
+               , ( "Wizard.Settings.KnowledgeModels.View.form.integrationConfig", "Integration Config" )
                , ( "Wizard.Settings.KnowledgeModels.View.form.public", "Public Knowledge Models" )
                , ( "Wizard.Settings.KnowledgeModels.View.form.public.desc", "If enabled you can define knowledge models that are publicly available for reading." )
                , ( "Wizard.Settings.LookAndFeel.LogoUploadModal.save", "Save" )

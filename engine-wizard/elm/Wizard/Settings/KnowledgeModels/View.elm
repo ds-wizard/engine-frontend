@@ -2,7 +2,7 @@ module Wizard.Settings.KnowledgeModels.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, button, div, span)
+import Html exposing (Html, button, div, hr, span)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Shared.Form.FormError exposing (FormError)
@@ -69,6 +69,8 @@ formView appState form =
         [ FormGroup.toggle form "publicEnabled" (l_ "form.public" appState)
         , FormExtra.mdAfter (l_ "form.public.desc" appState)
         , allowedInput
+        , hr [] []
+        , FormGroup.resizableTextarea appState form "integrationConfig" (l_ "form.integrationConfig" appState)
         ]
 
 

@@ -11,17 +11,21 @@ import Shared.Data.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKno
 
 
 type alias EditableKnowledgeModelConfig =
-    { public : EditablePublicKnowledgeModelsConfig
+    { integrationConfig : String
+    , public : EditablePublicKnowledgeModelsConfig
     }
 
 
 decoder : Decoder EditableKnowledgeModelConfig
 decoder =
     D.succeed EditableKnowledgeModelConfig
+        |> D.required "integrationConfig" D.string
         |> D.required "public" EditablePublicKnowledgeModelsConfig.decoder
 
 
 encode : EditableKnowledgeModelConfig -> E.Value
 encode config =
     E.object
-        [ ( "public", EditablePublicKnowledgeModelsConfig.encode config.public ) ]
+        [ ( "integrationConfig", E.string config.integrationConfig )
+        , ( "public", EditablePublicKnowledgeModelsConfig.encode config.public )
+        ]
