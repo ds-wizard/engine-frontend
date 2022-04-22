@@ -270,7 +270,7 @@ projectsCreateCustom =
 
 projectsCreateTemplate : Maybe String -> Route
 projectsCreateTemplate =
-    ProjectsRoute << Wizard.Projects.Routes.CreateRoute << Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute
+    ProjectsRoute << Wizard.Projects.Routes.CreateRoute << Wizard.Projects.Create.ProjectCreateRoute.TemplateCreateRoute
 
 
 projectsCreateMigration : Uuid -> Route
