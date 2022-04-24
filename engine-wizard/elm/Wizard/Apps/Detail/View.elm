@@ -19,6 +19,7 @@ import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Components.PlansList as PlansList
 import Wizard.Common.Components.UsageTable as UsageTable
 import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.View.AppIcon as AppIcon
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -66,8 +67,14 @@ header appState app =
                 [ faSet "_global.edit" appState
                 , lx_ "actions.edit" appState
                 ]
+
+        title =
+            span [ class "top-header-title-with-icon" ]
+                [ AppIcon.view app
+                , text app.name
+                ]
     in
-    DetailPage.header (text app.name) [ editAction ]
+    DetailPage.header title [ editAction ]
 
 
 content : AppState -> AppDetail -> Html Msg

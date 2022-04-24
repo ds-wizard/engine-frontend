@@ -5,6 +5,7 @@ module Wizard.Routes exposing
     , appsDetail
     , appsIndex
     , appsIndexWithFilters
+    , devOperations
     , documentsIndex
     , documentsIndexWithFilters
     , home
@@ -29,6 +30,9 @@ module Wizard.Routes exposing
     , knowledgeModelsIndex
     , knowledgeModelsIndexWithFilters
     , knowledgeModelsPreview
+    , persistentCommandsDetail
+    , persistentCommandsIndex
+    , persistentCommandsIndexWithFilters
     , projectsCreateCustom
     , projectsCreateMigration
     , projectsCreateTemplate
@@ -57,8 +61,8 @@ module Wizard.Routes exposing
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
-import Wizard.Admin.Routes
 import Wizard.Apps.Routes
+import Wizard.Dev.Routes
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
@@ -74,9 +78,9 @@ import Wizard.Users.Routes
 
 
 type Route
-    = AdminRoute Wizard.Admin.Routes.Route
-    | AppsRoute Wizard.Apps.Routes.Route
+    = AppsRoute Wizard.Apps.Routes.Route
     | DashboardRoute
+    | DevRoute Wizard.Dev.Routes.Route
     | DocumentsRoute Wizard.Documents.Routes.Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
@@ -135,6 +139,33 @@ isAppIndex route =
 
         _ ->
             False
+
+
+
+-- Dev
+
+
+devOperations : Route
+devOperations =
+    DevRoute Wizard.Dev.Routes.OperationsRoute
+
+
+persistentCommandsIndex : Route
+persistentCommandsIndex =
+    DevRoute (Wizard.Dev.Routes.PersistentCommandsIndex PaginationQueryString.empty Nothing)
+
+
+persistentCommandsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+persistentCommandsIndexWithFilters filters pagination =
+    DevRoute
+        (Wizard.Dev.Routes.PersistentCommandsIndex pagination
+            (PaginationQueryFilters.getValue Wizard.Dev.Routes.persistentCommandIndexRouteStateFilterId filters)
+        )
+
+
+persistentCommandsDetail : Uuid -> Route
+persistentCommandsDetail =
+    DevRoute << Wizard.Dev.Routes.PersistentCommandsDetail
 
 
 

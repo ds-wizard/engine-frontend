@@ -3,11 +3,11 @@ module Wizard.Msgs exposing (Msg(..))
 import Browser exposing (UrlRequest)
 import Time
 import Url exposing (Url)
-import Wizard.Admin.Msgs
 import Wizard.Apps.Msgs
 import Wizard.Auth.Msgs
 import Wizard.Common.Menu.Msgs
 import Wizard.Dashboard.Msgs
+import Wizard.Dev.Msgs
 import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
@@ -29,7 +29,7 @@ type Msg
     | SetSidebarCollapsed Bool
     | SetFullscreen Bool
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
-    | AdminMsg Wizard.Admin.Msgs.Msg
+    | AdminMsg Wizard.Dev.Msgs.Msg
     | AppsMsg Wizard.Apps.Msgs.Msg
     | DashboardMsg Wizard.Dashboard.Msgs.Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg

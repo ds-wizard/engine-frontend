@@ -10,6 +10,7 @@ import Shared.Data.BuildInfo exposing (BuildInfo)
 
 type alias Model =
     { reportIssueOpen : Bool
+    , devMenuDropdownState : Dropdown.State
     , helpMenuDropdownState : Dropdown.State
     , profileMenuDropdownState : Dropdown.State
     , aboutOpen : Bool
@@ -20,6 +21,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { reportIssueOpen = False
+    , devMenuDropdownState = Dropdown.initialState
     , helpMenuDropdownState = Dropdown.initialState
     , profileMenuDropdownState = Dropdown.initialState
     , aboutOpen = False

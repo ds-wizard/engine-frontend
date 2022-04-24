@@ -8,6 +8,15 @@
 
     .top-header {
         .top-header-content {
+            .top-header-title-with-icon {
+                display: flex;
+                align-items: center;
+
+                .ItemIcon {
+                    margin-right: .5rem;
+                }
+            }
+
             .top-header-actions {
                 margin-right: 1rem;
 
@@ -31,6 +40,11 @@
 
         &__Inner {
             max-width: 50rem;
+            margin: 20px auto;
+            padding: 0 1.25rem;
+        }
+
+        &__InnerFull {
             margin: 20px auto;
             padding: 0 1.25rem;
         }

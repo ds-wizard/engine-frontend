@@ -6,6 +6,7 @@ module Wizard.KnowledgeModels.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.Package exposing (Package)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
@@ -89,5 +90,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = PackagesApi.getPackages
     , getError = lg "apiError.packages.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.KnowledgeModelsRoute << IndexRoute
+    , toRoute = Routes.knowledgeModelsIndexWithFilters PaginationQueryFilters.empty
     }

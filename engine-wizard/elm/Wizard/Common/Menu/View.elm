@@ -2,6 +2,7 @@ module Wizard.Common.Menu.View exposing
     ( viewAboutModal
     , viewAboutModalContent
     , viewBuildInfo
+    , viewDevMenu
     , viewHelpMenu
     , viewProfileMenu
     , viewReportIssueModal
@@ -88,6 +89,36 @@ viewSettingsMenu appState =
                 , span [ class "sidebar-link" ] [ span [] [ lx_ "settingsMenu.settings" appState ] ]
                 ]
             ]
+
+    else
+        emptyNode
+
+
+viewDevMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg
+viewDevMenu appState dropdownState =
+    if Feature.dev appState then
+        Dropdown.dropdown dropdownState
+            { options = [ Dropdown.dropRight, Dropdown.attrs [ dataCy "menu_help" ] ]
+            , toggleMsg = Wizard.Msgs.MenuMsg << DevMenuDropdownMsg
+            , toggleButton =
+                Dropdown.toggle [ Button.roleLink ]
+                    [ faSet "menu.dev" appState
+                    , span [ class "sidebar-link" ]
+                        [ span [] [ text "Dev" ], faSet "menu.dropdownToggle" appState ]
+                    ]
+            , items =
+                [ Dropdown.anchorItem
+                    (linkToAttributes appState Routes.devOperations)
+                    [ faSet "menu.devOperations" appState
+                    , text "Dev Operations"
+                    ]
+                , Dropdown.anchorItem
+                    (linkToAttributes appState Routes.persistentCommandsIndex)
+                    [ faSet "menu.persistentCommands" appState
+                    , text "Persistent Commands"
+                    ]
+                ]
+            }
 
     else
         emptyNode

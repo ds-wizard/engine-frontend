@@ -12,6 +12,7 @@
             "Gizra/elm-debouncer": "2.0.0",
             "NoRedInk/elm-json-decode-pipeline": "1.0.1",
             "SiriusStarr/elm-password-strength": "1.0.2",
+            "ThinkAlexandria/elm-pretty-print-json": "1.0.1",
             "avh4/elm-color": "1.0.0",
             "dillonkearns/elm-markdown": "7.0.0",
             "elm/browser": "1.0.2",
@@ -37,6 +38,7 @@
             "kuon/elm-string-normalize": "1.0.3",
             "myrho/elm-round": "1.0.4",
             "noahzgordon/elm-color-extra": "1.0.2",
+            "pablohirafuji/elm-syntax-highlight": "3.4.1",
             "rtfeldman/elm-iso8601-date-strings": "1.1.4",
             "rundis/elm-bootstrap": "5.2.0",
             "simonh1000/elm-jwt": "7.1.1",
@@ -47,10 +49,12 @@
             "elm/bytes": "1.0.8",
             "elm/parser": "1.1.0",
             "elm/virtual-dom": "1.0.2",
+            "elm-community/basics-extra": "4.1.0",
             "elm-explorations/test": "1.2.2",
             "fredcy/elm-parseint": "2.0.1",
             "justinmimbs/date": "4.0.1",
             "rtfeldman/elm-hex": "1.0.0",
+            "the-sett/elm-pretty-printer": "2.2.3",
             "zwilias/elm-utf-tools": "2.0.1"
         }
     },

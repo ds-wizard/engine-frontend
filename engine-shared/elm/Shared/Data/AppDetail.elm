@@ -25,6 +25,8 @@ type alias AppDetail =
     , users : List User
     , usage : Usage
     , plans : List Plan
+    , primaryColor : Maybe String
+    , logoUrl : Maybe String
     }
 
 
@@ -42,3 +44,5 @@ decoder =
         |> D.required "users" (D.list User.decoder)
         |> D.required "usage" Usage.decoder
         |> D.required "plans" (D.list Plan.decoder)
+        |> D.required "primaryColor" (D.maybe D.string)
+        |> D.required "logoUrl" (D.maybe D.string)
