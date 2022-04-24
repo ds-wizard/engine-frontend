@@ -1,22 +1,22 @@
-module Wizard.Admin.Operations.Update exposing
+module Wizard.Dev.Operations.Update exposing
     ( fetchData
     , update
     )
 
 import ActionResult exposing (ActionResult(..))
 import Dict
-import Shared.Api.Admin as AdminApi
-import Shared.Data.AdminOperationSection as AdminOperationSection
-import Wizard.Admin.Operations.Models exposing (Model, fieldPath, getSection, operationPath)
-import Wizard.Admin.Operations.Msgs exposing (Msg(..))
+import Shared.Api.DevOperations as DevOperationsApi
+import Shared.Data.DevOperationSection as AdminOperationSection
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Dev.Operations.Models exposing (Model, fieldPath, getSection, operationPath)
+import Wizard.Dev.Operations.Msgs exposing (Msg(..))
 import Wizard.Msgs
 
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    AdminApi.getOperations appState GetAdminOperationsComplete
+    DevOperationsApi.getOperations appState GetAdminOperationsComplete
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -27,7 +27,7 @@ update msg wrapMsg appState model =
                 ( newModel, cmd ) =
                     applyResult appState
                         { setResult = \s m -> { m | adminOperationSections = s }
-                        , defaultError = "Unable to get admin operations."
+                        , defaultError = "Unable to get dev operations."
                         , model = model
                         , result = result
                         }
@@ -65,7 +65,7 @@ update msg wrapMsg appState model =
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                AdminApi.executeOperation execution appState (ExecuteOperationComplete sectionName operationName)
+                                DevOperationsApi.executeOperation execution appState (ExecuteOperationComplete sectionName operationName)
 
                         operationResults =
                             Dict.insert (operationPath sectionName operationName) Loading model.operationResults

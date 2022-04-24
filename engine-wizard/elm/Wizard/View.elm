@@ -4,12 +4,12 @@ import Browser exposing (Document)
 import Html exposing (Html)
 import Shared.Locale exposing (l)
 import Shared.Undraw as Undraw
-import Wizard.Admin.View
 import Wizard.Apps.View
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Layout as Layout
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.View
+import Wizard.Dev.View
 import Wizard.Documents.View
 import Wizard.KMEditor.View
 import Wizard.KnowledgeModels.View
@@ -36,8 +36,8 @@ view model =
 
     else
         case model.appState.route of
-            Routes.AdminRoute route ->
-                Wizard.Admin.View.view route model.appState model.adminModel
+            Routes.DevRoute route ->
+                Wizard.Dev.View.view route model.appState model.adminModel
                     |> Html.map AdminMsg
                     |> Layout.app model
 

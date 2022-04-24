@@ -48,7 +48,7 @@ handleDeleteVersion wrapMsg appState model =
     case model.package of
         Success package ->
             ( { model | deletingVersion = Loading }
-            , Cmd.map wrapMsg <| PackagesApi.deletePackageVersion package.id appState DeleteVersionCompleted
+            , PackagesApi.deletePackageVersion package.id appState (wrapMsg << DeleteVersionCompleted)
             )
 
         _ ->

@@ -1,23 +1,23 @@
-module Shared.Data.AdminOperation exposing
-    ( AdminOperation
+module Shared.Data.DevOperation exposing
+    ( DevOperation
     , decoder
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Data.AdminOperation.AdminOperationParameter as AdminOperationParameter exposing (AdminOperationParameter)
+import Shared.Data.DevOperation.DevOperationParameter as AdminOperationParameter exposing (AdminOperationParameter)
 
 
-type alias AdminOperation =
+type alias DevOperation =
     { name : String
     , description : Maybe String
     , parameters : List AdminOperationParameter
     }
 
 
-decoder : Decoder AdminOperation
+decoder : Decoder DevOperation
 decoder =
-    D.succeed AdminOperation
+    D.succeed DevOperation
         |> D.required "name" D.string
         |> D.required "description" (D.maybe D.string)
         |> D.required "parameters" (D.list AdminOperationParameter.decoder)

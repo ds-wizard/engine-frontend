@@ -2,15 +2,20 @@ module Wizard.Common.Components.DetailPage exposing
     ( container
     , content
     , contentInnerClass
+    , contentInnerFullClass
     , header
     , sidePanel
     , sidePanelItemWithIcon
+    , sidePanelItemWithIconWithLink
     , sidePanelList
     )
 
 import Html exposing (Html, br, dd, div, dl, dt, strong, text)
 import Html.Attributes exposing (class)
+import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Routes exposing (Route)
 
 
 container : List (Html msg) -> Html msg
@@ -38,6 +43,11 @@ contentInnerClass =
     class "DetailPage__Content__Inner"
 
 
+contentInnerFullClass : Html.Attribute msg
+contentInnerFullClass =
+    class "DetailPage__Content__InnerFull"
+
+
 sidePanel : List (Html msg) -> Html msg
 sidePanel =
     div [ class "DetailPage__SidePanel" ]
@@ -62,6 +72,18 @@ sidePanelItemWithIcon title description icon =
         [ icon
         , div [ class "content" ]
             [ strong [] [ text title ]
+            , br [] []
+            , description
+            ]
+        ]
+
+
+sidePanelItemWithIconWithLink : AppState -> Route -> String -> Html msg -> Html msg -> Html msg
+sidePanelItemWithIconWithLink appState route title description icon =
+    div [ class "DetailPage__SidePanel__ItemIcon" ]
+        [ icon
+        , div [ class "content" ]
+            [ strong [] [ linkTo appState route [] [ text title ] ]
             , br [] []
             , description
             ]

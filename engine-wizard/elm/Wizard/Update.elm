@@ -7,13 +7,13 @@ import Browser
 import Browser.Navigation exposing (load, pushUrl)
 import Shared.Auth.Session as Session
 import Url
-import Wizard.Admin.Update
 import Wizard.Apps.Update
 import Wizard.Auth.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Menu.Update
 import Wizard.Common.Time as Time
 import Wizard.Dashboard.Update
+import Wizard.Dev.Update
 import Wizard.Documents.Update
 import Wizard.KMEditor.Update
 import Wizard.KnowledgeModels.Update
@@ -35,9 +35,9 @@ fetchData model =
     let
         fetchCmd =
             case model.appState.route of
-                Routes.AdminRoute route ->
+                Routes.DevRoute route ->
                     Cmd.map AdminMsg <|
-                        Wizard.Admin.Update.fetchData route model.appState
+                        Wizard.Dev.Update.fetchData route model.appState
 
                 Routes.AppsRoute route ->
                     Cmd.map AppsMsg <|
@@ -192,7 +192,7 @@ update msg model =
             Wizard.Msgs.AdminMsg adminMsg ->
                 let
                     ( adminModel, cmd ) =
-                        Wizard.Admin.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
+                        Wizard.Dev.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
                 in
                 ( { model | adminModel = adminModel }, cmd )
 

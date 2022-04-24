@@ -1,4 +1,4 @@
-module Wizard.Admin.Operations.Models exposing
+module Wizard.Dev.Operations.Models exposing
     ( Model
     , fieldPath
     , getSection
@@ -9,15 +9,15 @@ module Wizard.Admin.Operations.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
 import List.Extra as List
-import Shared.Data.AdminOperationExecutionResult exposing (AdminOperationExecutionResult)
-import Shared.Data.AdminOperationSection exposing (AdminOperationSection)
+import Shared.Data.DevOperationExecutionResult exposing (DevOperationExecutionResult)
+import Shared.Data.DevOperationSection exposing (DevOperationSection)
 
 
 type alias Model =
-    { adminOperationSections : ActionResult (List AdminOperationSection)
+    { adminOperationSections : ActionResult (List DevOperationSection)
     , openedSection : Maybe String
     , fieldValues : Dict String String
-    , operationResults : Dict String (ActionResult AdminOperationExecutionResult)
+    , operationResults : Dict String (ActionResult DevOperationExecutionResult)
     }
 
 
@@ -40,6 +40,6 @@ operationPath sectionName operationName =
     sectionName ++ "__" ++ operationName
 
 
-getSection : String -> Model -> Maybe AdminOperationSection
+getSection : String -> Model -> Maybe DevOperationSection
 getSection sectionName model =
     ActionResult.unwrap Nothing (List.find (.name >> (==) sectionName)) model.adminOperationSections

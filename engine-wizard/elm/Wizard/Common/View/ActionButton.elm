@@ -1,9 +1,11 @@
 module Wizard.Common.View.ActionButton exposing
     ( ButtonConfig
+    , ButtonCustomConfig
     , ButtonExtraConfig
     , ButtonWithAttrsConfig
     , SubmitConfig
     , button
+    , buttonCustom
     , buttonExtra
     , buttonWithAttrs
     , loader
@@ -64,6 +66,22 @@ buttonExtra : AppState -> ButtonExtraConfig a msg -> Html msg
 buttonExtra appState cfg =
     actionButtonView appState
         [ onClick cfg.msg, class <| "btn btn-with-loader link-with-icon " ++ buttonClass cfg.dangerous ]
+        cfg.content
+        cfg.result
+
+
+type alias ButtonCustomConfig a msg =
+    { content : List (Html msg)
+    , result : ActionResult a
+    , msg : msg
+    , btnClass : String
+    }
+
+
+buttonCustom : AppState -> ButtonCustomConfig a msg -> Html msg
+buttonCustom appState cfg =
+    actionButtonView appState
+        [ onClick cfg.msg, class <| "btn btn-with-loader link-with-icon " ++ cfg.btnClass ]
         cfg.content
         cfg.result
 

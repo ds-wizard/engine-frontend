@@ -1,19 +1,19 @@
-module Shared.Data.AdminOperationExecution exposing
-    ( AdminOperationExecution
+module Shared.Data.DevOperationExecution exposing
+    ( DevOperationExecution
     , encode
     )
 
 import Json.Encode as E
 
 
-type alias AdminOperationExecution =
+type alias DevOperationExecution =
     { sectionName : String
     , operationName : String
     , parameters : List String
     }
 
 
-encode : AdminOperationExecution -> E.Value
+encode : DevOperationExecution -> E.Value
 encode execution =
     E.object
         [ ( "sectionName", E.string execution.sectionName )

@@ -46,6 +46,9 @@ update wrapMsg msg appState model =
                 Err error ->
                     ( { model | apiBuildInfo = ApiError.toActionResult appState (l_ "error.buildInfo" appState) error }, Cmd.none )
 
+        DevMenuDropdownMsg dropdownState ->
+            ( { model | devMenuDropdownState = dropdownState }, Cmd.none )
+
         HelpMenuDropdownMsg dropdownState ->
             ( { model | helpMenuDropdownState = dropdownState }, Cmd.none )
 
