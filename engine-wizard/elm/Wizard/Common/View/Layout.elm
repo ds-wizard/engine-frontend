@@ -20,7 +20,7 @@ import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.Html.Events exposing (onLinkClick)
-import Wizard.Common.Menu.View exposing (viewAboutModal, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
+import Wizard.Common.Menu.View exposing (viewAboutModal, viewDevMenu, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
 import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg(..))
@@ -314,6 +314,7 @@ profileInfo model =
     in
     div [ class "profile-info" ]
         [ viewSettingsMenu model.appState
+        , viewDevMenu model.appState model.menuModel.devMenuDropdownState
         , viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
         , viewProfileMenu model.appState model.menuModel.profileMenuDropdownState
         , collapseLink

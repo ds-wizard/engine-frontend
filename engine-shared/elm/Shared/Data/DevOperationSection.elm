@@ -1,5 +1,5 @@
-module Shared.Data.AdminOperationSection exposing
-    ( AdminOperationSection
+module Shared.Data.DevOperationSection exposing
+    ( DevOperationSection
     , decoder
     , getOperation
     )
@@ -7,24 +7,24 @@ module Shared.Data.AdminOperationSection exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
-import Shared.Data.AdminOperation as AdminOperation exposing (AdminOperation)
+import Shared.Data.DevOperation as AdminOperation exposing (DevOperation)
 
 
-type alias AdminOperationSection =
+type alias DevOperationSection =
     { name : String
     , description : Maybe String
-    , operations : List AdminOperation
+    , operations : List DevOperation
     }
 
 
-decoder : Decoder AdminOperationSection
+decoder : Decoder DevOperationSection
 decoder =
-    D.succeed AdminOperationSection
+    D.succeed DevOperationSection
         |> D.required "name" D.string
         |> D.required "description" (D.maybe D.string)
         |> D.required "operations" (D.list AdminOperation.decoder)
 
 
-getOperation : String -> AdminOperationSection -> Maybe AdminOperation
+getOperation : String -> DevOperationSection -> Maybe DevOperation
 getOperation operationName section =
     List.find (.name >> (==) operationName) section.operations

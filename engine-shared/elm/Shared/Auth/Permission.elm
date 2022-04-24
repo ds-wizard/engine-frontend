@@ -1,6 +1,7 @@
 module Shared.Auth.Permission exposing
     ( apps
     , dataManagementPlan
+    , dev
     , documents
     , hasPerm
     , knowledgeModel
@@ -33,6 +34,11 @@ apps =
 dataManagementPlan : String
 dataManagementPlan =
     "DMP_PERM"
+
+
+dev : String
+dev =
+    "DEV_PERM"
 
 
 documents : String
