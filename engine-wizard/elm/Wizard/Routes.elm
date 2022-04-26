@@ -1,6 +1,6 @@
 module Wizard.Routes exposing
     ( Route(..)
-    , app
+    , appHome
     , appsCreate
     , appsDetail
     , appsIndex
@@ -8,7 +8,6 @@ module Wizard.Routes exposing
     , devOperations
     , documentsIndex
     , documentsIndexWithFilters
-    , home
     , isAppIndex
     , isDocumentsIndex
     , isKmEditorIndex
@@ -44,6 +43,7 @@ module Wizard.Routes exposing
     , projectsIndexWithFilters
     , projectsMigration
     , publicForgottenPassword
+    , publicHome
     , publicLogin
     , publicSignup
     , settingsRegistry
@@ -94,13 +94,13 @@ type Route
     | NotFoundRoute
 
 
-home : Route
-home =
+publicHome : Route
+publicHome =
     PublicRoute <| Wizard.Public.Routes.LoginRoute Nothing
 
 
-app : Route
-app =
+appHome : Route
+appHome =
     DashboardRoute
 
 

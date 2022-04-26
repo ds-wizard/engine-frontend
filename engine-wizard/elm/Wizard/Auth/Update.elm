@@ -73,6 +73,6 @@ logout : Model -> ( Model, Cmd Msg )
 logout model =
     let
         cmd =
-            Cmd.batch [ Ports.clearSession (), cmdNavigate model.appState Routes.home ]
+            Cmd.batch [ Ports.clearSession (), cmdNavigate model.appState Routes.publicHome ]
     in
     ( setSession Session.init model, cmd )
