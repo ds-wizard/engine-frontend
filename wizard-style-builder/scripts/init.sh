@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Prepare src
 rm -rf ./src
 mkdir src
