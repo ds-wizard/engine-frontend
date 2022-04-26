@@ -64,6 +64,7 @@ jobs:
       # (2) -> Install dependencies
       - name: Install
         run: |
+          npm ci
           cd wizard-style-builder
           npm ci
 
