@@ -1,11 +1,14 @@
 module Wizard.Common.View.ActionButton exposing
     ( ButtonConfig
+    , ButtonCustomConfig
     , ButtonExtraConfig
     , ButtonWithAttrsConfig
     , SubmitConfig
     , button
+    , buttonCustom
     , buttonExtra
     , buttonWithAttrs
+    , loader
     , submit
     )
 
@@ -67,6 +70,22 @@ buttonExtra appState cfg =
         cfg.result
 
 
+type alias ButtonCustomConfig a msg =
+    { content : List (Html msg)
+    , result : ActionResult a
+    , msg : msg
+    , btnClass : String
+    }
+
+
+buttonCustom : AppState -> ButtonCustomConfig a msg -> Html msg
+buttonCustom appState cfg =
+    actionButtonView appState
+        [ onClick cfg.msg, class <| "btn btn-with-loader link-with-icon " ++ cfg.btnClass ]
+        cfg.content
+        cfg.result
+
+
 type alias SubmitConfig a =
     { label : String
     , result : ActionResult a
@@ -90,7 +109,7 @@ actionButtonView appState attributes content result =
         buttonContent =
             case result of
                 Loading ->
-                    [ faSet "_global.spinner" appState ]
+                    [ loader appState ]
 
                 _ ->
                     content
@@ -99,6 +118,11 @@ actionButtonView appState attributes content result =
             disabled (result == Loading) :: attributes
     in
     Html.button buttonAttributes buttonContent
+
+
+loader : AppState -> Html msg
+loader appState =
+    faSet "_global.spinner" appState
 
 
 buttonClass : Bool -> String

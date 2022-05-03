@@ -15,6 +15,8 @@ type alias App =
     , appId : String
     , name : String
     , enabled : Bool
+    , logoUrl : Maybe String
+    , primaryColor : Maybe String
     , createdAt : Time.Posix
     , updatedAt : Time.Posix
     , clientUrl : String
@@ -28,6 +30,8 @@ decoder =
         |> D.required "appId" D.string
         |> D.required "name" D.string
         |> D.required "enabled" D.bool
+        |> D.required "logoUrl" (D.maybe D.string)
+        |> D.required "primaryColor" (D.maybe D.string)
         |> D.required "createdAt" D.datetime
         |> D.required "updatedAt" D.datetime
         |> D.required "clientUrl" D.string

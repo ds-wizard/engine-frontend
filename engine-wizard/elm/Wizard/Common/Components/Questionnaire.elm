@@ -82,6 +82,7 @@ import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextare
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
+import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Tag as Tag
 import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
@@ -114,6 +115,7 @@ type alias Model =
     , activePage : ActivePage
     , rightPanel : RightPanel
     , questionnaire : QuestionnaireDetail
+    , removeItem : Maybe ( String, String )
     , typeHints : Maybe TypeHints
     , typeHintsDebounce : Debounce ( List String, String, String )
     , feedbackModalModel : FeedbackModal.Model
@@ -166,6 +168,7 @@ init appState questionnaire =
     , activePage = activePage
     , rightPanel = RightPanelNone
     , questionnaire = questionnaire
+    , removeItem = Nothing
     , typeHints = Nothing
     , typeHintsDebounce = Debounce.init
     , feedbackModalModel = FeedbackModal.init
@@ -303,6 +306,9 @@ type Msg
     | SetReply String Reply
     | ClearReply String
     | AddItem String (List String)
+    | RemoveItem String String
+    | RemoveItemConfirm
+    | RemoveItemCancel
     | OpenIntegrationWidget String String
     | GotIntegrationWidgetValue E.Value
     | SetLabels String (List String)
@@ -390,6 +396,34 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         AddItem path originalItems ->
             handleAddItem appState wrapMsg model path originalItems
+
+        RemoveItem path itemUuid ->
+            wrap <| { model | removeItem = Just ( path, itemUuid ) }
+
+        RemoveItemConfirm ->
+            case model.removeItem of
+                Just ( path, itemUuid ) ->
+                    let
+                        itemUuids =
+                            Dict.get path model.questionnaire.replies
+                                |> Maybe.unwrap [] (.value >> ReplyValue.getItemUuids)
+
+                        newItemUuids =
+                            List.filter ((/=) itemUuid) itemUuids
+
+                        replyValue =
+                            createReply appState (ItemListReply newItemUuids)
+
+                        setReplyMsg =
+                            SetReply path replyValue
+                    in
+                    withSeed ( { model | removeItem = Nothing }, dispatch setReplyMsg )
+
+                Nothing ->
+                    wrap model
+
+        RemoveItemCancel ->
+            wrap <| { model | removeItem = Nothing }
 
         OpenIntegrationWidget path requestUrl ->
             let
@@ -762,16 +796,13 @@ view appState cfg ctx model =
             else
                 ( emptyNode, False )
 
-        migrationRoute =
-            Routes.ProjectsRoute << MigrationRoute
-
         ( migrationWarning, migrationWarningEnabled ) =
             case model.questionnaire.migrationUuid of
                 Just migrationUuid ->
                     ( div [ class "questionnaire__warning" ]
                         [ div [ class "alert alert-warning" ]
                             (lh_ "migrationWarning"
-                                [ linkTo appState (migrationRoute migrationUuid) [] [ lx_ "migrationWarning.migration" appState ] ]
+                                [ linkTo appState (Routes.projectsMigration migrationUuid) [] [ lx_ "migrationWarning.migration" appState ] ]
                                 appState
                             )
                         ]
@@ -790,6 +821,7 @@ view appState cfg ctx model =
             , viewQuestionnaireRightPanel appState cfg model
             ]
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
+        , Html.map cfg.wrapMsg <| viewRemoveItemModal appState model
         ]
 
 
@@ -1875,7 +1907,7 @@ viewQuestionList : AppState -> Config msg -> Context -> Model -> List String -> 
 viewQuestionList appState cfg ctx model path humanIdentifiers question =
     let
         viewItem =
-            viewQuestionListItem appState cfg ctx model question itemUuids path humanIdentifiers
+            viewQuestionListItem appState cfg ctx model question path humanIdentifiers
 
         itemUuids =
             Dict.get (pathToString path) model.questionnaire.replies
@@ -1910,12 +1942,9 @@ viewQuestionListAdd appState cfg itemUuids path =
             ]
 
 
-viewQuestionListItem : AppState -> Config msg -> Context -> Model -> Question -> List String -> List String -> List String -> Int -> String -> Html Msg
-viewQuestionListItem appState cfg ctx model question itemUuids path humanIdentifiers index uuid =
+viewQuestionListItem : AppState -> Config msg -> Context -> Model -> Question -> List String -> List String -> Int -> String -> Html Msg
+viewQuestionListItem appState cfg ctx model question path humanIdentifiers index uuid =
     let
-        newItems =
-            List.filter ((/=) uuid) itemUuids
-
         newPath =
             path ++ [ uuid ]
 
@@ -1935,7 +1964,7 @@ viewQuestionListItem appState cfg ctx model question itemUuids path humanIdentif
             else
                 button
                     [ class "btn btn-outline-danger btn-item-delete"
-                    , onClick (SetReply (pathToString path) (createReply appState (ItemListReply newItems)))
+                    , onClick (RemoveItem (pathToString path) uuid)
                     ]
                     [ faSet "_global.delete" appState ]
     in
@@ -2334,6 +2363,24 @@ viewFeedbackAction appState cfg model question =
 
     else
         emptyNode
+
+
+viewRemoveItemModal : AppState -> Model -> Html Msg
+viewRemoveItemModal appState model =
+    let
+        cfg =
+            { modalTitle = l_ "removeItemModal.title" appState
+            , modalContent = [ lx_ "removeItemModal.text" appState ]
+            , visible = Maybe.isJust model.removeItem
+            , actionResult = Unset
+            , actionName = l_ "removeItemModal.action" appState
+            , actionMsg = RemoveItemConfirm
+            , cancelMsg = Just RemoveItemCancel
+            , dangerous = True
+            , dataCy = "remove-item"
+            }
+    in
+    Modal.confirm appState cfg
 
 
 

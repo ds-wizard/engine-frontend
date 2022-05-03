@@ -32,9 +32,7 @@ import Wizard.KnowledgeModels.Preview.Models exposing (Model)
 import Wizard.KnowledgeModels.Preview.Msgs exposing (Msg(..))
 import Wizard.Msgs
 import Wizard.Ports as Ports
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
-import Wizard.Projects.Routes exposing (Route(..))
-import Wizard.Routes
+import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
@@ -127,7 +125,7 @@ update msg wrapMsg appState model =
                             ( newSeed, model, cmd )
 
                         _ ->
-                            ( appState.seed, model, cmdNavigate appState (Wizard.Routes.ProjectsRoute (DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire)) )
+                            ( appState.seed, model, cmdNavigate appState (Routes.projectsDetailQuestionnaire questionnaire.uuid) )
 
                 Err error ->
                     ( appState.seed
@@ -138,7 +136,7 @@ update msg wrapMsg appState model =
         PutQuestionnaireContentComplete questionnaireUuid result ->
             case result of
                 Ok _ ->
-                    ( appState.seed, model, cmdNavigate appState (Wizard.Routes.ProjectsRoute (DetailRoute questionnaireUuid PlanDetailRoute.Questionnaire)) )
+                    ( appState.seed, model, cmdNavigate appState (Routes.projectsDetailQuestionnaire questionnaireUuid) )
 
                 Err error ->
                     ( appState.seed

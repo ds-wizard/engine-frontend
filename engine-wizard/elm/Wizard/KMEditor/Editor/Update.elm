@@ -29,7 +29,7 @@ import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Ports as Ports
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -63,7 +63,7 @@ fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( 
 fetchSubrouteDataFromAfter wrapMsg appState model =
     case ( model.branchModel, appState.route ) of
         ( Success _, KMEditorRoute (EditorRoute _ route) ) ->
-            ( initPageModel route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
+            ( initPageModel appState route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
 
         _ ->
             ( model, Cmd.none )
@@ -148,7 +148,7 @@ update wrapMsg msg appState model =
             withSeed ( { model | onlineUsers = List.updateAt index (OnlineUser.update onlineUserMsg) model.onlineUsers }, Cmd.none )
 
         SavingMsg savingMsg ->
-            withSeed ( { model | savingModel = PlanSaving.update savingMsg model.savingModel }, Cmd.none )
+            withSeed ( { model | savingModel = ProjectSaving.update savingMsg model.savingModel }, Cmd.none )
 
         Refresh ->
             withSeed ( model, Ports.refresh () )
@@ -315,8 +315,7 @@ getNavigateCmd appState uuid oldEditorBranch newEditorBranch =
                 else
                     Uuid.fromString newActiveEditor
         in
-        cmdNavigate appState <|
-            Routes.KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute uuid (KMEditorRoute.Edit activeEditorUuid))
+        cmdNavigate appState (Routes.kmEditorEditor uuid activeEditorUuid)
 
     else
         Cmd.none

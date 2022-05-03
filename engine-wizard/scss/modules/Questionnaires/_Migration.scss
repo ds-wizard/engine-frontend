@@ -1,16 +1,20 @@
 @import "../../variables";
 
-$migration-header-height: 75px;
+$migration-header-height: 100px;
 
 .Questionnaire__Migration {
     width: 100%;
-    margin-top: 55px;
+    margin-top: $migration-header-height - 20px;
     margin-bottom: -20px;
 
 
     .top-header {
         .top-header-content {
             height: $migration-header-height;
+
+            .top-header-actions {
+                padding-left: 1rem;
+            }
 
             .migration-info {
                 font-weight: normal;
@@ -24,10 +28,14 @@ $migration-header-height: 75px;
                     text-overflow: ellipsis;
                     padding-right: 2rem;
                     margin-bottom: 0.5rem;
+                    font-size: 1.125rem;
                 }
 
-                .package-info {
-                    margin: 0 0.5rem;
+                table {
+                    th {
+                        padding-right: .5rem;
+                        color: $gray-600;
+                    }
                 }
             }
         }
@@ -62,6 +70,10 @@ $migration-header-height: 75px;
 
                 &.resolved {
                     color: $gray-500;
+                }
+
+                p {
+                    word-break: break-word;
                 }
             }
         }

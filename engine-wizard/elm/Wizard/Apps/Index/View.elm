@@ -12,6 +12,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.View.AppIcon as AppIcon
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
 
@@ -58,7 +59,7 @@ listingConfig appState =
             , currentTime = appState.currentTime
             }
     , wrapMsg = ListingMsg
-    , iconView = Nothing
+    , iconView = Just AppIcon.view
     , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
     , sortOptions =
         [ ( "name", lg "app.name" appState )
@@ -104,7 +105,7 @@ listingDescription app =
 createButton : AppState -> Html Msg
 createButton appState =
     linkTo appState
-        (Routes.AppsRoute <| CreateRoute)
+        Routes.appsCreate
         [ class "btn btn-primary"
         ]
         [ lx_ "header.create" appState ]

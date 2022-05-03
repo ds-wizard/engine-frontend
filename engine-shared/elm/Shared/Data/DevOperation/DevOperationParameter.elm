@@ -1,16 +1,16 @@
-module Shared.Data.AdminOperation.AdminOperationParameter exposing
+module Shared.Data.DevOperation.DevOperationParameter exposing
     ( AdminOperationParameter
     , decoder
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Data.AdminOperation.AdminOperationParameterType as AdminOperationParameterType exposing (AdminOperationParameterType)
+import Shared.Data.DevOperation.DevOperationParameterType as AdminOperationParameterType exposing (DevOperationParameterType)
 
 
 type alias AdminOperationParameter =
     { name : String
-    , type_ : AdminOperationParameterType
+    , type_ : DevOperationParameterType
     }
 
 

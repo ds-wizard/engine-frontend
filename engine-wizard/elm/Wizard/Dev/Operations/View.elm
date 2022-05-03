@@ -1,4 +1,4 @@
-module Wizard.Admin.Operations.View exposing (view)
+module Wizard.Dev.Operations.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Dict
@@ -7,19 +7,19 @@ import Html.Attributes exposing (class, classList, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Data.AdminOperation exposing (AdminOperation)
-import Shared.Data.AdminOperation.AdminOperationParameter exposing (AdminOperationParameter)
-import Shared.Data.AdminOperation.AdminOperationParameterType as AdminOperationParameterType
-import Shared.Data.AdminOperationSection exposing (AdminOperationSection)
+import Shared.Data.DevOperation exposing (DevOperation)
+import Shared.Data.DevOperation.DevOperationParameter exposing (AdminOperationParameter)
+import Shared.Data.DevOperation.DevOperationParameterType as AdminOperationParameterType
+import Shared.Data.DevOperationSection exposing (DevOperationSection)
 import Shared.Html exposing (emptyNode)
 import Shared.Markdown as Markdown
-import Wizard.Admin.Operations.Models exposing (Model, fieldPath, operationPath)
-import Wizard.Admin.Operations.Msgs exposing (Msg(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Page as Page
+import Wizard.Dev.Operations.Models exposing (Model, fieldPath, operationPath)
+import Wizard.Dev.Operations.Msgs exposing (Msg(..))
 
 
 view : AppState -> Model -> Html Msg
@@ -27,7 +27,7 @@ view appState model =
     Page.actionResultView appState (viewContent appState model) model.adminOperationSections
 
 
-viewContent : AppState -> Model -> List AdminOperationSection -> Html Msg
+viewContent : AppState -> Model -> List DevOperationSection -> Html Msg
 viewContent appState model adminOperationSections =
     let
         section =
@@ -41,11 +41,11 @@ viewContent appState model adminOperationSections =
         ]
 
 
-navigation : Model -> List AdminOperationSection -> Html Msg
+navigation : Model -> List DevOperationSection -> Html Msg
 navigation model sections =
     let
         title =
-            strong [] [ text "Admin Operations" ]
+            strong [] [ text "Dev Operations" ]
 
         sectionLinks =
             List.map (navigationSectionLink model) sections
@@ -54,7 +54,7 @@ navigation model sections =
         (title :: sectionLinks)
 
 
-navigationSectionLink : Model -> AdminOperationSection -> Html Msg
+navigationSectionLink : Model -> DevOperationSection -> Html Msg
 navigationSectionLink model section =
     a
         [ class "nav-link"
@@ -64,7 +64,7 @@ navigationSectionLink model section =
         [ text section.name ]
 
 
-viewSection : AppState -> Model -> AdminOperationSection -> Html Msg
+viewSection : AppState -> Model -> DevOperationSection -> Html Msg
 viewSection appState model section =
     let
         operations =
@@ -80,7 +80,7 @@ viewSection appState model section =
         ]
 
 
-viewOperation : AppState -> Model -> String -> AdminOperation -> Html Msg
+viewOperation : AppState -> Model -> String -> DevOperation -> Html Msg
 viewOperation appState model sectionName operation =
     let
         description =

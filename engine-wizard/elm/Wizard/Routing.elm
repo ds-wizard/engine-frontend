@@ -1,14 +1,10 @@
 module Wizard.Routing exposing
-    ( appRoute
-    , cmdNavigate
+    ( cmdNavigate
     , cmdNavigateRaw
-    , homeRoute
     , isAllowed
-    , loginRoute
     , matchers
     , parseLocation
     , routeIfAllowed
-    , signupRoute
     , toUrl
     )
 
@@ -16,14 +12,13 @@ import Browser.Navigation exposing (pushUrl)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing (Parser, map, oneOf, s)
-import Wizard.Admin.Routing
 import Wizard.Apps.Routing
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Dev.Routing
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
 import Wizard.Projects.Routing
-import Wizard.Public.Routes
 import Wizard.Public.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
@@ -37,7 +32,7 @@ matchers appState =
     let
         parsers =
             []
-                ++ Wizard.Admin.Routing.parsers appState Routes.AdminRoute
+                ++ Wizard.Dev.Routing.parsers appState Routes.DevRoute
                 ++ Wizard.Apps.Routing.parsers Routes.AppsRoute
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
@@ -66,8 +61,8 @@ routeIfAllowed appState route =
 isAllowed : Routes.Route -> AppState -> Bool
 isAllowed route appState =
     case route of
-        Routes.AdminRoute adminRoute ->
-            Wizard.Admin.Routing.isAllowed adminRoute appState
+        Routes.DevRoute adminRoute ->
+            Wizard.Dev.Routing.isAllowed adminRoute appState
 
         Routes.AppsRoute appsRoute ->
             Wizard.Apps.Routing.isAllowed appsRoute appState
@@ -114,8 +109,8 @@ toUrl appState route =
     let
         parts =
             case route of
-                Routes.AdminRoute adminRoute ->
-                    Wizard.Admin.Routing.toUrl appState adminRoute
+                Routes.DevRoute adminRoute ->
+                    Wizard.Dev.Routing.toUrl appState adminRoute
 
                 Routes.AppsRoute appsRoute ->
                     Wizard.Apps.Routing.toUrl appsRoute
@@ -177,23 +172,3 @@ cmdNavigate appState =
 cmdNavigateRaw : AppState -> String -> Cmd msg
 cmdNavigateRaw appState =
     pushUrl appState.key
-
-
-homeRoute : Routes.Route
-homeRoute =
-    Routes.PublicRoute <| Wizard.Public.Routes.LoginRoute Nothing
-
-
-loginRoute : Maybe String -> Routes.Route
-loginRoute originalUrl =
-    Routes.PublicRoute <| Wizard.Public.Routes.LoginRoute originalUrl
-
-
-signupRoute : Routes.Route
-signupRoute =
-    Routes.PublicRoute Wizard.Public.Routes.SignupRoute
-
-
-appRoute : Routes.Route
-appRoute =
-    Routes.DashboardRoute

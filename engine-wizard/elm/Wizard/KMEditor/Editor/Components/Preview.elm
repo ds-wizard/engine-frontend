@@ -3,6 +3,7 @@ module Wizard.KMEditor.Editor.Components.Preview exposing
     , Msg
     , initialModel
     , setActiveChapterIfNot
+    , setPackageId
     , setPhase
     , subscriptions
     , update
@@ -67,6 +68,15 @@ setPhase mbPhaseUuid model =
 
     else
         model
+
+
+setPackageId : AppState -> String -> Model -> Model
+setPackageId appState packageId model =
+    let
+        questionnaire =
+            createQuestionnaireDetail packageId KnowledgeModel.empty
+    in
+    { model | questionnaireModel = Questionnaire.init appState questionnaire }
 
 
 createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireDetail

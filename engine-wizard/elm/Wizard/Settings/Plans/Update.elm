@@ -21,7 +21,7 @@ update msg appState model =
         GetPlansComplete result ->
             applyResult appState
                 { setResult = setPlans
-                , defaultError = lg "apiError.usage.getError" appState
+                , defaultError = lg "apiError.apps.getPlansError" appState
                 , model = model
                 , result = result
                 }

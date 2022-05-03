@@ -78,12 +78,20 @@ type alias UpdatedTimeConfig a =
 
 type Filter msg
     = SimpleFilter String SimpleFilterConfig
+    | SimpleMultiFilter String SimpleMultiFilterConfig
     | CustomFilter String (CustomFilterConfig msg)
 
 
 type alias SimpleFilterConfig =
     { name : String
     , options : List ( String, String )
+    }
+
+
+type alias SimpleMultiFilterConfig =
+    { name : String
+    , options : List ( String, String )
+    , maxVisibleValues : Int
     }
 
 
@@ -217,6 +225,9 @@ viewToolbarFilter appState cfg model filter =
         SimpleFilter filterId filterCfg ->
             viewToolbarSimpleFilter appState cfg model filterId filterCfg
 
+        SimpleMultiFilter filterId filterCfg ->
+            viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg
+
         CustomFilter filterId filterCfg ->
             viewToolbarCustomFilter appState cfg model filterId filterCfg
 
@@ -252,6 +263,75 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
 
         label =
             [ span [ class "filter-text-label" ] [ text filterLabel ] ]
+
+        items =
+            List.map item filterCfg.options
+    in
+    viewFilter appState cfg model filterId label items
+
+
+viewToolbarSimpleMultiFilter : AppState -> ViewConfig a msg -> Model a -> String -> SimpleMultiFilterConfig -> Html msg
+viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg =
+    let
+        item ( value, visibleName ) =
+            let
+                ( icon, newFilterValue ) =
+                    if List.member value filterValues then
+                        ( faSet "listing.filter.multi.selected" appState
+                        , removeValue value
+                        )
+
+                    else
+                        ( faSet "listing.filter.multi.notSelected" appState
+                        , addValue value
+                        )
+
+                route =
+                    cfg.toRoute
+                        (PaginationQueryFilters.insertValue filterId newFilterValue model.filters)
+                        (PaginationQueryString.resetPage model.paginationQueryString)
+            in
+            Dropdown.anchorItem [ href <| Routing.toUrl appState route, class "dropdown-item-icon" ]
+                [ icon, text visibleName ]
+
+        addValue value =
+            String.join "," <|
+                filterValues
+                    ++ [ value ]
+
+        removeValue value =
+            String.join "," <|
+                List.filter ((/=) value) filterValues
+
+        filterValues =
+            PaginationQueryFilters.getValue filterId model.filters
+                |> Maybe.unwrap [] (String.split ",")
+
+        filterValuesCount =
+            List.length filterValues
+
+        filterValueToLabel value =
+            List.find ((==) value << Tuple.first) filterCfg.options
+                |> Maybe.unwrap value Tuple.second
+
+        filterLabel =
+            if filterValuesCount == 0 then
+                filterCfg.name
+
+            else
+                List.take filterCfg.maxVisibleValues filterValues
+                    |> List.map filterValueToLabel
+                    |> String.join ", "
+
+        filterBadge =
+            if filterValuesCount > filterCfg.maxVisibleValues then
+                span [ class "badge badge-pill badge-dark" ] [ text ("+" ++ String.fromInt (filterValuesCount - filterCfg.maxVisibleValues)) ]
+
+            else
+                emptyNode
+
+        label =
+            [ span [ class "filter-text-label" ] [ text filterLabel ], filterBadge ]
 
         items =
             List.map item filterCfg.options

@@ -73,6 +73,13 @@ label {
     border-left: 5px solid theme-color-level("danger", $alert-border-level);
 }
 
+.pre-default {
+    padding: 1.5rem;
+    color: $gray-700;
+    background: $gray-200;
+    border-left: 5px solid $gray-500;
+}
+
 .btn {
     @include not-selectable();
 
@@ -268,6 +275,10 @@ ins, .ins {
 
 code {
     background-color: $code-block-bg;
+
+    a {
+        color: $code-color;
+    }
 }
 
 .dropdown-menu-right {
@@ -434,6 +445,10 @@ code {
             overflow: hidden;
             text-overflow: ellipsis;
             font-weight: bold;
+
+            .badge {
+                margin-left: .5rem;
+            }
         }
 
         .top-header-actions {

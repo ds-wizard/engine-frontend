@@ -6,6 +6,7 @@ import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins,
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import List.Extra as List
+import Registry.Common.View.ActionButton as ActionButton
 import Shared.Data.Event as Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
@@ -55,18 +56,24 @@ import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Migration exposing (Migration)
 import Shared.Data.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (lg, lh, lx)
+import Shared.Locale exposing (l, lg, lh, lx)
 import String.Format exposing (format)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.KMEditor.Migration.Models exposing (Model)
+import Wizard.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
 import Wizard.KMEditor.Migration.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Migration.View.DiffTree as DiffTree
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.KMEditor.Migration.View"
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
@@ -361,8 +368,8 @@ viewEvent appState model event name diffView =
         [ h3 [] [ text name ]
         , div [ class "card bg-light" ]
             [ div [ class "card-body" ]
-                [ diffView
-                , formActions appState model
+                [ formActions appState model
+                , diffView
                 ]
             ]
         ]
@@ -2302,20 +2309,47 @@ viewAnnotationsDiff appState originalAnnotations currentAnnotations =
 formActions : AppState -> Model -> Html Msg
 formActions appState model =
     let
-        actionsDisabled =
-            case model.conflict of
-                Loading ->
-                    True
+        ( rejectLabel, rejectDisabled ) =
+            actionState appState model RejectButtonClicked (l_ "action.reject" appState)
 
-                _ ->
-                    False
+        ( applyLabel, applyDisabled ) =
+            actionState appState model ApplyButtonClicked (l_ "action.apply" appState)
+
+        ( applyAllLabel, applyAllDisabled ) =
+            actionState appState model ApplyAllButtonClicked (l_ "action.applyAll" appState)
     in
     div [ class "form-actions" ]
-        [ button [ class "btn btn-warning", onClick RejectEvent, disabled actionsDisabled, dataCy "km-migration_reject-button" ]
-            [ lx_ "action.reject" appState ]
-        , button [ class "btn btn-success", onClick ApplyEvent, disabled actionsDisabled, dataCy "km-migration_apply-button" ]
-            [ lx_ "action.apply" appState ]
+        [ button [ class "btn btn-warning btn-with-loader", onClick RejectEvent, rejectDisabled, dataCy "km-migration_reject-button" ]
+            [ rejectLabel ]
+        , div []
+            [ button [ class "btn btn-success btn-with-loader", onClick ApplyEvent, applyDisabled, dataCy "km-migration_apply-button" ]
+                [ applyLabel ]
+            , button [ class "btn btn-success btn-with-loader", onClick ApplyAll, applyAllDisabled, dataCy "km-migration_apply-all-button" ]
+                [ applyAllLabel ]
+            ]
         ]
+
+
+actionState : AppState -> Model -> ButtonClicked -> String -> ( Html msg, Html.Attribute msg )
+actionState appState model buttonClicked defaultLabel =
+    let
+        disabledAttribute =
+            disabled <|
+                case model.conflict of
+                    Loading ->
+                        True
+
+                    _ ->
+                        False
+
+        labelHtml =
+            if ActionResult.isLoading model.conflict && model.buttonClicked == Just buttonClicked then
+                ActionButton.loader appState
+
+            else
+                text defaultLabel
+    in
+    ( labelHtml, disabledAttribute )
 
 
 viewCompletedMigration : AppState -> Model -> Html Msg
@@ -2330,7 +2364,7 @@ viewCompletedMigration appState model =
                 ]
             , div [ class "text-right" ]
                 [ linkTo appState
-                    (Routes.KMEditorRoute <| PublishRoute model.branchUuid)
+                    (Routes.kmEditorPublish model.branchUuid)
                     [ class "btn btn-primary"
                     , dataCy "km-migration_publish-button"
                     ]

@@ -14,7 +14,7 @@ import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Shared.Utils exposing (dispatch, flip, stringToBool)
+import Shared.Utils exposing (dispatch, stringToBool)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -24,7 +24,6 @@ import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
 import Wizard.Projects.Common.CloneProjectModal.Update as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
 import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
@@ -72,7 +71,7 @@ update wrapMsg msg appState model =
             let
                 updateConfig =
                     { wrapMsg = wrapMsg << DeleteQuestionnaireModalMsg
-                    , deleteCompleteCmd = cmdNavigate appState (Listing.toRouteAfterDelete Routes.projectIndexWithFilters model.questionnaires)
+                    , deleteCompleteCmd = cmdNavigate appState (Listing.toRouteAfterDelete Routes.projectsIndexWithFilters model.questionnaires)
                     }
 
                 ( deleteModalModel, cmd ) =
@@ -87,7 +86,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << CloneQuestionnaireModalMsg
                     , cloneCompleteCmd =
-                        cmdNavigate appState << Routes.ProjectsRoute << flip DetailRoute PlanDetailRoute.Questionnaire << .uuid
+                        cmdNavigate appState << Routes.projectsDetailQuestionnaire << .uuid
                     }
 
                 ( deleteModalModel, cmd ) =
@@ -274,5 +273,5 @@ listingUpdateConfig wrapMsg appState model =
             }
     , getError = lg "apiError.questionnaires.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.projectIndexWithFilters model.questionnaires.filters
+    , toRoute = Routes.projectsIndexWithFilters model.questionnaires.filters
     }

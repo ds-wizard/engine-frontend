@@ -23,7 +23,6 @@ import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute
 import Wizard.KMEditor.Index.Models exposing (Model)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
-import Wizard.KnowledgeModels.Routes
 import Wizard.Routes as Routes
 
 
@@ -51,7 +50,7 @@ view appState model =
 createButton : AppState -> Html Msg
 createButton appState =
     linkTo appState
-        (Routes.KMEditorRoute <| CreateRoute Nothing Nothing)
+        (Routes.kmEditorCreate Nothing Nothing)
         [ class "btn btn-primary"
         , dataCy "km-editor_create-button"
         ]
@@ -99,20 +98,20 @@ linkToKM appState branch =
     case branch.state of
         BranchState.Migrating ->
             if Feature.knowledgeModelEditorContinueMigration appState branch then
-                linkTo appState (Routes.KMEditorRoute <| MigrationRoute branch.uuid)
+                linkTo appState (Routes.kmEditorMigration branch.uuid)
 
             else
                 span
 
         BranchState.Migrated ->
             if Feature.knowledgeModelEditorPublish appState branch then
-                linkTo appState (Routes.KMEditorRoute <| PublishRoute branch.uuid)
+                linkTo appState (Routes.kmEditorPublish branch.uuid)
 
             else
                 span
 
         _ ->
-            linkTo appState (Routes.KMEditorRoute <| EditorRoute branch.uuid (KMEditorRoute.Edit Nothing))
+            linkTo appState (Routes.kmEditorEditor branch.uuid Nothing)
 
 
 listingTitleLastPublishedVersionBadge : AppState -> Branch -> Html msg
@@ -174,7 +173,7 @@ listingDescription appState branch =
                         elem =
                             case packageIdToComponents forkOfPackageId of
                                 Just ( orgId, kmId, version ) ->
-                                    linkTo appState (Routes.KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.DetailRoute <| orgId ++ ":" ++ kmId ++ ":" ++ version)
+                                    linkTo appState (Routes.knowledgeModelsDetail <| orgId ++ ":" ++ kmId ++ ":" ++ version)
 
                                 _ ->
                                     span

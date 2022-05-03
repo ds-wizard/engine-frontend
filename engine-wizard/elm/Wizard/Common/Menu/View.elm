@@ -2,6 +2,7 @@ module Wizard.Common.Menu.View exposing
     ( viewAboutModal
     , viewAboutModalContent
     , viewBuildInfo
+    , viewDevMenu
     , viewHelpMenu
     , viewProfileMenu
     , viewReportIssueModal
@@ -30,7 +31,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Settings.Routes
-import Wizard.Users.Routes
 
 
 l_ : String -> AppState -> String
@@ -94,6 +94,36 @@ viewSettingsMenu appState =
         emptyNode
 
 
+viewDevMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg
+viewDevMenu appState dropdownState =
+    if Feature.dev appState then
+        Dropdown.dropdown dropdownState
+            { options = [ Dropdown.dropRight, Dropdown.attrs [ dataCy "menu_dev" ] ]
+            , toggleMsg = Wizard.Msgs.MenuMsg << DevMenuDropdownMsg
+            , toggleButton =
+                Dropdown.toggle [ Button.roleLink ]
+                    [ faSet "menu.dev" appState
+                    , span [ class "sidebar-link" ]
+                        [ span [] [ text "Dev" ], faSet "menu.dropdownToggle" appState ]
+                    ]
+            , items =
+                [ Dropdown.anchorItem
+                    (linkToAttributes appState Routes.devOperations)
+                    [ faSet "menu.devOperations" appState
+                    , text "Dev Operations"
+                    ]
+                , Dropdown.anchorItem
+                    (linkToAttributes appState Routes.persistentCommandsIndex)
+                    [ faSet "menu.persistentCommands" appState
+                    , text "Persistent Commands"
+                    ]
+                ]
+            }
+
+    else
+        emptyNode
+
+
 viewProfileMenu : AppState -> Dropdown.State -> Html Wizard.Msgs.Msg
 viewProfileMenu appState dropdownState =
     let
@@ -115,7 +145,7 @@ viewProfileMenu appState dropdownState =
                 , span [ class "sidebar-link" ] [ span [] [ text name ], faSet "menu.dropdownToggle" appState ]
                 ]
         , items =
-            [ Dropdown.anchorItem (linkToAttributes appState (Routes.UsersRoute <| Wizard.Users.Routes.EditRoute "current"))
+            [ Dropdown.anchorItem (linkToAttributes appState Routes.usersEditCurrent)
                 [ faSet "menu.profile" appState
                 , lx_ "profileMenu.edit" appState
                 ]

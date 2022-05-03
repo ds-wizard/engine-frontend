@@ -1,7 +1,7 @@
 # Data Stewardship Wizard Engine Frontend
 
 [![User Guide](https://img.shields.io/badge/docs-User%20Guide-informational)](https://guide.ds-wizard.org)
-[![Engine Frontend CI](https://github.com/ds-wizard/engine-frontend/workflows/Engine%20Frontend%20CI/badge.svg?branch=master)](https://github.com/ds-wizard/engine-frontend/actions)
+[![Engine Frontend CI](https://github.com/ds-wizard/engine-frontend/workflows/Engine%20Frontend%20CI/badge.svg?branch=main)](https://github.com/ds-wizard/engine-frontend/actions)
 [![License](https://img.shields.io/github/license/ds-wizard/engine-frontend)](LICENSE)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4975/badge)](https://bestpractices.coreinfrastructure.org/projects/4975)
 

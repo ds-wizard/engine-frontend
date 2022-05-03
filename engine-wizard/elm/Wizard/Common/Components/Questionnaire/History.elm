@@ -38,9 +38,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)
-import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
-import Wizard.Projects.Routes as ProjectRoute
-import Wizard.Routes as Route
+import Wizard.Routes as Routes
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
@@ -329,9 +327,7 @@ viewEventHeaderDropdown appState cfg model event =
                 ( Just viewMsg, False ) ->
                     let
                         newDocumentRoute =
-                            Route.ProjectsRoute <|
-                                ProjectRoute.DetailRoute cfg.questionnaire.uuid <|
-                                    ProjectDetailRoute.NewDocument (Just eventUuidString)
+                            Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid (Just eventUuidString)
 
                         createDocumentAttributes =
                             linkToAttributes appState newDocumentRoute

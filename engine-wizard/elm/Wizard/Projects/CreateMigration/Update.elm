@@ -2,6 +2,7 @@ module Wizard.Projects.CreateMigration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Form.Field as Field
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -21,7 +22,6 @@ import Wizard.Msgs
 import Wizard.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
 import Wizard.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -125,19 +125,30 @@ handleForm wrapMsg formMsg appState model =
                         ( newModel, Cmd.none )
 
                 Nothing ->
-                    ( newModel, Cmd.none )
+                    ( { newModel | knowledgeModelPreview = Unset, selectedTags = [] }, Cmd.none )
 
 
 handleSelectPackage : Model -> PackageSuggestion -> ( Model, Cmd Wizard.Msgs.Msg )
 handleSelectPackage model package =
-    ( { model | selectedPackage = Just package }, Cmd.none )
+    let
+        formMsg =
+            Form.Input "packageId" Form.Select Field.EmptyField
+    in
+    ( { model
+        | selectedPackage = Just package
+        , knowledgeModelPreview = Unset
+        , selectedTags = []
+        , form = Form.update QuestionnaireMigrationCreateForm.validation formMsg model.form
+      }
+    , Cmd.none
+    )
 
 
 handlePostMigrationCompleted : AppState -> Model -> Result ApiError QuestionnaireMigration -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePostMigrationCompleted appState model result =
     case result of
         Ok migration ->
-            ( model, cmdNavigate appState <| Routes.ProjectsRoute <| MigrationRoute migration.newQuestionnaire.uuid )
+            ( model, cmdNavigate appState <| Routes.projectsMigration migration.newQuestionnaire.uuid )
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult appState (lg "apiError.questionnaires.migrations.postError" appState) error }

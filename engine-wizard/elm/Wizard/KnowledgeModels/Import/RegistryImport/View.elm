@@ -14,7 +14,6 @@ import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.KnowledgeModels.Import.RegistryImport.Models exposing (Model)
 import Wizard.KnowledgeModels.Import.RegistryImport.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Routes
 import Wizard.Routes as Routes
 
 
@@ -98,7 +97,7 @@ viewImported appState packageId =
             (lh_ "imported.message" [ code [] [ text packageId ] ] appState)
         , p [ class "lead" ]
             [ linkTo appState
-                (Routes.KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.DetailRoute packageId)
+                (Routes.knowledgeModelsDetail packageId)
                 [ class "btn btn-primary" ]
                 [ lx_ "imported.action" appState ]
             ]

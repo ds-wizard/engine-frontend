@@ -5,7 +5,7 @@ import Html.Attributes exposing (class, classList)
 import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Routes
+import Wizard.Routes as Routes
 import Wizard.Settings.Authentication.View
 import Wizard.Settings.Dashboard.View
 import Wizard.Settings.KnowledgeModels.View
@@ -161,6 +161,6 @@ navigationStatisticsLinks appState =
 navigationLink : AppState -> Route -> ( Route, String ) -> Html Msg
 navigationLink appState currentRoute ( route, title ) =
     linkTo appState
-        (Wizard.Routes.SettingsRoute route)
+        (Routes.SettingsRoute route)
         [ class "nav-link", classList [ ( "active", currentRoute == route ) ] ]
         [ text title ]

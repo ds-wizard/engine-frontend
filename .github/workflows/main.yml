@@ -84,14 +84,8 @@ jobs:
         docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $PRIVATE_IMAGE:$GITHUB_BRANCH
         docker push $PRIVATE_IMAGE:$GITHUB_BRANCH
 
-    - name: Docker tag and push - develop (public)
-      if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-      run: |
-        docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $PUBLIC_IMAGE:$TAG_DEVELOP
-        docker push $PUBLIC_IMAGE:$TAG_DEVELOP
-
     - name: Docker tag and push - latest (public)
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
         docker image tag $PRIVATE_IMAGE:$GITHUB_SHA $PUBLIC_IMAGE:$TAG_LATEST
         docker push $PUBLIC_IMAGE:$TAG_LATEST

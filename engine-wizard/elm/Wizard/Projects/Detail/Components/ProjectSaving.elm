@@ -1,4 +1,4 @@
-module Wizard.Projects.Detail.Components.PlanSaving exposing
+module Wizard.Projects.Detail.Components.ProjectSaving exposing
     ( Model
     , Msg
     , init
@@ -20,12 +20,12 @@ import Wizard.Common.AppState exposing (AppState)
 
 l_ : String -> AppState -> String
 l_ =
-    l "Wizard.Projects.Detail.Components.PlanSaving"
+    l "Wizard.Projects.Detail.Components.ProjectSaving"
 
 
 lx_ : String -> AppState -> Html msg
 lx_ =
-    lx "Wizard.Projects.Detail.Components.PlanSaving"
+    lx "Wizard.Projects.Detail.Components.ProjectSaving"
 
 
 

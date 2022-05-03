@@ -16,7 +16,6 @@ import Wizard.Public.Common.PasswordForm exposing (PasswordForm)
 import Wizard.Public.Common.View exposing (publicForm)
 import Wizard.Public.ForgottenPasswordConfirmation.Models exposing (Model)
 import Wizard.Public.ForgottenPasswordConfirmation.Msgs exposing (Msg(..))
-import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -80,7 +79,7 @@ successView appState =
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "success.message"
-                [ linkTo appState (Routes.PublicRoute (LoginRoute Nothing)) [ dataCy "login-link" ] [ lx_ "success.logIn" appState ]
+                [ linkTo appState (Routes.publicLogin Nothing) [ dataCy "login-link" ] [ lx_ "success.logIn" appState ]
                 ]
                 appState
             )

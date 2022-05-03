@@ -6,7 +6,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
-import Wizard.Routes
+import Wizard.Routes as Routes
 
 
 view : AppState -> EditorBranch -> Html msg
@@ -60,7 +60,7 @@ breadcrumbNode appState editorBranch ( maybeUuid, label ) =
             case maybeUuid of
                 Just uuid ->
                     ( linkTo appState
-                        (Wizard.Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid uuid editorBranch))
+                        (Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid uuid editorBranch))
                         []
                         [ text label ]
                     , True

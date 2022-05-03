@@ -6,6 +6,7 @@ import Shared.Error.ApiError exposing (ApiError)
 
 type Msg
     = GetMigrationCompleted (Result ApiError Migration)
+    | ApplyAll
     | ApplyEvent
     | RejectEvent
     | PostMigrationConflictCompleted (Result ApiError ())

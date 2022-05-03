@@ -9,5 +9,6 @@ type Msg
     = SetReportIssueOpen Bool
     | SetAboutOpen Bool
     | GetBuildInfoCompleted (Result ApiError BuildInfo)
+    | DevMenuDropdownMsg Dropdown.State
     | HelpMenuDropdownMsg Dropdown.State
     | ProfileMenuDropdownMsg Dropdown.State

@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.PackageDetail exposing (PackageDetail)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPackage)
@@ -121,7 +122,7 @@ handleUpgradeModalMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> UpgradeModal.Msg
 handleUpgradeModalMsg wrapMsg appState upgradeModalMsg model =
     let
         updateConfig =
-            { cmdUpgraded = cmdNavigate appState << Routes.KMEditorRoute << MigrationRoute
+            { cmdUpgraded = cmdNavigate appState << Routes.kmEditorMigration
             , wrapMsg = wrapMsg << UpgradeModalMsg
             }
 
@@ -140,5 +141,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = BranchesApi.getBranches
     , getError = lg "apiError.branches.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.KMEditorRoute << IndexRoute
+    , toRoute = Routes.kmEditorIndexWithFilters PaginationQueryFilters.empty
     }

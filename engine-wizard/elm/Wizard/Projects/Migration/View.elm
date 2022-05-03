@@ -1,23 +1,24 @@
 module Wizard.Projects.Migration.View exposing (view)
 
-import Html exposing (Html, button, code, div, h5, p, small, span, strong, text)
-import Html.Attributes exposing (class, classList, style)
+import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
+import Html.Attributes exposing (class, classList, style, target)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.Package exposing (Package)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lf, lgx, lx)
+import Shared.Locale exposing (l, lf, lx)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (boolToInt, flip)
-import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer as DiffQuestionnaireRenderer
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
 import Wizard.Projects.Migration.Models exposing (Model, isQuestionChangeResolved, isSelectedChangeResolved)
 import Wizard.Projects.Migration.Msgs exposing (Msg(..))
+import Wizard.Routes as Routes
 
 
 l_ : String -> AppState -> String
@@ -99,21 +100,26 @@ migrationInfo : AppState -> QuestionnaireMigration -> Html Msg
 migrationInfo appState migration =
     div [ class "migration-info" ]
         [ strong [] [ text migration.newQuestionnaire.name ]
-        , div []
-            [ lgx "projectMigration" appState
-            , text ":"
-            , packageInfo migration.oldQuestionnaire.package
-            , faSet "_global.arrowRight" appState
-            , packageInfo migration.newQuestionnaire.package
+        , table []
+            [ tr []
+                [ th [] [ lx_ "navbar.sourceKM" appState ]
+                , td [] [ packageInfo appState migration.oldQuestionnaire.package ]
+                ]
+            , tr []
+                [ th [] [ lx_ "navbar.targetKM" appState ]
+                , td [] [ packageInfo appState migration.newQuestionnaire.package ]
+                ]
             ]
         ]
 
 
-packageInfo : Package -> Html Msg
-packageInfo package =
-    span [ class "package-info" ]
-        [ text <| package.name ++ " (" ++ Version.toString package.version ++ ") "
-        , code [] [ text package.id ]
+packageInfo : AppState -> Package -> Html Msg
+packageInfo appState package =
+    code []
+        [ linkTo appState
+            (Routes.knowledgeModelsDetail package.id)
+            [ target "_blank" ]
+            [ text package.id ]
         ]
 
 

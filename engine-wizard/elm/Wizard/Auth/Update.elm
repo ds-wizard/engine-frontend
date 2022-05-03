@@ -13,7 +13,7 @@ import Wizard.Ports as Ports
 import Wizard.Public.Login.Msgs
 import Wizard.Public.Msgs
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate, cmdNavigateRaw, homeRoute)
+import Wizard.Routing exposing (cmdNavigate, cmdNavigateRaw)
 
 
 update : AuthMsgs.Msg -> Model -> ( Model, Cmd Msg )
@@ -73,6 +73,6 @@ logout : Model -> ( Model, Cmd Msg )
 logout model =
     let
         cmd =
-            Cmd.batch [ Ports.clearSession (), cmdNavigate model.appState homeRoute ]
+            Cmd.batch [ Ports.clearSession (), cmdNavigate model.appState Routes.publicHome ]
     in
     ( setSession Session.init model, cmd )

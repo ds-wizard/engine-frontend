@@ -1,7 +1,7 @@
 module Wizard.Documents.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
-import Html exposing (Html, a, button, div, h5, input, label, p, pre, span, strong, table, tbody, td, text, tr)
+import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)
 import Maybe.Extra as Maybe
@@ -10,7 +10,6 @@ import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.Submission.SubmissionState as SubmissionState
@@ -37,8 +36,6 @@ import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
-import Wizard.Projects.Routes
 import Wizard.Routes as Routes exposing (Route(..))
 
 
@@ -82,11 +79,11 @@ viewDocuments appState model mbQuestionnaire =
         questionnaireFilterView questionnaire =
             div [ class "listing-toolbar-extra questionnaire-filter" ]
                 [ linkTo appState
-                    (Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire))
+                    (Routes.projectsDetailQuestionnaire questionnaire.uuid)
                     [ class "questionnaire-name" ]
                     [ text questionnaire.name ]
                 , linkTo appState
-                    (Routes.DocumentsRoute (IndexRoute Nothing PaginationQueryString.empty))
+                    Routes.documentsIndex
                     [ class "text-danger" ]
                     [ faSet "_global.remove" appState ]
                 ]
@@ -100,6 +97,7 @@ viewDocuments appState model mbQuestionnaire =
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
+        , documentErrorModal appState model
         , submissionErrorModal appState model
         ]
 
@@ -171,13 +169,8 @@ listingDescription appState document =
         questionnaireLink =
             case document.questionnaire of
                 Just questionnaire ->
-                    let
-                        questionnaireRoute =
-                            Routes.ProjectsRoute <|
-                                Wizard.Projects.Routes.DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire
-                    in
                     linkTo appState
-                        questionnaireRoute
+                        (Routes.projectsDetailQuestionnaire questionnaire.uuid)
                         [ class "fragment" ]
                         [ text questionnaire.name ]
 
@@ -210,6 +203,9 @@ listingDescription appState document =
 listingActions : AppState -> Document -> List (ListingDropdownItem Msg)
 listingActions appState document =
     let
+        downloadEnabled =
+            Feature.documentDownload appState document
+
         download =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -219,6 +215,9 @@ listingActions appState document =
                 , dataCy = "download"
                 }
 
+        submitEnabled =
+            Feature.documentSubmit appState document
+
         submit =
             Listing.dropdownAction
                 { extraClass = Nothing
@@ -227,6 +226,21 @@ listingActions appState document =
                 , msg = ListingActionMsg (ShowHideSubmitDocument <| Just document)
                 , dataCy = "submit"
                 }
+
+        viewErrorEnabled =
+            Maybe.isJust document.workerLog && document.state == ErrorDocumentState
+
+        viewError =
+            Listing.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "documents.viewError" appState
+                , label = "View error"
+                , msg = ListingActionMsg (SetDocumentErrorModal document.workerLog)
+                , dataCy = "view-error"
+                }
+
+        deleteEnabled =
+            Feature.documentDelete appState document
 
         delete =
             Listing.dropdownAction
@@ -238,10 +252,11 @@ listingActions appState document =
                 }
     in
     []
-        |> listInsertIf download (Feature.documentDownload appState document)
-        |> listInsertIf submit (Feature.documentSubmit appState document)
-        |> listInsertIf Listing.dropdownSeparator (Feature.documentDelete appState document)
-        |> listInsertIf delete (Feature.documentDelete appState document)
+        |> listInsertIf download downloadEnabled
+        |> listInsertIf submit submitEnabled
+        |> listInsertIf viewError viewErrorEnabled
+        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled || viewErrorEnabled) && deleteEnabled)
+        |> listInsertIf delete deleteEnabled
 
 
 stateBadge : AppState -> DocumentState -> Html msg
@@ -475,6 +490,28 @@ submitModal appState model =
     Modal.simple modalConfig
 
 
+documentErrorModal : AppState -> Model -> Html Msg
+documentErrorModal appState model =
+    let
+        ( visible, message ) =
+            case model.documentErrorModal of
+                Just error ->
+                    ( True, error )
+
+                Nothing ->
+                    ( False, "" )
+
+        modalConfig =
+            { title = l_ "documentErrorModal.title" appState
+            , message = message
+            , visible = visible
+            , actionMsg = SetDocumentErrorModal Nothing
+            , dataCy = "document-error"
+            }
+    in
+    Modal.error appState modalConfig
+
+
 submissionErrorModal : AppState -> Model -> Html Msg
 submissionErrorModal appState model =
     let
@@ -486,25 +523,12 @@ submissionErrorModal appState model =
                 Nothing ->
                     ( False, "" )
 
-        modalContent =
-            [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ lx_ "submissionErrorModal.title" appState ] ]
-            , div [ class "modal-body" ]
-                [ pre [ class "pre-error" ] [ text message ]
-                ]
-            , div [ class "modal-footer" ]
-                [ button
-                    [ onClick (SetSubmissionErrorModal Nothing)
-                    , class "btn btn-primary"
-                    ]
-                    [ lx_ "submissionErrorModal.button" appState ]
-                ]
-            ]
-
         modalConfig =
-            { modalContent = modalContent
+            { title = l_ "submissionErrorModal.title" appState
+            , message = message
             , visible = visible
+            , actionMsg = SetSubmissionErrorModal Nothing
             , dataCy = "submission-error"
             }
     in
-    Modal.simpleWithAttrs [ class "modal-submission-error" ] modalConfig
+    Modal.error appState modalConfig

@@ -12,10 +12,7 @@ import Wizard.Common.Components.Listing as Listing exposing (ListingConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Routes
 import Wizard.Projects.Common.View exposing (visibilityIcons)
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -80,20 +77,15 @@ listingConfig appState =
 listingTitle : AppState -> Questionnaire -> Html msg
 listingTitle appState questionnaire =
     span []
-        (linkTo appState (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid PlanDetailRoute.Questionnaire) [] [ text questionnaire.name ]
+        (linkTo appState (Routes.projectsDetailQuestionnaire questionnaire.uuid) [] [ text questionnaire.name ]
             :: visibilityIcons appState questionnaire
         )
 
 
 listingDescription : AppState -> Questionnaire -> Html msg
 listingDescription appState questionnaire =
-    let
-        kmRoute =
-            Routes.KnowledgeModelsRoute <|
-                Wizard.KnowledgeModels.Routes.DetailRoute questionnaire.package.id
-    in
     linkTo appState
-        kmRoute
+        (Routes.knowledgeModelsDetail questionnaire.package.id)
         [ title <| l_ "knowledgeModel" appState ]
         [ text questionnaire.package.name
         , text ", "

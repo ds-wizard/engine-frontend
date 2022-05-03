@@ -1,6 +1,6 @@
 module Wizard.Common.Feature exposing
-    ( adminOperations
-    , apps
+    ( apps
+    , dev
     , documentDelete
     , documentDownload
     , documentSubmit
@@ -380,21 +380,21 @@ userEdit appState uuid =
 
 
 
--- Admin
-
-
-adminOperations : AppState -> Bool
-adminOperations =
-    isAdmin
-
-
-
 -- Apps
 
 
 apps : AppState -> Bool
 apps appState =
     Perm.hasPerm appState.session Perm.apps
+
+
+
+-- Dev
+
+
+dev : AppState -> Bool
+dev appState =
+    Perm.hasPerm appState.session Perm.dev
 
 
 

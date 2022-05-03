@@ -19,7 +19,7 @@ import Wizard.KMEditor.Editor.Components.Preview as Preview
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute)
-import Wizard.Projects.Detail.Components.PlanSaving as PlanSaving
+import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 
 
 type alias Model =
@@ -30,7 +30,7 @@ type alias Model =
     , error : Bool
     , onlineUsers : List OnlineUser.Model
     , savingActionUuids : List Uuid
-    , savingModel : PlanSaving.Model
+    , savingModel : ProjectSaving.Model
     , branchModel : ActionResult EditorBranch
     , kmEditorModel : KMEditor.Model
     , tagEditorModel : TagEditor.Model
@@ -49,7 +49,7 @@ init appState uuid mbEditorUuid =
     , error = False
     , onlineUsers = []
     , savingActionUuids = []
-    , savingModel = PlanSaving.init
+    , savingModel = ProjectSaving.init
     , branchModel = ActionResult.Loading
     , kmEditorModel = KMEditor.initialModel
     , tagEditorModel = TagEditor.initialModel
@@ -59,14 +59,20 @@ init appState uuid mbEditorUuid =
     }
 
 
-initPageModel : KMEditorRoute -> Model -> Model
-initPageModel route model =
+initPageModel : AppState -> KMEditorRoute -> Model -> Model
+initPageModel appState route model =
     case route of
         KMEditorRoute.Edit mbEditorUuid ->
             { model | branchModel = ActionResult.map (EditorBranch.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.branchModel }
 
         KMEditorRoute.Preview ->
             let
+                packageId =
+                    ActionResult.map .branch model.branchModel
+                        |> ActionResult.toMaybe
+                        |> Maybe.andThen .previousPackageId
+                        |> Maybe.withDefault ""
+
                 firstChapterUuid =
                     model.branchModel
                         |> ActionResult.unwrap Nothing (.branch >> .knowledgeModel >> .chapterUuids >> List.head)
@@ -79,6 +85,7 @@ initPageModel route model =
 
                 previewModel =
                     model.previewModel
+                        |> Preview.setPackageId appState packageId
                         |> Preview.setActiveChapterIfNot firstChapterUuid
                         |> Preview.setPhase defaultPhaseUuid
             in
@@ -92,7 +99,7 @@ addSavingActionUuid : Uuid -> Model -> Model
 addSavingActionUuid uuid model =
     { model
         | savingActionUuids = uuid :: model.savingActionUuids
-        , savingModel = PlanSaving.setSaving model.savingModel
+        , savingModel = ProjectSaving.setSaving model.savingModel
     }
 
 
@@ -104,7 +111,7 @@ removeSavingActionUuid uuid model =
 
         newSavingModel =
             if not (List.isEmpty model.savingActionUuids) && List.isEmpty newSavingActionUuids then
-                PlanSaving.setSaved model.savingModel
+                ProjectSaving.setSaved model.savingModel
 
             else
                 model.savingModel
