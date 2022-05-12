@@ -2103,6 +2103,12 @@ viewQuestionIntegrationTypeHints appState cfg model path =
     let
         content =
             case Maybe.unwrap Unset .hints model.typeHints of
+                Success [] ->
+                    div [ class "info" ]
+                        [ faSet "_global.info" appState
+                        , lx_ "typeHints.empty" appState
+                        ]
+
                 Success hints ->
                     ul [ class "integration-typehints-list" ] (List.map (viewQuestionIntegrationTypeHint appState cfg path) hints)
 
