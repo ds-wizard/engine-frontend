@@ -512,6 +512,7 @@ locale =
                , ( "Wizard.Common.Components.Questionnaire.toolbar.view.phases", "Phases" )
                , ( "Wizard.Common.Components.Questionnaire.toolbar.view.showAll", "Show all" )
                , ( "Wizard.Common.Components.Questionnaire.toolbar.view.tags", "Question tags" )
+               , ( "Wizard.Common.Components.Questionnaire.typeHints.empty", "There are no results for your search." )
                , ( "Wizard.Common.Components.Questionnaire.typeHints.loading", "Loading..." )
                , ( "Wizard.Common.Components.QuestionnaireVersionTag.current", "Current" )
                , ( "Wizard.Common.Components.SummaryReport.answeredIndication.label", "Answered: %s/%s" )
