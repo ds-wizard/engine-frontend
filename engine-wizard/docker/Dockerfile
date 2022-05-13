@@ -6,6 +6,7 @@ RUN apk add --no-cache libsass sassc && rm -f /tmp/* /etc/apk/cache/*
 # Dependencies needed to rebuild styles
 COPY node_modules/bootstrap src/~bootstrap
 COPY node_modules/@fortawesome src/~@fortawesome
+COPY node_modules/flatpickr src/~flatpickr
 
 COPY engine-wizard/docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY engine-wizard/docker/profile.sh /configuration/profile.sh

@@ -3,19 +3,25 @@ module Shared.Data.KnowledgeModel.Question.QuestionValueType exposing
     , decoder
     , default
     , encode
-    , forceFromString
+    , fromString
     , toString
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
+import Maybe.Extra as Maybe
 
 
 type QuestionValueType
     = StringQuestionValueType
-    | DateQuestionValueType
     | NumberQuestionValueType
+    | DateQuestionValueType
+    | DateTimeQuestionValueType
+    | TimeQuestionValueType
     | TextQuestionValueType
+    | EmailQuestionValueType
+    | UrlQuestionValueType
+    | ColorQuestionValueType
 
 
 decoder : Decoder QuestionValueType
@@ -23,21 +29,11 @@ decoder =
     D.string
         |> D.andThen
             (\str ->
-                case str of
-                    "StringQuestionValueType" ->
-                        D.succeed StringQuestionValueType
-
-                    "DateQuestionValueType" ->
-                        D.succeed DateQuestionValueType
-
-                    "NumberQuestionValueType" ->
-                        D.succeed NumberQuestionValueType
-
-                    "TextQuestionValueType" ->
-                        D.succeed TextQuestionValueType
-
-                    valueType ->
-                        D.fail <| "Unknown value type: " ++ valueType
+                let
+                    fail =
+                        D.fail <| "Unknown value type: " ++ str
+                in
+                Maybe.unwrap fail D.succeed (fromString str)
             )
 
 
@@ -57,27 +53,60 @@ toString questionValueType =
         StringQuestionValueType ->
             "StringQuestionValueType"
 
+        NumberQuestionValueType ->
+            "NumberQuestionValueType"
+
         DateQuestionValueType ->
             "DateQuestionValueType"
 
-        NumberQuestionValueType ->
-            "NumberQuestionValueType"
+        DateTimeQuestionValueType ->
+            "DateTimeQuestionValueType"
+
+        TimeQuestionValueType ->
+            "TimeQuestionValueType"
 
         TextQuestionValueType ->
             "TextQuestionValueType"
 
+        EmailQuestionValueType ->
+            "EmailQuestionValueType"
 
-forceFromString : String -> QuestionValueType
-forceFromString valueString =
+        UrlQuestionValueType ->
+            "UrlQuestionValueType"
+
+        ColorQuestionValueType ->
+            "ColorQuestionValueType"
+
+
+fromString : String -> Maybe QuestionValueType
+fromString valueString =
     case valueString of
-        "DateQuestionValueType" ->
-            DateQuestionValueType
+        "StringQuestionValueType" ->
+            Just StringQuestionValueType
 
         "NumberQuestionValueType" ->
-            NumberQuestionValueType
+            Just NumberQuestionValueType
+
+        "DateQuestionValueType" ->
+            Just DateQuestionValueType
+
+        "DateTimeQuestionValueType" ->
+            Just DateTimeQuestionValueType
+
+        "TimeQuestionValueType" ->
+            Just TimeQuestionValueType
 
         "TextQuestionValueType" ->
-            TextQuestionValueType
+            Just TextQuestionValueType
+
+        "EmailQuestionValueType" ->
+            Just EmailQuestionValueType
+
+        "UrlQuestionValueType" ->
+            Just UrlQuestionValueType
+
+        "ColorQuestionValueType" ->
+            Just ColorQuestionValueType
 
         _ ->
-            StringQuestionValueType
+            Nothing

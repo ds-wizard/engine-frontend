@@ -254,6 +254,25 @@ textarea {
     color: $gray-500;
 }
 
+.form-control[type="color"] {
+    -webkit-appearance: none;
+    padding: 0;
+    overflow: hidden;
+    width: 10rem;
+
+    &::-webkit-color-swatch-wrapper {
+        padding: .2rem;
+    }
+    &::-webkit-color-swatch {
+        border: none;
+        @include border-radius(.125rem)
+    }
+}
+
+.form-control.flatpickr-input[readonly] {
+    background: $white;
+}
+
 .form-control-inline {
     display: inline;
     width: auto;

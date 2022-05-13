@@ -27,7 +27,7 @@ import Bootstrap.Dropdown as Dropdown
 import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
-import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, textarea, ul)
+import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, title, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
 import Json.Decode as D
@@ -35,6 +35,7 @@ import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import Regex
 import Roman
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
@@ -65,6 +66,7 @@ import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
+import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import String exposing (fromInt)
@@ -72,6 +74,7 @@ import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Common.Components.Questionnaire.History as History
@@ -82,12 +85,12 @@ import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextare
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Tag as Tag
 import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -1986,25 +1989,76 @@ viewQuestionValue appState cfg model path question =
         defaultAttrs =
             [ class "form-control", value answer ]
 
+        toMsg =
+            SetReply (pathToString path) << createReply appState << StringReply
+
         extraAttrs =
             if cfg.features.readonly then
                 [ disabled True ]
 
             else
-                [ onInput (SetReply (pathToString path) << createReply appState << StringReply) ]
+                [ onInput toMsg ]
+
+        defaultInput =
+            [ input (type_ "text" :: defaultAttrs ++ extraAttrs) [] ]
+
+        readonlyOr otherInput =
+            if cfg.features.readonly then
+                defaultInput
+
+            else
+                otherInput
 
         inputView =
             case Question.getValueType question of
                 Just NumberQuestionValueType ->
-                    input (type_ "number" :: defaultAttrs ++ extraAttrs) []
+                    [ input (type_ "number" :: defaultAttrs ++ extraAttrs) [] ]
+
+                Just DateQuestionValueType ->
+                    readonlyOr [ DatePicker.datePicker [ DatePicker.onChange toMsg, DatePicker.value answer ] ]
+
+                Just DateTimeQuestionValueType ->
+                    readonlyOr [ DatePicker.dateTimePicker [ DatePicker.onChange toMsg, DatePicker.value answer ] ]
+
+                Just TimeQuestionValueType ->
+                    readonlyOr [ DatePicker.timePicker [ DatePicker.onChange toMsg, DatePicker.value answer ] ]
+
+                Just EmailQuestionValueType ->
+                    let
+                        warning =
+                            if not (String.isEmpty answer) && not (Regex.contains RegexPatterns.email answer) then
+                                Flash.warning appState "This is not a valid email address."
+
+                            else
+                                emptyNode
+                    in
+                    [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
+                    , warning
+                    ]
+
+                Just UrlQuestionValueType ->
+                    let
+                        warning =
+                            if not (String.isEmpty answer) && not (Regex.contains RegexPatterns.url answer) then
+                                Flash.warning appState "This is not a valid URL."
+
+                            else
+                                emptyNode
+                    in
+                    [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
+                    , warning
+                    ]
 
                 Just TextQuestionValueType ->
-                    textarea (defaultAttrs ++ extraAttrs ++ grammarlyAttributes) []
+                    [ resizableTextarea 3 answer (defaultAttrs ++ extraAttrs ++ grammarlyAttributes) [] ]
+
+                Just ColorQuestionValueType ->
+                    [ input (type_ "color" :: defaultAttrs ++ extraAttrs) [] ]
 
                 _ ->
-                    input (type_ "text" :: defaultAttrs ++ extraAttrs) []
+                    defaultInput
     in
-    div [] [ inputView ]
+    div [] inputView
 
 
 viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg
