@@ -1,6 +1,7 @@
 node_modules
 !node_modules/bootstrap
 !node_modules/@fortawesome
+!node_modules/flatpickr
 elm-stuff
 scripts
 src

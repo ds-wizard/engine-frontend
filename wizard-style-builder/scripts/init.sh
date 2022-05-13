@@ -7,6 +7,7 @@ rm -rf ./src
 mkdir src
 cp -r ../node_modules/@fortawesome ./src/~@fortawesome
 cp -r ../node_modules/bootstrap ./src/~bootstrap
+cp -r ../node_modules/flatpickr ./src/~flatpickr
 cp -r ../engine-wizard/scss ./src/scss
 
 # Create version based on git tag or branch
