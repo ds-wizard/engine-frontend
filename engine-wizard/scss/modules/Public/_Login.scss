@@ -1,10 +1,10 @@
-@import "../../variables";
+@import '../../variables';
 
 .Public__Login {
     .side-info {
         border-right: 1px solid $gray-300;
 
-        @media screen and (max-width: map-get($grid-breakpoints, "md")) {
+        @media screen and (max-width: map-get($grid-breakpoints, 'md')) {
             border: none;
             margin-bottom: 3rem;
         }
@@ -39,7 +39,7 @@
         margin-bottom: 1rem;
 
         &:before, &:after {
-            content: "";
+            content: '';
             flex: 1 1;
             border-bottom: 1px solid $gray-500;
             margin: auto;

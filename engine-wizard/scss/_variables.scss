@@ -1,11 +1,11 @@
-@import "customizations/variables";
-@import "customizations/variables-app";
+@import 'customizations/variables';
+@import 'customizations/variables-app';
 
 $font-size-base: 0.875rem !default;
 $primary: #0033aa !default;
 
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
 
 
 // public layout

@@ -1,6 +1,6 @@
-@import "../../../variables";
-@import "../../../mixins";
-@import "variables";
+@import '../../../variables';
+@import '../../../mixins';
+@import 'variables';
 
 $breadcrumbs-height: 40px;
 
@@ -48,7 +48,7 @@ $breadcrumbs-height: 40px;
         }
 
         .breadcrumb-item + .breadcrumb-item::before {
-            content: "〉";
+            content: '〉';
             padding: 0;
         }
     }
