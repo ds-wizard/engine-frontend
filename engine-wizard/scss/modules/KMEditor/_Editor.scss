@@ -1,9 +1,9 @@
-@import "../../variables";
-@import "../../mixins";
-@import "Editor/KMEditor";
-@import "Editor/Preview";
-@import "Editor/TagEditor";
-@import "Editor/SettingsEditor";
+@import '../../variables';
+@import '../../mixins';
+@import 'Editor/KMEditor';
+@import 'Editor/Preview';
+@import 'Editor/TagEditor';
+@import 'Editor/SettingsEditor';
 
 .KMEditor__Editor {
     width: 100%;

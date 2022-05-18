@@ -1,8 +1,8 @@
-@import "variables";
-@import "~bootstrap/scss/bootstrap";
+@import 'variables';
+@import '~bootstrap/scss/bootstrap';
 
-@import "customizations/extra-app";
-@import "customizations/extra";
+@import 'customizations/extra-app';
+@import 'customizations/extra';
 
 $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import '~@fortawesome/fontawesome-free/scss/fontawesome';
@@ -12,27 +12,27 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 
 @import '~flatpickr/dist/flatpickr';
 
+@import 'lib/flatpickr';
+@import 'lib/syntax-highlight';
 
-@import "animations";
-@import "common";
-@import "elements";
-@import "flatpickr";
-@import "forms";
-@import "layout";
-@import "syntax-highlight";
-@import "tables";
+@import 'animations';
+@import 'common';
+@import 'elements';
+@import 'forms';
+@import 'layout';
+@import 'tables';
 
-@import "modules/Common";
-@import "modules/Dashboard";
-@import "modules/Documents";
-@import "modules/KMEditor";
-@import "modules/KnowledgeModels";
-@import "modules/Projects";
-@import "modules/Public";
-@import "modules/Questionnaires";
-@import "modules/Settings";
-@import "modules/Shared";
-@import "modules/Users";
+@import 'modules/Common';
+@import 'modules/Dashboard';
+@import 'modules/Documents';
+@import 'modules/KMEditor';
+@import 'modules/KnowledgeModels';
+@import 'modules/Projects';
+@import 'modules/Public';
+@import 'modules/Questionnaires';
+@import 'modules/Settings';
+@import 'modules/Shared';
+@import 'modules/Users';
 
-@import "customizations/overrides-app";
-@import "customizations/overrides";
+@import 'customizations/overrides-app';
+@import 'customizations/overrides';

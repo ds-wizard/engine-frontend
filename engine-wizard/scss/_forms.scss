@@ -1,5 +1,5 @@
-@import "mixins";
-@import "variables";
+@import 'mixins';
+@import 'variables';
 
 textarea {
     resize: vertical;
@@ -254,7 +254,7 @@ textarea {
     color: $gray-500;
 }
 
-.form-control[type="color"] {
+.form-control[type='color'] {
     -webkit-appearance: none;
     padding: 0;
     overflow: hidden;

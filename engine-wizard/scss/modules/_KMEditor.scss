@@ -1,7 +1,7 @@
-@import "../variables";
-@import "KMEditor/Editor";
-@import "KMEditor/Migration";
-@import "KMEditor/Publish";
+@import '../variables';
+@import 'KMEditor/Editor';
+@import 'KMEditor/Migration';
+@import 'KMEditor/Publish';
 
 $indent-step: 20px;
 
@@ -87,7 +87,7 @@ $indent-step: 20px;
                 left: 0;
                 top: -2px;
                 background: $gray-400;
-                content: " ";
+                content: ' ';
                 z-index: 0;
             }
 
