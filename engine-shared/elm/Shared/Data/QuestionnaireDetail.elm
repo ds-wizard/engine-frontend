@@ -15,6 +15,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , getComments
     , getTodos
     , getVersionByEventUuid
+    , getWarnings
     , hasReply
     , isAnonymousProject
     , isCurrentVersion
@@ -31,6 +32,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , todoUuid
     , todosLength
     , updateContent
+    , warningsLength
     )
 
 import Dict exposing (Dict)
@@ -40,11 +42,13 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Regex
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
@@ -61,6 +65,7 @@ import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (Questi
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.UserInfo as UserInfo
+import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (boolToInt)
 import Time
 import Uuid exposing (Uuid)
@@ -436,6 +441,77 @@ getComments questionnaire =
 
             else
                 []
+    in
+    concatMapVisibleQuestions fn questionnaire
+
+
+type alias QuestionnaireWarning =
+    { chapter : Chapter
+    , question : Question
+    , path : String
+    }
+
+
+warningsLength : QuestionnaireDetail -> Int
+warningsLength =
+    List.length << getWarnings
+
+
+getWarnings : QuestionnaireDetail -> List QuestionnaireWarning
+getWarnings questionnaire =
+    let
+        fn chapter currentPath question =
+            let
+                questionnaireWarning =
+                    { chapter = chapter
+                    , question = question
+                    , path = pathToString currentPath
+                    }
+
+                checkValue regex value =
+                    if not (String.isEmpty value) && not (Regex.contains regex value) then
+                        [ questionnaireWarning
+                        ]
+
+                    else
+                        []
+            in
+            case question of
+                ValueQuestion _ questionData ->
+                    case getReplyValue questionnaire (pathToString currentPath) of
+                        Just replyValue ->
+                            case replyValue of
+                                StringReply value ->
+                                    case questionData.valueType of
+                                        DateQuestionValueType ->
+                                            checkValue RegexPatterns.date value
+
+                                        DateTimeQuestionValueType ->
+                                            checkValue RegexPatterns.datetime value
+
+                                        TimeQuestionValueType ->
+                                            checkValue RegexPatterns.time value
+
+                                        EmailQuestionValueType ->
+                                            checkValue RegexPatterns.email value
+
+                                        UrlQuestionValueType ->
+                                            checkValue RegexPatterns.url value
+
+                                        ColorQuestionValueType ->
+                                            checkValue RegexPatterns.color value
+
+                                        _ ->
+                                            []
+
+                                _ ->
+                                    []
+
+                        Nothing ->
+                            []
+
+                _ ->
+                    []
     in
     concatMapVisibleQuestions fn questionnaire
 

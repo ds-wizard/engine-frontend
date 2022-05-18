@@ -27,6 +27,7 @@ class DatePicker extends HTMLElement {
 
         this._options.wrap = true
         this._options.onChange = (selectedDates, dateStr) => {
+            this._removeErrorElement()
             this._datePickerValue = dateStr
             this.dispatchEvent(new CustomEvent('datePickerChanged'))
         }
@@ -34,19 +35,22 @@ class DatePicker extends HTMLElement {
             const value = error.toString().replace('Error: Invalid date provided: ', '')
 
             if (value) {
-                if (this._errorElement) {
-                    this.removeChild(this._errorElement)
-                }
-
+                this._removeErrorElement()
                 this._errorElement = document.createElement('div')
                 this._errorElement.classList.add('alert', 'alert-warning')
-                this._errorElement.innerHTML = `<i class="fa fas fa-exclamation-triangle"></i> The saved value "${value}" is invalid. Please enter a valid value.`
+                this._errorElement.innerHTML = `<i class="fa fas fa-exclamation-triangle"></i> The saved value "${value}" is invalid.`
                 this.appendChild(this._errorElement)
             }
         }
 
         this._instance = flatpickr(wrapper, this._options)
         this._instance.setDate(this._datePickerValue)
+    }
+
+    _removeErrorElement() {
+        if (this._errorElement) {
+            this.removeChild(this._errorElement)
+        }
     }
 }
 

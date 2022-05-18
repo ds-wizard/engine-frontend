@@ -1,4 +1,4 @@
-module Shared.RegexPatterns exposing (email, kmId, organizationId, projectTag, url, uuid)
+module Shared.RegexPatterns exposing (color, date, datetime, email, kmId, organizationId, projectTag, time, url, uuid)
 
 import Regex exposing (Regex)
 
@@ -31,6 +31,26 @@ kmId =
 projectTag : Regex
 projectTag =
     fromString "^[^,]+$"
+
+
+datetime : Regex
+datetime =
+    fromString "^[0-9]{4}-((0[0-9])|(1[012]))-((0[1-9])|([12][0-9])|(3[01])) (([01][1-9])|2[0-3]):[0-5][0-9]$"
+
+
+date : Regex
+date =
+    fromString "^[0-9]{4}-((0[0-9])|(1[012]))-((0[1-9])|([12][0-9])|(3[01]))$"
+
+
+time : Regex
+time =
+    fromString "^(([01][1-9])|2[0-3]):[0-5][0-9]$"
+
+
+color : Regex
+color =
+    fromString "^#(?:[0-9a-fA-F]{3}){1,2}$"
 
 
 fromString : String -> Regex

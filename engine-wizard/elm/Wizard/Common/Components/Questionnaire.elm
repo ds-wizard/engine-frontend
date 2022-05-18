@@ -154,6 +154,7 @@ type RightPanel
     | RightPanelHistory
     | RightPanelCommentsOverview
     | RightPanelComments String
+    | RightPanelWarnings
 
 
 init : AppState -> QuestionnaireDetail -> Model
@@ -910,6 +911,14 @@ viewQuestionnaireToolbar appState model =
                 _ ->
                     ( RightPanelHistory, False )
 
+        ( warningsPanel, warningsOpen ) =
+            case model.rightPanel of
+                RightPanelWarnings ->
+                    ( RightPanelNone, True )
+
+                _ ->
+                    ( RightPanelWarnings, False )
+
         todosLength =
             QuestionnaireDetail.todosLength model.questionnaire
 
@@ -952,6 +961,20 @@ viewQuestionnaireToolbar appState model =
                     ]
                 ]
 
+        warningsLength =
+            QuestionnaireDetail.warningsLength model.questionnaire
+
+        warningsButton =
+            div [ class "item-group" ]
+                [ a [ class "item", classList [ ( "selected", warningsOpen ) ], onClick (SetRightPanel warningsPanel) ]
+                    [ lx_ "toolbar.warnings" appState
+                    , span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt warningsLength) ]
+                    ]
+                ]
+
+        warningsButtonVisible =
+            warningsLength > 0 || warningsOpen
+
         versionHistoryButtonVisible =
             Feature.projectVersionHitory appState model.questionnaire
 
@@ -973,7 +996,8 @@ viewQuestionnaireToolbar appState model =
             [ dropdown
             ]
         , div [ class "questionnaire__toolbar__right" ]
-            [ navButton commentsOverviewButton commentsOverviewButtonVisible
+            [ navButton warningsButton warningsButtonVisible
+            , navButton commentsOverviewButton commentsOverviewButtonVisible
             , navButton todosButton todosButtonVisible
             , navButton versionHistoryButton versionHistoryButtonVisible
             , div [ class "item-group" ]
@@ -1129,6 +1153,10 @@ viewQuestionnaireRightPanel appState cfg model =
                 , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
                 ]
 
+        RightPanelWarnings ->
+            wrapPanel <|
+                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings appState model ]
+
 
 
 -- QUESTIONNAIRE - RIGHT PANEL - TODOS
@@ -1159,6 +1187,37 @@ viewQuestionnaireRightPanelTodos appState model =
     else
         div [ class "todos" ] <|
             List.map viewTodoGroup (QuestionnaireTodoGroup.groupTodos todos)
+
+
+
+-- QUESTIONNAIRE - RIGHT PANEL - WARNINGS
+
+
+viewQuestionnaireRightPanelWarnings : AppState -> Model -> Html Msg
+viewQuestionnaireRightPanelWarnings appState model =
+    let
+        warnings =
+            QuestionnaireDetail.getWarnings model.questionnaire
+
+        viewWarningGroup group =
+            div []
+                [ strong [] [ text group.chapter.title ]
+                , ul [ class "fa-ul" ] (List.map viewTodo group.todos)
+                ]
+
+        viewTodo todo =
+            li []
+                [ span [ class "fa-li" ] [ fa "fas fa-exclamation-triangle" ]
+                , a [ onClick (ScrollToPath todo.path) ] [ text <| Question.getTitle todo.question ]
+                ]
+    in
+    if List.isEmpty warnings then
+        div [ class "todos todos-empty" ] <|
+            [ illustratedMessage Undraw.feelingHappy (l_ "warnings.noWarnings" appState) ]
+
+    else
+        div [ class "todos" ] <|
+            List.map viewWarningGroup (QuestionnaireTodoGroup.groupTodos warnings)
 
 
 
@@ -1999,6 +2058,13 @@ viewQuestionValue appState cfg model path question =
             else
                 [ onInput toMsg ]
 
+        warningView regex warning =
+            if not (String.isEmpty answer) && not (Regex.contains regex answer) then
+                Flash.warning appState warning
+
+            else
+                emptyNode
+
         defaultInput =
             [ input (type_ "text" :: defaultAttrs ++ extraAttrs) [] ]
 
@@ -2024,36 +2090,22 @@ viewQuestionValue appState cfg model path question =
                     readonlyOr [ DatePicker.timePicker [ DatePicker.onChange toMsg, DatePicker.value answer ] ]
 
                 Just EmailQuestionValueType ->
-                    let
-                        warning =
-                            if not (String.isEmpty answer) && not (Regex.contains RegexPatterns.email answer) then
-                                Flash.warning appState "This is not a valid email address."
-
-                            else
-                                emptyNode
-                    in
                     [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
-                    , warning
+                    , warningView RegexPatterns.email (l_ "value.invalidEmail" appState)
                     ]
 
                 Just UrlQuestionValueType ->
-                    let
-                        warning =
-                            if not (String.isEmpty answer) && not (Regex.contains RegexPatterns.url answer) then
-                                Flash.warning appState "This is not a valid URL."
-
-                            else
-                                emptyNode
-                    in
                     [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
-                    , warning
+                    , warningView RegexPatterns.url (l_ "value.invalidUrl" appState)
                     ]
 
                 Just TextQuestionValueType ->
                     [ resizableTextarea 3 answer (defaultAttrs ++ extraAttrs ++ grammarlyAttributes) [] ]
 
                 Just ColorQuestionValueType ->
-                    [ input (type_ "color" :: defaultAttrs ++ extraAttrs) [] ]
+                    [ input (type_ "color" :: defaultAttrs ++ extraAttrs) []
+                    , warningView RegexPatterns.color (l_ "value.invalidColor" appState)
+                    ]
 
                 _ ->
                     defaultInput
