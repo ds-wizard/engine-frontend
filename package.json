@@ -32,7 +32,7 @@
     "apply-locale:wizard": "COMPONENT=wizard node scripts/apply-locale.js"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "^10.2.4",
+    "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^4.0.0",
     "elm": "^0.19.1-5",
