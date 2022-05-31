@@ -6,9 +6,9 @@ const axiosRetry = require('axios-retry')
 const program = require('./elm/Wizard.elm')
 
 const datetimePickers = require('./js/components/datetime-pickers')
+const charts = require('./js/components/charts')
 
 const cookies = require('./js/ports/cookies')
-const registerChartPorts = require('./js/ports/chart')
 const registerConsolePorts = require('./js/ports/console')
 const registerImportPorts = require('./js/ports/import')
 const registerPageUnloadPorts = require('./js/ports/page-unload')
@@ -116,7 +116,6 @@ function loadApp(config, provisioning) {
             }
         })
 
-        registerChartPorts(app)
         registerConsolePorts(app)
         registerCopyPorts(app)
         registerImportPorts(app)

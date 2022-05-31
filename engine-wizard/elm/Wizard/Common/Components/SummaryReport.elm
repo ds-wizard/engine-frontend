@@ -3,7 +3,6 @@ module Wizard.Common.Components.SummaryReport exposing
     , Model
     , Msg
     , fetchData
-    , fetchData2
     , init
     , update
     , view
@@ -11,12 +10,11 @@ module Wizard.Common.Components.SummaryReport exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import ChartJS exposing (ChartConfig)
-import Html exposing (Html, a, canvas, div, h2, h3, h4, hr, table, tbody, td, text, th, thead, tr)
+import ChartJS
+import Html exposing (Html, a, div, h2, h3, h4, hr, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, colspan, id, style)
 import Html.Events exposing (onClick)
 import List.Extra as List
-import Maybe.Extra as Maybe
 import Round
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel as KnowledgeModel
@@ -72,44 +70,19 @@ type Msg
     | ScrollToMetric String
 
 
-fetchData : AppState -> Uuid -> Model -> ( Model, Cmd Msg )
-fetchData appState questionnaireUuid model =
-    ( { model | summaryReport = Loading }
-    , QuestionnairesApi.getSummaryReport questionnaireUuid appState GetSummaryReportComplete
-    )
-
-
-fetchData2 : AppState -> Uuid -> Cmd Msg
-fetchData2 appState questionnaireUuid =
+fetchData : AppState -> Uuid -> Cmd Msg
+fetchData appState questionnaireUuid =
     QuestionnairesApi.getSummaryReport questionnaireUuid appState GetSummaryReportComplete
 
 
-update : Msg -> AppState -> Context -> Model -> ( Model, Cmd msg )
-update msg appState ctx model =
+update : Msg -> AppState -> Model -> ( Model, Cmd msg )
+update msg appState model =
     case msg of
         GetSummaryReportComplete result ->
             case result of
                 Ok summaryReport ->
-                    let
-                        metrics =
-                            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
-
-                        chapters =
-                            KnowledgeModel.getChapters ctx.questionnaire.knowledgeModel
-
-                        chapterChartsConfigs =
-                            List.map (createChapterChartConfig metrics chapters) summaryReport.chapterReports
-
-                        totalChartConfig =
-                            createTotalChartConfig metrics summaryReport.totalReport
-
-                        cmds =
-                            List.map
-                                (Ports.drawMetricsChart << ChartJS.encodeChartConfig)
-                                (totalChartConfig :: chapterChartsConfigs)
-                    in
                     ( { model | summaryReport = Success summaryReport }
-                    , Cmd.batch cmds
+                    , Cmd.none
                     )
 
                 Err error ->
@@ -138,9 +111,12 @@ viewContent appState ctx summaryReport =
         title =
             [ h2 [] [ lgx "questionnaire.summaryReport" appState ] ]
 
+        chartData =
+            createTotalChartData metrics summaryReport.totalReport
+
         totalReport =
             [ viewIndications appState summaryReport.totalReport.indications
-            , viewMetrics appState ctx summaryReport.totalReport.metrics totalReportId
+            , viewMetrics appState ctx summaryReport.totalReport.metrics chartData
             , hr [] []
             ]
 
@@ -174,16 +150,25 @@ viewChapterReport appState ctx chapterReport =
                 |> KnowledgeModel.getChapter chapterReport.chapterUuid
                 |> Maybe.map .title
                 |> Maybe.withDefault ""
+
+        metrics =
+            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+
+        chapters =
+            KnowledgeModel.getChapters ctx.questionnaire.knowledgeModel
+
+        chartData =
+            createChapterChartData metrics chapters chapterReport
     in
     div []
         [ h3 [] [ text chapterTitle ]
         , viewIndications appState chapterReport.indications
-        , viewMetrics appState ctx chapterReport.metrics chapterReport.chapterUuid
+        , viewMetrics appState ctx chapterReport.metrics chartData
         ]
 
 
-viewMetrics : AppState -> Context -> List MetricReport -> String -> Html Msg
-viewMetrics appState ctx metricReports canvasId =
+viewMetrics : AppState -> Context -> List MetricReport -> ChartJS.Data -> Html Msg
+viewMetrics appState ctx metricReports chartData =
     let
         metrics =
             KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
@@ -194,7 +179,7 @@ viewMetrics appState ctx metricReports canvasId =
 
             else if List.length metricReports > 2 then
                 [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState metrics metricReports ]
-                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart metrics canvasId ]
+                , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart chartData ]
                 ]
 
             else
@@ -282,10 +267,9 @@ viewProgressBar colorClass value =
         [ div [ class <| "progress-bar " ++ colorClass, style "width" width ] [] ]
 
 
-viewMetricsChart : List Metric -> String -> Html msg
-viewMetricsChart _ canvasId =
-    div [ class "metrics-chart" ]
-        [ canvas [ id <| reportCanvasId canvasId ] [] ]
+viewMetricsChart : ChartJS.Data -> Html msg
+viewMetricsChart chartData =
+    ChartJS.radarChart [ class "metrics-chart", ChartJS.chartData chartData ]
 
 
 getTitleByUuid : List { a | uuid : String, title : String } -> String -> String
@@ -320,17 +304,17 @@ metricId metricUuid =
 -- Chart helpers
 
 
-createTotalChartConfig : List Metric -> TotalReport -> ChartConfig
-createTotalChartConfig metrics totalReport =
+createTotalChartData : List Metric -> TotalReport -> ChartJS.Data
+createTotalChartData metrics totalReport =
     let
         data =
             List.map (createDataValue metrics) totalReport.metrics
     in
-    createChartConfig data "" totalReportId
+    createChartData data ""
 
 
-createChapterChartConfig : List Metric -> List Chapter -> ChapterReport -> ChartConfig
-createChapterChartConfig metrics chapters chapterReport =
+createChapterChartData : List Metric -> List Chapter -> ChapterReport -> ChartJS.Data
+createChapterChartData metrics chapters chapterReport =
     let
         data =
             List.map (createDataValue metrics) chapterReport.metrics
@@ -340,24 +324,21 @@ createChapterChartConfig metrics chapters chapterReport =
                 |> Maybe.map .title
                 |> Maybe.withDefault ""
     in
-    createChartConfig data label chapterReport.chapterUuid
+    createChartData data label
 
 
-createChartConfig : List ( String, Float ) -> String -> String -> ChartConfig
-createChartConfig data label canvasId =
-    { targetId = reportCanvasId canvasId
-    , data =
-        { labels = List.map Tuple.first data
-        , datasets =
-            [ { label = label
-              , borderColor = "rgb(23, 162, 184)"
-              , backgroundColor = "rgba(23, 162, 184, 0.5)"
-              , pointBackgroundColor = "rgb(23, 162, 184)"
-              , data = List.map Tuple.second data
-              , stack = Nothing
-              }
-            ]
-        }
+createChartData : List ( String, Float ) -> String -> ChartJS.Data
+createChartData data label =
+    { labels = List.map Tuple.first data
+    , datasets =
+        [ { label = label
+          , borderColor = "rgb(23, 162, 184)"
+          , backgroundColor = "rgba(23, 162, 184, 0.5)"
+          , pointBackgroundColor = "rgb(23, 162, 184)"
+          , data = List.map Tuple.second data
+          , stack = Nothing
+          }
+        ]
     }
 
 
@@ -370,13 +351,3 @@ createDataValue metrics report =
                 |> Maybe.withDefault "Metric"
     in
     ( label, report.measure )
-
-
-reportCanvasId : String -> String
-reportCanvasId canvasId =
-    "report-" ++ canvasId
-
-
-totalReportId : String
-totalReportId =
-    "total"
