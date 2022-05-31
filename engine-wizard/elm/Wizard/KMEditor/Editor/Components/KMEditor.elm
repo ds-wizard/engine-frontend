@@ -886,9 +886,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
                         questionValueTypeOptions =
                             [ ( "StringQuestionValueType", lg "questionValueType.string" appState )
-                            , ( "DateQuestionValueType", lg "questionValueType.date" appState )
                             , ( "NumberQuestionValueType", lg "questionValueType.number" appState )
+                            , ( "DateQuestionValueType", lg "questionValueType.date" appState )
+                            , ( "DateTimeQuestionValueType", lg "questionValueType.datetime" appState )
+                            , ( "TimeQuestionValueType", lg "questionValueType.time" appState )
                             , ( "TextQuestionValueType", lg "questionValueType.text" appState )
+                            , ( "EmailQuestionValueType", lg "questionValueType.email" appState )
+                            , ( "UrlQuestionValueType", lg "questionValueType.url" appState )
+                            , ( "ColorQuestionValueType", lg "questionValueType.color" appState )
                             ]
 
                         valueTypeInput =
@@ -897,7 +902,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , label = lg "questionValueType" appState
                                 , value = QuestionValueType.toString <| Maybe.withDefault QuestionValueType.default <| Question.getValueType question
                                 , options = questionValueTypeOptions
-                                , onChange = createTypeEditEvent setValueType << QuestionValueType.forceFromString
+                                , onChange = createTypeEditEvent setValueType << Maybe.withDefault QuestionValueType.default << QuestionValueType.fromString
                                 }
                     in
                     [ valueTypeInput ]

@@ -1,23 +1,25 @@
 'use strict'
 
-var axios = require('axios')
-var axiosRetry = require('axios-retry')
+const axios = require('axios')
+const axiosRetry = require('axios-retry')
 
-var program = require('./elm/Wizard.elm')
+const program = require('./elm/Wizard.elm')
 
-var cookies = require('./ports/cookies')
-var registerChartPorts = require('./ports/chart')
-var registerConsolePorts = require('./ports/console')
-var registerImportPorts = require('./ports/import')
-var registerPageUnloadPorts = require('./ports/page-unload')
-var registerRefreshPorts = require('./ports/refresh')
-var registerScrollPorts = require('./ports/scroll')
-var registerSessionPorts = require('./ports/session')
-var registerCopyPorts = require('../engine-shared/ports/copy')
-var registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
-var registerIntegrationWidgetPorts = require('./ports/integrationWidget')
+const datetimePickers = require('./js/components/datetime-pickers')
 
-var defaultStyleUrl
+const cookies = require('./js/ports/cookies')
+const registerChartPorts = require('./js/ports/chart')
+const registerConsolePorts = require('./js/ports/console')
+const registerImportPorts = require('./js/ports/import')
+const registerPageUnloadPorts = require('./js/ports/page-unload')
+const registerRefreshPorts = require('./js/ports/refresh')
+const registerScrollPorts = require('./js/ports/scroll')
+const registerSessionPorts = require('./js/ports/session')
+const registerCopyPorts = require('../engine-shared/ports/copy')
+const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
+const registerIntegrationWidgetPorts = require('./js/ports/integrationWidget')
+
+let defaultStyleUrl
 
 axiosRetry(axios, {
     retries: 3,
@@ -52,7 +54,7 @@ function apiUrl() {
 }
 
 function configUrl() {
-    var clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
+    const clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
     return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
@@ -76,9 +78,9 @@ function clientUrl() {
 }
 
 function setStyles(config, cb) {
-    var customizationEnabled = config.feature && config.feature.clientCustomizationEnabled
-    var styleUrl = customizationEnabled && config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
-    var link = document.createElement('link')
+    const customizationEnabled = config.feature && config.feature.clientCustomizationEnabled
+    const styleUrl = customizationEnabled && config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
+    const link = document.createElement('link')
     link.setAttribute("rel", "stylesheet")
     link.setAttribute("type", "text/css")
     link.onload = cb
@@ -96,7 +98,7 @@ function getApiUrl(config) {
 function loadApp(config, provisioning) {
     setStyles(config, function () {
 
-        var app = program.Elm.Wizard.init({
+        const app = program.Elm.Wizard.init({
             node: document.body,
             flags: {
                 seed: Math.floor(Math.random() * 0xFFFFFFFF),
@@ -131,24 +133,24 @@ function loadApp(config, provisioning) {
 }
 
 window.onload = function () {
-    var style = document.querySelector('[rel="stylesheet"]')
+    const style = document.querySelector('[rel="stylesheet"]')
     defaultStyleUrl = style.getAttribute('href')
     style.remove()
 
-    var promises = [axios.get(configUrl())]
-    var hasProvisioning = !!provisioningUrl()
+    const promises = [axios.get(configUrl())]
+    const hasProvisioning = !!provisioningUrl()
     if (hasProvisioning) {
         promises.push(axios.get(provisioningUrl()))
     }
 
     axios.all(promises)
         .then(function (results) {
-            var config = results[0].data
-            var provisioning = hasProvisioning ? results[1].data : null
+            const config = results[0].data
+            const provisioning = hasProvisioning ? results[1].data : null
             loadApp(config, provisioning)
         })
         .catch(function (err) {
-            var errorCode = err.response ? err.response.status : null
+            const errorCode = err.response ? err.response.status : null
 
             setStyles({}, function () {
                 document.body.innerHTML = bootstrapErrorHTML(errorCode)

@@ -1,5 +1,5 @@
-@import "../../../mixins";
-@import "../../../variables";
+@import '../../../mixins';
+@import '../../../variables';
 
 .Listing {
     width: 100%;
@@ -257,7 +257,7 @@
                 padding-left: 0.5rem;
             }
 
-            @media screen and (max-width: map-get($grid-breakpoints, "md")) {
+            @media screen and (max-width: map-get($grid-breakpoints, 'md')) {
                 display: none;
             }
         }
@@ -286,7 +286,7 @@
                 margin-left: 0.5rem;
 
                 &:before {
-                    content: "·";
+                    content: '·';
                     margin-right: 0.5rem;
                     display: inline-block;
                     text-decoration: none !important;

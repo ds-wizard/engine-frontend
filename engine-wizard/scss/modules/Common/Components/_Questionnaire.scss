@@ -1,5 +1,5 @@
-@import "../../../mixins";
-@import "../../../variables";
+@import '../../../mixins';
+@import '../../../variables';
 
 $toolbar-height: 40px;
 
@@ -619,12 +619,12 @@ $toolbar-height: 40px;
             }
 
             &.highlighted {
-                background: theme-color-level("warning", $highlighted-bg-level);
+                background: theme-color-level('warning', $highlighted-bg-level);
                 padding: 1rem;
                 @include border-radius($alert-border-radius);
 
                 &-resolved {
-                    background: theme-color-level("success", $highlighted-bg-level);
+                    background: theme-color-level('success', $highlighted-bg-level);
                 }
             }
 
@@ -722,7 +722,7 @@ $toolbar-height: 40px;
             color: $gray-500;
         }
 
-        input[type="radio"], input[type="checkbox"] {
+        input[type='radio'], input[type='checkbox'] {
             margin-right: 10px;
         }
 
@@ -952,6 +952,11 @@ $toolbar-height: 40px;
             .error {
                 padding: 10px 15px;
                 color: $danger;
+            }
+
+            .info {
+                padding: 10px 15px;
+                color: $info;
             }
 
             &-list {

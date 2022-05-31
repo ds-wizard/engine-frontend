@@ -27,7 +27,7 @@ import Bootstrap.Dropdown as Dropdown
 import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
-import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, textarea, ul)
+import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, title, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
 import Json.Decode as D
@@ -35,6 +35,7 @@ import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import Regex
 import Roman
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
@@ -65,6 +66,7 @@ import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
+import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import String exposing (fromInt)
@@ -72,6 +74,7 @@ import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Common.Components.Questionnaire.History as History
@@ -82,12 +85,12 @@ import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextare
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Tag as Tag
 import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -151,6 +154,7 @@ type RightPanel
     | RightPanelHistory
     | RightPanelCommentsOverview
     | RightPanelComments String
+    | RightPanelWarnings
 
 
 init : AppState -> QuestionnaireDetail -> Model
@@ -907,6 +911,14 @@ viewQuestionnaireToolbar appState model =
                 _ ->
                     ( RightPanelHistory, False )
 
+        ( warningsPanel, warningsOpen ) =
+            case model.rightPanel of
+                RightPanelWarnings ->
+                    ( RightPanelNone, True )
+
+                _ ->
+                    ( RightPanelWarnings, False )
+
         todosLength =
             QuestionnaireDetail.todosLength model.questionnaire
 
@@ -949,6 +961,20 @@ viewQuestionnaireToolbar appState model =
                     ]
                 ]
 
+        warningsLength =
+            QuestionnaireDetail.warningsLength model.questionnaire
+
+        warningsButton =
+            div [ class "item-group" ]
+                [ a [ class "item", classList [ ( "selected", warningsOpen ) ], onClick (SetRightPanel warningsPanel) ]
+                    [ lx_ "toolbar.warnings" appState
+                    , span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt warningsLength) ]
+                    ]
+                ]
+
+        warningsButtonVisible =
+            warningsLength > 0 || warningsOpen
+
         versionHistoryButtonVisible =
             Feature.projectVersionHitory appState model.questionnaire
 
@@ -970,7 +996,8 @@ viewQuestionnaireToolbar appState model =
             [ dropdown
             ]
         , div [ class "questionnaire__toolbar__right" ]
-            [ navButton commentsOverviewButton commentsOverviewButtonVisible
+            [ navButton warningsButton warningsButtonVisible
+            , navButton commentsOverviewButton commentsOverviewButtonVisible
             , navButton todosButton todosButtonVisible
             , navButton versionHistoryButton versionHistoryButtonVisible
             , div [ class "item-group" ]
@@ -1126,6 +1153,10 @@ viewQuestionnaireRightPanel appState cfg model =
                 , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
                 ]
 
+        RightPanelWarnings ->
+            wrapPanel <|
+                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings appState model ]
+
 
 
 -- QUESTIONNAIRE - RIGHT PANEL - TODOS
@@ -1156,6 +1187,37 @@ viewQuestionnaireRightPanelTodos appState model =
     else
         div [ class "todos" ] <|
             List.map viewTodoGroup (QuestionnaireTodoGroup.groupTodos todos)
+
+
+
+-- QUESTIONNAIRE - RIGHT PANEL - WARNINGS
+
+
+viewQuestionnaireRightPanelWarnings : AppState -> Model -> Html Msg
+viewQuestionnaireRightPanelWarnings appState model =
+    let
+        warnings =
+            QuestionnaireDetail.getWarnings model.questionnaire
+
+        viewWarningGroup group =
+            div []
+                [ strong [] [ text group.chapter.title ]
+                , ul [ class "fa-ul" ] (List.map viewTodo group.todos)
+                ]
+
+        viewTodo todo =
+            li []
+                [ span [ class "fa-li" ] [ fa "fas fa-exclamation-triangle" ]
+                , a [ onClick (ScrollToPath todo.path) ] [ text <| Question.getTitle todo.question ]
+                ]
+    in
+    if List.isEmpty warnings then
+        div [ class "todos todos-empty" ] <|
+            [ illustratedMessage Undraw.feelingHappy (l_ "warnings.noWarnings" appState) ]
+
+    else
+        div [ class "todos" ] <|
+            List.map viewWarningGroup (QuestionnaireTodoGroup.groupTodos warnings)
 
 
 
@@ -1986,25 +2048,69 @@ viewQuestionValue appState cfg model path question =
         defaultAttrs =
             [ class "form-control", value answer ]
 
+        toMsg =
+            SetReply (pathToString path) << createReply appState << StringReply
+
         extraAttrs =
             if cfg.features.readonly then
                 [ disabled True ]
 
             else
-                [ onInput (SetReply (pathToString path) << createReply appState << StringReply) ]
+                [ onInput toMsg ]
+
+        warningView regex warning =
+            if not (String.isEmpty answer) && not (Regex.contains regex answer) then
+                Flash.warning appState warning
+
+            else
+                emptyNode
+
+        defaultInput =
+            [ input (type_ "text" :: defaultAttrs ++ extraAttrs) [] ]
+
+        readonlyOr otherInput =
+            if cfg.features.readonly then
+                defaultInput
+
+            else
+                otherInput
 
         inputView =
             case Question.getValueType question of
                 Just NumberQuestionValueType ->
-                    input (type_ "number" :: defaultAttrs ++ extraAttrs) []
+                    [ input (type_ "number" :: defaultAttrs ++ extraAttrs) [] ]
+
+                Just DateQuestionValueType ->
+                    readonlyOr [ DatePicker.datePicker [ DatePicker.onChange toMsg, DatePicker.value answer ] ]
+
+                Just DateTimeQuestionValueType ->
+                    readonlyOr [ DatePicker.dateTimePicker [ DatePicker.onChange toMsg, DatePicker.value answer ] ]
+
+                Just TimeQuestionValueType ->
+                    readonlyOr [ DatePicker.timePicker [ DatePicker.onChange toMsg, DatePicker.value answer ] ]
+
+                Just EmailQuestionValueType ->
+                    [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
+                    , warningView RegexPatterns.email (l_ "value.invalidEmail" appState)
+                    ]
+
+                Just UrlQuestionValueType ->
+                    [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
+                    , warningView RegexPatterns.url (l_ "value.invalidUrl" appState)
+                    ]
 
                 Just TextQuestionValueType ->
-                    textarea (defaultAttrs ++ extraAttrs ++ grammarlyAttributes) []
+                    [ resizableTextarea 3 answer (defaultAttrs ++ extraAttrs ++ grammarlyAttributes) [] ]
+
+                Just ColorQuestionValueType ->
+                    [ input (type_ "color" :: defaultAttrs ++ extraAttrs) []
+                    , warningView RegexPatterns.color (l_ "value.invalidColor" appState)
+                    ]
 
                 _ ->
-                    input (type_ "text" :: defaultAttrs ++ extraAttrs) []
+                    defaultInput
     in
-    div [] [ inputView ]
+    div [] inputView
 
 
 viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg
@@ -2103,6 +2209,12 @@ viewQuestionIntegrationTypeHints appState cfg model path =
     let
         content =
             case Maybe.unwrap Unset .hints model.typeHints of
+                Success [] ->
+                    div [ class "info" ]
+                        [ faSet "_global.info" appState
+                        , lx_ "typeHints.empty" appState
+                        ]
+
                 Success hints ->
                     ul [ class "integration-typehints-list" ] (List.map (viewQuestionIntegrationTypeHint appState cfg path) hints)
 

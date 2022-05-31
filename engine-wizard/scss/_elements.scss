@@ -1,6 +1,6 @@
-@import "~bootstrap/scss/functions";
-@import "variables";
-@import "mixins";
+@import '~bootstrap/scss/functions';
+@import 'variables';
+@import 'mixins';
 
 a {
     cursor: pointer;
@@ -68,9 +68,9 @@ label {
 
 .pre-error {
     padding: 1.5rem;
-    color: theme-color-level("danger", $alert-color-level);
-    background: theme-color-level("danger", $alert-bg-level);
-    border-left: 5px solid theme-color-level("danger", $alert-border-level);
+    color: theme-color-level('danger', $alert-color-level);
+    background: theme-color-level('danger', $alert-bg-level);
+    border-left: 5px solid theme-color-level('danger', $alert-border-level);
 }
 
 .pre-default {
@@ -482,12 +482,12 @@ code {
 .diff {
     .diff {
         &-added {
-            background: theme-color-level("success", $alert-bg-level);
+            background: theme-color-level('success', $alert-bg-level);
         }
 
         &-removed {
             text-decoration: line-through;
-            background: theme-color-level("danger", $alert-bg-level);
+            background: theme-color-level('danger', $alert-bg-level);
         }
     }
 }

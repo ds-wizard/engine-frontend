@@ -24,6 +24,7 @@ import Rumkin
 import Shared.Form.FormError as FormError exposing (FormError(..))
 import Shared.Locale exposing (l)
 import Shared.Provisioning exposing (Provisioning)
+import Shared.RegexPatterns as RegexPatterns
 import Uuid exposing (Uuid)
 
 
@@ -101,50 +102,50 @@ optionalString =
     V.oneOf [ V.emptyString, V.string ]
 
 
-regex : String -> Validation e String
+regex : Regex -> Validation e String
 regex r =
     V.string
         |> V.andThen
-            (\s -> V.format (createRegex r) s |> V.mapError (\_ -> Error.value InvalidFormat))
+            (\s -> V.format r s |> V.mapError (\_ -> Error.value InvalidFormat))
 
 
-maybeRegex : String -> String -> Validation FormError (Maybe String)
+maybeRegex : Regex -> String -> Validation FormError (Maybe String)
 maybeRegex r error =
     V.oneOf
         [ V.map (\_ -> Nothing) <| V.emptyString
-        , V.map Just <| validateRegexWithCustomError (createRegex r) (FormError.Error error)
+        , V.map Just <| validateRegexWithCustomError r (FormError.Error error)
         ]
 
 
 uuidString : Validation FormError String
 uuidString =
-    validateRegexWithCustomError uuidPattern InvalidUuid
+    validateRegexWithCustomError RegexPatterns.uuid InvalidUuid
 
 
 uuid : Validation FormError Uuid
 uuid =
-    validateRegexWithCustomError uuidPattern InvalidUuid
+    validateRegexWithCustomError RegexPatterns.uuid InvalidUuid
         |> V.map Uuid.fromUuidString
 
 
 organizationId : Validation e String
 organizationId =
-    regex "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"
+    regex RegexPatterns.organizationId
 
 
 kmId : Validation e String
 kmId =
-    regex "^^(?![-])(?!.*[-]$)[a-zA-Z0-9-]+$"
+    regex RegexPatterns.kmId
 
 
 projectTag : { a | provisioning : Provisioning } -> Validation FormError String
 projectTag appState =
-    validateRegexWithCustomError (createRegex "^[^,]+$") (FormError.Error (l_ "projectTagError" appState))
+    validateRegexWithCustomError RegexPatterns.projectTag (FormError.Error (l_ "projectTagError" appState))
 
 
 projectTags : { a | provisioning : Provisioning } -> Validation FormError (Maybe String)
 projectTags appState =
-    maybeRegex "^[^,]+$" (l_ "projectTagError" appState)
+    maybeRegex RegexPatterns.projectTag (l_ "projectTagError" appState)
 
 
 validateRegexWithCustomError : Regex -> e -> Validation e String
@@ -155,23 +156,6 @@ validateRegexWithCustomError r customFormError =
                 V.format r s
                     |> V.mapError (\_ -> V.customError customFormError)
             )
-
-
-uuidPattern : Regex
-uuidPattern =
-    let
-        pattern =
-            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-
-        options =
-            { caseInsensitive = True, multiline = False }
-    in
-    Maybe.withDefault Regex.never <| Regex.fromStringWith options pattern
-
-
-createRegex : String -> Regex
-createRegex =
-    Maybe.withDefault Regex.never << Regex.fromString
 
 
 dict : Validation e a -> Validation e (Dict String a)

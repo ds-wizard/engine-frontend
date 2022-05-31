@@ -1,4 +1,4 @@
-var initGA = require('../../engine-shared/js/ga')
+var initGA = require('../../../engine-shared/js/ga')
 
 function getCookieConsent() {
     return !!localStorage.cookieConsent

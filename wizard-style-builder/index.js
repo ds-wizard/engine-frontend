@@ -6,7 +6,7 @@ const helmet = require('helmet')
 const morgan = require('morgan')
 const os = require('os')
 const path = require('path')
-const sass = require('node-sass')
+const sass = require('sass')
 
 const app = express()
 const port = 3000
@@ -61,19 +61,20 @@ const createVariables = (options) => (folder) => new Promise((resolve, reject) =
 const renderSass = (folder) => new Promise((resolve, reject) => {
     const mainPath = `${folder}/scss/main.scss`
 
-    sass.render({
-        file: mainPath,
-        includePaths: [folder],
-        outputStyle: 'compressed'
-    }, (err, result) => {
-        if (err) {
-            reject(err)
-        } else {
+    sass.compileAsync(mainPath, {
+        loadPaths: [folder],
+        style: 'compressed',
+        quietDeps: true
+    })
+        .then((result) => {
             const stripComment = (string) => string.replace(/\/\*[^*]*\*+([^\/][^*]*\*+)*\//, '')
             const css = stripComment(stripComment(result.css.toString()))
             resolve(css)
-        }
-    })
+        })
+        .catch((err) => {
+            reject(err)
+
+        })
 })
 
 const postProcessCss = (options) => (css) => new Promise((resolve) => {
@@ -88,7 +89,7 @@ const postProcessCss = (options) => (css) => new Promise((resolve) => {
 })
 
 const cleanTempDir = (folder) => {
-    fs.rmdir(folder, {recursive: true}, () => {})
+    fs.rm(folder, {recursive: true}, () => {})
 }
 
 
