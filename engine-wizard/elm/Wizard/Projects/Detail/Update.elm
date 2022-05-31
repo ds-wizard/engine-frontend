@@ -66,7 +66,7 @@ fetchSubrouteData appState model =
 
                 PlanDetailRoute.Metrics ->
                     Cmd.map SummaryReportMsg <|
-                        SummaryReport.fetchData2 appState uuid
+                        SummaryReport.fetchData appState uuid
 
                 PlanDetailRoute.Documents _ ->
                     Cmd.map DocumentsMsg <|
@@ -357,19 +357,14 @@ update wrapMsg msg appState model =
                 )
 
         SummaryReportMsg summaryReportMsg ->
-            case model.questionnaireModel of
-                Success qm ->
-                    let
-                        ( summaryReportModel, summaryReportCmd ) =
-                            SummaryReport.update summaryReportMsg appState { questionnaire = qm.questionnaire } model.summaryReportModel
-                    in
-                    withSeed <|
-                        ( { model | summaryReportModel = summaryReportModel }
-                        , Cmd.map (wrapMsg << SummaryReportMsg) summaryReportCmd
-                        )
-
-                _ ->
-                    withSeed ( model, Cmd.none )
+            let
+                ( summaryReportModel, summaryReportCmd ) =
+                    SummaryReport.update summaryReportMsg appState model.summaryReportModel
+            in
+            withSeed <|
+                ( { model | summaryReportModel = summaryReportModel }
+                , Cmd.map (wrapMsg << SummaryReportMsg) summaryReportCmd
+                )
 
         DocumentsMsg documentsMsg ->
             case model.questionnaireModel of

@@ -6,7 +6,6 @@ port module Wizard.Ports exposing
     , clearUnloadMessage
     , consoleError
     , createDropzone
-    , drawMetricsChart
     , fileContentRead
     , fileSelected
     , gotIntegrationWidgetValue
@@ -82,13 +81,6 @@ port alert : String -> Cmd msg
 
 
 port refresh : () -> Cmd msg
-
-
-
--- Charts
-
-
-port drawMetricsChart : E.Value -> Cmd msg
 
 
 
