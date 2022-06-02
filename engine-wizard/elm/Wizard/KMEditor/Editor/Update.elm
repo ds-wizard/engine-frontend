@@ -1,4 +1,4 @@
-module Wizard.KMEditor.Editor.Update exposing (fetchData, onUnload, update)
+module Wizard.KMEditor.Editor.Update exposing (fetchData, isGuarded, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
 import List.Extra as List
@@ -11,7 +11,7 @@ import Shared.Data.WebSockets.ClientBranchAction as ClientBranchAction
 import Shared.Data.WebSockets.ServerBranchAction as ServerBranchAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError
-import Shared.Locale exposing (lg)
+import Shared.Locale exposing (l, lg)
 import Shared.Utils exposing (dispatch, getUuid, getUuidString)
 import Shared.WebSocket as WebSocket
 import Uuid exposing (Uuid)
@@ -32,6 +32,11 @@ import Wizard.Ports as Ports
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing exposing (cmdNavigate)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.KMEditor.Editor.Update"
 
 
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
@@ -67,6 +72,15 @@ fetchSubrouteDataFromAfter wrapMsg appState model =
 
         _ ->
             ( model, Cmd.none )
+
+
+isGuarded : AppState -> Model -> Maybe String
+isGuarded appState model =
+    if List.isEmpty model.savingActionUuids then
+        Nothing
+
+    else
+        Just (l_ "unloadMessage" appState)
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
@@ -239,6 +253,9 @@ update wrapMsg msg appState model =
                 newBranchModel =
                     ActionResult.map (EditorBranch.applyEvent True event) model.branchModel
 
+                setUnloadMessageCmd =
+                    Ports.setUnloadMessage (l_ "unloadMessage" appState)
+
                 navigateCmd =
                     getNavigateCmd appState model.uuid model.branchModel newBranchModel
             in
@@ -247,7 +264,7 @@ update wrapMsg msg appState model =
                 | branchModel = newBranchModel
                 , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
               }
-            , Cmd.batch [ wsCmd, navigateCmd ]
+            , Cmd.batch [ wsCmd, setUnloadMessageCmd, navigateCmd ]
             )
 
 
@@ -266,12 +283,19 @@ handleWebSocketMsg websocketMsg appState model =
                     else
                         newModel
 
+                clearUnloadMessageCmd =
+                    if removed && List.isEmpty newModel2.savingActionUuids then
+                        Ports.clearUnloadMessage ()
+
+                    else
+                        Cmd.none
+
                 navigateCmd =
                     getNavigateCmd appState model.uuid model.branchModel newModel2.branchModel
             in
             ( appState.seed
             , newModel2
-            , navigateCmd
+            , Cmd.batch [ clearUnloadMessageCmd, navigateCmd ]
             )
     in
     case WebSocket.receive ServerBranchAction.decoder websocketMsg model.websocket of
