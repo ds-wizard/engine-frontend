@@ -1,4 +1,4 @@
-module Wizard.KMEditor.Update exposing (fetchData, onUnload, update)
+module Wizard.KMEditor.Update exposing (fetchData, isGuarded, onUnload, update)
 
 import Random exposing (Seed)
 import Wizard.Common.AppState exposing (AppState)
@@ -36,6 +36,16 @@ fetchData route model appState =
         PublishRoute uuid ->
             Cmd.map PublishMsg <|
                 Wizard.KMEditor.Publish.Update.fetchData uuid appState
+
+
+isGuarded : Route -> AppState -> Model -> Maybe String
+isGuarded route appState model =
+    case route of
+        EditorRoute _ _ ->
+            Wizard.KMEditor.Editor.Update.isGuarded appState model.editorModel
+
+        _ ->
+            Nothing
 
 
 onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Msg

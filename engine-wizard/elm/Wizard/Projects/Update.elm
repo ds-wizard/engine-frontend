@@ -1,5 +1,6 @@
 module Wizard.Projects.Update exposing
     ( fetchData
+    , isGuarded
     , onUnload
     , update
     )
@@ -40,6 +41,16 @@ fetchData route appState model =
         MigrationRoute uuid ->
             Cmd.map MigrationMsg <|
                 Wizard.Projects.Migration.Update.fetchData appState uuid
+
+
+isGuarded : Route -> AppState -> Model -> Maybe String
+isGuarded route appState model =
+    case route of
+        DetailRoute _ _ ->
+            Wizard.Projects.Detail.Update.isGuarded appState model.detailModel
+
+        _ ->
+            Nothing
 
 
 onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Msg

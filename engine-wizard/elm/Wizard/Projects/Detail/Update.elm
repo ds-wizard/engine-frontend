@@ -1,4 +1,4 @@
-module Wizard.Projects.Detail.Update exposing (fetchData, onUnload, update)
+module Wizard.Projects.Detail.Update exposing (fetchData, isGuarded, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
@@ -15,7 +15,7 @@ import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAc
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
-import Shared.Locale exposing (lg)
+import Shared.Locale exposing (l, lg)
 import Shared.Utils exposing (dispatch, getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
@@ -41,6 +41,11 @@ import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing as Routing exposing (cmdNavigate)
+
+
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.Projects.Detail.Update"
 
 
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
@@ -91,6 +96,15 @@ fetchSubrouteDataFromAfter wrapMsg appState model =
 
         _ ->
             ( model, Cmd.none )
+
+
+isGuarded : AppState -> Model -> Maybe String
+isGuarded appState model =
+    if List.isEmpty model.savingActionUuids then
+        Nothing
+
+    else
+        Just (l_ "unloadMessage" appState)
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
@@ -162,13 +176,16 @@ update wrapMsg msg appState model =
                         updatedModel =
                             { applyActionModel | questionnaireModel = updatedQuestionnaireModel }
 
-                        cmd =
+                        wsCmd =
                             event
                                 |> ClientQuestionnaireAction.SetContent
                                 |> ClientQuestionnaireAction.encode
                                 |> WebSocket.send model.websocket
+
+                        setUnloadMessageCmd =
+                            Ports.setUnloadMessage (l_ "unloadMessage" appState)
                     in
-                    ( applyActionSeed, updatedModel, cmd )
+                    ( applyActionSeed, updatedModel, Cmd.batch [ wsCmd, setUnloadMessageCmd ] )
 
                 createdAt =
                     appState.currentTime
@@ -632,10 +649,17 @@ handleWebsocketMsg websocketMsg appState model =
 
                     else
                         newModel
+
+                clearUnloadMessageCmd =
+                    if removed && List.isEmpty newModel2.savingActionUuids then
+                        Ports.clearUnloadMessage ()
+
+                    else
+                        Cmd.none
             in
             ( appState.seed
             , newModel2
-            , Cmd.none
+            , clearUnloadMessageCmd
             )
     in
     case WebSocket.receive ServerQuestionnaireAction.decoder websocketMsg model.websocket of

@@ -90,8 +90,16 @@ fetchData model =
 
 
 isGuarded : Model -> Maybe String
-isGuarded _ =
-    Nothing
+isGuarded model =
+    case model.appState.route of
+        Routes.KMEditorRoute route ->
+            Wizard.KMEditor.Update.isGuarded route model.appState model.kmEditorModel
+
+        Routes.ProjectsRoute route ->
+            Wizard.Projects.Update.isGuarded route model.appState model.projectsModel
+
+        _ ->
+            Nothing
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
