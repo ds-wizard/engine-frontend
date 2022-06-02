@@ -1,4 +1,4 @@
-module Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator(..), fromString, queryParser, toString, toUrlParam)
+module Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator(..), queryParser, toString, toUrlParam)
 
 import Url.Parser.Query as Query
 

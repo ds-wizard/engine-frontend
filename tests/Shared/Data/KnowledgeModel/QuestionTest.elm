@@ -3,7 +3,7 @@ module Shared.Data.KnowledgeModel.QuestionTest exposing (questionDecoderTest)
 import Dict
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder, parametrized)
 
 

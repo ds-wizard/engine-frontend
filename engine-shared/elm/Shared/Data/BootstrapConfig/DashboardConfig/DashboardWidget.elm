@@ -1,6 +1,5 @@
 module Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing
     ( DashboardWidget(..)
-    , decoder
     , dictDecoder
     , encode
     )

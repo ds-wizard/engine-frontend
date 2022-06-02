@@ -7,7 +7,6 @@ import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.Prefab exposing (Prefab)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.WebSocket as WebSocket
-import Time
 import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
@@ -20,7 +19,7 @@ type Msg
     = GetBranchComplete (Result ApiError BranchDetail)
     | GetIntegrationPrefabsComplete (Result ApiError (List (Prefab Integration)))
     | WebSocketMsg WebSocket.RawMsg
-    | WebSocketPing Time.Posix
+    | WebSocketPing
     | OnlineUserMsg Int OnlineUser.Msg
     | SavingMsg ProjectSaving.Msg
     | Refresh

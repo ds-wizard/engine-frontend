@@ -1,5 +1,6 @@
 module Wizard.Users.Common.UserEditForm exposing
-    ( UserEditForm
+    ( SubmissionProps
+    , UserEditForm
     , encode
     , init
     , initEmpty

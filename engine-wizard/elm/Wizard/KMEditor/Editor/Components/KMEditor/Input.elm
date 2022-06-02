@@ -1,9 +1,12 @@
 module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     ( AnnotationsInputConfig
     , CheckboxInputConfig
+    , ColorInputConfig
+    , HeadersInputConfig
     , InputConfig
     , MarkdownInputConfig
     , MetricsInputConfig
+    , PropsInputConfig
     , ReorderableInputConfig
     , SelectInputConfig
     , TagsInputConfig

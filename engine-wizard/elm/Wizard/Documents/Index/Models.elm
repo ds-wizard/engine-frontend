@@ -1,7 +1,6 @@
 module Wizard.Documents.Index.Models exposing (Model, addDocumentSubmission, anyDocumentInProgress, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import List.Extra as List
 import Shared.Data.Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)

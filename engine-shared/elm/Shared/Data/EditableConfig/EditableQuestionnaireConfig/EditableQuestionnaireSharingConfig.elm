@@ -1,7 +1,6 @@
 module Shared.Data.EditableConfig.EditableQuestionnaireConfig.EditableQuestionnaireSharingConfig exposing
     ( EditableQuestionnaireSharingConfig
     , decoder
-    , default
     , encode
     )
 
@@ -33,11 +32,3 @@ encode config =
         , ( "defaultValue", QuestionnaireSharing.encode config.defaultValue )
         , ( "anonymousEnabled", E.bool config.anonymousEnabled )
         ]
-
-
-default : EditableQuestionnaireSharingConfig
-default =
-    { enabled = True
-    , defaultValue = QuestionnaireSharing.RestrictedQuestionnaire
-    , anonymousEnabled = False
-    }

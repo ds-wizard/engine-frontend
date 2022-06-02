@@ -5,7 +5,6 @@ module Wizard.Registry.Models exposing
     )
 
 import Wizard.Registry.RegistrySignupConfirmation.Models
-import Wizard.Registry.Routes exposing (Route(..))
 
 
 type alias Model =
@@ -19,8 +18,6 @@ initialModel =
     }
 
 
-initLocalModel : Route -> Model -> Model
-initLocalModel route model =
-    case route of
-        RegistrySignupConfirmationRoute _ _ ->
-            { model | registrySignupConfirmationModel = Wizard.Registry.RegistrySignupConfirmation.Models.initialModel }
+initLocalModel : Model -> Model
+initLocalModel model =
+    { model | registrySignupConfirmationModel = Wizard.Registry.RegistrySignupConfirmation.Models.initialModel }

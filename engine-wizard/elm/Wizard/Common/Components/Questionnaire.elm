@@ -1,9 +1,13 @@
 module Wizard.Common.Components.Questionnaire exposing
     ( ActivePage(..)
+    , Config
     , Context
+    , FeaturesConfig
     , Model
     , Msg(..)
     , QuestionnaireRenderer
+    , RightPanel
+    , TypeHints
     , addComment
     , clearReply
     , deleteComment
@@ -638,26 +642,27 @@ handleShowTypeHints appState ctx model path emptySearch questionUuid value =
 handleTypeHintsInput : Model -> List String -> Bool -> Reply -> ( Model, Cmd Msg )
 handleTypeHintsInput model path emptySearch reply =
     let
-        questionUuid =
-            Maybe.withDefault "" (List.last path)
-
-        updatedTypeHints =
-            case model.typeHints of
-                Just typehints ->
-                    Just typehints
-
-                Nothing ->
-                    Just
-                        { path = path
-                        , hints = Loading
-                        }
-
         ( ( debounce, debounceCmd ), newTypeHints ) =
             case ( emptySearch, reply.value ) of
                 ( False, IntegrationReply (PlainType "") ) ->
                     ( ( model.typeHintsDebounce, Cmd.none ), Nothing )
 
                 _ ->
+                    let
+                        questionUuid =
+                            Maybe.withDefault "" (List.last path)
+
+                        updatedTypeHints =
+                            case model.typeHints of
+                                Just typehints ->
+                                    Just typehints
+
+                                Nothing ->
+                                    Just
+                                        { path = path
+                                        , hints = Loading
+                                        }
+                    in
                     ( Debounce.push
                         debounceConfig
                         ( path, questionUuid, ReplyValue.getStringReply reply.value )
@@ -1026,17 +1031,18 @@ viewQuestionnaireLeftPanel appState cfg model =
 viewQuestionnaireLeftPanelPhaseSelection : AppState -> Config msg -> Model -> Html Msg
 viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
     let
-        selectAttrs =
-            if cfg.features.readonly then
-                [ disabled True ]
-
-            else
-                [ onInput SetPhase ]
-
         phases =
             KnowledgeModel.getPhases model.questionnaire.knowledgeModel
     in
     if List.length phases > 0 then
+        let
+            selectAttrs =
+                if cfg.features.readonly then
+                    [ disabled True ]
+
+                else
+                    [ onInput SetPhase ]
+        in
         div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ lgx "questionnaire.currentPhase" appState ]
             , select (class "form-control" :: selectAttrs)
@@ -1544,15 +1550,16 @@ viewCommentHeader appState model path commentThread index comment =
                 |> listInsertIf editAction editActionVisible
                 |> listInsertIf deleteAction deleteActionVisible
 
-        dropdownState =
-            Dict.get (Uuid.toString comment.uuid) model.commentDropdownStates
-                |> Maybe.withDefault Dropdown.initialState
-
         dropdown =
             if List.isEmpty actions then
                 emptyNode
 
             else
+                let
+                    dropdownState =
+                        Dict.get (Uuid.toString comment.uuid) model.commentDropdownStates
+                            |> Maybe.withDefault Dropdown.initialState
+                in
                 Dropdown.dropdown dropdownState
                     { options = [ Dropdown.attrs [ class "ListingDropdown", dataCy "comments_comment_menu" ], Dropdown.alignMenuRight ]
                     , toggleMsg = CommentDropdownMsg (Uuid.toString comment.uuid)
@@ -2151,17 +2158,18 @@ viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationDat
 viewQuestionIntegrationApi : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiIntegrationData -> Question -> Html Msg
 viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiIntegrationData question =
     let
-        questionValue =
-            Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
-
-        onFocusHandler =
-            [ onFocus (ShowTypeHints path apiIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
-
         extraArgs =
             if cfg.features.readonly then
                 [ disabled True ]
 
             else
+                let
+                    questionValue =
+                        Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
+
+                    onFocusHandler =
+                        [ onFocus (ShowTypeHints path apiIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
+                in
                 [ onInput (TypeHintInput path apiIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
                 , onBlur HideTypeHints
                 ]
@@ -2362,38 +2370,30 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
 
 viewCommentAction : AppState -> Config msg -> Model -> List String -> Html Msg
 viewCommentAction appState cfg model path =
-    let
-        pathString =
-            pathToString path
+    if cfg.features.commentsEnabled && Feature.projectCommentAdd appState model.questionnaire then
+        let
+            pathString =
+                pathToString path
 
-        msg =
-            if isOpen then
-                SetRightPanel RightPanelNone
+            commentCount =
+                QuestionnaireDetail.getCommentCount pathString model.questionnaire
 
-            else
-                SetRightPanel (RightPanelComments pathString)
+            isOpen =
+                case model.rightPanel of
+                    RightPanelComments rightPanelPath ->
+                        rightPanelPath == pathString
 
-        commentCount =
-            QuestionnaireDetail.getCommentCount pathString model.questionnaire
+                    _ ->
+                        False
 
-        commentButton =
-            a
-                [ class "action"
-                , classList [ ( "action-comments-open", isOpen ) ]
-                , onClick msg
-                , dataCy "questionnaire_question-action_comment"
-                ]
-                [ faSet "questionnaire.comments" appState ]
+            msg =
+                if isOpen then
+                    SetRightPanel RightPanelNone
 
-        isOpen =
-            case model.rightPanel of
-                RightPanelComments rightPanelPath ->
-                    rightPanelPath == pathString
-
-                _ ->
-                    False
-
-        commentButtonWithComments =
+                else
+                    SetRightPanel (RightPanelComments pathString)
+        in
+        if commentCount > 0 then
             a
                 [ class "action action-comments"
                 , classList [ ( "action-comments-open", isOpen ) ]
@@ -2403,13 +2403,15 @@ viewCommentAction appState cfg model path =
                 [ faSet "questionnaire.comments" appState
                 , text <| String.fromInt commentCount ++ " comments"
                 ]
-    in
-    if cfg.features.commentsEnabled && Feature.projectCommentAdd appState model.questionnaire then
-        if commentCount > 0 then
-            commentButtonWithComments
 
         else
-            commentButton
+            a
+                [ class "action"
+                , classList [ ( "action-comments-open", isOpen ) ]
+                , onClick msg
+                , dataCy "questionnaire_question-action_comment"
+                ]
+                [ faSet "questionnaire.comments" appState ]
 
     else
         emptyNode
@@ -2417,16 +2419,17 @@ viewCommentAction appState cfg model path =
 
 viewTodoAction : AppState -> Config msg -> Model -> List String -> Html Msg
 viewTodoAction appState cfg model path =
-    let
-        currentPath =
-            pathToString path
+    if cfg.features.todosEnabled then
+        let
+            currentPath =
+                pathToString path
 
-        hasTodo =
-            model.questionnaire.labels
-                |> Dict.get currentPath
-                |> Maybe.unwrap False (List.member QuestionnaireDetail.todoUuid)
-
-        todoButton =
+            hasTodo =
+                model.questionnaire.labels
+                    |> Dict.get currentPath
+                    |> Maybe.unwrap False (List.member QuestionnaireDetail.todoUuid)
+        in
+        if hasTodo then
             span [ class "action action-todo" ]
                 [ span [] [ lx_ "todoAction.todo" appState ]
                 , a
@@ -2436,7 +2439,7 @@ viewTodoAction appState cfg model path =
                     [ faSet "_global.remove" appState ]
                 ]
 
-        addTodoButton =
+        else
             a
                 [ class "action action-add-todo"
                 , onClick <| SetLabels currentPath [ QuestionnaireDetail.todoUuid ]
@@ -2444,13 +2447,6 @@ viewTodoAction appState cfg model path =
                 [ faSet "_global.add" appState
                 , span [] [ span [] [ lx_ "todoAction.add" appState ] ]
                 ]
-    in
-    if cfg.features.todosEnabled then
-        if hasTodo then
-            todoButton
-
-        else
-            addTodoButton
 
     else
         emptyNode
@@ -2459,13 +2455,14 @@ viewTodoAction appState cfg model path =
 viewFeedbackAction : AppState -> Config msg -> Model -> Question -> Html Msg
 viewFeedbackAction appState cfg model question =
     let
-        openFeedbackModal =
-            FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.package.id (Question.getUuid question))
-
         feedbackEnabled =
             appState.config.questionnaire.feedback.enabled && cfg.features.feedbackEnabled
     in
     if feedbackEnabled then
+        let
+            openFeedbackModal =
+                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.package.id (Question.getUuid question))
+        in
         a
             [ class "action"
             , attribute "data-cy" "feedback"

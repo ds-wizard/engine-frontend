@@ -1,8 +1,7 @@
-module Shared.Data.KnowledgeModel.ChoiceTest exposing (..)
+module Shared.Data.KnowledgeModel.ChoiceTest exposing (choiceDecoderTest)
 
-import Dict
 import Shared.Data.KnowledgeModel.Choice as Choice
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

@@ -1,6 +1,7 @@
 module Wizard.Projects.Detail.Components.ShareModal exposing
     ( Model
     , Msg
+    , UpdateConfig
     , init
     , openMsg
     , subscriptions
@@ -316,15 +317,16 @@ userView appState users form i =
 
         mbUser =
             List.find (.uuid >> Uuid.toString >> Just >> (==) memberUuid) users
-
-        roleOptions =
-            QuestionnaireEditFormMemberPerms.formOptions appState
-
-        roleSelect =
-            FormExtra.inlineSelect roleOptions form ("permissions." ++ String.fromInt i ++ ".perms")
     in
     case mbUser of
         Just user ->
+            let
+                roleOptions =
+                    QuestionnaireEditFormMemberPerms.formOptions appState
+
+                roleSelect =
+                    FormExtra.inlineSelect roleOptions form ("permissions." ++ String.fromInt i ++ ".perms")
+            in
             div [ class "user-row" ]
                 [ div []
                     [ UserIcon.viewSmall user
@@ -348,28 +350,29 @@ userView appState users form i =
 formView : AppState -> Uuid -> Form FormError QuestionnaireEditForm -> Html Msg
 formView appState questionnaireUuid form =
     let
-        visibilityEnabled =
-            Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" form).value
-
-        visibilityEnabledInput =
-            FormGroup.toggle form "visibilityEnabled" (lg "questionnaire.visibility" appState)
-
-        visibilityPermissionInput =
-            div
-                [ class "form-group form-group-toggle-extra"
-                , classList [ ( "visible", visibilityEnabled ) ]
-                ]
-                (lgh "questionnaire.visibilityPermission" [ visibilitySelect ] appState)
-
-        visibilitySelect =
-            if (Form.getFieldAsString "sharingPermission" form).value == Just "edit" then
-                strong [] [ lgx "questionnairePermission.edit" appState ]
-
-            else
-                FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "visibilityPermission"
-
         visibilityInputs =
             if appState.config.questionnaire.questionnaireVisibility.enabled then
+                let
+                    visibilitySelect =
+                        if (Form.getFieldAsString "sharingPermission" form).value == Just "edit" then
+                            strong [] [ lgx "questionnairePermission.edit" appState ]
+
+                        else
+                            FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "visibilityPermission"
+
+                    visibilityEnabled =
+                        Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" form).value
+
+                    visibilityPermissionInput =
+                        div
+                            [ class "form-group form-group-toggle-extra"
+                            , classList [ ( "visible", visibilityEnabled ) ]
+                            ]
+                            (lgh "questionnaire.visibilityPermission" [ visibilitySelect ] appState)
+
+                    visibilityEnabledInput =
+                        FormGroup.toggle form "visibilityEnabled" (lg "questionnaire.visibility" appState)
+                in
                 [ Html.map FormMsg visibilityEnabledInput
                 , Html.map FormMsg visibilityPermissionInput
                 ]
@@ -377,38 +380,39 @@ formView appState questionnaireUuid form =
             else
                 []
 
-        sharingEnabled =
-            Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
-
-        sharingEnabledInput =
-            FormGroup.toggle form "sharingEnabled" (lg "questionnaire.sharing" appState)
-
-        sharingPermissionInput =
-            div
-                [ class "form-group form-group-toggle-extra"
-                , classList [ ( "visible", sharingEnabled ) ]
-                ]
-                (lgh "questionnaire.sharingPermission" [ sharingSelect ] appState)
-
-        sharingSelect =
-            FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "sharingPermission"
-
-        publicLink =
-            appState.clientUrl ++ Routing.toUrl appState (Routes.ProjectsRoute (Routes.DetailRoute questionnaireUuid ProjectDetailRoute.Questionnaire))
-
-        publicLinkView =
-            div
-                [ class "form-group form-group-toggle-extra"
-                , classList [ ( "visible", sharingEnabled ) ]
-                ]
-                [ div [ class "d-flex" ]
-                    [ input [ readonly True, class "form-control", id "public-link", value publicLink ] []
-                    , button [ class "btn btn-link", onClick (CopyPublicLink publicLink) ] [ lx_ "copyLink" appState ]
-                    ]
-                ]
-
         sharingInputs =
             if appState.config.questionnaire.questionnaireSharing.enabled then
+                let
+                    publicLink =
+                        appState.clientUrl ++ Routing.toUrl appState (Routes.ProjectsRoute (Routes.DetailRoute questionnaireUuid ProjectDetailRoute.Questionnaire))
+
+                    sharingEnabled =
+                        Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
+
+                    publicLinkView =
+                        div
+                            [ class "form-group form-group-toggle-extra"
+                            , classList [ ( "visible", sharingEnabled ) ]
+                            ]
+                            [ div [ class "d-flex" ]
+                                [ input [ readonly True, class "form-control", id "public-link", value publicLink ] []
+                                , button [ class "btn btn-link", onClick (CopyPublicLink publicLink) ] [ lx_ "copyLink" appState ]
+                                ]
+                            ]
+
+                    sharingSelect =
+                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "sharingPermission"
+
+                    sharingPermissionInput =
+                        div
+                            [ class "form-group form-group-toggle-extra"
+                            , classList [ ( "visible", sharingEnabled ) ]
+                            ]
+                            (lgh "questionnaire.sharingPermission" [ sharingSelect ] appState)
+
+                    sharingEnabledInput =
+                        FormGroup.toggle form "sharingEnabled" (lg "questionnaire.sharing" appState)
+                in
                 [ Html.map FormMsg sharingEnabledInput
                 , Html.map FormMsg sharingPermissionInput
                 , publicLinkView

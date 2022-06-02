@@ -170,20 +170,17 @@ viewChapterReport appState ctx chapterReport =
 viewMetrics : AppState -> Context -> List MetricReport -> ChartJS.Data -> Html Msg
 viewMetrics appState ctx metricReports chartData =
     let
-        metrics =
-            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
-
         content =
             if List.length metricReports == 0 then
                 []
 
             else if List.length metricReports > 2 then
-                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState metrics metricReports ]
+                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState ctx metricReports ]
                 , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart chartData ]
                 ]
 
             else
-                [ div [ class "col-12" ] [ viewMetricsTable appState metrics metricReports ] ]
+                [ div [ class "col-12" ] [ viewMetricsTable appState ctx metricReports ] ]
     in
     div [ class "row" ] content
 
@@ -221,8 +218,12 @@ viewAnsweredIndication appState title data =
         ]
 
 
-viewMetricsTable : AppState -> List Metric -> List MetricReport -> Html Msg
-viewMetricsTable appState metrics metricReports =
+viewMetricsTable : AppState -> Context -> List MetricReport -> Html Msg
+viewMetricsTable appState ctx metricReports =
+    let
+        metrics =
+            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+    in
     table [ class "table table-metrics-report" ]
         [ thead []
             [ tr []

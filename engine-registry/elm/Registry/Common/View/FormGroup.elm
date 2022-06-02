@@ -1,18 +1,12 @@
 module Registry.Common.View.FormGroup exposing
-    ( codeView
-    , formGroup
-    , getErrors
-    , input
+    ( input
     , password
-    , select
-    , textView
     , textarea
-    , toggle
     )
 
-import Form exposing (Form, InputType(..), Msg(..))
+import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, code, div, label, p, span, text)
+import Html exposing (Html, div, label, p, text)
 import Html.Attributes exposing (class, for, id, name)
 import Registry.Common.AppState exposing (AppState)
 import Shared.Form exposing (errorToString)
@@ -34,34 +28,11 @@ password =
     formGroup Input.passwordInput []
 
 
-{-| Helper for creating form group with select field.
--}
-select : AppState -> List ( String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
-select appState options =
-    formGroup (Input.selectInput options) [] appState
-
-
 {-| Helper for creating form group with textarea.
 -}
 textarea : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 textarea =
     formGroup Input.textArea []
-
-
-{-| Helper for creating form group with toggle
--}
-toggle : Form FormError o -> String -> String -> Html Form.Msg
-toggle form fieldName labelText =
-    let
-        field =
-            Form.getFieldAsBool fieldName form
-    in
-    div [ class "form-check" ]
-        [ label [ class "form-check-label form-check-toggle" ]
-            [ Input.checkboxInput field [ class "form-check-input" ]
-            , span [] [ text labelText ]
-            ]
-        ]
 
 
 {-| Create Html for a form field using the given input field.
@@ -79,33 +50,6 @@ formGroup inputFn attrs appState form fieldName labelText =
         [ label [ for fieldName ] [ text labelText ]
         , inputFn field (attrs ++ [ class <| "form-control " ++ errorClass, id fieldName, name fieldName ])
         , error
-        ]
-
-
-{-| Helper for creating plain group with text value.
--}
-textView : String -> String -> Html.Html msg
-textView value =
-    plainGroup <|
-        p [ class "form-value" ] [ text value ]
-
-
-{-| Helper for creating plain group with code block.
--}
-codeView : String -> String -> Html.Html msg
-codeView value =
-    plainGroup <|
-        code [] [ text value ]
-
-
-{-| Plain group is same Html as formGroup but without any input fields. It only
-shows label with read only Html value.
--}
-plainGroup : Html.Html msg -> String -> Html.Html msg
-plainGroup valueHtml labelText =
-    div [ class "form-group" ]
-        [ label [ class "control-label" ] [ text labelText ]
-        , valueHtml
         ]
 
 

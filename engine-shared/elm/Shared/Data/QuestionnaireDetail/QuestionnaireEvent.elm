@@ -8,8 +8,6 @@ module Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing
     , getQuestionUuid
     , getUuid
     , isInvisible
-    , isSetLabels
-    , isSetReplyList
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -102,40 +100,12 @@ encode =
         DeleteCommentData.encode
 
 
-isSetLabels : QuestionnaireEvent -> Bool
-isSetLabels event =
-    case event of
-        SetLabels _ ->
-            True
-
-        _ ->
-            False
-
-
-isSetReplyList : QuestionnaireEvent -> Bool
-isSetReplyList event =
-    case event of
-        SetReply data ->
-            case data.value of
-                ItemListReply _ ->
-                    True
-
-                _ ->
-                    False
-
-        _ ->
-            False
-
-
 isInvisible : QuestionnaireEvent -> Bool
 isInvisible event =
     case event of
         SetReply data ->
             case data.value of
                 ItemListReply _ ->
-                    True
-
-                EmptyReply ->
                     True
 
                 _ ->

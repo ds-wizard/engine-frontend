@@ -1,5 +1,6 @@
 module Shared.Api.Apps exposing
-    ( deletePlan
+    ( GetAppsFilters
+    , deletePlan
     , getApp
     , getApps
     , getCurrentPlans

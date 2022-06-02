@@ -1,5 +1,8 @@
 module Wizard.KMEditor.Editor.Components.KMEditor exposing
-    ( Model
+    ( DeleteModalState
+    , EventMsg
+    , Model
+    , MoveModalState
     , Msg(..)
     , closeAllModals
     , initialModel

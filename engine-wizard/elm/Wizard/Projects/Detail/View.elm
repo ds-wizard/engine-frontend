@@ -243,7 +243,7 @@ viewProjectNavigationNav appState route model qm =
             , label = l_ "nav.preview" appState
             , icon = fa "fa far fa-eye"
             , isActive = route == ProjectDetailRoute.Preview
-            , isVisible = Features.projectMetrics appState questionnaire
+            , isVisible = Features.projectPreview appState questionnaire
             , dataCy = "project_nav_preview"
             }
 
@@ -283,14 +283,8 @@ viewProjectNavigationNav appState route model qm =
 viewProjectContent : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
 viewProjectContent appState route model qm =
     let
-        isOwner =
-            QuestionnaireDetail.isOwner appState qm.questionnaire
-
         isEditable =
             QuestionnaireDetail.isEditor appState qm.questionnaire
-
-        isMigrating =
-            QuestionnaireDetail.isMigrating qm.questionnaire
 
         isAuthenticated =
             Session.exists appState.session
@@ -300,6 +294,10 @@ viewProjectContent appState route model qm =
     in
     case route of
         ProjectDetailRoute.Questionnaire ->
+            let
+                isMigrating =
+                    QuestionnaireDetail.isMigrating qm.questionnaire
+            in
             Questionnaire.view appState
                 { features =
                     { feedbackEnabled = True
@@ -342,6 +340,10 @@ viewProjectContent appState route model qm =
                 forbiddenPage
 
         ProjectDetailRoute.Settings ->
+            let
+                isOwner =
+                    QuestionnaireDetail.isOwner appState qm.questionnaire
+            in
             if isOwner && isAuthenticated then
                 Html.map SettingsMsg <|
                     Settings.view appState

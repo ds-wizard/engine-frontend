@@ -2,7 +2,6 @@ module Wizard.Common.Api exposing
     ( applyResult
     , applyResultCmd
     , applyResultTransform
-    , applyResultTransformCmd
     , getResultCmd
     )
 

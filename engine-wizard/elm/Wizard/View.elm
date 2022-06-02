@@ -51,9 +51,9 @@ view model =
                     |> Html.map DashboardMsg
                     |> Layout.app model
 
-            Routes.DocumentsRoute route ->
+            Routes.DocumentsRoute _ ->
                 model.documentsModel
-                    |> Wizard.Documents.View.view route model.appState
+                    |> Wizard.Documents.View.view model.appState
                     |> Html.map DocumentsMsg
                     |> Layout.app model
 

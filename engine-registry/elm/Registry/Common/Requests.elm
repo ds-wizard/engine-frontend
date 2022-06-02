@@ -1,5 +1,6 @@
 module Registry.Common.Requests exposing
-    ( getOrganization
+    ( ToMsg
+    , getOrganization
     , getPackage
     , getPackages
     , getTemplate
@@ -254,8 +255,8 @@ expectWhatever toMsg =
 resolve : (String -> Result String a) -> Http.Response String -> Result ApiError a
 resolve toResult response =
     case response of
-        Http.BadUrl_ url ->
-            Err (BadUrl url)
+        Http.BadUrl_ _ ->
+            Err OtherError
 
         Http.Timeout_ ->
             Err Timeout
@@ -267,4 +268,4 @@ resolve toResult response =
             Err (BadStatus metadata.statusCode body)
 
         Http.GoodStatus_ _ body ->
-            Result.mapError BadBody (toResult body)
+            Result.mapError (always OtherError) (toResult body)

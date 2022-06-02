@@ -1,7 +1,6 @@
 module Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing
     ( URLReferenceData
     , decoder
-    , new
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -14,15 +13,6 @@ type alias URLReferenceData =
     , url : String
     , label : String
     , annotations : List Annotation
-    }
-
-
-new : String -> URLReferenceData
-new uuid =
-    { uuid = uuid
-    , url = "http://example.com"
-    , label = "See also"
-    , annotations = []
     }
 
 

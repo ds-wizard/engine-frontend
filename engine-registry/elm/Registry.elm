@@ -1,4 +1,4 @@
-module Registry exposing (main)
+module Registry exposing (Model, Msg, PageModel, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav

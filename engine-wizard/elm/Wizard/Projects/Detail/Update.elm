@@ -463,31 +463,8 @@ update wrapMsg msg appState model =
         WebSocketMsg wsMsg ->
             handleWebsocketMsg wsMsg appState model
 
-        WebSocketPing _ ->
+        WebSocketPing ->
             withSeed ( model, WebSocket.ping model.websocket )
-
-        ScrollToTodo todo ->
-            case model.questionnaireModel of
-                Success questionnaireModel ->
-                    let
-                        newQuestionnaireModel =
-                            Questionnaire.setActiveChapterUuid todo.chapter.uuid questionnaireModel
-
-                        selector =
-                            "[data-path=\"" ++ todo.path ++ "\"]"
-                    in
-                    ( appState.seed
-                    , { model
-                        | questionnaireModel = Success newQuestionnaireModel
-                      }
-                    , Cmd.batch
-                        [ cmdNavigate appState (Routes.projectsDetailQuestionnaire model.uuid)
-                        , Ports.scrollIntoView selector
-                        ]
-                    )
-
-                _ ->
-                    ( appState.seed, model, Cmd.none )
 
         OnlineUserMsg index ouMsg ->
             withSeed <| handleOnlineUserMsg index ouMsg model

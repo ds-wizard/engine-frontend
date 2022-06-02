@@ -1,7 +1,6 @@
 module Shared.Data.KnowledgeModel.Question.MultiChoiceQuestionData exposing
     ( MultiChoiceQuestionData
     , decoder
-    , new
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -16,9 +15,3 @@ decoder : Decoder MultiChoiceQuestionData
 decoder =
     D.succeed MultiChoiceQuestionData
         |> D.required "choiceUuids" (D.list D.string)
-
-
-new : MultiChoiceQuestionData
-new =
-    { choiceUuids = []
-    }

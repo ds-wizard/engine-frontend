@@ -1,6 +1,5 @@
 module Shared.Data.Branch exposing
     ( Branch
-    , compare
     , decoder
     , matchState
     )
@@ -39,8 +38,3 @@ decoder =
 matchState : List BranchState -> Branch -> Bool
 matchState states branch =
     List.any ((==) branch.state) states
-
-
-compare : Branch -> Branch -> Order
-compare b1 b2 =
-    Basics.compare (String.toLower b1.name) (String.toLower b2.name)

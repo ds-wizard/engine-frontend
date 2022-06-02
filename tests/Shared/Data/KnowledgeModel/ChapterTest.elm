@@ -1,8 +1,7 @@
 module Shared.Data.KnowledgeModel.ChapterTest exposing (chapterDecoderTest)
 
-import Dict
 import Shared.Data.KnowledgeModel.Chapter as Chapter
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

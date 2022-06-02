@@ -1,5 +1,7 @@
 module Shared.Data.QuestionnaireDetail exposing
-    ( QuestionnaireDetail
+    ( QuestionCommentInfo
+    , QuestionnaireDetail
+    , QuestionnaireWarning
     , addComment
     , calculateUnansweredQuestionsForChapter
     , canComment
@@ -10,7 +12,6 @@ module Shared.Data.QuestionnaireDetail exposing
     , deleteComment
     , deleteCommentThread
     , editComment
-    , encode
     , getCommentCount
     , getComments
     , getTodos
@@ -23,7 +24,6 @@ module Shared.Data.QuestionnaireDetail exposing
     , isMigrating
     , isOwner
     , isVersion
-    , lastVisibleEvent
     , reopenCommentThread
     , resolveCommentThread
     , setLabels
@@ -38,8 +38,6 @@ module Shared.Data.QuestionnaireDetail exposing
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Json.Encode as E
-import Json.Encode.Extra as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Regex
@@ -123,14 +121,6 @@ decoder =
         |> D.required "events" (D.list QuestionnaireEvent.decoder)
         |> D.required "versions" (D.list QuestionnaireVersion.decoder)
         |> D.required "migrationUuid" (D.maybe Uuid.decoder)
-
-
-encode : QuestionnaireDetail -> E.Value
-encode questionnaire =
-    E.object
-        [ ( "phaseUuid", E.maybe Uuid.encode questionnaire.phaseUuid )
-        , ( "labels", E.dict identity (E.list E.string) questionnaire.labels )
-        ]
 
 
 isEditor : AbstractAppState a -> QuestionnaireDetail -> Bool
@@ -533,9 +523,6 @@ concatMapVisibleQuestionsChapters fn questionnaire chapter =
 mapVisibleQuestion : (Chapter -> List String -> Question -> List a) -> QuestionnaireDetail -> Chapter -> List String -> Question -> List a
 mapVisibleQuestion fn questionnaire chapter path question =
     let
-        km =
-            questionnaire.knowledgeModel
-
         currentPath =
             path ++ [ Question.getUuid question ]
 
@@ -545,6 +532,10 @@ mapVisibleQuestion fn questionnaire chapter path question =
         childResults =
             case getReplyValue questionnaire (pathToString currentPath) of
                 Just replyValue ->
+                    let
+                        km =
+                            questionnaire.knowledgeModel
+                    in
                     case question of
                         OptionsQuestion commonData _ ->
                             case List.find (.uuid >> (==) (ReplyValue.getAnswerUuid replyValue)) (KnowledgeModel.getQuestionAnswers commonData.uuid km) of

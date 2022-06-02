@@ -4,11 +4,9 @@ module Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing
     , encode
     , getAnswerUuid
     , getChoiceUuid
-    , getItemListCount
     , getItemUuids
     , getStringReply
     , isEmpty
-    , isEmptyReply
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -23,7 +21,6 @@ type ReplyValue
     | AnswerReply String
     | MultiChoiceReply (List String)
     | ItemListReply (List String)
-    | EmptyReply
     | IntegrationReply IntegrationReplyType
 
 
@@ -103,19 +100,6 @@ encode replyValue =
         IntegrationReply integrationReplyValue ->
             IntegrationReplyValue.encode integrationReplyValue
 
-        EmptyReply ->
-            E.null
-
-
-getItemListCount : ReplyValue -> Int
-getItemListCount replyValue =
-    case replyValue of
-        ItemListReply itemUuids ->
-            List.length itemUuids
-
-        _ ->
-            0
-
 
 getItemUuids : ReplyValue -> List String
 getItemUuids replyValue =
@@ -165,22 +149,9 @@ getStringReply replyValue =
             ""
 
 
-isEmptyReply : ReplyValue -> Bool
-isEmptyReply replyValue =
-    case replyValue of
-        EmptyReply ->
-            True
-
-        _ ->
-            False
-
-
 isEmpty : ReplyValue -> Bool
 isEmpty replyValue =
     case replyValue of
-        EmptyReply ->
-            True
-
         StringReply str ->
             String.isEmpty str
 

@@ -1,5 +1,7 @@
 module Shared.Data.EditableConfig.EditableAuthenticationConfig exposing
     ( EditableAuthenticationConfig
+    , External
+    , Internal
     , decoder
     , encode
     )

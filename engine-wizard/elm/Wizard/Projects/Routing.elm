@@ -35,17 +35,15 @@ parsers appState wrapRoute =
         createSegment =
             lr "projects.create" appState
 
-        fromTemplateSegment =
-            lr "projects.create.template" appState
-
-        customSegment =
-            lr "projects.create.custom" appState
-
         selectedParam =
             lr "projects.create.selected" appState
 
         createFromTemplateRoute =
             if Feature.projectsCreateFromTemplate appState then
+                let
+                    fromTemplateSegment =
+                        lr "projects.create.template" appState
+                in
                 [ map (wrapRoute << CreateRoute << ProjectCreateRoute.TemplateCreateRoute) (s moduleRoot </> s createSegment </> s fromTemplateSegment <?> Query.string selectedParam) ]
 
             else
@@ -53,6 +51,10 @@ parsers appState wrapRoute =
 
         createCustomRoute =
             if Feature.projectsCreateCustom appState then
+                let
+                    customSegment =
+                        lr "projects.create.custom" appState
+                in
                 [ map (wrapRoute << CreateRoute << ProjectCreateRoute.CustomCreateRoute) (s moduleRoot </> s createSegment </> s customSegment <?> Query.string selectedParam) ]
 
             else

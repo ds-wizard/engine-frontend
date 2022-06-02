@@ -1,6 +1,7 @@
 module Wizard.Common.Components.Questionnaire.DeleteVersionModal exposing
     ( Model
     , Msg
+    , UpdateConfig
     , init
     , setVersion
     , update

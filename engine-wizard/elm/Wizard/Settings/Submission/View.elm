@@ -219,14 +219,15 @@ requestFormView appState form prefix =
         multipartEnabledField =
             field "multipart.enabled"
 
-        multipartFileName =
-            field "multipart.fileName"
-
         multipartEnabled =
             Maybe.withDefault False (Form.getFieldAsBool multipartEnabledField form).value
 
         multipartFileNameInput =
             if multipartEnabled then
+                let
+                    multipartFileName =
+                        field "multipart.fileName"
+                in
                 div [ class "nested-group" ]
                     [ FormGroup.input appState form multipartFileName (l_ "form.multipartFileName" appState)
                     ]

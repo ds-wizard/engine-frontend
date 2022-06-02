@@ -6,7 +6,6 @@ module Wizard.KMEditor.Index.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Shared.Data.Branch exposing (Branch)
-import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.Components.Listing.Models as Listing
@@ -21,7 +20,6 @@ type alias Model =
     , deletingKnowledgeModel : ActionResult String
     , creatingMigration : ActionResult String
     , branchToBeUpgraded : Maybe Branch
-    , package : ActionResult PackageDetail
     , branchUpgradeForm : Form FormError BranchUpgradeForm
     , deletingMigration : ActionResult String
     , deleteModal : DeleteModal.Model
@@ -36,7 +34,6 @@ initialModel paginationQueryString =
     , deletingKnowledgeModel = Unset
     , creatingMigration = Unset
     , branchToBeUpgraded = Nothing
-    , package = Unset
     , branchUpgradeForm = BranchUpgradeForm.init
     , deletingMigration = Unset
     , deleteModal = DeleteModal.initialModel

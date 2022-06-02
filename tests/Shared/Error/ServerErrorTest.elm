@@ -2,9 +2,9 @@ module Shared.Error.ServerErrorTest exposing (errorDecoderTests)
 
 import Dict
 import Expect
-import Json.Decode exposing (..)
+import Json.Decode exposing (decodeString)
 import Shared.Error.ServerError as ServerError
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 
 
 errorDecoderTests : Test
@@ -21,11 +21,7 @@ errorDecoderTests =
                             Ok (ServerError.UserSimpleError message) ->
                                 Ok message
 
-                            Err err ->
-                                let
-                                    _ =
-                                        Debug.log "err" err
-                                in
+                            Err _ ->
                                 Err ()
 
                             _ ->

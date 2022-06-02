@@ -20,7 +20,7 @@ import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent(..))
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
@@ -155,7 +155,6 @@ view appState cfg model =
         filterEvents event =
             not (QuestionnaireEvent.isInvisible event)
 
-        --not (QuestionnaireEvent.isSetLabels event) && not (QuestionnaireEvent.isSetReplyList event)
         eventGroups =
             cfg.questionnaire.events
                 |> List.filter filterEvents
@@ -185,7 +184,7 @@ viewEventsMonthGroup appState cfg model group =
             TimeUtils.monthToString appState group.month
 
         dayGroups =
-            List.map (viewEventsDayGroup appState cfg model group.year group.month) (List.reverse group.days)
+            List.map (viewEventsDayGroup appState cfg model group.month (createEventsDayGroupIdentifier group.year group.month)) (List.reverse group.days)
     in
     div [ class "history-month" ]
         [ h5 [] [ text <| monthString ++ " " ++ yearString ]
@@ -193,12 +192,9 @@ viewEventsMonthGroup appState cfg model group =
         ]
 
 
-viewEventsDayGroup : AppState -> ViewConfig msg -> Model -> Int -> Time.Month -> EventsDayGroup -> Html msg
-viewEventsDayGroup appState cfg model year month group =
+viewEventsDayGroup : AppState -> ViewConfig msg -> Model -> Time.Month -> (EventsDayGroup -> String) -> EventsDayGroup -> Html msg
+viewEventsDayGroup appState cfg model month getIdentifier group =
     let
-        yearString =
-            String.fromInt year
-
         monthString =
             String.fromInt (TimeUtils.monthToInt month)
 
@@ -208,21 +204,8 @@ viewEventsDayGroup appState cfg model year month group =
         dateString =
             dayString ++ ". " ++ monthString ++ "."
 
-        identifier =
-            yearString ++ "-" ++ monthString ++ "-" ++ dayString
-
-        isExpanded =
-            List.member identifier model.expandedDays
-
         events =
             List.map (viewEvent appState cfg model) (List.reverse (filterDayEvents cfg.questionnaire group.events))
-
-        users =
-            group.events
-                |> List.map QuestionnaireEvent.getCreatedBy
-                |> List.sortBy (Maybe.unwrap "{" User.fullName)
-                |> List.uniqueBy (Maybe.unwrap "" User.fullName)
-                |> List.map (viewEventUser appState)
 
         content =
             if model.namedOnly then
@@ -232,8 +215,8 @@ viewEventsDayGroup appState cfg model year month group =
                 , div [] events
                 ]
 
-            else if isExpanded then
-                [ a [ onClick (cfg.wrapMsg <| SetVersionDateCollapsed identifier), class "date open" ]
+            else if List.member (getIdentifier group) model.expandedDays then
+                [ a [ onClick (cfg.wrapMsg <| SetVersionDateCollapsed (getIdentifier group)), class "date open" ]
                     [ fa "fas fa-caret-down"
                     , strong [] [ text dateString ]
                     ]
@@ -241,7 +224,15 @@ viewEventsDayGroup appState cfg model year month group =
                 ]
 
             else
-                [ a [ onClick (cfg.wrapMsg <| SetVersionDateExpanded identifier), class "date closed" ]
+                let
+                    users =
+                        group.events
+                            |> List.map QuestionnaireEvent.getCreatedBy
+                            |> List.sortBy (Maybe.unwrap "{" User.fullName)
+                            |> List.uniqueBy (Maybe.unwrap "" User.fullName)
+                            |> List.map (viewEventUser appState)
+                in
+                [ a [ onClick (cfg.wrapMsg <| SetVersionDateExpanded (getIdentifier group)), class "date closed" ]
                     [ fa "fas fa-caret-right"
                     , strong [] [ text dateString ]
                     ]
@@ -292,14 +283,15 @@ viewEventHeaderDropdown appState cfg model event =
         eventUuidString =
             Uuid.toString eventUuid
 
-        mbVersion =
-            QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire eventUuid
-
         isOwner =
             QuestionnaireDetail.isOwner appState cfg.questionnaire
 
         versionActions =
             if isOwner then
+                let
+                    mbVersion =
+                        QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire eventUuid
+                in
                 case mbVersion of
                     Just version ->
                         [ Dropdown.anchorItem [ onClick (cfg.renameVersionMsg version) ]
@@ -326,12 +318,6 @@ viewEventHeaderDropdown appState cfg model event =
             case ( cfg.previewQuestionnaireEventMsg, QuestionnaireDetail.isCurrentVersion cfg.questionnaire eventUuid ) of
                 ( Just viewMsg, False ) ->
                     let
-                        newDocumentRoute =
-                            Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid (Just eventUuidString)
-
-                        createDocumentAttributes =
-                            linkToAttributes appState newDocumentRoute
-
                         viewQuestionnaireAction =
                             [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
                                 [ faSet "_global.questionnaire" appState
@@ -341,6 +327,13 @@ viewEventHeaderDropdown appState cfg model event =
 
                         createDocumentAction =
                             if Session.exists appState.session then
+                                let
+                                    newDocumentRoute =
+                                        Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid (Just eventUuidString)
+
+                                    createDocumentAttributes =
+                                        linkToAttributes appState newDocumentRoute
+                                in
                                 [ Dropdown.anchorItem createDocumentAttributes
                                     [ faSet "questionnaire.history.createDocument" appState
                                     , lx_ "action.createDocument" appState
@@ -371,14 +364,15 @@ viewEventHeaderDropdown appState cfg model event =
                 _ ->
                     []
 
-        dropdownState =
-            Maybe.withDefault Dropdown.initialState <|
-                Dict.get eventUuidString model.dropdownStates
-
         items =
             versionActions ++ previewAction ++ revertAction
     in
     if List.length items > 0 then
+        let
+            dropdownState =
+                Maybe.withDefault Dropdown.initialState <|
+                    Dict.get eventUuidString model.dropdownStates
+        in
         ListingDropdown.dropdown appState
             { dropdownState = dropdownState
             , toggleMsg = cfg.wrapMsg << DropdownMsg eventUuidString
@@ -535,6 +529,21 @@ type alias EventsDayGroup =
     }
 
 
+createEventsDayGroupIdentifier : Int -> Time.Month -> EventsDayGroup -> String
+createEventsDayGroupIdentifier year month group =
+    let
+        yearString =
+            String.fromInt year
+
+        monthString =
+            String.fromInt (TimeUtils.monthToInt month)
+
+        dayString =
+            String.fromInt group.day
+    in
+    yearString ++ "-" ++ monthString ++ "-" ++ dayString
+
+
 groupEvents : AppState -> QuestionnaireEvent -> List EventsMonthGroup -> List EventsMonthGroup
 groupEvents appState event groups =
     let
@@ -602,16 +611,16 @@ filterDayEvents questionnaire events =
             }
 
         fold event acc =
-            let
-                createdBy =
-                    QuestionnaireEvent.getCreatedBy event
-            in
             if QuestionnaireEvent.isInvisible event then
                 acc
 
             else
                 case QuestionnaireEvent.getPath event of
                     Just eventPath ->
+                        let
+                            createdBy =
+                                QuestionnaireEvent.getCreatedBy event
+                        in
                         if not (QuestionnaireDetail.isVersion questionnaire event) && Maybe.unwrap False ((==) createdBy) (Dict.get eventPath acc.questions) then
                             acc
 

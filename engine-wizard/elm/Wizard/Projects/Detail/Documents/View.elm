@@ -1,6 +1,6 @@
-module Wizard.Projects.Detail.Documents.View exposing (view)
+module Wizard.Projects.Detail.Documents.View exposing (ViewConfig, view)
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
 import Html.Events exposing (onCheck, onClick)

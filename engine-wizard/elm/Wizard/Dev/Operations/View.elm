@@ -2,7 +2,7 @@ module Wizard.Dev.Operations.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Dict
-import Html exposing (Html, a, button, div, h2, h3, input, label, span, strong, text)
+import Html exposing (Html, a, div, h2, h3, input, label, span, strong, text)
 import Html.Attributes exposing (class, classList, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List

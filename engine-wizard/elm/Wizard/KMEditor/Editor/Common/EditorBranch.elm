@@ -172,18 +172,15 @@ getFilteredKM editorBranch =
                 , questions = Dict.map filterQuestion knowledgeModelEntities.questions
                 , answers = Dict.map filterAnswer knowledgeModelEntities.answers
             }
-
-        filteredKnowledgeModel =
-            { knowledgeModel
-                | chapterUuids = filterDeleted editorBranch knowledgeModel.chapterUuids
-                , tagUuids = filterDeleted editorBranch knowledgeModel.tagUuids
-                , integrationUuids = filterDeleted editorBranch knowledgeModel.integrationUuids
-                , metricUuids = filterDeleted editorBranch knowledgeModel.metricUuids
-                , phaseUuids = filterDeleted editorBranch knowledgeModel.phaseUuids
-                , entities = entities
-            }
     in
-    filteredKnowledgeModel
+    { knowledgeModel
+        | chapterUuids = filterDeleted editorBranch knowledgeModel.chapterUuids
+        , tagUuids = filterDeleted editorBranch knowledgeModel.tagUuids
+        , integrationUuids = filterDeleted editorBranch knowledgeModel.integrationUuids
+        , metricUuids = filterDeleted editorBranch knowledgeModel.metricUuids
+        , phaseUuids = filterDeleted editorBranch knowledgeModel.phaseUuids
+        , entities = entities
+    }
 
 
 sortDeleted : (a -> String) -> EditorBranch -> List a -> List a

@@ -1,4 +1,4 @@
-module Wizard.Common.Components.PlansList exposing (view)
+module Wizard.Common.Components.PlansList exposing (ViewConfig, view)
 
 import Html exposing (Html, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
@@ -83,33 +83,28 @@ view appState cfg plans =
                 , td [ dataCy "plans-list_to" ] [ text (viewPlanTime plan.until) ]
                 , planActions
                 ]
-
-        headerActions =
-            if Maybe.isJust cfg.actions then
-                th [] []
-
-            else
-                emptyNode
-
-        plansTable =
-            table [ class "table table-striped table-hover" ]
-                [ thead []
-                    [ tr []
-                        [ th [] [ lx_ "table.plan" appState ]
-                        , th [] [ lgx "appPlan.users" appState ]
-                        , th [] [ lgx "appPlan.from" appState ]
-                        , th [] [ lgx "appPlan.to" appState ]
-                        , headerActions
-                        ]
-                    ]
-                , tbody [] (List.map viewPlan plans)
-                ]
-
-        noPlans =
-            Flash.info appState (l_ "noPlans" appState)
     in
     if List.isEmpty plans then
-        noPlans
+        Flash.info appState (l_ "noPlans" appState)
 
     else
-        plansTable
+        let
+            headerActions =
+                if Maybe.isJust cfg.actions then
+                    th [] []
+
+                else
+                    emptyNode
+        in
+        table [ class "table table-striped table-hover" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ lx_ "table.plan" appState ]
+                    , th [] [ lgx "appPlan.users" appState ]
+                    , th [] [ lgx "appPlan.from" appState ]
+                    , th [] [ lgx "appPlan.to" appState ]
+                    , headerActions
+                    ]
+                ]
+            , tbody [] (List.map viewPlan plans)
+            ]

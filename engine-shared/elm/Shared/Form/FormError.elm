@@ -6,4 +6,3 @@ type FormError
     | InvalidUuid
     | ServerValidationError String
     | Error String
-    | IntegrationIdAlreadyUsed

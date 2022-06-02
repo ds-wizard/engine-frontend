@@ -1,7 +1,7 @@
 module Shared.Data.KnowledgeModel.MetricMeasureTest exposing (metricMeasureDecoderTest)
 
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

@@ -5,4 +5,4 @@ import Dict exposing (Dict)
 
 iconSet : Dict String String
 iconSet =
-    Dict.fromList []
+    Dict.empty

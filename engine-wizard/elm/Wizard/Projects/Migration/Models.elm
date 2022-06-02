@@ -19,7 +19,6 @@ import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Utils exposing (flip, listFilterJust)
 import Uuid exposing (Uuid)
-import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Projects.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData)
 import Wizard.Projects.Common.ChoiceChange exposing (ChoiceAddData, ChoiceChange(..), ChoiceChangeData)
@@ -59,8 +58,8 @@ isSelectedChangeResolved model =
         |> Maybe.withDefault False
 
 
-initializeChangeList : AppState -> Model -> Model
-initializeChangeList appState model =
+initializeChangeList : Model -> Model
+initializeChangeList model =
     case model.questionnaireMigration of
         Success migration ->
             let
@@ -74,7 +73,7 @@ initializeChangeList appState model =
                     }
 
                 changes =
-                    getChangeList appState context
+                    getChangeList context
 
                 selectedChange =
                     changes.questions
@@ -98,21 +97,21 @@ type alias ChangeListContext =
     }
 
 
-getChangeList : AppState -> ChangeListContext -> QuestionnaireChanges
-getChangeList appState context =
+getChangeList : ChangeListContext -> QuestionnaireChanges
+getChangeList context =
     KnowledgeModel.getChapters context.newKM
-        |> QuestionnaireChanges.foldMap (getChapterChanges appState context)
+        |> QuestionnaireChanges.foldMap (getChapterChanges context)
 
 
-getChapterChanges : AppState -> ChangeListContext -> Chapter -> QuestionnaireChanges
-getChapterChanges appState context chapter =
+getChapterChanges : ChangeListContext -> Chapter -> QuestionnaireChanges
+getChapterChanges context chapter =
     QuestionnaireChanges.foldMap
-        (getQuestionChanges appState context chapter)
+        (getQuestionChanges context chapter)
         (KnowledgeModel.getChapterQuestions chapter.uuid context.newKM)
 
 
-getQuestionChanges : AppState -> ChangeListContext -> Chapter -> Question -> QuestionnaireChanges
-getQuestionChanges appState context chapter question =
+getQuestionChanges : ChangeListContext -> Chapter -> Question -> QuestionnaireChanges
+getQuestionChanges context chapter question =
     let
         questionChange =
             case KnowledgeModel.getQuestion (Question.getUuid question) context.oldKM of
@@ -151,7 +150,7 @@ getQuestionChanges appState context chapter question =
                             case KnowledgeModel.getAnswer (ReplyValue.getAnswerUuid replyValue) context.newKM of
                                 Just answer ->
                                     QuestionnaireChanges.foldMap
-                                        (getQuestionChanges appState context chapter)
+                                        (getQuestionChanges context chapter)
                                         (KnowledgeModel.getAnswerFollowupQuestions answer.uuid context.newKM)
 
                                 Nothing ->
@@ -159,7 +158,7 @@ getQuestionChanges appState context chapter question =
 
                         ListQuestion commonData _ ->
                             QuestionnaireChanges.foldMap
-                                (getQuestionChanges appState context chapter)
+                                (getQuestionChanges context chapter)
                                 (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid context.newKM)
 
                         _ ->

@@ -1,5 +1,6 @@
 module Registry.Pages.Login exposing
-    ( Model
+    ( LoginForm
+    , Model
     , Msg
     , init
     , update

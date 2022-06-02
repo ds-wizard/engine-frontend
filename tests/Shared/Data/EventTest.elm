@@ -48,7 +48,7 @@ import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(.
 import Shared.Data.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Utils exposing (nilUuid)
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectEncodeDecode, parametrized)
 import Time
 

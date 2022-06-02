@@ -176,20 +176,17 @@ userFormView appState user form current =
                 [ div [ class "col-4 d-flex align-items-center" ] [ text propName ]
                 , div [ class "col-8" ] [ Input.textInput valueField [ class "form-control" ] ]
                 ]
-
-        formHtml =
-            div []
-                [ FormGroup.input appState form "email" <| lg "user.email" appState
-                , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
-                , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
-                , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
-                , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
-                , roleSelect
-                , activeToggle
-                , submissionSettings
-                ]
     in
-    formHtml
+    div []
+        [ FormGroup.input appState form "email" <| lg "user.email" appState
+        , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
+        , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
+        , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
+        , roleSelect
+        , activeToggle
+        , submissionSettings
+        ]
 
 
 passwordView : AppState -> Model -> Html Msg

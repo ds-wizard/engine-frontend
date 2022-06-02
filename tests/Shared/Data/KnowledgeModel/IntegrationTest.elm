@@ -1,7 +1,7 @@
 module Shared.Data.KnowledgeModel.IntegrationTest exposing (integrationDecoderTest)
 
 import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration(..))
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

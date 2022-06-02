@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.Components.Settings exposing
     ( Model
     , Msg
+    , UpdateConfig
     , initialModel
     , setBranchDetail
     , update

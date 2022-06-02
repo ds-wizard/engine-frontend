@@ -1,4 +1,4 @@
-module Wizard.Common.Menu.Update exposing (fetchData, update)
+module Wizard.Common.Menu.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.BuildInfo as BuildInfoApi
@@ -15,12 +15,6 @@ l_ =
     l "Wizard.Common.Menu.Update"
 
 
-fetchData : (Msg -> Wizard.Msgs.Msg) -> AppState -> Cmd Wizard.Msgs.Msg
-fetchData wrapMsg appState =
-    Cmd.map wrapMsg <|
-        BuildInfoApi.getBuildInfo appState GetBuildInfoCompleted
-
-
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update wrapMsg msg appState model =
     case msg of
@@ -31,7 +25,7 @@ update wrapMsg msg appState model =
             let
                 ( apiBuildInfo, cmd ) =
                     if open then
-                        ( Loading, fetchData wrapMsg appState )
+                        ( Loading, loadBuildInfo wrapMsg appState )
 
                     else
                         ( Unset, Cmd.none )
@@ -54,3 +48,9 @@ update wrapMsg msg appState model =
 
         ProfileMenuDropdownMsg dropdownState ->
             ( { model | profileMenuDropdownState = dropdownState }, Cmd.none )
+
+
+loadBuildInfo : (Msg -> Wizard.Msgs.Msg) -> AppState -> Cmd Wizard.Msgs.Msg
+loadBuildInfo wrapMsg appState =
+    Cmd.map wrapMsg <|
+        BuildInfoApi.getBuildInfo appState GetBuildInfoCompleted
