@@ -1,7 +1,4 @@
-module Shared.Data.Questionnaire.QuestionnaireTodo exposing
-    ( QuestionnaireTodo
-    , getSelectorPath
-    )
+module Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question exposing (Question)
@@ -12,8 +9,3 @@ type alias QuestionnaireTodo =
     , question : Question
     , path : String
     }
-
-
-getSelectorPath : QuestionnaireTodo -> String
-getSelectorPath =
-    .path >> String.split "." >> List.drop 1 >> String.join "."

@@ -14,9 +14,7 @@ module Shared.Utils exposing
     , listInsertIf
     , nilUuid
     , packageIdToComponents
-    , pair
     , stringToBool
-    , stringToInt
     , tuplePrepend
     , withNoCmd
     )
@@ -38,11 +36,6 @@ flip f a b =
 compose2 : (c -> d) -> (a -> b -> c) -> a -> b -> d
 compose2 g f x y =
     g (f x y)
-
-
-pair : a -> b -> ( a, b )
-pair a b =
-    ( a, b )
 
 
 tuplePrepend : a -> ( b, c ) -> ( a, b, c )
@@ -81,11 +74,6 @@ httpMethodOptions =
 dispatch : a -> Cmd a
 dispatch msg =
     Task.perform (always msg) (Task.succeed ())
-
-
-stringToInt : String -> Int
-stringToInt =
-    String.toInt >> Maybe.withDefault 0
 
 
 boolToInt : Bool -> Int

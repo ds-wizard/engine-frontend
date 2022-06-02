@@ -1,8 +1,7 @@
 module Shared.Data.KnowledgeModel.TagTest exposing (tagDecoderTest)
 
-import Dict
 import Shared.Data.KnowledgeModel.Tag as Tag
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

@@ -1,8 +1,7 @@
 module Shared.Data.KnowledgeModel.ReferenceTest exposing (referenceDecoderTest)
 
-import Dict
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

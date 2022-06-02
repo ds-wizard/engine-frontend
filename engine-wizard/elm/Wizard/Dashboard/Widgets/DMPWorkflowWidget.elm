@@ -34,16 +34,17 @@ view appState questionnaires =
             questionnaires
                 |> ActionResult.map (List.length >> (==) 0)
                 |> ActionResult.withDefault False
-
-        createRoute =
-            CreateRoute <|
-                if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
-                    TemplateCreateRoute Nothing
-
-                else
-                    CustomCreateRoute Nothing
     in
     if visible then
+        let
+            createRoute =
+                CreateRoute <|
+                    if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
+                        TemplateCreateRoute Nothing
+
+                    else
+                        CustomCreateRoute Nothing
+        in
         div [ class "DMPWorkflowWidget", dataCy "dashboard_dmp-workflow-widget" ]
             [ div [ class "DMPWorkflowWidget__Message" ]
                 [ text <| lf_ "welcome" [ LookAndFeelConfig.getAppTitle appState.config.lookAndFeel ] appState

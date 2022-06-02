@@ -21,8 +21,8 @@ subscriptions model =
                 Routes.AppsRoute route ->
                     Sub.map AppsMsg <| Wizard.Apps.Subscriptions.subscriptions route model.appsModel
 
-                Routes.DocumentsRoute route ->
-                    Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions route model.documentsModel
+                Routes.DocumentsRoute _ ->
+                    Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions model.documentsModel
 
                 Routes.KMEditorRoute route ->
                     Wizard.KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel

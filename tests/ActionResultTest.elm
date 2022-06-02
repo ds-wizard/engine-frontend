@@ -1,8 +1,17 @@
-module ActionResultTest exposing (Combine3Test(..), combine3Tests, combineTests, isErrorTests, isLoadingTests, isSuccessTests, isUnsetTests, mapTests, withDefaultTests)
+module ActionResultTest exposing
+    ( combine3Tests
+    , combineTests
+    , isErrorTests
+    , isLoadingTests
+    , isSuccessTests
+    , isUnsetTests
+    , mapTests
+    , withDefaultTests
+    )
 
 import ActionResult exposing (ActionResult(..))
-import Expect exposing (Expectation)
-import Test exposing (..)
+import Expect
+import Test exposing (Test, describe, test)
 import TestUtils exposing (parametrized)
 
 

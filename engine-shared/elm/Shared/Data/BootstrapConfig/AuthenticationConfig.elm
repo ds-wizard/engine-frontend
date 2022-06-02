@@ -1,5 +1,7 @@
 module Shared.Data.BootstrapConfig.AuthenticationConfig exposing
     ( AuthenticationConfig
+    , External
+    , Internal
     , decoder
     , default
     )

@@ -1,6 +1,6 @@
 module Wizard.Common.Components.DetailNavigation exposing
-    ( container
-    , navLink
+    ( NavLinkConfig
+    , container
     , navigation
     , onlineUsers
     , row

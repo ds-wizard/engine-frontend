@@ -124,8 +124,8 @@ initLocalModel model =
         Routes.PublicRoute route ->
             { model | publicModel = Wizard.Public.Models.initLocalModel model.appState route model.publicModel }
 
-        Routes.RegistryRoute route ->
-            { model | registryModel = Wizard.Registry.Models.initLocalModel route model.registryModel }
+        Routes.RegistryRoute _ ->
+            { model | registryModel = Wizard.Registry.Models.initLocalModel model.registryModel }
 
         Routes.SettingsRoute route ->
             { model | settingsModel = Wizard.Settings.Models.initLocalModel model.appState route model.settingsModel }

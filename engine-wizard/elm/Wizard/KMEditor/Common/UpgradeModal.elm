@@ -141,14 +141,6 @@ view appState model =
                 Nothing ->
                     ( False, "" )
 
-        options =
-            case model.package of
-                Success package ->
-                    ( "", l_ "form.defaultOption" appState ) :: PackageDetail.createFormOptions package
-
-                _ ->
-                    []
-
         modalContent =
             case model.package of
                 Unset ->
@@ -161,6 +153,15 @@ view appState model =
                     [ p [ class "alert alert-danger" ] [ text error ] ]
 
                 Success _ ->
+                    let
+                        options =
+                            case model.package of
+                                Success package ->
+                                    ( "", l_ "form.defaultOption" appState ) :: PackageDetail.createFormOptions package
+
+                                _ ->
+                                    []
+                    in
                     [ p [ class "alert alert-info" ]
                         (lh_ "text" [ strong [] [ text name ] ] appState)
                     , FormGroup.select appState options model.branchUpgradeForm "targetPackageId" (l_ "form.targetPackageId" appState)

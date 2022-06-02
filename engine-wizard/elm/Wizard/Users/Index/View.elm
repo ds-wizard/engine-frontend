@@ -19,7 +19,7 @@ import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Routes as Routes
 import Wizard.Users.Index.Models exposing (Model)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
-import Wizard.Users.Routes exposing (Route(..), indexRouteRoleFilterId)
+import Wizard.Users.Routes exposing (indexRouteRoleFilterId)
 
 
 l_ : String -> AppState -> String

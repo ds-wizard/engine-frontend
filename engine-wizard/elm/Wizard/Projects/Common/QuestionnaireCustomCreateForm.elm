@@ -5,8 +5,8 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
+import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)

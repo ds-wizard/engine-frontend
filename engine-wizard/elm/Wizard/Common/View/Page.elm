@@ -6,7 +6,6 @@ module Wizard.Common.View.Page exposing
     , illustratedMessage
     , illustratedMessageHtml
     , loader
-    , message
     , success
     )
 

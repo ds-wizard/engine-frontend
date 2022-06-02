@@ -52,22 +52,23 @@ view appState model =
 formView : AppState -> Model -> Html Msg
 formView appState model =
     let
-        cfg =
-            { viewItem = TypeHintItem.packageSuggestionWithVersion
-            , wrapMsg = PackageTypeHintInputMsg
-            , nothingSelectedItem = text "--"
-            , clearEnabled = True
-            }
-
-        typeHintInput =
-            TypeHintInput.view appState cfg model.packageTypeHintInputModel
-
         parentInput =
             case model.selectedPackage of
                 Just package ->
                     FormGroup.codeView package
 
                 Nothing ->
+                    let
+                        cfg =
+                            { viewItem = TypeHintItem.packageSuggestionWithVersion
+                            , wrapMsg = PackageTypeHintInputMsg
+                            , nothingSelectedItem = text "--"
+                            , clearEnabled = True
+                            }
+
+                        typeHintInput =
+                            TypeHintInput.view appState cfg model.packageTypeHintInputModel
+                    in
                     FormGroup.formGroupCustom typeHintInput appState model.form "packageId"
     in
     div []

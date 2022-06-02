@@ -2,6 +2,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.TreeInput exposing
     ( Model
     , MovingEntity(..)
     , Msg
+    , ViewProps
     , initialModel
     , update
     , view

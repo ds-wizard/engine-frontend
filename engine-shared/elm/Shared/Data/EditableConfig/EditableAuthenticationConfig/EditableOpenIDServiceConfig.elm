@@ -1,6 +1,7 @@
 module Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing
     ( EditableOpenIDServiceConfig
     , Parameter
+    , Style
     , decoder
     , encode
     )

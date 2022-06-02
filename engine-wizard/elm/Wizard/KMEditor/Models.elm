@@ -38,19 +38,19 @@ initLocalModel appState route model =
             { model | createModel = Wizard.KMEditor.Create.Models.initialModel selectedPackage edit }
 
         EditorRoute uuid subroute ->
-            let
-                mbEditorUuid =
-                    case subroute of
-                        KMEditorRoute.Edit mbUuid ->
-                            mbUuid
-
-                        _ ->
-                            Nothing
-            in
             if uuid == model.editorModel.uuid then
                 { model | editorModel = Editor.initPageModel appState subroute model.editorModel }
 
             else
+                let
+                    mbEditorUuid =
+                        case subroute of
+                            KMEditorRoute.Edit mbUuid ->
+                                mbUuid
+
+                            _ ->
+                                Nothing
+                in
                 { model | editorModel = Editor.initPageModel appState subroute <| Editor.init appState uuid mbEditorUuid }
 
         IndexRoute paginationQueryString ->

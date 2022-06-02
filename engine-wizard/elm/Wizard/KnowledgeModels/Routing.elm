@@ -1,6 +1,5 @@
 module Wizard.KnowledgeModels.Routing exposing
-    ( detail
-    , isAllowed
+    ( isAllowed
     , parsers
     , toUrl
     )

@@ -14,13 +14,11 @@ module Shared.Api exposing
     , jwtGet
     , jwtOrHttpFetch
     , jwtOrHttpGet
-    , jwtOrHttpHead
     , jwtOrHttpPut
     , jwtPost
     , jwtPostEmpty
     , jwtPostFile
     , jwtPostFileWithData
-    , jwtPostString
     , jwtPut
     , wsUrl
     )
@@ -54,19 +52,6 @@ jwtOrHttpFetch url decoder body appState =
     jwtOrHttp appState jwtFetch httpFetch url decoder body appState
 
 
-jwtOrHttpHead : String -> AbstractAppState b -> ToMsg Http.Metadata msg -> Cmd msg
-jwtOrHttpHead url appState toMsg =
-    Http.request
-        { method = "HEAD"
-        , headers = authorizationHeaders appState
-        , url = appState.apiUrl ++ url
-        , body = Http.emptyBody
-        , expect = expectMetadata toMsg
-        , timeout = Nothing
-        , tracker = Nothing
-        }
-
-
 jwtGet : String -> Decoder a -> AbstractAppState b -> ToMsg a msg -> Cmd msg
 jwtGet url decoder appState toMsg =
     Jwt.Http.get appState.session.token.token
@@ -80,15 +65,6 @@ jwtPost url body appState toMsg =
     Jwt.Http.post appState.session.token.token
         { url = appState.apiUrl ++ url
         , body = Http.jsonBody body
-        , expect = expectWhatever toMsg
-        }
-
-
-jwtPostString : String -> String -> String -> AbstractAppState b -> ToMsg () msg -> Cmd msg
-jwtPostString url mime contents appState toMsg =
-    Jwt.Http.post appState.session.token.token
-        { url = appState.apiUrl ++ url
-        , body = Http.stringBody mime contents
         , expect = expectWhatever toMsg
         }
 
@@ -250,8 +226,8 @@ expectMetadata toMsg =
     Http.expectStringResponse toMsg <|
         \response ->
             case response of
-                Http.BadUrl_ url ->
-                    Err (BadUrl url)
+                Http.BadUrl_ _ ->
+                    Err OtherError
 
                 Http.Timeout_ ->
                     Err Timeout
@@ -269,8 +245,8 @@ expectMetadata toMsg =
 resolve : (String -> Result String a) -> Http.Response String -> Result ApiError a
 resolve toResult response =
     case response of
-        Http.BadUrl_ url ->
-            Err (BadUrl url)
+        Http.BadUrl_ _ ->
+            Err OtherError
 
         Http.Timeout_ ->
             Err Timeout
@@ -282,7 +258,7 @@ resolve toResult response =
             Err (BadStatus metadata.statusCode body)
 
         Http.GoodStatus_ _ body ->
-            Result.mapError BadBody (toResult body)
+            Result.mapError (always OtherError) (toResult body)
 
 
 jwtOrHttp : AbstractAppState b -> a -> a -> a

@@ -11,11 +11,10 @@ import Shared.Provisioning exposing (Provisioning)
 
 
 type ApiError
-    = BadUrl String
-    | Timeout
+    = Timeout
     | NetworkError
     | BadStatus Int String
-    | BadBody String
+    | OtherError
 
 
 toServerError : ApiError -> Maybe ServerError
@@ -28,12 +27,8 @@ toServerError error =
             Nothing
 
         BadStatus _ response ->
-            case decodeString ServerError.decoder response of
-                Ok err ->
-                    Just err
-
-                Err _ ->
-                    Nothing
+            Result.toMaybe <|
+                decodeString ServerError.decoder response
 
         _ ->
             Nothing

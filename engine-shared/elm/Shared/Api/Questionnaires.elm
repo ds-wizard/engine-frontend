@@ -1,5 +1,6 @@
 module Shared.Api.Questionnaires exposing
-    ( cloneQuestionnaire
+    ( GetQuestionnairesFilters
+    , cloneQuestionnaire
     , completeQuestionnaireMigration
     , deleteQuestionnaire
     , deleteQuestionnaireMigration

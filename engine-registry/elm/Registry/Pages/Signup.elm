@@ -1,6 +1,7 @@
 module Registry.Pages.Signup exposing
     ( Model
     , Msg
+    , SignupForm
     , init
     , update
     , view

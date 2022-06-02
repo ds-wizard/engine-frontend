@@ -155,7 +155,7 @@ update wrapMsg msg appState model =
         WebSocketMsg wsMsg ->
             handleWebSocketMsg wsMsg appState model
 
-        WebSocketPing _ ->
+        WebSocketPing ->
             withSeed ( model, WebSocket.ping model.websocket )
 
         OnlineUserMsg index onlineUserMsg ->

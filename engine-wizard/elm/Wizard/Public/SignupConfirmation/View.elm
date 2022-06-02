@@ -8,7 +8,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
-import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Public.SignupConfirmation.Models exposing (Model)
 import Wizard.Public.SignupConfirmation.Msgs exposing (Msg)
 import Wizard.Routes as Routes

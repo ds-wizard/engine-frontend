@@ -1,6 +1,5 @@
 module Shared.Data.Questionnaire exposing
     ( Questionnaire
-    , compare
     , decoder
     , isEditable
     )
@@ -72,11 +71,6 @@ decoder =
         |> D.required "state" QuestionnaireState.decoder
         |> D.required "updatedAt" D.datetime
         |> D.required "report" QuestionnaireReport.decoder
-
-
-compare : Questionnaire -> Questionnaire -> Order
-compare q1 q2 =
-    Basics.compare (String.toLower q1.name) (String.toLower q2.name)
 
 
 matchOwner : Questionnaire -> Maybe UserInfo -> Bool

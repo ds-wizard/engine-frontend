@@ -1,6 +1,7 @@
 module Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal exposing
     ( Model
     , Msg
+    , ViewConfig
     , init
     , initEmpty
     , update

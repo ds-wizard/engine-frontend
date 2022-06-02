@@ -2,6 +2,7 @@ module Wizard.Projects.Detail.Components.Settings exposing
     ( Model
     , Msg
     , UpdateConfig
+    , ViewConfig
     , init
     , subscriptions
     , update

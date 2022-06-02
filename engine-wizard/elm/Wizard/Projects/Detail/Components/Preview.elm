@@ -125,16 +125,12 @@ handleHeadDocumentPreviewComplete appState model result =
 
 view : AppState -> QuestionnaireDetail -> Model -> Html Msg
 view appState questionnaire model =
-    let
-        content =
-            case model.previewState of
-                Preview preview ->
-                    Page.actionResultViewWithError appState (viewContent appState model) viewError preview
+    case model.previewState of
+        Preview preview ->
+            Page.actionResultViewWithError appState (viewContent appState model) viewError preview
 
-                TemplateNotSet ->
-                    viewTemplateNotSet appState questionnaire
-    in
-    content
+        TemplateNotSet ->
+            viewTemplateNotSet appState questionnaire
 
 
 viewContent : AppState -> Model -> Maybe String -> Html Msg

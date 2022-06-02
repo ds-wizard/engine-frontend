@@ -13,7 +13,6 @@ import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Settings.Generic.Model exposing (Model)
-import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 
 
 type alias ViewProps form msg =

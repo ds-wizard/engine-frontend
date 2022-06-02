@@ -1,8 +1,7 @@
 module Shared.Data.KnowledgeModel.ExpertTest exposing (expertDecoderTest)
 
-import Dict
 import Shared.Data.KnowledgeModel.Expert as Expert
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

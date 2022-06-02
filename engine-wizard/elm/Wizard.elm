@@ -11,7 +11,7 @@ import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
-import Wizard.Projects.Routes as PlansRoutes exposing (Route(..))
+import Wizard.Projects.Routes as PlansRoutes
 import Wizard.Public.Routes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)

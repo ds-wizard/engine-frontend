@@ -14,7 +14,6 @@ import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
-import Wizard.Public.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -34,12 +33,13 @@ view appState model =
         form =
             formView appState model
 
-        splitScreenClass =
-            "col-12 d-flex align-items-center"
-
         content =
             case appState.config.lookAndFeel.loginInfo of
                 Just loginInfo ->
+                    let
+                        splitScreenClass =
+                            "col-12 d-flex align-items-center"
+                    in
                     [ div
                         [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info"
                         , dataCy "login_side-info"

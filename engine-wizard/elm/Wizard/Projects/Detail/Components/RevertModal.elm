@@ -1,6 +1,7 @@
 module Wizard.Projects.Detail.Components.RevertModal exposing
     ( Model
     , Msg
+    , UpdateConfig
     , init
     , setEvent
     , update

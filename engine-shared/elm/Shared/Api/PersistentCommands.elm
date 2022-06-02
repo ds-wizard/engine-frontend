@@ -1,4 +1,4 @@
-module Shared.Api.PersistentCommands exposing (getPersistentCommand, getPersistentCommands, retry, retryAllFailed)
+module Shared.Api.PersistentCommands exposing (GetPersistentCommandsFilters, getPersistentCommand, getPersistentCommands, retry, retryAllFailed)
 
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtGet, jwtPostEmpty)

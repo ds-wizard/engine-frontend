@@ -69,21 +69,22 @@ formView appState form =
         enabled =
             Maybe.withDefault False (Form.getFieldAsBool "enabled" form).value
 
-        hasToken =
-            (Form.getFieldAsString "token" form).value
-                |> Maybe.map (not << String.isEmpty)
-                |> Maybe.withDefault False
-
-        signupButton =
-            if hasToken then
-                emptyNode
-
-            else
-                button [ class "btn btn-outline-primary", onClick <| ToggleRegistrySignup True ]
-                    [ lx_ "form.signUp" appState ]
-
         tokenInput =
             if enabled then
+                let
+                    hasToken =
+                        (Form.getFieldAsString "token" form).value
+                            |> Maybe.map (not << String.isEmpty)
+                            |> Maybe.withDefault False
+
+                    signupButton =
+                        if hasToken then
+                            emptyNode
+
+                        else
+                            button [ class "btn btn-outline-primary", onClick <| ToggleRegistrySignup True ]
+                                [ lx_ "form.signUp" appState ]
+                in
                 div [ class "nested-group" ]
                     [ formWrap <| FormGroup.textarea appState form "token" (l_ "form.token" appState)
                     , FormExtra.mdAfter (l_ "form.token.desc" appState)
@@ -128,20 +129,6 @@ registrySignupModal appState model =
                 ]
                 [ lx_ "registryModal.button.cancel" appState ]
 
-        form =
-            model.registrySignupForm
-
-        formBody =
-            Html.map FormMsg <|
-                div []
-                    [ FormResult.errorOnlyView appState model.registrySigningUp
-                    , FormGroup.inputAttrs [ readonly True ] appState form "organizationId" (l_ "registryModal.form.organizationId" appState)
-                    , FormGroup.inputAttrs [ readonly True ] appState form "name" (l_ "registryModal.form.organizationName" appState)
-                    , FormGroup.textareaAttrs [ readonly True ] appState form "description" (l_ "registryModal.form.organizationDescription" appState)
-                    , FormGroup.input appState form "email" (l_ "registryModal.form.email" appState)
-                    , FormExtra.textAfter (l_ "registryModal.form.email.desc" appState)
-                    ]
-
         resultBody resultText =
             Flash.success appState resultText
 
@@ -150,7 +137,19 @@ registrySignupModal appState model =
                 ActionResultBlock.view appState resultBody model.registrySigningUp
 
             else
-                formBody
+                let
+                    form =
+                        model.registrySignupForm
+                in
+                Html.map FormMsg <|
+                    div []
+                        [ FormResult.errorOnlyView appState model.registrySigningUp
+                        , FormGroup.inputAttrs [ readonly True ] appState form "organizationId" (l_ "registryModal.form.organizationId" appState)
+                        , FormGroup.inputAttrs [ readonly True ] appState form "name" (l_ "registryModal.form.organizationName" appState)
+                        , FormGroup.textareaAttrs [ readonly True ] appState form "description" (l_ "registryModal.form.organizationDescription" appState)
+                        , FormGroup.input appState form "email" (l_ "registryModal.form.email" appState)
+                        , FormExtra.textAfter (l_ "registryModal.form.email.desc" appState)
+                        ]
 
         content =
             [ div [ class "modal-header" ]

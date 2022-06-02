@@ -1,5 +1,6 @@
 module Shared.Api.Users exposing
-    ( deleteUser
+    ( GetUsersFilters
+    , deleteUser
     , getCurrentUser
     , getUser
     , getUsers

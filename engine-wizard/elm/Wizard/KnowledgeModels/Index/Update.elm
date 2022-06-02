@@ -16,7 +16,6 @@ import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
-import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)

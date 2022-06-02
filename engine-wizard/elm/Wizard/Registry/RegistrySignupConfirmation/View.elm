@@ -10,7 +10,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Registry.RegistrySignupConfirmation.Models exposing (Model)
 import Wizard.Registry.RegistrySignupConfirmation.Msgs exposing (Msg)
 import Wizard.Routes as Routes
-import Wizard.Settings.Routes exposing (Route(..))
 
 
 lh_ : String -> List (Html msg) -> AppState -> List (Html msg)

@@ -1,5 +1,6 @@
 module Shared.Data.OnlineUserInfo exposing
-    ( LoggedData
+    ( AnonymousData
+    , LoggedData
     , OnlineUserInfo(..)
     , decoder
     )

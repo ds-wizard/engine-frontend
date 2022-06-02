@@ -11,7 +11,6 @@ module Wizard.Common.Components.TypeHintInput exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Bootstrap.Dropdown as Dropdown
 import Browser.Dom as Dom
 import Browser.Events
 import Debounce exposing (Debounce)
@@ -38,7 +37,6 @@ type alias Model a =
     { typehints : Maybe (ActionResult (Pagination a))
     , q : String
     , debounce : Debounce String
-    , dropdownState : Dropdown.State
     , selected : Maybe a
     , fieldId : String
     }
@@ -49,7 +47,6 @@ init fieldId =
     { typehints = Nothing
     , q = ""
     , debounce = Debounce.init
-    , dropdownState = Dropdown.initialState
     , selected = Nothing
     , fieldId = fieldId
     }
@@ -72,7 +69,6 @@ type Msg a
     | SetReply a
     | ClearReply
     | DebounceMsg Debounce.Msg
-    | DropdownMsg Dropdown.State
     | NoOp
 
 
@@ -93,7 +89,7 @@ update cfg msg appState model =
             ( { model | typehints = Just Loading }
             , Cmd.batch
                 [ Cmd.map cfg.wrapMsg (loadTypeHints cfg appState model.q)
-                , Task.attempt (\_ -> cfg.wrapMsg NoOp) (Dom.focus (model.fieldId ++ "-search"))
+                , Task.attempt (always (cfg.wrapMsg NoOp)) (Dom.focus (model.fieldId ++ "-search"))
                 ]
             )
 
@@ -124,9 +120,6 @@ update cfg msg appState model =
                     Debounce.update debounceConfig (Debounce.takeLast load) debounceMsg model.debounce
             in
             ( { model | debounce = debounce }, Cmd.map cfg.wrapMsg debounceCmd )
-
-        DropdownMsg state ->
-            ( { model | dropdownState = state }, Cmd.none )
 
         TypeHintsLoaded q result ->
             case model.typehints of
@@ -265,28 +258,28 @@ view appState cfg model isInvalid =
 
 viewTypeHints : AppState -> ViewConfig a msg -> Model a -> Html msg
 viewTypeHints appState cfg model =
-    let
-        content =
-            case Maybe.withDefault Unset model.typehints of
-                Success hints ->
-                    ul [] (List.map (viewTypeHint cfg) hints.items)
-
-                Loading ->
-                    div [ class "loading" ]
-                        [ faSet "_global.spinner" appState
-                        , lgx "loading" appState
-                        ]
-
-                Error err ->
-                    div [ class "error" ]
-                        [ faSet "_global.error" appState
-                        , text err
-                        ]
-
-                Unset ->
-                    emptyNode
-    in
     if Maybe.isJust model.typehints then
+        let
+            content =
+                case Maybe.withDefault Unset model.typehints of
+                    Success hints ->
+                        ul [] (List.map (viewTypeHint cfg) hints.items)
+
+                    Loading ->
+                        div [ class "loading" ]
+                            [ faSet "_global.spinner" appState
+                            , lgx "loading" appState
+                            ]
+
+                    Error err ->
+                        div [ class "error" ]
+                            [ faSet "_global.error" appState
+                            , text err
+                            ]
+
+                    Unset ->
+                        emptyNode
+        in
         div [ class "TypeHintInput__TypeHints" ]
             [ div [ class "TypeHintInput__TypeHints__Search" ]
                 [ fa "fas fa-search"

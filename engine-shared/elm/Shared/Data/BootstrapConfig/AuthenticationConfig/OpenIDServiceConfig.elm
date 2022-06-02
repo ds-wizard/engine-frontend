@@ -1,5 +1,6 @@
 module Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing
     ( OpenIDServiceConfig
+    , Style
     , decoder
     )
 

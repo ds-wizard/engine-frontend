@@ -1,4 +1,4 @@
-module Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters, create, empty, fromValues, getOp, getValue, insertOp, insertValue, isFilterActive, removeFilter, removeOp, removeValue)
+module Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters, create, empty, fromValues, getOp, getValue, insertOp, insertValue, isFilterActive, removeFilter)
 
 import Dict exposing (Dict)
 import Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)

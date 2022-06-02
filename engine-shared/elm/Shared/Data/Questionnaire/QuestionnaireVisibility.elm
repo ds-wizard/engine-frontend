@@ -3,12 +3,9 @@ module Shared.Data.Questionnaire.QuestionnaireVisibility exposing
     , decoder
     , encode
     , field
-    , formOptions
     , fromFormValues
-    , fromString
     , richFormOptions
     , toFormValues
-    , toString
     , validation
     )
 
@@ -160,22 +157,5 @@ richFormOptions appState =
     , ( toString VisibleEditQuestionnaire
       , lg "questionnaireVisibility.public" appState
       , lg "questionnaireVisibility.public.description" appState
-      )
-    ]
-
-
-formOptions : { a | provisioning : Provisioning } -> List ( String, String )
-formOptions appState =
-    [ ( toString PrivateQuestionnaire
-      , lg "questionnaireVisibility.private" appState
-      )
-    , ( toString VisibleViewQuestionnaire
-      , lg "questionnaireVisibility.publicReadOnly" appState
-      )
-    , ( toString VisibleCommentQuestionnaire
-      , lg "questionnaireVisibility.publicComment" appState
-      )
-    , ( toString VisibleEditQuestionnaire
-      , lg "questionnaireVisibility.public" appState
       )
     ]

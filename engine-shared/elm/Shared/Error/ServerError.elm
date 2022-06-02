@@ -1,6 +1,8 @@
 module Shared.Error.ServerError exposing
     ( Message
     , ServerError(..)
+    , SystemLogErrorData
+    , UserFormErrorData
     , decoder
     , forbiddenMessage
     , messageToReadable

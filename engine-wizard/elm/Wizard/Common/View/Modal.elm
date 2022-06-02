@@ -1,17 +1,14 @@
 module Wizard.Common.View.Modal exposing
-    ( AlertConfig
-    , ConfirmConfig
+    ( ConfirmConfig
     , ErrorConfig
     , SimpleConfig
-    , alert
     , confirm
     , error
     , simple
-    , simpleWithAttrs
     )
 
-import ActionResult exposing (ActionResult(..))
-import Html exposing (Attribute, Html, button, div, h5, p, pre, text)
+import ActionResult exposing (ActionResult)
+import Html exposing (Attribute, Html, button, div, h5, pre, text)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
@@ -68,12 +65,13 @@ confirm appState cfg =
         content =
             FormResult.view appState cfg.actionResult :: cfg.modalContent
 
-        cancelDisabled =
-            ActionResult.isLoading cfg.actionResult
-
         cancelButton =
             case cfg.cancelMsg of
                 Just cancelMsg ->
+                    let
+                        cancelDisabled =
+                            ActionResult.isLoading cfg.actionResult
+                    in
                     button
                         [ onClick cancelMsg
                         , disabled cancelDisabled
@@ -97,28 +95,6 @@ confirm appState cfg =
                     [ ActionButton.buttonWithAttrs appState <|
                         ActionButton.ButtonWithAttrsConfig cfg.actionName cfg.actionResult cfg.actionMsg cfg.dangerous [ dataCy "modal_action-button" ]
                     , cancelButton
-                    ]
-                ]
-            ]
-        ]
-
-
-type alias AlertConfig msg =
-    { message : String
-    , visible : Bool
-    , actionMsg : msg
-    , actionName : String
-    }
-
-
-alert : AlertConfig msg -> Html msg
-alert cfg =
-    div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
-        [ div [ class "modal-dialog" ]
-            [ div [ class "modal-content" ]
-                [ div [ class "modal-body text-center" ]
-                    [ p [] [ text cfg.message ]
-                    , button [ onClick cfg.actionMsg, class "btn btn-primary" ] [ text cfg.actionName ]
                     ]
                 ]
             ]

@@ -62,7 +62,7 @@ update wrapMsg msg appState model =
         FinalizeMigrationCompleted result ->
             withSeed <| handleFinalizeMigrationCompleted appState model result
 
-        PutQuestionnaireContentCompleted _ ->
+        PutQuestionnaireContentCompleted ->
             ( appState.seed, model, Cmd.none )
 
 
@@ -153,7 +153,7 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                             , QuestionnairesApi.putQuestionnaireContent model.questionnaireUuid
                                 [ event ]
                                 appState
-                                PutQuestionnaireContentCompleted
+                                (always PutQuestionnaireContentCompleted)
                             )
 
                         _ ->
@@ -279,7 +279,7 @@ setResult appState migration model =
                 _ ->
                     Nothing
     in
-    initializeChangeList appState
+    initializeChangeList
         { model
             | questionnaireMigration = migration
             , questionnaireModel = questionnaireModel

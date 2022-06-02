@@ -2,7 +2,6 @@ module Wizard.Documents.Common.DocumentCreateForm exposing
     ( DocumentCreateForm
     , encode
     , init
-    , initEmpty
     , validation
     )
 
@@ -25,11 +24,6 @@ type alias DocumentCreateForm =
     , formatUuid : String
     , questionnaireEventUuid : Maybe String
     }
-
-
-initEmpty : Form FormError DocumentCreateForm
-initEmpty =
-    Form.initial [] validation
 
 
 init :

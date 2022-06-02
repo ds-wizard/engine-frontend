@@ -1,4 +1,4 @@
-module Wizard.Projects.Common.DeleteProjectModal.Update exposing (update)
+module Wizard.Projects.Common.DeleteProjectModal.Update exposing (UpdateConfig, update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Questionnaires as QuestionnairesApi

@@ -6,7 +6,6 @@ import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins,
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import List.Extra as List
-import Registry.Common.View.ActionButton as ActionButton
 import Shared.Data.Event as Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
@@ -67,7 +66,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
 import Wizard.KMEditor.Migration.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Migration.View.DiffTree as DiffTree
-import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -98,10 +96,6 @@ migrationView appState model migration =
             div [ class "alert alert-danger" ]
                 [ lx_ "stateError" appState ]
 
-        runningStateMessage =
-            div [ class "alert alert-warning" ]
-                [ lx_ "running" appState ]
-
         currentView =
             case migration.migrationState.stateType of
                 ConflictState ->
@@ -128,7 +122,8 @@ migrationView appState model migration =
                     viewCompletedMigration appState model
 
                 RunningState ->
-                    runningStateMessage
+                    div [ class "alert alert-warning" ]
+                        [ lx_ "running" appState ]
 
                 _ ->
                     errorMessage

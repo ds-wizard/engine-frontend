@@ -1,4 +1,4 @@
-module Wizard.Public.SignupConfirmation.Update exposing (fetchData, handleSendConfirmationCompleted, update)
+module Wizard.Public.SignupConfirmation.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Users as UsersApi

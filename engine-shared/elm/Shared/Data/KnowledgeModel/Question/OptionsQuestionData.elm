@@ -1,7 +1,6 @@
 module Shared.Data.KnowledgeModel.Question.OptionsQuestionData exposing
     ( OptionsQuestionData
     , decoder
-    , new
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -17,9 +16,3 @@ decoder : Decoder OptionsQuestionData
 decoder =
     D.succeed OptionsQuestionData
         |> D.required "answerUuids" (D.list D.string)
-
-
-new : OptionsQuestionData
-new =
-    { answerUuids = []
-    }

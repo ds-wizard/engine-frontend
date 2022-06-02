@@ -109,9 +109,9 @@ listen =
     wsMessage
 
 
-schedulePing : (Time.Posix -> msg) -> Sub msg
-schedulePing =
-    Time.every (30 * 1000)
+schedulePing : msg -> Sub msg
+schedulePing msg =
+    Time.every (30 * 1000) (always msg)
 
 
 port wsOpen : String -> Cmd msg

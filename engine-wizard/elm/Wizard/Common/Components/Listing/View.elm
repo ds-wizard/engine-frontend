@@ -1,14 +1,16 @@
 module Wizard.Common.Components.Listing.View exposing
-    ( Filter(..)
+    ( CustomFilterConfig
+    , Filter(..)
     , ListingActionConfig
     , ListingActionType(..)
     , ListingDropdownItem
+    , SimpleFilterConfig
+    , SimpleMultiFilterConfig
     , UpdatedTimeConfig
     , ViewConfig
     , dropdownAction
     , dropdownSeparator
     , view
-    , viewItem
     )
 
 import Bootstrap.Button as Button
@@ -27,7 +29,7 @@ import Shared.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
-import Time exposing (Month(..))
+import Time
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Item, Model)
@@ -360,18 +362,19 @@ viewFilter appState cfg model filterId label items =
             else
                 Button.outlineSecondary
 
-        clearAllRoute =
-            Routing.toUrl appState <|
-                cfg.toRoute
-                    (PaginationQueryFilters.removeFilter filterId model.filters)
-                    (PaginationQueryString.resetPage model.paginationQueryString)
-
-        clearAllItem =
-            Dropdown.anchorItem [ href clearAllRoute ]
-                [ lx_ "filter.clearSelection" appState ]
-
         clearSelection =
             if filterActive then
+                let
+                    clearAllRoute =
+                        Routing.toUrl appState <|
+                            cfg.toRoute
+                                (PaginationQueryFilters.removeFilter filterId model.filters)
+                                (PaginationQueryString.resetPage model.paginationQueryString)
+
+                    clearAllItem =
+                        Dropdown.anchorItem [ href clearAllRoute ]
+                            [ lx_ "filter.clearSelection" appState ]
+                in
                 [ Dropdown.divider
                 , clearAllItem
                 ]
@@ -425,27 +428,6 @@ viewPagination appState cfg model page =
                 ]
                 [ text (String.fromInt number) ]
 
-        firstLink =
-            if currentPage > 1 then
-                viewPageLink 1
-                    [ class "icon-left" ]
-                    [ fa "fas fa-angle-double-left"
-                    , lx_ "pagination.first" appState
-                    ]
-
-            else
-                emptyNode
-
-        prevLink =
-            viewPageLink (currentPage - 1)
-                [ class "icon-left"
-                , classList [ ( "disabled", currentPage == 1 ) ]
-                , dataCy "listing_page-link_prev"
-                ]
-                [ fa "fas fa-angle-left"
-                , lx_ "pagination.prev" appState
-                ]
-
         dots =
             li [ class "page-item disabled" ] [ a [ class "page-link" ] [ text "..." ] ]
 
@@ -462,35 +444,57 @@ viewPagination appState cfg model page =
 
             else
                 ( page.totalPages, emptyNode )
-
-        pageLinks =
-            List.map viewNavLink (List.range left right)
-
-        nextLink =
-            viewPageLink (currentPage + 1)
-                [ class "icon-right"
-                , classList [ ( "disabled", currentPage == page.totalPages ) ]
-                , dataCy "listing_page-link_next"
-                ]
-                [ lx_ "pagination.next" appState
-                , fa "fas fa-angle-right"
-                ]
-
-        lastLink =
-            if currentPage < page.totalPages then
-                viewPageLink page.totalPages
-                    [ class "icon-right" ]
-                    [ lx_ "pagination.last" appState
-                    , fa "fas fa-angle-double-right"
-                    ]
-
-            else
-                emptyNode
-
-        links =
-            [ firstLink, prevLink, leftDots ] ++ pageLinks ++ [ rightDots, nextLink, lastLink ]
     in
     if page.totalPages > 1 then
+        let
+            lastLink =
+                if currentPage < page.totalPages then
+                    viewPageLink page.totalPages
+                        [ class "icon-right" ]
+                        [ lx_ "pagination.last" appState
+                        , fa "fas fa-angle-double-right"
+                        ]
+
+                else
+                    emptyNode
+
+            nextLink =
+                viewPageLink (currentPage + 1)
+                    [ class "icon-right"
+                    , classList [ ( "disabled", currentPage == page.totalPages ) ]
+                    , dataCy "listing_page-link_next"
+                    ]
+                    [ lx_ "pagination.next" appState
+                    , fa "fas fa-angle-right"
+                    ]
+
+            pageLinks =
+                List.map viewNavLink (List.range left right)
+
+            prevLink =
+                viewPageLink (currentPage - 1)
+                    [ class "icon-left"
+                    , classList [ ( "disabled", currentPage == 1 ) ]
+                    , dataCy "listing_page-link_prev"
+                    ]
+                    [ fa "fas fa-angle-left"
+                    , lx_ "pagination.prev" appState
+                    ]
+
+            firstLink =
+                if currentPage > 1 then
+                    viewPageLink 1
+                        [ class "icon-left" ]
+                        [ fa "fas fa-angle-double-left"
+                        , lx_ "pagination.first" appState
+                        ]
+
+                else
+                    emptyNode
+
+            links =
+                [ firstLink, prevLink, leftDots ] ++ pageLinks ++ [ rightDots, nextLink, lastLink ]
+        in
         nav [] [ ul [ class "pagination" ] links ]
 
     else

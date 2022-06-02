@@ -3,7 +3,6 @@ module Wizard.Common.View.Layout exposing
     , misconfigured
     , mixedApp
     , public
-    , publicApp
     )
 
 import Browser exposing (Document)
@@ -23,7 +22,7 @@ import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.View exposing (viewAboutModal, viewDevMenu, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
 import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model, userLoggedIn)
-import Wizard.Msgs exposing (Msg(..))
+import Wizard.Msgs exposing (Msg)
 import Wizard.Routes as Routes
 
 
@@ -99,18 +98,6 @@ publicApp model content =
 publicHeader : Bool -> Model -> Html Msg
 publicHeader fluid model =
     let
-        signUpLink =
-            if model.appState.config.authentication.internal.registration.enabled then
-                li [ class "nav-item" ]
-                    [ linkTo model.appState
-                        Routes.publicSignup
-                        [ class "nav-link", dataCy "public_nav_sign-up" ]
-                        [ lx_ "header.signUp" model.appState ]
-                    ]
-
-            else
-                emptyNode
-
         links =
             if userLoggedIn model then
                 [ li [ class "nav-item" ]
@@ -122,6 +109,19 @@ publicHeader fluid model =
                 ]
 
             else
+                let
+                    signUpLink =
+                        if model.appState.config.authentication.internal.registration.enabled then
+                            li [ class "nav-item" ]
+                                [ linkTo model.appState
+                                    Routes.publicSignup
+                                    [ class "nav-link", dataCy "public_nav_sign-up" ]
+                                    [ lx_ "header.signUp" model.appState ]
+                                ]
+
+                        else
+                            emptyNode
+                in
                 [ li [ class "nav-item" ]
                     [ linkTo model.appState
                         (Routes.publicLogin Nothing)
