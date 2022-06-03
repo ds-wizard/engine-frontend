@@ -2048,9 +2048,16 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers index
 viewQuestionValue : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
 viewQuestionValue appState cfg model path question =
     let
+        defaultValue =
+            if Question.getValueType question == Just ColorQuestionValueType then
+                "#000000"
+
+            else
+                ""
+
         answer =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.unwrap "" (.value >> ReplyValue.getStringReply)
+                |> Maybe.unwrap defaultValue (.value >> ReplyValue.getStringReply)
 
         defaultAttrs =
             [ class "form-control", value answer ]
