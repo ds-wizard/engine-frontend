@@ -98,9 +98,12 @@ fetchSubrouteDataFromAfter wrapMsg appState model =
             ( model, Cmd.none )
 
 
-isGuarded : AppState -> Model -> Maybe String
-isGuarded appState model =
+isGuarded : AppState -> Routes.Route -> Model -> Maybe String
+isGuarded appState nextRoute model =
     if List.isEmpty model.savingActionUuids then
+        Nothing
+
+    else if Routes.isProjectsDetail model.uuid nextRoute then
         Nothing
 
     else
@@ -108,7 +111,7 @@ isGuarded appState model =
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
-onUnload newRoute model =
+onUnload nextRoute model =
     let
         leaveCmd =
             Cmd.batch
@@ -116,7 +119,7 @@ onUnload newRoute model =
                 , dispatch ResetModel
                 ]
     in
-    case newRoute of
+    case nextRoute of
         ProjectsRoute (DetailRoute uuid _) ->
             if uuid == model.uuid then
                 Cmd.none

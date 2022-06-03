@@ -43,22 +43,22 @@ fetchData route appState model =
                 Wizard.Projects.Migration.Update.fetchData appState uuid
 
 
-isGuarded : Route -> AppState -> Model -> Maybe String
-isGuarded route appState model =
+isGuarded : Route -> AppState -> Wizard.Routes.Route -> Model -> Maybe String
+isGuarded route appState nextRoute model =
     case route of
         DetailRoute _ _ ->
-            Wizard.Projects.Detail.Update.isGuarded appState model.detailModel
+            Wizard.Projects.Detail.Update.isGuarded appState nextRoute model.detailModel
 
         _ ->
             Nothing
 
 
 onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Msg
-onUnload route newRoute model =
+onUnload route nextRoute model =
     case route of
         DetailRoute _ _ ->
             Cmd.map DetailMsg <|
-                Wizard.Projects.Detail.Update.onUnload newRoute model.detailModel
+                Wizard.Projects.Detail.Update.onUnload nextRoute model.detailModel
 
         _ ->
             Cmd.none

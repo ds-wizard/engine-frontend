@@ -82,29 +82,29 @@ fetchData model =
             Cmd.none
 
 
-isGuarded : Model -> Maybe String
-isGuarded model =
+isGuarded : Routes.Route -> Model -> Maybe String
+isGuarded nextRoute model =
     case model.appState.route of
         Routes.KMEditorRoute route ->
-            Wizard.KMEditor.Update.isGuarded route model.appState model.kmEditorModel
+            Wizard.KMEditor.Update.isGuarded route model.appState nextRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
-            Wizard.Projects.Update.isGuarded route model.appState model.projectsModel
+            Wizard.Projects.Update.isGuarded route model.appState nextRoute model.projectsModel
 
         _ ->
             Nothing
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
-onUnload newRoute model =
+onUnload nextRoute model =
     case model.appState.route of
         Routes.KMEditorRoute route ->
             Cmd.map KMEditorMsg <|
-                Wizard.KMEditor.Update.onUnload route newRoute model.kmEditorModel
+                Wizard.KMEditor.Update.onUnload route nextRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
             Cmd.map ProjectsMsg <|
-                Wizard.Projects.Update.onUnload route newRoute model.projectsModel
+                Wizard.Projects.Update.onUnload route nextRoute model.projectsModel
 
         _ ->
             Cmd.none
@@ -125,19 +125,23 @@ update msg model =
         case msg of
             Wizard.Msgs.OnUrlChange location ->
                 let
-                    newRoute =
+                    nextRoute =
                         parseLocation model.appState location
 
                     newModel =
-                        setRoute newRoute model
+                        setRoute nextRoute model
                             |> initLocalModel
                 in
-                ( newModel, Cmd.batch [ onUnload newRoute model, fetchData newModel ] )
+                ( newModel, Cmd.batch [ onUnload nextRoute model, fetchData newModel ] )
 
             Wizard.Msgs.OnUrlRequest urlRequest ->
                 case urlRequest of
                     Browser.Internal url ->
-                        case isGuarded model of
+                        let
+                            nextRoute =
+                                parseLocation model.appState url
+                        in
+                        case isGuarded nextRoute model of
                             Just guardMsg ->
                                 ( model, Ports.alert guardMsg )
 

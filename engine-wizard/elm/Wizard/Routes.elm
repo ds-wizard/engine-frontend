@@ -10,8 +10,10 @@ module Wizard.Routes exposing
     , documentsIndexWithFilters
     , isAppIndex
     , isDocumentsIndex
+    , isKmEditorEditor
     , isKmEditorIndex
     , isKnowledgeModelsIndex
+    , isProjectsDetail
     , isProjectsIndex
     , isTemplateIndex
     , isUsersIndex
@@ -206,6 +208,16 @@ kmEditorEditor branchUuid mbEntityUuid =
     KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid (Wizard.KMEditor.Editor.KMEditorRoute.Edit mbEntityUuid))
 
 
+isKmEditorEditor : Uuid -> Route -> Bool
+isKmEditorEditor uuid route =
+    case route of
+        KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute editorUuid _) ->
+            uuid == editorUuid
+
+        _ ->
+            False
+
+
 kmEditorEditorQuestionTags : Uuid -> Route
 kmEditorEditorQuestionTags branchUuid =
     KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.QuestionTags)
@@ -327,6 +339,16 @@ projectsDetailDocumentsNew uuid mbEventUuidString =
 projectsDetailSettings : Uuid -> Route
 projectsDetailSettings uuid =
     ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Settings
+
+
+isProjectsDetail : Uuid -> Route -> Bool
+isProjectsDetail uuid route =
+    case route of
+        ProjectsRoute (Wizard.Projects.Routes.DetailRoute projectUuid _) ->
+            uuid == projectUuid
+
+        _ ->
+            False
 
 
 projectsIndex : Route

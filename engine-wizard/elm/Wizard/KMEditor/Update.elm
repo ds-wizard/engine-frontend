@@ -38,22 +38,22 @@ fetchData route model appState =
                 Wizard.KMEditor.Publish.Update.fetchData uuid appState
 
 
-isGuarded : Route -> AppState -> Model -> Maybe String
-isGuarded route appState model =
+isGuarded : Route -> AppState -> Wizard.Routes.Route -> Model -> Maybe String
+isGuarded route appState nextRoute model =
     case route of
         EditorRoute _ _ ->
-            Wizard.KMEditor.Editor.Update.isGuarded appState model.editorModel
+            Wizard.KMEditor.Editor.Update.isGuarded appState nextRoute model.editorModel
 
         _ ->
             Nothing
 
 
 onUnload : Route -> Wizard.Routes.Route -> Model -> Cmd Msg
-onUnload route newRoute model =
+onUnload route nextRoute model =
     case route of
         EditorRoute _ _ ->
             Cmd.map EditorMsg <|
-                Wizard.KMEditor.Editor.Update.onUnload newRoute model.editorModel
+                Wizard.KMEditor.Editor.Update.onUnload nextRoute model.editorModel
 
         _ ->
             Cmd.none
