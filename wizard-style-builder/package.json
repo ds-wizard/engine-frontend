@@ -20,7 +20,7 @@
     "sass": "^1.52.1"
   },
   "devDependencies": {
-    "jest": "^28.1.0",
+    "jest": "^28.1.1",
     "nodemon": "^2.0.16",
     "supertest": "^6.2.3"
   },
