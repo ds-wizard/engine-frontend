@@ -42,7 +42,7 @@
     "fast-csv": "^4.3.6",
     "html-webpack-plugin": "^5.5.0",
     "lodash": "^4.17.21",
-    "mini-css-extract-plugin": "^2.6.0",
+    "mini-css-extract-plugin": "^2.6.1",
     "sass": "^1.52.1",
     "sass-loader": "^13.0.0",
     "terser-webpack-plugin": "^5.3.3",
