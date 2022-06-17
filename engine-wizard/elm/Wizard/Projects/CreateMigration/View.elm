@@ -109,7 +109,7 @@ createMigrationView appState model questionnaire =
                 ]
             ]
         , FormActions.view appState
-            Routes.projectsIndex
+            (Routes.projectsIndex appState)
             (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingMigration (FormMsg Form.Submit) False)
         ]
 

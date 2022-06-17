@@ -43,7 +43,7 @@ viewContent appState model mbQuestionnaire =
         [ FormResult.view appState model.savingQuestionnaire
         , formView appState model mbQuestionnaire
         , FormActions.view appState
-            Routes.projectsIndex
+            (Routes.projectsIndex appState)
             (ActionResult.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
         ]
 

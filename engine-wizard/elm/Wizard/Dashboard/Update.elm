@@ -4,6 +4,7 @@ module Wizard.Dashboard.Update exposing
     )
 
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Auth.Session as Session
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lg)
@@ -25,8 +26,11 @@ fetchData appState =
         let
             pagination =
                 PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC PaginationQueryString.empty
+
+            mbUserUuid =
+                Session.getUserUuid appState.session
         in
-        QuestionnairesApi.getQuestionnaires { isTemplate = Just False, userUuids = Nothing, userUuidsOp = Nothing, projectTags = Nothing, projectTagsOp = Nothing } pagination appState GetQuestionnairesCompleted
+        QuestionnairesApi.getQuestionnaires { isTemplate = Just False, userUuids = mbUserUuid, userUuidsOp = Nothing, projectTags = Nothing, projectTagsOp = Nothing } pagination appState GetQuestionnairesCompleted
 
     else
         Cmd.none

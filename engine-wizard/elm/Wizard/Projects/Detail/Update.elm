@@ -492,7 +492,7 @@ update wrapMsg msg appState model =
             let
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
-                    , redirectCmd = cmdNavigate appState Routes.projectsIndex
+                    , redirectCmd = cmdNavigate appState (Routes.projectsIndex appState)
                     , packageId = ActionResult.unwrap "" (.questionnaire >> .package >> .id) model.questionnaireModel
                     , questionnaireUuid = model.uuid
                     , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
