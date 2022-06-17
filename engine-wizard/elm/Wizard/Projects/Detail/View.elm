@@ -19,7 +19,7 @@ import Wizard.Common.Feature as Features
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
-import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDetail
+import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Projects.Common.View exposing (visibilityIcons)
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.Preview as Preview
@@ -347,7 +347,10 @@ viewProjectContent appState route model qm =
             if isOwner && isAuthenticated then
                 Html.map SettingsMsg <|
                     Settings.view appState
-                        { questionnaire = QuestionnaireDetail.fromQuestionnaireDetail qm.questionnaire, package = qm.questionnaire.package }
+                        { questionnaire = QuestionnaireDescriptor.fromQuestionnaireDetail qm.questionnaire
+                        , package = qm.questionnaire.package
+                        , templateState = qm.questionnaire.templateState
+                        }
                         model.settingsModel
 
             else

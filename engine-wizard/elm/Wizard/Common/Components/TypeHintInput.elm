@@ -23,10 +23,15 @@ import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (lgx)
+import Shared.Locale exposing (lgx, lx)
 import Shared.Utils exposing (dispatch)
 import Task
 import Wizard.Common.AppState exposing (AppState)
+
+
+lx_ : String -> AppState -> Html msg
+lx_ =
+    lx "Wizard.Common.Components.TypeHintInput"
 
 
 
@@ -263,7 +268,11 @@ viewTypeHints appState cfg model =
             content =
                 case Maybe.withDefault Unset model.typehints of
                     Success hints ->
-                        ul [] (List.map (viewTypeHint cfg) hints.items)
+                        if List.isEmpty hints.items then
+                            div [ class "empty" ] [ lx_ "emptyResult" appState ]
+
+                        else
+                            ul [] (List.map (viewTypeHint cfg) hints.items)
 
                     Loading ->
                         div [ class "loading" ]

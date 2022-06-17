@@ -69,13 +69,17 @@
             }
         }
 
-        .loading, .error {
+        .loading, .error, .empty {
             background: $white;
             padding: .5rem .75rem;
 
             .fa {
                 margin-right: 0.25rem;
             }
+        }
+
+        .empty {
+            font-style: italic;
         }
 
         .loading {
