@@ -239,7 +239,7 @@ menuItems appState =
     , MenuItem
         (l_ "menu.projects" appState)
         (faSet "menu.projects" appState)
-        Routes.projectsIndex
+        (Routes.projectsIndex appState)
         Routes.isProjectsIndex
         Feature.projectsView
         "projects-link"

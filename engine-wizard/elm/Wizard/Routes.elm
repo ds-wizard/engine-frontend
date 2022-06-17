@@ -60,6 +60,7 @@ module Wizard.Routes exposing
     , usersIndexWithFilters
     )
 
+import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
@@ -351,9 +352,13 @@ isProjectsDetail uuid route =
             False
 
 
-projectsIndex : Route
-projectsIndex =
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing)
+projectsIndex : { a | session : Session } -> Route
+projectsIndex appState =
+    let
+        mbUserUuid =
+            Session.getUserUuid appState.session
+    in
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing)
 
 
 projectsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route

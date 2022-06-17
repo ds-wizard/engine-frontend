@@ -240,7 +240,7 @@ handleFinalizeMigrationCompleted appState model result =
                             Routes.projectsDetailQuestionnaire questionnaireMigration.oldQuestionnaire.uuid
 
                         _ ->
-                            Routes.projectsIndex
+                            Routes.projectsIndex appState
             in
             ( model, cmdNavigate appState route )
 

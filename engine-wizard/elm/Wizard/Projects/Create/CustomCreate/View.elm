@@ -44,7 +44,7 @@ view appState model =
         , formView appState model
         , tagsView appState model
         , FormActions.viewCustomButton appState
-            Routes.projectsIndex
+            (Routes.projectsIndex appState)
             submitButton
         ]
 
