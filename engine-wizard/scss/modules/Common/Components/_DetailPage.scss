@@ -34,6 +34,10 @@
         margin-top: $top-header-height;
         overflow-x: auto;
 
+        .alert {
+            border-radius: 0;
+        }
+
         .alert + .alert {
             margin-top: -1rem;
         }

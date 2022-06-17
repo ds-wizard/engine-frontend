@@ -61,6 +61,7 @@ import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
+import Shared.Data.Template.TemplateState as TemplateState exposing (TemplateState)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.UserInfo as UserInfo
 import Shared.RegexPatterns as RegexPatterns
@@ -87,6 +88,7 @@ type alias QuestionnaireDetail =
     , selectedQuestionTagUuids : List String
     , templateId : Maybe String
     , template : Maybe TemplateSuggestion
+    , templateState : Maybe TemplateState
     , formatUuid : Maybe Uuid
     , format : Maybe TemplateFormat
     , labels : Dict String (List String)
@@ -115,6 +117,7 @@ decoder =
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
         |> D.required "templateId" (D.maybe D.string)
         |> D.required "template" (D.maybe TemplateSuggestion.decoder)
+        |> D.required "templateState" (D.maybe TemplateState.decoder)
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe TemplateFormat.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
@@ -166,6 +169,7 @@ createQuestionnaireDetail package km =
     , selectedQuestionTagUuids = []
     , templateId = Nothing
     , template = Nothing
+    , templateState = Nothing
     , formatUuid = Nothing
     , format = Nothing
     , labels = Dict.empty
