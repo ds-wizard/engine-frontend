@@ -14,15 +14,11 @@ $tag-selection-height: 80px;
         border-bottom: 1px solid $gray-400;
 
         .tag-selection-header {
-            margin-bottom: 1rem;
+            margin-bottom: .125rem;
 
             a {
                 margin-left: 1rem;
             }
-        }
-
-        .tag-list {
-            margin-top: -10px;
         }
     }
 
@@ -33,6 +29,19 @@ $tag-selection-height: 80px;
     &--WithTags {
         .questionnaire {
             height:  calc(100vh - #{$editor-header-height} - #{$tag-selection-height});
+        }
+
+        .tag-list {
+            white-space: nowrap;
+            overflow-y: auto;
+
+            .tag {
+                margin-bottom: 0;
+
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
         }
     }
 }
