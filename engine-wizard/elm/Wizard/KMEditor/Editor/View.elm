@@ -91,7 +91,7 @@ viewKMEditor route appState model branch =
             else
                 viewKMEditorNavigation appState route model branch
     in
-    div [ class "KMEditor__Editor", dataCy "km-editor" ]
+    div [ class "KMEditor__Editor col-full flex-column", dataCy "km-editor" ]
         [ navigation
         , viewKMEditorContent appState route model branch
         ]
@@ -121,11 +121,11 @@ viewKMEditorNavigationTitleRow appState model branch =
             , viewKMEditorNavigationSaving appState model
             ]
         , DetailNavigation.section
-            [ DetailNavigation.onlineUsers OnlineUserMsg appState model.onlineUsers
+            [ DetailNavigation.onlineUsers appState model.onlineUsers
             , DetailNavigation.sectionActions
                 [ linkTo appState
                     (Routes.kmEditorPublish branch.branch.uuid)
-                    [ class "btn btn-primary link-with-icon"
+                    [ class "btn btn-primary"
                     , dataCy "km-editor_publish-button"
                     ]
                     [ faSet "kmEditorList.publish" appState

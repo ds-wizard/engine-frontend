@@ -7,12 +7,14 @@ module Wizard.Common.Components.SimpleList exposing
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l)
 import Shared.Undraw as Undraw
 import Time
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (tooltip)
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
@@ -87,7 +89,14 @@ viewUpdated : AppState -> Config a msg -> a -> Html msg
 viewUpdated appState config item =
     case config.updated of
         Just updated ->
-            span []
+            let
+                time =
+                    updated.getTime item
+
+                readableTime =
+                    TimeUtils.toReadableDateTime appState.timeZone time
+            in
+            span (tooltip readableTime)
                 [ text <| l_ "item.updated" appState ++ inWordsWithConfig { withAffix = True } (locale appState) (updated.getTime item) updated.currentTime ]
 
         Nothing ->

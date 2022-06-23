@@ -1,9 +1,13 @@
-module Wizard.Common.Components.PlansList exposing (ViewConfig, view)
+module Wizard.Common.Components.PlansList exposing
+    ( ViewConfig
+    , view
+    )
 
-import Html exposing (Html, span, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.Badge as Badge
 import Shared.Data.Plan exposing (Plan)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lgx, lx)
@@ -31,7 +35,7 @@ view appState cfg plans =
     let
         viewTrialBadge plan =
             if plan.test then
-                span [ class "badge badge-secondary ml-2" ] [ lx_ "badge.trial" appState ]
+                Badge.secondary [ class "ms-2" ] [ lx_ "badge.trial" appState ]
 
             else
                 emptyNode
@@ -53,7 +57,7 @@ view appState cfg plans =
                             True
             in
             if active then
-                span [ class "badge badge-success ml-2" ] [ lx_ "badge.active" appState ]
+                Badge.success [ class "ms-2" ] [ lx_ "badge.active" appState ]
 
             else
                 emptyNode

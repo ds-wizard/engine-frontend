@@ -1,9 +1,10 @@
 module Wizard.Projects.Detail.View exposing (view)
 
-import Html exposing (Html, button, div, p, span, text)
+import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Auth.Session as Session
+import Shared.Components.Badge as Badge
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa)
@@ -107,7 +108,7 @@ viewProject route appState model qm =
             , versions = qm.questionnaire.versions
             }
     in
-    div [ class "Projects__Detail" ]
+    div [ class "Projects__Detail col-full flex-column" ]
         [ navigation
         , viewProjectContent appState route model qm
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
@@ -142,7 +143,7 @@ viewProjectNavigationTitleRow appState model questionnaire =
                 ++ [ viewProjectNavigationProjectSaving appState model ]
             )
         , DetailNavigation.section
-            [ DetailNavigation.onlineUsers OnlineUserMsg appState model.onlineUsers
+            [ DetailNavigation.onlineUsers appState model.onlineUsers
             , viewProjectNavigationActions appState model questionnaire
             ]
         ]
@@ -151,8 +152,7 @@ viewProjectNavigationTitleRow appState model questionnaire =
 templateBadge : AppState -> QuestionnaireDetail -> Html msg
 templateBadge appState questionnaire =
     if questionnaire.isTemplate then
-        span [ class "badge badge-info" ]
-            [ lgx "questionnaire.templateBadge" appState ]
+        Badge.info [] [ lgx "questionnaire.templateBadge" appState ]
 
     else
         emptyNode
@@ -183,7 +183,7 @@ viewProjectNavigationActions appState model questionnaire =
     else if QuestionnaireDetail.isOwner appState questionnaire then
         DetailNavigation.sectionActions
             [ button
-                [ class "btn btn-info link-with-icon"
+                [ class "btn btn-info text-light"
                 , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
                 , dataCy "project_detail_share-button"
                 ]

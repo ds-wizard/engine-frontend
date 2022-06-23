@@ -38,6 +38,16 @@ body {
     max-width: 33rem;
 }
 
+.col-full {
+    width: 100%;
+    height: 100vh;
+    margin-top: -20px;
+    margin-bottom: -20px;
+    display: flex;
+    padding-left: 0;
+    padding-right: 0;
+}
+
 .side-navigation {
     background-color: $side-navigation-bg;
     width: $side-navigation-width;
@@ -100,13 +110,14 @@ body {
                 &:hover {
                     background: $side-navigation-link-hover-bg;
                     color: $side-navigation-link-color;
-                    text-decoration: none;
+                    text-decoration: none !important;
                 }
 
                 .fa {
                     display: inline-block;
                     text-align: center;
                     flex: 0 0 40px;
+                    margin-right: 0;
                 }
             }
         }
@@ -148,7 +159,8 @@ body {
                 .fa {
                     display: inline-block;
                     width: 40px;
-                    text-align: center
+                    text-align: center;
+                    margin-right: 0;
                 }
 
                 .user-icon-wrapper {
@@ -211,7 +223,7 @@ body {
             color: rgba($side-navigation-link-color, 0.8);
 
             &:hover {
-                text-decoration: none;
+                text-decoration: none !important;
                 background: $side-navigation-collapse-hover;
                 color: $side-navigation-link-color;
             }

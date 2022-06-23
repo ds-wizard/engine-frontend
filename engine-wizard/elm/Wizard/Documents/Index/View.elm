@@ -2,12 +2,13 @@ module Wizard.Documents.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
-import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
+import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
 import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.Badge as Badge
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -24,7 +25,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, listClass, tooltip, tooltipCustom)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
@@ -112,7 +113,7 @@ listingConfig appState model mbQuestionnaireFilterView =
             else
                 Just <|
                     [ strong [] [ lx_ "submissions.title" appState ]
-                    , table [ class "table table-sm" ]
+                    , table [ class "table table-sm table-borderless table-striped" ]
                         [ tbody []
                             (List.map (viewSubmission appState) (List.sortWith Submission.compare document.submissions))
                         ]
@@ -145,19 +146,20 @@ listingConfig appState model mbQuestionnaireFilterView =
 listingTitle : AppState -> Document -> Html Msg
 listingTitle appState document =
     let
-        name =
+        ( name, downloadTooltip ) =
             if document.state == DoneDocumentState then
-                a
+                ( a
                     [ href <| DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState
                     , target "_blank"
-                    , title <| l_ "listing.name.title" appState
                     ]
                     [ text document.name ]
+                , tooltipCustom "with-tooltip-right with-tooltip-align-left" (l_ "listing.name.title" appState)
+                )
 
             else
-                span [] [ text document.name ]
+                ( span [] [ text document.name ], [] )
     in
-    span []
+    span downloadTooltip
         [ name
         , stateBadge appState document.state
         ]
@@ -263,13 +265,13 @@ stateBadge : AppState -> DocumentState -> Html msg
 stateBadge appState state =
     case state of
         QueuedDocumentState ->
-            span [ class "badge badge-info", dataCy "documents_state-badge" ]
+            Badge.info [ dataCy "documents_state-badge" ]
                 [ faSet "_global.spinner" appState
                 , lx_ "badge.queued" appState
                 ]
 
         InProgressDocumentState ->
-            span [ class "badge badge-info", dataCy "documents_state-badge" ]
+            Badge.info [ dataCy "documents_state-badge" ]
                 [ faSet "_global.spinner" appState
                 , lx_ "badge.inProgress" appState
                 ]
@@ -278,7 +280,7 @@ stateBadge appState state =
             emptyNode
 
         ErrorDocumentState ->
-            span [ class "badge badge-danger", dataCy "documents_state-badge" ]
+            Badge.danger [ dataCy "documents_state-badge" ]
                 [ lx_ "badge.error" appState ]
 
 
@@ -288,18 +290,16 @@ viewSubmission appState submission =
         viewSubmissionState submissionState =
             case submissionState of
                 SubmissionState.InProgress ->
-                    span [ class "badge badge-info badge-with-icon" ]
+                    Badge.info []
                         [ faSet "_global.spinner" appState
                         , lgx "submissionState.inProgress" appState
                         ]
 
                 SubmissionState.Done ->
-                    span [ class "badge badge-success" ]
-                        [ lgx "submissionState.done" appState ]
+                    Badge.success [] [ lgx "submissionState.done" appState ]
 
                 SubmissionState.Error ->
-                    span [ class "badge badge-danger" ]
-                        [ lgx "submissionState.error" appState ]
+                    Badge.danger [] [ lgx "submissionState.error" appState ]
 
         readableTime =
             TimeUtils.toReadableDateTime appState.timeZone submission.updatedAt
@@ -332,7 +332,7 @@ viewSubmission appState submission =
                 ]
             ]
         , td [] [ link ]
-        , td [] [ span [ class "timestamp", title readableTime ] [ text updatedText ] ]
+        , td [] [ span (class "timestamp" :: tooltip readableTime) [ text updatedText ] ]
         ]
 
 

@@ -61,7 +61,7 @@ header : AppState -> TemplateDetail -> Html Msg
 header appState template =
     let
         exportAction =
-            a [ class "link-with-icon", href <| TemplatesApi.exportTemplateUrl template.id appState, target "_blank" ]
+            a [ href <| TemplatesApi.exportTemplateUrl template.id appState, target "_blank" ]
                 [ faSet "_global.export" appState
                 , lx_ "header.export" appState
                 ]
@@ -251,7 +251,7 @@ sidePanelRegistryLink appState template =
         toRegistryLink registryLink =
             ( lg "template.registryLink" appState
             , "registry-link"
-            , a [ href registryLink, class "link-with-icon", target "_blank" ]
+            , a [ href registryLink, target "_blank" ]
                 [ faSet "kmDetail.registryLink" appState
                 , text template.id
                 ]

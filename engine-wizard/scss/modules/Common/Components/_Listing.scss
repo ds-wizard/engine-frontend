@@ -7,13 +7,18 @@
     .listing-toolbar {
         display: flex;
         justify-content: space-between;
+        align-items: flex-start;
 
         .filter-sort {
             & > .btn, & > .btn-group {
-                margin-left: 1rem;
+                margin-bottom: $spacer-2;
+
+                &:not(:last-child) {
+                    margin-right: $spacer-3;
+                }
 
                 .badge {
-                    margin-left: .25rem;
+                    margin-left: $spacer-1;
                 }
             }
 
@@ -204,14 +209,14 @@
                     align-items: center;
                     justify-content: flex-start;
 
-                    & > .fa {
+                    & > .fa, & > .with-tooltip {
                         margin-left: 0.5rem;
                         color: $gray-500;
                     }
                 }
             }
 
-            a {
+            a:not(.badge) {
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 overflow: hidden;
@@ -268,6 +273,10 @@
         }
 
         .fragment {
+            & > *:not(:first-child) {
+                margin-left: $spacer-1;
+            }
+
             &:not(code) {
                 color: $gray-700;
             }

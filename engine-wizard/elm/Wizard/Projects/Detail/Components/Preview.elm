@@ -173,7 +173,7 @@ viewNotSupported appState documentUrl =
         , content =
             [ p [] [ lx_ "notSupported.text" appState ]
             , p []
-                [ a [ class "btn btn-primary btn-lg link-with-icon", href documentUrl, target "_blank" ]
+                [ a [ class "btn btn-primary btn-lg", href documentUrl, target "_blank" ]
                     [ faSet "_global.download" appState
                     , lx_ "notSupported.download" appState
                     ]

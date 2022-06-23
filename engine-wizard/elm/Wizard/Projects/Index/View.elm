@@ -8,6 +8,7 @@ import Html.Events exposing (onInput)
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Components.Badge as Badge
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
@@ -408,7 +409,7 @@ filterBadge items =
             emptyNode
 
         n ->
-            span [ class "badge badge-pill badge-dark" ] [ text ("+" ++ String.fromInt (n - 1)) ]
+            Badge.dark [ class "rounded-pill" ] [ text ("+" ++ String.fromInt (n - 1)) ]
 
 
 listingTitle : AppState -> Questionnaire -> Html Msg
@@ -603,13 +604,12 @@ stateBadge : AppState -> Questionnaire -> Html msg
 stateBadge appState questionnaire =
     case questionnaire.state of
         Migrating ->
-            span [ class "badge badge-info" ]
-                [ lx_ "badge.migrating" appState ]
+            Badge.info [] [ lx_ "badge.migrating" appState ]
 
         Outdated ->
             linkTo appState
                 (Routes.projectsCreateMigration questionnaire.uuid)
-                [ class "badge badge-warning" ]
+                [ class Badge.warningClass ]
                 [ lx_ "badge.outdated" appState ]
 
         Default ->
@@ -619,8 +619,7 @@ stateBadge appState questionnaire =
 templateBadge : AppState -> Questionnaire -> Html msg
 templateBadge appState questionnaire =
     if questionnaire.isTemplate then
-        span [ class "badge badge-info" ]
-            [ lgx "questionnaire.templateBadge" appState ]
+        Badge.info [] [ lgx "questionnaire.templateBadge" appState ]
 
     else
         emptyNode

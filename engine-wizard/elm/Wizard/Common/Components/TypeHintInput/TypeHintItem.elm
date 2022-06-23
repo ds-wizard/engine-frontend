@@ -6,8 +6,9 @@ module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
     , templateSuggestion
     )
 
-import Html exposing (Html, div, span, strong, text)
+import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class)
+import Shared.Components.Badge as Badge
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.User as User
@@ -52,7 +53,7 @@ packageSuggestion withVersion pkg =
     let
         version =
             if withVersion then
-                span [ class "badge badge-light", dataCy "typehint-item_package_version" ] [ text <| Version.toString pkg.version ]
+                Badge.light [ dataCy "typehint-item_package_version" ] [ text <| Version.toString pkg.version ]
 
             else
                 emptyNode
@@ -84,7 +85,7 @@ templateSuggestion appState template =
         , div []
             [ div []
                 [ strong [] [ text visibleName ]
-                , span [ class "badge badge-light" ] [ text <| Version.toString template.version ]
+                , Badge.light [] [ text <| Version.toString template.version ]
                 ]
             , div [] [ text template.description ]
             ]

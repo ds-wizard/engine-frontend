@@ -62,8 +62,7 @@ header appState package =
         previewAction =
             linkTo appState
                 (Routes.knowledgeModelsPreview package.id Nothing)
-                [ class "link-with-icon"
-                , dataCy "km-detail_preview-link"
+                [ dataCy "km-detail_preview-link"
                 ]
                 [ faSet "kmDetail.preview" appState
                 , lgx "km.action.preview" appState
@@ -75,8 +74,7 @@ header appState package =
         createEditorAction =
             linkTo appState
                 (Routes.kmEditorCreate (Just package.id) (Just True))
-                [ class "link-with-icon"
-                , dataCy "km-detail_create-editor-link"
+                [ dataCy "km-detail_create-editor-link"
                 ]
                 [ faSet "kmDetail.createKMEditor" appState
                 , lgx "km.action.kmEditor" appState
@@ -88,8 +86,7 @@ header appState package =
         forkAction =
             linkTo appState
                 (Routes.kmEditorCreate (Just package.id) Nothing)
-                [ class "link-with-icon"
-                , dataCy "km-detail_fork-link"
+                [ dataCy "km-detail_fork-link"
                 ]
                 [ faSet "kmDetail.fork" appState
                 , lgx "km.action.fork" appState
@@ -113,8 +110,7 @@ header appState package =
 
         exportAction =
             a
-                [ class "link-with-icon"
-                , href <| PackagesApi.exportPackageUrl package.id appState
+                [ href <| PackagesApi.exportPackageUrl package.id appState
                 , target "_blank"
                 , dataCy "km-detail_export-link"
                 ]
@@ -128,7 +124,7 @@ header appState package =
         deleteAction =
             a
                 [ onClick <| ShowDeleteDialog True
-                , class "text-danger link-with-icon"
+                , class "text-danger"
                 , dataCy "km-detail_delete-link"
                 ]
                 [ faSet "_global.delete" appState
@@ -273,7 +269,7 @@ sidePanelRegistryLink appState package =
         toRegistryLinkInfo registryLink =
             ( lg "package.registryLink" appState
             , "registry-link"
-            , a [ href registryLink, class "link-with-icon", target "_blank" ]
+            , a [ href registryLink, target "_blank" ]
                 [ faSet "kmDetail.registryLink" appState
                 , text package.id
                 ]

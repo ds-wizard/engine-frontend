@@ -2,7 +2,7 @@ module Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
 import Html exposing (Html, code, div, h3, span, text)
-import Html.Attributes exposing (class, title)
+import Html.Attributes exposing (class)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
@@ -80,7 +80,7 @@ listingDescription : AppState -> Questionnaire -> Html msg
 listingDescription appState questionnaire =
     linkTo appState
         (Routes.knowledgeModelsDetail questionnaire.package.id)
-        [ title <| l_ "knowledgeModel" appState ]
+        []
         [ text questionnaire.package.name
         , text ", "
         , text <| Version.toString questionnaire.package.version

@@ -101,7 +101,7 @@ viewNavbarItem title icon isActive msg dataCyValue =
     li [ class "nav-item" ]
         [ a
             [ onClick msg
-            , class "nav-link link-with-icon"
+            , class "nav-link"
             , classList [ ( "active", isActive ) ]
             , dataCy dataCyValue
             ]

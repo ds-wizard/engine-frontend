@@ -427,7 +427,7 @@ header model =
 
 loggedInHeaderNavigation : AppState -> Html Msg
 loggedInHeaderNavigation appState =
-    ul [ class "nav navbar-nav ml-auto" ]
+    ul [ class "nav navbar-nav ms-auto" ]
         [ li [ class "nav-item" ]
             [ a
                 [ href <| Routing.toString Routing.Organization
@@ -447,7 +447,7 @@ loggedInHeaderNavigation appState =
 
 publicHeaderNavigation : AppState -> Html Msg
 publicHeaderNavigation appState =
-    ul [ class "nav navbar-nav ml-auto" ]
+    ul [ class "nav navbar-nav ms-auto" ]
         [ li [ class "nav-item" ]
             [ a [ href <| Routing.toString Routing.Login, class "nav-link" ]
                 [ lx_ "publicHeaderNavigation.logIn" appState ]

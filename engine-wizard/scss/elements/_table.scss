@@ -1,0 +1,43 @@
+@import '../variables';
+@import '../version';
+
+.table-usage {
+    tbody {
+        tr:first-child {
+            border-top-width: 1px;
+        }
+    }
+
+    td {
+        vertical-align: middle;
+        white-space: nowrap;
+
+        .progress {
+            width: 100%;
+            min-width: 5rem;
+        }
+    }
+}
+
+
+.table-build-info {
+    thead {
+        background: $gray-200;
+    }
+
+    &:first-child {
+        margin-bottom: 2rem;
+    }
+
+    tr {
+        td:first-child {
+            width: 25%;
+        }
+    }
+
+    #client-style-version {
+        &::after {
+            content: $version;
+        }
+    }
+}

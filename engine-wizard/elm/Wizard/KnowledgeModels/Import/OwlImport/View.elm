@@ -87,7 +87,7 @@ fileView appState model fileName =
             [ faSet "kmImport.file" appState
             , div [ class "filename" ]
                 [ text fileName
-                , a [ disabled cancelDisabled, class "ml-1 text-danger", onClick CancelFile ]
+                , a [ disabled cancelDisabled, class "ms-1 text-danger", onClick CancelFile ]
                     [ faSet "_global.remove" appState ]
                 ]
             ]

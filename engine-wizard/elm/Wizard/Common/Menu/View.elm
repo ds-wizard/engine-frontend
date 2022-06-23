@@ -169,8 +169,7 @@ viewReportIssueModal appState isOpen =
             [ p [] [ lx_ "reportModal.info" appState ]
             , p []
                 [ a
-                    [ class "link-with-icon"
-                    , dataCy "report-modal_link_repository"
+                    [ dataCy "report-modal_link_repository"
                     , href <| PrivacyAndSupportConfig.getSupportRepositoryUrl appState.config.privacyAndSupport
                     , target "_blank"
                     ]

@@ -5,6 +5,10 @@ module Wizard.Common.Html.Attribute exposing
     , grammarlyAttributes
     , linkToAttributes
     , listClass
+    , tooltip
+    , tooltipCustom
+    , tooltipLeft
+    , tooltipRight
     , wideDetailClass
     )
 
@@ -49,3 +53,23 @@ grammarlyAttribute =
 dataCy : String -> Html.Attribute msg
 dataCy value =
     attribute "data-cy" value
+
+
+tooltip : String -> List (Html.Attribute msg)
+tooltip =
+    tooltipCustom ""
+
+
+tooltipLeft : String -> List (Html.Attribute msg)
+tooltipLeft =
+    tooltipCustom "with-tooltip-left"
+
+
+tooltipRight : String -> List (Html.Attribute msg)
+tooltipRight =
+    tooltipCustom "with-tooltip-right"
+
+
+tooltipCustom : String -> String -> List (Html.Attribute msg)
+tooltipCustom extraClass value =
+    [ class "with-tooltip", class extraClass, attribute "data-tooltip" value ]

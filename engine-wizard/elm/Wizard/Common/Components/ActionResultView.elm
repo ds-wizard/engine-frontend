@@ -10,7 +10,7 @@ error : ActionResult a -> Html msg
 error actionResult =
     case actionResult of
         Error err ->
-            span [ class "text-danger action-result-error" ] [ text err ]
+            span [ class "text-danger mx-4" ] [ text err ]
 
         _ ->
             emptyNode

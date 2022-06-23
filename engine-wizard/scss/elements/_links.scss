@@ -1,0 +1,52 @@
+@import '../variables';
+@import '../mixins';
+
+a {
+    cursor: pointer;
+    text-decoration: none;
+
+    &.btn,
+    &.dropdown-item,
+    &.logo,
+    &.navbar-brand,
+    &.nav-link {
+        text-decoration: none !important;
+    }
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    &:not([href]):not([tabindex]) {
+        color: $link-color;
+
+        &:hover, &:active, &:focus {
+            text-decoration: underline;
+            color: $link-hover-color;
+        }
+    }
+
+    &.disabled {
+        text-decoration: none;
+        color: $gray-500;
+    }
+
+    .fa {
+        margin-right: $spacer-1;
+    }
+}
+
+
+.link-with-icon-only {
+    .fa {
+        margin: 0;
+    }
+}
+
+
+.link-with-icon-after {
+    .fa {
+        margin-right: 0;
+        margin-left: $spacer-2;
+    }
+}

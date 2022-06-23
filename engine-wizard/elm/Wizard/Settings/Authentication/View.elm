@@ -141,10 +141,10 @@ serviceFormView appState openIDPrefabs form i =
             , div [ class "row" ]
                 [ div [ class "col" ]
                     [ mapFormMsg <| FormGroup.input appState form idField (l_ "form.service.id" appState) ]
-                , div [ class "col text-right" ]
+                , div [ class "col text-end" ]
                     [ mapFormMsg <|
                         a
-                            [ class "btn btn-danger link-with-icon"
+                            [ class "btn btn-danger"
                             , onClick (Form.RemoveItem "services" i)
                             , dataCy "settings_authentication_service_remove-button"
                             ]
@@ -243,7 +243,7 @@ serviceParameterView appState prefix form i =
             [ Input.textInput valueField [ class <| "form-control " ++ valueErrorClass, attribute "data-cy" "settings_authentication_service_parameter-value" ]
             , valueError
             ]
-        , div [ class "col-1 text-right" ]
+        , div [ class "col-1 text-end" ]
             [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix i) ] [ faSet "_global.delete" appState ] ]
         ]
 

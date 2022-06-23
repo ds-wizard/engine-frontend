@@ -11,12 +11,6 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
 
 
 .Projects__Detail {
-    width: 100%;
-    overflow-x: hidden;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-
     .public--app & {
         height: calc(100vh - #{$public-header-height});
 
@@ -184,11 +178,6 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
                 }
             }
         }
-    }
-
-    .page > & {
-        margin-top: -20px;
-        margin-bottom: -20px;
     }
 
     .questionnaire {

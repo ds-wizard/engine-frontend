@@ -4,6 +4,7 @@ import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Components.Badge as Badge
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
@@ -83,13 +84,14 @@ renderAnswerBadges metrics answer =
                 |> Maybe.withDefault "Unknown"
 
         getBadgeClass value =
-            (++) "badge-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
+            (++) "bg-value-" <| String.fromInt <| (*) 10 <| round <| value * 10
 
         metricExists measure =
             List.find ((==) measure.metricUuid << .uuid) metrics /= Nothing
 
         createBadge metricMeasure =
-            span [ class <| "badge " ++ getBadgeClass metricMeasure.measure ]
+            Badge.badge
+                [ class (getBadgeClass metricMeasure.measure) ]
                 [ text <| getMetricName metricMeasure.metricUuid ]
     in
     if List.isEmpty answer.metricMeasures then

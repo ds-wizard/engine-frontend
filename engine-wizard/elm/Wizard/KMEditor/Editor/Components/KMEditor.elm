@@ -13,7 +13,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
 
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, span, strong, text, ul)
-import Html.Attributes exposing (class, disabled, id, src, title)
+import Html.Attributes exposing (class, disabled, id, src)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Maybe.Extra as Maybe
@@ -75,7 +75,7 @@ import String.Extra as String
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -1863,10 +1863,11 @@ editorTitle appState config =
     let
         copyUuidButton =
             button
-                [ class "btn btn-link link-with-icon"
-                , title <| l_ "editorTitle.copyUuid" appState
-                , onClick <| config.wrapMsg <| CopyUuid config.uuid
-                ]
+                ([ class "btn btn-link"
+                 , onClick <| config.wrapMsg <| CopyUuid config.uuid
+                 ]
+                    ++ tooltip (l_ "editorTitle.copyUuid" appState)
+                )
                 [ faSet "kmEditor.copyUuid" appState
                 , small [] [ text <| String.slice 0 8 config.uuid ]
                 ]
@@ -1875,7 +1876,7 @@ editorTitle appState config =
             case config.mbMovingEntity of
                 Just movingEntity ->
                     button
-                        [ class "btn btn-outline-secondary link-with-icon"
+                        [ class "btn btn-outline-secondary"
                         , onClick <| config.wrapMsg <| OpenMoveModal movingEntity config.uuid
                         , dataCy "km-editor_move-button"
                         ]
@@ -1890,7 +1891,7 @@ editorTitle appState config =
             case config.mbDeleteModalState of
                 Just deleteModalState ->
                     button
-                        [ class "btn btn-outline-danger link-with-icon"
+                        [ class "btn btn-outline-danger"
                         , dataCy "km-editor_delete-button"
                         , onClick <| config.wrapMsg <| SetDeleteModalState <| deleteModalState config.uuid
                         ]

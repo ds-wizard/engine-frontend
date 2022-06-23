@@ -9,7 +9,7 @@
     }
 
     .dropdown-item {
-        padding: 0.25rem 1rem;
+        padding: $spacer-1 $spacer-3;
 
         color: $gray-900;
         text-decoration: none !important;
@@ -34,7 +34,7 @@
         .fa {
             width: 1.5rem;
             text-align: center;
-            margin-right: 0.25rem;
+            margin-right: $spacer-1;
         }
     }
 }

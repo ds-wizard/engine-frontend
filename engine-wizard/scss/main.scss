@@ -16,11 +16,29 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'lib/syntax-highlight';
 
 @import 'animations';
-@import 'common';
-@import 'elements';
-@import 'forms';
 @import 'layout';
-@import 'tables';
+
+@import 'elements/alert';
+@import 'elements/code';
+@import 'elements/badge';
+@import 'elements/bg';
+@import 'elements/btn';
+@import 'elements/diffs';
+@import 'elements/dropdown';
+@import 'elements/fa';
+@import 'elements/forms';
+@import 'elements/full-page';
+@import 'elements/header';
+@import 'elements/illustrated-message';
+@import 'elements/links';
+@import 'elements/modal';
+@import 'elements/nav';
+@import 'elements/pre';
+@import 'elements/table';
+@import 'elements/top-header';
+@import 'elements/tooltips';
+@import 'elements/undraw';
+@import 'elements/user-icon';
 
 @import 'modules/Common';
 @import 'modules/Dashboard';

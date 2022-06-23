@@ -410,7 +410,7 @@ projectTagView appState form i =
     div [ class "project-tag", dataCy "project_settings_tag" ]
         [ text value
         , a
-            [ class "text-danger ml-2"
+            [ class "text-danger ms-2"
             , onClick (Form.RemoveItem "projectTags" i)
             , dataCy "project_settings_tag-remove"
             ]
@@ -463,15 +463,13 @@ projectTagInput appState model =
             , id "projectTag"
             , name "projectTag"
             ]
-        , div [ class "input-group-append" ]
-            [ button
-                [ class "btn btn-secondary"
-                , disabled (isEmpty || hasError)
-                , onClick (Form.Append "projectTags")
-                , dataCy "project_settings_add-tag-button"
-                ]
-                [ lx_ "form.addProjectTag" appState ]
+        , button
+            [ class "btn btn-secondary"
+            , disabled (isEmpty || hasError)
+            , onClick (Form.Append "projectTags")
+            , dataCy "project_settings_add-tag-button"
             ]
+            [ lx_ "form.addProjectTag" appState ]
         ]
     , errorView
     , typehintsView field.hasFocus
@@ -486,7 +484,7 @@ knowledgeModel appState cfg =
             (Routes.knowledgeModelsDetail cfg.package.id)
             [ class "package-link" ]
             [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package) ]
-        , div [ class "text-right mt-3" ]
+        , div [ class "text-end mt-3" ]
             [ linkTo appState
                 (Routes.projectsCreateMigration cfg.questionnaire.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]

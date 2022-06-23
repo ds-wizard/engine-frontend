@@ -2350,22 +2350,20 @@ actionState appState model buttonClicked defaultLabel =
 viewCompletedMigration : AppState -> Model -> Html Msg
 viewCompletedMigration appState model =
     div [ class "col-xs-12" ]
-        [ div [ class "jumbotron full-page-error", dataCy "km-migration_completed" ]
+        [ div [ class "p-5 mb-4 bg-light rounded-3 full-page-error", dataCy "km-migration_completed" ]
             [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
-            , p []
+            , p [ class "fs-4" ]
                 [ lx_ "completed.msg1" appState
                 , br [] []
                 , lx_ "completed.msg2" appState
                 ]
-            , div [ class "text-right" ]
-                [ linkTo appState
-                    (Routes.kmEditorPublish model.branchUuid)
-                    [ class "btn btn-primary"
-                    , dataCy "km-migration_publish-button"
-                    ]
-                    [ lx_ "completed.publish" appState
-                    , faSet "_global.arrowRight" appState
-                    ]
+            , linkTo appState
+                (Routes.kmEditorPublish model.branchUuid)
+                [ class "btn btn-primary btn-lg link-with-icon-after"
+                , dataCy "km-migration_publish-button"
+                ]
+                [ lx_ "completed.publish" appState
+                , faSet "_global.arrowRight" appState
                 ]
             ]
         ]

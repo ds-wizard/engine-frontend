@@ -11,12 +11,12 @@ module Wizard.Projects.Detail.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnaireApi
+import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
@@ -35,7 +35,7 @@ type alias Model =
     , websocket : WebSocket
     , offline : Bool
     , error : Bool
-    , onlineUsers : List OnlineUser.Model
+    , onlineUsers : List OnlineUserInfo
     , savingActionUuids : List Uuid
     , projectSavingModel : ProjectSaving.Model
     , shareModalModel : ShareModal.Model

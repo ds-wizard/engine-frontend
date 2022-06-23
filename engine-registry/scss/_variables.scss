@@ -1,13 +1,8 @@
+@import '~bootstrap/scss/functions';
 @import "~bootstrap/scss/variables";
 
 
-@function color-level($color, $level: 0) {
-    $color-base: if($level > 0, $black, $white);
-    $level: abs($level);
-    @return mix($color-base, $color, $level * $theme-color-interval);
-}
-
-$code-block-bg-level: -12 !default;
-$code-block-bg: color-level($code-color, $code-block-bg-level);
+$code-block-bg-scale: -95% !default;
+$code-block-bg: shift-color($code-color, $code-block-bg-scale);
 
 $illustrations-color: #ff6347 !default;
