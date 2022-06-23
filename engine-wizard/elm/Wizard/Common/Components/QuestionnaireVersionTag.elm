@@ -3,8 +3,8 @@ module Wizard.Common.Components.QuestionnaireVersionTag exposing
     , version
     )
 
-import Html exposing (Html, span, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, text)
+import Shared.Components.Badge as Badge
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
@@ -17,9 +17,9 @@ lx_ =
 
 version : QuestionnaireVersion -> Html msg
 version qv =
-    span [ class "badge badge-secondary" ] [ text qv.name ]
+    Badge.secondary [] [ text qv.name ]
 
 
 current : AppState -> Html msg
 current appState =
-    span [ class "badge badge-info" ] [ lx_ "current" appState ]
+    Badge.info [] [ lx_ "current" appState ]

@@ -1,0 +1,28 @@
+@import '../animations';
+@import '../mixins';
+@import '../variables';
+
+.alert {
+    word-break: break-word;
+
+    & > .fa:first-child {
+        margin-right: $spacer-2;
+    }
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+
+    &-inline-loader {
+        color: $gray-500;
+        opacity: 0;
+        @include animation(fadeIn, ease-in, 1);
+        @include animation-duration(1s);
+        @include animation-delay(.4s);
+        @include animation-fill-mode(forwards);
+
+        .fa {
+            margin-right: $spacer-3;
+        }
+    }
+}

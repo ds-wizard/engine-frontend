@@ -2,7 +2,6 @@ module Wizard.Projects.Detail.Update exposing (fetchData, isGuarded, onUnload, u
 
 import ActionResult exposing (ActionResult(..))
 import Form
-import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -21,7 +20,6 @@ import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Msgs
@@ -469,9 +467,6 @@ update wrapMsg msg appState model =
         WebSocketPing ->
             withSeed ( model, WebSocket.ping model.websocket )
 
-        OnlineUserMsg index ouMsg ->
-            withSeed <| handleOnlineUserMsg index ouMsg model
-
         ProjectSavingMsg qsMsg ->
             withSeed ( { model | projectSavingModel = ProjectSaving.update qsMsg model.projectSavingModel }, Cmd.none )
 
@@ -648,7 +643,7 @@ handleWebsocketMsg websocketMsg appState model =
                 WebSocketServerAction.Success message ->
                     case message of
                         ServerQuestionnaireAction.SetUserList users ->
-                            ( appState.seed, { model | onlineUsers = List.map OnlineUser.init users }, Cmd.none )
+                            ( appState.seed, { model | onlineUsers = users }, Cmd.none )
 
                         ServerQuestionnaireAction.SetContent event ->
                             case event of
@@ -690,8 +685,3 @@ handleWebsocketMsg websocketMsg appState model =
 
         _ ->
             ( appState.seed, model, Cmd.none )
-
-
-handleOnlineUserMsg : Int -> OnlineUser.Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleOnlineUserMsg index msg model =
-    ( { model | onlineUsers = List.updateAt index (OnlineUser.update msg) model.onlineUsers }, Cmd.none )

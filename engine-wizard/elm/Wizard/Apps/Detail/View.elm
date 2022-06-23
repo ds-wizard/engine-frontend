@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.Badge as Badge
 import Shared.Data.AppDetail exposing (AppDetail)
 import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (faSet)
@@ -63,7 +64,7 @@ header : AppState -> AppDetail -> Html Msg
 header appState app =
     let
         editAction =
-            a [ class "link-with-icon", onClick EditModalOpen, dataCy "app-detail_edit" ]
+            a [ onClick EditModalOpen, dataCy "app-detail_edit" ]
                 [ faSet "_global.edit" appState
                 , lx_ "actions.edit" appState
                 ]
@@ -82,7 +83,7 @@ content appState appDetail =
     let
         planActions plan =
             [ a [ onClick (EditPlanModalOpen plan), dataCy "app-detail_plan_edit" ] [ faSet "_global.edit" appState ]
-            , a [ onClick (DeletePlanModalOpen plan), class "text-danger ml-3", dataCy "app-detail_plan_delete" ] [ faSet "_global.delete" appState ]
+            , a [ onClick (DeletePlanModalOpen plan), class "text-danger ms-3", dataCy "app-detail_plan_delete" ] [ faSet "_global.delete" appState ]
             ]
     in
     DetailPage.content
@@ -116,10 +117,10 @@ sidePanelInfo appState appDetail =
     let
         enabledBadge =
             if appDetail.enabled then
-                span [ class "badge badge-success" ] [ lx_ "badge.enabled" appState ]
+                Badge.success [] [ lx_ "badge.enabled" appState ]
 
             else
-                span [ class "badge badge-danger" ] [ lx_ "badge.disabled" appState ]
+                Badge.danger [] [ lx_ "badge.disabled" appState ]
 
         infoList =
             [ ( l_ "sidePanel.appId" appState, "app-id", text appDetail.appId )

@@ -108,7 +108,7 @@ app.post('/simple', (req, res) => {
             res.send(result)
         })
         .catch((err) => {
-            res.status(500).send(err)
+            res.status(500).send(err.toString())
         })
         .finally(() => {
             cleanTempDir(tempDir)

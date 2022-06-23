@@ -319,7 +319,7 @@ customMenuLinkItemView appState form i =
                 , span [] []
                 ]
             ]
-        , div [ class "col-1 text-right" ]
+        , div [ class "col-1 text-end" ]
             [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem "customMenuLinks" i), attribute "data-cy" "button-remove" ]
                 [ faSet "_global.delete" appState ]
             ]

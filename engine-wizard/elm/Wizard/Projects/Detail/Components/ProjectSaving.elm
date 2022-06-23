@@ -10,23 +10,18 @@ module Wizard.Projects.Detail.Components.ProjectSaving exposing
     , view
     )
 
-import Bootstrap.Popover as Popover
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
 import Shared.Html exposing (fa, faKeyClass)
-import Shared.Locale exposing (l, lx)
+import Shared.Locale exposing (l)
 import Time
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (tooltipRight)
 
 
 l_ : String -> AppState -> String
 l_ =
     l "Wizard.Projects.Detail.Components.ProjectSaving"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Detail.Components.ProjectSaving"
 
 
 
@@ -35,7 +30,6 @@ lx_ =
 
 type alias Model =
     { state : State
-    , popoverState : Popover.State
     }
 
 
@@ -48,7 +42,6 @@ type State
 init : Model
 init =
     { state = Saved
-    , popoverState = Popover.initialState
     }
 
 
@@ -73,26 +66,20 @@ setSaved model =
 
 type Msg
     = SavedTickMsg
-    | PopoverMsg Popover.State
 
 
 update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        SavedTickMsg ->
-            case model.state of
-                SavedRecently n ->
-                    if n - 1 <= 0 then
-                        { model | state = Saved }
+update _ model =
+    case model.state of
+        SavedRecently n ->
+            if n - 1 <= 0 then
+                { model | state = Saved }
 
-                    else
-                        { model | state = SavedRecently (n - 1) }
+            else
+                { model | state = SavedRecently (n - 1) }
 
-                _ ->
-                    model
-
-        PopoverMsg state ->
-            { model | popoverState = state }
+        _ ->
+            model
 
 
 
@@ -123,7 +110,7 @@ view appState model =
             viewSavedRecently appState
 
         Saved ->
-            viewSaved appState model
+            viewSaved appState
 
 
 viewSaving : AppState -> Html Msg
@@ -136,13 +123,9 @@ viewSavedRecently appState =
     viewHelper [] (faKeyClass "questionnaire.saving.saved" appState) (l_ "label.saved" appState)
 
 
-viewSaved : AppState -> Model -> Html Msg
-viewSaved appState model =
-    Popover.config
-        (viewHelper (Popover.onHover model.popoverState PopoverMsg) (faKeyClass "questionnaire.saving.saved" appState) "")
-        |> Popover.bottom
-        |> Popover.content [] [ lx_ "popover.saved" appState ]
-        |> Popover.view model.popoverState
+viewSaved : AppState -> Html Msg
+viewSaved appState =
+    viewHelper (tooltipRight (l_ "popover.saved" appState)) (faKeyClass "questionnaire.saving.saved" appState) ""
 
 
 viewHelper : List (Html.Attribute Msg) -> String -> String -> Html Msg

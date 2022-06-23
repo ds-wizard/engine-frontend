@@ -10,6 +10,7 @@ module Wizard.Common.Components.DetailNavigation exposing
 
 import Html exposing (Html, div, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
+import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.OnlineUser as OnlineUser
@@ -38,8 +39,8 @@ sectionActions =
     div [ class "DetailNavigation__Row__Section__Actions" ]
 
 
-onlineUsers : (Int -> OnlineUser.Msg -> msg) -> AppState -> List OnlineUser.Model -> Html msg
-onlineUsers wrapMsg appState users =
+onlineUsers : AppState -> List OnlineUserInfo -> Html msg
+onlineUsers appState users =
     if List.isEmpty users then
         emptyNode
 
@@ -57,7 +58,7 @@ onlineUsers wrapMsg appState users =
             [ class "DetailNavigation__Row__Section__Online-Users"
             , classList [ ( "DetailNavigation__Row__Section__Online-Users--Stacked", List.length users > 5 ) ]
             ]
-            (List.indexedMap (\i u -> Html.map (wrapMsg i) (OnlineUser.view appState u)) (List.take 10 users)
+            (List.map (OnlineUser.view appState) (List.take 10 users)
                 ++ [ extraUsers ]
             )
 

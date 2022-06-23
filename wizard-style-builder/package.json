@@ -8,7 +8,7 @@
     "init": "./scripts/init.sh",
     "start": "NODE_ENV=production node index.js",
     "clean": "rm -rf ./src",
-    "test": "NODE_ENV=test jest --silent=false --testTimeout=10000 --runInBand --detectOpenHandles"
+    "test": "NODE_ENV=test jest --silent=false --testTimeout=20000 --runInBand --detectOpenHandles"
   },
   "license": "Apache-2.0",
   "dependencies": {
@@ -21,11 +21,12 @@
   },
   "devDependencies": {
     "jest": "^28.1.1",
+    "jest-environment-node-single-context": "^28.1.0",
     "nodemon": "^2.0.16",
     "supertest": "^6.2.3"
   },
   "jest": {
-    "testEnvironment": "node",
+    "testEnvironment": "jest-environment-node-single-context",
     "coveragePathIgnorePatterns": [
       "//node_modules/"
     ]

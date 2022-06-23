@@ -49,7 +49,6 @@ header appState persistentCommand =
         rerunAction =
             a
                 [ onClick RerunCommand
-                , class "link-with-icon"
                 , dataCy "persistent-command-detail_rerun-link"
                 ]
                 [ faSet "persistentCommand.retry" appState

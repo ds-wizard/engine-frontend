@@ -1,0 +1,34 @@
+@import '../variables';
+@import '../mixins';
+
+
+del, .del {
+    color: $text-deleted-color;
+    background: $text-delete-bg;
+    text-decoration: line-through;
+}
+
+ins, .ins {
+    color: $text-inserted-color;
+    background: $text-inserted-bg;
+    text-decoration: none;
+}
+
+.edited {
+    color: $text-edited-color;
+    background: $text-edited-bg;
+}
+
+
+.diff {
+    .diff {
+        &-added {
+            background: shift-color($success, $alert-bg-scale);
+        }
+
+        &-removed {
+            text-decoration: line-through;
+            background: shift-color($danger, $alert-bg-scale);
+        }
+    }
+}

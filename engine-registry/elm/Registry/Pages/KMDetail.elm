@@ -94,7 +94,7 @@ viewDetail appState model package =
     let
         viewKmIdCopied =
             if model.copied then
-                span [ class "ml-2 text-muted" ] [ lx_ "view.kmId.copied" appState ]
+                span [ class "ms-2 text-muted" ] [ lx_ "view.kmId.copied" appState ]
 
             else
                 emptyNode

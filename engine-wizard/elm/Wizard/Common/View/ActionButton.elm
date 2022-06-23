@@ -65,7 +65,7 @@ type alias ButtonExtraConfig a msg =
 buttonExtra : AppState -> ButtonExtraConfig a msg -> Html msg
 buttonExtra appState cfg =
     actionButtonView appState
-        [ onClick cfg.msg, class <| "btn btn-with-loader link-with-icon " ++ buttonClass cfg.dangerous ]
+        [ onClick cfg.msg, class <| "btn btn-with-loader " ++ buttonClass cfg.dangerous ]
         cfg.content
         cfg.result
 
@@ -81,7 +81,7 @@ type alias ButtonCustomConfig a msg =
 buttonCustom : AppState -> ButtonCustomConfig a msg -> Html msg
 buttonCustom appState cfg =
     actionButtonView appState
-        [ onClick cfg.msg, class <| "btn btn-with-loader link-with-icon " ++ cfg.btnClass ]
+        [ onClick cfg.msg, class <| "btn btn-with-loader " ++ cfg.btnClass ]
         cfg.content
         cfg.result
 

@@ -32,7 +32,7 @@ import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, title, type_, value)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
 import Json.Decode as D
 import Json.Encode as E
@@ -43,6 +43,7 @@ import Regex
 import Roman
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.Badge as Badge
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -86,7 +87,7 @@ import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as Quest
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Flash as Flash
@@ -929,7 +930,7 @@ viewQuestionnaireToolbar appState model =
 
         todosBadge =
             if todosLength > 0 then
-                span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt todosLength) ]
+                Badge.danger [ class "rounded-pill" ] [ text (String.fromInt todosLength) ]
 
             else
                 emptyNode
@@ -950,7 +951,7 @@ viewQuestionnaireToolbar appState model =
 
         commentsBadge =
             if commentsLength > 0 then
-                span [ class "badge badge-pill badge-secondary", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
+                Badge.secondary [ class "rounded-pill", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
 
             else
                 emptyNode
@@ -973,7 +974,7 @@ viewQuestionnaireToolbar appState model =
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", warningsOpen ) ], onClick (SetRightPanel warningsPanel) ]
                     [ lx_ "toolbar.warnings" appState
-                    , span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt warningsLength) ]
+                    , Badge.danger [ class "rounded-pill" ] [ text (String.fromInt warningsLength) ]
                     ]
                 ]
 
@@ -1107,7 +1108,7 @@ viewQuestionnaireLeftPanelChaptersChapterIndication appState questionnaire chapt
             QuestionnaireDetail.calculateUnansweredQuestionsForChapter appState questionnaire chapter
     in
     if unanswered > 0 then
-        span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]
+        Badge.light [ class "rounded-pill" ] [ text <| fromInt unanswered ]
 
     else
         faSet "questionnaire.answeredIndication" appState
@@ -1243,7 +1244,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
             li []
                 [ a [ onClick (OpenComments comment.path) ]
                     [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
-                    , span [ class "badge badge-pill badge-light" ] [ text (String.fromInt comment.comments) ]
+                    , Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.comments) ]
                     ]
                 ]
 
@@ -1378,7 +1379,7 @@ viewCommentsNavigation appState model commentThreads =
                 emptyNode
 
             else
-                span [ class "badge badge-pill badge-light" ] [ text (String.fromInt count) ]
+                Badge.light [ class "rounded-pill" ] [ text (String.fromInt count) ]
     in
     ul [ class "nav nav-underline-tabs" ]
         [ li [ class "nav-item" ]
@@ -1467,7 +1468,7 @@ viewComment appState model path commentThread index comment =
                             []
                         , div []
                             [ button
-                                [ class "btn btn-primary btn-sm mr-1"
+                                [ class "btn btn-primary btn-sm me-1"
                                 , disabled (String.isEmpty editValue)
                                 , onClick (CommentEditSubmit path commentThread.uuid comment.uuid editValue commentThread.private)
                                 ]
@@ -1507,11 +1508,12 @@ viewCommentHeader appState model path commentThread index comment =
         resolveAction =
             if index == 0 && Feature.projectCommentThreadResolve appState model.questionnaire commentThread then
                 a
-                    [ class "ml-1"
-                    , onClick (CommentThreadResolve path commentThread.uuid commentThread.private)
-                    , title (l_ "comments.comment.action.resolveTitle" appState)
-                    , dataCy "comments_comment_resolve"
-                    ]
+                    ([ class "ms-1"
+                     , onClick (CommentThreadResolve path commentThread.uuid commentThread.private)
+                     , dataCy "comments_comment_resolve"
+                     ]
+                        ++ tooltipLeft (l_ "comments.comment.action.resolveTitle" appState)
+                    )
                     [ faSet "questionnaire.commentsResolve" appState ]
 
             else
@@ -1574,7 +1576,7 @@ viewCommentHeader appState model path commentThread index comment =
 
         editedLabel =
             if comment.createdAt /= comment.updatedAt then
-                span [ title (TimeUtils.toReadableDateTime appState.timeZone comment.updatedAt) ]
+                span (tooltip (TimeUtils.toReadableDateTime appState.timeZone comment.updatedAt))
                     [ text <| " (" ++ l_ "comments.comment.editedLabel" appState ++ ")" ]
 
             else
@@ -1646,7 +1648,7 @@ viewCommentReplyForm appState { submitText, placeholderText, model, path, mbThre
             else
                 div []
                     [ button
-                        [ class "btn btn-primary btn-sm mr-1"
+                        [ class "btn btn-primary btn-sm me-1"
                         , onClick (CommentSubmit path mbThreadUuid commentValue private)
                         , dataCy (cyFormType "comments_reply-form_submit")
                         ]
@@ -1678,7 +1680,7 @@ viewCommentDeleteOverlay appState { deleteMsg, deleteText, extraClass } =
         [ div [ class "text-center" ]
             [ div [ class "mb-2" ] [ text deleteText ]
             , button
-                [ class "btn btn-danger btn-sm mr-2"
+                [ class "btn btn-danger btn-sm me-2"
                 , onClick deleteMsg
                 , dataCy "comments_delete-modal_delete"
                 ]
@@ -1816,9 +1818,9 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             Time.inWordsWithConfig { withAffix = True } (TimeDistance.locale appState) reply.createdAt appState.currentTime
 
                         time =
-                            span [ title readableTime ] [ text timeDiff ]
+                            span (tooltip readableTime) [ text timeDiff ]
                     in
-                    div [ class "answered" ]
+                    div [ class "mt-2" ]
                         (lh_ "question.answeredBy" [ time, text userName ] appState)
 
                 _ ->
@@ -1864,12 +1866,11 @@ viewQuestionLabel appState cfg _ model path humanIdentifiers question =
     in
     label []
         [ span []
-            [ span
-                [ class "badge badge-secondary badge-human-identifier"
+            [ Badge.secondary
+                [ class "mb-1 me-2 py-1 px-2 fs-6"
                 , classList
-                    [ ( "badge-secondary", questionState == Default )
-                    , ( "badge-success", questionState == Answered )
-                    , ( "badge-danger", questionState == Desirable )
+                    [ ( "bg-success", questionState == Answered )
+                    , ( "bg-danger", questionState == Desirable )
                     ]
                 ]
                 [ text (String.join "." humanIdentifiers) ]
@@ -2003,7 +2004,7 @@ viewQuestionListAdd appState cfg itemUuids path =
 
     else
         button
-            [ class "btn btn-outline-secondary link-with-icon"
+            [ class "btn btn-outline-secondary"
             , onClick (AddItem (pathToString path) itemUuids)
             ]
             [ faSet "_global.add" appState
@@ -2352,11 +2353,12 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
                 emptyNode
 
             else
-                i
-                    [ class ("expand-icon " ++ faKeyClass "questionnaire.followUpsIndication" appState)
-                    , title (l_ "answer.followUpTitle" appState)
+                span (class "ms-3 text-muted" :: tooltipRight (l_ "answer.followUpTitle" appState))
+                    [ i
+                        [ class (faKeyClass "questionnaire.followUpsIndication" appState)
+                        ]
+                        []
                     ]
-                    []
 
         isSelected =
             selectedAnswerUuid == Just answer.uuid
@@ -2440,9 +2442,9 @@ viewTodoAction appState cfg model path =
             span [ class "action action-todo" ]
                 [ span [] [ lx_ "todoAction.todo" appState ]
                 , a
-                    [ title <| l_ "todoAction.remove" appState
-                    , onClick <| SetLabels currentPath []
-                    ]
+                    ((onClick <| SetLabels currentPath [])
+                        :: tooltip (l_ "todoAction.remove" appState)
+                    )
                     [ faSet "_global.remove" appState ]
                 ]
 

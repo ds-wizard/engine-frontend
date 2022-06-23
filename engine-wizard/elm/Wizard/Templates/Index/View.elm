@@ -3,6 +3,7 @@ module Wizard.Templates.Index.View exposing (view)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Api.Templates as TemplatesApi
+import Shared.Components.Badge as Badge
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Html exposing (emptyNode, faSet)
@@ -13,7 +14,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Html.Attribute exposing (listClass, tooltip)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -53,7 +54,7 @@ importButton appState =
     if Feature.templatesImport appState then
         linkTo appState
             (Routes.templatesImport Nothing)
-            [ class "btn btn-primary link-with-icon" ]
+            [ class "btn btn-primary" ]
             [ faSet "kms.upload" appState
             , lx_ "header.import" appState
             ]
@@ -91,10 +92,8 @@ listingTitle : AppState -> Template -> Html Msg
 listingTitle appState template =
     span []
         [ linkTo appState (Routes.templatesDetail template.id) [] [ text template.name ]
-        , span
-            [ class "badge badge-light"
-            , title <| lg "package.latestVersion" appState
-            ]
+        , Badge.light
+            (tooltip (lg "package.latestVersion" appState))
             [ text <| Version.toString template.version ]
         , listingTitleOutdatedBadge appState template
         , listingTitleUnsupportedBadge appState template
@@ -110,7 +109,7 @@ listingTitleOutdatedBadge appState template =
         in
         linkTo appState
             (Routes.templatesImport templateId)
-            [ class "badge badge-warning" ]
+            [ class Badge.warningClass ]
             [ lx_ "badge.outdated" appState ]
 
     else
@@ -120,7 +119,7 @@ listingTitleOutdatedBadge appState template =
 listingTitleUnsupportedBadge : AppState -> Template -> Html Msg
 listingTitleUnsupportedBadge appState template =
     if template.state == TemplateState.UnsupportedMetamodelVersion then
-        span [ class "badge badge-danger" ] [ lx_ "badge.unsupported" appState ]
+        Badge.danger [] [ lx_ "badge.unsupported" appState ]
 
     else
         emptyNode

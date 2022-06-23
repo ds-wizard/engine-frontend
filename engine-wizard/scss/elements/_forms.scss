@@ -1,8 +1,22 @@
-@import 'mixins';
-@import 'variables';
+@import '../mixins';
+@import '../variables';
+
+
+input[type=color] {
+    min-height: 30px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: $spacer-2;
+}
 
 textarea {
     resize: vertical;
+}
+
+select {
+    word-wrap: normal;
 }
 
 .resizable-textarea {
@@ -33,6 +47,7 @@ textarea {
 
 .form-text {
     text-align: justify;
+    font-size: $font-size-base;
 }
 
 .form-text-after {
@@ -67,6 +82,7 @@ textarea {
 
 .form-group {
     position: relative;
+    margin-bottom: $spacer-3;
 
     code.form-value {
         display: block;
@@ -263,6 +279,7 @@ textarea {
     &::-webkit-color-swatch-wrapper {
         padding: .2rem;
     }
+
     &::-webkit-color-swatch {
         border: none;
         @include border-radius(.125rem)
@@ -290,10 +307,15 @@ textarea {
     padding-left: 0;
 }
 
+.form-check-label {
+    margin-bottom: 0;
+}
+
 .form-check-toggle {
     position: relative;
     padding-left: 0;
     line-height: 20px;
+    margin-bottom: 0;
 
     input {
         display: block;
@@ -373,7 +395,6 @@ textarea {
     }
 }
 
-
 .form-radio-group {
     .form-check {
         padding: .5rem .5rem .5rem 2rem;
@@ -402,6 +423,10 @@ textarea {
     }
 }
 
-input[type=color] {
-    min-height: 30px;
+.invalid-feedback {
+    font-size: 100%;
+
+    & + .invalid-feedback {
+        margin-top: -1rem;
+    }
 }

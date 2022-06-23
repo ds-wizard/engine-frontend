@@ -140,7 +140,7 @@ publicHeader fluid model =
                     [ text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
                     ]
                 ]
-            , ul [ class "nav navbar-nav ml-auto" ] links
+            , ul [ class "nav navbar-nav ms-auto flex-row" ] links
             ]
         ]
 

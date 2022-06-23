@@ -616,7 +616,6 @@ locale =
                , ( "Wizard.Dashboard.Widgets.DMPWorkflowWidget.steps.fillQuestionnaire", "Fill in the Questionnaire, chapter by chapter." )
                , ( "Wizard.Dashboard.Widgets.DMPWorkflowWidget.steps.getDMP", "Get your Data Management Plan ready to be submitted." )
                , ( "Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget.clickCreate", "Click \"Create\" button to add a new Questionnaire." )
-               , ( "Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget.knowledgeModel", "Knowledge Model" )
                , ( "Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget.noProjectsInPhase", "No Projects in this phase" )
                , ( "Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget.recentProjects", "Recent Projects" )
                , ( "Wizard.Dashboard.Widgets.WelcomeWidget.welcome", "Welcome to the %s!" )

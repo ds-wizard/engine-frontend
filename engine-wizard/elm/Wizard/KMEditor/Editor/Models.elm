@@ -9,10 +9,10 @@ module Wizard.KMEditor.Editor.Models exposing
 import ActionResult exposing (ActionResult)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
@@ -28,7 +28,7 @@ type alias Model =
     , websocket : WebSocket
     , offline : Bool
     , error : Bool
-    , onlineUsers : List OnlineUser.Model
+    , onlineUsers : List OnlineUserInfo
     , savingActionUuids : List Uuid
     , savingModel : ProjectSaving.Model
     , branchModel : ActionResult EditorBranch

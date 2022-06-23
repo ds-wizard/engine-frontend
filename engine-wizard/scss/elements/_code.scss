@@ -1,0 +1,10 @@
+@import '../variables';
+@import '../mixins';
+
+code {
+    background-color: $code-block-bg;
+
+    a {
+        color: $code-color;
+    }
+}

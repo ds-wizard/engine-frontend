@@ -1,9 +1,17 @@
-module Wizard.Common.View.ExternalLoginButton exposing (badgeWrapper, defaultBackground, defaultColor, defaultIcon, render, view)
+module Wizard.Common.View.ExternalLoginButton exposing
+    ( badgeWrapper
+    , defaultBackground
+    , defaultColor
+    , defaultIcon
+    , render
+    , view
+    )
 
-import Html exposing (Attribute, Html, a, span, text)
+import Html exposing (Attribute, Html, a, text)
 import Html.Attributes exposing (class, href, style)
 import List.Extra as List
 import Shared.Api.Auth as AuthApi
+import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Shared.Html exposing (fa, faKey, faSet)
 import Wizard.Common.AppState exposing (AppState)
@@ -43,14 +51,13 @@ badgeWrapper appState sourceId =
             viewAsBadge appState service
 
         Nothing ->
-            span [ class "badge badge-external-service badge-light" ] [ text sourceId ]
+            Badge.light [] [ text sourceId ]
 
 
 viewAsBadge : AppState -> OpenIDServiceConfig -> Html msg
 viewAsBadge appState config =
-    span
-        [ class "badge badge-external-service"
-        , color config.style.color
+    Badge.badge
+        [ color config.style.color
         , background config.style.background
         ]
         [ icon appState config.style.icon, text config.name ]

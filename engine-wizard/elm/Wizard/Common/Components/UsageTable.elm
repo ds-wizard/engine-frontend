@@ -16,7 +16,7 @@ l_ =
 
 view : AppState -> Usage -> Html msg
 view appState usage =
-    table [ class "table usage-table table-hover" ]
+    table [ class "table table-usage table-hover" ]
         [ tbody []
             [ viewUsageRowSimple (l_ "metric.users" appState) usage.users
             , viewUsageRowSimple (l_ "metric.activeUsers" appState) usage.activeUsers
@@ -72,6 +72,6 @@ viewUsageRow mapValue usageLabel usageValue =
     in
     tr []
         [ th [] [ text usageLabel ]
-        , td [ class "text-right" ] [ text visibleValue ]
+        , td [ class "text-end" ] [ text visibleValue ]
         , td [] [ progressBar ]
         ]

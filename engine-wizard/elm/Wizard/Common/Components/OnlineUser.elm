@@ -1,7 +1,6 @@
-module Wizard.Common.Components.OnlineUser exposing (Model, Msg, init, update, view)
+module Wizard.Common.Components.OnlineUser exposing (view)
 
-import Bootstrap.Popover as Popover
-import Html exposing (Html, div, img, text)
+import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)
 import List.Extra as List
 import Shared.Data.OnlineUserInfo as OnlineUserInfo exposing (LoggedData, OnlineUserInfo)
@@ -9,51 +8,21 @@ import Shared.Data.User as User
 import Shared.Html exposing (fa, faKeyClass)
 import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (tooltip)
 
 
-type alias Model =
-    { userInfo : OnlineUserInfo
-    , popoverState : Popover.State
-    }
-
-
-type Msg
-    = PopoverMsg Popover.State
-
-
-init : OnlineUserInfo -> Model
-init userInfo =
-    { userInfo = userInfo
-    , popoverState = Popover.initialState
-    }
-
-
-update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        PopoverMsg state ->
-            { model | popoverState = state }
-
-
-view : AppState -> Model -> Html Msg
-view appState model =
+view : AppState -> OnlineUserInfo -> Html msg
+view appState userInfo =
     let
         ( username, colorClass, content ) =
-            case model.userInfo of
+            case userInfo of
                 OnlineUserInfo.Logged data ->
                     viewLogged data
 
                 OnlineUserInfo.Anonymous { avatarNumber, colorNumber } ->
                     viewAnonymous appState avatarNumber colorNumber
     in
-    Popover.config
-        (div
-            (class "OnlineUser" :: class colorClass :: Popover.onHover model.popoverState PopoverMsg)
-            [ content ]
-        )
-        |> Popover.bottom
-        |> Popover.content [] [ text username ]
-        |> Popover.view model.popoverState
+    div (class "OnlineUser" :: class colorClass :: tooltip username) [ content ]
 
 
 viewLogged : LoggedData -> ( String, String, Html msg )

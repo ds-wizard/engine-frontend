@@ -17,11 +17,12 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Dict
 import Html exposing (Html, a, div, input, li, nav, span, text, ul)
-import Html.Attributes exposing (class, classList, href, id, placeholder, target, title, type_, value)
+import Html.Attributes exposing (class, classList, href, id, placeholder, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.Badge as Badge
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -36,7 +37,7 @@ import Wizard.Common.Components.Listing.Models exposing (Item, Model)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
 import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
@@ -143,14 +144,14 @@ view appState config model =
 
 viewToolbar : AppState -> ViewConfig a msg -> Model a -> Html msg
 viewToolbar appState cfg model =
-    div [ class "listing-toolbar mb-3 form-inline" ]
+    div [ class "listing-toolbar mb-2" ]
         [ div [ class "filter-sort" ]
             ([ viewToolbarSearch appState cfg model
              , viewToolbarSort appState cfg model
              ]
                 ++ viewToolbarFilters appState cfg model
             )
-        , Maybe.withDefault emptyNode cfg.toolbarExtra
+        , Maybe.unwrap emptyNode (div [ class "ms-4" ] << List.singleton) cfg.toolbarExtra
         ]
 
 
@@ -165,7 +166,7 @@ viewToolbarSearch appState cfg model =
         , placeholder placeholderText
         , onInput (cfg.wrapMsg << QueryInput)
         , value model.qInput
-        , class "form-control"
+        , class "form-control d-inline w-auto align-top me-3"
         , id "filter"
         ]
         []
@@ -211,7 +212,7 @@ viewToolbarSort appState cfg model =
             }
         , linkTo appState
             sortDirectionButtonUrl
-            [ class "btn btn-outline-secondary", dataCy "listing_toolbar_sort-direction" ]
+            [ class "btn btn-outline-secondary link-with-icon-only", dataCy "listing_toolbar_sort-direction" ]
             [ sortDirectionButtonIcon ]
         ]
 
@@ -327,7 +328,7 @@ viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg =
 
         filterBadge =
             if filterValuesCount > filterCfg.maxVisibleValues then
-                span [ class "badge badge-pill badge-dark" ] [ text ("+" ++ String.fromInt (filterValuesCount - filterCfg.maxVisibleValues)) ]
+                Badge.dark [ class "rounded-pill" ] [ text ("+" ++ String.fromInt (filterValuesCount - filterCfg.maxVisibleValues)) ]
 
             else
                 emptyNode
@@ -566,7 +567,7 @@ viewUpdated appState config item =
                 readableTime =
                     TimeUtils.toReadableDateTime appState.timeZone time
             in
-            span [ title readableTime ]
+            span (tooltip readableTime)
                 [ text <| l_ "item.updated" appState ++ inWordsWithConfig { withAffix = True } (locale appState) time updated.currentTime ]
 
         Nothing ->

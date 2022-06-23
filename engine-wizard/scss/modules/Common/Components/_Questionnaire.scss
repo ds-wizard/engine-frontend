@@ -615,16 +615,17 @@ $toolbar-height: 40px;
                 display: flex;
                 width: 100%;
                 justify-content: space-between;
+                align-items: center;
                 font-size: 120%;
             }
 
             &.highlighted {
-                background: theme-color-level('warning', $highlighted-bg-level);
+                background: color-level('warning', $highlighted-bg-level);
                 padding: 1rem;
                 @include border-radius($alert-border-radius);
 
                 &-resolved {
-                    background: theme-color-level('success', $highlighted-bg-level);
+                    background: color-level('success', $highlighted-bg-level);
                 }
             }
 
@@ -697,6 +698,10 @@ $toolbar-height: 40px;
 
             .btn-item-delete {
                 margin-left: 10px;
+
+                .fa {
+                    margin: 0;
+                }
             }
 
             .radio {
@@ -715,11 +720,6 @@ $toolbar-height: 40px;
             p:last-child {
                 margin-bottom: 0;
             }
-        }
-
-        .expand-icon {
-            margin-left: 10px;
-            color: $gray-500;
         }
 
         input[type='radio'], input[type='checkbox'] {
@@ -790,10 +790,13 @@ $toolbar-height: 40px;
                 font-size: 75%;
                 transition: all 0.25s ease-in-out;
 
-
                 &:hover {
                     color: $gray-700;
                     text-decoration: none;
+                }
+
+                .fa {
+                    margin: 0;
                 }
 
 
@@ -848,7 +851,6 @@ $toolbar-height: 40px;
                             color: $gray-900;
                         }
                     }
-
 
                     .fa {
                         margin-right: 0.25rem;
@@ -910,17 +912,6 @@ $toolbar-height: 40px;
                     margin-bottom: 0;
                 }
             }
-        }
-
-        .answered {
-            margin-top: 0.5rem;
-        }
-
-        .badge-human-identifier {
-            font-size: 85%;
-            margin-bottom: 0.25rem;
-            margin-right: 0.5rem;
-            padding: .25em 0.8em;
         }
 
         .integration-typehints {

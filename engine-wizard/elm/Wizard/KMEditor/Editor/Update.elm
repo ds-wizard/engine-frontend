@@ -1,7 +1,6 @@
 module Wizard.KMEditor.Editor.Update exposing (fetchData, isGuarded, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
-import List.Extra as List
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Prefabs as PrefabsApi
@@ -17,7 +16,6 @@ import Shared.WebSocket as WebSocket
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
@@ -160,9 +158,6 @@ update wrapMsg msg appState model =
 
         WebSocketPing ->
             withSeed ( model, WebSocket.ping model.websocket )
-
-        OnlineUserMsg index onlineUserMsg ->
-            withSeed ( { model | onlineUsers = List.updateAt index (OnlineUser.update onlineUserMsg) model.onlineUsers }, Cmd.none )
 
         SavingMsg savingMsg ->
             withSeed ( { model | savingModel = ProjectSaving.update savingMsg model.savingModel }, Cmd.none )
@@ -307,7 +302,7 @@ handleWebSocketMsg websocketMsg appState model =
                 WebSocketServerAction.Success message ->
                     case message of
                         ServerBranchAction.SetUserList users ->
-                            ( appState.seed, { model | onlineUsers = List.map OnlineUser.init users }, Cmd.none )
+                            ( appState.seed, { model | onlineUsers = users }, Cmd.none )
 
                         ServerBranchAction.SetContent setContentBranchAction ->
                             case setContentBranchAction of

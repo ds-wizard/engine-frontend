@@ -1,0 +1,25 @@
+@import '../variables';
+@import '../mixins';
+
+
+.dropdown-menu-right {
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: 0 !important;
+    transform: none !important;
+    margin-top: 35px;
+}
+
+.dropdown-item {
+    &-icon {
+        padding-left: $spacer-5;
+        position: relative;
+
+        .fa {
+            position: absolute;
+            left: $spacer-4;
+            top: $spacer-2;
+        }
+    }
+}

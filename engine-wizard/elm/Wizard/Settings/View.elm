@@ -86,7 +86,7 @@ view route appState model =
                     Html.map PlansMsg <|
                         Wizard.Settings.Plans.View.view appState model.plansModel
     in
-    div [ class "Settings" ]
+    div [ class "Settings col-full" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
         , div [ class "Settings__content" ] [ content ]
         ]
