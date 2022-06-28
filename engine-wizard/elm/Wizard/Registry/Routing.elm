@@ -28,17 +28,15 @@ registrySignupConfirmation wrapRoute organizationId hash =
 
 toUrl : AppState -> Route -> List String
 toUrl appState route =
-    let
-        moduleRoot =
-            lr "registry" appState
-    in
     case route of
         RegistrySignupConfirmationRoute organizationId hash ->
+            let
+                moduleRoot =
+                    lr "registry" appState
+            in
             [ moduleRoot, lr "registry.signupConfirmation" appState, organizationId, hash ]
 
 
 isAllowed : Route -> AppState -> Bool
-isAllowed route appState =
-    case route of
-        RegistrySignupConfirmationRoute _ _ ->
-            Feature.settings appState
+isAllowed _ appState =
+    Feature.settings appState

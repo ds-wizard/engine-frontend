@@ -1,6 +1,5 @@
 module Wizard.Common.View.FormGroup exposing
     ( codeView
-    , formGroup
     , formGroupCustom
     , formatRadioGroup
     , getErrors
@@ -19,7 +18,6 @@ module Wizard.Common.View.FormGroup exposing
     , resizableTextarea
     , richRadioGroup
     , select
-    , selectWithDisabled
     , simpleDate
     , textView
     , textarea
@@ -28,17 +26,16 @@ module Wizard.Common.View.FormGroup exposing
     , viewList
     )
 
-import Form exposing (Form, InputType(..), Msg(..))
+import Form exposing (Form, Msg(..))
 import Form.Field as Field
 import Form.Input as Input
-import Html exposing (Html, a, button, code, div, label, li, option, p, span, text, ul)
-import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, selected, type_, value)
-import Html.Events exposing (on, onBlur, onCheck, onClick, onFocus, onMouseDown, targetValue)
-import Json.Decode as Json
+import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
+import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, type_, value)
+import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
 import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
-import Shared.Form.FormError exposing (FormError(..))
+import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa)
 import Shared.Locale exposing (l, lx)
 import Shared.Markdown as Markdown
@@ -88,22 +85,23 @@ inputWithTypehints options appState form fieldName labelText =
         ( error, errorClass ) =
             getErrors appState field labelText
 
-        typehintMessage =
-            Form.Input fieldName Form.Text << Field.String
-
         contains a b =
             String.contains (String.toLower a) (String.toLower b)
 
-        filteredOptions =
-            case field.value of
-                Just value ->
-                    List.filter (contains value) options
-
-                Nothing ->
-                    options
-
         typehints =
             if field.hasFocus then
+                let
+                    typehintMessage =
+                        Form.Input fieldName Form.Text << Field.String
+
+                    filteredOptions =
+                        case field.value of
+                            Just value ->
+                                List.filter (contains value) options
+
+                            Nothing ->
+                                options
+                in
                 ul [ class "typehints" ]
                     (List.map
                         (\option ->
@@ -152,27 +150,6 @@ passwordWithStrength appState form fieldName labelText =
 select : AppState -> List ( String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 select appState options =
     formGroup (Input.selectInput options) [] appState
-
-
-selectWithDisabled : AppState -> List ( String, String, Bool ) -> Form FormError o -> String -> String -> Html Form.Msg
-selectWithDisabled appState options =
-    let
-        input_ state attrs =
-            let
-                formAttrs =
-                    [ on
-                        "change"
-                        (targetValue |> Json.map (Field.String >> Input state.path Select))
-                    , onFocus (Focus state.path)
-                    , onBlur (Blur state.path)
-                    ]
-
-                buildOption ( k, v, d ) =
-                    option [ value k, selected (state.value == Just k), disabled d ] [ text v ]
-            in
-            Html.select (formAttrs ++ attrs) (List.map buildOption options)
-    in
-    formGroup input_ [] appState
 
 
 richRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg

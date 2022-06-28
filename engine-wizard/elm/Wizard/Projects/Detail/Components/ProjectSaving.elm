@@ -1,6 +1,7 @@
 module Wizard.Projects.Detail.Components.ProjectSaving exposing
     ( Model
     , Msg
+    , State
     , init
     , setSaved
     , setSaving
@@ -71,14 +72,14 @@ setSaved model =
 
 
 type Msg
-    = SavedTickMsg Time.Posix
+    = SavedTickMsg
     | PopoverMsg Popover.State
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        SavedTickMsg _ ->
+        SavedTickMsg ->
             case model.state of
                 SavedRecently n ->
                     if n - 1 <= 0 then
@@ -102,7 +103,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.state of
         SavedRecently _ ->
-            Time.every (1 * 1000) SavedTickMsg
+            Time.every 1000 (always SavedTickMsg)
 
         _ ->
             Sub.none

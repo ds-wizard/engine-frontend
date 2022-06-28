@@ -1,12 +1,10 @@
 module Wizard.Settings.Common.Forms.OpenIDServiceConfigForm exposing
     ( OpenIDServiceConfigForm
     , configToFormInitials
-    , init
     , toEditableOpenIDServiceConfig
     , validation
     )
 
-import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
@@ -26,11 +24,6 @@ type alias OpenIDServiceConfigForm =
     , styleColor : Maybe String
     , styleIcon : Maybe String
     }
-
-
-init : EditableOpenIDServiceConfig -> Form FormError OpenIDServiceConfigForm
-init config =
-    Form.initial (configToFormInitials config) validation
 
 
 validation : Validation FormError OpenIDServiceConfigForm

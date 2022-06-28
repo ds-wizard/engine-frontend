@@ -2,7 +2,6 @@ module Shared.Data.Event.AddIntegrationWidgetEventData exposing
     ( AddIntegrationWidgetEventData
     , decoder
     , encode
-    , init
     , toIntegration
     )
 
@@ -47,18 +46,6 @@ encode data =
     , ( "annotations", E.list Annotation.encode data.annotations )
     , ( "widgetUrl", E.string data.widgetUrl )
     ]
-
-
-init : AddIntegrationWidgetEventData
-init =
-    { id = ""
-    , name = ""
-    , props = []
-    , logo = ""
-    , itemUrl = ""
-    , annotations = []
-    , widgetUrl = ""
-    }
 
 
 toIntegration : String -> AddIntegrationWidgetEventData -> Integration

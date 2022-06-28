@@ -1,7 +1,6 @@
 module Shared.Data.MigrationResolution exposing
     ( MigrationResolution
     , apply
-    , create
     , encode
     , reject
     )

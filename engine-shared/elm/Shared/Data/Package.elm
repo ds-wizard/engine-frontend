@@ -1,7 +1,5 @@
 module Shared.Data.Package exposing
     ( Package
-    , compare
-    , createFormOption
     , decoder
     , dummy
     )
@@ -60,17 +58,3 @@ dummy =
     , state = PackageState.unknown
     , createdAt = Time.millisToPosix 0
     }
-
-
-createFormOption : Package -> ( String, String )
-createFormOption package =
-    let
-        optionText =
-            package.name ++ " " ++ Version.toString package.version ++ " (" ++ package.id ++ ")"
-    in
-    ( package.id, optionText )
-
-
-compare : Package -> Package -> Order
-compare p1 p2 =
-    Basics.compare (String.toLower p1.name) (String.toLower p2.name)

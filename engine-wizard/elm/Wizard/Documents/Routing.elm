@@ -32,13 +32,12 @@ indexRoute wrapRoute documentUuid =
 
 toUrl : AppState -> Route -> List String
 toUrl appState route =
-    let
-        moduleRoot =
-            lr "documents" appState
-    in
     case route of
         IndexRoute questionnaireUuid paginationQueryString ->
             let
+                moduleRoot =
+                    lr "documents" appState
+
                 queryString =
                     PaginationQueryString.toUrlWith
                         [ ( lr "documents.index.questionnaireUuid" appState, Maybe.unwrap "" Uuid.toString questionnaireUuid )

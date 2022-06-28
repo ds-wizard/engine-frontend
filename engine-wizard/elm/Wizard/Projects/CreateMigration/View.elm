@@ -56,7 +56,7 @@ createMigrationView appState model questionnaire =
             ( packageId, versionString )
 
         createOptions package =
-            ( "", "--" ) :: List.map (createVersionOption package) package.versions
+            ( "", "--" ) :: List.map (createVersionOption package) (List.reverse (List.sortWith Version.compare package.versions))
 
         tags =
             KnowledgeModel.getTags questionnaire.knowledgeModel
@@ -109,7 +109,7 @@ createMigrationView appState model questionnaire =
                 ]
             ]
         , FormActions.view appState
-            Routes.projectsIndex
+            (Routes.projectsIndex appState)
             (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingMigration (FormMsg Form.Submit) False)
         ]
 

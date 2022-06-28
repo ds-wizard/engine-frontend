@@ -1,6 +1,6 @@
 {
   "name": "wizard-style-builder",
-  "version": "3.12.0",
+  "version": "3.13.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,10 +17,10 @@
     "fs-extra": "^10.1.0",
     "helmet": "^5.1.0",
     "morgan": "^1.10.0",
-    "sass": "^1.52.1"
+    "sass": "^1.52.3"
   },
   "devDependencies": {
-    "jest": "^28.1.0",
+    "jest": "^28.1.1",
     "nodemon": "^2.0.16",
     "supertest": "^6.2.3"
   },

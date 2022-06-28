@@ -1,4 +1,4 @@
-module Wizard.Common.View.ExternalLoginButton exposing (badgeWrapper, defaultBackground, defaultColor, defaultIcon, render, view, viewAsBadge)
+module Wizard.Common.View.ExternalLoginButton exposing (badgeWrapper, defaultBackground, defaultColor, defaultIcon, render, view)
 
 import Html exposing (Attribute, Html, a, span, text)
 import Html.Attributes exposing (class, href, style)

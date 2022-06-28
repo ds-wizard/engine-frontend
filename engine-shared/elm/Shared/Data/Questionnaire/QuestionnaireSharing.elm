@@ -3,11 +3,9 @@ module Shared.Data.Questionnaire.QuestionnaireSharing exposing
     , decoder
     , encode
     , field
-    , formOptions
     , fromFormValues
     , richFormOptions
     , toFormValues
-    , toString
     , validation
     )
 
@@ -149,22 +147,5 @@ richFormOptions appState =
     , ( toString AnyoneWithLinkEditQuestionnaire
       , lg "questionnaireSharing.anyoneWithLinkEdit" appState
       , lg "questionnaireSharing.anyoneWithLinkEdit.description" appState
-      )
-    ]
-
-
-formOptions : { a | provisioning : Provisioning } -> List ( String, String )
-formOptions appState =
-    [ ( toString RestrictedQuestionnaire
-      , lg "questionnaireSharing.restricted" appState
-      )
-    , ( toString AnyoneWithLinkViewQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLinkView" appState
-      )
-    , ( toString AnyoneWithLinkCommentQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLinkComment" appState
-      )
-    , ( toString AnyoneWithLinkEditQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLinkEdit" appState
       )
     ]

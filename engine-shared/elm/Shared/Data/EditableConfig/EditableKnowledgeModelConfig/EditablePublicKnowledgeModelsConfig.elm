@@ -1,7 +1,6 @@
 module Shared.Data.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig exposing
     ( EditablePublicKnowledgeModelsConfig
     , decoder
-    , default
     , encode
     )
 
@@ -30,10 +29,3 @@ encode config =
         [ ( "enabled", E.bool config.enabled )
         , ( "packages", E.list AllowedPackage.encode config.packages )
         ]
-
-
-default : EditablePublicKnowledgeModelsConfig
-default =
-    { enabled = False
-    , packages = []
-    }

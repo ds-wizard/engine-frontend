@@ -103,29 +103,30 @@ formView appState form =
         colorPicker colorOptions field =
             div [ class "color-picker" ] (List.map (colorButtonView field) colorOptions)
 
-        appTitleValue =
-            (Form.getFieldAsString "appTitleShort" form).value
-                |> Maybe.andThen String.toMaybe
-                |> Maybe.withDefault LookAndFeelConfig.defaultAppTitleShort
-
-        logoPreview =
-            div []
-                [ div
-                    [ class "LogoPreview" ]
-                    [ span [ class "LogoPreview__Logo LogoPreview__Logo--Original" ] []
-                    , text appTitleValue
-                    ]
-                , div [ class "mt-2" ]
-                    [ button
-                        [ class "btn btn-secondary"
-                        , onClick (LogoUploadModalMsg (LogoUploadModal.SetOpen True))
-                        ]
-                        [ text "Change" ]
-                    ]
-                ]
-
         clientCustomizations =
             if appState.config.feature.clientCustomizationEnabled then
+                let
+                    appTitleValue =
+                        (Form.getFieldAsString "appTitleShort" form).value
+                            |> Maybe.andThen String.toMaybe
+                            |> Maybe.withDefault LookAndFeelConfig.defaultAppTitleShort
+
+                    logoPreview =
+                        div []
+                            [ div
+                                [ class "LogoPreview" ]
+                                [ span [ class "LogoPreview__Logo LogoPreview__Logo--Original" ] []
+                                , text appTitleValue
+                                ]
+                            , div [ class "mt-2" ]
+                                [ button
+                                    [ class "btn btn-secondary"
+                                    , onClick (LogoUploadModalMsg (LogoUploadModal.SetOpen True))
+                                    ]
+                                    [ text "Change" ]
+                                ]
+                            ]
+                in
                 [ div [ class "row mt-5" ]
                     [ div [ class "col-8" ]
                         [ FormGroup.plainGroup logoPreview "Logo"

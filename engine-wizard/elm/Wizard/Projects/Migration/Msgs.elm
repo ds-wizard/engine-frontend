@@ -12,7 +12,7 @@ type Msg
     | SelectChange QuestionChange
     | ResolveCurrentChange
     | UndoResolveCurrentChange
-    | PutQuestionnaireContentCompleted (Result ApiError ())
+    | PutQuestionnaireContentCompleted
     | PutQuestionnaireMigrationCompleted (Result ApiError ())
     | FinalizeMigration
     | FinalizeMigrationCompleted (Result ApiError ())

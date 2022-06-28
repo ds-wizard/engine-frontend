@@ -1,8 +1,7 @@
 module Shared.Data.KnowledgeModel.PhaseTest exposing (phaseDecoderTest)
 
-import Dict
 import Shared.Data.KnowledgeModel.Phase as Phase
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

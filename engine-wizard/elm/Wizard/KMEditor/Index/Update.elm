@@ -3,13 +3,11 @@ module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch exposing (Branch)
-import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setPackage)
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
@@ -18,7 +16,6 @@ import Wizard.KMEditor.Common.DeleteModal as DeleteModal
 import Wizard.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.KMEditor.Index.Models exposing (Model)
 import Wizard.KMEditor.Index.Msgs exposing (Msg(..))
-import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
@@ -32,9 +29,6 @@ fetchData =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetPackageCompleted result ->
-            handleGetPackageCompleted appState model result
-
         DeleteMigration uuid ->
             handleDeleteMigration wrapMsg appState model uuid
 
@@ -53,16 +47,6 @@ update msg wrapMsg appState model =
 
 
 -- Handlers
-
-
-handleGetPackageCompleted : AppState -> Model -> Result ApiError PackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetPackageCompleted appState model result =
-    applyResult appState
-        { setResult = setPackage
-        , defaultError = lg "apiError.packages.getError" appState
-        , model = model
-        , result = result
-        }
 
 
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )

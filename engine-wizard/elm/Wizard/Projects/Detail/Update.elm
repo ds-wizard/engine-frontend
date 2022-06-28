@@ -1,4 +1,4 @@
-module Wizard.Projects.Detail.Update exposing (fetchData, onUnload, update)
+module Wizard.Projects.Detail.Update exposing (fetchData, isGuarded, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
@@ -15,7 +15,7 @@ import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAc
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
-import Shared.Locale exposing (lg)
+import Shared.Locale exposing (l, lg)
 import Shared.Utils exposing (dispatch, getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
@@ -43,6 +43,11 @@ import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
+l_ : String -> AppState -> String
+l_ =
+    l "Wizard.Projects.Detail.Update"
+
+
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
 fetchData appState uuid model =
     if ActionResult.unwrap False (.uuid >> (==) uuid) model.questionnaireModel then
@@ -66,7 +71,7 @@ fetchSubrouteData appState model =
 
                 PlanDetailRoute.Metrics ->
                     Cmd.map SummaryReportMsg <|
-                        SummaryReport.fetchData2 appState uuid
+                        SummaryReport.fetchData appState uuid
 
                 PlanDetailRoute.Documents _ ->
                     Cmd.map DocumentsMsg <|
@@ -93,8 +98,20 @@ fetchSubrouteDataFromAfter wrapMsg appState model =
             ( model, Cmd.none )
 
 
+isGuarded : AppState -> Routes.Route -> Model -> Maybe String
+isGuarded appState nextRoute model =
+    if List.isEmpty model.savingActionUuids then
+        Nothing
+
+    else if Routes.isProjectsDetail model.uuid nextRoute then
+        Nothing
+
+    else
+        Just (l_ "unloadMessage" appState)
+
+
 onUnload : Routes.Route -> Model -> Cmd Msg
-onUnload newRoute model =
+onUnload nextRoute model =
     let
         leaveCmd =
             Cmd.batch
@@ -102,7 +119,7 @@ onUnload newRoute model =
                 , dispatch ResetModel
                 ]
     in
-    case newRoute of
+    case nextRoute of
         ProjectsRoute (DetailRoute uuid _) ->
             if uuid == model.uuid then
                 Cmd.none
@@ -162,13 +179,16 @@ update wrapMsg msg appState model =
                         updatedModel =
                             { applyActionModel | questionnaireModel = updatedQuestionnaireModel }
 
-                        cmd =
+                        wsCmd =
                             event
                                 |> ClientQuestionnaireAction.SetContent
                                 |> ClientQuestionnaireAction.encode
                                 |> WebSocket.send model.websocket
+
+                        setUnloadMessageCmd =
+                            Ports.setUnloadMessage (l_ "unloadMessage" appState)
                     in
-                    ( applyActionSeed, updatedModel, cmd )
+                    ( applyActionSeed, updatedModel, Cmd.batch [ wsCmd, setUnloadMessageCmd ] )
 
                 createdAt =
                     appState.currentTime
@@ -357,19 +377,14 @@ update wrapMsg msg appState model =
                 )
 
         SummaryReportMsg summaryReportMsg ->
-            case model.questionnaireModel of
-                Success qm ->
-                    let
-                        ( summaryReportModel, summaryReportCmd ) =
-                            SummaryReport.update summaryReportMsg appState { questionnaire = qm.questionnaire } model.summaryReportModel
-                    in
-                    withSeed <|
-                        ( { model | summaryReportModel = summaryReportModel }
-                        , Cmd.map (wrapMsg << SummaryReportMsg) summaryReportCmd
-                        )
-
-                _ ->
-                    withSeed ( model, Cmd.none )
+            let
+                ( summaryReportModel, summaryReportCmd ) =
+                    SummaryReport.update summaryReportMsg appState model.summaryReportModel
+            in
+            withSeed <|
+                ( { model | summaryReportModel = summaryReportModel }
+                , Cmd.map (wrapMsg << SummaryReportMsg) summaryReportCmd
+                )
 
         DocumentsMsg documentsMsg ->
             case model.questionnaireModel of
@@ -451,31 +466,8 @@ update wrapMsg msg appState model =
         WebSocketMsg wsMsg ->
             handleWebsocketMsg wsMsg appState model
 
-        WebSocketPing _ ->
+        WebSocketPing ->
             withSeed ( model, WebSocket.ping model.websocket )
-
-        ScrollToTodo todo ->
-            case model.questionnaireModel of
-                Success questionnaireModel ->
-                    let
-                        newQuestionnaireModel =
-                            Questionnaire.setActiveChapterUuid todo.chapter.uuid questionnaireModel
-
-                        selector =
-                            "[data-path=\"" ++ todo.path ++ "\"]"
-                    in
-                    ( appState.seed
-                    , { model
-                        | questionnaireModel = Success newQuestionnaireModel
-                      }
-                    , Cmd.batch
-                        [ cmdNavigate appState (Routes.projectsDetailQuestionnaire model.uuid)
-                        , Ports.scrollIntoView selector
-                        ]
-                    )
-
-                _ ->
-                    ( appState.seed, model, Cmd.none )
 
         OnlineUserMsg index ouMsg ->
             withSeed <| handleOnlineUserMsg index ouMsg model
@@ -500,7 +492,7 @@ update wrapMsg msg appState model =
             let
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
-                    , redirectCmd = cmdNavigate appState Routes.projectsIndex
+                    , redirectCmd = cmdNavigate appState (Routes.projectsIndex appState)
                     , packageId = ActionResult.unwrap "" (.questionnaire >> .package >> .id) model.questionnaireModel
                     , questionnaireUuid = model.uuid
                     , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
@@ -637,10 +629,17 @@ handleWebsocketMsg websocketMsg appState model =
 
                     else
                         newModel
+
+                clearUnloadMessageCmd =
+                    if removed && List.isEmpty newModel2.savingActionUuids then
+                        Ports.clearUnloadMessage ()
+
+                    else
+                        Cmd.none
             in
             ( appState.seed
             , newModel2
-            , Cmd.none
+            , clearUnloadMessageCmd
             )
     in
     case WebSocket.receive ServerQuestionnaireAction.decoder websocketMsg model.websocket of

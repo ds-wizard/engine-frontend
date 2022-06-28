@@ -1,6 +1,5 @@
 module Wizard.Templates.Routing exposing
-    ( detail
-    , isAllowed
+    ( isAllowed
     , parsers
     , toUrl
     )

@@ -1,7 +1,6 @@
 module Shared.Data.EditableConfig.EditableQuestionnaireConfig.EditableQuestionnaireVisibilityConfig exposing
     ( EditableQuestionnaireVisibilityConfig
     , decoder
-    , default
     , encode
     )
 
@@ -30,10 +29,3 @@ encode config =
         [ ( "enabled", E.bool config.enabled )
         , ( "defaultValue", QuestionnaireVisibility.encode config.defaultValue )
         ]
-
-
-default : EditableQuestionnaireVisibilityConfig
-default =
-    { enabled = True
-    , defaultValue = QuestionnaireVisibility.PrivateQuestionnaire
-    }

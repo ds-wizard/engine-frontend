@@ -1,5 +1,7 @@
 module Shared.Data.EditableConfig.EditableQuestionnairesConfig exposing
     ( EditableQuestionnairesConfig
+    , Feedback
+    , ProjectTagging
     , decoder
     , encode
     )

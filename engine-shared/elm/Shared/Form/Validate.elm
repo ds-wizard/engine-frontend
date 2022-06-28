@@ -4,16 +4,13 @@ module Shared.Form.Validate exposing
     , ifElse
     , kmId
     , maybeInt
-    , maybeRegex
     , maybeString
     , optionalString
     , organizationId
     , password
     , projectTag
     , projectTags
-    , regex
     , uuid
-    , uuidString
     )
 
 import Dict exposing (Dict)
@@ -115,11 +112,6 @@ maybeRegex r error =
         [ V.map (\_ -> Nothing) <| V.emptyString
         , V.map Just <| validateRegexWithCustomError r (FormError.Error error)
         ]
-
-
-uuidString : Validation FormError String
-uuidString =
-    validateRegexWithCustomError RegexPatterns.uuid InvalidUuid
 
 
 uuid : Validation FormError Uuid

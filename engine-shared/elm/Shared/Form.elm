@@ -59,9 +59,6 @@ errorToString appState labelText error =
                 Error msg ->
                     msg
 
-                IntegrationIdAlreadyUsed ->
-                    l_ "error.integrationIdAlreadyUsed" appState
-
         _ ->
             l_ "error.default" appState
 

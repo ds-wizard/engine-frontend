@@ -1,8 +1,6 @@
 module Wizard.Routing exposing
     ( cmdNavigate
     , cmdNavigateRaw
-    , isAllowed
-    , matchers
     , parseLocation
     , routeIfAllowed
     , toUrl
@@ -31,8 +29,7 @@ matchers : AppState -> Parser (Routes.Route -> b) b
 matchers appState =
     let
         parsers =
-            []
-                ++ Wizard.Dev.Routing.parsers appState Routes.DevRoute
+            Wizard.Dev.Routing.parsers appState Routes.DevRoute
                 ++ Wizard.Apps.Routing.parsers Routes.AppsRoute
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute

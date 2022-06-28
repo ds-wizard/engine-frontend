@@ -1,8 +1,7 @@
 module Shared.Data.KnowledgeModel.AnswerTest exposing (answerDecoderTest)
 
-import Dict
 import Shared.Data.KnowledgeModel.Answer as Answer
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

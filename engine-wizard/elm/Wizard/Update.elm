@@ -1,7 +1,4 @@
-module Wizard.Update exposing
-    ( fetchData
-    , update
-    )
+module Wizard.Update exposing (update)
 
 import Browser
 import Browser.Navigation exposing (load, pushUrl)
@@ -32,78 +29,82 @@ import Wizard.Users.Update
 
 fetchData : Model -> Cmd Msg
 fetchData model =
-    let
-        fetchCmd =
-            case model.appState.route of
-                Routes.DevRoute route ->
-                    Cmd.map AdminMsg <|
-                        Wizard.Dev.Update.fetchData route model.appState
+    case model.appState.route of
+        Routes.DevRoute route ->
+            Cmd.map AdminMsg <|
+                Wizard.Dev.Update.fetchData route model.appState
 
-                Routes.AppsRoute route ->
-                    Cmd.map AppsMsg <|
-                        Wizard.Apps.Update.fetchData route model.appState
+        Routes.AppsRoute route ->
+            Cmd.map AppsMsg <|
+                Wizard.Apps.Update.fetchData route model.appState
 
-                Routes.DashboardRoute ->
-                    Cmd.map DashboardMsg <|
-                        Wizard.Dashboard.Update.fetchData model.appState
+        Routes.DashboardRoute ->
+            Cmd.map DashboardMsg <|
+                Wizard.Dashboard.Update.fetchData model.appState
 
-                Routes.DocumentsRoute route ->
-                    Cmd.map DocumentsMsg <|
-                        Wizard.Documents.Update.fetchData route model.appState model.documentsModel
+        Routes.DocumentsRoute _ ->
+            Cmd.map DocumentsMsg <|
+                Wizard.Documents.Update.fetchData model.appState model.documentsModel
 
-                Routes.KMEditorRoute route ->
-                    Cmd.map Wizard.Msgs.KMEditorMsg <|
-                        Wizard.KMEditor.Update.fetchData route model.kmEditorModel model.appState
+        Routes.KMEditorRoute route ->
+            Cmd.map Wizard.Msgs.KMEditorMsg <|
+                Wizard.KMEditor.Update.fetchData route model.kmEditorModel model.appState
 
-                Routes.KnowledgeModelsRoute route ->
-                    Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
-                        Wizard.KnowledgeModels.Update.fetchData route model.appState
+        Routes.KnowledgeModelsRoute route ->
+            Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
+                Wizard.KnowledgeModels.Update.fetchData route model.appState
 
-                Routes.ProjectsRoute route ->
-                    Cmd.map Wizard.Msgs.ProjectsMsg <|
-                        Wizard.Projects.Update.fetchData route model.appState model.projectsModel
+        Routes.ProjectsRoute route ->
+            Cmd.map Wizard.Msgs.ProjectsMsg <|
+                Wizard.Projects.Update.fetchData route model.appState model.projectsModel
 
-                Routes.PublicRoute route ->
-                    Cmd.map Wizard.Msgs.PublicMsg <|
-                        Wizard.Public.Update.fetchData route model.appState
+        Routes.PublicRoute route ->
+            Cmd.map Wizard.Msgs.PublicMsg <|
+                Wizard.Public.Update.fetchData route model.appState
 
-                Routes.RegistryRoute route ->
-                    Cmd.map Wizard.Msgs.RegistryMsg <|
-                        Wizard.Registry.Update.fetchData route model.appState
+        Routes.RegistryRoute route ->
+            Cmd.map Wizard.Msgs.RegistryMsg <|
+                Wizard.Registry.Update.fetchData route model.appState
 
-                Routes.SettingsRoute route ->
-                    Cmd.map Wizard.Msgs.SettingsMsg <|
-                        Wizard.Settings.Update.fetchData route model.appState model.settingsModel
+        Routes.SettingsRoute route ->
+            Cmd.map Wizard.Msgs.SettingsMsg <|
+                Wizard.Settings.Update.fetchData route model.appState model.settingsModel
 
-                Routes.TemplatesRoute route ->
-                    Cmd.map Wizard.Msgs.TemplatesMsg <|
-                        Wizard.Templates.Update.fetchData route model.appState
+        Routes.TemplatesRoute route ->
+            Cmd.map Wizard.Msgs.TemplatesMsg <|
+                Wizard.Templates.Update.fetchData route model.appState
 
-                Routes.UsersRoute route ->
-                    Cmd.map Wizard.Msgs.UsersMsg <|
-                        Wizard.Users.Update.fetchData route model.appState
+        Routes.UsersRoute route ->
+            Cmd.map Wizard.Msgs.UsersMsg <|
+                Wizard.Users.Update.fetchData route model.appState
 
-                _ ->
-                    Cmd.none
-    in
-    fetchCmd
+        _ ->
+            Cmd.none
 
 
-isGuarded : Model -> Maybe String
-isGuarded _ =
-    Nothing
+isGuarded : Routes.Route -> Model -> Maybe String
+isGuarded nextRoute model =
+    case model.appState.route of
+        Routes.KMEditorRoute route ->
+            Wizard.KMEditor.Update.isGuarded route model.appState nextRoute model.kmEditorModel
+
+        Routes.ProjectsRoute route ->
+            Wizard.Projects.Update.isGuarded route model.appState nextRoute model.projectsModel
+
+        _ ->
+            Nothing
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
-onUnload newRoute model =
+onUnload nextRoute model =
     case model.appState.route of
         Routes.KMEditorRoute route ->
             Cmd.map KMEditorMsg <|
-                Wizard.KMEditor.Update.onUnload route newRoute model.kmEditorModel
+                Wizard.KMEditor.Update.onUnload route nextRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
             Cmd.map ProjectsMsg <|
-                Wizard.Projects.Update.onUnload route newRoute model.projectsModel
+                Wizard.Projects.Update.onUnload route nextRoute model.projectsModel
 
         _ ->
             Cmd.none
@@ -124,19 +125,23 @@ update msg model =
         case msg of
             Wizard.Msgs.OnUrlChange location ->
                 let
-                    newRoute =
+                    nextRoute =
                         parseLocation model.appState location
 
                     newModel =
-                        setRoute newRoute model
+                        setRoute nextRoute model
                             |> initLocalModel
                 in
-                ( newModel, Cmd.batch [ onUnload newRoute model, fetchData newModel ] )
+                ( newModel, Cmd.batch [ onUnload nextRoute model, fetchData newModel ] )
 
             Wizard.Msgs.OnUrlRequest urlRequest ->
                 case urlRequest of
                     Browser.Internal url ->
-                        case isGuarded model of
+                        let
+                            nextRoute =
+                                parseLocation model.appState url
+                        in
+                        case isGuarded nextRoute model of
                             Just guardMsg ->
                                 ( model, Ports.alert guardMsg )
 

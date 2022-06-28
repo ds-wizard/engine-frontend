@@ -1,4 +1,4 @@
-module Wizard.Apps.Common.AppEditForm exposing (AppEditForm, encode, init, initEmpty, validation)
+module Wizard.Apps.Common.AppEditForm exposing (AppEditForm, encode, init, validation)
 
 import Form exposing (Form)
 import Form.Field as Field
@@ -12,11 +12,6 @@ type alias AppEditForm =
     { appId : String
     , name : String
     }
-
-
-initEmpty : Form FormError AppEditForm
-initEmpty =
-    Form.initial [] validation
 
 
 init : AppDetail -> Form FormError AppEditForm

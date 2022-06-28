@@ -1,7 +1,5 @@
 module Wizard.Common.Menu.View exposing
     ( viewAboutModal
-    , viewAboutModalContent
-    , viewBuildInfo
     , viewDevMenu
     , viewHelpMenu
     , viewProfileMenu

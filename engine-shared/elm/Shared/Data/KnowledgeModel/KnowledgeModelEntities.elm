@@ -207,16 +207,13 @@ moveAnswer answer oldParentUuid newParentUuid entities =
 
                 Nothing ->
                     entities
-
-        entitiesAdded =
-            case Dict.get newParentUuid entities.questions of
-                Just question ->
-                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addAnswerUuid answer.uuid question) entitiesRemoved.questions }
-
-                Nothing ->
-                    entitiesRemoved
     in
-    entitiesAdded
+    case Dict.get newParentUuid entities.questions of
+        Just question ->
+            { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addAnswerUuid answer.uuid question) entitiesRemoved.questions }
+
+        Nothing ->
+            entitiesRemoved
 
 
 moveChoice : Choice -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
@@ -229,16 +226,13 @@ moveChoice choice oldParentUuid newParentUuid entities =
 
                 Nothing ->
                     entities
-
-        entitiesAdded =
-            case Dict.get newParentUuid entities.questions of
-                Just question ->
-                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addChoiceUuid choice.uuid question) entitiesRemoved.questions }
-
-                Nothing ->
-                    entitiesRemoved
     in
-    entitiesAdded
+    case Dict.get newParentUuid entities.questions of
+        Just question ->
+            { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addChoiceUuid choice.uuid question) entitiesRemoved.questions }
+
+        Nothing ->
+            entitiesRemoved
 
 
 moveExpert : Expert -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
@@ -251,16 +245,13 @@ moveExpert expert oldParentUuid newParentUuid entities =
 
                 Nothing ->
                     entities
-
-        entitiesAdded =
-            case Dict.get newParentUuid entities.questions of
-                Just question ->
-                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addExpertUuid expert.uuid question) entitiesRemoved.questions }
-
-                Nothing ->
-                    entitiesRemoved
     in
-    entitiesAdded
+    case Dict.get newParentUuid entities.questions of
+        Just question ->
+            { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addExpertUuid expert.uuid question) entitiesRemoved.questions }
+
+        Nothing ->
+            entitiesRemoved
 
 
 moveQuestion : Question -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
@@ -286,26 +277,23 @@ moveQuestion question oldParentUuid newParentUuid entities =
 
                                 Nothing ->
                                     entities
+    in
+    case Dict.get newParentUuid entities.chapters of
+        Just chapter ->
+            { entitiesRemoved | chapters = Dict.insert chapter.uuid (Chapter.addQuestionUuid questionUuid chapter) entitiesRemoved.chapters }
 
-        entitiesAdded =
-            case Dict.get newParentUuid entities.chapters of
-                Just chapter ->
-                    { entitiesRemoved | chapters = Dict.insert chapter.uuid (Chapter.addQuestionUuid questionUuid chapter) entitiesRemoved.chapters }
+        Nothing ->
+            case Dict.get newParentUuid entities.questions of
+                Just parentQuestion ->
+                    { entitiesRemoved | questions = Dict.insert (Question.getUuid parentQuestion) (Question.addItemTemplateQuestionUuids questionUuid parentQuestion) entitiesRemoved.questions }
 
                 Nothing ->
-                    case Dict.get newParentUuid entities.questions of
-                        Just parentQuestion ->
-                            { entitiesRemoved | questions = Dict.insert (Question.getUuid parentQuestion) (Question.addItemTemplateQuestionUuids questionUuid parentQuestion) entitiesRemoved.questions }
+                    case Dict.get newParentUuid entities.answers of
+                        Just answer ->
+                            { entitiesRemoved | answers = Dict.insert answer.uuid (Answer.addFollowUpUuid questionUuid answer) entitiesRemoved.answers }
 
                         Nothing ->
-                            case Dict.get newParentUuid entities.answers of
-                                Just answer ->
-                                    { entitiesRemoved | answers = Dict.insert answer.uuid (Answer.addFollowUpUuid questionUuid answer) entitiesRemoved.answers }
-
-                                Nothing ->
-                                    entitiesRemoved
-    in
-    entitiesAdded
+                            entitiesRemoved
 
 
 moveReference : Reference -> String -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
@@ -321,16 +309,13 @@ moveReference reference oldParentUuid newParentUuid entities =
 
                 Nothing ->
                     entities
-
-        entitiesAdded =
-            case Dict.get newParentUuid entities.questions of
-                Just question ->
-                    { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addReferenceUuid referenceUuid question) entitiesRemoved.questions }
-
-                Nothing ->
-                    entitiesRemoved
     in
-    entitiesAdded
+    case Dict.get newParentUuid entities.questions of
+        Just question ->
+            { entitiesRemoved | questions = Dict.insert (Question.getUuid question) (Question.addReferenceUuid referenceUuid question) entitiesRemoved.questions }
+
+        Nothing ->
+            entitiesRemoved
 
 
 updateAnswer : Answer -> KnowledgeModelEntities -> KnowledgeModelEntities

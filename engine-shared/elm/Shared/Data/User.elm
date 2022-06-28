@@ -1,5 +1,6 @@
 module Shared.Data.User exposing
-    ( User
+    ( SubmissionProps
+    , User
     , compare
     , decoder
     , defaultGravatar

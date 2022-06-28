@@ -4,10 +4,8 @@ module Shared.Data.Questionnaire.QuestionnaireCreation exposing
     , decoder
     , encode
     , field
-    , fromString
     , fromTemplateEnabled
     , richFormOptions
-    , toString
     , validation
     )
 

@@ -18,7 +18,7 @@ import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEven
 import Shared.Data.Event.EditQuestionValueEventData as EditQuestionValueEventData exposing (EditQuestionValueEventData)
 import Shared.Data.Event.EventField as EventField
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType
 
 
 type EditQuestionEventData

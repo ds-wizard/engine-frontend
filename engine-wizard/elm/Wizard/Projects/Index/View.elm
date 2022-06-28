@@ -1,6 +1,6 @@
 module Wizard.Projects.Index.View exposing (view)
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, a, code, div, img, input, span, text)
 import Html.Attributes exposing (class, classList, href, placeholder, src, title, type_, value)
@@ -15,7 +15,7 @@ import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
-import Shared.Data.SummaryReport exposing (IndicationReport(..), compareIndicationReport, unwrapIndicationReport)
+import Shared.Data.SummaryReport exposing (compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lx)
@@ -183,9 +183,6 @@ listingProjectTagsFilter appState model =
         selectedTagItem =
             viewTagItem removeTagLink (faSet "listing.filter.multi.selected" appState)
 
-        addTagItem =
-            viewTagItem addTagLink (faSet "listing.filter.multi.notSelected" appState)
-
         sortTags =
             List.sortBy String.toUpper
 
@@ -243,6 +240,10 @@ listingProjectTagsFilter appState model =
 
         foundTagsItems =
             if not (List.isEmpty foundTags) then
+                let
+                    addTagItem =
+                        viewTagItem addTagLink (faSet "listing.filter.multi.notSelected" appState)
+                in
                 List.map addTagItem foundTags
 
             else if not (String.isEmpty model.projectTagsFilterSearchValue) then
@@ -303,9 +304,6 @@ listingUsersFilter appState model =
 
         selectedUserItem =
             viewUserItem removeUserLink (faSet "listing.filter.multi.selected" appState)
-
-        addUserItem =
-            viewUserItem addUserLink (faSet "listing.filter.multi.notSelected" appState)
 
         foundSelectedUsers =
             ActionResult.unwrap [] .items model.userFilterSelectedUsers
@@ -371,6 +369,10 @@ listingUsersFilter appState model =
 
         foundUsersItems =
             if not (List.isEmpty foundUsers) then
+                let
+                    addUserItem =
+                        viewUserItem addUserLink (faSet "listing.filter.multi.notSelected" appState)
+                in
                 List.map addUserItem foundUsers
 
             else if not (String.isEmpty model.userFilterSearchValue) then

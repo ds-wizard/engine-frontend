@@ -1,6 +1,5 @@
 module Shared.Common.TimeUtils exposing
     ( fromYMD
-    , intToMonth
     , isAfter
     , isBefore
     , isBetween

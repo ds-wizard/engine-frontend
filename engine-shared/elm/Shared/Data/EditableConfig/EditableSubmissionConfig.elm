@@ -1,5 +1,9 @@
 module Shared.Data.EditableConfig.EditableSubmissionConfig exposing
     ( EditableSubmissionConfig
+    , Multipart
+    , Request
+    , Service
+    , SupportedFormat
     , decoder
     , encode
     , initEmptyForm

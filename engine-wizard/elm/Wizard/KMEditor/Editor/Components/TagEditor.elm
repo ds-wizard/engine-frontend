@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.Components.TagEditor exposing
-    ( Model
+    ( EventMsg
+    , Model
     , Msg
     , initialModel
     , update
@@ -108,12 +109,6 @@ view appState wrapMsg eventMsg editorBranch model =
                                 |> setTagUuids tagUuids
                                 |> EditQuestionMultiChoiceEvent
 
-        props =
-            { wrapMsg = wrapMsg
-            , setTagsEventMsg = setTagsEventMsg
-            , editorBranch = editorBranch
-            }
-
         content =
             if List.isEmpty editorBranch.branch.knowledgeModel.tagUuids then
                 Flash.info appState (l_ "noTags" appState)
@@ -122,6 +117,13 @@ view appState wrapMsg eventMsg editorBranch model =
                 Flash.info appState (l_ "noQuestions" appState)
 
             else
+                let
+                    props =
+                        { wrapMsg = wrapMsg
+                        , setTagsEventMsg = setTagsEventMsg
+                        , editorBranch = editorBranch
+                        }
+                in
                 tagEditorTable appState props model
     in
     div [ class "KMEditor__Editor__TagEditor", dataCy "km-editor_tags" ]

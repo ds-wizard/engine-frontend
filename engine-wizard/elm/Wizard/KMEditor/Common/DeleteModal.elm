@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Common.DeleteModal exposing
     ( Model
     , Msg
+    , UpdateConfig
     , initialModel
     , open
     , update

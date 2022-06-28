@@ -4,6 +4,7 @@ module Wizard.Dashboard.Update exposing
     )
 
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Auth.Session as Session
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lg)
@@ -20,28 +21,27 @@ fetchData appState =
     let
         widgets =
             AppState.getDashboardWidgets appState
-
-        pagination =
-            PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC PaginationQueryString.empty
     in
     if List.any (\w -> w == DMPWorkflowDashboardWidget || w == LevelsQuestionnaireDashboardWidget) widgets then
-        QuestionnairesApi.getQuestionnaires { isTemplate = Just False, userUuids = Nothing, userUuidsOp = Nothing, projectTags = Nothing, projectTagsOp = Nothing } pagination appState GetQuestionnairesCompleted
+        let
+            pagination =
+                PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC PaginationQueryString.empty
+
+            mbUserUuid =
+                Session.getUserUuid appState.session
+        in
+        QuestionnairesApi.getQuestionnaires { isTemplate = Just False, userUuids = mbUserUuid, userUuidsOp = Nothing, projectTags = Nothing, projectTagsOp = Nothing } pagination appState GetQuestionnairesCompleted
 
     else
         Cmd.none
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update msg appState model =
-    case msg of
-        GetQuestionnairesCompleted result ->
-            applyResultTransform appState
-                { setResult = setQuestionnaires
-                , defaultError = lg "apiError.questionnaires.getListError" appState
-                , model = model
-                , result = result
-                , transform = .items
-                }
-
-        _ ->
-            ( model, Cmd.none )
+update (GetQuestionnairesCompleted result) appState model =
+    applyResultTransform appState
+        { setResult = setQuestionnaires
+        , defaultError = lg "apiError.questionnaires.getListError" appState
+        , model = model
+        , result = result
+        , transform = .items
+        }

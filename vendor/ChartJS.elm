@@ -1,19 +1,16 @@
 module ChartJS exposing
-    ( ChartConfig
-    , Data
+    ( Data
     , DataSet
-    , encodeChartConfig
+    , chartData
+    , encodeData
+    , radarChart
     )
 
+import Html exposing (Html)
+import Html.Attributes
 import Json.Encode as E exposing (Value)
 import Json.Encode.Extra as E
 import Round
-
-
-type alias ChartConfig =
-    { targetId : String
-    , data : Data
-    }
 
 
 type alias Data =
@@ -32,12 +29,14 @@ type alias DataSet =
     }
 
 
-encodeChartConfig : ChartConfig -> Value
-encodeChartConfig config =
-    E.object
-        [ ( "targetId", E.string config.targetId )
-        , ( "data", encodeData config.data )
-        ]
+radarChart : List (Html.Attribute msg) -> Html msg
+radarChart attributes =
+    Html.node "chart-radar" attributes []
+
+
+chartData : Data -> Html.Attribute msg
+chartData =
+    Html.Attributes.property "chartData" << encodeData
 
 
 encodeData : Data -> Value

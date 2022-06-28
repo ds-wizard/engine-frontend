@@ -2,6 +2,7 @@ module Wizard.Projects.Detail.Components.Settings exposing
     ( Model
     , Msg
     , UpdateConfig
+    , ViewConfig
     , init
     , subscriptions
     , update
@@ -26,6 +27,7 @@ import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.Template.TemplateState as TemplateState exposing (TemplateState)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
@@ -42,6 +44,7 @@ import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -298,6 +301,7 @@ subscriptions model =
 type alias ViewConfig =
     { questionnaire : QuestionnaireDescriptor
     , package : Package
+    , templateState : Maybe TemplateState
     }
 
 
@@ -305,7 +309,7 @@ view : AppState -> ViewConfig -> Model -> Html Msg
 view appState cfg model =
     div [ class "Projects__Detail__Content Projects__Detail__Content--Settings" ]
         [ div [ detailClass "container" ]
-            [ formView appState model
+            [ formView appState cfg model
             , hr [ class "separator" ] []
             , knowledgeModel appState cfg
             , hr [ class "separator" ] []
@@ -315,18 +319,30 @@ view appState cfg model =
         ]
 
 
-formView : AppState -> Model -> Html Msg
-formView appState model =
+formView : AppState -> ViewConfig -> Model -> Html Msg
+formView appState cfg model =
     let
-        cfg =
+        typeHintInputConfig =
             { viewItem = TypeHintItem.templateSuggestion appState
             , wrapMsg = TemplateTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = True
             }
 
-        typeHintInput =
-            TypeHintInput.view appState cfg model.templateTypeHintInputModel
+        typeHintInput isInvalid =
+            let
+                unsupportedError =
+                    case cfg.templateState of
+                        Just TemplateState.UnsupportedMetamodelVersion ->
+                            Flash.error appState (l_ "unsupportedTemplate" appState)
+
+                        _ ->
+                            emptyNode
+            in
+            div []
+                [ unsupportedError
+                , TypeHintInput.view appState typeHintInputConfig model.templateTypeHintInputModel isInvalid
+                ]
 
         formatInput =
             case model.templateTypeHintInputModel.selected of

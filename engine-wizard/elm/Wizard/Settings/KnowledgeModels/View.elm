@@ -48,16 +48,17 @@ formView appState form =
         enabled =
             Maybe.withDefault False (Form.getFieldAsBool "publicEnabled" form).value
 
-        allowedInputHeader =
-            div [ class "form-list-header mb-2" ]
-                [ span [] [ lx_ "form.allowedPackages.orgId" appState ]
-                , span [] [ lx_ "form.allowedPackages.kmId" appState ]
-                , span [] [ lx_ "form.allowedPackages.minVersion" appState ]
-                , span [] [ lx_ "form.allowedPackages.maxVersion" appState ]
-                ]
-
         allowedInput =
             if enabled then
+                let
+                    allowedInputHeader =
+                        div [ class "form-list-header mb-2" ]
+                            [ span [] [ lx_ "form.allowedPackages.orgId" appState ]
+                            , span [] [ lx_ "form.allowedPackages.kmId" appState ]
+                            , span [] [ lx_ "form.allowedPackages.minVersion" appState ]
+                            , span [] [ lx_ "form.allowedPackages.maxVersion" appState ]
+                            ]
+                in
                 div [ class "nested-group" ]
                     [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) form "publicPackages" (l_ "form.allowedPackages" appState)
                     ]

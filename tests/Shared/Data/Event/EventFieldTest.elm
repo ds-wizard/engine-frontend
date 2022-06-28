@@ -1,10 +1,10 @@
 module Shared.Data.Event.EventFieldTest exposing (eventFieldTest)
 
-import Expect exposing (Expectation)
+import Expect
 import Json.Decode as D
 import Json.Encode as E
 import Shared.Data.Event.EventField as EventField
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectEncodeDecode)
 
 

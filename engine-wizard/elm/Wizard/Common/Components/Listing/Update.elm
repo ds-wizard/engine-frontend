@@ -30,8 +30,7 @@ type alias UpdateConfig a =
 
 fetchData : Cmd (Msg a)
 fetchData =
-    Cmd.batch
-        [ dispatch Reload ]
+    dispatch Reload
 
 
 update : UpdateConfig a -> AppState -> Msg a -> Model a -> ( Model a, Cmd Wizard.Msgs.Msg )

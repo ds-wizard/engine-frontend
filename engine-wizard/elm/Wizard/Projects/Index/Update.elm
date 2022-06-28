@@ -26,7 +26,7 @@ import Wizard.Projects.Common.CloneProjectModal.Update as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 

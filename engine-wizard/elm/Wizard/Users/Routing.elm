@@ -1,6 +1,5 @@
 module Wizard.Users.Routing exposing
     ( isAllowed
-    , moduleRoot
     , parsers
     , toUrl
     )

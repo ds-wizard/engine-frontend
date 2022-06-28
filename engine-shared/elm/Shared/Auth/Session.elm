@@ -3,6 +3,7 @@ module Shared.Auth.Session exposing
     , decoder
     , encode
     , exists
+    , getUserUuid
     , init
     , setFullscreen
     , setSidebarCollapsed
@@ -16,6 +17,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Data.Token as Token exposing (Token)
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
+import Uuid
 
 
 type alias Session =
@@ -55,6 +57,11 @@ setSidebarCollapsed session collapsed =
 setFullscreen : Session -> Bool -> Session
 setFullscreen session fullscreen =
     { session | fullscreen = fullscreen }
+
+
+getUserUuid : Session -> Maybe String
+getUserUuid session =
+    Maybe.map (Uuid.toString << .uuid) session.user
 
 
 decoder : Decoder Session

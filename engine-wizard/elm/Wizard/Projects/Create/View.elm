@@ -12,9 +12,7 @@ import Wizard.Common.View.Page as Page
 import Wizard.Projects.Create.CustomCreate.View as CustomCreateView
 import Wizard.Projects.Create.Models exposing (CreateModel(..), Model)
 import Wizard.Projects.Create.Msgs exposing (Msg(..))
-import Wizard.Projects.Create.ProjectCreateRoute exposing (ProjectCreateRoute(..))
 import Wizard.Projects.Create.TemplateCreate.View as TemplateCreateView
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 

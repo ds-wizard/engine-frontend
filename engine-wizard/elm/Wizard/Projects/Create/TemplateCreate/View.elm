@@ -43,7 +43,7 @@ viewContent appState model mbQuestionnaire =
         [ FormResult.view appState model.savingQuestionnaire
         , formView appState model mbQuestionnaire
         , FormActions.view appState
-            Routes.projectsIndex
+            (Routes.projectsIndex appState)
             (ActionResult.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
         ]
 
@@ -51,16 +51,6 @@ viewContent appState model mbQuestionnaire =
 formView : AppState -> Model -> Maybe QuestionnaireDetail -> Html Msg
 formView appState model mbQuestionnaire =
     let
-        cfg =
-            { viewItem = TypeHintItem.questionnaireSuggestion
-            , wrapMsg = QuestionnaireTypeHintInputMsg
-            , nothingSelectedItem = text "--"
-            , clearEnabled = True
-            }
-
-        typeHintInput =
-            TypeHintInput.view appState cfg model.questionnaireTypeHintInputModel
-
         parentInput =
             case mbQuestionnaire of
                 Just questionnaire ->
@@ -71,6 +61,17 @@ formView appState model mbQuestionnaire =
                     FormGroup.plainGroup value (lg "questionnaire.templateBadge" appState)
 
                 Nothing ->
+                    let
+                        cfg =
+                            { viewItem = TypeHintItem.questionnaireSuggestion
+                            , wrapMsg = QuestionnaireTypeHintInputMsg
+                            , nothingSelectedItem = text "--"
+                            , clearEnabled = True
+                            }
+
+                        typeHintInput =
+                            TypeHintInput.view appState cfg model.questionnaireTypeHintInputModel
+                    in
                     FormGroup.formGroupCustom typeHintInput appState model.form "questionnaireUuid" (lg "questionnaire.templateBadge" appState)
     in
     div []

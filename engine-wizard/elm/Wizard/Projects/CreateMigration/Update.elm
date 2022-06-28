@@ -28,11 +28,7 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    let
-        getQuestionnaireCmd =
-            QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted
-    in
-    Cmd.batch [ getQuestionnaireCmd ]
+    QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

@@ -5,7 +5,7 @@ import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
 import Shared.Data.KnowledgeModel.KnowledgeModelEntities as KnowledgeModelEntities
 import Shared.Data.KnowledgeModel.Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Reference exposing (Reference(..))
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 
 

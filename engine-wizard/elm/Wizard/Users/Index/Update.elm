@@ -17,7 +17,7 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Users.Index.Models exposing (Model)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
-import Wizard.Users.Routes exposing (Route(..), indexRouteRoleFilterId)
+import Wizard.Users.Routes exposing (indexRouteRoleFilterId)
 
 
 fetchData : Cmd Msg

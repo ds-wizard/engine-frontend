@@ -8,10 +8,10 @@ import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing as Listing exposing (ListingConfig)
+import Wizard.Common.Components.SimpleList as SimpleList
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
-import Wizard.Dashboard.Msgs exposing (Msg(..))
+import Wizard.Dashboard.Msgs exposing (Msg)
 import Wizard.Projects.Common.View exposing (visibilityIcons)
 import Wizard.Routes as Routes
 
@@ -45,23 +45,18 @@ viewQuestionnaires appState questionnaires =
 
 viewQuestionnaireListing : AppState -> List Questionnaire -> Html Msg
 viewQuestionnaireListing appState questionnaires =
-    let
-        content =
-            if List.length questionnaires > 0 then
-                Listing.view appState (listingConfig appState) <| Listing.modelFromList <| List.take 10 questionnaires
+    if List.length questionnaires > 0 then
+        SimpleList.view appState (simpleListConfig appState) <| List.take 10 questionnaires
 
-            else
-                div [ class "empty" ]
-                    [ lx_ "noProjectsInPhase" appState ]
-    in
-    content
+    else
+        div [ class "empty" ]
+            [ lx_ "noProjectsInPhase" appState ]
 
 
-listingConfig : AppState -> ListingConfig Questionnaire Msg
-listingConfig appState =
+simpleListConfig : AppState -> SimpleList.Config Questionnaire Msg
+simpleListConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
-    , dropdownItems = always []
     , textTitle = .name
     , emptyText = l_ "clickCreate" appState
     , updated =
@@ -69,7 +64,6 @@ listingConfig appState =
             { getTime = .updatedAt
             , currentTime = appState.currentTime
             }
-    , wrapMsg = ListingMsg
     , iconView = Nothing
     }
 

@@ -3,7 +3,7 @@ module Shared.Data.KnowledgeModelTest exposing (knowledgeModelDecoderTest)
 import Dict
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 import Uuid
 

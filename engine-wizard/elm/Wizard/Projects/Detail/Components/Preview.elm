@@ -55,6 +55,7 @@ type alias Model =
 
 type PreviewState
     = TemplateNotSet
+    | TemplateUnsupported
     | Preview (ActionResult (Maybe String))
 
 
@@ -108,15 +109,22 @@ handleHeadDocumentPreviewComplete appState model result =
 
         Err apiError ->
             let
-                error =
+                previewState =
                     case ApiError.toServerError apiError of
                         Just (ServerError.SystemLogError data) ->
-                            String.format data.defaultMessage data.params
+                            Preview (Error (String.format data.defaultMessage data.params))
+
+                        Just (ServerError.UserSimpleError message) ->
+                            if message.code == "error.validation.tml_unsupported_version" then
+                                TemplateUnsupported
+
+                            else
+                                Preview (Error (lg "apiError.questionnaires.headDocumentPreview" appState))
 
                         _ ->
-                            lg "apiError.questionnaires.headDocumentPreview" appState
+                            Preview (Error (lg "apiError.questionnaires.headDocumentPreview" appState))
             in
-            ( { model | previewState = Preview (Error error) }, Cmd.none )
+            ( { model | previewState = previewState }, Cmd.none )
 
 
 
@@ -125,16 +133,15 @@ handleHeadDocumentPreviewComplete appState model result =
 
 view : AppState -> QuestionnaireDetail -> Model -> Html Msg
 view appState questionnaire model =
-    let
-        content =
-            case model.previewState of
-                Preview preview ->
-                    Page.actionResultViewWithError appState (viewContent appState model) viewError preview
+    case model.previewState of
+        Preview preview ->
+            Page.actionResultViewWithError appState (viewContent appState model) viewError preview
 
-                TemplateNotSet ->
-                    viewTemplateNotSet appState questionnaire
-    in
-    content
+        TemplateNotSet ->
+            viewTemplateNotSet appState questionnaire
+
+        TemplateUnsupported ->
+            viewTemplateUnsupported appState questionnaire
 
 
 viewContent : AppState -> Model -> Maybe String -> Html Msg
@@ -203,6 +210,38 @@ viewTemplateNotSet appState questionnaire =
     Page.illustratedMessageHtml
         { image = Undraw.websiteBuilder
         , heading = l_ "templateNotSet.heading" appState
+        , content = content
+        , cy = "template-not-set"
+        }
+
+
+viewTemplateUnsupported : AppState -> QuestionnaireDetail -> Html msg
+viewTemplateUnsupported appState questionnaire =
+    let
+        content =
+            if not (Session.exists appState.session) then
+                [ p [] [ lx_ "templateUnsupported.textAnonymous" appState ]
+                ]
+
+            else if QuestionnaireDetail.isOwner appState questionnaire then
+                [ p [] [ lx_ "templateUnsupported.textOwner" appState ]
+                , p []
+                    [ linkTo appState
+                        (Routes.projectsDetailSettings questionnaire.uuid)
+                        [ class "btn btn-primary btn-lg link-with-icon-after" ]
+                        [ lx_ "templateUnsupported.link" appState
+                        , faSet "_global.arrowRight" appState
+                        ]
+                    ]
+                ]
+
+            else
+                [ p [] [ lx_ "templateUnsupported.textNotOwner" appState ]
+                ]
+    in
+    Page.illustratedMessageHtml
+        { image = Undraw.warning
+        , heading = l_ "templateUnsupported.heading" appState
         , content = content
         , cy = "template-not-set"
         }

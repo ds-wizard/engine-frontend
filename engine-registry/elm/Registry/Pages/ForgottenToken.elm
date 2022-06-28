@@ -1,6 +1,7 @@
 module Registry.Pages.ForgottenToken exposing
     ( Model
     , Msg
+    , RecoveryForm
     , init
     , update
     , view

@@ -1,6 +1,7 @@
 module Registry.Pages.Organization exposing
     ( Model
     , Msg
+    , OrganizationForm
     , init
     , update
     , view

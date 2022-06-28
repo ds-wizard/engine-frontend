@@ -10,8 +10,10 @@ module Wizard.Routes exposing
     , documentsIndexWithFilters
     , isAppIndex
     , isDocumentsIndex
+    , isKmEditorEditor
     , isKmEditorIndex
     , isKnowledgeModelsIndex
+    , isProjectsDetail
     , isProjectsIndex
     , isTemplateIndex
     , isUsersIndex
@@ -58,6 +60,7 @@ module Wizard.Routes exposing
     , usersIndexWithFilters
     )
 
+import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
@@ -206,6 +209,16 @@ kmEditorEditor branchUuid mbEntityUuid =
     KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid (Wizard.KMEditor.Editor.KMEditorRoute.Edit mbEntityUuid))
 
 
+isKmEditorEditor : Uuid -> Route -> Bool
+isKmEditorEditor uuid route =
+    case route of
+        KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute editorUuid _) ->
+            uuid == editorUuid
+
+        _ ->
+            False
+
+
 kmEditorEditorQuestionTags : Uuid -> Route
 kmEditorEditorQuestionTags branchUuid =
     KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.QuestionTags)
@@ -329,9 +342,23 @@ projectsDetailSettings uuid =
     ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Settings
 
 
-projectsIndex : Route
-projectsIndex =
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing)
+isProjectsDetail : Uuid -> Route -> Bool
+isProjectsDetail uuid route =
+    case route of
+        ProjectsRoute (Wizard.Projects.Routes.DetailRoute projectUuid _) ->
+            uuid == projectUuid
+
+        _ ->
+            False
+
+
+projectsIndex : { a | session : Session } -> Route
+projectsIndex appState =
+    let
+        mbUserUuid =
+            Session.getUserUuid appState.session
+    in
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing)
 
 
 projectsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route

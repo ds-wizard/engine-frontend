@@ -1,6 +1,7 @@
 module Wizard.Common.Components.Questionnaire.VersionModal exposing
     ( Model
     , Msg
+    , UpdateConfig
     , init
     , setEventUuid
     , setVersion
