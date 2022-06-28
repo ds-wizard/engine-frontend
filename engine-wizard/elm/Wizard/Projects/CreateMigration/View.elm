@@ -56,7 +56,7 @@ createMigrationView appState model questionnaire =
             ( packageId, versionString )
 
         createOptions package =
-            ( "", "--" ) :: List.map (createVersionOption package) package.versions
+            ( "", "--" ) :: List.map (createVersionOption package) (List.reverse (List.sortWith Version.compare package.versions))
 
         tags =
             KnowledgeModel.getTags questionnaire.knowledgeModel
