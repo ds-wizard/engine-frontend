@@ -209,9 +209,17 @@
                     align-items: center;
                     justify-content: flex-start;
 
-                    & > .fa, & > .with-tooltip {
+                    & > .fa {
                         margin-left: 0.5rem;
                         color: $gray-500;
+                    }
+
+                    & > .with-tooltip {
+                        margin-left: 0.5rem;
+
+                        .fa {
+                            color: $gray-500;
+                        }
                     }
                 }
             }
