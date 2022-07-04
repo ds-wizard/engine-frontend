@@ -37,7 +37,7 @@
     "css-minimizer-webpack-plugin": "^4.0.0",
     "elm": "^0.19.1-5",
     "elm-review": "^2.7.2",
-    "elm-test": "^0.19.1-revision8",
+    "elm-test": "^0.19.1-revision9",
     "elm-webpack-loader": "^8.0.0",
     "fast-csv": "^4.3.6",
     "html-webpack-plugin": "^5.5.0",
