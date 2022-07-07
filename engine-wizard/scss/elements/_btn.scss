@@ -9,6 +9,12 @@
         margin-right: $spacer-2;
     }
 
+    &-sm {
+        .fa {
+            margin-right: $spacer-1;
+        }
+    }
+
     &[disabled] {
         cursor: not-allowed;
     }

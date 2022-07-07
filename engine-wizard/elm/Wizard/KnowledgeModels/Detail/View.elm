@@ -175,13 +175,13 @@ newVersionInRegistryWarning appState package =
             div [ class "alert alert-warning" ]
                 (faSet "_global.warning" appState
                     :: lh_ "registryVersion.warning"
-                        [ text (Version.toString remoteLatestVersion)
-                        , linkTo appState
-                            (Routes.knowledgeModelsImport (Just latestPackageId))
-                            []
-                            [ lx_ "registryVersion.warning.import" appState ]
-                        ]
+                        [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
                         appState
+                    ++ [ linkTo appState
+                            (Routes.templatesImport (Just latestPackageId))
+                            [ class "btn btn-primary btn-sm ms-2" ]
+                            [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                       ]
                 )
 
         _ ->
