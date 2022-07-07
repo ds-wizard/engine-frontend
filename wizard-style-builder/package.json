@@ -23,7 +23,7 @@
     "jest": "^28.1.2",
     "jest-environment-node-single-context": "^28.1.0",
     "nodemon": "^2.0.16",
-    "supertest": "^6.2.3"
+    "supertest": "^6.2.4"
   },
   "jest": {
     "testEnvironment": "jest-environment-node-single-context",
