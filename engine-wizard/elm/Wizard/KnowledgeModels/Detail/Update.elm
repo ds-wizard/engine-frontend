@@ -13,6 +13,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -41,6 +42,9 @@ update msg wrapMsg appState model =
 
         DeleteVersionCompleted result ->
             deleteVersionCompleted appState model result
+
+        ExportPackage package ->
+            ( model, Ports.downloadFile (PackagesApi.exportPackageUrl package.id appState) )
 
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

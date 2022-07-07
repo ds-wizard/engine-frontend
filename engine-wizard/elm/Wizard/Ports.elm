@@ -6,6 +6,7 @@ port module Wizard.Ports exposing
     , clearUnloadMessage
     , consoleError
     , createDropzone
+    , downloadFile
     , fileContentRead
     , fileSelected
     , gotIntegrationWidgetValue
@@ -98,3 +99,10 @@ port openIntegrationWidget : E.Value -> Cmd msg
 
 
 port gotIntegrationWidgetValue : (E.Value -> msg) -> Sub msg
+
+
+
+-- File Download
+
+
+port downloadFile : String -> Cmd msg

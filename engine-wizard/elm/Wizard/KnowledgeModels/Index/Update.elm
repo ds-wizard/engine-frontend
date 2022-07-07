@@ -17,6 +17,7 @@ import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -40,6 +41,9 @@ update msg wrapMsg appState model =
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
+
+        ExportPackage package ->
+            ( model, Ports.downloadFile (PackagesApi.exportPackageUrl package.id appState) )
 
 
 handleDeletePackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

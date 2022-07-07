@@ -2,7 +2,6 @@ module Wizard.Templates.Index.View exposing (view)
 
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
-import Shared.Api.Templates as TemplatesApi
 import Shared.Components.Badge as Badge
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Template.TemplateState as TemplateState
@@ -175,7 +174,7 @@ listingActions appState template =
                 { extraClass = Nothing
                 , icon = faSet "_global.export" appState
                 , label = l_ "action.export" appState
-                , msg = ListingActionExternalLink (TemplatesApi.exportTemplateUrl template.id appState)
+                , msg = ListingActionMsg (ExportTemplate template)
                 , dataCy = "export"
                 }
 

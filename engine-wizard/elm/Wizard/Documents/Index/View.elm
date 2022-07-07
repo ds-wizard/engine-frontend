@@ -5,7 +5,6 @@ import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, t
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
 import Maybe.Extra as Maybe
-import Shared.Api.Documents as DocumentsApi
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
@@ -20,7 +19,6 @@ import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listInsertIf)
 import Time.Distance as TimeDistance
-import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
@@ -149,9 +147,7 @@ listingTitle appState document =
         ( name, downloadTooltip ) =
             if document.state == DoneDocumentState then
                 ( a
-                    [ href <| DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState
-                    , target "_blank"
-                    ]
+                    [ onClick (DownloadDocument document) ]
                     [ text document.name ]
                 , tooltipCustom "with-tooltip-right with-tooltip-align-left" (l_ "listing.name.title" appState)
                 )
@@ -213,7 +209,7 @@ listingActions appState document =
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
                 , label = l_ "action.download" appState
-                , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState)
+                , msg = ListingActionMsg (DownloadDocument document)
                 , dataCy = "download"
                 }
 

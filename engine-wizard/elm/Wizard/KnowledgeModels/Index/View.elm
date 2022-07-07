@@ -2,7 +2,6 @@ module Wizard.KnowledgeModels.Index.View exposing (view)
 
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
-import Shared.Api.Packages as PackagesApi
 import Shared.Components.Badge as Badge
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackageState as PackageState
@@ -166,7 +165,7 @@ listingActions appState package =
                 { extraClass = Nothing
                 , icon = faSet "_global.export" appState
                 , label = lg "km.action.export" appState
-                , msg = ListingActionExternalLink (PackagesApi.exportPackageUrl package.id appState)
+                , msg = ListingActionMsg (ExportPackage package)
                 , dataCy = "export"
                 }
 

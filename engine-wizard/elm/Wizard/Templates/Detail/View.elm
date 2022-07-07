@@ -3,7 +3,6 @@ module Wizard.Templates.Detail.View exposing (view)
 import Html exposing (Html, a, div, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
-import Shared.Api.Templates as TemplatesApi
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Template.TemplatePackage as TemplatePackage
@@ -61,7 +60,7 @@ header : AppState -> TemplateDetail -> Html Msg
 header appState template =
     let
         exportAction =
-            a [ href <| TemplatesApi.exportTemplateUrl template.id appState, target "_blank" ]
+            a [ onClick (ExportTemplate template) ]
                 [ faSet "_global.export" appState
                 , lx_ "header.export" appState
                 ]

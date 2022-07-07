@@ -3,7 +3,6 @@ module Wizard.KnowledgeModels.Detail.View exposing (view)
 import Html exposing (Html, a, div, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
-import Shared.Api.Packages as PackagesApi
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackageState as PackageState
@@ -110,8 +109,7 @@ header appState package =
 
         exportAction =
             a
-                [ href <| PackagesApi.exportPackageUrl package.id appState
-                , target "_blank"
+                [ onClick (ExportPackage package)
                 , dataCy "km-detail_export-link"
                 ]
                 [ faSet "_global.export" appState

@@ -14,6 +14,7 @@ import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Templates.Index.Models exposing (Model)
@@ -40,6 +41,9 @@ update msg wrapMsg appState model =
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
+
+        ExportTemplate template ->
+            ( model, Ports.downloadFile (TemplatesApi.exportTemplateUrl template.id appState) )
 
 
 handleDeletePackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
