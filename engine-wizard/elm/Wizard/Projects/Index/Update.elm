@@ -38,7 +38,7 @@ fetchData appState model =
             case Dict.get indexRouteUsersFilterId model.questionnaires.filters.values of
                 Just userUuids ->
                     UsersApi.getUsersSuggestionsWithOptions
-                        model.questionnaires.paginationQueryString
+                        PaginationQueryString.empty
                         (String.split "," userUuids)
                         []
                         appState
