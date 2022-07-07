@@ -13,7 +13,7 @@ module Shared.Api.Packages exposing
 import File exposing (File)
 import Http
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData)
+import Shared.Api exposing (ToMsg, authorizedUrl, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData)
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
@@ -80,5 +80,5 @@ importFromOwl params =
 
 
 exportPackageUrl : String -> AbstractAppState a -> String
-exportPackageUrl packageId appState =
-    appState.apiUrl ++ "/packages/" ++ packageId ++ "/bundle"
+exportPackageUrl packageId =
+    authorizedUrl ("/packages/" ++ packageId ++ "/bundle")

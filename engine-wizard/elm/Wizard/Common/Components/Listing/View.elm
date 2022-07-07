@@ -17,7 +17,7 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Dict
 import Html exposing (Html, a, div, input, li, nav, span, text, ul)
-import Html.Attributes exposing (class, classList, href, id, placeholder, target, type_, value)
+import Html.Attributes exposing (class, classList, href, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -121,7 +121,6 @@ type alias ListingActionConfig msg =
 type ListingActionType msg
     = ListingActionMsg msg
     | ListingActionLink Routes.Route
-    | ListingActionExternalLink String
 
 
 dropdownAction : ListingActionConfig msg -> ListingDropdownItem msg
@@ -583,9 +582,6 @@ viewAction appState dropdownItem =
                     case action.msg of
                         ListingActionLink route ->
                             [ href <| Routing.toUrl appState route ]
-
-                        ListingActionExternalLink url ->
-                            [ href url, target "_blank" ]
 
                         ListingActionMsg msg ->
                             [ onClick msg ]

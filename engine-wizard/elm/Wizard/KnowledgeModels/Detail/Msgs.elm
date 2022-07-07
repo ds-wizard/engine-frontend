@@ -9,3 +9,4 @@ type Msg
     | ShowDeleteDialog Bool
     | DeleteVersion
     | DeleteVersionCompleted (Result ApiError ())
+    | ExportPackage PackageDetail

@@ -5,7 +5,6 @@ import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, t
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
 import Maybe.Extra as Maybe
-import Shared.Api.Documents as DocumentsApi
 import Shared.Auth.Session as Session
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
@@ -100,7 +99,7 @@ listingConfig cfg appState =
                         ]
                     ]
     in
-    { title = listingTitle appState
+    { title = listingTitle cfg appState
     , description = listingDescription cfg appState
     , itemAdditionalData = itemAdditionalData
     , dropdownItems = listingActions appState cfg
@@ -138,15 +137,13 @@ listingConfig cfg appState =
     }
 
 
-listingTitle : AppState -> Document -> Html msg
-listingTitle appState document =
+listingTitle : ViewConfig msg -> AppState -> Document -> Html msg
+listingTitle cfg appState document =
     let
         ( name, downloadTooltip ) =
             if document.state == DoneDocumentState then
                 ( a
-                    [ href <| DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState
-                    , target "_blank"
-                    ]
+                    [ onClick (cfg.wrapMsg <| DownloadDocument document) ]
                     [ text document.name ]
                 , tooltipCustom "with-tooltip-right with-tooltip-align-left" (l_ "listing.name.title" appState)
                 )
@@ -208,7 +205,7 @@ listingActions appState cfg document =
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
                 , label = l_ "action.download" appState
-                , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState)
+                , msg = ListingActionMsg (cfg.wrapMsg <| DownloadDocument document)
                 , dataCy = "download"
                 }
 

@@ -19,3 +19,4 @@ type Msg
     | SubmitDocumentCompleted (Result ApiError Submission)
     | SetDocumentErrorModal (Maybe String)
     | SetSubmissionErrorModal (Maybe String)
+    | DownloadDocument Document

@@ -10,3 +10,4 @@ type Msg
     | DeletePackage
     | DeletePackageCompleted (Result ApiError ())
     | ListingMsg (Listing.Msg Package)
+    | ExportPackage Package

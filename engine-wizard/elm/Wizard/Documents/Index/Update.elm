@@ -23,6 +23,7 @@ import Wizard.Documents.Index.Models exposing (Model, addDocumentSubmission)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -82,6 +83,9 @@ update wrapMsg msg appState model =
 
         SetSubmissionErrorModal mbError ->
             ( { model | submissionErrorModal = mbError }, Cmd.none )
+
+        DownloadDocument document ->
+            ( model, Ports.downloadFile (DocumentsApi.downloadDocumentUrl document.uuid appState) )
 
 
 handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
