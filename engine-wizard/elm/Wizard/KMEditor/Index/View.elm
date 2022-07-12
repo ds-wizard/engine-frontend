@@ -1,12 +1,12 @@
 module Wizard.KMEditor.Index.View exposing (view)
 
-import Html exposing (Attribute, Html, a, code, div, i, span, text)
+import Html exposing (Attribute, Html, a, code, div, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
-import Shared.Html exposing (emptyNode, faKeyClass, faSet)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Shared.Utils exposing (listInsertIf, packageIdToComponents)
 import Version
@@ -151,11 +151,8 @@ listingTitleBadge appState branch =
                 [ lx_ "badge.migrated" appState ]
 
         BranchState.Edited ->
-            i
-                (class (faKeyClass "kmEditorList.edited" appState)
-                    :: tooltip (l_ "badge.edited.title" appState)
-                )
-                []
+            span (tooltip (l_ "badge.edited.title" appState))
+                [ faSet "kmEditorList.edited" appState ]
 
         _ ->
             emptyNode
