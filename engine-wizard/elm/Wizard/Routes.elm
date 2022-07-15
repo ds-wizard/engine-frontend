@@ -34,6 +34,7 @@ module Wizard.Routes exposing
     , persistentCommandsDetail
     , persistentCommandsIndex
     , persistentCommandsIndexWithFilters
+    , projectsCreate
     , projectsCreateCustom
     , projectsCreateMigration
     , projectsCreateTemplate
@@ -48,6 +49,9 @@ module Wizard.Routes exposing
     , publicHome
     , publicLogin
     , publicSignup
+    , settingsAuthentication
+    , settingsLookAndFeel
+    , settingsOrganization
     , settingsRegistry
     , templatesDetail
     , templatesImport
@@ -61,8 +65,10 @@ module Wizard.Routes exposing
     )
 
 import Shared.Auth.Session as Session exposing (Session)
+import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Uuid exposing (Uuid)
 import Wizard.Apps.Routes
 import Wizard.Dev.Routes
@@ -307,6 +313,15 @@ knowledgeModelsPreview packageId mbQuestionUuid =
 -- Projects
 
 
+projectsCreate : { a | config : BootstrapConfig } -> Route
+projectsCreate appState =
+    if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
+        projectsCreateTemplate Nothing
+
+    else
+        projectsCreateCustom Nothing
+
+
 projectsCreateCustom : Maybe String -> Route
 projectsCreateCustom =
     ProjectsRoute << Wizard.Projects.Routes.CreateRoute << Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute
@@ -409,6 +424,21 @@ publicSignup =
 
 
 -- Settings
+
+
+settingsAuthentication : Route
+settingsAuthentication =
+    SettingsRoute Wizard.Settings.Routes.AuthenticationRoute
+
+
+settingsLookAndFeel : Route
+settingsLookAndFeel =
+    SettingsRoute Wizard.Settings.Routes.LookAndFeelRoute
+
+
+settingsOrganization : Route
+settingsOrganization =
+    SettingsRoute Wizard.Settings.Routes.OrganizationRoute
 
 
 settingsRegistry : Route

@@ -2,31 +2,40 @@ module Wizard.Dashboard.View exposing (view)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Html exposing (emptyNode)
 import Shared.Markdown as Markdown
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-import Wizard.Dashboard.Models exposing (Model)
+import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
+import Wizard.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
+import Wizard.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
+import Wizard.Dashboard.Dashboards.WelcomeDashboard as WelcomeDashboard
+import Wizard.Dashboard.Models exposing (CurrentDashboard(..), Model)
 import Wizard.Dashboard.Msgs exposing (Msg)
-import Wizard.Dashboard.Widgets.DMPWorkflowWidget as DMPWorkflowWidget
-import Wizard.Dashboard.Widgets.PhaseQuestionnaireWidget as PhaseQuestionnaireWidget
-import Wizard.Dashboard.Widgets.WelcomeWidget as WelcomeWidget
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
     let
-        widgets =
-            AppState.getDashboardWidgets appState
-                |> List.map (viewWidget appState model)
+        content =
+            case model.currentDashboard of
+                WelcomeDashboard ->
+                    WelcomeDashboard.view appState
+
+                ResearcherDashboard ->
+                    ResearcherDashboard.view appState model.researcherDashboardModel
+
+                DataStewardDashboard ->
+                    DataStewardDashboard.view appState
+
+                AdminDashboard ->
+                    AdminDashboard.view appState model.adminDashboardModel
     in
-    div [ class "col Dashboard" ]
-        ([ viewAlert "warning" appState.config.dashboard.welcomeWarning
-         , viewAlert "info" appState.config.dashboard.welcomeInfo
-         ]
-            ++ widgets
-        )
+    div [ class "Dashboard" ]
+        [ viewAlert "warning" appState.config.dashboard.welcomeWarning
+        , viewAlert "info" appState.config.dashboard.welcomeInfo
+        , content
+        ]
 
 
 viewAlert : String -> Maybe String -> Html Msg
@@ -38,16 +47,3 @@ viewAlert alertClass mbMessage =
 
         Nothing ->
             emptyNode
-
-
-viewWidget : AppState -> Model -> DashboardWidget -> Html Msg
-viewWidget appState model widget =
-    case widget of
-        DMPWorkflowDashboardWidget ->
-            DMPWorkflowWidget.view appState model.questionnaires
-
-        LevelsQuestionnaireDashboardWidget ->
-            PhaseQuestionnaireWidget.view appState model.questionnaires
-
-        WelcomeDashboardWidget ->
-            WelcomeWidget.view appState

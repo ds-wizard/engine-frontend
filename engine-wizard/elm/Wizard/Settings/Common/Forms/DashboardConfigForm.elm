@@ -1,6 +1,6 @@
 module Wizard.Settings.Common.Forms.DashboardConfigForm exposing
     ( DashboardConfigForm
-    , dashboardDmp
+    , dashboardRoleBased
     , dashboardWelcome
     , init
     , initEmpty
@@ -8,20 +8,18 @@ module Wizard.Settings.Common.Forms.DashboardConfigForm exposing
     , validation
     )
 
-import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Shared.Auth.Role as Role
 import Shared.Data.BootstrapConfig.DashboardConfig exposing (DashboardConfig)
-import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
+import Shared.Data.BootstrapConfig.DashboardConfig.DashboardType as DashboardType
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 
 
 type alias DashboardConfigForm =
-    { widgets : String
+    { dashboardType : String
     , welcomeInfo : Maybe String
     , welcomeWarning : Maybe String
     }
@@ -35,16 +33,16 @@ initEmpty =
 init : DashboardConfig -> Form FormError DashboardConfigForm
 init config =
     let
-        widgets =
-            case config.widgets of
-                Just _ ->
-                    dashboardDmp
-
-                Nothing ->
+        dashboardType =
+            case config.dashboardType of
+                DashboardType.Welcome ->
                     dashboardWelcome
 
+                DashboardType.RoleBased ->
+                    dashboardRoleBased
+
         fields =
-            [ ( "widgets", Field.string widgets )
+            [ ( "dashboardType", Field.string dashboardType )
             , ( "welcomeInfo", Field.maybeString config.welcomeInfo )
             , ( "welcomeWarning", Field.maybeString config.welcomeWarning )
             ]
@@ -55,7 +53,7 @@ init config =
 validation : Validation FormError DashboardConfigForm
 validation =
     V.succeed DashboardConfigForm
-        |> V.andMap (V.field "widgets" V.string)
+        |> V.andMap (V.field "dashboardType" V.string)
         |> V.andMap (V.field "welcomeInfo" V.maybeString)
         |> V.andMap (V.field "welcomeWarning" V.maybeString)
 
@@ -63,14 +61,14 @@ validation =
 toDashboardConfig : DashboardConfigForm -> DashboardConfig
 toDashboardConfig form =
     let
-        widgets =
-            if form.widgets == dashboardDmp then
-                Just dashboardDmpSettings
+        dashboardType =
+            if form.dashboardType == dashboardRoleBased then
+                DashboardType.RoleBased
 
             else
-                Nothing
+                DashboardType.Welcome
     in
-    { widgets = widgets
+    { dashboardType = dashboardType
     , welcomeInfo = form.welcomeInfo
     , welcomeWarning = form.welcomeWarning
     }
@@ -81,15 +79,6 @@ dashboardWelcome =
     "welcome"
 
 
-dashboardDmp : String
-dashboardDmp =
-    "dmp"
-
-
-dashboardDmpSettings : Dict String (List DashboardWidget)
-dashboardDmpSettings =
-    Dict.fromList
-        [ ( Role.admin, [ DMPWorkflowDashboardWidget, LevelsQuestionnaireDashboardWidget ] )
-        , ( Role.dataSteward, [ DMPWorkflowDashboardWidget, LevelsQuestionnaireDashboardWidget ] )
-        , ( Role.researcher, [ DMPWorkflowDashboardWidget, LevelsQuestionnaireDashboardWidget ] )
-        ]
+dashboardRoleBased : String
+dashboardRoleBased =
+    "roleBased"

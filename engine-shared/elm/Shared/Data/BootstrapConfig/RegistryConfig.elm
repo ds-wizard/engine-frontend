@@ -2,6 +2,7 @@ module Shared.Data.BootstrapConfig.RegistryConfig exposing
     ( RegistryConfig(..)
     , decoder
     , default
+    , isEnabled
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -32,3 +33,13 @@ decoder =
 default : RegistryConfig
 default =
     RegistryDisabled
+
+
+isEnabled : RegistryConfig -> Bool
+isEnabled registryConfig =
+    case registryConfig of
+        RegistryEnabled _ ->
+            True
+
+        _ ->
+            False

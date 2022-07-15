@@ -3,6 +3,7 @@ module Shared.Auth.Session exposing
     , decoder
     , encode
     , exists
+    , getUserRole
     , getUserUuid
     , init
     , setFullscreen
@@ -15,6 +16,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Maybe.Extra as Maybe
 import Shared.Data.Token as Token exposing (Token)
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
 import Uuid
@@ -62,6 +64,11 @@ setFullscreen session fullscreen =
 getUserUuid : Session -> Maybe String
 getUserUuid session =
     Maybe.map (Uuid.toString << .uuid) session.user
+
+
+getUserRole : Session -> String
+getUserRole =
+    Maybe.unwrap "" .role << .user
 
 
 decoder : Decoder Session
