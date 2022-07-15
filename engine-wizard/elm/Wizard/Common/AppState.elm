@@ -1,7 +1,6 @@
 module Wizard.Common.AppState exposing
     ( AppState
     , acceptCookies
-    , getDashboardWidgets
     , init
     , isFullscreen
     , setCurrentTime
@@ -9,13 +8,11 @@ module Wizard.Common.AppState exposing
     )
 
 import Browser.Navigation as Navigation exposing (Key)
-import Dict
 import Json.Decode as D exposing (Error(..))
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Common.Navigator exposing (Navigator)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
-import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
 import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Time
 import Wizard.Common.Flags as Flags
@@ -118,19 +115,6 @@ setTimeZone appState timeZone =
 acceptCookies : AppState -> AppState
 acceptCookies appState =
     { appState | cookieConsent = True }
-
-
-getDashboardWidgets : AppState -> List DashboardWidget
-getDashboardWidgets appState =
-    let
-        role =
-            appState.session.user
-                |> Maybe.map .role
-                |> Maybe.withDefault ""
-    in
-    appState.config.dashboard.widgets
-        |> Maybe.andThen (Dict.get role)
-        |> Maybe.withDefault [ WelcomeDashboardWidget ]
 
 
 isFullscreen : AppState -> Bool

@@ -8,7 +8,6 @@ module Shared.Setters exposing
     , setPlans
     , setPulling
     , setQuestionnaire
-    , setQuestionnaires
     , setSelected
     , setTemplate
     , setTemplates
@@ -59,11 +58,6 @@ setPulling value record =
 setQuestionnaire : a -> { b | questionnaire : a } -> { b | questionnaire : a }
 setQuestionnaire value record =
     { record | questionnaire = value }
-
-
-setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }
-setQuestionnaires value record =
-    { record | questionnaires = value }
 
 
 setSelected : a -> { b | selected : a } -> { b | selected : a }

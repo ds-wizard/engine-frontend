@@ -13,10 +13,8 @@ import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
+import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
-import Shared.Data.SummaryReport exposing (compareIndicationReport, unwrapIndicationReport)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lgx, lx)
@@ -84,16 +82,8 @@ view appState model =
 
 createButton : AppState -> Html Msg
 createButton appState =
-    let
-        createRoute =
-            if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
-                Routes.projectsCreateTemplate Nothing
-
-            else
-                Routes.projectsCreateCustom Nothing
-    in
     linkTo appState
-        createRoute
+        (Routes.projectsCreate appState)
         [ class "btn btn-primary", dataCy "projects_create-button" ]
         [ lx_ "header.create" appState ]
 
@@ -486,22 +476,16 @@ listingDescription appState questionnaire =
                 , text ")"
                 ]
 
-        toAnsweredInidcation answeredInidciation =
-            let
-                { answeredQuestions, unansweredQuestions } =
-                    unwrapIndicationReport answeredInidciation
-            in
+        toAnsweredIndication ( answeredQuestions, unansweredQuestions ) =
             span [ class "fragment", classList [ ( "text-success", unansweredQuestions == 0 ) ] ]
                 [ text ("Answered " ++ String.fromInt answeredQuestions ++ "/" ++ String.fromInt (answeredQuestions + unansweredQuestions)) ]
 
         answered =
-            questionnaire.report.indications
-                |> List.sortWith compareIndicationReport
-                |> List.take 1
-                |> List.map toAnsweredInidcation
+            Questionnaire.getAnsweredIndication questionnaire
+                |> Maybe.unwrap emptyNode toAnsweredIndication
     in
     span []
-        (collaborators :: kmLink :: answered)
+        [ collaborators, kmLink, answered ]
 
 
 listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)

@@ -3,45 +3,38 @@ module Wizard.Dashboard.Update exposing
     , update
     )
 
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Auth.Session as Session
-import Shared.Data.BootstrapConfig.DashboardConfig.DashboardWidget exposing (DashboardWidget(..))
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Locale exposing (lg)
-import Shared.Setters exposing (setQuestionnaires)
-import Wizard.Common.Api exposing (applyResultTransform)
-import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.Dashboard.Models exposing (Model)
+import Wizard.Common.AppState exposing (AppState)
+import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
+import Wizard.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
+import Wizard.Dashboard.Models exposing (CurrentDashboard(..), Model)
 import Wizard.Dashboard.Msgs exposing (Msg(..))
 import Wizard.Msgs
 
 
-fetchData : AppState -> Cmd Msg
-fetchData appState =
-    let
-        widgets =
-            AppState.getDashboardWidgets appState
-    in
-    if List.any (\w -> w == DMPWorkflowDashboardWidget || w == LevelsQuestionnaireDashboardWidget) widgets then
-        let
-            pagination =
-                PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC PaginationQueryString.empty
+fetchData : AppState -> Model -> Cmd Msg
+fetchData appState model =
+    case model.currentDashboard of
+        ResearcherDashboard ->
+            Cmd.map ResearcherDashboardMsg <|
+                ResearcherDashboard.fetchData appState
 
-            mbUserUuid =
-                Session.getUserUuid appState.session
-        in
-        QuestionnairesApi.getQuestionnaires { isTemplate = Just False, userUuids = mbUserUuid, userUuidsOp = Nothing, projectTags = Nothing, projectTagsOp = Nothing } pagination appState GetQuestionnairesCompleted
+        AdminDashboard ->
+            Cmd.map AdminDashboardMsg <|
+                AdminDashboard.fetchData appState
 
-    else
-        Cmd.none
+        _ ->
+            Cmd.none
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update (GetQuestionnairesCompleted result) appState model =
-    applyResultTransform appState
-        { setResult = setQuestionnaires
-        , defaultError = lg "apiError.questionnaires.getListError" appState
-        , model = model
-        , result = result
-        , transform = .items
-        }
+update msg appState model =
+    case msg of
+        ResearcherDashboardMsg researcherDashboardMsg ->
+            ( { model | researcherDashboardModel = ResearcherDashboard.update researcherDashboardMsg appState model.researcherDashboardModel }
+            , Cmd.none
+            )
+
+        AdminDashboardMsg adminDashboardMsg ->
+            ( { model | adminDashboardModel = AdminDashboard.update adminDashboardMsg appState model.adminDashboardModel }
+            , Cmd.none
+            )

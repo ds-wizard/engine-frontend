@@ -61,4 +61,14 @@
             display: block;
         }
     }
+
+    &-wide {
+        padding-left: $spacer-4;
+        padding-right: $spacer-4;
+
+        &.btn-lg {
+            padding-left: $spacer-5;
+            padding-right: $spacer-5;
+        }
+    }
 }
