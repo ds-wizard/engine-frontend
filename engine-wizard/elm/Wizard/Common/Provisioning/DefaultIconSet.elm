@@ -11,6 +11,8 @@ iconSet =
             ++ [ ( "_global.add", "fas fa-plus" )
                , ( "_global.arrowRight", "fas fa-long-arrow-alt-right" )
                , ( "_global.cancel", "fas fa-ban" )
+               , ( "_global.chevronLeft", "fas fa-chevron-left" )
+               , ( "_global.chevronRight", "fas fa-chevron-right" )
                , ( "_global.close", "fas fa-times" )
                , ( "_global.delete", "fas fa-trash" )
                , ( "_global.download", "fas fa-download" )

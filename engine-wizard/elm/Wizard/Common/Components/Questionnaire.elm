@@ -74,7 +74,8 @@ import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
-import String exposing (fromInt)
+import SplitPane
+import String
 import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
@@ -83,6 +84,7 @@ import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Common.Components.Questionnaire.History as History
+import Wizard.Common.Components.Questionnaire.NavigationTree as NavigationTree
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Feature as Feature
@@ -139,6 +141,8 @@ type alias Model =
     , commentsViewResolved : Bool
     , commentsViewPrivate : Bool
     , commentDropdownStates : Dict String Dropdown.State
+    , splitPane : SplitPane.State
+    , navigationTreeModel : NavigationTree.Model
     }
 
 
@@ -165,13 +169,17 @@ type RightPanel
 init : AppState -> QuestionnaireDetail -> Model
 init appState questionnaire =
     let
-        activePage =
-            case List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel) of
-                Just chapter ->
-                    PageChapter chapter.uuid
+        mbChapterUuid =
+            Maybe.map .uuid <|
+                List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel)
 
-                Nothing ->
-                    PageNone
+        activePage =
+            Maybe.unwrap PageNone PageChapter mbChapterUuid
+
+        navigationTreeModel =
+            Maybe.unwrap NavigationTree.initialModel
+                (flip NavigationTree.openChapter NavigationTree.initialModel)
+                mbChapterUuid
     in
     { uuid = questionnaire.uuid
     , activePage = activePage
@@ -193,12 +201,17 @@ init appState questionnaire =
     , commentsViewResolved = False
     , commentsViewPrivate = False
     , commentDropdownStates = Dict.empty
+    , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
+    , navigationTreeModel = navigationTreeModel
     }
 
 
 setActiveChapterUuid : String -> Model -> Model
 setActiveChapterUuid uuid model =
-    { model | activePage = PageChapter uuid }
+    { model
+        | activePage = PageChapter uuid
+        , navigationTreeModel = NavigationTree.openChapter uuid model.navigationTreeModel
+    }
 
 
 setPhaseUuid : Maybe Uuid -> Model -> Model
@@ -347,6 +360,8 @@ type Msg
     | CommentsViewResolved Bool
     | CommentsViewPrivate Bool
     | CommentDropdownMsg String Dropdown.State
+    | SplitPaneMsg SplitPane.Msg
+    | NavigationTreeMsg NavigationTree.Msg
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -360,7 +375,19 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
     in
     case msg of
         SetActivePage activePage ->
-            withSeed <| ( { model | activePage = activePage }, Ports.scrollToTop ".questionnaire__content" )
+            let
+                newNavigationTreeModel =
+                    case activePage of
+                        PageChapter chapterUuid ->
+                            NavigationTree.openChapter chapterUuid model.navigationTreeModel
+
+                        _ ->
+                            model.navigationTreeModel
+            in
+            withSeed <|
+                ( { model | activePage = activePage, navigationTreeModel = newNavigationTreeModel }
+                , Ports.scrollToTop ".questionnaire__content"
+                )
 
         SetRightPanel rightPanel ->
             wrap { model | rightPanel = rightPanel }
@@ -603,6 +630,12 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         CommentDropdownMsg commentUuid state ->
             wrap { model | commentDropdownStates = Dict.insert commentUuid state model.commentDropdownStates }
 
+        SplitPaneMsg splitPaneMsg ->
+            wrap { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }
+
+        NavigationTreeMsg navigationTreeMsg ->
+            wrap { model | navigationTreeModel = NavigationTree.update navigationTreeMsg model.navigationTreeModel }
+
         _ ->
             wrap model
 
@@ -781,12 +814,17 @@ subscriptions model =
         commentDropdownSubs =
             Dict.toList model.commentDropdownStates
                 |> List.map (\( uuid, state ) -> Dropdown.subscriptions state (CommentDropdownMsg uuid))
+
+        splitPaneSubscriptions =
+            Sub.map SplitPaneMsg <|
+                SplitPane.subscriptions model.splitPane
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
          , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
+         , splitPaneSubscriptions
          ]
             ++ commentDropdownSubs
         )
@@ -821,13 +859,21 @@ view appState cfg ctx model =
 
                 Nothing ->
                     ( emptyNode, False )
+
+        splitPaneConfig =
+            SplitPane.createViewConfig
+                { toMsg = cfg.wrapMsg << SplitPaneMsg
+                , customSplitter = Nothing
+                }
     in
     div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ), ( "warning-enabled", migrationWarningEnabled ) ] ]
         [ toolbar
         , migrationWarning
         , div [ class "questionnaire__body" ]
-            [ Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model
-            , Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model
+            [ SplitPane.view splitPaneConfig
+                (Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model)
+                (Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model)
+                model.splitPane
             , viewQuestionnaireRightPanel appState cfg model
             ]
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
@@ -1078,40 +1124,15 @@ viewQuestionnaireLeftPanelChapters appState model =
                 _ ->
                     Nothing
 
-        chapters =
-            KnowledgeModel.getChapters model.questionnaire.knowledgeModel
+        navigationTreeConfig =
+            { activeChapterUuid = mbActiveChapterUuid
+            , questionnaire = model.questionnaire
+            , openChapter = SetActivePage << PageChapter
+            , scrollToPath = ScrollToPath
+            , wrapMsg = NavigationTreeMsg
+            }
     in
-    div [ class "questionnaire__left-panel__chapters" ]
-        [ strong [] [ lgx "chapters" appState ]
-        , div [ class "nav nav-pills flex-column" ]
-            (List.indexedMap (viewQuestionnaireLeftPanelChaptersChapter appState model mbActiveChapterUuid) chapters)
-        ]
-
-
-viewQuestionnaireLeftPanelChaptersChapter : AppState -> Model -> Maybe String -> Int -> Chapter -> Html Msg
-viewQuestionnaireLeftPanelChaptersChapter appState model mbActiveChapterUuid order chapter =
-    a
-        [ class "nav-link"
-        , classList [ ( "active", mbActiveChapterUuid == Just chapter.uuid ) ]
-        , onClick (SetActivePage (PageChapter chapter.uuid))
-        ]
-        [ span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
-        , span [ class "chapter-name" ] [ text chapter.title ]
-        , viewQuestionnaireLeftPanelChaptersChapterIndication appState model.questionnaire chapter
-        ]
-
-
-viewQuestionnaireLeftPanelChaptersChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html Msg
-viewQuestionnaireLeftPanelChaptersChapterIndication appState questionnaire chapter =
-    let
-        unanswered =
-            QuestionnaireDetail.calculateUnansweredQuestionsForChapter appState questionnaire chapter
-    in
-    if unanswered > 0 then
-        Badge.light [ class "rounded-pill" ] [ text <| fromInt unanswered ]
-
-    else
-        faSet "questionnaire.answeredIndication" appState
+    NavigationTree.view appState navigationTreeConfig model.navigationTreeModel
 
 
 
@@ -1720,8 +1741,11 @@ viewQuestionnaireContent appState cfg ctx model =
 viewQuestionnaireContentChapter : AppState -> Config msg -> Context -> Model -> Chapter -> Html Msg
 viewQuestionnaireContentChapter appState cfg ctx model chapter =
     let
-        chapterNumber =
+        chapters =
             KnowledgeModel.getChapters model.questionnaire.knowledgeModel
+
+        chapterNumber =
+            chapters
                 |> List.findIndex (.uuid >> (==) chapter.uuid)
                 |> Maybe.unwrap "I" ((+) 1 >> Roman.toRomanNumber)
 
@@ -1734,8 +1758,68 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
     div [ class "questionnaire__form container" ]
         [ h2 [] [ text (chapterNumber ++ ". " ++ chapter.title) ]
         , Markdown.toHtml [ class "chapter-description" ] (Maybe.withDefault "" chapter.text)
-        , div [] questionViews
+        , div [ class "flex-grow-1" ] questionViews
+        , viewPrevAndNextChapterLinks appState chapters chapter
         ]
+
+
+viewPrevAndNextChapterLinks : AppState -> List Chapter -> Chapter -> Html Msg
+viewPrevAndNextChapterLinks appState chapters currentChapter =
+    let
+        findPrevChapter cs =
+            case cs of
+                prev :: current :: rest ->
+                    if current.uuid == currentChapter.uuid then
+                        Just prev
+
+                    else
+                        findPrevChapter (current :: rest)
+
+                _ ->
+                    Nothing
+
+        findNextChapter cs =
+            case cs of
+                current :: next :: rest ->
+                    if current.uuid == currentChapter.uuid then
+                        Just next
+
+                    else
+                        findNextChapter (next :: rest)
+
+                _ ->
+                    Nothing
+
+        viewChapterLink cls label icon c =
+            div
+                [ class ("rounded-3 py-3 chapter-link " ++ cls)
+                , onClick (SetActivePage (PageChapter c.uuid))
+                ]
+                [ div [ class "text-lighter" ] [ text label ]
+                , text c.title
+                , icon
+                ]
+
+        viewPrevChapterLink =
+            viewChapterLink "chapter-link-prev"
+                (l_ "chapterLinks.prev" appState)
+                (faSet "_global.chevronLeft" appState)
+
+        viewNextChapterLink =
+            viewChapterLink "chapter-link-next"
+                (l_ "chapterLinks.next" appState)
+                (faSet "_global.chevronRight" appState)
+
+        prevChapterLink =
+            findPrevChapter chapters
+                |> Maybe.unwrap emptyNode viewPrevChapterLink
+
+        nextChapterLink =
+            findNextChapter chapters
+                |> Maybe.unwrap emptyNode viewNextChapterLink
+    in
+    div [ class "mt-5 pt-3 pb-3 d-flex flex-gap-2" ]
+        [ prevChapterLink, nextChapterLink ]
 
 
 viewQuestion : AppState -> Config msg -> Context -> Model -> List String -> List String -> Int -> Question -> Html Msg

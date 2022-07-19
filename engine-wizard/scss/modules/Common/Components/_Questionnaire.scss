@@ -1,6 +1,8 @@
 @import '../../../mixins';
 @import '../../../variables';
 
+@import 'Questionnaire/NavigationTree';
+
 $toolbar-height: 40px;
 
 .questionnaire {
@@ -102,7 +104,7 @@ $toolbar-height: 40px;
     }
 
     &__left-panel {
-        flex: 0 0 20rem;
+        width: 100%;
         overflow: auto;
         padding: 1rem;
 
@@ -118,29 +120,6 @@ $toolbar-height: 40px;
             margin-bottom: 2rem;
         }
 
-        &__chapters {
-            margin-bottom: 2rem;
-
-            .nav {
-                .nav-link {
-                    .chapter-number {
-                        min-width: 1.5em;
-                        text-align: right;
-                    }
-
-                    .chapter-name {
-                        flex-grow: 1;
-                        margin-left: 0.5em;
-                        margin-right: 0.5em;
-                    }
-                }
-            }
-        }
-
-        &__more {
-
-        }
-
         .nav-link {
             display: flex;
             justify-content: space-between;
@@ -149,7 +128,7 @@ $toolbar-height: 40px;
     }
 
     &__content {
-        flex-grow: 1;
+        width: 100%;
         overflow: auto;
         padding: 1rem;
 
@@ -157,7 +136,49 @@ $toolbar-height: 40px;
             margin-bottom: 50px;
             text-align: justify;
         }
+
+        .chapter-link {
+            @include transition(background-color 0.15s ease-in-out);
+            flex: 1 1 0;
+            width: 0;
+            cursor: pointer;
+            background-color: $gray-100;
+            position: relative;
+
+            &:hover {
+                background-color: $gray-200;
+            }
+
+            .fa {
+                color: $gray-500;
+                font-size: 1.5rem;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            &-next {
+                text-align: left;
+                padding-right: $spacer-5;
+                padding-left: $spacer-4;
+
+                .fa {
+                    right: $spacer-4;
+                }
+            }
+
+            &-prev {
+                text-align: right;
+                padding-right: $spacer-4;
+                padding-left: $spacer-5;
+
+                .fa {
+                    left: $spacer-4;
+                }
+            }
+        }
     }
+
 
     &__right-panel {
         flex: 0 0 20rem;
@@ -602,6 +623,9 @@ $toolbar-height: 40px;
 
     &__form {
         padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
 
         .form-group {
             margin-bottom: 60px;

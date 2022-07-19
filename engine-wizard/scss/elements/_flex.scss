@@ -1,0 +1,7 @@
+@import '../variables';
+
+@each $size, $space in $spacers {
+    .flex-gap-#{$size} {
+        gap: $space;
+    }
+}
