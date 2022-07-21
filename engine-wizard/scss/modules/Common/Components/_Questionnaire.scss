@@ -646,12 +646,12 @@ $toolbar-height: 40px;
             }
 
             &.highlighted {
-                background: color-level('warning', $highlighted-bg-level);
+                background: shift-color($warning, $highlighted-bg-scale);
                 padding: 1rem;
                 @include border-radius($alert-border-radius);
 
                 &-resolved {
-                    background: color-level('success', $highlighted-bg-level);
+                    background: shift-color($success, $highlighted-bg-scale);
                 }
             }
 
