@@ -5,6 +5,8 @@ $font-size-base: 0.875rem !default;
 $primary: #0033aa !default;
 $cyan: #17a2b8 !default;
 
+$min-contrast-ratio: 3 !default;
+
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
 
