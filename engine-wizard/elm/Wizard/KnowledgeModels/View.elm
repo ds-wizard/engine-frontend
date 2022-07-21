@@ -24,4 +24,4 @@ view route appState model =
             Html.map IndexMsg <| Wizard.KnowledgeModels.Index.View.view appState model.indexModel
 
         PreviewRoute _ _ ->
-            Html.map ProjectMsg <| Wizard.KnowledgeModels.Preview.View.view appState model.projectModel
+            Html.map PreviewMsg <| Wizard.KnowledgeModels.Preview.View.view appState model.previewModel

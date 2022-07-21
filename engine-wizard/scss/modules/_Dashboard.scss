@@ -3,6 +3,8 @@
 
 .Dashboard {
     max-width: 90rem;
+    margin-top: $spacer-3;
+    margin-bottom: $spacer-3;
 
     .alert {
         p:last-child {

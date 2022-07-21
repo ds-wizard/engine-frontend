@@ -4,6 +4,7 @@ import Wizard.Projects.Create.Subscriptions
 import Wizard.Projects.CreateMigration.Subscriptions
 import Wizard.Projects.Detail.Subscriptions
 import Wizard.Projects.Index.Subscriptions
+import Wizard.Projects.Migration.Subscriptions
 import Wizard.Projects.Models exposing (Model)
 import Wizard.Projects.Msgs exposing (Msg(..))
 import Wizard.Projects.Routes exposing (Route(..))
@@ -27,5 +28,5 @@ subscriptions route model =
         IndexRoute _ _ _ _ _ _ ->
             Sub.map IndexMsg <| Wizard.Projects.Index.Subscriptions.subscriptions model.indexModel
 
-        _ ->
-            Sub.none
+        MigrationRoute _ ->
+            Sub.map MigrationMsg <| Wizard.Projects.Migration.Subscriptions.subscriptions model.migrationModel

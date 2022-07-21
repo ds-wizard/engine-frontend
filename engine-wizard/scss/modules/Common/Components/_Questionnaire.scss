@@ -13,6 +13,8 @@ $toolbar-height: 40px;
     }
 
     &.warning-enabled {
+        position: relative;
+
         .questionnaire__body {
             padding-top: 45px;
         }

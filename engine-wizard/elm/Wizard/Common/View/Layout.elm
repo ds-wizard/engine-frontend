@@ -131,7 +131,7 @@ publicHeader fluid model =
                 , signUpLink
                 ]
     in
-    nav [ class "navbar navbar-expand-sm fixed-top top-navigation" ]
+    nav [ class "navbar navbar-expand-sm fixed-top px-3 top-navigation" ]
         [ div [ classList [ ( "container-fluid", fluid ), ( "container", not fluid ) ] ]
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState

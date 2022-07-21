@@ -23,26 +23,30 @@ body {
 }
 
 .page {
-    margin: 20px 0;
+    margin: 0;
 }
 
 .col-list {
     max-width: 80rem;
+    margin-top: $spacer-4;
+    margin-bottom: $spacer-4;
 }
 
 .col-wide-detail {
     max-width: 50rem;
+    margin-top: $spacer-4;
+    margin-bottom: $spacer-4;
 }
 
 .col-detail {
     max-width: 33rem;
+    margin-top: $spacer-4;
+    margin-bottom: $spacer-4;
 }
 
 .col-full {
     width: 100%;
     height: 100vh;
-    margin-top: -20px;
-    margin-bottom: -20px;
     display: flex;
     padding-left: 0;
     padding-right: 0;
