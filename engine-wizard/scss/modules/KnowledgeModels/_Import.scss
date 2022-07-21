@@ -2,14 +2,6 @@
 @import '../../mixins';
 
 .KnowledgeModels__Import {
-    &__RegistryImport {
-        .jumbotron {
-            p:not(.lead) {
-                margin-bottom: 0;
-            }
-        }
-    }
-
     &__FileImport {
         .dropzone {
             height: 300px;

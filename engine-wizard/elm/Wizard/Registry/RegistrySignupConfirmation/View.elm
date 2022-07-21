@@ -30,7 +30,7 @@ view appState model =
 
 successView : AppState -> () -> Html Msg
 successView appState _ =
-    div [ class "jumbotron full-page-error" ]
+    div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "confirmation"

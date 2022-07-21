@@ -68,7 +68,7 @@ success appState =
 
 message : Html msg -> String -> String -> Html msg
 message icon cy msg =
-    div [ class "jumbotron full-page-message", dataCy ("message_" ++ cy) ]
+    div [ class "px-4 py-5 bg-light rounded-3 full-page-message", dataCy ("message_" ++ cy) ]
         [ h1 [ class "display-3" ] [ icon ]
         , p [ class "lead" ] [ text msg ]
         ]

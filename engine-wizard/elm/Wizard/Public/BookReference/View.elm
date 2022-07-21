@@ -39,10 +39,10 @@ crcUrl =
 viewBookReference : AppState -> BookReference -> Html Msg
 viewBookReference appState bookReference =
     div [ class "Public__BookReference" ]
-        [ div [ class "jumbotron" ]
+        [ div [ class "px-4 py-5 bg-light rounded-3 book-title" ]
             [ div [ class "book-name" ]
                 [ a [ href bookUrl, target "_blank" ]
-                    [ img [ src "/img/book-preview.png", alt "Book" ] []
+                    [ img [ src "/img/book-preview.png", alt "Data Stewardship for Open Science Book Cover" ] []
                     , lx_ "bookName" appState
                     ]
                 , text <| ": " ++ l_ "bookChapter" appState ++ " " ++ bookReference.bookChapter

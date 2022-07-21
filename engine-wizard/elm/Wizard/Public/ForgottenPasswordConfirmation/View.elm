@@ -75,7 +75,7 @@ formView appState form =
 
 successView : AppState -> Html Msg
 successView appState =
-    div [ class "jumbotron full-page-message", dataCy "message_success" ]
+    div [ class "px-4 py-5 bg-light rounded-3", dataCy "message_success" ]
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "success.message"
