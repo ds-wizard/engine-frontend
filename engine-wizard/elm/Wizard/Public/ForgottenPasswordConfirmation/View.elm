@@ -79,7 +79,7 @@ successView appState =
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "success.message"
-                [ linkTo appState (Routes.publicLogin Nothing) [ dataCy "login-link" ] [ lx_ "success.logIn" appState ]
+                [ linkTo appState (Routes.publicLogin Nothing) [ dataCy "login-link", class "btn btn-primary ms-1" ] [ lx_ "success.logIn" appState ]
                 ]
                 appState
             )
