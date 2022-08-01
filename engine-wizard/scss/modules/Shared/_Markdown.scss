@@ -11,7 +11,7 @@
     }
 
     pre {
-        @include border-radius(.25rem);
+        @include border-radius($border-radius);
         background: $code-block-bg;
         padding: .5rem;
     }

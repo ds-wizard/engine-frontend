@@ -1,3 +1,5 @@
+@import '~bootstrap/scss/functions';
+
 @import 'customizations/variables';
 @import 'customizations/variables-app';
 
@@ -7,7 +9,6 @@ $cyan: #17a2b8 !default;
 
 $min-contrast-ratio: 3 !default;
 
-@import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
 
 
@@ -98,3 +99,5 @@ $spacer-2: map-get($spacers, 2); // 0.5rem
 $spacer-3: map-get($spacers, 3); // 1rem
 $spacer-4: map-get($spacers, 4); // 1.5rem
 $spacer-5: map-get($spacers, 5); // 3rem
+
+@import '~bootstrap/scss/maps';

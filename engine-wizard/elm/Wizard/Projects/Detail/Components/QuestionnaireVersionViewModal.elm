@@ -133,7 +133,7 @@ view cfg appState model =
                 |> Maybe.andThen (QuestionnaireDetail.getVersionByEventUuid { versions = cfg.versions })
                 |> Maybe.unwrap emptyNode QuestionnaireVersionTag.version
     in
-    div [ class "QuestionnaireVersionViewModal modal-cover", classList [ ( "visible", visible ) ] ]
+    div [ class "QuestionnaireVersionViewModal modal modal-cover", classList [ ( "visible", visible ) ] ]
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy "modal_project-version" ]
                 [ div [ class "modal-header" ]

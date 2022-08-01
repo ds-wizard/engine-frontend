@@ -43,8 +43,8 @@
         .navbar-nav {
             & > li {
                 a {
+                    @include border-radius($border-radius);
                     color: $side-navigation-title-color;
-                    border-radius: 5px;
                     margin-left: 0.5rem;
                     padding-left: 1rem;
                     padding-right: 1rem;

@@ -56,7 +56,7 @@
 
             .row {
                 padding: 0.25rem 0;
-                @include border-radius(0.25rem);
+                @include border-radius($border-radius);
 
                 &:hover {
                     background-color: $gray-200;
@@ -76,9 +76,9 @@
     }
 
     .settings-img {
+        @include border-radius($border-radius);
         max-width: 100%;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        border-radius: 0.25rem;
     }
 
     .nested-group {
@@ -144,11 +144,11 @@
             margin-top: -0.5rem;
 
             .color {
+                @include border-radius($border-radius);
                 cursor: pointer;
                 flex-grow: 1;
                 margin: 0.25rem;
                 height: 1.5rem;
-                border-radius: 0.25rem;
 
                 &:hover {
                     opacity: 0.9;
@@ -165,9 +165,9 @@
         }
 
         .AppPreview {
+            @include border-radius($border-radius);
             display: flex;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            border-radius: 0.25rem;
             overflow: hidden;
             position: relative;
 
@@ -222,7 +222,7 @@
         }
 
         .LogoPreview {
-            @include border-radius(.25rem);
+            @include border-radius($border-radius);
             background-color: $primary;
             display: flex;
             justify-content: center;

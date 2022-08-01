@@ -117,7 +117,7 @@ select {
                 width: 28px;
                 bottom: 5px;
                 background: $tag-default-background;
-                @include border-radius(.25rem);
+                @include border-radius($border-radius);
             }
 
             input {
@@ -135,7 +135,7 @@ select {
 
             a {
                 height: 50px;
-                border-radius: 5px;
+                @include border-radius($border-radius);
             }
         }
     }
@@ -207,11 +207,11 @@ select {
     }
 
     .export-link {
+        @include border-radius($border-radius);
         display: block;
         width: 100%;
         border: 1px solid $gray-300;
         padding: .75rem 1.25rem;
-        border-radius: .25rem;
         margin-bottom: 0.25rem;
         color: $body-color;
         text-decoration: none;
@@ -240,11 +240,11 @@ select {
     }
 
     .typehints {
+        @include border-radius($border-radius);
         background: #fff;
         position: absolute;
         width: 100%;
         border: 1px solid $gray-400;
-        border-radius: 0.25rem;
         z-index: 10;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         max-height: 200px;
@@ -282,7 +282,7 @@ select {
 
     &::-webkit-color-swatch {
         border: none;
-        @include border-radius(.125rem)
+        @include border-radius($border-radius)
     }
 }
 

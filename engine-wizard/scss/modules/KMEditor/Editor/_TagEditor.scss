@@ -84,7 +84,7 @@ $highlight-transition: background-color 0.1s ease-in-out;
                         .tag {
                             min-width: 80px;
                             padding: 5px 10px;
-                            border-radius: 0.25rem;
+                            @include border-radius($border-radius);
                             font-weight: normal;
                             background-color: $tag-default-background;
 

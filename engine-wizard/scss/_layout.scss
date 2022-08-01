@@ -104,7 +104,7 @@ body {
                 padding: 10px;
                 color: $side-navigation-link-color;
                 text-decoration: none;
-                @include border-radius(5px);
+                @include border-radius($border-radius);
                 transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
 
                 &.active {
@@ -136,6 +136,10 @@ body {
             font-size: 14px;
         }
 
+        .btn-link {
+            box-shadow: none;
+        }
+
         .btn-group {
             width: 100%;
             padding: 1px 3px;
@@ -146,7 +150,7 @@ body {
                 color: $side-navigation-link-color;
                 text-decoration: none;
                 padding: 10px;
-                @include border-radius(5px);
+                @include border-radius($border-radius);
                 transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
                 display: flex;
                 align-items: baseline;

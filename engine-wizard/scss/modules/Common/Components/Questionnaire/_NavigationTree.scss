@@ -20,7 +20,7 @@
             &:not(.active) {
                 &:after {
                     @include transition(background-color 0.15s ease-in-out);
-                    @include border-radius(.25rem);
+                    @include border-radius($border-radius);
                     content: ' ';
                     position: absolute;
                     left: 0;

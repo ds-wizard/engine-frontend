@@ -52,9 +52,9 @@ $toolbar-height: 40px;
         }
 
         .item {
+            @include border-radius($border-radius);
             transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
             padding: 8px;
-            border-radius: .25rem;
             color: $gray-900 !important;
             text-decoration: none !important;
 
@@ -116,9 +116,9 @@ $toolbar-height: 40px;
         }
 
         &__phase {
+            @include border-radius($border-radius);
             background: $gray-100;
             padding: 1rem;
-            border-radius: $border-radius;
             margin-bottom: 2rem;
         }
 
@@ -759,9 +759,9 @@ $toolbar-height: 40px;
         }
 
         .radio {
+            @include border-radius($border-radius);
             @include transition(background-color 0.15s ease-in-out);
             background: $gray-100;
-            border-radius: 0.25rem;
             margin-bottom: 5px;
 
             label {
@@ -941,11 +941,11 @@ $toolbar-height: 40px;
         }
 
         .integration-typehints {
+            @include border-radius($border-radius);
             background: #fff;
             position: absolute;
             width: 100%;
             border: 1px solid $gray-400;
-            border-radius: 0.25rem;
             z-index: 10;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-height: 200px;
