@@ -234,7 +234,7 @@ menuItems appState =
         (faSet "menu.knowledgeModels" appState)
         Routes.knowledgeModelsIndex
         Routes.isKnowledgeModelsIndex
-        Feature.knowledgeModelsView
+        Feature.knowledgeModelsImport
         "km-link"
     , MenuItem
         (l_ "menu.projects" appState)
