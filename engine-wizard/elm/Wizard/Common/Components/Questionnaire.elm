@@ -1904,7 +1904,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                         time =
                             span (tooltip readableTime) [ text timeDiff ]
                     in
-                    div [ class "mt-2" ]
+                    div [ class "mt-2", dataCy "questionnaire_answered-by" ]
                         (lh_ "question.answeredBy" [ time, text userName ] appState)
 
                 _ ->
