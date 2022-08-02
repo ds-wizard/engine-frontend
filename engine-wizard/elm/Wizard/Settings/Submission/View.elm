@@ -174,9 +174,9 @@ supportedFormatFormView appState templates prefix form index =
                 |> Maybe.withDefault []
     in
     div [ class "input-group mb-2" ]
-        [ Input.selectInput templateOptions templateField [ class "form-control", class templateIdErrorClass ]
-        , Input.selectInput templateVersionOptions templateIdField [ class "form-control", class templateIdErrorClass ]
-        , Input.selectInput formatOptions formatUuidField [ class "form-control", class formatUuidErrorClass ]
+        [ Input.selectInput templateOptions templateField [ class "form-select", class templateIdErrorClass ]
+        , Input.selectInput templateVersionOptions templateIdField [ class "form-select", class templateIdErrorClass ]
+        , Input.selectInput formatOptions formatUuidField [ class "form-select", class formatUuidErrorClass ]
         , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
             [ faSet "_global.delete" appState ]
         , templateIdError

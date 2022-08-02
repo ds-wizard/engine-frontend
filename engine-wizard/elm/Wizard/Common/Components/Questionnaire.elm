@@ -1092,7 +1092,7 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
         in
         div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ lgx "questionnaire.currentPhase" appState ]
-            , select (class "form-control" :: selectAttrs)
+            , select (class "form-select" :: selectAttrs)
                 (List.map (viewQuestionnaireLeftPanelPhaseSelectionOption model.questionnaire.phaseUuid) phases)
             ]
 

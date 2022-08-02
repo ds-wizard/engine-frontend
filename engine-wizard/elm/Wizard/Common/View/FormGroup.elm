@@ -149,7 +149,7 @@ passwordWithStrength appState form fieldName labelText =
 -}
 select : AppState -> List ( String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 select appState options =
-    formGroup (Input.selectInput options) [] appState
+    formGroup (Input.selectInput options) [ class "form-select" ] appState
 
 
 richRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
