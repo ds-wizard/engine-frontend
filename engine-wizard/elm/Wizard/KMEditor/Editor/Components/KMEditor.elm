@@ -729,6 +729,41 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , onChange = onTypeChange
                 }
 
+        typeWarning =
+            case question of
+                OptionsQuestion _ _ ->
+                    if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question) then
+                        emptyNode
+
+                    else
+                        FormExtra.blockAfter
+                            [ faSet "_global.warning" appState
+                            , text (l_ "question.type.warning.options" appState)
+                            ]
+
+                ListQuestion _ _ ->
+                    if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question) then
+                        emptyNode
+
+                    else
+                        FormExtra.blockAfter
+                            [ faSet "_global.warning" appState
+                            , text (l_ "question.type.warning.list" appState)
+                            ]
+
+                MultiChoiceQuestion _ _ ->
+                    if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question) then
+                        emptyNode
+
+                    else
+                        FormExtra.blockAfter
+                            [ faSet "_global.warning" appState
+                            , text (l_ "question.type.warning.multichoice" appState)
+                            ]
+
+                _ ->
+                    emptyNode
+
         titleInput =
             Input.string
                 { name = "title"
@@ -1007,6 +1042,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
     editor ("question-" ++ questionUuid)
         ([ questionEditorTitle
          , typeInput
+         , typeWarning
          , titleInput
          , textInput
          , requiredPhaseUuidInput
