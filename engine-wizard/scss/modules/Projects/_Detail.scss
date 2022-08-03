@@ -11,12 +11,6 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
 
 
 .Projects__Detail {
-    width: 100%;
-    overflow-x: hidden;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-
     .public--app & {
         height: calc(100vh - #{$public-header-height});
 
@@ -120,7 +114,7 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
                 .project-tag {
                     background: $gray-200;
                     padding: .25rem .75rem;
-                    border-radius: .25rem;
+                    @include border-radius($border-radius);
                     margin-bottom: .5rem;
                     display: flex;
                     justify-content: space-between;
@@ -135,7 +129,7 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
                     position: absolute;
                     width: 100%;
                     border: 1px solid $gray-400;
-                    border-radius: 0.25rem;
+                    @include border-radius($border-radius);
                     z-index: 10;
                     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                     max-height: 200px;
@@ -159,7 +153,7 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
 
                 .TypeHintInput__TypeHints__ComplexItem {
                     border: 1px solid $gray-400;
-                    border-radius: .25rem;
+                    @include border-radius($border-radius);
                     padding: .375rem .75rem;
                 }
 
@@ -184,11 +178,6 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
                 }
             }
         }
-    }
-
-    .page > & {
-        margin-top: -20px;
-        margin-bottom: -20px;
     }
 
     .questionnaire {

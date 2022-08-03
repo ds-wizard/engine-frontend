@@ -1,0 +1,74 @@
+@import '../mixins';
+@import '../variables';
+
+
+.btn {
+    @include not-selectable();
+
+    .fa {
+        margin-right: $spacer-2;
+    }
+
+    &-sm {
+        .fa {
+            margin-right: $spacer-1;
+        }
+    }
+
+    &[disabled] {
+        cursor: not-allowed;
+    }
+
+    &-danger {
+        color: $white !important;
+        text-decoration: none !important;
+    }
+
+    &-external-login {
+        width: 100%;
+        border: 0;
+        margin-bottom: 0.5rem;
+        text-decoration: none !important;
+        transition: opacity 0.15s ease-in-out;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+
+    &-with-loader {
+        min-width: 100px;
+        text-align: center;
+    }
+
+    &-file {
+        position: relative;
+        overflow: hidden;
+
+        input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            background: white;
+            cursor: inherit;
+            display: block;
+        }
+    }
+
+    &-wide {
+        padding-left: $spacer-4;
+        padding-right: $spacer-4;
+
+        &.btn-lg {
+            padding-left: $spacer-5;
+            padding-right: $spacer-5;
+        }
+    }
+}

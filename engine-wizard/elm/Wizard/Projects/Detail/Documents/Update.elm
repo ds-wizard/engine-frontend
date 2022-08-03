@@ -17,6 +17,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Projects.Detail.Documents.Models exposing (Model, addDocumentSubmission)
 import Wizard.Projects.Detail.Documents.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
@@ -64,6 +65,9 @@ update wrapMsg msg appState questionnaireUuid model =
 
         SetSubmissionErrorModal mbError ->
             ( { model | submissionErrorModal = mbError }, Cmd.none )
+
+        DownloadDocument document ->
+            ( model, Ports.downloadFile (DocumentsApi.downloadDocumentUrl document.uuid appState) )
 
 
 handleShowHideDeleteDocument : Model -> Maybe Document -> ( Model, Cmd Wizard.Msgs.Msg )

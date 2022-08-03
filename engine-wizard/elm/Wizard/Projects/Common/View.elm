@@ -1,12 +1,13 @@
 module Wizard.Projects.Common.View exposing (visibilityIcons)
 
-import Html exposing (Html, i)
-import Html.Attributes exposing (class, title)
+import Html exposing (Html, i, span)
+import Html.Attributes exposing (class)
 import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Locale exposing (l)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html.Attribute exposing (tooltipRight)
 
 
 l_ : String -> AppState -> String
@@ -18,7 +19,8 @@ visibilityIcons : AppState -> { q | visibility : QuestionnaireVisibility, sharin
 visibilityIcons appState questionnaire =
     let
         visibleIcon =
-            i [ class "fa fas fa-user-friends", title visibleTitle ] []
+            span (tooltipRight visibleTitle)
+                [ i [ class "fa fas fa-user-friends" ] [] ]
 
         visibleTitle =
             if questionnaire.visibility == VisibleEditQuestionnaire then
@@ -28,7 +30,8 @@ visibilityIcons appState questionnaire =
                 l_ "visibilityIcons.titleLoggedView" appState
 
         linkIcon =
-            i [ class "fa fas fa-link", title linkTitle ] []
+            span (tooltipRight linkTitle)
+                [ i [ class "fa fas fa-link" ] [] ]
 
         linkTitle =
             if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then

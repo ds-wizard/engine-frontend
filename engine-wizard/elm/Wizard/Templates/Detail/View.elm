@@ -3,7 +3,6 @@ module Wizard.Templates.Detail.View exposing (view)
 import Html exposing (Html, a, div, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
-import Shared.Api.Templates as TemplatesApi
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Template.TemplatePackage as TemplatePackage
@@ -61,7 +60,7 @@ header : AppState -> TemplateDetail -> Html Msg
 header appState template =
     let
         exportAction =
-            a [ class "link-with-icon", href <| TemplatesApi.exportTemplateUrl template.id appState, target "_blank" ]
+            a [ onClick (ExportTemplate template) ]
                 [ faSet "_global.export" appState
                 , lx_ "header.export" appState
                 ]
@@ -120,13 +119,13 @@ newVersionInRegistryWarning appState template =
             div [ class "alert alert-warning" ]
                 (faSet "_global.warning" appState
                     :: lh_ "registryVersion.warning"
-                        [ text (Version.toString remoteLatestVersion)
-                        , linkTo appState
-                            (Routes.templatesImport (Just latestPackageId))
-                            []
-                            [ lx_ "registryVersion.warning.import" appState ]
-                        ]
+                        [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
                         appState
+                    ++ [ linkTo appState
+                            (Routes.templatesImport (Just latestPackageId))
+                            [ class "btn btn-primary btn-sm ms-2" ]
+                            [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                       ]
                 )
 
         _ ->
@@ -146,13 +145,13 @@ unsupportedMetamodelVersionWarning appState template =
                         in
                         text " "
                             :: lh_ "registryVersion.warning"
-                                [ text (Version.toString remoteLatestVersion)
-                                , linkTo appState
-                                    (Routes.templatesImport (Just latestPackageId))
-                                    []
-                                    [ lx_ "registryVersion.warning.import" appState ]
-                                ]
+                                [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
                                 appState
+                            ++ [ linkTo appState
+                                    (Routes.templatesImport (Just latestPackageId))
+                                    [ class "btn btn-primary btn-sm ms-2" ]
+                                    [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                               ]
 
                     _ ->
                         []
@@ -251,7 +250,7 @@ sidePanelRegistryLink appState template =
         toRegistryLink registryLink =
             ( lg "template.registryLink" appState
             , "registry-link"
-            , a [ href registryLink, class "link-with-icon", target "_blank" ]
+            , a [ href registryLink, target "_blank" ]
                 [ faSet "kmDetail.registryLink" appState
                 , text template.id
                 ]

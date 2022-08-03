@@ -1,0 +1,18 @@
+@import '../variables';
+@import '../mixins';
+
+.pre {
+    &-error {
+        padding: $spacer-4;
+        color: shift-color($danger, $alert-color-scale);
+        background: shift-color($danger, $alert-bg-scale);
+        border-left: 5px solid shift-color($danger, $alert-border-scale);
+    }
+
+    &-default {
+        padding: $spacer-4;
+        color: $gray-700;
+        background: $gray-200;
+        border-left: 5px solid $gray-500;
+    }
+}

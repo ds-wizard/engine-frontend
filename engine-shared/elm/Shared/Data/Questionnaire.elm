@@ -1,6 +1,7 @@
 module Shared.Data.Questionnaire exposing
     ( Questionnaire
     , decoder
+    , getAnsweredIndication
     , isEditable
     )
 
@@ -15,6 +16,7 @@ import Shared.Data.Questionnaire.QuestionnaireReport as QuestionnaireReport expo
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
+import Shared.Data.SummaryReport as SummaryReport
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
 import Time
 import Uuid exposing (Uuid)
@@ -76,3 +78,19 @@ decoder =
 matchOwner : Questionnaire -> Maybe UserInfo -> Bool
 matchOwner questionnaire mbUser =
     List.any (.member >> .uuid >> Just >> (==) (Maybe.map .uuid mbUser)) questionnaire.permissions
+
+
+getAnsweredIndication : Questionnaire -> Maybe ( Int, Int )
+getAnsweredIndication questionnaire =
+    let
+        toTuple answeredInidciation =
+            let
+                { answeredQuestions, unansweredQuestions } =
+                    SummaryReport.unwrapIndicationReport answeredInidciation
+            in
+            ( answeredQuestions, unansweredQuestions )
+    in
+    questionnaire.report.indications
+        |> List.sortWith SummaryReport.compareIndicationReport
+        |> List.head
+        |> Maybe.map toTuple

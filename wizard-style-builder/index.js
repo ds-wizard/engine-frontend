@@ -81,8 +81,9 @@ const postProcessCss = (options) => (css) => new Promise((resolve) => {
     if (options.clientUrl) {
         const clientUrl = options.clientUrl.replace(/\/$/, '')
         const cssWithFonts = replaceAll(css, 'url("~@fortawesome/fontawesome-free/webfonts/', `url("${clientUrl}/`)
-        const cssWitLogoUrl = replaceAll(cssWithFonts, 'url(../img/logo.svg', `url(${clientUrl}/img/logo.svg`)
-        resolve(cssWitLogoUrl)
+        const cssWithLogoUrl = replaceAll(cssWithFonts, 'url(../img/logo.svg', `url(${clientUrl}/img/logo.svg`)
+        const cssWithLsLoginUrl = replaceAll(cssWithLogoUrl, 'url(../img/ls-login.png)', `url(${clientUrl}/img/ls-login.png)`)
+        resolve(cssWithLsLoginUrl)
     } else {
         resolve(css)
     }
@@ -108,7 +109,7 @@ app.post('/simple', (req, res) => {
             res.send(result)
         })
         .catch((err) => {
-            res.status(500).send(err)
+            res.status(500).send(err.toString())
         })
         .finally(() => {
             cleanTempDir(tempDir)

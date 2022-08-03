@@ -1,8 +1,22 @@
-@import 'mixins';
-@import 'variables';
+@import '../mixins';
+@import '../variables';
+
+
+input[type=color] {
+    min-height: 30px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: $spacer-2;
+}
 
 textarea {
     resize: vertical;
+}
+
+select {
+    word-wrap: normal;
 }
 
 .resizable-textarea {
@@ -33,6 +47,7 @@ textarea {
 
 .form-text {
     text-align: justify;
+    font-size: $font-size-base;
 }
 
 .form-text-after {
@@ -67,6 +82,7 @@ textarea {
 
 .form-group {
     position: relative;
+    margin-bottom: $spacer-3;
 
     code.form-value {
         display: block;
@@ -101,7 +117,7 @@ textarea {
                 width: 28px;
                 bottom: 5px;
                 background: $tag-default-background;
-                @include border-radius(.25rem);
+                @include border-radius($border-radius);
             }
 
             input {
@@ -119,7 +135,7 @@ textarea {
 
             a {
                 height: 50px;
-                border-radius: 5px;
+                @include border-radius($border-radius);
             }
         }
     }
@@ -191,11 +207,11 @@ textarea {
     }
 
     .export-link {
+        @include border-radius($border-radius);
         display: block;
         width: 100%;
         border: 1px solid $gray-300;
         padding: .75rem 1.25rem;
-        border-radius: .25rem;
         margin-bottom: 0.25rem;
         color: $body-color;
         text-decoration: none;
@@ -224,11 +240,11 @@ textarea {
     }
 
     .typehints {
+        @include border-radius($border-radius);
         background: #fff;
         position: absolute;
         width: 100%;
         border: 1px solid $gray-400;
-        border-radius: 0.25rem;
         z-index: 10;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         max-height: 200px;
@@ -263,9 +279,10 @@ textarea {
     &::-webkit-color-swatch-wrapper {
         padding: .2rem;
     }
+
     &::-webkit-color-swatch {
         border: none;
-        @include border-radius(.125rem)
+        @include border-radius($border-radius)
     }
 }
 
@@ -290,10 +307,15 @@ textarea {
     padding-left: 0;
 }
 
+.form-check-label {
+    margin-bottom: 0;
+}
+
 .form-check-toggle {
     position: relative;
     padding-left: 0;
     line-height: 20px;
+    margin-bottom: 0;
 
     input {
         display: block;
@@ -373,7 +395,6 @@ textarea {
     }
 }
 
-
 .form-radio-group {
     .form-check {
         padding: .5rem .5rem .5rem 2rem;
@@ -402,6 +423,10 @@ textarea {
     }
 }
 
-input[type=color] {
-    min-height: 30px;
+.invalid-feedback {
+    font-size: 100%;
+
+    & + .invalid-feedback {
+        margin-top: -1rem;
+    }
 }

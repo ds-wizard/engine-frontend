@@ -32,7 +32,7 @@ import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, title, type_, value)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
 import Json.Decode as D
 import Json.Encode as E
@@ -43,6 +43,7 @@ import Regex
 import Roman
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.Badge as Badge
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -73,7 +74,8 @@ import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
-import String exposing (fromInt)
+import SplitPane
+import String
 import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
@@ -82,11 +84,12 @@ import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Common.Components.Questionnaire.History as History
+import Wizard.Common.Components.Questionnaire.NavigationTree as NavigationTree
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Flash as Flash
@@ -138,6 +141,8 @@ type alias Model =
     , commentsViewResolved : Bool
     , commentsViewPrivate : Bool
     , commentDropdownStates : Dict String Dropdown.State
+    , splitPane : SplitPane.State
+    , navigationTreeModel : NavigationTree.Model
     }
 
 
@@ -164,13 +169,17 @@ type RightPanel
 init : AppState -> QuestionnaireDetail -> Model
 init appState questionnaire =
     let
-        activePage =
-            case List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel) of
-                Just chapter ->
-                    PageChapter chapter.uuid
+        mbChapterUuid =
+            Maybe.map .uuid <|
+                List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel)
 
-                Nothing ->
-                    PageNone
+        activePage =
+            Maybe.unwrap PageNone PageChapter mbChapterUuid
+
+        navigationTreeModel =
+            Maybe.unwrap NavigationTree.initialModel
+                (flip NavigationTree.openChapter NavigationTree.initialModel)
+                mbChapterUuid
     in
     { uuid = questionnaire.uuid
     , activePage = activePage
@@ -192,12 +201,17 @@ init appState questionnaire =
     , commentsViewResolved = False
     , commentsViewPrivate = False
     , commentDropdownStates = Dict.empty
+    , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
+    , navigationTreeModel = navigationTreeModel
     }
 
 
 setActiveChapterUuid : String -> Model -> Model
 setActiveChapterUuid uuid model =
-    { model | activePage = PageChapter uuid }
+    { model
+        | activePage = PageChapter uuid
+        , navigationTreeModel = NavigationTree.openChapter uuid model.navigationTreeModel
+    }
 
 
 setPhaseUuid : Maybe Uuid -> Model -> Model
@@ -346,6 +360,8 @@ type Msg
     | CommentsViewResolved Bool
     | CommentsViewPrivate Bool
     | CommentDropdownMsg String Dropdown.State
+    | SplitPaneMsg SplitPane.Msg
+    | NavigationTreeMsg NavigationTree.Msg
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -359,7 +375,19 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
     in
     case msg of
         SetActivePage activePage ->
-            withSeed <| ( { model | activePage = activePage }, Ports.scrollToTop ".questionnaire__content" )
+            let
+                newNavigationTreeModel =
+                    case activePage of
+                        PageChapter chapterUuid ->
+                            NavigationTree.openChapter chapterUuid model.navigationTreeModel
+
+                        _ ->
+                            model.navigationTreeModel
+            in
+            withSeed <|
+                ( { model | activePage = activePage, navigationTreeModel = newNavigationTreeModel }
+                , Ports.scrollToTop ".questionnaire__content"
+                )
 
         SetRightPanel rightPanel ->
             wrap { model | rightPanel = rightPanel }
@@ -602,6 +630,12 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         CommentDropdownMsg commentUuid state ->
             wrap { model | commentDropdownStates = Dict.insert commentUuid state model.commentDropdownStates }
 
+        SplitPaneMsg splitPaneMsg ->
+            wrap { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }
+
+        NavigationTreeMsg navigationTreeMsg ->
+            wrap { model | navigationTreeModel = NavigationTree.update navigationTreeMsg model.navigationTreeModel }
+
         _ ->
             wrap model
 
@@ -780,12 +814,17 @@ subscriptions model =
         commentDropdownSubs =
             Dict.toList model.commentDropdownStates
                 |> List.map (\( uuid, state ) -> Dropdown.subscriptions state (CommentDropdownMsg uuid))
+
+        splitPaneSubscriptions =
+            Sub.map SplitPaneMsg <|
+                SplitPane.subscriptions model.splitPane
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
          , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
+         , splitPaneSubscriptions
          ]
             ++ commentDropdownSubs
         )
@@ -820,13 +859,21 @@ view appState cfg ctx model =
 
                 Nothing ->
                     ( emptyNode, False )
+
+        splitPaneConfig =
+            SplitPane.createViewConfig
+                { toMsg = cfg.wrapMsg << SplitPaneMsg
+                , customSplitter = Nothing
+                }
     in
     div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ), ( "warning-enabled", migrationWarningEnabled ) ] ]
         [ toolbar
         , migrationWarning
         , div [ class "questionnaire__body" ]
-            [ Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model
-            , Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model
+            [ SplitPane.view splitPaneConfig
+                (Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model)
+                (Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model)
+                model.splitPane
             , viewQuestionnaireRightPanel appState cfg model
             ]
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
@@ -929,7 +976,7 @@ viewQuestionnaireToolbar appState model =
 
         todosBadge =
             if todosLength > 0 then
-                span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt todosLength) ]
+                Badge.danger [ class "rounded-pill" ] [ text (String.fromInt todosLength) ]
 
             else
                 emptyNode
@@ -950,7 +997,7 @@ viewQuestionnaireToolbar appState model =
 
         commentsBadge =
             if commentsLength > 0 then
-                span [ class "badge badge-pill badge-secondary", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
+                Badge.secondary [ class "rounded-pill", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
 
             else
                 emptyNode
@@ -973,7 +1020,7 @@ viewQuestionnaireToolbar appState model =
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", warningsOpen ) ], onClick (SetRightPanel warningsPanel) ]
                     [ lx_ "toolbar.warnings" appState
-                    , span [ class "badge badge-pill badge-danger" ] [ text (String.fromInt warningsLength) ]
+                    , Badge.danger [ class "rounded-pill" ] [ text (String.fromInt warningsLength) ]
                     ]
                 ]
 
@@ -1045,7 +1092,7 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
         in
         div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ lgx "questionnaire.currentPhase" appState ]
-            , select (class "form-control" :: selectAttrs)
+            , select (class "form-select" :: selectAttrs)
                 (List.map (viewQuestionnaireLeftPanelPhaseSelectionOption model.questionnaire.phaseUuid) phases)
             ]
 
@@ -1077,40 +1124,15 @@ viewQuestionnaireLeftPanelChapters appState model =
                 _ ->
                     Nothing
 
-        chapters =
-            KnowledgeModel.getChapters model.questionnaire.knowledgeModel
+        navigationTreeConfig =
+            { activeChapterUuid = mbActiveChapterUuid
+            , questionnaire = model.questionnaire
+            , openChapter = SetActivePage << PageChapter
+            , scrollToPath = ScrollToPath
+            , wrapMsg = NavigationTreeMsg
+            }
     in
-    div [ class "questionnaire__left-panel__chapters" ]
-        [ strong [] [ lgx "chapters" appState ]
-        , div [ class "nav nav-pills flex-column" ]
-            (List.indexedMap (viewQuestionnaireLeftPanelChaptersChapter appState model mbActiveChapterUuid) chapters)
-        ]
-
-
-viewQuestionnaireLeftPanelChaptersChapter : AppState -> Model -> Maybe String -> Int -> Chapter -> Html Msg
-viewQuestionnaireLeftPanelChaptersChapter appState model mbActiveChapterUuid order chapter =
-    a
-        [ class "nav-link"
-        , classList [ ( "active", mbActiveChapterUuid == Just chapter.uuid ) ]
-        , onClick (SetActivePage (PageChapter chapter.uuid))
-        ]
-        [ span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
-        , span [ class "chapter-name" ] [ text chapter.title ]
-        , viewQuestionnaireLeftPanelChaptersChapterIndication appState model.questionnaire chapter
-        ]
-
-
-viewQuestionnaireLeftPanelChaptersChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html Msg
-viewQuestionnaireLeftPanelChaptersChapterIndication appState questionnaire chapter =
-    let
-        unanswered =
-            QuestionnaireDetail.calculateUnansweredQuestionsForChapter appState questionnaire chapter
-    in
-    if unanswered > 0 then
-        span [ class "badge badge-light badge-pill" ] [ text <| fromInt unanswered ]
-
-    else
-        faSet "questionnaire.answeredIndication" appState
+    NavigationTree.view appState navigationTreeConfig model.navigationTreeModel
 
 
 
@@ -1243,7 +1265,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
             li []
                 [ a [ onClick (OpenComments comment.path) ]
                     [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
-                    , span [ class "badge badge-pill badge-light" ] [ text (String.fromInt comment.comments) ]
+                    , Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.comments) ]
                     ]
                 ]
 
@@ -1378,7 +1400,7 @@ viewCommentsNavigation appState model commentThreads =
                 emptyNode
 
             else
-                span [ class "badge badge-pill badge-light" ] [ text (String.fromInt count) ]
+                Badge.light [ class "rounded-pill" ] [ text (String.fromInt count) ]
     in
     ul [ class "nav nav-underline-tabs" ]
         [ li [ class "nav-item" ]
@@ -1467,7 +1489,7 @@ viewComment appState model path commentThread index comment =
                             []
                         , div []
                             [ button
-                                [ class "btn btn-primary btn-sm mr-1"
+                                [ class "btn btn-primary btn-sm me-1"
                                 , disabled (String.isEmpty editValue)
                                 , onClick (CommentEditSubmit path commentThread.uuid comment.uuid editValue commentThread.private)
                                 ]
@@ -1507,11 +1529,12 @@ viewCommentHeader appState model path commentThread index comment =
         resolveAction =
             if index == 0 && Feature.projectCommentThreadResolve appState model.questionnaire commentThread then
                 a
-                    [ class "ml-1"
-                    , onClick (CommentThreadResolve path commentThread.uuid commentThread.private)
-                    , title (l_ "comments.comment.action.resolveTitle" appState)
-                    , dataCy "comments_comment_resolve"
-                    ]
+                    ([ class "ms-1"
+                     , onClick (CommentThreadResolve path commentThread.uuid commentThread.private)
+                     , dataCy "comments_comment_resolve"
+                     ]
+                        ++ tooltipLeft (l_ "comments.comment.action.resolveTitle" appState)
+                    )
                     [ faSet "questionnaire.commentsResolve" appState ]
 
             else
@@ -1574,7 +1597,7 @@ viewCommentHeader appState model path commentThread index comment =
 
         editedLabel =
             if comment.createdAt /= comment.updatedAt then
-                span [ title (TimeUtils.toReadableDateTime appState.timeZone comment.updatedAt) ]
+                span (tooltip (TimeUtils.toReadableDateTime appState.timeZone comment.updatedAt))
                     [ text <| " (" ++ l_ "comments.comment.editedLabel" appState ++ ")" ]
 
             else
@@ -1646,7 +1669,7 @@ viewCommentReplyForm appState { submitText, placeholderText, model, path, mbThre
             else
                 div []
                     [ button
-                        [ class "btn btn-primary btn-sm mr-1"
+                        [ class "btn btn-primary btn-sm me-1"
                         , onClick (CommentSubmit path mbThreadUuid commentValue private)
                         , dataCy (cyFormType "comments_reply-form_submit")
                         ]
@@ -1678,7 +1701,7 @@ viewCommentDeleteOverlay appState { deleteMsg, deleteText, extraClass } =
         [ div [ class "text-center" ]
             [ div [ class "mb-2" ] [ text deleteText ]
             , button
-                [ class "btn btn-danger btn-sm mr-2"
+                [ class "btn btn-danger btn-sm me-2"
                 , onClick deleteMsg
                 , dataCy "comments_delete-modal_delete"
                 ]
@@ -1718,8 +1741,11 @@ viewQuestionnaireContent appState cfg ctx model =
 viewQuestionnaireContentChapter : AppState -> Config msg -> Context -> Model -> Chapter -> Html Msg
 viewQuestionnaireContentChapter appState cfg ctx model chapter =
     let
-        chapterNumber =
+        chapters =
             KnowledgeModel.getChapters model.questionnaire.knowledgeModel
+
+        chapterNumber =
+            chapters
                 |> List.findIndex (.uuid >> (==) chapter.uuid)
                 |> Maybe.unwrap "I" ((+) 1 >> Roman.toRomanNumber)
 
@@ -1732,8 +1758,68 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
     div [ class "questionnaire__form container" ]
         [ h2 [] [ text (chapterNumber ++ ". " ++ chapter.title) ]
         , Markdown.toHtml [ class "chapter-description" ] (Maybe.withDefault "" chapter.text)
-        , div [] questionViews
+        , div [ class "flex-grow-1" ] questionViews
+        , viewPrevAndNextChapterLinks appState chapters chapter
         ]
+
+
+viewPrevAndNextChapterLinks : AppState -> List Chapter -> Chapter -> Html Msg
+viewPrevAndNextChapterLinks appState chapters currentChapter =
+    let
+        findPrevChapter cs =
+            case cs of
+                prev :: current :: rest ->
+                    if current.uuid == currentChapter.uuid then
+                        Just prev
+
+                    else
+                        findPrevChapter (current :: rest)
+
+                _ ->
+                    Nothing
+
+        findNextChapter cs =
+            case cs of
+                current :: next :: rest ->
+                    if current.uuid == currentChapter.uuid then
+                        Just next
+
+                    else
+                        findNextChapter (next :: rest)
+
+                _ ->
+                    Nothing
+
+        viewChapterLink cls label icon c =
+            div
+                [ class ("rounded-3 py-3 chapter-link " ++ cls)
+                , onClick (SetActivePage (PageChapter c.uuid))
+                ]
+                [ div [ class "text-lighter" ] [ text label ]
+                , text c.title
+                , icon
+                ]
+
+        viewPrevChapterLink =
+            viewChapterLink "chapter-link-prev"
+                (l_ "chapterLinks.prev" appState)
+                (faSet "_global.chevronLeft" appState)
+
+        viewNextChapterLink =
+            viewChapterLink "chapter-link-next"
+                (l_ "chapterLinks.next" appState)
+                (faSet "_global.chevronRight" appState)
+
+        prevChapterLink =
+            findPrevChapter chapters
+                |> Maybe.unwrap emptyNode viewPrevChapterLink
+
+        nextChapterLink =
+            findNextChapter chapters
+                |> Maybe.unwrap emptyNode viewNextChapterLink
+    in
+    div [ class "mt-5 pt-3 pb-3 d-flex flex-gap-2" ]
+        [ prevChapterLink, nextChapterLink ]
 
 
 viewQuestion : AppState -> Config msg -> Context -> Model -> List String -> List String -> Int -> Question -> Html Msg
@@ -1816,9 +1902,9 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             Time.inWordsWithConfig { withAffix = True } (TimeDistance.locale appState) reply.createdAt appState.currentTime
 
                         time =
-                            span [ title readableTime ] [ text timeDiff ]
+                            span (tooltip readableTime) [ text timeDiff ]
                     in
-                    div [ class "answered" ]
+                    div [ class "mt-2", dataCy "questionnaire_answered-by" ]
                         (lh_ "question.answeredBy" [ time, text userName ] appState)
 
                 _ ->
@@ -1864,12 +1950,11 @@ viewQuestionLabel appState cfg _ model path humanIdentifiers question =
     in
     label []
         [ span []
-            [ span
-                [ class "badge badge-secondary badge-human-identifier"
+            [ Badge.secondary
+                [ class "mb-1 me-2 py-1 px-2 fs-6"
                 , classList
-                    [ ( "badge-secondary", questionState == Default )
-                    , ( "badge-success", questionState == Answered )
-                    , ( "badge-danger", questionState == Desirable )
+                    [ ( "bg-success", questionState == Answered )
+                    , ( "bg-danger", questionState == Desirable )
                     ]
                 ]
                 [ text (String.join "." humanIdentifiers) ]
@@ -2003,7 +2088,7 @@ viewQuestionListAdd appState cfg itemUuids path =
 
     else
         button
-            [ class "btn btn-outline-secondary link-with-icon"
+            [ class "btn btn-outline-secondary"
             , onClick (AddItem (pathToString path) itemUuids)
             ]
             [ faSet "_global.add" appState
@@ -2352,11 +2437,12 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
                 emptyNode
 
             else
-                i
-                    [ class ("expand-icon " ++ faKeyClass "questionnaire.followUpsIndication" appState)
-                    , title (l_ "answer.followUpTitle" appState)
+                span (class "ms-3 text-muted" :: tooltipRight (l_ "answer.followUpTitle" appState))
+                    [ i
+                        [ class (faKeyClass "questionnaire.followUpsIndication" appState)
+                        ]
+                        []
                     ]
-                    []
 
         isSelected =
             selectedAnswerUuid == Just answer.uuid
@@ -2440,9 +2526,9 @@ viewTodoAction appState cfg model path =
             span [ class "action action-todo" ]
                 [ span [] [ lx_ "todoAction.todo" appState ]
                 , a
-                    [ title <| l_ "todoAction.remove" appState
-                    , onClick <| SetLabels currentPath []
-                    ]
+                    ((onClick <| SetLabels currentPath [])
+                        :: tooltip (l_ "todoAction.remove" appState)
+                    )
                     [ faSet "_global.remove" appState ]
                 ]
 

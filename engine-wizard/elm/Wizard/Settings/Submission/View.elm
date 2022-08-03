@@ -104,8 +104,8 @@ serviceFormView appState templates form i =
             [ div [ class "row" ]
                 [ div [ class "col" ]
                     [ FormGroup.input appState form idField (l_ "form.id" appState) ]
-                , div [ class "col text-right" ]
-                    [ a [ class "btn btn-danger link-with-icon", onClick (Form.RemoveItem "services" i) ]
+                , div [ class "col text-end" ]
+                    [ a [ class "btn btn-danger", onClick (Form.RemoveItem "services" i) ]
                         [ faSet "_global.delete" appState
                         , lx_ "form.service.remove" appState
                         ]
@@ -174,13 +174,11 @@ supportedFormatFormView appState templates prefix form index =
                 |> Maybe.withDefault []
     in
     div [ class "input-group mb-2" ]
-        [ Input.selectInput templateOptions templateField [ class "form-control", class templateIdErrorClass ]
-        , Input.selectInput templateVersionOptions templateIdField [ class "form-control", class templateIdErrorClass ]
-        , Input.selectInput formatOptions formatUuidField [ class "form-control", class formatUuidErrorClass ]
-        , div [ class "input-group-append" ]
-            [ button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
-                [ faSet "_global.delete" appState ]
-            ]
+        [ Input.selectInput templateOptions templateField [ class "form-select", class templateIdErrorClass ]
+        , Input.selectInput templateVersionOptions templateIdField [ class "form-select", class templateIdErrorClass ]
+        , Input.selectInput formatOptions formatUuidField [ class "form-select", class formatUuidErrorClass ]
+        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
+            [ faSet "_global.delete" appState ]
         , templateIdError
         , formatUuidError
         ]
@@ -194,10 +192,8 @@ propFormView appState prefix form index =
     in
     div [ class "input-group mb-2" ]
         [ Input.textInput field [ class "form-control" ]
-        , div [ class "input-group-append" ]
-            [ button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
-                [ faSet "_global.delete" appState ]
-            ]
+        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
+            [ faSet "_global.delete" appState ]
         ]
 
 
@@ -269,10 +265,8 @@ headerFormView appState prefix form index =
     div [ class "input-group mb-2" ]
         [ Input.textInput headerField [ placeholder (l_ "form.header" appState), class "form-control", class headerErrorClass ]
         , Input.textInput valueField [ placeholder (l_ "form.value" appState), class "form-control", class valueErrorClass ]
-        , div [ class "input-group-append" ]
-            [ button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
-                [ faSet "_global.delete" appState ]
-            ]
+        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
+            [ faSet "_global.delete" appState ]
         , headerError
         , valueError
         ]

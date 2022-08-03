@@ -1,6 +1,8 @@
 @import '../../../mixins';
 @import '../../../variables';
 
+@import 'Questionnaire/NavigationTree';
+
 $toolbar-height: 40px;
 
 .questionnaire {
@@ -11,6 +13,8 @@ $toolbar-height: 40px;
     }
 
     &.warning-enabled {
+        position: relative;
+
         .questionnaire__body {
             padding-top: 45px;
         }
@@ -44,13 +48,12 @@ $toolbar-height: 40px;
         .item-group {
             display: flex;
             align-items: center;
-            padding: 20px 0;
         }
 
         .item {
+            @include border-radius($border-radius);
             transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
             padding: 8px;
-            border-radius: .25rem;
             color: $gray-900 !important;
             text-decoration: none !important;
 
@@ -102,7 +105,7 @@ $toolbar-height: 40px;
     }
 
     &__left-panel {
-        flex: 0 0 20rem;
+        width: 100%;
         overflow: auto;
         padding: 1rem;
 
@@ -112,33 +115,10 @@ $toolbar-height: 40px;
         }
 
         &__phase {
+            @include border-radius($border-radius);
             background: $gray-100;
             padding: 1rem;
-            border-radius: $border-radius;
             margin-bottom: 2rem;
-        }
-
-        &__chapters {
-            margin-bottom: 2rem;
-
-            .nav {
-                .nav-link {
-                    .chapter-number {
-                        min-width: 1.5em;
-                        text-align: right;
-                    }
-
-                    .chapter-name {
-                        flex-grow: 1;
-                        margin-left: 0.5em;
-                        margin-right: 0.5em;
-                    }
-                }
-            }
-        }
-
-        &__more {
-
         }
 
         .nav-link {
@@ -149,7 +129,7 @@ $toolbar-height: 40px;
     }
 
     &__content {
-        flex-grow: 1;
+        width: 100%;
         overflow: auto;
         padding: 1rem;
 
@@ -157,7 +137,49 @@ $toolbar-height: 40px;
             margin-bottom: 50px;
             text-align: justify;
         }
+
+        .chapter-link {
+            @include transition(background-color 0.15s ease-in-out);
+            flex: 1 1 0;
+            width: 0;
+            cursor: pointer;
+            background-color: $gray-100;
+            position: relative;
+
+            &:hover {
+                background-color: $gray-200;
+            }
+
+            .fa {
+                color: $gray-500;
+                font-size: 1.5rem;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            &-next {
+                text-align: left;
+                padding-right: $spacer-5;
+                padding-left: $spacer-4;
+
+                .fa {
+                    right: $spacer-4;
+                }
+            }
+
+            &-prev {
+                text-align: right;
+                padding-right: $spacer-4;
+                padding-left: $spacer-5;
+
+                .fa {
+                    left: $spacer-4;
+                }
+            }
+        }
     }
+
 
     &__right-panel {
         flex: 0 0 20rem;
@@ -602,6 +624,9 @@ $toolbar-height: 40px;
 
     &__form {
         padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
 
         .form-group {
             margin-bottom: 60px;
@@ -615,16 +640,17 @@ $toolbar-height: 40px;
                 display: flex;
                 width: 100%;
                 justify-content: space-between;
+                align-items: center;
                 font-size: 120%;
             }
 
             &.highlighted {
-                background: theme-color-level('warning', $highlighted-bg-level);
+                background: shift-color($warning, $highlighted-bg-scale);
                 padding: 1rem;
                 @include border-radius($alert-border-radius);
 
                 &-resolved {
-                    background: theme-color-level('success', $highlighted-bg-level);
+                    background: shift-color($success, $highlighted-bg-scale);
                 }
             }
 
@@ -697,6 +723,10 @@ $toolbar-height: 40px;
 
             .btn-item-delete {
                 margin-left: 10px;
+
+                .fa {
+                    margin: 0;
+                }
             }
 
             .radio {
@@ -717,11 +747,6 @@ $toolbar-height: 40px;
             }
         }
 
-        .expand-icon {
-            margin-left: 10px;
-            color: $gray-500;
-        }
-
         input[type='radio'], input[type='checkbox'] {
             margin-right: 10px;
         }
@@ -733,9 +758,9 @@ $toolbar-height: 40px;
         }
 
         .radio {
+            @include border-radius($border-radius);
             @include transition(background-color 0.15s ease-in-out);
             background: $gray-100;
-            border-radius: 0.25rem;
             margin-bottom: 5px;
 
             label {
@@ -790,10 +815,13 @@ $toolbar-height: 40px;
                 font-size: 75%;
                 transition: all 0.25s ease-in-out;
 
-
                 &:hover {
                     color: $gray-700;
                     text-decoration: none;
+                }
+
+                .fa {
+                    margin: 0;
                 }
 
 
@@ -848,7 +876,6 @@ $toolbar-height: 40px;
                             color: $gray-900;
                         }
                     }
-
 
                     .fa {
                         margin-right: 0.25rem;
@@ -912,23 +939,12 @@ $toolbar-height: 40px;
             }
         }
 
-        .answered {
-            margin-top: 0.5rem;
-        }
-
-        .badge-human-identifier {
-            font-size: 85%;
-            margin-bottom: 0.25rem;
-            margin-right: 0.5rem;
-            padding: .25em 0.8em;
-        }
-
         .integration-typehints {
+            @include border-radius($border-radius);
             background: #fff;
             position: absolute;
             width: 100%;
             border: 1px solid $gray-400;
-            border-radius: 0.25rem;
             z-index: 10;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-height: 200px;

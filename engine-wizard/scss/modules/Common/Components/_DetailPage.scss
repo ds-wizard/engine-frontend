@@ -1,10 +1,11 @@
 @import '../../../variables';
 
 .DetailPage {
-    margin: -20px 0;
     width: 100%;
     height: 100vh;
     display: flex;
+    padding-left: 0;
+    padding-right: 0;
 
     .top-header {
         .top-header-content {
@@ -112,7 +113,6 @@
 
 .public--app {
     .DetailPage {
-        margin-top: 0;
         height: calc(100vh - #{$public-header-height});
 
         &__Content, &__SidePanel {

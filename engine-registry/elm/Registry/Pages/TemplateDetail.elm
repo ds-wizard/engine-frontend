@@ -94,7 +94,7 @@ viewDetail appState model template =
     let
         viewTemplateIdCopied =
             if model.copied then
-                span [ class "ml-2 text-muted" ] [ lx_ "view.templateId.copied" appState ]
+                span [ class "ms-2 text-muted" ] [ lx_ "view.templateId.copied" appState ]
 
             else
                 emptyNode

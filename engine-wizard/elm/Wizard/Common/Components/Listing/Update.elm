@@ -1,6 +1,7 @@
 module Wizard.Common.Components.Listing.Update exposing (UpdateConfig, fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Browser.Dom as Dom
 import Browser.Navigation as Navigation
 import Debouncer.Extra as Debouncer
 import Dict
@@ -11,6 +12,7 @@ import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Error.ApiError as ApiError
 import Shared.Setters exposing (setDropdownState)
 import Shared.Utils exposing (dispatch)
+import Task
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Model, setPagination)
@@ -59,7 +61,15 @@ update cfg appState msg model =
             case result of
                 Ok pagination ->
                     if model.paginationQueryString == paginationQueryString then
-                        ( setPagination pagination model, Cmd.none )
+                        let
+                            cmd =
+                                if String.isEmpty model.qInput then
+                                    Cmd.none
+
+                                else
+                                    Task.attempt (always (cfg.wrapMsg NoOp)) (Dom.focus "filter")
+                        in
+                        ( setPagination pagination model, cmd )
 
                     else
                         ( model, Cmd.none )
@@ -96,3 +106,6 @@ update cfg appState msg model =
                     }
             in
             Debouncer.update (update cfg appState) updateConfig debounceMsg model
+
+        NoOp ->
+            ( model, Cmd.none )

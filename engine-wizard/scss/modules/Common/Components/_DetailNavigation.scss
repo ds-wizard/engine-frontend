@@ -30,7 +30,7 @@ $nav-row-padding: 16px;
                 min-width: 0;
             }
 
-            & > .fa {
+            & > .with-tooltip {
                 margin-left: 0.5rem;
                 color: $gray-500;
             }
@@ -55,12 +55,6 @@ $nav-row-padding: 16px;
 
                 .fa {
                     margin-right: 0.25rem;
-                }
-
-                & + .popover {
-                    .popover-body {
-                        white-space: nowrap;
-                    }
                 }
             }
 

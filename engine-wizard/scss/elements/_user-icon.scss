@@ -1,0 +1,16 @@
+@import '../variables';
+@import '../mixins';
+
+
+.user-icon {
+    @include border-radius(100%);
+    width: 1.5rem;
+
+    &-small {
+        width: 1.125rem;
+    }
+
+    &-large {
+        width: 5rem;
+    }
+}

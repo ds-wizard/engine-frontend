@@ -51,7 +51,7 @@ viewForm : AppState -> Model -> Html Msg
 viewForm appState model =
     div []
         [ FormResult.errorOnlyView appState model.pulling
-        , div [ class "jumbotron" ]
+        , div [ class "px-4 py-5 bg-light rounded-3" ]
             [ Html.form [ onSubmit Submit, class "input-group" ]
                 [ input
                     [ onInput ChangeTemplateId
@@ -61,12 +61,10 @@ viewForm appState model =
                     , placeholder <| lg "template.templateId" appState
                     ]
                     []
-                , div [ class "input-group-append" ]
-                    [ ActionButton.submit appState
-                        { label = l_ "form.import" appState
-                        , result = model.pulling
-                        }
-                    ]
+                , ActionButton.submit appState
+                    { label = l_ "form.import" appState
+                    , result = model.pulling
+                    }
                 ]
             , hr [] []
             , viewRegistryText appState
@@ -91,7 +89,7 @@ viewRegistryText appState =
 
 viewImported : AppState -> String -> Html Msg
 viewImported appState packageId =
-    div [ class "jumbotron" ]
+    div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "imported.message" [ code [] [ text packageId ] ] appState)

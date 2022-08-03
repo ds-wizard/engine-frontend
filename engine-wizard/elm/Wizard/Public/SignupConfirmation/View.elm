@@ -31,11 +31,11 @@ view appState model =
 
 successView : AppState -> String -> Html Msg
 successView appState _ =
-    div [ class "jumbotron full-page-message", dataCy "message_success" ]
+    div [ class "px-4 py-5 bg-light rounded-3e", dataCy "message_success" ]
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (lh_ "confirmation"
-                [ linkTo appState (Routes.publicLogin Nothing) [] [ lx_ "logIn" appState ]
+                [ linkTo appState (Routes.publicLogin Nothing) [ class "btn btn-primary ms-1" ] [ lx_ "logIn" appState ]
                 ]
                 appState
             )

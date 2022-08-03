@@ -39,4 +39,4 @@ inlineSelect options form fieldName =
     Input.selectInput
         options
         (Form.getFieldAsString fieldName form)
-        [ class "form-control form-control-inline", id fieldName ]
+        [ class "form-select form-control-inline", id fieldName ]

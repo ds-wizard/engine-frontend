@@ -1,11 +1,75 @@
-@import 'Dashboard/DMPWorkflowWidget';
-@import 'Dashboard/PhaseQuestionnaireWidget';
-@import 'Dashboard/WelcomeWidget';
+@import '../variables';
+@import './Dashboard/WelcomeDashboard';
 
 .Dashboard {
+    max-width: 90rem;
+    margin-top: $spacer-3;
+    margin-bottom: $spacer-3;
+
     .alert {
         p:last-child {
             margin-bottom: 0;
+        }
+    }
+
+    .WelcomeRoleWidget {
+        .container-fluid {
+            z-index: 1;
+        }
+
+        .undraw {
+            max-width: 25rem;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: none;
+            margin-right: $spacer-3;
+
+            @include media-breakpoint-up(lg) {
+                display: block;
+            }
+        }
+    }
+
+    .RecentProjectsWidget {
+        &__ProjectList {
+            a {
+                color: $body-color;
+                text-decoration: none !important;
+                position: relative;
+
+                &:not(:last-child):after {
+                    content: ' ';
+                    border-bottom: 1px solid $gray-200;
+                    position: absolute;
+                    bottom: -1px;
+                    left: 0.3rem;
+                    right: 0.3rem;
+                }
+
+                &:hover {
+                    background-color: $gray-200;
+                    border-bottom-color: transparent;
+
+                    &:after {
+                        display: none;
+                    }
+                }
+
+                .content {
+                    flex-basis: 0;
+                    min-width: 0;
+
+                    strong {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        display: block;
+                        max-width: 100%;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
         }
     }
 }

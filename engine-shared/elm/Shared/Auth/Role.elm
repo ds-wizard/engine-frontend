@@ -1,8 +1,8 @@
 module Shared.Auth.Role exposing
     ( admin
-    , dataSteward
     , options
     , researcher
+    , switch
     , toReadableString
     )
 
@@ -58,3 +58,18 @@ toReadableString appState role =
 
     else
         researcherLocale appState
+
+
+switch : String -> a -> a -> a -> a -> a
+switch role adminValue dataStewardValue researcherValue defaultValue =
+    if role == admin then
+        adminValue
+
+    else if role == dataSteward then
+        dataStewardValue
+
+    else if role == researcher then
+        researcherValue
+
+    else
+        defaultValue

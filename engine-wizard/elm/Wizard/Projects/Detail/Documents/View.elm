@@ -2,13 +2,13 @@ module Wizard.Projects.Detail.Documents.View exposing (ViewConfig, view)
 
 import ActionResult
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
-import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, title, type_)
+import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
 import Maybe.Extra as Maybe
-import Shared.Api.Documents as DocumentsApi
 import Shared.Auth.Session as Session
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.Badge as Badge
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
@@ -26,6 +26,7 @@ import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionT
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (tooltip, tooltipCustom)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
@@ -98,7 +99,7 @@ listingConfig cfg appState =
                         ]
                     ]
     in
-    { title = listingTitle appState
+    { title = listingTitle cfg appState
     , description = listingDescription cfg appState
     , itemAdditionalData = itemAdditionalData
     , dropdownItems = listingActions appState cfg
@@ -136,22 +137,21 @@ listingConfig cfg appState =
     }
 
 
-listingTitle : AppState -> Document -> Html msg
-listingTitle appState document =
+listingTitle : ViewConfig msg -> AppState -> Document -> Html msg
+listingTitle cfg appState document =
     let
-        name =
+        ( name, downloadTooltip ) =
             if document.state == DoneDocumentState then
-                a
-                    [ href <| DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState
-                    , target "_blank"
-                    , title <| l_ "listing.name.title" appState
-                    ]
+                ( a
+                    [ onClick (cfg.wrapMsg <| DownloadDocument document) ]
                     [ text document.name ]
+                , tooltipCustom "with-tooltip-right with-tooltip-align-left" (l_ "listing.name.title" appState)
+                )
 
             else
-                span [] [ text document.name ]
+                ( span [] [ text document.name ], [] )
     in
-    span []
+    span downloadTooltip
         [ name
         , stateBadge appState document.state
         ]
@@ -205,7 +205,7 @@ listingActions appState cfg document =
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
                 , label = l_ "action.download" appState
-                , msg = ListingActionExternalLink (DocumentsApi.downloadDocumentUrl (Uuid.toString document.uuid) appState)
+                , msg = ListingActionMsg (cfg.wrapMsg <| DownloadDocument document)
                 , dataCy = "download"
                 }
 
@@ -275,13 +275,13 @@ stateBadge : AppState -> DocumentState -> Html msg
 stateBadge appState state =
     case state of
         QueuedDocumentState ->
-            span [ class "badge badge-info" ]
+            Badge.info []
                 [ faSet "_global.spinner" appState
                 , lx_ "badge.queued" appState
                 ]
 
         InProgressDocumentState ->
-            span [ class "badge badge-info" ]
+            Badge.info []
                 [ faSet "_global.spinner" appState
                 , lx_ "badge.inProgress" appState
                 ]
@@ -290,8 +290,7 @@ stateBadge appState state =
             emptyNode
 
         ErrorDocumentState ->
-            span [ class "badge badge-danger" ]
-                [ lx_ "badge.error" appState ]
+            Badge.danger [] [ lx_ "badge.error" appState ]
 
 
 viewSubmission : ViewConfig msg -> AppState -> Submission -> Html msg
@@ -300,18 +299,16 @@ viewSubmission cfg appState submission =
         viewSubmissionState submissionState =
             case submissionState of
                 SubmissionState.InProgress ->
-                    span [ class "badge badge-info badge-with-icon" ]
+                    Badge.info []
                         [ faSet "_global.spinner" appState
                         , lgx "submissionState.inProgress" appState
                         ]
 
                 SubmissionState.Done ->
-                    span [ class "badge badge-success" ]
-                        [ lgx "submissionState.done" appState ]
+                    Badge.success [] [ lgx "submissionState.done" appState ]
 
                 SubmissionState.Error ->
-                    span [ class "badge badge-danger" ]
-                        [ lgx "submissionState.error" appState ]
+                    Badge.danger [] [ lgx "submissionState.error" appState ]
 
         readableTime =
             TimeUtils.toReadableDateTime appState.timeZone submission.updatedAt
@@ -344,7 +341,7 @@ viewSubmission cfg appState submission =
                 ]
             ]
         , td [] [ link ]
-        , td [] [ span [ class "timestamp", title readableTime ] [ text updatedText ] ]
+        , td [] [ span (class "timestamp" :: tooltip readableTime) [ text updatedText ] ]
         ]
 
 

@@ -35,7 +35,7 @@ viewContent appState model adminOperationSections =
                 |> List.find (.name >> Just >> (==) model.openedSection)
                 |> Maybe.unwrap emptyNode (viewSection appState model)
     in
-    div [ class "Settings" ]
+    div [ class "Settings col-full" ]
         [ div [ class "Settings__navigation" ] [ navigation model adminOperationSections ]
         , div [ class "Settings__content" ] [ section ]
         ]
@@ -154,8 +154,7 @@ viewParameter model sectionName operationName parameter =
     div [ class "form-group" ]
         [ label [] [ text parameter.name ]
         , div [ class "input-group" ]
-            [ div [ class "input-group-prepend" ]
-                [ span [ class "input-group-text" ] [ text parameterTypeLabel ] ]
+            [ span [ class "input-group-text" ] [ text parameterTypeLabel ]
             , input
                 [ type_ "text"
                 , class "form-control"

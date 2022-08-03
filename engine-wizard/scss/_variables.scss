@@ -1,10 +1,14 @@
+@import '~bootstrap/scss/functions';
+
 @import 'customizations/variables';
 @import 'customizations/variables-app';
 
 $font-size-base: 0.875rem !default;
 $primary: #0033aa !default;
+$cyan: #17a2b8 !default;
 
-@import '~bootstrap/scss/functions';
+$min-contrast-ratio: 3 !default;
+
 @import '~bootstrap/scss/variables';
 
 
@@ -42,23 +46,18 @@ $listing-filter-dropdown-width: 300px;
 
 
 // special text colors
-@function color-level($color, $level: 0) {
-    $color-base: if($level > 0, $black, $white);
-    $level: abs($level);
-    @return mix($color-base, $color, $level * $theme-color-interval);
-}
 
-$text-deleted-color: color-level($red, $alert-color-level) !default;
-$text-delete-bg: color-level($red, $alert-bg-level) !default;
+$text-deleted-color: shift-color($red, $alert-color-scale) !default;
+$text-delete-bg: shift-color($red, $alert-bg-scale) !default;
 
-$text-inserted-color: color-level($green, $alert-color-level) !default;
-$text-inserted-bg: color-level($green, $alert-bg-level) !default;
+$text-inserted-color: shift-color($green, $alert-color-scale) !default;
+$text-inserted-bg: shift-color($green, $alert-bg-scale) !default;
 
-$text-edited-color: color-level($blue, $alert-color-level) !default;
-$text-edited-bg: color-level($blue, $alert-bg-level) !default;
+$text-edited-color: shift-color($blue, $alert-color-scale) !default;
+$text-edited-bg: shift-color($blue, $alert-bg-scale) !default;
 
-$code-block-bg-level: -12 !default;
-$code-block-bg: color-level($code-color, $code-block-bg-level);
+$code-block-bg-scale: -95% !default;
+$code-block-bg: shift-color($code-color, $code-block-bg-scale);
 
 
 // colors of success
@@ -76,17 +75,29 @@ $color-value-0: $red !default;
 
 
 // form engine
-$highlighted-bg-level: -11;
+$highlighted-bg-scale: -90%;
 
 
 // project private comments
+$comments-private-bg-scale: -95% !default;
 $comments-private-primary: $purple !default;
-$comments-private-color: color-level($purple, $alert-color-level) !default;
-$comments-private-color-lighter: color-level($purple, -1) !default;
-$comments-private-bg: color-level($purple, -12) !default;
-$comments-private-border: color-level($purple, $alert-border-level) !default;
+$comments-private-color: shift-color($purple, $alert-color-scale) !default;
+$comments-private-color-lighter: shift-color($purple, -10%) !default;
+$comments-private-bg: shift-color($purple, $comments-private-bg-scale) !default;
+$comments-private-border: shift-color($purple, $alert-border-scale) !default;
 
 
 // tags
 $tag-default-background: $gray-400 !default;
 $tag-default-color: $body-color !default;
+
+
+// spacer helpers
+$spacer-0: map-get($spacers, 0); // 0
+$spacer-1: map-get($spacers, 1); // 0.25rem
+$spacer-2: map-get($spacers, 2); // 0.5rem
+$spacer-3: map-get($spacers, 3); // 1rem
+$spacer-4: map-get($spacers, 4); // 1.5rem
+$spacer-5: map-get($spacers, 5); // 3rem
+
+@import '~bootstrap/scss/maps';

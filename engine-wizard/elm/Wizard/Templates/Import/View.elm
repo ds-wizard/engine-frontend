@@ -63,7 +63,7 @@ viewNavbar appState registryActive =
         [ li [ class "nav-item" ]
             [ a
                 [ onClick ShowRegistryImport
-                , class "nav-link link-with-icon"
+                , class "nav-link"
                 , classList [ ( "active", registryActive ) ]
                 , dataCy "template_import_nav_registry"
                 ]
@@ -74,7 +74,7 @@ viewNavbar appState registryActive =
         , li [ class "nav-item" ]
             [ a
                 [ onClick ShowFileImport
-                , class "nav-link link-with-icon"
+                , class "nav-link"
                 , classList [ ( "active", not registryActive ) ]
                 , dataCy "template_import_nav_file"
                 ]

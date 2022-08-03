@@ -4,9 +4,8 @@ $migration-header-height: 100px;
 
 .Questionnaire__Migration {
     width: 100%;
-    margin-top: $migration-header-height - 20px;
-    margin-bottom: -20px;
-
+    margin-top: $migration-header-height;
+    padding: 0;
 
     .top-header {
         .top-header-content {

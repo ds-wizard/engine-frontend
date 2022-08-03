@@ -17,3 +17,4 @@ type Msg a
     | QueryInput String
     | QueryApply String
     | DebouncerMsg (Debouncer.Msg (Msg a))
+    | NoOp

@@ -449,9 +449,9 @@ viewNode icon cssClass mbTitle mbChildNode =
 
 stateClass : { edited : String, added : String, deleted : String, none : String }
 stateClass =
-    { edited = "state-edited"
-    , added = "state-added"
-    , deleted = "state-deleted"
+    { edited = "edited"
+    , added = "ins"
+    , deleted = "del"
     , none = ""
     }
 

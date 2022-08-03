@@ -24,7 +24,7 @@ fetchData route appState =
                 Wizard.KnowledgeModels.Index.Update.fetchData
 
         PreviewRoute packageId _ ->
-            Cmd.map ProjectMsg <|
+            Cmd.map PreviewMsg <|
                 Wizard.KnowledgeModels.Preview.Update.fetchData appState packageId
 
         _ ->
@@ -55,9 +55,9 @@ update msg wrapMsg appState model =
             in
             ( appState.seed, { model | indexModel = indexModel }, cmd )
 
-        ProjectMsg pMsg ->
+        PreviewMsg pMsg ->
             let
                 ( newSeed, projectModel, cmd ) =
-                    Wizard.KnowledgeModels.Preview.Update.update pMsg (wrapMsg << ProjectMsg) appState model.projectModel
+                    Wizard.KnowledgeModels.Preview.Update.update pMsg (wrapMsg << PreviewMsg) appState model.previewModel
             in
-            ( newSeed, { model | projectModel = projectModel }, cmd )
+            ( newSeed, { model | previewModel = projectModel }, cmd )

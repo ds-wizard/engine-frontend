@@ -53,5 +53,5 @@ viewSubmit appState cancelRoute submitConfig =
 -}
 viewActionOnly : AppState -> ActionButton.ButtonConfig a msg -> Html msg
 viewActionOnly appState actionButtonConfig =
-    div [ class "text-right" ]
+    div [ class "text-end" ]
         [ ActionButton.button appState actionButtonConfig ]

@@ -10,4 +10,4 @@ type Msg
     = DetailMsg Wizard.KnowledgeModels.Detail.Msgs.Msg
     | ImportMsg Wizard.KnowledgeModels.Import.Msgs.Msg
     | IndexMsg Wizard.KnowledgeModels.Index.Msgs.Msg
-    | ProjectMsg Wizard.KnowledgeModels.Preview.Msgs.Msg
+    | PreviewMsg Wizard.KnowledgeModels.Preview.Msgs.Msg

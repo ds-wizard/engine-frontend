@@ -13,7 +13,7 @@ type alias Model =
     { detailModel : Wizard.KnowledgeModels.Detail.Models.Model
     , importModel : Wizard.KnowledgeModels.Import.Models.Model
     , indexModel : Wizard.KnowledgeModels.Index.Models.Model
-    , projectModel : Wizard.KnowledgeModels.Preview.Models.Model
+    , previewModel : Wizard.KnowledgeModels.Preview.Models.Model
     }
 
 
@@ -22,7 +22,7 @@ initialModel appState =
     { detailModel = Wizard.KnowledgeModels.Detail.Models.initialModel
     , importModel = Wizard.KnowledgeModels.Import.Models.initialModel appState Nothing
     , indexModel = Wizard.KnowledgeModels.Index.Models.initialModel PaginationQueryString.empty
-    , projectModel = Wizard.KnowledgeModels.Preview.Models.initialModel Nothing
+    , previewModel = Wizard.KnowledgeModels.Preview.Models.initialModel Nothing
     }
 
 
@@ -39,4 +39,4 @@ initLocalModel route appState model =
             { model | indexModel = Wizard.KnowledgeModels.Index.Models.initialModel paginationQueryString }
 
         PreviewRoute _ mbQuestionUuid ->
-            { model | projectModel = Wizard.KnowledgeModels.Preview.Models.initialModel mbQuestionUuid }
+            { model | previewModel = Wizard.KnowledgeModels.Preview.Models.initialModel mbQuestionUuid }

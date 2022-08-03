@@ -47,7 +47,7 @@ view appState model =
 
 profileView : AppState -> Model -> User -> Html Msg
 profileView appState model user =
-    div [ class "Users__Edit" ]
+    div [ class "Users__Edit col-full" ]
         [ div [ class "Users__Edit__navigation" ] [ navigation appState model ]
         , div [ class "Users__Edit__content" ]
             [ userView appState model user

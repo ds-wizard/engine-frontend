@@ -18,8 +18,8 @@
         margin-top: 1rem;
 
         .TypeHintInput__TypeHints__ComplexItem {
+            @include border-radius($border-radius);
             border: 1px solid $gray-400;
-            border-radius: .25rem;
             padding: .375rem .75rem;
         }
 

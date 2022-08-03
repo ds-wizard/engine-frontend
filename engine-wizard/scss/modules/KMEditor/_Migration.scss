@@ -44,25 +44,5 @@
 
     .diff-tree {
         border-left: 1px solid $gray-400;
-
-        .state-edited {
-            color: $text-edited-color;
-            background: $text-edited-bg;
-        }
-
-        .state-added {
-            color: $text-inserted-color;
-            background: $text-inserted-bg;
-        }
-
-        .state-deleted {
-            color: $text-deleted-color;
-            background: $text-delete-bg;
-            text-decoration: line-through;
-        }
-
-        div > li:first-child {
-            margin-bottom: 3rem;
-        }
     }
 }

@@ -36,6 +36,29 @@ h1 + form {
     margin-top: 2rem;
 }
 
+a {
+    cursor: pointer;
+    text-decoration: none;
+
+    &:not(.btn):not(.dropdown-item):hover {
+        text-decoration: underline;
+    }
+
+    &:not([href]):not([tabindex]) {
+        color: $link-color;
+
+        &:hover, &:active, &:focus {
+            text-decoration: underline;
+            color: $link-hover-color;
+        }
+    }
+
+    &.disabled {
+        text-decoration: none;
+        color: $gray-500;
+    }
+}
+
 
 .btn-with-loader {
     min-width: 100px;

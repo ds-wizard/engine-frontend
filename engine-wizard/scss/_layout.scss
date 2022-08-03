@@ -23,19 +23,33 @@ body {
 }
 
 .page {
-    margin: 20px 0;
+    margin: 0;
 }
 
 .col-list {
     max-width: 80rem;
+    margin-top: $spacer-4;
+    margin-bottom: $spacer-4;
 }
 
 .col-wide-detail {
     max-width: 50rem;
+    margin-top: $spacer-4;
+    margin-bottom: $spacer-4;
 }
 
 .col-detail {
     max-width: 33rem;
+    margin-top: $spacer-4;
+    margin-bottom: $spacer-4;
+}
+
+.col-full {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .side-navigation {
@@ -90,7 +104,7 @@ body {
                 padding: 10px;
                 color: $side-navigation-link-color;
                 text-decoration: none;
-                @include border-radius(5px);
+                @include border-radius($border-radius);
                 transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
 
                 &.active {
@@ -100,13 +114,14 @@ body {
                 &:hover {
                     background: $side-navigation-link-hover-bg;
                     color: $side-navigation-link-color;
-                    text-decoration: none;
+                    text-decoration: none !important;
                 }
 
                 .fa {
                     display: inline-block;
                     text-align: center;
                     flex: 0 0 40px;
+                    margin-right: 0;
                 }
             }
         }
@@ -121,6 +136,10 @@ body {
             font-size: 14px;
         }
 
+        .btn-link {
+            box-shadow: none;
+        }
+
         .btn-group {
             width: 100%;
             padding: 1px 3px;
@@ -131,7 +150,7 @@ body {
                 color: $side-navigation-link-color;
                 text-decoration: none;
                 padding: 10px;
-                @include border-radius(5px);
+                @include border-radius($border-radius);
                 transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
                 display: flex;
                 align-items: baseline;
@@ -148,7 +167,8 @@ body {
                 .fa {
                     display: inline-block;
                     width: 40px;
-                    text-align: center
+                    text-align: center;
+                    margin-right: 0;
                 }
 
                 .user-icon-wrapper {
@@ -180,6 +200,7 @@ body {
                 top: auto !important;
                 bottom: 0 !important;
                 min-width: 200px;
+                margin-left: 3px;
 
                 .dropdown-item {
                     padding: 0.25rem 0.75rem;
@@ -211,7 +232,7 @@ body {
             color: rgba($side-navigation-link-color, 0.8);
 
             &:hover {
-                text-decoration: none;
+                text-decoration: none !important;
                 background: $side-navigation-collapse-hover;
                 color: $side-navigation-link-color;
             }

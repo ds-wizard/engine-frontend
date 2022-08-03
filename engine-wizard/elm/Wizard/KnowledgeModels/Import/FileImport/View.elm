@@ -54,7 +54,7 @@ fileView appState model fileName =
                 _ ->
                     False
     in
-    div [ class "file-view" ]
+    div [ class "rounded-3 file-view" ]
         [ div [ class "file" ]
             [ faSet "kmImport.file" appState
             , div [ class "filename" ]
@@ -90,7 +90,7 @@ dropzoneAttributes model =
                 _ ->
                     "active"
     in
-    [ class ("dropzone " ++ cssClass)
+    [ class ("rounded-3 dropzone " ++ cssClass)
     , id dropzoneId
     , onDragEvent "dragenter" DragEnter
     , onDragEvent "dragover" DragOver

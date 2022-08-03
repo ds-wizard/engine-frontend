@@ -47,8 +47,8 @@ $indent-step: 20px;
     }
 
     &-input {
+        @include border-radius($border-radius);
         border: 1px solid $gray-400;
-        border-radius: .25rem;
         height: 15rem;
         overflow: auto;
         margin: 0;

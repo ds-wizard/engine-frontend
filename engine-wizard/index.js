@@ -10,14 +10,15 @@ const charts = require('./js/components/charts')
 
 const cookies = require('./js/ports/cookies')
 const registerConsolePorts = require('./js/ports/console')
+const registerCopyPorts = require('../engine-shared/ports/copy')
+const registerDownloadPorts = require('./js/ports/download')
 const registerImportPorts = require('./js/ports/import')
+const registerIntegrationWidgetPorts = require('./js/ports/integrationWidget')
 const registerPageUnloadPorts = require('./js/ports/page-unload')
 const registerRefreshPorts = require('./js/ports/refresh')
 const registerScrollPorts = require('./js/ports/scroll')
 const registerSessionPorts = require('./js/ports/session')
-const registerCopyPorts = require('../engine-shared/ports/copy')
 const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
-const registerIntegrationWidgetPorts = require('./js/ports/integrationWidget')
 
 let defaultStyleUrl
 
@@ -118,13 +119,14 @@ function loadApp(config, provisioning) {
 
         registerConsolePorts(app)
         registerCopyPorts(app)
+        registerDownloadPorts(app)
         registerImportPorts(app)
+        registerIntegrationWidgetPorts(app)
         registerPageUnloadPorts(app)
         registerRefreshPorts(app)
         registerScrollPorts(app)
         registerSessionPorts(app)
         registerWebsocketPorts(app)
-        registerIntegrationWidgetPorts(app)
         cookies.registerCookiePorts(app)
 
         cookies.init()

@@ -1,0 +1,93 @@
+@import '../../../../mixins';
+@import '../../../../variables';
+
+.NavigationTree {
+    margin-bottom: 2rem;
+
+    .nav {
+        & > div {
+            max-width: 100%;
+
+            &:not(:first-child) {
+                margin-top: .5rem;
+            }
+        }
+
+        .nav-link {
+            @include transition(none);
+            position: relative;
+
+            &:not(.active) {
+                &:after {
+                    @include transition(background-color 0.15s ease-in-out);
+                    @include border-radius($border-radius);
+                    content: ' ';
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
+                    background-color: $gray-100;
+                    z-index: -1;
+                }
+
+                &:hover {
+                    &:after {
+                        opacity: 1;
+                        background-color: $gray-200;
+                    }
+                }
+            }
+
+            .chapter-number {
+                min-width: 1.5em;
+                text-align: right;
+            }
+
+            .chapter-name {
+                flex-grow: 1;
+                margin-left: 0.5em;
+                margin-right: 0.5em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+
+        li {
+            padding: 0 0 0 20px;
+            position: relative;
+
+            a:not(.caret)  {
+                color: $body-color !important;
+                display: block;
+                max-width: 100%;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                padding: .2rem 0;
+
+                &:hover {
+                    color: $primary !important;
+                    text-decoration: none !important;
+                }
+            }
+        }
+
+        .caret {
+            color: $body-color !important;
+            position: absolute;
+            top: .2rem;
+            left: 0;
+            width: 25px;
+            text-align: center;
+        }
+    }
+}

@@ -40,7 +40,7 @@ fetchData model =
 
         Routes.DashboardRoute ->
             Cmd.map DashboardMsg <|
-                Wizard.Dashboard.Update.fetchData model.appState
+                Wizard.Dashboard.Update.fetchData model.appState model.dashboardModel
 
         Routes.DocumentsRoute _ ->
             Cmd.map DocumentsMsg <|

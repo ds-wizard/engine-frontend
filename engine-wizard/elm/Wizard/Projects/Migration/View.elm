@@ -51,7 +51,7 @@ contentView appState model migration =
 
         finalizeAction =
             if allResolved then
-                button [ class "btn btn-primary link-with-icon", onClick FinalizeMigration ]
+                button [ class "btn btn-primary", onClick FinalizeMigration ]
                     [ lx_ "navbar.finalize" appState ]
 
             else
@@ -139,12 +139,12 @@ changeView appState model migration =
             if isSelectedChangeResolved model then
                 div []
                     [ lx_ "changeView.resolved" appState
-                    , button [ class "btn btn-outline-secondary link-with-icon", onClick UndoResolveCurrentChange ]
+                    , button [ class "btn btn-outline-secondary", onClick UndoResolveCurrentChange ]
                         [ faSet "questionnaireMigration.undo" appState, lx_ "changeView.undo" appState ]
                     ]
 
             else
-                button [ class "btn btn-outline-primary link-with-icon", onClick ResolveCurrentChange ]
+                button [ class "btn btn-outline-primary", onClick ResolveCurrentChange ]
                     [ faSet "questionnaireMigration.resolve" appState, lx_ "changeView.resolve" appState ]
     in
     div [ class "change-view" ]

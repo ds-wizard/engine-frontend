@@ -13,7 +13,7 @@ module Shared.Api.Templates exposing
 import File exposing (File)
 import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
+import Shared.Api exposing (ToMsg, authorizedUrl, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Template as Template exposing (Template)
@@ -76,5 +76,5 @@ importTemplate =
 
 
 exportTemplateUrl : String -> AbstractAppState a -> String
-exportTemplateUrl templateId appState =
-    appState.apiUrl ++ "/templates/" ++ templateId ++ "/bundle"
+exportTemplateUrl templateId =
+    authorizedUrl ("/templates/" ++ templateId ++ "/bundle")

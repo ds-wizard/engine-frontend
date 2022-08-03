@@ -51,7 +51,7 @@ initialModel appState =
     , menuModel = Wizard.Common.Menu.Models.initialModel
     , adminModel = Wizard.Dev.Models.initialModel
     , appsModel = Wizard.Apps.Models.initialModel
-    , dashboardModel = Wizard.Dashboard.Models.initialModel
+    , dashboardModel = Wizard.Dashboard.Models.initialModel appState
     , documentsModel = Wizard.Documents.Models.initialModel
     , kmEditorModel = Wizard.KMEditor.Models.initialModel appState
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
@@ -103,6 +103,9 @@ setSeed seed model =
 initLocalModel : Model -> Model
 initLocalModel model =
     case model.appState.route of
+        Routes.DashboardRoute ->
+            { model | dashboardModel = Wizard.Dashboard.Models.initialModel model.appState }
+
         Routes.DevRoute route ->
             { model | adminModel = Wizard.Dev.Models.initLocalModel route model.adminModel }
 

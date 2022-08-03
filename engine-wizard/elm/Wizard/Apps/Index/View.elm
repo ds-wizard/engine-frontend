@@ -2,6 +2,7 @@ module Wizard.Apps.Index.View exposing (view)
 
 import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
+import Shared.Components.Badge as Badge
 import Shared.Data.App exposing (App)
 import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lg, lx)
@@ -80,7 +81,7 @@ listingTitle appState app =
     let
         disabledBadge =
             if not app.enabled then
-                span [ class "badge badge-danger" ] [ lx_ "badge.disabled" appState ]
+                Badge.danger [] [ lx_ "badge.disabled" appState ]
 
             else
                 emptyNode

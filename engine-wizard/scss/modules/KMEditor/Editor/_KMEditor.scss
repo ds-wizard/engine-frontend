@@ -24,14 +24,18 @@ $breadcrumbs-height: 40px;
         }
 
         .breadcrumb-button {
+            @include border-radius($border-radius);
             transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
             padding: 8px;
-            border-radius: .25rem;
             color: $gray-900 !important;
             text-decoration: none !important;
 
             &:hover {
                 background: $gray-200;
+            }
+
+            .fa {
+                margin: 0;
             }
         }
 
@@ -140,13 +144,13 @@ $breadcrumbs-height: 40px;
     }
 
     .input-child {
+        @include border-radius($border-radius);
         padding: 8px 12px;
         margin-bottom: 5px;
         display: flex;
         justify-content: space-between;
         background: $gray-200;
         border: 1px solid $gray-400;
-        border-radius: 4px;
         width: 100%;
         cursor: move;
         @include not-selectable();
@@ -272,7 +276,7 @@ $breadcrumbs-height: 40px;
                     flex-direction: column;
                     justify-content: space-between;
                     align-items: center;
-                    @include border-radius(.25rem);
+                    @include border-radius($border-radius);
                     @include transition(all 0.2s ease-in-out);
                     border: 1px solid $gray-600;
                     text-align: center;

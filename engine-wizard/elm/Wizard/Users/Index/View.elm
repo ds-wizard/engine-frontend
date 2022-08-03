@@ -1,8 +1,9 @@
 module Wizard.Users.Index.View exposing (view)
 
 import Html exposing (Html, a, div, img, p, span, strong, text)
-import Html.Attributes exposing (class, classList, href, src)
+import Html.Attributes exposing (class, href, src)
 import Shared.Auth.Role as Role
+import Shared.Components.Badge as Badge
 import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
@@ -98,8 +99,7 @@ listingTitleBadge appState user =
                 emptyNode
 
             else
-                span [ class "badge badge-danger" ]
-                    [ lx_ "badge.inactive" appState ]
+                Badge.danger [] [ lx_ "badge.inactive" appState ]
     in
     span []
         [ roleBadge appState user
@@ -109,11 +109,15 @@ listingTitleBadge appState user =
 
 roleBadge : AppState -> User -> Html msg
 roleBadge appState user =
-    span
-        [ class "badge"
-        , classList [ ( "badge-light", user.role /= Role.admin ), ( "badge-dark", user.role == Role.admin ) ]
-        ]
-        [ text <| Role.toReadableString appState user.role ]
+    let
+        badge =
+            if user.role == Role.admin then
+                Badge.dark
+
+            else
+                Badge.light
+    in
+    badge [] [ text <| Role.toReadableString appState user.role ]
 
 
 listingDescription : AppState -> User -> Html Msg

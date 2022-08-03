@@ -50,17 +50,17 @@ formView appState form =
                     , img [ class "settings-img", src "/img/settings/dashboard-welcome.png" ] []
                     ]
               )
-            , ( DashboardConfigForm.dashboardDmp
+            , ( DashboardConfigForm.dashboardRoleBased
               , div []
-                    [ strong [] [ lx_ "dashboardOptions.dmp" appState ]
-                    , p [ class "text-muted" ] [ lx_ "dashboardOptions.dmp.desc" appState ]
-                    , img [ class "settings-img", src "/img/settings/dashboard-dmp.png" ] []
+                    [ strong [] [ lx_ "dashboardOptions.roleBased" appState ]
+                    , p [ class "text-muted" ] [ lx_ "dashboardOptions.roleBased.desc" appState ]
+                    , img [ class "settings-img", src "/img/settings/dashboard-rolebased.png" ] []
                     ]
               )
             ]
     in
     div [ class "Dashboard" ]
-        [ FormGroup.htmlRadioGroup appState opts form "widgets" (l_ "form.dashboardStyle" appState)
+        [ FormGroup.htmlRadioGroup appState opts form "dashboardType" (l_ "form.dashboardStyle" appState)
         , div [ class "row mt-5" ]
             [ div [ class "col-12" ]
                 [ label [] [ lx_ "form.welcomeInfo" appState ]

@@ -5,7 +5,7 @@
     .user-card {
         display: flex;
         background: $gray-200;
-        @include border-radius(5px);
+        @include border-radius($border-radius);
         padding: 20px;
         margin: auto;
         justify-content: flex-start;

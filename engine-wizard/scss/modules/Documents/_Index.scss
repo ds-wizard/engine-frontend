@@ -2,9 +2,9 @@
 
 .Documents__Index {
     .questionnaire-filter {
+        @include border-radius($border-radius);
         padding: .375rem .75rem;
         border: 1px solid #ced4da;
-        border-radius: .25rem;
         max-width: 25%;
         white-space: nowrap;
         display: flex;

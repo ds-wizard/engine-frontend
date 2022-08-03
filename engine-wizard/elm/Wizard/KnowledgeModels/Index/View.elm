@@ -2,7 +2,7 @@ module Wizard.KnowledgeModels.Index.View exposing (view)
 
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
-import Shared.Api.Packages as PackagesApi
+import Shared.Components.Badge as Badge
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Html exposing (emptyNode, faSet)
@@ -13,7 +13,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (listClass)
+import Wizard.Common.Html.Attribute exposing (listClass, tooltip)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -53,7 +53,7 @@ importButton appState =
     if Feature.knowledgeModelsImport appState then
         linkTo appState
             (Routes.knowledgeModelsImport Nothing)
-            [ class "btn btn-primary link-with-icon" ]
+            [ class "btn btn-primary" ]
             [ faSet "kms.upload" appState
             , lx_ "header.import" appState
             ]
@@ -92,10 +92,8 @@ listingTitle : AppState -> Package -> Html Msg
 listingTitle appState package =
     span []
         [ linkTo appState (Routes.knowledgeModelsDetail package.id) [] [ text package.name ]
-        , span
-            [ class "badge badge-light"
-            , title <| lg "package.latestVersion" appState
-            ]
+        , Badge.light
+            (tooltip <| lg "package.latestVersion" appState)
             [ text <| Version.toString package.version ]
         , listingTitleOutdatedBadge appState package
         ]
@@ -110,7 +108,7 @@ listingTitleOutdatedBadge appState package =
         in
         linkTo appState
             (Routes.knowledgeModelsImport packageId)
-            [ class "badge badge-warning" ]
+            [ class Badge.warningClass ]
             [ lx_ "badge.outdated" appState ]
 
     else
@@ -167,7 +165,7 @@ listingActions appState package =
                 { extraClass = Nothing
                 , icon = faSet "_global.export" appState
                 , label = lg "km.action.export" appState
-                , msg = ListingActionExternalLink (PackagesApi.exportPackageUrl package.id appState)
+                , msg = ListingActionMsg (ExportPackage package)
                 , dataCy = "export"
                 }
 

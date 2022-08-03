@@ -131,7 +131,7 @@ publicHeader fluid model =
                 , signUpLink
                 ]
     in
-    nav [ class "navbar navbar-expand-sm fixed-top top-navigation" ]
+    nav [ class "navbar navbar-expand-sm fixed-top px-3 top-navigation" ]
         [ div [ classList [ ( "container-fluid", fluid ), ( "container", not fluid ) ] ]
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState
@@ -140,7 +140,7 @@ publicHeader fluid model =
                     [ text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
                     ]
                 ]
-            , ul [ class "nav navbar-nav ml-auto" ] links
+            , ul [ class "nav navbar-nav ms-auto flex-row" ] links
             ]
         ]
 
@@ -234,7 +234,7 @@ menuItems appState =
         (faSet "menu.knowledgeModels" appState)
         Routes.knowledgeModelsIndex
         Routes.isKnowledgeModelsIndex
-        Feature.knowledgeModelsView
+        Feature.knowledgeModelsImport
         "km-link"
     , MenuItem
         (l_ "menu.projects" appState)

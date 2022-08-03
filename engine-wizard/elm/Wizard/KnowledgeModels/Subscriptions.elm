@@ -4,6 +4,7 @@ import Wizard.KnowledgeModels.Import.Subscriptions
 import Wizard.KnowledgeModels.Index.Subscriptions
 import Wizard.KnowledgeModels.Models exposing (Model)
 import Wizard.KnowledgeModels.Msgs exposing (Msg(..))
+import Wizard.KnowledgeModels.Preview.Subscriptions
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 
 
@@ -15,6 +16,9 @@ subscriptions route model =
 
         IndexRoute _ ->
             Sub.map IndexMsg <| Wizard.KnowledgeModels.Index.Subscriptions.subscriptions model.indexModel
+
+        PreviewRoute _ _ ->
+            Sub.map PreviewMsg <| Wizard.KnowledgeModels.Preview.Subscriptions.subscriptions model.previewModel
 
         _ ->
             Sub.none

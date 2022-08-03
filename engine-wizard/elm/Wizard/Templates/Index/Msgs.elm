@@ -10,3 +10,4 @@ type Msg
     | DeleteTemplate
     | DeleteTemplateCompleted (Result ApiError ())
     | ListingMsg (Listing.Msg Template)
+    | ExportTemplate Template

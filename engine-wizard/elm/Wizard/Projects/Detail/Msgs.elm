@@ -5,7 +5,6 @@ import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (Questionnair
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.WebSocket as WebSocket
 import Uuid exposing (Uuid)
-import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
@@ -22,7 +21,6 @@ type Msg
     = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
     | WebSocketMsg WebSocket.RawMsg
     | WebSocketPing
-    | OnlineUserMsg Int OnlineUser.Msg
     | ProjectSavingMsg ProjectSaving.Msg
     | PreviewMsg Preview.Msg
     | QuestionnaireMsg Questionnaire.Msg

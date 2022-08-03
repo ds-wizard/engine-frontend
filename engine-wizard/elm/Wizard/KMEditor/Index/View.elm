@@ -1,11 +1,12 @@
 module Wizard.KMEditor.Index.View exposing (view)
 
-import Html exposing (Attribute, Html, a, code, div, i, span, text)
+import Html exposing (Attribute, Html, a, code, div, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
+import Shared.Components.Badge as Badge
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
-import Shared.Html exposing (emptyNode, faKeyClass, faSet)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (l, lg, lx)
 import Shared.Utils exposing (listInsertIf, packageIdToComponents)
 import Version
@@ -13,7 +14,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, listClass, tooltip)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.BranchUtils as BranchUtils
@@ -118,7 +119,7 @@ listingTitleLastPublishedVersionBadge : AppState -> Branch -> Html msg
 listingTitleLastPublishedVersionBadge appState branch =
     let
         badge version =
-            span [ title <| l_ "badge.lastPublishedVersion.title" appState, class "badge badge-light" ]
+            Badge.light (tooltip <| l_ "badge.lastPublishedVersion.title" appState)
                 [ text <| Version.toString version ]
     in
     BranchUtils.lastVersion appState branch
@@ -131,33 +132,27 @@ listingTitleBadge appState branch =
     case branch.state of
         BranchState.Outdated ->
             a
-                [ title <| l_ "badge.outdated.title" appState
-                , class "badge badge-warning"
-                , onClick (UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId)))
-                , dataCy "km-editor_list_outdated-badge"
-                ]
+                ([ class Badge.warningClass
+                 , onClick (UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId)))
+                 , dataCy "km-editor_list_outdated-badge"
+                 ]
+                    ++ tooltip (l_ "badge.outdated.title" appState)
+                )
                 [ lx_ "badge.outdated" appState ]
 
         BranchState.Migrating ->
-            span
-                [ title <| l_ "badge.migrating.title" appState
-                , class "badge badge-info"
-                ]
+            Badge.info
+                (tooltip <| l_ "badge.migrating.title" appState)
                 [ lx_ "badge.migrating" appState ]
 
         BranchState.Migrated ->
-            span
-                [ title <| l_ "badge.migrated.title" appState
-                , class "badge badge-success"
-                ]
+            Badge.success
+                (tooltip <| l_ "badge.migrated.title" appState)
                 [ lx_ "badge.migrated" appState ]
 
         BranchState.Edited ->
-            i
-                [ title <| l_ "badge.edited.title" appState
-                , class <| faKeyClass "kmEditorList.edited" appState
-                ]
-                []
+            span (tooltip (l_ "badge.edited.title" appState))
+                [ faSet "kmEditorList.edited" appState ]
 
         _ ->
             emptyNode
@@ -271,7 +266,7 @@ listingActions appState branch =
         |> listInsertIf openEditor showOpenEditor
         |> listInsertIf Listing.dropdownSeparator showPublish
         |> listInsertIf publish showPublish
-        |> listInsertIf Listing.dropdownSeparator (showUpgrade || showContinueMigration || showCancelMigration)
+        |> listInsertIf Listing.dropdownSeparator ((showOpenEditor || showPublish) && (showUpgrade || showContinueMigration || showCancelMigration))
         |> listInsertIf upgrade showUpgrade
         |> listInsertIf continueMigration showContinueMigration
         |> listInsertIf cancelMigration showCancelMigration

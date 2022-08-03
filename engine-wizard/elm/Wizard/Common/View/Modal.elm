@@ -38,7 +38,7 @@ simple =
 
 simpleWithAttrs : List (Attribute msg) -> SimpleConfig msg -> Html msg
 simpleWithAttrs attributes cfg =
-    div ([ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ] ++ attributes)
+    div ([ class "modal modal-cover", classList [ ( "visible", cfg.visible ) ] ] ++ attributes)
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
                 cfg.modalContent
@@ -83,7 +83,7 @@ confirm appState cfg =
                 Nothing ->
                     emptyNode
     in
-    div [ class "modal-cover", classList [ ( "visible", cfg.visible ) ] ]
+    div [ class "modal modal-cover", classList [ ( "visible", cfg.visible ) ] ]
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
                 [ div [ class "modal-header" ]

@@ -11,6 +11,7 @@ import Shared.Setters exposing (setTemplate)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Templates.Detail.Models exposing (Model)
@@ -41,6 +42,9 @@ update msg wrapMsg appState model =
 
         DeleteVersionCompleted result ->
             deleteVersionCompleted appState model result
+
+        ExportTemplate template ->
+            ( model, Ports.downloadFile (TemplatesApi.exportTemplateUrl template.id appState) )
 
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

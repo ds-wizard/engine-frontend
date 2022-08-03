@@ -92,11 +92,9 @@ allowedPackageFormView appState form index =
         , viewField "kmId"
         , viewField "minVersion"
         , viewField "maxVersion"
-        , div [ class "input-group-append" ]
-            [ button
-                [ class "btn btn-link text-danger"
-                , onClick (Form.RemoveItem "publicPackages" index)
-                ]
-                [ faSet "_global.delete" appState ]
+        , button
+            [ class "btn btn-link text-danger"
+            , onClick (Form.RemoveItem "publicPackages" index)
             ]
+            [ faSet "_global.delete" appState ]
         ]
