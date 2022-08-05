@@ -13,6 +13,7 @@ import Shared.Utils exposing (dictFromMaybeList, flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s)
 import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
+import Url.Parser.Query.Extra as Query
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
@@ -79,7 +80,7 @@ parsers appState wrapRoute =
            , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
            , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
            , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
-           , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.string "eventUuid")
+           , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.uuid "eventUuid")
            , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
            , map (PaginationQueryString.wrapRoute5 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
            , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "projects.migration" appState) </> uuid)
@@ -136,7 +137,7 @@ toUrl appState route =
                 ProjectDetailRoute.NewDocument mbEventUuid ->
                     case mbEventUuid of
                         Just eventUuid ->
-                            [ moduleRoot, Uuid.toString uuid, "documents", "new", "?eventUuid=" ++ eventUuid ]
+                            [ moduleRoot, Uuid.toString uuid, "documents", "new", "?eventUuid=" ++ Uuid.toString eventUuid ]
 
                         Nothing ->
                             [ moduleRoot, Uuid.toString uuid, "documents", "new" ]

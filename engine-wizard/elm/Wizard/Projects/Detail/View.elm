@@ -1,5 +1,6 @@
 module Wizard.Projects.Detail.View exposing (view)
 
+import ActionResult
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -104,7 +105,7 @@ viewProject route appState model qm =
                 viewProjectNavigation appState route model qm
 
         modalConfig =
-            { events = qm.questionnaire.events
+            { events = ActionResult.withDefault [] qm.questionnaireEvents
             , versions = qm.questionnaire.versions
             }
     in
@@ -331,10 +332,10 @@ viewProjectContent appState route model qm =
                 }
                 model.documentsModel
 
-        ProjectDetailRoute.NewDocument mbEventUuid ->
+        ProjectDetailRoute.NewDocument _ ->
             if isEditable && isAuthenticated then
                 Html.map NewDocumentMsg <|
-                    NewDocument.view appState qm.questionnaire mbEventUuid model.newDocumentModel
+                    NewDocument.view appState qm.questionnaire model.newDocumentModel
 
             else
                 forbiddenPage

@@ -12,6 +12,8 @@ module Shared.Api.Questionnaires exposing
     , getDocuments
     , getProjectTagsSuggestions
     , getQuestionnaire
+    , getQuestionnaireEvent
+    , getQuestionnaireEvents
     , getQuestionnaireMigration
     , getQuestionnaires
     , getSummaryReport
@@ -84,6 +86,16 @@ getQuestionnaire uuid =
 getQuestionnaireMigration : Uuid -> AbstractAppState a -> ToMsg QuestionnaireMigration msg -> Cmd msg
 getQuestionnaireMigration uuid =
     jwtGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/migrations/current") QuestionnaireMigration.decoder
+
+
+getQuestionnaireEvents : Uuid -> AbstractAppState a -> ToMsg (List QuestionnaireEvent) msg -> Cmd msg
+getQuestionnaireEvents uuid =
+    jwtGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/events") (D.list QuestionnaireEvent.decoder)
+
+
+getQuestionnaireEvent : Uuid -> Uuid -> AbstractAppState a -> ToMsg QuestionnaireEvent msg -> Cmd msg
+getQuestionnaireEvent uuid eventUuid =
+    jwtGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/events/" ++ Uuid.toString eventUuid) QuestionnaireEvent.decoder
 
 
 postQuestionnaire : Value -> AbstractAppState a -> ToMsg Questionnaire msg -> Cmd msg

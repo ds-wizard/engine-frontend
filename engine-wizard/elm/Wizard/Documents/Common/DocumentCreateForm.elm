@@ -10,9 +10,7 @@ import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
@@ -27,19 +25,15 @@ type alias DocumentCreateForm =
 
 
 init :
-    { q | name : String, template : Maybe TemplateSuggestion, formatUuid : Maybe Uuid, events : List QuestionnaireEvent }
+    { q | name : String, template : Maybe TemplateSuggestion, formatUuid : Maybe Uuid }
     -> Maybe Uuid
     -> Form FormError DocumentCreateForm
 init questionnaire mbEventUuid =
-    let
-        eventUuid =
-            Maybe.or mbEventUuid (Maybe.map QuestionnaireEvent.getUuid (List.last questionnaire.events))
-    in
     Form.initial
         [ ( "name", Field.string questionnaire.name )
         , ( "templateId", Field.string (Maybe.unwrap "" .id questionnaire.template) )
         , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString questionnaire.formatUuid) )
-        , ( "questionnaireEventUuid", Field.string (Maybe.unwrap "" Uuid.toString eventUuid) )
+        , ( "questionnaireEventUuid", Field.string (Maybe.unwrap "" Uuid.toString mbEventUuid) )
         ]
         validation
 

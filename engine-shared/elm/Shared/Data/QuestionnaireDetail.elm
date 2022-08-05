@@ -92,7 +92,6 @@ type alias QuestionnaireDetail =
     , formatUuid : Maybe Uuid
     , format : Maybe TemplateFormat
     , labels : Dict String (List String)
-    , events : List QuestionnaireEvent
     , versions : List QuestionnaireVersion
     , migrationUuid : Maybe Uuid
     }
@@ -121,7 +120,6 @@ decoder =
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe TemplateFormat.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
-        |> D.required "events" (D.list QuestionnaireEvent.decoder)
         |> D.required "versions" (D.list QuestionnaireVersion.decoder)
         |> D.required "migrationUuid" (D.maybe Uuid.decoder)
 
@@ -173,7 +171,6 @@ createQuestionnaireDetail package km =
     , formatUuid = Nothing
     , format = Nothing
     , labels = Dict.empty
-    , events = []
     , versions = []
     , migrationUuid = Nothing
     }
@@ -600,22 +597,21 @@ getVersionByEventUuid questionnaire eventUuid =
     List.find (.eventUuid >> (==) eventUuid) questionnaire.versions
 
 
-lastVisibleEvent : QuestionnaireDetail -> Maybe QuestionnaireEvent
+isVersion : QuestionnaireDetail -> QuestionnaireEvent -> Bool
+isVersion questionnaire event =
+    List.any (.eventUuid >> (==) (QuestionnaireEvent.getUuid event)) questionnaire.versions
+
+
+lastVisibleEvent : List QuestionnaireEvent -> Maybe QuestionnaireEvent
 lastVisibleEvent =
-    .events
-        >> List.reverse
+    List.reverse
         >> List.dropWhile QuestionnaireEvent.isInvisible
         >> List.head
 
 
-isCurrentVersion : QuestionnaireDetail -> Uuid -> Bool
+isCurrentVersion : List QuestionnaireEvent -> Uuid -> Bool
 isCurrentVersion questionnaire eventUuid =
     Maybe.map QuestionnaireEvent.getUuid (lastVisibleEvent questionnaire) == Just eventUuid
-
-
-isVersion : QuestionnaireDetail -> QuestionnaireEvent -> Bool
-isVersion questionnaire event =
-    List.any (.eventUuid >> (==) (QuestionnaireEvent.getUuid event)) questionnaire.versions
 
 
 
@@ -721,6 +717,4 @@ updateContent detail content =
         | replies = content.replies
         , phaseUuid = content.phaseUuid
         , labels = content.labels
-        , events = content.events
-        , versions = content.versions
     }

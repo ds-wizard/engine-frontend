@@ -94,6 +94,8 @@ locale =
                , ( "_global.apiError.packages.version.postError", "Publishing the new version failed." )
                , ( "_global.apiError.questionnaires.cloneError", "Unable to clone Questionnaire." )
                , ( "_global.apiError.questionnaires.deleteError", "Questionnaire could not be deleted." )
+               , ( "_global.apiError.questionnaires.events.getError", "Unable to get questionnaire event." )
+               , ( "_global.apiError.questionnaires.events.getListError", "Unable to get version history." )
                , ( "_global.apiError.questionnaires.getError", "Unable to get the Questionnaire." )
                , ( "_global.apiError.questionnaires.getListError", "Unable to get Questionnaires." )
                , ( "_global.apiError.questionnaires.getProjectTagsSuggestionsError", "Unable to get project tags." )
