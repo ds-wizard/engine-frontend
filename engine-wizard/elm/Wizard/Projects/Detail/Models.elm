@@ -98,7 +98,7 @@ initPageModel appState route model =
                 | newDocumentModel =
                     case model.questionnaireModel of
                         Success qm ->
-                            NewDocument.initialModel qm.questionnaire (Maybe.andThen Uuid.fromString mbEventUuid)
+                            NewDocument.initialModel qm.questionnaire mbEventUuid
 
                         _ ->
                             NewDocument.initEmpty
@@ -127,17 +127,7 @@ addSavingActionUuid uuid model =
 
 addQuestionnaireEvent : QuestionnaireEvent -> Model -> Model
 addQuestionnaireEvent event model =
-    let
-        setEvent questionnaireModel =
-            let
-                questionnaire =
-                    questionnaireModel.questionnaire
-            in
-            { questionnaireModel
-                | questionnaire = { questionnaire | events = questionnaire.events ++ [ event ] }
-            }
-    in
-    { model | questionnaireModel = ActionResult.map setEvent model.questionnaireModel }
+    { model | questionnaireModel = ActionResult.map (Questionnaire.addEvent event) model.questionnaireModel }
 
 
 removeSavingActionUuid : Uuid -> Model -> ( Model, Bool )

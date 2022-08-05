@@ -347,9 +347,9 @@ projectsDetailDocuments uuid =
     ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Documents PaginationQueryString.empty
 
 
-projectsDetailDocumentsNew : Uuid -> Maybe String -> Route
-projectsDetailDocumentsNew uuid mbEventUuidString =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.NewDocument mbEventUuidString
+projectsDetailDocumentsNew : Uuid -> Maybe Uuid -> Route
+projectsDetailDocumentsNew uuid mbEventUuid =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.NewDocument mbEventUuid
 
 
 projectsDetailSettings : Uuid -> Route
