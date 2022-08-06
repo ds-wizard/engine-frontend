@@ -1,1 +1,4 @@
 src
+event.json
+*.zip
+wizard-style-builder-lambda
