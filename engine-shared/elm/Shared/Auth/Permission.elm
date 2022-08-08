@@ -8,6 +8,7 @@ module Shared.Auth.Permission exposing
     , packageManagementRead
     , packageManagementWrite
     , questionnaire
+    , questionnaireImporter
     , questionnaireTemplate
     , settings
     , submission
@@ -67,6 +68,11 @@ questionnaire =
 questionnaireTemplate : String
 questionnaireTemplate =
     "QTN_TML_PERM"
+
+
+questionnaireImporter : String
+questionnaireImporter =
+    "QTN_IMPORTER_PERM"
 
 
 settings : String

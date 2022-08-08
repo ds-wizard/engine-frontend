@@ -3,6 +3,7 @@ module Wizard.Projects.Subscriptions exposing (subscriptions)
 import Wizard.Projects.Create.Subscriptions
 import Wizard.Projects.CreateMigration.Subscriptions
 import Wizard.Projects.Detail.Subscriptions
+import Wizard.Projects.Import.Subscriptions
 import Wizard.Projects.Index.Subscriptions
 import Wizard.Projects.Migration.Subscriptions
 import Wizard.Projects.Models exposing (Model)
@@ -30,3 +31,6 @@ subscriptions route model =
 
         MigrationRoute _ ->
             Sub.map MigrationMsg <| Wizard.Projects.Migration.Subscriptions.subscriptions model.migrationModel
+
+        ImportRoute _ _ ->
+            Sub.map ImportMsg Wizard.Projects.Import.Subscriptions.subscriptions

@@ -5,6 +5,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Projects.Create.View
 import Wizard.Projects.CreateMigration.View
 import Wizard.Projects.Detail.View as Detail
+import Wizard.Projects.Import.View
 import Wizard.Projects.Index.View
 import Wizard.Projects.Migration.View
 import Wizard.Projects.Models exposing (Model)
@@ -34,3 +35,7 @@ view route appState model =
         MigrationRoute _ ->
             Html.map MigrationMsg <|
                 Wizard.Projects.Migration.View.view appState model.migrationModel
+
+        ImportRoute _ _ ->
+            Html.map ImportMsg <|
+                Wizard.Projects.Import.View.view appState model.importModel

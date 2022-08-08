@@ -13,6 +13,7 @@ module Wizard.Routes exposing
     , isKmEditorEditor
     , isKmEditorIndex
     , isKnowledgeModelsIndex
+    , isProjectImportersIndex
     , isProjectsDetail
     , isProjectsIndex
     , isTemplateIndex
@@ -34,6 +35,8 @@ module Wizard.Routes exposing
     , persistentCommandsDetail
     , persistentCommandsIndex
     , persistentCommandsIndexWithFilters
+    , projectImport
+    , projectImportersIndex
     , projectsCreate
     , projectsCreateCustom
     , projectsCreateMigration
@@ -76,6 +79,7 @@ import Wizard.Documents.Routes
 import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
+import Wizard.ProjectImporters.Routes
 import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Detail.ProjectDetailRoute
 import Wizard.Projects.Routes
@@ -94,6 +98,7 @@ type Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
     | ProjectsRoute Wizard.Projects.Routes.Route
+    | ProjectImportersRoute Wizard.ProjectImporters.Routes.Route
     | PublicRoute Wizard.Public.Routes.Route
     | RegistryRoute Wizard.Registry.Routes.Route
     | SettingsRoute Wizard.Settings.Routes.Route
@@ -310,6 +315,25 @@ knowledgeModelsPreview packageId mbQuestionUuid =
 
 
 
+-- Project Importers
+
+
+projectImportersIndex : Route
+projectImportersIndex =
+    ProjectImportersRoute (Wizard.ProjectImporters.Routes.IndexRoute PaginationQueryString.empty)
+
+
+isProjectImportersIndex : Route -> Bool
+isProjectImportersIndex route =
+    case route of
+        ProjectImportersRoute (Wizard.ProjectImporters.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False
+
+
+
 -- Projects
 
 
@@ -401,6 +425,11 @@ isProjectsIndex route =
 projectsMigration : Uuid -> Route
 projectsMigration =
     ProjectsRoute << Wizard.Projects.Routes.MigrationRoute
+
+
+projectImport : Uuid -> String -> Route
+projectImport uuid importerId =
+    ProjectsRoute <| Wizard.Projects.Routes.ImportRoute uuid importerId
 
 
 

@@ -11,6 +11,7 @@ import Wizard.Dev.Msgs
 import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
+import Wizard.ProjectImporters.Msgs
 import Wizard.Projects.Msgs
 import Wizard.Public.Msgs
 import Wizard.Registry.Msgs
@@ -35,6 +36,7 @@ type Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
+    | ProjectImportersMsg Wizard.ProjectImporters.Msgs.Msg
     | ProjectsMsg Wizard.Projects.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg
     | RegistryMsg Wizard.Registry.Msgs.Msg

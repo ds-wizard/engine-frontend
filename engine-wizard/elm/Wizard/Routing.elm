@@ -16,6 +16,7 @@ import Wizard.Dev.Routing
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
+import Wizard.ProjectImporters.Routing
 import Wizard.Projects.Routing
 import Wizard.Public.Routing
 import Wizard.Registry.Routing
@@ -34,6 +35,7 @@ matchers appState =
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
+                ++ Wizard.ProjectImporters.Routing.parsers appState Routes.ProjectImportersRoute
                 ++ Wizard.Projects.Routing.parsers appState Routes.ProjectsRoute
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
@@ -76,8 +78,11 @@ isAllowed route appState =
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
             Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute appState
 
-        Routes.ProjectsRoute plansRoute ->
-            Wizard.Projects.Routing.isAllowed plansRoute appState
+        Routes.ProjectImportersRoute _ ->
+            Wizard.ProjectImporters.Routing.isAllowed appState
+
+        Routes.ProjectsRoute projectsRoute ->
+            Wizard.Projects.Routing.isAllowed projectsRoute appState
 
         Routes.PublicRoute _ ->
             True
@@ -124,8 +129,11 @@ toUrl appState route =
                 Routes.KnowledgeModelsRoute kmPackagesRoute ->
                     Wizard.KnowledgeModels.Routing.toUrl appState kmPackagesRoute
 
-                Routes.ProjectsRoute plansRoute ->
-                    Wizard.Projects.Routing.toUrl appState plansRoute
+                Routes.ProjectImportersRoute projectImportersRoute ->
+                    Wizard.ProjectImporters.Routing.toUrl appState projectImportersRoute
+
+                Routes.ProjectsRoute projectsRoute ->
+                    Wizard.Projects.Routing.toUrl appState projectsRoute
 
                 Routes.PublicRoute publicRoute ->
                     Wizard.Public.Routing.toUrl appState publicRoute

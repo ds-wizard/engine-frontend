@@ -244,6 +244,13 @@ menuItems appState =
         Feature.projectsView
         "projects-link"
     , MenuItem
+        (l_ "menu.projectImporters" appState)
+        (faSet "menu.projectImporters" appState)
+        Routes.projectImportersIndex
+        Routes.isProjectImportersIndex
+        Feature.projectImporters
+        "project-importers-link"
+    , MenuItem
         (l_ "menu.documents" appState)
         (faSet "menu.documents" appState)
         Routes.documentsIndex

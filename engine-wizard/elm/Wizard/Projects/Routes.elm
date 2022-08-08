@@ -18,6 +18,7 @@ type Route
     | DetailRoute Uuid ProjectDetailRoute
     | IndexRoute PaginationQueryString (Maybe String) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator)
     | MigrationRoute Uuid
+    | ImportRoute Uuid String
 
 
 indexRouteUsersFilterId : String
