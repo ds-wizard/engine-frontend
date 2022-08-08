@@ -17,6 +17,7 @@ import Wizard.KnowledgeModels.Update
 import Wizard.Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Ports as Ports
+import Wizard.ProjectImporters.Update
 import Wizard.Projects.Update
 import Wizard.Public.Update
 import Wizard.Registry.Update
@@ -53,6 +54,10 @@ fetchData model =
         Routes.KnowledgeModelsRoute route ->
             Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
                 Wizard.KnowledgeModels.Update.fetchData route model.appState
+
+        Routes.ProjectImportersRoute _ ->
+            Cmd.map Wizard.Msgs.ProjectImportersMsg <|
+                Wizard.ProjectImporters.Update.fetchData
 
         Routes.ProjectsRoute route ->
             Cmd.map Wizard.Msgs.ProjectsMsg <|
@@ -235,6 +240,13 @@ update msg model =
                         Wizard.KnowledgeModels.Update.update kmPackagesMsg Wizard.Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
                 in
                 ( setSeed seed { model | kmPackagesModel = kmPackagesModel }, cmd )
+
+            Wizard.Msgs.ProjectImportersMsg projectImporterMsg ->
+                let
+                    ( projectImportersModel, cmd ) =
+                        Wizard.ProjectImporters.Update.update projectImporterMsg Wizard.Msgs.ProjectImportersMsg model.appState model.projectImportersModel
+                in
+                ( { model | projectImportersModel = projectImportersModel }, cmd )
 
             Wizard.Msgs.ProjectsMsg plansMsg ->
                 let

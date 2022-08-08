@@ -6,6 +6,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Projects.Create.Models
 import Wizard.Projects.CreateMigration.Models
 import Wizard.Projects.Detail.Models as Detail
+import Wizard.Projects.Import.Models
 import Wizard.Projects.Index.Models
 import Wizard.Projects.Migration.Models
 import Wizard.Projects.Routes exposing (Route(..))
@@ -17,6 +18,7 @@ type alias Model =
     , detailModel : Detail.Model
     , indexModel : Wizard.Projects.Index.Models.Model
     , migrationModel : Wizard.Projects.Migration.Models.Model
+    , importModel : Wizard.Projects.Import.Models.Model
     }
 
 
@@ -27,6 +29,7 @@ initialModel appState =
     , detailModel = Detail.init appState Uuid.nil
     , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing
     , migrationModel = Wizard.Projects.Migration.Models.initialModel Uuid.nil
+    , importModel = Wizard.Projects.Import.Models.initialModel Uuid.nil ""
     }
 
 
@@ -51,3 +54,6 @@ initLocalModel appState route model =
 
         MigrationRoute uuid ->
             { model | migrationModel = Wizard.Projects.Migration.Models.initialModel uuid }
+
+        ImportRoute uuid importerId ->
+            { model | importModel = Wizard.Projects.Import.Models.initialModel uuid importerId }

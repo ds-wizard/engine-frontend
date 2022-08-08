@@ -9,7 +9,9 @@ port module Wizard.Ports exposing
     , downloadFile
     , fileContentRead
     , fileSelected
+    , gotImporterData
     , gotIntegrationWidgetValue
+    , openImporter
     , openIntegrationWidget
     , refresh
     , scrollIntoView
@@ -99,6 +101,16 @@ port openIntegrationWidget : E.Value -> Cmd msg
 
 
 port gotIntegrationWidgetValue : (E.Value -> msg) -> Sub msg
+
+
+
+-- Importer
+
+
+port openImporter : String -> Cmd msg
+
+
+port gotImporterData : (E.Value -> msg) -> Sub msg
 
 
 

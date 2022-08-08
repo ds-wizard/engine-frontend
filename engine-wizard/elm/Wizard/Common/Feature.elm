@@ -34,6 +34,7 @@ module Wizard.Common.Feature exposing
     , projectCreateMigration
     , projectDelete
     , projectDocumentsView
+    , projectImporters
     , projectMetrics
     , projectOpen
     , projectPreview
@@ -323,6 +324,15 @@ projectCommentThreadDelete appState questionnaire commentThread =
 projectCommentPrivate : AppState -> QuestionnaireDetail -> Bool
 projectCommentPrivate appState questionnaire =
     QuestionnaireDetail.isEditor appState questionnaire
+
+
+
+-- Project Importers
+
+
+projectImporters : AppState -> Bool
+projectImporters =
+    adminOr Perm.questionnaireImporter
 
 
 

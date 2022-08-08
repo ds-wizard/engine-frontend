@@ -20,6 +20,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , setActiveChapterUuid
     , setLabels
     , setPhaseUuid
+    , setQuestionnaireImporters
     , setReply
     , subscriptions
     , update
@@ -65,6 +66,7 @@ import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (Questionnair
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.TypeHint exposing (TypeHint)
 import Shared.Data.User as User
@@ -91,7 +93,7 @@ import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as Quest
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, tooltip, tooltipLeft, tooltipRight)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Flash as Flash
@@ -146,6 +148,8 @@ type alias Model =
     , commentDropdownStates : Dict String Dropdown.State
     , splitPane : SplitPane.State
     , navigationTreeModel : NavigationTree.Model
+    , questionnaireImportersDropdown : Dropdown.State
+    , questionnaireImporters : List QuestionnaireImporter
     }
 
 
@@ -207,7 +211,14 @@ init appState questionnaire =
     , commentDropdownStates = Dict.empty
     , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
     , navigationTreeModel = navigationTreeModel
+    , questionnaireImportersDropdown = Dropdown.initialState
+    , questionnaireImporters = []
     }
+
+
+setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
+setQuestionnaireImporters importers model =
+    { model | questionnaireImporters = importers }
 
 
 addEvent : QuestionnaireEvent -> Model -> Model
@@ -372,6 +383,7 @@ type Msg
     | CommentDropdownMsg String Dropdown.State
     | SplitPaneMsg SplitPane.Msg
     | NavigationTreeMsg NavigationTree.Msg
+    | ImportersDropdownMsg Dropdown.State
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -663,6 +675,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         NavigationTreeMsg navigationTreeMsg ->
             wrap { model | navigationTreeModel = NavigationTree.update navigationTreeMsg model.navigationTreeModel }
 
+        ImportersDropdownMsg state ->
+            wrap { model | questionnaireImportersDropdown = state }
+
         _ ->
             wrap model
 
@@ -848,6 +863,7 @@ subscriptions model =
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
+         , Dropdown.subscriptions model.questionnaireImportersDropdown ImportersDropdownMsg
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
          , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
@@ -915,7 +931,7 @@ view appState cfg ctx model =
 viewQuestionnaireToolbar : AppState -> Model -> Html Msg
 viewQuestionnaireToolbar appState model =
     let
-        dropdown =
+        viewDropdown =
             let
                 viewSettings =
                     model.viewSettings
@@ -958,6 +974,27 @@ viewQuestionnaireToolbar appState model =
                         ]
                     }
                 ]
+
+        importersDropdown =
+            if List.isEmpty model.questionnaireImporters then
+                emptyNode
+
+            else
+                div [ class "item-group" ]
+                    [ Dropdown.dropdown model.questionnaireImportersDropdown
+                        { options = []
+                        , toggleMsg = ImportersDropdownMsg
+                        , toggleButton =
+                            Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
+                                [ text "Import answers" ]
+                        , items = List.map importerDropdownItem model.questionnaireImporters
+                        }
+                    ]
+
+        importerDropdownItem importer =
+            Dropdown.anchorItem
+                (class "dropdown-item" :: linkToAttributes appState (Routes.projectImport model.uuid importer.id))
+                [ text importer.name ]
 
         navButton buttonElement visibleCondition =
             if visibleCondition then
@@ -1072,7 +1109,8 @@ viewQuestionnaireToolbar appState model =
     in
     div [ class "questionnaire__toolbar" ]
         [ div [ class "questionnaire__toolbar__left" ]
-            [ dropdown
+            [ viewDropdown
+            , importersDropdown
             ]
         , div [ class "questionnaire__toolbar__right" ]
             [ navButton warningsButton warningsButtonVisible
