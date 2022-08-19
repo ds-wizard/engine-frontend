@@ -183,6 +183,10 @@ body {
                     align-items: baseline;
                     justify-content: space-between;
                 }
+
+                &.user-profile {
+                    align-items: center;
+                }
             }
 
             .sidebar-link {
