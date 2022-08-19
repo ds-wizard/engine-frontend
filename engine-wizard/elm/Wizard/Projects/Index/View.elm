@@ -575,12 +575,12 @@ listingActions appState questionnaire =
     in
     []
         |> listInsertIf openProject openProjectVisible
-        |> listInsertIf Listing.dropdownSeparator (cloneVisible || continueMigrationVisible || cancelMigrationVisible || createMigrationVisible)
+        |> listInsertIf Listing.dropdownSeparator openProjectVisible
         |> listInsertIf clone cloneVisible
         |> listInsertIf continueMigration continueMigrationVisible
         |> listInsertIf cancelMigration cancelMigrationVisible
         |> listInsertIf createMigration createMigrationVisible
-        |> listInsertIf Listing.dropdownSeparator deleteVisible
+        |> listInsertIf Listing.dropdownSeparator ((cloneVisible || continueMigrationVisible || cancelMigrationVisible || createMigrationVisible) && deleteVisible)
         |> listInsertIf delete deleteVisible
 
 
