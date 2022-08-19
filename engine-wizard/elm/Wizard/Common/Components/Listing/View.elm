@@ -211,7 +211,7 @@ viewToolbarSort appState cfg model =
             }
         , linkTo appState
             sortDirectionButtonUrl
-            [ class "btn btn-outline-secondary link-with-icon-only", dataCy "listing_toolbar_sort-direction" ]
+            [ class "btn btn-outline-secondary", dataCy "listing_toolbar_sort-direction" ]
             [ sortDirectionButtonIcon ]
         ]
 

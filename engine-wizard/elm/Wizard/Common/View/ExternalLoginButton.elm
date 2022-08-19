@@ -66,7 +66,7 @@ viewAsBadge appState config =
 render : List (Attribute msg) -> AppState -> String -> Maybe String -> Maybe String -> Maybe String -> Html msg
 render attributes appState name mbIcon mbColor mbBackground =
     a
-        ([ class "btn btn-external-login"
+        ([ class "btn btn-external-login with-icon"
          , color mbColor
          , background mbBackground
          ]

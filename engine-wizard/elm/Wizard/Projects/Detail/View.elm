@@ -184,7 +184,7 @@ viewProjectNavigationActions appState model questionnaire =
     else if QuestionnaireDetail.isOwner appState questionnaire then
         DetailNavigation.sectionActions
             [ button
-                [ class "btn btn-info text-light"
+                [ class "btn btn-info text-light with-icon"
                 , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
                 , dataCy "project_detail_share-button"
                 ]

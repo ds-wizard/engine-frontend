@@ -69,7 +69,7 @@ header appState template =
             Feature.templatesExport appState
 
         deleteAction =
-            a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
+            a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
                 [ faSet "_global.delete" appState
                 , lx_ "header.delete" appState
                 ]

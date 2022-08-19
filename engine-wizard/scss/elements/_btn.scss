@@ -5,11 +5,13 @@
 .btn {
     @include not-selectable();
 
-    .fa {
-        margin-right: $spacer-2;
+    &.with-icon {
+        .fa {
+            margin-right: $spacer-2;
+        }
     }
 
-    &-sm {
+    &-sm.with-icon, &-link.with-icon {
         .fa {
             margin-right: $spacer-1;
         }

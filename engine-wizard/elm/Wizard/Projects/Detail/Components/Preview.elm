@@ -196,7 +196,7 @@ viewTemplateNotSet appState questionnaire =
                 , p []
                     [ linkTo appState
                         (Routes.projectsDetailSettings questionnaire.uuid)
-                        [ class "btn btn-primary btn-lg link-with-icon-after" ]
+                        [ class "btn btn-primary btn-lg with-icon-after" ]
                         [ lx_ "templateNotSet.link" appState
                         , faSet "_global.arrowRight" appState
                         ]
@@ -228,7 +228,7 @@ viewTemplateUnsupported appState questionnaire =
                 , p []
                     [ linkTo appState
                         (Routes.projectsDetailSettings questionnaire.uuid)
-                        [ class "btn btn-primary btn-lg link-with-icon-after" ]
+                        [ class "btn btn-primary btn-lg with-icon-after" ]
                         [ lx_ "templateUnsupported.link" appState
                         , faSet "_global.arrowRight" appState
                         ]

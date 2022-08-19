@@ -1898,8 +1898,8 @@ editorTitle : AppState -> EditorTitleConfig msg -> Html msg
 editorTitle appState config =
     let
         copyUuidButton =
-            button
-                ([ class "btn btn-link"
+            a
+                ([ class "btn btn-link with-icon"
                  , onClick <| config.wrapMsg <| CopyUuid config.uuid
                  ]
                     ++ tooltip (l_ "editorTitle.copyUuid" appState)
@@ -1912,7 +1912,7 @@ editorTitle appState config =
             case config.mbMovingEntity of
                 Just movingEntity ->
                     button
-                        [ class "btn btn-outline-secondary"
+                        [ class "btn btn-outline-secondary with-icon"
                         , onClick <| config.wrapMsg <| OpenMoveModal movingEntity config.uuid
                         , dataCy "km-editor_move-button"
                         ]
@@ -1927,7 +1927,7 @@ editorTitle appState config =
             case config.mbDeleteModalState of
                 Just deleteModalState ->
                     button
-                        [ class "btn btn-outline-danger"
+                        [ class "btn btn-outline-danger with-icon"
                         , dataCy "km-editor_delete-button"
                         , onClick <| config.wrapMsg <| SetDeleteModalState <| deleteModalState config.uuid
                         ]

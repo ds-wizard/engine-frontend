@@ -223,7 +223,7 @@ select {
         }
 
         .fa {
-            margin-right: 5px;
+            margin-right: $spacer-1;
         }
 
         &:hover, &-selected {

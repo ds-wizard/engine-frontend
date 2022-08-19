@@ -125,7 +125,7 @@ viewKMEditorNavigationTitleRow appState model branch =
             , DetailNavigation.sectionActions
                 [ linkTo appState
                     (Routes.kmEditorPublish branch.branch.uuid)
-                    [ class "btn btn-primary"
+                    [ class "btn btn-primary with-icon"
                     , dataCy "km-editor_publish-button"
                     ]
                     [ faSet "kmEditorList.publish" appState

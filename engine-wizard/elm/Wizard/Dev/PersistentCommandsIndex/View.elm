@@ -39,7 +39,7 @@ listingConfig appState model =
                     ]
                 , result = model.retryFailed
                 , msg = RetryFailed
-                , btnClass = "btn-outline-secondary"
+                , btnClass = "btn-outline-secondary with-icon"
                 }
     in
     { title = listingTitle appState

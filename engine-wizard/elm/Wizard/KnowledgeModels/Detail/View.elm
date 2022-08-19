@@ -97,7 +97,7 @@ header appState package =
         createProjectAction =
             linkTo appState
                 (Routes.projectsCreateCustom (Just package.id))
-                [ class "link-with-icon"
+                [ class "with-icon"
                 , dataCy "km-detail_create-project-link"
                 ]
                 [ faSet "kmDetail.createQuestionnaire" appState

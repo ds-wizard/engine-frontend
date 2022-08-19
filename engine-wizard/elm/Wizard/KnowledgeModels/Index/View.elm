@@ -53,7 +53,7 @@ importButton appState =
     if Feature.knowledgeModelsImport appState then
         linkTo appState
             (Routes.knowledgeModelsImport Nothing)
-            [ class "btn btn-primary" ]
+            [ class "btn btn-primary with-icon" ]
             [ faSet "kms.upload" appState
             , lx_ "header.import" appState
             ]

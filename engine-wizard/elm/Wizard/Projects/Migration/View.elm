@@ -139,12 +139,12 @@ changeView appState model migration =
             if isSelectedChangeResolved model then
                 div []
                     [ lx_ "changeView.resolved" appState
-                    , button [ class "btn btn-outline-secondary", onClick UndoResolveCurrentChange ]
+                    , button [ class "btn btn-outline-secondary with-icon", onClick UndoResolveCurrentChange ]
                         [ faSet "questionnaireMigration.undo" appState, lx_ "changeView.undo" appState ]
                     ]
 
             else
-                button [ class "btn btn-outline-primary", onClick ResolveCurrentChange ]
+                button [ class "btn btn-outline-primary with-icon", onClick ResolveCurrentChange ]
                     [ faSet "questionnaireMigration.resolve" appState, lx_ "changeView.resolve" appState ]
     in
     div [ class "change-view" ]
