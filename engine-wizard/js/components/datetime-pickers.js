@@ -22,7 +22,7 @@ class DatePicker extends HTMLElement {
     connectedCallback() {
         const wrapper = document.createElement('div')
         wrapper.classList.add('input-group')
-        wrapper.innerHTML = '<input type="text" class="form-control" data-input><div class="input-group-append"><button class="btn btn-outline-secondary" data-clear><i class="fa fas fa-times"></i></button>'
+        wrapper.innerHTML = '<input type="text" class="form-control" data-input><button class="btn btn-outline-secondary" data-clear><i class="fa fas fa-times"></i></button>'
         this.appendChild(wrapper)
 
         this._options.wrap = true
