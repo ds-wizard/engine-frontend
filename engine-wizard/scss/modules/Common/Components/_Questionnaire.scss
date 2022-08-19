@@ -58,8 +58,9 @@ $toolbar-height: 40px;
             text-decoration: none !important;
 
 
-            &:hover {
+            &:hover, &:focus {
                 background: $gray-200;
+                box-shadow: none;
             }
 
             &.selected {
