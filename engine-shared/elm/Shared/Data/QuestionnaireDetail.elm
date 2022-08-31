@@ -68,6 +68,7 @@ import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (boolToInt)
 import Time
 import Uuid exposing (Uuid)
+import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -78,6 +79,7 @@ type alias QuestionnaireDetail =
     , projectTags : List String
     , isTemplate : Bool
     , package : Package
+    , packageVersions : List Version
     , knowledgeModel : KnowledgeModel
     , replies : Dict String Reply
     , commentThreadsMap : Dict String (List CommentThread)
@@ -106,6 +108,7 @@ decoder =
         |> D.required "projectTags" (D.list D.string)
         |> D.required "isTemplate" D.bool
         |> D.required "package" Package.decoder
+        |> D.required "packageVersions" (D.list Version.decoder)
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" (D.dict Reply.decoder)
         |> D.required "commentThreadsMap" (D.dict (D.list CommentThread.decoder))
@@ -160,6 +163,7 @@ createQuestionnaireDetail package km =
     , sharing = RestrictedQuestionnaire
     , permissions = []
     , package = package
+    , packageVersions = []
     , knowledgeModel = km
     , replies = Dict.empty
     , commentThreadsMap = Dict.empty

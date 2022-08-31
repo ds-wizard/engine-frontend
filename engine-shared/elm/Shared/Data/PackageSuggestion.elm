@@ -29,11 +29,11 @@ decoder =
         |> D.required "versions" (D.list Version.decoder)
 
 
-fromPackage : Package -> PackageSuggestion
-fromPackage package =
+fromPackage : Package -> List Version -> PackageSuggestion
+fromPackage package packageVersions =
     { id = package.id
     , name = package.name
     , description = package.description
     , version = package.version
-    , versions = package.versions
+    , versions = packageVersions
     }

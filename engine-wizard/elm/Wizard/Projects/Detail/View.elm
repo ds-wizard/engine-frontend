@@ -350,6 +350,7 @@ viewProjectContent appState route model qm =
                     Settings.view appState
                         { questionnaire = QuestionnaireDescriptor.fromQuestionnaireDetail qm.questionnaire
                         , package = qm.questionnaire.package
+                        , packageVersions = qm.questionnaire.packageVersions
                         , templateState = qm.questionnaire.templateState
                         }
                         model.settingsModel
