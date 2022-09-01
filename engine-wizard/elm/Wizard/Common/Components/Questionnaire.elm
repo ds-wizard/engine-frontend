@@ -2153,7 +2153,7 @@ viewQuestionListAdd appState cfg itemUuids path =
 
     else
         button
-            [ class "btn btn-outline-secondary"
+            [ class "btn btn-outline-secondary with-icon"
             , onClick (AddItem (pathToString path) itemUuids)
             ]
             [ faSet "_global.add" appState
