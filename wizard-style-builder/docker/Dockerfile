@@ -6,6 +6,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY src ./src
+COPY core.js .
 COPY index.js .
 
 ENV NODE_ENV production
