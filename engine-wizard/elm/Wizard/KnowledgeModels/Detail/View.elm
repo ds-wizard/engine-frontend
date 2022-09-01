@@ -267,9 +267,9 @@ sidePanelRegistryLink appState package =
         toRegistryLinkInfo registryLink =
             ( lg "package.registryLink" appState
             , "registry-link"
-            , a [ href registryLink, target "_blank" ]
+            , a [ href registryLink, target "_blank", class "with-icon" ]
                 [ faSet "kmDetail.registryLink" appState
-                , text package.id
+                , lx_ "registryLinkLabel" appState
                 ]
             )
     in

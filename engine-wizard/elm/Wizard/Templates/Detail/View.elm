@@ -264,7 +264,7 @@ sidePanelRegistryLink appState template =
             , "registry-link"
             , a [ href registryLink, target "_blank", class "with-icon" ]
                 [ faSet "kmDetail.registryLink" appState
-                , text template.id
+                , lx_ "registryLinkLabel" appState
                 ]
             )
     in
