@@ -123,7 +123,7 @@ newVersionInRegistryWarning appState template =
                         appState
                     ++ [ linkTo appState
                             (Routes.templatesImport (Just latestPackageId))
-                            [ class "btn btn-primary btn-sm ms-2" ]
+                            [ class "btn btn-primary btn-sm with-icon ms-2" ]
                             [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
                        ]
                 )
@@ -149,7 +149,7 @@ unsupportedMetamodelVersionWarning appState template =
                                 appState
                             ++ [ linkTo appState
                                     (Routes.templatesImport (Just latestPackageId))
-                                    [ class "btn btn-primary btn-sm ms-2" ]
+                                    [ class "btn btn-primary btn-sm with-icon ms-2" ]
                                     [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
                                ]
 
