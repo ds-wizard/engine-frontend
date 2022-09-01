@@ -16,7 +16,8 @@ import Html.Events exposing (onClick)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch.BranchState as BranchState exposing (BranchState)
 import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
+import Shared.Data.Package exposing (Package)
+import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
@@ -171,7 +172,7 @@ view appState branchDetail model =
         ]
 
 
-parentKnowledgeModel : AppState -> BranchState -> PackageSuggestion -> BranchDetail -> Html Msg
+parentKnowledgeModel : AppState -> BranchState -> Package -> BranchDetail -> Html Msg
 parentKnowledgeModel appState branchState forkOfPackage branchDetail =
     let
         outdatedWarning =
@@ -194,7 +195,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
         , linkTo appState
             (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestionWithVersion forkOfPackage ]
+            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage []) ]
         , outdatedWarning
         ]
 
