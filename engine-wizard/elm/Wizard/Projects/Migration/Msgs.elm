@@ -11,6 +11,7 @@ type Msg
     | QuestionnaireMsg Questionnaire.Msg
     | SelectChange QuestionChange
     | ResolveCurrentChange
+    | ResolveAllChanges
     | UndoResolveCurrentChange
     | PutQuestionnaireContentCompleted
     | PutQuestionnaireMigrationCompleted (Result ApiError ())

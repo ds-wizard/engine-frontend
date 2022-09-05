@@ -4,6 +4,7 @@ module Wizard.Projects.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -52,6 +53,9 @@ update wrapMsg msg appState model =
 
         ResolveCurrentChange ->
             handleResolveCurrentChange wrapMsg appState model
+
+        ResolveAllChanges ->
+            handleResolveAllChanges wrapMsg appState model
 
         UndoResolveCurrentChange ->
             withSeed <| handleUndoResolveCurrentChange wrapMsg appState model
@@ -197,6 +201,32 @@ handleResolveCurrentChange wrapMsg appState model =
 
         ( newSeed, newModel, scrollCmd ) =
             handleSelectChange appState modelWithMigration nextChange
+
+        putCmd =
+            putCurrentResolvedIds wrapMsg appState newModel
+    in
+    ( newSeed, newModel, Cmd.batch [ scrollCmd, putCmd ] )
+
+
+handleResolveAllChanges : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+handleResolveAllChanges wrapMsg appState model =
+    let
+        allQuestionUuids =
+            List.map QuestionChange.getQuestionUuid model.changes.questions
+
+        newQuestionnaireMigration =
+            ActionResult.map (QuestionnaireMigration.addResolvedQuestions allQuestionUuids) model.questionnaireMigration
+
+        lastChange =
+            model.changes.questions
+                |> List.last
+                |> Maybe.orElse model.selectedChange
+
+        modelWithMigration =
+            { model | questionnaireMigration = newQuestionnaireMigration }
+
+        ( newSeed, newModel, scrollCmd ) =
+            handleSelectChange appState modelWithMigration lastChange
 
         putCmd =
             putCurrentResolvedIds wrapMsg appState newModel

@@ -1014,6 +1014,7 @@ locale =
                , ( "Wizard.Projects.Migration.View.change.resolved", "Resolved" )
                , ( "Wizard.Projects.Migration.View.changeView.undo", "Undo" )
                , ( "Wizard.Projects.Migration.View.changeView.resolve", "Resolve" )
+               , ( "Wizard.Projects.Migration.View.changeView.resolveAll", "Resolve all" )
                , ( "Wizard.Projects.Migration.View.changeView.resolved", "Change already resolved" )
                , ( "Wizard.Projects.Migration.View.changeView.resolvedChanges", "Resolved changes %s/%s" )
                , ( "Wizard.Projects.Migration.View.navbar.finalize", "Finalize migration" )

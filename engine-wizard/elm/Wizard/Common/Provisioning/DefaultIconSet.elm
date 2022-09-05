@@ -140,6 +140,7 @@ iconSet =
                , ( "questionnaireList.clone", "far fa-copy" )
                , ( "questionnaireList.createMigration", "fas fa-random" )
                , ( "questionnaireMigration.resolve", "fas fa-check" )
+               , ( "questionnaireMigration.resolveAll", "fas fa-check-double" )
                , ( "questionnaireMigration.undo", "fas fa-undo-alt" )
                , ( "report.repository", "fab fa-github" )
                ]
