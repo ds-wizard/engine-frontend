@@ -44,13 +44,8 @@ view appState model =
 contentView : AppState -> Model -> QuestionnaireMigration -> Html Msg
 contentView appState model migration =
     let
-        allResolved =
-            model.changes.questions
-                |> List.map (QuestionChange.getQuestionUuid >> flip QuestionnaireMigration.isQuestionResolved migration)
-                |> List.all ((==) True)
-
         finalizeAction =
-            if allResolved then
+            if allResolved model migration then
                 button [ class "btn btn-primary", onClick FinalizeMigration ]
                     [ lx_ "navbar.finalize" appState ]
 
@@ -146,6 +141,14 @@ changeView appState model migration =
             else
                 button [ class "btn btn-outline-primary with-icon", onClick ResolveCurrentChange ]
                     [ faSet "questionnaireMigration.resolve" appState, lx_ "changeView.resolve" appState ]
+
+        resolveAllAction =
+            if allResolved model migration then
+                emptyNode
+
+            else
+                button [ class "btn btn-outline-primary with-icon", onClick ResolveAllChanges ]
+                    [ faSet "questionnaireMigration.resolveAll" appState, lx_ "changeView.resolveAll" appState ]
     in
     div [ class "change-view" ]
         [ div [ class "progress-view" ]
@@ -153,8 +156,8 @@ changeView appState model migration =
             , div [ class "progress" ]
                 [ div [ class "progress-bar", classList [ ( "bg-success", resolvedCount == changesCount ) ], style "width" (progress ++ "%") ] [] ]
             ]
-        , div [ class "controls-view" ]
-            [ resolveAction ]
+        , div [ class "controls-view d-flex" ]
+            [ resolveAction, resolveAllAction ]
         ]
 
 
@@ -224,3 +227,10 @@ viewChange appState model migration change =
             ]
         , p [ class "mb-0" ] [ text <| Question.getTitle question ]
         ]
+
+
+allResolved : Model -> QuestionnaireMigration -> Bool
+allResolved model migration =
+    model.changes.questions
+        |> List.map (QuestionChange.getQuestionUuid >> flip QuestionnaireMigration.isQuestionResolved migration)
+        |> List.all ((==) True)

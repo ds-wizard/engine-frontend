@@ -1,6 +1,7 @@
 module Shared.Data.QuestionnaireMigration exposing
     ( QuestionnaireMigration
     , addResolvedQuestion
+    , addResolvedQuestions
     , decoder
     , encode
     , isQuestionResolved
@@ -38,6 +39,11 @@ encode migration =
 addResolvedQuestion : String -> QuestionnaireMigration -> QuestionnaireMigration
 addResolvedQuestion questionUuid migration =
     { migration | resolvedQuestionUuids = List.unique <| migration.resolvedQuestionUuids ++ [ questionUuid ] }
+
+
+addResolvedQuestions : List String -> QuestionnaireMigration -> QuestionnaireMigration
+addResolvedQuestions questionUuids migration =
+    { migration | resolvedQuestionUuids = List.unique <| migration.resolvedQuestionUuids ++ questionUuids }
 
 
 isQuestionResolved : String -> QuestionnaireMigration -> Bool
