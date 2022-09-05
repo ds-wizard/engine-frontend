@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "jest": "^29.0.1",
-    "jest-environment-node-single-context": "^28.1.0",
+    "jest-environment-node-single-context": "^29.0.0",
     "nodemon": "^2.0.19",
     "supertest": "^6.2.4"
   },
