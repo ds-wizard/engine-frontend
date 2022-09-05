@@ -89,11 +89,8 @@ inputWithTypehints options appState form fieldName labelText =
             String.contains (String.toLower a) (String.toLower b)
 
         typehints =
-            if field.hasFocus then
+            if not (List.isEmpty options) && field.hasFocus then
                 let
-                    typehintMessage =
-                        Form.Input fieldName Form.Text << Field.String
-
                     filteredOptions =
                         case field.value of
                             Just value ->
@@ -102,13 +99,21 @@ inputWithTypehints options appState form fieldName labelText =
                             Nothing ->
                                 options
                 in
-                ul [ class "typehints" ]
-                    (List.map
-                        (\option ->
-                            li [ onMouseDown <| typehintMessage option, dataCy "form-group_typehints_item" ] [ text option ]
+                if List.isEmpty filteredOptions then
+                    emptyNode
+
+                else
+                    ul [ class "typehints" ]
+                        (List.map
+                            (\option ->
+                                li
+                                    [ onMouseDown (Form.Input fieldName Form.Text (Field.String option))
+                                    , dataCy "form-group_typehints_item"
+                                    ]
+                                    [ text option ]
+                            )
+                            filteredOptions
                         )
-                        filteredOptions
-                    )
 
             else
                 emptyNode
