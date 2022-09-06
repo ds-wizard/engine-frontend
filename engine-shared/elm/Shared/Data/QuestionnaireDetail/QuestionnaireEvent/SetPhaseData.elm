@@ -9,6 +9,7 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Time
 import Uuid exposing (Uuid)
@@ -19,6 +20,7 @@ type alias SetPhaseData =
     , phaseUuid : Maybe Uuid
     , createdAt : Time.Posix
     , createdBy : Maybe UserSuggestion
+    , phasesAnsweredIndication : AnsweredIndicationData
     }
 
 
@@ -28,6 +30,7 @@ encode data =
         [ ( "type", E.string "SetPhaseEvent" )
         , ( "uuid", Uuid.encode data.uuid )
         , ( "phaseUuid", E.maybe Uuid.encode data.phaseUuid )
+        , ( "phasesAnsweredIndication", AnsweredIndicationData.encode data.phasesAnsweredIndication )
         ]
 
 
@@ -38,3 +41,4 @@ decoder =
         |> D.required "phaseUuid" (D.maybe Uuid.decoder)
         |> D.required "createdAt" D.datetime
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
+        |> D.hardcoded AnsweredIndicationData.empty

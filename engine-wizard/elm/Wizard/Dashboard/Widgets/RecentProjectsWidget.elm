@@ -3,9 +3,8 @@ module Wizard.Dashboard.Widgets.RecentProjectsWidget exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, br, div, h2, p, strong, text)
 import Html.Attributes exposing (class, style)
-import Maybe.Extra as Maybe
-import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Data.Questionnaire exposing (Questionnaire)
+import Shared.Html exposing (faSet)
 import Shared.Locale exposing (lx)
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
@@ -56,17 +55,13 @@ viewRecentProjects appState questionnaires =
 viewProject : AppState -> Questionnaire -> Html msg
 viewProject appState questionnaire =
     let
-        projectProgress ( answered, unanswered ) =
+        projectProgressView =
             let
                 pctg =
-                    (toFloat answered / toFloat (answered + unanswered)) * 100
+                    (toFloat questionnaire.answeredQuestions / toFloat (questionnaire.answeredQuestions + questionnaire.unansweredQuestions)) * 100
             in
             div [ class "progress mt-1 flex-grow-1", style "height" "7px" ]
                 [ div [ class "progress-bar bg-info", style "width" (String.fromFloat pctg ++ "%") ] [] ]
-
-        projectProgressView =
-            Questionnaire.getAnsweredIndication questionnaire
-                |> Maybe.unwrap emptyNode projectProgress
 
         updatedText =
             inWordsWithConfig { withAffix = True } (locale appState) questionnaire.updatedAt appState.currentTime

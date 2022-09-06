@@ -21,7 +21,8 @@ import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.SummaryReport exposing (AnsweredIndicationData, ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
+import Shared.Data.SummaryReport exposing (ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
+import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Locale exposing (lf, lg, lgx, lx)
 import Shared.Markdown as Markdown

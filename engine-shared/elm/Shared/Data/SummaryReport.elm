@@ -1,19 +1,16 @@
 module Shared.Data.SummaryReport exposing
-    ( AnsweredIndicationData
-    , ChapterReport
+    ( ChapterReport
     , IndicationReport(..)
     , MetricReport
     , SummaryReport
     , TotalReport
-    , compareIndicationReport
     , decoder
-    , indicationReportDecoder
-    , unwrapIndicationReport
     )
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
+import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData exposing (AnsweredIndicationData)
 
 
 type alias SummaryReport =
@@ -44,35 +41,6 @@ type alias MetricReport =
 type IndicationReport
     = AnsweredIndication AnsweredIndicationData
     | PhasesAnsweredIndication AnsweredIndicationData
-
-
-type alias AnsweredIndicationData =
-    { answeredQuestions : Int
-    , unansweredQuestions : Int
-    }
-
-
-compareIndicationReport : IndicationReport -> IndicationReport -> Order
-compareIndicationReport ir1 ir2 =
-    case ( ir1, ir2 ) of
-        ( AnsweredIndication _, PhasesAnsweredIndication _ ) ->
-            GT
-
-        ( PhasesAnsweredIndication _, AnsweredIndication _ ) ->
-            LT
-
-        _ ->
-            EQ
-
-
-unwrapIndicationReport : IndicationReport -> AnsweredIndicationData
-unwrapIndicationReport report =
-    case report of
-        AnsweredIndication data ->
-            data
-
-        PhasesAnsweredIndication data ->
-            data
 
 
 decoder : Decoder SummaryReport
@@ -119,16 +87,9 @@ indicationType =
 
 answeredIndicationDecoder : Decoder IndicationReport
 answeredIndicationDecoder =
-    Decode.map AnsweredIndication answeredIndicationDataDecoder
+    Decode.map AnsweredIndication AnsweredIndicationData.decoder
 
 
 phasesAnsweredIndicationDecoder : Decoder IndicationReport
 phasesAnsweredIndicationDecoder =
-    Decode.map PhasesAnsweredIndication answeredIndicationDataDecoder
-
-
-answeredIndicationDataDecoder : Decoder AnsweredIndicationData
-answeredIndicationDataDecoder =
-    Decode.succeed AnsweredIndicationData
-        |> required "answeredQuestions" Decode.int
-        |> required "unansweredQuestions" Decode.int
+    Decode.map PhasesAnsweredIndication AnsweredIndicationData.decoder

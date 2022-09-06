@@ -3,6 +3,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , QuestionnaireDetail
     , QuestionnaireWarning
     , addComment
+    , calculatePhasesAnsweredIndications
     , calculateUnansweredQuestionsForChapter
     , canComment
     , clearReplyValue
@@ -60,6 +61,7 @@ import Shared.Data.QuestionnaireDetail.Reply as Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
+import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
 import Shared.Data.Template.TemplateState as TemplateState exposing (TemplateState)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
@@ -67,9 +69,9 @@ import Shared.Data.UserInfo as UserInfo
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (boolToInt)
 import Time
+import Tuple.Extra as Tuple
 import Uuid exposing (Uuid)
 import Version exposing (Version)
-import Wizard.Common.AppState exposing (AppState)
 
 
 type alias QuestionnaireDetail =
@@ -622,15 +624,33 @@ isCurrentVersion questionnaire eventUuid =
 -- Evaluations
 
 
-calculateUnansweredQuestionsForChapter : AppState -> QuestionnaireDetail -> Chapter -> Int
-calculateUnansweredQuestionsForChapter appState questionnaire chapter =
+calculatePhasesAnsweredIndications : QuestionnaireDetail -> AnsweredIndicationData
+calculatePhasesAnsweredIndications questionnaire =
+    let
+        ( unaswered, total ) =
+            KnowledgeModel.getChapters questionnaire.knowledgeModel
+                |> List.map (evaluateChapter questionnaire)
+                |> List.foldl Tuple.sum ( 0, 0 )
+    in
+    { answeredQuestions = total - unaswered
+    , unansweredQuestions = unaswered
+    }
+
+
+calculateUnansweredQuestionsForChapter : QuestionnaireDetail -> Chapter -> Int
+calculateUnansweredQuestionsForChapter questionnaire =
+    Tuple.first << evaluateChapter questionnaire
+
+
+evaluateChapter : QuestionnaireDetail -> Chapter -> ( Int, Int )
+evaluateChapter questionnaire chapter =
     KnowledgeModel.getChapterQuestions chapter.uuid questionnaire.knowledgeModel
-        |> List.map (evaluateQuestion appState questionnaire [ chapter.uuid ])
-        |> List.foldl (+) 0
+        |> List.map (evaluateQuestion questionnaire [ chapter.uuid ])
+        |> List.foldl Tuple.sum ( 0, 0 )
 
 
-evaluateQuestion : AppState -> QuestionnaireDetail -> List String -> Question -> Int
-evaluateQuestion appState questionnaire path question =
+evaluateQuestion : QuestionnaireDetail -> List String -> Question -> ( Int, Int )
+evaluateQuestion questionnaire path question =
     let
         currentPath =
             path ++ [ Question.getUuid question ]
@@ -662,8 +682,9 @@ evaluateQuestion appState questionnaire path question =
                 OptionsQuestion _ questionData ->
                     questionData.answerUuids
                         |> List.find ((==) (ReplyValue.getAnswerUuid value))
-                        |> Maybe.map (evaluateFollowups appState questionnaire currentPath)
-                        |> Maybe.withDefault 1
+                        |> Maybe.map (evaluateFollowups questionnaire currentPath)
+                        |> Maybe.map (Tuple.sum ( 0, boolToInt requiredNow ))
+                        |> Maybe.withDefault ( boolToInt requiredNow, boolToInt requiredNow )
 
                 ListQuestion commonData _ ->
                     let
@@ -672,43 +693,43 @@ evaluateQuestion appState questionnaire path question =
                     in
                     if not (List.isEmpty itemUuids) then
                         itemUuids
-                            |> List.map (evaluateAnswerItem appState questionnaire currentPath (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid questionnaire.knowledgeModel))
-                            |> List.foldl (+) 0
+                            |> List.map (evaluateAnswerItem questionnaire currentPath (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid questionnaire.knowledgeModel))
+                            |> List.foldl Tuple.sum ( 0, boolToInt requiredNow )
 
                     else
-                        boolToInt requiredNow
+                        ( boolToInt requiredNow, boolToInt requiredNow )
 
                 _ ->
                     if ReplyValue.isEmpty value then
-                        boolToInt requiredNow
+                        ( boolToInt requiredNow, boolToInt requiredNow )
 
                     else
-                        0
+                        ( 0, boolToInt requiredNow )
 
         Nothing ->
-            boolToInt requiredNow
+            ( boolToInt requiredNow, boolToInt requiredNow )
 
 
-evaluateFollowups : AppState -> QuestionnaireDetail -> List String -> String -> Int
-evaluateFollowups appState questionnaire path answerUuid =
+evaluateFollowups : QuestionnaireDetail -> List String -> String -> ( Int, Int )
+evaluateFollowups questionnaire path answerUuid =
     let
         currentPath =
             path ++ [ answerUuid ]
     in
     KnowledgeModel.getAnswerFollowupQuestions answerUuid questionnaire.knowledgeModel
-        |> List.map (evaluateQuestion appState questionnaire currentPath)
-        |> List.foldl (+) 0
+        |> List.map (evaluateQuestion questionnaire currentPath)
+        |> List.foldl Tuple.sum ( 0, 0 )
 
 
-evaluateAnswerItem : AppState -> QuestionnaireDetail -> List String -> List Question -> String -> Int
-evaluateAnswerItem appState questionnaire path questions uuid =
+evaluateAnswerItem : QuestionnaireDetail -> List String -> List Question -> String -> ( Int, Int )
+evaluateAnswerItem questionnaire path questions uuid =
     let
         currentPath =
             path ++ [ uuid ]
     in
     questions
-        |> List.map (evaluateQuestion appState questionnaire currentPath)
-        |> List.foldl (+) 0
+        |> List.map (evaluateQuestion questionnaire currentPath)
+        |> List.foldl Tuple.sum ( 0, 0 )
 
 
 
