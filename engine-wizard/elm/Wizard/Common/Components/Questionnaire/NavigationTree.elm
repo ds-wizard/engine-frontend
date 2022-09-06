@@ -126,7 +126,7 @@ viewChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html msg
 viewChapterIndication appState questionnaire chapter =
     let
         unanswered =
-            QuestionnaireDetail.calculateUnansweredQuestionsForChapter appState questionnaire chapter
+            QuestionnaireDetail.calculateUnansweredQuestionsForChapter questionnaire chapter
     in
     if unanswered > 0 then
         Badge.light [ class "rounded-pill" ] [ text <| String.fromInt unanswered ]
