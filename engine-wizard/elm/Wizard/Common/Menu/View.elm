@@ -137,7 +137,7 @@ viewProfileMenu appState dropdownState =
         { options = [ Dropdown.dropRight, Dropdown.attrs [ dataCy "menu_profile" ] ]
         , toggleMsg = Wizard.Msgs.MenuMsg << ProfileMenuDropdownMsg
         , toggleButton =
-            Dropdown.toggle [ Button.roleLink ]
+            Dropdown.toggle [ Button.roleLink, Button.attrs [ class "user-profile" ] ]
                 [ div [ class "user-icon-wrapper" ]
                     [ img [ class "user-icon", src imageUrl ] [] ]
                 , span [ class "sidebar-link" ] [ span [] [ text name ], faSet "menu.dropdownToggle" appState ]
@@ -170,6 +170,7 @@ viewReportIssueModal appState isOpen =
             , p []
                 [ a
                     [ dataCy "report-modal_link_repository"
+                    , class "with-icon"
                     , href <| PrivacyAndSupportConfig.getSupportRepositoryUrl appState.config.privacyAndSupport
                     , target "_blank"
                     ]

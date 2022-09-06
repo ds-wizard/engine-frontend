@@ -199,7 +199,7 @@ preselectKnowledgeModel ( model, cmd ) =
                 Success questionnaire ->
                     let
                         packageSuggestion =
-                            Just <| PackageSuggestion.fromPackage questionnaire.package
+                            Just <| PackageSuggestion.fromPackage questionnaire.package questionnaire.packageVersions
                     in
                     { model
                         | selectedPackage = packageSuggestion

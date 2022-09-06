@@ -69,7 +69,7 @@ header appState template =
             Feature.templatesExport appState
 
         deleteAction =
-            a [ onClick <| ShowDeleteDialog True, class "text-danger link-with-icon" ]
+            a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
                 [ faSet "_global.delete" appState
                 , lx_ "header.delete" appState
                 ]
@@ -113,19 +113,27 @@ newVersionInRegistryWarning appState template =
     case ( template.remoteLatestVersion, template.state == TemplateState.Outdated, appState.config.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
-                latestPackageId =
-                    template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
+                link =
+                    if Version.greaterThan template.version remoteLatestVersion then
+                        let
+                            latestPackageId =
+                                template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
+                        in
+                        [ linkTo appState
+                            (Routes.templatesImport (Just latestPackageId))
+                            [ class "btn btn-primary btn-sm with-icon ms-2" ]
+                            [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                        ]
+
+                    else
+                        []
             in
             div [ class "alert alert-warning" ]
                 (faSet "_global.warning" appState
                     :: lh_ "registryVersion.warning"
                         [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
                         appState
-                    ++ [ linkTo appState
-                            (Routes.templatesImport (Just latestPackageId))
-                            [ class "btn btn-primary btn-sm ms-2" ]
-                            [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
-                       ]
+                    ++ link
                 )
 
         _ ->
@@ -139,19 +147,23 @@ unsupportedMetamodelVersionWarning appState template =
             link =
                 case ( TemplateDetail.isLatestVersion template, template.remoteLatestVersion, appState.config.registry ) of
                     ( True, Just remoteLatestVersion, RegistryEnabled _ ) ->
-                        let
-                            latestPackageId =
-                                template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
-                        in
-                        text " "
-                            :: lh_ "registryVersion.warning"
-                                [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                                appState
-                            ++ [ linkTo appState
-                                    (Routes.templatesImport (Just latestPackageId))
-                                    [ class "btn btn-primary btn-sm ms-2" ]
-                                    [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
-                               ]
+                        if Version.greaterThan template.version remoteLatestVersion then
+                            let
+                                latestPackageId =
+                                    template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
+                            in
+                            text " "
+                                :: lh_ "registryVersion.warning"
+                                    [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
+                                    appState
+                                ++ [ linkTo appState
+                                        (Routes.templatesImport (Just latestPackageId))
+                                        [ class "btn btn-primary btn-sm with-icon ms-2" ]
+                                        [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                                   ]
+
+                        else
+                            []
 
                     _ ->
                         []
@@ -250,9 +262,9 @@ sidePanelRegistryLink appState template =
         toRegistryLink registryLink =
             ( lg "template.registryLink" appState
             , "registry-link"
-            , a [ href registryLink, target "_blank" ]
+            , a [ href registryLink, target "_blank", class "with-icon" ]
                 [ faSet "kmDetail.registryLink" appState
-                , text template.id
+                , lx_ "registryLinkLabel" appState
                 ]
             )
     in

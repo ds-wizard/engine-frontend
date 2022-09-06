@@ -121,7 +121,6 @@ body {
                     display: inline-block;
                     text-align: center;
                     flex: 0 0 40px;
-                    margin-right: 0;
                 }
             }
         }
@@ -168,7 +167,6 @@ body {
                     display: inline-block;
                     width: 40px;
                     text-align: center;
-                    margin-right: 0;
                 }
 
                 .user-icon-wrapper {
@@ -182,6 +180,10 @@ body {
                     display: flex;
                     align-items: baseline;
                     justify-content: space-between;
+                }
+
+                &.user-profile {
+                    align-items: center;
                 }
             }
 
@@ -217,7 +219,7 @@ body {
                     .fa {
                         width: 20px;
                         text-align: center;
-                        margin-right: 5px;
+                        margin-right: $spacer-1;
                     }
                 }
             }

@@ -1,7 +1,13 @@
 FROM nginx:alpine
 
-# Install sass in case we need to rebuild styles
-RUN apk add --no-cache libsass sassc && rm -f /tmp/* /etc/apk/cache/*
+# Install alpine-pkg-glibc for dart-sass
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/glibc-2.34-r0.apk
+RUN apk add glibc-2.34-r0.apk
+
+# Install dart-sass
+RUN wget https://github.com/sass/dart-sass/releases/download/1.54.5/dart-sass-1.54.5-linux-x64.tar.gz
+RUN tar -xvzf ./dart-sass-1.54.5-linux-x64.tar.gz -C /opt/
 
 # Dependencies needed to rebuild styles
 COPY node_modules/bootstrap src/~bootstrap

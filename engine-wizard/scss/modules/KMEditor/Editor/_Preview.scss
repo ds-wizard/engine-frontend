@@ -31,15 +31,17 @@ $tag-selection-height: 80px;
             height:  calc(100vh - #{$editor-header-height} - #{$tag-selection-height});
         }
 
-        .tag-list {
-            white-space: nowrap;
-            overflow-y: auto;
+        .tag-selection {
+            .tag-list {
+                white-space: nowrap;
+                overflow-y: auto;
 
-            .tag {
-                margin-bottom: 0;
+                .tag {
+                    margin-bottom: 0;
 
-                &:last-child {
-                    margin-right: 0;
+                    &:last-child {
+                        margin-right: 0;
+                    }
                 }
             }
         }

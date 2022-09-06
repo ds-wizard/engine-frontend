@@ -319,7 +319,7 @@ viewSubmission cfg appState submission =
         link =
             case ( submission.state, submission.location, submission.returnedData ) of
                 ( SubmissionState.Done, Just location, _ ) ->
-                    a [ href location, class "link-with-icon-after", target "_blank" ]
+                    a [ href location, class "with-icon-after", target "_blank" ]
                         [ lx_ "submissions.viewLink" appState
                         , faSet "_global.externalLink" appState
                         ]

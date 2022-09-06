@@ -284,7 +284,7 @@ reorderable appState config =
         addChild =
             a
                 [ onClick config.addChildMsg
-                , class "link-add-child"
+                , class "link-add-child with-icon"
                 , dataCy ("km-editor_input-children_" ++ config.addChildDataCy ++ "_add-button")
                 ]
                 [ faSet "_global.add" appState
@@ -386,7 +386,7 @@ annotations appState config =
 
         addAnnotation =
             a
-                [ class "link-with-icon"
+                [ class "with-icon"
                 , onClick (config.onEdit (config.annotations ++ [ Annotation.new ]))
                 ]
                 [ faSet "_global.add" appState
@@ -634,6 +634,7 @@ props appState config =
             a
                 [ onClick (config.onChange (config.values ++ [ "" ]))
                 , dataCy "props-input_add-button"
+                , class "with-icon"
                 ]
                 [ faSet "_global.add" appState
                 , lx_ "props.add" appState
@@ -712,7 +713,7 @@ headers appState config =
 
         addHeader =
             a
-                [ class "link-with-icon"
+                [ class "with-icon"
                 , onClick (config.onEdit (config.headers ++ [ RequestHeader.new ]))
                 , dataCy "integration-input_add-button"
                 ]

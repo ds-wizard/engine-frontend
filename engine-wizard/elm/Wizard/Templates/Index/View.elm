@@ -53,7 +53,7 @@ importButton appState =
     if Feature.templatesImport appState then
         linkTo appState
             (Routes.templatesImport Nothing)
-            [ class "btn btn-primary" ]
+            [ class "btn btn-primary with-icon" ]
             [ faSet "kms.upload" appState
             , lx_ "header.import" appState
             ]

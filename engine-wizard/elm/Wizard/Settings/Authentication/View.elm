@@ -144,7 +144,7 @@ serviceFormView appState openIDPrefabs form i =
                 , div [ class "col text-end" ]
                     [ mapFormMsg <|
                         a
-                            [ class "btn btn-danger"
+                            [ class "btn btn-danger with-icon"
                             , onClick (Form.RemoveItem "services" i)
                             , dataCy "settings_authentication_service_remove-button"
                             ]

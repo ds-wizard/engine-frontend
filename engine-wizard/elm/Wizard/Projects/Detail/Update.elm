@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
@@ -55,7 +56,10 @@ fetchData appState uuid model =
             ]
 
     else
-        QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
+        Cmd.batch
+            [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
+            , QuestionnaireImportersApi.getQuestionnaireImportersFor uuid appState GetQuestionnaireImportersComplete
+            ]
 
 
 fetchSubrouteData : AppState -> Model -> Cmd Msg
@@ -75,9 +79,9 @@ fetchSubrouteData appState model =
                     Cmd.map DocumentsMsg <|
                         Documents.fetchData
 
-                PlanDetailRoute.NewDocument _ ->
+                PlanDetailRoute.NewDocument mbEventUuid ->
                     Cmd.map NewDocumentMsg <|
-                        NewDocument.fetchData appState uuid
+                        NewDocument.fetchData appState uuid mbEventUuid
 
                 _ ->
                     Cmd.none
@@ -427,12 +431,20 @@ update wrapMsg msg appState model =
                 Ok questionnaire ->
                     let
                         questionnaireModel =
-                            Success <| Questionnaire.init appState questionnaire
+                            Questionnaire.init appState questionnaire
+
+                        questionnaireModelWithImporters =
+                            case model.questionnaireImporters of
+                                Success questionnaireImporters ->
+                                    Questionnaire.setQuestionnaireImporters questionnaireImporters questionnaireModel
+
+                                _ ->
+                                    questionnaireModel
 
                         ( newModel, fetchCmd ) =
                             fetchSubrouteDataFromAfter wrapMsg
                                 appState
-                                { model | questionnaireModel = questionnaireModel }
+                                { model | questionnaireModel = Success questionnaireModelWithImporters }
                     in
                     withSeed <|
                         ( newModel
@@ -460,6 +472,26 @@ update wrapMsg msg appState model =
                                 ( { model | questionnaireModel = ApiError.toActionResult appState (lg "apiError.questionnaires.getError" appState) error }
                                 , Cmd.none
                                 )
+
+        GetQuestionnaireImportersComplete result ->
+            case result of
+                Ok questionnaireImporters ->
+                    let
+                        questionnaireModel =
+                            case model.questionnaireModel of
+                                Success qm ->
+                                    Success (Questionnaire.setQuestionnaireImporters questionnaireImporters qm)
+
+                                _ ->
+                                    model.questionnaireModel
+
+                        newModel =
+                            { model | questionnaireImporters = Success questionnaireImporters, questionnaireModel = questionnaireModel }
+                    in
+                    withSeed ( newModel, Cmd.none )
+
+                Err _ ->
+                    withSeed ( model, Cmd.none )
 
         WebSocketMsg wsMsg ->
             handleWebsocketMsg wsMsg appState model

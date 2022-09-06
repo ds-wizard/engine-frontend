@@ -105,7 +105,7 @@ serviceFormView appState templates form i =
                 [ div [ class "col" ]
                     [ FormGroup.input appState form idField (l_ "form.id" appState) ]
                 , div [ class "col text-end" ]
-                    [ a [ class "btn btn-danger", onClick (Form.RemoveItem "services" i) ]
+                    [ a [ class "btn btn-danger with-icon", onClick (Form.RemoveItem "services" i) ]
                         [ faSet "_global.delete" appState
                         , lx_ "form.service.remove" appState
                         ]

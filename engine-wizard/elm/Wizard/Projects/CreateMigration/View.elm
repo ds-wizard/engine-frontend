@@ -93,7 +93,7 @@ createMigrationView appState model questionnaire =
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package))
+                    (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package questionnaire.packageVersions))
                     (l_ "form.originalKM" appState)
                 , FormGroup.codeView (Version.toString questionnaire.package.version) <| l_ "form.originalVersion" appState
                 , originalTagList

@@ -93,7 +93,7 @@ content appState appDetail =
             , hr [ class "my-5" ] []
             , h3 [] [ lx_ "content.title.plans" appState ]
             , PlansList.view appState { actions = Just planActions } appDetail.plans
-            , a [ class "link-with-icon", onClick AddPlanModalOpen, dataCy "app-detail_add-plan" ]
+            , a [ class "with-icon", onClick AddPlanModalOpen, dataCy "app-detail_add-plan" ]
                 [ faSet "_global.add" appState, lx_ "content.plans.add" appState ]
             ]
         ]

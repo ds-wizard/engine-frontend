@@ -13,6 +13,7 @@ const registerConsolePorts = require('./js/ports/console')
 const registerCopyPorts = require('../engine-shared/ports/copy')
 const registerDownloadPorts = require('./js/ports/download')
 const registerImportPorts = require('./js/ports/import')
+const registerImporterPorts = require('./js/ports/importer')
 const registerIntegrationWidgetPorts = require('./js/ports/integrationWidget')
 const registerPageUnloadPorts = require('./js/ports/page-unload')
 const registerRefreshPorts = require('./js/ports/refresh')
@@ -70,8 +71,9 @@ function localProvisioning() {
 }
 
 function bootstrapErrorHTML(errorCode) {
-    const message = errorCode ? (errorCode === 423 ? 'The application is not active.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
-    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>Bootstrap Error</h1><p>' + message + '<br>Please, contact the administrator.</p></div></div>'
+    const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
+    const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
+    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
 }
 
 function clientUrl() {
@@ -121,6 +123,7 @@ function loadApp(config, provisioning) {
         registerCopyPorts(app)
         registerDownloadPorts(app)
         registerImportPorts(app)
+        registerImporterPorts(app)
         registerIntegrationWidgetPorts(app)
         registerPageUnloadPorts(app)
         registerRefreshPorts(app)

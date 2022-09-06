@@ -11,6 +11,7 @@ import Wizard.Msgs
 import Wizard.Projects.Create.Update
 import Wizard.Projects.CreateMigration.Update
 import Wizard.Projects.Detail.Update
+import Wizard.Projects.Import.Update
 import Wizard.Projects.Index.Update
 import Wizard.Projects.Migration.Update
 import Wizard.Projects.Models exposing (Model)
@@ -41,6 +42,10 @@ fetchData route appState model =
         MigrationRoute uuid ->
             Cmd.map MigrationMsg <|
                 Wizard.Projects.Migration.Update.fetchData appState uuid
+
+        ImportRoute uuid importerId ->
+            Cmd.map ImportMsg <|
+                Wizard.Projects.Import.Update.fetchData appState uuid importerId
 
 
 isGuarded : Route -> AppState -> Wizard.Routes.Route -> Model -> Maybe String
@@ -101,3 +106,10 @@ update wrapMsg msg appState model =
                     Wizard.Projects.Migration.Update.update (wrapMsg << MigrationMsg) mMsg appState model.migrationModel
             in
             ( newSeed, { model | migrationModel = migrationModel }, cmd )
+
+        ImportMsg iMsg ->
+            let
+                ( newSeed, importModel, cmd ) =
+                    Wizard.Projects.Import.Update.update (wrapMsg << ImportMsg) iMsg appState model.importModel
+            in
+            ( newSeed, { model | importModel = importModel }, cmd )

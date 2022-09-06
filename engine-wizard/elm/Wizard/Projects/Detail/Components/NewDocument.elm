@@ -14,7 +14,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Html exposing (Html, br, div, p, strong, text)
 import Html.Attributes exposing (class)
-import List.Extra as List
+import Maybe.Extra as Maybe
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
@@ -69,6 +69,7 @@ lx_ =
 
 type alias Model =
     { summaryReport : ActionResult SummaryReport
+    , event : ActionResult QuestionnaireEvent
     , form : Form FormError DocumentCreateForm
     , templateTypeHintInputModel : TypeHintInput.Model TemplateSuggestion
     , savingDocument : ActionResult String
@@ -76,11 +77,12 @@ type alias Model =
 
 
 initialModel :
-    { q | name : String, template : Maybe TemplateSuggestion, formatUuid : Maybe Uuid, events : List QuestionnaireEvent }
+    { q | name : String, template : Maybe TemplateSuggestion, formatUuid : Maybe Uuid }
     -> Maybe Uuid
     -> Model
 initialModel questionnaire mbEventUuid =
     { summaryReport = Loading
+    , event = Maybe.unwrap Unset (always Loading) mbEventUuid
     , form = DocumentCreateForm.init questionnaire mbEventUuid
     , templateTypeHintInputModel = setSelected questionnaire.template <| TypeHintInput.init "templateId"
     , savingDocument = Unset
@@ -98,14 +100,27 @@ initEmpty =
 
 type Msg
     = GetSummaryReportComplete (Result ApiError SummaryReport)
+    | GetQuestionnaireEventComplete (Result ApiError QuestionnaireEvent)
     | FormMsg Form.Msg
     | TemplateTypeHintInputMsg (TypeHintInput.Msg TemplateSuggestion)
     | PostDocumentCompleted (Result ApiError Document)
 
 
-fetchData : AppState -> Uuid -> Cmd Msg
-fetchData appState questionnaireUuid =
-    QuestionnairesApi.getSummaryReport questionnaireUuid appState GetSummaryReportComplete
+fetchData : AppState -> Uuid -> Maybe Uuid -> Cmd Msg
+fetchData appState questionnaireUuid mbEventUuid =
+    let
+        eventCmd =
+            case mbEventUuid of
+                Just eventUuid ->
+                    QuestionnairesApi.getQuestionnaireEvent questionnaireUuid eventUuid appState GetQuestionnaireEventComplete
+
+                Nothing ->
+                    Cmd.none
+
+        summaryReportCmd =
+            QuestionnairesApi.getSummaryReport questionnaireUuid appState GetSummaryReportComplete
+    in
+    Cmd.batch [ eventCmd, summaryReportCmd ]
 
 
 type alias UpdateConfig msg =
@@ -121,6 +136,9 @@ update cfg msg appState model =
     case msg of
         GetSummaryReportComplete result ->
             handleGetSummaryReportCompleted appState model result
+
+        GetQuestionnaireEventComplete result ->
+            handleGetQuestionnaireEventCompleted appState model result
 
         FormMsg formMsg ->
             handleForm cfg formMsg appState model
@@ -144,6 +162,20 @@ handleGetSummaryReportCompleted appState model result =
                     ApiError.toActionResult appState (lg "apiError.questionnaires.summaryReport.fetchError" appState) error
     in
     ( { model | summaryReport = newSummaryReport }, Cmd.none )
+
+
+handleGetQuestionnaireEventCompleted : AppState -> Model -> Result ApiError QuestionnaireEvent -> ( Model, Cmd msg )
+handleGetQuestionnaireEventCompleted appState model result =
+    let
+        newEvent =
+            case result of
+                Ok event ->
+                    Success event
+
+                Err error ->
+                    ApiError.toActionResult appState (lg "apiError.questionnaires.events.getError" appState) error
+    in
+    ( { model | event = newEvent }, Cmd.none )
 
 
 handleForm : UpdateConfig msg -> Form.Msg -> AppState -> Model -> ( Model, Cmd msg )
@@ -216,19 +248,30 @@ handlePostDocumentCompleted cfg appState model result =
 -- VIEW
 
 
-view : AppState -> QuestionnaireDetail -> Maybe String -> Model -> Html Msg
-view appState questionnaire mbEventUuid model =
-    Page.actionResultView appState (viewFormState appState questionnaire mbEventUuid model) model.summaryReport
+view : AppState -> QuestionnaireDetail -> Model -> Html Msg
+view appState questionnaire model =
+    let
+        eventActionResult =
+            if ActionResult.isUnset model.event then
+                Success Nothing
+
+            else
+                ActionResult.map Just model.event
+
+        actionResult =
+            ActionResult.combine model.summaryReport eventActionResult
+    in
+    Page.actionResultView appState (viewFormState appState questionnaire model) actionResult
 
 
-viewFormState : AppState -> QuestionnaireDetail -> Maybe String -> Model -> SummaryReport -> Html Msg
-viewFormState appState questionnaire mbEventUuid model summaryReport =
+viewFormState : AppState -> QuestionnaireDetail -> Model -> ( SummaryReport, Maybe QuestionnaireEvent ) -> Html Msg
+viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
     div [ class "Projects__Detail__Content Projects__Detail__Content--NewDocument" ]
         [ div [ detailClass "container" ]
             [ Page.header (l_ "header.title" appState) []
             , div []
                 [ FormResult.view appState model.savingDocument
-                , formView appState questionnaire mbEventUuid model summaryReport
+                , formView appState questionnaire mbEvent model summaryReport
                 , FormActions.view appState
                     (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid <| ProjectDetailRoute.Documents PaginationQueryString.empty)
                     (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingDocument (FormMsg Form.Submit) False)
@@ -237,8 +280,8 @@ viewFormState appState questionnaire mbEventUuid model summaryReport =
         ]
 
 
-formView : AppState -> QuestionnaireDetail -> Maybe String -> Model -> SummaryReport -> Html Msg
-formView appState questionnaire mbEventUuid model summaryReport =
+formView : AppState -> QuestionnaireDetail -> Maybe QuestionnaireEvent -> Model -> SummaryReport -> Html Msg
+formView appState questionnaire mbEvent model summaryReport =
     let
         cfg =
             { viewItem = TypeHintItem.templateSuggestion appState
@@ -260,9 +303,6 @@ formView appState questionnaire mbEventUuid model summaryReport =
 
                 _ ->
                     emptyNode
-
-        mbEvent =
-            List.find (QuestionnaireEvent.getUuid >> Uuid.toString >> Just >> (==) mbEventUuid) questionnaire.events
 
         extraInfo =
             case mbEvent of

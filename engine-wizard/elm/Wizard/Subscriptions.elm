@@ -7,6 +7,7 @@ import Wizard.KMEditor.Subscriptions
 import Wizard.KnowledgeModels.Subscriptions
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.ProjectImporters.Subscriptions
 import Wizard.Projects.Subscriptions
 import Wizard.Routes as Routes
 import Wizard.Templates.Subscriptions
@@ -29,6 +30,9 @@ subscriptions model =
 
                 Routes.KnowledgeModelsRoute route ->
                     Sub.map KnowledgeModelsMsg <| Wizard.KnowledgeModels.Subscriptions.subscriptions route model.kmPackagesModel
+
+                Routes.ProjectImportersRoute _ ->
+                    Sub.map ProjectImportersMsg <| Wizard.ProjectImporters.Subscriptions.subscriptions model.projectImportersModel
 
                 Routes.ProjectsRoute route ->
                     Sub.map ProjectsMsg <| Wizard.Projects.Subscriptions.subscriptions route model.projectsModel

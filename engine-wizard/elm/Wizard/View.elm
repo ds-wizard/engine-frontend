@@ -15,6 +15,7 @@ import Wizard.KMEditor.View
 import Wizard.KnowledgeModels.View
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.ProjectImporters.View
 import Wizard.Projects.View
 import Wizard.Public.View
 import Wizard.Registry.View
@@ -68,6 +69,12 @@ view model =
                     |> Wizard.KnowledgeModels.View.view route model.appState
                     |> Html.map KnowledgeModelsMsg
                     |> Layout.mixedApp model
+
+            Routes.ProjectImportersRoute _ ->
+                model.projectImportersModel
+                    |> Wizard.ProjectImporters.View.view model.appState
+                    |> Html.map ProjectImportersMsg
+                    |> Layout.app model
 
             Routes.ProjectsRoute route ->
                 model.projectsModel

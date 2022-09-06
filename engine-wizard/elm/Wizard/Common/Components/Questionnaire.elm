@@ -9,6 +9,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , RightPanel
     , TypeHints
     , addComment
+    , addEvent
     , clearReply
     , deleteComment
     , deleteCommentThread
@@ -19,6 +20,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , setActiveChapterUuid
     , setLabels
     , setPhaseUuid
+    , setQuestionnaireImporters
     , setReply
     , subscriptions
     , update
@@ -41,6 +43,7 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
 import Roman
+import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
@@ -63,6 +66,7 @@ import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (Questionnair
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.TypeHint exposing (TypeHint)
 import Shared.Data.User as User
@@ -89,7 +93,7 @@ import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as Quest
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, tooltip, tooltipLeft, tooltipRight)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Flash as Flash
@@ -125,6 +129,7 @@ type alias Model =
     , activePage : ActivePage
     , rightPanel : RightPanel
     , questionnaire : QuestionnaireDetail
+    , questionnaireEvents : ActionResult (List QuestionnaireEvent)
     , removeItem : Maybe ( String, String )
     , typeHints : Maybe TypeHints
     , typeHintsDebounce : Debounce ( List String, String, String )
@@ -143,6 +148,8 @@ type alias Model =
     , commentDropdownStates : Dict String Dropdown.State
     , splitPane : SplitPane.State
     , navigationTreeModel : NavigationTree.Model
+    , questionnaireImportersDropdown : Dropdown.State
+    , questionnaireImporters : List QuestionnaireImporter
     }
 
 
@@ -185,6 +192,7 @@ init appState questionnaire =
     , activePage = activePage
     , rightPanel = RightPanelNone
     , questionnaire = questionnaire
+    , questionnaireEvents = ActionResult.Unset
     , removeItem = Nothing
     , typeHints = Nothing
     , typeHintsDebounce = Debounce.init
@@ -203,7 +211,19 @@ init appState questionnaire =
     , commentDropdownStates = Dict.empty
     , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
     , navigationTreeModel = navigationTreeModel
+    , questionnaireImportersDropdown = Dropdown.initialState
+    , questionnaireImporters = []
     }
+
+
+setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
+setQuestionnaireImporters importers model =
+    { model | questionnaireImporters = importers }
+
+
+addEvent : QuestionnaireEvent -> Model -> Model
+addEvent event model =
+    { model | questionnaireEvents = ActionResult.map (\events -> events ++ [ event ]) model.questionnaireEvents }
 
 
 setActiveChapterUuid : String -> Model -> Model
@@ -336,6 +356,7 @@ type Msg
     | SetLabels String (List String)
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
+    | GetQuestionnaireEventsComplete (Result ApiError (List QuestionnaireEvent))
     | HistoryMsg History.Msg
     | VersionModalMsg VersionModal.Msg
     | DeleteVersionModalMsg DeleteVersionModal.Msg
@@ -362,6 +383,7 @@ type Msg
     | CommentDropdownMsg String Dropdown.State
     | SplitPaneMsg SplitPane.Msg
     | NavigationTreeMsg NavigationTree.Msg
+    | ImportersDropdownMsg Dropdown.State
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -390,7 +412,15 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 )
 
         SetRightPanel rightPanel ->
-            wrap { model | rightPanel = rightPanel }
+            let
+                cmd =
+                    if rightPanel == RightPanelHistory then
+                        QuestionnairesApi.getQuestionnaireEvents model.uuid appState GetQuestionnaireEventsComplete
+
+                    else
+                        Cmd.none
+            in
+            withSeed ( { model | rightPanel = rightPanel, questionnaireEvents = ActionResult.Loading }, cmd )
 
         SetFullscreen fullscreen ->
             case mbSetFullscreenMsg of
@@ -491,6 +521,15 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         SetViewSettings viewSettings ->
             wrap { model | viewSettings = viewSettings }
+
+        GetQuestionnaireEventsComplete result ->
+            wrap <|
+                case result of
+                    Ok questionnaireHistory ->
+                        { model | questionnaireEvents = Success questionnaireHistory }
+
+                    Err _ ->
+                        { model | questionnaireEvents = Error (lg "apiError.questionnaires.events.getListError" appState) }
 
         HistoryMsg historyMsg ->
             wrap { model | historyModel = History.update historyMsg model.historyModel }
@@ -635,6 +674,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         NavigationTreeMsg navigationTreeMsg ->
             wrap { model | navigationTreeModel = NavigationTree.update navigationTreeMsg model.navigationTreeModel }
+
+        ImportersDropdownMsg state ->
+            wrap { model | questionnaireImportersDropdown = state }
 
         _ ->
             wrap model
@@ -821,6 +863,7 @@ subscriptions model =
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
+         , Dropdown.subscriptions model.questionnaireImportersDropdown ImportersDropdownMsg
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
          , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
@@ -888,7 +931,7 @@ view appState cfg ctx model =
 viewQuestionnaireToolbar : AppState -> Model -> Html Msg
 viewQuestionnaireToolbar appState model =
     let
-        dropdown =
+        viewDropdown =
             let
                 viewSettings =
                     model.viewSettings
@@ -931,6 +974,27 @@ viewQuestionnaireToolbar appState model =
                         ]
                     }
                 ]
+
+        importersDropdown =
+            if List.isEmpty model.questionnaireImporters then
+                emptyNode
+
+            else
+                div [ class "item-group" ]
+                    [ Dropdown.dropdown model.questionnaireImportersDropdown
+                        { options = []
+                        , toggleMsg = ImportersDropdownMsg
+                        , toggleButton =
+                            Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
+                                [ text "Import answers" ]
+                        , items = List.map importerDropdownItem model.questionnaireImporters
+                        }
+                    ]
+
+        importerDropdownItem importer =
+            Dropdown.anchorItem
+                (class "dropdown-item" :: linkToAttributes appState (Routes.projectImport model.uuid importer.id))
+                [ text importer.name ]
 
         navButton buttonElement visibleCondition =
             if visibleCondition then
@@ -1045,7 +1109,8 @@ viewQuestionnaireToolbar appState model =
     in
     div [ class "questionnaire__toolbar" ]
         [ div [ class "questionnaire__toolbar__left" ]
-            [ dropdown
+            [ viewDropdown
+            , importersDropdown
             ]
         , div [ class "questionnaire__toolbar__right" ]
             [ navButton warningsButton warningsButtonVisible
@@ -1176,7 +1241,7 @@ viewQuestionnaireRightPanel appState cfg model =
                     }
             in
             wrapPanel <|
-                [ History.view appState historyCfg model.historyModel
+                [ History.view appState historyCfg model.historyModel model.questionnaireEvents
                 , Html.map (cfg.wrapMsg << VersionModalMsg) <| VersionModal.view appState model.versionModalModel
                 , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
                 ]
@@ -2088,7 +2153,7 @@ viewQuestionListAdd appState cfg itemUuids path =
 
     else
         button
-            [ class "btn btn-outline-secondary"
+            [ class "btn btn-outline-secondary with-icon"
             , onClick (AddItem (pathToString path) itemUuids)
             ]
             [ faSet "_global.add" appState

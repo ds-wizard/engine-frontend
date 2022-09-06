@@ -58,8 +58,9 @@ $toolbar-height: 40px;
             text-decoration: none !important;
 
 
-            &:hover {
+            &:hover, &:focus {
                 background: $gray-200;
+                box-shadow: none;
             }
 
             &.selected {
@@ -722,11 +723,7 @@ $toolbar-height: 40px;
             }
 
             .btn-item-delete {
-                margin-left: 10px;
-
-                .fa {
-                    margin: 0;
-                }
+                margin-left: $spacer-2;
             }
 
             .radio {
@@ -819,11 +816,6 @@ $toolbar-height: 40px;
                     color: $gray-700;
                     text-decoration: none;
                 }
-
-                .fa {
-                    margin: 0;
-                }
-
 
                 &-add-todo {
                     & > span {

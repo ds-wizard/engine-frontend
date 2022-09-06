@@ -37,6 +37,7 @@ import Shared.Locale exposing (l, lg, lgx, lx)
 import Shared.Setters exposing (setSelected)
 import Shared.Utils exposing (dispatch, listFilterJust)
 import Uuid exposing (Uuid)
+import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -301,6 +302,7 @@ subscriptions model =
 type alias ViewConfig =
     { questionnaire : QuestionnaireDescriptor
     , package : Package
+    , packageVersions : List Version
     , templateState : Maybe TemplateState
     }
 
@@ -483,7 +485,7 @@ knowledgeModel appState cfg =
         , linkTo appState
             (Routes.knowledgeModelsDetail cfg.package.id)
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package) ]
+            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package cfg.packageVersions) ]
         , div [ class "text-end mt-3" ]
             [ linkTo appState
                 (Routes.projectsCreateMigration cfg.questionnaire.uuid)

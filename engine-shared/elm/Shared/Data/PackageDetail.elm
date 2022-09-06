@@ -71,7 +71,6 @@ toPackage package =
     , kmId = package.kmId
     , version = package.version
     , description = package.description
-    , versions = package.versions
     , organization = package.organization
     , remoteLatestVersion = Maybe.map Version.toString package.remoteLatestVersion
     , state = package.state

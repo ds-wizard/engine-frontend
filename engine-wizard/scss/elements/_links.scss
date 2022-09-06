@@ -30,21 +30,16 @@ a {
         text-decoration: none;
         color: $gray-500;
     }
+}
 
+
+.with-icon {
     .fa {
         margin-right: $spacer-1;
     }
 }
 
-
-.link-with-icon-only {
-    .fa {
-        margin: 0;
-    }
-}
-
-
-.link-with-icon-after {
+.with-icon-after {
     .fa {
         margin-right: 0;
         margin-left: $spacer-2;

@@ -14,6 +14,7 @@ import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -41,6 +42,7 @@ type alias Model =
     , shareModalModel : ShareModal.Model
     , previewModel : Preview.Model
     , questionnaireModel : ActionResult Questionnaire.Model
+    , questionnaireImporters : ActionResult (List QuestionnaireImporter)
     , summaryReportModel : SummaryReport.Model
     , documentsModel : Documents.Model
     , settingsModel : Settings.Model
@@ -63,6 +65,7 @@ init appState uuid =
     , shareModalModel = ShareModal.init appState
     , previewModel = Preview.init uuid Preview.TemplateNotSet
     , questionnaireModel = Loading
+    , questionnaireImporters = Loading
     , summaryReportModel = SummaryReport.init
     , documentsModel = Documents.initialModel PaginationQueryString.empty
     , newDocumentModel = NewDocument.initEmpty
@@ -98,7 +101,7 @@ initPageModel appState route model =
                 | newDocumentModel =
                     case model.questionnaireModel of
                         Success qm ->
-                            NewDocument.initialModel qm.questionnaire (Maybe.andThen Uuid.fromString mbEventUuid)
+                            NewDocument.initialModel qm.questionnaire mbEventUuid
 
                         _ ->
                             NewDocument.initEmpty
@@ -127,17 +130,7 @@ addSavingActionUuid uuid model =
 
 addQuestionnaireEvent : QuestionnaireEvent -> Model -> Model
 addQuestionnaireEvent event model =
-    let
-        setEvent questionnaireModel =
-            let
-                questionnaire =
-                    questionnaireModel.questionnaire
-            in
-            { questionnaireModel
-                | questionnaire = { questionnaire | events = questionnaire.events ++ [ event ] }
-            }
-    in
-    { model | questionnaireModel = ActionResult.map setEvent model.questionnaireModel }
+    { model | questionnaireModel = ActionResult.map (Questionnaire.addEvent event) model.questionnaireModel }
 
 
 removeSavingActionUuid : Uuid -> Model -> ( Model, Bool )

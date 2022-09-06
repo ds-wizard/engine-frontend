@@ -97,7 +97,7 @@ header appState package =
         createProjectAction =
             linkTo appState
                 (Routes.projectsCreateCustom (Just package.id))
-                [ class "link-with-icon"
+                [ class "with-icon"
                 , dataCy "km-detail_create-project-link"
                 ]
                 [ faSet "kmDetail.createQuestionnaire" appState
@@ -179,7 +179,7 @@ newVersionInRegistryWarning appState package =
                         appState
                     ++ [ linkTo appState
                             (Routes.templatesImport (Just latestPackageId))
-                            [ class "btn btn-primary btn-sm ms-2" ]
+                            [ class "btn btn-primary btn-sm with-icon ms-2" ]
                             [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
                        ]
                 )
@@ -217,7 +217,7 @@ sidePanelKmInfo appState package =
                 Just parentPackageId ->
                     [ ( lg "package.forkOf" appState
                       , "fork-of"
-                      , text parentPackageId
+                      , linkTo appState (Routes.knowledgeModelsDetail parentPackageId) [] [ text parentPackageId ]
                       )
                     ]
 
@@ -267,9 +267,9 @@ sidePanelRegistryLink appState package =
         toRegistryLinkInfo registryLink =
             ( lg "package.registryLink" appState
             , "registry-link"
-            , a [ href registryLink, target "_blank" ]
+            , a [ href registryLink, target "_blank", class "with-icon" ]
                 [ faSet "kmDetail.registryLink" appState
-                , text package.id
+                , lx_ "registryLinkLabel" appState
                 ]
             )
     in

@@ -2359,7 +2359,7 @@ viewCompletedMigration appState model =
                 ]
             , linkTo appState
                 (Routes.kmEditorPublish model.branchUuid)
-                [ class "btn btn-primary btn-lg link-with-icon-after"
+                [ class "btn btn-primary btn-lg with-icon-after"
                 , dataCy "km-migration_publish-button"
                 ]
                 [ lx_ "completed.publish" appState

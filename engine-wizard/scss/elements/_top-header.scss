@@ -33,6 +33,10 @@
 
         .top-header-actions {
             white-space: nowrap;
+
+            .fa {
+                margin-right: $spacer-1;
+            }
         }
     }
 }

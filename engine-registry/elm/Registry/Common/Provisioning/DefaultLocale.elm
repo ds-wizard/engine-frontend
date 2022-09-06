@@ -10,7 +10,7 @@ locale =
         (SharedLocale.locale
             ++ [ ( "Registry.header.brandTitle", "DSW Registry" )
                , ( "Registry.header.knowledgeModels", "Knowledge Models" )
-               , ( "Registry.header.templates", "Templates" )
+               , ( "Registry.header.templates", "Document Templates" )
                , ( "Registry.loggedInNavigation.logOut", "Log Out" )
                , ( "Registry.loggedInNavigation.profile", "Profile" )
                , ( "Registry.publicHeaderNavigation.logIn", "Log In" )
