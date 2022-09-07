@@ -330,6 +330,6 @@ formView appState questionnaire mbEvent model summaryReport =
     div []
         [ Html.map FormMsg <| nameInput
         , div [ class "form-group" ] [ extraInfo ]
-        , FormGroup.formGroupCustom templateInput appState model.form "templateId" <| lg "questionnaire.template" appState
+        , FormGroup.formGroupCustom templateInput appState model.form "templateId" <| lg "template" appState
         , Html.map FormMsg <| formatInput
         ]

@@ -58,7 +58,7 @@ formView appState model mbQuestionnaire =
                         value =
                             TypeHintItem.questionnaireSuggestion questionnaire
                     in
-                    FormGroup.plainGroup value (lg "questionnaire.templateBadge" appState)
+                    FormGroup.plainGroup value (lg "questionnaire.template" appState)
 
                 Nothing ->
                     let
@@ -72,7 +72,7 @@ formView appState model mbQuestionnaire =
                         typeHintInput =
                             TypeHintInput.view appState cfg model.questionnaireTypeHintInputModel
                     in
-                    FormGroup.formGroupCustom typeHintInput appState model.form "questionnaireUuid" (lg "questionnaire.templateBadge" appState)
+                    FormGroup.formGroupCustom typeHintInput appState model.form "questionnaireUuid" (lg "questionnaire.template" appState)
     in
     div []
         [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
