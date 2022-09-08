@@ -477,14 +477,18 @@ listingDescription appState questionnaire =
                 ]
 
         projectProgressView =
-            let
-                pctg =
-                    (toFloat questionnaire.answeredQuestions / toFloat (questionnaire.answeredQuestions + questionnaire.unansweredQuestions)) * 100
-            in
-            span [ class "fragment flex-grow-1" ]
-                [ span [ class "progress", style "height" "7px" ]
-                    [ span [ class "progress-bar bg-info", style "width" (String.fromFloat pctg ++ "%") ] [] ]
-                ]
+            if questionnaire.answeredQuestions == 0 && questionnaire.unansweredQuestions == 0 then
+                emptyNode
+
+            else
+                let
+                    pctg =
+                        (toFloat questionnaire.answeredQuestions / toFloat (questionnaire.answeredQuestions + questionnaire.unansweredQuestions)) * 100
+                in
+                span [ class "fragment flex-grow-1" ]
+                    [ span [ class "progress", style "height" "7px" ]
+                        [ span [ class "progress-bar bg-info", style "width" (String.fromFloat pctg ++ "%") ] [] ]
+                    ]
     in
     span []
         [ collaborators, kmLink, projectProgressView ]
