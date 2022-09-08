@@ -401,7 +401,7 @@ viewList appState cfg model pagination =
             ]
 
     else
-        viewEmpty appState cfg
+        viewEmpty appState cfg model
 
 
 viewPagination : AppState -> ViewConfig a msg -> Model a -> Page -> Html msg
@@ -501,12 +501,23 @@ viewPagination appState cfg model page =
         emptyNode
 
 
-viewEmpty : AppState -> ViewConfig a msg -> Html msg
-viewEmpty appState config =
+viewEmpty : AppState -> ViewConfig a msg -> Model a -> Html msg
+viewEmpty appState config model =
+    let
+        filtersActive =
+            not (String.isEmpty model.qInput && List.isEmpty (Dict.toList model.filters.values))
+
+        emptyText =
+            if filtersActive then
+                l_ "empty.noMatch" appState
+
+            else
+                config.emptyText
+    in
     Page.illustratedMessage
         { image = Undraw.noData
         , heading = l_ "empty.heading" appState
-        , lines = [ config.emptyText ]
+        , lines = [ emptyText ]
         , cy = "listing-empty"
         }
 

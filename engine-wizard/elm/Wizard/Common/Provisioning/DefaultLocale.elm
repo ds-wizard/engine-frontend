@@ -440,6 +440,7 @@ locale =
                , ( "Wizard.Apps.Detail.View.sidePanel.updatedAt", "Updated at" )
                , ( "Wizard.Apps.Detail.View.sidePanel.urls", "URLs" )
                , ( "Wizard.Common.Components.Listing.View.empty.heading", "No data" )
+               , ( "Wizard.Common.Components.Listing.View.empty.noMatch", "There are no results matching your search and filters." )
                , ( "Wizard.Common.Components.Listing.View.filter.clearSelection", "Clear selection" )
                , ( "Wizard.Common.Components.Listing.View.item.updated", "Updated " )
                , ( "Wizard.Common.Components.Listing.View.pagination.first", "First" )
