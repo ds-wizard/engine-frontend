@@ -713,17 +713,33 @@ $toolbar-height: 40px;
         }
 
         .item {
-            position: relative;
-            display: flex;
-            align-items: flex-start;
+            &-header {
+                background: $gray-200;
+                margin-top: -$card-spacer-y;
+                margin-left: -$card-spacer-x;
+                margin-right: -$card-spacer-x;
+                margin-bottom: $card-spacer-y;
+                padding: ($card-spacer-y * 0.5) $card-spacer-x;
+            }
+
+            &-collapsed {
+                .item-header {
+                    margin-top: 0;
+                    margin-bottom: 0;
+                }
+
+                .card {
+                    .card-body {
+                        padding-top: 0;
+                        padding-bottom: 0;
+                    }
+                }
+            }
 
             .card {
                 background: $gray-100 !important;
                 flex-grow: 1;
-            }
-
-            .btn-item-delete {
-                margin-left: $spacer-2;
+                overflow: hidden;
             }
 
             .radio {

@@ -36,13 +36,15 @@ import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
-import Json.Decode as D
+import Json.Decode as D exposing (Decoder, decodeValue)
+import Json.Decode.Extra as D
 import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
 import Roman
+import Set exposing (Set)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
@@ -73,7 +75,7 @@ import Shared.Data.User as User
 import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
-import Shared.Locale exposing (l, lg, lgx, lh, lx)
+import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
@@ -95,6 +97,7 @@ import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
+import Wizard.Common.LocalStorageData as LocalStorageData exposing (LocalStorageData)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
@@ -118,6 +121,11 @@ lh_ =
 lx_ : String -> AppState -> Html msg
 lx_ =
     lx "Wizard.Common.Components.Questionnaire"
+
+
+lf_ : String -> List String -> AppState -> String
+lf_ =
+    lf "Wizard.Common.Components.Questionnaire"
 
 
 
@@ -150,6 +158,7 @@ type alias Model =
     , navigationTreeModel : NavigationTree.Model
     , questionnaireImportersDropdown : Dropdown.State
     , questionnaireImporters : List QuestionnaireImporter
+    , collapsedItems : Set String
     }
 
 
@@ -173,7 +182,7 @@ type RightPanel
     | RightPanelWarnings
 
 
-init : AppState -> QuestionnaireDetail -> Model
+init : AppState -> QuestionnaireDetail -> ( Model, Cmd Msg )
 init appState questionnaire =
     let
         mbChapterUuid =
@@ -187,33 +196,37 @@ init appState questionnaire =
             Maybe.unwrap NavigationTree.initialModel
                 (flip NavigationTree.openChapter NavigationTree.initialModel)
                 mbChapterUuid
+
+        model =
+            { uuid = questionnaire.uuid
+            , activePage = activePage
+            , rightPanel = RightPanelNone
+            , questionnaire = questionnaire
+            , questionnaireEvents = ActionResult.Unset
+            , removeItem = Nothing
+            , typeHints = Nothing
+            , typeHintsDebounce = Debounce.init
+            , feedbackModalModel = FeedbackModal.init
+            , viewSettings = QuestionnaireViewSettings.all
+            , viewSettingsDropdown = Dropdown.initialState
+            , historyModel = History.init appState
+            , versionModalModel = VersionModal.init
+            , deleteVersionModalModel = DeleteVersionModal.init
+            , commentInputs = Dict.empty
+            , commentEditInputs = Dict.empty
+            , commentDeleting = Nothing
+            , commentDeletingListenClicks = False
+            , commentsViewResolved = False
+            , commentsViewPrivate = False
+            , commentDropdownStates = Dict.empty
+            , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
+            , navigationTreeModel = navigationTreeModel
+            , questionnaireImportersDropdown = Dropdown.initialState
+            , questionnaireImporters = []
+            , collapsedItems = Set.empty
+            }
     in
-    { uuid = questionnaire.uuid
-    , activePage = activePage
-    , rightPanel = RightPanelNone
-    , questionnaire = questionnaire
-    , questionnaireEvents = ActionResult.Unset
-    , removeItem = Nothing
-    , typeHints = Nothing
-    , typeHintsDebounce = Debounce.init
-    , feedbackModalModel = FeedbackModal.init
-    , viewSettings = QuestionnaireViewSettings.all
-    , viewSettingsDropdown = Dropdown.initialState
-    , historyModel = History.init appState
-    , versionModalModel = VersionModal.init
-    , deleteVersionModalModel = DeleteVersionModal.init
-    , commentInputs = Dict.empty
-    , commentEditInputs = Dict.empty
-    , commentDeleting = Nothing
-    , commentDeletingListenClicks = False
-    , commentsViewResolved = False
-    , commentsViewPrivate = False
-    , commentDropdownStates = Dict.empty
-    , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
-    , navigationTreeModel = navigationTreeModel
-    , questionnaireImportersDropdown = Dropdown.initialState
-    , questionnaireImporters = []
-    }
+    ( model, Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid) )
 
 
 setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
@@ -329,6 +342,21 @@ type QuestionViewState
     | Desirable
 
 
+localStorageCollapsedItemKey : Uuid -> String
+localStorageCollapsedItemKey uuid =
+    "project-" ++ Uuid.toString uuid ++ "-items"
+
+
+localStorageCollapsedItemsDecoder : Decoder (LocalStorageData (Set String))
+localStorageCollapsedItemsDecoder =
+    LocalStorageData.decoder (D.set D.string)
+
+
+localStorageCollapsedItemsEncode : LocalStorageData (Set String) -> E.Value
+localStorageCollapsedItemsEncode =
+    LocalStorageData.encode (E.list E.string << Set.toList)
+
+
 
 -- UPDATE
 
@@ -384,6 +412,9 @@ type Msg
     | SplitPaneMsg SplitPane.Msg
     | NavigationTreeMsg NavigationTree.Msg
     | ImportersDropdownMsg Dropdown.State
+    | CollapseItem String
+    | ExpandItem String
+    | GotCollapsedItems E.Value
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -678,8 +709,53 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         ImportersDropdownMsg state ->
             wrap { model | questionnaireImportersDropdown = state }
 
+        CollapseItem path ->
+            let
+                newCollapsedItems =
+                    Set.insert path model.collapsedItems
+            in
+            withSeed
+                ( { model | collapsedItems = newCollapsedItems }
+                , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
+                )
+
+        ExpandItem path ->
+            let
+                newCollapsedItems =
+                    Set.remove path model.collapsedItems
+            in
+            withSeed
+                ( { model | collapsedItems = newCollapsedItems }
+                , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
+                )
+
+        GotCollapsedItems value ->
+            case decodeValue localStorageCollapsedItemsDecoder value of
+                Ok data ->
+                    if data.key == localStorageCollapsedItemKey model.uuid then
+                        wrap { model | collapsedItems = data.value }
+
+                    else
+                        wrap model
+
+                Err _ ->
+                    wrap model
+
         _ ->
             wrap model
+
+
+localStorageCollapsedItemsCmd : Uuid -> Set String -> Cmd msg
+localStorageCollapsedItemsCmd uuid items =
+    let
+        data =
+            { key = localStorageCollapsedItemKey uuid
+            , value = items
+            }
+    in
+    data
+        |> localStorageCollapsedItemsEncode
+        |> Ports.localStorageSet
 
 
 handleScrollToPath : Model -> String -> ( Model, Cmd Msg )
@@ -860,6 +936,9 @@ subscriptions model =
         splitPaneSubscriptions =
             Sub.map SplitPaneMsg <|
                 SplitPane.subscriptions model.splitPane
+
+        collapsedItemsSub =
+            Ports.localStorageData GotCollapsedItems
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
@@ -868,6 +947,7 @@ subscriptions model =
          , commentDeleteSub
          , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
          , splitPaneSubscriptions
+         , collapsedItemsSub
          ]
             ++ commentDropdownSubs
         )
@@ -2164,34 +2244,68 @@ viewQuestionListAdd appState cfg itemUuids path =
 viewQuestionListItem : AppState -> Config msg -> Context -> Model -> Question -> List String -> List String -> Int -> String -> Html Msg
 viewQuestionListItem appState cfg ctx model question path humanIdentifiers index uuid =
     let
-        newPath =
+        itemPath =
             path ++ [ uuid ]
 
-        newHumanIdentifiers =
-            humanIdentifiers ++ [ identifierToChar index ]
+        itemPathString =
+            pathToString itemPath
+
+        isCollapsed =
+            Set.member itemPathString model.collapsedItems
 
         questions =
             KnowledgeModel.getQuestionItemTemplateQuestions (Question.getUuid question) model.questionnaire.knowledgeModel
 
         itemQuestions =
-            List.indexedMap (viewQuestion appState cfg ctx model newPath newHumanIdentifiers) questions
+            if isCollapsed then
+                []
+
+            else
+                let
+                    newHumanIdentifiers =
+                        humanIdentifiers ++ [ identifierToChar index ]
+                in
+                List.indexedMap (viewQuestion appState cfg ctx model itemPath newHumanIdentifiers) questions
 
         deleteButton =
             if cfg.features.readonly then
                 emptyNode
 
             else
-                button
-                    [ class "btn btn-outline-danger btn-item-delete"
+                a
+                    [ class "btn-link text-danger"
                     , onClick (RemoveItem (pathToString path) uuid)
                     ]
                     [ faSet "_global.delete" appState ]
+
+        itemTitle =
+            if isCollapsed then
+                Maybe.unwrap
+                    (i [ class "ms-2" ] [ text (lf_ "list.defaultItem" [ String.fromInt (index + 1) ] appState) ])
+                    (strong [ class "ms-2" ] << List.singleton << text)
+                    (QuestionnaireDetail.getItemTitle model.questionnaire itemPath questions)
+
+            else
+                emptyNode
+
+        collapseButton =
+            if isCollapsed then
+                a [ onClick (ExpandItem itemPathString) ] [ faSet "questionnaire.itemExpand" appState ]
+
+            else
+                a [ onClick (CollapseItem itemPathString) ] [ faSet "questionnaire.itemCollapse" appState ]
+
+        itemHeader =
+            div [ class "item-header d-flex justify-content-between" ]
+                [ div [] [ collapseButton, itemTitle ]
+                , div [] [ deleteButton ]
+                ]
     in
-    div [ class "item" ]
-        [ div [ class "card bg-light mb-5" ]
-            [ div [ class "card-body" ] itemQuestions
+    div [ class "item mb-3", classList [ ( "item-collapsed", isCollapsed ) ] ]
+        [ div [ class "card bg-light" ]
+            [ div [ class "card-body" ]
+                (itemHeader :: itemQuestions)
             ]
-        , deleteButton
         ]
 
 

@@ -76,6 +76,7 @@ update msg questionnaire appState model =
                         questionnaireModel =
                             QuestionnaireDetail.updateContent questionnaire content
                                 |> Questionnaire.init appState
+                                |> Tuple.first
                                 |> Success
                     in
                     ( { model | questionnaireModel = questionnaireModel }, Cmd.none )

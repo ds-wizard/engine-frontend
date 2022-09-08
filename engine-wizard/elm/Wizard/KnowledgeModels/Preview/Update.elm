@@ -165,7 +165,7 @@ initQuestionnaireModel appState ( model, cmd ) =
                         _ ->
                             ( ( appState.seed, Nothing, questionnaire ), Cmd.none )
 
-                questionnaireModel =
+                ( questionnaireModel, _ ) =
                     Questionnaire.init appState questionnaireWithReplies
 
                 questionnaireModelWithChapter =
