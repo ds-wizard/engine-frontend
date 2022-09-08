@@ -441,7 +441,7 @@ update wrapMsg msg appState model =
             case result of
                 Ok questionnaire ->
                     let
-                        questionnaireModel =
+                        ( questionnaireModel, questionnaireCmd ) =
                             Questionnaire.init appState questionnaire
 
                         questionnaireModelWithImporters =
@@ -462,6 +462,7 @@ update wrapMsg msg appState model =
                         , Cmd.batch
                             [ WebSocket.open model.websocket
                             , fetchCmd
+                            , Cmd.map (wrapMsg << QuestionnaireMsg) questionnaireCmd
                             ]
                         )
 

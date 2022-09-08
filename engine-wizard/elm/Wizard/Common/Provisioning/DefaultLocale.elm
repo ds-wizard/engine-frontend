@@ -507,6 +507,7 @@ locale =
                , ( "Wizard.Common.Components.Questionnaire.comments.viewResolved", "View resolved comments" )
                , ( "Wizard.Common.Components.Questionnaire.commentsOverview.empty", "Click the %s icon to add new comments to a question." )
                , ( "Wizard.Common.Components.Questionnaire.list.add", "Add" )
+               , ( "Wizard.Common.Components.Questionnaire.list.defaultItem", "Item %s" )
                , ( "Wizard.Common.Components.Questionnaire.list.noAnswers", "There are no answers yet." )
                , ( "Wizard.Common.Components.Questionnaire.migrationWarning", "There is an ongoing %s. Finish it before you can continue editing this project." )
                , ( "Wizard.Common.Components.Questionnaire.migrationWarning.migration", "project migration" )

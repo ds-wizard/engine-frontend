@@ -15,6 +15,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , editComment
     , getCommentCount
     , getComments
+    , getItemTitle
     , getTodos
     , getVersionByEventUuid
     , getWarnings
@@ -66,8 +67,10 @@ import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateF
 import Shared.Data.Template.TemplateState as TemplateState exposing (TemplateState)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.UserInfo as UserInfo
+import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (boolToInt)
+import String.Extra as String
 import Time
 import Tuple.Extra as Tuple
 import Uuid exposing (Uuid)
@@ -618,6 +621,22 @@ lastVisibleEvent =
 isCurrentVersion : List QuestionnaireEvent -> Uuid -> Bool
 isCurrentVersion questionnaire eventUuid =
     Maybe.map QuestionnaireEvent.getUuid (lastVisibleEvent questionnaire) == Just eventUuid
+
+
+getItemTitle : QuestionnaireDetail -> List String -> List Question -> Maybe String
+getItemTitle questionnaire itemPath itemTemplateQuestions =
+    let
+        firstQuestionUuid =
+            Maybe.unwrap "" Question.getUuid (List.head itemTemplateQuestions)
+
+        titleFromMarkdown value =
+            Markdown.toString value
+                |> String.split "\n"
+                |> List.find (not << String.isEmpty)
+    in
+    Dict.get (pathToString (itemPath ++ [ firstQuestionUuid ])) questionnaire.replies
+        |> Maybe.andThen (.value >> ReplyValue.getStringReply >> titleFromMarkdown)
+        |> Maybe.andThen String.toMaybe
 
 
 

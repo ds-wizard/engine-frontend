@@ -304,7 +304,7 @@ setResult appState migration model =
         questionnaireModel =
             case migration of
                 Success m ->
-                    Just <| Questionnaire.init appState m.newQuestionnaire
+                    Just <| Tuple.first <| Questionnaire.init appState m.newQuestionnaire
 
                 _ ->
                     Nothing

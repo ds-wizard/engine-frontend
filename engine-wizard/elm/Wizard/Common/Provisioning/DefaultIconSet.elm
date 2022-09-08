@@ -130,6 +130,8 @@ iconSet =
                , ( "questionnaire.followUpsIndication", "fas fa-list-ul" )
                , ( "questionnaire.history.createDocument", "far fa-file" )
                , ( "questionnaire.history.revert", "fas fa-history" )
+               , ( "questionnaire.itemCollapse", "fa-fw fas fa-chevron-down" )
+               , ( "questionnaire.itemExpand", "fa-fw fas fa-chevron-right" )
                , ( "questionnaire.resourcePageReferences", "fas fa-book" )
                , ( "questionnaire.saving.saving", "fas fa-sync-alt fa-spin" )
                , ( "questionnaire.saving.saved", "far fa-check-circle" )
